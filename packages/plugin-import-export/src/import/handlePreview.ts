@@ -94,6 +94,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
           fields: targetCollection.config.flattenedFields ?? [],
           format: 'json',
           operation: 'import',
+          req,
         }),
       )
     }

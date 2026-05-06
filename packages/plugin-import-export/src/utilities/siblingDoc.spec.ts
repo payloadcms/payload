@@ -64,6 +64,7 @@ describe('beforeExport / beforeImport siblingDoc arg', () => {
         data: { group: { inner: 'deep' }, title: 'Top' },
         exportFieldHooks,
         format: 'csv',
+        req: mockReq,
       })
 
       expect(received).toEqual([
@@ -105,6 +106,7 @@ describe('beforeExport / beforeImport siblingDoc arg', () => {
         data: { firstName: 'Ada', fullName: '(computed)', lastName: 'Lovelace' },
         exportFieldHooks,
         format: 'csv',
+        req: mockReq,
       })
 
       expect(result.fullName).toBe('Ada Lovelace')
@@ -151,6 +153,7 @@ describe('beforeExport / beforeImport siblingDoc arg', () => {
         fields,
         format: 'json',
         operation: 'export',
+        req: mockReq,
         type: 'beforeExport',
       })
 
@@ -241,6 +244,7 @@ describe('beforeExport / beforeImport siblingDoc arg', () => {
         fields,
         format: 'json',
         operation: 'import',
+        req: mockReq,
         type: 'beforeImport',
       })
 

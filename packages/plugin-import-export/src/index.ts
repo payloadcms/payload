@@ -241,8 +241,8 @@ declare module 'payload' {
        */
       disabled?: boolean
       /**
-       * @deprecated since v4 — use `hooks.beforeImport` instead.
-       * Still functional, but will be removed in v4.
+       * @deprecated use `hooks.beforeImport` instead.
+       * Still functional, but will be removed in a future major version.
        */
       fromCSV?: FromCSVFunction
       /**
@@ -262,8 +262,8 @@ declare module 'payload' {
         beforeImport?: FieldBeforeImportHook
       }
       /**
-       * @deprecated since v4 — use `hooks.beforeExport` instead.
-       * Still functional, but will be removed in v4.
+       * @deprecated use `hooks.beforeExport` instead.
+       * Still functional, but will be removed in a future major version.
        */
       toCSV?: ToCSVFunction
     }

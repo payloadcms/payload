@@ -86,7 +86,7 @@ export const createImport = async ({
       format,
       importMode,
       matchField,
-      message: 'Starting import process with args:',
+      msg: 'Starting import process with args:',
       transactionID: req.transactionID, // Log transaction ID to verify we're in same transaction
     })
   }
@@ -103,8 +103,8 @@ export const createImport = async ({
     req.payload.logger.debug({
       fileName: file.name,
       fileSize: file.data.length,
-      message: 'File info',
       mimeType: file.mimetype,
+      msg: 'File info',
     })
   }
 
@@ -159,7 +159,7 @@ export const createImport = async ({
     if (debug) {
       req.payload.logger.debug({
         documentCount: documents.length,
-        message: 'After unflattening CSV',
+        msg: 'After unflattening CSV',
         rawDataCount: rawData.length,
       })
     }
@@ -174,18 +174,19 @@ export const createImport = async ({
         fields: collectionConfig.flattenedFields ?? [],
         format,
         operation: 'import',
+        req,
       }),
     )
   }
 
   if (debug) {
     req.payload.logger.debug({
-      message: `Parsed ${documents.length} documents from ${format} file`,
+      msg: `Parsed ${documents.length} documents from ${format} file`,
     })
     if (documents.length > 0) {
       req.payload.logger.debug({
         doc: documents[0],
-        message: 'First document sample:',
+        msg: 'First document sample:',
       })
     }
   }
@@ -209,7 +210,7 @@ export const createImport = async ({
     req.payload.logger.debug({
       batchSize,
       documentCount: documents.length,
-      message: 'Processing import in batches',
+      msg: 'Processing import in batches',
     })
   }
 
@@ -239,7 +240,7 @@ export const createImport = async ({
     req.payload.logger.info({
       errors: result.errors.length,
       imported: result.imported,
-      message: 'Import completed',
+      msg: 'Import completed',
       total: result.total,
       updated: result.updated,
     })

@@ -133,7 +133,7 @@ export const createExport = async (args: CreateExportArgs) => {
   const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
 
   if (debug) {
-    req.payload.logger.debug({ message: 'Export configuration:', name, isCSV, locale })
+    req.payload.logger.debug({ isCSV, locale, msg: 'Export configuration:', name })
   }
 
   // Determine maximum export documents:
@@ -172,8 +172,8 @@ export const createExport = async (args: CreateExportArgs) => {
     accessDenied = true
     if (debug) {
       req.payload.logger.debug({
-        message: 'Access denied for collection, creating empty export',
         collectionSlug,
+        msg: 'Access denied for collection, creating empty export',
       })
     }
   }
@@ -197,7 +197,7 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   if (debug) {
-    req.payload.logger.debug({ message: 'Find arguments:', findArgs })
+    req.payload.logger.debug({ findArgs, msg: 'Find arguments:' })
   }
 
   const exportFieldHooks = getExportFieldFunctions({
@@ -340,6 +340,7 @@ export const createExport = async (args: CreateExportArgs) => {
                 fields,
                 format,
                 exportFieldHooks,
+                req,
               }),
             ),
           )
@@ -425,6 +426,7 @@ export const createExport = async (args: CreateExportArgs) => {
                 fields: collectionConfig.flattenedFields,
                 format,
                 operation: 'export',
+                req,
                 type: 'beforeExport',
               }),
             ),
@@ -506,6 +508,7 @@ export const createExport = async (args: CreateExportArgs) => {
             fields,
             format,
             exportFieldHooks,
+            req,
           }),
         )
       : filterDisabledJSON(
@@ -515,6 +518,7 @@ export const createExport = async (args: CreateExportArgs) => {
             fields: collectionConfig.flattenedFields,
             format,
             operation: 'export',
+            req,
             type: 'beforeExport',
           }),
         )

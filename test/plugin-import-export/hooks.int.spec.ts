@@ -19,6 +19,8 @@ let user: any
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const createdHookPostIDs: (number | string)[] = []
+
 describe('@payloadcms/plugin-import-export — hooks', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
@@ -32,8 +34,12 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
     await payload.destroy()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     resetHookSpies()
+    for (const id of createdHookPostIDs) {
+      await payload.delete({ collection: postsWithHooksSlug, id }).catch(() => undefined)
+    }
+    createdHookPostIDs.length = 0
   })
 
   // ─────────────────────────────────────────────
@@ -46,6 +52,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         collection: postsWithHooksSlug,
         data: { title: 'Hook Test', secret: 'top-secret', count: 1 },
       })
+      createdHookPostIDs.push(post.id)
 
       let exportDoc = await payload.create({
         collection: 'posts-with-hooks-export',
@@ -81,8 +88,6 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       // before hook masks `secret` — it should be absent from the exported CSV
       expect(rows[0]!.secret).toBeUndefined()
       expect(rows[0]!.title).toBe('Hook Test')
-
-      await payload.delete({ collection: postsWithHooksSlug, id: post.id })
     })
 
     it('should call export.hooks.after with correct args after write', async () => {
@@ -90,6 +95,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         collection: postsWithHooksSlug,
         data: { title: 'After Hook Test', secret: 'hidden', count: 2 },
       })
+      createdHookPostIDs.push(post.id)
 
       let exportDoc = await payload.create({
         collection: 'posts-with-hooks-export',
@@ -115,8 +121,6 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       // after receives the (already masked) data from before
       expect(afterArgs.data).toBeDefined()
       expect(afterArgs.originalData).toBeDefined()
-
-      await payload.delete({ collection: postsWithHooksSlug, id: post.id })
     })
 
     it('should call export.hooks.before for JSON exports with nested docs', async () => {
@@ -124,6 +128,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         collection: postsWithHooksSlug,
         data: { title: 'JSON Hook Test', secret: 'json-secret', count: 3 },
       })
+      createdHookPostIDs.push(post.id)
 
       let exportDoc = await payload.create({
         collection: 'posts-with-hooks-export',
@@ -149,8 +154,6 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       // before hook masks `secret` — absent from JSON output too
       expect(jsonDocs[0]!.secret).toBeUndefined()
       expect(jsonDocs[0]!.title).toBe('JSON Hook Test')
-
-      await payload.delete({ collection: postsWithHooksSlug, id: post.id })
     })
 
     it('should call export.hooks.before once per batch when multiple batches occur', async () => {
@@ -162,6 +165,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
           }),
         ),
       )
+      posts.forEach((p) => createdHookPostIDs.push(p.id))
 
       // posts-with-hooks is configured with batchSize: 2 — 5 docs → 3 batches
       let exportDoc = await payload.create({
@@ -184,10 +188,6 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       const batchNumbers = hookCalls.exportBefore.map((c) => c.batchNumber)
       expect(batchNumbers[0]).toBe(1)
       expect(batchNumbers[1]).toBe(2)
-
-      await Promise.all(
-        posts.map((p) => payload.delete({ collection: postsWithHooksSlug, id: p.id })),
-      )
     })
 
     it('should call export.hooks.before via streaming download', async () => {
@@ -195,6 +195,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         collection: postsWithHooksSlug,
         data: { title: 'Download Hook Test', secret: 'streamed-secret', count: 4 },
       })
+      createdHookPostIDs.push(post.id)
 
       const response = await restClient.POST('/posts-with-hooks-export/download', {
         body: JSON.stringify({
@@ -212,8 +213,6 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       await response.text()
       expect(hookCalls.exportBefore).toHaveLength(1)
       expect(hookCalls.exportBefore[0]!.format).toBe('csv')
-
-      await payload.delete({ collection: postsWithHooksSlug, id: post.id })
     })
   })
 
@@ -263,8 +262,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         where: { title: { equals: 'Original Title_imported' } },
       })
       expect(importedDocs.docs).toHaveLength(1)
-
-      await payload.delete({ collection: postsWithHooksSlug, id: importedDocs.docs[0]!.id })
+      importedDocs.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
 
     it('should call import.hooks.after with per-batch ImportResult', async () => {
@@ -302,9 +300,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         collection: postsWithHooksSlug,
         where: { title: { equals: 'After Hook Post_imported' } },
       })
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ collection: postsWithHooksSlug, id: d.id })),
-      )
+      imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
 
     it('should call import.hooks.before for JSON imports', async () => {
@@ -337,10 +333,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         where: { title: { equals: 'JSON Import Hook_imported' } },
       })
       expect(imported.docs).toHaveLength(1)
-
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ collection: postsWithHooksSlug, id: d.id })),
-      )
+      imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
 
     it('should call import.hooks.before once per batch', async () => {
@@ -380,9 +373,7 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         where: { title: { contains: 'Batch Import' } },
         limit: 10,
       })
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ collection: postsWithHooksSlug, id: d.id })),
-      )
+      imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
   })
 

@@ -593,8 +593,8 @@ In addition to collection-level hooks, you can configure field-level export and 
 | `disabled`           | boolean  | When `true` the field is completely excluded from the import-export plugin. |
 | `hooks.beforeExport` | function | Runs before a field value is exported. Works for CSV and JSON.              |
 | `hooks.beforeImport` | function | Runs before a field value is imported. Works for CSV and JSON.              |
-| `toCSV`              | function | **Deprecated** — use `hooks.beforeExport` instead. Removed in v5.           |
-| `fromCSV`            | function | **Deprecated** — use `hooks.beforeImport` instead. Removed in v5.           |
+| `toCSV`              | function | **Deprecated** — use `hooks.beforeExport` instead. Will be removed in v4.   |
+| `fromCSV`            | function | **Deprecated** — use `hooks.beforeImport` instead. Will be removed in v4.   |
 
 ### Disabling Fields
 
@@ -722,7 +722,7 @@ Field-level hooks run **before** collection-level hooks:
 
 ### Migrating from toCSV / fromCSV
 
-`toCSV` and `fromCSV` are deprecated and will be removed in v5. Existing hooks continue to work unchanged. New code should use `hooks.beforeExport` / `hooks.beforeImport`, which also run for JSON exports and imports.
+`toCSV` and `fromCSV` are deprecated and will be removed in v4. Existing hooks continue to work unchanged. New code should use `hooks.beforeExport` / `hooks.beforeImport`, which also run for JSON exports and imports.
 
 ```ts
 // Before

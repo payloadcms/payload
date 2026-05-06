@@ -1,4 +1,4 @@
-import type { FlattenedField, PayloadRequest, Where } from 'payload'
+import type { PayloadRequest, Where } from 'payload'
 
 import { addDataAndFileToRequest } from 'payload'
 import { getObjectDotNotation } from 'payload/shared'
@@ -180,15 +180,13 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   let transformed: Record<string, unknown>[]
 
   const exportFieldHooks = getExportFieldFunctions({
-    fields: targetCollection.config.fields as FlattenedField[],
+    fields: targetCollection.config.flattenedFields,
   })
 
   if (isCSV) {
-    const possibleKeys = getFlattenedFieldKeys(
-      targetCollection.config.fields as FlattenedField[],
-      '',
-      { localeCodes },
-    )
+    const possibleKeys = getFlattenedFieldKeys(targetCollection.config.flattenedFields, '', {
+      localeCodes,
+    })
 
     // Flatten docs without padding yet. This preserves the exact keys produced by toCSV hooks,
     // allowing mergeColumns to detect which schema columns were replaced with derived ones.
@@ -198,6 +196,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         exportFieldHooks,
         fields,
         format: 'csv',
+        req,
       }),
     )
 
@@ -238,6 +237,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         fields: targetCollection.config.flattenedFields,
         format: 'json',
         operation: 'export',
+        req,
       })
 
       // Remove disabled fields

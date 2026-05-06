@@ -135,21 +135,30 @@ export const unflattenObject = ({
 
     const importHookEntry = importFieldHooks[flatKey] ?? importFieldHooks[toLogicalKey(flatKey)]
     if (importHookEntry) {
-      if (importHookEntry.type === 'beforeImport') {
-        value = importHookEntry.fn({
-          columnName: flatKey,
-          data,
-          format,
-          siblingData: data,
-          siblingDoc: data,
-          value,
+      try {
+        if (importHookEntry.type === 'beforeImport') {
+          value = importHookEntry.fn({
+            columnName: flatKey,
+            data,
+            format,
+            siblingData: data,
+            siblingDoc: data,
+            value,
+          })
+        } else {
+          value = importHookEntry.fn({
+            columnName: flatKey,
+            data,
+            value,
+          })
+        }
+      } catch (error) {
+        req.payload.logger.error({
+          err: error,
+          msg: `[plugin-import-export] Field-level beforeImport hook for "${flatKey}" threw — falling back to original value`,
         })
-      } else {
-        value = importHookEntry.fn({
-          columnName: flatKey,
-          data,
-          value,
-        })
+        // Keep the original value so the row is not dropped — downstream
+        // validation will surface any deeper issue per-row.
       }
     }
 

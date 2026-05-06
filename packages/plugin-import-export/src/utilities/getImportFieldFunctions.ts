@@ -87,12 +87,15 @@ const registerImportHandler = (
       return
     }
     registerBeforeImport(({ value }) => {
+      if (isEmptyImportValue(value)) {
+        return undefined
+      }
       if (typeof value === 'number') {
         return value
       }
       if (typeof value === 'string') {
         const parsed = parseFloat(value)
-        return isNaN(parsed) ? 0 : parsed
+        return isNaN(parsed) ? undefined : parsed
       }
       return value
     })
@@ -101,6 +104,9 @@ const registerImportHandler = (
 
   if (field.type === 'checkbox') {
     registerBeforeImport(({ value }) => {
+      if (isEmptyImportValue(value)) {
+        return undefined
+      }
       if (typeof value === 'boolean') {
         return value
       }
@@ -114,8 +120,8 @@ const registerImportHandler = (
 
   if (field.type === 'date') {
     registerBeforeImport(({ value }) => {
-      if (!value) {
-        return value
+      if (isEmptyImportValue(value)) {
+        return undefined
       }
       if (typeof value === 'string' && !isNaN(Date.parse(value))) {
         return value
@@ -132,6 +138,9 @@ const registerImportHandler = (
 
   if (field.type === 'json' || field.type === 'richText') {
     registerBeforeImport(({ value }) => {
+      if (isEmptyImportValue(value)) {
+        return undefined
+      }
       if (typeof value === 'object') {
         return value
       }
@@ -146,3 +155,6 @@ const registerImportHandler = (
     })
   }
 }
+
+const isEmptyImportValue = (value: unknown): boolean =>
+  value === '' || value === null || value === undefined

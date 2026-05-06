@@ -53,8 +53,6 @@ const registerExportHandler = (
   fullKey: string,
   result: Record<string, ExportFieldHookEntry>,
 ): void => {
-  const baseKey = (field as { name: string }).name
-
   const beforeExport = field.custom?.['plugin-import-export']?.hooks?.beforeExport
 
   const toCSV = field.custom?.['plugin-import-export']?.toCSV
@@ -69,15 +67,12 @@ const registerExportHandler = (
     return
   }
 
-  const registerWithBaseFallback = (handler: FieldBeforeExportHook) => {
+  const registerHandler = (handler: FieldBeforeExportHook) => {
     result[fullKey] = { type: 'beforeExport', fn: handler }
-    if (fullKey !== baseKey) {
-      result[baseKey] = { type: 'beforeExport', fn: handler }
-    }
   }
 
   if (field.type === 'json' || field.type === 'richText') {
-    registerWithBaseFallback(({ format, value }) => {
+    registerHandler(({ format, value }) => {
       if (format === 'json') {
         return value
       }
@@ -93,7 +88,7 @@ const registerExportHandler = (
   }
 
   if (field.type === 'date') {
-    registerWithBaseFallback(({ value }) => value)
+    registerHandler(({ value }) => value)
     return
   }
 
@@ -103,13 +98,13 @@ const registerExportHandler = (
 
   if (field.hasMany !== true) {
     if (!Array.isArray(field.relationTo)) {
-      registerWithBaseFallback(({ value }) =>
+      registerHandler(({ value }) =>
         typeof value === 'object' && value && 'id' in value ? value.id : value,
       )
       return
     }
 
-    registerWithBaseFallback(({ siblingData, value }) => {
+    registerHandler(({ siblingData, value }) => {
       if (value && typeof value === 'object' && 'relationTo' in value && 'value' in value) {
         const typed = value as { relationTo: string; value: { id: number | string } }
         if (typed.value && typeof typed.value === 'object') {
@@ -123,7 +118,7 @@ const registerExportHandler = (
   }
 
   if (!Array.isArray(field.relationTo)) {
-    registerWithBaseFallback(({ siblingData, value }) => {
+    registerHandler(({ siblingData, value }) => {
       const arr = value as Array<number | Record<string, unknown> | string> | undefined
       if (Array.isArray(arr)) {
         arr.forEach((val, i) => {
@@ -136,7 +131,7 @@ const registerExportHandler = (
     return
   }
 
-  registerWithBaseFallback(({ siblingData, value }) => {
+  registerHandler(({ siblingData, value }) => {
     const arr = value as Array<Record<string, unknown>> | undefined
     if (Array.isArray(arr)) {
       arr.forEach((val, i) => {

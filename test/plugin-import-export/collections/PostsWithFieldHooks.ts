@@ -219,6 +219,71 @@ export const PostsWithFieldHooks: CollectionConfig = {
       ],
     },
     {
+      name: 'mayCrash',
+      type: 'text',
+      custom: {
+        'plugin-import-export': {
+          hooks: {
+            beforeExport: (({ value }) => {
+              if (value === 'CRASH') {
+                throw new Error('Field-level beforeExport hook intentionally crashed')
+              }
+              return typeof value === 'string' ? `${value}_exported` : value
+            }) satisfies FieldBeforeExportHook,
+            beforeImport: (({ value }) => {
+              if (value === 'CRASH') {
+                throw new Error('Field-level beforeImport hook intentionally crashed')
+              }
+              return typeof value === 'string' ? `${value}_imported` : value
+            }) satisfies FieldBeforeImportHook,
+          },
+        },
+      },
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'rowField',
+          type: 'text',
+          custom: {
+            'plugin-import-export': {
+              hooks: {
+                beforeExport: (({ value }) => {
+                  return typeof value === 'string' ? `${value}_row_exported` : value
+                }) satisfies FieldBeforeExportHook,
+                beforeImport: (({ value }) => {
+                  return typeof value === 'string' ? `${value}_row_imported` : value
+                }) satisfies FieldBeforeImportHook,
+              },
+            },
+          },
+        },
+      ],
+    },
+    {
+      type: 'collapsible',
+      fields: [
+        {
+          name: 'collapsibleField',
+          type: 'text',
+          custom: {
+            'plugin-import-export': {
+              hooks: {
+                beforeExport: (({ value }) => {
+                  return typeof value === 'string' ? `${value}_collapsible_exported` : value
+                }) satisfies FieldBeforeExportHook,
+                beforeImport: (({ value }) => {
+                  return typeof value === 'string' ? `${value}_collapsible_imported` : value
+                }) satisfies FieldBeforeImportHook,
+              },
+            },
+          },
+        },
+      ],
+      label: 'Collapsible Section',
+    },
+    {
       name: 'metadata',
       type: 'group',
       fields: [

@@ -2,7 +2,7 @@ import type { Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
@@ -29,6 +29,13 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  afterEach(async () => {
+    await payload.delete({
+      collection: postsWithFieldHooksSlug,
+      where: { id: { exists: true } },
+    })
   })
 
   // ─────────────────────────────────────────────
@@ -62,8 +69,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
       // Field-level export hook should have transformed the value
       expect(rows[0]!.customExport).toBe('raw value exported')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
 
     it('should receive format: csv during CSV export', async () => {
@@ -92,8 +97,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
       // The hook writes format into a side-channel column
       expect(rows[0]!.customExport_format).toBe('csv')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
 
     it('should receive format: json during JSON export', async () => {
@@ -122,8 +125,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
       // Field-level export hook should have transformed the value for JSON too
       expect(docs[0]!.customExport).toBe('test exported')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
 
     it('should transform deeply nested fields (group > named tab > field)', async () => {
@@ -155,8 +156,34 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
       // Deeply nested field hook should have run
       expect(rows[0]!.group_namedTab_deepField).toBe('deep value deep_exported')
+    })
 
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
+    it('should transform deeply nested fields in CSV preview (group > named tab > field)', async () => {
+      const post = await payload.create({
+        collection: postsWithFieldHooksSlug,
+        data: {
+          group: { namedTab: { deepField: 'preview deep value' } },
+          title: 'Preview Deep Field Test',
+        },
+      })
+
+      const previewResponse = await restClient
+        .POST('/posts-with-field-hooks-export/export-preview', {
+          body: JSON.stringify({
+            collectionSlug: postsWithFieldHooksSlug,
+            format: 'csv',
+            limit: 5,
+            where: { id: { equals: post.id } },
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+        .then((res) => res.json())
+
+      expect(previewResponse.docs).toBeDefined()
+      expect(previewResponse.docs.length).toBe(1)
+      expect(previewResponse.docs[0]?.group_namedTab_deepField).toBe(
+        'preview deep value deep_exported',
+      )
     })
   })
 
@@ -194,10 +221,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
         where: { customImport: { equals: 'original_value_imported_csv' } },
       })
       expect(imported.docs).toHaveLength(1)
-
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ id: d.id, collection: postsWithFieldHooksSlug })),
-      )
     })
 
     it('should transform value during JSON import using field-level import hook', async () => {
@@ -235,10 +258,52 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
         where: { customImport: { equals: 'json_value_imported_json' } },
       })
       expect(imported.docs).toHaveLength(1)
+    })
+  })
 
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ id: d.id, collection: postsWithFieldHooksSlug })),
-      )
+  // ─────────────────────────────────────────────
+  // Empty-cell preservation on update import
+  // ─────────────────────────────────────────────
+
+  describe('synthetic import hooks should not clobber existing data with empty cells', () => {
+    it('should preserve existing number value when CSV update row has a blank count cell', async () => {
+      const existing = await payload.create({
+        collection: postsWithFieldHooksSlug,
+        data: { count: 5, title: 'Empty Cell Update Number Test' },
+      })
+
+      const csvContent = `id,title,count\n${existing.id},"Empty Cell Update Number Test",`
+      const file = {
+        name: 'empty-number.csv',
+        data: Buffer.from(csvContent),
+        mimetype: 'text/csv',
+        size: Buffer.from(csvContent).length,
+      }
+
+      let importDoc = await payload.create({
+        collection: 'posts-with-field-hooks-import',
+        data: {
+          collectionSlug: postsWithFieldHooksSlug,
+          importMode: 'update',
+          matchField: 'id',
+        },
+        file,
+        user,
+      })
+
+      importDoc = await payload.findByID({
+        id: importDoc.id,
+        collection: 'posts-with-field-hooks-import',
+      })
+
+      expect(importDoc.status).toBe('completed')
+
+      const after = await payload.findByID({
+        id: existing.id,
+        collection: postsWithFieldHooksSlug,
+      })
+
+      expect(after.count).toBe(5)
     })
   })
 
@@ -272,8 +337,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       const rows = await readCSV(csvPath)
 
       expect(rows[0]!.legacyToCSV).toBe('legacy value legacy_toCSV')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
 
     it('should still pass legacy args (row, doc, siblingDoc, data=row) to toCSV during CSV export', async () => {
@@ -304,8 +367,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(rows[0]!.legacyToCSVArgs_has_row).toBe('yes')
       expect(rows[0]!.legacyToCSVArgs_has_doc).toBe('yes')
       expect(rows[0]!.legacyToCSVArgs_has_siblingDoc).toBe('yes')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
 
     it('should still pass legacy args (columnName, data=flat row, value) to fromCSV during CSV import', async () => {
@@ -337,10 +398,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).legacyFromCSVArgs).toBe('incoming:legacyFromCSVArgs:yes')
-
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ id: d.id, collection: postsWithFieldHooksSlug })),
-      )
     })
 
     it('should still apply deprecated fromCSV during CSV import', async () => {
@@ -371,10 +428,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
         where: { legacyFromCSV: { equals: 'incoming_value_legacy_fromCSV' } },
       })
       expect(imported.docs).toHaveLength(1)
-
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ id: d.id, collection: postsWithFieldHooksSlug })),
-      )
     })
   })
 
@@ -414,8 +467,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       // Field-level hook ran first: value should be 'raw exported'
       // Collection-level hook (if any) would operate on the already-transformed data
       expect(rows[0]!.customExport).toBe('raw exported')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
   })
 
@@ -450,8 +501,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
       // The reusable email field hook lowercases the value
       expect(rows[0]!.email).toBe('user@example.com')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
   })
 
@@ -491,8 +540,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(rows[0]!.customExport).toBe('test exported')
       // toCSV hook ran on its own field (appends ' legacy_toCSV')
       expect(rows[0]!.legacyToCSV).toBe('legacy legacy_toCSV')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
 
     it('should use default flattening when export hook returns undefined', async () => {
@@ -522,8 +569,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
       // No hook on 'secret' — value passes through unchanged
       expect(rows[0]!.secret).toBe('plain-text')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
   })
 
@@ -561,8 +606,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
       expect(rows[0]!.items_0_note).toBe('first array_exported')
       expect(rows[0]!.items_1_note).toBe('second array_exported')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
 
     it('should run field-level export hook on array item sub-fields (JSON)', async () => {
@@ -594,8 +637,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
       expect(docs[0]!.items[0].note).toBe('alpha array_exported')
       expect(docs[0]!.items[1].note).toBe('beta array_exported')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
 
     it('should run field-level import hook on array item sub-fields (CSV)', async () => {
@@ -628,10 +669,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).items[0].note).toBe('one_array_imported')
       expect((imported.docs[0] as any).items[1].note).toBe('two_array_imported')
-
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ id: d.id, collection: postsWithFieldHooksSlug })),
-      )
     })
 
     it('should run field-level import hook on array item sub-fields (JSON)', async () => {
@@ -670,10 +707,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).items[0].note).toBe('uno_array_imported')
       expect((imported.docs[0] as any).items[1].note).toBe('dos_array_imported')
-
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ id: d.id, collection: postsWithFieldHooksSlug })),
-      )
     })
   })
 
@@ -710,8 +743,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
 
       expect(rows[0]!.content_0_textBlock_body).toBe('hello block_exported')
       expect(rows[0]!.content_1_textBlock_body).toBe('world block_exported')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
 
     it('should run field-level export hook on block sub-fields (JSON)', async () => {
@@ -742,8 +773,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       const docs = await readJSON(jsonPath)
 
       expect(docs[0]!.content[0].body).toBe('foo block_exported')
-
-      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
 
     it('should run field-level import hook on block sub-fields (CSV)', async () => {
@@ -775,10 +804,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).content[0].body).toBe('csv-body_block_imported')
-
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ id: d.id, collection: postsWithFieldHooksSlug })),
-      )
     })
 
     it('should run field-level import hook on block sub-fields (JSON)', async () => {
@@ -819,10 +844,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).content[0].body).toBe('json-body_block_imported')
-
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ id: d.id, collection: postsWithFieldHooksSlug })),
-      )
     })
   })
 
@@ -873,10 +894,307 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).metadata.siblingEcho).toBe('start:my-slug')
+    })
+  })
 
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ id: d.id, collection: postsWithFieldHooksSlug })),
-      )
+  // ─────────────────────────────────────────────
+  // Hook error isolation: a thrown field-level hook on one row/doc
+  // must not abort the whole batch.
+  // ─────────────────────────────────────────────
+
+  describe('field-level hook error isolation', () => {
+    it('should isolate a thrown beforeImport hook to its row during CSV import', async () => {
+      const csvContent = [
+        'title,mayCrash',
+        '"Crash Row 1","ok1"',
+        '"Crash Row 2","CRASH"',
+        '"Crash Row 3","ok3"',
+      ].join('\n')
+      const file = {
+        name: 'crash-import.csv',
+        data: Buffer.from(csvContent),
+        mimetype: 'text/csv',
+        size: Buffer.from(csvContent).length,
+      }
+
+      let importDoc = await payload.create({
+        collection: 'posts-with-field-hooks-import',
+        data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
+        file,
+        user,
+      })
+
+      importDoc = await payload.findByID({
+        id: importDoc.id,
+        collection: 'posts-with-field-hooks-import',
+      })
+
+      expect(importDoc.status).toBe('completed')
+
+      const imported = await payload.find({
+        collection: postsWithFieldHooksSlug,
+        sort: 'title',
+        where: { title: { in: ['Crash Row 1', 'Crash Row 2', 'Crash Row 3'] } },
+      })
+
+      expect(imported.docs).toHaveLength(3)
+      const byTitle = Object.fromEntries(imported.docs.map((d: any) => [d.title, d]))
+      expect(byTitle['Crash Row 1']!.mayCrash).toBe('ok1_imported')
+      expect(byTitle['Crash Row 2']!.mayCrash).toBe('CRASH')
+      expect(byTitle['Crash Row 3']!.mayCrash).toBe('ok3_imported')
+    })
+
+    it('should isolate a thrown beforeImport hook to its row during JSON import', async () => {
+      const jsonContent = JSON.stringify([
+        { mayCrash: 'json-ok-1', title: 'JSON Crash 1' },
+        { mayCrash: 'CRASH', title: 'JSON Crash 2' },
+        { mayCrash: 'json-ok-3', title: 'JSON Crash 3' },
+      ])
+      const file = {
+        name: 'crash-import.json',
+        data: Buffer.from(jsonContent),
+        mimetype: 'application/json',
+        size: Buffer.from(jsonContent).length,
+      }
+
+      let importDoc = await payload.create({
+        collection: 'posts-with-field-hooks-import',
+        data: {
+          collectionSlug: postsWithFieldHooksSlug,
+          format: 'json',
+          importMode: 'create',
+        },
+        file,
+        user,
+      })
+
+      importDoc = await payload.findByID({
+        id: importDoc.id,
+        collection: 'posts-with-field-hooks-import',
+      })
+
+      expect(importDoc.status).toBe('completed')
+
+      const imported = await payload.find({
+        collection: postsWithFieldHooksSlug,
+        sort: 'title',
+        where: { title: { in: ['JSON Crash 1', 'JSON Crash 2', 'JSON Crash 3'] } },
+      })
+
+      expect(imported.docs).toHaveLength(3)
+      const byTitle = Object.fromEntries(imported.docs.map((d: any) => [d.title, d]))
+      expect(byTitle['JSON Crash 1']!.mayCrash).toBe('json-ok-1_imported')
+      expect(byTitle['JSON Crash 2']!.mayCrash).toBe('CRASH')
+      expect(byTitle['JSON Crash 3']!.mayCrash).toBe('json-ok-3_imported')
+    })
+
+    it('should isolate a thrown beforeExport hook to its doc during CSV export', async () => {
+      const docs = await Promise.all([
+        payload.create({
+          collection: postsWithFieldHooksSlug,
+          data: { mayCrash: 'safe-a', title: 'Export Crash A' },
+        }),
+        payload.create({
+          collection: postsWithFieldHooksSlug,
+          data: { mayCrash: 'CRASH', title: 'Export Crash B' },
+        }),
+        payload.create({
+          collection: postsWithFieldHooksSlug,
+          data: { mayCrash: 'safe-c', title: 'Export Crash C' },
+        }),
+      ])
+
+      let exportDoc = await payload.create({
+        collection: 'posts-with-field-hooks-export',
+        data: {
+          collectionSlug: postsWithFieldHooksSlug,
+          format: 'csv',
+          where: { id: { in: docs.map((d) => d.id) } },
+        },
+        user,
+      })
+
+      exportDoc = await payload.findByID({
+        id: exportDoc.id,
+        collection: 'posts-with-field-hooks-export',
+      })
+
+      const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
+      const rows = await readCSV(csvPath)
+
+      expect(rows).toHaveLength(3)
+      const byTitle = Object.fromEntries(rows.map((r: any) => [r.title, r]))
+      expect(byTitle['Export Crash A']!.mayCrash).toBe('safe-a_exported')
+      expect(byTitle['Export Crash B']!.mayCrash).toBe('CRASH')
+      expect(byTitle['Export Crash C']!.mayCrash).toBe('safe-c_exported')
+    })
+
+    it('should isolate a thrown beforeExport hook to its doc during JSON export', async () => {
+      const docs = await Promise.all([
+        payload.create({
+          collection: postsWithFieldHooksSlug,
+          data: { mayCrash: 'json-safe-a', title: 'JSON Export Crash A' },
+        }),
+        payload.create({
+          collection: postsWithFieldHooksSlug,
+          data: { mayCrash: 'CRASH', title: 'JSON Export Crash B' },
+        }),
+        payload.create({
+          collection: postsWithFieldHooksSlug,
+          data: { mayCrash: 'json-safe-c', title: 'JSON Export Crash C' },
+        }),
+      ])
+
+      let exportDoc = await payload.create({
+        collection: 'posts-with-field-hooks-export',
+        data: {
+          collectionSlug: postsWithFieldHooksSlug,
+          format: 'json',
+          where: { id: { in: docs.map((d) => d.id) } },
+        },
+        user,
+      })
+
+      exportDoc = await payload.findByID({
+        id: exportDoc.id,
+        collection: 'posts-with-field-hooks-export',
+      })
+
+      const jsonPath = path.join(dirname, 'uploads', exportDoc.filename as string)
+      const exportedDocs = await readJSON(jsonPath)
+
+      expect(exportedDocs).toHaveLength(3)
+      const byTitle = Object.fromEntries(exportedDocs.map((d: any) => [d.title, d])) as Record<
+        string,
+        any
+      >
+      expect(byTitle['JSON Export Crash A']!.mayCrash).toBe('json-safe-a_exported')
+      expect(byTitle['JSON Export Crash B']!.mayCrash).toBe('CRASH')
+      expect(byTitle['JSON Export Crash C']!.mayCrash).toBe('json-safe-c_exported')
+    })
+  })
+
+  // ─────────────────────────────────────────────
+  // Hooks on fields wrapped in unnamed presentational containers
+  // (row, collapsible). These wrappers are stripped by flattenedFields,
+  // so child hooks should still register and fire.
+  // ─────────────────────────────────────────────
+
+  describe('field-level hooks under unnamed presentational wrappers', () => {
+    it('should fire export hook on a field nested in a row wrapper (CSV)', async () => {
+      const post = await payload.create({
+        collection: postsWithFieldHooksSlug,
+        data: { rowField: 'inside-row', title: 'Row Wrapper Export' },
+      })
+
+      let exportDoc = await payload.create({
+        collection: 'posts-with-field-hooks-export',
+        data: {
+          collectionSlug: postsWithFieldHooksSlug,
+          format: 'csv',
+          where: { id: { equals: post.id } },
+        },
+        user,
+      })
+
+      exportDoc = await payload.findByID({
+        id: exportDoc.id,
+        collection: 'posts-with-field-hooks-export',
+      })
+
+      const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
+      const rows = await readCSV(csvPath)
+
+      expect(rows[0]!.rowField).toBe('inside-row_row_exported')
+    })
+
+    it('should fire import hook on a field nested in a row wrapper (CSV)', async () => {
+      const csvContent = `title,rowField\n"Row Wrapper Import","incoming"`
+      const file = {
+        name: 'row-wrapper-import.csv',
+        data: Buffer.from(csvContent),
+        mimetype: 'text/csv',
+        size: Buffer.from(csvContent).length,
+      }
+
+      let importDoc = await payload.create({
+        collection: 'posts-with-field-hooks-import',
+        data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
+        file,
+        user,
+      })
+
+      importDoc = await payload.findByID({
+        id: importDoc.id,
+        collection: 'posts-with-field-hooks-import',
+      })
+
+      expect(importDoc.status).toBe('completed')
+
+      const imported = await payload.find({
+        collection: postsWithFieldHooksSlug,
+        where: { title: { equals: 'Row Wrapper Import' } },
+      })
+      expect(imported.docs).toHaveLength(1)
+      expect((imported.docs[0] as any).rowField).toBe('incoming_row_imported')
+    })
+
+    it('should fire export hook on a field nested in a collapsible wrapper (CSV)', async () => {
+      const post = await payload.create({
+        collection: postsWithFieldHooksSlug,
+        data: { collapsibleField: 'inside-collapsible', title: 'Collapsible Wrapper Export' },
+      })
+
+      let exportDoc = await payload.create({
+        collection: 'posts-with-field-hooks-export',
+        data: {
+          collectionSlug: postsWithFieldHooksSlug,
+          format: 'csv',
+          where: { id: { equals: post.id } },
+        },
+        user,
+      })
+
+      exportDoc = await payload.findByID({
+        id: exportDoc.id,
+        collection: 'posts-with-field-hooks-export',
+      })
+
+      const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
+      const rows = await readCSV(csvPath)
+
+      expect(rows[0]!.collapsibleField).toBe('inside-collapsible_collapsible_exported')
+    })
+
+    it('should fire import hook on a field nested in a collapsible wrapper (CSV)', async () => {
+      const csvContent = `title,collapsibleField\n"Collapsible Wrapper Import","incoming"`
+      const file = {
+        name: 'collapsible-wrapper-import.csv',
+        data: Buffer.from(csvContent),
+        mimetype: 'text/csv',
+        size: Buffer.from(csvContent).length,
+      }
+
+      let importDoc = await payload.create({
+        collection: 'posts-with-field-hooks-import',
+        data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
+        file,
+        user,
+      })
+
+      importDoc = await payload.findByID({
+        id: importDoc.id,
+        collection: 'posts-with-field-hooks-import',
+      })
+
+      expect(importDoc.status).toBe('completed')
+
+      const imported = await payload.find({
+        collection: postsWithFieldHooksSlug,
+        where: { title: { equals: 'Collapsible Wrapper Import' } },
+      })
+      expect(imported.docs).toHaveLength(1)
+      expect((imported.docs[0] as any).collapsibleField).toBe('incoming_collapsible_imported')
     })
   })
 
@@ -918,10 +1236,6 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       })
       expect(imported.docs).toHaveLength(1)
       expect((imported.docs[0] as any).metadata.slugFromTitle).toBe('top-doc-access')
-
-      await Promise.all(
-        imported.docs.map((d) => payload.delete({ id: d.id, collection: postsWithFieldHooksSlug })),
-      )
     })
   })
 })

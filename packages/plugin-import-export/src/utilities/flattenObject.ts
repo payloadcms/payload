@@ -1,3 +1,5 @@
+import type { PayloadRequest } from 'payload'
+
 import type { ExportFieldHookEntry } from '../types.js'
 
 import { fieldToRegex } from './fieldToRegex.js'
@@ -8,6 +10,7 @@ type Args = {
   fields?: string[]
   format: 'csv' | 'json' | ({} & string)
   path?: string
+  req: PayloadRequest
 }
 
 export const flattenObject = ({
@@ -16,14 +19,9 @@ export const flattenObject = ({
   fields,
   format,
   path,
+  req,
 }: Args): Record<string, unknown> => {
   const row: Record<string, unknown> = {}
-
-  const getExportHookEntry = (
-    fieldSchemaPath: string,
-    baseFieldName: string,
-  ): ExportFieldHookEntry | undefined =>
-    exportFieldHooks?.[fieldSchemaPath] ?? exportFieldHooks?.[baseFieldName]
 
   const invokeHook = (
     entry: ExportFieldHookEntry,
@@ -68,12 +66,48 @@ export const flattenObject = ({
 
       const fieldPath = currentPath ? `${currentPath}_${key}` : key
       const fieldSchemaPath = currentSchemaPath ? `${currentSchemaPath}_${key}` : key
-      const hookEntry = getExportHookEntry(fieldSchemaPath, key)
+      const hookEntry = exportFieldHooks?.[fieldSchemaPath]
+
+      const flattenArray = (items: unknown[], arrayPath: string, arraySchemaPath: string): void => {
+        items.forEach((item, index) => {
+          if (typeof item === 'object' && item !== null) {
+            const blockType =
+              typeof (item as Record<string, unknown>).blockType === 'string'
+                ? ((item as Record<string, unknown>).blockType as string)
+                : undefined
+            const itemPath = blockType
+              ? `${arrayPath}_${index}_${blockType}`
+              : `${arrayPath}_${index}`
+            const itemSchemaPath = blockType ? `${arraySchemaPath}_${blockType}` : arraySchemaPath
+
+            const itemRecord = item as Record<string, unknown>
+            if (
+              'relationTo' in itemRecord &&
+              'value' in itemRecord &&
+              typeof itemRecord.value === 'object' &&
+              itemRecord.value !== null
+            ) {
+              row[`${itemPath}_relationTo`] = itemRecord.relationTo
+              row[`${itemPath}_id`] = (itemRecord.value as Record<string, unknown>).id
+              return
+            }
+
+            flattenWithFilter(itemRecord, itemPath, itemSchemaPath)
+          } else {
+            row[`${arrayPath}_${index}`] = item
+          }
+        })
+      }
 
       if (Array.isArray(value)) {
         if (hookEntry) {
           try {
             const result = invokeHook(hookEntry, fieldPath, value, siblingSource)
+
+            if (Array.isArray(result)) {
+              flattenArray(result, fieldPath, fieldSchemaPath)
+              return
+            }
 
             if (typeof result !== 'undefined') {
               row[fieldPath] = result
@@ -86,53 +120,35 @@ export const flattenObject = ({
               }
             }
           } catch (error) {
-            throw new Error(
-              `Error in field export hook for array "${fieldPath}": ${JSON.stringify(value)}\n${
-                (error as Error).message
-              }`,
-            )
+            req.payload.logger.error({
+              err: error,
+              msg: `[plugin-import-export] Field-level beforeExport hook for "${fieldPath}" threw — falling back to default flattening`,
+            })
+            // Fall through to default flattening so the array values are not lost
           }
         }
 
-        value.forEach((item, index) => {
-          if (typeof item === 'object' && item !== null) {
-            const blockType = typeof item.blockType === 'string' ? item.blockType : undefined
-            const itemPath = blockType
-              ? `${fieldPath}_${index}_${blockType}`
-              : `${fieldPath}_${index}`
-            const itemSchemaPath = blockType ? `${fieldSchemaPath}_${blockType}` : fieldSchemaPath
-
-            if (
-              'relationTo' in item &&
-              'value' in item &&
-              typeof item.value === 'object' &&
-              item.value !== null
-            ) {
-              row[`${itemPath}_relationTo`] = item.relationTo
-              row[`${itemPath}_id`] = item.value.id
-              return
-            }
-
-            flattenWithFilter(item, itemPath, itemSchemaPath)
-          } else {
-            row[`${fieldPath}_${index}`] = item
-          }
-        })
+        flattenArray(value, fieldPath, fieldSchemaPath)
       } else if (typeof value === 'object' && value !== null) {
         if (!hookEntry) {
           flattenWithFilter(value as Record<string, unknown>, fieldPath, fieldSchemaPath)
         } else {
           try {
             const result = invokeHook(hookEntry, fieldPath, value, siblingSource)
-            if (typeof result !== 'undefined') {
+            if (typeof result === 'undefined') {
+              flattenWithFilter(value as Record<string, unknown>, fieldPath, fieldSchemaPath)
+            } else if (result !== null && typeof result === 'object' && !Array.isArray(result)) {
+              flattenWithFilter(result as Record<string, unknown>, fieldPath, fieldSchemaPath)
+            } else {
               row[fieldPath] = result
             }
           } catch (error) {
-            throw new Error(
-              `Error in field export hook for nested object "${fieldPath}": ${JSON.stringify(value)}\n${
-                (error as Error).message
-              }`,
-            )
+            req.payload.logger.error({
+              err: error,
+              msg: `[plugin-import-export] Field-level beforeExport hook for "${fieldPath}" threw — falling back to default flattening`,
+            })
+            // Fall through: recursively flatten the original nested object so the data is not lost
+            flattenWithFilter(value as Record<string, unknown>, fieldPath, fieldSchemaPath)
           }
         }
       } else {
@@ -143,11 +159,11 @@ export const flattenObject = ({
               row[fieldPath] = result
             }
           } catch (error) {
-            throw new Error(
-              `Error in field export hook for field "${fieldPath}": ${JSON.stringify(value)}\n${
-                (error as Error).message
-              }`,
-            )
+            req.payload.logger.error({
+              err: error,
+              msg: `[plugin-import-export] Field-level beforeExport hook for "${fieldPath}" threw — falling back to original value`,
+            })
+            row[fieldPath] = value
           }
         } else {
           row[fieldPath] = value

@@ -1,4 +1,4 @@
-import type { FlattenedField } from 'payload'
+import type { FlattenedField, PayloadRequest } from 'payload'
 
 import type {
   ExportFieldHookEntry,
@@ -23,6 +23,7 @@ export type Args = {
   fields: FlattenedField[]
   format: 'csv' | 'json' | ({} & string)
   operation: 'export' | 'import'
+  req: PayloadRequest
   type: 'beforeExport' | 'beforeImport'
 }
 
@@ -40,6 +41,7 @@ const traverseFields = ({
   format,
   operation,
   path,
+  req,
   schemaPath,
   siblingData,
 }: TraverseArgs): Record<string, unknown> => {
@@ -56,8 +58,6 @@ const traverseFields = ({
     const hook = entry?.type === type ? (entry.fn as FieldHook) : undefined
 
     if (typeof hook === 'function' && field.name in result) {
-      const value = result[field.name]
-
       try {
         const transformed = hook({
           columnName: fieldPath,
@@ -65,21 +65,21 @@ const traverseFields = ({
           format,
           siblingData: result,
           siblingDoc: siblingData,
-          value,
+          value: result[field.name],
         })
 
         if (typeof transformed !== 'undefined') {
           result[field.name] = transformed
         }
       } catch (error) {
-        throw new Error(
-          `Error in field ${operation} hook for "${fieldPath}": ${(error as Error).message}`,
-        )
+        req.payload.logger.error({
+          err: error,
+          msg: `[plugin-import-export] Field-level before${operation === 'export' ? 'Export' : 'Import'} hook for "${fieldPath}" threw — falling back to original value`,
+        })
       }
-      continue
     }
 
-    if (hook || !(field.name in result)) {
+    if (!(field.name in result)) {
       continue
     }
 
@@ -94,6 +94,7 @@ const traverseFields = ({
         format,
         operation,
         path: fieldPath,
+        req,
         schemaPath: fieldSchemaPath,
         siblingData: value,
       })
@@ -110,6 +111,7 @@ const traverseFields = ({
           format,
           operation,
           path: `${fieldPath}_${index}`,
+          req,
           schemaPath: fieldSchemaPath,
           siblingData: item,
         })
@@ -129,6 +131,7 @@ const traverseFields = ({
           format,
           operation,
           path: blockType ? `${fieldPath}_${index}_${blockType}` : `${fieldPath}_${index}`,
+          req,
           schemaPath: blockType ? `${fieldSchemaPath}_${blockType}` : fieldSchemaPath,
           siblingData: item,
         })
@@ -143,6 +146,9 @@ const traverseFields = ({
  * Walks a nested document and applies each field's `beforeExport` or
  * `beforeImport` hook. Legacy `toCSV` / `fromCSV` hooks are handled by the
  * flat CSV pipelines and skipped here.
+ *
+ * Field-level hook errors are logged and the field falls back to its
+ * original value so a single bad doc does not abort the batch.
  */
 export const applyFieldHooks = (args: Args): Record<string, unknown> => {
   const { data, fieldHooks } = args

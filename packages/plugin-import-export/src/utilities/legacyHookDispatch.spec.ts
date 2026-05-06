@@ -45,6 +45,7 @@ describe('legacy toCSV / fromCSV argument shape', () => {
         data: doc,
         exportFieldHooks,
         format: 'csv',
+        req: mockReq,
       })
 
       expect(received).toHaveLength(1)
@@ -87,7 +88,7 @@ describe('legacy toCSV / fromCSV argument shape', () => {
       const exportFieldHooks = getExportFieldFunctions({ fields })
 
       const doc = { modern: 'v', title: 'Top' }
-      flattenObject({ data: doc, exportFieldHooks, format: 'csv' })
+      flattenObject({ data: doc, exportFieldHooks, format: 'csv', req: mockReq })
 
       expect(received).toHaveLength(1)
       const args = received[0]!
@@ -133,6 +134,7 @@ describe('legacy toCSV / fromCSV argument shape', () => {
         data: { both: 'x' },
         exportFieldHooks,
         format: 'csv',
+        req: mockReq,
       })
 
       expect(modernCalls).toEqual(['x'])

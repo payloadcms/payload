@@ -354,7 +354,7 @@ export type FieldBeforeImportHook = (args: {
 }) => unknown
 
 /**
- * @deprecated since v4 — use `hooks.beforeExport`. Will be removed in v4.
+ * @deprecated use `hooks.beforeExport`. Will be removed in a future major version.
  * Original arg shape preserved for backwards compatibility.
  */
 export type ToCSVFunction = (args: {
@@ -371,7 +371,7 @@ export type ToCSVFunction = (args: {
 }) => unknown
 
 /**
- * @deprecated since v4 — use `hooks.beforeImport`. Will be removed in v4.
+ * @deprecated use `hooks.beforeImport`. Will be removed in a future major version.
  * Original arg shape preserved for backwards compatibility.
  */
 export type FromCSVFunction = (args: {
