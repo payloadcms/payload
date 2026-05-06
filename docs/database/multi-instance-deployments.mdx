@@ -39,6 +39,29 @@ Payload 3.x includes automatic migration locking to prevent concurrent migration
 
 All database adapters support transactions by default.
 
+### Upgrading from Previous Versions
+
+When upgrading to a Payload version that includes migration locking:
+
+**First migration run after upgrade:**
+
+- The migration lock global doesn't exist in the database yet
+- Migrations will run **without locking** on the first execution
+- A warning will be logged: "Migration lock global not initialized"
+- This is expected behavior and safe for single-instance deployments
+
+**After first migration:**
+
+- The lock global is created during the first migration run
+- All subsequent migrations will use the locking mechanism
+- Multi-instance coordination is fully active
+
+**For multi-instance deployments during upgrade:**
+
+- Use a separate migration step (see below) to run migrations once before scaling
+- Or temporarily scale down to a single instance for the first migration after upgrade
+- Once the lock global exists, scale back up safely
+
 ## Deployment Strategies
 
 ### Preferred: Separate Migration Step

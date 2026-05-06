@@ -32,10 +32,20 @@ export async function acquireMigrationLock({
     await initTransaction(req)
 
     // Read current lock state
-    const lock = await payload.findGlobal({
-      slug: 'payload-migrations-lock',
-      req,
-    })
+    let lock
+    try {
+      lock = await payload.findGlobal({
+        slug: 'payload-migrations-lock',
+        req,
+      })
+    } catch (err) {
+      // Lock global doesn't exist yet (first run after upgrade or before restart)
+      payload.logger.warn({
+        msg: 'Migration lock global not initialized. This is expected on first run after upgrading Payload. Proceeding without lock - not safe for multi-instance deployments until application is restarted.',
+      })
+      await killTransaction(req)
+      return { acquired: true, instanceId: 'no-lock' }
+    }
 
     const now = new Date()
     const isLocked = lock.locked && lock.expires_at && lock.expires_at > now
