@@ -68,6 +68,58 @@ const quoteBlock: Block = {
   ],
 }
 
+const contentBlock: Block = {
+  slug: 'content-block',
+  fields: [
+    {
+      name: 'heading',
+      type: 'text',
+    },
+    {
+      name: 'body',
+      type: 'textarea',
+    },
+    {
+      name: 'link',
+      type: 'text',
+    },
+    {
+      name: 'footnote',
+      type: 'text',
+    },
+  ],
+}
+
+const formBlock: Block = {
+  slug: 'form-block',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+    {
+      name: 'firstName',
+      type: 'text',
+    },
+    {
+      name: 'lastName',
+      type: 'text',
+    },
+    {
+      name: 'email',
+      type: 'email',
+    },
+    {
+      name: 'message',
+      type: 'textarea',
+    },
+    {
+      name: 'terms',
+      type: 'checkbox',
+    },
+  ],
+}
+
 const testBlockRequired: Block = {
   slug: 'test-block-required',
   fields: [
@@ -114,7 +166,15 @@ const BlocksFields: CollectionConfig = {
       admin: {
         description: 'A block field with multiple block types.',
       },
-      blocks: [testBlock, heroBlock, callToActionBlock, imageBlock, quoteBlock],
+      blocks: [
+        testBlock,
+        heroBlock,
+        callToActionBlock,
+        imageBlock,
+        quoteBlock,
+        contentBlock,
+        formBlock,
+      ],
     },
     {
       name: 'blocksWithRequiredField',

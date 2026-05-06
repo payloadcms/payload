@@ -58,6 +58,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   errorCount,
   fields,
   hasMaxRows,
+  isDragging,
   isLoading: isLoadingFromProps,
   isSortable,
   Label,
@@ -90,6 +91,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   const classNames = [
     `${baseClass}__row`,
     fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+    isDragging && `${baseClass}__row--is-dragging`,
   ]
     .filter(Boolean)
     .join(' ')

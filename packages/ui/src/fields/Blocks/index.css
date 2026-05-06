@@ -57,7 +57,7 @@
     align-items: center;
     gap: var(--spacer-2);
     flex-shrink: 0;
-    color: var(--text-default-default);
+    color: var(--text-default);
 
     & > li:first-child .blocks-field__header-action {
       padding: 0 var(--spacer-2) 0 0;
@@ -79,7 +79,7 @@
 
     &:hover,
     &:focus-visible {
-      color: var(--text-default-secondary);
+      color: var(--text-secondary);
     }
   }
 
@@ -107,7 +107,7 @@
 
   .blocks-field__block-number {
     flex-shrink: 0;
-    color: var(--text-default-default);
+    color: var(--text-default);
   }
 
   .blocks-field__block-pill {
@@ -128,5 +128,9 @@
     border: none;
     align-self: flex-start;
     border-radius: var(--radius-medium);
+  }
+
+  .blocks-field__row--is-dragging {
+    opacity: 0.5;
   }
 }
