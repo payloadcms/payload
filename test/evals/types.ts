@@ -55,11 +55,6 @@ export type CodegenRunnerResult = {
   modifiedConfig: string
   usage: TokenUsage
 }
-export type RunCodegenEvalOptions = {
-  model?: LanguageModel
-  systemPromptKey?: SystemPromptKey
-}
-
 // Scorer
 export type ConfigChangeScorerResult = {
   changeDescription: string
