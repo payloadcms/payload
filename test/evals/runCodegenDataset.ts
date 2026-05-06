@@ -83,26 +83,10 @@ export async function runCodegenCase(
   const bypassCache = isCacheBypassed()
   const cached = !bypassCache && getCachedResult(key)
   if (cached) {
-    const needsBackfill =
-      !cached.modelId || !cached.runnerKind || (kind === 'llm' && !cached.systemPromptKey)
-    const taggedResult = needsBackfill
-      ? {
-          ...cached,
-          modelId: cached.modelId ?? resolvedModelId,
-          runnerKind: cached.runnerKind ?? kind,
-          systemPromptKey: cached.systemPromptKey ?? (kind === 'llm' ? systemPromptKey : undefined),
-        }
-      : cached
-    if (needsBackfill) {
-      setCachedResult(key, taggedResult)
-    }
-    const cachedScore =
-      taggedResult.score != null ? `  score: ${taggedResult.score.toFixed(2)}` : ''
-    console.log(
-      `[${taggedResult.category}] ${taggedResult.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`,
-    )
-    console.log(`  Task: ${taggedResult.question}`)
-    return taggedResult
+    const cachedScore = cached.score != null ? `  score: ${cached.score.toFixed(2)}` : ''
+    console.log(`[${cached.category}] ${cached.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`)
+    console.log(`  Task: ${cached.question}`)
+    return cached
   }
 
   const runnerOutput = await runCodegenEval(testCase.input, starterConfig, {
