@@ -96,6 +96,7 @@ const DatePicker: React.FC<Props> = (props) => {
     popperPlacement: 'bottom-start',
     previousMonthButtonLabel: <ChevronIcon direction="left" large size={24} />,
     selected: value && new Date(value),
+    shouldCloseOnSelect: false,
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',

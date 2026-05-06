@@ -485,6 +485,10 @@
       border-radius: var(--radius-full);
       background-color: var(--bg-brand);
     }
+
+    &.react-datepicker__day--selected::after {
+      background-color: var(--icon-onbrand-secondary);
+    }
   }
 
   /* Outside month days (prev/next month) */
@@ -514,10 +518,6 @@
     }
   }
 
-  .react-datepicker__day--selected:focus {
-    background-color: var(--bg-selected-strong);
-  }
-
   .react-datepicker__day--keyboard-selected,
   .react-datepicker__month-text--keyboard-selected,
   .react-datepicker__quarter-text--keyboard-selected,
@@ -530,10 +530,13 @@
     }
   }
 
-  .react-datepicker__day--keyboard-selected:focus {
-    background-color: var(--bg-selected);
+  /* When focus is on the already-selected day, use white outline for contrast */
+  .react-datepicker__day--selected[tabindex='0']:focus,
+  .react-datepicker__month-text--selected[tabindex='0']:focus,
+  .react-datepicker__quarter-text--selected[tabindex='0']:focus,
+  .react-datepicker__year-text--selected[tabindex='0']:focus {
     outline: var(--accessibility-outline);
-    outline-offset: -2px;
+    outline-offset: var(--accessibility-outline-offset);
   }
 
   /* In-range selecting (partial selection) */
