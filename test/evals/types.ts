@@ -18,18 +18,6 @@ export type EvalCategory =
   | 'structure'
   | 'testing'
 
-export type EvalCase = {
-  category: EvalCategory
-  expected: string
-  /**
-   * Path to a fixture file relative to test/evals/fixtures/.
-   * When set, runDataset reads the file and injects it into the prompt as context
-   * (used for config-review / negative-detection cases).
-   */
-  fixturePath?: string
-  input: string
-}
-
 export type CodegenEvalCase = {
   /** Optional structural assertions evaluated against the LLM output. Failing any short-circuits the case to fail before the LLM scorer runs. */
   assertions?: Assertion[]
@@ -41,7 +29,7 @@ export type CodegenEvalCase = {
 }
 
 // Models
-export type ModelKey = 'openai:gpt-4o' | 'openai:gpt-4o-mini' | 'openai:gpt-5.2'
+export type ModelKey = 'openai:gpt-4o-mini' | 'openai:gpt-5.2'
 
 // Usage
 export type TokenUsage = {
@@ -61,25 +49,11 @@ export type EvalUsage = {
 }
 
 // Runner
-export type SystemPromptKey =
-  | 'codegenNoSkill'
-  | 'codegenWithSkill'
-  | 'configReview'
-  | 'qaNoSkill'
-  | 'qaWithSkill'
-export type RunnerResult = {
-  answer: string
-  confidence: number
-  usage: TokenUsage
-}
+export type SystemPromptKey = 'codegenNoSkill' | 'codegenWithSkill'
 export type CodegenRunnerResult = {
   confidence: number
   modifiedConfig: string
   usage: TokenUsage
-}
-export type RunEvalOptions = {
-  model?: LanguageModel
-  systemPromptKey?: SystemPromptKey
 }
 export type RunCodegenEvalOptions = {
   model?: LanguageModel
@@ -87,14 +61,6 @@ export type RunCodegenEvalOptions = {
 }
 
 // Scorer
-export type ScorerResult = {
-  completeness: number
-  correctness: number
-  pass: boolean
-  reasoning: string
-  score: number
-  usage: TokenUsage
-}
 export type ConfigChangeScorerResult = {
   changeDescription: string
   completeness: number
@@ -103,9 +69,6 @@ export type ConfigChangeScorerResult = {
   reasoning: string
   score: number
   usage: TokenUsage
-}
-export type ScoreAnswerOptions = {
-  model?: LanguageModel
 }
 export type ScoreConfigChangeOptions = {
   model?: LanguageModel
@@ -126,7 +89,7 @@ export type EvalResult = {
   correctness?: number
   /** For codegen results: the fixture directory the starter file came from, relative to test/evals/fixtures/. Used by the dashboard to render a diff. */
   fixturePath?: string
-  /** Runner model ID (e.g. "openai/gpt-5.2") — distinguishes high-power vs low-power in the dashboard */
+  /** Runner model ID (e.g. "openai/gpt-5.2") — surfaced in the dashboard for cross-run comparison */
   modelId?: string
   pass: boolean
   question: string
@@ -141,11 +104,6 @@ export type EvalResult = {
   tscErrors?: string[]
   /** Token usage across all LLM calls for this eval case */
   usage?: EvalUsage
-}
-export type RunDatasetOptions = {
-  runnerModel?: LanguageModel
-  scorerModel?: LanguageModel
-  systemPromptKey?: SystemPromptKey
 }
 export type RunCodegenDatasetOptions = {
   runnerModel?: LanguageModel

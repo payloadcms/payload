@@ -9,19 +9,16 @@ import type { EvalEntry, RunSnapshot } from './index.js'
 import { AUDIENCE_CONFIG } from './audience.js'
 import { CompareTable } from './CompareTable.js'
 
-type Variant = 'baseline' | 'low-power' | 'skill'
+type Variant = 'baseline' | 'skill'
 
 function getVariant(entry: EvalEntry): null | Variant {
-  if (entry.result.systemPromptKey === 'qaNoSkill') {
+  if (entry.result.systemPromptKey === 'codegenNoSkill') {
     return 'baseline'
   }
-  const { modelId } = entry.result
-  if (!modelId) {
+  if (!entry.result.modelId) {
     return null
   }
-  const isHighPower =
-    modelId.includes('gpt-5') || modelId.includes('o3') || modelId.includes('claude-3-5')
-  return isHighPower ? 'skill' : 'low-power'
+  return 'skill'
 }
 
 function VariantBadge({ variant }: { variant: null | Variant }) {
@@ -34,7 +31,6 @@ function VariantBadge({ variant }: { variant: null | Variant }) {
       color: 'var(--theme-elevation-600)',
       label: 'Baseline',
     },
-    'low-power': { bg: 'rgba(232,168,56,0.15)', color: '#e8a838', label: 'Low Power' },
     skill: { bg: 'var(--theme-success-100)', color: 'var(--theme-success-700)', label: 'Skill' },
   }
   const { bg, color, label } = config[variant]
@@ -65,7 +61,7 @@ type Props = {
 type ViewMode = 'compare' | 'list'
 
 type FilterStatus = 'all' | 'fail' | 'pass'
-type FilterType = 'all' | 'codegen' | 'qa'
+type FilterType = 'all' | 'codegen'
 type FilterAudience = 'all' | Audience
 
 function ScoreBadge({
@@ -128,11 +124,11 @@ function CategoryBadge({ category }: { category: string }) {
   )
 }
 
-function TypeBadge({ type }: { type: 'codegen' | 'qa' }) {
+function TypeBadge({ type }: { type: 'codegen' }) {
   return (
     <span
       style={{
-        background: type === 'codegen' ? 'var(--theme-elevation-150)' : 'transparent',
+        background: 'var(--theme-elevation-150)',
         border: '1px solid var(--theme-elevation-200)',
         borderRadius: '4px',
         color: 'var(--theme-elevation-700)',
@@ -141,7 +137,7 @@ function TypeBadge({ type }: { type: 'codegen' | 'qa' }) {
         whiteSpace: 'nowrap',
       }}
     >
-      {type === 'codegen' ? 'Codegen' : 'QA'}
+      {type === 'codegen' ? 'Codegen' : null}
     </span>
   )
 }
@@ -242,20 +238,12 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
     >
       {/* Question / Task */}
       <div style={sectionStyle}>
-        <span style={labelStyle}>{entry.type === 'codegen' ? 'Task' : 'Question'}</span>
+        <span style={labelStyle}>Task</span>
         <span style={valueStyle}>{result.question}</span>
       </div>
 
-      {/* QA: Answer */}
-      {entry.type === 'qa' && result.answer && (
-        <div style={sectionStyle}>
-          <span style={labelStyle}>Answer</span>
-          <span style={valueStyle}>{result.answer}</span>
-        </div>
-      )}
-
       {/* Codegen: Change Description */}
-      {entry.type === 'codegen' && result.changeDescription && (
+      {result.changeDescription && (
         <div style={sectionStyle}>
           <span style={labelStyle}>Change Description</span>
           <span style={valueStyle}>{result.changeDescription}</span>
@@ -263,67 +251,64 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
       )}
 
       {/* Codegen: Generated Code */}
-      {entry.type === 'codegen' && (
-        <div style={sectionStyle}>
+      <div style={sectionStyle}>
+        <span
+          style={{
+            ...labelStyle,
+            alignItems: 'center',
+            display: 'flex',
+            gap: '8px',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>Generated Code</span>
           <span
             style={{
-              ...labelStyle,
-              alignItems: 'center',
-              display: 'flex',
-              gap: '8px',
-              justifyContent: 'space-between',
+              color: 'var(--theme-elevation-500)',
+              fontSize: '0.7rem',
+              fontWeight: 500,
+              letterSpacing: 0,
+              textTransform: 'none',
             }}
           >
-            <span>Generated Code</span>
-            <span
-              style={{
-                color: 'var(--theme-elevation-500)',
-                fontSize: '0.7rem',
-                fontWeight: 500,
-                letterSpacing: 0,
-                textTransform: 'none',
-              }}
-            >
-              payload.config.ts ·{' '}
-              {rendered?.mode === 'diff'
-                ? 'Diff'
-                : rendered?.mode === 'file'
-                  ? 'Generated File'
-                  : 'Raw'}
-              {rendered?.mode === 'diff' && (
-                <>
-                  {' '}
-                  ·{' '}
-                  <span style={{ color: 'var(--theme-success-600)' }}>
-                    +{rendered.added ?? 0}
-                  </span>{' '}
-                  <span style={{ color: 'var(--theme-error-600)' }}>−{rendered.removed ?? 0}</span>
-                </>
-              )}
-            </span>
+            payload.config.ts ·{' '}
+            {rendered?.mode === 'diff'
+              ? 'Diff'
+              : rendered?.mode === 'file'
+                ? 'Generated File'
+                : 'Raw'}
+            {rendered?.mode === 'diff' && (
+              <>
+                {' '}
+                · <span style={{ color: 'var(--theme-success-600)' }}>
+                  +{rendered.added ?? 0}
+                </span>{' '}
+                <span style={{ color: 'var(--theme-error-600)' }}>−{rendered.removed ?? 0}</span>
+              </>
+            )}
           </span>
-          {rendered ? (
-            <div dangerouslySetInnerHTML={{ __html: rendered.html }} />
-          ) : (
-            <pre
-              style={{
-                background: 'var(--theme-elevation-50)',
-                border: '1px solid var(--theme-elevation-150)',
-                borderRadius: '4px',
-                fontFamily: 'monospace',
-                fontSize: '0.75rem',
-                margin: 0,
-                maxHeight: '600px',
-                overflow: 'auto',
-                padding: '8px 10px',
-                whiteSpace: 'pre',
-              }}
-            >
-              {result.answer}
-            </pre>
-          )}
-        </div>
-      )}
+        </span>
+        {rendered ? (
+          <div dangerouslySetInnerHTML={{ __html: rendered.html }} />
+        ) : (
+          <pre
+            style={{
+              background: 'var(--theme-elevation-50)',
+              border: '1px solid var(--theme-elevation-150)',
+              borderRadius: '4px',
+              fontFamily: 'monospace',
+              fontSize: '0.75rem',
+              margin: 0,
+              maxHeight: '600px',
+              overflow: 'auto',
+              padding: '8px 10px',
+              whiteSpace: 'pre',
+            }}
+          >
+            {result.answer}
+          </pre>
+        )}
+      </div>
 
       {/* TSC Errors */}
       {result.tscErrors && result.tscErrors.length > 0 && (
@@ -432,16 +417,6 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
   const [hoveredHash, setHoveredHash] = useState<null | string>(null)
   const [sortKey, setSortKey] = useState<null | SortKey>(null)
   const [sortDir, setSortDir] = useState<null | SortDir>(null)
-
-  const comparablePairs = useMemo(
-    () =>
-      entries.filter(
-        (e) =>
-          e.type === 'qa' &&
-          (e.systemPromptKey === 'qaWithSkill' || e.systemPromptKey === 'qaNoSkill'),
-      ).length,
-    [entries],
-  )
 
   const categories = useMemo(
     () => ['all', ...Array.from(new Set(entries.map((e) => e.category))).sort()],
@@ -606,11 +581,6 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
           >
             Compare Results
           </button>
-          {comparablePairs === 0 && viewMode === 'compare' && (
-            <span style={{ color: 'var(--theme-elevation-400)', fontSize: '0.75rem' }}>
-              · Re-run evals to populate comparison data
-            </span>
-          )}
         </div>
 
         {viewMode === 'compare' && (
@@ -755,14 +725,14 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
             />
 
             <div style={{ display: 'flex', gap: '4px' }}>
-              {(['all', 'qa', 'codegen'] as FilterType[]).map((t) => (
+              {(['all', 'codegen'] as FilterType[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTypeFilter(t)}
                   style={filterBtnStyle(typeFilter === t)}
                   type="button"
                 >
-                  {t === 'all' ? 'All' : t === 'qa' ? 'QA' : 'Codegen'}
+                  {t === 'all' ? 'All' : 'Codegen'}
                 </button>
               ))}
             </div>
