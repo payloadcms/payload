@@ -1,6 +1,9 @@
-import type { Payload, PayloadRequest } from 'payload'
+import type { Payload } from '../../index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
-import { commitTransaction, initTransaction, killTransaction } from 'payload'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 
 export interface AcquireLockResult {
   acquired: boolean

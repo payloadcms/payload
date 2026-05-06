@@ -24,12 +24,7 @@ describe('Migration Locking', () => {
   })
 
   it('should acquire and release lock', async () => {
-    const { acquireMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/acquireMigrationLock.js'
-    )
-    const { releaseMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/releaseMigrationLock.js'
-    )
+    const { acquireMigrationLock, releaseMigrationLock } = await import('payload')
 
     // Read initial lock state
     const initialLock = await payload.findGlobal({
@@ -74,12 +69,7 @@ describe('Migration Locking', () => {
   })
 
   it('should respect existing locks and release properly', async () => {
-    const { acquireMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/acquireMigrationLock.js'
-    )
-    const { releaseMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/releaseMigrationLock.js'
-    )
+    const { acquireMigrationLock, releaseMigrationLock } = await import('payload')
 
     // First instance acquires lock
     const req1 = await createLocalReq({}, payload)
@@ -155,9 +145,7 @@ describe('Migration Locking', () => {
     })
 
     // Try to acquire lock - should succeed because lock is stale
-    const { acquireMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/acquireMigrationLock.js'
-    )
+    const { acquireMigrationLock, releaseMigrationLock } = await import('payload')
     const req = await createLocalReq({}, payload)
     const result = await acquireMigrationLock({
       payload,
@@ -168,9 +156,6 @@ describe('Migration Locking', () => {
     expect(result.acquired).toBe(true)
 
     // Cleanup
-    const { releaseMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/releaseMigrationLock.js'
-    )
     await releaseMigrationLock({
       payload,
       req,

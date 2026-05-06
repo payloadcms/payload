@@ -2,9 +2,7 @@ import type { Payload } from 'payload'
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-import { acquireMigrationLock } from './acquireMigrationLock.js'
-
-import { releaseMigrationLock } from './releaseMigrationLock.js'
+import { acquireMigrationLock, releaseMigrationLock } from 'payload'
 
 describe('acquireMigrationLock', () => {
   let mockPayload: Partial<Payload>

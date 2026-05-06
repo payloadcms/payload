@@ -1,4 +1,5 @@
-import type { Payload, PayloadRequest } from 'payload'
+import type { Payload } from '../../index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
 export async function releaseMigrationLock({
   instanceId,
@@ -18,5 +19,6 @@ export async function releaseMigrationLock({
   await payload.updateGlobal({
     slug: 'payload-migrations-lock',
     data: { locked: false },
+    req,
   })
 }
