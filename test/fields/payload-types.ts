@@ -164,7 +164,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es';
-  widgets: {};
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -941,6 +943,7 @@ export interface ConditionalLogic {
   customFieldWithField?: string | null;
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
+  customServerFieldWithCondition?: string | null;
   conditionalRichText?: {
     root: {
       type: string;
@@ -1158,6 +1161,7 @@ export interface EmailField {
 export interface RadioField {
   id: string;
   radio?: ('one' | 'two' | 'three') | null;
+  radioWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1600,6 +1604,7 @@ export interface SelectField {
   settings?: {
     category?: ('a' | 'b')[] | null;
   };
+  selectWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   disallowOption1?: boolean | null;
   selectWithFilteredOptions?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
@@ -2807,6 +2812,7 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
   customFieldWithField?: T;
   customFieldWithHOC?: T;
   customClientFieldWithCondition?: T;
+  customServerFieldWithCondition?: T;
   conditionalRichText?: T;
   userConditional?: T;
   parentGroup?:
@@ -3009,6 +3015,7 @@ export interface EmailFieldsSelect<T extends boolean = true> {
  */
 export interface RadioFieldsSelect<T extends boolean = true> {
   radio?: T;
+  radioWithJsxLabelOption?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3376,6 +3383,7 @@ export interface SelectFieldsSelect<T extends boolean = true> {
     | {
         category?: T;
       };
+  selectWithJsxLabelOption?: T;
   disallowOption1?: T;
   selectWithFilteredOptions?: T;
   updatedAt?: T;
@@ -3749,6 +3757,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

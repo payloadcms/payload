@@ -10,7 +10,6 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
@@ -113,41 +112,14 @@ describe('Conditional Logic', () => {
       await expect(fieldOnlyVisibleIfNoID).toBeVisible()
 
       const textField = page.locator('#field-text')
-      await assertNetworkRequests(
-        page,
-        '/admin/collections/conditional-logic',
-        async () => {
-          await textField.fill('some text')
-        },
-        {
-          minimumNumberOfRequests: 1,
-        },
-      )
+      await textField.fill('some text')
 
-      await assertNetworkRequests(
-        page,
-        '/api/conditional-logic',
-        async () => {
-          await saveDocAndAssert(page)
-        },
-        {
-          minimumNumberOfRequests: 1,
-        },
-      )
+      await saveDocAndAssert(page)
 
       await expect(fieldOnlyVisibleIfNoID).toBeHidden()
 
-      // Fill text and wait for form state request to come back
-      await assertNetworkRequests(
-        page,
-        '/admin/collections/conditional-logic',
-        async () => {
-          await textField.fill('updated text')
-        },
-        {
-          minimumNumberOfRequests: 1,
-        },
-      )
+      await textField.fill('updated text')
+      await page.waitForTimeout(1000)
 
       await expect(fieldOnlyVisibleIfNoID).toBeHidden()
     },

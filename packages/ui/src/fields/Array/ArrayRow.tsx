@@ -165,7 +165,16 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
                           schemaPath: '',
                           silent: true,
                         })
-                        return Comp ? <Comp path={path} rowNumber={rowIndex} /> : undefined
+                        if (!Comp) {
+                          return undefined
+                        }
+                        const extraProps =
+                          typeof clientRowLabelPath === 'object' &&
+                          clientRowLabelPath &&
+                          'clientProps' in clientRowLabelPath
+                            ? clientRowLabelPath.clientProps
+                            : undefined
+                        return <Comp path={path} rowNumber={rowIndex} {...(extraProps as any)} />
                       })()
                     : undefined)
                 }

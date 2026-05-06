@@ -103,7 +103,9 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
   // import map using the serializable paths stored in `clientComponentPaths`.
   const resolvedCustomComponents = useMemo(() => {
     const existing = field?.customComponents
-    if (existing || !importMap || !field?.clientComponentPaths) {
+    const hasExistingComponents =
+      existing && Object.values(existing).some((v) => v !== undefined && v !== null)
+    if (hasExistingComponents || !importMap || !field?.clientComponentPaths) {
       return existing
     }
 
@@ -125,7 +127,12 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
               schemaPath: '',
               silent: true,
             })
-            return Comp ? <Comp key={i} /> : null
+            if (!Comp) {
+              return null
+            }
+            const extraProps =
+              typeof cp === 'object' && cp && 'clientProps' in cp ? cp.clientProps : undefined
+            return <Comp key={i} path={path} {...(extraProps as any)} />
           })
           .filter(Boolean)
 
@@ -141,14 +148,18 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
           silent: true,
         })
         if (Comp) {
-          resolved[slotKey] = <Comp />
+          const extraProps =
+            typeof componentPath === 'object' && componentPath && 'clientProps' in componentPath
+              ? componentPath.clientProps
+              : undefined
+          resolved[slotKey] = <Comp path={path} {...(extraProps as any)} />
           hasResolved = true
         }
       }
     }
 
     return hasResolved ? resolved : undefined
-  }, [field?.customComponents, field?.clientComponentPaths, importMap])
+  }, [field?.customComponents, field?.clientComponentPaths, importMap, path])
 
   // Store result from hook as ref
   // to prevent unnecessary rerenders

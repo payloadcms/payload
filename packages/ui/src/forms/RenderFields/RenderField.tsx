@@ -122,6 +122,7 @@ export function RenderField({
           <ResolvedCustomField
             {...baseFieldProps}
             {...clientProps}
+            clientField={clientFieldConfig}
             field={clientFieldConfig}
             path={path}
           />
