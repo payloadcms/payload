@@ -125,9 +125,7 @@ export const getDocumentView = ({
         }
         switch (segment4) {
           case 'api': {
-            if (collectionConfig?.admin?.hideAPIURL !== true) {
-              View = getCustomDocumentViewByKey(views, 'api') || FallbackAPIView
-            }
+            View = getCustomDocumentViewByKey(views, 'api') || FallbackAPIView
             break
           }
 
@@ -177,9 +175,7 @@ export const getDocumentView = ({
         if (segment3 === 'trash') {
           switch (segment5) {
             case 'api': {
-              if (collectionConfig?.admin?.hideAPIURL !== true) {
-                View = getCustomDocumentViewByKey(views, 'api') || FallbackAPIView
-              }
+              View = getCustomDocumentViewByKey(views, 'api') || FallbackAPIView
               break
             }
             case 'versions': {
@@ -283,10 +279,7 @@ export const getDocumentView = ({
       case 3: {
         switch (segment3) {
           case 'api': {
-            if (globalConfig?.admin?.hideAPIURL !== true) {
-              View = getCustomDocumentViewByKey(views, 'api') || FallbackAPIView
-            }
-
+            View = getCustomDocumentViewByKey(views, 'api') || FallbackAPIView
             break
           }
 

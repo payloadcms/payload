@@ -3,7 +3,6 @@ import type { ServerFunction } from 'payload'
 import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
 import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
-import { getFolderResultsComponentAndDataHandler } from './getFolderResultsComponentAndData.js'
 import { schedulePublishHandler } from './schedulePublishHandler.js'
 
 /**
@@ -14,7 +13,6 @@ import { schedulePublishHandler } from './schedulePublishHandler.js'
 export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
   'form-state': buildFormStateHandler,
-  'get-folder-results-component-and-data': getFolderResultsComponentAndDataHandler,
   'schedule-publish': schedulePublishHandler,
   'table-state': buildTableStateHandler,
 }

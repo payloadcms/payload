@@ -58,7 +58,7 @@ export const renderDocumentSlots: (args: {
 
   const BeforeDocumentControls =
     collectionConfig?.admin?.components?.edit?.beforeDocumentControls ||
-    globalConfig?.admin?.components?.elements?.beforeDocumentControls
+    globalConfig?.admin?.components?.edit?.beforeDocumentControls
 
   if (BeforeDocumentControls) {
     components.BeforeDocumentControls = render({
@@ -80,7 +80,7 @@ export const renderDocumentSlots: (args: {
 
   const CustomPreviewButton =
     collectionConfig?.admin?.components?.edit?.PreviewButton ||
-    globalConfig?.admin?.components?.elements?.PreviewButton
+    globalConfig?.admin?.components?.edit?.PreviewButton
 
   if (isPreviewEnabled && CustomPreviewButton) {
     components.PreviewButton = render({
@@ -112,7 +112,7 @@ export const renderDocumentSlots: (args: {
 
   const CustomDescription =
     collectionConfig?.admin?.components?.Description ||
-    globalConfig?.admin?.components?.elements?.Description
+    globalConfig?.admin?.components?.edit?.Description
 
   const hasDescription = CustomDescription || staticDescription
 
@@ -132,7 +132,7 @@ export const renderDocumentSlots: (args: {
   if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
     const CustomStatus =
       collectionConfig?.admin?.components?.edit?.Status ||
-      globalConfig?.admin?.components?.elements?.Status
+      globalConfig?.admin?.components?.edit?.Status
 
     if (CustomStatus) {
       components.Status = render({
@@ -147,7 +147,7 @@ export const renderDocumentSlots: (args: {
     if (hasDraftsEnabled(collectionConfig || globalConfig)) {
       const CustomPublishButton =
         collectionConfig?.admin?.components?.edit?.PublishButton ||
-        globalConfig?.admin?.components?.elements?.PublishButton
+        globalConfig?.admin?.components?.edit?.PublishButton
 
       if (CustomPublishButton) {
         components.PublishButton = render({
@@ -159,7 +159,7 @@ export const renderDocumentSlots: (args: {
 
       const CustomUnpublishButton =
         collectionConfig?.admin?.components?.edit?.UnpublishButton ||
-        globalConfig?.admin?.components?.elements?.UnpublishButton
+        globalConfig?.admin?.components?.edit?.UnpublishButton
 
       if (CustomUnpublishButton) {
         components.UnpublishButton = render({
@@ -171,7 +171,7 @@ export const renderDocumentSlots: (args: {
 
       const CustomSaveDraftButton =
         collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
-        globalConfig?.admin?.components?.elements?.SaveDraftButton
+        globalConfig?.admin?.components?.edit?.SaveDraftButton
 
       const draftsEnabled = hasDraftsEnabled(collectionConfig || globalConfig)
 
@@ -185,7 +185,7 @@ export const renderDocumentSlots: (args: {
     } else {
       const CustomSaveButton =
         collectionConfig?.admin?.components?.edit?.SaveButton ||
-        globalConfig?.admin?.components?.elements?.SaveButton
+        globalConfig?.admin?.components?.edit?.SaveButton
 
       if (CustomSaveButton) {
         components.SaveButton = render({

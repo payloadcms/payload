@@ -12,7 +12,6 @@ import { useConfig } from '../../providers/Config/index.js'
 import { usePathname } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { EntityType } from '../../utilities/groupNavItems.js'
-import { BrowseByFolderButton } from '../FolderView/BrowseByFolderButton/index.js'
 import { Link } from '../Link/index.js'
 import { NavGroup } from '../NavGroup/index.js'
 
@@ -29,26 +28,14 @@ export const DefaultNavClient: React.FC<{
 
   const {
     config: {
-      admin: {
-        routes: { browseByFolder: foldersRoute },
-      },
-      folders,
       routes: { admin: adminRoute },
     },
   } = useConfig()
 
   const { i18n } = useTranslation()
 
-  const folderURL = formatAdminURL({
-    adminRoute,
-    path: foldersRoute,
-  })
-
-  const viewingRootFolderView = pathname.startsWith(folderURL)
-
   return (
     <Fragment>
-      {folders && folders.browseByFolder && <BrowseByFolderButton active={viewingRootFolderView} />}
       {groups.map(({ entities, label }, key) => {
         return (
           <NavGroup isOpen={navPreferences?.groups?.[label]?.open} key={key} label={label}>

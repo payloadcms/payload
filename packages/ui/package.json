@@ -1626,11 +1626,6 @@
         "types": "./dist/utilities/buildTableState.d.ts",
         "default": "./dist/utilities/buildTableState.js"
       },
-      "./utilities/getFolderResultsComponentAndData": {
-        "import": "./dist/utilities/getFolderResultsComponentAndData.js",
-        "types": "./dist/utilities/getFolderResultsComponentAndData.d.ts",
-        "default": "./dist/utilities/getFolderResultsComponentAndData.js"
-      },
       "./utilities/getClientSchemaMap": {
         "import": "./dist/utilities/getClientSchemaMap.js",
         "types": "./dist/utilities/getClientSchemaMap.d.ts",
