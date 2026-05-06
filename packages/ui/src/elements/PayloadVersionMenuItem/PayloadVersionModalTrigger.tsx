@@ -3,8 +3,7 @@
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Client component imports from same package's client bundle
-import { Modal, PopupList, useModal } from '../../exports/client/index.js'
-import { CopyButton } from './CopyButton.js'
+import { CopyToClipboard, Modal, PopupList, useModal } from '../../exports/client/index.js'
 import { formatForClipboard } from './formatForClipboard.js'
 import { VersionList } from './VersionList.js'
 import './index.scss'
@@ -39,7 +38,7 @@ export const PayloadVersionModalTrigger: React.FC<{
             </div>
             <VersionList versions={versions} />
             <div className={`${baseClass}__controls`}>
-              <CopyButton text={formatForClipboard(versions)} />
+              <CopyToClipboard value={formatForClipboard(versions)} />
             </div>
           </div>
         </Modal>
