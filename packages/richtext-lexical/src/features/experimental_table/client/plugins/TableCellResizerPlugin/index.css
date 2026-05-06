@@ -5,7 +5,7 @@
 
 @media (pointer: coarse) {
   .TableCellResizer__resizer {
-    background-color: #adf;
+    background-color: var(--bg-selected);
     mix-blend-mode: color;
   }
 }

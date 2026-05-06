@@ -361,6 +361,53 @@ export const typographyContent = {
   },
 }
 
+const textNode = (text: string) => ({
+  type: 'text',
+  version: 1,
+  text,
+  detail: 0,
+  format: 0,
+  mode: 'normal',
+  style: '',
+})
+
+const listItem = (indent: number, value: number, children: object[]) => ({
+  type: 'listitem',
+  version: 1,
+  direction: 'ltr' as const,
+  format: '',
+  indent,
+  value,
+  children,
+})
+
+const checkListItem = (indent: number, value: number, checked: boolean, children: object[]) => ({
+  type: 'listitem',
+  version: 1,
+  direction: 'ltr' as const,
+  format: '',
+  indent,
+  value,
+  checked,
+  children,
+})
+
+const nestedList = (
+  listType: 'number' | 'bullet' | 'check',
+  tag: 'ol' | 'ul',
+  children: object[],
+) => ({
+  type: 'list',
+  listType,
+  start: 1,
+  tag,
+  version: 1,
+  direction: null,
+  format: '',
+  indent: 0,
+  children,
+})
+
 export const listsContent = {
   root: {
     type: 'root',
@@ -369,335 +416,72 @@ export const listsContent = {
     version: 1,
     direction: null,
     children: [
-      // Ordered list with nested levels: 1. → a. → i. → 1. → a.
-      {
-        type: 'list',
-        listType: 'number',
-        start: 1,
-        tag: 'ol',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        children: [
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            value: 1,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Lorem',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 1,
-            value: 1,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Ipsum',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 2,
-            value: 1,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Dolor',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 3,
-            value: 1,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Sit',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 4,
-            value: 1,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Amet',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-        ],
-      },
+      // Ordered list with nested levels
+      nestedList('number', 'ol', [
+        listItem(0, 1, [textNode('Lorem')]),
+        listItem(0, 2, [
+          nestedList('number', 'ol', [
+            listItem(1, 1, [textNode('Ipsum')]),
+            listItem(1, 2, [
+              nestedList('number', 'ol', [
+                listItem(2, 1, [textNode('Dolor')]),
+                listItem(2, 2, [
+                  nestedList('number', 'ol', [
+                    listItem(3, 1, [textNode('Sit')]),
+                    listItem(3, 2, [
+                      nestedList('number', 'ol', [listItem(4, 1, [textNode('Amet')])]),
+                    ]),
+                  ]),
+                ]),
+              ]),
+            ]),
+          ]),
+        ]),
+      ]),
       // Unordered list with nested levels
-      {
-        type: 'list',
-        listType: 'bullet',
-        start: 1,
-        tag: 'ul',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        children: [
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            value: 1,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Lorem',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 1,
-            value: 1,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Ipsum',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 2,
-            value: 1,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Dolor',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 3,
-            value: 1,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Sit',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 4,
-            value: 1,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Amet',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-        ],
-      },
-      // Checklist with mixed checked/unchecked states
-      {
-        type: 'list',
-        listType: 'check',
-        start: 1,
-        tag: 'ul',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        children: [
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            value: 1,
-            checked: false,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Lorem',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            value: 2,
-            checked: true,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Ipsum',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 1,
-            value: 1,
-            checked: false,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Dolor',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 1,
-            value: 2,
-            checked: true,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Sit',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-          {
-            type: 'listitem',
-            version: 1,
-            direction: 'ltr',
-            format: '',
-            indent: 2,
-            value: 1,
-            checked: true,
-            children: [
-              {
-                type: 'text',
-                version: 1,
-                text: 'Amet',
-                detail: 0,
-                format: 0,
-                mode: 'normal',
-                style: '',
-              },
-            ],
-          },
-        ],
-      },
+      nestedList('bullet', 'ul', [
+        listItem(0, 1, [textNode('Lorem')]),
+        listItem(0, 2, [
+          nestedList('bullet', 'ul', [
+            listItem(1, 1, [textNode('Ipsum')]),
+            listItem(1, 2, [
+              nestedList('bullet', 'ul', [
+                listItem(2, 1, [textNode('Dolor')]),
+                listItem(2, 2, [
+                  nestedList('bullet', 'ul', [
+                    listItem(3, 1, [textNode('Sit')]),
+                    listItem(3, 2, [
+                      nestedList('bullet', 'ul', [listItem(4, 1, [textNode('Amet')])]),
+                    ]),
+                  ]),
+                ]),
+              ]),
+            ]),
+          ]),
+        ]),
+      ]),
+      // Checklist with mixed checked/unchecked states and nested levels
+      nestedList('check', 'ul', [
+        checkListItem(0, 1, false, [textNode('Lorem')]),
+        checkListItem(0, 2, false, [
+          nestedList('check', 'ul', [
+            checkListItem(1, 1, true, [textNode('Ipsum')]),
+            checkListItem(1, 2, false, [
+              nestedList('check', 'ul', [
+                checkListItem(2, 1, false, [textNode('Dolor')]),
+                checkListItem(2, 2, false, [
+                  nestedList('check', 'ul', [
+                    checkListItem(3, 1, true, [textNode('Sit')]),
+                    checkListItem(3, 2, false, [
+                      nestedList('check', 'ul', [checkListItem(4, 1, true, [textNode('Amet')])]),
+                    ]),
+                  ]),
+                ]),
+              ]),
+            ]),
+          ]),
+        ]),
+      ]),
     ],
   },
 }

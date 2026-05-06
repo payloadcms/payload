@@ -167,5 +167,5 @@
 
 /* Add left padding to Monaco line numbers area */
 .payload-richtext-code-block .monaco-editor .margin {
-  padding-left: 8px;
+  padding-left: var(--spacer-2);
 }

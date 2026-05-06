@@ -32,7 +32,7 @@
     margin-bottom: 30px;
 
     ::selection {
-      background: rgba(172, 206, 247);
+      background: var(--bg-selected);
     }
 
     br::selection {
@@ -77,21 +77,31 @@
   }
 
   .LexicalEditorTheme__tableSelected {
-    outline: 2px solid rgb(60, 132, 244);
+    outline: 2px solid var(--border-selected);
   }
 
   .LexicalEditorTheme__tableCell {
     border: 1px solid var(--border-default);
     vertical-align: top;
     text-align: start;
-    padding: 6px 8px;
+    padding: var(--spacer-2);
     position: relative;
     cursor: default;
     outline: none;
   }
 
-  .LexicalEditorTheme__tableCell > * {
+  .LexicalEditorTheme__tableCell > .LexicalEditorTheme__paragraph,
+  .LexicalEditorTheme__tableCell > .LexicalEditorTheme__h1,
+  .LexicalEditorTheme__tableCell > .LexicalEditorTheme__h2,
+  .LexicalEditorTheme__tableCell > .LexicalEditorTheme__h3,
+  .LexicalEditorTheme__tableCell > .LexicalEditorTheme__h4,
+  .LexicalEditorTheme__tableCell > .LexicalEditorTheme__h5,
+  .LexicalEditorTheme__tableCell > .LexicalEditorTheme__h6,
+  .LexicalEditorTheme__tableCell > .LexicalEditorTheme__quote,
+  .LexicalEditorTheme__tableCell > .LexicalEditorTheme__ol1,
+  .LexicalEditorTheme__tableCell > .LexicalEditorTheme__ul {
     overflow: inherit;
+    margin-block: 0;
   }
 
   .LexicalEditorTheme__tableCellResizer {
@@ -105,7 +115,7 @@
   }
 
   .LexicalEditorTheme__tableCellHeader {
-    background-color: #f5f5f5;
+    background-color: var(--bg-secondary);
     text-align: start;
   }
 
@@ -187,18 +197,18 @@
   }
 
   .LexicalEditorTheme__tableCellActionButton {
-    background-color: #eee;
+    background-color: var(--bg-secondary);
     display: block;
     border: 0;
     border-radius: 20px;
     width: 20px;
     height: 20px;
-    color: #222;
+    color: var(--text-default);
     cursor: pointer;
   }
 
   .LexicalEditorTheme__tableCellActionButton:hover {
-    background-color: #ddd;
+    background-color: var(--border-default);
   }
 
   html[data-theme='dark'] {

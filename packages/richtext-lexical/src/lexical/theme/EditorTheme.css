@@ -152,7 +152,7 @@
   .LexicalEditorTheme__textCode {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-default);
-    color: var(--text-danger);
+    color: var(--text-default);
     padding: calc(var(--base) * 0.1) calc(var(--base) * 0.2);
     font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace;
     font-size: 0.875em;
@@ -339,12 +339,6 @@
   .LexicalEditorTheme__nestedListItem:before,
   .LexicalEditorTheme__nestedListItem:after {
     display: none;
-  }
-
-  html[data-theme='dark'] {
-    .LexicalEditorTheme__textCode {
-      color: var(--text-warning);
-    }
   }
 }
 
