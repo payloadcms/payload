@@ -53,8 +53,10 @@
       display: flex;
       flex-direction: column;
       gap: calc(var(--base) / 4);
-      max-height: 60vh;
-      overflow-y: auto;
+    }
+
+    &__button {
+      color: var(--theme-elevation-500);
     }
 
     &__row {
