@@ -16,6 +16,7 @@ import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
 import DateFields from './collections/Date/index.js'
+import DraftVersions from './collections/DraftVersions/index.js'
 import EmailFields from './collections/Email/index.js'
 import FolderItems from './collections/FolderItems/index.js'
 import { Folders } from './collections/Folders/index.js'
@@ -68,6 +69,7 @@ export const collections: CollectionConfig[] = [
   TextareaFields,
   Uploads,
   UploadFields,
+  DraftVersions,
 ]
 
 export const baseConfig: Partial<Config> = {

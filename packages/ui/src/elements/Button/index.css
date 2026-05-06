@@ -67,7 +67,6 @@
 
   .btn--style-secondary {
     color: var(--text-default);
-    background-color: var(--special-bg-transparent);
     border: 1px solid var(--special-border-translucent);
 
     &:hover:not(.btn--disabled),
@@ -372,7 +371,6 @@
     }
 
     .popup-button {
-      border: 1px solid transparent;
       border-radius: var(--radius-medium);
       align-items: center;
 
@@ -420,7 +418,6 @@
     .btn,
     .popup-button {
       color: var(--text-default);
-      background-color: var(--special-bg-transparent);
       border-color: var(--special-border-translucent);
 
       &:hover,

@@ -92,6 +92,7 @@ export interface Config {
     'textarea-fields': TextareaField;
     uploads: Upload;
     'upload-fields': UploadField;
+    'draft-versions': DraftVersion;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -124,6 +125,7 @@ export interface Config {
     'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'upload-fields': UploadFieldsSelect<false> | UploadFieldsSelect<true>;
+    'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -684,6 +686,18 @@ export interface RelationshipField {
    * This field is read-only
    */
   authorReadOnly?: (string | null) | User;
+  /**
+   * Can relate to users or text fields
+   */
+  polymorphic?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'text-fields';
+        value: string | TextField;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -934,6 +948,19 @@ export interface UploadField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-versions".
+ */
+export interface DraftVersion {
+  id: string;
+  title: string;
+  content?: string | null;
+  author?: (string | null) | User;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1055,6 +1082,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'upload-fields';
         value: string | UploadField;
+      } | null)
+    | ({
+        relationTo: 'draft-versions';
+        value: string | DraftVersion;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1477,6 +1508,7 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relatedPosts?: T;
   authorDisabled?: T;
   authorReadOnly?: T;
+  polymorphic?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1627,6 +1659,18 @@ export interface UploadFieldsSelect<T extends boolean = true> {
   heroImageHasMany?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-versions_select".
+ */
+export interface DraftVersionsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  author?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

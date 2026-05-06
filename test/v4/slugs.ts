@@ -22,6 +22,7 @@ export const blocksFieldsSlug = 'blocks-fields'
 export const dateFieldsSlug = 'date-fields'
 export const foldersSlug = 'folders'
 export const folderItemsSlug = 'folder-items'
+export const draftVersionsSlug = 'draft-versions'
 
 export const collectionSlugs = [
   'users',
@@ -49,4 +50,5 @@ export const collectionSlugs = [
   dateFieldsSlug,
   foldersSlug,
   folderItemsSlug,
+  draftVersionsSlug,
 ]
