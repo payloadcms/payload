@@ -480,8 +480,8 @@ export interface ForceSelect {
 export interface ForceSelectFn {
   id: string;
   text?: string | null;
-  forceSelectedAlways?: string | null;
-  forceSelectedOnFind?: string | null;
+  field1?: string | null;
+  field2?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -953,8 +953,8 @@ export interface ForceSelectSelect<T extends boolean = true> {
  */
 export interface ForceSelectFnSelect<T extends boolean = true> {
   text?: T;
-  forceSelectedAlways?: T;
-  forceSelectedOnFind?: T;
+  field1?: T;
+  field2?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1113,8 +1113,8 @@ export interface ForceSelectGlobal {
 export interface ForceSelectFnGlobal {
   id: string;
   text?: string | null;
-  forceSelectedAlways?: string | null;
-  forceSelectedOnUpdate?: string | null;
+  field1?: string | null;
+  field2?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1152,8 +1152,8 @@ export interface ForceSelectGlobalSelect<T extends boolean = true> {
  */
 export interface ForceSelectFnGlobalSelect<T extends boolean = true> {
   text?: T;
-  forceSelectedAlways?: T;
-  forceSelectedOnUpdate?: T;
+  field1?: T;
+  field2?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

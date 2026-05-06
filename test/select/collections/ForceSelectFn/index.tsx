@@ -8,19 +8,21 @@ export const ForceSelectFn: CollectionConfig<'force-select-fn'> = {
       type: 'text',
     },
     {
-      name: 'forceSelectedAlways',
+      name: 'field1',
       type: 'text',
     },
     {
-      name: 'forceSelectedOnFind',
+      name: 'field2',
       type: 'text',
     },
   ],
-  forceSelect: ({ operation }) => {
-    if (operation === 'find') {
-      return { forceSelectedAlways: true, forceSelectedOnFind: true }
+  // When the caller selects `field1`, also auto-select `field2`.
+  // Function form *replaces* the caller's select with the returned value.
+  select: ({ select }) => {
+    if (select?.field1) {
+      return { field1: true, field2: true }
     }
 
-    return { forceSelectedAlways: true }
+    return undefined
   },
 }

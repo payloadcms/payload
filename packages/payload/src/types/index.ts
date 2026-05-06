@@ -208,9 +208,9 @@ export type SelectMode = 'exclude' | 'include'
 export type SelectType = SelectExcludeType | SelectIncludeType
 
 /**
- * Operation contexts in which `forceSelect` may be evaluated.
+ * Operation contexts in which the entity-level `select` config may be evaluated.
  */
-export type ForceSelectOperation =
+export type SelectFnOperation =
   | 'create'
   | 'delete'
   | 'deleteByID'
@@ -224,25 +224,30 @@ export type ForceSelectOperation =
   | 'updateByID'
 
 /**
- * Arguments passed to a `forceSelect` function.
+ * Arguments passed to a `select` function on a collection or global config.
  *
- * Note: per-document `data` is intentionally not provided — `forceSelect` runs
- * before the read, so the document body is not yet known. Branch on `req.user`,
- * `req.locale`, or `operation` instead.
+ * Note: per-document `data` is intentionally not provided — the function runs
+ * before the read, so the document body is not yet known. Branch on the
+ * caller's `select`, `req.user`, `req.locale`, or `operation` instead.
  */
-export type ForceSelectFnArgs = {
-  operation: ForceSelectOperation
+export type SelectFnArgs = {
+  operation: SelectFnOperation
   req: PayloadRequest
+  /** The caller's `select` arg, or `undefined` if not provided (full document). */
+  select?: SelectType
 }
 
 /**
- * `forceSelect` may be either a static select object or a function that
- * returns one. The function receives the current request context and runs
- * once per read operation.
+ * A function used to modify the `select` argument sent through Payload
+ * operations. Receives the current request context (including the caller's
+ * `select`) and returns the final `select` to apply, replacing the caller's.
+ * Return `undefined` to leave the caller's `select` unchanged.
+ *
+ * @link https://payloadcms.com/docs/queries/select
  */
-export type ForceSelect<TSelect extends SelectType = SelectType> =
-  | ((args: ForceSelectFnArgs) => TSelect)
-  | TSelect
+export type SelectFn<TSelect extends SelectType = SelectType> = (
+  args: SelectFnArgs,
+) => TSelect | undefined
 
 export type ApplyDisableErrors<T, DisableErrors = false> = false extends DisableErrors
   ? T

@@ -26,7 +26,7 @@ import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { resolveForceSelect } from '../../utilities/resolveForceSelect.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
@@ -244,12 +244,12 @@ export const updateOperation = async <
 
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
-          forceSelect: resolveForceSelect({
-            forceSelect: collectionConfig.forceSelect,
+          select: resolveSelect({
+            config: collectionConfig.select,
             operation: 'update',
             req,
+            select: incomingSelect,
           }),
-          select: incomingSelect,
         })
 
         // ///////////////////////////////////////////////

@@ -24,7 +24,7 @@ import type {
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
-import type { ForceSelect, PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
+import type { PayloadRequest, SelectFn, SelectIncludeType, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
@@ -205,19 +205,6 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   dbName?: DBIdentifierName
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
-  /**
-   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks.
-   *
-   * May be a static select object or a function returning one. The function
-   * receives the current request context (`req`, `operation`) and runs once
-   * per read. Per-document data is not provided — `forceSelect` runs before
-   * the read, so the document body is not yet known.
-   */
-  forceSelect?: ForceSelect<
-    IsAny<SelectFromGlobalSlug<TSlug>> extends true
-      ? SelectIncludeType
-      : SelectFromGlobalSlug<TSlug>
-  >
   graphQL?:
     | {
         disableMutations?: true
@@ -243,6 +230,23 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
         duration: number
       }
     | false
+  /**
+   * Entity-level Select API configuration.
+   *
+   * A function that receives the current request context (`operation`, `req`,
+   * the caller's `select`) and returns the final `select` to apply, replacing
+   * the caller's. Return `undefined` to leave the caller's `select` unchanged.
+   *
+   * Useful for augmenting the caller's selection or enforcing fields are
+   * always read for access control / hooks.
+   *
+   * Note: per-document data is not available — runs before the read.
+   */
+  select?: SelectFn<
+    IsAny<SelectFromGlobalSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromGlobalSlug<TSlug>
+  >
   slug: string
   /**
    * Options used in typescript generation

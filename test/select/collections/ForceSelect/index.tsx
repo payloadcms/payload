@@ -22,5 +22,11 @@ export const ForceSelect: CollectionConfig<'force-select'> = {
       ],
     },
   ],
-  forceSelect: { array: { forceSelected: true }, forceSelected: true },
+  select: ({ select }) => {
+    if (!select) {
+      return undefined
+    }
+
+    return { ...select, array: { forceSelected: true }, forceSelected: true }
+  },
 }

@@ -107,7 +107,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
-      forceSelect: { array: { forceSelected: true }, forceSelected: true },
+      select: { array: { forceSelected: true }, forceSelected: true },
     } satisfies GlobalConfig<'force-select-global'>,
     {
       slug: 'force-select-fn-global',
@@ -117,20 +117,20 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
         {
-          name: 'forceSelectedAlways',
+          name: 'field1',
           type: 'text',
         },
         {
-          name: 'forceSelectedOnUpdate',
+          name: 'field2',
           type: 'text',
         },
       ],
-      forceSelect: ({ operation }) => {
-        if (operation === 'update') {
-          return { forceSelectedAlways: true, forceSelectedOnUpdate: true }
+      select: ({ select }) => {
+        if (select?.field1) {
+          return { field1: true, field2: true }
         }
 
-        return { forceSelectedAlways: true }
+        return undefined
       },
     } satisfies GlobalConfig<'force-select-fn-global'>,
   ],

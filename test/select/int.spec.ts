@@ -2553,7 +2553,7 @@ describe('Select', () => {
     })
   })
 
-  it('should force collection select fields with forceSelect', async () => {
+  it('should force collection select fields with static select config', async () => {
     const { id, array, forceSelected, text } = await payload.create({
       collection: 'force-select',
       data: {
@@ -2577,7 +2577,7 @@ describe('Select', () => {
     })
   })
 
-  it('should force global select fields with forceSelect', async () => {
+  it('should force global select fields with static select config', async () => {
     const { id, array, forceSelected, text } = await payload.updateGlobal({
       slug: 'force-select-global',
       data: {
@@ -2600,72 +2600,84 @@ describe('Select', () => {
     })
   })
 
-  it('should resolve collection forceSelect function per operation', async () => {
-    const created = await payload.create({
+  it('should auto-select field2 when caller selects field1 on collections', async () => {
+    const { id } = await payload.create({
       collection: 'force-select-fn',
-      data: {
-        forceSelectedAlways: 'always',
-        forceSelectedOnFind: 'on-find-only',
-        text: 'some-text',
-      },
+      data: { field1: 'one', field2: 'two', text: 'control' },
     })
 
-    // findByID — function returns { forceSelectedAlways: true } only.
-    // forceSelectedOnFind must NOT be included.
-    const findByIDResult = await payload.findByID({
-      id: created.id,
+    // Caller selects `field1` → function auto-selects `field2`.
+    const augmented = await payload.findByID({
+      id,
       collection: 'force-select-fn',
-      select: { text: true },
+      select: { field1: true },
     })
 
-    expect(findByIDResult).toStrictEqual({
-      id: created.id,
-      forceSelectedAlways: 'always',
-      text: 'some-text',
+    expect(augmented).toStrictEqual({
+      id,
+      field1: 'one',
+      field2: 'two',
     })
-    expect((findByIDResult as Record<string, unknown>).forceSelectedOnFind).toBeUndefined()
 
-    // find — function returns both forced fields.
-    const findResult = await payload.find({
+    // Caller selects `text` (not field1) → function returns nothing, `field2` excluded.
+    const notAugmented = await payload.findByID({
+      id,
       collection: 'force-select-fn',
       select: { text: true },
-      where: { id: { equals: created.id } },
     })
 
-    expect(findResult.docs[0]).toStrictEqual({
-      id: created.id,
-      forceSelectedAlways: 'always',
-      forceSelectedOnFind: 'on-find-only',
-      text: 'some-text',
+    expect(notAugmented).toStrictEqual({
+      id,
+      text: 'control',
     })
 
-    await payload.delete({ id: created.id, collection: 'force-select-fn' })
+    await payload.delete({ id, collection: 'force-select-fn' })
   })
 
-  it('should pass req context to forceSelect function', async () => {
-    const calls: Array<{ operation: string; userEmail?: string }> = []
+  it('should auto-select field2 when caller selects field1 on globals', async () => {
+    const { id } = await payload.updateGlobal({
+      slug: 'force-select-fn-global',
+      data: { field1: 'one', field2: 'two', text: 'control' },
+    })
+
+    const augmented = await payload.findGlobal({
+      slug: 'force-select-fn-global',
+      select: { field1: true },
+    })
+
+    expect(augmented).toStrictEqual({
+      id,
+      field1: 'one',
+      field2: 'two',
+    })
+  })
+
+  it('should pass req + select context to the select function', async () => {
+    const calls: Array<{ operation: string; selectKeys?: string[]; userEmail?: string }> = []
 
     const collection = payload.config.collections.find((c) => c.slug === 'force-select-fn')!
-    const originalForceSelect = collection.forceSelect
+    const originalSelect = collection.select
 
-    collection.forceSelect = (args) => {
+    collection.select = (args) => {
       calls.push({
         operation: args.operation,
+        selectKeys: args.select ? Object.keys(args.select) : undefined,
         userEmail: args.req?.user?.email,
       })
-      return { forceSelectedAlways: true }
+      return undefined
     }
 
     try {
       const created = await payload.create({
         collection: 'force-select-fn',
-        data: { forceSelectedAlways: 'always', text: 't' },
+        data: { field1: 'a', field2: 'b' },
+        select: { field1: true },
       })
 
       await payload.findByID({
         id: created.id,
         collection: 'force-select-fn',
-        select: { text: true },
+        select: { field1: true },
       })
 
       await payload.delete({ id: created.id, collection: 'force-select-fn' })
@@ -2674,38 +2686,12 @@ describe('Select', () => {
       expect(operations).toContain('create')
       expect(operations).toContain('findByID')
       expect(operations).toContain('deleteByID')
+
+      const findByIDCall = calls.find((c) => c.operation === 'findByID')
+      expect(findByIDCall?.selectKeys).toEqual(['field1'])
     } finally {
-      collection.forceSelect = originalForceSelect
+      collection.select = originalSelect
     }
-  })
-
-  it('should resolve global forceSelect function per operation', async () => {
-    const updated = await payload.updateGlobal({
-      slug: 'force-select-fn-global',
-      data: {
-        forceSelectedAlways: 'always',
-        forceSelectedOnUpdate: 'on-update-only',
-        text: 'some-text',
-      },
-    })
-
-    expect(updated).toMatchObject({
-      forceSelectedAlways: 'always',
-      forceSelectedOnUpdate: 'on-update-only',
-      text: 'some-text',
-    })
-
-    // findOne — function returns { forceSelectedAlways: true } only.
-    const findResult = await payload.findGlobal({
-      slug: 'force-select-fn-global',
-      select: { text: true },
-    })
-
-    expect(findResult).toMatchObject({
-      forceSelectedAlways: 'always',
-      text: 'some-text',
-    })
-    expect((findResult as Record<string, unknown>).forceSelectedOnUpdate).toBeUndefined()
   })
 
   it('should properly return relationships when using select on block with depth 0', async () => {

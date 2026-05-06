@@ -20,7 +20,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { resolveForceSelect } from '../../utilities/resolveForceSelect.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
@@ -176,12 +176,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
-      forceSelect: resolveForceSelect({
-        forceSelect: collectionConfig.forceSelect,
+      select: resolveSelect({
+        config: collectionConfig.select,
         operation: 'deleteByID',
         req,
+        select: incomingSelect,
       }),
-      select: incomingSelect,
     })
 
     // /////////////////////////////////////

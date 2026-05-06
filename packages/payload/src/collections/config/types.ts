@@ -52,8 +52,8 @@ import type {
   TypedLocale,
 } from '../../index.js'
 import type {
-  ForceSelect,
   PayloadRequest,
+  SelectFn,
   SelectIncludeType,
   SelectType,
   Sort,
@@ -610,19 +610,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   folders?: boolean | FoldersConfig
   /**
-   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks.
-   *
-   * May be a static select object or a function returning one. The function
-   * receives the current request context (`req`, `operation`) and runs once
-   * per read. Per-document data is not provided — `forceSelect` runs before
-   * the read, so the document body is not yet known.
-   */
-  forceSelect?: ForceSelect<
-    IsAny<SelectFromCollectionSlug<TSlug>> extends true
-      ? SelectIncludeType
-      : SelectFromCollectionSlug<TSlug>
-  >
-  /**
    * GraphQL configuration
    */
   graphQL?:
@@ -723,6 +710,24 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @experimental There may be frequent breaking changes to this API
    */
   orderable?: boolean
+  /**
+   * Entity-level Select API configuration.
+   *
+   * A function that receives the current request context (`operation`, `req`,
+   * the caller's `select`) and returns the final `select` to apply, replacing
+   * the caller's. Return `undefined` to leave the caller's `select` unchanged.
+   *
+   * Useful for augmenting the caller's selection (e.g. opting in additional
+   * fields when a particular field is requested) or enforcing fields are
+   * always read for access control / hooks.
+   *
+   * Note: per-document data is not available — runs before the read.
+   */
+  select?: SelectFn<
+    IsAny<SelectFromCollectionSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromCollectionSlug<TSlug>
+  >
   slug: string
   /**
    * Enable tags hierarchy preset for this collection.
