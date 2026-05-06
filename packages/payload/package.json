@@ -137,7 +137,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/minimist": "1.2.2",
-    "@types/nodemailer": "7.0.2",
+    "@types/nodemailer": "^8.0.0",
     "@types/pluralize": "0.0.33",
     "@types/range-parser": "1.2.7",
     "@types/ws": "^8.5.10",
