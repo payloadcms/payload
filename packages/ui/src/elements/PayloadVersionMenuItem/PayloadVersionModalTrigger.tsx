@@ -6,7 +6,7 @@ import React from 'react'
 import { CopyToClipboard, Modal, PopupList, useModal } from '../../exports/client/index.js'
 import { formatForClipboard } from './formatForClipboard.js'
 import { VersionList } from './VersionList.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'payload-version-menu-item'
 const modalSlug = 'payload-version-info'
