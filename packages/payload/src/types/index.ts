@@ -228,11 +228,9 @@ export type ForceSelectOperation =
  *
  * Note: per-document `data` is intentionally not provided — `forceSelect` runs
  * before the read, so the document body is not yet known. Branch on `req.user`,
- * `req.locale`, `operation`, or `id` (when available) instead.
+ * `req.locale`, or `operation` instead.
  */
 export type ForceSelectFnArgs = {
-  /** Document id when the operation targets a single document (e.g. `findByID`). */
-  id?: number | string
   operation: ForceSelectOperation
   req: PayloadRequest
 }

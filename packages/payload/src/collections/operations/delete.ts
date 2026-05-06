@@ -120,8 +120,9 @@ export const deleteOperation = async <
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
       forceSelect: resolveForceSelect({
-        args: { operation: 'delete', req },
         forceSelect: collectionConfig.forceSelect,
+        operation: 'delete',
+        req,
       }),
       select: incomingSelect,
     })

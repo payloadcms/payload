@@ -102,8 +102,9 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     const select = sanitizeSelect({
       fields: globalConfig.flattenedFields,
       forceSelect: resolveForceSelect({
-        args: { operation: 'findOne', req },
         forceSelect: globalConfig.forceSelect,
+        operation: 'findOne',
+        req,
       }),
       select: incomingSelect,
     })

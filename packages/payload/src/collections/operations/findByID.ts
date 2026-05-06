@@ -101,8 +101,9 @@ export const findByIDOperation = async <
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
       forceSelect: resolveForceSelect({
-        args: { id, operation: 'findByID', req },
         forceSelect: collectionConfig.forceSelect,
+        operation: 'findByID',
+        req,
       }),
       select: incomingSelect,
     })

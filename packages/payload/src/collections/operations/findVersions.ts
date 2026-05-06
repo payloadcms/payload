@@ -104,8 +104,9 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       fields: versionFields,
       forceSelect: getQueryDraftsSelect({
         select: resolveForceSelect({
-          args: { operation: 'findVersions', req },
           forceSelect: collectionConfig.forceSelect,
+          operation: 'findVersions',
+          req,
         }),
       }),
       select: incomingSelect,

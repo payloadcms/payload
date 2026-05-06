@@ -64,8 +64,9 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
       fields: buildVersionGlobalFields(payload.config, globalConfig, true),
       forceSelect: getQueryDraftsSelect({
         select: resolveForceSelect({
-          args: { id, operation: 'findVersionByID', req },
           forceSelect: globalConfig.forceSelect,
+          operation: 'findVersionByID',
+          req,
         }),
       }),
       select: incomingSelect,

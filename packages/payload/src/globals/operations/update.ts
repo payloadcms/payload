@@ -338,8 +338,9 @@ export const updateOperation = async <
     const select = sanitizeSelect({
       fields: globalConfig.flattenedFields,
       forceSelect: resolveForceSelect({
-        args: { operation: 'update', req },
         forceSelect: globalConfig.forceSelect,
+        operation: 'update',
+        req,
       }),
       select: incomingSelect,
     })

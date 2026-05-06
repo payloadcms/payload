@@ -261,8 +261,9 @@ export const restoreVersionOperation = async <
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
       forceSelect: resolveForceSelect({
-        args: { id: parentDocID, operation: 'restoreVersion', req },
         forceSelect: collectionConfig.forceSelect,
+        operation: 'restoreVersion',
+        req,
       }),
       select: incomingSelect,
     })

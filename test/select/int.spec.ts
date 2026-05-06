@@ -2643,14 +2643,13 @@ describe('Select', () => {
   })
 
   it('should pass req context to forceSelect function', async () => {
-    const calls: Array<{ id?: number | string; operation: string; userEmail?: string }> = []
+    const calls: Array<{ operation: string; userEmail?: string }> = []
 
     const collection = payload.config.collections.find((c) => c.slug === 'force-select-fn')!
     const originalForceSelect = collection.forceSelect
 
     collection.forceSelect = (args) => {
       calls.push({
-        id: args.id,
         operation: args.operation,
         userEmail: args.req?.user?.email,
       })
@@ -2675,9 +2674,6 @@ describe('Select', () => {
       expect(operations).toContain('create')
       expect(operations).toContain('findByID')
       expect(operations).toContain('deleteByID')
-
-      const findByIDCall = calls.find((c) => c.operation === 'findByID')
-      expect(findByIDCall?.id).toEqual(created.id)
     } finally {
       collection.forceSelect = originalForceSelect
     }

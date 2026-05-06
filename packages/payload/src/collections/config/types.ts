@@ -613,9 +613,9 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks.
    *
    * May be a static select object or a function returning one. The function
-   * receives the current request context (`req`, `operation`, `id`) and runs
-   * once per read. Per-document data is not provided — `forceSelect` runs
-   * before the read, so the document body is not yet known.
+   * receives the current request context (`req`, `operation`) and runs once
+   * per read. Per-document data is not provided — `forceSelect` runs before
+   * the read, so the document body is not yet known.
    */
   forceSelect?: ForceSelect<
     IsAny<SelectFromCollectionSlug<TSlug>> extends true

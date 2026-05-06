@@ -194,8 +194,9 @@ export const updateByIDOperation = async <
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
       forceSelect: resolveForceSelect({
-        args: { id, operation: 'updateByID', req },
         forceSelect: collectionConfig.forceSelect,
+        operation: 'updateByID',
+        req,
       }),
       select: incomingSelect,
     })

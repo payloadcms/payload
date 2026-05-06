@@ -288,8 +288,9 @@ export const createOperation = async <
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
       forceSelect: resolveForceSelect({
-        args: { operation: 'create', req },
         forceSelect: collectionConfig.forceSelect,
+        operation: 'create',
+        req,
       }),
       select: incomingSelect,
     })

@@ -99,8 +99,9 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       fields: buildVersionCollectionFields(payload.config, collectionConfig, true),
       forceSelect: getQueryDraftsSelect({
         select: resolveForceSelect({
-          args: { id, operation: 'findVersionByID', req },
           forceSelect: collectionConfig.forceSelect,
+          operation: 'findVersionByID',
+          req,
         }),
       }),
       select: incomingSelect,
