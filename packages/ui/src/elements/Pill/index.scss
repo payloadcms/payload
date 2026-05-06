@@ -15,8 +15,8 @@
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
     display: inline-flex;
-    background: var(--color-black-200);
-    color: var(--text-default);
+    background: var(--ramp-black-200);
+    color: var(--color-text);
     border-radius: var(--radius-medium);
     cursor: inherit;
     border: 0;
@@ -78,26 +78,26 @@
     &--style-white {
       &.pill--has-action {
         &:hover {
-          background: var(--bg-default-secondary-hover);
+          background: var(--color-bg-secondary-hover);
         }
 
         &:active {
-          background: var(--bg-default-secondary-pressed);
+          background: var(--color-bg-secondary-pressed);
         }
       }
     }
 
     &--style-always-white {
-      background: var(--bg-inverse-default);
-      color: var(--text-inverse-oninverse);
+      background: var(--color-bg-inverse);
+      color: var(--color-text-oninverse);
 
       &.pill--has-action {
         &:hover {
-          background: var(--bg-inverse-hover);
+          background: var(--color-bg-inverse-hover);
         }
 
         &:active {
-          background: var(--bg-inverse-pressed);
+          background: var(--color-bg-inverse-pressed);
         }
       }
     }
@@ -105,50 +105,50 @@
     &--style-light {
       &.pill--has-action {
         &:hover {
-          background: var(--bg-default-secondary-hover);
+          background: var(--color-bg-secondary-hover);
         }
 
         &:active {
-          background: var(--bg-default-secondary-pressed);
+          background: var(--color-bg-secondary-pressed);
         }
       }
     }
 
     &--style-light-gray {
-      background: var(--bg-default-secondary);
-      color: var(--text-default);
+      background: var(--color-bg-secondary);
+      color: var(--color-text);
     }
 
     &--style-warning {
-      background: var(--bg-warning-tertiary);
-      color: var(--text-warning-default);
+      background: var(--color-bg-warning-tertiary);
+      color: var(--color-text-warning);
     }
 
     &--style-success {
-      background: var(--bg-success-tertiary);
-      color: var(--text-success-default);
+      background: var(--color-bg-success-tertiary);
+      color: var(--color-text-success);
     }
 
     &--style-error {
-      background: var(--bg-danger-tertiary);
-      color: var(--text-danger-default);
+      background: var(--color-bg-danger-tertiary);
+      color: var(--color-text-danger);
     }
 
     &--style-dark {
-      background: var(--bg-inverse-default);
-      color: var(--text-inverse-oninverse);
+      background: var(--color-bg-inverse);
+      color: var(--color-text-oninverse);
 
       svg {
-        @include color-svg(var(--text-inverse-oninverse));
+        @include color-svg(var(--color-text-oninverse));
       }
 
       &.pill--has-action {
         &:hover {
-          background: var(--bg-inverse-hover);
+          background: var(--color-bg-inverse-hover);
         }
 
         &:active {
-          background: var(--bg-inverse-pressed);
+          background: var(--color-bg-inverse-pressed);
         }
       }
     }
@@ -170,17 +170,17 @@
   html[data-theme='light'] {
     .pill {
       &--style-always-white {
-        background: var(--bg-default-default);
-        color: var(--text-default);
-        border: 1px solid var(--border-default-default);
+        background: var(--color-bg);
+        color: var(--color-text);
+        border: 1px solid var(--color-border);
 
         &.pill--has-action {
           &:hover {
-            background: var(--bg-default-secondary-hover);
+            background: var(--color-bg-secondary-hover);
           }
 
           &:active {
-            background: var(--bg-default-secondary-pressed);
+            background: var(--color-bg-secondary-pressed);
           }
         }
       }

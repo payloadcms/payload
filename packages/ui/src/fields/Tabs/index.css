@@ -46,7 +46,7 @@
       left: 0;
       right: 0;
       height: 1px;
-      background: var(--border-default-default);
+      background: var(--color-border);
     }
   }
 

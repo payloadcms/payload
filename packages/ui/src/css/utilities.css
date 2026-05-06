@@ -1,6 +1,6 @@
 @layer payload-default {
   :root {
-    --accessibility-outline: 1px solid var(--border-selected-strong);
+    --accessibility-outline: 1px solid var(--color-border-selected-strong);
     --accessibility-outline-offset: 1px;
   }
 

@@ -23,8 +23,8 @@
 
     position: absolute;
     z-index: var(--z-popup);
-    background: var(--bg-elevated-default);
-    color: var(--text-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-text);
     border-radius: var(--radius-large);
     padding: var(--spacer-2);
     min-width: 80px;
@@ -73,11 +73,11 @@
 
   .popup--v-bottom .popup__caret {
     top: calc(var(--popup-caret-size) * -2);
-    border-bottom-color: var(--bg-elevated-default);
+    border-bottom-color: var(--color-bg-elevated);
   }
 
   .popup--v-top .popup__caret {
     bottom: calc(var(--popup-caret-size) * -2);
-    border-top-color: var(--bg-elevated-default);
+    border-top-color: var(--color-bg-elevated);
   }
 }

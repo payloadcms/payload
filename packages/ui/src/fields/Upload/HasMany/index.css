@@ -16,7 +16,7 @@
 
   .upload--has-many__dragItem {
     .icon--drag-handle {
-      color: var(--text-tertiary);
+      color: var(--color-text-tertiary);
     }
   }
 }

@@ -24,10 +24,10 @@
       position: relative;
       width: 100%;
       min-height: var(--spacer-5);
-      background: var(--bg-default-secondary);
+      background: var(--color-bg-secondary);
       border: 1px solid transparent;
       border-radius: var(--radius-medium);
-      color: var(--text-default);
+      color: var(--color-text);
       font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
@@ -49,12 +49,12 @@
       }
 
       &:hover:not(:focus-within) {
-        border-color: var(--border-default);
+        border-color: var(--color-border);
       }
     }
 
     .rs__placeholder {
-      color: var(--text-default-tertiary);
+      color: var(--color-text-tertiary);
     }
 
     .rs__menu-notice {
@@ -79,7 +79,7 @@
     }
 
     .rs__input-container {
-      color: var(--text-default);
+      color: var(--color-text);
       height: 1.25rem;
       margin: 0;
       padding: 0;
@@ -99,7 +99,7 @@
         0 0 0.5px rgba(0, 0, 0, 0.12),
         0 10px 16px rgba(0, 0, 0, 0.08),
         0 2px 6px rgba(0, 0, 0, 0.12);
-      background: var(--bg-default);
+      background: var(--color-bg);
       overflow: hidden;
     }
 
@@ -109,7 +109,7 @@
     }
 
     .rs__group-heading {
-      color: var(--text-tertiary);
+      color: var(--color-text-tertiary);
       padding: 0.75rem 1rem 0.25rem 1rem;
       font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
@@ -123,21 +123,21 @@
       font-weight: var(--text-body-medium-font-weight);
       line-height: 2rem;
       padding-inline: var(--spacer-2);
-      color: var(--text-default);
+      color: var(--color-text);
     }
 
     .rs__option--is-focused {
-      background-color: var(--bg-default-secondary);
+      background-color: var(--color-bg-secondary);
     }
 
     .rs__option--is-selected {
-      background-color: var(--bg-selected);
+      background-color: var(--color-bg-selected);
     }
 
     &.rs--is-disabled .rs__control {
-      background: var(--bg-default-default);
-      border-color: var(--border-default);
-      color: var(--text-disabled-default);
+      background: var(--color-bg);
+      border-color: var(--color-border);
+      color: var(--color-text-disabled);
     }
   }
 
@@ -145,7 +145,7 @@
   .react-select--error:hover,
   .react-select--error:focus-within {
     div.rs__control {
-      border: 1px solid var(--border-danger-strong);
+      border: 1px solid var(--color-border-danger-strong);
 
       & > div.rs__indicator > button.dropdown-indicator[type='button'] {
         border: none;

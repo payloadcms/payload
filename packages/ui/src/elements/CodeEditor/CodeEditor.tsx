@@ -23,8 +23,8 @@ function definePayloadThemes(monaco: Monaco) {
       'editor.lineHighlightBackground': '#00000000',
       'editor.lineHighlightBorder': '#00000000',
       'editorGutter.background': '#00000000',
-      'editorLineNumber.activeForeground': '#000000b3', // var(--text-default-secondary) - black at 70% opacity
-      'editorLineNumber.foreground': '#00000080', // var(--text-default-secondary) - black at 50% opacity
+      'editorLineNumber.activeForeground': '#000000b3', // var(--color-text-secondary) - black at 70% opacity
+      'editorLineNumber.foreground': '#00000080', // var(--color-text-secondary) - black at 50% opacity
     },
     inherit: true,
     rules: [],
@@ -36,8 +36,8 @@ function definePayloadThemes(monaco: Monaco) {
       'editor.lineHighlightBackground': '#00000000',
       'editor.lineHighlightBorder': '#00000000',
       'editorGutter.background': '#00000000',
-      'editorLineNumber.activeForeground': '#ffffffb3', // var(--text-default-secondary) - white at 70% opacity
-      'editorLineNumber.foreground': '#ffffffb3', // var(--text-default-secondary) - white at 70% opacity
+      'editorLineNumber.activeForeground': '#ffffffb3', // var(--color-text-secondary) - white at 70% opacity
+      'editorLineNumber.foreground': '#ffffffb3', // var(--color-text-secondary) - white at 70% opacity
     },
     inherit: true,
     rules: [],

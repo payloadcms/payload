@@ -25,7 +25,7 @@
     }
 
     &.error .form-input-group {
-      border-color: var(--border-danger-strong);
+      border-color: var(--color-border-danger-strong);
     }
 
     &.read-only .input-stepper {
