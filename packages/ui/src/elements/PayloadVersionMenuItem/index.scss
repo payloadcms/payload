@@ -1,30 +1,82 @@
-.payload-version-menu-item__content {
-  padding: var(--base);
-  display: flex;
-  flex-direction: column;
-  gap: var(--base);
-}
+@import '../../scss/styles.scss';
 
-.payload-version-menu-item__list {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--base) / 2);
-}
+@layer payload-default {
+  .payload-version-menu-item {
+    @include blur-bg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
 
-.payload-version-menu-item__row {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--base);
-  font-family: var(--font-mono);
-  font-size: 0.875rem;
-}
+    &__wrapper {
+      z-index: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: base(0.8);
+      padding: base(2);
+      max-width: base(36);
+      min-width: base(20);
+      background: var(--theme-bg);
+      border: 1px solid var(--theme-elevation-150);
+      border-radius: var(--style-radius-m);
+    }
 
-.payload-version-menu-item__row dt {
-  color: var(--theme-elevation-800);
-}
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: base(0.5);
 
-.payload-version-menu-item__row dd {
-  margin: 0;
-  color: var(--theme-elevation-500);
+      h2 {
+        margin: 0;
+        font-size: 1.125rem;
+      }
+    }
+
+    &__close {
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-size: 1.5rem;
+      line-height: 1;
+      padding: 0;
+      color: var(--theme-elevation-500);
+
+      &:hover {
+        color: var(--theme-elevation-800);
+      }
+    }
+
+    &__list {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) / 4);
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    &__row {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--base);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+
+      dt {
+        color: var(--theme-elevation-800);
+      }
+
+      dd {
+        margin: 0;
+        color: var(--theme-elevation-500);
+      }
+    }
+
+    &__controls {
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
 }
