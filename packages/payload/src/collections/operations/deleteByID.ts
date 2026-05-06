@@ -178,7 +178,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       fields: collectionConfig.flattenedFields,
       select: resolveSelect({
         config: collectionConfig.select,
-        operation: 'deleteByID',
+        operation: 'delete',
         req,
         select: incomingSelect,
       }),

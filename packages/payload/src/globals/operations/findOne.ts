@@ -103,7 +103,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       fields: globalConfig.flattenedFields,
       select: resolveSelect({
         config: globalConfig.select,
-        operation: 'findOne',
+        operation: 'read',
         req,
         select: incomingSelect,
       }),

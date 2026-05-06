@@ -107,7 +107,13 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
-      select: { array: { forceSelected: true }, forceSelected: true },
+      select: ({ select }) => {
+        if (!select) {
+          return undefined
+        }
+
+        return { ...select, array: { forceSelected: true }, forceSelected: true }
+      },
     } satisfies GlobalConfig<'force-select-global'>,
     {
       slug: 'force-select-fn-global',

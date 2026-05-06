@@ -1,4 +1,5 @@
-import type { PayloadRequest, SelectFn, SelectFnOperation, SelectType } from '../types/index.js'
+import type { HookOperationType } from '../collections/config/types.js'
+import type { PayloadRequest, SelectFn, SelectType } from '../types/index.js'
 
 /**
  * Invoke an entity-level `select` config (always a function form) and return
@@ -15,7 +16,7 @@ export const resolveSelect = <TSelect extends SelectType = SelectType>({
   select,
 }: {
   config?: SelectFn<TSelect>
-  operation: SelectFnOperation
+  operation: HookOperationType
   req: PayloadRequest
   select?: SelectType
 }): SelectType | undefined => {

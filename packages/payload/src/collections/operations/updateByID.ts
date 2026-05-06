@@ -195,7 +195,7 @@ export const updateByIDOperation = async <
       fields: collectionConfig.flattenedFields,
       select: resolveSelect({
         config: collectionConfig.select,
-        operation: 'updateByID',
+        operation: 'update',
         req,
         select: incomingSelect,
       }),

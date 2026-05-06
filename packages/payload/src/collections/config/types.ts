@@ -713,15 +713,13 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
    * Entity-level Select API configuration.
    *
-   * A function that receives the current request context (`operation`, `req`,
-   * the caller's `select`) and returns the final `select` to apply, replacing
-   * the caller's. Return `undefined` to leave the caller's `select` unchanged.
+   * A function that receives the caller's `select` argument and returns a modified `select`.
    *
-   * Useful for augmenting the caller's selection (e.g. opting in additional
-   * fields when a particular field is requested) or enforcing fields are
-   * always read for access control / hooks.
+   * Useful to dynamically modify the caller's selection based the request context.
+   *  - Forcing a field to be populated for reference within hooks.
+   *  - Differentiating between API requests and admin panel requests, to optimize the amount of data being queried in each case.
    *
-   * Note: per-document data is not available — runs before the read.
+   * @see https://payloadcms.com/docs/queries/select
    */
   select?: SelectFn<
     IsAny<SelectFromCollectionSlug<TSlug>> extends true

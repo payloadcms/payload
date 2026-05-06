@@ -63,7 +63,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
       fields: buildVersionGlobalFields(payload.config, globalConfig, true),
       select: resolveSelect({
         config: globalConfig.select,
-        operation: 'findVersionByID',
+        operation: 'read',
         req,
         select: incomingSelect,
       }),

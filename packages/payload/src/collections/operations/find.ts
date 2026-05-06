@@ -109,7 +109,7 @@ export const findOperation = async <
       fields: collectionConfig.flattenedFields,
       select: resolveSelect({
         config: collectionConfig.select,
-        operation: 'find',
+        operation: 'read',
         req,
         select: incomingSelect,
       }),

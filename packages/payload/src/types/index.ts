@@ -5,6 +5,7 @@ import type { URL } from 'url'
 
 import type {
   DataFromCollectionSlug,
+  HookOperationType,
   QueryDraftDataFromCollectionSlug,
   TypeWithID,
   TypeWithTimestamps,
@@ -207,43 +208,13 @@ export type SelectMode = 'exclude' | 'include'
 
 export type SelectType = SelectExcludeType | SelectIncludeType
 
-/**
- * Operation contexts in which the entity-level `select` config may be evaluated.
- */
-export type SelectFnOperation =
-  | 'create'
-  | 'delete'
-  | 'deleteByID'
-  | 'find'
-  | 'findByID'
-  | 'findOne'
-  | 'findVersionByID'
-  | 'findVersions'
-  | 'restoreVersion'
-  | 'update'
-  | 'updateByID'
-
-/**
- * Arguments passed to a `select` function on a collection or global config.
- *
- * Note: per-document `data` is intentionally not provided — the function runs
- * before the read, so the document body is not yet known. Branch on the
- * caller's `select`, `req.user`, `req.locale`, or `operation` instead.
- */
 export type SelectFnArgs = {
-  operation: SelectFnOperation
+  operation: HookOperationType
   req: PayloadRequest
-  /** The caller's `select` arg, or `undefined` if not provided (full document). */
+  /** The caller's `select` arg, or `undefined` if not provided. */
   select?: SelectType
 }
 
-/**
- * A function used to modify the `select` argument sent through Payload operations.
- * Receives the current request context, including the caller's `select`, and returns the result.
- * Returning `undefined` is equivalent to returning `select` unmodified.
- *
- * @link https://payloadcms.com/docs/queries/select
- */
 export type SelectFn<TSelect extends SelectType = SelectType> = (
   args: SelectFnArgs,
 ) => TSelect | undefined

@@ -103,7 +103,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       fields: versionFields,
       select: resolveSelect({
         config: collectionConfig.select,
-        operation: 'findVersions',
+        operation: 'read',
         req,
         select: incomingSelect,
       }),

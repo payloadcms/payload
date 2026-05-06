@@ -2684,11 +2684,11 @@ describe('Select', () => {
 
       const operations = calls.map((c) => c.operation)
       expect(operations).toContain('create')
-      expect(operations).toContain('findByID')
-      expect(operations).toContain('deleteByID')
+      expect(operations).toContain('read')
+      expect(operations).toContain('delete')
 
-      const findByIDCall = calls.find((c) => c.operation === 'findByID')
-      expect(findByIDCall?.selectKeys).toEqual(['field1'])
+      const readCall = calls.find((c) => c.operation === 'read')
+      expect(readCall?.selectKeys).toEqual(['field1'])
     } finally {
       collection.select = originalSelect
     }

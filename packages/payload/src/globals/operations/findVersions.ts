@@ -72,7 +72,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
       fields: buildVersionGlobalFields(payload.config, globalConfig, true),
       select: resolveSelect({
         config: globalConfig.select,
-        operation: 'findVersions',
+        operation: 'read',
         req,
         select: incomingSelect,
       }),
