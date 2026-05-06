@@ -26,6 +26,7 @@ describe('acquireMigrationLock', () => {
     }
     mockReq = {
       payload: mockPayload,
+      transactionID: Promise.resolve('mock-transaction-id'),
     }
   })
 
@@ -102,7 +103,7 @@ describe('acquireMigrationLock', () => {
   })
 
   it('should return no-lock when transactions unavailable', async () => {
-    mockPayload.db = {}
+    mockReq.transactionID = Promise.resolve(null)
 
     const result = await acquireMigrationLock({
       payload: mockPayload as Payload,
