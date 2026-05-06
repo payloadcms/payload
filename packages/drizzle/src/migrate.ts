@@ -1,18 +1,18 @@
 import type { MigrationResult, Payload } from 'payload'
 
 import {
+  acquireMigrationLock,
   commitTransaction,
   createPayloadRequest,
   initTransaction,
   killTransaction,
   readMigrationFiles,
+  releaseMigrationLock,
 } from 'payload'
 import prompts from 'prompts'
 
 import type { DrizzleAdapter, Migration } from './types.js'
 
-import { acquireMigrationLock } from './utilities/acquireMigrationLock.js'
-import { releaseMigrationLock } from './utilities/releaseMigrationLock.js'
 import { getTransaction } from './utilities/getTransaction.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 import { parseError } from './utilities/parseError.js'

@@ -1,45 +1,23 @@
-import type { Payload } from 'payload'
+/* eslint-disable vitest/no-standalone-expect -- test is the shared integration fixture registrar. */
+import { createPayloadRequest } from 'payload'
+import { expect } from 'vitest'
 
-import path from 'path'
-import { createLocalReq } from 'payload'
-import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { test } from '../__helpers/int/vitest.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-
-let payload: Payload
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-describe('Migration Locking', () => {
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-  })
-
-  afterAll(async () => {
-    if (payload) {
-      await payload.db.destroy()
-    }
-  })
-
-  it('should acquire and release lock', async () => {
-    const { acquireMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/acquireMigrationLock.js'
-    )
-    const { releaseMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/releaseMigrationLock.js'
-    )
+test.suite('Migration Locking', { config: './config.ts' }, () => {
+  test('should acquire and release lock', async ({ payload }) => {
+    const { acquireMigrationLock, releaseMigrationLock } = await import('payload')
 
     // Read initial lock state
     const initialLock = await payload.findGlobal({
       slug: 'payload-migrations-lock',
+      overrideAccess: true,
     })
 
     expect(initialLock.locked).toBe(false)
 
     // Acquire lock
-    const req = await createLocalReq({}, payload)
+    const req = await createPayloadRequest({ payload })
     const lockResult = await acquireMigrationLock({
       payload,
       req,
@@ -52,6 +30,7 @@ describe('Migration Locking', () => {
     // Check lock is set
     const activeLock = await payload.findGlobal({
       slug: 'payload-migrations-lock',
+      overrideAccess: true,
     })
 
     expect(activeLock.locked).toBe(true)
@@ -59,30 +38,26 @@ describe('Migration Locking', () => {
 
     // Release lock
     await releaseMigrationLock({
+      instanceId: lockResult.instanceId,
       payload,
       req,
-      instanceId: lockResult.instanceId,
     })
 
     // Check lock was released
     const finalLock = await payload.findGlobal({
       slug: 'payload-migrations-lock',
+      overrideAccess: true,
     })
 
     expect(finalLock.locked).toBe(false)
     expect(finalLock.locked_by).toBe(lockResult.instanceId) // Should still have instanceId from last holder
   })
 
-  it('should respect existing locks and release properly', async () => {
-    const { acquireMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/acquireMigrationLock.js'
-    )
-    const { releaseMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/releaseMigrationLock.js'
-    )
+  test('should respect existing locks and release properly', async ({ payload }) => {
+    const { acquireMigrationLock, releaseMigrationLock } = await import('payload')
 
     // First instance acquires lock
-    const req1 = await createLocalReq({}, payload)
+    const req1 = await createPayloadRequest({ payload })
     const lock1 = await acquireMigrationLock({
       payload,
       req: req1,
@@ -94,6 +69,7 @@ describe('Migration Locking', () => {
     // Verify lock is held
     const lockState1 = await payload.findGlobal({
       slug: 'payload-migrations-lock',
+      overrideAccess: true,
     })
 
     expect(lockState1.locked).toBe(true)
@@ -102,21 +78,22 @@ describe('Migration Locking', () => {
 
     // Release lock
     await releaseMigrationLock({
+      instanceId: lock1.instanceId,
       payload,
       req: req1,
-      instanceId: lock1.instanceId,
     })
 
     // Verify lock is released
     const lockState2 = await payload.findGlobal({
       slug: 'payload-migrations-lock',
+      overrideAccess: true,
     })
 
     expect(lockState2.locked).toBe(false)
     expect(lockState2.locked_by).toBe(lock1.instanceId) // Still has last holder ID
 
     // Second instance can now acquire
-    const req2 = await createLocalReq({}, payload)
+    const req2 = await createPayloadRequest({ payload })
     const lock2 = await acquireMigrationLock({
       payload,
       req: req2,
@@ -129,6 +106,7 @@ describe('Migration Locking', () => {
     // Verify new lock holder
     const lockState3 = await payload.findGlobal({
       slug: 'payload-migrations-lock',
+      overrideAccess: true,
     })
 
     expect(lockState3.locked).toBe(true)
@@ -136,29 +114,28 @@ describe('Migration Locking', () => {
 
     // Cleanup
     await releaseMigrationLock({
+      instanceId: lock2.instanceId,
       payload,
       req: req2,
-      instanceId: lock2.instanceId,
     })
   })
 
-  it('should detect and clear stale locks', async () => {
+  test('should detect and clear stale locks', async ({ payload }) => {
     // Manually create a stale lock
     await payload.updateGlobal({
       slug: 'payload-migrations-lock',
       data: {
-        locked: true,
-        locked_by: 'crashed-instance',
-        locked_at: new Date(Date.now() - 600000), // 10 minutes ago
         expires_at: new Date(Date.now() - 1000), // Expired 1 second ago
+        locked: true,
+        locked_at: new Date(Date.now() - 600000), // 10 minutes ago
+        locked_by: 'crashed-instance',
       },
+      overrideAccess: true,
     })
 
     // Try to acquire lock - should succeed because lock is stale
-    const { acquireMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/acquireMigrationLock.js'
-    )
-    const req = await createLocalReq({}, payload)
+    const { acquireMigrationLock, releaseMigrationLock } = await import('payload')
+    const req = await createPayloadRequest({ payload })
     const result = await acquireMigrationLock({
       payload,
       req,
@@ -168,13 +145,10 @@ describe('Migration Locking', () => {
     expect(result.acquired).toBe(true)
 
     // Cleanup
-    const { releaseMigrationLock } = await import(
-      '../../packages/drizzle/src/utilities/releaseMigrationLock.js'
-    )
     await releaseMigrationLock({
+      instanceId: result.instanceId,
       payload,
       req,
-      instanceId: result.instanceId,
     })
   })
 })
