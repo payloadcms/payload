@@ -6,7 +6,6 @@ import type {
   AdminViewClientProps,
   ClientUser,
   CollectionPreferences,
-  CollectionSlug,
   CustomComponent,
   DocumentSubViewTypes,
   ImportMap,
@@ -47,7 +46,6 @@ import { initReq } from '../../utilities/initReq.js'
 import { getRouteData } from './getRouteData.js'
 
 export type SerializableRouteData = {
-  browseByFolderSlugs: CollectionSlug[]
   collectionSlug?: string
   /**
    * When the config defines a custom component for a built-in view type (e.g. createFirstUser),
@@ -59,8 +57,6 @@ export type SerializableRouteData = {
   hasView: boolean
   routeParams: {
     collection?: string
-    folderCollection?: string
-    folderID?: number | string
     global?: string
     id?: number | string
     token?: string
@@ -227,22 +223,15 @@ export async function getAdminPageData({
 
   let collectionPreferences: CollectionPreferences | undefined
 
-  if (collectionConfig && segments.length === 2) {
-    if (
-      config.folders &&
-      collectionConfig.folders &&
-      segments[1] !== config.folders.slug &&
-      req.user
-    ) {
-      const prefs = await getPreferences<CollectionPreferences>(
-        `collection-${collectionConfig.slug}`,
-        req.payload,
-        req.user.id,
-        config.admin.user,
-      )
-      if (prefs?.value) {
-        collectionPreferences = prefs.value
-      }
+  if (collectionConfig && segments.length === 2 && collectionConfig.hierarchy && req.user) {
+    const prefs = await getPreferences<CollectionPreferences>(
+      `collection-${collectionConfig.slug}`,
+      req.payload,
+      req.user.id,
+      config.admin.user,
+    )
+    if (prefs?.value) {
+      collectionPreferences = prefs.value
     }
   }
 
@@ -267,14 +256,12 @@ export async function getAdminPageData({
   })
 
   const viewProps: AdminViewClientProps = {
-    browseByFolderSlugs: routeData.browseByFolderSlugs,
     clientConfig: rootData.clientConfig,
     documentSubViewType: routeData.documentSubViewType,
     viewType: routeData.viewType ?? ('dashboard' as ViewTypes),
   }
 
   const serializableRouteData: SerializableRouteData = {
-    browseByFolderSlugs: routeData.browseByFolderSlugs,
     collectionSlug: routeData.collectionConfig?.slug,
     customViewComponent: routeData.customViewComponent,
     documentSubViewType: routeData.documentSubViewType,

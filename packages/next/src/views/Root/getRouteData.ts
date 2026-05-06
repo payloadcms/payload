@@ -38,6 +38,7 @@ import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
 import { getCustomCollectionViewByRoute } from './getCustomCollectionViewByRoute.js'
+import { getCustomGlobalViewByRoute } from './getCustomGlobalViewByRoute.js'
 
 const baseClasses = {
   account: 'account',
