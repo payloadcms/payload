@@ -136,11 +136,12 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   return (
     <div
       id={`${parentPath?.split('.').join('-')}-row-${rowIndex}`}
-      key={`${parentPath}-row-${rowIndex}`}
+      key={`${parentPath}-row-${row.id}`}
       ref={setNodeRef}
       style={{
         transform,
         transition,
+        zIndex: isDragging ? 1 : undefined,
       }}
     >
       <Collapsible
