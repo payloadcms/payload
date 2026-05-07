@@ -179,39 +179,85 @@
 .components-view__icon-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--spacer-2);
-  padding: var(--spacer-3);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-medium);
   background: var(--bg-default);
   transition: border-color 0.15s ease;
-  min-width: 80px;
+  min-width: 100px;
+  overflow: hidden;
 }
 
 .components-view__icon-item:hover {
   border-color: var(--border-strong);
 }
 
+.components-view__icon-item > span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-default);
+  text-align: left;
+  padding: var(--spacer-1) var(--spacer-2);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-default);
+}
+
 .components-view__icon-item > svg {
   width: 24px;
   height: 24px;
   color: var(--icon-default);
-}
-
-.components-view__icon-item span {
-  font-size: 11px;
-  color: var(--text-secondary);
-  text-align: center;
+  margin: var(--spacer-3);
 }
 
 .components-view__icon-item--variants {
-  min-width: 120px;
+  min-width: 140px;
+}
+
+.components-view__icon-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-3);
+  padding: var(--spacer-1);
+}
+
+.components-view__icon-variant-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-1);
+}
+
+.components-view__icon-variant-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .components-view__icon-variants {
   display: flex;
   flex-wrap: wrap;
+  gap: var(--spacer-2);
+}
+
+.components-view__icon-variants svg {
+  color: var(--icon-default);
+}
+
+.components-view__icon-size-row {
+  display: flex;
+  flex-direction: column;
   gap: var(--spacer-1);
-  justify-content: center;
+}
+
+.components-view__icon-size-row > span {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.25px;
+  padding-bottom: var(--spacer-1);
+  border-bottom: 1px solid var(--border-default);
+  margin-bottom: var(--spacer-1);
+}
+
+.components-view__icon-size-row svg {
+  color: var(--icon-default);
 }

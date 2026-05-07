@@ -79,15 +79,8 @@ export const baseConfig: Partial<Config> = {
       baseDir: path.resolve(dirname),
     },
     components: {
-      afterNavLinks: [
-        './views/Icons/NavLink.js#IconsNavLink',
-        './views/Components/NavLink.js#ComponentsNavLink',
-      ],
+      afterNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
       views: {
-        icons: {
-          Component: './views/Icons/index.js#IconsView',
-          path: '/icons',
-        },
         components: {
           Component: './views/Components/index.js#ComponentsView',
           path: '/components',

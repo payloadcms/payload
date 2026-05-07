@@ -45,39 +45,20 @@ import React from 'react'
 import { Section } from '../shared.js'
 
 const icons = [
-  { name: 'AlignJustified', Icon: AlignJustifiedIcon },
-  { name: 'Arrow', Icon: ArrowIcon },
   { name: 'Calendar', Icon: CalendarIcon },
-  { name: 'Check', Icon: CheckIcon },
-  { name: 'CircledX', Icon: CircledXIcon },
-  { name: 'CirclePlus', Icon: CirclePlusIcon },
   { name: 'Clipboard', Icon: ClipboardIcon },
-  { name: 'CloseMenu', Icon: CloseMenuIcon },
-  { name: 'CodeBlock', Icon: CodeBlockIcon },
-  { name: 'Copy', Icon: CopyIcon },
   { name: 'Document', Icon: DocumentIcon },
   { name: 'Duplicate', Icon: DuplicateIcon },
   { name: 'Edit', Icon: EditIcon },
-  { name: 'ExternalLink', Icon: ExternalLinkIcon },
-  { name: 'Eye', Icon: EyeIcon },
   { name: 'Filter', Icon: FilterIcon },
-  { name: 'Folder', Icon: FolderIcon },
   { name: 'Gear', Icon: GearIcon },
   { name: 'GridView', Icon: GridViewIcon },
-  { name: 'Line', Icon: LineIcon },
-  { name: 'Link', Icon: LinkIcon },
-  { name: 'Lock', Icon: LockIcon },
-  { name: 'LockOpen', Icon: LockOpenIcon },
   { name: 'LogOut', Icon: LogOutIcon },
   { name: 'More', Icon: MoreIcon },
-  { name: 'MoveFolder', Icon: MoveFolderIcon },
-  { name: 'People', Icon: PeopleIcon },
   { name: 'Refresh', Icon: RefreshIcon },
   { name: 'Search', Icon: SearchIcon },
   { name: 'SortDown', Icon: SortDownIcon },
-  { name: 'Spinner', Icon: SpinnerIcon },
   { name: 'Swap', Icon: SwapIcon },
-  { name: 'Tag', Icon: TagIcon },
   { name: 'ThreeDots', Icon: ThreeDotsIcon },
   { name: 'Trash', Icon: TrashIcon },
   { name: 'Write', Icon: WriteIcon },
@@ -86,70 +67,480 @@ const icons = [
 export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selectedComponent }) => (
   <Section id="icons" selectedComponent={selectedComponent} title="Icons">
     <div className="components-view__icon-grid">
-      {/* Variant: Chevron direction */}
+      {/* Chevron - direction + large */}
       <div className="components-view__icon-item components-view__icon-item--variants">
         <span>Chevron</span>
-        <div className="components-view__icon-variants">
-          <ChevronIcon direction="down" />
-          <ChevronIcon direction="up" />
-          <ChevronIcon direction="left" />
-          <ChevronIcon direction="right" />
-        </div>
-        <div className="components-view__icon-size-row">
-          <span>lg</span>
-          <ChevronIcon direction="down" large />
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>direction: down (default)</span>
+            <div className="components-view__icon-variants">
+              <ChevronIcon direction="down" />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>direction: up | left | right</span>
+            <div className="components-view__icon-variants">
+              <ChevronIcon direction="up" />
+              <ChevronIcon direction="left" />
+              <ChevronIcon direction="right" />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>large: true</span>
+            <div className="components-view__icon-variants">
+              <ChevronIcon direction="down" large />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Variant: MinimizeMaximize */}
+      {/* Arrow - direction + size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>Arrow</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>direction: up (default)</span>
+            <div className="components-view__icon-variants">
+              <ArrowIcon direction="up" />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>direction: down</span>
+            <div className="components-view__icon-variants">
+              <ArrowIcon direction="down" />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <ArrowIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <ArrowIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MinimizeMaximize - isMinimized */}
       <div className="components-view__icon-item components-view__icon-item--variants">
         <span>MinimizeMaximize</span>
-        <div className="components-view__icon-variants">
-          <MinimizeMaximizeIcon isMinimized={false} />
-          <MinimizeMaximizeIcon isMinimized />
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>isMinimized: false (default)</span>
+            <div className="components-view__icon-variants">
+              <MinimizeMaximizeIcon isMinimized={false} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>isMinimized: true</span>
+            <div className="components-view__icon-variants">
+              <MinimizeMaximizeIcon isMinimized />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Variant: Plus sizes */}
+      {/* Eye - active */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>Eye</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>active: true (default, hidden)</span>
+            <div className="components-view__icon-variants">
+              <EyeIcon active />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>active: false (visible)</span>
+            <div className="components-view__icon-variants">
+              <EyeIcon active={false} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Spinner - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>Spinner</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 16 (default)</span>
+            <div className="components-view__icon-variants">
+              <SpinnerIcon size={16} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 24</span>
+            <div className="components-view__icon-variants">
+              <SpinnerIcon size={24} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Plus - size */}
       <div className="components-view__icon-item components-view__icon-item--variants">
         <span>Plus</span>
-        <div className="components-view__icon-size-row">
-          <span>16</span>
-          <PlusIcon size={16} />
-        </div>
-        <div className="components-view__icon-size-row">
-          <span>24</span>
-          <PlusIcon size={24} />
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <PlusIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <PlusIcon size={16} />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Variant: X sizes */}
+      {/* X - size */}
       <div className="components-view__icon-item components-view__icon-item--variants">
         <span>X</span>
-        <div className="components-view__icon-size-row">
-          <span>16</span>
-          <XIcon size={16} />
-        </div>
-        <div className="components-view__icon-size-row">
-          <span>24</span>
-          <XIcon size={24} />
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 16 (default)</span>
+            <div className="components-view__icon-variants">
+              <XIcon size={16} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 24</span>
+            <div className="components-view__icon-variants">
+              <XIcon size={24} />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Variant: Line sizes */}
+      {/* Line - size */}
       <div className="components-view__icon-item components-view__icon-item--variants">
         <span>Line</span>
-        <div className="components-view__icon-size-row">
-          <span>16</span>
-          <LineIcon size={16} />
-        </div>
-        <div className="components-view__icon-size-row">
-          <span>24</span>
-          <LineIcon size={24} />
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <LineIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <LineIcon size={16} />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* All other icons */}
+      {/* Check - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>Check</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 16 (default)</span>
+            <div className="components-view__icon-variants">
+              <CheckIcon size={16} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 24</span>
+            <div className="components-view__icon-variants">
+              <CheckIcon size={24} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CircledX - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>CircledX</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 16 (default)</span>
+            <div className="components-view__icon-variants">
+              <CircledXIcon size={16} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 24</span>
+            <div className="components-view__icon-variants">
+              <CircledXIcon size={24} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CirclePlus - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>CirclePlus</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <CirclePlusIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <CirclePlusIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CloseMenu - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>CloseMenu</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <CloseMenuIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <CloseMenuIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CodeBlock - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>CodeBlock</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <CodeBlockIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <CodeBlockIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Copy - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>Copy</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <CopyIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <CopyIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ExternalLink - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>ExternalLink</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <ExternalLinkIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <ExternalLinkIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Folder - size + color */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>Folder</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <FolderIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <FolderIcon size={16} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>color: default | dark | muted</span>
+            <div className="components-view__icon-variants">
+              <FolderIcon color="default" />
+              <FolderIcon color="dark" />
+              <FolderIcon color="muted" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Link - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>Link</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <LinkIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <LinkIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Lock - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>Lock</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <LockIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <LockIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* LockOpen - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>LockOpen</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <LockOpenIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <LockOpenIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MoveFolder - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>MoveFolder</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <MoveFolderIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <MoveFolderIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* People - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>People</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <PeopleIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <PeopleIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tag - size + color */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>Tag</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <TagIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <TagIcon size={16} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>color: default | dark | muted</span>
+            <div className="components-view__icon-variants">
+              <TagIcon color="default" />
+              <TagIcon color="dark" />
+              <TagIcon color="muted" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* AlignJustified - size */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>AlignJustified</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 16 (default)</span>
+            <div className="components-view__icon-variants">
+              <AlignJustifiedIcon size={16} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 24</span>
+            <div className="components-view__icon-variants">
+              <AlignJustifiedIcon size={24} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Icons without variants */}
       {icons.map(({ name, Icon }) => (
         <div className="components-view__icon-item" key={name}>
           <span>{name}</span>
