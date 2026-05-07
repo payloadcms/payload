@@ -1,3 +1,4 @@
+import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 import { getFromImportMap } from 'payload/shared'
@@ -19,7 +20,8 @@ export const loadDashboard = createServerFn({ method: 'GET' }).handler(async () 
   })
 
   if ('redirect' in result) {
-    return { _redirect: result.redirect } as any
+    // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing redirect objects
+    throw redirect({ to: result.redirect })
   }
   return toSerializable(result.data) as any
 })
@@ -41,7 +43,8 @@ export const loadAdminPage = createServerFn({ method: 'GET' })
     })
 
     if ('redirect' in result) {
-      return { _redirect: result.redirect } as any
+      // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing redirect objects
+      throw redirect({ to: result.redirect })
     }
 
     const { customViewRenderContext, ...pageData } = result.data
