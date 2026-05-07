@@ -15,6 +15,8 @@ export const createHandler: PayloadHandler = async (req) => {
 
   const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
 
+  const templateID = req.query.templateID as number | string | undefined
+
   const doc = await createOperation({
     autosave,
     collection,
@@ -26,6 +28,7 @@ export const createHandler: PayloadHandler = async (req) => {
     publishSpecificLocale,
     req,
     select,
+    templateID,
   })
 
   return Response.json(

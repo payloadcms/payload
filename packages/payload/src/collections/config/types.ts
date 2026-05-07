@@ -51,6 +51,7 @@ import type {
   TypedCollectionSelect,
   TypedLocale,
 } from '../../index.js'
+import type { TemplatesConfig } from '../../templates/types.js'
 import type {
   PayloadRequest,
   SelectIncludeType,
@@ -724,6 +725,17 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Cannot be used together with `folders` or `hierarchy`.
    */
   tags?: boolean | TagsConfig
+  /**
+   * Opt-in to the Templates API for this collection.
+   *
+   * Pass `true` as shorthand for `{ save: true, create: true }`. Provide an object for
+   * granular control over the "Save as Template" / "Create from Template" affordances
+   * and their access control.
+   *
+   * @experimental
+   * @see https://github.com/payloadcms/payload/discussions/16515
+   */
+  templates?: TemplatesConfig | true
   /**
    * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *

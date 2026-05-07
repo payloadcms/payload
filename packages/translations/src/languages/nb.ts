@@ -239,6 +239,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Endringene dine er ikke lagret. Hvis du forlater nå, vil du miste endringene dine.',
+    chooseTemplate: 'Choose a template',
     clear: 'Tydelig',
     clearAll: 'Tøm alt',
     close: 'Lukk',
@@ -269,6 +270,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     create: 'Opprett',
     created: 'Opprettet',
     createdAt: 'Opprettet',
+    createFromTemplate: 'Create from Template',
     createNew: 'Opprett ny',
     createNewLabel: 'Opprett ny {{label}}',
     creating: 'Oppretter',
@@ -328,6 +330,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Grupper etter {{label}}',
     import: 'Import',
     increment: 'Øk',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'redigerer',
     item: 'Vare',
     items: 'elementer',
@@ -393,6 +396,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Last inn dokument',
     remove: 'Fjern',
     rename: 'Endre navn',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Tilbakestill',
     resetPreferences: 'Tilbakestill preferanser',
     resetPreferencesDescription:
@@ -407,7 +411,10 @@ export const nbTranslations: DefaultTranslationsObject = {
     row: 'Rad',
     rows: 'Rader',
     save: 'Lagre',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Lagre endringer',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Lagrer...',
     schedulePublishFor: 'Planlegg publisering for {{title}}',
     searchBy: 'Søk etter {{label}}',
@@ -431,6 +438,10 @@ export const nbTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Vellykket reindeksering av {{count}} av totalt {{total}} dokumenter fra {{collections}}, og {{skips}} utkast ble hoppet over.',
     takeOver: 'Ta over',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Norsk',
     time: 'Tid',
     timezone: 'Tidssone',

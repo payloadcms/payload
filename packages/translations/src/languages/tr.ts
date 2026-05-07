@@ -241,6 +241,7 @@ export const trTranslations: DefaultTranslationsObject = {
     cancel: 'İptal',
     changesNotSaved:
       'Değişiklikleriniz henüz kaydedilmedi. Eğer bu sayfayı terk ederseniz değişiklikleri kaybedeceksiniz.',
+    chooseTemplate: 'Choose a template',
     clear: 'Temiz',
     clearAll: 'Hepsini Temizle',
     close: 'Kapat',
@@ -271,6 +272,7 @@ export const trTranslations: DefaultTranslationsObject = {
     create: 'Oluştur',
     created: 'Oluşturma tarihi',
     createdAt: 'Oluşturma tarihi',
+    createFromTemplate: 'Create from Template',
     createNew: 'Yeni oluştur',
     createNewLabel: 'Yeni bir {{label}} oluştur',
     creating: 'Oluşturuluyor',
@@ -330,6 +332,7 @@ export const trTranslations: DefaultTranslationsObject = {
     groupByLabel: "{{label}}'ye göre grupla",
     import: 'İthalat',
     increment: 'Arttırmak',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'düzenliyor',
     item: 'Öğe',
     items: 'öğeler',
@@ -395,6 +398,7 @@ export const trTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Dokümanı yeniden yükle',
     remove: 'Kaldır',
     rename: 'Yeniden adlandır',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Sıfırla',
     resetPreferences: 'Tercihleri sıfırla',
     resetPreferencesDescription:
@@ -409,7 +413,10 @@ export const trTranslations: DefaultTranslationsObject = {
     row: 'Satır',
     rows: 'Satır',
     save: 'Kaydet',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Değişiklikleri Kaydet',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Kaydediliyor...',
     schedulePublishFor: '{{title}} için yayınlama programı ayarlayın.',
     searchBy: 'Şuna göre sırala: {{label}}',
@@ -433,6 +440,10 @@ export const trTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}}’den toplam {{total}} belge arasından {{count}} belge başarıyla yeniden indekslendi ve {{skips}} taslak atlandı.',
     takeOver: 'Devralmak',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Türkçe',
     time: 'Zaman',
     timezone: 'Saat dilimi',

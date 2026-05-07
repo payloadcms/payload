@@ -238,6 +238,7 @@ export const isTranslations: DefaultTranslationsObject = {
     cancel: 'Hætta við',
     changesNotSaved:
       'Breytingarnar þínar hafa ekki verið vistaðar. Ef þú ferð núna muntu missa breytingarnar þínar.',
+    chooseTemplate: 'Choose a template',
     clear: 'Hreinsa',
     clearAll: 'Hreinsa allt',
     close: 'Loka',
@@ -267,6 +268,7 @@ export const isTranslations: DefaultTranslationsObject = {
     create: 'Nýskrá',
     created: 'Nýskráð',
     createdAt: 'Nýskráð',
+    createFromTemplate: 'Create from Template',
     createNew: 'Nýskrá',
     createNewLabel: 'Nýskrá: {{label}}',
     creating: 'Nýskrái',
@@ -325,6 +327,7 @@ export const isTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Flokka eftir {{label}}',
     import: 'Flytja inn',
     increment: 'Auka',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'er að breyta',
     item: 'hlutur',
     items: 'hlutir',
@@ -389,6 +392,7 @@ export const isTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Endurhlaða skjal',
     remove: 'Fjarlægja',
     rename: 'Endurnefna',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Endurstilla',
     resetPreferences: 'Endurstilla þínar stillingar',
     resetPreferencesDescription:
@@ -402,7 +406,10 @@ export const isTranslations: DefaultTranslationsObject = {
     row: 'Röð',
     rows: 'Raðir',
     save: 'Vista',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Vista breytingar',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Vista...',
     schedulePublishFor: 'Áætla útgáfu fyrir {{title}}',
     searchBy: 'Leita eftir {{label}}',
@@ -426,6 +433,10 @@ export const isTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Tókst að endurvísa {{count}} af {{total}} skjölum úr {{collections}} og {{skips}} drög voru sleppt.',
     takeOver: 'Taka yfir',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Íslenska',
     time: 'Tími',
     timezone: 'Tímabelti',

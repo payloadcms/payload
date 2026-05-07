@@ -239,6 +239,7 @@ export const enTranslations = {
     cancel: 'Cancel',
     changesNotSaved:
       'Your changes have not been saved. If you leave now, you will lose your changes.',
+    chooseTemplate: 'Choose a template',
     clear: 'Clear',
     clearAll: 'Clear All',
     close: 'Close',
@@ -269,6 +270,7 @@ export const enTranslations = {
     create: 'Create',
     created: 'Created',
     createdAt: 'Created At',
+    createFromTemplate: 'Create from Template',
     createNew: 'Create New',
     createNewLabel: 'Create new {{label}}',
     creating: 'Creating',
@@ -328,6 +330,7 @@ export const enTranslations = {
     groupByLabel: 'Group by {{label}}',
     import: 'Import',
     increment: 'Increment',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'is editing',
     item: 'Item',
     items: 'items',
@@ -392,6 +395,7 @@ export const enTranslations = {
     reloadDocument: 'Reload document',
     remove: 'Remove',
     rename: 'Rename',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Reset',
     resetPreferences: 'Reset Preferences',
     resetPreferencesDescription:
@@ -405,7 +409,10 @@ export const enTranslations = {
     row: 'Row',
     rows: 'Rows',
     save: 'Save',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Save Changes',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Saving...',
     schedulePublishFor: 'Schedule publish for {{title}}',
     searchBy: 'Search by {{label}}',
@@ -429,6 +436,10 @@ export const enTranslations = {
     successfullyReindexed:
       'Successfully reindexed {{count}} of {{total}} documents from {{collections}} and skipped {{skips}} drafts.',
     takeOver: 'Take over',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'English',
     time: 'Time',
     timezone: 'Timezone',

@@ -239,6 +239,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     cancel: 'Cancelar',
     changesNotSaved:
       'Suas alterações não foram salvas. Se você sair agora, essas alterações serão perdidas.',
+    chooseTemplate: 'Choose a template',
     clear: 'Claro',
     clearAll: 'Limpar Tudo',
     close: 'Fechar',
@@ -269,6 +270,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     create: 'Criar',
     created: 'Criado',
     createdAt: 'Criado Em',
+    createFromTemplate: 'Create from Template',
     createNew: 'Criar Novo',
     createNewLabel: 'Criar novo(a) {{label}}',
     creating: 'Criando',
@@ -328,6 +330,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Agrupar por {{label}}',
     import: 'Importar',
     increment: 'Incrementar',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'está editando',
     item: 'Item',
     items: 'itens',
@@ -393,6 +396,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Recarregar documento',
     remove: 'Remover',
     rename: 'Renomear',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Redefinir',
     resetPreferences: 'Redefinir preferências',
     resetPreferencesDescription:
@@ -407,7 +411,10 @@ export const ptTranslations: DefaultTranslationsObject = {
     row: 'Linha',
     rows: 'Linhas',
     save: 'Salvar',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Salvar Alterações',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Salvando...',
     schedulePublishFor: 'Agendar publicação para {{title}}',
     searchBy: 'Buscar por {{label}}',
@@ -431,6 +438,10 @@ export const ptTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Reindexação bem‑sucedida de {{count}} de {{total}} documentos de {{collections}}, e {{skips}} rascunhos foram ignorados.',
     takeOver: 'Assumir',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Português',
     time: 'Tempo',
     timezone: 'Fuso horário',

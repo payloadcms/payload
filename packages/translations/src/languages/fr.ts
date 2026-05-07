@@ -248,6 +248,7 @@ export const frTranslations: DefaultTranslationsObject = {
     cancel: 'Annuler',
     changesNotSaved:
       'Vos modifications n’ont pas été enregistrées. Vous perdrez vos modifications si vous quittez maintenant.',
+    chooseTemplate: 'Choose a template',
     clear: 'Clair',
     clearAll: 'Tout effacer',
     close: 'Fermer',
@@ -278,6 +279,7 @@ export const frTranslations: DefaultTranslationsObject = {
     create: 'Créer',
     created: 'Créé(e)',
     createdAt: 'Créé(e) à',
+    createFromTemplate: 'Create from Template',
     createNew: 'Créer un(e) nouveau ou nouvelle',
     createNewLabel: 'Créer un(e) nouveau ou nouvelle {{label}}',
     creating: 'création en cours',
@@ -337,6 +339,7 @@ export const frTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Regrouper par {{label}}',
     import: 'Importation',
     increment: 'Incrément',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'est en train de modifier',
     item: 'Article',
     items: 'articles',
@@ -402,6 +405,7 @@ export const frTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Recharger le document',
     remove: 'Retirer',
     rename: 'Renommer',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Réinitialiser',
     resetPreferences: 'Réinitialiser les préférences',
     resetPreferencesDescription:
@@ -415,7 +419,10 @@ export const frTranslations: DefaultTranslationsObject = {
     row: 'Ligne',
     rows: 'Lignes',
     save: 'Sauvegarder',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Enregistrer les modifications',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Sauvegarde en cours...',
     schedulePublishFor: 'Programmer la publication pour {{titre}}',
     searchBy: 'Rechercher par {{label}}',
@@ -439,6 +446,10 @@ export const frTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{count}} des {{total}} documents de {{collections}} ont été réindexés avec succès, et {{skips}} brouillons ont été ignorés.',
     takeOver: 'Prendre en charge',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Français',
     time: 'Temps',
     timezone: 'Fuseau horaire',

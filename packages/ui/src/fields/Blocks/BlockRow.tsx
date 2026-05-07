@@ -30,22 +30,27 @@ type BlocksFieldProps = {
   errorCount: number
   fields: ClientField[]
   hasMaxRows?: boolean
+  hostCollectionSlug?: string
+  hostFieldPath?: string
   isLoading?: boolean
   isSortable?: boolean
   Label?: React.ReactNode
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
+  onInsertTemplate?: (rowIndex: number, data: Record<string, unknown>) => void
   parentPath: string
   pasteRow: (rowIndex: number) => void
   path: string
   permissions: SanitizedFieldPermissions
   readOnly: boolean
   removeRow: (rowIndex: number) => void
+  resolveRowData?: (rowIndex: number) => Record<string, unknown> | undefined
   row: Row
   rowCount: number
   rowIndex: number
   schemaPath: string
   setCollapse: (id: string, collapsed: boolean) => void
+  templatesEnabled?: boolean
 } & UseDraggableSortableReturn
 
 export const BlockRow: React.FC<BlocksFieldProps> = ({
@@ -58,24 +63,29 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   errorCount,
   fields,
   hasMaxRows,
+  hostCollectionSlug,
+  hostFieldPath,
   isLoading: isLoadingFromProps,
   isSortable,
   Label,
   labels,
   listeners,
   moveRow,
+  onInsertTemplate,
   parentPath,
   pasteRow,
   path,
   permissions,
   readOnly,
   removeRow,
+  resolveRowData,
   row,
   rowCount,
   rowIndex,
   schemaPath,
   setCollapse,
   setNodeRef,
+  templatesEnabled,
   transform,
 }) => {
   const isLoading = useThrottledValue(isLoadingFromProps, 500)
@@ -150,13 +160,18 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
               duplicateRow={duplicateRow}
               fields={block.fields}
               hasMaxRows={hasMaxRows}
+              hostCollectionSlug={hostCollectionSlug}
+              hostFieldPath={hostFieldPath}
               isSortable={isSortable}
               labels={labels}
               moveRow={moveRow}
+              onInsertTemplate={onInsertTemplate}
               pasteRow={pasteRow}
               removeRow={removeRow}
+              resolveRowData={resolveRowData}
               rowCount={rowCount}
               rowIndex={rowIndex}
+              templatesEnabled={templatesEnabled}
             />
           ) : undefined
         }

@@ -21,6 +21,19 @@ export type Props = {
   index: number
   isSortable?: boolean
   moveRow: (from: number, to: number) => void
+  /**
+   * When set, renders a "Insert from Template" entry in the row menu that
+   * triggers this callback. The host (e.g. `<BlocksField>`) is responsible
+   * for showing a picker drawer and inserting a new row at `index + 1` with
+   * the resolved template data.
+   */
+  onInsertFromTemplate?: (index: number) => void
+  /**
+   * When set, renders a "Save as Template" entry in the row menu that
+   * triggers this callback. The host is responsible for prompting for a
+   * title and POSTing to `/api/payload-templates`.
+   */
+  onSaveAsTemplate?: (index: number) => void
   pasteRow: (index: number) => void
   removeRow: (index: number) => void
   rowCount: number
@@ -34,6 +47,8 @@ export const ArrayAction: React.FC<Props> = ({
   index,
   isSortable,
   moveRow,
+  onInsertFromTemplate,
+  onSaveAsTemplate,
   pasteRow,
   removeRow,
   rowCount,
@@ -120,6 +135,28 @@ export const ArrayAction: React.FC<Props> = ({
             >
               <ClipboardActionLabel isPaste isRow />
             </PopupList.Button>
+            {onSaveAsTemplate && (
+              <PopupList.Button
+                className={`${baseClass}__action ${baseClass}__save-as-template`}
+                onClick={() => {
+                  onSaveAsTemplate(index)
+                  close()
+                }}
+              >
+                {t('general:saveAsTemplate')}
+              </PopupList.Button>
+            )}
+            {onInsertFromTemplate && !hasMaxRows && (
+              <PopupList.Button
+                className={`${baseClass}__action ${baseClass}__insert-from-template`}
+                onClick={() => {
+                  onInsertFromTemplate(index)
+                  close()
+                }}
+              >
+                {t('general:insertFromTemplate')}
+              </PopupList.Button>
+            )}
             <PopupList.Button
               className={`${baseClass}__action ${baseClass}__remove`}
               onClick={() => {

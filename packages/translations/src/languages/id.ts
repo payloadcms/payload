@@ -240,6 +240,7 @@ export const idTranslations: DefaultTranslationsObject = {
     cancel: 'Batal',
     changesNotSaved:
       'Perubahan Anda belum disimpan. Jika Anda pergi sekarang, Anda akan kehilangan perubahan Anda.',
+    chooseTemplate: 'Choose a template',
     clear: 'Hapus',
     clearAll: 'Hapus Semua',
     close: 'Tutup',
@@ -270,6 +271,7 @@ export const idTranslations: DefaultTranslationsObject = {
     create: 'Buat',
     created: 'Dibuat',
     createdAt: 'Dibuat Pada',
+    createFromTemplate: 'Create from Template',
     createNew: 'Buat Baru',
     createNewLabel: 'Buat {{label}} baru',
     creating: 'Membuat',
@@ -329,6 +331,7 @@ export const idTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Kelompokkan berdasarkan {{label}}',
     import: 'Impor',
     increment: 'Kenaikan',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'sedang mengedit',
     item: 'Item',
     items: 'item',
@@ -394,6 +397,7 @@ export const idTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Muat ulang dokumen',
     remove: 'Hapus',
     rename: 'Ganti Nama',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Atur Ulang',
     resetPreferences: 'Atur Ulang Preferensi',
     resetPreferencesDescription:
@@ -407,7 +411,10 @@ export const idTranslations: DefaultTranslationsObject = {
     row: 'Baris',
     rows: 'Baris',
     save: 'Simpan',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Simpan Perubahan',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Menyimpan...',
     schedulePublishFor: 'Jadwalkan publikasi untuk {{title}}',
     searchBy: 'Cari berdasarkan {{label}}',
@@ -431,6 +438,10 @@ export const idTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Berhasil mengindeks ulang {{count}} dari {{total}} dokumen dari {{collections}}, dan melewatkan {{skips}} draf.',
     takeOver: 'Ambil alih',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Bahasa Indonesia',
     time: 'Waktu',
     timezone: 'Zona Waktu',

@@ -242,6 +242,7 @@ export const huTranslations: DefaultTranslationsObject = {
     cancel: 'Mégsem',
     changesNotSaved:
       'A módosítások nem lettek mentve. Ha most távozik, elveszíti a változtatásokat.',
+    chooseTemplate: 'Choose a template',
     clear: 'Tiszta',
     clearAll: 'Törölj mindent',
     close: 'Bezárás',
@@ -272,6 +273,7 @@ export const huTranslations: DefaultTranslationsObject = {
     create: 'Létrehozás',
     created: 'Létrehozva',
     createdAt: 'Létrehozva:',
+    createFromTemplate: 'Create from Template',
     createNew: 'Új létrehozása',
     createNewLabel: 'Új {{label}} létrehozása',
     creating: 'Létrehozás',
@@ -331,6 +333,7 @@ export const huTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Csoportosítás {{label}} szerint',
     import: 'Behozatal',
     increment: 'Növelés',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'szerkeszt',
     item: 'Tétel',
     items: 'tételek',
@@ -395,6 +398,7 @@ export const huTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Dokumentum újratöltése',
     remove: 'Törlés',
     rename: 'Átnevez',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Visszaállítás',
     resetPreferences: 'Beállítások visszaállítása',
     resetPreferencesDescription:
@@ -409,7 +413,10 @@ export const huTranslations: DefaultTranslationsObject = {
     row: 'Sor',
     rows: 'Sorok',
     save: 'Mentés',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Mentése a változásoknak',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Mentés...',
     schedulePublishFor: 'Tervezett közzététel a(z) {{title}} című számára',
     searchBy: 'Keresés a következő szerint: {{label}}',
@@ -433,6 +440,10 @@ export const huTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Sikeresen újraindexelésre került {{count}} a {{total}} dokumentumból a {{collections}} gyűjteményből, és {{skips}} vázlat kerül átugrásra.',
     takeOver: 'Átvétel',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Magyar',
     time: 'Idő',
     timezone: 'Időzóna',

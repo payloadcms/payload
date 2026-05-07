@@ -33,6 +33,7 @@ import { getPreferencesCollection, preferencesCollectionSlug } from '../preferen
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
+import { getTemplatesCollection, templatesCollectionSlug } from '../templates/config.js'
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -199,6 +200,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     jobsCollectionSlug,
     lockedDocumentsCollectionSlug,
     preferencesCollectionSlug,
+    templatesCollectionSlug,
   ]
 
   const dashboardWidgets = config.admin?.dashboard?.widgets ?? ([] as Widget[])
@@ -422,6 +424,15 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     await sanitizeCollection(
       config as unknown as Config,
       getPreferencesCollection(config as unknown as Config),
+      richTextSanitizationPromises,
+      validRelationships,
+    ),
+  )
+
+  configWithDefaults.collections!.push(
+    await sanitizeCollection(
+      config as unknown as Config,
+      getTemplatesCollection(config as unknown as Config),
       richTextSanitizationPromises,
       validRelationships,
     ),

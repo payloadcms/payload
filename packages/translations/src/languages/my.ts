@@ -241,6 +241,7 @@ export const myTranslations: DefaultTranslationsObject = {
     cancel: 'မလုပ်တော့ပါ။',
     changesNotSaved:
       'သင်၏ပြောင်းလဲမှုများကို မသိမ်းဆည်းရသေးပါ။ ယခု စာမျက်နှာက ထွက်လိုက်ပါက သင်၏ပြောင်းလဲမှုများ အကုန် ဆုံးရှုံးသွားပါမည်။ အကုန်နော်။',
+    chooseTemplate: 'Choose a template',
     clear: 'Jelas',
     clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
     close: 'ပိတ်',
@@ -271,6 +272,7 @@ export const myTranslations: DefaultTranslationsObject = {
     create: 'ဖန်တီးမည်။',
     created: 'ဖန်တီးခဲ့သည်။',
     createdAt: 'ဖန်တီးခဲ့သည့်အချိန်',
+    createFromTemplate: 'Create from Template',
     createNew: 'အသစ် ဖန်တီးမည်။',
     createNewLabel: '{{label}} အသစ် ဖန်တီးမည်။',
     creating: 'ဖန်တီးနေသည်။',
@@ -330,6 +332,7 @@ export const myTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Berkumpulkan mengikut {{label}}',
     import: 'သွင်းကုန်',
     increment: 'တိုးမြှင့်သည်',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'ပြင်ဆင်နေသည်',
     item: 'Barang',
     items: 'barang-barang',
@@ -396,6 +399,7 @@ export const myTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Muat semula dokumen',
     remove: 'ဖယ်ရှားမည်။',
     rename: 'အမည်ပြောင်း',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Tetapkan semula',
     resetPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်မည်',
     resetPreferencesDescription:
@@ -410,7 +414,10 @@ export const myTranslations: DefaultTranslationsObject = {
     row: 'အတန်း',
     rows: 'Rows',
     save: 'သိမ်းဆည်းမည်။',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Simpan Perubahan',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'သိမ်းနေဆဲ ...',
     schedulePublishFor: 'Jadualkan penerbitan untuk {{title}}',
     searchBy: 'ရှာဖွေပါ။',
@@ -434,6 +441,10 @@ export const myTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} မှ စုစုပေါင်း {{total}} စာတမ်းထဲမှ {{count}} စာတမ်းကိုအောင်မြင်စွာပြန်လည်ညွှန်းကောက်ခဲ့ပြီး {{skips}} အကြမ်းဖျဉ်ချုပ်ကိုလွဲချခဲ့သည်။',
     takeOver: 'တာဝန်ယူပါ',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'မြန်မာစာ',
     time: 'Masa',
     timezone: 'Masa Wilayah',

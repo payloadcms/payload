@@ -1286,6 +1286,16 @@ type Payload = BasePayload
 
 interface RequestContext {
   [key: string]: unknown
+  /**
+   * Set to `true` while saving, applying, or editing a Templates API template.
+   * Field hooks, validators, and access control may branch on this flag — for
+   * example, required-field validation is relaxed when `true` to allow partial
+   * templates.
+   *
+   * @experimental
+   * @see https://github.com/payloadcms/payload/discussions/16515
+   */
+  isTemplate?: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -1776,7 +1786,6 @@ export { getAncestors } from './hierarchy/utils/getAncestors.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
 export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
-
 export type {
   CollapsedPreferences,
   CollectionPreferences,
@@ -1792,6 +1801,7 @@ export type {
   PreferenceUpdateRequest,
   TabsPreferences,
 } from './preferences/types.js'
+
 export type { QueryPreset } from './query-presets/types.js'
 export { jobAfterRead } from './queues/config/collection.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
@@ -1819,16 +1829,17 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
-
 export { JobCancelledError } from './queues/errors/index.js'
+
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
-
 export {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
+
+export type { TemplateDocument, TemplateEntityType, TemplatesConfig } from './templates/types.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 

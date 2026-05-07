@@ -11,6 +11,7 @@ import { DrawerRelationshipSelect } from '../../../elements/ListHeader/DrawerRel
 import { ListDrawerCreateNewDocButton } from '../../../elements/ListHeader/DrawerTitleActions/index.js'
 import { ListHeader } from '../../../elements/ListHeader/index.js'
 import {
+  CreateFromTemplateButton,
   ListBulkUploadButton,
   ListCreateNewButton,
   ListEmptyTrashButton,
@@ -138,6 +139,12 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             hasCreatePermission={hasCreatePermission}
             key="list-header-create-new-doc"
             newDocumentURL={newDocumentURL}
+          />
+        ),
+        hasCreatePermission && !isTrashRoute && Boolean(collectionConfig.templates) && (
+          <CreateFromTemplateButton
+            collectionConfig={collectionConfig}
+            key="list-header-create-from-template"
           />
         ),
         hasCreatePermission && isBulkUploadEnabled && !isTrashRoute && (

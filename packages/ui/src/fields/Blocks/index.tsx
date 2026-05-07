@@ -21,6 +21,7 @@ import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { FieldTemplateActions } from '../../elements/FieldTemplateActions/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
@@ -73,7 +74,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const minRows = minRowsProp ?? (required ? 1 : 0)
 
-  const { setDocFieldPreferences } = useDocumentInfo()
+  const { collectionSlug: hostCollectionSlug, setDocFieldPreferences } = useDocumentInfo()
   const {
     addFieldRow,
     dispatchFields,
@@ -181,6 +182,110 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       }, 0)
     },
     [addFieldRow, path, schemaPath],
+  )
+
+  const onInsertTemplate = useCallback(
+    (rowIndex: number, data: Record<string, unknown>) => {
+      const blockType = String(data.blockType ?? '')
+      if (!blockType) {
+        return
+      }
+      const subFieldState: Record<string, { initialValue: unknown; valid: true; value: unknown }> =
+        {}
+      for (const [key, value] of Object.entries(data)) {
+        if (key === 'id' || key === 'blockType') {
+          continue
+        }
+        subFieldState[key] = { initialValue: value, valid: true, value }
+      }
+      addFieldRow({
+        blockType,
+        path,
+        rowIndex,
+        schemaPath,
+        subFieldState,
+      })
+      setTimeout(() => {
+        scrollToID(`${path}-row-${rowIndex + 1}`)
+      }, 0)
+    },
+    [addFieldRow, path, schemaPath],
+  )
+
+  const resolveRowData = useCallback(
+    (rowIndex: number): Record<string, unknown> | undefined => {
+      const formState = getFields()
+      const result: Record<string, unknown> = {}
+      const prefix = `${path}.${rowIndex}.`
+      for (const key in formState) {
+        if (!key.startsWith(prefix)) {
+          continue
+        }
+        const subKey = key.slice(prefix.length)
+        if (subKey.includes('.')) {
+          continue
+        }
+        const fieldState = formState[key]
+        if (fieldState && 'value' in fieldState) {
+          result[subKey] = fieldState.value
+        }
+      }
+      return Object.keys(result).length ? result : undefined
+    },
+    [getFields, path],
+  )
+
+  const resolveFieldValueAsArray = useCallback(() => {
+    const items: Record<string, unknown>[] = []
+    const rowsField = getFields()[path]
+    const rowList = rowsField?.rows ?? []
+    for (let i = 0; i < rowList.length; i++) {
+      const data = resolveRowData(i) ?? {}
+      const blockTypeKey = `${path}.${i}.blockType`
+      const blockTypeValue = getFields()[blockTypeKey]?.value
+      if (blockTypeValue) {
+        data.blockType = blockTypeValue
+      }
+      items.push(data)
+    }
+    return items
+  }, [getFields, path, resolveRowData])
+
+  const replaceFieldWithTemplate = useCallback(
+    (items: unknown[]) => {
+      const currentRows = getFields()[path]?.rows ?? []
+      for (let i = currentRows.length - 1; i >= 0; i--) {
+        removeFieldRow({ path, rowIndex: i })
+      }
+      items.forEach((item, idx) => {
+        if (!item || typeof item !== 'object') {
+          return
+        }
+        const itemRecord = item as Record<string, unknown>
+        const blockType = String(itemRecord.blockType ?? '')
+        if (!blockType) {
+          return
+        }
+        const subFieldState: Record<
+          string,
+          { initialValue: unknown; valid: true; value: unknown }
+        > = {}
+        for (const [key, value] of Object.entries(itemRecord)) {
+          if (key === 'id' || key === 'blockType') {
+            continue
+          }
+          subFieldState[key] = { initialValue: value, valid: true, value }
+        }
+        addFieldRow({
+          blockType,
+          path,
+          rowIndex: idx,
+          schemaPath,
+          subFieldState,
+        })
+      })
+    },
+    [addFieldRow, getFields, path, removeFieldRow, schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -376,6 +481,19 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                 type={type}
               />
             </li>
+            {field.templates && hostCollectionSlug ? (
+              <li>
+                <FieldTemplateActions
+                  entitySlug={`${hostCollectionSlug}.${path}`}
+                  hostCollectionSlug={hostCollectionSlug}
+                  hostFieldPath={path}
+                  onReplaceWithTemplate={(items) => {
+                    void replaceFieldWithTemplate(items)
+                  }}
+                  resolveFieldValue={() => resolveFieldValueAsArray()}
+                />
+              </li>
+            ) : null}
           </ul>
         </div>
         <RenderCustomComponent
@@ -427,22 +545,27 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
                       hasMaxRows={hasMaxRows}
+                      hostCollectionSlug={hostCollectionSlug ?? undefined}
+                      hostFieldPath={path}
                       isLoading={isLoading}
                       isSortable={isSortable}
                       Label={rows?.[i]?.customComponents?.RowLabel}
                       labels={labels}
                       moveRow={moveRow}
+                      onInsertTemplate={onInsertTemplate}
                       parentPath={path}
                       pasteRow={pasteRow}
                       path={rowPath}
                       permissions={permissions}
                       readOnly={readOnly || disabled}
                       removeRow={removeRow}
+                      resolveRowData={resolveRowData}
                       row={row}
                       rowCount={rows.length}
                       rowIndex={i}
                       schemaPath={schemaPath + blockConfig.slug}
                       setCollapse={setCollapse}
+                      templatesEnabled={Boolean(field.templates)}
                     />
                   )}
                 </DraggableSortableItem>

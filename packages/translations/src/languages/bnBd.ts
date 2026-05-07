@@ -241,6 +241,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     cancel: 'বাতিল করুন',
     changesNotSaved:
       'আপনার পরিবর্তনগুলি সংরক্ষণ করা হয়নি। আপনি যদি এখন চলে যান, তাহলে আপনার পরিবর্তনগুলি হারিয়ে যাবে।',
+    chooseTemplate: 'Choose a template',
     clear:
       'মূল পাঠের অর্থ সম্মান করুন পেলোড প্রসঙ্গে। এখানে পেলোড নির্দিষ্ট বিশেষ অর্থ বহন করে এরকম একটি সাধারণ টার্মের তালিকা:\n    - সংগ্রহ',
     clearAll: 'সমস্ত সাফ করুন',
@@ -272,6 +273,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     create: 'তৈরি করুন',
     created: 'তৈরি করা হয়েছে',
     createdAt: 'তৈরি করার তারিখ',
+    createFromTemplate: 'Create from Template',
     createNew: 'নতুন তৈরি করুন',
     createNewLabel: 'নতুন {{label}} তৈরি করুন',
     creating: 'তৈরি করা হচ্ছে',
@@ -331,6 +333,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     groupByLabel: '{{label}} অনুযায়ী গ্রুপ করুন',
     import: 'ইম্পোর্ট করুন',
     increment: 'বৃদ্ধি',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'সম্পাদনা করছেন',
     item: 'আইটেম',
     items: 'আইটেমগুলি',
@@ -397,6 +400,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     reloadDocument: 'নথি পুনরায় লোড করুন',
     remove: 'অপসারণ করুন',
     rename: 'নাম পরিবর্তন করুন',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'রিসেট করুন',
     resetPreferences: 'পছন্দগুলি রিসেট করুন',
     resetPreferencesDescription: 'এটি আপনার সমস্ত পছন্দগুলি তাদের ডিফল্ট সেটিংসে রিসেট করবে।',
@@ -410,7 +414,10 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     row: 'সারি',
     rows: 'সারিগুলি',
     save: 'সংরক্ষণ করুন',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'পরিবর্তনগুলি সংরক্ষণ করুন',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'সংরক্ষণ করা হচ্ছে...',
     schedulePublishFor: '{{title}} এর জন্য প্রকাশ নির্ধারণ করুন',
     searchBy: '{{label}} দ্বারা অনুসন্ধান করুন',
@@ -434,6 +441,10 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} থেকে মোট {{total}}টি ডকুমেন্টের মধ্যে {{count}}টি সফলভাবে পুনরায় ইনডেক্স করা হয়েছে এবং {{skips}}টি খসড়া বাদ দেওয়া হয়েছে।',
     takeOver: 'দায়িত্ব নিন',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'বাংলা (বাংলাদেশ)',
     time: 'সময়',
     timezone: 'টাইমজোন',

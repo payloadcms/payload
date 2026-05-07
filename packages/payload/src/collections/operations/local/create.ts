@@ -105,6 +105,16 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    * @default false
    */
   showHiddenFields?: boolean
+  /**
+   * If you want to seed the new document from a saved template in `payload-templates`,
+   * pass the template document's ID. Template `data` is overlaid on top of field defaults
+   * and beneath any user-provided `data`. The merge runs through field hooks and
+   * validation as normal.
+   *
+   * @experimental
+   * @see https://github.com/payloadcms/payload/discussions/16515
+   */
+  templateID?: number | string
   // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
@@ -206,6 +216,7 @@ export async function createLocal<
     publishAllLocales,
     select,
     showHiddenFields,
+    templateID,
   } = options
 
   const collection = payload.collections[collectionSlug]
@@ -235,5 +246,6 @@ export async function createLocal<
     req,
     select,
     showHiddenFields,
+    templateID,
   })
 }

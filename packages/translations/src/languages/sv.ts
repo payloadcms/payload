@@ -239,6 +239,7 @@ export const svTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Dina ändringar har inte sparats. Om du lämnar nu kommer du att förlora dina ändringar.',
+    chooseTemplate: 'Choose a template',
     clear: 'Rensa',
     clearAll: 'Rensa alla',
     close: 'Stäng',
@@ -269,6 +270,7 @@ export const svTranslations: DefaultTranslationsObject = {
     create: 'Skapa',
     created: 'Skapat',
     createdAt: 'Skapat',
+    createFromTemplate: 'Create from Template',
     createNew: 'Skapa ny',
     createNewLabel: 'Skapa ny {{label}}',
     creating: 'Skapar...',
@@ -328,6 +330,7 @@ export const svTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Gruppera efter {{label}}',
     import: 'Importera',
     increment: 'Öka',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'redigerar',
     item: 'Artikel',
     items: 'artiklar',
@@ -393,6 +396,7 @@ export const svTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Ladda om dokumentet',
     remove: 'Ta bort',
     rename: 'Byt namn',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Återställ',
     resetPreferences: 'Återställ preferenser',
     resetPreferencesDescription:
@@ -407,7 +411,10 @@ export const svTranslations: DefaultTranslationsObject = {
     row: 'Rad',
     rows: 'Rader',
     save: 'Spara',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Spara Ändringar',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Sparar...',
     schedulePublishFor: 'Schemalägg publicering för {{title}}',
     searchBy: 'Sök efter {{label}}',
@@ -431,6 +438,10 @@ export const svTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Omindexerade {{count}} av {{total}} dokument från {{collections}}. {{skips}} utkast hoppades över.',
     takeOver: 'Ta över',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Svenska',
     time: 'Tid',
     timezone: 'Tidszon',

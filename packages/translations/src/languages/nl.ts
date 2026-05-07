@@ -245,6 +245,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     cancel: 'Annuleren',
     changesNotSaved:
       'Uw wijzigingen zijn niet bewaard. Als u weggaat zullen de wijzigingen verloren gaan.',
+    chooseTemplate: 'Choose a template',
     clear: 'Wissen',
     clearAll: 'Alles wissen',
     close: 'Sluiten',
@@ -275,6 +276,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     create: 'Aanmaken',
     created: 'Aangemaakt',
     createdAt: 'Aangemaakt op',
+    createFromTemplate: 'Create from Template',
     createNew: 'Nieuw aanmaken',
     createNewLabel: 'Nieuw(e) {{label}} aanmaken',
     creating: 'Aanmaken',
@@ -334,6 +336,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Groepeer op {{label}}',
     import: 'Importeren',
     increment: 'Verhogen',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'is aan het bewerken',
     item: 'Artikel',
     items: 'artikelen',
@@ -399,6 +402,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Document opnieuw laden',
     remove: 'Verwijderen',
     rename: 'Hernoemen',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Resetten',
     resetPreferences: 'Voorkeuren resetten',
     resetPreferencesDescription:
@@ -413,7 +417,10 @@ export const nlTranslations: DefaultTranslationsObject = {
     row: 'Rij',
     rows: 'Rijen',
     save: 'Bewaar',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Wijzigingen Opslaan',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Bewaren...',
     schedulePublishFor: 'Plan publicatie voor {{title}}',
     searchBy: 'Zoeken op {{label}}',
@@ -437,6 +444,10 @@ export const nlTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Succesvol {{count}} van {{total}} documenten uit {{collections}} opnieuw geïndexeerd, en {{skips}} concepten werden overgeslagen.',
     takeOver: 'Overnemen',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Nederlands',
     time: 'Tijd',
     timezone: 'Tijdzone',

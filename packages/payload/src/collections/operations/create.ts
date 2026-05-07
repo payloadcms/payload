@@ -58,6 +58,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   selectedLocales?: string[]
   showHiddenFields?: boolean
+  templateID?: number | string
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const createOperation = async <
@@ -117,9 +118,20 @@ export const createOperation = async <
       select: incomingSelect,
       selectedLocales,
       showHiddenFields,
+      templateID,
     } = args
 
     let { data } = args
+
+    if (templateID) {
+      const { applyTemplate } = await import('../../templates/applyTemplate.js')
+      data = (await applyTemplate({
+        collection: collectionConfig,
+        data: data as JsonObject,
+        req,
+        templateID,
+      })) as RequiredDataFromCollectionSlug<TSlug>
+    }
 
     const publishAllLocales =
       !draft &&

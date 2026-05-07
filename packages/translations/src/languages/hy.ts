@@ -236,6 +236,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     cancel: 'Չեղարկել',
     changesNotSaved:
       'Ձեր փոփոխությունները չեն պահպանվել։ Եթե հիմա հեռանաք, կկորցնեք չպահպանված փոփոխությունները։',
+    chooseTemplate: 'Choose a template',
     clear:
       'Հիմնական տեքստի իմաստը պետք է պահպանվի Payload կոնտեքստի մեջ: Այս այս այստեղ են հաճախակի',
     clearAll: 'Մաքրել բոլորը',
@@ -267,6 +268,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     create: 'Ստեղծել',
     created: 'Ստեղծված',
     createdAt: 'Ստեղծման ժամանակ',
+    createFromTemplate: 'Create from Template',
     createNew: 'Ստեղծել նոր',
     createNewLabel: 'Ստեղծել նոր {{label}}',
     creating: 'Ստեղծվում է',
@@ -326,6 +328,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Խմբավորել {{label}}-ով',
     import: 'Ներմուծում',
     increment: 'Աճ',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'խմբագրում է',
     item: 'տարր',
     items: 'տեսականի',
@@ -391,6 +394,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Թարմացնել փաստաթուղթը',
     remove: 'Հեռացնել',
     rename: 'Վերանվանել',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Վերակայել',
     resetPreferences: 'Վերակայել նախընտրությունները',
     resetPreferencesDescription:
@@ -405,7 +409,10 @@ export const hyTranslations: DefaultTranslationsObject = {
     row: 'Տող',
     rows: 'Տողեր',
     save: 'Պահպանել',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Պահպանել փոփոխությունները',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Պահպանվում է...',
     schedulePublishFor: 'Հրապարակման ժամանակ նշանակել {{title}}-ի համար',
     searchBy: 'Որոնել ըստ {{label}}-ի',
@@ -429,6 +436,10 @@ export const hyTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}}-ից {{total}} փաստաթղթից {{count}}-ը հաջողությամբ վերաինդեքսավորվեց, և {{skips}} նախագիծ թռիչք դարձան։',
     takeOver: 'Վերցնել վերահսկողությունը',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Հայերեն',
     time: 'Ժամ',
     timezone: 'Ժամային գոտի',

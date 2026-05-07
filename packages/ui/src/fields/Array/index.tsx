@@ -23,6 +23,7 @@ import { CollapseAllToggle } from '../../elements/CollapseAllToggle/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { FieldTemplateActions } from '../../elements/FieldTemplateActions/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
@@ -71,7 +72,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const minRows = minRowsProp ?? (required ? 1 : 0)
 
-  const { setDocFieldPreferences } = useDocumentInfo()
+  const { collectionSlug: hostCollectionSlug, setDocFieldPreferences } = useDocumentInfo()
   const {
     addFieldRow,
     dispatchFields,
@@ -182,6 +183,64 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       removeFieldRow({ path, rowIndex })
     },
     [removeFieldRow, path],
+  )
+
+  const resolveFieldValueAsArray = useCallback(() => {
+    const formState = getFields()
+    const rowsField = formState[path]
+    const rowList = rowsField?.rows ?? []
+    const items: Record<string, unknown>[] = []
+    for (let i = 0; i < rowList.length; i++) {
+      const data: Record<string, unknown> = {}
+      const prefix = `${path}.${i}.`
+      for (const key in formState) {
+        if (!key.startsWith(prefix)) {
+          continue
+        }
+        const subKey = key.slice(prefix.length)
+        if (subKey.includes('.')) {
+          continue
+        }
+        const fieldState = formState[key]
+        if (fieldState && 'value' in fieldState) {
+          data[subKey] = fieldState.value
+        }
+      }
+      items.push(data)
+    }
+    return items
+  }, [getFields, path])
+
+  const replaceFieldWithTemplate = useCallback(
+    (items: unknown[]) => {
+      const currentRows = getFields()[path]?.rows ?? []
+      for (let i = currentRows.length - 1; i >= 0; i--) {
+        removeFieldRow({ path, rowIndex: i })
+      }
+      items.forEach((item, idx) => {
+        if (!item || typeof item !== 'object') {
+          return
+        }
+        const itemRecord = item as Record<string, unknown>
+        const subFieldState: Record<
+          string,
+          { initialValue: unknown; valid: true; value: unknown }
+        > = {}
+        for (const [key, value] of Object.entries(itemRecord)) {
+          if (key === 'id') {
+            continue
+          }
+          subFieldState[key] = { initialValue: value, valid: true, value }
+        }
+        addFieldRow({
+          path,
+          rowIndex: idx,
+          schemaPath,
+          subFieldState,
+        })
+      })
+    },
+    [addFieldRow, getFields, path, removeFieldRow, schemaPath],
   )
 
   const moveRow = useCallback(
@@ -363,6 +422,19 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                 type={type}
               />
             </li>
+            {field.templates && hostCollectionSlug ? (
+              <li>
+                <FieldTemplateActions
+                  entitySlug={`${hostCollectionSlug}.${path}`}
+                  hostCollectionSlug={hostCollectionSlug}
+                  hostFieldPath={path}
+                  onReplaceWithTemplate={(items) => {
+                    void replaceFieldWithTemplate(items)
+                  }}
+                  resolveFieldValue={() => resolveFieldValueAsArray()}
+                />
+              </li>
+            ) : null}
           </ul>
         </div>
         <RenderCustomComponent

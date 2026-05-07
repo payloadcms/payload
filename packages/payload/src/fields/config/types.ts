@@ -1399,6 +1399,14 @@ export type ArrayField = {
   labels?: Labels
   maxRows?: number
   minRows?: number
+  /**
+   * Enable saving rows of this array as field templates, and inserting them via the row menu.
+   * Requires the host collection to have `templates` enabled.
+   *
+   * @experimental
+   * @see https://github.com/payloadcms/payload/discussions/16515
+   */
+  templates?: true
   type: 'array'
   validate?: ArrayFieldValidation
 } & Omit<FieldBase, 'validate'>
@@ -1409,7 +1417,7 @@ export type ArrayFieldClient = {
   fields: ClientField[]
   labels?: LabelsClient
 } & FieldBaseClient &
-  Pick<ArrayField, 'interfaceName' | 'maxRows' | 'minRows' | 'type'>
+  Pick<ArrayField, 'interfaceName' | 'maxRows' | 'minRows' | 'templates' | 'type'>
 
 export type RadioField = {
   admin?: {
@@ -1660,6 +1668,14 @@ export type BlocksField = {
   labels?: Labels
   maxRows?: number
   minRows?: number
+  /**
+   * Enable saving individual blocks (tier 2) and the entire field value (tier 3) as templates.
+   * Requires the host collection to have `templates` enabled.
+   *
+   * @experimental
+   * @see https://github.com/payloadcms/payload/discussions/16515
+   */
+  templates?: true
   type: 'blocks'
   validate?: BlocksFieldValidation
 } & Omit<FieldBase, 'validate'>
@@ -1676,7 +1692,7 @@ export type BlocksFieldClient = {
   blocks: ClientBlock[]
   labels?: LabelsClient
 } & FieldBaseClient &
-  Pick<BlocksField, 'maxRows' | 'minRows' | 'type'>
+  Pick<BlocksField, 'maxRows' | 'minRows' | 'templates' | 'type'>
 
 export type PointField = {
   admin?: {

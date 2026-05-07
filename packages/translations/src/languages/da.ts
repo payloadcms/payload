@@ -238,6 +238,7 @@ export const daTranslations: DefaultTranslationsObject = {
     cancel: 'Anuller',
     changesNotSaved:
       'Dine ændringer er ikke blevet gemt. Hvis du forlader siden, vil din ændringer gå tabt.',
+    chooseTemplate: 'Choose a template',
     clear: 'Klar',
     clearAll: 'Ryd alt',
     close: 'Luk',
@@ -268,6 +269,7 @@ export const daTranslations: DefaultTranslationsObject = {
     create: 'Opret',
     created: 'Oprettet',
     createdAt: 'Oprettet til',
+    createFromTemplate: 'Create from Template',
     createNew: 'Opret ny',
     createNewLabel: 'Opret ny {{label}}',
     creating: 'Opretter',
@@ -326,6 +328,7 @@ export const daTranslations: DefaultTranslationsObject = {
     groupByLabel: 'Gruppér efter {{label}}',
     import: 'Import',
     increment: 'Forøg',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'redigerer',
     item: 'Vare',
     items: 'elementer',
@@ -391,6 +394,7 @@ export const daTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Genindlæs dokument',
     remove: 'Fjern',
     rename: 'Omdøb',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Nulstil',
     resetPreferences: 'Nulstil præferencer',
     resetPreferencesDescription:
@@ -405,7 +409,10 @@ export const daTranslations: DefaultTranslationsObject = {
     row: 'Række',
     rows: 'Rækker',
     save: 'Gem',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Gem ændringer',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Gemmer...',
     schedulePublishFor: 'Planlæg offentliggørelse for {{title}}',
     searchBy: 'Søg efter {{label}}',
@@ -429,6 +436,10 @@ export const daTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{count}} ud af {{total}} dokumenter fra {{collections}} blev succesfuldt genindekseret, og {{skips}} kladder blev sprunget over.',
     takeOver: 'Overtag',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Dansk',
     time: 'Tid',
     timezone: 'Tidszone',

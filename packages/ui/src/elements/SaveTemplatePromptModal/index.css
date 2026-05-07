@@ -1,0 +1,52 @@
+.save-template-prompt {
+  &__form {
+    background: var(--theme-elevation-0);
+    border-radius: var(--style-radius-m);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0 auto;
+    max-width: 500px;
+    padding: 1.5rem;
+    width: 100%;
+
+    h2 {
+      margin: 0;
+    }
+  }
+
+  &__label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+  &__input,
+  &__textarea {
+    background: var(--theme-input-bg);
+    border: 1px solid var(--theme-elevation-150);
+    border-radius: var(--style-radius-s);
+    color: var(--theme-text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 0.5rem;
+  }
+
+  &__input:focus,
+  &__textarea:focus {
+    border-color: var(--theme-elevation-400);
+    outline: none;
+  }
+
+  &__textarea {
+    resize: vertical;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+}

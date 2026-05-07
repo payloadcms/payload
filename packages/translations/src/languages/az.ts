@@ -240,6 +240,7 @@ export const azTranslations: DefaultTranslationsObject = {
     cancel: 'Ləğv et',
     changesNotSaved:
       'Dəyişiklikləriniz saxlanılmayıb. İndi çıxsanız, dəyişikliklərinizi itirəcəksiniz.',
+    chooseTemplate: 'Choose a template',
     clear:
       'Payload kontekstində orijinal mətnin mənasını qoruya. İşte Payload terminləri siyahısıdır ki, onlar üzərində çox xüsusi mənalar gəlir:\n    - Kolleksiya: Kolleksiya sənədlərin hamıya ortaq struktur və məqsəd sərbəst olan bir qrupdur. Kolleksiyalar Payload-da məzmunu təşkil etmək və idarə etmək üçün istifadə edilir.\n    - Sahə: Sahə',
     clearAll: 'Hamısını təmizlə',
@@ -271,6 +272,7 @@ export const azTranslations: DefaultTranslationsObject = {
     create: 'Yarat',
     created: 'Yaradıldı',
     createdAt: 'Yaradıldığı tarix',
+    createFromTemplate: 'Create from Template',
     createNew: 'Yeni yarat',
     createNewLabel: 'Yeni {{label}} yarat',
     creating: 'Yaradılır',
@@ -330,6 +332,7 @@ export const azTranslations: DefaultTranslationsObject = {
     groupByLabel: '{{label}} ilə qruplaşdırın',
     import: 'İdxal',
     increment: 'Artırmaq',
+    insertFromTemplate: 'Insert from Template',
     isEditing: 'redaktə edir',
     item: 'Əşya',
     items: 'maddələr',
@@ -395,6 +398,7 @@ export const azTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Sənədə yenidən yükləyin',
     remove: 'Sil',
     rename: 'Yenidən adlandırın',
+    replaceFromTemplate: 'Replace from Template',
     reset: 'Yenidən başlat',
     resetPreferences: 'Təhlükəsizlik parametrlərini sıfırlamaq',
     resetPreferencesDescription: 'Bu, bütün parametrlərinizi standart vəziyyətlərinə sıfırlayacaq.',
@@ -408,7 +412,10 @@ export const azTranslations: DefaultTranslationsObject = {
     row: 'Sətir',
     rows: 'Sətirlər',
     save: 'Saxla',
+    saveAsTemplate: 'Save as Template',
+    saveBlockAsTemplate: 'Save Block as Template',
     saveChanges: 'Dəyişiklikləri Saxla',
+    saveFieldAsTemplate: 'Save Field as Template',
     saving: 'Saxlanılır...',
     schedulePublishFor: '{{title}} üçün nəşr cədvəlini təyin edin',
     searchBy: '{{label}} ilə axtar',
@@ -432,6 +439,10 @@ export const azTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '"{{collections}}" kolleksiyalarından {{total}} sənəddən {{count}} sənəd uğurla yenidən indeksləndi və {{skips}} qaralama keçildi.',
     takeOver: 'Əvvəl',
+    templateName: 'Template Name',
+    templateOutOfDate:
+      'This template is out of date with the current schema. Editing and saving will bring it up to date.',
+    templateSaved: '{{name}} saved as a template.',
     thisLanguage: 'Azərbaycan dili',
     time: 'Vaxt',
     timezone: 'Saat qurşağı',

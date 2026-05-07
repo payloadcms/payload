@@ -34,6 +34,7 @@ import { PreviewButton } from '../PreviewButton/index.js'
 import { PublishButton } from '../PublishButton/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { RestoreButton } from '../RestoreButton/index.js'
+import { SaveAsTemplate } from '../SaveAsTemplate/index.js'
 import { SaveButton } from '../SaveButton/index.js'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
@@ -389,6 +390,12 @@ export const DocumentControls: React.FC<{
                           />
                         )}
                       </>
+                    )}
+                    {Boolean(collectionConfig.templates) && isEditing && (
+                      <SaveAsTemplate
+                        collectionSlug={collectionConfig.slug}
+                        singularLabel={collectionConfig?.labels?.singular}
+                      />
                     )}
                   </React.Fragment>
                 )}
