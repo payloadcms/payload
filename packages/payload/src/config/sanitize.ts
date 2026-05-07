@@ -4,7 +4,12 @@ import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
 import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
-import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
+import type {
+  CollectionSlug,
+  GlobalSlug,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+} from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type {
   Config,
@@ -504,5 +509,15 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   await Promise.all(promises)
 
-  return config as SanitizedConfig
+  const collectionsBySlug = new Map<string, SanitizedCollectionConfig>()
+  for (const collection of config.collections as SanitizedCollectionConfig[]) {
+    collectionsBySlug.set(collection.slug, collection)
+  }
+
+  const globalsBySlug = new Map<string, SanitizedGlobalConfig>()
+  for (const global of config.globals ?? []) {
+    globalsBySlug.set(global.slug, global)
+  }
+
+  return { ...config, collectionsBySlug, globalsBySlug } as SanitizedConfig
 }

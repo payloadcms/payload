@@ -92,7 +92,7 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   const locale = localeFromInput ?? localeFromReq
-  const collectionConfig = payload.config.collections.find(({ slug }) => slug === collectionSlug)
+  const collectionConfig = payload.config.collectionsBySlug.get(collectionSlug)
 
   if (!collectionConfig) {
     throw new APIError(`Collection with slug ${collectionSlug} not found.`)

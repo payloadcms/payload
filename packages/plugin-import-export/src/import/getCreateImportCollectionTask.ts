@@ -47,9 +47,7 @@ export const getCreateCollectionImportTask = (
       }
 
       // Get the collection config for the imports collection
-      const collectionConfig = req.payload.config.collections.find(
-        (c) => c.slug === importCollection,
-      )
+      const collectionConfig = req.payload.config.collectionsBySlug.get(importCollection)
 
       if (!collectionConfig) {
         throw new Error(`Collection config not found for: ${importCollection}`)

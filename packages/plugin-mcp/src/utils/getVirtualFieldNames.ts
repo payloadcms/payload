@@ -6,7 +6,7 @@ import { fieldIsVirtual } from 'payload/shared'
  * Returns the names of all top-level virtual fields for a given collection slug.
  */
 export function getCollectionVirtualFieldNames(config: SanitizedConfig, slug: string): string[] {
-  const collection = config.collections.find((c) => c.slug === slug)
+  const collection = config.collectionsBySlug.get(slug)
 
   if (!collection) {
     return []
@@ -21,7 +21,7 @@ export function getCollectionVirtualFieldNames(config: SanitizedConfig, slug: st
  * Returns the names of all top-level virtual fields for a given global slug.
  */
 export function getGlobalVirtualFieldNames(config: SanitizedConfig, slug: string): string[] {
-  const global = config.globals.find((g) => g.slug === slug)
+  const global = config.globalsBySlug.get(slug)
 
   if (!global) {
     return []

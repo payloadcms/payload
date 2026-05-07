@@ -21,6 +21,7 @@ import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/c
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
   | 'bin'
+  | 'collectionsBySlug'
   | 'cors'
   | 'csrf'
   | 'custom'
@@ -28,6 +29,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'editor'
   | 'email'
   | 'endpoints'
+  | 'globalsBySlug'
   | 'graphQL'
   | 'hooks'
   | 'i18n'
@@ -99,6 +101,8 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'logger',
   'kv',
   'queryPresets',
+  'collectionsBySlug',
+  'globalsBySlug',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
