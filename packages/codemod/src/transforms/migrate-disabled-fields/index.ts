@@ -11,8 +11,8 @@ const OLD_TO_NEW: Record<string, string> = {
   disableListFilter: 'filter',
 }
 
-export const consolidateDisabledFields: Transform = {
-  name: 'consolidate-disabled-fields',
+export const migrateDisabledFields: Transform = {
+  name: 'migrate-disabled-fields',
   apply: ({ project }) => {
     const filesChanged = new Set<string>()
     const notes: string[] = []
