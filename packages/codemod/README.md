@@ -26,6 +26,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 ## Transforms
 
 - `globals-components-edit` — Globals: rename `admin.components.elements` to `admin.components.edit` and hoist `Description` to top-level `admin.components.Description` to match Collection conventions.
+- `migrate-force-select` — migrates `forceSelect: { ... }` on Collection/Global configs to `select: ({ select }) => ({ ...select, ... })`. Object-literal `forceSelect` becomes a select function that augments the caller's `select`. Non-literal values, sibling `select` already present, and unsupported member kinds are surfaced as notes for manual review.
 - `migrate-hide-api-url` — migrates `admin.hideAPIURL: true` to `admin.components.views.edit.api.tab.condition: () => false` on collection and global configs.
 
 ## Contributing
