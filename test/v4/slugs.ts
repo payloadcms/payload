@@ -22,3 +22,33 @@ export const blocksFieldsSlug = 'blocks-fields'
 export const dateFieldsSlug = 'date-fields'
 export const foldersSlug = 'folders'
 export const folderItemsSlug = 'folder-items'
+export const draftVersionsSlug = 'draft-versions'
+
+export const collectionSlugs = [
+  'users',
+  textFieldsSlug,
+  textareaFieldsSlug,
+  emailFieldsSlug,
+  numberFieldsSlug,
+  passwordFieldsSlug,
+  checkboxFieldsSlug,
+  selectFieldsSlug,
+  relationshipFieldsSlug,
+  uploadFieldsSlug,
+  uploadsSlug,
+  slugFieldsSlug,
+  codeFieldsSlug,
+  jsonFieldsSlug,
+  collapsibleFieldsSlug,
+  groupFieldsSlug,
+  tabsFieldsSlug,
+  pointFieldsSlug,
+  radioFieldsSlug,
+  rowFieldsSlug,
+  arrayFieldsSlug,
+  blocksFieldsSlug,
+  dateFieldsSlug,
+  foldersSlug,
+  folderItemsSlug,
+  draftVersionsSlug,
+]

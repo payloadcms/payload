@@ -36,6 +36,7 @@ export const listViewPreviewSlug = 'list-view-preview'
 export const threeDimensionalSlug = 'three-dimensional'
 export const constructorOptionsSlug = 'constructor-options'
 export const bulkUploadsSlug = 'bulk-uploads'
+export const bulkUploadsHookErrorSlug = 'bulk-uploads-hook-error'
 export const restrictedMimeTypesSlug = 'restricted-mime-types'
 export const pdfOnlySlug = 'pdf-only'
 

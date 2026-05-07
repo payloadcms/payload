@@ -20,6 +20,10 @@
     &.error {
       .radio-input__styled-radio {
         border-color: var(--border-danger-strong);
+
+        &:hover {
+          border-color: var(--border-danger-strong);
+        }
       }
     }
   }
