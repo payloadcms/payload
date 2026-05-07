@@ -1,9 +1,9 @@
-export type DisabledArea = 'bulkEdit' | 'column' | 'edit' | 'filter' | 'groupBy'
+export type DisabledArea = 'bulkEdit' | 'column' | 'field' | 'filter' | 'groupBy'
 
 export type DisabledOptions = {
   bulkEdit?: boolean
   column?: boolean
-  edit?: boolean
+  field?: boolean
   filter?: boolean
   groupBy?: boolean
 }

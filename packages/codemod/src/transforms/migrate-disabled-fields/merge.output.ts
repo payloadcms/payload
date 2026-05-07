@@ -5,7 +5,7 @@ export const cfg = {
       name: 'a',
       type: 'text',
       admin: {
-        disabled: { column: true, edit: true }
+        disabled: { column: true, field: true }
       },
     },
   ],

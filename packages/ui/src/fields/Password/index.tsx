@@ -107,7 +107,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       }}
       path={path}
       placeholder={placeholder}
-      readOnly={disabled || isFieldDisabled(field, 'edit')}
+      readOnly={disabled || isFieldDisabled(field, 'field')}
       required={required}
       rtl={renderRTL}
       showError={showError}

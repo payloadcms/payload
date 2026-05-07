@@ -373,7 +373,7 @@ export type FieldAdmin = {
   /**
    * Controls where this field is disabled in the admin UI.
    * - `true` disables the field everywhere (edit form, list column, list filter, groupBy, bulk edit).
-   * - An object enables granular control per area: `{ edit?, column?, filter?, groupBy?, bulkEdit? }`.
+   * - An object enables granular control per area: `{ field?, column?, filter?, groupBy?, bulkEdit? }`.
    */
   disabled?: boolean | DisabledOptions
   hidden?: boolean
@@ -391,7 +391,7 @@ export type AdminClient = {
   /**
    * Controls where this field is disabled in the admin UI.
    * - `true` disables the field everywhere (edit form, list column, list filter, groupBy, bulk edit).
-   * - An object enables granular control per area: `{ edit?, column?, filter?, groupBy?, bulkEdit? }`.
+   * - An object enables granular control per area: `{ field?, column?, filter?, groupBy?, bulkEdit? }`.
    */
   disabled?: boolean | DisabledOptions
   hidden?: boolean
@@ -949,7 +949,7 @@ export type UIField = {
     /**
      * Controls where this UI field is disabled in the admin UI.
      * - `true` disables the field everywhere.
-     * - An object enables granular control per area: `{ edit?, column?, filter?, groupBy?, bulkEdit? }`.
+     * - An object enables granular control per area: `{ field?, column?, filter?, groupBy?, bulkEdit? }`.
      * UI fields default to `disabled: { bulkEdit: true }` via sanitize.
      */
     disabled?: boolean | DisabledOptions
@@ -2089,7 +2089,7 @@ export function fieldIsHiddenOrDisabled<
   if (disabled === true) {
     return true
   }
-  return typeof disabled === 'object' && disabled !== null && disabled.edit === true
+  return typeof disabled === 'object' && disabled !== null && disabled.field === true
 }
 
 export function fieldAffectsData<
