@@ -79,7 +79,7 @@
     "@stripe/react-stripe-js": "3.7.0",
     "@stripe/stripe-js": "7.3.1",
     "@types/diff": "^8.0.0",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vercel/blob": "2.3.1",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
