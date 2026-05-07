@@ -12,7 +12,11 @@
     }
 
     &.error input {
-      border-color: var(--border-danger-default);
+      border-color: var(--border-danger-strong);
+
+      &:hover {
+        border-color: var(--border-danger-strong);
+      }
     }
   }
 }

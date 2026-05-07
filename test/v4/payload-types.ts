@@ -92,6 +92,7 @@ export interface Config {
     'textarea-fields': TextareaField;
     uploads: Upload;
     'upload-fields': UploadField;
+    'draft-versions': DraftVersion;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -124,6 +125,7 @@ export interface Config {
     'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'upload-fields': UploadFieldsSelect<false> | UploadFieldsSelect<true>;
+    'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -197,6 +199,7 @@ export interface ArrayField {
   arrayField?:
     | {
         name?: string | null;
+        anotherNestedTextField?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -415,6 +418,8 @@ export interface DateField {
   timeOnly?: string | null;
   dayAndTime?: string | null;
   monthOnly?: string | null;
+  withTimezone?: string | null;
+  withTimezone_tz?: SupportedTimezones;
   updatedAt: string;
   createdAt: string;
 }
@@ -683,6 +688,18 @@ export interface RelationshipField {
    * This field is read-only
    */
   authorReadOnly?: (string | null) | User;
+  /**
+   * Can relate to users or text fields
+   */
+  polymorphic?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'text-fields';
+        value: string | TextField;
+      } | null);
   updatedAt: string;
   createdAt: string;
 }
@@ -871,6 +888,18 @@ export interface TabsField {
   socialImage?: string | null;
   customCSS?: string | null;
   visibility?: ('public' | 'private' | 'draft') | null;
+  sidebarGroup?: {
+    showRecentPosts?: boolean | null;
+    showCategories?: boolean | null;
+    adCode?: string | null;
+    customHTML?: string | null;
+  };
+  apiKey?: string | null;
+  webhookUrl?: string | null;
+  emailNotifications?: boolean | null;
+  pushNotifications?: boolean | null;
+  autoBackup?: boolean | null;
+  backupFrequency?: ('daily' | 'weekly' | 'monthly') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -931,6 +960,19 @@ export interface UploadField {
   heroImageHasManyReadOnly?: (string | Upload)[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-versions".
+ */
+export interface DraftVersion {
+  id: string;
+  title: string;
+  content?: string | null;
+  author?: (string | null) | User;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1055,6 +1097,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'upload-fields';
         value: string | UploadField;
+      } | null)
+    | ({
+        relationTo: 'draft-versions';
+        value: string | DraftVersion;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1129,6 +1175,7 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | T
     | {
         name?: T;
+        anotherNestedTextField?: T;
         id?: T;
       };
   arrayWithRequiredField?:
@@ -1333,6 +1380,8 @@ export interface DateFieldsSelect<T extends boolean = true> {
   timeOnly?: T;
   dayAndTime?: T;
   monthOnly?: T;
+  withTimezone?: T;
+  withTimezone_tz?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1476,6 +1525,7 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relatedPosts?: T;
   authorDisabled?: T;
   authorReadOnly?: T;
+  polymorphic?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1570,6 +1620,20 @@ export interface TabsFieldsSelect<T extends boolean = true> {
   socialImage?: T;
   customCSS?: T;
   visibility?: T;
+  sidebarGroup?:
+    | T
+    | {
+        showRecentPosts?: T;
+        showCategories?: T;
+        adCode?: T;
+        customHTML?: T;
+      };
+  apiKey?: T;
+  webhookUrl?: T;
+  emailNotifications?: T;
+  pushNotifications?: T;
+  autoBackup?: T;
+  backupFrequency?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1627,6 +1691,18 @@ export interface UploadFieldsSelect<T extends boolean = true> {
   heroImageHasManyReadOnly?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-versions_select".
+ */
+export interface DraftVersionsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  author?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -61,23 +61,4 @@
   .popup__scroll-container:not(.popup__scroll-container--show-scrollbar)::-webkit-scrollbar {
     display: none; /* Chrome/Safari/Opera */
   }
-
-  .popup__caret {
-    position: absolute;
-    width: 0;
-    height: 0;
-    border: var(--popup-caret-size) solid transparent;
-    left: var(--caret-left, 16px);
-    transform: translateX(-50%);
-  }
-
-  .popup--v-bottom .popup__caret {
-    top: calc(var(--popup-caret-size) * -2);
-    border-bottom-color: var(--bg-elevated-default);
-  }
-
-  .popup--v-top .popup__caret {
-    bottom: calc(var(--popup-caret-size) * -2);
-    border-top-color: var(--bg-elevated-default);
-  }
 }
