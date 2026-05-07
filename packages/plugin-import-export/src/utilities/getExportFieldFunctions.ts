@@ -2,7 +2,7 @@ import type { FlattenedField } from 'payload'
 
 import type { ExportFieldHookEntry, FieldBeforeExportHook } from '../types.js'
 
-import { getBlockFlattenedFields, getNestedFlattenedFields } from './flattenedFields.js'
+import { registerFieldHooks } from './flattenedFields.js'
 import { getPolymorphicRelId, isPolymorphicRelValue } from './polymorphicRel.js'
 
 type Args = {
@@ -15,35 +15,8 @@ type Args = {
  */
 export const getExportFieldFunctions = ({ fields }: Args): Record<string, ExportFieldHookEntry> => {
   const result: Record<string, ExportFieldHookEntry> = {}
-  registerExportHooks(fields, '', result)
+  registerFieldHooks(fields, '', result, registerExportHandler)
   return result
-}
-
-const registerExportHooks = (
-  fields: FlattenedField[],
-  parentPath: string,
-  result: Record<string, ExportFieldHookEntry>,
-): void => {
-  for (const field of fields) {
-    if (!('name' in field) || !field.name) {
-      continue
-    }
-
-    if (field.type === 'blocks') {
-      const base = parentPath ? `${parentPath}_${field.name}` : field.name
-      for (const block of field.blocks ?? []) {
-        registerExportHooks(getBlockFlattenedFields(block), `${base}_${block.slug}`, result)
-      }
-      continue
-    }
-
-    const fullKey = parentPath ? `${parentPath}_${field.name}` : field.name
-    registerExportHandler(field, fullKey, result)
-
-    if (field.type === 'group' || field.type === 'tab' || field.type === 'array') {
-      registerExportHooks(getNestedFlattenedFields(field) ?? [], fullKey, result)
-    }
-  }
 }
 
 const registerExportHandler = (

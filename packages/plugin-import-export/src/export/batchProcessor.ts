@@ -115,6 +115,14 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
   const batchSize = options.batchSize ?? 100
   const debug = options.debug ?? false
 
+  const computeTotalBatches = (totalDocs: number | undefined, maxDocs: number): number => {
+    const effectiveDocs =
+      totalDocs !== undefined
+        ? Math.min(totalDocs, maxDocs === Number.POSITIVE_INFINITY ? totalDocs : maxDocs)
+        : 0
+    return effectiveDocs > 0 ? Math.ceil(effectiveDocs / batchSize) : 1
+  }
+
   /**
    * Process an export operation by fetching and transforming documents in batches.
    *
@@ -135,11 +143,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
       transformDoc,
     } = processOptions
 
-    const effectiveDocs =
-      totalDocs !== undefined
-        ? Math.min(totalDocs, maxDocs === Number.POSITIVE_INFINITY ? totalDocs : maxDocs)
-        : 0
-    const totalBatches = effectiveDocs > 0 ? Math.ceil(effectiveDocs / batchSize) : 1
+    const totalBatches = computeTotalBatches(totalDocs, maxDocs)
 
     const docs: Record<string, unknown>[] = []
     const columnsSet = new Set<string>()
@@ -247,11 +251,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
       transformDoc,
     } = processOptions
 
-    const effectiveDocs =
-      totalDocs !== undefined
-        ? Math.min(totalDocs, maxDocs === Number.POSITIVE_INFINITY ? totalDocs : maxDocs)
-        : 0
-    const totalBatches = effectiveDocs > 0 ? Math.ceil(effectiveDocs / batchSize) : 1
+    const totalBatches = computeTotalBatches(totalDocs, maxDocs)
 
     const columnsSet = new Set<string>()
     const columns: string[] = []

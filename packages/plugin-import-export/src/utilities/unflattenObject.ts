@@ -37,10 +37,7 @@ const collectArrayLikeNames = (fields: FlattenedField[], into: Set<string>): voi
  * before it names an array or blocks field, so a literal field name like
  * `2024` is preserved.
  */
-const toLogicalKey = (flatKey: string, fields: FlattenedField[]): string => {
-  const arrayLikeNames = new Set<string>()
-  collectArrayLikeNames(fields, arrayLikeNames)
-
+const toLogicalKey = (flatKey: string, arrayLikeNames: Set<string>): string => {
   const segments = flatKey.split('_')
   return segments
     .filter((seg, i) => !indexSegment.test(seg) || !arrayLikeNames.has(segments[i - 1] ?? ''))
@@ -72,6 +69,9 @@ export const unflattenObject = ({
   }
 
   const result: Record<string, unknown> = {}
+
+  const arrayLikeNames = new Set<string>()
+  collectArrayLikeNames(fields, arrayLikeNames)
 
   // Sort keys to ensure array indices are processed in order
   const sortedKeys = Object.keys(data).sort((a, b) => {
@@ -156,7 +156,7 @@ export const unflattenObject = ({
     }
 
     const importHookEntry =
-      importFieldHooks[flatKey] ?? importFieldHooks[toLogicalKey(flatKey, fields)]
+      importFieldHooks[flatKey] ?? importFieldHooks[toLogicalKey(flatKey, arrayLikeNames)]
     if (importHookEntry) {
       try {
         if (importHookEntry.type === 'beforeImport') {

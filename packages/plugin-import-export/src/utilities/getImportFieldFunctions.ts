@@ -2,7 +2,7 @@ import type { FlattenedField } from 'payload'
 
 import type { FieldBeforeImportHook, ImportFieldHookEntry } from '../types.js'
 
-import { getBlockFlattenedFields, getNestedFlattenedFields } from './flattenedFields.js'
+import { registerFieldHooks } from './flattenedFields.js'
 
 type Args = {
   fields: FlattenedField[]
@@ -14,35 +14,8 @@ type Args = {
  */
 export const getImportFieldFunctions = ({ fields }: Args): Record<string, ImportFieldHookEntry> => {
   const result: Record<string, ImportFieldHookEntry> = {}
-  registerImportHooks(fields, '', result)
+  registerFieldHooks(fields, '', result, registerImportHandler)
   return result
-}
-
-const registerImportHooks = (
-  fields: FlattenedField[],
-  parentPath: string,
-  result: Record<string, ImportFieldHookEntry>,
-): void => {
-  for (const field of fields) {
-    if (!('name' in field) || !field.name) {
-      continue
-    }
-
-    if (field.type === 'blocks') {
-      const base = parentPath ? `${parentPath}_${field.name}` : field.name
-      for (const block of field.blocks ?? []) {
-        registerImportHooks(getBlockFlattenedFields(block), `${base}_${block.slug}`, result)
-      }
-      continue
-    }
-
-    const fullKey = parentPath ? `${parentPath}_${field.name}` : field.name
-    registerImportHandler(field, fullKey, result)
-
-    if (field.type === 'group' || field.type === 'tab' || field.type === 'array') {
-      registerImportHooks(getNestedFlattenedFields(field) ?? [], fullKey, result)
-    }
-  }
 }
 
 const registerImportHandler = (

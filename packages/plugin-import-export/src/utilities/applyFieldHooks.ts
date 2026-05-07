@@ -26,6 +26,8 @@ export type Args = {
   type: 'beforeExport' | 'beforeImport'
 }
 
+const operationLabel = { export: 'Export', import: 'Import' } as const
+
 type TraverseArgs = {
   path: string | undefined
   schemaPath: string | undefined
@@ -73,7 +75,7 @@ const traverseFields = ({
       } catch (error) {
         req.payload.logger.error({
           err: error,
-          msg: `[plugin-import-export] Field-level before${operation === 'export' ? 'Export' : 'Import'} hook for "${fieldPath}" threw — falling back to original value`,
+          msg: `[plugin-import-export] Field-level before${operationLabel[operation]} hook for "${fieldPath}" threw — falling back to original value`,
         })
       }
     }
