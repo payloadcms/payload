@@ -1,7 +1,8 @@
+import { stubAdapter } from '@/db-stub.js'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  db: null as unknown as Parameters<typeof buildConfig>[0]['db'],
+  db: stubAdapter,
   secret: 'eval-fixture',
   collections: [
     {
