@@ -1,0 +1,5 @@
+.drag-overlay-preview {
+  opacity: 0.9;
+  border-radius: var(--radius-medium);
+  cursor: grabbing;
+}

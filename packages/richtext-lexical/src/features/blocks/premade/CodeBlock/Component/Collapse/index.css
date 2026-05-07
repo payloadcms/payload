@@ -7,7 +7,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-medium);
-  color: var(--icon-default-secondary);
+  color: var(--icon-secondary);
   box-sizing: border-box;
 
   &:hover {

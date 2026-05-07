@@ -10,7 +10,7 @@
     content: '';
     display: block;
     height: 2px;
-    background: var(--icon-default-tertiary);
+    background: var(--icon-tertiary);
     transform: translateY(-50%);
   }
 

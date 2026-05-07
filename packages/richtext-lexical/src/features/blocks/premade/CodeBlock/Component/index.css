@@ -77,7 +77,7 @@
     .popup-button,
     .LexicalEditorTheme__block__removeButton.btn {
       border-radius: var(--radius-medium);
-      color: var(--icon-default-secondary);
+      color: var(--icon-secondary);
       min-width: 24px;
       min-height: 24px;
       padding: 0;
@@ -144,7 +144,7 @@
   }
 
   .payload-richtext-code-block__chevron {
-    color: var(--icon-default-secondary);
+    color: var(--icon-secondary);
     width: 16px;
     height: 24px;
     display: flex;
