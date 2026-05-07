@@ -1,4 +1,5 @@
-import { fileTypeFromBuffer } from 'file-type'
+import { fileTypeFromBuffer, fileTypeFromFile } from 'file-type'
+import fs from 'fs/promises'
 
 import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
@@ -53,7 +54,6 @@ export const checkFileRestrictions = async ({
 }: checkFileRestrictionsParams): Promise<void> => {
   const errors: string[] = []
   const { upload: uploadConfig } = collection
-  const useTempFiles = req?.payload?.config?.upload?.useTempFiles ?? false
   const configMimeTypes =
     uploadConfig &&
     typeof uploadConfig === 'object' &&
@@ -87,9 +87,44 @@ export const checkFileRestrictions = async ({
     return
   }
 
+  // For temp files, use fileTypeFromFile so large files (e.g. video) are never loaded into memory
+  // just for detection. For content validation (SVG safety, PDF integrity), the full buffer is
+  // loaded lazily and only when the file type actually requires it.
+  const { tempFilePath } = file
+  const isTempFile = !!tempFilePath && (!file.data || file.data.length === 0)
+
+  // Lazily reads the full file — only reached for small text-based types (SVG, PDF).
+  let _fileBuffer: Buffer | undefined
+  const getFileBuffer = async (): Promise<Buffer> => {
+    if (_fileBuffer) {
+      return _fileBuffer
+    }
+    if (!isTempFile || !tempFilePath) {
+      return (_fileBuffer = file.data)
+    }
+    try {
+      _fileBuffer = await fs.readFile(tempFilePath)
+      return _fileBuffer
+    } catch {
+      throw new ValidationError({
+        errors: [{ message: 'Could not read uploaded file for validation.', path: 'file' }],
+      })
+    }
+  }
+
   // Secondary mimetype check to assess file type from buffer
   if (configMimeTypes.length > 0) {
-    let detected = await fileTypeFromBuffer(file.data)
+    let detected
+    try {
+      detected =
+        isTempFile && tempFilePath
+          ? await fileTypeFromFile(tempFilePath)
+          : await fileTypeFromBuffer(file.data)
+    } catch {
+      throw new ValidationError({
+        errors: [{ message: 'Could not read uploaded file for type detection.', path: 'file' }],
+      })
+    }
     const typeFromExtension = file.name.split('.').pop() || ''
 
     // Handle SVG files that are detected as XML due to <?xml declarations
@@ -99,13 +134,13 @@ export const checkFileRestrictions = async ({
         (type) => type.includes('image/') && (type.includes('svg') || type === 'image/*'),
       )
     ) {
-      const isSvg = detectSvgFromXml(file.data)
+      const isSvg = detectSvgFromXml(await getFileBuffer())
       if (isSvg) {
-        detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
+        detected = { ext: 'svg', mime: 'image/svg+xml' }
       }
     }
 
-    if (!detected && !useTempFiles) {
+    if (!detected) {
       const mimeTypeFromExtension = getFileTypeFallback(file.name).mime
       const extIsValid = validateMimeType(mimeTypeFromExtension, configMimeTypes)
 
@@ -116,7 +151,7 @@ export const checkFileRestrictions = async ({
       } else {
         // SVG security check (text-based files not detectable by buffer)
         if (typeFromExtension.toLowerCase() === 'svg') {
-          const isSafeSvg = validateSvg(file.data)
+          const isSafeSvg = validateSvg(await getFileBuffer())
           if (!isSafeSvg) {
             errors.push('SVG file contains potentially harmful content.')
           }
@@ -124,7 +159,7 @@ export const checkFileRestrictions = async ({
 
         // PDF validation
         if (mimeTypeFromExtension === 'application/pdf') {
-          const isValidPDF = validatePDF(file.data)
+          const isValidPDF = validatePDF(await getFileBuffer())
           if (!isValidPDF) {
             errors.push('Invalid or corrupted PDF file.')
           }
@@ -141,7 +176,7 @@ export const checkFileRestrictions = async ({
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
 
     if (passesMimeTypeCheck && detected?.mime === 'application/pdf') {
-      const isValidPDF = validatePDF(file?.data)
+      const isValidPDF = validatePDF(await getFileBuffer())
       if (!isValidPDF) {
         errors.push('Invalid PDF file.')
       }

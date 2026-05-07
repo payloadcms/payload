@@ -2,6 +2,7 @@ import type { ContainerClient } from '@azure/storage-blob'
 import type { CollectionSlug, Payload } from 'payload'
 
 import { BlobServiceClient } from '@azure/storage-blob'
+import { readFile } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
@@ -20,6 +21,12 @@ let payload: Payload
 describe('@payloadcms/storage-azure', () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
+
+  const clearContainer = async () => {
+    for await (const blob of client.listBlobsFlat()) {
+      await client.deleteBlob(blob.name)
+    }
+  }
 
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
@@ -40,6 +47,20 @@ describe('@payloadcms/storage-azure', () => {
 
   afterEach(async () => {
     await clearContainer()
+  })
+
+  it('preserves mime type when uploaded via rest endpoint', async () => {
+    const fileBuffer = await readFile(`${dirname}/../uploads/image.png`)
+
+    const data = new FormData()
+    data.append('file', new Blob([fileBuffer], { type: 'image/png' }), 'image2.png')
+    const newMedia: { doc: { url: string } } = await (
+      await restClient.POST('/media', {
+        body: data,
+      })
+    ).json()
+    const response = await restClient.GET(newMedia.doc.url.replace(/^\/api/, '') as `/${string}`)
+    expect(response.headers.get('content-type')).toEqual('image/png')
   })
 
   it('can upload', async () => {
@@ -67,19 +88,15 @@ describe('@payloadcms/storage-azure', () => {
       uploadId: upload.id,
       prefix,
     })
-    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+    expect(upload.url).toEqual(
+      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
+    )
   })
 
   it('returns 404 for non-existing file', async () => {
     const response = await restClient.GET(`/${mediaSlug}/file/nonexistent.png`)
     expect(response.status).toBe(404)
   })
-
-  async function clearContainer() {
-    for await (const blob of client.listBlobsFlat()) {
-      await client.deleteBlob(blob.name)
-    }
-  }
 
   async function verifyUploads({
     collectionSlug,
@@ -95,10 +112,9 @@ describe('@payloadcms/storage-azure', () => {
       id: uploadId,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
-    const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
-      const rawFilename = uploadData.sizes[key].filename
-      return prefix ? `${prefix}/${rawFilename}` : rawFilename
-    })
+    const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>
+      prefix ? `${prefix}/${rawFilename}` : rawFilename,
+    )
 
     fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
 

@@ -1,0 +1,60 @@
+@import '../../../elements/SidebarRow/index.css';
+@layer payload-default {
+  .hierarchy-sidebar-tab {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .tree {
+    --tree-indent: var(--spacer-3);
+    --tree-chevron-width: var(--spacer-3);
+    --tree-chevron-spacing: var(--spacer-2);
+    --tree-node-padding-y: var(--spacer-1);
+    --tree-node-content-height: var(--text-body-medium-line-height);
+    --tree-row-gap: var(--spacer-1);
+    --tree-font-size: var(--text-body-medium-font-size);
+
+    padding: 0;
+    margin: 0;
+  }
+
+  .tree__all-option-wrapper {
+    display: grid;
+    gap: var(--spacer-1);
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    margin-bottom: var(--spacer-2);
+
+    .tree__create-button {
+      padding: 0;
+
+      &:hover {
+        color: var(--icon-default);
+      }
+    }
+  }
+
+  .tree__all-option {
+    gap: var(--spacer-1);
+    padding-left: var(--spacer-2);
+
+    .sidebar-row__title {
+      font-weight: var(--text-body-medium-strong-font-weight);
+    }
+  }
+
+  .tree__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacer-3);
+    min-height: calc(var(--spacer-6) * 2.5);
+  }
+
+  .tree__empty {
+    padding: var(--spacer-2-5) var(--spacer-3);
+    color: var(--text-tertiary);
+    font-size: var(--tree-font-size);
+  }
+}

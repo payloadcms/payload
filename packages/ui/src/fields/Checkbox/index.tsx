@@ -22,7 +22,7 @@ import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { CheckboxInput } from './Input.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'checkbox'
 
@@ -106,16 +106,18 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         .join(' ')}
       style={styles}
     >
-      <RenderCustomComponent
-        CustomComponent={Error}
-        Fallback={
-          <FieldError alignCaret={isRTL ? 'right' : 'left'} path={path} showError={showError} />
-        }
-      />
       <CheckboxInput
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}
         checked={checked}
+        Error={
+          <RenderCustomComponent
+            CustomComponent={Error}
+            Fallback={
+              <FieldError alignCaret={isRTL ? 'right' : 'left'} path={path} showError={showError} />
+            }
+          />
+        }
         id={fieldID}
         inputRef={null}
         Label={Label}

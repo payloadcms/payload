@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
-import './index.scss'
+import './index.css'
 
 export type Props = {
   alignCaret?: 'center' | 'left' | 'right'
@@ -24,7 +24,7 @@ export const Tooltip: React.FC<Props> = (props) => {
     boundingRef,
     children,
     className,
-    delay = 350,
+    delay = 500,
     position: positionFromProps,
     show: showFromProps = true,
     staticPositioning = false,

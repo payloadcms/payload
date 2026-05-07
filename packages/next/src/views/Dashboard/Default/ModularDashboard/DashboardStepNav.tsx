@@ -77,24 +77,21 @@ export function DashboardBreadcrumbDropdown(props: {
   const { isEditing, onCancel, onEditClick, onResetLayout, onSaveChanges, widgetsDrawerSlug } =
     props
   const { t } = useTranslation()
+
   if (isEditing) {
     return (
       <div className="dashboard-breadcrumb-dropdown__editing">
-        <span>
-          {t('general:editing')} {t('general:dashboard')}
-        </span>
+        <span>{t('dashboard:editingDashboard')}</span>
         <div className="dashboard-breadcrumb-dropdown__actions">
           <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
-            <Button buttonStyle="pill" el="span" size="small">
-              {t('fields:addLabel', {
-                label: '+',
-              })}
+            <Button buttonStyle="pill" el="span" size="medium">
+              {t('dashboard:addButton')}
             </Button>
           </DrawerToggler>
-          <Button buttonStyle="pill" onClick={onSaveChanges} size="small">
-            {t('general:saveChanges')}
+          <Button buttonStyle="pill" onClick={onSaveChanges} size="medium">
+            {t('fields:saveChanges')}
           </Button>
-          <Button buttonStyle="pill" onClick={onCancel} size="small">
+          <Button buttonStyle="pill" onClick={onCancel} size="medium">
             {t('general:cancel')}
           </Button>
         </div>
@@ -103,8 +100,8 @@ export function DashboardBreadcrumbDropdown(props: {
   }
 
   const options = [
-    { label: `${t('general:edit')} ${t('general:dashboard')}`, value: 'edit' },
-    { label: `${t('general:reset')} ${t('general:layout')}`, value: 'reset' },
+    { label: t('dashboard:editDashboard'), value: 'edit' },
+    { label: t('dashboard:resetLayout'), value: 'reset' },
   ]
 
   const handleChange = (selectedOption: Option | Option[]) => {

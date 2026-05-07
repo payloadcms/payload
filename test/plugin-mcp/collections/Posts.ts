@@ -36,6 +36,14 @@ export const Posts: CollectionConfig = {
         description: 'Geographic location coordinates',
       },
     },
+    {
+      name: 'computedTitle',
+      type: 'text',
+      virtual: true,
+      admin: {
+        description: 'A virtual field that is computed and not stored in the database',
+      },
+    },
   ],
   hooks: {
     beforeRead: [

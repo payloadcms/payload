@@ -4,10 +4,10 @@ import React, { createContext, use, useCallback, useLayoutEffect, useState } fro
 
 import type { Props, TogglerProps } from './types.js'
 
-import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
 import { Gutter } from '../Gutter/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'drawer'
 
@@ -51,6 +51,7 @@ export const Drawer: React.FC<Props> = ({
   className,
   gutter = true,
   Header,
+  headerActions,
   hoverTitle,
   title,
 }) => {
@@ -105,21 +106,38 @@ export const Drawer: React.FC<Props> = ({
               {Header}
               {Header === undefined && (
                 <div className={`${baseClass}__header`}>
-                  <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
-                    {title}
-                  </h2>
                   {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
                     i.e. changing to a `div` element will fix the animation issue but will break accessibility
                   */}
-                  <button
+                  <Button
                     aria-label={t('general:close')}
+                    buttonStyle="icon-label"
                     className={`${baseClass}__header__close`}
                     id={`close-drawer__${slug}`}
                     onClick={() => closeModal(slug)}
-                    type="button"
                   >
-                    <XIcon />
-                  </button>
+                    {/* TODO: add icon */}
+                    &lsaquo;
+                  </Button>
+                  <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
+                    {title}
+                  </h2>
+                  {headerActions && headerActions.length > 0 && (
+                    <div className={`${baseClass}__header__actions`}>
+                      {headerActions.map((action, i) => (
+                        <Button
+                          buttonStyle={action.style || 'secondary'}
+                          disabled={action.disabled}
+                          key={i}
+                          margin={false}
+                          onClick={action.onClick}
+                          size="medium"
+                        >
+                          {action.label}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
               {children}

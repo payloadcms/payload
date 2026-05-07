@@ -16,13 +16,13 @@ import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
-import './index.scss'
 import { Input } from './Input/index.js'
 import { generateMultiValueDraggableID, MultiValue } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
 import { MultiValueRemove } from './MultiValueRemove/index.js'
 import { SingleValue } from './SingleValue/index.js'
 import { ValueContainer } from './ValueContainer/index.js'
+import './index.css'
 
 const createOption = (label: string) => ({
   label,
@@ -72,6 +72,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     // z-index in the "payload-default" css layer can take effect, in such a way
     // that end users can easily override it as with other styles.
     menu: (rsStyles) => ({ ...rsStyles, zIndex: undefined }),
+    // Remove the default react-select min-height so our CSS can control it
+    control: (rsStyles) => ({ ...rsStyles, minHeight: undefined }),
   }
 
   if (!hasMounted) {
@@ -87,6 +89,9 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         {...props}
         className={classes}
         classNamePrefix="rs"
+        classNames={{
+          menu: (state) => (state.placement ? `rs__menu--placement-${state.placement}` : ''),
+        }}
         components={{
           ClearIndicator,
           Control,
@@ -166,6 +171,9 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       {...props}
       className={classes}
       classNamePrefix="rs"
+      classNames={{
+        menu: (state) => (state.placement ? `rs__menu--placement-${state.placement}` : ''),
+      }}
       components={{
         ClearIndicator,
         Control,

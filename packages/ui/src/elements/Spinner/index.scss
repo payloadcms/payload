@@ -1,0 +1,18 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .spinner {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 2);
+    color: var(--theme-elevation-500);
+
+    &--small {
+      gap: calc(var(--base) / 4);
+
+      .spinner__text {
+        font-size: 12px;
+      }
+    }
+  }
+}

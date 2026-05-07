@@ -16,6 +16,7 @@ import { DocumentDrawerHeader } from '../../elements/DocumentDrawer/DrawerHeader
 import { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../elements/DocumentFields/index.js'
 import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
+import { DocumentStaleData } from '../../elements/DocumentStaleData/index.js'
 import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 import { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
@@ -55,6 +56,7 @@ export type OnSaveContext = {
 // This is solely to support custom edit views which get server-rendered
 export function DefaultEditView({
   BeforeDocumentControls,
+  BeforeDocumentMeta,
   Description,
   EditMenuItems,
   LivePreview: CustomLivePreview,
@@ -178,8 +180,14 @@ export function DefaultEditView({
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
+  const [showStaleDataModal, setShowStaleDataModal] = useState(false)
 
   const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
+
+  const hasCheckedForStaleDataRef = useRef(false)
+  const originalUpdatedAtRef = useRef(data?.updatedAt)
+  const saveCounterRef = useRef(0)
+  const isSavingRef = useRef(false)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
   const isLockExpired = Date.now() > lockExpiryTime
@@ -239,6 +247,14 @@ export function DefaultEditView({
     [documentLockState, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
   )
 
+  const handleStaleDataReload = useCallback(() => {
+    // Reset modal state so it can appear again if needed
+    setShowStaleDataModal(false)
+
+    // Refresh to get the latest data
+    router.refresh()
+  }, [router])
+
   const handlePrevent = useCallback((nextHref: null | string) => {
     nextHrefRef.current = nextHref
   }, [])
@@ -296,7 +312,13 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      setLastUpdateTime(updatedAt)
+      setLastUpdateTime(new Date(updatedAt).getTime())
+
+      // Update stale data check refs after successful save
+      // This allows detecting if another user modifies the document after this save
+      originalUpdatedAtRef.current = updatedAt
+      hasCheckedForStaleDataRef.current = false
+      isSavingRef.current = false
 
       if (context?.incrementVersionCount !== false) {
         incrementVersionCount()
@@ -448,6 +470,18 @@ export function DefaultEditView({
     async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
+      // Capture save state before the async form-state request so we can detect
+      // if a save was triggered while this request was in-flight
+      const saveCounterAtStart = saveCounterRef.current
+      const isSavingAtStart = isSavingRef.current
+
+      // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
+      if (data?.updatedAt && data.updatedAt > originalUpdatedAtRef.current) {
+        originalUpdatedAtRef.current = data.updatedAt
+        // Reset check flag so we can detect new stale data
+        hasCheckedForStaleDataRef.current = false
+      }
+
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - editSessionStartTime
 
@@ -457,16 +491,31 @@ export function DefaultEditView({
         setEditSessionStartTime(currentTime)
       }
 
+      // Check for stale data on first edit only
+      // Skip this check entirely for autosave-enabled collections/globals to prevent
+      // false positives from the user's own autosaves
+      const checkForStaleData =
+        !hasCheckedForStaleDataRef.current &&
+        originalUpdatedAtRef.current &&
+        operation === 'update' &&
+        !autosaveEnabled
+
+      if (checkForStaleData) {
+        hasCheckedForStaleDataRef.current = true
+      }
+
       const docPreferences = await getDocPreferences()
 
       const result = await getFormState({
         id,
+        checkForStaleData,
         collectionSlug,
         docPermissions,
         docPreferences,
         formState: prevFormState,
         globalSlug,
         operation,
+        originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
         renderAllFields: false,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
@@ -479,10 +528,21 @@ export function DefaultEditView({
         return
       }
 
-      const { lockedState, state } = result
+      const { lockedState, staleDataState, state } = result
 
       if (isLockingEnabled) {
         handleDocumentLocking(lockedState)
+      }
+
+      // Handle stale data detection.
+      // Skip if a save was in-flight when this request started, or if the save counter
+      // has advanced — either way the newer updatedAt is from our OWN save.
+      if (
+        staleDataState?.isStale &&
+        !isSavingAtStart &&
+        saveCounterRef.current === saveCounterAtStart
+      ) {
+        setShowStaleDataModal(true)
       }
 
       abortOnChangeRef.current = null
@@ -490,6 +550,7 @@ export function DefaultEditView({
       return state
     },
     [
+      data?.updatedAt,
       editSessionStartTime,
       isLockingEnabled,
       getDocPreferences,
@@ -501,6 +562,7 @@ export function DefaultEditView({
       operation,
       schemaPathSegments,
       handleDocumentLocking,
+      autosaveEnabled,
     ],
   )
 
@@ -544,7 +606,11 @@ export function DefaultEditView({
     !documentLockState.current?.hasShownLockedModal &&
     !isLockExpired
 
-  const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
+  const isFolderCollection = Boolean(
+    collectionConfig?.hierarchy &&
+      typeof collectionConfig.hierarchy === 'object' &&
+      collectionConfig.hierarchy.allowHasMany === false,
+  )
 
   return (
     <main
@@ -571,6 +637,10 @@ export function DefaultEditView({
           key={`${isLocked}`}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
+          onSubmit={() => {
+            saveCounterRef.current += 1
+            isSavingRef.current = true
+          }}
           onSuccess={onSave}
         >
           {isInDrawer && (
@@ -616,6 +686,9 @@ export function DefaultEditView({
               }}
             />
           )}
+          {showStaleDataModal && (
+            <DocumentStaleData isActive={showStaleDataModal} onReload={handleStaleDataReload} />
+          )}
           {preventLeaveWithoutSaving && (
             <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
           )}
@@ -638,6 +711,7 @@ export function DefaultEditView({
           <DocumentControls
             apiURL={apiURL}
             BeforeDocumentControls={BeforeDocumentControls}
+            BeforeDocumentMeta={BeforeDocumentMeta}
             customComponents={{
               PreviewButton,
               PublishButton,
@@ -647,7 +721,7 @@ export function DefaultEditView({
               UnpublishButton,
             }}
             data={data}
-            disableActions={disableActions || isFolderCollection || isTrashed}
+            disableActions={disableActions || isTrashed}
             disableCreate={disableCreate}
             EditMenuItems={EditMenuItems}
             hasPublishPermission={hasPublishPermission}

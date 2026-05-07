@@ -10,7 +10,9 @@ import open from 'open'
 import { loadEnv } from 'payload/node'
 import { parse } from 'url'
 
+import { assertDbReachable } from './__helpers/shared/assertDbReachable.js'
 import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
+import { getCurrentDatabaseAdapter } from './dbAdapters.js'
 import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
@@ -65,6 +67,9 @@ if (enableTurbo) {
   process.env.TURBOPACK = '1'
 }
 
+await assertDbReachable(getCurrentDatabaseAdapter())
+
+// eslint-disable-next-line @typescript-eslint/await-thenable
 const { beforeTest } = await createTestHooks(testSuiteArg, testSuiteConfigOverride)
 await beforeTest()
 
@@ -78,7 +83,7 @@ nextEnvImport.updateInitialEnv(process.env)
 
 // Open the admin if the -o flag is passed
 if (args.o) {
-  await open(`http://localhost:3000${adminRoute}`)
+  await open(`http://localhost:${process.env.PORT || 3000}${adminRoute}`)
 }
 
 const findOpenPort = (startPort: number): Promise<number> => {

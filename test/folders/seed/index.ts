@@ -1,10 +1,15 @@
 import type { Config, Payload } from 'payload'
 
-import type { FolderInterface, Post } from '../payload-types.js'
+import { folderSlug } from 'folders/shared.js'
+
+import type { Post } from '../payload-types.js'
 
 import { devUser } from '../../credentials.js'
 
-async function createPost(payload: Payload, { title, folder }: any): Promise<Post> {
+async function createPost(
+  payload: Payload,
+  { title, folder }: { folder?: string; title: string },
+): Promise<Post> {
   return payload.create({
     collection: 'posts',
     data: {
@@ -16,10 +21,10 @@ async function createPost(payload: Payload, { title, folder }: any): Promise<Pos
 
 async function createFolder(
   payload: Payload,
-  { name, folder }: Pick<FolderInterface, 'folder' | 'name'>,
-): Promise<FolderInterface> {
+  { name, folder }: { folder?: string; name: string },
+): Promise<{ folder?: string; id: string; name: string }> {
   return payload.create({
-    collection: 'payload-folders',
+    collection: folderSlug,
     data: {
       name,
       folder,

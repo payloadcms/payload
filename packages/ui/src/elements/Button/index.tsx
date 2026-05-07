@@ -1,5 +1,5 @@
 'use client'
-import React, { Fragment, isValidElement } from 'react'
+import React, { Fragment } from 'react'
 
 import type { Props } from './types.js'
 
@@ -11,7 +11,7 @@ import { SwapIcon } from '../../icons/Swap/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { Link } from '../Link/index.js'
 import { Popup } from '../Popup/index.js'
-import './index.scss'
+import './index.css'
 import { Tooltip } from '../Tooltip/index.js'
 
 const icons = {
@@ -26,7 +26,9 @@ const icons = {
 const baseClass = 'btn'
 
 export const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
-  const BuiltInIcon = icons[icon]
+  const BuiltInIcon = typeof icon === 'string' ? icons[icon] : undefined
+  // Check if icon is a React element (including RSC payloads) - not a string icon name
+  const isReactIcon = icon && typeof icon !== 'string'
 
   return (
     <Fragment>
@@ -39,7 +41,7 @@ export const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
         {children && <span className={`${baseClass}__label`}>{children}</span>}
         {icon && (
           <span className={`${baseClass}__icon`}>
-            {isValidElement(icon) && icon}
+            {isReactIcon && icon}
             {BuiltInIcon && <BuiltInIcon />}
           </span>
         )}

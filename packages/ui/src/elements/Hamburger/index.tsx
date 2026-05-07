@@ -1,9 +1,9 @@
 'use client'
 import React from 'react'
 
+import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { CloseMenuIcon } from '../../icons/CloseMenu/index.js'
-import { MenuIcon } from '../../icons/Menu/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -24,7 +24,7 @@ export const Hamburger: React.FC<{
           className={`${baseClass}__open-icon`}
           title={t('general:open')}
         >
-          <MenuIcon />
+          <AlignJustifiedIcon size={16} />
         </div>
       )}
       {isActive && (

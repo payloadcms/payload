@@ -1,6 +1,6 @@
 import type { BlocksField, CollectionConfig } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { blockFieldsSlug, textFieldsSlug } from '../../slugs.js'
 import { getBlocksFieldSeedData } from './shared.js'
@@ -27,7 +27,25 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
         {
           name: 'richText',
           type: 'richText',
-          editor: slateEditor({}),
+          editor: lexicalEditor({}),
+        },
+      ],
+    },
+    {
+      slug: prefix ? `${prefix}WithIcon` : 'withIcon',
+
+      interfaceName: prefix ? `${prefix}WithIconBlock` : 'WithIconBlock',
+      admin: {
+        images: {
+          icon: { url: '/api/uploads/file/payload20x20.png', alt: 'Block icon' },
+          thumbnail: { url: '/api/uploads/file/payload480x320.jpg', alt: 'Block thumbnail' },
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
         },
       ],
     },

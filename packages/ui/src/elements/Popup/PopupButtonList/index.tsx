@@ -4,7 +4,7 @@ import type { LinkProps } from 'next/link.js'
 import * as React from 'react'
 
 import { Link } from '../../Link/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'popup-button-list'
 
@@ -12,7 +12,7 @@ export { PopupListDivider as Divider } from '../PopupDivider/index.js'
 export { PopupListGroupLabel as GroupLabel } from '../PopupGroupLabel/index.js'
 
 export const ButtonGroup: React.FC<{
-  buttonSize?: 'default' | 'small'
+  buttonSize?: 'default' | 'medium'
   children: React.ReactNode
   className?: string
   textAlign?: 'center' | 'left' | 'right'

@@ -124,14 +124,7 @@ const getInitialDrawerData = ({
 const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
-    field: {
-      admin: { allowCreate, description },
-      collection,
-      label,
-      localized,
-      on,
-      required,
-    },
+    field: { admin: { allowCreate, description } = {}, collection, label, localized, on, required },
     path: pathFromProps,
   } = props
 
@@ -224,7 +217,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
           </h4>
         }
         parent={
-          Array.isArray(collection)
+          typeof docID !== 'undefined'
             ? {
                 id: docID,
                 collectionSlug: docConfig.slug,

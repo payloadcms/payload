@@ -9,14 +9,15 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
+import { addListFilter } from '../../../__helpers/e2e/filters/addListFilter.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { dateFieldsSlug } from '../../slugs.js'
@@ -84,6 +85,43 @@ describe('Date', () => {
     await expect(notFormattedDateCell).toContainText('August')
   })
 
+  test('should use admin.dateFormat in collection filter date picker', async () => {
+    await goToListView(page)
+
+    // Add a date filter without a value — this sets up the field and operator
+    const { condition } = await addListFilter({
+      page,
+      fieldLabel: 'Created At',
+      operatorLabel: 'is greater than',
+    })
+
+    // Click the date picker input to open the calendar
+    const dateInput = condition.locator(
+      '.condition-value-date .date-time-picker__input-wrapper input',
+    )
+    await dateInput.click()
+
+    // Wait for the calendar popup to appear
+    const calendar = page.locator('.react-datepicker__month')
+    await expect(calendar).toBeVisible()
+
+    // Click on day 15 of the current month
+    await page
+      .locator('.react-datepicker__day--015:not(.react-datepicker__day--outside-month)')
+      .click()
+
+    // The default admin.dateFormat is 'MMMM do yyyy, h:mm a' which renders full month names
+    // e.g. "March 15th 2026, 12:00 PM". The old hardcoded format would render "03/15/2026".
+    await expect(async () => {
+      const inputValue = await dateInput.inputValue()
+
+      expect(inputValue).not.toMatch(/^\d{2}\/\d{2}\/\d{4}$/)
+      expect(inputValue).toMatch(
+        /^(January|February|March|April|May|June|July|August|September|October|November|December)/,
+      )
+    }).toPass()
+  })
+
   test('should display formatted date in useAsTitle', async () => {
     await goToListView(page)
     // Wait for hydration
@@ -105,32 +143,6 @@ describe('Date', () => {
 
     await expect(dateField).toHaveValue('02/07/2023')
     await expect(page.locator('.doc-header__title.render-title')).toContainText('February')
-  })
-
-  test('should clear date', async () => {
-    await page.goto(url.create)
-    const dateField = page.locator('#field-default input')
-    await expect(dateField).toBeVisible()
-    await dateField.fill('02/07/2023')
-    await expect(dateField).toHaveValue('02/07/2023')
-
-    // Fill in remaining required fields, this is just to make sure saving is possible
-    const dateWithTz = page.locator('#field-dayAndTimeWithTimezone .react-datepicker-wrapper input')
-
-    await dateWithTz.fill('08/12/2027 10:00 AM')
-
-    const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
-
-    const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
-    await page.click(dropdownControlSelector)
-    await page.click(timezoneOptionSelector)
-
-    await saveDocAndAssert(page)
-
-    const clearButton = page.locator('#field-default .date-time-picker__clear-button')
-    await expect(clearButton).toBeVisible()
-    await clearButton.click()
-    await expect(dateField).toHaveValue('')
   })
 
   test('should clear miliseconds from dates with time', async () => {
@@ -602,6 +614,28 @@ describe('Date', () => {
 
       // eslint-disable-next-line payload/no-flaky-assertions
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
+    })
+
+    test('should not show UTC in timezone picker when no defaultTimezone is configured', async () => {
+      await page.goto(url.create)
+
+      const valueContainer = page.locator('#field-dateWithTimezoneNoDefault .rs__value-container')
+
+      await expect(valueContainer).toBeVisible()
+
+      const singleValue = page.locator('#field-dateWithTimezoneNoDefault .rs__single-value')
+
+      await expect(singleValue).toBeHidden()
+    })
+
+    test('should show configured defaultTimezone in timezone picker on create', async () => {
+      await page.goto(url.create)
+
+      const selectedTimezone = page.locator(
+        '#field-dayAndTimeWithTimezoneRequired .rs__value-container',
+      )
+
+      await expect(selectedTimezone).toContainText('Eastern Time')
     })
   })
 

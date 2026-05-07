@@ -3,7 +3,7 @@
 @layer payload-default {
   .clickable-arrow {
     cursor: pointer;
-    @extend %btn-reset;
+
     width: base(1.5);
     height: base(1.5);
     display: flex;

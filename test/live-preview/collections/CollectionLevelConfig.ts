@@ -8,7 +8,7 @@ export const CollectionLevelConfig: CollectionConfig = {
     description: "Live Preview is enabled on this collection's own config, not the root config.",
     useAsTitle: 'title',
     livePreview: {
-      url: 'http://localhost:3000/live-preview',
+      url: `http://localhost:${process.env.PORT || 3000}/live-preview`,
     },
   },
   access: {

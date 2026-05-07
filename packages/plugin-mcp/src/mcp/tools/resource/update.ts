@@ -4,9 +4,13 @@ import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import { z } from 'zod'
 
-import type { PluginMCPServerConfig } from '../../../types.js'
+import type { MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
+import {
+  getCollectionVirtualFieldNames,
+  stripVirtualFields,
+} from '../../../utils/getVirtualFieldNames.js'
 import { convertCollectionSchemaToZod } from '../../../utils/schemaConversion/convertCollectionSchemaToZod.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { toolSchemas } from '../schemas.js'
@@ -16,7 +20,7 @@ export const updateResourceTool = (
   user: TypedUser,
   verboseLogs: boolean,
   collectionSlug: string,
-  collections: PluginMCPServerConfig['collections'],
+  collections: MCPPluginConfig['collections'],
   schema: JSONSchema4,
 ) => {
   const tool = async (
@@ -53,6 +57,9 @@ export const updateResourceTool = (
 
         // Transform point fields from object format to tuple array
         parsedData = transformPointDataToPayload(parsedData)
+
+        const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
+        parsedData = stripVirtualFields(parsedData, virtualFieldNames)
 
         if (verboseLogs) {
           payload.logger.info(
@@ -171,7 +178,7 @@ export const updateResourceTool = (
               text: `Document updated successfully in collection "${collectionSlug}"!
 Updated document:
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
             },
           ],
@@ -229,14 +236,14 @@ Errors: ${errors.length}
         if (docs.length > 0) {
           responseText += `\n\nUpdated documents:
 \`\`\`json
-${JSON.stringify(docs, null, 2)}
+${JSON.stringify(docs)}
 \`\`\``
         }
 
         if (errors.length > 0) {
           responseText += `\n\nErrors:
 \`\`\`json
-${JSON.stringify(errors, null, 2)}
+${JSON.stringify(errors)}
 \`\`\``
         }
 

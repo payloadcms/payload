@@ -15,6 +15,7 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -24,7 +25,6 @@ import { Button } from '../Button/index.js'
 import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
-import { MoveDocToFolder } from '../FolderView/MoveDocToFolder/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { LivePreviewToggler } from '../LivePreview/Toggler/index.js'
 import { Locked } from '../Locked/index.js'
@@ -35,16 +35,17 @@ import { PublishButton } from '../PublishButton/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { RestoreButton } from '../RestoreButton/index.js'
 import { SaveButton } from '../SaveButton/index.js'
-import './index.scss'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
 import { UnpublishButton } from '../UnpublishButton/index.js'
+import './index.scss'
 
 const baseClass = 'doc-controls'
 
 export const DocumentControls: React.FC<{
   readonly apiURL: string
   readonly BeforeDocumentControls?: React.ReactNode
+  readonly BeforeDocumentMeta?: React.ReactNode
   readonly customComponents?: {
     readonly PreviewButton?: React.ReactNode
     readonly PublishButton?: React.ReactNode
@@ -83,6 +84,7 @@ export const DocumentControls: React.FC<{
     id,
     slug,
     BeforeDocumentControls,
+    BeforeDocumentMeta,
     customComponents: {
       PreviewButton: CustomPreviewButton,
       PublishButton: CustomPublishButton,
@@ -125,11 +127,13 @@ export const DocumentControls: React.FC<{
 
   const { isLivePreviewEnabled } = useLivePreviewContext()
 
+  const { hasDeletePermission: docHasDeletePermission, hasTrashPermission: docHasTrashPermission } =
+    useDocumentInfo()
+
   const {
     admin: { dateFormat },
     localization,
     routes: { admin: adminRoute },
-    serverURL,
   } = config
 
   // Settings these in state to avoid hydration issues if there is a mismatch between the server and client
@@ -150,17 +154,23 @@ export const DocumentControls: React.FC<{
 
   const hasCreatePermission = permissions && 'create' in permissions && permissions.create
 
-  const hasDeletePermission = permissions && 'delete' in permissions && permissions.delete
+  const collectionDeletePermission = permissions && 'delete' in permissions && permissions.delete
 
-  const showDotMenu = Boolean(
-    collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
-  )
+  const hasDeletePermission = collectionConfig?.trash
+    ? docHasTrashPermission || docHasDeletePermission
+    : collectionDeletePermission
 
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
 
   const globalHasDraftsEnabled = hasDraftsEnabled(globalConfig)
   const collectionHasDraftsEnabled = hasDraftsEnabled(collectionConfig)
+
+  const showDotMenu = Boolean(
+    !disableActions &&
+      ((collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
+        (globalConfig && (globalHasDraftsEnabled || localization))),
+  )
   const collectionAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
   const globalAutosaveEnabled = hasAutosaveEnabled(globalConfig)
   const autosaveEnabled = collectionAutosaveEnabled || globalAutosaveEnabled
@@ -174,26 +184,20 @@ export const DocumentControls: React.FC<{
       globalConfig.versions.drafts.autosave.showSaveDraftButton === true)
   const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
 
-  const showFolderMetaIcon = collectionConfig && collectionConfig.folders
   const showLockedMetaIcon = user && readOnlyForIncomingUser
 
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
-          {showLockedMetaIcon || showFolderMetaIcon ? (
-            <div className={`${baseClass}__meta-icons`}>
+          {Boolean(showLockedMetaIcon || BeforeDocumentMeta) && (
+            <div className={`${baseClass}__before-meta`}>
               {showLockedMetaIcon && (
                 <Locked className={`${baseClass}__locked-controls`} user={user} />
               )}
-              {showFolderMetaIcon && config.folders && !isTrashed && (
-                <MoveDocToFolder
-                  folderCollectionSlug={config.folders.slug}
-                  folderFieldName={config.folders.fieldName}
-                />
-              )}
+              {BeforeDocumentMeta}
             </div>
-          ) : null}
+          )}
           <ul className={`${baseClass}__meta`}>
             {collectionConfig && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
@@ -277,11 +281,11 @@ export const DocumentControls: React.FC<{
                     {(unsavedDraftWithValidations ||
                       !autosaveEnabled ||
                       (autosaveEnabled && showSaveDraftButton)) && (
-                        <RenderCustomComponent
-                          CustomComponent={CustomSaveDraftButton}
-                          Fallback={<SaveDraftButton />}
-                        />
-                      )}
+                      <RenderCustomComponent
+                        CustomComponent={CustomSaveDraftButton}
+                        Fallback={<SaveDraftButton />}
+                      />
+                    )}
                     <RenderCustomComponent
                       CustomComponent={CustomPublishButton}
                       Fallback={<PublishButton />}
@@ -295,7 +299,7 @@ export const DocumentControls: React.FC<{
                 )}
               </Fragment>
             )}
-            {hasDeletePermission && isTrashed && (
+            {docHasDeletePermission && isTrashed && (
               <PermanentlyDeleteButton
                 buttonId="action-permanently-delete"
                 collectionSlug={collectionConfig?.slug}

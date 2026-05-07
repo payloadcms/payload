@@ -6,7 +6,7 @@ import React from 'react'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
+import './index.css'
 import { RowProvider } from './provider.js'
 
 const baseClass = 'row'

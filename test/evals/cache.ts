@@ -1,0 +1,140 @@
+import { createHash } from 'node:crypto'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import type { EvalResult } from './types.js'
+
+import { loadSkillContext } from './skillContent.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const cacheDir = path.join(__dirname, 'eval-results', 'cache')
+
+type CacheEntry = {
+  createdAt: string
+  result: EvalResult
+  version: 1
+}
+
+function hashKey(parts: Record<string, string | undefined>): string {
+  const stable = JSON.stringify(parts, Object.keys(parts).sort())
+  return createHash('sha256').update(stable).digest('hex')
+}
+
+function cacheFilePath(key: string): string {
+  return path.join(cacheDir, `${key}.json`)
+}
+
+/**
+ * Prompt keys that inject SKILL.md content into the system prompt.
+ * Cache entries for these keys must be invalidated when the skill file changes.
+ */
+const SKILL_PROMPT_KEYS = new Set(['codegenWithSkill'])
+
+/** Lazy-loaded 8-char prefix of the full skill context (SKILL.md + every reference/*.md). Computed once per process. */
+let _skillHash: null | string = null
+
+function getSkillHash(): string {
+  if (_skillHash !== null) {
+    return _skillHash
+  }
+  try {
+    _skillHash = createHash('sha256').update(loadSkillContext()).digest('hex').slice(0, 8)
+  } catch {
+    _skillHash = 'unknown'
+  }
+  return _skillHash
+}
+
+/** Returns true when EVAL_NO_CACHE=true is set, meaning cache reads are bypassed. */
+export function isCacheBypassed(): boolean {
+  return process.env.EVAL_NO_CACHE === 'true'
+}
+
+/** Reads a cached EvalResult. Returns null on miss, bypass, or read errors. */
+export function getCachedResult(key: string): EvalResult | null {
+  if (isCacheBypassed()) {
+    return null
+  }
+  const filePath = cacheFilePath(key)
+  if (!existsSync(filePath)) {
+    return null
+  }
+  try {
+    const entry = JSON.parse(readFileSync(filePath, 'utf-8')) as CacheEntry
+    if (entry.version !== 1) {
+      return null
+    }
+    return entry.result
+  } catch {
+    return null
+  }
+}
+
+/** Persists an EvalResult to the cache. Always writes regardless of bypass flag. */
+export function setCachedResult(key: string, result: EvalResult): void {
+  mkdirSync(cacheDir, { recursive: true })
+  const entry: CacheEntry = {
+    version: 1,
+    createdAt: new Date().toISOString(),
+    result,
+  }
+  writeFileSync(cacheFilePath(key), JSON.stringify(entry, null, 2), 'utf-8')
+}
+
+/**
+ * Removes cache files whose result matches `match` but whose key differs from
+ * `currentKey`. Used after writing a fresh result so prior entries for the same
+ * logical case (e.g. earlier fixture or skill content) are dropped, keeping
+ * the dashboard from showing duplicate or stale rows.
+ */
+export function pruneStaleEntries(
+  currentKey: string,
+  match: (result: EvalResult) => boolean,
+): void {
+  let files: string[]
+  try {
+    files = readdirSync(cacheDir).filter((f) => f.endsWith('.json'))
+  } catch {
+    return
+  }
+  for (const file of files) {
+    const fileKey = file.replace(/\.json$/, '')
+    if (fileKey === currentKey) {
+      continue
+    }
+    const filePath = path.join(cacheDir, file)
+    try {
+      const entry = JSON.parse(readFileSync(filePath, 'utf-8')) as CacheEntry
+      if (entry.version === 1 && match(entry.result)) {
+        rmSync(filePath, { force: true })
+      }
+    } catch {
+      // skip unreadable / corrupt entries
+    }
+  }
+}
+
+/**
+ * Generates a cache key for a codegen eval case.
+ * Keyed on: instruction input, expected outcome, fixture *content* (not path), model ID,
+ * and systemPromptKey. Using content instead of path means the cache is automatically
+ * invalidated when a fixture changes. systemPromptKey distinguishes skill vs baseline runs.
+ */
+export function codegenKey(params: {
+  expected: string
+  fixtureContent: string
+  input: string
+  modelId: string
+  systemPromptKey: string
+}): string {
+  return hashKey({
+    type: 'codegen',
+    input: params.input,
+    expected: params.expected,
+    fixtureContent: params.fixtureContent,
+    modelId: params.modelId,
+    systemPromptKey: params.systemPromptKey,
+    skillHash: SKILL_PROMPT_KEYS.has(params.systemPromptKey) ? getSkillHash() : undefined,
+  })
+}

@@ -1,0 +1,53 @@
+@layer payload-default {
+  .upload__dropzoneAndUpload {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .upload__dropzoneContent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacer-2);
+    width: 100%;
+  }
+
+  .upload__dropzoneContent__buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .upload__dropzoneContent__orText {
+    color: var(--text-secondary);
+    text-transform: lowercase;
+  }
+
+  .upload__dragAndDropText {
+    flex-shrink: 0;
+    margin: 0;
+    text-transform: lowercase;
+    color: var(--text-secondary);
+  }
+
+  .upload__loadingRows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .upload .shimmer-effect {
+    border-radius: var(--radius-medium);
+  }
+
+  .upload.error .dropzone {
+    border-color: var(--border-danger-strong);
+  }
+
+  @media (max-width: 768px) {
+    .upload__dragAndDropText {
+      display: none;
+    }
+  }
+}

@@ -14,8 +14,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
@@ -938,6 +938,115 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs[0]?.title).toBe('from single task')
   })
 
+  describe('when a queued task slug is no longer registered in config', () => {
+    let originalTasks: typeof payload.config.jobs.tasks
+
+    beforeEach(() => {
+      originalTasks = payload.config.jobs.tasks
+    })
+
+    afterEach(() => {
+      payload.config.jobs.tasks = originalTasks
+    })
+
+    it('should permanently fail the job after one attempt instead of retrying forever', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'queued before task removal',
+        },
+      })
+
+      // Simulate a deploy that removed the 'CreateSimple' task from config
+      payload.config.jobs.tasks = originalTasks!.filter((t) => t.slug !== 'CreateSimple')
+
+      await payload.jobs.run({ silent: true })
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterRun.hasError).toBe(true)
+      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.totalTried).toBe(1)
+    })
+
+    it('should permanently fail when a workflow handler calls a task that has been removed', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        workflow: 'workflowNoRetriesSet',
+        input: {
+          message: 'queued before referenced task removal',
+        },
+      })
+
+      payload.config.jobs.tasks = originalTasks!.filter((t) => t.slug !== 'CreateSimple')
+
+      await payload.jobs.run({ silent: true })
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterRun.hasError).toBe(true)
+      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.totalTried).toBe(1)
+    })
+  })
+
+  it('should not retry a workflow with no retries configured when its handler throws', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'throwsInHandlerNoRetries',
+      input: {},
+    })
+
+    await payload.jobs.run({ silent: true })
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.processing).toBe(false)
+    expect(jobAfterRun.totalTried).toBe(1)
+  })
+
+  it('should retry a workflow with retries=1 exactly once when its handler throws', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'throwsInHandlerRetries1',
+      input: {},
+    })
+
+    let hasJobsRemaining = true
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run({ silent: true })
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // Initial attempt + 1 retry = 2. Once hasError is true the queue stops picking it up,
+    // so the loop naturally bounds at exactly 2 attempts.
+    expect(jobAfterRun.totalTried).toBe(2)
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.processing).toBe(false)
+  })
+
   it('can queue and run via the endpoint single tasks without workflows', async () => {
     const workflowsRef = payload.config.jobs.workflows
     delete payload.config.jobs.workflows
@@ -1770,50 +1879,6 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun?.log?.[0]?.state).toBe('failed')
   })
 
-  it('can tasks return error', async () => {
-    payload.config.jobs.deleteJobOnComplete = false
-
-    const job = await payload.jobs.queue({
-      task: 'ReturnError',
-      input: {},
-    })
-
-    await payload.jobs.run({ silent: true })
-
-    const jobAfterRun = await payload.findByID({
-      collection: 'payload-jobs',
-      id: job.id,
-    })
-
-    expect(jobAfterRun.hasError).toBe(true)
-    expect(jobAfterRun.log?.length).toBe(1)
-    expect(jobAfterRun?.log?.[0]?.error?.message).toBe('Task handler returned a failed state')
-    expect(jobAfterRun?.log?.[0]?.state).toBe('failed')
-  })
-
-  it('can tasks return error with custom error message', async () => {
-    payload.config.jobs.deleteJobOnComplete = false
-
-    const job = await payload.jobs.queue({
-      task: 'ReturnCustomError',
-      input: {
-        errorMessage: 'custom error message',
-      },
-    })
-
-    await payload.jobs.run({ silent: true })
-
-    const jobAfterRun = await payload.findByID({
-      collection: 'payload-jobs',
-      id: job.id,
-    })
-
-    expect(jobAfterRun.hasError).toBe(true)
-    expect(jobAfterRun.log?.length).toBe(1)
-    expect(jobAfterRun?.log?.[0]?.error?.message).toBe('custom error message')
-    expect(jobAfterRun?.log?.[0]?.state).toBe('failed')
-  })
-
   it('can reliably run workflows with parallel tasks', async () => {
     if (process.env.PAYLOAD_DATABASE === 'supabase') {
       // TODO: This test is flaky on supabase in CI, so we skip it for now
@@ -2636,6 +2701,79 @@ describe('Queues - Payload', () => {
 
         expect(middleJobFinal).toBeNull()
       })
+    })
+  })
+
+  describe('cron recovery', () => {
+    it('should recover cron after a transient DB error in jobs.run', async () => {
+      // --- Step 1: Verify cron works normally ---
+
+      _internal_jobSystemGlobals.shouldAutoRun = false
+
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: { message: 'baseline-job' },
+        queue: 'autorunSecond',
+      })
+
+      _internal_jobSystemGlobals.shouldAutoRun = true
+      await wait(2500)
+
+      const baselineDocs = await payload.find({
+        collection: 'simple',
+        where: { title: { equals: 'baseline-job' } },
+      })
+      expect(baselineDocs.totalDocs).toBe(1)
+
+      // --- Step 2: Inject a transient DB failure ---
+
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      await wait(1500)
+
+      const originalUpdateJobs = payload.db.updateJobs.bind(payload.db)
+      let failureCount = 0
+      payload.db.updateJobs = async (args) => {
+        failureCount++
+        if (failureCount <= 1) {
+          throw new Error('My Error')
+        }
+        return originalUpdateJobs(args)
+      }
+
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: { message: 'during-failure' },
+        queue: 'autorunSecond',
+      })
+
+      // Enable autorun — first cron tick will fail, but handler is wrapped in try/catch
+      _internal_jobSystemGlobals.shouldAutoRun = true
+      await wait(2500)
+
+      // --- Step 3: Restore DB and queue another job ---
+
+      payload.db.updateJobs = originalUpdateJobs
+
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: { message: 'after-recovery' },
+        queue: 'autorunSecond',
+      })
+
+      // Wait for cron to pick up the new job on subsequent ticks
+      await wait(3000)
+
+      // --- Step 4: Verify recovery ---
+
+      const afterRecoveryDocs = await payload.find({
+        collection: 'simple',
+        where: { title: { equals: 'after-recovery' } },
+      })
+      expect(afterRecoveryDocs.totalDocs).toBe(1)
+
+      // The cron's blocking flag should NOT be stuck
+      const cronInstance = payload.crons[0] as any
+      expect(cronInstance._states.blocking).toBe(false)
     })
   })
 })

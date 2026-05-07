@@ -76,9 +76,6 @@
       "path": "./packages/plugin-multi-tenant"
     },
     {
-      "path": "./packages/richtext-slate"
-    },
-    {
       "path": "./packages/richtext-lexical"
     },
     {

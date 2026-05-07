@@ -54,6 +54,18 @@ describe('collections-rest', () => {
       expect(doc).toMatchObject(data)
     })
 
+    it('should return 400 when request body contains malformed JSON', async () => {
+      const response = await restClient.POST(`/${postsSlug}`, {
+        body: '{ invalid json',
+      })
+
+      expect(response.status).toEqual(400)
+      const result: any = await response.json()
+
+      expect(result.errors).toBeDefined()
+      expect(result.errors[0].message).toEqual('Invalid JSON')
+    })
+
     it('should find', async () => {
       const post1 = await createPost()
       const post2 = await createPost()
@@ -1211,6 +1223,49 @@ describe('collections-rest', () => {
 
           expect(response.status).toEqual(200)
           expect(result.docs).toHaveLength(0)
+        })
+
+        // https://github.com/payloadcms/payload/issues/14471 - ensure geospatial queries use true geodetic meters, not the distorted meters of EPSG:3857
+        it('should use true geodetic meters at high latitudes', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
+
+          // A point ~10 km north of NYC: lat += 10000/111320 ≈ 0.0898°
+          const queryLng = -74.0059
+          const queryLat = 40.7128
+          const pointLat = queryLat + 0.0898 // ~10 km north
+          let createdId: number | string | undefined
+
+          try {
+            const created = await payload.create({
+              collection: pointSlug,
+              data: { point: [queryLng, pointLat] },
+            })
+
+            createdId = created.id
+
+            // Query with 12 km radius — the point at ~10 km should be within range.
+            // With the old EPSG:3857 approach, the effective radius at this latitude was
+            // only ~9 km, causing the point to be missed.
+            const response = await restClient.GET(`/${pointSlug}`, {
+              query: {
+                where: {
+                  point: {
+                    near: `${queryLng}, ${queryLat}, 12000`,
+                  },
+                },
+              },
+            })
+            const result: any = await response.json()
+
+            expect(response.status).toEqual(200)
+            expect(result.docs.map((d: { id: number | string }) => d.id)).toContain(createdId)
+          } finally {
+            if (createdId !== undefined) {
+              await payload.delete({ collection: pointSlug, id: createdId })
+            }
+          }
         })
 
         it('should not return a point far away', async () => {

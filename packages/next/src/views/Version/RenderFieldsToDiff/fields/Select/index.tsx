@@ -3,7 +3,13 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Option, SelectField, SelectFieldDiffClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { FieldDiffContainer, getHTMLDiffComponents, useTranslation } from '@payloadcms/ui'
+import {
+  escapeDiffHTML,
+  FieldDiffContainer,
+  getHTMLDiffComponents,
+  unescapeDiffHTML,
+  useTranslation,
+} from '@payloadcms/ui'
 import React from 'react'
 
 import './index.scss'
@@ -94,8 +100,9 @@ export const Select: SelectFieldDiffClientComponent = ({
       : ''
 
   const { From, To } = getHTMLDiffComponents({
-    fromHTML: '<p>' + renderedValueFrom + '</p>',
-    toHTML: '<p>' + renderedValueTo + '</p>',
+    fromHTML: '<p>' + escapeDiffHTML(renderedValueFrom) + '</p>',
+    postProcess: unescapeDiffHTML,
+    toHTML: '<p>' + escapeDiffHTML(renderedValueTo) + '</p>',
     tokenizeByCharacter: true,
   })
 

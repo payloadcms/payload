@@ -1,0 +1,76 @@
+@layer payload-default {
+  .banner {
+    display: block;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-letter-spacing);
+    border-radius: var(--radius-medium);
+    padding: var(--spacer-2) var(--spacer-2-5);
+    color: var(--text-default-default);
+    background: var(--bg-default-secondary);
+  }
+
+  .banner--has-action {
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover {
+      background: var(--bg-default-hover);
+    }
+
+    &:active {
+      background: var(--bg-default-pressed);
+    }
+  }
+
+  .banner--has-icon {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+
+    svg {
+      display: block;
+    }
+  }
+
+  .banner--type-error {
+    background: var(--bg-danger-tertiary);
+    color: var(--text-default-default);
+
+    &.banner--has-action:hover {
+      background: var(--bg-danger-tertiary-hover);
+    }
+
+    &.banner--has-action:active {
+      background: var(--bg-danger-tertiary-pressed);
+    }
+  }
+
+  .banner--type-success {
+    background: var(--bg-success-tertiary);
+    color: var(--text-success-default);
+
+    &.banner--has-action:hover {
+      background: var(--bg-success-tertiary-hover);
+    }
+
+    &.banner--has-action:active {
+      background: var(--bg-success-tertiary-pressed);
+    }
+  }
+
+  .banner--type-info {
+    background: var(--bg-brand-tertiary);
+    color: var(--text-brand-default);
+
+    &.banner--has-action:hover {
+      background: var(--bg-brand-tertiary-hover);
+    }
+
+    &.banner--has-action:active {
+      background: var(--bg-brand-tertiary-pressed);
+    }
+  }
+}

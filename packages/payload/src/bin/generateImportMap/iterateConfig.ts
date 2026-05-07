@@ -73,6 +73,14 @@ export function iterateConfig({
 
   addToImportMap(config.admin?.components?.providers)
 
+  // Sidebar tabs
+  if (config.admin?.components?.sidebar?.tabs?.length) {
+    for (const tab of config.admin.components.sidebar.tabs) {
+      addToImportMap(tab.components.Icon)
+      addToImportMap(tab.components.Content)
+    }
+  }
+
   if (config.admin?.components?.views) {
     if (Object.keys(config.admin?.components?.views)?.length) {
       for (const key in config.admin?.components?.views) {
@@ -84,7 +92,17 @@ export function iterateConfig({
 
   if (config.admin?.dashboard?.widgets?.length) {
     for (const dashboardWidget of config.admin.dashboard.widgets) {
-      addToImportMap(dashboardWidget.ComponentPath)
+      addToImportMap(dashboardWidget.Component)
+      if (dashboardWidget.fields?.length) {
+        genImportMapIterateFields({
+          addToImportMap,
+          baseDir,
+          config,
+          fields: dashboardWidget.fields,
+          importMap,
+          imports,
+        })
+      }
     }
   }
 

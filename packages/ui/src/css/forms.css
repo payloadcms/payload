@@ -1,0 +1,108 @@
+@layer payload-default {
+  .form-input {
+    width: 100%;
+    min-height: var(--spacer-5);
+    background: var(--bg-secondary);
+    border: 1px solid transparent;
+    border-radius: var(--radius-medium);
+    color: var(--text-default);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    padding: 0 var(--spacer-2);
+    appearance: none;
+    -webkit-appearance: none;
+    transition-property: box-shadow, background-color;
+    transition-duration: 100ms;
+    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+    outline: none;
+
+    &[data-rtl='true'] {
+      direction: rtl;
+    }
+
+    &::placeholder {
+      color: var(--text-tertiary);
+      font-weight: var(--text-body-medium-font-weight);
+      font-size: var(--text-body-medium-font-size);
+    }
+
+    &:where(:hover:not(:focus):not(:disabled)) {
+      border-color: var(--border-default);
+    }
+
+    &:focus {
+      border-color: var(--border-selected-default);
+      border-radius: var(--radius-medium);
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
+
+    &:disabled {
+      color: var(--text-disabled-default);
+      border-color: var(--border-default);
+      background: none;
+    }
+  }
+
+  .form-input-error {
+    border-color: var(--border-danger-strong);
+
+    &:focus {
+      border-color: var(--border-selected-default);
+    }
+  }
+
+  .form-input-group {
+    display: flex;
+    position: relative;
+    align-items: stretch;
+    background: var(--bg-default-secondary);
+    border: 1px solid transparent;
+    border-radius: var(--radius-medium);
+    min-height: var(--spacer-5);
+    transition-property: box-shadow, background-color;
+    transition-duration: 100ms;
+    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+
+    &:where(:hover:not(:focus-within):not(:has(input:disabled))) {
+      border-color: var(--border-default);
+    }
+
+    &:focus-within {
+      outline: none;
+      border-color: var(--border-selected-default);
+    }
+
+    &:has(input:disabled) {
+      background: transparent;
+      border-color: var(--border-disabled-default);
+      color: var(--text-disabled-default);
+    }
+
+    input.form-input {
+      flex: 1;
+      min-width: 0;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      min-height: unset;
+      outline: none;
+
+      &:focus {
+        border-color: transparent;
+      }
+    }
+  }
+
+  .form-input-group-error {
+    border-color: var(--border-danger-strong);
+
+    &:focus-within {
+      border-color: var(--border-selected-default);
+    }
+  }
+}

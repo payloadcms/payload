@@ -13,10 +13,10 @@
       gap: calc(var(--base) * 0.5);
     }
 
-    &__button {
+    &__button,
+    &__button.btn {
       color: var(--theme-elevation-800);
       background: unset;
-      border: none;
       text-decoration: underline;
       cursor: pointer;
       padding: 0;

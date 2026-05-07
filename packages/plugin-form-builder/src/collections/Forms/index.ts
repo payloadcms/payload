@@ -1,4 +1,4 @@
-import type { Block, CollectionConfig, Field } from 'payload'
+import type { Block, CollectionConfig, Config, Field } from 'payload'
 
 import { deepMergeWithSourceArrays } from 'payload'
 
@@ -6,8 +6,37 @@ import type { FormBuilderPluginConfig } from '../../types.js'
 
 import { fields } from './fields.js'
 
+const applyUploadCollectionLabels = (args: {
+  block: Block
+  collections: Config['collections']
+  uploadCollections: FormBuilderPluginConfig['uploadCollections']
+}): Block => {
+  const { block, collections, uploadCollections } = args
+  const collectionsBySlug = new Map(
+    (collections || []).map((collection) => [collection.slug, collection]),
+  )
+
+  for (const field of block.fields) {
+    if ('name' in field && field.name === 'uploadCollection' && field.type === 'select') {
+      // Replace the default slug labels with the source collection's labels.singular.
+      // Select option labels accept strings, locale records and label functions —
+      // Payload's admin resolves them at render time via getTranslation.
+      field.options = (uploadCollections || []).map((slug) => {
+        const singular = collectionsBySlug.get(slug)?.labels?.singular
+        return { label: singular ?? slug, value: slug }
+      })
+      break
+    }
+  }
+
+  return block
+}
+
 // all settings can be overridden by the config
-export const generateFormCollection = (formConfig: FormBuilderPluginConfig): CollectionConfig => {
+export const generateFormCollection = (
+  formConfig: FormBuilderPluginConfig,
+  collections?: Config['collections'],
+): CollectionConfig => {
   const redirect: Field = {
     name: 'redirect',
     type: 'group',
@@ -90,6 +119,15 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
             }
 
             if (typeof block === 'function') {
+              // Special handling for upload field - factory takes slug list; after it runs,
+              // inject resolved collection labels into the uploadCollection select.
+              if (fieldKey === 'upload') {
+                return applyUploadCollectionLabels({
+                  block: block(formConfig.uploadCollections || []),
+                  collections,
+                  uploadCollections: formConfig.uploadCollections,
+                })
+              }
               return block(fieldConfig)
             }
 

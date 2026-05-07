@@ -4,8 +4,22 @@ import { noApiViewCollectionSlug } from '../slugs.js'
 
 export const CollectionNoApiView: CollectionConfig = {
   slug: noApiViewCollectionSlug,
+  labels: {
+    singular: 'No API View',
+    plural: 'No API View',
+  },
   admin: {
-    hideAPIURL: true,
+    components: {
+      views: {
+        edit: {
+          api: {
+            tab: {
+              condition: () => false,
+            },
+          },
+        },
+      },
+    },
   },
   fields: [],
 }

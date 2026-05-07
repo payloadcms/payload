@@ -253,7 +253,10 @@ export const updateOperation = async <
       global: globalConfig,
       operation: 'update' as Operation,
       req,
-      skipValidation: isSavingDraft && !hasDraftValidationEnabled(globalConfig),
+      skipValidation:
+        (isSavingDraft && !hasDraftValidationEnabled(globalConfig)) ||
+        // Skip validation for unpublish operations — they only change _status, not document data
+        unpublishAllLocales,
     }
 
     let result: JsonObject = await beforeChange(beforeChangeArgs)
@@ -379,6 +382,7 @@ export const updateOperation = async <
         req,
         select,
         snapshot: snapshotToSave,
+        unpublish: unpublishAllLocales,
       })
 
       result = {

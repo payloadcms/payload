@@ -2,15 +2,17 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import { login } from '../__helpers/e2e/auth/login.js'
+import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
-import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { BASE_PATH } from './shared.js'
@@ -39,17 +41,36 @@ test.describe('Base Path', () => {
     initPageConsoleErrorCatch(page)
 
     await ensureCompilationIsDone({
+      noAutoLogin: true,
       page,
       serverURL,
     })
   })
 
+  test('should submit forgot-password form with correct basePath in action', async () => {
+    await page.goto(`${url.admin}/forgot`)
+
+    // Verify the form action includes the basePath prefix
+    await expect(async () => {
+      const formAction = await page.locator('form').getAttribute('action')
+      expect(formAction).toContain('/cms/api/users/forgot-password')
+    }).toPass()
+
+    // Fill in the email field and submit
+    await page.locator('#field-email').fill('dev@payloadcms.com')
+    await page.locator('button[type="submit"]').click()
+
+    // Verify success state renders — proves the POST went to the correct URL
+    await expect(page.locator('.form-header h1')).toHaveText('Email Sent')
+  })
+
   test('should navigate to posts collection by clicking nav link', async () => {
     // Navigate to the admin dashboard
+    await login({ page, serverURL })
     await page.goto(url.admin)
 
     // click first dashboard card
-    await page.locator('.dashboard__card-list .card').first().click()
+    await page.locator('.collections__card-list .card').first().click()
 
     // should navigate to basePath url
     await expect.poll(() => page.url()).toContain('/cms/admin/collections/posts')

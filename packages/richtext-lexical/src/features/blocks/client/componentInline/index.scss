@@ -15,7 +15,6 @@
     }
 
     &__container {
-      @extend %body;
       @include shadow-sm;
       margin-right: base(0.2);
       margin-left: base(0.2);

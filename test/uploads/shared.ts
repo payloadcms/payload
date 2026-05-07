@@ -36,6 +36,7 @@ export const listViewPreviewSlug = 'list-view-preview'
 export const threeDimensionalSlug = 'three-dimensional'
 export const constructorOptionsSlug = 'constructor-options'
 export const bulkUploadsSlug = 'bulk-uploads'
+export const bulkUploadsHookErrorSlug = 'bulk-uploads-hook-error'
 export const restrictedMimeTypesSlug = 'restricted-mime-types'
 export const pdfOnlySlug = 'pdf-only'
 
@@ -47,3 +48,4 @@ export const mediaWithImageSizeAdminPropsSlug = 'media-with-image-size-admin-pro
 export const uploads2Slug = 'uploads-2'
 export const noFilesRequiredSlug = 'no-files-required'
 export const relationToNoFilesRequiredSlug = 'relation-to-no-files-required'
+export const prefixMediaSlug = 'prefix-media'

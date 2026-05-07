@@ -4,9 +4,13 @@ import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import { z } from 'zod'
 
-import type { PluginMCPServerConfig } from '../../../types.js'
+import type { MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
+import {
+  getCollectionVirtualFieldNames,
+  stripVirtualFields,
+} from '../../../utils/getVirtualFieldNames.js'
 import { convertCollectionSchemaToZod } from '../../../utils/schemaConversion/convertCollectionSchemaToZod.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { toolSchemas } from '../schemas.js'
@@ -16,7 +20,7 @@ export const createResourceTool = (
   user: TypedUser,
   verboseLogs: boolean,
   collectionSlug: string,
-  collections: PluginMCPServerConfig['collections'],
+  collections: MCPPluginConfig['collections'],
   schema: JSONSchema4,
 ) => {
   const tool = async (
@@ -48,6 +52,9 @@ export const createResourceTool = (
 
         // Transform point fields from object format to tuple array
         parsedData = transformPointDataToPayload(parsedData)
+
+        const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
+        parsedData = stripVirtualFields(parsedData, virtualFieldNames)
 
         if (verboseLogs) {
           payload.logger.info(
@@ -107,7 +114,7 @@ export const createResourceTool = (
             text: `Resource created successfully in collection "${collectionSlug}"!
 Created resource:
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
           },
         ],

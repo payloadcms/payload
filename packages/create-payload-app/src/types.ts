@@ -3,6 +3,7 @@ import type arg from 'arg'
 import type { ALL_DATABASE_ADAPTERS, ALL_STORAGE_ADAPTERS } from './lib/ast/types.js'
 
 export interface Args extends arg.Spec {
+  '--agent': StringConstructor
   '--beta': BooleanConstructor
   '--branch': StringConstructor
   '--db': StringConstructor
@@ -17,6 +18,7 @@ export interface Args extends arg.Spec {
   '--local-example': StringConstructor
   '--local-template': StringConstructor
   '--name': StringConstructor
+  '--no-agent': BooleanConstructor
   '--no-deps': BooleanConstructor
   '--no-git': BooleanConstructor
   '--secret': StringConstructor
@@ -28,6 +30,7 @@ export interface Args extends arg.Spec {
 
   // Aliases
 
+  '-a': string
   '-e': string
   '-h': string
   '-n': string
@@ -77,8 +80,6 @@ export type DbDetails = {
   type: DbType
 }
 
-export type EditorType = 'lexical' | 'slate'
-
 export type NextAppDetails = {
   hasTopLevelLayout: boolean
   isPayloadInstalled?: boolean
@@ -93,3 +94,5 @@ export type NextAppDetails = {
 export type NextConfigType = 'cjs' | 'esm' | 'ts'
 
 export type StorageAdapterType = (typeof ALL_STORAGE_ADAPTERS)[number]
+
+export type AgentType = 'claude' | 'codex' | 'cursor'
