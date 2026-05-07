@@ -82,4 +82,8 @@
     align-self: flex-start;
     margin: 0;
   }
+
+  .array-field__row--is-dragging {
+    opacity: 0.5;
+  }
 }

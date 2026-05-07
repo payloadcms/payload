@@ -26,7 +26,7 @@ import { FieldSelect } from '../../FieldSelect/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { baseClass } from './index.js'
 import './index.scss'
-import '../../../forms/RenderFields/index.scss'
+import '../../../forms/RenderFields/index.css'
 
 export const EditManyBulkUploadsDrawerContent: React.FC<
   {

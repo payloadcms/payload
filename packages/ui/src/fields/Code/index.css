@@ -5,7 +5,7 @@
     flex-direction: column;
     gap: var(--spacer-2);
 
-    & .code-editor {
+    .code-editor {
       background: var(--color-bg-secondary);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-medium);
@@ -18,12 +18,16 @@
       }
 
       &:focus-within {
-        border-color: var(--color-border-selected-strong);
+        border-color: var(--color-border-selected);
       }
     }
 
-    &.error .code-editor {
+    &.error .code-editor:not(:focus-within) {
       border-color: var(--color-border-danger-strong);
+
+      &:hover {
+        border-color: var(--color-border-danger-strong);
+      }
     }
 
     &.read-only .code-editor {

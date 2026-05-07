@@ -9,6 +9,10 @@
       .code-editor {
         border-color: var(--color-border-danger-strong);
 
+        &:hover {
+          border-color: var(--border-danger-strong);
+        }
+
         &:focus-within {
           border-color: var(--color-border-selected-strong);
         }

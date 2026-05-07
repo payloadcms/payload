@@ -35,19 +35,9 @@
   .tabs-field__tabs-wrap {
     overflow-x: auto;
     overflow-y: hidden;
-    margin-bottom: var(--spacer-2-5);
+    margin-bottom: var(--spacer-2);
     position: relative;
     padding-bottom: 2px;
-
-    &:after {
-      content: '';
-      position: absolute;
-      bottom: 2px;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: var(--color-border);
-    }
   }
 
   .tabs-field__tabs {
@@ -56,6 +46,7 @@
     vertical-align: bottom;
     position: relative;
     z-index: 1;
+    box-shadow: inset 0px -1px var(--color-border);
 
     &:before,
     &:after {
@@ -71,7 +62,7 @@
   }
 
   .tabs-field__description {
-    margin-bottom: var(--spacer-2);
+    margin-bottom: var(--spacer-4);
   }
 
   @media (max-width: 768px) {

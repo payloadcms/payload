@@ -18,7 +18,9 @@
     z-index: 2;
     cursor: pointer;
 
-    &:not(.toggle-disabled):hover {
+    &:not(.toggle-disabled):hover:not(
+        :has(.section-title__input:hover, .section-title__input:focus)
+      ) {
       background: var(--color-bg-secondary-hover);
     }
 
@@ -65,9 +67,8 @@
     border-radius: var(--radius-medium);
 
     &:focus-visible {
-      border-radius: var(--radius-medium, 0.3125rem);
       outline: var(--accessibility-outline);
-      outline-offset: calc(var(--accessibility-outline-offset) + 1px);
+      outline-offset: -1px;
     }
 
     span {
@@ -88,7 +89,7 @@
     background-color: var(--color-bg-danger-tertiary);
     border-color: var(--color-border-danger-strong);
 
-    &:hover {
+    &:hover:not(:has(.section-title__input:hover, .section-title__input:focus)) {
       background: var(--color-bg-danger-tertiary-hover);
     }
   }

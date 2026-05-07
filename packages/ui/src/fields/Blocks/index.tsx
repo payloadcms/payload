@@ -1,6 +1,7 @@
 'use client'
 import type { BlocksFieldClientComponent, ClientBlock } from 'payload'
 
+import { verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -17,22 +18,25 @@ import {
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
 import { CollapseAllToggle } from '../../elements/CollapseAllToggle/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
+import { DragOverlayPreview } from '../../elements/DraggableSortable/DragOverlayPreview/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { Pill } from '../../elements/Pill/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
+import { RowLabel } from '../../forms/RowLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { CirclePlusIcon } from '../../icons/CirclePlus/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
@@ -41,6 +45,7 @@ import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
+import { SectionTitle } from './SectionTitle/index.js'
 
 const baseClass = 'blocks-field'
 
@@ -166,6 +171,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       clientBlocksAfterFilter: resolvedBlocks,
     }
   }, [blockReferences, blocks, blocksFilterOptions, config.blocksMap])
+
+  const getBlockConfig = (blockType: string): ClientBlock | undefined =>
+    config.blocksMap[blockType] ?? clientBlocks.find((block) => block.slug === blockType)
 
   const addRow = useCallback(
     (rowIndex: number, blockType: string) => {
@@ -316,6 +324,57 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
+  const renderDragOverlay = useCallback(
+    (activeId: number | string) => {
+      const activeIndex = rows.findIndex((row) => row.id === activeId)
+      if (activeIndex === -1) {
+        return null
+      }
+
+      const activeRow = rows[activeIndex]
+      const blockConfig = getBlockConfig(activeRow.blockType)
+
+      if (!blockConfig) {
+        return null
+      }
+
+      const showBlockName = !blockConfig.admin?.disableBlockName
+      const blockName = showBlockName
+        ? (getFields()?.[`${path}.${activeIndex}.blockName`]?.value as string)
+        : undefined
+
+      return (
+        <DragOverlayPreview
+          header={
+            <div className={`${baseClass}__block-header`}>
+              <RowLabel
+                CustomComponent={rows?.[activeIndex]?.customComponents?.RowLabel}
+                label={
+                  <>
+                    <span className={`${baseClass}__block-number`}>
+                      {String(activeIndex + 1).padStart(2, '0')}
+                    </span>
+                    <Pill
+                      className={`${baseClass}__block-pill ${baseClass}__block-pill-${activeRow.blockType}`}
+                      pillStyle="white"
+                      size="small"
+                    >
+                      {getTranslation(blockConfig.labels.singular, i18n)}
+                    </Pill>
+                    {blockName && <span className="section-title__text">{blockName}</span>}
+                  </>
+                }
+                path={`${path}.${activeIndex}`}
+                rowNumber={activeIndex}
+              />
+            </div>
+          }
+        />
+      )
+    },
+    [rows, config.blocksMap, clientBlocks, i18n, path, getFields],
+  )
+
   return (
     <div
       className={[
@@ -395,12 +454,13 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           className={`${baseClass}__rows`}
           ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
+          renderDragOverlay={isSortable && !readOnly && !disabled ? renderDragOverlay : undefined}
+          sortingStrategy={verticalListSortingStrategy}
         >
           {rows.map((row, i) => {
             const { blockType, isLoading } = row
 
-            const blockConfig: ClientBlock =
-              config.blocksMap[blockType] ?? clientBlocks.find((block) => block.slug === blockType)
+            const blockConfig = getBlockConfig(blockType)
 
             if (blockConfig) {
               const rowPath = `${path}.${i}`

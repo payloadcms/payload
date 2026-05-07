@@ -4,6 +4,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacer-2);
+    flex-grow: 1;
 
     .field-type__wrap {
       display: flex;
@@ -14,7 +15,7 @@
     textarea {
       overflow-y: auto;
       resize: vertical;
-      min-height: 3.75rem;
+      min-height: calc(var(--spacer-5) * 2);
       height: auto;
       display: flex;
       field-sizing: content;
@@ -36,6 +37,10 @@
     &.error {
       textarea {
         border-color: var(--color-border-danger-strong);
+
+        &:hover {
+          border-color: var(--color-border-danger-strong);
+        }
       }
     }
   }

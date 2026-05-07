@@ -405,7 +405,6 @@
     }
 
     .popup-button {
-      border: 1px solid transparent;
       border-radius: var(--radius-medium);
       align-items: center;
 

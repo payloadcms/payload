@@ -129,4 +129,8 @@
     align-self: flex-start;
     border-radius: var(--radius-medium);
   }
+
+  .blocks-field__row--is-dragging {
+    opacity: 0.5;
+  }
 }

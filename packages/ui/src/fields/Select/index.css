@@ -5,5 +5,9 @@
 
   .field-type.select.error .rs__control {
     border-color: var(--color-border-danger-strong);
+
+    &:hover {
+      border-color: var(--color-border-danger-strong);
+    }
   }
 }

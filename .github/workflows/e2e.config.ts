@@ -87,6 +87,7 @@ export default createE2EConfig([
   { file: 'locked-documents', shards: 1 },
   { file: 'i18n', shards: 1 },
   { file: 'plugin-cloud-storage', shards: 1 },
+  { file: 'storage-azure__client-uploads#client-uploads/config.ts', shards: 1 },
   { file: 'storage-s3__client-uploads#client-uploads/config.ts', shards: 1 },
   { file: 'storage-vercel-blob__client-uploads#client-uploads/config.ts', shards: 1 },
   { file: 'plugin-form-builder', shards: 1 },

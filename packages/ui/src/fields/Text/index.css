@@ -11,8 +11,12 @@
       gap: var(--spacer-2);
     }
 
-    &.error input {
-      border-color: var(--color-border-danger);
+    &.error input:not(:focus) {
+      border-color: var(--color-border-danger-strong);
+
+      &:hover {
+        border-color: var(--color-border-danger-strong);
+      }
     }
   }
 }

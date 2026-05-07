@@ -41,8 +41,12 @@
       }
     }
 
-    &.error input {
+    &.error input:not(:focus) {
       border-color: var(--color-border-danger-strong);
+
+      &:hover {
+        border-color: var(--color-border-danger-strong);
+      }
     }
   }
 }
