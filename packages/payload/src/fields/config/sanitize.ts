@@ -503,8 +503,17 @@ export const sanitizeField = async ({
     }
   }
 
-  if (field.type === 'ui' && typeof field.admin.disableBulkEdit === 'undefined') {
-    field.admin.disableBulkEdit = true
+  if (field.type === 'ui') {
+    const existing = field.admin.disabled
+    if (existing === undefined) {
+      field.admin.disabled = { bulkEdit: true }
+    } else if (
+      existing !== true &&
+      typeof existing === 'object' &&
+      existing.bulkEdit === undefined
+    ) {
+      field.admin.disabled = { ...existing, bulkEdit: true }
+    }
   }
 
   // Timezone field insertion

@@ -47,7 +47,8 @@ export {
 } from '../fields/config/types.js'
 
 export { getFieldPaths } from '../fields/getFieldPaths.js'
-
+export { isFieldDisabled } from '../fields/isFieldDisabled.js'
+export type { DisabledArea, DisabledOptions } from '../fields/isFieldDisabled.js'
 export * from '../fields/validations.js'
 export {
   DEFAULT_HIERARCHY_LIST_LIMIT,

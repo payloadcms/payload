@@ -35,7 +35,7 @@ export const reduceFieldsToOptions = ({
 }: ReduceFieldOptionsArgs): ReducedField[] => {
   return fields.reduce((reduced, field) => {
     let pathPrefix = pathPrefixFromArgs
-    // Do not filter out `field.admin.disableListFilter` fields here, as these should still render as disabled if they appear in the URL query
+    // Do not filter out `field.admin.disabled.filter` fields here, as these should still render as disabled if they appear in the URL query
     // Filter out `virtual: true` fields since they are regular virtuals and not backed by a DB field
     if (
       (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||

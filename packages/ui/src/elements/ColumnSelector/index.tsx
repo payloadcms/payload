@@ -1,7 +1,7 @@
 'use client'
 import type { SanitizedCollectionConfig, StaticLabel } from 'payload'
 
-import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
+import { fieldIsHiddenOrDisabled, fieldIsID, isFieldDisabled } from 'payload/shared'
 import React, { useId, useMemo } from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -24,7 +24,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
       columns?.filter(
         (col) =>
           !(fieldIsHiddenOrDisabled(col.field) && !fieldIsID(col.field)) &&
-          !col?.field?.admin?.disableListColumn,
+          !isFieldDisabled(col.field, 'column'),
       ),
     [columns],
   )
