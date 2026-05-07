@@ -177,7 +177,8 @@ function stripRscFromClientImportMap(): PluginOption {
       if (options?.ssr) {
         return
       }
-      if (!id.includes('importMap') || !id.endsWith('.js')) {
+      const cleanId = id.replace(/\?.*$/, '')
+      if (!cleanId.includes('importMap') || !cleanId.endsWith('.js')) {
         return
       }
 
@@ -209,6 +210,36 @@ function stripRscFromClientImportMap(): PluginOption {
       }
 
       return { code: transformed, map: null }
+    },
+  }
+}
+
+const serverOnlyModulesForClient = ['ajv', 'ajv/dist/ajv.js']
+
+/**
+ * Provides empty ESM shims for server-only CJS packages when imported on the client.
+ * These packages (e.g. ajv) get pulled in through deep transitive imports from the
+ * payload barrel export and cause SyntaxErrors because their CJS format isn't
+ * compatible with native ESM in the browser.
+ */
+function shimServerOnlyModulesForClient(): PluginOption {
+  const shimmedId = '\0payload-client-shim'
+  return {
+    name: 'payload:shim-server-only-client',
+    enforce: 'pre',
+    load(id) {
+      if (id === shimmedId) {
+        return 'export default {}; export {};'
+      }
+    },
+    resolveId(id, _importer, options) {
+      if (options?.ssr) {
+        return
+      }
+      const bare = id.replace(/\?.*$/, '')
+      if (serverOnlyModulesForClient.some((mod) => bare === mod || bare.endsWith(`/${mod}`))) {
+        return shimmedId
+      }
     },
   }
 }
@@ -402,6 +433,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
             }
           },
         },
+        shimServerOnlyModulesForClient(),
         stripRscFromClientImportMap(),
         ssrStripDistStyleImports(),
         safeSSRConsole(),
