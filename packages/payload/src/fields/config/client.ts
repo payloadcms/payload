@@ -512,7 +512,7 @@ export const createClientFields = ({
       type: defaultIDType,
       admin: {
         description: 'The unique identifier for this document',
-        disabled: true,
+        disabled: { bulkEdit: true },
         hidden: true,
       },
       hidden: true,
