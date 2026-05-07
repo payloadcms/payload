@@ -11,7 +11,7 @@ export const PAYLOAD_PACKAGE_LIST = [
   '@payloadcms/ecommerce',
   '@payloadcms/email-nodemailer',
   '@payloadcms/email-resend',
-  '@payloadcms/graphql',
+  '@payloadcms/plugin-graphql',
   '@payloadcms/live-preview',
   '@payloadcms/live-preview-react',
   '@payloadcms/live-preview-vue',

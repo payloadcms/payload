@@ -183,7 +183,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
             '@payloadcms/drizzle',
             '@payloadcms/email-nodemailer',
             '@payloadcms/email-resend',
-            '@payloadcms/graphql',
+            '@payloadcms/plugin-graphql',
             '@payloadcms/payload-cloud',
             '@payloadcms/plugin-redirects',
             // TODO: Add the following packages, excluding their /client subpath exports, once Next.js supports it

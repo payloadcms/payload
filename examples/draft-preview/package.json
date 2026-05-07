@@ -30,7 +30,7 @@
     "react-dom": "19.2.1"
   },
   "devDependencies": {
-    "@payloadcms/graphql": "latest",
+    "@payloadcms/plugin-graphql": "latest",
     "@swc/core": "^1.6.13",
     "@types/escape-html": "^1.0.2",
     "@types/react": "19.2.9",

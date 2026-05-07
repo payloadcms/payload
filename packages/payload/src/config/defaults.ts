@@ -47,11 +47,6 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   defaultMaxTextLength: 40000,
   endpoints: [],
   globals: [],
-  graphQL: {
-    disablePlaygroundInProduction: true,
-    maxComplexity: 1000,
-    schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
-  },
   hooks: {},
   i18n: {},
   jobs: {
@@ -69,8 +64,6 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   routes: {
     admin: '/admin',
     api: '/api',
-    graphQL: '/graphql',
-    graphQLPlayground: '/graphql-playground',
   },
   serverURL: '',
   telemetry: true,
@@ -123,13 +116,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.defaultMaxTextLength = config.defaultMaxTextLength ?? 40000
   config.endpoints = config.endpoints ?? []
   config.globals = config.globals ?? []
-  config.graphQL = {
-    disableIntrospectionInProduction: true,
-    disablePlaygroundInProduction: true,
-    maxComplexity: 1000,
-    schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
-    ...(config.graphQL || {}),
-  }
   config.hooks = config.hooks ?? {}
   config.i18n = config.i18n ?? {}
   config.jobs = {
@@ -148,8 +134,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.routes = {
     admin: '/admin',
     api: '/api',
-    graphQL: '/graphql',
-    graphQLPlayground: '/graphql-playground',
     ...(config.routes || {}),
   }
   config.serverURL = config.serverURL ?? ''

@@ -6,15 +6,60 @@ desc: Payload ships with a fully featured and extensible GraphQL API, which can 
 keywords: graphql, resolvers, mutations, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-In addition to its REST and Local APIs, Payload ships with a fully featured and extensible GraphQL API.
+In addition to its REST and Local APIs, Payload offers a fully featured and extensible GraphQL API via the [`@payloadcms/plugin-graphql`](https://github.com/payloadcms/payload/tree/main/packages/plugin-graphql) plugin.
 
-By default, the GraphQL API is exposed via `/api/graphql`, but you can customize this URL via specifying your `routes` within the main Payload Config.
+<Banner>
+  As of Payload v4, GraphQL is opt-in via a plugin. Projects that don't use it no longer ship `graphql`, `graphql-http`, or `graphql-playground-html` — saving roughly 2.9 MB of installed footprint and meaningful cold-boot time on serverless deploys. Upgrading from v3? See [Migrating to v4](/docs/graphql/migration-v4).
+</Banner>
+
+## Setup
+
+Install the plugin and `graphql` (a peer dependency):
+
+```sh
+pnpm add @payloadcms/plugin-graphql graphql
+```
+
+Add `graphQLPlugin` to your Payload Config:
+
+```ts
+import { buildConfig } from 'payload'
+import { graphQLPlugin } from '@payloadcms/plugin-graphql'
+
+export default buildConfig({
+  plugins: [
+    graphQLPlugin({
+      maxComplexity: 1000,
+    }),
+  ],
+})
+```
+
+Wire up the Next.js route handlers:
+
+```ts
+// app/(payload)/api/graphql/route.ts
+import config from '@payload-config'
+import { GRAPHQL_POST } from '@payloadcms/plugin-graphql/next'
+
+export const POST = GRAPHQL_POST(config)
+```
+
+```ts
+// app/(payload)/api/graphql-playground/route.ts
+import config from '@payload-config'
+import { GRAPHQL_PLAYGROUND_GET } from '@payloadcms/plugin-graphql/next'
+
+export const GET = GRAPHQL_PLAYGROUND_GET(config)
+```
+
+By default, the GraphQL API is exposed via `/api/graphql`. You can customize this via the plugin's `routes` option.
 
 The labels you provide for your Collections and Globals are used to name the GraphQL types that are created to correspond to your config. Special characters and spaces are removed.
 
 ## GraphQL Options
 
-At the top of your Payload Config you can define all the options to manage GraphQL.
+All options are passed to `graphQLPlugin({ ... })`.
 
 | Option                             | Description                                                                                                                                                |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |

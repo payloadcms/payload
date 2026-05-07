@@ -4,11 +4,11 @@ import type { ParsedQs } from 'qs-esm'
 import {
   REST_DELETE as createDELETE,
   REST_GET as createGET,
-  GRAPHQL_POST as createGraphqlPOST,
   REST_PATCH as createPATCH,
   REST_POST as createPOST,
   REST_PUT as createPUT,
 } from '@payloadcms/next/routes'
+import { GRAPHQL_POST as createGraphqlPOST } from '@payloadcms/plugin-graphql/next'
 import * as qs from 'qs-esm'
 
 import { devUser } from '../../credentials.js'

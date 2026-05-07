@@ -19,7 +19,7 @@ export const tgzToPkgNameMap = {
   '@payloadcms/eslint-config': 'payloadcms-eslint-config-*',
   '@payloadcms/eslint-plugin': 'payloadcms-eslint-plugin-*',
   '@payloadcms/figma': 'payloadcms-figma-*',
-  '@payloadcms/graphql': 'payloadcms-graphql-*',
+  '@payloadcms/plugin-graphql': 'payloadcms-graphql-*',
   '@payloadcms/live-preview': 'payloadcms-live-preview-*',
   '@payloadcms/live-preview-react': 'payloadcms-live-preview-react-*',
   '@payloadcms/kv-redis': 'payloadcms-kv-redis-*',

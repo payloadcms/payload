@@ -46,7 +46,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
     "@payloadcms/figma": "latest",
-    "@payloadcms/graphql": "workspace:*",
+    "@payloadcms/plugin-graphql": "workspace:*",
     "@payloadcms/kv-redis": "workspace:*",
     "@payloadcms/live-preview": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",

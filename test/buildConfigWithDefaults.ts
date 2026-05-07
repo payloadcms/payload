@@ -1,5 +1,6 @@
 import type { Config, SanitizedConfig } from 'payload'
 
+import { graphQLPlugin } from '@payloadcms/plugin-graphql'
 import {
   AlignFeature,
   BlockquoteFeature,
@@ -135,6 +136,7 @@ export async function buildConfigWithDefaults(
     telemetry: false,
     ...testConfig,
     endpoints: [localAPIEndpoint, reInitEndpoint, ...(testConfig?.endpoints || [])],
+    plugins: [graphQLPlugin(testConfig?.graphQL ?? {}), ...(testConfig?.plugins || [])],
     i18n: {
       supportedLanguages: {
         de,

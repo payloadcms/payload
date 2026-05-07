@@ -1,4 +1,4 @@
-import { GraphQLJSON } from '@payloadcms/graphql/types'
+import { GraphQLJSON } from '@payloadcms/plugin-graphql/types'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)

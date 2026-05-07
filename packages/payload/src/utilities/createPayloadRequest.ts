@@ -43,8 +43,13 @@ export const createPayloadRequest = async ({
   const urlProperties = new URL(request.url)
   const { pathname, searchParams } = urlProperties
 
+  // GraphQL is opt-in via the @payloadcms/plugin-graphql plugin. The plugin sets
+  // `config.graphQL` and `config.routes.graphQL` when loaded. Without it, this is
+  // always a non-GraphQL request.
   const isGraphQL =
+    !!config.graphQL &&
     !config.graphQL.disable &&
+    !!config.routes?.graphQL &&
     pathname ===
       formatAdminURL({
         apiRoute: config.routes.api,
