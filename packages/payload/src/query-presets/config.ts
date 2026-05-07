@@ -135,6 +135,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       },
     },
   ],
+  forceSelect: { relatedCollection: true },
   hooks: {
     beforeValidate: [
       ({ data, operation }) => {
