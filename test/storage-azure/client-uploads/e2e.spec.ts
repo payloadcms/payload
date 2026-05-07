@@ -33,9 +33,23 @@ test.describe('storage-azure client uploads E2E', () => {
     payloadSDK = payload as unknown as typeof payloadSDK
     mediaWithDocPrefixURL = new AdminUrlUtil(serverURL, mediaWithDocPrefixSlug)
 
-    containerClient = BlobServiceClient.fromConnectionString(
+    const blobService = BlobServiceClient.fromConnectionString(
       process.env.AZURE_STORAGE_CONNECTION_STRING!,
-    ).getContainerClient(process.env.AZURE_STORAGE_CONTAINER_NAME!)
+    )
+
+    await blobService.setProperties({
+      cors: [
+        {
+          allowedHeaders: '*',
+          allowedMethods: 'GET,PUT,POST,DELETE,OPTIONS,HEAD',
+          allowedOrigins: '*',
+          exposedHeaders: '*',
+          maxAgeInSeconds: 3600,
+        },
+      ],
+    })
+
+    containerClient = blobService.getContainerClient(process.env.AZURE_STORAGE_CONTAINER_NAME!)
     await containerClient.createIfNotExists()
 
     // Clear leftover blobs from previous runs so the listBlobsFlat assertion
