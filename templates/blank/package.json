@@ -25,10 +25,10 @@
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
-    "next": "16.2.3",
+    "next": "16.2.6",
     "payload": "workspace:*",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "sharp": "0.34.2"
   },
   "devDependencies": {
@@ -39,7 +39,7 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "4.5.2",
     "eslint": "^9.16.0",
-    "eslint-config-next": "16.2.3",
+    "eslint-config-next": "16.2.6",
     "jsdom": "28.0.0",
     "prettier": "^3.4.2",
     "tsx": "4.21.0",
