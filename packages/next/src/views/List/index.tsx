@@ -274,6 +274,11 @@ export const renderListView = async (
     select._order = true
   }
 
+  /** Force select `_status` for drafts-enabled collections — needed by `enrichDocsWithVersionStatus` and `formatDocURL` */
+  if (collectionConfig.versions?.drafts) {
+    select._status = true
+  }
+
   // Check for hierarchy parent param
   const isHierarchyCollection = Boolean(collectionConfig.hierarchy)
   let hierarchyParentId: null | number | string = null
