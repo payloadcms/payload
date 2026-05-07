@@ -153,6 +153,66 @@ function ssrStripDistStyleImports(): PluginOption {
   }
 }
 
+const rscImportSpecifiers = [
+  /^@payloadcms\/richtext-lexical\/rsc$/,
+  /^@payloadcms\/richtext-slate\/rsc$/,
+  /^@payloadcms\/next\/rsc$/,
+]
+
+function isRscSpecifier(specifier: string): boolean {
+  return rscImportSpecifiers.some((re) => re.test(specifier))
+}
+
+/**
+ * Strips RSC-only imports from importMap.js in the client environment.
+ * RSC components are server-only and should never be bundled for the client.
+ * Without this, the RSC import chain pulls in server dependencies (ajv, url, path, etc.)
+ * which cause SyntaxErrors and hydration mismatches on the client.
+ */
+function stripRscFromClientImportMap(): PluginOption {
+  return {
+    name: 'payload:strip-rsc-client-importmap',
+    enforce: 'pre',
+    transform(code, id, options) {
+      if (options?.ssr) {
+        return
+      }
+      if (!id.includes('importMap') || !id.endsWith('.js')) {
+        return
+      }
+
+      const importLineRe = /^import\s+\{([^}]+)\}\s+from\s+['"]([^'"]+)['"]/gm
+      const rscIdentifiers = new Set<string>()
+      let transformed = code
+
+      let match
+      while ((match = importLineRe.exec(code)) !== null) {
+        const specifier = match[2]!
+        if (isRscSpecifier(specifier)) {
+          const importClause = match[1]!.trim()
+          const alias = importClause.split(/\s+as\s+/)[1]?.trim() || importClause
+          rscIdentifiers.add(alias)
+          transformed = transformed.replace(match[0], `// [stripped RSC] ${match[0]}`)
+        }
+      }
+
+      if (rscIdentifiers.size === 0) {
+        return
+      }
+
+      for (const ident of rscIdentifiers) {
+        const re = new RegExp(
+          `("(?:[^"\\\\]|\\\\.)*"\\s*:\\s*)${ident.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`,
+          'g',
+        )
+        transformed = transformed.replace(re, `$1null`)
+      }
+
+      return { code: transformed, map: null }
+    },
+  }
+}
+
 function payloadTransforms(): PluginOption {
   const headScriptsId = 'tanstack-start-injected-head-scripts:v'
   const resolvedHeadScriptsId = '\0' + headScriptsId
@@ -342,6 +402,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
             }
           },
         },
+        stripRscFromClientImportMap(),
         ssrStripDistStyleImports(),
         safeSSRConsole(),
         payloadTransforms(),
