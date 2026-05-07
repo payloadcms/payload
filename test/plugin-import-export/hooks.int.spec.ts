@@ -305,6 +305,42 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
 
+    it('should pass originalData (raw pre-transform rows) to import.hooks.after', async () => {
+      const csvContent = `title,count\n"OriginalData Post","42"`
+      const file = {
+        data: Buffer.from(csvContent),
+        mimetype: 'text/csv',
+        name: 'hooks-after-originaldata-test.csv',
+        size: Buffer.from(csvContent).length,
+      }
+
+      let importDoc = await payload.create({
+        collection: 'posts-with-hooks-import',
+        user,
+        data: { collectionSlug: postsWithHooksSlug, importMode: 'create' },
+        file,
+      })
+
+      importDoc = await payload.findByID({
+        collection: 'posts-with-hooks-import',
+        id: importDoc.id,
+      })
+
+      expect(importDoc.status).toBe('completed')
+      expect(hookCalls.importAfter).toHaveLength(1)
+
+      const afterArgs = hookCalls.importAfter[0]!
+      expect(afterArgs.originalData).toBeDefined()
+      expect(afterArgs.originalData).toHaveLength(1)
+      expect(afterArgs.originalData[0]).toMatchObject({ title: 'OriginalData Post', count: 42 })
+
+      const imported = await payload.find({
+        collection: postsWithHooksSlug,
+        where: { title: { equals: 'OriginalData Post_imported' } },
+      })
+      imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
+    })
+
     it('should call import.hooks.before for JSON imports', async () => {
       const jsonContent = JSON.stringify([{ title: 'JSON Import Hook', count: 5 }])
       const file = {

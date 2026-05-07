@@ -715,6 +715,7 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
         await hooks.after({
           batchNumber,
           format,
+          originalData: originalBatch,
           req,
           result: batchHookResult,
           totalBatches,

@@ -116,6 +116,12 @@ export type ImportAfterHook = (args: {
   batchNumber: number
   /** Import format */
   format: 'csv' | 'json' | ({} & string)
+  /**
+   * Raw parsed file rows for this batch before unflattening and before-hook
+   * transformation. For CSV this is the flat key/value row; for JSON this is
+   * the top-level parsed document. Read-only reference.
+   */
+  originalData: Record<string, unknown>[]
   req: PayloadRequest
   /** Result of this batch — counts and errors. Not the cumulative total. */
   result: ImportResult
