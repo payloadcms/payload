@@ -1,25 +1,24 @@
 'use client'
 import React from 'react'
 
-
-const paths: Record<number, string> = {
-  24: 'M5 7.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5m0 4a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5m.5 3.5a.5.5 0 0 0 0 1h13a.5.5 0 0 0 0-1z',
-}
-
 export const AlignJustifyIcon: React.FC<{
   readonly className?: string
-  readonly size?: 16 | 24
-}> = ({ className, size = 24 }) => (
+}> = ({ className }) => (
   <svg
     aria-hidden="true"
     className={['icon', className].filter(Boolean).join(' ')}
     fill="none"
     focusable="false"
-    height={size}
-    viewBox={`0 0 ${size} ${size}`}
-    width={size}
+    height={24}
+    viewBox="0 0 24 24"
+    width={24}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path clipRule="evenodd" d={paths[size]} fill="currentColor" fillRule="evenodd" />
+    <path
+      clipRule="evenodd"
+      d="M5 7.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5m0 4a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5m.5 3.5a.5.5 0 0 0 0 1h13a.5.5 0 0 0 0-1z"
+      fill="currentColor"
+      fillRule="evenodd"
+    />
   </svg>
 )

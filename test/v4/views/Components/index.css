@@ -208,6 +208,11 @@
   margin: var(--spacer-3);
 }
 
+/* TextState icon is a span, not svg */
+.components-view__icon-item > span + span {
+  margin: var(--spacer-3);
+}
+
 .components-view__icon-item--variants {
   min-width: 140px;
 }
