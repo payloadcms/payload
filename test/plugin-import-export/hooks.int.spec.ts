@@ -374,6 +374,57 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
     })
 
+    it('should pass originalData as raw parsed JSON (before field hooks) to import hooks', async () => {
+      // The posts-with-hooks collection has an `email` field with a beforeImport field hook
+      // that lowercases the value. This test verifies that originalData in both the before
+      // and after collection hooks contains the raw parsed JSON value ('TEST@EXAMPLE.COM'),
+      // not the field-hook-transformed value ('test@example.com').
+      const jsonContent = JSON.stringify([
+        { title: 'JSON Original Data Test', count: 7, email: 'TEST@EXAMPLE.COM' },
+      ])
+
+      const file = {
+        data: Buffer.from(jsonContent),
+        mimetype: 'application/json',
+        name: 'hooks-json-originaldata.json',
+        size: Buffer.from(jsonContent).length,
+      }
+
+      let importDoc = await payload.create({
+        collection: 'posts-with-hooks-import',
+        user,
+        data: { collectionSlug: postsWithHooksSlug, importMode: 'create', format: 'json' },
+        file,
+      })
+
+      importDoc = await payload.findByID({
+        collection: 'posts-with-hooks-import',
+        id: importDoc.id,
+      })
+
+      expect(importDoc.status).toBe('completed')
+      expect(hookCalls.importBefore).toHaveLength(1)
+      expect(hookCalls.importAfter).toHaveLength(1)
+
+      // originalData must be the raw parsed JSON — the email field hook (lowercase) must NOT
+      // have been applied yet. With the bug, originalData === data (after field hooks),
+      // so email would be 'test@example.com' instead of the raw 'TEST@EXAMPLE.COM'.
+      const beforeOriginalData = hookCalls.importBefore[0]!.originalData[0] as Record<
+        string,
+        unknown
+      >
+      expect(beforeOriginalData.email).toBe('TEST@EXAMPLE.COM')
+
+      const afterOriginalData = hookCalls.importAfter[0]!.originalData[0] as Record<string, unknown>
+      expect(afterOriginalData.email).toBe('TEST@EXAMPLE.COM')
+
+      const imported = await payload.find({
+        collection: postsWithHooksSlug,
+        where: { title: { equals: 'JSON Original Data Test_imported' } },
+      })
+      imported.docs.forEach((d) => createdHookPostIDs.push(d.id))
+    })
+
     it('should call import.hooks.before once per batch', async () => {
       const rows = Array.from({ length: 4 }, (_, i) => `"Batch Import ${i}","${i}"`).join('\n')
       const csvContent = `title,count\n${rows}`

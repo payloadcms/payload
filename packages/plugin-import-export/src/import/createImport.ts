@@ -131,7 +131,7 @@ export const createImport = async ({
   })
 
   // Parse the file data
-  let originalDocuments: Record<string, unknown>[] | undefined
+  let originalDocs: Record<string, unknown>[] | undefined
   let documents: Record<string, unknown>[]
   if (format === 'csv') {
     const rawData = await parseCSV({
@@ -139,7 +139,7 @@ export const createImport = async ({
       req,
     })
 
-    originalDocuments = rawData
+    originalDocs = rawData
     documents = rawData
 
     // Unflatten CSV data
@@ -165,6 +165,7 @@ export const createImport = async ({
     }
   } else {
     const parsedDocs = parseJSON({ data: file.data, req })
+    originalDocs = parsedDocs
     // Apply field-level import hooks for JSON format
     documents = parsedDocs.map((doc) =>
       applyFieldHooks({
@@ -225,12 +226,12 @@ export const createImport = async ({
   // Process import with batch processor
   const result = await processor.processImport({
     collectionSlug,
-    documents,
+    docs: documents,
     format,
     hooks: importHooks,
     importMode,
     matchField,
-    originalDocuments,
+    originalDocs,
     req,
     totalBatches,
     user,

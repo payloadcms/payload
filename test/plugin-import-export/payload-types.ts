@@ -513,6 +513,7 @@ export interface PostsWithHook {
   title: string;
   secret?: string | null;
   count?: number | null;
+  email?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -534,7 +535,9 @@ export interface PostsWithFieldHook {
     };
   };
   legacyToCSV?: string | null;
+  legacyToCSVArgs?: string | null;
   legacyFromCSV?: string | null;
+  legacyFromCSVArgs?: string | null;
   items?:
     | {
         note?: string | null;
@@ -549,6 +552,9 @@ export interface PostsWithFieldHook {
         blockType: 'textBlock';
       }[]
     | null;
+  mayCrash?: string | null;
+  rowField?: string | null;
+  collapsibleField?: string | null;
   metadata?: {
     slugFromTitle?: string | null;
     siblingEcho?: string | null;
@@ -892,7 +898,6 @@ export interface Import {
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
-  batchSize?: number | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
   summary?: {
     imported?: number | null;
@@ -930,7 +935,6 @@ export interface PostsImport {
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
-  batchSize?: number | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
   summary?: {
     imported?: number | null;
@@ -968,7 +972,6 @@ export interface PostsWithS3Import {
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
-  batchSize?: number | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
   summary?: {
     imported?: number | null;
@@ -1006,7 +1009,6 @@ export interface PostsWithLimitsImport {
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
-  batchSize?: number | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
   summary?: {
     imported?: number | null;
@@ -1044,7 +1046,6 @@ export interface PostsWithHooksImport {
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
-  batchSize?: number | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
   summary?: {
     imported?: number | null;
@@ -1082,7 +1083,6 @@ export interface PostsWithFieldHooksImport {
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
-  batchSize?: number | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
   summary?: {
     imported?: number | null;
@@ -1120,7 +1120,6 @@ export interface PostsWithColumnMapImport {
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
-  batchSize?: number | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
   summary?: {
     imported?: number | null;
@@ -1540,6 +1539,7 @@ export interface PostsWithHooksSelect<T extends boolean = true> {
   title?: T;
   secret?: T;
   count?: T;
+  email?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1564,7 +1564,9 @@ export interface PostsWithFieldHooksSelect<T extends boolean = true> {
             };
       };
   legacyToCSV?: T;
+  legacyToCSVArgs?: T;
   legacyFromCSV?: T;
+  legacyFromCSVArgs?: T;
   items?:
     | T
     | {
@@ -1582,6 +1584,9 @@ export interface PostsWithFieldHooksSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  mayCrash?: T;
+  rowField?: T;
+  collapsibleField?: T;
   metadata?:
     | T
     | {
@@ -1871,7 +1876,6 @@ export interface ImportsSelect<T extends boolean = true> {
   collectionSlug?: T;
   importMode?: T;
   matchField?: T;
-  batchSize?: T;
   status?: T;
   summary?:
     | T
@@ -1902,7 +1906,6 @@ export interface PostsImportSelect<T extends boolean = true> {
   collectionSlug?: T;
   importMode?: T;
   matchField?: T;
-  batchSize?: T;
   status?: T;
   summary?:
     | T
@@ -1933,7 +1936,6 @@ export interface PostsWithS3ImportSelect<T extends boolean = true> {
   collectionSlug?: T;
   importMode?: T;
   matchField?: T;
-  batchSize?: T;
   status?: T;
   summary?:
     | T
@@ -1964,7 +1966,6 @@ export interface PostsWithLimitsImportSelect<T extends boolean = true> {
   collectionSlug?: T;
   importMode?: T;
   matchField?: T;
-  batchSize?: T;
   status?: T;
   summary?:
     | T
@@ -1995,7 +1996,6 @@ export interface PostsWithHooksImportSelect<T extends boolean = true> {
   collectionSlug?: T;
   importMode?: T;
   matchField?: T;
-  batchSize?: T;
   status?: T;
   summary?:
     | T
@@ -2026,7 +2026,6 @@ export interface PostsWithFieldHooksImportSelect<T extends boolean = true> {
   collectionSlug?: T;
   importMode?: T;
   matchField?: T;
-  batchSize?: T;
   status?: T;
   summary?:
     | T
@@ -2057,7 +2056,6 @@ export interface PostsWithColumnMapImportSelect<T extends boolean = true> {
   collectionSlug?: T;
   importMode?: T;
   matchField?: T;
-  batchSize?: T;
   status?: T;
   summary?:
     | T

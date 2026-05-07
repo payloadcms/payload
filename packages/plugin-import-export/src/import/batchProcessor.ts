@@ -48,7 +48,7 @@ export interface ImportBatchResult {
  */
 export interface ImportProcessOptions {
   collectionSlug: string
-  documents: Record<string, unknown>[]
+  docs: Record<string, unknown>[]
   /** Export format — passed through to hook args */
   format?: 'csv' | 'json'
   /** Lifecycle hooks for this import operation */
@@ -59,7 +59,7 @@ export interface ImportProcessOptions {
   importMode: ImportMode
   matchField?: string
   /** Raw parsed rows before unflattening — used as originalData in hooks */
-  originalDocuments?: Record<string, unknown>[]
+  originalDocs?: Record<string, unknown>[]
   req: PayloadRequest
   /** Total number of batches (pre-computed for hook args) */
   totalBatches?: number
@@ -625,20 +625,17 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
   const processImport = async (processOptions: ImportProcessOptions): Promise<ImportResult> => {
     const {
       collectionSlug,
-      documents,
+      docs: documents,
       format = 'csv',
       hooks,
       importMode,
       matchField,
-      originalDocuments,
+      originalDocs: originalDocs,
       req,
       totalBatches: totalBatchesFromOptions,
       user,
     } = processOptions
     const batches = createBatches(documents, processorOptions.batchSize)
-    const originalBatches = originalDocuments
-      ? createBatches(originalDocuments, processorOptions.batchSize)
-      : batches
     const totalBatches = totalBatchesFromOptions ?? batches.length
 
     const result: ImportResult = {
@@ -655,7 +652,10 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
       }
 
       const batchNumber = i + 1
-      const originalBatch = originalBatches[i] ?? currentBatch
+      const batchStart = i * processorOptions.batchSize
+      const originalBatch = originalDocs
+        ? originalDocs.slice(batchStart, batchStart + currentBatch.length)
+        : currentBatch
 
       const batchToProcess: Record<string, unknown>[] =
         hooks?.before && currentBatch.length > 0

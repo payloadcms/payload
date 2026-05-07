@@ -24,6 +24,7 @@ import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readCSV } from './helpers.js'
 import {
   postsWithColumnMapSlug,
+  postsWithHooksSlug,
   postsWithS3ExportSlug,
   postsWithS3ImportSlug,
   postsWithS3Slug,
@@ -1747,6 +1748,135 @@ test.describe('Import Export Plugin', () => {
         collection: 'posts-with-column-map-export',
         id: exportDoc.id,
       })
+    })
+  })
+
+  test.describe('Hooks — Preview', () => {
+    const createdPostIds: (number | string)[] = []
+
+    test.beforeAll(async () => {
+      // Seed two posts so the export preview has rows to show
+      for (let i = 1; i <= 2; i++) {
+        const doc = await payload.create({
+          collection: postsWithHooksSlug,
+          data: { title: `Hook Preview Post ${i}`, secret: `secret-${i}`, count: i },
+        })
+        createdPostIds.push(doc.id)
+      }
+    })
+
+    test.afterAll(async () => {
+      for (const id of createdPostIds) {
+        await payload.delete({ collection: postsWithHooksSlug, id }).catch(() => null)
+      }
+    })
+
+    // These tests call the preview REST endpoints directly (POST to /api/.../export-preview
+    // and /api/.../preview-data) rather than driving the browser UI. The preview endpoints
+    // are registered as plain Payload endpoints, not Next.js server actions, so they work
+    // reliably in dev mode without triggering UnrecognizedActionError from hot-reload races.
+
+    test('should apply export.hooks.before in CSV export preview (secret field masked)', async () => {
+      const response = await page.request.post(
+        `${serverURL}/api/posts-with-hooks-export/export-preview`,
+        {
+          data: {
+            collectionSlug: postsWithHooksSlug,
+            format: 'csv',
+          },
+        },
+      )
+
+      expect(response.ok()).toBe(true)
+      const body = await response.json()
+
+      expect(body.docs).toBeDefined()
+      expect(body.docs.length).toBeGreaterThan(0)
+
+      // export.hooks.before removes the `secret` field — it must be absent from all preview rows
+      for (const doc of body.docs) {
+        expect(doc).not.toHaveProperty('secret')
+        expect(doc).toHaveProperty('title')
+      }
+
+      // secret column must not appear in the CSV column list
+      expect(body.columns).toBeDefined()
+      expect(body.columns).not.toContain('secret')
+      expect(body.columns).toContain('title')
+    })
+
+    test('should apply export.hooks.before in JSON export preview (secret field masked)', async () => {
+      const response = await page.request.post(
+        `${serverURL}/api/posts-with-hooks-export/export-preview`,
+        {
+          data: {
+            collectionSlug: postsWithHooksSlug,
+            format: 'json',
+          },
+        },
+      )
+
+      expect(response.ok()).toBe(true)
+      const body = await response.json()
+
+      expect(body.docs).toBeDefined()
+      expect(body.docs.length).toBeGreaterThan(0)
+
+      // export.hooks.before masks secret for JSON format too
+      for (const doc of body.docs) {
+        expect(doc).not.toHaveProperty('secret')
+        expect(doc).toHaveProperty('title')
+      }
+    })
+
+    test('should apply import.hooks.before in CSV import preview (title gets _imported suffix)', async () => {
+      const csvContent = 'title,count\n"Hook Preview Import CSV","1"'
+      const fileData = Buffer.from(csvContent).toString('base64')
+
+      const response = await page.request.post(
+        `${serverURL}/api/posts-with-hooks-import/preview-data`,
+        {
+          data: {
+            collectionSlug: postsWithHooksSlug,
+            format: 'csv',
+            fileData,
+          },
+        },
+      )
+
+      expect(response.ok()).toBe(true)
+      const body = await response.json()
+
+      expect(body.docs).toBeDefined()
+      expect(body.docs).toHaveLength(1)
+
+      // import.hooks.before appends '_imported' to the title
+      expect(body.docs[0].title).toBe('Hook Preview Import CSV_imported')
+    })
+
+    test('should apply import.hooks.before in JSON import preview (title gets _imported suffix)', async () => {
+      const jsonContent = JSON.stringify([{ title: 'Hook Preview Import JSON', count: 2 }])
+      const fileData = Buffer.from(jsonContent).toString('base64')
+
+      const response = await page.request.post(
+        `${serverURL}/api/posts-with-hooks-import/preview-data`,
+        {
+          data: {
+            collectionSlug: postsWithHooksSlug,
+            format: 'json',
+            fileData,
+          },
+        },
+      )
+
+      expect(response.ok()).toBe(true)
+      const body = await response.json()
+
+      expect(body.docs).toBeDefined()
+      expect(body.docs).toHaveLength(1)
+
+      // import.hooks.before appends '_imported' to the title
+      expect(body.docs[0].title).toBe('Hook Preview Import JSON_imported')
     })
   })
 })
