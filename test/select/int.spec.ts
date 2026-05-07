@@ -2609,7 +2609,7 @@ describe('Select', () => {
     const calls: Array<{ operation: string; selectKeys?: string[]; userEmail?: string }> = []
 
     const collection = payload.config.collections.find((c) => c.slug === 'force-select')!
-    const originalHooks = collection.hooks?.beforeOperation
+    const originalSelect = collection.select
 
     collection.select = (args) => {
       calls.push({
