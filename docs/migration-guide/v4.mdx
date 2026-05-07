@@ -28,23 +28,6 @@ The `admin.enableListViewSelectAPI` Collection Config property has been removed.
 
 If you previously set `admin.enableListViewSelectAPI: true`, remove the property — the behavior is now default. The `migrate-list-view-select-api` transform in `@payloadcms/codemod` handles this automatically.
 
-#### Admin-only `forceSelect`
-
-If your admin-only functions rely on specific fields, e.g. `admin.formatDocURL`, there's a new `admin.forceSelect` property that is specifically designed to ensure these fields exist when queried within the admin panel. This is useful to avoid forcing these fields to be selected on all external-facing APIs, which is what `forceSelect` (top-level) would do.
-
-```diff
-import type { CollectionConfig } from 'payload'
-
-const MyCollection: CollectionConfig = {
-  slug: 'pages',
-  admin: {
-+    forceSelect: {
-+      _status: true,
-+    },
-  },
-}
-```
-
 ### Globals: `admin.components.elements` renamed to `admin.components.edit`
 
 Global configs now use the same `admin.components` shape as Collections. The Edit View slot container is renamed from `elements` to `edit`, the `Description` slot is hoisted to top-level `admin.components.Description`, and `editMenuItems` is now supported.

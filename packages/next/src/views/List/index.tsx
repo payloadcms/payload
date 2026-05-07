@@ -27,7 +27,6 @@ import {
   appendDateTimezoneSelectFields,
   appendUploadSelectFields,
   combineWhereConstraints,
-  deepMergeWithSourceArrays,
   formatAdminURL,
   isNumber,
   mergeListSearchAndWhere,
@@ -256,12 +255,7 @@ export const renderListView = async (
   })
 
   /** Automatically force select active columns. */
-  let select = transformColumnsToSelect(columns)
-
-  /** Apply custom force select from the collection config, if any. */
-  if (collectionConfig.admin.forceSelect) {
-    select = deepMergeWithSourceArrays(select, collectionConfig.admin.forceSelect)
-  }
+  const select = transformColumnsToSelect(columns)
 
   /** Force select image fields for list view thumbnails */
   appendUploadSelectFields({

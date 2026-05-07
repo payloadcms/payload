@@ -464,13 +464,6 @@ export type CollectionAdminOptions = {
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
-   * Fields to always include when querying documents for the List View, regardless of which columns are active.
-   * Useful when `admin.formatDocURL` or other List View logic reads fields that may not be selected via the Select API.
-   *
-   * Unlike the top-level `forceSelect` (which applies to all reads), this only affects the List View query.
-   */
-  forceSelect?: SelectType
-  /**
    * Function to format the URL for document links in the list view.
    * Return null to disable linking for that document.
    * Return a string to customize the link destination.
