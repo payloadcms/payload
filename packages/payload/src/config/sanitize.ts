@@ -509,14 +509,14 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   await Promise.all(promises)
 
-  const collectionsBySlug = new Map<string, SanitizedCollectionConfig>()
+  const collectionsBySlug: Record<string, SanitizedCollectionConfig> = {}
   for (const collection of config.collections as SanitizedCollectionConfig[]) {
-    collectionsBySlug.set(collection.slug, collection)
+    collectionsBySlug[collection.slug] = collection
   }
 
-  const globalsBySlug = new Map<string, SanitizedGlobalConfig>()
+  const globalsBySlug: Record<string, SanitizedGlobalConfig> = {}
   for (const global of config.globals ?? []) {
-    globalsBySlug.set(global.slug, global)
+    globalsBySlug[global.slug] = global
   }
 
   return { ...config, collectionsBySlug, globalsBySlug } as SanitizedConfig

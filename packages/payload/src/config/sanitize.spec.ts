@@ -12,9 +12,9 @@ describe('sanitizeConfig', () => {
       globals: [{ slug: 'settings', fields: [] }],
     } as any)
 
-    expect(config.collectionsBySlug).toBeInstanceOf(Map)
-    expect(config.collectionsBySlug.size).toBe(config.collections.length)
-    expect(config.collectionsBySlug.get('posts')).toBe(
+    expect(config.collectionsBySlug).toEqual(expect.objectContaining({ posts: expect.any(Object) }))
+    expect(Object.keys(config.collectionsBySlug).length).toBe(config.collections.length)
+    expect(config.collectionsBySlug['posts']).toBe(
       config.collections.find((c) => c.slug === 'posts'),
     )
   })
@@ -28,10 +28,8 @@ describe('sanitizeConfig', () => {
       ],
     } as any)
 
-    expect(config.globalsBySlug).toBeInstanceOf(Map)
-    expect(config.globalsBySlug.size).toBe(config.globals.length)
-    expect(config.globalsBySlug.get('settings')).toBe(
-      config.globals.find((g) => g.slug === 'settings'),
-    )
+    expect(config.globalsBySlug).toEqual(expect.objectContaining({ settings: expect.any(Object) }))
+    expect(Object.keys(config.globalsBySlug).length).toBe(config.globals.length)
+    expect(config.globalsBySlug['settings']).toBe(config.globals.find((g) => g.slug === 'settings'))
   })
 })

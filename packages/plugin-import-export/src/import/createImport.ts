@@ -116,7 +116,7 @@ export const createImport = async ({
     })
   }
 
-  const collectionConfig = req.payload.config.collectionsBySlug.get(collectionSlug)
+  const collectionConfig = req.payload.config.collectionsBySlug[collectionSlug]
 
   if (!collectionConfig) {
     if (!collectionSlug) {

@@ -1586,12 +1586,12 @@ export type SanitizedConfig = {
   } & DeepRequired<Config['admin']>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
-  collectionsBySlug: Map<string, SanitizedCollectionConfig>
+  collectionsBySlug: Record<string, SanitizedCollectionConfig>
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
-  globalsBySlug: Map<string, SanitizedGlobalConfig>
+  globalsBySlug: Record<string, SanitizedGlobalConfig>
   i18n: Required<I18nOptions>
   jobs: SanitizedJobsConfig
   localization: false | SanitizedLocalizationConfig

@@ -144,10 +144,9 @@ export const seoPlugin =
             const result = pluginConfig.generateTitle
               ? await pluginConfig.generateTitle({
                   ...data,
-                  collectionConfig: req.payload.config.collectionsBySlug.get(
-                    reqData.collectionSlug ?? '',
-                  ),
-                  globalConfig: req.payload.config.globalsBySlug.get(reqData.globalSlug ?? ''),
+                  collectionConfig:
+                    req.payload.config.collectionsBySlug[reqData.collectionSlug ?? ''],
+                  globalConfig: req.payload.config.globalsBySlug[reqData.globalSlug ?? ''],
                   req,
                 } satisfies Parameters<GenerateTitle>[0])
               : ''
@@ -168,10 +167,9 @@ export const seoPlugin =
             const result = pluginConfig.generateDescription
               ? await pluginConfig.generateDescription({
                   ...data,
-                  collectionConfig: req.payload.config.collectionsBySlug.get(
-                    reqData.collectionSlug ?? '',
-                  ),
-                  globalConfig: req.payload.config.globalsBySlug.get(reqData.globalSlug ?? ''),
+                  collectionConfig:
+                    req.payload.config.collectionsBySlug[reqData.collectionSlug ?? ''],
+                  globalConfig: req.payload.config.globalsBySlug[reqData.globalSlug ?? ''],
                   req,
                 } satisfies Parameters<GenerateDescription>[0])
               : ''
@@ -192,10 +190,9 @@ export const seoPlugin =
             const result = pluginConfig.generateURL
               ? await pluginConfig.generateURL({
                   ...data,
-                  collectionConfig: req.payload.config.collectionsBySlug.get(
-                    reqData.collectionSlug ?? '',
-                  ),
-                  globalConfig: req.payload.config.globalsBySlug.get(reqData.globalSlug ?? ''),
+                  collectionConfig:
+                    req.payload.config.collectionsBySlug[reqData.collectionSlug ?? ''],
+                  globalConfig: req.payload.config.globalsBySlug[reqData.globalSlug ?? ''],
                   req,
                 } satisfies Parameters<GenerateURL>[0])
               : ''
@@ -216,10 +213,9 @@ export const seoPlugin =
             const result = pluginConfig.generateImage
               ? await pluginConfig.generateImage({
                   ...data,
-                  collectionConfig: req.payload.config.collectionsBySlug.get(
-                    reqData.collectionSlug ?? '',
-                  ),
-                  globalConfig: req.payload.config.globalsBySlug.get(reqData.globalSlug ?? ''),
+                  collectionConfig:
+                    req.payload.config.collectionsBySlug[reqData.collectionSlug ?? ''],
+                  globalConfig: req.payload.config.globalsBySlug[reqData.globalSlug ?? ''],
                   req,
                 } satisfies Parameters<GenerateImage>[0])
               : ''
