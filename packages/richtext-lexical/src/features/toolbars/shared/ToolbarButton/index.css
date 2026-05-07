@@ -44,6 +44,10 @@
     &.disabled {
       cursor: not-allowed;
 
+      &:hover {
+        background: none;
+      }
+
       .icon {
         opacity: 0.2;
       }

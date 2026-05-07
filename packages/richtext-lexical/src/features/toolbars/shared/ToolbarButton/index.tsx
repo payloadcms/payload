@@ -62,6 +62,7 @@ export const ToolbarButton = ({
     <button
       className={className}
       data-button-key={item.key}
+      disabled={!enabled}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       type="button"
