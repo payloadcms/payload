@@ -1,4 +1,3 @@
-import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 import { getFromImportMap } from 'payload/shared'
@@ -12,16 +11,23 @@ export const loadDashboard = createServerFn({ method: 'GET' }).handler(async () 
   const { importMap } = await import('../importMap.server.js')
   const toSerializable = await getToSerializable()
 
-  const result = await getAdminPageData({
-    configPromise: config,
-    importMap,
-    params: { segments: [] },
-    searchParams: {},
-  })
+  let result: Awaited<ReturnType<typeof getAdminPageData>>
+  try {
+    result = await getAdminPageData({
+      configPromise: config,
+      importMap,
+      params: { segments: [] },
+      searchParams: {},
+    })
+  } catch (err) {
+    if (err instanceof Error && err.message === 'not-found') {
+      return { _notFound: true } as any
+    }
+    throw err
+  }
 
   if ('redirect' in result) {
-    // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing redirect objects
-    throw redirect({ to: result.redirect })
+    return { _redirect: result.redirect } as any
   }
   return toSerializable(result.data) as any
 })
@@ -35,16 +41,24 @@ export const loadAdminPage = createServerFn({ method: 'GET' })
     const toSerializable = await getToSerializable()
 
     const segments = data._splat ? data._splat.split('/').filter(Boolean) : []
-    const result = await getAdminPageData({
-      configPromise: config,
-      importMap,
-      params: { segments },
-      searchParams: data.search ?? {},
-    })
+
+    let result: Awaited<ReturnType<typeof getAdminPageData>>
+    try {
+      result = await getAdminPageData({
+        configPromise: config,
+        importMap,
+        params: { segments },
+        searchParams: data.search ?? {},
+      })
+    } catch (err) {
+      if (err instanceof Error && err.message === 'not-found') {
+        return { _notFound: true } as any
+      }
+      throw err
+    }
 
     if ('redirect' in result) {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing redirect objects
-      throw redirect({ to: result.redirect })
+      return { _redirect: result.redirect } as any
     }
 
     const { customViewRenderContext, ...pageData } = result.data
