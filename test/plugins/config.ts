@@ -1,8 +1,6 @@
-import type { Config } from 'payload'
-
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { definePlugin } from 'payload'
+import { type Config, definePlugin } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'

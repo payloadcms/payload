@@ -64,10 +64,16 @@ export const addListFilter = async ({
   })
 
   if (value !== undefined) {
-    const networkPromise = page.waitForResponse(
-      (response) =>
-        response.url().includes(encodeURIComponent('where[or')) && response.status() === 200,
-    )
+    const networkPromise = page
+      .waitForResponse(
+        (response) =>
+          (response.url().includes(encodeURIComponent('where[or')) ||
+            response.url().includes('where%5Bor')) &&
+          response.status() === 200,
+        { timeout: 5000 },
+      )
+      .catch(() => null)
+
     const valueLocator = condition.locator('.condition__value')
 
     // Check if this is a react-select input
@@ -106,7 +112,11 @@ export const addListFilter = async ({
       await expect(valueInput).toHaveValue(stringValue)
     }
 
-    await networkPromise
+    const matched = await networkPromise
+    if (!matched) {
+      await page.waitForURL((url) => url.search.includes('where'), { timeout: 10000 })
+      await page.waitForLoadState('networkidle')
+    }
   }
 
   return { whereBuilder, condition }

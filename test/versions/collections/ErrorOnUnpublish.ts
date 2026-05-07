@@ -1,6 +1,4 @@
-import type { CollectionConfig } from 'payload'
-
-import { APIError } from 'payload'
+import { APIError, type CollectionConfig } from 'payload'
 
 import { errorOnUnpublishSlug } from '../slugs.js'
 

@@ -34,10 +34,13 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   onSave: onSaveFromProps,
   overrideEntityVisibility = true,
   redirectAfterCreate,
-  redirectAfterDelete,
-  redirectAfterDuplicate,
-  redirectAfterRestore,
+  redirectAfterDelete: redirectAfterDeleteProp,
+  redirectAfterDuplicate: redirectAfterDuplicateProp,
+  redirectAfterRestore: redirectAfterRestoreProp,
 }) => {
+  const redirectAfterDelete = redirectAfterDeleteProp ?? false
+  const redirectAfterDuplicate = redirectAfterDuplicateProp ?? false
+  const redirectAfterRestore = redirectAfterRestoreProp ?? false
   const { getEntityConfig } = useConfig()
 
   const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug }))
@@ -73,10 +76,9 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
             initialData,
             overrideEntityVisibility,
             redirectAfterCreate,
-            redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
-            redirectAfterDuplicate:
-              redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
-            redirectAfterRestore: redirectAfterRestore !== undefined ? redirectAfterRestore : false,
+            redirectAfterDelete,
+            redirectAfterDuplicate,
+            redirectAfterRestore,
             signal: controller.signal,
           })
 

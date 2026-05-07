@@ -1,6 +1,4 @@
-import type { CollectionConfig } from 'payload'
-
-import { ValidationError } from 'payload'
+import { type CollectionConfig, ValidationError } from 'payload'
 
 import { categoriesSlug, hiddenPostsSlug, postsSlug, versionsSlug } from '../shared.js'
 import { singularSlug } from './Singular.js'

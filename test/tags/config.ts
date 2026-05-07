@@ -4,11 +4,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-import type { CollectionConfig } from 'payload'
-
-import type { CollectionConfig } from 'payload'
-
-import { createTagField } from 'payload'
+import { type CollectionConfig, createTagField } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
