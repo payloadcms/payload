@@ -219,6 +219,33 @@ export type SelectFn<TSelect extends SelectType = SelectType> = (
   args: SelectFnArgs,
 ) => TSelect | undefined
 
+/**
+ * Shared shape for the entity-level `select` config used by Collections and Globals.
+ * The JSDoc on the `select` property is the single source of truth — pick from this
+ * type when defining the config:
+ *
+ *   & Pick<WithSelectFn<...>, 'select'>
+ */
+export type WithSelectFn<TSelect extends SelectType = SelectType> = {
+  /**
+   * Entity-level Select API configuration.
+   *
+   * A function that receives the current request context (`operation`, `req`,
+   * the caller's `select`) and returns the final `select` to apply, replacing
+   * the caller's. Return `undefined` to leave the caller's `select` unchanged.
+   *
+   * Useful to dynamically modify the caller's selection based on the request context:
+   *  - Forcing a field to be populated for reference within hooks / access control.
+   *  - Differentiating between API requests and admin panel requests, to optimize
+   *    the amount of data being queried in each case.
+   *
+   * Note: per-document data is not available — this runs before the read.
+   *
+   * @see https://payloadcms.com/docs/queries/select
+   */
+  select?: SelectFn<TSelect>
+}
+
 export type ApplyDisableErrors<T, DisableErrors = false> = false extends DisableErrors
   ? T
   : null | T

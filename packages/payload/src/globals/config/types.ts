@@ -24,7 +24,7 @@ import type {
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
-import type { PayloadRequest, SelectFn, SelectIncludeType, Where } from '../../types/index.js'
+import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
@@ -230,23 +230,6 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
         duration: number
       }
     | false
-  /**
-   * Entity-level Select API configuration.
-   *
-   * A function that receives the current request context (`operation`, `req`,
-   * the caller's `select`) and returns the final `select` to apply, replacing
-   * the caller's. Return `undefined` to leave the caller's `select` unchanged.
-   *
-   * Useful for augmenting the caller's selection or enforcing fields are
-   * always read for access control / hooks.
-   *
-   * Note: per-document data is not available — runs before the read.
-   */
-  select?: SelectFn<
-    IsAny<SelectFromGlobalSlug<TSlug>> extends true
-      ? SelectIncludeType
-      : SelectFromGlobalSlug<TSlug>
-  >
   slug: string
   /**
    * Options used in typescript generation
@@ -258,7 +241,14 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     interface?: string
   }
   versions?: boolean | IncomingGlobalVersions
-}
+} & Pick<
+  WithSelectFn<
+    IsAny<SelectFromGlobalSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromGlobalSlug<TSlug>
+  >,
+  'select'
+>
 
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {

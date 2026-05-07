@@ -53,12 +53,12 @@ import type {
 } from '../../index.js'
 import type {
   PayloadRequest,
-  SelectFn,
   SelectIncludeType,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
   Where,
+  WithSelectFn,
 } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
@@ -710,22 +710,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @experimental There may be frequent breaking changes to this API
    */
   orderable?: boolean
-  /**
-   * Entity-level Select API configuration.
-   *
-   * A function that receives the caller's `select` argument and returns a modified `select`.
-   *
-   * Useful to dynamically modify the caller's selection based the request context.
-   *  - Forcing a field to be populated for reference within hooks.
-   *  - Differentiating between API requests and admin panel requests, to optimize the amount of data being queried in each case.
-   *
-   * @see https://payloadcms.com/docs/queries/select
-   */
-  select?: SelectFn<
-    IsAny<SelectFromCollectionSlug<TSlug>> extends true
-      ? SelectIncludeType
-      : SelectFromCollectionSlug<TSlug>
-  >
   slug: string
   /**
    * Enable tags hierarchy preset for this collection.
@@ -774,7 +758,14 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @default false // disable versioning
    */
   versions?: boolean | IncomingCollectionVersions
-}
+} & Pick<
+  WithSelectFn<
+    IsAny<SelectFromCollectionSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromCollectionSlug<TSlug>
+  >,
+  'select'
+>
 
 export type SanitizedJoin = {
   /**
