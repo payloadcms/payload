@@ -55,8 +55,8 @@ export function TableGridPopup({
   const colsInputRef = useRef<HTMLInputElement>(null)
   const rowsInputRef = useRef<HTMLInputElement>(null)
 
-  const effectiveCols = hoverCol > 0 ? hoverCol : inputCols ? parseInt(inputCols, 10) || 0 : 0
-  const effectiveRows = hoverRow > 0 ? hoverRow : inputRows ? parseInt(inputRows, 10) || 0 : 0
+  const effectiveCols = hoverCol > 0 ? hoverCol : inputCols ? parseInt(inputCols, 10) || 0 : 5
+  const effectiveRows = hoverRow > 0 ? hoverRow : inputRows ? parseInt(inputRows, 10) || 0 : 5
 
   useEffect(() => {
     if (!isOpen) {
@@ -174,7 +174,7 @@ export function TableGridPopup({
                 onBlur={() => setFocusedInput(null)}
                 onChange={(e) => setInputCols(e.target.value)}
                 onFocus={() => setFocusedInput('cols')}
-                placeholder={hoverCol > 0 ? String(hoverCol) : ''}
+                placeholder={hoverCol > 0 ? String(hoverCol) : '5'}
                 ref={colsInputRef}
                 type="number"
                 value={inputCols}
@@ -194,7 +194,7 @@ export function TableGridPopup({
                 onBlur={() => setFocusedInput(null)}
                 onChange={(e) => setInputRows(e.target.value)}
                 onFocus={() => setFocusedInput('rows')}
-                placeholder={hoverRow > 0 ? String(hoverRow) : ''}
+                placeholder={hoverRow > 0 ? String(hoverRow) : '5'}
                 ref={rowsInputRef}
                 type="number"
                 value={inputRows}

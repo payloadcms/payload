@@ -1142,9 +1142,9 @@ describe('lexicalBlocks', () => {
       await uploadBlock.scrollIntoViewIfNeeded()
       await expect(uploadBlock).toBeVisible()
 
-      await expect(
-        uploadBlock.locator('.LexicalEditorTheme__upload__doc-drawer-toggler strong'),
-      ).toHaveText('payload.jpg')
+      await expect(uploadBlock.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
+        'payload.jpg',
+      )
     })
 
     test('should respect required error state in deeply nested text field', async () => {

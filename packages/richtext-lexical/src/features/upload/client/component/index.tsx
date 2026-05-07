@@ -93,13 +93,12 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
   })
 
   // Need to use hook to initialize useEffect that restores cursor position
-  const { toggleDrawer: _toggleDrawer } = useLexicalDrawer(extraFieldsDrawerSlug, true)
+  const { toggleDrawer } = useLexicalDrawer(extraFieldsDrawerSlug, true)
 
-  const { closeDocumentDrawer, DocumentDrawer, DocumentDrawerToggler, openDocumentDrawer } =
-    useLexicalDocumentDrawer({
-      id: value,
-      collectionSlug: relatedCollection.slug,
-    })
+  const { closeDocumentDrawer, DocumentDrawer, DocumentDrawerToggler } = useLexicalDocumentDrawer({
+    id: value,
+    collectionSlug: relatedCollection.slug,
+  })
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
@@ -201,7 +200,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
 
           {isEditable && (
             <div className={`${baseClass}__floater`}>
-              <Pill pillStyle="dark" size="small">
+              <Pill className={`${baseClass}__collectionLabel`} pillStyle="dark" size="small">
                 {getTranslation(relatedCollection.labels.singular, i18n)}
               </Pill>
 
@@ -211,18 +210,19 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
                 </span>
               </DocumentDrawerToggler>
 
-              {/* TODO: Wire up functionality for direct edit (crop/focal point) instead of opening DocumentDrawer */}
-              <Button
-                buttonStyle="icon-label"
-                className={`${baseClass}__edit-button`}
-                disabled={!isEditable}
-                el="button"
-                icon="edit"
-                onClick={openDocumentDrawer}
-                round
-                size="medium"
-                tooltip={t('fields:editRelationship')}
-              />
+              {hasExtraFields ? (
+                <Button
+                  buttonStyle="icon-label"
+                  className={`${baseClass}__upload-drawer-toggler`}
+                  disabled={!isEditable}
+                  el="button"
+                  icon="edit"
+                  onClick={toggleDrawer}
+                  round
+                  size="medium"
+                  tooltip={t('fields:editRelationship')}
+                />
+              ) : null}
 
               <div className={`${baseClass}__divider`} />
 
