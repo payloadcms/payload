@@ -124,4 +124,18 @@
   .group-field--within-tab + .group-field--within-row {
     padding-top: 0;
   }
+
+  @media (max-width: 768px) {
+    .group-field--top-level {
+      &::before {
+        content: '';
+        position: absolute;
+        top: calc(var(--spacer-5) / -2.5);
+        left: calc(var(--gutter-h) * -1);
+        right: calc(var(--gutter-h) * -1);
+        height: 0;
+        border-top: 1px solid var(--border-default);
+      }
+    }
+  }
 }

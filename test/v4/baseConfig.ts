@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { getFileByPath } from 'payload'
 
+import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
 import {
   getRichTextContent,
@@ -12,7 +13,7 @@ import {
   listsContent,
   typographyContent,
 } from './seed/richTextData.js'
-import { blocksFieldsSlug, richTextFieldsSlug, textFieldsSlug, uploadsSlug } from './slugs.js'
+import { blocksFieldsSlug, collectionSlugs, richTextFieldsSlug, textFieldsSlug, uploadsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,6 +24,7 @@ import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
 import DateFields from './collections/Date/index.js'
+import DraftVersions from './collections/DraftVersions/index.js'
 import EmailFields from './collections/Email/index.js'
 import FolderItems from './collections/FolderItems/index.js'
 import { Folders } from './collections/Folders/index.js'
@@ -77,6 +79,7 @@ export const collections: CollectionConfig[] = [
   TextareaFields,
   Uploads,
   UploadFields,
+  DraftVersions,
 ]
 
 export const baseConfig: Partial<Config> = {
@@ -96,77 +99,47 @@ export const baseConfig: Partial<Config> = {
     },
   },
   onInit: async (payload) => {
-    const usersCount = await payload.count({ collection: 'users' })
-    if (usersCount.totalDocs === 0) {
+    // Clear existing data before seeding
+    await resetDB(payload, collectionSlugs)
+
+    // Seed users
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+
+    const authors = [
+      { email: 'alice@example.com', password: 'password123' },
+      { email: 'bob@example.com', password: 'password123' },
+      { email: 'charlie@example.com', password: 'password123' },
+    ]
+
+    for (const author of authors) {
       await payload.create({
         collection: 'users',
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
+        data: author,
       })
-
-      // Seed additional users for relationship field testing
-      const authors = [
-        { email: 'alice@example.com', password: 'password123' },
-        { email: 'bob@example.com', password: 'password123' },
-        { email: 'charlie@example.com', password: 'password123' },
-      ]
-
-      for (const author of authors) {
-        await payload.create({
-          collection: 'users',
-          data: author,
-        })
-      }
     }
 
     // Seed text-fields collection for relationship testing
-    const textFieldsCount = await payload.count({ collection: textFieldsSlug })
-    if (textFieldsCount.totalDocs === 0) {
-      const posts = [
-        { title: 'Getting Started with Payload' },
-        { title: 'Advanced Relationship Fields' },
-        { title: 'Building a Blog with Payload' },
-        { title: 'Understanding Collections' },
-        { title: 'Working with Uploads' },
-        { title: 'Custom Components Guide' },
-        { title: 'Authentication Deep Dive' },
-        { title: 'GraphQL vs REST API' },
-      ]
+    const posts = [
+      { title: 'Getting Started with Payload' },
+      { title: 'Advanced Relationship Fields' },
+      { title: 'Building a Blog with Payload' },
+      { title: 'Understanding Collections' },
+      { title: 'Working with Uploads' },
+      { title: 'Custom Components Guide' },
+      { title: 'Authentication Deep Dive' },
+      { title: 'GraphQL vs REST API' },
+    ]
 
-      for (const post of posts) {
-        await payload.create({
-          collection: textFieldsSlug,
-          data: post,
-        })
-      }
-    }
-
-    const blocksCount = await payload.count({ collection: blocksFieldsSlug })
-    if (blocksCount.totalDocs === 0) {
+    for (const post of posts) {
       await payload.create({
-        collection: blocksFieldsSlug,
-        data: {
-          multipleBlockTypes: [
-            {
-              blockType: 'test-block',
-              blockName: 'My Named Block',
-              text: 'This block has a title',
-            },
-            {
-              blockType: 'hero-block',
-              heading: 'Hero heading',
-            },
-          ],
-          readOnlyBlocks: [
-            {
-              blockType: 'test-block',
-              blockName: 'Read Only Named Block',
-              text: 'This is a read-only block',
-            },
-          ],
-        },
+        collection: textFieldsSlug,
+        data: post,
       })
     }
 
@@ -211,6 +184,30 @@ export const baseConfig: Partial<Config> = {
         },
       })
     }
+    // Seed blocks collection
+    await payload.create({
+      collection: blocksFieldsSlug,
+      data: {
+        multipleBlockTypes: [
+          {
+            blockType: 'test-block',
+            blockName: 'My Named Block',
+            text: 'This block has a title',
+          },
+          {
+            blockType: 'hero-block',
+            heading: 'Hero heading',
+          },
+        ],
+        readOnlyBlocks: [
+          {
+            blockType: 'test-block',
+            blockName: 'Read Only Named Block',
+            text: 'This is a read-only block',
+          },
+        ],
+      },
+    })
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

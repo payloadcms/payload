@@ -6,6 +6,6 @@
 
   .field-description--margin-bottom {
     margin-top: 0;
-    margin-bottom: var(--spacer-2);
+    margin-bottom: var(--spacer-3);
   }
 }
