@@ -147,6 +147,7 @@ import type {
   PickPreserveOptional,
   Where,
 } from '../../types/index.js'
+import type { DisabledOptions } from '../isFieldDisabled.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -369,23 +370,12 @@ export type FieldAdmin = {
    * we use the field description to generate JSDoc comments for the generated TypeScript types.
    */
   description?: Description
-  disableBulkEdit?: boolean
-  disabled?: boolean
   /**
-   * Shows / hides fields from appearing in the list view groupBy options.
-   * @type boolean
+   * Controls where this field is disabled in the admin UI.
+   * - `true` disables the field everywhere (edit form, list column, list filter, groupBy, bulk edit).
+   * - An object enables granular control per area: `{ field?, column?, filter?, groupBy?, bulkEdit? }`.
    */
-  disableGroupBy?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view column selector.
-   * @type boolean
-   */
-  disableListColumn?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view filter options.
-   * @type boolean
-   */
-  disableListFilter?: boolean
+  disabled?: boolean | DisabledOptions
   hidden?: boolean
   position?: FieldPosition
   readOnly?: boolean
@@ -398,23 +388,12 @@ export type AdminClient = {
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
   description?: StaticDescription
-  disableBulkEdit?: boolean
-  disabled?: boolean
   /**
-   * Shows / hides fields from appearing in the list view groupBy options.
-   * @type boolean
+   * Controls where this field is disabled in the admin UI.
+   * - `true` disables the field everywhere (edit form, list column, list filter, groupBy, bulk edit).
+   * - An object enables granular control per area: `{ field?, column?, filter?, groupBy?, bulkEdit? }`.
    */
-  disableGroupBy?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view column selector.
-   * @type boolean
-   */
-  disableListColumn?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view filter options.
-   * @type boolean
-   */
-  disableListFilter?: boolean
+  disabled?: boolean | DisabledOptions
   hidden?: boolean
   position?: FieldPosition
   readOnly?: boolean
@@ -968,15 +947,12 @@ export type UIField = {
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
     /**
-     * Set `false` make the UI field appear in the list view column selector. `true` by default for UI fields.
-     * @default true
+     * Controls where this UI field is disabled in the admin UI.
+     * - `true` disables the field everywhere.
+     * - An object enables granular control per area: `{ field?, column?, filter?, groupBy?, bulkEdit? }`.
+     * UI fields default to `disabled: { bulkEdit: true }` via sanitize.
      */
-    disableBulkEdit?: boolean
-    /**
-     * Shows / hides fields from appearing in the list view column selector.
-     * @type boolean
-     */
-    disableListColumn?: boolean
+    disabled?: boolean | DisabledOptions
     position?: string
     width?: CSSProperties['width']
   }
@@ -991,10 +967,7 @@ export type UIFieldClient = {
   // still include FieldBaseClient.admin (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
 
   admin: DeepUndefinable<FieldBaseClient['admin']> &
-    Pick<
-      UIField['admin'],
-      'custom' | 'disableBulkEdit' | 'disableListColumn' | 'position' | 'width'
-    >
+    Pick<UIField['admin'], 'custom' | 'disabled' | 'position' | 'width'>
 } & Omit<DeepUndefinable<FieldBaseClient>, 'admin'> & // still include FieldBaseClient (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
   Pick<UIField, 'label' | 'name' | 'type'>
 
@@ -2106,10 +2079,17 @@ export function fieldIsID<TField extends ClientField | Field>(
 export function fieldIsHiddenOrDisabled<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
 >(field: TField): field is { admin: { hidden: true } } & TField {
-  return (
-    ('hidden' in field && field.hidden) ||
-    ('admin' in field && 'disabled' in field.admin! && field.admin.disabled!)
-  )
+  if ('hidden' in field && field.hidden) {
+    return true
+  }
+  if (!('admin' in field) || !field.admin || !('disabled' in field.admin)) {
+    return false
+  }
+  const disabled = field.admin.disabled
+  if (disabled === true) {
+    return true
+  }
+  return typeof disabled === 'object' && disabled !== null && disabled.field === true
 }
 
 export function fieldAffectsData<
