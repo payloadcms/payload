@@ -11,9 +11,9 @@ export async function runCodegenEval(
   starterConfig: string,
   options: RunCodegenEvalOptions = {},
 ): Promise<CodegenRunnerResult> {
-  const { model = DEFAULT_RUNNER_MODEL, systemPromptKey = 'qaWithSkill' } = options
+  const { model = DEFAULT_RUNNER_MODEL, systemPromptKey = 'codegenWithSkill' } = options
   const system =
-    systemPromptKey === 'qaNoSkill'
+    systemPromptKey === 'codegenNoSkill'
       ? SYSTEM_PROMPTS.codegenNoSkill
       : SYSTEM_PROMPTS.codegenWithSkill
 

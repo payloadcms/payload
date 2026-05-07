@@ -29,7 +29,7 @@ function cacheFilePath(key: string): string {
  * Prompt keys that inject SKILL.md content into the system prompt.
  * Cache entries for these keys must be invalidated when the skill file changes.
  */
-const SKILL_PROMPT_KEYS = new Set(['codegenWithSkill', 'qaWithSkill'])
+const SKILL_PROMPT_KEYS = new Set(['codegenWithSkill'])
 
 /** Lazy-loaded 8-char prefix of the full skill context (SKILL.md + every reference/*.md). Computed once per process. */
 let _skillHash: null | string = null
@@ -113,30 +113,6 @@ export function pruneStaleEntries(
       // skip unreadable / corrupt entries
     }
   }
-}
-
-/**
- * Generates a cache key for a QA eval case.
- * Keyed on: question input, expected answer, system prompt, fixture path (if any), and model ID.
- * For skill-variant prompts, also includes an 8-char hash of SKILL.md so the cache is
- * automatically invalidated whenever the skill file changes.
- */
-export function qaKey(params: {
-  expected: string
-  fixturePath?: string
-  input: string
-  modelId: string
-  systemPromptKey: string
-}): string {
-  return hashKey({
-    type: 'qa',
-    input: params.input,
-    expected: params.expected,
-    fixturePath: params.fixturePath ?? '',
-    systemPromptKey: params.systemPromptKey,
-    modelId: params.modelId,
-    skillHash: SKILL_PROMPT_KEYS.has(params.systemPromptKey) ? getSkillHash() : undefined,
-  })
 }
 
 /**

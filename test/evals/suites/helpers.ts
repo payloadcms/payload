@@ -1,35 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import type { CodegenEvalCase, EvalCase, SystemPromptKey } from '../types.js'
+import type { CodegenEvalCase } from '../types.js'
 import type { SuiteOptions } from './types.js'
 
 import { runCodegenCase } from '../runCodegenDataset.js'
-import { runQACase } from '../runDataset.js'
 import { caseFailureMessage } from '../utils/index.js'
-
-type RegisterQAOptions = {
-  /** Override the variant's systemPromptKey (used by negative.ts to force configReview). */
-  systemPromptKeyOverride?: SystemPromptKey
-} & SuiteOptions
-
-export function registerQACases(
-  dataset: EvalCase[],
-  label: string,
-  options: RegisterQAOptions = {},
-) {
-  const { labelSuffix = '', runnerModel, systemPromptKey, systemPromptKeyOverride } = options
-  describe.concurrent(`QA${labelSuffix}`, () => {
-    for (const testCase of dataset) {
-      it(testCase.input, async () => {
-        const result = await runQACase(testCase, label, {
-          runnerModel,
-          systemPromptKey: systemPromptKeyOverride ?? systemPromptKey,
-        })
-        expect(result.pass, caseFailureMessage(result)).toBe(true)
-      })
-    }
-  })
-}
 
 type RegisterCodegenOptions = {
   /** When false, asserts result.pass === false (used by negative invalid-instruction tests). */

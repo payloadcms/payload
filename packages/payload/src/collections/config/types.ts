@@ -58,6 +58,7 @@ import type {
   Sort,
   TransformCollectionWithSelect,
   Where,
+  WithSelectFn,
 } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
@@ -600,12 +601,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   folders?: boolean | FoldersConfig
   /**
-   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
-   */
-  forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
-    ? SelectIncludeType
-    : SelectFromCollectionSlug<TSlug>
-  /**
    * GraphQL configuration
    */
   graphQL?:
@@ -754,7 +749,14 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @default false // disable versioning
    */
   versions?: boolean | IncomingCollectionVersions
-}
+} & Pick<
+  WithSelectFn<
+    IsAny<SelectFromCollectionSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromCollectionSlug<TSlug>
+  >,
+  'select'
+>
 
 export type SanitizedJoin = {
   /**

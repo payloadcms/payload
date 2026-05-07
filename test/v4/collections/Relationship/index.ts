@@ -54,6 +54,15 @@ const RelationshipFields: CollectionConfig = {
         description: 'This field is read-only',
       },
     },
+    {
+      name: 'polymorphic',
+      type: 'relationship',
+      relationTo: ['users', textFieldsSlug],
+      label: 'Polymorphic',
+      admin: {
+        description: 'Can relate to users or text fields',
+      },
+    },
   ],
 }
 

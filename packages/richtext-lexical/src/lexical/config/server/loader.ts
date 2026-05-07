@@ -117,14 +117,16 @@ export async function loadFeatures({
   parentIsLocalized: boolean
   unSanitizedEditorConfig: ServerEditorConfig
 }): Promise<ResolvedServerFeatureMap> {
-  // First remove all duplicate features. The LAST feature with a given key wins.
-  unSanitizedEditorConfig.features = unSanitizedEditorConfig.features
-    .reverse()
-    .filter((f, i, arr) => {
-      const firstIndex = arr.findIndex((f2) => f2.key === f.key)
-      return firstIndex === i
-    })
-    .reverse()
+  // First remove all duplicate features. The LAST feature with a given key wins,
+  // and keeps the position of its last occurrence (matching the prior reverse/filter/reverse semantics).
+  const dedupedByKey = new Map<string, FeatureProviderServer<unknown, unknown, unknown>>()
+  for (const f of unSanitizedEditorConfig.features) {
+    if (dedupedByKey.has(f.key)) {
+      dedupedByKey.delete(f.key)
+    }
+    dedupedByKey.set(f.key, f)
+  }
+  unSanitizedEditorConfig.features = Array.from(dedupedByKey.values())
 
   unSanitizedEditorConfig.features = sortFeaturesForOptimalLoading(unSanitizedEditorConfig.features)
 
@@ -146,8 +148,7 @@ export async function loadFeatures({
     }
     if (featureProvider.dependencies?.length) {
       for (const dependencyKey of featureProvider.dependencies) {
-        const found = unSanitizedEditorConfig.features.find((f) => f.key === dependencyKey)
-        if (!found) {
+        if (!featureProviderMap.has(dependencyKey)) {
           throw new Error(
             `Feature ${featureProvider.key} has a dependency ${dependencyKey} which does not exist.`,
           )
@@ -160,10 +161,7 @@ export async function loadFeatures({
         // look in the resolved features instead of the editorConfig.features, as a dependency requires the feature to be loaded before it, contrary to a soft-dependency
         const found = resolvedFeatures.get(priorityDependencyKey)
         if (!found) {
-          const existsInEditorConfig = unSanitizedEditorConfig.features.find(
-            (f) => f.key === priorityDependencyKey,
-          )
-          if (!existsInEditorConfig) {
+          if (!featureProviderMap.has(priorityDependencyKey)) {
             throw new Error(
               `Feature ${featureProvider.key} has a priority dependency ${priorityDependencyKey} which does not exist.`,
             )

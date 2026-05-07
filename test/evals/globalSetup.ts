@@ -24,38 +24,19 @@ type SnapshotResult = {
   pass: boolean
   question: string
   score?: number
-  type: 'codegen' | 'qa'
+  type: 'codegen'
 }
 
-type Variant = 'baseline' | 'low-power' | 'skill'
-
-function isHighPowerModel(modelId: string | undefined): boolean {
-  if (!modelId) {
-    return true
-  }
-  return modelId.includes('gpt-5') || modelId.includes('o3') || modelId.includes('claude-3-5')
-}
+type Variant = 'baseline' | 'skill'
 
 function getEntryVariant(result: CacheEntry['result']): null | Variant {
-  const key = result.systemPromptKey
-  if (key === 'qaNoSkill' || key === 'codegenNoSkill') {
+  if (result.systemPromptKey === 'codegenNoSkill') {
     return 'baseline'
-  }
-  if (!isHighPowerModel(result.modelId)) {
-    return 'low-power'
   }
   if (!result.modelId) {
     return null
   }
   return 'skill'
-}
-
-function isCodegenResult(result: CacheEntry['result']): boolean {
-  return (
-    result.changeDescription !== undefined ||
-    (result.tscErrors?.length ?? 0) > 0 ||
-    (result.assertionErrors?.length ?? 0) > 0
-  )
 }
 
 export function setup() {
@@ -94,7 +75,7 @@ export function teardown() {
         pass: raw.result.pass,
         question: raw.result.question,
         score: raw.result.score,
-        type: isCodegenResult(raw.result) ? 'codegen' : 'qa',
+        type: 'codegen',
       })
     } catch {
       // skip corrupt entries
@@ -106,10 +87,7 @@ export function teardown() {
   }
 
   results.sort(
-    (a, b) =>
-      a.category.localeCompare(b.category) ||
-      a.type.localeCompare(b.type) ||
-      a.question.localeCompare(b.question),
+    (a, b) => a.category.localeCompare(b.category) || a.question.localeCompare(b.question),
   )
 
   mkdirSync(runsDir, { recursive: true })
