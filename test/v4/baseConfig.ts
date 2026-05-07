@@ -5,6 +5,7 @@ import path from 'path'
 
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
+import { blocksSeedData } from './seed/blocksSeedData.js'
 import { blocksFieldsSlug, collectionSlugs, textFieldsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -126,36 +127,10 @@ export const baseConfig: Partial<Config> = {
       { title: 'GraphQL vs REST API' },
     ]
 
-    for (const post of posts) {
-      await payload.create({
-        collection: textFieldsSlug,
-        data: post,
-      })
-    }
-
     // Seed blocks collection
     await payload.create({
       collection: blocksFieldsSlug,
-      data: {
-        multipleBlockTypes: [
-          {
-            blockType: 'test-block',
-            blockName: 'My Named Block',
-            text: 'This block has a title',
-          },
-          {
-            blockType: 'hero-block',
-            heading: 'Hero heading',
-          },
-        ],
-        readOnlyBlocks: [
-          {
-            blockType: 'test-block',
-            blockName: 'Read Only Named Block',
-            text: 'This is a read-only block',
-          },
-        ],
-      },
+      data: blocksSeedData,
     })
   },
   typescript: {

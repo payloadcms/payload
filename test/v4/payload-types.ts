@@ -288,6 +288,26 @@ export interface BlocksField {
             blockName?: string | null;
             blockType: 'quote-block';
           }
+        | {
+            heading?: string | null;
+            body?: string | null;
+            link?: string | null;
+            footnote?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content-block';
+          }
+        | {
+            title?: string | null;
+            firstName?: string | null;
+            lastName?: string | null;
+            email?: string | null;
+            message?: string | null;
+            terms?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'form-block';
+          }
       )[]
     | null;
   blocksWithRequiredField?:
@@ -1259,6 +1279,28 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
           | {
               quote?: T;
               author?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'content-block'?:
+          | T
+          | {
+              heading?: T;
+              body?: T;
+              link?: T;
+              footnote?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'form-block'?:
+          | T
+          | {
+              title?: T;
+              firstName?: T;
+              lastName?: T;
+              email?: T;
+              message?: T;
+              terms?: T;
               id?: T;
               blockName?: T;
             };
