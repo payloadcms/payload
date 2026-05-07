@@ -13,6 +13,10 @@ const ArrayFields: CollectionConfig = {
           name: 'name',
           type: 'text',
         },
+        {
+          name: 'anotherNestedTextField',
+          type: 'text',
+        },
       ],
     },
     {

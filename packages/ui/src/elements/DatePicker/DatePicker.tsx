@@ -13,8 +13,8 @@ import type { Props } from './types.js'
 import { CalendarIcon } from '../../icons/Calendar/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.css'
 import { getFormattedLocale } from './getFormattedLocale.js'
+import './index.css'
 
 const baseClass = 'date-time-picker'
 
@@ -96,6 +96,7 @@ const DatePicker: React.FC<Props> = (props) => {
     popperPlacement: 'bottom-start',
     previousMonthButtonLabel: <ChevronIcon direction="left" />,
     selected: value && new Date(value),
+    shouldCloseOnSelect: false,
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',

@@ -7,7 +7,8 @@
   label.field-label:not(.unstyled) {
     display: flex;
     color: var(--text-default);
-    font-family: var(--text-body-medium-font-family);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-weight: var(--text-body-medium-strong-font-weight);
 
     html:not([dir='RTL']) & {
       margin-right: auto;

@@ -90,8 +90,9 @@ export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selected
             </div>
           </div>
           <div className="components-view__icon-size-row">
-            <span>direction: up | left | right</span>
+            <span>direction: down (default) | up | left | right</span>
             <div className="components-view__icon-variants">
+              <ChevronIcon />
               <ChevronIcon direction="up" />
               <ChevronIcon direction="left" />
               <ChevronIcon direction="right" />
