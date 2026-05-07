@@ -1,5 +1,5 @@
 export const Pages = {
   slug: 'pages',
-  select: ({ select }) => ({ ...select, title: true, slug: true }),
+  select: ({ select }) => (select ? { ...select, title: true, slug: true } : undefined),
   fields: [],
 }

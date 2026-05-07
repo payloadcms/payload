@@ -95,7 +95,7 @@ import type { CollectionConfig } from 'payload'
 export const Posts: CollectionConfig = {
   slug: 'posts',
   // Always include `title`, regardless of the caller's `select`.
-  select: ({ select }) => ({ ...select, title: true }),
+  select: ({ select }) => (select ? { ...select, title: true } : undefined),
   fields: [
     // ...
   ],

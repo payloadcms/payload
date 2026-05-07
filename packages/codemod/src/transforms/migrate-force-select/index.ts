@@ -61,7 +61,7 @@ export const migrateForceSelect: Transform = {
 
         prop.set({
           name: 'select',
-          initializer: `({ select }) => ({ ...select, ${parts.join(', ')} })`,
+          initializer: `({ select }) => (select ? { ...select, ${parts.join(', ')} } : undefined)`,
         })
         filesChanged.add(filePath)
       }
