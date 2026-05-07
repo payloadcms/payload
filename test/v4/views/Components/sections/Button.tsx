@@ -34,9 +34,6 @@ export const ButtonSection: React.FC<{ selectedComponent: string }> = ({ selecte
     <Variant label="Disabled">
       <Button disabled>Disabled</Button>
     </Variant>
-    <Variant label="Size: Small">
-      <Button size="small">Small</Button>
-    </Variant>
     <Variant label="Size: Medium">
       <Button size="medium">Medium</Button>
     </Variant>
