@@ -1,25 +1,9 @@
-:root {
-  :has(> .react-select .rs__control--is-focused) {
-    background-color: red;
-    outline: var(--accessibility-outline) !important;
-    outline-offset: var(--accessibility-outline-offset);
-    border-radius: var(--radius-medium);
-  }
-}
 @layer payload-default {
   .react-select-container {
     width: 100%;
   }
 
   .react-select {
-    &:focus-visible {
-    }
-    &:focus-within {
-      .rs__control {
-        outline: none;
-      }
-    }
-
     .rs__control {
       position: relative;
       width: 100%;
@@ -40,9 +24,12 @@
       height: auto;
       padding-block: calc(var(--spacer-1) + 1px);
       padding-inline: var(--spacer-2) var(--spacer-5);
-
       flex-wrap: wrap;
       gap: var(--spacer-1);
+
+      &.rs__control--is-focused {
+        border-color: var(--border-selected-default);
+      }
 
       &:has(.clear-indicator) {
         padding-inline-end: calc(var(--spacer-4) * 2);
@@ -80,37 +67,35 @@
 
     .rs__input-container {
       color: var(--text-default);
-      height: 1.25rem;
+      height: var(--text-body-medium-line-height);
       margin: 0;
       padding: 0;
-    }
-
-    .rs__input {
-      font-family: var(--text-body-medium-font-family);
-      width: 0.625rem;
-      height: 1.25rem;
     }
 
     .rs__menu {
       z-index: 4;
       border-radius: var(--radius-medium);
-      box-shadow:
-        0 0 0 1px rgba(0, 0, 0, 0.04),
-        0 0 0.5px rgba(0, 0, 0, 0.12),
-        0 10px 16px rgba(0, 0, 0, 0.08),
-        0 2px 6px rgba(0, 0, 0, 0.12);
+      box-shadow: var(--elevation-400-menu-panel);
       background: var(--bg-default);
       overflow: hidden;
     }
 
+    .rs__menu--placement-bottom {
+      margin-top: var(--spacer-1);
+    }
+
+    .rs__menu--placement-top {
+      margin-bottom: var(--spacer-1);
+    }
+
     .rs__menu-list {
-      max-height: 15rem;
+      max-height: calc(var(--spacer-6) * 5);
       overflow-y: auto;
     }
 
     .rs__group-heading {
       color: var(--text-tertiary);
-      padding: 0.75rem 1rem 0.25rem 1rem;
+      padding: var(--spacer-2-5) var(--spacer-3) var(--spacer-1);
       font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
@@ -121,8 +106,9 @@
       font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
-      line-height: 2rem;
-      padding-inline: var(--spacer-2);
+      line-height: var(--text-body-medium-line-height);
+      padding-inline: var(--spacer-3) var(--spacer-1);
+      padding-block: var(--spacer-2);
       color: var(--text-default);
     }
 
@@ -135,21 +121,26 @@
     }
 
     &.rs--is-disabled .rs__control {
-      background: var(--bg-default-default);
+      background: var(--bg-default);
       border-color: var(--border-default);
       color: var(--text-disabled-default);
     }
   }
 
   .react-select--error,
-  .react-select--error:hover,
-  .react-select--error:focus-within {
+  .react-select--error:hover {
     div.rs__control {
       border: 1px solid var(--border-danger-strong);
 
       & > div.rs__indicator > button.dropdown-indicator[type='button'] {
         border: none;
       }
+    }
+  }
+
+  .react-select--error:focus-within {
+    div.rs__control {
+      border-color: var(--border-selected-default);
     }
   }
 }

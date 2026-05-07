@@ -4,6 +4,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacer-2);
+    flex-grow: 1;
 
     .field-type__wrap {
       display: flex;
@@ -36,6 +37,10 @@
     &.error {
       textarea {
         border-color: var(--border-danger-strong);
+
+        &:hover {
+          border-color: var(--border-danger-strong);
+        }
       }
     }
   }

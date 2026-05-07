@@ -26,6 +26,10 @@
 
     &.error .form-input-group {
       border-color: var(--border-danger-strong);
+
+      &:hover {
+        border-color: var(--border-danger-strong);
+      }
     }
 
     &.read-only .input-stepper {
