@@ -632,9 +632,25 @@ The following options are available:
 
 The `admin.disabled` property controls where a field is disabled in the Admin Panel. It accepts either a boolean or an object.
 
-- `disabled: true` — disables the field everywhere (edit form, list column selector, list filter dropdown, groupBy selector, bulk edit modal).
-- `disabled: false` (or `undefined`) — field is enabled everywhere.
-- `disabled: { ... }` — granular control per area:
+#### Disable everywhere (boolean)
+
+Pass `true` to disable the field across **all** Admin Panel surfaces — the edit form, list column selector, list filter dropdown, groupBy selector, and bulk edit modal:
+
+```ts
+fields: [
+  {
+    name: 'internalRef',
+    type: 'text',
+    admin: { disabled: true }, // hidden from every admin surface
+  },
+]
+```
+
+Pass `false` (or omit the property) to enable the field everywhere.
+
+#### Disable per area (object)
+
+Pass an object to disable the field in specific areas only. Any key not set defaults to enabled:
 
 | Key        | Disables                    |
 | ---------- | --------------------------- |
