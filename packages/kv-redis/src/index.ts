@@ -49,6 +49,23 @@ export class RedisKVAdapter implements KVAdapter {
     return prefixedKeys
   }
 
+  async mget<T extends KVStoreValue>(keys: readonly string[]): Promise<Array<null | T>> {
+    if (keys.length === 0) {
+      return []
+    }
+
+    const prefixedKeys = keys.map((key) => `${this.keyPrefix}${key}`)
+    const values = await this.redisClient.mget(prefixedKeys)
+
+    return values.map((data) => {
+      if (data === null) {
+        return null
+      }
+
+      return JSON.parse(data)
+    })
+  }
+
   async set(key: string, data: KVStoreValue): Promise<void> {
     await this.redisClient.set(`${this.keyPrefix}${key}`, JSON.stringify(data))
   }
