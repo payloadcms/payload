@@ -1,4 +1,4 @@
-import type { S3, S3ClientConfig } from '@aws-sdk/client-s3'
+import type { S3ClientConfig } from '@aws-sdk/client-s3'
 import type {
   ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
@@ -7,6 +7,7 @@ import type {
 import type { NodeHttpHandlerOptions } from '@smithy/node-http-handler'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
+import { S3 } from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
@@ -108,14 +109,6 @@ type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
 
 const s3Clients = new Map<string, S3>()
 
-let s3ConstructorPromise: Promise<typeof import('@aws-sdk/client-s3').S3> | undefined
-const loadS3Constructor = () => {
-  if (!s3ConstructorPromise) {
-    s3ConstructorPromise = import('@aws-sdk/client-s3').then((m) => m.S3)
-  }
-  return s3ConstructorPromise
-}
-
 const defaultRequestHandlerOpts: NodeHttpHandlerOptions = {
   httpAgent: {
     keepAlive: true,
@@ -129,31 +122,19 @@ const defaultRequestHandlerOpts: NodeHttpHandlerOptions = {
 
 export const s3Storage: S3StoragePlugin =
   (s3StorageOptions: S3StorageOptions) =>
-  async (incomingConfig: Config): Promise<Config> => {
+  (incomingConfig: Config): Config => {
     const cacheKey = s3StorageOptions.clientCacheKey || `s3:${s3StorageOptions.bucket}`
 
     const isPluginDisabled = s3StorageOptions.enabled === false
-
-    // The AWS SDK is ~5MB. Skip loading it entirely when the plugin is disabled
-    // so users with `enabled: false` (e.g. dev/test toggles) don't pay the cost.
-    let S3Constructor: typeof import('@aws-sdk/client-s3').S3 | undefined
-    if (!isPluginDisabled) {
-      S3Constructor = await loadS3Constructor()
-    }
 
     const getStorageClient: () => S3 = () => {
       if (s3Clients.has(cacheKey)) {
         return s3Clients.get(cacheKey)!
       }
-      if (!S3Constructor) {
-        throw new Error(
-          'storage-s3: getStorageClient() called while the plugin is disabled. This is a bug — getStorageClient should not be invoked on a disabled adapter.',
-        )
-      }
 
       s3Clients.set(
         cacheKey,
-        new S3Constructor({
+        new S3({
           requestHandler: defaultRequestHandlerOpts,
           ...(s3StorageOptions.config ?? {}),
         }),

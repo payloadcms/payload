@@ -55,6 +55,15 @@ export const seoPlugin =
       },
     ]
 
+    const collectionConfigBySlug = new Map<string, NonNullable<Config['collections']>[number]>()
+    for (const c of config.collections ?? []) {
+      collectionConfigBySlug.set(c.slug, c)
+    }
+    const globalConfigBySlug = new Map<string, NonNullable<Config['globals']>[number]>()
+    for (const g of config.globals ?? []) {
+      globalConfigBySlug.set(g.slug, g)
+    }
+
     return {
       ...config,
       collections:
@@ -130,115 +139,113 @@ export const seoPlugin =
 
           return collection
         }) || [],
-      endpoints: (() => {
-        // Built once per plugin init: avoid an O(N) array scan per request × 4 endpoints.
-        // Closes over the plugin's input `config` snapshot — same lifetime as the prior
-        // `.find()` calls below, so behavior is preserved.
-        const collectionConfigBySlug = new Map<string, NonNullable<Config['collections']>[number]>()
-        for (const c of config.collections ?? []) {
-          collectionConfigBySlug.set(c.slug, c)
-        }
-        const globalConfigBySlug = new Map<string, NonNullable<Config['globals']>[number]>()
-        for (const g of config.globals ?? []) {
-          globalConfigBySlug.set(g.slug, g)
-        }
-        const getCollectionConfig = (slug: string | undefined) =>
-          slug ? collectionConfigBySlug.get(slug) : undefined
-        const getGlobalConfig = (slug: string | undefined) =>
-          slug ? globalConfigBySlug.get(slug) : undefined
+      endpoints: [
+        ...(config.endpoints ?? []),
+        {
+          handler: async (req) => {
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json?.()
 
-        return [
-          ...(config.endpoints ?? []),
-          {
-            handler: async (req) => {
-              const data: Omit<
-                Parameters<GenerateTitle>[0],
-                'collectionConfig' | 'globalConfig' | 'req'
-              > = await req.json?.()
+            const reqData = data ?? req.data
 
-              const reqData = data ?? req.data
-
-              const result = pluginConfig.generateTitle
-                ? await pluginConfig.generateTitle({
-                    ...data,
-                    collectionConfig: getCollectionConfig(reqData.collectionSlug),
-                    globalConfig: getGlobalConfig(reqData.globalSlug),
-                    req,
-                  } satisfies Parameters<GenerateTitle>[0])
-                : ''
-              return new Response(JSON.stringify({ result }), { status: 200 })
-            },
-            method: 'post',
-            path: '/plugin-seo/generate-title',
+            const result = pluginConfig.generateTitle
+              ? await pluginConfig.generateTitle({
+                  ...data,
+                  collectionConfig: reqData.collectionSlug
+                    ? collectionConfigBySlug.get(reqData.collectionSlug)
+                    : undefined,
+                  globalConfig: reqData.globalSlug
+                    ? globalConfigBySlug.get(reqData.globalSlug)
+                    : undefined,
+                  req,
+                } satisfies Parameters<GenerateTitle>[0])
+              : ''
+            return new Response(JSON.stringify({ result }), { status: 200 })
           },
-          {
-            handler: async (req) => {
-              const data: Omit<
-                Parameters<GenerateTitle>[0],
-                'collectionConfig' | 'globalConfig' | 'req'
-              > = await req.json?.()
+          method: 'post',
+          path: '/plugin-seo/generate-title',
+        },
+        {
+          handler: async (req) => {
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json?.()
 
-              const reqData = data ?? req.data
+            const reqData = data ?? req.data
 
-              const result = pluginConfig.generateDescription
-                ? await pluginConfig.generateDescription({
-                    ...data,
-                    collectionConfig: getCollectionConfig(reqData.collectionSlug),
-                    globalConfig: getGlobalConfig(reqData.globalSlug),
-                    req,
-                  } satisfies Parameters<GenerateDescription>[0])
-                : ''
-              return new Response(JSON.stringify({ result }), { status: 200 })
-            },
-            method: 'post',
-            path: '/plugin-seo/generate-description',
+            const result = pluginConfig.generateDescription
+              ? await pluginConfig.generateDescription({
+                  ...data,
+                  collectionConfig: reqData.collectionSlug
+                    ? collectionConfigBySlug.get(reqData.collectionSlug)
+                    : undefined,
+                  globalConfig: reqData.globalSlug
+                    ? globalConfigBySlug.get(reqData.globalSlug)
+                    : undefined,
+                  req,
+                } satisfies Parameters<GenerateDescription>[0])
+              : ''
+            return new Response(JSON.stringify({ result }), { status: 200 })
           },
-          {
-            handler: async (req) => {
-              const data: Omit<
-                Parameters<GenerateTitle>[0],
-                'collectionConfig' | 'globalConfig' | 'req'
-              > = await req.json?.()
+          method: 'post',
+          path: '/plugin-seo/generate-description',
+        },
+        {
+          handler: async (req) => {
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json?.()
 
-              const reqData = data ?? req.data
+            const reqData = data ?? req.data
 
-              const result = pluginConfig.generateURL
-                ? await pluginConfig.generateURL({
-                    ...data,
-                    collectionConfig: getCollectionConfig(reqData.collectionSlug),
-                    globalConfig: getGlobalConfig(reqData.globalSlug),
-                    req,
-                  } satisfies Parameters<GenerateURL>[0])
-                : ''
-              return new Response(JSON.stringify({ result }), { status: 200 })
-            },
-            method: 'post',
-            path: '/plugin-seo/generate-url',
+            const result = pluginConfig.generateURL
+              ? await pluginConfig.generateURL({
+                  ...data,
+                  collectionConfig: reqData.collectionSlug
+                    ? collectionConfigBySlug.get(reqData.collectionSlug)
+                    : undefined,
+                  globalConfig: reqData.globalSlug
+                    ? globalConfigBySlug.get(reqData.globalSlug)
+                    : undefined,
+                  req,
+                } satisfies Parameters<GenerateURL>[0])
+              : ''
+            return new Response(JSON.stringify({ result }), { status: 200 })
           },
-          {
-            handler: async (req) => {
-              const data: Omit<
-                Parameters<GenerateTitle>[0],
-                'collectionConfig' | 'globalConfig' | 'req'
-              > = await req.json?.()
+          method: 'post',
+          path: '/plugin-seo/generate-url',
+        },
+        {
+          handler: async (req) => {
+            const data: Omit<
+              Parameters<GenerateTitle>[0],
+              'collectionConfig' | 'globalConfig' | 'req'
+            > = await req.json?.()
 
-              const reqData = data ?? req.data
+            const reqData = data ?? req.data
 
-              const result = pluginConfig.generateImage
-                ? await pluginConfig.generateImage({
-                    ...data,
-                    collectionConfig: getCollectionConfig(reqData.collectionSlug),
-                    globalConfig: getGlobalConfig(reqData.globalSlug),
-                    req,
-                  } satisfies Parameters<GenerateImage>[0])
-                : ''
-              return new Response(JSON.stringify({ result }), { status: 200 })
-            },
-            method: 'post',
-            path: '/plugin-seo/generate-image',
+            const result = pluginConfig.generateImage
+              ? await pluginConfig.generateImage({
+                  ...data,
+                  collectionConfig: reqData.collectionSlug
+                    ? collectionConfigBySlug.get(reqData.collectionSlug)
+                    : undefined,
+                  globalConfig: reqData.globalSlug
+                    ? globalConfigBySlug.get(reqData.globalSlug)
+                    : undefined,
+                  req,
+                } satisfies Parameters<GenerateImage>[0])
+              : ''
+            return new Response(JSON.stringify({ result }), { status: 200 })
           },
-        ]
-      })(),
+          method: 'post',
+          path: '/plugin-seo/generate-image',
+        },
+      ],
       globals:
         config.globals?.map((global) => {
           const { slug } = global
