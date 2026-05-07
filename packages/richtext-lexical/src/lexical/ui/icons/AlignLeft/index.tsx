@@ -1,19 +1,25 @@
 'use client'
 import React from 'react'
 
-export const AlignLeftIcon: React.FC = () => (
+
+const paths: Record<number, string> = {
+  24: 'M5 7.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5m0 4a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 3.5a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1z',
+}
+
+export const AlignLeftIcon: React.FC<{
+  readonly className?: string
+  readonly size?: 16 | 24
+}> = ({ className, size = 24 }) => (
   <svg
     aria-hidden="true"
-    className="icon"
+    className={['icon', className].filter(Boolean).join(' ')}
     fill="none"
     focusable="false"
-    height="20"
-    viewBox="0 0 20 20"
-    width="20"
+    height={size}
+    viewBox={`0 0 ${size} ${size}`}
+    width={size}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path d="M2.5 5H17.5" stroke="currentColor" strokeWidth="1.5" />
-    <path d="M2.5 10H17.5" stroke="currentColor" strokeWidth="1.5" />
-    <path d="M2.5 15H12.5" stroke="currentColor" strokeWidth="1.5" />
+    <path clipRule="evenodd" d={paths[size]} fill="currentColor" fillRule="evenodd" />
   </svg>
 )

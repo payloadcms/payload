@@ -1,18 +1,24 @@
 'use client'
 import React from 'react'
 
-export const CodeIcon: React.FC = () => (
+const paths: Record<number, string> = {
+  24: 'M16.5 6C17.3284 6 18 6.67157 18 7.5V16.5C18 17.3284 17.3284 18 16.5 18H7.5C6.67157 18 6 17.3284 6 16.5V12.5C6 12.2239 6.22386 12 6.5 12C6.77614 12 7 12.2239 7 12.5V16.5C7 16.7761 7.22386 17 7.5 17H16.5C16.7761 17 17 16.7761 17 16.5V7.5C17 7.22386 16.7761 7 16.5 7H15.5C15.2239 7 15 6.77614 15 6.5C15 6.22386 15.2239 6 15.5 6H16.5ZM8.14648 6.14648C8.34175 5.95122 8.65825 5.95122 8.85352 6.14648C9.04878 6.34175 9.04878 6.65825 8.85352 6.85352L7.20703 8.5L8.85352 10.1465C9.04878 10.3417 9.04878 10.6583 8.85352 10.8535C8.65825 11.0488 8.34175 11.0488 8.14648 10.8535L6.14648 8.85352C5.95122 8.65825 5.95122 8.34175 6.14648 8.14648L8.14648 6.14648ZM11.1465 6.14648C11.3417 5.95122 11.6583 5.95122 11.8535 6.14648L13.8535 8.14648C14.0488 8.34175 14.0488 8.65825 13.8535 8.85352L11.8535 10.8535C11.6583 11.0488 11.3417 11.0488 11.1465 10.8535C10.9512 10.6583 10.9512 10.3417 11.1465 10.1465L12.793 8.5L11.1465 6.85352C10.9512 6.65825 10.9512 6.34175 11.1465 6.14648Z',
+}
+
+export const CodeIcon: React.FC<{
+  readonly className?: string
+  readonly size?: 16 | 24
+}> = ({ className, size = 24 }) => (
   <svg
     aria-hidden="true"
-    className="icon"
+    className={['icon', className].filter(Boolean).join(' ')}
     fill="none"
     focusable="false"
-    height="20"
-    viewBox="0 0 20 20"
-    width="20"
+    height={size}
+    viewBox={`0 0 ${size} ${size}`}
+    width={size}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path d="M7.76465 6L3.76465 10L7.76465 14" stroke="currentColor" />
-    <path d="M12.2354 6L16.2354 10L12.2354 14" stroke="currentColor" />
+    <path clipRule="evenodd" d={paths[size]} fill="currentColor" fillRule="evenodd" />
   </svg>
 )
