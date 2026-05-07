@@ -21,7 +21,6 @@ export const useDraggableSortable = (props: UseDraggableArguments): UseDraggable
     attributes: {
       ...attributes,
       style: {
-        cursor: isDragging ? 'grabbing' : 'grab',
         transition,
       },
     },

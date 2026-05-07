@@ -6,14 +6,21 @@ import { getFileByPath } from 'payload'
 
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
+import { blocksSeedData } from './seed/blocksSeedData.js'
 import {
-  getRichTextContent,
   codeContent,
-  tableContent,
+  getRichTextContent,
   listsContent,
+  tableContent,
   typographyContent,
 } from './seed/richTextData.js'
-import { blocksFieldsSlug, collectionSlugs, richTextFieldsSlug, textFieldsSlug, uploadsSlug } from './slugs.js'
+import {
+  blocksFieldsSlug,
+  collectionSlugs,
+  richTextFieldsSlug,
+  textFieldsSlug,
+  uploadsSlug,
+} from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -89,11 +96,11 @@ export const baseConfig: Partial<Config> = {
       baseDir: path.resolve(dirname),
     },
     components: {
-      afterNavLinks: ['./views/Icons/NavLink.js#IconsNavLink'],
+      afterNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
       views: {
-        icons: {
-          Component: './views/Icons/index.js#IconsView',
-          path: '/icons',
+        components: {
+          Component: './views/Components/index.js#ComponentsView',
+          path: '/components',
         },
       },
     },
@@ -187,26 +194,7 @@ export const baseConfig: Partial<Config> = {
     // Seed blocks collection
     await payload.create({
       collection: blocksFieldsSlug,
-      data: {
-        multipleBlockTypes: [
-          {
-            blockType: 'test-block',
-            blockName: 'My Named Block',
-            text: 'This block has a title',
-          },
-          {
-            blockType: 'hero-block',
-            heading: 'Hero heading',
-          },
-        ],
-        readOnlyBlocks: [
-          {
-            blockType: 'test-block',
-            blockName: 'Read Only Named Block',
-            text: 'This is a read-only block',
-          },
-        ],
-      },
+      data: blocksSeedData,
     })
   },
   typescript: {
