@@ -5,7 +5,6 @@ import type { URL } from 'url'
 
 import type {
   DataFromCollectionSlug,
-  HookOperationType,
   QueryDraftDataFromCollectionSlug,
   TypeWithID,
   TypeWithTimestamps,
@@ -208,8 +207,19 @@ export type SelectMode = 'exclude' | 'include'
 
 export type SelectType = SelectExcludeType | SelectIncludeType
 
+/**
+ * Operations that invoke an entity-level `select` function.
+ *
+ * Narrower than `HookOperationType`: `select` runs only for read- and
+ * write-path operations that materialize a document (`create`, `delete`,
+ * `read`, `restoreVersion`, `update`). Operations like `autosave`, `count`,
+ * `countVersions`, `forgotPassword`, `login`, `readDistinct`, `refresh`, and
+ * `resetPassword` do not invoke `select` and are intentionally excluded.
+ */
+export type SelectFnOperation = 'create' | 'delete' | 'read' | 'restoreVersion' | 'update'
+
 export type SelectFnArgs = {
-  operation: HookOperationType
+  operation: SelectFnOperation
   req: PayloadRequest
   /** The caller's `select` arg, or `undefined` if not provided. */
   select?: SelectType
