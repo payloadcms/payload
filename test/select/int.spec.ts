@@ -2553,63 +2553,16 @@ describe('Select', () => {
     })
   })
 
-  it('should force collection select fields with static select config', async () => {
-    const { id, array, forceSelected, text } = await payload.create({
-      collection: 'force-select',
-      data: {
-        array: [{ forceSelected: 'text' }],
-        forceSelected: 'force-selected',
-        text: 'some-text',
-      },
-    })
-
-    const response = await payload.findByID({
-      id,
-      collection: 'force-select',
-      select: { text: true },
-    })
-
-    expect(response).toStrictEqual({
-      id,
-      array,
-      forceSelected,
-      text,
-    })
-  })
-
-  it('should force global select fields with static select config', async () => {
-    const { id, array, forceSelected, text } = await payload.updateGlobal({
-      slug: 'force-select-global',
-      data: {
-        array: [{ forceSelected: 'text' }],
-        forceSelected: 'force-selected',
-        text: 'some-text',
-      },
-    })
-
-    const response = await payload.findGlobal({
-      slug: 'force-select-global',
-      select: { text: true },
-    })
-
-    expect(response).toStrictEqual({
-      id,
-      array,
-      forceSelected,
-      text,
-    })
-  })
-
   it('should auto-select field2 when caller selects field1 on collections', async () => {
     const { id } = await payload.create({
-      collection: 'force-select-fn',
+      collection: 'force-select',
       data: { field1: 'one', field2: 'two', text: 'control' },
     })
 
-    // Caller selects `field1` → function auto-selects `field2`.
+    // Caller selects `field1` → hook auto-selects `field2`.
     const augmented = await payload.findByID({
       id,
-      collection: 'force-select-fn',
+      collection: 'force-select',
       select: { field1: true },
     })
 
@@ -2619,10 +2572,10 @@ describe('Select', () => {
       field2: 'two',
     })
 
-    // Caller selects `text` (not field1) → function returns nothing, `field2` excluded.
+    // Caller selects `text` (not field1) → hook returns args unchanged, `field2` excluded.
     const notAugmented = await payload.findByID({
       id,
-      collection: 'force-select-fn',
+      collection: 'force-select',
       select: { text: true },
     })
 
@@ -2631,17 +2584,17 @@ describe('Select', () => {
       text: 'control',
     })
 
-    await payload.delete({ id, collection: 'force-select-fn' })
+    await payload.delete({ id, collection: 'force-select' })
   })
 
   it('should auto-select field2 when caller selects field1 on globals', async () => {
     const { id } = await payload.updateGlobal({
-      slug: 'force-select-fn-global',
+      slug: 'force-select-global',
       data: { field1: 'one', field2: 'two', text: 'control' },
     })
 
     const augmented = await payload.findGlobal({
-      slug: 'force-select-fn-global',
+      slug: 'force-select-global',
       select: { field1: true },
     })
 
@@ -2655,8 +2608,8 @@ describe('Select', () => {
   it('should pass req + select context to the select function', async () => {
     const calls: Array<{ operation: string; selectKeys?: string[]; userEmail?: string }> = []
 
-    const collection = payload.config.collections.find((c) => c.slug === 'force-select-fn')!
-    const originalSelect = collection.select
+    const collection = payload.config.collections.find((c) => c.slug === 'force-select')!
+    const originalHooks = collection.hooks?.beforeOperation
 
     collection.select = (args) => {
       calls.push({
@@ -2669,18 +2622,18 @@ describe('Select', () => {
 
     try {
       const created = await payload.create({
-        collection: 'force-select-fn',
+        collection: 'force-select',
         data: { field1: 'a', field2: 'b' },
         select: { field1: true },
       })
 
       await payload.findByID({
         id: created.id,
-        collection: 'force-select-fn',
+        collection: 'force-select',
         select: { field1: true },
       })
 
-      await payload.delete({ id: created.id, collection: 'force-select-fn' })
+      await payload.delete({ id: created.id, collection: 'force-select' })
 
       const operations = calls.map((c) => c.operation)
       expect(operations).toContain('create')

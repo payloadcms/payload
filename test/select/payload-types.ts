@@ -74,7 +74,6 @@ export interface Config {
     pages: Page;
     points: Point;
     'force-select': ForceSelect;
-    'force-select-fn': ForceSelectFn;
     upload: Upload;
     rels: Rel;
     'relationships-blocks': RelationshipsBlock;
@@ -94,7 +93,6 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     points: PointsSelect<false> | PointsSelect<true>;
     'force-select': ForceSelectSelect<false> | ForceSelectSelect<true>;
-    'force-select-fn': ForceSelectFnSelect<false> | ForceSelectFnSelect<true>;
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
     'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
@@ -112,12 +110,10 @@ export interface Config {
   globals: {
     'global-post': GlobalPost;
     'force-select-global': ForceSelectGlobal;
-    'force-select-fn-global': ForceSelectFnGlobal;
   };
   globalsSelect: {
     'global-post': GlobalPostSelect<false> | GlobalPostSelect<true>;
     'force-select-global': ForceSelectGlobalSelect<false> | ForceSelectGlobalSelect<true>;
-    'force-select-fn-global': ForceSelectFnGlobalSelect<false> | ForceSelectFnGlobalSelect<true>;
   };
   locale: 'en' | 'de';
   widgets: {
@@ -463,23 +459,6 @@ export interface Point {
 export interface ForceSelect {
   id: string;
   text?: string | null;
-  forceSelected?: string | null;
-  array?:
-    | {
-        forceSelected?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "force-select-fn".
- */
-export interface ForceSelectFn {
-  id: string;
-  text?: string | null;
   field1?: string | null;
   field2?: string | null;
   updatedAt: string;
@@ -591,10 +570,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'force-select';
         value: string | ForceSelect;
-      } | null)
-    | ({
-        relationTo: 'force-select-fn';
-        value: string | ForceSelectFn;
       } | null)
     | ({
         relationTo: 'upload';
@@ -937,22 +912,6 @@ export interface PointsSelect<T extends boolean = true> {
  */
 export interface ForceSelectSelect<T extends boolean = true> {
   text?: T;
-  forceSelected?: T;
-  array?:
-    | T
-    | {
-        forceSelected?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "force-select-fn_select".
- */
-export interface ForceSelectFnSelect<T extends boolean = true> {
-  text?: T;
   field1?: T;
   field2?: T;
   updatedAt?: T;
@@ -1096,23 +1055,6 @@ export interface GlobalPost {
 export interface ForceSelectGlobal {
   id: string;
   text?: string | null;
-  forceSelected?: string | null;
-  array?:
-    | {
-        forceSelected?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "force-select-fn-global".
- */
-export interface ForceSelectFnGlobal {
-  id: string;
-  text?: string | null;
   field1?: string | null;
   field2?: string | null;
   updatedAt?: string | null;
@@ -1134,23 +1076,6 @@ export interface GlobalPostSelect<T extends boolean = true> {
  * via the `definition` "force-select-global_select".
  */
 export interface ForceSelectGlobalSelect<T extends boolean = true> {
-  text?: T;
-  forceSelected?: T;
-  array?:
-    | T
-    | {
-        forceSelected?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "force-select-fn-global_select".
- */
-export interface ForceSelectFnGlobalSelect<T extends boolean = true> {
   text?: T;
   field1?: T;
   field2?: T;

@@ -8,7 +8,6 @@ import { devUser } from '../credentials.js'
 import { CustomID } from './collections/CustomID/index.js'
 import { DeepPostsCollection } from './collections/DeepPosts/index.js'
 import { ForceSelect } from './collections/ForceSelect/index.js'
-import { ForceSelectFn } from './collections/ForceSelectFn/index.js'
 import { LocalizedPostsCollection } from './collections/LocalizedPosts/index.js'
 import { Pages } from './collections/Pages/index.js'
 import { Points } from './collections/Points/index.js'
@@ -29,7 +28,6 @@ export const getConfig: () => Partial<Config> = () => ({
     Pages,
     Points,
     ForceSelect,
-    ForceSelectFn,
     {
       slug: 'upload',
       fields: [],
@@ -93,36 +91,6 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
         {
-          name: 'forceSelected',
-          type: 'text',
-        },
-        {
-          name: 'array',
-          type: 'array',
-          fields: [
-            {
-              name: 'forceSelected',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-      select: ({ select }) => {
-        if (!select) {
-          return undefined
-        }
-
-        return { ...select, array: { forceSelected: true }, forceSelected: true }
-      },
-    } satisfies GlobalConfig<'force-select-global'>,
-    {
-      slug: 'force-select-fn-global',
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-        },
-        {
           name: 'field1',
           type: 'text',
         },
@@ -132,13 +100,17 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
       select: ({ select }) => {
+        if (!select) {
+          return undefined
+        }
+
         if (select?.field1) {
           return { field1: true, field2: true }
         }
 
-        return undefined
+        return select
       },
-    } satisfies GlobalConfig<'force-select-fn-global'>,
+    } satisfies GlobalConfig<'force-select-global'>,
   ],
   admin: {
     importMap: {

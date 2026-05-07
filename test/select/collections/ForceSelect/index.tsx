@@ -8,18 +8,12 @@ export const ForceSelect: CollectionConfig<'force-select'> = {
       type: 'text',
     },
     {
-      name: 'forceSelected',
+      name: 'field1',
       type: 'text',
     },
     {
-      name: 'array',
-      type: 'array',
-      fields: [
-        {
-          name: 'forceSelected',
-          type: 'text',
-        },
-      ],
+      name: 'field2',
+      type: 'text',
     },
   ],
   select: ({ select }) => {
@@ -27,6 +21,13 @@ export const ForceSelect: CollectionConfig<'force-select'> = {
       return undefined
     }
 
-    return { ...select, array: { forceSelected: true }, forceSelected: true }
+    if (select.field1) {
+      return {
+        ...select,
+        field2: true,
+      }
+    }
+
+    return select
   },
 }
