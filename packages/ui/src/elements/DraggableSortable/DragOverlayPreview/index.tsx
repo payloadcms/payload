@@ -12,7 +12,7 @@ export const DragOverlayPreview: React.FC<{ header: React.ReactNode }> = ({ head
     <div className={baseClass}>
       <Collapsible
         collapsibleStyle="default"
-        dragHandleProps={{ attributes: {}, id: '', listeners: undefined }}
+        dragHandleProps={{ id: '', attributes: {}, listeners: undefined }}
         header={header}
         isCollapsed
       >

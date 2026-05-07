@@ -78,6 +78,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   setCollapse,
   setNodeRef,
   transform,
+  transition,
 }) => {
   const isLoading = useThrottledValue(isLoadingFromProps, 500)
 
@@ -139,6 +140,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
       ref={setNodeRef}
       style={{
         transform,
+        transition,
       }}
     >
       <Collapsible
