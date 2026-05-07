@@ -3,7 +3,7 @@ import type { PayloadHandler } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
 
 import type { S3StorageOptions } from './index.js'
@@ -62,10 +62,12 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const { fileKey, sanitizedDocPrefix } = getFileKey({
+    const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
       collectionPrefix,
+      collectionSlug,
       docPrefix,
       filename,
+      req,
       useCompositePrefixes,
     })
 
@@ -100,6 +102,7 @@ export const getGenerateSignedURLHandler = ({
 
     return Response.json({
       docPrefix: sanitizedDocPrefix,
+      filename: sanitizedFilename,
       url,
     })
   }

@@ -1,7 +1,7 @@
 import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
 import type { PayloadHandler } from 'payload'
 
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
 
 import type { R2StorageOptions } from './index.js'
@@ -52,10 +52,12 @@ export const getHandleMultiPartUpload =
     }
 
     const collectionPrefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
-    const { fileKey } = getFileKey({
+    const { fileKey, sanitizedFilename } = await resolveSignedURLKey({
       collectionPrefix,
+      collectionSlug,
       docPrefix: params.docPrefix ?? undefined,
       filename: params.fileName,
+      req,
       useCompositePrefixes,
     })
 
@@ -88,6 +90,7 @@ export const getHandleMultiPartUpload =
       })
 
       return Response.json({
+        filename: sanitizedFilename,
         key: multipartUpload.key,
         uploadId: multipartUpload.uploadId,
       })
