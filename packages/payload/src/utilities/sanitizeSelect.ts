@@ -1,5 +1,3 @@
-import { deepMergeSimple } from '@payloadcms/translations/utilities'
-
 import type { FlattenedField } from '../fields/config/types.js'
 import type { SelectIncludeType, SelectType } from '../types/index.js'
 
@@ -114,12 +112,10 @@ const resolveVirtualRelationsToSelect = ({
 
 export const sanitizeSelect = ({
   fields,
-  forceSelect,
   select,
   versions,
 }: {
   fields: FlattenedField[]
-  forceSelect?: SelectType
   select?: SelectType
   versions?: boolean
 }): SelectType | undefined => {
@@ -133,32 +129,26 @@ export const sanitizeSelect = ({
     return select
   }
 
-  if (forceSelect) {
-    select = deepMergeSimple(select, forceSelect)
-  }
+  const virtualRelations = resolveVirtualRelationsToSelect({
+    fields,
+    selectValue: select as SelectIncludeType,
+    topLevelFields: fields,
+    versions: versions ?? false,
+  })
 
-  if (select) {
-    const virtualRelations = resolveVirtualRelationsToSelect({
-      fields,
-      selectValue: select as SelectIncludeType,
-      topLevelFields: fields,
-      versions: versions ?? false,
-    })
+  for (const path of virtualRelations) {
+    let currentRef = select
+    const segments = path.split('.')
+    for (let i = 0; i < segments.length; i++) {
+      const isLast = segments.length - 1 === i
+      const segment = segments[i]!
 
-    for (const path of virtualRelations) {
-      let currentRef = select
-      const segments = path.split('.')
-      for (let i = 0; i < segments.length; i++) {
-        const isLast = segments.length - 1 === i
-        const segment = segments[i]!
-
-        if (isLast) {
-          currentRef[segment] = true
-        } else {
-          if (!(segment in currentRef)) {
-            currentRef[segment] = {}
-            currentRef = currentRef[segment]
-          }
+      if (isLast) {
+        currentRef[segment] = true
+      } else {
+        if (!(segment in currentRef)) {
+          currentRef[segment] = {}
+          currentRef = currentRef[segment]
         }
       }
     }

@@ -13,6 +13,7 @@ import { CheckboxSection } from './sections/Checkbox.js'
 import { DrawerSection } from './sections/DrawerSection.js'
 import { IconsSection } from './sections/Icons.js'
 import { InputSection } from './sections/Input.js'
+import { LexicalIconsSection } from './sections/LexicalIcons.js'
 import { ModalSection } from './sections/ModalSection.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
@@ -52,6 +53,7 @@ type ComponentId =
   | 'icons'
   | 'input'
   | 'json-field'
+  | 'lexical-icons'
   | 'modal'
   | 'number-field'
   | 'password-field'
@@ -84,6 +86,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Checkbox', value: 'checkbox' },
   { category: 'primitives', label: 'Icons', value: 'icons' },
   { category: 'primitives', label: 'Input', value: 'input' },
+  { category: 'primitives', label: 'Lexical Icons', value: 'lexical-icons' },
   { category: 'primitives', label: 'Pill', value: 'pill' },
   { category: 'primitives', label: 'Popup', value: 'popup' },
   { category: 'primitives', label: 'Radio', value: 'radio' },
@@ -205,6 +208,9 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('button', 'primitives') && <ButtonSection selectedComponent="button" />}
         {shouldShow('pill', 'primitives') && <PillSection selectedComponent="pill" />}
         {shouldShow('icons', 'primitives') && <IconsSection selectedComponent="icons" />}
+        {shouldShow('lexical-icons', 'primitives') && (
+          <LexicalIconsSection selectedComponent="lexical-icons" />
+        )}
         {shouldShow('tooltip', 'primitives') && <TooltipSection selectedComponent="tooltip" />}
         {shouldShow('popup', 'primitives') && <PopupSection selectedComponent="popup" />}
         {shouldShow('card', 'primitives') && <CardSection selectedComponent="card" />}
