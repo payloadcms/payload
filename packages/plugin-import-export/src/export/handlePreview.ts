@@ -3,7 +3,7 @@ import type { PayloadRequest, Where } from 'payload'
 import { addDataAndFileToRequest } from 'payload'
 import { getObjectDotNotation } from 'payload/shared'
 
-import type { ExportPreviewResponse } from '../types.js'
+import type { ExportBeforeHook, ExportPreviewResponse } from '../types.js'
 
 import {
   DEFAULT_PREVIEW_LIMIT,
@@ -20,6 +20,26 @@ import { getSelect } from '../utilities/getSelect.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
 import { resolveLimit } from '../utilities/resolveLimit.js'
 import { setNestedValue } from '../utilities/setNestedValue.js'
+
+const applyExportBeforeHook = async (
+  hook: ExportBeforeHook | undefined,
+  data: Record<string, unknown>[],
+  originalDocs: unknown[],
+  format: 'csv' | 'json' | ({} & string),
+  req: PayloadRequest,
+): Promise<Record<string, unknown>[]> => {
+  if (!hook || data.length === 0) {
+    return data
+  }
+  return hook({
+    batchNumber: 1,
+    data,
+    format,
+    originalData: originalDocs as Record<string, unknown>[],
+    req,
+    totalBatches: 1,
+  })
+}
 
 export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   await addDataAndFileToRequest(req)
@@ -183,6 +203,8 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     fields: targetCollection.config.flattenedFields,
   })
 
+  const exportHooks = targetCollection.config.custom?.['plugin-import-export']?.exportHooks
+
   if (isCSV) {
     const possibleKeys = getFlattenedFieldKeys(targetCollection.config.flattenedFields, '', {
       localeCodes,
@@ -200,8 +222,8 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       }),
     )
 
-    // Merge schema columns with data-discovered columns (e.g., derived columns from toCSV)
-    // This ensures the preview headers match what the actual export will produce
+    transformed = await applyExportBeforeHook(exportHooks?.before, transformed, docs, 'csv', req)
+
     if (schemaColumns && transformed.length > 0) {
       const dataColumns: string[] = []
       const seenCols = new Set<string>()
@@ -213,7 +235,11 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
           }
         }
       }
-      columns = mergeColumns(schemaColumns, dataColumns)
+      const mergedColumns = mergeColumns(schemaColumns, dataColumns)
+      columns =
+        Boolean(exportHooks?.before) && transformed.length > 0
+          ? mergedColumns.filter((col) => dataColumns.includes(col))
+          : mergedColumns
     }
 
     // Pad rows with null for missing columns (uses merged columns, not raw schema)
@@ -257,6 +283,8 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
 
       return output
     })
+
+    transformed = await applyExportBeforeHook(exportHooks?.before, transformed, docs, 'json', req)
   }
 
   const hasNextPage = previewPage < previewTotalPages

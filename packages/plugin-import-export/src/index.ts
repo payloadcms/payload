@@ -298,9 +298,17 @@ declare module 'payload' {
   }
 
   export interface CollectionCustom {
+    /**
+     * @internal
+     * Server-side storage for resolved plugin config. Users should configure
+     * import/export via `importExportPlugin({ collections: [{ slug, export: { ... }, import: { ... } }] })`.
+     * These fields are populated automatically and are not part of the public
+     * API — the names here intentionally diverge from the user-facing nested
+     * `export.hooks` / `import.hooks` config and may change without notice.
+     */
     'plugin-import-export'?: {
       /**
-       * Default version status for imported documents when _status field is not provided.
+       * @internal Default version status for imported documents when _status field is not provided.
        * Only applies to collections with versions enabled.
        * @default 'published'
        */

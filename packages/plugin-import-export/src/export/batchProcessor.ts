@@ -178,8 +178,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
               batchNumber,
               data: batchData,
               format,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              originalData: originalDocs as any,
+              originalData: originalDocs,
               req,
               totalBatches,
             })
@@ -290,8 +289,7 @@ export function createExportBatchProcessor(options: ExportBatchProcessorOptions 
               batchNumber,
               data: batchData,
               format,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              originalData: originalDocs as any,
+              originalData: originalDocs,
               req,
               totalBatches,
             })

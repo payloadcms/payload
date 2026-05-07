@@ -1,6 +1,9 @@
 import type { FlattenedField } from 'payload'
 
-import type { ExportFieldHookEntry, FieldBeforeExportHook, ToCSVFunction } from '../types.js'
+import type { ExportFieldHookEntry, FieldBeforeExportHook } from '../types.js'
+
+import { getBlockFlattenedFields, getNestedFlattenedFields } from './flattenedFields.js'
+import { getPolymorphicRelId, isPolymorphicRelValue } from './polymorphicRel.js'
 
 type Args = {
   fields: FlattenedField[]
@@ -12,9 +15,7 @@ type Args = {
  */
 export const getExportFieldFunctions = ({ fields }: Args): Record<string, ExportFieldHookEntry> => {
   const result: Record<string, ExportFieldHookEntry> = {}
-
   registerExportHooks(fields, '', result)
-
   return result
 }
 
@@ -29,11 +30,9 @@ const registerExportHooks = (
     }
 
     if (field.type === 'blocks') {
-      const blocksField = field
       const base = parentPath ? `${parentPath}_${field.name}` : field.name
-      for (const block of blocksField.blocks ?? []) {
-        const blockFields = (block as { flattenedFields?: FlattenedField[] }).flattenedFields ?? []
-        registerExportHooks(blockFields, `${base}_${block.slug}`, result)
+      for (const block of field.blocks ?? []) {
+        registerExportHooks(getBlockFlattenedFields(block), `${base}_${block.slug}`, result)
       }
       continue
     }
@@ -42,8 +41,7 @@ const registerExportHooks = (
     registerExportHandler(field, fullKey, result)
 
     if (field.type === 'group' || field.type === 'tab' || field.type === 'array') {
-      const nestedFields = (field as { flattenedFields?: FlattenedField[] }).flattenedFields ?? []
-      registerExportHooks(nestedFields, fullKey, result)
+      registerExportHooks(getNestedFlattenedFields(field) ?? [], fullKey, result)
     }
   }
 }
@@ -105,26 +103,26 @@ const registerExportHandler = (
     }
 
     registerHandler(({ siblingData, value }) => {
-      if (value && typeof value === 'object' && 'relationTo' in value && 'value' in value) {
-        const typed = value as { relationTo: string; value: { id: number | string } }
-        if (typed.value && typeof typed.value === 'object') {
-          siblingData[`${fullKey}_id`] = typed.value.id
-          siblingData[`${fullKey}_relationTo`] = typed.relationTo
+      if (isPolymorphicRelValue(value)) {
+        const id = getPolymorphicRelId(value)
+        if (id !== undefined) {
+          siblingData[`${fullKey}_id`] = id
+          siblingData[`${fullKey}_relationTo`] = value.relationTo
         }
       }
-      return undefined
+      return null
     })
     return
   }
 
   if (!Array.isArray(field.relationTo)) {
     registerHandler(({ siblingData, value }) => {
-      const arr = value as Array<number | Record<string, unknown> | string> | undefined
-      if (Array.isArray(arr)) {
-        arr.forEach((val, i) => {
-          const id = typeof val === 'object' && val ? val.id : val
+      if (Array.isArray(value)) {
+        value.forEach((val, i) => {
+          const id = typeof val === 'object' && val ? (val as { id: unknown }).id : val
           siblingData[`${fullKey}_${i}_id`] = id
         })
+        return null
       }
       return undefined
     })
@@ -132,18 +130,17 @@ const registerExportHandler = (
   }
 
   registerHandler(({ siblingData, value }) => {
-    const arr = value as Array<Record<string, unknown>> | undefined
-    if (Array.isArray(arr)) {
-      arr.forEach((val, i) => {
-        if (val && typeof val === 'object') {
-          const relationTo = val.relationTo
-          const relatedDoc = val.value as Record<string, unknown> | undefined
-          if (relationTo && relatedDoc && typeof relatedDoc === 'object') {
-            siblingData[`${fullKey}_${i}_id`] = relatedDoc.id
-            siblingData[`${fullKey}_${i}_relationTo`] = relationTo
+    if (Array.isArray(value)) {
+      value.forEach((val, i) => {
+        if (isPolymorphicRelValue(val)) {
+          const id = getPolymorphicRelId(val)
+          if (id !== undefined) {
+            siblingData[`${fullKey}_${i}_id`] = id
+            siblingData[`${fullKey}_${i}_relationTo`] = val.relationTo
           }
         }
       })
+      return null
     }
     return undefined
   })

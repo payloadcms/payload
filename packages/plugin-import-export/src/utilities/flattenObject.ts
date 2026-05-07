@@ -3,6 +3,8 @@ import type { PayloadRequest } from 'payload'
 import type { ExportFieldHookEntry } from '../types.js'
 
 import { fieldToRegex } from './fieldToRegex.js'
+import { isPlainObject } from './isPlainObject.js'
+import { getPolymorphicRelId, isPolymorphicRelValue } from './polymorphicRel.js'
 
 type Args = {
   data: Record<string, unknown>
@@ -70,32 +72,27 @@ export const flattenObject = ({
 
       const flattenArray = (items: unknown[], arrayPath: string, arraySchemaPath: string): void => {
         items.forEach((item, index) => {
-          if (typeof item === 'object' && item !== null) {
-            const blockType =
-              typeof (item as Record<string, unknown>).blockType === 'string'
-                ? ((item as Record<string, unknown>).blockType as string)
-                : undefined
-            const itemPath = blockType
-              ? `${arrayPath}_${index}_${blockType}`
-              : `${arrayPath}_${index}`
-            const itemSchemaPath = blockType ? `${arraySchemaPath}_${blockType}` : arraySchemaPath
+          if (!isPlainObject(item)) {
+            row[`${arrayPath}_${index}`] = item
+            return
+          }
 
-            const itemRecord = item as Record<string, unknown>
-            if (
-              'relationTo' in itemRecord &&
-              'value' in itemRecord &&
-              typeof itemRecord.value === 'object' &&
-              itemRecord.value !== null
-            ) {
-              row[`${itemPath}_relationTo`] = itemRecord.relationTo
-              row[`${itemPath}_id`] = (itemRecord.value as Record<string, unknown>).id
+          const blockType = typeof item.blockType === 'string' ? item.blockType : undefined
+          const itemPath = blockType
+            ? `${arrayPath}_${index}_${blockType}`
+            : `${arrayPath}_${index}`
+          const itemSchemaPath = blockType ? `${arraySchemaPath}_${blockType}` : arraySchemaPath
+
+          if (isPolymorphicRelValue(item) && isPlainObject(item.value)) {
+            const id = getPolymorphicRelId(item)
+            if (id !== undefined) {
+              row[`${itemPath}_relationTo`] = item.relationTo
+              row[`${itemPath}_id`] = id
               return
             }
-
-            flattenWithFilter(itemRecord, itemPath, itemSchemaPath)
-          } else {
-            row[`${arrayPath}_${index}`] = item
           }
+
+          flattenWithFilter(item, itemPath, itemSchemaPath)
         })
       }
 
@@ -103,6 +100,10 @@ export const flattenObject = ({
         if (hookEntry) {
           try {
             const result = invokeHook(hookEntry, fieldPath, value, siblingSource)
+
+            if (result === null) {
+              return
+            }
 
             if (Array.isArray(result)) {
               flattenArray(result, fieldPath, fieldSchemaPath)
@@ -113,18 +114,11 @@ export const flattenObject = ({
               row[fieldPath] = result
               return
             }
-
-            for (const k in row) {
-              if (k === fieldPath || k.startsWith(`${fieldPath}_`)) {
-                return
-              }
-            }
           } catch (error) {
             req.payload.logger.error({
               err: error,
               msg: `[plugin-import-export] Field-level beforeExport hook for "${fieldPath}" threw — falling back to default flattening`,
             })
-            // Fall through to default flattening so the array values are not lost
           }
         }
 
@@ -133,11 +127,21 @@ export const flattenObject = ({
         if (!hookEntry) {
           flattenWithFilter(value as Record<string, unknown>, fieldPath, fieldSchemaPath)
         } else {
+          const keysBeforeHook = new Set(Object.keys(row))
           try {
             const result = invokeHook(hookEntry, fieldPath, value, siblingSource)
+            if (result === null) {
+              return
+            }
             if (typeof result === 'undefined') {
+              const hookWroteForField = Object.keys(row).some(
+                (k) => !keysBeforeHook.has(k) && (k === fieldPath || k.startsWith(`${fieldPath}_`)),
+              )
+              if (hookWroteForField) {
+                return
+              }
               flattenWithFilter(value as Record<string, unknown>, fieldPath, fieldSchemaPath)
-            } else if (result !== null && typeof result === 'object' && !Array.isArray(result)) {
+            } else if (typeof result === 'object' && !Array.isArray(result)) {
               flattenWithFilter(result as Record<string, unknown>, fieldPath, fieldSchemaPath)
             } else {
               row[fieldPath] = result
@@ -147,7 +151,6 @@ export const flattenObject = ({
               err: error,
               msg: `[plugin-import-export] Field-level beforeExport hook for "${fieldPath}" threw — falling back to default flattening`,
             })
-            // Fall through: recursively flatten the original nested object so the data is not lost
             flattenWithFilter(value as Record<string, unknown>, fieldPath, fieldSchemaPath)
           }
         }

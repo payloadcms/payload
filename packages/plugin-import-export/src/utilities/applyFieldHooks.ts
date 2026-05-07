@@ -7,12 +7,11 @@ import type {
   ImportFieldHookEntry,
 } from '../types.js'
 
+import { isPlainObject } from './isPlainObject.js'
+
 export type FieldHook = FieldBeforeExportHook | FieldBeforeImportHook
 
 export type FieldHookEntry = ExportFieldHookEntry | ImportFieldHookEntry
-
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const joinPath = (parent: string | undefined, segment: string): string =>
   parent ? `${parent}_${segment}` : segment

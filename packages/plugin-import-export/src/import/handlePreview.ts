@@ -61,6 +61,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   try {
     // Parse the file data
     let parsedData: Record<string, unknown>[]
+    let originalDocs: Record<string, unknown>[] = []
     const buffer = Buffer.from(fileData, 'base64')
 
     const importFieldHooks = getImportFieldFunctions({
@@ -69,6 +70,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
 
     if (format === 'csv') {
       const rawData = await parseCSV({ data: buffer, req })
+      originalDocs = rawData
 
       // Unflatten CSV data
       parsedData = rawData
@@ -85,6 +87,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         .filter((doc) => doc && Object.keys(doc).length > 0)
     } else {
       const parsedDocs = parseJSON({ data: buffer, req })
+      originalDocs = parsedDocs
       // Apply field-level import hooks for JSON format
       parsedData = parsedDocs.map((doc) =>
         applyFieldHooks({
@@ -97,6 +100,19 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
           req,
         }),
       )
+    }
+
+    const importHooks = targetCollection.config.custom?.['plugin-import-export']?.importHooks
+    if (importHooks?.before && parsedData.length > 0) {
+      const result = await importHooks.before({
+        batchNumber: 1,
+        data: parsedData as unknown as Parameters<typeof importHooks.before>[0]['data'],
+        format: format ?? 'csv',
+        originalData: originalDocs,
+        req,
+        totalBatches: 1,
+      })
+      parsedData = result as unknown as Record<string, unknown>[]
     }
 
     // Remove disabled fields from the documents

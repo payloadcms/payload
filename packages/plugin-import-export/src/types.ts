@@ -51,8 +51,15 @@ export type ExportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (a
   data: Record<string, unknown>[]
   /** Export format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
-  /** Raw DB documents before format-specific transformation. Read-only reference. */
-  originalData: DataFromCollectionSlug<TSlug>[]
+  /**
+   * Raw DB documents before format-specific transformation. Read-only reference.
+   *
+   * Typed as a union so call sites that don't know the collection slug at
+   * compile time (e.g. job tasks) don't need `as any` casts. To get the
+   * narrower typed shape, declare your hook with a slug:
+   * `const hook: ExportBeforeHook<'posts'> = (args) => { ... }`.
+   */
+  originalData: DataFromCollectionSlug<TSlug>[] | Record<string, unknown>[]
   req: PayloadRequest
   /** Total number of batches for this export operation */
   totalBatches: number
@@ -84,8 +91,13 @@ export type ExportAfterHook = (args: {
 export type ImportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (args: {
   /** Current batch number, starting at 1 */
   batchNumber: number
-  /** Unflattened documents ready to be written to the database. Modify and return this. */
-  data: DataFromCollectionSlug<TSlug>[]
+  /**
+   * Unflattened documents ready to be written to the database. Modify and
+   * return this. Typed as `Partial<...>` because rows from a CSV or JSON
+   * import are not guaranteed to include every required field of the
+   * collection — required fields are validated at write time.
+   */
+  data: Partial<DataFromCollectionSlug<TSlug>>[]
   /** Import format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
   /** Raw parsed file rows before unflattening. Read-only reference. */
@@ -93,7 +105,7 @@ export type ImportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (a
   req: PayloadRequest
   /** Total number of batches for this import operation */
   totalBatches: number
-}) => DataFromCollectionSlug<TSlug>[] | Promise<DataFromCollectionSlug<TSlug>[]>
+}) => Partial<DataFromCollectionSlug<TSlug>>[] | Promise<Partial<DataFromCollectionSlug<TSlug>>[]>
 
 /**
  * Hook called after each import batch has been written to the database.
@@ -323,6 +335,10 @@ export type ImportExportPluginConfig = {
  * CSV and JSON. Return a value to replace the field, or `undefined` to fall
  * back to default behavior. Mutate `siblingData` to add or remove columns at
  * the same level.
+ *
+ * Return `null` (CSV only) when the hook has already written its replacement
+ * columns to `siblingData` and default flattening should be skipped — used by
+ * built-in handlers for polymorphic relationships to avoid duplicate columns.
  */
 export type FieldBeforeExportHook = (args: {
   /** Runtime column path, underscore-separated (includes array indices, e.g. `items_0_note`). */

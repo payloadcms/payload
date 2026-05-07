@@ -352,8 +352,7 @@ export const createExport = async (args: CreateExportArgs) => {
               batchNumber: streamBatchNumber,
               data: batchRows,
               format,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              originalData: originalDocs as any,
+              originalData: originalDocs,
               req,
               totalBatches,
             })
@@ -439,8 +438,7 @@ export const createExport = async (args: CreateExportArgs) => {
               batchNumber: streamBatchNumber,
               data: batchRows,
               format,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              originalData: originalDocs as any,
+              originalData: originalDocs,
               req,
               totalBatches,
             })

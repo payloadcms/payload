@@ -524,6 +524,7 @@ async function processImportBatch({
                     draft: collectionHasVersions ? false : undefined,
                     overrideAccess: false,
                     req: localeReq,
+                    user,
                   })
                 } catch (error) {
                   // Log but don't fail the entire import if a locale update fails
@@ -656,12 +657,11 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
       const batchNumber = i + 1
       const originalBatch = originalBatches[i] ?? currentBatch
 
-      const batchToProcess =
+      const batchToProcess: Record<string, unknown>[] =
         hooks?.before && currentBatch.length > 0
           ? ((await hooks.before({
               batchNumber,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              data: currentBatch as any,
+              data: currentBatch as Parameters<ImportBeforeHook>[0]['data'],
               format,
               originalData: originalBatch,
               req,

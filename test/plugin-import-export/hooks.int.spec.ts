@@ -37,7 +37,9 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
   afterEach(async () => {
     resetHookSpies()
     for (const id of createdHookPostIDs) {
-      await payload.delete({ collection: postsWithHooksSlug, id }).catch(() => undefined)
+      await payload
+        .delete({ collection: postsWithHooksSlug, id })
+        .catch((err) => payload.logger.warn({ err, id, msg: 'hooks.int.spec cleanup failed' }))
     }
     createdHookPostIDs.length = 0
   })
@@ -481,6 +483,71 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(rows[0]!.sharedName).toBeUndefined()
     })
 
+    it('should reflect collection-level export.hooks.before in CSV export preview', async () => {
+      const post = await payload.create({
+        collection: postsWithColumnMapSlug,
+        data: { title: 'Preview Rename', excerpt: 'preview excerpt', count: 11 },
+      })
+      createdIDs.push(post.id)
+
+      const res = await restClient.POST('/posts-with-column-map-export/export-preview', {
+        body: JSON.stringify({
+          collectionSlug: postsWithColumnMapSlug,
+          format: 'csv',
+          previewLimit: 10,
+          previewPage: 1,
+          where: { id: { equals: post.id } },
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      expect(res.status).toBe(200)
+      const body: { columns: string[]; docs: Array<Record<string, unknown>> } = await res.json()
+
+      expect(body.docs).toHaveLength(1)
+      expect(body.docs[0]!['Post Title']).toBe('Preview Rename')
+      expect(body.docs[0]!.Summary).toBe('preview excerpt')
+      expect(body.docs[0]!['View Count']).toBe(11)
+      expect(body.docs[0]!.title).toBeUndefined()
+      expect(body.docs[0]!.excerpt).toBeUndefined()
+      expect(body.docs[0]!.count).toBeUndefined()
+
+      expect(body.columns).toContain('Post Title')
+      expect(body.columns).toContain('Summary')
+      expect(body.columns).toContain('View Count')
+      expect(body.columns).not.toContain('title')
+      expect(body.columns).not.toContain('excerpt')
+      expect(body.columns).not.toContain('count')
+    })
+
+    it('should reflect collection-level export.hooks.before in JSON export preview', async () => {
+      const post = await payload.create({
+        collection: postsWithColumnMapSlug,
+        data: { title: 'JSON Preview Rename', excerpt: 'json preview', count: 22 },
+      })
+      createdIDs.push(post.id)
+
+      const res = await restClient.POST('/posts-with-column-map-export/export-preview', {
+        body: JSON.stringify({
+          collectionSlug: postsWithColumnMapSlug,
+          format: 'json',
+          previewLimit: 10,
+          previewPage: 1,
+          where: { id: { equals: post.id } },
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      expect(res.status).toBe(200)
+      const body: { docs: Array<Record<string, unknown>> } = await res.json()
+
+      expect(body.docs).toHaveLength(1)
+      expect(body.docs[0]!['Post Title']).toBe('JSON Preview Rename')
+      expect(body.docs[0]!.Summary).toBe('json preview')
+      expect(body.docs[0]!['View Count']).toBe(22)
+      expect(body.docs[0]!.title).toBeUndefined()
+    })
+
     it('should rename JSON keys via collection-level export.hooks.before', async () => {
       const post = await payload.create({
         collection: postsWithColumnMapSlug,
@@ -519,7 +586,9 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
 
     afterEach(async () => {
       for (const id of createdIDs) {
-        await payload.delete({ collection: postsWithColumnMapSlug, id }).catch(() => {})
+        await payload
+          .delete({ collection: postsWithColumnMapSlug, id })
+          .catch((err) => payload.logger.warn({ err, id, msg: 'column-map cleanup failed' }))
       }
       createdIDs.length = 0
     })
@@ -609,6 +678,69 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(imported.docs[0]!.count).toBe(5)
       expect(imported.docs[1]!.title).toBe('JSON B')
       expect(imported.docs[1]!.count).toBe(6)
+    })
+
+    it('should reflect collection-level import.hooks.before in CSV import preview', async () => {
+      const csv =
+        '"Post Title","Summary","View Count","Ignored Column"\n' +
+        '"Preview Imported","preview summary","30","noise"\n'
+
+      const fileData = Buffer.from(csv).toString('base64')
+
+      const res = await restClient.POST('/posts-with-column-map-import/preview-data', {
+        body: JSON.stringify({
+          collectionSlug: postsWithColumnMapSlug,
+          fileData,
+          format: 'csv',
+          previewLimit: 10,
+          previewPage: 1,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      expect(res.status).toBe(200)
+      const body: { docs: Array<Record<string, unknown>> } = await res.json()
+
+      expect(body.docs).toHaveLength(1)
+      expect(body.docs[0]!.title).toBe('Preview Imported')
+      expect(body.docs[0]!.excerpt).toBe('preview summary')
+      expect(body.docs[0]!.count).toBe(30)
+      expect(body.docs[0]!['Post Title']).toBeUndefined()
+      expect(body.docs[0]!.Summary).toBeUndefined()
+      expect(body.docs[0]!['Ignored Column']).toBeUndefined()
+    })
+
+    it('should reflect collection-level import.hooks.before in JSON import preview', async () => {
+      const content = JSON.stringify([
+        {
+          'Post Title': 'JSON Preview Imported',
+          Summary: 'json preview summary',
+          'View Count': 40,
+          'Ignored Column': 'noise',
+        },
+      ])
+
+      const fileData = Buffer.from(content).toString('base64')
+
+      const res = await restClient.POST('/posts-with-column-map-import/preview-data', {
+        body: JSON.stringify({
+          collectionSlug: postsWithColumnMapSlug,
+          fileData,
+          format: 'json',
+          previewLimit: 10,
+          previewPage: 1,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      expect(res.status).toBe(200)
+      const body: { docs: Array<Record<string, unknown>> } = await res.json()
+
+      expect(body.docs).toHaveLength(1)
+      expect(body.docs[0]!.title).toBe('JSON Preview Imported')
+      expect(body.docs[0]!.excerpt).toBe('json preview summary')
+      expect(body.docs[0]!.count).toBe(40)
+      expect(body.docs[0]!['Post Title']).toBeUndefined()
     })
 
     it('should drop foreign columns not present in the rename map', async () => {

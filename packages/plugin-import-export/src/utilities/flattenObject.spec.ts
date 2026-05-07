@@ -92,6 +92,26 @@ describe('flattenObject parent + child traversal', () => {
     expect(childFn).not.toHaveBeenCalled()
   })
 
+  it('should fall back to default array flattening when an undefined-returning hook did not write any keys, even if a sibling key with a matching prefix exists', () => {
+    const exportFieldHooks: Record<string, ExportFieldHookEntry> = {
+      tag: {
+        type: 'beforeExport',
+        fn: () => undefined,
+      },
+    }
+
+    const row = flattenObject({
+      data: { tag_meta: 'sibling-set-first', tag: ['a', 'b'] },
+      exportFieldHooks,
+      format: 'csv',
+      req: mockReq,
+    })
+
+    expect(row.tag_meta).toBe('sibling-set-first')
+    expect(row.tag_0).toBe('a')
+    expect(row.tag_1).toBe('b')
+  })
+
   it('should run a parent array hook then child hooks for each item', () => {
     const exportFieldHooks: Record<string, ExportFieldHookEntry> = {
       items: {

@@ -32,10 +32,14 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
   })
 
   afterEach(async () => {
-    await payload.delete({
+    const existing = await payload.find({
       collection: postsWithFieldHooksSlug,
-      where: { id: { exists: true } },
+      limit: 1000,
+      pagination: false,
     })
+    for (const doc of existing.docs) {
+      await payload.delete({ collection: postsWithFieldHooksSlug, id: doc.id })
+    }
   })
 
   // ─────────────────────────────────────────────
