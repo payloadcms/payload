@@ -73,7 +73,7 @@ export const PostsCollection: CollectionConfig = {
 
 The same change applies to Globals.
 
-Run `npx @payloadcms/codemod --transform migrate-force-select` to migrate automatically. The codemod handles object-literal `forceSelect` values; non-literal values, configs that already define a sibling `select`, and nested object literals (which previously deep-merged) are surfaced as notes for manual review.
+Run `npx @payloadcms/codemod --transform migrate-force-select` to migrate automatically. The codemod handles object-literal `forceSelect` values, including nested ones (which previously deep-merged) — those are rewritten to call `deepMergeSimple` from `payload/shared`, with the import added automatically. Non-literal values, configs that already define a sibling `select`, and unsupported member kinds are surfaced as notes for manual review.
 
 #### The `admin.hideAPIURL` property on Collections and Globals has been removed
 

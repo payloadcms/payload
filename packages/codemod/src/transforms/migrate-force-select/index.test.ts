@@ -67,7 +67,7 @@ export const Pages = {
     expect(result).not.toContain('forceSelect')
   })
 
-  it('flags nested object literals for manual review', async () => {
+  it('migrates nested forceSelect using deepMergeSimple', async () => {
     const input = `export const Pages = {
   slug: 'pages',
   forceSelect: {
@@ -81,7 +81,29 @@ export const Pages = {
 
     const result = await runTransform({ source: input, transform: migrateForceSelect })
 
-    expect(result).toContain('select: ({ select }) =>')
     expect(result).not.toContain('forceSelect')
+    expect(result).toContain(`import { deepMergeSimple } from 'payload/shared'`)
+    expect(result).toMatch(
+      /select:\s*\(\{\s*select\s*\}\)\s*=>\s*\(select\s*\?\s*deepMergeSimple\(select,\s*\{[\s\S]*group:[\s\S]*sub:\s*true[\s\S]*\}\)\s*:\s*undefined\)/,
+    )
+  })
+
+  it('does not duplicate the deepMergeSimple import on rerun', async () => {
+    const input = `import { deepMergeSimple } from 'payload/shared'
+
+export const Pages = {
+  slug: 'pages',
+  forceSelect: {
+    group: {
+      sub: true,
+    },
+  },
+  fields: [],
+}
+`
+
+    const result = await runTransform({ source: input, transform: migrateForceSelect })
+
+    expect(result.match(/from 'payload\/shared'/g)?.length).toBe(1)
   })
 })

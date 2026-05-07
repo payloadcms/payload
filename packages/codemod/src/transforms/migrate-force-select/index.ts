@@ -1,4 +1,4 @@
-import type { ObjectLiteralExpression } from 'ts-morph'
+import type { ObjectLiteralExpression, SourceFile } from 'ts-morph'
 
 import { Node, SyntaxKind } from 'ts-morph'
 
@@ -54,9 +54,13 @@ export const migrateForceSelect: Transform = {
         }
 
         if (hasNestedObjectLiteral(initializer)) {
-          notes.push(
-            `${filePath}: 'forceSelect' contains nested object literals — generated 'select' uses shallow merge; verify deep-merge semantics.`,
-          )
+          ensureDeepMergeImport(sourceFile)
+          prop.set({
+            name: 'select',
+            initializer: `({ select }) => (select ? deepMergeSimple(select, { ${parts.join(', ')} }) : undefined)`,
+          })
+          filesChanged.add(filePath)
+          continue
         }
 
         prop.set({
@@ -73,7 +77,7 @@ export const migrateForceSelect: Transform = {
     }
   },
   description:
-    "Migrate 'forceSelect: { ... }' to 'select: ({ select }) => ({ ...select, ... })' on Collection and Global configs.",
+    "Migrate 'forceSelect: { ... }' to a 'select' function on Collection and Global configs. Shallow values become spread; nested values use 'deepMergeSimple' from 'payload/shared'.",
 }
 
 function hasNestedObjectLiteral(obj: ObjectLiteralExpression): boolean {
@@ -108,4 +112,17 @@ function collectSelectParts(obj: ObjectLiteralExpression): null | string[] {
   }
 
   return parts
+}
+
+function ensureDeepMergeImport(sourceFile: SourceFile): void {
+  const alreadyImported = sourceFile.getImportDeclarations().some((decl) => {
+    return decl.getNamedImports().some((named) => named.getName() === 'deepMergeSimple')
+  })
+  if (alreadyImported) {
+    return
+  }
+  sourceFile.addImportDeclaration({
+    moduleSpecifier: 'payload/shared',
+    namedImports: ['deepMergeSimple'],
+  })
 }
