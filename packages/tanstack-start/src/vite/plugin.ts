@@ -153,95 +153,85 @@ function ssrStripDistStyleImports(): PluginOption {
   }
 }
 
-const rscImportSpecifiers = [
-  /^@payloadcms\/richtext-lexical\/rsc$/,
-  /^@payloadcms\/richtext-slate\/rsc$/,
-  /^@payloadcms\/next\/rsc$/,
-]
-
-function isRscSpecifier(specifier: string): boolean {
-  return rscImportSpecifiers.some((re) => re.test(specifier))
-}
-
 /**
- * Strips RSC-only imports from importMap.js in the client environment.
- * RSC components are server-only and should never be bundled for the client.
- * Without this, the RSC import chain pulls in server dependencies (ajv, url, path, etc.)
- * which cause SyntaxErrors and hydration mismatches on the client.
+ * Wraps CJS `node_modules` files in ESM-compatible code when served to the client.
+ *
+ * Packages in `optimizeDeps.exclude` (like `payload`, `@payloadcms/ui`) import CJS
+ * dependencies that Vite serves via raw `/@fs/` URLs, bypassing pre-bundling. The
+ * browser fails to parse them because they use `module.exports` / `exports.X` syntax.
+ *
+ * This plugin detects CJS patterns in the transform phase and wraps them with a
+ * CommonJS-like runtime shim so the browser can execute them as ESM.
  */
-function stripRscFromClientImportMap(): PluginOption {
+function wrapCjsForClient(): PluginOption {
   return {
-    name: 'payload:strip-rsc-client-importmap',
-    enforce: 'pre',
+    name: 'payload:wrap-cjs-client',
+    enforce: 'post',
     transform(code, id, options) {
       if (options?.ssr) {
         return
       }
+
+      if (!id.includes('/node_modules/') || id.includes('/node_modules/.vite/')) {
+        return
+      }
+
       const cleanId = id.replace(/\?.*$/, '')
-      if (!cleanId.includes('importMap') || !cleanId.endsWith('.js')) {
+      if (!cleanId.endsWith('.js') && !cleanId.endsWith('.cjs')) {
         return
       }
 
-      const importLineRe = /^import\s+\{([^}]+)\}\s+from\s+['"]([^'"]+)['"]/gm
-      const rscIdentifiers = new Set<string>()
-      let transformed = code
-
-      let match
-      while ((match = importLineRe.exec(code)) !== null) {
-        const specifier = match[2]!
-        if (isRscSpecifier(specifier)) {
-          const importClause = match[1]!.trim()
-          const alias = importClause.split(/\s+as\s+/)[1]?.trim() || importClause
-          rscIdentifiers.add(alias)
-          transformed = transformed.replace(match[0], `// [stripped RSC] ${match[0]}`)
-        }
-      }
-
-      if (rscIdentifiers.size === 0) {
+      if (code.includes('import ') || code.includes('export ')) {
         return
       }
 
-      for (const ident of rscIdentifiers) {
-        const re = new RegExp(
-          `("(?:[^"\\\\]|\\\\.)*"\\s*:\\s*)${ident.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`,
-          'g',
-        )
-        transformed = transformed.replace(re, `$1null`)
+      if (
+        !code.includes('module.exports') &&
+        !code.includes('exports.') &&
+        !code.includes('Object.defineProperty(exports')
+      ) {
+        return
       }
 
-      return { code: transformed, map: null }
+      const namedExports = extractCjsExports(code)
+      const names = Object.keys(namedExports)
+
+      const wrapped = [
+        `var module = { exports: {} };`,
+        `var exports = module.exports;`,
+        ``,
+        code,
+        ``,
+        `var __cjs_result__ = module.exports;`,
+        `export default __cjs_result__;`,
+        ...names.map(
+          (name) =>
+            `export var ${name} = typeof __cjs_result__ === 'object' && __cjs_result__ !== null ? __cjs_result__["${name}"] : undefined;`,
+        ),
+      ].join('\n')
+
+      return { code: wrapped, map: null }
     },
   }
 }
 
-const serverOnlyModulesForClient = ['ajv', 'ajv/dist/ajv.js']
-
-/**
- * Provides empty ESM shims for server-only CJS packages when imported on the client.
- * These packages (e.g. ajv) get pulled in through deep transitive imports from the
- * payload barrel export and cause SyntaxErrors because their CJS format isn't
- * compatible with native ESM in the browser.
- */
-function shimServerOnlyModulesForClient(): PluginOption {
-  const shimmedId = '\0payload-client-shim'
-  return {
-    name: 'payload:shim-server-only-client',
-    enforce: 'pre',
-    load(id) {
-      if (id === shimmedId) {
-        return 'export default {}; export {};'
+function extractCjsExports(code: string): Record<string, true> {
+  const found: Record<string, true> = {}
+  const patterns = [
+    /exports\.(\w+)\s*=/g,
+    /exports\[["'](\w+)["']\]\s*=/g,
+    /Object\.defineProperty\(exports,\s*["'](\w+)["']/g,
+  ]
+  for (const re of patterns) {
+    let m
+    while ((m = re.exec(code)) !== null) {
+      const name = m[1]!
+      if (name !== '__esModule' && name !== 'default') {
+        found[name] = true
       }
-    },
-    resolveId(id, _importer, options) {
-      if (options?.ssr) {
-        return
-      }
-      const bare = id.replace(/\?.*$/, '')
-      if (serverOnlyModulesForClient.some((mod) => bare === mod || bare.endsWith(`/${mod}`))) {
-        return shimmedId
-      }
-    },
+    }
   }
+  return found
 }
 
 function payloadTransforms(): PluginOption {
@@ -433,8 +423,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
             }
           },
         },
-        shimServerOnlyModulesForClient(),
-        stripRscFromClientImportMap(),
+        wrapCjsForClient(),
         ssrStripDistStyleImports(),
         safeSSRConsole(),
         payloadTransforms(),
