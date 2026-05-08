@@ -14,18 +14,18 @@
     }
 
     .checkboxItem__icon {
-      width: 16px;
-      height: 16px;
-      margin-right: 8px;
-      border: 1px solid var(--text-default);
-      border-radius: 3px;
+      width: var(--spacer-3);
+      height: var(--spacer-3);
+      margin-right: var(--spacer-2);
+      border: var(--stroke-width-small) solid var(--text-default);
+      border-radius: var(--radius-medium);
       display: flex;
       align-items: center;
       justify-content: center;
       pointer-events: none;
 
       .icon--check {
-        height: 11px;
+        height: var(--spacer-2-5);
       }
 
       &[data-match-type='create'] {
@@ -38,7 +38,7 @@
     }
 
     .checkboxItem--nested {
-      margin-left: 1.5rem;
+      margin-left: var(--spacer-4);
     }
   }
 }

@@ -1,5 +1,5 @@
 .debug-jsx-converter {
-  padding-left: 36px;
+  padding-left: var(--spacer-5);
 
   ul,
   ol {

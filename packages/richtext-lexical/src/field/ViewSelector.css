@@ -8,10 +8,10 @@
   all: unset;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 6px;
+  gap: var(--spacer-1);
+  padding: var(--spacer-1) var(--spacer-2);
   background: transparent;
-  border-radius: var(--border-radius-s);
+  border-radius: var(--radius-small);
   cursor: pointer;
   color: var(--text-secondary);
   box-sizing: border-box;

@@ -1,6 +1,23 @@
 @layer payload-default {
   .LexicalEditorTheme {
     --lexical-indent-base-value: 40px;
+
+    /* Lexical heading typography scale */
+    --lexical-h1-font-size: 2rem; /* 32px */
+    --lexical-h1-letter-spacing: -0.544px;
+    --lexical-h2-font-size: 1.5rem; /* 24px */
+    --lexical-h2-letter-spacing: -0.408px;
+    --lexical-h2-line-height: 2rem; /* 32px */
+    --lexical-h3-font-size: 1.25rem; /* 20px */
+    --lexical-h3-letter-spacing: -0.34px;
+    --lexical-h4-font-size: 1rem; /* 16px */
+    --lexical-h4-letter-spacing: -0.272px;
+    --lexical-h5-font-size: 0.8125rem; /* 13px */
+    --lexical-h5-letter-spacing: -0.221px;
+    --lexical-h6-font-size: 0.6875rem; /* 11px */
+    --lexical-h6-letter-spacing: -0.187px;
+    --lexical-body-letter-spacing: -0.0325px;
+
     color: var(--color-text);
   }
 
@@ -17,20 +34,20 @@
     font-size: var(--text-body-large-font-size);
     font-weight: var(--text-body-large-font-weight);
     line-height: var(--text-body-large-line-height);
-    letter-spacing: -0.0325px;
+    letter-spacing: var(--lexical-body-letter-spacing);
     margin-block: var(--spacer-3);
     position: relative;
   }
 
   .LexicalEditorTheme__quote {
-    font-size: calc(var(--base) * 0.8);
+    font-size: var(--spacer-3);
     line-height: 1.5;
     letter-spacing: normal;
     color: var(--color-text);
     margin-block: var(--spacer-3);
     margin-inline: var(--spacer-1);
     border-inline-start-color: var(--border-default);
-    border-inline-start-width: calc(var(--base) * 0.2);
+    border-inline-start-width: var(--spacer-1);
     border-inline-start-style: solid;
     padding-inline-start: var(--spacer-2-5);
     padding-block: var(--spacer-1);
@@ -48,34 +65,34 @@
   }
 
   .LexicalEditorTheme__h1 {
-    font-size: 2rem;
-    letter-spacing: -0.544px;
+    font-size: var(--lexical-h1-font-size);
+    letter-spacing: var(--lexical-h1-letter-spacing);
   }
 
   .LexicalEditorTheme__h2 {
-    font-size: var(--text-heading-large-font-size);
-    line-height: var(--text-heading-large-line-height);
-    letter-spacing: -0.408px;
+    font-size: var(--lexical-h2-font-size);
+    line-height: var(--lexical-h2-line-height);
+    letter-spacing: var(--lexical-h2-letter-spacing);
   }
 
   .LexicalEditorTheme__h3 {
-    font-size: 1.25rem;
-    letter-spacing: -0.34px;
+    font-size: var(--lexical-h3-font-size);
+    letter-spacing: var(--lexical-h3-letter-spacing);
   }
 
   .LexicalEditorTheme__h4 {
-    font-size: 1rem;
-    letter-spacing: -0.272px;
+    font-size: var(--lexical-h4-font-size);
+    letter-spacing: var(--lexical-h4-letter-spacing);
   }
 
   .LexicalEditorTheme__h5 {
-    font-size: var(--text-heading-small-font-size);
-    letter-spacing: -0.221px;
+    font-size: var(--lexical-h5-font-size);
+    letter-spacing: var(--lexical-h5-letter-spacing);
   }
 
   .LexicalEditorTheme__h6 {
-    font-size: var(--text-body-medium-font-size);
-    letter-spacing: -0.187px;
+    font-size: var(--lexical-h6-font-size);
+    letter-spacing: var(--lexical-h6-letter-spacing);
   }
 
   .LexicalEditorTheme__textBold {
@@ -151,11 +168,10 @@
 
   .LexicalEditorTheme__textCode {
     background-color: var(--bg-secondary);
-    border: 1px solid var(--border-default);
+    border: var(--stroke-width-small) solid var(--border-default);
     color: var(--text-default);
-    padding: calc(var(--base) * 0.1) calc(var(--base) * 0.2);
+    padding: var(--spacer-1);
     font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace;
-    font-size: 0.875em;
     border-radius: var(--radius-small);
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
@@ -177,8 +193,8 @@
       display: block;
       position: absolute;
       top: -2px;
-      width: 20px;
-      border-top: 1px solid var(--text-default);
+      width: var(--spacer-3);
+      border-top: var(--stroke-width-small) solid var(--text-default);
       animation: CursorBlink 1.1s steps(2, start) infinite;
     }
   }
@@ -236,11 +252,9 @@
   }
 
   .LexicalEditorTheme__listItem {
-    font-size: calc(var(--base) * 0.8);
-    line-height: 1.5;
-    letter-spacing: normal;
-    margin: 0 0 0.4em 40px;
-    color: var(--text-default);
+    font-family: var(--text-body-large-font-family);
+    font-size: var(--text-body-large-font-size);
+    margin: 0 0 var(--spacer-3) var(--spacer-4);
   }
 
   .LexicalEditorTheme__listItem[style*='text-align: center'],
@@ -263,8 +277,7 @@
   .LexicalEditorTheme__listItemChecked,
   .LexicalEditorTheme__listItemUnchecked {
     position: relative;
-    margin-left: 15px;
-    padding-left: 25px;
+    padding-left: var(--spacer-4);
     list-style-type: none;
     outline: none;
   }
@@ -273,8 +286,7 @@
   .LexicalEditorTheme__listItemChecked[dir='rtl'] {
     margin-left: 0;
     padding-left: 0;
-    padding-right: 25px;
-    margin-right: 15px;
+    padding-right: var(--spacer-4);
   }
 
   .LexicalEditorTheme__listItemChecked {
@@ -284,9 +296,9 @@
   .LexicalEditorTheme__listItemUnchecked:before,
   .LexicalEditorTheme__listItemChecked:before {
     content: '';
-    width: 16px;
-    height: 16px;
-    top: 4px;
+    width: var(--spacer-3);
+    height: var(--spacer-3);
+    top: var(--spacer-1);
     left: 0;
     cursor: pointer;
     display: block;
@@ -324,10 +336,10 @@
     border-style: solid;
     position: absolute;
     display: block;
-    top: 7px;
-    width: 3px;
-    left: 6px;
-    height: 6px;
+    top: var(--spacer-1);
+    width: var(--spacer-1-5);
+    left: var(--spacer-1-5);
+    height: var(--spacer-1-5);
     transform: rotate(45deg);
     border-width: 0 2px 2px 0;
   }

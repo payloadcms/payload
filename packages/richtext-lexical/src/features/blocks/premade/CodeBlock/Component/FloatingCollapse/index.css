@@ -11,9 +11,8 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  height: 24px;
-  bottom: -12px;
-
+  height: var(--spacer-4);
+  bottom: calc(var(--spacer-2-5) * -1);
   padding: var(--spacer-1) var(--spacer-2);
   border-radius: var(--radius-medium);
 
@@ -37,7 +36,7 @@
   }
 
   &:focus-visible {
-    outline: 1px solid var(--border-brand-strong);
-    outline-offset: -1px;
+    outline: var(--stroke-width-small) solid var(--border-brand-strong);
+    outline-offset: calc(var(--stroke-width-small) / -1);
   }
 }

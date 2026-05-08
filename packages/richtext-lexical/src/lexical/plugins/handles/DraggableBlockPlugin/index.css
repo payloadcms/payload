@@ -1,7 +1,7 @@
 @layer payload-default {
   .draggable-block-menu {
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-medium);
     padding: 0;
     cursor: grab;
     opacity: 0;
@@ -24,8 +24,8 @@
 
     .icon {
       background-color: transparent;
-      width: 18px;
-      height: 24px;
+      width: var(--spacer-3);
+      height: var(--spacer-4);
       opacity: 0.3;
       background-image: url(../../../ui/icons/DraggableBlock/index.svg);
     }
@@ -43,14 +43,14 @@
     > .editor-scroller
     > .editor {
     > .draggable-block-target-line {
-      left: 3rem;
+      left: var(--spacer-6);
     }
   }
 
   .draggable-block-target-line {
     pointer-events: none;
     background: var(--border-selected);
-    border-radius: 1px;
+    border-radius: var(--radius-small);
     height: var(--spacer-1);
     position: absolute;
     left: 0;

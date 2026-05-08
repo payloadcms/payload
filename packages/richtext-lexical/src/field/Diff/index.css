@@ -2,12 +2,14 @@
   .lexical-diff .field-diff-content {
     .html-diff {
       font-family: var(--font-serif);
-      font-size: calc(var(--base) * 0.8);
+      font-size: var(--text-body-large-font-size);
+      line-height: var(--text-body-large-line-height);
       letter-spacing: 0.02em;
     }
 
     blockquote {
-      font-size: calc(var(--base) * 0.8);
+      font-size: var(--text-body-large-font-size);
+      line-height: var(--text-body-large-line-height);
       margin-block: var(--spacer-3);
       margin-inline: 0;
       padding-inline-start: var(--spacer-2-5);
@@ -34,51 +36,51 @@
     }
 
     a {
-      border-bottom: 1px dotted;
+      border-bottom: var(--stroke-width-small) dotted;
       text-decoration: none;
     }
 
     h1 {
       padding: calc(var(--base) * 0.7) 0px calc(var(--base) * 0.55);
-      line-height: calc(var(--base) * 1.5);
+      line-height: var(--text-heading-large-line-height);
       font-weight: 600;
-      font-size: calc(var(--base) * 1.4);
+      font-size: var(--text-heading-large-font-size);
       font-family: var(--font-body);
     }
     h2 {
       padding: calc(var(--base) * 0.7) 0px calc(var(--base) * 0.5);
-      line-height: calc(var(--base) * 1.4);
+      line-height: var(--text-heading-medium-line-height);
       font-weight: 600;
-      font-size: calc(var(--base) * 1.25);
+      font-size: var(--text-heading-medium-font-size);
       font-family: var(--font-body);
     }
     h3 {
       padding: calc(var(--base) * 0.6) 0px calc(var(--base) * 0.45);
-      line-height: calc(var(--base) * 1.4);
+      line-height: var(--text-heading-small-line-height);
       font-weight: 600;
-      font-size: calc(var(--base) * 1.1);
+      font-size: var(--text-heading-small-font-size);
       font-family: var(--font-body);
     }
     h4 {
       padding: calc(var(--base) * 0.4) 0px calc(var(--base) * 0.35);
-      line-height: calc(var(--base) * 1.5);
+      line-height: var(--text-body-large-line-height);
       font-weight: 600;
-      font-size: calc(var(--base) * 1.05);
+      font-size: var(--text-body-large-font-size);
       font-family: var(--font-body);
     }
     h5 {
       padding: calc(var(--base) * 0.3) 0px calc(var(--base) * 0.3);
-      line-height: calc(var(--base) * 1.4);
+      line-height: var(--text-body-medium-line-height);
       font-weight: 600;
-      font-size: calc(var(--base) * 0.9);
+      font-size: var(--text-body-medium-font-size);
       font-family: var(--font-body);
     }
 
     h6 {
       padding: calc(var(--base) * 0.55) 0px calc(var(--base) * 0.25);
-      line-height: calc(var(--base) * 0.5);
+      line-height: var(--text-body-small-line-height);
       font-weight: 600;
-      font-size: calc(var(--base) * 0.75);
+      font-size: var(--text-body-small-font-size);
       font-family: var(--font-body);
     }
 

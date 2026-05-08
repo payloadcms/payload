@@ -1,16 +1,16 @@
 @layer payload-default {
   .rich-text-lexical--show-gutter {
     .insert-paragraph-at-end {
-      padding: 4px 0px 2px 40px;
+      padding: var(--spacer-1) 0 calc(var(--spacer-1) / 2) var(--spacer-6);
     }
   }
   .insert-paragraph-at-end {
-    height: 24px;
-    margin-top: -16px;
+    height: var(--spacer-4);
+    margin-top: calc(var(--spacer-4) * -1);
     width: 100%;
     z-index: 0;
     position: relative;
-    padding: 4px 0px 2px 0px;
+    padding: var(--spacer-1) 0 calc(var(--spacer-1) / 2) 0;
 
     &:hover {
       cursor: pointer;
@@ -32,7 +32,7 @@
     transition: background-color 0.1s ease-in-out;
     display: flex;
     justify-content: center;
-    border-radius: 3px;
+    border-radius: var(--radius-medium);
     color: var(--text-secondary);
 
     span {

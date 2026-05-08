@@ -1,33 +1,34 @@
 @layer payload-default {
   .tree-view-output {
+    --tree-view-max-height: 25rem;
     display: block;
     background: #222;
     color: #fff;
     padding: 0;
-    font-size: 12px;
+    font-size: var(--text-body-medium-font-size);
     margin: 1px auto 10px auto;
     position: relative;
     overflow: hidden;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: var(--radius-medium);
+    border-bottom-right-radius: var(--radius-medium);
 
     pre {
       line-height: 1.1;
       background: #222;
       color: #fff;
       margin: 0;
-      padding: 10px;
-      font-size: 12px;
+      padding: var(--spacer-2);
+      font-size: var(--text-body-medium-font-size);
       overflow: auto;
-      max-height: 400px;
+      max-height: var(--tree-view-max-height);
     }
 
     .debug-treetype-button {
       border: 0;
       padding: 0;
-      font-size: 12px;
-      top: 10px;
-      right: 85px;
+      font-size: var(--text-body-medium-font-size);
+      top: var(--spacer-2);
+      right: calc(var(--spacer-6) * 2);
       position: absolute;
       background: none;
       color: #fff;
@@ -40,9 +41,9 @@
     .debug-timetravel-button {
       border: 0;
       padding: 0;
-      font-size: 12px;
-      top: 10px;
-      right: 15px;
+      font-size: var(--text-body-medium-font-size);
+      top: var(--spacer-2);
+      right: var(--spacer-3);
       position: absolute;
       background: none;
       color: #fff;
@@ -54,7 +55,7 @@
 
     .debug-timetravel-panel {
       overflow: hidden;
-      padding: 0 0 10px;
+      padding: 0 0 var(--spacer-2);
       margin: auto;
       display: flex;
     }
@@ -65,7 +66,7 @@
       background: none;
       flex: 1;
       color: #fff;
-      font-size: 12px;
+      font-size: var(--text-body-large-font-size);
 
       &:hover {
         text-decoration: underline;

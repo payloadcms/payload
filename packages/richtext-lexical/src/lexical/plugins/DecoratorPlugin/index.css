@@ -1,7 +1,7 @@
 @layer payload-default {
   [data-lexical-decorator='true'] {
     width: fit-content;
-    border-radius: 4px;
+    border-radius: var(--radius-medium);
   }
 
   .decorator-selected {

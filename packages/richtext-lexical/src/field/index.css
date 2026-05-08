@@ -17,8 +17,8 @@
   .rich-text-lexical__label-row {
     display: flex;
     align-items: center;
-    margin-bottom: calc(var(--base) / 4);
-    gap: calc(var(--base) / 3);
+    margin-bottom: var(--spacer-2);
+    gap: var(--spacer-2);
 
     label.field-label:not(.unstyled) {
       margin-right: unset;

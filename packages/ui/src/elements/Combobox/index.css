@@ -21,7 +21,7 @@
     background: var(--bg-default-secondary);
     color: var(--text-default-default);
     border: none;
-    border-radius: var(--style-radius-s);
+    border-radius: var(--radius-medium);
     padding: calc(var(--base) * 0.25) calc(var(--base) * 0.5);
     outline: none;
     box-shadow: none;

@@ -18,10 +18,10 @@
 
   .table-cell-action-button {
     border: 0;
-    padding: 2px;
+    padding: var(--spacer-1);
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: var(--spacer-2);
+    right: var(--spacer-2);
     border-radius: var(--radius-medium);
     color: var(--text-secondary);
     background: transparent;
@@ -38,12 +38,13 @@
   }
 
   .table-action-menu-dropdown {
+    --menu-min-width: 10rem;
     z-index: 100;
     display: flex;
     flex-direction: column;
     position: fixed;
     background: var(--bg-menu);
-    min-width: 160px;
+    min-width: var(--menu-min-width);
     border-radius: var(--radius-large);
     padding: var(--spacer-2);
     overflow-y: auto;
@@ -54,13 +55,13 @@
 
     hr {
       border: none;
-      height: 1px;
+      height: var(--stroke-width-small);
       margin: var(--spacer-2) calc(var(--spacer-2) * -1);
       background-color: var(--color-white-200);
     }
 
     .item {
-      padding: 6px 8px;
+      padding: var(--spacer-2);
       color: var(--color-white-800);
       background: transparent;
       cursor: pointer;
@@ -68,7 +69,6 @@
       font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
       line-height: var(--text-body-medium-line-height);
-      letter-spacing: 0.055px;
       display: flex;
       align-items: center;
       flex-shrink: 0;

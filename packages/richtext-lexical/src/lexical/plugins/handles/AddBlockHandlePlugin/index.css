@@ -1,7 +1,7 @@
 @layer payload-default {
   .add-block-menu {
     all: unset;
-    border-radius: 4px;
+    border-radius: var(--radius-medium);
     padding: 0;
     cursor: pointer;
     opacity: 0;
@@ -18,8 +18,8 @@
     }
 
     .icon {
-      width: 18px;
-      height: 24px;
+      width: var(--spacer-3);
+      height: var(--spacer-3);
       opacity: 0.3;
       background-image: url(../../../ui/icons/Add/index.svg);
     }

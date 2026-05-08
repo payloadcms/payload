@@ -7,13 +7,13 @@
   }
 
   .table-grid-popup__content {
-    width: 200px;
+    width: 13rem;
     background: var(--bg-default);
     border-radius: var(--radius-large);
     padding: var(--spacer-2);
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: var(--spacer-2);
     box-shadow:
       0px 0px 0.5px 0px rgba(0, 0, 0, 0.15),
       0px 5px 12px 0px rgba(0, 0, 0, 0.13),
@@ -36,7 +36,7 @@
     border-radius: var(--radius-medium);
     overflow: clip;
     min-width: 0;
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
   }
 
   .table-grid-popup__input-group:hover {
@@ -71,7 +71,6 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    letter-spacing: 0.055px;
     color: var(--text-secondary);
     padding: 0;
     padding-right: var(--spacer-2);
@@ -105,8 +104,8 @@
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     grid-template-rows: repeat(7, 1fr);
-    row-gap: 2px;
-    column-gap: 2px;
+    row-gap: calc(var(--spacer-1) / 2);
+    column-gap: calc(var(--spacer-1) / 2);
     flex-shrink: 0;
     align-self: stretch;
     position: relative;
@@ -117,19 +116,17 @@
     background: var(--bg-secondary);
     border-radius: var(--radius-small);
     cursor: pointer;
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
   }
 
   .table-grid-popup__cell--selected {
     background: var(--bg-selected-default);
     border-color: var(--color-blue-400);
-    border-radius: 3px;
   }
 
   .table-grid-popup__cell--hover {
     background: var(--bg-selected-hover);
     border-color: var(--color-blue-400);
-    border-radius: 3px;
   }
 
   .table-grid-popup__tooltip {
@@ -151,7 +148,7 @@
   .table-grid-popup__tooltip::after {
     content: '';
     position: absolute;
-    bottom: -4px;
+    bottom: calc(var(--spacer-1) * -1);
     left: 50%;
     transform: translateX(-50%);
     width: 0;

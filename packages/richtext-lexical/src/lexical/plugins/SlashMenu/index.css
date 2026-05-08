@@ -1,12 +1,14 @@
 @layer payload-default {
   .slash-menu-popup {
+    --slash-menu-width: 12.5rem;
+    --slash-menu-max-height: 18.75rem;
     background: var(--bg-default);
-    width: 200px;
+    width: var(--slash-menu-width);
     color: var(--text-default);
-    border-radius: 4px;
+    border-radius: var(--radius-medium);
     list-style: none;
     font-family: var(--font-body);
-    max-height: 300px;
+    max-height: var(--slash-menu-max-height);
     overflow-y: auto;
     z-index: 10;
     position: absolute;
@@ -17,26 +19,25 @@
   }
 
   .slash-menu-popup__group {
-    padding-bottom: 8px;
+    padding-bottom: var(--spacer-2);
   }
 
   .slash-menu-popup__group-title {
-    padding-left: 10px;
+    padding-left: var(--spacer-2-5);
     color: var(--text-secondary);
-    font-size: 10px;
+    font-size: var(--text-body-small-font-size);
   }
 
   .slash-menu-popup__item {
     all: unset;
-    padding-left: 12px;
-    font-size: 13px;
+    padding-left: var(--spacer-2-5);
     box-sizing: border-box;
     background: none;
     border: none;
     color: var(--text-default);
     display: flex;
     align-items: center;
-    height: 30px;
+    height: var(--spacer-5);
     width: 100%;
     cursor: pointer;
 
@@ -50,7 +51,7 @@
   }
 
   .slash-menu-popup__item-text {
-    margin-left: 6px;
+    margin-left: var(--spacer-2);
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

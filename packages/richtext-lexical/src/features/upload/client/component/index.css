@@ -1,6 +1,9 @@
 @layer payload-default {
   .LexicalEditorTheme__upload {
-    border: 1px solid transparent;
+    --upload-filename-max-width: 12rem;
+    --upload-filename-max-width-mobile: 6rem;
+    --upload-media-size: 28.125rem;
+    border: var(--stroke-width-small) solid transparent;
     position: relative;
     font-family: var(--font-body);
     margin-block: var(--spacer-2);
@@ -53,16 +56,16 @@
   .LexicalEditorTheme__upload__contents--landscape {
     img,
     svg {
-      max-width: 450px;
-      min-width: 450px;
+      max-width: var(--upload-media-size);
+      min-width: var(--upload-media-size);
     }
   }
 
   .LexicalEditorTheme__upload__contents--portrait {
     img,
     svg {
-      max-height: 450px;
-      min-height: 450px;
+      max-height: var(--upload-media-size);
+      min-height: var(--upload-media-size);
     }
   }
 
@@ -108,10 +111,10 @@
 
     .btn {
       color: var(--color-white-800);
-      width: 24px;
-      height: 24px;
-      min-width: 24px;
-      min-height: 24px;
+      width: var(--spacer-4);
+      height: var(--spacer-4);
+      min-width: var(--spacer-4);
+      min-height: var(--spacer-4);
       padding: 0;
       border-radius: var(--radius-medium);
       background: transparent;
@@ -143,17 +146,17 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    letter-spacing: 0.055px;
+    letter-spacing: var(--text-body-medium-letter-spacing);
     text-decoration: none;
     cursor: pointer;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    max-width: 12rem;
+    max-width: var(--upload-filename-max-width);
   }
 
   .LexicalEditorTheme__upload__divider {
-    width: 1px;
+    width: var(--stroke-width-small);
     height: var(--spacer-6);
     background: var(--color-grey-700);
     flex-shrink: 0;
@@ -181,7 +184,7 @@
     }
 
     .LexicalEditorTheme__upload__filename {
-      max-width: 6rem;
+      max-width: var(--upload-filename-max-width-mobile);
     }
   }
 }

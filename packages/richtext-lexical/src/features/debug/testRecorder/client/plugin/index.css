@@ -10,9 +10,9 @@
   .test-recorder-button {
     position: relative;
     display: block;
-    font-size: 10px;
-    padding: 6px 6px;
-    border-radius: 4px;
+    font-size: var(--text-body-small-font-size);
+    padding: var(--spacer-1);
+    border-radius: var(--radius-medium);
     border: none;
     cursor: pointer;
     outline: none;
@@ -27,16 +27,16 @@
   }
 
   .test-recorder-button + .test-recorder-button {
-    margin-left: 4px;
+    margin-left: var(--spacer-1);
   }
 
   .test-recorder-button::after {
     content: '';
     position: absolute;
-    top: 8px;
-    right: 8px;
-    bottom: 8px;
-    left: 8px;
+    top: var(--spacer-2);
+    right: var(--spacer-2);
+    bottom: var(--spacer-2);
+    left: var(--spacer-2);
     display: block;
     background-size: contain;
     filter: invert(1);

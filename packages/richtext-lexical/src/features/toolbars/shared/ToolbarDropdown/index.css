@@ -1,17 +1,16 @@
 @layer payload-default {
   .toolbar-popup__dropdown {
+    --dropdown-width: 12.5rem;
     display: flex;
     align-items: center;
     vertical-align: middle;
     justify-content: center;
-    gap: var(--spacer-1);
-    height: calc(var(--base) * 1.5);
     border: 0;
     background: none;
-    border-radius: 4px;
+    border-radius: var(--radius-medium);
     cursor: pointer;
     position: relative;
-    padding: 0 var(--spacer-2);
+    padding-right: var(--spacer-2);
     transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
 
     &:disabled {
@@ -46,19 +45,20 @@
 
   .toolbar-popup__dropdown-caret {
     width: var(--spacer-2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute;
+    right: 0;
+    top: 50%;
     transform: rotate(45deg);
+
     &:after {
       display: block;
       content: ' ';
       position: absolute;
-      width: 4px;
-      height: 4px;
+      width: var(--spacer-1);
+      height: var(--spacer-1);
       transform: translateY(-2px);
-      border: solid 1px currentColor;
-      border-width: 0 1px 1px 0;
+      border: solid var(--stroke-width-small) var(--text-default-secondary);
+      border-width: 0 var(--stroke-width-small) var(--stroke-width-small) 0;
     }
   }
 
@@ -68,8 +68,8 @@
     color: var(--text-default-default);
     border-radius: var(--radius-large);
     padding: var(--spacer-2);
-    min-width: 200px;
-    max-width: 200px;
+    min-width: var(--dropdown-width);
+    max-width: var(--dropdown-width);
     z-index: 100;
     box-shadow:
       0 2px 6px 0 rgba(0, 0, 0, 0.12),
@@ -131,7 +131,7 @@
 
       padding: 0 var(--spacer-1);
       width: 100%;
-      height: 24px;
+      height: var(--spacer-4);
       border-radius: var(--radius-medium);
       box-sizing: border-box;
       display: flex;
@@ -139,9 +139,7 @@
       gap: var(--spacer-1);
 
       .icon {
-        min-width: 20px;
-        height: 20px;
-        color: var(--icon-default-default);
+        color: var(--icon-default-secondary);
       }
     }
   }
@@ -174,8 +172,8 @@
       position: absolute;
       left: var(--spacer-2-5);
       top: 50%;
-      width: 5px;
-      height: 9px;
+      width: var(--spacer-1);
+      height: var(--spacer-2);
       border: solid var(--text-selected-onselected-strong);
       border-width: 0 1px 1px 0;
       transform: translateY(-60%) rotate(45deg);

@@ -78,8 +78,8 @@
     .LexicalEditorTheme__block__removeButton.btn {
       border-radius: var(--radius-medium);
       color: var(--icon-secondary);
-      min-width: 24px;
-      min-height: 24px;
+      min-width: var(--spacer-4);
+      min-height: var(--spacer-4);
       padding: 0;
       display: flex;
       align-items: center;
@@ -95,8 +95,8 @@
       }
 
       &:focus-visible {
-        outline: 1px solid var(--border-brand-strong);
-        outline-offset: -1px;
+        outline: var(--stroke-width-small) solid var(--border-brand-strong);
+        outline-offset: calc(var(--stroke-width-small) / -1);
       }
     }
   }
@@ -105,7 +105,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 24px;
+    min-width: var(--spacer-4);
     color: var(--icon-tertiary);
   }
 
@@ -145,8 +145,8 @@
 
   .payload-richtext-code-block__chevron {
     color: var(--icon-secondary);
-    width: 16px;
-    height: 24px;
+    width: var(--spacer-3);
+    height: var(--spacer-4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -156,12 +156,12 @@
 
 /* Override the collapsible container to use a simple border wrapper */
 .payload-richtext-code-block {
-  border: 1px solid var(--border-default);
+  border: var(--stroke-width-small) solid var(--border-default);
   border-radius: var(--radius-medium);
 
   &:focus-within {
-    outline: 1px solid var(--border-brand-strong);
-    outline-offset: -1px;
+    outline: var(--stroke-width-small) solid var(--border-brand-strong);
+    outline-offset: calc(var(--stroke-width-small) / -1);
   }
 }
 

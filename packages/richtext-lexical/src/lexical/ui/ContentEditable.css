@@ -5,8 +5,8 @@
     position: relative;
     tab-size: 1;
     outline: 0;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding-top: var(--spacer-2);
+    padding-bottom: var(--spacer-2);
     padding-left: 0;
     padding-right: 0;
 
@@ -57,7 +57,7 @@
         &.error {
           > .rich-text-lexical__wrap {
             background-color: var(--bg-danger-tertiary);
-            border: 1px solid var(--border-danger);
+            border: var(--stroke-width-small) solid var(--border-danger);
           }
         }
       }
@@ -82,7 +82,7 @@
         &.error {
           > .rich-text-lexical__wrap {
             background-color: var(--bg-danger-tertiary);
-            border: 1px solid var(--border-danger);
+            border: var(--stroke-width-small) solid var(--border-danger);
 
             &:hover {
               border-color: var(--border-danger);

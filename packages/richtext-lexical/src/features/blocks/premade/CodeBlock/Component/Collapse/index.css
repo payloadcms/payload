@@ -1,8 +1,8 @@
 .code-block-collapse-button {
   all: unset;
   cursor: pointer;
-  min-width: 24px;
-  min-height: 24px;
+  min-width: var(--spacer-4);
+  min-height: var(--spacer-4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,6 +21,6 @@
 
   &:focus-visible {
     outline: 1px solid var(--border-brand-strong);
-    outline-offset: -1px;
+    outline-offset: calc(var(--stroke-width-small) / -1);
   }
 }

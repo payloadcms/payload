@@ -10,15 +10,15 @@
     flex-wrap: wrap;
     align-items: center;
     padding: 0 var(--spacer-2);
+    gap: var(--spacer-2);
     vertical-align: middle;
     position: sticky;
     z-index: 2;
     top: var(--doc-controls-height);
-    border: 1px solid var(--border-default);
+    border: var(--stroke-width-small) solid var(--border-default);
     border-collapse: unset;
     border-radius: var(--radius-medium) var(--radius-medium) 0 0;
-    transform: translateY(1px);
-    min-height: 40px;
+    transform: translateY(var(--stroke-width-small));
 
     &:before,
     &:after {
@@ -45,12 +45,12 @@
 
       > .editor-scroller > .editor {
         > .ContentEditable__root {
-          padding-top: calc(var(--base) * 1.25);
+          padding-top: var(--spacer-2);
         }
       }
 
       > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder {
-        top: calc(var(--base) * 1.25);
+        top: var(--spacer-2);
       }
     }
   }
@@ -60,19 +60,17 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--spacer-2);
+    height: var(--spacer-5);
     z-index: 1;
 
     .icon {
-      min-width: 20px;
-      height: 20px;
       color: var(--text-secondary);
     }
 
     .divider {
-      width: 1px;
-      height: 40px;
+      width: var(--stroke-width-small);
+      align-self: stretch;
       background-color: var(--bg-hover);
-      margin: 0 6.25px 0 4.25px;
     }
   }
 
@@ -81,8 +79,8 @@
       + .editor-container {
         > .editor-scroller > .editor {
           > .ContentEditable__root::before {
-            top: calc(var(--base) * 1.25) !important;
-            height: calc(100% - calc(var(--base) * 1.25) - 8px) !important;
+            top: var(--spacer-4) !important;
+            height: calc(100% - var(--spacer-4) - 8px) !important;
           }
         }
       }
