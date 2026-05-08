@@ -322,8 +322,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -350,8 +350,8 @@ importers:
         specifier: 2.4.2
         version: 2.4.2
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -399,8 +399,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
     devDependencies:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: 0.2.6
@@ -442,8 +442,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -485,8 +485,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
     devDependencies:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: 0.2.6
@@ -525,8 +525,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
     devDependencies:
       '@libsql/client':
         specifier: 0.14.0
@@ -810,8 +810,8 @@ importers:
         specifier: 1.77.4
         version: 1.77.4
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
     devDependencies:
       '@babel/cli':
         specifier: 7.27.2
@@ -952,8 +952,8 @@ importers:
         specifier: 7.24.4
         version: 7.24.4
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
       ws:
         specifier: ^8.16.0
         version: 8.20.0(bufferutil@4.1.0)
@@ -1274,7 +1274,7 @@ importers:
     dependencies:
       '@sentry/nextjs':
         specifier: ^9.5.0
-        version: 9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0))(react@19.2.6)(webpack@5.106.2(@swc/core@1.15.3)(esbuild@0.25.12))
+        version: 9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0))(react@19.2.6)(webpack@5.106.2(@swc/core@1.15.3)(esbuild@0.25.12))
       '@sentry/types':
         specifier: ^9.5.0
         version: 9.47.1
@@ -1344,8 +1344,8 @@ importers:
         specifier: ^10.2.0
         version: 10.17.0
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1462,8 +1462,8 @@ importers:
         specifier: 10.0.3
         version: 10.0.3(typescript@5.7.3)
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
     devDependencies:
       '@babel/cli':
         specifier: 7.27.2
@@ -1784,8 +1784,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0(react@19.2.6)(scheduler@0.25.0)
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
     devDependencies:
       '@babel/cli':
         specifier: 7.27.2
@@ -2290,7 +2290,7 @@ importers:
     dependencies:
       recharts:
         specifier: 3.2.1
-        version: 3.2.1(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-is@16.13.1)(react@19.2.6)(redux@5.0.1)
+        version: 3.2.1(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1)
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.614.0
@@ -2557,8 +2557,8 @@ importers:
         specifier: 5.7.3
         version: 5.7.3
       uuid:
-        specifier: 11.1.0
-        version: 11.1.0
+        specifier: 13.0.2
+        version: 13.0.2
       vitest:
         specifier: 4.1.2
         version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@22.19.9)(@vitest/ui@4.1.2)(happy-dom@20.9.0(bufferutil@4.1.0))(jsdom@28.0.0(@noble/hashes@1.8.0))(vite@7.3.3(@types/node@22.19.9)(jiti@2.7.0)(lightningcss@1.30.2)(sass-embedded@1.99.0)(sass@1.77.4)(terser@5.47.1)(tsx@4.21.0)(yaml@2.8.4))
@@ -14437,8 +14437,8 @@ packages:
     deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
-  uuid@11.1.0:
-    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
+  uuid@13.0.2:
+    resolution: {integrity: sha512-vzi9uRZ926x4XV73S/4qQaTwPXM2JBj6/6lI/byHH1jOpCzb0zDbfytgA9LcN/hzb2l7WQSQnxITOVx5un/wGw==}
     hasBin: true
 
   uuid@8.3.2:
@@ -20220,7 +20220,7 @@ snapshots:
       - supports-color
       - webpack
 
-  '@sentry/nextjs@9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0))(react@19.2.6)(webpack@5.106.2(@swc/core@1.15.3)(esbuild@0.25.12))':
+  '@sentry/nextjs@9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0))(react@19.2.6)(webpack@5.106.2(@swc/core@1.15.3)(esbuild@0.25.12))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.40.0
@@ -20233,7 +20233,7 @@ snapshots:
       '@sentry/vercel-edge': 9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))
       '@sentry/webpack-plugin': 3.6.1(webpack@5.106.2(@swc/core@1.15.3)(esbuild@0.25.12))
       chalk: 3.0.0
-      next: 16.2.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0)
+      next: 16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0)
       resolve: 1.22.8
       rollup: 4.59.0
       stacktrace-parser: 0.1.11
@@ -26392,33 +26392,6 @@ snapshots:
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
 
-  next@16.2.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0):
-    dependencies:
-      '@next/env': 16.2.3
-      '@swc/helpers': 0.5.15
-      baseline-browser-mapping: 2.10.27
-      caniuse-lite: 1.0.30001792
-      postcss: 8.4.31
-      react: 19.2.6
-      react-dom: 19.2.6(react@19.2.6)
-      styled-jsx: 5.1.6(@babel/core@7.29.0)(react@19.2.6)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 16.2.3
-      '@next/swc-darwin-x64': 16.2.3
-      '@next/swc-linux-arm64-gnu': 16.2.3
-      '@next/swc-linux-arm64-musl': 16.2.3
-      '@next/swc-linux-x64-gnu': 16.2.3
-      '@next/swc-linux-x64-musl': 16.2.3
-      '@next/swc-win32-arm64-msvc': 16.2.3
-      '@next/swc-win32-x64-msvc': 16.2.3
-      '@opentelemetry/api': 1.9.1
-      '@playwright/test': 1.58.2
-      sass: 1.99.0
-      sharp: 0.34.5
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
-
   next@16.2.3(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0):
     dependencies:
       '@next/env': 16.2.3
@@ -27402,7 +27375,7 @@ snapshots:
 
   real-require@0.2.0: {}
 
-  recharts@3.2.1(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-is@16.13.1)(react@19.2.6)(redux@5.0.1):
+  recharts@3.2.1(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1):
     dependencies:
       '@reduxjs/toolkit': 2.11.2(react-redux@9.2.0(@types/react@19.2.14)(react@19.2.6)(redux@5.0.1))(react@19.2.6)
       clsx: 2.1.1
@@ -27412,7 +27385,7 @@ snapshots:
       immer: 10.2.0
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
-      react-is: 16.13.1
+      react-is: 17.0.2
       react-redux: 9.2.0(@types/react@19.2.14)(react@19.2.6)(redux@5.0.1)
       reselect: 5.1.1
       tiny-invariant: 1.3.3
@@ -29003,7 +28976,7 @@ snapshots:
 
   uuid@10.0.0: {}
 
-  uuid@11.1.0: {}
+  uuid@13.0.2: {}
 
   uuid@8.3.2: {}
 
