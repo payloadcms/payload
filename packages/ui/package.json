@@ -159,7 +159,7 @@
     "sonner": "^1.7.2",
     "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
-    "uuid": "11.1.0"
+    "uuid": "13.0.2"
   },
   "devDependencies": {
     "@babel/cli": "7.27.2",
