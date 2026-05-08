@@ -86,6 +86,8 @@ export const Button: React.FC<Props> = (props) => {
 
   const [showTooltip, setShowTooltip] = React.useState(false)
 
+  // Explicit `=== true` check preserves `false` for aria-disabled attribute.
+  // Using `disabled || loading` would treat `false` as falsy, omitting the attribute entirely.
   const isDisabled = disabled === true || loading === true
 
   const classes = [
