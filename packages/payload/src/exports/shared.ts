@@ -64,6 +64,7 @@ export { validOperators, validOperatorSet } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 export { isImage } from '../uploads/isImage.js'
+export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
 export { applyLocaleFiltering } from '../utilities/applyLocaleFiltering.js'
 

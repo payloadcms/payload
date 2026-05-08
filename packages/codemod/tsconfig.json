@@ -5,5 +5,5 @@
     "lib": ["ES2022"]
   },
   "include": ["src"],
-  "exclude": ["src/transforms/**/*.input.ts", "src/transforms/**/*.output.ts"]
+  "exclude": ["**/*.input.ts", "**/*.output.ts"]
 }

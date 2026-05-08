@@ -169,7 +169,6 @@ The following options are available:
 | `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                |
 | `components`                 | Swap in your own React components to be used within this Collection. [More details](#custom-components).                                                                                                                     |
 | `listSearchableFields`       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                                    |
-| `enableListViewSelectAPI`    | Performance opt-in. When `true`, uses the Select API in the List View to query only the active columns as opposed to entire documents. [More details](#enable-list-view-select-api).                                         |
 | `pagination`                 | Set pagination-specific options for this Collection in the List View. [More details](#pagination).                                                                                                                           |
 | `baseFilter`                 | Defines a default base filter which will be applied to the List View (along with any other filters applied by the user) and internal links in Lexical Editor,                                                                |
 
@@ -316,34 +315,13 @@ export const Posts: CollectionConfig = {
   these fields so your admin queries can remain performant.
 </Banner>
 
-## Enable List View Select API
+## List View Select API
 
-When `true`, the List View will use the [Select API](../queries/select) to query only the _active_ columns as opposed to entire documents. This can greatly improve performance, especially for collections with large documents or many fields.
+The List View uses the [Select API](../queries/select) to query only the _active_ columns as opposed to entire documents. This greatly improves performance, especially for collections with large documents or many fields.
 
-To enable this, set `enableListViewSelectAPI: true` in your Collection Config:
+This may cause unexpected behavior in some cases, such as when using hooks that rely on the full document data.
 
-```ts
-import type { CollectionConfig } from 'payload'
-
-export const Posts: CollectionConfig = {
-  // ...
-  admin: {
-    // ...
-    // highlight-start
-    enableListViewSelectAPI: true,
-    // highlight-end
-  },
-}
-```
-
-<Banner type="info">
-  **Note:** The `enableListViewSelectAPI` property is labeled as experimental,
-  as it will likely become the default behavior in v4 and be deprecated.
-</Banner>
-
-Enabling this feature may cause unexpected behavior in some cases, however, such as when using hooks that rely on the full document data.
-
-For example, if your component relies on a "title" field, this field will no longer be populated if the column is inactive:
+For example, if your component relies on a "title" field, this field will not be populated if the column is inactive:
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -357,7 +335,7 @@ export const Posts: CollectionConfig = {
       type: 'text',
       hooks: {
         afterRead: [
-          ({ doc }) => doc.title, // The `title` field will no longer be populated by default, unless the column is active
+          ({ doc }) => doc.title, // The `title` field will not be populated by default, unless the column is active
         ],
       },
     },

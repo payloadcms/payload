@@ -123,7 +123,7 @@
     "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
     "sass": "1.77.4",
-    "uuid": "11.1.0"
+    "uuid": "14.0.0"
   },
   "devDependencies": {
     "@babel/cli": "7.27.2",
