@@ -197,6 +197,9 @@ function wrapCjsForClient(): PluginOption {
       const namedExports = extractCjsExports(code)
       const names = Object.keys(namedExports)
 
+      const declaredIdentifiers = extractDeclaredIdentifiers(code)
+      const safeNames = names.filter((name) => !declaredIdentifiers.has(name))
+
       const wrapped = [
         `var module = { exports: {} };`,
         `var exports = module.exports;`,
@@ -205,7 +208,7 @@ function wrapCjsForClient(): PluginOption {
         ``,
         `var __cjs_result__ = module.exports;`,
         `export default __cjs_result__;`,
-        ...names.map(
+        ...safeNames.map(
           (name) =>
             `export var ${name} = typeof __cjs_result__ === 'object' && __cjs_result__ !== null ? __cjs_result__["${name}"] : undefined;`,
         ),
@@ -233,6 +236,23 @@ function extractCjsExports(code: string): Record<string, true> {
     }
   }
   return found
+}
+
+/**
+ * Detects top-level identifiers declared with class/function/var/let/const in CJS code.
+ * Used to avoid re-declaring them via `export var` in the CJS wrapper, which would cause
+ * `SyntaxError: Identifier has already been declared` in strict mode (ESM).
+ */
+function extractDeclaredIdentifiers(code: string): Set<string> {
+  const identifiers = new Set<string>()
+  const patterns = [/\bclass\s+(\w+)/g, /\bfunction\s+(\w+)/g, /\b(?:var|let|const)\s+(\w+)/g]
+  for (const re of patterns) {
+    let m
+    while ((m = re.exec(code)) !== null) {
+      identifiers.add(m[1]!)
+    }
+  }
+  return identifiers
 }
 
 /**
@@ -550,7 +570,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
             : []),
           ...additionalAliases,
         ],
-        dedupe: ['react', 'react-dom', 'scheduler', '@payloadcms/ui'],
+        dedupe: ['react', 'react-dom', 'scheduler', '@payloadcms/ui', 'ajv'],
         extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
         tsconfigPaths: true,
       } as any,
