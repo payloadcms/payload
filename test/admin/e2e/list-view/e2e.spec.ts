@@ -59,6 +59,7 @@ import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
+import { openNav } from '../../../__helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
@@ -337,7 +338,7 @@ describe('List View', () => {
 
       await expect(page.locator('#search-filter-input')).toHaveValue('test')
 
-      await page.locator('.nav-toggler.template-default__nav-toggler').click()
+      await openNav(page)
       await expect(page.locator('#nav-uploads')).toContainText('Uploads')
 
       const uploadsUrl = await page.locator('#nav-uploads').getAttribute('href')

@@ -5,6 +5,7 @@ import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useEffect, useRef } from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { windowInfoBreakpoints } from '../../providers/WindowInfo/index.js'
 
 type NavContextType = {
   hydrated: boolean
@@ -45,7 +46,7 @@ export const NavProvider: React.FC<{
   initialIsOpen?: boolean
 }> = ({ children, initialIsOpen }) => {
   const {
-    breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
+    breakpoints: { m: midBreak, s: smallBreak },
   } = useWindowInfo()
 
   const pathname = usePathname()
@@ -59,12 +60,23 @@ export const NavProvider: React.FC<{
   // we will open it after the preference is loaded
   const [navOpen, setNavOpen] = React.useState(initialIsOpen)
 
+  // On first paint, close the nav for tablet/mobile viewports before the browser renders.
+  // useLayoutEffect fires after hydration but before the browser paints, so the nav
+  // starts in the correct closed state without a visible flash and without a hydration mismatch.
+  // m (1024px) is the wider boundary — any viewport matching s (768px) also matches m,
+  // so a single check against m covers both tablet and mobile breakpoints.
+  React.useLayoutEffect(() => {
+    if (window.matchMedia(windowInfoBreakpoints.m).matches) {
+      setNavOpen(false)
+    }
+  }, [])
+
   const [shouldAnimate, setShouldAnimate] = React.useState(false)
   const [hydrated, setHydrated] = React.useState(false)
 
   // on load check the user's preference and set "initial" state
   useEffect(() => {
-    if (largeBreak === false) {
+    if (midBreak === false && smallBreak === false) {
       const setNavFromPreferences = async () => {
         const preferredState = await getNavPreference(getPreference)
         setNavOpen(preferredState)
@@ -72,7 +84,7 @@ export const NavProvider: React.FC<{
 
       void setNavFromPreferences()
     }
-  }, [largeBreak, getPreference, setNavOpen])
+  }, [midBreak, smallBreak, getPreference, setNavOpen])
 
   // on smaller screens where the nav is a modal
   // close the nav when the user navigates away
@@ -80,7 +92,7 @@ export const NavProvider: React.FC<{
     if (smallBreak === true) {
       setNavOpen(false)
     }
-  }, [pathname])
+  }, [pathname, smallBreak])
 
   // on open and close, lock the body scroll
   // do not do this on desktop, the sidebar is not a modal
@@ -98,7 +110,7 @@ export const NavProvider: React.FC<{
   // close the nav when the user resizes down to mobile
   // the sidebar is a modal on mobile
   useEffect(() => {
-    if (largeBreak === true || midBreak === true || smallBreak === true) {
+    if (midBreak === true || smallBreak === true) {
       setNavOpen(false)
     }
     setHydrated(true)
@@ -109,7 +121,7 @@ export const NavProvider: React.FC<{
     return () => {
       clearTimeout(timeout)
     }
-  }, [largeBreak, midBreak, smallBreak])
+  }, [midBreak, smallBreak])
 
   // when the component unmounts, clear all body scroll locks
   useEffect(() => {

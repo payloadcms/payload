@@ -412,7 +412,11 @@ export { UploadHandlersProvider, useUploadHandlers } from '../../providers/Uploa
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
 export { defaultTheme, type Theme, ThemeProvider, useTheme } from '../../providers/Theme/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
-export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
+export {
+  useWindowInfo,
+  windowInfoBreakpoints,
+  WindowInfoProvider,
+} from '../../providers/WindowInfo/index.js'
 export { useControllableState } from '../../hooks/useControllableState.js'
 
 export { Text as TextCondition } from '../../elements/WhereBuilder/Condition/Text/index.js'
