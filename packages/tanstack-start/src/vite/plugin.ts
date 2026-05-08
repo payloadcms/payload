@@ -166,6 +166,7 @@ function ssrStripDistStyleImports(): PluginOption {
 function wrapCjsForClient(): PluginOption {
   return {
     name: 'payload:wrap-cjs-client',
+    apply: 'serve',
     enforce: 'post',
     transform(code, id, options) {
       if (options?.ssr) {
