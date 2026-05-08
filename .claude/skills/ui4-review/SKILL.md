@@ -34,7 +34,7 @@ grep -nE ':\s*[0-9]+px|:\s*[0-9.]+rem' "$FILE"
 grep -nE '#[0-9a-fA-F]{3,8}|rgba?\(' "$FILE"
 
 # 4. Legacy Theme Variables
-grep -nE 'var\(--theme-|var\(--style-' "$FILE"
+grep -nE 'var\(--theme-|var\(--style-|var\(--base\)' "$FILE"
 
 # 5. Long-form Token Names (should use shorthands)
 grep -nE '\-\-icon-default-default|\-\-text-default-default|\-\-bg-default-default|\-\-border-default-default' "$FILE"
@@ -122,13 +122,26 @@ After fixing, report:
 
 ### Legacy Variables (Replace Immediately)
 
-| Legacy                  | Replacement        |
-| ----------------------- | ------------------ |
-| `--theme-elevation-0`   | `--bg-default`     |
-| `--theme-elevation-50`  | `--bg-secondary`   |
-| `--theme-elevation-100` | `--border-default` |
-| `--theme-text`          | `--text-default`   |
-| `--style-radius-m`      | `--radius-medium`  |
+| Legacy                  | Replacement                         |
+| ----------------------- | ----------------------------------- |
+| `var(--base)`           | `--spacer-*` (see conversion table) |
+| `--theme-elevation-0`   | `--bg-default`                      |
+| `--theme-elevation-50`  | `--bg-secondary`                    |
+| `--theme-elevation-100` | `--border-default`                  |
+| `--theme-text`          | `--text-default`                    |
+| `--style-radius-m`      | `--radius-medium`                   |
+
+**`var(--base)` Conversion:** Legacy token = 20px. Convert using:
+
+| Original            | Pixels | Replacement                     |
+| ------------------- | ------ | ------------------------------- |
+| `var(--base) * 0.4` | 8px    | `var(--spacer-2)`               |
+| `var(--base) * 0.5` | 10px   | `calc(var(--spacer-1) * 2.5)`   |
+| `var(--base) * 0.6` | 12px   | `var(--spacer-2-5)`             |
+| `var(--base)`       | 20px   | `calc(var(--spacer-4) * 0.833)` |
+| `var(--base) * 2`   | 40px   | `var(--spacer-6)`               |
+
+See ui4 skill Step 1 for full conversion table.
 
 ---
 

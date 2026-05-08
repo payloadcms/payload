@@ -105,6 +105,76 @@ To find the correct icon:
 3. Update import: `import './index.scss'` → `import './index.css'`
 4. Delete `index.scss`
 5. Wrap in `@layer payload-default {}`
+6. **Convert legacy `var(--base)` to `--spacer` tokens** (see below)
+
+---
+
+#### Legacy Token Migration: `var(--base)` → `--spacer`
+
+**What is `--base`?** A legacy spacing token equal to `20px` (1.25rem). It must be replaced with `--spacer-*` tokens.
+
+**Spacer token values:**
+
+| Token          | Value | Pixels |
+| -------------- | ----- | ------ |
+| `--spacer-0`   | 0     | 0px    |
+| `--spacer-1`   | 4px   | 4px    |
+| `--spacer-2`   | 8px   | 8px    |
+| `--spacer-2-5` | 12px  | 12px   |
+| `--spacer-3`   | 16px  | 16px   |
+| `--spacer-4`   | 24px  | 24px   |
+| `--spacer-5`   | 32px  | 32px   |
+| `--spacer-6`   | 40px  | 40px   |
+
+**Conversion strategy:**
+
+1. **Direct match:** If the result equals a spacer token, use it directly:
+
+   ```css
+   /* Before: var(--base) = 20px → closest is --spacer-3 (16px) or --spacer-4 (24px) */
+   padding: var(--base);
+
+   /* After: Choose semantically correct size */
+   padding: var(--spacer-4); /* if 24px is acceptable */
+   ```
+
+2. **Calculated values:** When exact pixel value is important, use `calc()`:
+
+   ```css
+   /* Before: calc(var(--base) * 0.5) = 10px */
+   gap: calc(var(--base) * 0.5);
+
+   /* After: calc(var(--spacer-1) * 2.5) = 10px */
+   gap: calc(var(--spacer-1) * 2.5);
+   ```
+
+3. **Common conversion formulas:**
+
+   | Original             | Pixels | Conversion                       |
+   | -------------------- | ------ | -------------------------------- |
+   | `var(--base) * 0.25` | 5px    | `calc(var(--spacer-1) * 1.25)`   |
+   | `var(--base) * 0.3`  | 6px    | `calc(var(--spacer-1) * 1.5)`    |
+   | `var(--base) * 0.4`  | 8px    | `var(--spacer-2)`                |
+   | `var(--base) * 0.5`  | 10px   | `calc(var(--spacer-1) * 2.5)`    |
+   | `var(--base) * 0.6`  | 12px   | `var(--spacer-2-5)`              |
+   | `var(--base) * 0.75` | 15px   | `calc(var(--spacer-2-5) * 1.25)` |
+   | `var(--base)`        | 20px   | `calc(var(--spacer-4) * 0.833)`  |
+   | `var(--base) * 1.5`  | 30px   | `calc(var(--spacer-5) * 0.9375)` |
+   | `var(--base) * 2`    | 40px   | `var(--spacer-6)`                |
+   | `var(--base) * 3`    | 60px   | `calc(var(--spacer-4) * 2.5)`    |
+   | `var(--base) * 10`   | 200px  | `calc(var(--spacer-5) * 6.25)`   |
+
+4. **Prefer semantic sizing:** When visually acceptable, round to nearest spacer token rather than preserving exact pixels:
+
+   ```css
+   /* Before: calc(var(--base) * 0.55) = 11px */
+   /* After: Use --spacer-2-5 (12px) if 1px difference is acceptable */
+   padding: var(--spacer-2-5);
+   ```
+
+5. **Check Figma design:** The best approach is to check the Figma design for the intended spacing value and use the matching `--spacer-*` token directly.
+
+---
 
 **CRITICAL: SCSS nesting patterns that DON'T work in CSS:**
 
@@ -509,6 +579,7 @@ This will:
 
 - Example migrated component: `packages/ui/src/elements/Button/index.css`
 - Token files: `packages/ui/src/css/*.css`
+- **Legacy token migration:** See Step 1 for `var(--base)` → `--spacer` conversion table
 - **v4 test suite:** `test/v4/` — dedicated collections per field type
   - Each collection should have: default, required, disabled, readOnly field variants
   - Disabled/readOnly fields need `defaultValue` for visible content
