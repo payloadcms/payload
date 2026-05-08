@@ -987,29 +987,13 @@ type SharedUploadProperties = {
 } & (
   | {
       hasMany: true
-      /**
-       * @deprecated Use 'maxRows' instead
-       */
-      max?: number
       maxRows?: number
-      /**
-       * @deprecated Use 'minRows' instead
-       */
-      min?: number
       minRows?: number
       validate?: UploadFieldManyValidation
     }
   | {
       hasMany?: false | undefined
-      /**
-       * @deprecated Use 'maxRows' instead
-       */
-      max?: undefined
       maxRows?: undefined
-      /**
-       * @deprecated Use 'minRows' instead
-       */
-      min?: undefined
       minRows?: undefined
       validate?: UploadFieldSingleValidation
     }
@@ -1018,10 +1002,7 @@ type SharedUploadProperties = {
   Omit<FieldBase, 'validate'>
 
 type SharedUploadPropertiesClient = FieldBaseClient &
-  Pick<
-    SharedUploadProperties,
-    'hasMany' | 'max' | 'maxDepth' | 'maxRows' | 'min' | 'minRows' | 'type'
-  >
+  Pick<SharedUploadProperties, 'hasMany' | 'maxDepth' | 'maxRows' | 'minRows' | 'type'>
 
 type UploadAdmin = {
   allowCreate?: boolean
@@ -1198,29 +1179,13 @@ type SharedRelationshipProperties = {
 } & (
   | {
       hasMany: true
-      /**
-       * @deprecated Use 'maxRows' instead
-       */
-      max?: number
       maxRows?: number
-      /**
-       * @deprecated Use 'minRows' instead
-       */
-      min?: number
       minRows?: number
       validate?: RelationshipFieldManyValidation
     }
   | {
       hasMany?: false | undefined
-      /**
-       * @deprecated Use 'maxRows' instead
-       */
-      max?: undefined
       maxRows?: undefined
-      /**
-       * @deprecated Use 'minRows' instead
-       */
-      min?: undefined
       minRows?: undefined
       validate?: RelationshipFieldSingleValidation
     }
@@ -1229,10 +1194,7 @@ type SharedRelationshipProperties = {
   Omit<FieldBase, 'validate'>
 
 type SharedRelationshipPropertiesClient = FieldBaseClient &
-  Pick<
-    SharedRelationshipProperties,
-    'hasMany' | 'max' | 'maxDepth' | 'maxRows' | 'min' | 'minRows' | 'type'
-  >
+  Pick<SharedRelationshipProperties, 'hasMany' | 'maxDepth' | 'maxRows' | 'minRows' | 'type'>
 
 type RelationshipAdmin = {
   allowCreate?: boolean
