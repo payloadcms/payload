@@ -2,9 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
-  HTMLConverterFeature,
   lexicalEditor,
-  lexicalHTML,
   LinkFeature,
   TreeViewFeature,
   UploadFeature,
@@ -35,7 +33,6 @@ const RichTextFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           TreeViewFeature(),
-          HTMLConverterFeature({}),
           LinkFeature({
             fields: ({ defaultFields }) => [
               ...defaultFields,
@@ -71,7 +68,6 @@ const RichTextFields: CollectionConfig = {
         ],
       }),
     },
-    lexicalHTML('lexicalCustomFields', { name: 'lexicalCustomFields_html' }),
     {
       name: 'lexical',
       type: 'richText',
