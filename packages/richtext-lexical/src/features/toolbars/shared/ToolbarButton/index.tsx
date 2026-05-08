@@ -46,7 +46,7 @@ export const ToolbarButton = ({
     }
     // Convert camelCase key to Title Case (e.g. "inlineCode" -> "Inline Code")
     return item.key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase())
-  }, [item.label, item.key, featureClientSchemaMap, i18n, schemaPath])
+  }, [featureClientSchemaMap, i18n, schemaPath, item])
 
   const className = useMemo(() => {
     return [
