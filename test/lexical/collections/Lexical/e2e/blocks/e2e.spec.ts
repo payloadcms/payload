@@ -25,6 +25,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
+  waitForLexicalReady,
 } from '../../../../../__helpers/e2e/helpers.js'
 import { goToFirstCell } from '../../../../../__helpers/e2e/navigateToDoc.js'
 import { AdminUrlUtil } from '../../../../../__helpers/shared/adminUrlUtil.js'
@@ -1676,6 +1677,7 @@ async function navigateToLexicalFields(
   await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
 
   await waitForFormReady(page)
+  await waitForLexicalReady(richTextField)
 
   return {
     richTextField,

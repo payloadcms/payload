@@ -37,7 +37,7 @@ const serverOnlyClientSpecifiers: Array<RegExp | string> = [
   /^@payloadcms\/next\/rsc/,
   /^@payloadcms\/richtext-lexical\/rsc/,
   /^@payloadcms\/richtext-slate\/rsc/,
-  /^@payloadcms\/tanstack-start\/(layouts|server|views\/server)/,
+  /^@payloadcms\/tanstack-start\/(layouts|rsc|server|views\/server)/,
   'sharp',
   'busboy',
   'croner',
@@ -235,6 +235,42 @@ function extractCjsExports(code: string): Record<string, true> {
   return found
 }
 
+/**
+ * Resolves `/client` subpath exports for `@payloadcms/plugin-*` and `@payloadcms/storage-*`
+ * packages when normal Vite resolution fails (common in monorepo dev where the package
+ * `exports` field may not be picked up for pre-excluded dependencies).
+ */
+function resolvePayloadPluginClientExports(): PluginOption {
+  return {
+    name: 'payload:resolve-plugin-client-exports',
+    enforce: 'pre',
+    async resolveId(id, importer, options) {
+      if (!/^@payloadcms\/(?:plugin|storage)-[^/]+\/client$/.test(id)) {
+        return
+      }
+      const resolved = await this.resolve(id, importer, { ...options, skipSelf: true })
+      if (resolved) {
+        return resolved
+      }
+      const pkgName = id.replace(/\/client$/, '')
+      const pkgResolved = await this.resolve(pkgName, importer, { ...options, skipSelf: true })
+      if (pkgResolved) {
+        const pkgDir = path.dirname(pkgResolved.id)
+        const candidates = [
+          path.resolve(pkgDir, 'src', 'exports', 'client.ts'),
+          path.resolve(pkgDir, 'src', 'exports', 'client.js'),
+          path.resolve(pkgDir, 'dist', 'exports', 'client.js'),
+        ]
+        for (const candidate of candidates) {
+          if (fs.existsSync(candidate)) {
+            return candidate
+          }
+        }
+      }
+    },
+  }
+}
+
 function payloadTransforms(): PluginOption {
   const headScriptsId = 'tanstack-start-injected-head-scripts:v'
   const resolvedHeadScriptsId = '\0' + headScriptsId
@@ -424,6 +460,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
             }
           },
         },
+        resolvePayloadPluginClientExports(),
         wrapCjsForClient(),
         ssrStripDistStyleImports(),
         safeSSRConsole(),
@@ -519,7 +556,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
       } as any,
       server: {
         warmup: {
-          clientFiles: ['./src/importMap.js', './src/importMap.server.ts'],
+          clientFiles: ['./src/importMap.js'],
         },
       },
       ssr: {

@@ -28,7 +28,7 @@ export async function handleServerFunctionRequest(
 ) {
   const toSerializable = await getToSerializable()
   const configPromise = (await import('@payload-config')).default
-  const { importMap } = await import('../importMap.server.js')
+  const { importMap } = await import('../importMap.js')
 
   const cookies = parseCookies(headers)
   // @ts-expect-error - monorepo dual SanitizedConfig types (dist vs src)

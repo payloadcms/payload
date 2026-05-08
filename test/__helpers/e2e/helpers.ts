@@ -333,6 +333,19 @@ export async function waitForFormReady(page: Page) {
 }
 
 /**
+ * Wait until a Lexical editor within the given locator is fully interactive.
+ * Checks for `contenteditable="true"` on the Lexical root element, which is only
+ * present after React has hydrated, Lexical has initialized, and the editor is editable.
+ */
+export async function waitForLexicalReady(locator: Locator) {
+  await expect(
+    locator
+      .locator('> .rich-text-lexical__wrap [data-lexical-editor="true"][contenteditable="true"]')
+      .first(),
+  ).toBeVisible()
+}
+
+/**
  * Navigate to a document page and wait for the form to be ready before interacting.
  * Necessary because TanStack Start's hydration is asynchronous, and interacting
  * with form inputs (e.g. setInputFiles) before hydration completes will silently

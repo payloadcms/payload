@@ -8,7 +8,7 @@ import { getToSerializable } from './getToSerializable.js'
 export const loadDashboard = createServerFn({ method: 'GET' }).handler(async () => {
   const { getAdminPageData } = await import('@payloadcms/tanstack-start/views/server')
   const config = (await import('@payload-config')).default
-  const { importMap } = await import('../importMap.server.js')
+  const { importMap } = await import('../importMap.js')
   const toSerializable = await getToSerializable()
 
   let result: Awaited<ReturnType<typeof getAdminPageData>>
@@ -37,7 +37,7 @@ export const loadAdminPage = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     const { getAdminPageData } = await import('@payloadcms/tanstack-start/views/server')
     const config = (await import('@payload-config')).default
-    const { importMap } = await import('../importMap.server.js')
+    const { importMap } = await import('../importMap.js')
     const toSerializable = await getToSerializable()
 
     const segments = data._splat ? data._splat.split('/').filter(Boolean) : []

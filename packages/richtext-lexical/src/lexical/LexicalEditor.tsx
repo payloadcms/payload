@@ -27,6 +27,30 @@ import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { TextPlugin } from './plugins/TextPlugin/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
 
+/**
+ * Marks the Lexical root element with `data-lexical-editable` once the editor
+ * is mounted and interactive. Tests can query this attribute to confirm that
+ * React event handlers are attached and keyboard input will be processed.
+ */
+function EditorReadyPlugin() {
+  const [editor] = useLexicalComposerContext()
+
+  useEffect(() => {
+    const root = editor.getRootElement()
+    if (root) {
+      root.dataset.lexicalEditable = String(editor.isEditable())
+    }
+    return editor.registerEditableListener((editable) => {
+      const el = editor.getRootElement()
+      if (el) {
+        el.dataset.lexicalEditable = String(editable)
+      }
+    })
+  }, [editor])
+
+  return null
+}
+
 export const LexicalEditor: React.FC<
   {
     editorContainerRef: React.RefObject<HTMLDivElement | null>
@@ -112,6 +136,7 @@ export const LexicalEditor: React.FC<
           }
           ErrorBoundary={LexicalErrorBoundary}
         />
+        <EditorReadyPlugin />
         <NormalizeSelectionPlugin />
         {isEditable && <InsertParagraphAtEndPlugin />}
         <DecoratorPlugin />
