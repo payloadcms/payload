@@ -1,5 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
+  EntityType,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
@@ -11,18 +12,18 @@ import { getTranslation } from '@payloadcms/translations'
 export type EntityToGroup =
   | {
       entity: SanitizedCollectionConfig
-      type: 'collections'
+      type: EntityType.collection
     }
   | {
       entity: SanitizedGlobalConfig
-      type: 'globals'
+      type: EntityType.global
     }
 
 export type NavGroupType = {
   entities: {
     label: StaticLabel
     slug: string
-    type: 'collections' | 'globals'
+    type: EntityType
   }[]
   label: string
 }

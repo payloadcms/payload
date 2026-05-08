@@ -6,6 +6,7 @@ import type { NavPreferences } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
 import { usePathname } from 'next/navigation.js'
+import { EntityType } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
@@ -37,12 +38,12 @@ export const DefaultNavClient: React.FC<{
               let href: string
               let id: string
 
-              if (type === 'collections') {
+              if (type === EntityType.collection) {
                 href = formatAdminURL({ adminRoute, path: `/collections/${slug}` })
                 id = `nav-${slug}`
               }
 
-              if (type === 'globals') {
+              if (type === EntityType.global) {
                 href = formatAdminURL({ adminRoute, path: `/globals/${slug}` })
                 id = `nav-global-${slug}`
               }

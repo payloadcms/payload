@@ -1,7 +1,7 @@
 import type { WidgetServerProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getAccessResults } from 'payload'
+import { EntityType, getAccessResults } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
@@ -45,7 +45,7 @@ export async function CollectionCards(props: WidgetServerProps) {
                     let isLocked = null
                     let userEditing = null
 
-                    if (type === 'collections') {
+                    if (type === EntityType.collection) {
                       title = getTranslation(label, i18n)
 
                       buttonAriaLabel = t('general:showAllLabel', { label: title })
@@ -63,7 +63,7 @@ export async function CollectionCards(props: WidgetServerProps) {
                       hasCreatePermission = permissions?.collections?.[slug]?.create
                     }
 
-                    if (type === 'globals') {
+                    if (type === EntityType.global) {
                       title = getTranslation(label, i18n)
 
                       buttonAriaLabel = t('general:editLabel', {
@@ -101,7 +101,7 @@ export async function CollectionCards(props: WidgetServerProps) {
                           actions={
                             isLocked && user?.id !== userEditing?.id ? (
                               <Locked className={`${baseClass}__locked`} user={userEditing} />
-                            ) : hasCreatePermission && type === 'collections' ? (
+                            ) : hasCreatePermission && type === EntityType.collection ? (
                               <Button
                                 aria-label={t('general:createNewLabel', {
                                   label,

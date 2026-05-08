@@ -1,6 +1,7 @@
 import type { SanitizedConfig, SanitizedPermissions, VisibleEntities } from 'payload'
 
 import { type I18nClient } from '@payloadcms/translations'
+import { EntityType } from 'payload'
 
 import { type EntityToGroup, groupNavItems } from './groupNavItems.js'
 
@@ -26,7 +27,7 @@ export function getNavGroups(
     [
       ...(collections.map((collection) => {
         const entityToGroup: EntityToGroup = {
-          type: 'collections',
+          type: EntityType.collection,
           entity: collection,
         }
 
@@ -34,7 +35,7 @@ export function getNavGroups(
       }) ?? []),
       ...(globals.map((global) => {
         const entityToGroup: EntityToGroup = {
-          type: 'globals',
+          type: EntityType.global,
           entity: global,
         }
 
