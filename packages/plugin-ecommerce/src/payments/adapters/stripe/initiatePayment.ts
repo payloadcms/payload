@@ -11,7 +11,7 @@ type Props = {
 
 export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['initiatePayment'] =
   (props) =>
-  async ({ data, req, transactionsSlug }) => {
+  async ({ customersSlug = 'users', data, req, transactionsSlug }) => {
     const payload = req.payload
     const { apiVersion, appInfo, secretKey } = props || {}
 
@@ -106,7 +106,9 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
       const transaction = await payload.create({
         collection: transactionsSlug,
         data: {
-          ...(req.user ? { customer: req.user.id } : { customerEmail }),
+          ...(req.user?.collection === customersSlug
+            ? { customer: req.user.id }
+            : { customerEmail }),
           amount: paymentIntent.amount,
           billingAddress: billingAddressFromData,
           cart: cart.id,

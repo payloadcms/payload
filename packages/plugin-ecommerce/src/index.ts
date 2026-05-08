@@ -232,7 +232,9 @@ export const ecommercePlugin =
 
           const initiatePayment: Endpoint = {
             handler: initiatePaymentHandler({
+              cartsSlug: collectionSlugMap.carts,
               currenciesConfig,
+              customersSlug: collectionSlugMap.customers,
               inventory: sanitizedPluginConfig.inventory,
               paymentMethod,
               productsSlug: collectionSlugMap.products,
