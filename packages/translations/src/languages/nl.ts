@@ -323,6 +323,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     error: 'Fout',
     errors: 'Fouten',
     exitLivePreview: 'Verlaat Live Voorbeeld',
+    expand: 'Uitvouwen',
     export: 'Exporteren',
     fallbackToDefaultLocale: 'Terugval naar standaardtaal',
     false: 'Onwaar',

@@ -310,6 +310,7 @@ export const thTranslations: DefaultTranslationsObject = {
     error: 'ข้อผิดพลาด',
     errors: 'ข้อผิดพลาด',
     exitLivePreview: 'ออกจากการแสดงตัวอย่างสด',
+    expand: 'ขยาย',
     export: 'ส่งออก',
     fallbackToDefaultLocale: 'สำรองไปยังตำแหน่งที่ตั้งเริ่มต้น',
     false: 'เท็จ',

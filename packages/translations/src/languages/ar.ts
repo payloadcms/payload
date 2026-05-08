@@ -307,6 +307,7 @@ export const arTranslations: DefaultTranslationsObject = {
     error: 'خطأ',
     errors: 'أخطاء',
     exitLivePreview: 'إغلاق المعاينة المباشرة',
+    expand: 'توسيع',
     export: 'تصدير',
     fallbackToDefaultLocale: 'الرجوع إلى اللغة الافتراضية',
     false: 'كاذب',

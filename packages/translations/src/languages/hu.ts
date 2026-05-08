@@ -320,6 +320,7 @@ export const huTranslations: DefaultTranslationsObject = {
     error: 'Hiba',
     errors: 'Hibák',
     exitLivePreview: 'Kilépés az Élő Előnézetből',
+    expand: 'Kibővítés',
     export: 'Export',
     fallbackToDefaultLocale: 'Visszatérés az alapértelmezett nyelvhez',
     false: 'Hamis',

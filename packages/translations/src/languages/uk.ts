@@ -314,6 +314,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     error: 'Помилка',
     errors: 'Помилки',
     exitLivePreview: 'Вийти з режиму "Наживо"',
+    expand: 'Розгорнути',
     export: 'Експорт',
     fallbackToDefaultLocale: 'Перехід на мову за замовчуванням',
     false: 'Ні',

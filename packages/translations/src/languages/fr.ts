@@ -326,6 +326,7 @@ export const frTranslations: DefaultTranslationsObject = {
     error: 'Erreur',
     errors: 'Erreurs',
     exitLivePreview: "Quittez l'aperçu en direct",
+    expand: 'Développer',
     export: 'Exportation',
     fallbackToDefaultLocale: 'Retour à la locale par défaut',
     false: 'Faux',

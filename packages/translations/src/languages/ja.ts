@@ -318,6 +318,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     error: 'エラー',
     errors: 'エラー',
     exitLivePreview: 'ライブプレビューを終了する',
+    expand: '展開',
     export: 'エクスポート',
     fallbackToDefaultLocale: 'デフォルトロケールへのフォールバック',
     false: 'false',

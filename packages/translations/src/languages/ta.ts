@@ -314,6 +314,7 @@ export const taTranslations: DefaultTranslationsObject = {
     error: 'பிழை',
     errors: 'பிழைகள்',
     exitLivePreview: 'நேரடி முன்னோட்டத்திலிருந்து வெளியேறு',
+    expand: 'விரிவுபடுத்தவும்',
     export: 'ஏற்றுமதி',
     fallbackToDefaultLocale: 'இயல்புநிலை மொழிக்கு மாறுக',
     false: 'பொய்',

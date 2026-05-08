@@ -317,6 +317,7 @@ export const svTranslations: DefaultTranslationsObject = {
     error: 'Fel',
     errors: 'Fel',
     exitLivePreview: 'Avsluta förhandsgranskning',
+    expand: 'Expandera',
     export: 'Exportera',
     fallbackToDefaultLocale: 'Återgå till standardspråk',
     false: 'Falskt',

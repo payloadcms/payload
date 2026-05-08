@@ -318,6 +318,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     error: 'Ошибка',
     errors: 'Ошибки',
     exitLivePreview: 'Выйти из режима прямого просмотра',
+    expand: 'Развернуть',
     export: 'Экспорт',
     fallbackToDefaultLocale: 'Возврат к локали по умолчанию',
     false: 'Ложь',

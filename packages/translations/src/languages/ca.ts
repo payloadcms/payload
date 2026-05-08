@@ -317,6 +317,7 @@ export const caTranslations: DefaultTranslationsObject = {
     error: 'Error',
     errors: 'Errors',
     exitLivePreview: 'Sortir de la Vista Previa en Directe',
+    expand: 'Amplia',
     export: 'Exportació',
     fallbackToDefaultLocale: 'Torna al idioma per defecte',
     false: 'Fals',

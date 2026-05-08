@@ -318,6 +318,7 @@ export const idTranslations: DefaultTranslationsObject = {
     error: 'Kesalahan',
     errors: 'Kesalahan',
     exitLivePreview: 'Keluar dari Pratinjau Langsung',
+    expand: 'Perluas',
     export: 'Ekspor',
     fallbackToDefaultLocale: 'Kembali ke lokal default',
     false: 'Salah',

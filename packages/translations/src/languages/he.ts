@@ -306,6 +306,7 @@ export const heTranslations: DefaultTranslationsObject = {
     error: 'שגיאה',
     errors: 'שגיאות',
     exitLivePreview: 'צא מתצוגה חיה',
+    expand: 'הרחב',
     export: 'יצוא',
     fallbackToDefaultLocale: 'חזרה לשפת ברירת המחדל',
     false: 'False',

@@ -319,6 +319,7 @@ export const azTranslations: DefaultTranslationsObject = {
     error: 'Xəta',
     errors: 'Xətalar',
     exitLivePreview: 'Canlı Önizləmədən Çıxın',
+    expand: 'Genişləndirin',
     export: 'İxrac',
     fallbackToDefaultLocale: 'Standart lokalə keçid',
     false: 'Yalan',

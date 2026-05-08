@@ -317,6 +317,7 @@ export const skTranslations: DefaultTranslationsObject = {
     error: 'Chyba',
     errors: 'Chyby',
     exitLivePreview: 'Ukončiť živý náhľad',
+    expand: 'Rozbaliť',
     export: 'Export',
     fallbackToDefaultLocale: 'Zálohovať do predvoleného jazyka',
     false: 'Nepravdivé',

@@ -319,6 +319,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     error: 'Klaida',
     errors: 'Klaidos',
     exitLivePreview: 'Išeiti iš tiesioginės peržiūros',
+    expand: 'Išplėsti',
     export: 'Eksportas',
     fallbackToDefaultLocale: 'Grįžkite į numatytąją vietovę',
     false: 'Netiesa',

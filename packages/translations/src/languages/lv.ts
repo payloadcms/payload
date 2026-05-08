@@ -317,6 +317,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     error: 'Kļūda',
     errors: 'Kļūdas',
     exitLivePreview: 'Iziet no tiešā priekšskatījuma',
+    expand: 'Izvērst',
     export: 'Eksports',
     fallbackToDefaultLocale: 'Izmantot noklusēto lokalizāciju',
     false: 'Nepatiesi',

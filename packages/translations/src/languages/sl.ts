@@ -315,6 +315,7 @@ export const slTranslations: DefaultTranslationsObject = {
     error: 'Napaka',
     errors: 'Napake',
     exitLivePreview: 'Izhodi iz živega predogleda',
+    expand: 'Razširi',
     export: 'Izvoz',
     fallbackToDefaultLocale: 'Uporabi privzeti jezik',
     false: 'Ne',
