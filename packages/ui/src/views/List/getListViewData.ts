@@ -288,9 +288,7 @@ export async function getListViewData(args: GetListViewDataArgs): Promise<ListVi
     permissions,
   })
 
-  const select = collectionConfig.admin.enableListViewSelectAPI
-    ? transformColumnsToSelect(columns)
-    : undefined
+  const select = transformColumnsToSelect(columns)
 
   appendUploadSelectFields({
     collectionConfig,
