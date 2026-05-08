@@ -20,7 +20,7 @@ export const baseVersionFields = ({ localized }: { localized: boolean }): Field[
       components: {
         Field: false,
       },
-      disableBulkEdit: true,
+      disabled: { bulkEdit: true },
     },
     defaultValue: 'draft',
     index: true,
@@ -39,7 +39,6 @@ export const versionSnapshotField: CheckboxField = {
   name: 'snapshot',
   type: 'checkbox',
   admin: {
-    disableBulkEdit: true,
     disabled: true,
   },
   index: true,

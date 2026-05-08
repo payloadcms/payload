@@ -1,6 +1,8 @@
 'use client'
 import type { ClientField, Field, SanitizedCollectionConfig } from 'payload'
 
+import { isFieldDisabled } from 'payload/shared'
+
 import './index.scss'
 
 import React, { useMemo } from 'react'
@@ -175,7 +177,7 @@ export const GroupByBuilder: React.FC<Props> = ({
           onChange={handleFieldChange}
           options={reducedFields.filter(
             (field) =>
-              !field.field.admin?.disableGroupBy &&
+              !isFieldDisabled(field.field, 'groupBy') &&
               field.value !== 'id' &&
               supportedFieldTypes.includes(field.field.type),
           )}
