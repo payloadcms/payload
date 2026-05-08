@@ -77,7 +77,6 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
             buttonStyle="icon-label"
             className={`${baseClass}__remove`}
             icon="x"
-            iconStyle="with-border"
             onClick={handleRemove}
             round
           />

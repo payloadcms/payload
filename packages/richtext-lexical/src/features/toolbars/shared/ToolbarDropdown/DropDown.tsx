@@ -71,7 +71,6 @@ export function DropDownItem({
       }}
       icon={Icon}
       iconPosition="left"
-      iconStyle="none"
       onClick={() => {
         if (enabled !== false) {
           editor.focus(() => {

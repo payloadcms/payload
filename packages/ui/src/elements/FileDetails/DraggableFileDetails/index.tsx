@@ -98,7 +98,6 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
                 buttonStyle="icon-label"
                 className={`${baseClass}__remove`}
                 icon="x"
-                iconStyle="none"
                 onClick={() => removeItem(rowIndex)}
                 round
               />

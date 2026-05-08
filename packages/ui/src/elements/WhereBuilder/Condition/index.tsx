@@ -192,7 +192,6 @@ export const Condition: React.FC<Props> = (props) => {
             buttonStyle="icon-label"
             className={`${baseClass}__actions-remove`}
             icon="x"
-            iconStyle="with-border"
             onClick={() =>
               removeCondition({
                 andIndex,
@@ -205,7 +204,6 @@ export const Condition: React.FC<Props> = (props) => {
             buttonStyle="icon-label"
             className={`${baseClass}__actions-add`}
             icon="plus"
-            iconStyle="with-border"
             onClick={() =>
               addCondition({
                 andIndex: andIndex + 1,

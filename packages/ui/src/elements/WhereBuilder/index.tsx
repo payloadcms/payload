@@ -225,7 +225,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             className={`${baseClass}__add-or`}
             icon="plus"
             iconPosition="left"
-            iconStyle="with-border"
             onClick={async () => {
               await addCondition({
                 andIndex: 0,
@@ -247,7 +246,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             className={`${baseClass}__add-first-filter`}
             icon="plus"
             iconPosition="left"
-            iconStyle="with-border"
             onClick={async () => {
               if (reducedFields.length > 0) {
                 await addCondition({

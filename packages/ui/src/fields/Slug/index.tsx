@@ -147,7 +147,6 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
                   buttonStyle="icon-subtle"
                   className={`${baseClass}__action-btn`}
                   icon={<RefreshIcon />}
-                  iconStyle="none"
                   id={`field-${fieldPath?.replace(/\./g, '__')}-generate`}
                   margin={false}
                   onClick={handleGenerate}
@@ -158,7 +157,6 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
                 buttonStyle="icon-subtle"
                 className={`${baseClass}__action-btn`}
                 icon={isLocked ? <LockIcon size={16} /> : <LockOpenIcon size={16} />}
-                iconStyle="none"
                 id={`field-${fieldPath?.replace(/\./g, '__')}-lock`}
                 margin={false}
                 onClick={toggleLock}

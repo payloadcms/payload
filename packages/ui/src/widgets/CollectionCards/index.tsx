@@ -112,7 +112,6 @@ export async function CollectionCards(props: WidgetServerProps) {
                                 buttonStyle="icon-label"
                                 el="link"
                                 icon="plus"
-                                iconStyle="with-border"
                                 round
                                 to={createHREF}
                               />

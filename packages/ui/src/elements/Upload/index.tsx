@@ -480,7 +480,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 buttonStyle="icon-label"
                 className={`${baseClass}__remove`}
                 icon="x"
-                iconStyle="with-border"
                 onClick={() => {
                   setShowUrlInput(false)
                   setUploadControlFileUrl('')
@@ -520,7 +519,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 buttonStyle="icon-label"
                 className={`${baseClass}__remove`}
                 icon="x"
-                iconStyle="with-border"
                 onClick={handleFileRemoval}
                 round
                 tooltip={t('general:cancel')}

@@ -139,7 +139,6 @@ export function RelationshipContent(props: Props) {
               buttonStyle="icon-subtle"
               className={`${baseClass}__action-btn`}
               icon={<WriteIcon />}
-              iconStyle="none"
               margin={false}
               onClick={openDrawer}
             />
@@ -150,7 +149,6 @@ export function RelationshipContent(props: Props) {
               buttonStyle="icon-subtle"
               className={`${baseClass}__action-btn`}
               icon={<XIcon size={24} />}
-              iconStyle="none"
               margin={false}
               onClick={() => onRemove()}
             />
