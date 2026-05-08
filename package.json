@@ -78,6 +78,7 @@
     "dev:generate-graphql-schema": "pnpm runts ./test/generateGraphQLSchema.ts",
     "dev:generate-importmap": "pnpm runts ./test/generateImportMap.ts",
     "dev:generate-types": "pnpm runts ./test/generateTypes.ts",
+    "dev:pattern-library": "pnpm --filter @tools/pattern-library dev",
     "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres pnpm runts ./test/dev.ts",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/dev.ts --prod",
     "dev:vercel-postgres": "cross-env PAYLOAD_DATABASE=vercel-postgres pnpm runts ./test/dev.ts",

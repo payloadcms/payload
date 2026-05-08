@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": ["vite/client"],
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "next/link": ["./src/mocks/next-link.tsx"],
+      "next/link.js": ["./src/mocks/next-link.tsx"],
+      "next/navigation": ["./src/mocks/next-navigation.ts"],
+      "next/navigation.js": ["./src/mocks/next-navigation.ts"],
+      "next/image": ["./src/mocks/next-image.tsx"],
+      "next/image.js": ["./src/mocks/next-image.tsx"],
+      "next/headers": ["./src/mocks/next-headers.ts"],
+      "next/headers.js": ["./src/mocks/next-headers.ts"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}

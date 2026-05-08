@@ -1,0 +1,85 @@
+:root {
+  --font-family-sans: 'Inter Variable', sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-default-default);
+  color: var(--text-default-default);
+  font-family: var(--font-family-sans);
+  font-size: var(--text-body-medium-font-size);
+  font-weight: var(--text-body-medium-font-weight);
+  line-height: var(--text-body-medium-line-height);
+  letter-spacing: var(--text-letter-spacing);
+}
+
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacer-3);
+  height: 44px;
+  background-color: var(--bg-default-default);
+  border-bottom: 1px solid var(--border-default-default);
+}
+
+.app-title {
+  font-size: var(--text-body-medium-font-size);
+  font-weight: var(--text-heading-small-font-weight);
+  color: var(--text-default-default);
+  letter-spacing: var(--text-letter-spacing);
+}
+
+.app-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.app-canvas {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-default-default);
+}
+
+
+.app-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.app-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-default-tertiary);
+  font-size: var(--text-body-medium-font-size);
+}

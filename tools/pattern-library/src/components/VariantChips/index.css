@@ -1,0 +1,45 @@
+.variant-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-2);
+  padding: var(--spacer-2) var(--spacer-3);
+  border-bottom: 1px solid var(--border-default-default);
+  background-color: var(--bg-default-default);
+  flex-shrink: 0;
+}
+
+.variant-chips__label {
+  font-size: 10px;
+  font-weight: var(--text-heading-small-font-weight);
+  color: var(--text-default-tertiary);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.variant-chips__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-1);
+}
+
+.variant-chips__chip {
+  padding: 2px var(--spacer-2);
+  border: 1px solid var(--border-default-default);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-default-secondary);
+  font-family: var(--font-family-sans);
+  font-size: var(--text-body-medium-font-size);
+  cursor: pointer;
+}
+
+.variant-chips__chip:hover {
+  background-color: var(--bg-default-hover);
+  color: var(--text-default-default);
+}
+
+.variant-chips__chip--active {
+  background-color: var(--bg-selected-default);
+  border-color: var(--border-selected-default);
+  color: var(--text-brand-default);
+}

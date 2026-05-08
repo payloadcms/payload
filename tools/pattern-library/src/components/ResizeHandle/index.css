@@ -1,0 +1,19 @@
+.resize-handle {
+  width: 4px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  transition: background-color 0.15s ease;
+  user-select: none;
+}
+
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  inset: 0 -2px;
+}
+
+.resize-handle:hover {
+  background-color: var(--border-selected-default);
+}

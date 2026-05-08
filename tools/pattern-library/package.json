@@ -1,0 +1,30 @@
+{
+  "name": "@tools/pattern-library",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Payload pattern library viewer",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "5.2.8",
+    "@fontsource/roboto-mono": "5.2.8",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-markdown": "^9.0.3",
+    "react-zoom-pan-pinch": "^3.6.1",
+    "remark-gfm": "^4.0.1",
+    "shiki": "^3.4.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.9",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.4.1",
+    "vite": "^6.3.5"
+  }
+}
