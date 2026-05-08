@@ -1,7 +1,7 @@
 import type { WidgetServerProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { EntityType, getAccessResults } from 'payload'
+import { getAccessResults } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
@@ -45,8 +45,7 @@ export async function CollectionCards(props: WidgetServerProps) {
                     let isLocked = null
                     let userEditing = null
 
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                    if (type === EntityType.collection) {
+                    if (type === 'collections') {
                       title = getTranslation(label, i18n)
 
                       buttonAriaLabel = t('general:showAllLabel', { label: title })
@@ -64,8 +63,7 @@ export async function CollectionCards(props: WidgetServerProps) {
                       hasCreatePermission = permissions?.collections?.[slug]?.create
                     }
 
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                    if (type === EntityType.global) {
+                    if (type === 'globals') {
                       title = getTranslation(label, i18n)
 
                       buttonAriaLabel = t('general:editLabel', {
@@ -103,8 +101,7 @@ export async function CollectionCards(props: WidgetServerProps) {
                           actions={
                             isLocked && user?.id !== userEditing?.id ? (
                               <Locked className={`${baseClass}__locked`} user={userEditing} />
-                            ) : // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                            hasCreatePermission && type === EntityType.collection ? (
+                            ) : hasCreatePermission && type === 'collections' ? (
                               <Button
                                 aria-label={t('general:createNewLabel', {
                                   label,

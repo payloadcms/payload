@@ -4,7 +4,6 @@ import type { PayloadRequest, ServerProps } from 'payload'
 import { AlignJustifiedIcon, Logout } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { groupNavItems } from '@payloadcms/ui/shared'
-import { EntityType } from 'payload'
 import React from 'react'
 
 import { DefaultNavClient } from './index.client.js'
@@ -58,7 +57,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
         .map(
           (collection) =>
             ({
-              type: EntityType.collection,
+              type: 'collections',
               entity: collection,
             }) satisfies EntityToGroup,
         ),
@@ -67,7 +66,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
         .map(
           (global) =>
             ({
-              type: EntityType.global,
+              type: 'globals',
               entity: global,
             }) satisfies EntityToGroup,
         ),
