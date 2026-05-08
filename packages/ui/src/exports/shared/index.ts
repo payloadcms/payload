@@ -19,7 +19,6 @@ export { getNavGroups } from '../../utilities/getNavGroups.js'
 export { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 export {
   type EntityToGroup,
-  EntityType,
   groupNavItems,
   type NavGroupType,
 } from '../../utilities/groupNavItems.js'
