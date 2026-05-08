@@ -7,7 +7,7 @@
   .combobox__search-wrapper {
     padding-top: var(--popup-padding);
     padding-bottom: calc(var(--base) * 0.5);
-    border-bottom: 1px solid var(--border-default-default);
+    border-bottom: 1px solid var(--border-default);
     margin-bottom: calc(var(--base) * 0.5);
   }
 
@@ -19,7 +19,7 @@
   .combobox__search-input {
     width: 100%;
     background: var(--bg-default-secondary);
-    color: var(--text-default-default);
+    color: var(--text-default);
     border: none;
     border-radius: var(--radius-medium);
     padding: calc(var(--base) * 0.25) calc(var(--base) * 0.5);

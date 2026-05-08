@@ -20,6 +20,8 @@
     border-radius: var(--radius-medium) var(--radius-medium) 0 0;
     transform: translateY(var(--stroke-width-small));
 
+    min-height: var(--spacer-6);
+
     &:before,
     &:after {
       content: ' ';
@@ -60,17 +62,13 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--spacer-2);
-    height: var(--spacer-5);
+    align-self: stretch;
     z-index: 1;
-
-    .icon {
-      color: var(--text-secondary);
-    }
 
     .divider {
       width: var(--stroke-width-small);
       align-self: stretch;
-      background-color: var(--bg-hover);
+      background-color: var(--border-default);
     }
   }
 

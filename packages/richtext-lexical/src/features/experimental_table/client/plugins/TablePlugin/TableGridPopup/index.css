@@ -145,7 +145,7 @@
     z-index: 1;
   }
 
-  .table-grid-popup__tooltip::after {
+  /* .table-grid-popup__tooltip::after {
     content: '';
     position: absolute;
     bottom: calc(var(--spacer-1) * -1);
@@ -156,7 +156,7 @@
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-top: 4px solid var(--bg-menu);
-  }
+  } */
 
   .table-grid-popup__backdrop {
     position: fixed;
