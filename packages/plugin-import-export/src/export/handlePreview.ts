@@ -1,4 +1,4 @@
-import type { PayloadRequest, Where } from 'payload'
+import type { PayloadRequest, Sort, Where } from 'payload'
 
 import { addDataAndFileToRequest } from 'payload'
 import { getObjectDotNotation } from 'payload/shared'
@@ -63,8 +63,8 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     locale?: string
     previewLimit?: number
     previewPage?: number
-    sort?: any
-    where?: any
+    sort?: Sort
+    where?: Where
   }
 
   // Validate and clamp pagination values to safe bounds

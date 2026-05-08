@@ -224,7 +224,7 @@ export const createExport = async (args: CreateExportArgs) => {
     return filtered
   }
 
-  const filterDisabledJSON = (doc: any, parentPath = ''): any => {
+  const filterDisabledJSON = (doc: unknown, parentPath = ''): unknown => {
     if (Array.isArray(doc)) {
       return doc.map((item) => filterDisabledJSON(item, parentPath))
     }
@@ -233,8 +233,8 @@ export const createExport = async (args: CreateExportArgs) => {
       return doc
     }
 
-    const filtered: Record<string, any> = {}
-    for (const [key, value] of Object.entries(doc)) {
+    const filtered: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(doc as Record<string, unknown>)) {
       const currentPath = parentPath ? `${parentPath}.${key}` : key
 
       // Only remove if this exact path is disabled
@@ -417,18 +417,19 @@ export const createExport = async (args: CreateExportArgs) => {
           }
         } else {
           // --- JSON Streaming ---
-          const batchRows = result.docs.map((doc) =>
-            filterDisabledJSON(
-              applyFieldHooks({
-                data: doc as Record<string, unknown>,
-                fieldHooks: exportFieldHooks,
-                fields: collectionConfig.flattenedFields,
-                format,
-                operation: 'export',
-                req,
-                type: 'beforeExport',
-              }),
-            ),
+          const batchRows = result.docs.map(
+            (doc) =>
+              filterDisabledJSON(
+                applyFieldHooks({
+                  data: doc as Record<string, unknown>,
+                  fieldHooks: exportFieldHooks,
+                  fields: collectionConfig.flattenedFields,
+                  format,
+                  operation: 'export',
+                  req,
+                  type: 'beforeExport',
+                }),
+              ) as Record<string, unknown>,
           )
 
           const originalDocs = result.docs as Record<string, unknown>[]
@@ -509,7 +510,7 @@ export const createExport = async (args: CreateExportArgs) => {
             req,
           }),
         )
-      : filterDisabledJSON(
+      : (filterDisabledJSON(
           applyFieldHooks({
             data: doc as Record<string, unknown>,
             fieldHooks: exportFieldHooks,
@@ -519,7 +520,7 @@ export const createExport = async (args: CreateExportArgs) => {
             req,
             type: 'beforeExport',
           }),
-        )
+        ) as Record<string, unknown>)
 
   // Skip fetching if access was denied - we'll create an empty export
   let exportResult = {
