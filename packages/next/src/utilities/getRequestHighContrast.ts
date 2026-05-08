@@ -1,10 +1,6 @@
 import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
 import type { SanitizedConfig } from 'payload'
 
-export type HighContrastMode = 'off' | 'on'
-
-export const defaultHighContrastMode: HighContrastMode = 'off'
-
 type GetRequestHighContrastArgs = {
   config: SanitizedConfig
   cookies: Map<string, string> | ReadonlyRequestCookies
@@ -15,23 +11,20 @@ export const getRequestHighContrast = ({
   config,
   cookies,
   headers,
-}: GetRequestHighContrastArgs): HighContrastMode => {
+}: GetRequestHighContrastArgs): boolean => {
   const cookieKey = `${config.cookiePrefix || 'payload'}-high-contrast-mode`
   const modeCookie = cookies.get(cookieKey)
 
-  const modeFromCookie: HighContrastMode = (
-    typeof modeCookie === 'string' ? modeCookie : modeCookie?.value
-  ) as HighContrastMode
+  const modeFromCookie = typeof modeCookie === 'string' ? modeCookie : modeCookie?.value
 
-  if (modeFromCookie === 'on' || modeFromCookie === 'off') {
-    return modeFromCookie
+  if (modeFromCookie === 'true') {
+    return true
+  }
+  if (modeFromCookie === 'false') {
+    return false
   }
 
   const contrastHeader = headers.get('Sec-CH-Prefers-Contrast')
 
-  if (contrastHeader === 'more' || contrastHeader === 'forced') {
-    return 'on'
-  }
-
-  return defaultHighContrastMode
+  return contrastHeader === 'more' || contrastHeader === 'forced'
 }

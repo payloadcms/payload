@@ -143,7 +143,7 @@ const RootLayoutContent = async ({
       className={[inter.variable, robotoMono.variable, htmlProps?.className]
         .filter(Boolean)
         .join(' ')}
-      data-enhanced-contrast={highContrastMode === 'on' ? '' : undefined}
+      data-enhanced-contrast={highContrastMode ? '' : undefined}
       data-theme={theme}
       dir={dir}
       lang={languageCode}
