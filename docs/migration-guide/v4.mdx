@@ -110,3 +110,23 @@ export const PostsCollection: CollectionConfig = {
 ```
 
 Run `npx @payloadcms/codemod --transform remove-hide-api-url` to migrate automatically.
+
+### `title` and `setDocumentTitle` removed from `useDocumentInfo`
+
+For performance reasons, the document title state has been split out of `DocumentInfoContext` into its own `DocumentTitleContext`. Access it through the `useDocumentTitle` hook, which exposes the same `title` and `setDocumentTitle` API. Components that subscribed to `useDocumentInfo` solely for the title will no longer re-render when unrelated document state changes.
+
+```diff
+'use client'
+- import { useDocumentInfo } from '@payloadcms/ui'
++ import { useDocumentTitle } from '@payloadcms/ui'
+
+const Heading: React.FC = () => {
+-  const { title, setDocumentTitle } = useDocumentInfo()
++  const { title, setDocumentTitle } = useDocumentTitle()
+  return <h2>{title}</h2>
+}
+```
+
+If you only used `useDocumentInfo` for `title` / `setDocumentTitle`, drop the import entirely. If you used it for other properties as well, leave the original `useDocumentInfo()` call in place and add a separate `useDocumentTitle()` call alongside it.
+
+Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migrate automatically. The codemod splits mixed destructures, removes the `useDocumentInfo` import when no other properties are still used, and preserves any rename aliases (e.g. `{ title: docTitle }`).
