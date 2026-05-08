@@ -304,11 +304,12 @@ describe('General', () => {
   })
 
   describe('theme', () => {
-    test('should render light theme by default', async () => {
+    test('should default to automatic theme mode', async () => {
       await page.goto(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
       await page.goto(`${postsUrl.admin}/account`)
-      await expect(page.locator('#field-theme-light')).toBeChecked()
+      await expect(page.locator('#field-theme-auto')).toBeChecked()
+      await expect(page.locator('#field-theme-light')).not.toBeChecked()
       await expect(page.locator('#field-theme-dark')).not.toBeChecked()
     })
 
