@@ -4,7 +4,7 @@ import { RadioGroupField, useTheme, useTranslation } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
 
 export const ToggleTheme: React.FC = () => {
-  const { setTheme, theme } = useTheme()
+  const { autoMode, setTheme, theme } = useTheme()
   const { t } = useTranslation()
 
   const onChange = useCallback(
@@ -22,6 +22,10 @@ export const ToggleTheme: React.FC = () => {
         label: t('general:adminTheme'),
         options: [
           {
+            label: t('general:automatic'),
+            value: 'auto',
+          },
+          {
             label: t('general:light'),
             value: 'light',
           },
@@ -33,7 +37,7 @@ export const ToggleTheme: React.FC = () => {
       }}
       onChange={onChange}
       path="theme"
-      value={theme}
+      value={autoMode ? 'auto' : theme}
     />
   )
 }
