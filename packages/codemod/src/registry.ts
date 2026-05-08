@@ -5,11 +5,13 @@ import { globalsComponentsEdit } from './transforms/globals-components-edit/inde
 import { migrateDisabledFields } from './transforms/migrate-disabled-fields/index.js'
 import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
 import { migrateHideAPIURL } from './transforms/migrate-hide-api-url/index.js'
+import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
 
 export const transforms: Transform[] = [
   exampleNoop,
   migrateHideAPIURL,
   globalsComponentsEdit,
+  migrateListViewSelectAPI,
   migrateDisabledFields,
   migrateForceSelect,
 ]
