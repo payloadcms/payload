@@ -625,7 +625,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                 showDragHandle
                   ? {
                       id: nodeKey,
-                      attributes: { role: 'button', roleDescription: '', tabIndex: 0 },
+                      attributes: { role: 'button', tabIndex: 0 },
                       listeners: {},
                     }
                   : undefined
