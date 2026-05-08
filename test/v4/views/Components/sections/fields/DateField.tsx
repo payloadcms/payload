@@ -1,12 +1,12 @@
 'use client'
 
-import { Banner, DatePicker } from '@payloadcms/ui'
+import { DatePicker } from '@payloadcms/ui'
 import React from 'react'
 
 import { Section, Variant } from '../../shared.js'
 
 export const DateFieldSection: React.FC = () => (
-  <Section id="date-field" selectedComponent="date-field" title="Date Field">
+  <Section id="date-field" selectedComponent="date-field" title="Date">
     <Variant label="Default">
       <DatePicker onChange={() => {}} value={undefined} />
     </Variant>
@@ -18,11 +18,6 @@ export const DateFieldSection: React.FC = () => (
     </Variant>
     <Variant label="Time Only">
       <DatePicker onChange={() => {}} pickerAppearance="timeOnly" value={new Date()} />
-    </Variant>
-    <Variant label="DateInput">
-      <Banner type="default">
-        <code>DateInput</code> — coming soon
-      </Banner>
     </Variant>
   </Section>
 )

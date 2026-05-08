@@ -6,7 +6,7 @@ import React from 'react'
 import { Section, Variant } from '../../shared.js'
 
 export const EmailFieldSection: React.FC = () => (
-  <Section id="email-field" selectedComponent="email-field" title="Email Field">
+  <Section id="email-field" selectedComponent="email-field" title="Email">
     <Variant>
       <TextInput label="Default" onChange={() => {}} path="email" value="" />
     </Variant>
