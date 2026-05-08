@@ -519,5 +519,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     globalsBySlug[global.slug] = global
   }
 
-  return { ...config, collectionsBySlug, globalsBySlug } as SanitizedConfig
+  config.collectionsBySlug = collectionsBySlug
+  config.globalsBySlug = globalsBySlug
+  return config as SanitizedConfig
 }
