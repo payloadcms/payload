@@ -2,66 +2,64 @@
   .slash-menu-popup {
     --slash-menu-width: 12.5rem;
     --slash-menu-max-height: 18.75rem;
-    background: var(--bg-default);
+    background: var(--bg-elevated-default);
+    color: var(--text-default-default);
     width: var(--slash-menu-width);
-    color: var(--text-default);
-    border-radius: var(--radius-medium);
+    border-radius: var(--radius-large);
+    padding: var(--spacer-2);
     list-style: none;
-    font-family: var(--font-body);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
     max-height: var(--slash-menu-max-height);
     overflow-y: auto;
     z-index: 10;
     position: absolute;
     box-shadow:
-      0px 1px 2px 1px rgba(0, 0, 0, 0.1),
-      0px 4px 16px 0px rgba(0, 0, 0, 0.2),
-      0px -4px 8px 0px rgba(0, 0, 0, 0.1);
+      0 2px 6px 0 rgba(0, 0, 0, 0.12),
+      0 10px 16px 0 rgba(0, 0, 0, 0.08),
+      0 0 0.5px 0 rgba(0, 0, 0, 0.12),
+      0 0 0 1px rgba(0, 0, 0, 0.04);
   }
 
   .slash-menu-popup__group {
-    padding-bottom: var(--spacer-2);
+    padding-bottom: var(--spacer-1);
   }
 
   .slash-menu-popup__group-title {
-    padding-left: var(--spacer-2-5);
-    color: var(--text-secondary);
+    padding: 0 var(--spacer-1);
+    color: var(--text-default-secondary);
     font-size: var(--text-body-small-font-size);
+    line-height: var(--spacer-4);
   }
 
   .slash-menu-popup__item {
     all: unset;
-    padding-left: var(--spacer-2-5);
+    padding: 0 var(--spacer-1);
     box-sizing: border-box;
-    background: none;
-    border: none;
-    color: var(--text-default);
+    color: var(--text-default-default);
     display: flex;
     align-items: center;
-    height: var(--spacer-5);
+    height: var(--spacer-4);
     width: 100%;
+    border-radius: var(--radius-medium);
     cursor: pointer;
+    gap: var(--spacer-1);
+    transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
 
     .icon {
-      color: var(--text-secondary);
+      color: var(--icon-default-secondary);
     }
   }
 
   .slash-menu-popup__item--selected {
-    background: var(--bg-hover);
+    background-color: var(--bg-transparent-pressed);
   }
 
   .slash-menu-popup__item-text {
-    margin-left: var(--spacer-2);
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-  }
-
-  html[data-theme='light'] {
-    .slash-menu-popup {
-      box-shadow:
-        0px 1px 2px 1px rgba(0, 0, 0, 0.05),
-        0px 4px 8px 0px rgba(0, 0, 0, 0.1);
-    }
   }
 }

@@ -1,4 +1,14 @@
 @layer payload-default {
+  @keyframes button-press {
+    0% {
+      background-color: var(--bg-transparent-pressed);
+    }
+
+    100% {
+      background-color: var(--bg-selected);
+    }
+  }
+
   .toolbar-popup__button {
     display: flex;
     align-items: center;
@@ -13,16 +23,17 @@
     padding: 0;
     transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
 
-    &:hover {
+    &:hover:not(.active) {
       background-color: var(--bg-transparent-hover);
     }
 
-    &:active {
+    &:active:not(.active) {
       background-color: var(--bg-transparent-pressed);
     }
 
     &.active {
       background-color: var(--bg-selected);
+      animation: button-press 0.15s cubic-bezier(0, 0.2, 0.2, 1);
 
       &:hover {
         background-color: var(--bg-selected-hover);

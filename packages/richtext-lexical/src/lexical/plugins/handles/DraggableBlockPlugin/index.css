@@ -25,7 +25,7 @@
     .icon {
       background-color: transparent;
       width: var(--spacer-3);
-      height: var(--spacer-4);
+      height: var(--spacer-3);
       opacity: 0.3;
       background-image: url(../../../ui/icons/DraggableBlock/index.svg);
     }

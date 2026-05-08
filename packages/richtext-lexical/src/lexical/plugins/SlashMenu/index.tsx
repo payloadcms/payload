@@ -207,7 +207,7 @@ export function SlashMenuPlugin({
       ) =>
         anchorElementRef.current && groups.length
           ? ReactDOM.createPortal(
-              <div className={baseClass}>
+              <div className={baseClass} data-theme="dark">
                 {groups.map((group) => {
                   let groupTitle = group.key
                   if (group.label && featureClientSchemaMap) {
