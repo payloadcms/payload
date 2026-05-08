@@ -25,7 +25,7 @@ const SOURCE_MAP: Record<string, Record<string, Migration>> = {
     ListViewSlots: { to: 'payload' },
   },
   '@payloadcms/ui/shared': {
-    EntityType: { to: 'payload' },
+    EntityType: { to: 'payload/shared' },
     formatAdminURL: { to: 'payload/shared' },
     mergeListSearchAndWhere: { to: 'payload/shared' },
   },
@@ -36,8 +36,8 @@ type MigratingSpec = {
   named: ImportSpecifier
 }
 
-export const migrateDedupedExports: Transform = {
-  name: 'migrate-deduped-exports',
+export const migrateAliasedExports: Transform = {
+  name: 'migrate-aliased-exports',
   apply: ({ project }) => {
     const filesChanged = new Set<string>()
     const notes: string[] = []
@@ -126,7 +126,7 @@ export const migrateDedupedExports: Transform = {
     }
   },
   description:
-    'Move imports of deduped re-exports from @payloadcms/ui and @payloadcms/next/utilities to their canonical sources in `payload` / `payload/shared`. Renamed names (`ListPreferences` → `CollectionPreferences`, `ListComponentClientProps` → `ListViewClientProps`, `ListComponentServerProps` → `ListViewServerProps`) are imported using an `as` alias so existing usages keep compiling.',
+    'Move imports of aliased re-exports from @payloadcms/ui and @payloadcms/next/utilities to their canonical sources in `payload` / `payload/shared`. Renamed names (`ListPreferences` → `CollectionPreferences`, `ListComponentClientProps` → `ListViewClientProps`, `ListComponentServerProps` → `ListViewServerProps`) are imported using an `as` alias so existing usages keep compiling.',
 }
 
 type ApplyRenameArgs = {
