@@ -314,6 +314,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     emailAddress: 'El. pašto adresas',
     emptyTrash: 'Ištuštinti šiukšliadėžę',
     emptyTrashLabel: 'Ištuštuokite {{label}} šiukšliadėžę',
+    enhancedContrastMode: 'Padidinto kontrasto režimas',
     enterANumber: 'Įveskite skaičių',
     enterAValue: 'Įveskite reikšmę',
     error: 'Klaida',

@@ -313,6 +313,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     emailAddress: 'Email',
     emptyTrash: 'Очистить корзину',
     emptyTrashLabel: 'Очистить корзину для {{label}}',
+    enhancedContrastMode: 'Режим повышенного контраста',
     enterANumber: 'Введите число',
     enterAValue: 'Введите значение',
     error: 'Ошибка',

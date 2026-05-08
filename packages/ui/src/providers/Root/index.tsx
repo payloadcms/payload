@@ -45,6 +45,7 @@ type Props = {
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
   readonly fallbackLang: I18nOptions['fallbackLanguage']
+  readonly highContrastMode: boolean
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
@@ -62,6 +63,7 @@ export const RootProvider: React.FC<Props> = ({
   config,
   dateFNSKey,
   fallbackLang,
+  highContrastMode,
   isNavOpen,
   languageCode,
   languageOptions,
@@ -107,7 +109,7 @@ export const RootProvider: React.FC<Props> = ({
                           <AuthProvider permissions={permissions} user={user}>
                             <PreferencesProvider>
                               <HierarchyProvider>
-                                <ThemeProvider theme={theme}>
+                                <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
                                   <ParamsProvider>
                                     <LocaleProvider locale={locale}>
                                       <StepNavProvider>

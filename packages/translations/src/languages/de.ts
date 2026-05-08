@@ -228,7 +228,6 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Du bist dabei, das {{label}} <1>{{title}}</1> in den Papierkorb zu verschieben. Bist du dir sicher?',
     aboutToTrashCount: 'Du bist dabei, {{count}} {{label}} in den Papierkorb zu verschieben.',
-
     accepts: 'Akzeptiert',
     addBelow: 'Unterhalb hinzufügen',
     addFilter: 'Filter hinzufügen',
@@ -320,6 +319,7 @@ export const deTranslations: DefaultTranslationsObject = {
     emailAddress: 'E-Mail-Adresse',
     emptyTrash: 'Papierkorb leeren',
     emptyTrashLabel: '{{label}} Papierkorb leeren',
+    enhancedContrastMode: 'Modus für erhöhten Kontrast',
     enterANumber: 'Geben Sie eine Zahl ein',
     enterAValue: 'Gib einen Wert ein',
     error: 'Fehler',

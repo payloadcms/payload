@@ -310,6 +310,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     emailAddress: 'Էլ. փոստի հասցե',
     emptyTrash: 'Մաքրել աղբաղեցույցը',
     emptyTrashLabel: 'Դատարկել {{label}} աղբուկը',
+    enhancedContrastMode: 'Առավելացված հակադրության ռեժիմ',
     enterANumber: 'Մուտքագրեք թիվ',
     enterAValue: 'Մուտքագրեք արժեք',
     error: 'Սխալ',

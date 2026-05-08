@@ -315,6 +315,7 @@ export const huTranslations: DefaultTranslationsObject = {
     emailAddress: 'E-mail cím',
     emptyTrash: 'Ürítse ki a szemetet',
     emptyTrashLabel: 'Ürítse ki a {{label}} szemetest',
+    enhancedContrastMode: 'Fokozott kontraszt mód',
     enterANumber: 'Adjon meg egy számot',
     enterAValue: 'Adjon meg egy értéket',
     error: 'Hiba',

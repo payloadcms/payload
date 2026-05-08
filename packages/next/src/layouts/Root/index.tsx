@@ -10,6 +10,7 @@ import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
+import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
@@ -91,6 +92,12 @@ const RootLayoutContent = async ({
     headers,
   })
 
+  const highContrastMode = getRequestHighContrast({
+    config,
+    cookies,
+    headers,
+  })
+
   const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
     ? 'RTL'
     : 'LTR'
@@ -136,6 +143,7 @@ const RootLayoutContent = async ({
       className={[inter.variable, robotoMono.variable, htmlProps?.className]
         .filter(Boolean)
         .join(' ')}
+      data-enhanced-contrast={highContrastMode ? '' : undefined}
       data-theme={theme}
       dir={dir}
       lang={languageCode}
@@ -149,6 +157,7 @@ const RootLayoutContent = async ({
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
+          highContrastMode={highContrastMode}
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}
