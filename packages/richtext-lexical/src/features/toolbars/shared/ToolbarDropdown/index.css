@@ -10,7 +10,6 @@
   }
 
   .toolbar-popup__dropdown {
-    --dropdown-width: 12.5rem;
     display: flex;
     align-items: center;
     vertical-align: middle;
@@ -70,13 +69,13 @@
   }
 
   .toolbar-popup__dropdown-items {
+    --dropdown-min-width: 5rem;
     position: absolute;
     background: var(--bg-elevated-default);
     color: var(--text-default-default);
     border-radius: var(--radius-large);
     padding: var(--spacer-2);
-    min-width: var(--dropdown-width);
-    max-width: var(--dropdown-width);
+    min-width: var(--dropdown-min-width);
     z-index: 100;
     box-shadow:
       0 2px 6px 0 rgba(0, 0, 0, 0.12),

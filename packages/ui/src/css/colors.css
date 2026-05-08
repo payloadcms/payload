@@ -74,6 +74,7 @@
     --bg-inverse-pressed: var(--color-grey-600);
 
     --bg-menu-default: var(--color-grey-900);
+    --bg-menu-hover: var(--color-grey-700);
     --bg-tooltip-default: var(--color-grey-900);
 
     --bg-selected-default: var(--color-blue-200);

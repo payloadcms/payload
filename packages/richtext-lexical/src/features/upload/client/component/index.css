@@ -117,16 +117,15 @@
       min-height: var(--spacer-4);
       padding: 0;
       border-radius: var(--radius-medium);
-      background: transparent;
       border: none;
       cursor: pointer;
 
-      &:hover {
-        background: var(--color-white-200);
+      &:hover:not(.btn--disabled) {
+        background: var(--bg-menu-hover);
       }
 
-      &:active {
-        background: var(--color-white-400);
+      &:active:not(.btn--disabled) {
+        background: var(--bg-menu-hover);
       }
     }
   }

@@ -70,7 +70,6 @@ const ToolbarItem = ({
       item={item}
       itemKey={item.key}
       key={item.key}
-      tooltip={title}
     >
       <span className="text">{croppedTitle}</span>
     </DropDownItem>
