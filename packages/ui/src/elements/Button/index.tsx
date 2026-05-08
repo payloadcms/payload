@@ -86,7 +86,7 @@ export const Button: React.FC<Props> = (props) => {
 
   const [showTooltip, setShowTooltip] = React.useState(false)
 
-  const isDisabled = disabled || loading
+  const isDisabled = disabled === true || loading === true
 
   const classes = [
     baseClass,
