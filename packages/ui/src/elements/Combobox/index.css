@@ -2,9 +2,16 @@
   .combobox__content {
     display: flex;
     flex-direction: column;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .combobox__search-wrapper {
+    display: none;
     padding-top: var(--popup-padding);
     padding-bottom: calc(var(--base) * 0.5);
     border-bottom: 1px solid var(--border-default);

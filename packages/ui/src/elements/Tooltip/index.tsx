@@ -95,7 +95,6 @@ export const Tooltip: React.FC<Props> = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        title={getTitleAttribute(children)}
       >
         <div className="tooltip-content">{children}</div>
       </aside>

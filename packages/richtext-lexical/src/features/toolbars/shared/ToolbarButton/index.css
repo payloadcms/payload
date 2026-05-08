@@ -10,6 +10,7 @@
   }
 
   .toolbar-popup__button {
+    position: relative;
     display: flex;
     align-items: center;
     vertical-align: middle;

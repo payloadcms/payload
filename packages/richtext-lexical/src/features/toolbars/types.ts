@@ -44,6 +44,10 @@ export type ToolbarDropdownGroup = {
   /**
    * Determines where the toolbar group will be.
    */
+  /**
+   * If true, the dropdown items will only show icons (text labels are hidden via CSS) and tooltips will be displayed on hover.
+   */
+  iconOnly?: boolean
   order?: number
   /**
    * Controls the toolbar group type. Set to `dropdown` to create a buttons toolbar group, which displays toolbar items vertically using their icons and labels, if the dropdown is open.

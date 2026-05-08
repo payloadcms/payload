@@ -30,22 +30,25 @@
       width: 100%;
       min-width: 0;
       box-sizing: border-box;
-
+      gap: var(--spacer-2);
       border: 0;
       outline: 0;
       position: relative;
       font-family: var(--font-body);
 
-      .icon--externalLink {
-        margin-right: var(--spacer-1);
+      > .icon:first-child {
+        color: var(--color-white-400);
+        flex-shrink: 0;
       }
 
-      a {
+      & a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-decoration: underline;
-        display: block;
+        gap: var(--spacer-1);
         white-space: nowrap;
         overflow: hidden;
-        margin-right: var(--spacer-2);
         text-overflow: ellipsis;
         color: var(--text-brand-onbrand);
         font-size: var(--text-body-medium-font-size);

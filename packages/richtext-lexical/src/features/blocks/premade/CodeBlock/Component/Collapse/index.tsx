@@ -6,12 +6,13 @@ const baseClass = 'code-block-collapse-button'
 import { useCollapsible } from '@payloadcms/ui'
 
 import { CollapseIcon } from '../../../../../../lexical/ui/icons/Collapse/index.js'
+import { ExpandIcon } from '../../../../../../lexical/ui/icons/Expand/index.js'
 
 export const Collapse: React.FC = () => {
-  const { toggle } = useCollapsible()
+  const { isCollapsed, toggle } = useCollapsible()
   return (
     <button className={baseClass} onClick={toggle} type="button">
-      <CollapseIcon />
+      {isCollapsed ? <ExpandIcon /> : <CollapseIcon />}
     </button>
   )
 }

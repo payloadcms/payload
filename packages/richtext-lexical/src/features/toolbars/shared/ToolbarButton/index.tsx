@@ -1,11 +1,13 @@
 'use client'
 import type { LexicalEditor } from 'lexical'
 
+import { Tooltip, useTranslation } from '@payloadcms/ui'
 import { $addUpdateTag } from 'lexical'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
 import type { ToolbarGroupItem } from '../../types.js'
 
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import './index.css'
 
 const baseClass = 'toolbar-popup__button'
@@ -23,6 +25,23 @@ export const ToolbarButton = ({
   enabled?: boolean
   item: ToolbarGroupItem
 }) => {
+  const { i18n } = useTranslation<{}, string>()
+  const {
+    fieldProps: { featureClientSchemaMap, schemaPath },
+  } = useEditorConfigContext()
+
+  const [showTooltip, setShowTooltip] = useState(false)
+
+  const tooltipLabel = useMemo(() => {
+    if (item.label) {
+      return typeof item.label === 'function'
+        ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+        : item.label
+    }
+    // Convert camelCase key to Title Case (e.g. "inlineCode" -> "Inline Code")
+    return item.key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase())
+  }, [item.label, item.key, featureClientSchemaMap, i18n, schemaPath])
+
   const className = useMemo(() => {
     return [
       baseClass,
@@ -60,13 +79,19 @@ export const ToolbarButton = ({
 
   return (
     <button
+      aria-label={tooltipLabel}
       className={className}
       data-button-key={item.key}
       disabled={!enabled}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
+      onPointerEnter={() => setShowTooltip(true)}
+      onPointerLeave={() => setShowTooltip(false)}
       type="button"
     >
+      <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
+        {tooltipLabel}
+      </Tooltip>
       {children}
     </button>
   )

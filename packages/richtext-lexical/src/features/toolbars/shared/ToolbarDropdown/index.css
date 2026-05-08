@@ -166,6 +166,19 @@
       .btn__icon {
         border: none;
       }
+
+      .btn__tooltip {
+        background-color: var(--color-grey-900);
+        color: var(--color-grey-100);
+
+        &.tooltip--position-top::after {
+          border-top-color: var(--color-grey-900);
+        }
+
+        &.tooltip--position-bottom::after {
+          border-bottom-color: var(--color-grey-900);
+        }
+      }
     }
 
     & .toolbar-popup__dropdown-label {

@@ -7,7 +7,6 @@ import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import {
-  CloseMenuIcon,
   EditIcon,
   ExternalLinkIcon,
   formatDrawerSlug,
@@ -35,6 +34,9 @@ import type { LinkFields } from '../../../../nodes/types.js'
 import type { LinkPayload } from '../types.js'
 
 import { useEditorConfigContext } from '../../../../../../lexical/config/client/EditorConfigProvider.js'
+import { LinkIcon } from '../../../../../../lexical/ui/icons/Link/index.js'
+import { PageIcon } from '../../../../../../lexical/ui/icons/Page/index.js'
+import { TrashIcon } from '../../../../../../lexical/ui/icons/Trash/index.js'
 import { getSelectedNode } from '../../../../../../lexical/utils/getSelectedNode.js'
 import { setFloatingElemPositionForLinkEditor } from '../../../../../../lexical/utils/setFloatingElemPositionForLinkEditor.js'
 import { FieldsDrawer } from '../../../../../../utilities/fieldsDrawer/Drawer.js'
@@ -362,17 +364,17 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   return (
     <React.Fragment>
-      <div className="link-editor" ref={editorRef}>
+      <div className="link-editor" data-theme="dark" ref={editorRef}>
         <div className="link-input">
-          {/* TODO: Add leading link icon before the URL/label to match the design */}
+          {linkNode?.__fields?.linkType === 'custom' ? <LinkIcon /> : <PageIcon />}
           {linkUrl && linkUrl.length > 0 ? (
             <a href={linkUrl} rel="noopener noreferrer" target="_blank">
-              {linkNode?.__fields.newTab ? <ExternalLinkIcon /> : null}
+              {linkNode?.__fields.newTab ? <ExternalLinkIcon size={16} /> : null}
               {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
             </a>
           ) : linkLabel != null && linkLabel.length > 0 ? (
             <>
-              {linkNode?.__fields.newTab ? <ExternalLinkIcon /> : null}
+              {linkNode?.__fields.newTab ? <ExternalLinkIcon size={16} /> : null}
               <span className="link-input__label-pure">{linkLabel}</span>
             </>
           ) : null}
@@ -403,7 +405,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
                   tabIndex={0}
                   type="button"
                 >
-                  <CloseMenuIcon />
+                  <TrashIcon />
                 </button>
               )}
             </React.Fragment>
