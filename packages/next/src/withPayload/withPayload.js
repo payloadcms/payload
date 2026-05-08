@@ -4,11 +4,6 @@
  * TypeScript compilation is not available. This ensures compatibility with all templates and
  * user projects regardless of their TypeScript setup.
  */
-import {
-  getNextjsVersion,
-  supportsServerFastRefreshConfig,
-  supportsTurbopackExternalizeTransitiveDependencies,
-} from './withPayload.utils.js'
 
 const poweredByHeader = {
   key: 'X-Powered-By',
@@ -21,11 +16,6 @@ const poweredByHeader = {
  * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
  * */
 export const withPayload = (nextConfig = {}, options = {}) => {
-  const nextjsVersion = getNextjsVersion()
-
-  const supportsTurbopackBuild = supportsTurbopackExternalizeTransitiveDependencies(nextjsVersion)
-  const hasServerFastRefreshConfigOption = supportsServerFastRefreshConfig(nextjsVersion)
-
   const env = nextConfig.env || {}
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
@@ -40,12 +30,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   }
 
   env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'true'
-
-  if (nextjsVersion?.major === 16 && !hasServerFastRefreshConfigOption) {
-    console.warn(
-      'Payload: You are using an unsupported Next.js 16 version. You can find the supported Next.js versions here: https://payloadcms.com/docs/getting-started/installation',
-    )
-  }
 
   const consoleWarn = console.warn
 
