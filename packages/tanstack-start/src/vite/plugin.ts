@@ -256,6 +256,62 @@ function extractDeclaredIdentifiers(code: string): Set<string> {
 }
 
 /**
+ * Handles server-only module resolution for the client bundle:
+ * 1. Stubs RSC modules (payloadcms rsc entries) with no-op components
+ * 2. Redirects bare 'payload' imports to 'payload/shared' to avoid loading
+ *    payload/src/index.ts which has top-level side effects requiring Node.js APIs
+ */
+function stubServerOnlyImportMapEntries(): PluginOption {
+  const stubPrefix = '\0payload:server-stub:'
+  const serverOnlyPatterns = [
+    /^@payloadcms\/richtext-lexical\/rsc$/,
+    /^@payloadcms\/richtext-slate\/rsc$/,
+    /^@payloadcms\/next\/rsc$/,
+    /^@payloadcms\/tanstack-start\/rsc$/,
+  ]
+  const serverOnlyExports: Record<string, string[]> = {
+    '@payloadcms/next/rsc': ['CollectionCards'],
+    '@payloadcms/richtext-lexical/rsc': [
+      'RscEntryLexicalCell',
+      'RscEntryLexicalField',
+      'LexicalDiffComponent',
+    ],
+    '@payloadcms/tanstack-start/rsc': ['CollectionCards', 'renderPayloadComponentOnServer'],
+  }
+
+  function isServerOnlySpecifier(id: string): boolean {
+    return serverOnlyPatterns.some((p) => p.test(id))
+  }
+
+  return {
+    name: 'payload:stub-server-only-import-map',
+    enforce: 'pre',
+    load(id) {
+      if (!id.startsWith(stubPrefix)) {
+        return
+      }
+      const specifier = id.slice(stubPrefix.length)
+      const exports = serverOnlyExports[specifier]
+      if (exports) {
+        return exports.map((name) => `export const ${name} = () => null;`).join('\n')
+      }
+      return `export default null;`
+    },
+    async resolveId(id, importer, options) {
+      if (options?.ssr) {
+        return
+      }
+      if (isServerOnlySpecifier(id)) {
+        return stubPrefix + id
+      }
+      if (id === 'payload' && importer && !importer.includes('/node_modules/')) {
+        return this.resolve('payload/shared', importer, { ...options, skipSelf: true })
+      }
+    },
+  }
+}
+
+/**
  * Resolves `/client` subpath exports for `@payloadcms/plugin-*` and `@payloadcms/storage-*`
  * packages when normal Vite resolution fails (common in monorepo dev where the package
  * `exports` field may not be picked up for pre-excluded dependencies).
@@ -480,6 +536,35 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
             }
           },
         },
+        {
+          name: 'payload:fix-ajv-namespace-mutation',
+          enforce: 'post' as const,
+          transform(code, id) {
+            const cleanId = id.replace(/\?.*$/, '')
+            if (
+              !cleanId.includes('ajv') ||
+              !/[\\/](?:lib|dist)[\\/]runtime[\\/](?:uri|equal|re2)\.(?:ts|js)$/.test(cleanId)
+            ) {
+              return
+            }
+            if (!code.includes('.code =') && !code.includes('.code=')) {
+              return
+            }
+            const patched = code.replace(
+              /(const|let|var)\s+(\w+)\s*=\s*\(?__cjs_interop__\(await\s+import\([^)]+\)\)\)?;/g,
+              (match, decl, name) => {
+                return (
+                  match.replace(`${decl} ${name}`, `${decl} __raw_${name}`) +
+                  `\nvar ${name} = typeof __raw_${name} === 'object' && __raw_${name} !== null ? { ...__raw_${name} } : __raw_${name};`
+                )
+              },
+            )
+            if (patched !== code) {
+              return { code: patched, map: null }
+            }
+          },
+        },
+        stubServerOnlyImportMapEntries(),
         resolvePayloadPluginClientExports(),
         wrapCjsForClient(),
         ssrStripDistStyleImports(),

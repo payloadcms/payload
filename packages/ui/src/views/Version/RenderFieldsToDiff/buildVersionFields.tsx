@@ -1,28 +1,28 @@
 import type { I18nClient } from '@payloadcms/translations'
+import type {
+  BaseVersionField,
+  ClientField,
+  ClientFieldSchemaMap,
+  ComponentRenderer,
+  Field,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldTypes,
+  FlattenedBlock,
+  PayloadComponent,
+  PayloadRequest,
+  SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
+  VersionField,
+} from 'payload'
 
 import { dequal } from 'dequal/lite'
-import {
-  type BaseVersionField,
-  type ClientField,
-  type ClientFieldSchemaMap,
-  type ComponentRenderer,
-  type Field,
-  type FieldDiffClientProps,
-  type FieldDiffServerProps,
-  type FieldTypes,
-  type FlattenedBlock,
-  MissingEditorProp,
-  type PayloadComponent,
-  type PayloadRequest,
-  type SanitizedFieldPermissions,
-  type SanitizedFieldsPermissions,
-  type VersionField,
-} from 'payload'
 import {
   fieldIsID,
   fieldShouldBeLocalized,
   getFieldPaths,
   getUniqueListBy,
+  MissingEditorProp,
   tabHasName,
 } from 'payload/shared'
 
