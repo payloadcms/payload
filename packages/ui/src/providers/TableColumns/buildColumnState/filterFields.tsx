@@ -1,15 +1,15 @@
 import type { ClientField, Field } from 'payload'
 
-import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
+import { fieldIsHiddenOrDisabled, fieldIsID, isFieldDisabled } from 'payload/shared'
 
 /**
- * Filters fields that are hidden, disabled, or have `disableListColumn` set to `true`.
+ * Filters fields that are hidden, disabled, or have `disabled.column` set to `true`.
  * Recurses through `tabs` and any container with `.fields` (e.g., `row`, `group`, `collapsible`).
  */
 export const filterFields = <T extends ClientField | Field>(incomingFields: T[]): T[] => {
   const shouldSkipField = (field: T): boolean =>
     (field.type !== 'ui' && fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
-    field?.admin?.disableListColumn === true
+    isFieldDisabled(field, 'column')
 
   return (incomingFields ?? []).reduce<T[]>((acc, field) => {
     if (shouldSkipField(field)) {

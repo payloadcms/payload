@@ -9,7 +9,6 @@ import {
   supportsServerFastRefreshConfig,
   supportsTurbopackExternalizeTransitiveDependencies,
 } from './withPayload.utils.js'
-import { withPayloadLegacy } from './withPayloadLegacy.js'
 
 const poweredByHeader = {
   key: 'X-Powered-By',
@@ -74,7 +73,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     experimental: {
       ...(nextConfig.experimental || {}),
       // Server fast refresh breaks HMR
-      ...(hasServerFastRefreshConfigOption ? { turbopackServerFastRefresh: false } : {}),
+      turbopackServerFastRefresh: false,
     },
     sassOptions: {
       ...(nextConfig.sassOptions || {}),
@@ -272,23 +271,19 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     baseConfig.env.NEXT_BASE_PATH = nextConfig.basePath
   }
 
-  if (!supportsTurbopackBuild) {
-    return withPayloadLegacy(baseConfig)
-  } else {
-    return {
-      ...baseConfig,
-      serverExternalPackages: [
-        ...(baseConfig.serverExternalPackages || []),
-        'drizzle-kit',
-        'drizzle-kit/api',
-        'sharp',
-        'libsql',
-        'require-in-the-middle',
-        'json-schema-to-typescript',
-        // Prevents turbopack build errors by the thread-stream package which is installed by pino
-        'pino',
-      ],
-    }
+  return {
+    ...baseConfig,
+    serverExternalPackages: [
+      ...(baseConfig.serverExternalPackages || []),
+      'drizzle-kit',
+      'drizzle-kit/api',
+      'sharp',
+      'libsql',
+      'require-in-the-middle',
+      'json-schema-to-typescript',
+      // Prevents turbopack build errors by the thread-stream package which is installed by pino
+      'pino',
+    ],
   }
 }
 

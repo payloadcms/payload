@@ -86,15 +86,25 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
     }
 
     const featureI18n: Partial<GenericLanguages> = finalSanitizedEditorConfig.features.i18n
-    for (const _lang in i18n) {
+    const supportedLanguages = config.i18n?.supportedLanguages
+    const supportedLanguagesToMerge: Partial<GenericLanguages> = {}
+    for (const _lang in supportedLanguages) {
+      if (!(_lang in i18n)) {
+        if (featureI18n[_lang as keyof typeof i18n]) {
+          supportedLanguagesToMerge[_lang as keyof typeof i18n] =
+            featureI18n[_lang as keyof typeof i18n]
+        }
+        continue
+      }
       const lang = _lang as keyof typeof i18n
       const lexicalI18nForLang = ((featureI18n[lang] ??= {}).lexical ??=
         {}) as GenericTranslationsObject
 
       lexicalI18nForLang.general = i18n[lang] ?? {}
+      supportedLanguagesToMerge[lang] = featureI18n[lang]
     }
 
-    config.i18n.translations = deepMergeSimple(config.i18n.translations, featureI18n)
+    config.i18n.translations = deepMergeSimple(config.i18n.translations, supportedLanguagesToMerge)
 
     const rscEnabled = isRSCEnabled()
 

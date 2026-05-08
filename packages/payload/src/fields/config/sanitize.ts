@@ -264,20 +264,6 @@ export const sanitizeField = async ({
         }
       })
     }
-
-    if (field.min && !field.minRows) {
-      console.warn(
-        `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
-      )
-      field.minRows = field.min
-    }
-
-    if (field.max && !field.maxRows) {
-      console.warn(
-        `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
-      )
-      field.maxRows = field.max
-    }
   }
 
   // Upload isSortable default
@@ -503,8 +489,17 @@ export const sanitizeField = async ({
     }
   }
 
-  if (field.type === 'ui' && typeof field.admin.disableBulkEdit === 'undefined') {
-    field.admin.disableBulkEdit = true
+  if (field.type === 'ui') {
+    const existing = field.admin.disabled
+    if (existing === undefined) {
+      field.admin.disabled = { bulkEdit: true }
+    } else if (
+      existing !== true &&
+      typeof existing === 'object' &&
+      existing.bulkEdit === undefined
+    ) {
+      field.admin.disabled = { ...existing, bulkEdit: true }
+    }
   }
 
   // Timezone field insertion

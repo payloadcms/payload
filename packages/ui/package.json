@@ -850,7 +850,7 @@
     "sonner": "^1.7.2",
     "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
-    "uuid": "11.1.0"
+    "uuid": "14.0.0"
   },
   "devDependencies": {
     "@babel/cli": "7.27.2",
@@ -860,7 +860,7 @@
     "@babel/preset-typescript": "7.27.1",
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.27.1",

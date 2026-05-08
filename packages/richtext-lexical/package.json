@@ -393,7 +393,7 @@
     "qs-esm": "8.0.1",
     "react-error-boundary": "4.1.2",
     "ts-essentials": "10.0.3",
-    "uuid": "11.1.0"
+    "uuid": "14.0.0"
   },
   "devDependencies": {
     "@babel/cli": "7.27.2",
@@ -406,7 +406,7 @@
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
     "@types/node": "22.15.30",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "babel-plugin-transform-remove-imports": "^1.8.0",

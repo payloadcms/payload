@@ -1,9 +1,9 @@
-<svg width="18" height="24" viewBox="0 0 18 24" fill="#ffffff"
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none"
      xmlns="http://www.w3.org/2000/svg">
-    <circle cx="7" cy="8" r="1"/>
-    <circle cx="11" cy="8" r="1"/>
-    <circle cx="7" cy="12" r="1"/>
-    <circle cx="11" cy="12" r="1"/>
-    <circle cx="7" cy="16" r="1"/>
-    <circle cx="11" cy="16" r="1"/>
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M5 4.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5M5 8a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5A.5.5 0 0 1 5 8m6 3.5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 .5-.5"
+      fill="#ffffff"
+    />
 </svg>

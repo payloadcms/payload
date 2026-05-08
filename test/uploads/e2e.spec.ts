@@ -34,6 +34,7 @@ import {
   adminUploadControlSlug,
   animatedTypeMedia,
   audioSlug,
+  bulkUploadsHookErrorSlug,
   bulkUploadsSlug,
   constructorOptionsSlug,
   customFileNameMediaSlug,
@@ -110,6 +111,7 @@ let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
 let bulkUploadsURL: AdminUrlUtil
+let bulkUploadsHookErrorURL: AdminUrlUtil
 let fileMimeTypeURL: AdminUrlUtil
 let svgOnlyURL: AdminUrlUtil
 let mediaWithoutDeleteAccessURL: AdminUrlUtil
@@ -154,6 +156,7 @@ describe('Uploads', () => {
     threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
     constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
     bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
+    bulkUploadsHookErrorURL = new AdminUrlUtil(serverURL, bulkUploadsHookErrorSlug)
     fileMimeTypeURL = new AdminUrlUtil(serverURL, fileMimeTypeSlug)
     svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
     mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
@@ -1671,6 +1674,51 @@ describe('Uploads', () => {
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
+    })
+
+    test('should report failure when beforeChange hook throws non-field error', async () => {
+      await page.goto(bulkUploadsHookErrorURL.list)
+
+      await expect(page.locator('.list-header__title')).toBeVisible()
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeEnabled()
+
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ timeout: 5000, intervals: [500] })
+
+      await page
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([path.resolve(dirname, './image.png'), path.resolve(dirname, './small.png')])
+
+      const nextButton = page.locator('.bulk-upload--actions-bar__controls button:nth-of-type(2)')
+      await nextButton.click()
+
+      await page.locator('#field-shouldFail').check()
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Successfully saved 1 files',
+      )
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
+      ).toBeVisible()
+      await expect(
+        page.locator(
+          '.payload-toast-container .toast-error:has-text("Simulated hook error in beforeChange")',
+        ),
+      ).toBeVisible()
+
+      await expect(page.locator('.file-selections .file-selections__fileRowContainer')).toHaveCount(
+        1,
+      )
     })
   })
 

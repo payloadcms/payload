@@ -71,6 +71,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   fields,
   hasMaxRows,
   importMap,
+  isDragging,
   isLoading: isLoadingFromProps,
   isSortable,
   Label,
@@ -90,6 +91,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   setCollapse,
   setNodeRef,
   transform,
+  transition,
 }) => {
   const isLoading = useThrottledValue(isLoadingFromProps, 500)
 
@@ -103,6 +105,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   const classNames = [
     `${baseClass}__row`,
     fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+    isDragging && `${baseClass}__row--is-dragging`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -146,10 +149,12 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   return (
     <div
       id={`${parentPath?.split('.').join('-')}-row-${rowIndex}`}
-      key={`${parentPath}-row-${rowIndex}`}
+      key={`${parentPath}-row-${row.id}`}
       ref={setNodeRef}
       style={{
         transform,
+        transition,
+        zIndex: isDragging ? 1 : undefined,
       }}
     >
       <Collapsible

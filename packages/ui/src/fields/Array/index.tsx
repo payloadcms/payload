@@ -5,6 +5,7 @@ import type {
   ArrayField as ArrayFieldType,
 } from 'payload'
 
+import { verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
 import { getFromImportMap } from 'payload/shared'
 import React, { Fragment, useCallback, useId, useMemo } from 'react'
@@ -22,6 +23,7 @@ import {
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
 import { CollapseAllToggle } from '../../elements/CollapseAllToggle/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
+import { DragOverlayPreview } from '../../elements/DraggableSortable/DragOverlayPreview/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -31,6 +33,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
+import { RowLabel } from '../../forms/RowLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { CirclePlusIcon } from '../../icons/CirclePlus/index.js'
@@ -312,6 +315,29 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
+  const renderDragOverlay = useCallback(
+    (activeId: number | string) => {
+      const activeIndex = rows.findIndex((row) => row.id === activeId)
+      if (activeIndex === -1) {
+        return null
+      }
+
+      return (
+        <DragOverlayPreview
+          header={
+            <RowLabel
+              CustomComponent={rows?.[activeIndex]?.customComponents?.RowLabel}
+              label={`${getTranslation(label, i18n)} ${String(activeIndex + 1).padStart(2, '0')}`}
+              path={`${path}.${activeIndex}`}
+              rowNumber={activeIndex}
+            />
+          }
+        />
+      )
+    },
+    [rows, label, i18n, path],
+  )
+
   return (
     <div
       className={[
@@ -386,6 +412,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           className={`${baseClass}__draggable-rows`}
           ids={rows.map((row) => row.id)}
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
+          renderDragOverlay={isSortable && !readOnly && !disabled ? renderDragOverlay : undefined}
+          sortingStrategy={verticalListSortingStrategy}
         >
           {rows.map((rowData, i) => {
             const { id: rowID, isLoading } = rowData

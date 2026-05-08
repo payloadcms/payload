@@ -485,6 +485,10 @@
       border-radius: var(--radius-full);
       background-color: var(--bg-brand);
     }
+
+    &.react-datepicker__day--selected::after {
+      background-color: var(--icon-onbrand-secondary);
+    }
   }
 
   /* Outside month days (prev/next month) */
@@ -514,10 +518,6 @@
     }
   }
 
-  .react-datepicker__day--selected:focus {
-    background-color: var(--bg-selected-strong);
-  }
-
   .react-datepicker__day--keyboard-selected,
   .react-datepicker__month-text--keyboard-selected,
   .react-datepicker__quarter-text--keyboard-selected,
@@ -530,10 +530,13 @@
     }
   }
 
-  .react-datepicker__day--keyboard-selected:focus {
-    background-color: var(--bg-selected);
-    outline: 2px solid var(--border-selected);
-    outline-offset: -2px;
+  /* When focus is on the already-selected day, use white outline for contrast */
+  .react-datepicker__day--selected[tabindex='0']:focus,
+  .react-datepicker__month-text--selected[tabindex='0']:focus,
+  .react-datepicker__quarter-text--selected[tabindex='0']:focus,
+  .react-datepicker__year-text--selected[tabindex='0']:focus {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
   }
 
   /* In-range selecting (partial selection) */
@@ -802,9 +805,8 @@
   }
 
   .date-time-picker .icon--calendar {
-    top: 50%;
-    right: var(--spacer-2-5);
-    width: 1.125rem;
+    top: var(--spacer-3);
+    right: var(--spacer-1);
     pointer-events: none;
     transform: translateY(-50%);
   }
@@ -814,49 +816,51 @@
   }
 
   /* ——— Input field ——— */
-  .date-time-picker .react-datepicker__input-container input {
-    font-family: var(--text-body-medium-font-family);
-    font-size: var(--text-body-medium-font-size);
-    font-weight: var(--text-body-medium-font-weight);
-    line-height: var(--text-body-medium-line-height);
-    letter-spacing: var(--text-letter-spacing);
-    width: 100%;
-    border: 1px solid transparent;
-    border-radius: var(--radius-medium);
-    background: var(--bg-default-secondary);
-    color: var(--text-default);
-    height: 2rem;
-    padding: var(--spacer-2);
-    padding-right: 2.25rem;
-    -webkit-appearance: none;
-    outline: none;
-
-    &::placeholder {
-      color: var(--text-tertiary);
+  .date-time-picker {
+    input {
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
-    }
+      line-height: var(--text-body-medium-line-height);
+      width: 100%;
+      min-height: var(--spacer-5);
+      border: 1px solid transparent;
+      border-radius: var(--radius-medium);
+      background: var(--bg-default-secondary);
+      color: var(--text-default);
+      padding-block: calc(var(--spacer-1));
+      padding-inline: var(--spacer-2) var(--spacer-5); /* space for calendar icon */
 
-    &:hover:not(:focus):not(:disabled) {
-      border-color: var(--border-default);
-    }
+      &::placeholder {
+        color: var(--text-tertiary);
+        font-weight: var(--text-body-medium-font-weight);
+      }
 
-    &:focus,
-    &:focus-within,
-    &:active {
-      border-color: var(--border-selected);
-      outline: 0;
-    }
+      &:hover:not(:focus) {
+        border-color: var(--border-default);
+      }
 
-    &:disabled {
-      background: none;
-      color: var(--text-disabled-default);
-      border-color: var(--border-disabled-default);
+      &:focus {
+        border-color: var(--border-selected-default);
+        outline: none;
+      }
+
+      &:disabled {
+        background: none;
+        /* color: var(--text-disabled-default); */
+        border-color: var(--border-disabled-default);
+      }
     }
+  }
+
+  /* ——— Disabled calendar icon state ——— */
+  .date-time-picker:has(input:disabled) .icon--calendar {
+    color: var(--icon-disabled-default);
   }
 
   /* ——— Error state ——— */
   .date-time-picker--has-error .react-datepicker__input-container input {
-    border-color: var(--border-danger-default);
+    border-color: var(--border-danger-strong);
     border-width: 2px;
     padding: calc(var(--spacer-1) - 1px) calc(var(--spacer-2-5) - 1px);
     padding-right: calc(2.25rem - 1px);
@@ -866,6 +870,10 @@
   .date-time-picker__appearance--dayOnly .react-datepicker__month-container,
   .date-time-picker__appearance--monthOnly .react-datepicker__month-container {
     border-right: none;
+  }
+
+  .date-time-picker__input-wrapper {
+    position: relative;
   }
 
   @media (max-width: 768px) {

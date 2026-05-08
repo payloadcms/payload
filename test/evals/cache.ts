@@ -1,9 +1,11 @@
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import type { EvalResult } from './types.js'
+
+import { loadSkillContext } from './skillContent.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const cacheDir = path.join(__dirname, 'eval-results', 'cache')
@@ -27,9 +29,9 @@ function cacheFilePath(key: string): string {
  * Prompt keys that inject SKILL.md content into the system prompt.
  * Cache entries for these keys must be invalidated when the skill file changes.
  */
-const SKILL_PROMPT_KEYS = new Set(['codegenWithSkill', 'qaWithSkill'])
+const SKILL_PROMPT_KEYS = new Set(['codegenWithSkill'])
 
-/** Lazy-loaded 8-char prefix of the skill file's SHA-256 hash. Computed once per process. */
+/** Lazy-loaded 8-char prefix of the full skill context (SKILL.md + every reference/*.md). Computed once per process. */
 let _skillHash: null | string = null
 
 function getSkillHash(): string {
@@ -37,9 +39,7 @@ function getSkillHash(): string {
     return _skillHash
   }
   try {
-    const skillPath = path.resolve(process.cwd(), 'tools/claude-plugin/skills/payload/SKILL.md')
-    const content = readFileSync(skillPath, 'utf-8')
-    _skillHash = createHash('sha256').update(content).digest('hex').slice(0, 8)
+    _skillHash = createHash('sha256').update(loadSkillContext()).digest('hex').slice(0, 8)
   } catch {
     _skillHash = 'unknown'
   }
@@ -83,27 +83,36 @@ export function setCachedResult(key: string, result: EvalResult): void {
 }
 
 /**
- * Generates a cache key for a QA eval case.
- * Keyed on: question input, expected answer, system prompt, fixture path (if any), and model ID.
- * For skill-variant prompts, also includes an 8-char hash of SKILL.md so the cache is
- * automatically invalidated whenever the skill file changes.
+ * Removes cache files whose result matches `match` but whose key differs from
+ * `currentKey`. Used after writing a fresh result so prior entries for the same
+ * logical case (e.g. earlier fixture or skill content) are dropped, keeping
+ * the dashboard from showing duplicate or stale rows.
  */
-export function qaKey(params: {
-  expected: string
-  fixturePath?: string
-  input: string
-  modelId: string
-  systemPromptKey: string
-}): string {
-  return hashKey({
-    type: 'qa',
-    input: params.input,
-    expected: params.expected,
-    fixturePath: params.fixturePath ?? '',
-    systemPromptKey: params.systemPromptKey,
-    modelId: params.modelId,
-    skillHash: SKILL_PROMPT_KEYS.has(params.systemPromptKey) ? getSkillHash() : undefined,
-  })
+export function pruneStaleEntries(
+  currentKey: string,
+  match: (result: EvalResult) => boolean,
+): void {
+  let files: string[]
+  try {
+    files = readdirSync(cacheDir).filter((f) => f.endsWith('.json'))
+  } catch {
+    return
+  }
+  for (const file of files) {
+    const fileKey = file.replace(/\.json$/, '')
+    if (fileKey === currentKey) {
+      continue
+    }
+    const filePath = path.join(cacheDir, file)
+    try {
+      const entry = JSON.parse(readFileSync(filePath, 'utf-8')) as CacheEntry
+      if (entry.version === 1 && match(entry.result)) {
+        rmSync(filePath, { force: true })
+      }
+    } catch {
+      // skip unreadable / corrupt entries
+    }
+  }
 }
 
 /**
@@ -126,5 +135,6 @@ export function codegenKey(params: {
     fixtureContent: params.fixtureContent,
     modelId: params.modelId,
     systemPromptKey: params.systemPromptKey,
+    skillHash: SKILL_PROMPT_KEYS.has(params.systemPromptKey) ? getSkillHash() : undefined,
   })
 }

@@ -121,6 +121,7 @@ export interface Config {
     'three-dimensional': ThreeDimensional;
     'constructor-options': ConstructorOption;
     'bulk-uploads': BulkUpload;
+    'bulk-uploads-hook-error': BulkUploadsHookError;
     'simple-relationship': SimpleRelationship;
     'file-mime-type': FileMimeType;
     'svg-only': SvgOnly;
@@ -189,6 +190,7 @@ export interface Config {
     'three-dimensional': ThreeDimensionalSelect<false> | ThreeDimensionalSelect<true>;
     'constructor-options': ConstructorOptionsSelect<false> | ConstructorOptionsSelect<true>;
     'bulk-uploads': BulkUploadsSelect<false> | BulkUploadsSelect<true>;
+    'bulk-uploads-hook-error': BulkUploadsHookErrorSelect<false> | BulkUploadsHookErrorSelect<true>;
     'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
     'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
@@ -1703,6 +1705,26 @@ export interface SimpleRelationship {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-uploads-hook-error".
+ */
+export interface BulkUploadsHookError {
+  id: string;
+  title?: string | null;
+  shouldFail?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "file-mime-type".
  */
 export interface FileMimeType {
@@ -2091,6 +2113,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'bulk-uploads';
         value: string | BulkUpload;
+      } | null)
+    | ({
+        relationTo: 'bulk-uploads-hook-error';
+        value: string | BulkUploadsHookError;
       } | null)
     | ({
         relationTo: 'simple-relationship';
@@ -3679,6 +3705,25 @@ export interface ConstructorOptionsSelect<T extends boolean = true> {
 export interface BulkUploadsSelect<T extends boolean = true> {
   title?: T;
   relationship?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-uploads-hook-error_select".
+ */
+export interface BulkUploadsHookErrorSelect<T extends boolean = true> {
+  title?: T;
+  shouldFail?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

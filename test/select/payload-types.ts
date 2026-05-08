@@ -116,6 +116,9 @@ export interface Config {
     'force-select-global': ForceSelectGlobalSelect<false> | ForceSelectGlobalSelect<true>;
   };
   locale: 'en' | 'de';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -408,11 +411,6 @@ export interface Page {
           };
           [k: string]: unknown;
         } | null;
-        richTextSlate?:
-          | {
-              [k: string]: unknown;
-            }[]
-          | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'introduction';
@@ -461,13 +459,8 @@ export interface Point {
 export interface ForceSelect {
   id: string;
   text?: string | null;
-  forceSelected?: string | null;
-  array?:
-    | {
-        forceSelected?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+  field1?: string | null;
+  field2?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -875,7 +868,6 @@ export interface PagesSelect<T extends boolean = true> {
                     label?: T;
                   };
               richTextLexical?: T;
-              richTextSlate?: T;
               id?: T;
               blockName?: T;
             };
@@ -920,13 +912,8 @@ export interface PointsSelect<T extends boolean = true> {
  */
 export interface ForceSelectSelect<T extends boolean = true> {
   text?: T;
-  forceSelected?: T;
-  array?:
-    | T
-    | {
-        forceSelected?: T;
-        id?: T;
-      };
+  field1?: T;
+  field2?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1068,13 +1055,8 @@ export interface GlobalPost {
 export interface ForceSelectGlobal {
   id: string;
   text?: string | null;
-  forceSelected?: string | null;
-  array?:
-    | {
-        forceSelected?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+  field1?: string | null;
+  field2?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1095,16 +1077,21 @@ export interface GlobalPostSelect<T extends boolean = true> {
  */
 export interface ForceSelectGlobalSelect<T extends boolean = true> {
   text?: T;
-  forceSelected?: T;
-  array?:
-    | T
-    | {
-        forceSelected?: T;
-        id?: T;
-      };
+  field1?: T;
+  field2?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

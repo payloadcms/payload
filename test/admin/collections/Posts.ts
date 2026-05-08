@@ -261,14 +261,14 @@ export const Posts: CollectionConfig = {
       name: 'disableListColumnText',
       type: 'text',
       admin: {
-        disableListColumn: true,
+        disabled: { column: true },
       },
     },
     {
       name: 'disableListFilterText',
       type: 'text',
       admin: {
-        disableListFilter: true,
+        disabled: { filter: true },
       },
     },
     {
@@ -332,7 +332,7 @@ export const Posts: CollectionConfig = {
           name: 'disableListColumnTextInRow',
           type: 'text',
           admin: {
-            disableListColumn: true,
+            disabled: { column: true },
           },
         },
       ],
@@ -345,7 +345,7 @@ export const Posts: CollectionConfig = {
           name: 'disableListColumnTextInGroup',
           type: 'text',
           admin: {
-            disableListColumn: true,
+            disabled: { column: true },
           },
         },
       ],
