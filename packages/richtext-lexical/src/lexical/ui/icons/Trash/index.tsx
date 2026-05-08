@@ -1,9 +1,23 @@
 'use client'
 import React from 'react'
 
+const paths = {
+  // icon-24-trash - standard variant
+  default:
+    'M6 5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .496.5h12.008a.5.5 0 0 0 .496-.5v-1A.5.5 0 0 0 18 5zM4.5 6.5a1.5 1.5 0 0 0 1.037 1.427L5.725 10H5a.5.5 0 0 0 0 1h.816l.653 7.181A2 2 0 0 0 8.46 20h7.078a2 2 0 0 0 1.992-1.819L18.184 11H19a.5.5 0 0 0 0-1h-.725l.188-2.073A1.5 1.5 0 0 0 19.5 6.5v-1A1.5 1.5 0 0 0 18 4H6a1.5 1.5 0 0 0-1.5 1.5zm2.965 11.59L6.548 8h10.905l-.918 10.09a1 1 0 0 1-.996.91H8.461a1 1 0 0 1-.996-.91M11 10.5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0zm3 0a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z',
+  // icon-24-trash-small - compact variant
+  small:
+    'M6.5 7a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-.039l-.08 1H17a.5.5 0 0 1 0 1h-.7l-.455 5.62A1.5 1.5 0 0 1 14.35 18h-4.7a1.5 1.5 0 0 1-1.495-1.38L7.7 11H7a.5.5 0 0 1 0-1h.62l-.081-1H7.5a1 1 0 0 1-1-1zm9.494 1h.506V7h-9v1zm-.536 1H8.542l.61 7.54a.5.5 0 0 0 .498.46h4.7a.5.5 0 0 0 .499-.46zM11.5 11.5a.5.5 0 0 0-1 0v3a.5.5 0 0 0 1 0zm2 0a.5.5 0 0 0-1 0v3a.5.5 0 0 0 1 0z',
+}
+
 export const TrashIcon: React.FC<{
   readonly className?: string
-}> = ({ className }) => (
+  /**
+   * Use the compact trash icon variant (icon-24-trash-small).
+   * Both variants are 24x24, but the small variant has less visual weight.
+   */
+  readonly small?: boolean
+}> = ({ className, small }) => (
   <svg
     aria-hidden="true"
     className={['icon', className].filter(Boolean).join(' ')}
@@ -14,13 +28,10 @@ export const TrashIcon: React.FC<{
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      d="M18 4C18.8284 4 19.5 4.67157 19.5 5.5V6.5C19.5 7.16674 19.0646 7.73058 18.4629 7.92578L18.2744 10H19C19.2761 10 19.5 10.2239 19.5 10.5C19.5 10.7761 19.2761 11 19 11H18.1836L17.5312 18.1807C17.4376 19.2108 16.5735 20 15.5391 20H8.46094C7.42653 20 6.5624 19.2108 6.46875 18.1807L5.81543 11H5C4.72386 11 4.5 10.7761 4.5 10.5C4.5 10.2239 4.72386 10 5 10H5.72461L5.53613 7.92578C4.93491 7.73031 4.5 7.16641 4.5 6.5V5.5C4.5 4.67157 5.17157 4 6 4H18ZM7.46484 18.0908C7.5118 18.6058 7.94383 19 8.46094 19H15.5391C16.0562 19 16.4882 18.6058 16.5352 18.0908L17.4521 8H6.54785L7.46484 18.0908ZM6 5C5.72386 5 5.5 5.22386 5.5 5.5V6.5C5.5 6.77614 5.72386 7 6 7H18C18.2761 7 18.5 6.77614 18.5 6.5V5.5C18.5 5.22386 18.2761 5 18 5H6Z"
+      clipRule="evenodd"
+      d={small ? paths.small : paths.default}
       fill="currentColor"
-    />
-    <path
-      d="M12 13L10 11M12 13L14 11M12 13L14 15M12 13L10 15"
-      stroke="currentColor"
-      strokeLinecap="round"
+      fillRule="evenodd"
     />
   </svg>
 )

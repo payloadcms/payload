@@ -79,6 +79,11 @@
       line-height: var(--text-body-medium-line-height);
     }
 
+    .link-input__actions {
+      display: flex;
+      gap: var(--spacer-1);
+    }
+
     button {
       all: unset;
       display: flex;

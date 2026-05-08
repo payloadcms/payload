@@ -7,13 +7,13 @@ import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import {
-  EditIcon,
   ExternalLinkIcon,
   formatDrawerSlug,
   useConfig,
   useEditDepth,
   useLocale,
   useTranslation,
+  WriteIcon,
 } from '@payloadcms/ui'
 import { requests } from '@payloadcms/ui/shared'
 import {
@@ -388,7 +388,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
           ) : null}
 
           {isEditable && (
-            <React.Fragment>
+            <div className="link-input__actions">
               <button
                 aria-label="Edit link"
                 className="link-edit"
@@ -400,7 +400,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
                 tabIndex={0}
                 type="button"
               >
-                <EditIcon />
+                <WriteIcon />
               </button>
               {!isAutoLink && (
                 <button
@@ -413,10 +413,10 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
                   tabIndex={0}
                   type="button"
                 >
-                  <TrashIcon />
+                  <TrashIcon small />
                 </button>
               )}
-            </React.Fragment>
+            </div>
           )}
         </div>
       </div>
