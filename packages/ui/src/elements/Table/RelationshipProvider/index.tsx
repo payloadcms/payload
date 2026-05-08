@@ -72,7 +72,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
           const collection = collections.find((c) => c.slug === slug)
 
           if (!collection) {
-            continue
+            return
           }
 
           const fieldToSelect = collection.admin.useAsTitle ?? 'id'
