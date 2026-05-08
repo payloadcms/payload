@@ -12,15 +12,11 @@ import { CardSection } from './sections/Card.js'
 import { CheckboxSection } from './sections/Checkbox.js'
 import { DrawerSection } from './sections/DrawerSection.js'
 import { IconsSection } from './sections/Icons.js'
-import { InputSection } from './sections/Input.js'
 import { LexicalIconsSection } from './sections/LexicalIcons.js'
+import { LoadingSection } from './sections/LoadingSection.js'
 import { ModalSection } from './sections/ModalSection.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
-import { RadioSection } from './sections/Radio.js'
-import { SelectSection } from './sections/Select.js'
-import { ShimmerSection } from './sections/ShimmerSection.js'
-import { TextareaSection } from './sections/Textarea.js'
 import { ToastSection } from './sections/ToastSection.js'
 import { TooltipSection } from './sections/Tooltip.js'
 // Field sections
@@ -47,19 +43,20 @@ type ComponentId =
   | 'checkbox'
   | 'code-field'
   | 'date-field'
-  // Patterns
   | 'drawer'
   | 'email-field'
   | 'icons'
   | 'input'
   | 'json-field'
   | 'lexical-icons'
+  | 'loading-overlay'
+  // Patterns
   | 'modal'
   | 'number-field'
   | 'password-field'
-  // Fields
   | 'pill'
   | 'point-field'
+  // Fields
   | 'popup'
   | 'radio'
   | 'radiogroup-field'
@@ -95,6 +92,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Tooltip', value: 'tooltip' },
   // Patterns
   { category: 'patterns', label: 'Drawer', value: 'drawer' },
+  { category: 'patterns', label: 'Loading Overlay', value: 'loading-overlay' },
   { category: 'patterns', label: 'Modal', value: 'modal' },
   { category: 'patterns', label: 'Shimmer / Loading', value: 'shimmer' },
   { category: 'patterns', label: 'Toast', value: 'toast' },
@@ -205,6 +203,10 @@ export const ComponentsView: React.FC = () => {
 
       <div className="components-view__content">
         {/* Primitives */}
+        {(selectedCategory === 'all' || selectedCategory === 'primitives') &&
+          selectedComponent === 'all' && (
+            <h2 className="components-view__category-title">Primitives</h2>
+          )}
         {shouldShow('button', 'primitives') && <ButtonSection selectedComponent="button" />}
         {shouldShow('pill', 'primitives') && <PillSection selectedComponent="pill" />}
         {shouldShow('icons', 'primitives') && <IconsSection selectedComponent="icons" />}
@@ -215,30 +217,36 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('popup', 'primitives') && <PopupSection selectedComponent="popup" />}
         {shouldShow('card', 'primitives') && <CardSection selectedComponent="card" />}
         {shouldShow('banner', 'primitives') && <BannerSection selectedComponent="banner" />}
-        {shouldShow('input', 'primitives') && <InputSection selectedComponent="input" />}
-        {shouldShow('textarea', 'primitives') && <TextareaSection selectedComponent="textarea" />}
-        {shouldShow('checkbox', 'primitives') && <CheckboxSection selectedComponent="checkbox" />}
-        {shouldShow('radio', 'primitives') && <RadioSection selectedComponent="radio" />}
-        {shouldShow('select', 'primitives') && <SelectSection selectedComponent="select" />}
 
         {/* Patterns */}
+        {(selectedCategory === 'all' || selectedCategory === 'patterns') &&
+          selectedComponent === 'all' && (
+            <h2 className="components-view__category-title">Patterns</h2>
+          )}
         {shouldShow('drawer', 'patterns') && <DrawerSection selectedComponent="drawer" />}
+        {shouldShow('loading-overlay', 'patterns') && (
+          <LoadingSection selectedComponent="loading-overlay" />
+        )}
         {shouldShow('modal', 'patterns') && <ModalSection selectedComponent="modal" />}
         {shouldShow('toast', 'patterns') && <ToastSection selectedComponent="toast" />}
-        {shouldShow('shimmer', 'patterns') && <ShimmerSection selectedComponent="shimmer" />}
 
         {/* Fields */}
+        {(selectedCategory === 'all' || selectedCategory === 'fields') &&
+          selectedComponent === 'all' && (
+            <h2 className="components-view__category-title">Input Fields</h2>
+          )}
         {shouldShow('text-field', 'fields') && <TextFieldSection />}
         {shouldShow('email-field', 'fields') && <EmailFieldSection />}
         {shouldShow('number-field', 'fields') && <NumberFieldSection />}
         {shouldShow('password-field', 'fields') && <PasswordFieldSection />}
-        {shouldShow('textarea-field', 'fields') && <TextareaFieldSection />}
-        {shouldShow('date-field', 'fields') && <DateFieldSection />}
-        {shouldShow('code-field', 'fields') && <CodeFieldSection />}
-        {shouldShow('json-field', 'fields') && <JSONFieldSection />}
-        {shouldShow('select-field', 'fields') && <SelectFieldSection />}
-        {shouldShow('radiogroup-field', 'fields') && <RadioGroupFieldSection />}
         {shouldShow('point-field', 'fields') && <PointFieldSection />}
+        {shouldShow('select-field', 'fields') && <SelectFieldSection />}
+        {shouldShow('date-field', 'fields') && <DateFieldSection />}
+        {shouldShow('textarea-field', 'fields') && <TextareaFieldSection />}
+        {shouldShow('checkbox', 'primitives') && <CheckboxSection selectedComponent="checkbox" />}
+        {shouldShow('radiogroup-field', 'fields') && <RadioGroupFieldSection />}
+        {shouldShow('json-field', 'fields') && <JSONFieldSection />}
+        {shouldShow('code-field', 'fields') && <CodeFieldSection />}
       </div>
     </div>
   )
