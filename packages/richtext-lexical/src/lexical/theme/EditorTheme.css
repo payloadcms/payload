@@ -1,6 +1,6 @@
 @layer payload-default {
   .LexicalEditorTheme {
-    --lexical-indent-base-value: 40px;
+    --lexical-indent-base-value: var(--spacer-3);
 
     /* Lexical heading typography scale */
     --lexical-h1-font-size: 2rem; /* 32px */
@@ -167,11 +167,12 @@
   }
 
   .LexicalEditorTheme__textCode {
-    background-color: var(--bg-secondary);
     border: var(--stroke-width-small) solid var(--border-default);
     color: var(--text-default);
     padding: var(--spacer-1);
     font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace;
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
     border-radius: var(--radius-small);
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
@@ -254,7 +255,7 @@
   .LexicalEditorTheme__listItem {
     font-family: var(--text-body-large-font-family);
     font-size: var(--text-body-large-font-size);
-    margin: 0 0 var(--spacer-3) var(--spacer-4);
+    margin: 0 0 var(--spacer-3) var(--spacer-3);
   }
 
   .LexicalEditorTheme__listItem[style*='text-align: center'],
@@ -271,7 +272,7 @@
   }
 
   .LexicalEditorTheme__listItem[dir='rtl'] {
-    margin: 0 40px 0.4em 0;
+    margin: 0 var(--spacer-3) 0.4em 0;
   }
 
   .LexicalEditorTheme__listItemChecked,
@@ -298,7 +299,7 @@
     content: '';
     width: var(--spacer-3);
     height: var(--spacer-3);
-    top: var(--spacer-1);
+    top: 0;
     left: 0;
     cursor: pointer;
     display: block;
@@ -320,28 +321,17 @@
   }
 
   .LexicalEditorTheme__listItemUnchecked:before {
-    border: 1.5px solid var(--border-default);
+    border: 1px solid var(--text-default);
     background-color: var(--bg-default);
   }
 
   .LexicalEditorTheme__listItemChecked:before {
-    border: 1.5px solid var(--border-selected-strong);
+    border: none;
     background-color: var(--bg-brand);
-  }
-
-  .LexicalEditorTheme__listItemChecked:after {
-    content: '';
-    cursor: pointer;
-    border-color: white;
-    border-style: solid;
-    position: absolute;
-    display: block;
-    top: var(--spacer-1);
-    width: var(--spacer-1-5);
-    left: var(--spacer-1-5);
-    height: var(--spacer-1-5);
-    transform: rotate(45deg);
-    border-width: 0 2px 2px 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M11.5839 3.72266C11.7371 3.49298 12.0476 3.43085 12.2773 3.58399C12.5069 3.73716 12.569 4.04762 12.416 4.27735L7.41596 11.7773C7.33289 11.9019 7.19778 11.9833 7.04877 11.998C6.8999 12.0126 6.75223 11.9593 6.64642 11.8535L3.64642 8.85352C3.4512 8.65826 3.45119 8.34174 3.64642 8.14649C3.84169 7.95133 4.15822 7.95128 4.35346 8.14649L6.92182 10.7148L11.5839 3.72266Z' fill='white'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: var(--spacer-3);
   }
 
   .LexicalEditorTheme__nestedListItem {

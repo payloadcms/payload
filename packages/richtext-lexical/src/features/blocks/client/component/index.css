@@ -106,7 +106,8 @@
     max-width: 100%;
     width: 100%;
     overflow: hidden;
-    gap: var(--spacer-1);
+    gap: var(--spacer-2);
+    align-items: center;
     justify-content: flex-start;
     pointer-events: none;
 
@@ -115,9 +116,9 @@
     }
   }
 
-  .LexicalEditorTheme__block__block-header > div:nth-child(2) {
-    display: flex;
-    justify-content: flex-end;
+  .LexicalEditorTheme__block__block-number {
+    flex-shrink: 0;
+    color: var(--text-default);
   }
 
   .LexicalEditorTheme__block__block-number {

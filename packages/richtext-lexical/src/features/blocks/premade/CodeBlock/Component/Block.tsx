@@ -117,6 +117,8 @@ export const CodeBlockBlockComponent: React.FC<Pick<AdditionalCodeComponentProps
           <CodeBlockIcon />
         </div>
       }
+      showDragHandle={false}
+      showRowNumber={false}
     >
       <RenderFields
         fields={formSchema}

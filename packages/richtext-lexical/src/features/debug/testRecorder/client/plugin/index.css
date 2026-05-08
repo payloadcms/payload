@@ -1,6 +1,6 @@
 @layer payload-default {
   .test-recorder-output {
-    margin: 20px auto 20px auto;
+    margin: var(--spacer-4) auto var(--spacer-4) auto;
     width: 100%;
   }
   .test-recorder-toolbar {

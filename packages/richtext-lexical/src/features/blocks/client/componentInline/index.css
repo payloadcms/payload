@@ -23,7 +23,7 @@
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
     margin-right: var(--spacer-1);
     margin-left: var(--spacer-1);
-    padding: var(--spacer-1);
+    padding: 0;
     padding-inline-start: var(--spacer-2);
     background: var(--bg-default);
     outline: var(--stroke-width-small) solid var(--border-default);
@@ -32,6 +32,7 @@
     font-family: var(--font-body);
     display: flex;
     align-items: center;
+    cursor: pointer;
 
     &:hover {
       outline: var(--stroke-width-small) solid var(--border-default);
@@ -48,26 +49,14 @@
     overflow: hidden;
   }
 
-  .LexicalEditorTheme__inlineBlock__editButton.btn {
-    margin: 0;
-  }
-
-  .LexicalEditorTheme__inlineBlock__editButton {
-    &:disabled {
-      color: var(--icon-tertiary);
-      pointer-events: none;
-    }
-  }
-
   .LexicalEditorTheme__inlineBlock__actions {
     display: flex;
     align-items: center;
-    flex-shrink: 0;
-    margin-left: var(--spacer-2);
 
     & > .btn {
-      width: var(--spacer-3);
-      height: var(--spacer-3);
+      width: (var(--spacer-3));
+      height: (var(--spacer-3));
+      margin: 2px;
 
       &:not(:disabled):hover {
         background: var(--bg-hover);
@@ -80,7 +69,9 @@
   }
 
   .LexicalEditorTheme__inlineBlock__removeButton.btn {
-    margin: 0;
+    padding: 0;
+    margin: 2px;
+    color: var(--icon-secondary);
 
     line {
       stroke-width: var(--stroke-width-small);

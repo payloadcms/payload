@@ -133,232 +133,342 @@ export function getRichTextContent(
   )
 }
 
-export const typographyContent = {
-  root: {
-    type: 'root',
-    format: '',
-    indent: 0,
-    version: 1,
-    children: [
-      {
-        type: 'heading',
-        tag: 'h1',
-        version: 1,
-        direction: 'ltr',
+export function getTypographyContent(formattedUserID?: number | string) {
+  return JSON.parse(
+    JSON.stringify({
+      root: {
+        type: 'root',
         format: '',
         indent: 0,
+        version: 1,
         children: [
           {
-            type: 'text',
+            type: 'heading',
+            tag: 'h1',
             version: 1,
-            text: 'Heading 1',
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            children: [
+              {
+                type: 'text',
+                version: 1,
+                text: 'Heading 1',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+              },
+            ],
+          },
+          {
+            type: 'heading',
+            tag: 'h2',
+            version: 1,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            children: [
+              {
+                type: 'text',
+                version: 1,
+                text: 'Heading 2',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+              },
+            ],
+          },
+          {
+            type: 'heading',
+            tag: 'h3',
+            version: 1,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            children: [
+              {
+                type: 'text',
+                version: 1,
+                text: 'Heading 3',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+              },
+            ],
+          },
+          {
+            type: 'heading',
+            tag: 'h4',
+            version: 1,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            children: [
+              {
+                type: 'text',
+                version: 1,
+                text: 'Heading 4',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+              },
+            ],
+          },
+          {
+            type: 'heading',
+            tag: 'h5',
+            version: 1,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            children: [
+              {
+                type: 'text',
+                version: 1,
+                text: 'Heading 5',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+              },
+            ],
+          },
+          {
+            type: 'heading',
+            tag: 'h6',
+            version: 1,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            children: [
+              {
+                type: 'text',
+                version: 1,
+                text: 'Heading 6',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            version: 1,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            children: [
+              {
+                type: 'text',
+                version: 1,
+                text: 'Precision agriculture technologies allow farmers to monitor and respond to field conditions with unprecedented granularity, reducing waste while improving yields. Smart sensors, drones, and AI are making farming more efficient and sustainable.',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            version: 1,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            children: [
+              {
+                type: 'text',
+                version: 1,
+                text: 'Strikethrough',
+                detail: 0,
+                format: 4,
+                mode: 'normal',
+                style: '',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            version: 1,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            children: [
+              {
+                type: 'text',
+                version: 1,
+                text: 'Super',
+                detail: 0,
+                format: 64,
+                mode: 'normal',
+                style: '',
+              },
+              {
+                type: 'text',
+                version: 1,
+                text: 'script, ',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+              },
+              {
+                type: 'text',
+                version: 1,
+                text: 'Sub',
+                detail: 0,
+                format: 32,
+                mode: 'normal',
+                style: '',
+              },
+              {
+                type: 'text',
+                version: 1,
+                text: 'script',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            version: 1,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            children: [
+              {
+                type: 'text',
+                version: 1,
+                text: 'inline code',
+                detail: 0,
+                format: 16,
+                mode: 'normal',
+                style: '',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            version: 1,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            children: [
+              {
+                type: 'link',
+                version: 3,
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                fields: {
+                  linkType: 'custom',
+                  newTab: false,
+                  url: 'https://figma.com',
+                },
+                children: [
+                  {
+                    type: 'text',
+                    version: 1,
+                    text: 'External link',
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                  },
+                ],
+              },
+            ],
+          },
+          ...(formattedUserID !== undefined
+            ? [
+                {
+                  type: 'paragraph',
+                  version: 1,
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  textFormat: 0,
+                  children: [
+                    {
+                      type: 'link',
+                      version: 3,
+                      direction: 'ltr',
+                      format: '',
+                      indent: 0,
+                      fields: {
+                        linkType: 'internal',
+                        newTab: false,
+                        doc: {
+                          value: '{{USER_ID}}',
+                          relationTo: 'users',
+                        },
+                      },
+                      children: [
+                        {
+                          type: 'text',
+                          version: 1,
+                          text: 'Internal link',
+                          detail: 0,
+                          format: 0,
+                          mode: 'normal',
+                          style: '',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ]
+            : []),
+          {
+            type: 'paragraph',
+            version: 1,
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            children: [
+              {
+                type: 'link',
+                version: 3,
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                fields: {
+                  linkType: 'custom',
+                  newTab: true,
+                  url: 'https://figma.com',
+                },
+                children: [
+                  {
+                    type: 'text',
+                    version: 1,
+                    text: 'External link (new tab)',
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
-      {
-        type: 'heading',
-        tag: 'h2',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        children: [
-          {
-            type: 'text',
-            version: 1,
-            text: 'Heading 2',
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-      },
-      {
-        type: 'heading',
-        tag: 'h3',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        children: [
-          {
-            type: 'text',
-            version: 1,
-            text: 'Heading 3',
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-      },
-      {
-        type: 'heading',
-        tag: 'h4',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        children: [
-          {
-            type: 'text',
-            version: 1,
-            text: 'Heading 4',
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-      },
-      {
-        type: 'heading',
-        tag: 'h5',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        children: [
-          {
-            type: 'text',
-            version: 1,
-            text: 'Heading 5',
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-      },
-      {
-        type: 'heading',
-        tag: 'h6',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        children: [
-          {
-            type: 'text',
-            version: 1,
-            text: 'Heading 6',
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        textFormat: 0,
-        children: [
-          {
-            type: 'text',
-            version: 1,
-            text: 'Precision agriculture technologies allow farmers to monitor and respond to field conditions with unprecedented granularity, reducing waste while improving yields. Smart sensors, drones, and AI are making farming more efficient and sustainable.',
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        textFormat: 0,
-        children: [
-          {
-            type: 'text',
-            version: 1,
-            text: 'Strikethrough',
-            detail: 0,
-            format: 4,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        textFormat: 0,
-        children: [
-          {
-            type: 'text',
-            version: 1,
-            text: 'Super',
-            detail: 0,
-            format: 64,
-            mode: 'normal',
-            style: '',
-          },
-          {
-            type: 'text',
-            version: 1,
-            text: 'script, ',
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-          {
-            type: 'text',
-            version: 1,
-            text: 'Sub',
-            detail: 0,
-            format: 32,
-            mode: 'normal',
-            style: '',
-          },
-          {
-            type: 'text',
-            version: 1,
-            text: 'script',
-            detail: 0,
-            format: 0,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        version: 1,
-        direction: 'ltr',
-        format: '',
-        indent: 0,
-        textFormat: 0,
-        children: [
-          {
-            type: 'text',
-            version: 1,
-            text: 'inline code',
-            detail: 0,
-            format: 16,
-            mode: 'normal',
-            style: '',
-          },
-        ],
-      },
-    ],
-  },
+    }).replace(/"\{\{USER_ID\}\}"/g, formattedUserID !== undefined ? `${formattedUserID}` : '""'),
+  )
 }
 
 const textNode = (text: string) => ({
@@ -393,7 +503,7 @@ const checkListItem = (indent: number, value: number, checked: boolean, children
 })
 
 const nestedList = (
-  listType: 'number' | 'bullet' | 'check',
+  listType: 'bullet' | 'check' | 'number',
   tag: 'ol' | 'ul',
   children: object[],
 ) => ({
@@ -463,21 +573,13 @@ export const listsContent = {
       // Checklist with mixed checked/unchecked states and nested levels
       nestedList('check', 'ul', [
         checkListItem(0, 1, false, [textNode('Lorem')]),
-        checkListItem(0, 2, false, [
+        checkListItem(0, 2, true, [textNode('Ipsum')]),
+        checkListItem(0, 3, false, [
           nestedList('check', 'ul', [
-            checkListItem(1, 1, true, [textNode('Ipsum')]),
-            checkListItem(1, 2, false, [
-              nestedList('check', 'ul', [
-                checkListItem(2, 1, false, [textNode('Dolor')]),
-                checkListItem(2, 2, false, [
-                  nestedList('check', 'ul', [
-                    checkListItem(3, 1, true, [textNode('Sit')]),
-                    checkListItem(3, 2, false, [
-                      nestedList('check', 'ul', [checkListItem(4, 1, true, [textNode('Amet')])]),
-                    ]),
-                  ]),
-                ]),
-              ]),
+            checkListItem(1, 1, false, [textNode('Dolor')]),
+            checkListItem(1, 2, true, [textNode('Sit')]),
+            checkListItem(1, 3, false, [
+              nestedList('check', 'ul', [checkListItem(2, 1, true, [textNode('Amet')])]),
             ]),
           ]),
         ]),

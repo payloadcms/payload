@@ -6,7 +6,7 @@
     color: #fff;
     padding: 0;
     font-size: var(--text-body-medium-font-size);
-    margin: 1px auto 10px auto;
+    margin: 1px auto var(--spacer-2) auto;
     position: relative;
     overflow: hidden;
     border-bottom-left-radius: var(--radius-medium);

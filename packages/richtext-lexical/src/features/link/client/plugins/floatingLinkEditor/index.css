@@ -54,11 +54,19 @@
         font-size: var(--text-body-medium-font-size);
         line-height: var(--text-body-medium-line-height);
         min-width: 0;
+        height: 100%;
 
         &:hover {
           color: var(--text-brand-onbrand);
         }
       }
+    }
+
+    .link-input__divider {
+      width: var(--stroke-width-small);
+      align-self: stretch;
+      background-color: var(--color-white-400);
+      margin-left: var(--spacer-2);
     }
 
     .link-input__label-pure {

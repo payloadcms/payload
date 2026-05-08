@@ -368,14 +368,22 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         <div className="link-input">
           {linkNode?.__fields?.linkType === 'custom' ? <LinkIcon /> : <PageIcon />}
           {linkUrl && linkUrl.length > 0 ? (
-            <a href={linkUrl} rel="noopener noreferrer" target="_blank">
-              {linkNode?.__fields.newTab ? <ExternalLinkIcon size={16} /> : null}
+            <a className="link-input__url" href={linkUrl} rel="noopener noreferrer" target="_blank">
               {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
+              {linkNode?.__fields.newTab ? (
+                <>
+                  <ExternalLinkIcon size={16} /> <div className="link-input__divider" />{' '}
+                </>
+              ) : null}
             </a>
           ) : linkLabel != null && linkLabel.length > 0 ? (
             <>
-              {linkNode?.__fields.newTab ? <ExternalLinkIcon size={16} /> : null}
               <span className="link-input__label-pure">{linkLabel}</span>
+              {linkNode?.__fields.newTab ? (
+                <>
+                  <ExternalLinkIcon size={16} /> <div className="link-input__divider" />{' '}
+                </>
+              ) : null}
             </>
           ) : null}
 

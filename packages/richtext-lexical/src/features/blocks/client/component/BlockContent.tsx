@@ -47,6 +47,16 @@ export type BlockCollapsibleProps = {
    * @default true
    */
   removeButton?: boolean
+  /**
+   * Whether to show the drag handle icon
+   * @default true
+   */
+  showDragHandle?: boolean
+  /**
+   * Whether to show the row number
+   * @default true
+   */
+  showRowNumber?: boolean
 }
 
 export type BlockCollapsibleWithErrorProps = {

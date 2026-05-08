@@ -10,9 +10,9 @@ import { blocksSeedData } from './seed/blocksSeedData.js'
 import {
   codeContent,
   getRichTextContent,
+  getTypographyContent,
   listsContent,
   tableContent,
-  typographyContent,
 } from './seed/richTextData.js'
 import {
   blocksFieldsSlug,
@@ -185,7 +185,7 @@ export const baseConfig: Partial<Config> = {
           title: 'Data harvest \u2013 how AI and sensors are revolutionizing farming',
           content: richTextContent,
           lists: listsContent,
-          typography: typographyContent,
+          typography: getTypographyContent(formattedUserID),
           table: tableContent,
           code: codeContent,
         },

@@ -17,11 +17,18 @@
       }
     }
 
+    &:active {
+      background-color: var(--bg-transparent-pressed);
+    }
+
     .icon {
       width: var(--spacer-3);
-      height: var(--spacer-3);
+      height: var(--spacer-4);
       opacity: 0.3;
       background-image: url(../../../ui/icons/Add/index.svg);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
     }
 
     html[data-theme='dark'] & {

@@ -3,7 +3,7 @@ import type { LexicalEditor } from 'lexical'
 
 import { Tooltip, useTranslation } from '@payloadcms/ui'
 import { $addUpdateTag } from 'lexical'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { ToolbarGroupItem } from '../../types.js'
 
@@ -31,6 +31,12 @@ export const ToolbarButton = ({
   } = useEditorConfigContext()
 
   const [showTooltip, setShowTooltip] = useState(false)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  // Clear pressing state when active prop changes (React has re-rendered)
+  useEffect(() => {
+    buttonRef.current?.removeAttribute('data-pressing')
+  }, [active])
 
   const tooltipLabel = useMemo(() => {
     if (item.label) {
@@ -75,6 +81,8 @@ export const ToolbarButton = ({
     // Thus only happens if you click on the SVG of the button. Clicking on the outside works. Related issue: https://github.com/payloadcms/payload/issues/4025
     // TODO: Find out why exactly it happens and why e.preventDefault() on the mouseDown fixes it. Write that down here, or potentially fix a root cause, if there is any.
     e.preventDefault()
+    // Suppress hover flash between mouseup and React adding .active class
+    ;(e.currentTarget as HTMLElement).setAttribute('data-pressing', '')
   }, [])
 
   return (
@@ -86,7 +94,11 @@ export const ToolbarButton = ({
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       onPointerEnter={() => setShowTooltip(true)}
-      onPointerLeave={() => setShowTooltip(false)}
+      onPointerLeave={() => {
+        setShowTooltip(false)
+        buttonRef.current?.removeAttribute('data-pressing')
+      }}
+      ref={buttonRef}
       type="button"
     >
       <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>

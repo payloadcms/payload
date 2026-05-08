@@ -12,7 +12,10 @@ import {
   Form,
   formatDrawerSlug,
   FormSubmit,
+  MoreIcon,
   Pill,
+  Popup,
+  PopupList,
   RenderFields,
   SectionTitle,
   useConfig,
@@ -22,9 +25,10 @@ import {
   useFormSubmitted,
   useServerFunctions,
   useTranslation,
+  XIcon,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
+import { $getNodeByKey, $getRoot, SKIP_DOM_SELECTION_TAG } from 'lexical'
 import {
   type BlocksFieldClient,
   type ClientBlock,
@@ -446,6 +450,31 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     })
   }, [editor, nodeKey])
 
+  const [rowIndex, setRowIndex] = React.useState<number>(0)
+
+  useEffect(() => {
+    const updateIndex = () => {
+      editor.getEditorState().read(() => {
+        const root = $getRoot()
+        const children = root.getChildren()
+        let blockCount = 0
+        for (const child of children) {
+          if ($isBlockNode(child)) {
+            if (child.getKey() === nodeKey) {
+              setRowIndex(blockCount)
+              return
+            }
+            blockCount++
+          }
+        }
+      })
+    }
+    updateIndex()
+    return editor.registerUpdateListener(() => {
+      updateIndex()
+    })
+  }, [editor, nodeKey])
+
   const blockDisplayName = clientBlock?.labels?.singular
     ? getTranslation(clientBlock.labels.singular, i18n)
     : clientBlock?.slug
@@ -539,10 +568,51 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         Label,
         Pill: CustomPill,
         removeButton,
+        showDragHandle = true,
+        showRowNumber = true,
       }: BlockCollapsibleWithErrorProps) => {
         return (
           <div className={`${baseClass}__container ${baseClass}-${blockType}`}>
             <Collapsible
+              actions={
+                typeof Actions !== 'undefined' ? (
+                  Actions
+                ) : isEditable ? (
+                  <Popup
+                    button={<MoreIcon />}
+                    buttonClassName={`${baseClass}__actions-button`}
+                    caret={false}
+                    horizontalAlign="right"
+                    render={({ close }) => (
+                      <PopupList.ButtonGroup buttonSize="medium">
+                        {((resolvedCustomBlock && editButton !== false) ||
+                          (!resolvedCustomBlock && editButton)) && (
+                          <PopupList.Button
+                            onClick={() => {
+                              toggleDrawer()
+                              close()
+                            }}
+                          >
+                            {t('general:edit')}
+                          </PopupList.Button>
+                        )}
+                        {removeButton !== false && (
+                          <PopupList.Button
+                            onClick={() => {
+                              removeBlock()
+                              close()
+                            }}
+                          >
+                            <XIcon />
+                            {t('general:remove')}
+                          </PopupList.Button>
+                        )}
+                      </PopupList.ButtonGroup>
+                    )}
+                    size="large"
+                  />
+                ) : null
+              }
               className={[
                 `${baseClass}__row`,
                 fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
@@ -551,6 +621,15 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                 .filter(Boolean)
                 .join(' ')}
               collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
+              dragHandleProps={
+                showDragHandle
+                  ? {
+                      id: nodeKey,
+                      attributes: { role: 'button', roleDescription: '', tabIndex: 0 },
+                      listeners: {},
+                    }
+                  : undefined
+              }
               header={
                 <div className={`${baseClass}__block-header`}>
                   {typeof Label !== 'undefined' ? (
@@ -559,6 +638,11 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                     resolvedCustomLabel
                   ) : (
                     <div className={`${baseClass}__block-label`}>
+                      {showRowNumber && (
+                        <span className={`${baseClass}__block-number`}>
+                          {String(rowIndex + 1).padStart(2, '0')}
+                        </span>
+                      )}
                       {typeof CustomPill !== 'undefined' ? (
                         CustomPill
                       ) : (
@@ -579,20 +663,6 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                       )}
                     </div>
                   )}
-
-                  <div className={`${baseClass}__block-actions`}>
-                    {typeof Actions !== 'undefined' ? (
-                      Actions
-                    ) : (
-                      <>
-                        {(resolvedCustomBlock && editButton !== false) ||
-                        (!resolvedCustomBlock && editButton) ? (
-                          <EditButton />
-                        ) : null}
-                        {removeButton !== false && isEditable ? <RemoveButton /> : null}
-                      </>
-                    )}
-                  </div>
                 </div>
               }
               isCollapsed={isCollapsed}
@@ -611,8 +681,6 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     [
       resolvedCustomBlock,
       resolvedCustomLabel,
-      EditButton,
-      RemoveButton,
       blockDisplayName,
       baseClass,
       clientBlock?.admin?.disableBlockName,
@@ -621,6 +689,11 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       isCollapsed,
       onCollapsedChange,
       isEditable,
+      nodeKey,
+      removeBlock,
+      rowIndex,
+      t,
+      toggleDrawer,
     ],
   )
 
