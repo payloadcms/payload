@@ -26,6 +26,7 @@ const SOURCE_MAP: Record<string, Record<string, Migration>> = {
   },
   '@payloadcms/ui/shared': {
     EntityType: { to: 'payload' },
+    formatAdminURL: { to: 'payload/shared' },
     mergeListSearchAndWhere: { to: 'payload/shared' },
   },
 }
