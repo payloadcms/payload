@@ -35,6 +35,22 @@ export const metadata = {
 type RootLayoutProps = {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
+  /**
+   * Custom content to render inside the admin panel's `<head>` element.
+   *
+   * Use this to inject scripts, meta tags, or links — for example, analytics
+   * snippets via `next/script`, custom favicons, or preconnect hints.
+   *
+   * @example
+   * ```tsx
+   * import Script from 'next/script'
+   *
+   * <RootLayout
+   *   head={<Script src="https://example.com/analytics.js" strategy="afterInteractive" />}
+   *   {...rest}
+   * />
+   * ```
+   */
   readonly head?: React.ReactNode
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
