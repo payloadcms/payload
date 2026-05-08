@@ -35,6 +35,7 @@ export const metadata = {
 type RootLayoutProps = {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
+  readonly head?: React.ReactNode
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
@@ -43,6 +44,7 @@ type RootLayoutProps = {
 export const RootLayout = ({
   children,
   config: configPromise,
+  head,
   htmlProps,
   importMap,
   serverFunction,
@@ -52,6 +54,7 @@ export const RootLayout = ({
   const content = (
     <RootLayoutContent
       config={configPromise}
+      head={head}
       htmlProps={htmlProps}
       importMap={importMap}
       serverFunction={serverFunction}
@@ -70,6 +73,7 @@ export const RootLayout = ({
 const RootLayoutContent = async ({
   children,
   config: configPromise,
+  head: headFromProps,
   htmlProps = {},
   importMap,
   serverFunction,
@@ -143,6 +147,7 @@ const RootLayoutContent = async ({
     >
       <head>
         <style>{`@layer payload-default, payload;`}</style>
+        {headFromProps}
       </head>
       <body>
         <RootProvider
