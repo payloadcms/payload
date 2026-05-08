@@ -26,6 +26,7 @@ export type ServerOnlyCollectionProperties = keyof Pick<
   | 'joins'
   | 'polymorphicJoins'
   | 'sanitizedIndexes'
+  | 'select'
 >
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
@@ -82,6 +83,7 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'flattenedFields',
   'indexes',
   'sanitizedIndexes',
+  'select',
   // `upload`
   // `admin`
   // are all handled separately

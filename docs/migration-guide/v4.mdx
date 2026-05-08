@@ -22,6 +22,12 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### List View Select API is now the default
+
+The `admin.enableListViewSelectAPI` Collection Config property has been removed. The List View now always uses the [Select API](../queries/select) to query only the active columns, which was previously opt-in.
+
+If you previously set `admin.enableListViewSelectAPI: true`, remove the property — the behavior is now default. The `migrate-list-view-select-api` transform in `@payloadcms/codemod` handles this automatically.
+
 ### Globals: `admin.components.elements` renamed to `admin.components.edit`
 
 Global configs now use the same `admin.components` shape as Collections. The Edit View slot container is renamed from `elements` to `edit`, the `Description` slot is hoisted to top-level `admin.components.Description`, and `editMenuItems` is now supported.

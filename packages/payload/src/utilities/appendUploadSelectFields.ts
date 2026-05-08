@@ -19,6 +19,10 @@ export const appendUploadSelectFields = ({
   select.mimeType = true
   select.thumbnailURL = true
 
+  if (collectionConfig.upload.cacheTags) {
+    select.updatedAt = true
+  }
+
   if (collectionConfig.upload.imageSizes && collectionConfig.upload.imageSizes.length > 0) {
     if (
       collectionConfig.upload.adminThumbnail &&
