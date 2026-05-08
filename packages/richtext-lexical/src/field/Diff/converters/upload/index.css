@@ -2,7 +2,7 @@
   .lexical-diff {
     .lexical-upload-diff {
       box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-      min-width: calc(var(--base) * 10);
+      min-width: calc(var(--spacer-5) * 6.25);
       max-width: fit-content;
       display: flex;
       align-items: center;
@@ -11,8 +11,8 @@
       border: var(--stroke-width-small) solid var(--border-default);
       position: relative;
       font-family: var(--font-body);
-      margin-block: calc(var(--base) * 0.5);
-      max-height: calc(var(--base) * 3);
+      margin-block: calc(var(--spacer-1) * 2.5);
+      max-height: calc(var(--spacer-4) * 2.5);
       padding: var(--spacer-2-5);
 
       &[data-match-type='create'] {
@@ -71,8 +71,8 @@
     }
 
     .lexical-upload-diff__thumbnail {
-      width: calc(var(--base) * 3 - calc(var(--base) * 0.6) * 2);
-      height: calc(var(--base) * 3 - calc(var(--base) * 0.6) * 2);
+      width: calc(var(--spacer-4) * 1.5);
+      height: calc(var(--spacer-4) * 1.5);
       position: relative;
       overflow: hidden;
       flex-shrink: 0;
@@ -94,7 +94,7 @@
       display: flex;
       align-items: flex-start;
       flex-direction: column;
-      padding: calc(var(--base) * 0.25) calc(var(--base) * 0.75);
+      padding: calc(var(--spacer-1) * 1.25) calc(var(--spacer-2-5) * 1.25);
       justify-content: space-between;
       font-weight: 400;
 

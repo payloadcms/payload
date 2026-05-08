@@ -41,35 +41,35 @@
     }
 
     h1 {
-      padding: calc(var(--base) * 0.7) 0px calc(var(--base) * 0.55);
+      padding: calc(var(--spacer-2) * 1.75) 0px calc(var(--spacer-2) * 1.375);
       line-height: var(--text-heading-large-line-height);
       font-weight: 600;
       font-size: var(--text-heading-large-font-size);
       font-family: var(--font-body);
     }
     h2 {
-      padding: calc(var(--base) * 0.7) 0px calc(var(--base) * 0.5);
+      padding: calc(var(--spacer-2) * 1.75) 0px calc(var(--spacer-1) * 2.5);
       line-height: var(--text-heading-medium-line-height);
       font-weight: 600;
       font-size: var(--text-heading-medium-font-size);
       font-family: var(--font-body);
     }
     h3 {
-      padding: calc(var(--base) * 0.6) 0px calc(var(--base) * 0.45);
+      padding: var(--spacer-2-5) 0px calc(var(--spacer-1) * 2.25);
       line-height: var(--text-heading-small-line-height);
       font-weight: 600;
       font-size: var(--text-heading-small-font-size);
       font-family: var(--font-body);
     }
     h4 {
-      padding: calc(var(--base) * 0.4) 0px calc(var(--base) * 0.35);
+      padding: var(--spacer-2) 0px calc(var(--spacer-1) * 1.75);
       line-height: var(--text-body-large-line-height);
       font-weight: 600;
       font-size: var(--text-body-large-font-size);
       font-family: var(--font-body);
     }
     h5 {
-      padding: calc(var(--base) * 0.3) 0px calc(var(--base) * 0.3);
+      padding: calc(var(--spacer-1) * 1.5) 0px calc(var(--spacer-1) * 1.5);
       line-height: var(--text-body-medium-line-height);
       font-weight: 600;
       font-size: var(--text-body-medium-font-size);
@@ -77,7 +77,7 @@
     }
 
     h6 {
-      padding: calc(var(--base) * 0.55) 0px calc(var(--base) * 0.25);
+      padding: calc(var(--spacer-2) * 1.375) 0px calc(var(--spacer-1) * 1.25);
       line-height: var(--text-body-small-line-height);
       font-weight: 600;
       font-size: var(--text-body-small-font-size);

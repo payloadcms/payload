@@ -9,9 +9,9 @@
     border: var(--stroke-width-small) solid var(--border-default);
     position: relative;
     font-family: var(--font-body);
-    margin-block: calc(var(--base) * 0.5);
-    max-height: calc(var(--base) * 4);
-    padding: calc(var(--base) * 0.25);
+    margin-block: calc(var(--spacer-1) * 2.5);
+    max-height: calc(var(--spacer-5) * 2.5);
+    padding: calc(var(--spacer-1) * 1.25);
 
     &[data-match-type='create'] {
       border-color: var(--diff-create-pill-border);
