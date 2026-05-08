@@ -533,6 +533,37 @@ describe('unflattenObject', () => {
     })
   })
 
+  describe('field-hook key resolution', () => {
+    it('should fire an import hook on a digit-only field name nested inside an array', () => {
+      const fields: FlattenedField[] = [
+        {
+          name: 'archives',
+          type: 'array',
+          flattenedFields: [{ name: '2024', type: 'text' }],
+        } as unknown as FlattenedField,
+      ]
+
+      const importFieldHooks = {
+        archives_2024: {
+          type: 'beforeImport' as const,
+          fn: ({ value }: { value: unknown }) => `transformed-${value as string}`,
+        },
+      }
+
+      const data = { archives_0_2024: 'raw' }
+
+      const result = unflattenObject({
+        data,
+        fields,
+        importFieldHooks,
+        req: mockReq,
+      })
+
+      const archives = result.archives as Array<Record<string, unknown>>
+      expect(archives[0]!['2024']).toBe('transformed-raw')
+    })
+  })
+
   describe('edge cases', () => {
     it('should handle empty data', () => {
       const result = unflattenObject({ data: {}, fields: [], req: mockReq })

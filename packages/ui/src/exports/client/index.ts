@@ -364,6 +364,7 @@ export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/C
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
+export type { DocumentTitleContext } from '../../providers/DocumentTitle/index.js'
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
 export { useUploadControls } from '../../providers/UploadControls/index.js'
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'

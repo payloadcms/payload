@@ -6,7 +6,7 @@ import React from 'react'
 import { Section, Variant } from '../../shared.js'
 
 export const TextareaFieldSection: React.FC = () => (
-  <Section id="textarea-field" selectedComponent="textarea-field" title="Textarea Field">
+  <Section id="textarea-field" selectedComponent="textarea-field" title="Textarea">
     <Variant>
       <TextareaInput label="Default" onChange={() => {}} path="textarea" value="" />
     </Variant>
