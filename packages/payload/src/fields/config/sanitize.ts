@@ -264,20 +264,6 @@ export const sanitizeField = async ({
         }
       })
     }
-
-    if (field.min && !field.minRows) {
-      console.warn(
-        `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
-      )
-      field.minRows = field.min
-    }
-
-    if (field.max && !field.maxRows) {
-      console.warn(
-        `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
-      )
-      field.maxRows = field.max
-    }
   }
 
   // Upload isSortable default
