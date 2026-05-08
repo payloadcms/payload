@@ -356,6 +356,39 @@ describe('General', () => {
     })
   })
 
+  describe('enhanced contrast mode', () => {
+    test('should not have data-enhanced-contrast attribute by default', async () => {
+      await page.goto(postsUrl.admin)
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+      await page.goto(`${postsUrl.admin}/account`)
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+    })
+
+    test('should add data-enhanced-contrast when enabled and persist after reload', async () => {
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-highContrastMode"]').click()
+      await expect(page.locator('#field-highContrastMode')).toBeChecked()
+      await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+
+      await page.reload()
+      await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-highContrastMode"]').click()
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+    })
+
+    test('should not have data-enhanced-contrast attribute after reload when off', async () => {
+      await page.goto(`${postsUrl.admin}/account`)
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+
+      await page.reload()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+    })
+  })
+
   describe('routing', () => {
     test('should 404 not found root pages', async () => {
       const unknownPageURL = formatAdminURL({

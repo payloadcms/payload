@@ -312,6 +312,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     emailAddress: 'E-pasta adrese',
     emptyTrash: 'Iztukšot miskasti',
     emptyTrashLabel: 'Izrakstīt {{label}} atkritumu',
+    enhancedContrastMode: 'Uzlabots kontrasta režīms',
     enterANumber: 'Ievadiet skaitli',
     enterAValue: 'Ievadiet vērtību',
     error: 'Kļūda',

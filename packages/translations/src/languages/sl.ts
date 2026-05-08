@@ -310,6 +310,7 @@ export const slTranslations: DefaultTranslationsObject = {
     emailAddress: 'E-poštni naslov',
     emptyTrash: 'Izprazni koš',
     emptyTrashLabel: 'Izprazni {{label}} smeti',
+    enhancedContrastMode: 'Način izboljšanega kontrasta',
     enterANumber: 'Vnesite številko',
     enterAValue: 'Vnesite vrednost',
     error: 'Napaka',

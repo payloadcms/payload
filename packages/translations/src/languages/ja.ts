@@ -313,6 +313,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     emailAddress: 'メールアドレス',
     emptyTrash: 'ゴミ箱を空にする',
     emptyTrashLabel: '{{label}}のゴミ箱を空にする',
+    enhancedContrastMode: 'コントラスト強調モード',
     enterANumber: '数字を入力してください',
     enterAValue: '値を入力',
     error: 'エラー',

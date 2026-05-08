@@ -311,6 +311,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     emailAddress: 'Аdresa e-pošte',
     emptyTrash: 'Isprazni otpad',
     emptyTrashLabel: 'Isprazni {{label}} korpu za smeće',
+    enhancedContrastMode: 'Režim poboljšanog kontrasta',
     enterANumber: 'Unesite broj',
     enterAValue: 'Unesi vrednost',
     error: 'Greška',

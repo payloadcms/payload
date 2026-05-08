@@ -14,6 +14,7 @@ import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import React from 'react'
 
+import type { HighContrastMode } from '../HighContrast/index.js'
 import type { Theme } from '../Theme/index.js'
 
 import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
@@ -28,6 +29,7 @@ import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
 import { HierarchyProvider } from '../Hierarchy/index.js'
+import { HighContrastProvider } from '../HighContrast/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
@@ -45,6 +47,7 @@ type Props = {
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
   readonly fallbackLang: I18nOptions['fallbackLanguage']
+  readonly highContrastMode: HighContrastMode
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
@@ -62,6 +65,7 @@ export const RootProvider: React.FC<Props> = ({
   config,
   dateFNSKey,
   fallbackLang,
+  highContrastMode,
   isNavOpen,
   languageCode,
   languageOptions,
@@ -107,29 +111,31 @@ export const RootProvider: React.FC<Props> = ({
                           <AuthProvider permissions={permissions} user={user}>
                             <PreferencesProvider>
                               <HierarchyProvider>
-                                <ThemeProvider theme={theme}>
-                                  <ParamsProvider>
-                                    <LocaleProvider locale={locale}>
-                                      <StepNavProvider>
-                                        <LoadingOverlayProvider>
-                                          <DocumentEventsProvider>
-                                            <NavProvider initialIsOpen={isNavOpen}>
-                                              <UploadHandlersProvider>
-                                                <DndContext
-                                                  collisionDetection={pointerWithin}
-                                                  // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                  id={dndContextID}
-                                                >
-                                                  {children}
-                                                </DndContext>
-                                              </UploadHandlersProvider>
-                                            </NavProvider>
-                                          </DocumentEventsProvider>
-                                        </LoadingOverlayProvider>
-                                      </StepNavProvider>
-                                    </LocaleProvider>
-                                  </ParamsProvider>
-                                </ThemeProvider>
+                                <HighContrastProvider highContrastMode={highContrastMode}>
+                                  <ThemeProvider theme={theme}>
+                                    <ParamsProvider>
+                                      <LocaleProvider locale={locale}>
+                                        <StepNavProvider>
+                                          <LoadingOverlayProvider>
+                                            <DocumentEventsProvider>
+                                              <NavProvider initialIsOpen={isNavOpen}>
+                                                <UploadHandlersProvider>
+                                                  <DndContext
+                                                    collisionDetection={pointerWithin}
+                                                    // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                    id={dndContextID}
+                                                  >
+                                                    {children}
+                                                  </DndContext>
+                                                </UploadHandlersProvider>
+                                              </NavProvider>
+                                            </DocumentEventsProvider>
+                                          </LoadingOverlayProvider>
+                                        </StepNavProvider>
+                                      </LocaleProvider>
+                                    </ParamsProvider>
+                                  </ThemeProvider>
+                                </HighContrastProvider>
                               </HierarchyProvider>
                             </PreferencesProvider>
                             <ModalContainer />

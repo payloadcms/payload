@@ -310,6 +310,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     emailAddress: 'Имейл адрес',
     emptyTrash: 'Изпразни кошчето',
     emptyTrashLabel: 'Изпразнете кошчето за {{label}}',
+    enhancedContrastMode: 'Разширен режим на контраст',
     enterANumber: 'Въведете число',
     enterAValue: 'Въведи стойност',
     error: 'Грешка',

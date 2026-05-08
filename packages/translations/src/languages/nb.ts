@@ -312,6 +312,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     emailAddress: 'E-postadresse',
     emptyTrash: 'Tøm søppelkassen',
     emptyTrashLabel: 'Tøm {{label}} søppel',
+    enhancedContrastMode: 'Forbedret kontrastmodus',
     enterANumber: 'Angi et tall',
     enterAValue: 'Skriv inn en verdi',
     error: 'Feil',

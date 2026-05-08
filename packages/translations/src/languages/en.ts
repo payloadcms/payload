@@ -312,6 +312,7 @@ export const enTranslations = {
     emailAddress: 'Email Address',
     emptyTrash: 'Empty trash',
     emptyTrashLabel: 'Empty {{label}} trash',
+    enhancedContrastMode: 'Enhanced Contrast Mode',
     enterANumber: 'Enter a number',
     enterAValue: 'Enter a value',
     error: 'Error',
