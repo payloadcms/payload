@@ -110,3 +110,42 @@ export const PostsCollection: CollectionConfig = {
 ```
 
 Run `npx @payloadcms/codemod --transform remove-hide-api-url` to migrate automatically.
+
+### Deduplicated type and utility re-exports from `@payloadcms/ui` and `@payloadcms/next`
+
+Several types and utilities that were re-exported from `@payloadcms/ui` and `@payloadcms/next/utilities` for backwards compatibility have been removed. The canonical exports live in `payload` (and `payload/shared` for `mergeListSearchAndWhere`); import directly from there.
+
+**Pass-through re-exports** — same name, new source:
+
+| Symbol                        | Old source                   | New source       |
+| ----------------------------- | ---------------------------- | ---------------- |
+| `Column`                      | `@payloadcms/ui`             | `payload`        |
+| `ListViewSlots`               | `@payloadcms/ui`             | `payload`        |
+| `ListViewClientProps`         | `@payloadcms/ui`             | `payload`        |
+| `EntityType`                  | `@payloadcms/ui/shared`      | `payload`        |
+| `mergeListSearchAndWhere`     | `@payloadcms/ui/shared`      | `payload/shared` |
+| `mergeHeaders`                | `@payloadcms/next/utilities` | `payload`        |
+| `headersWithCors`             | `@payloadcms/next/utilities` | `payload`        |
+| `createPayloadRequest`        | `@payloadcms/next/utilities` | `payload`        |
+| `addDataAndFileToRequest`     | `@payloadcms/next/utilities` | `payload`        |
+| `sanitizeLocales`             | `@payloadcms/next/utilities` | `payload`        |
+| `addLocalesToRequestFromData` | `@payloadcms/next/utilities` | `payload`        |
+
+**Renamed types** — use the new canonical name from `payload`:
+
+| Old name                   | New name                |
+| -------------------------- | ----------------------- |
+| `ListPreferences`          | `CollectionPreferences` |
+| `ListComponentClientProps` | `ListViewClientProps`   |
+| `ListComponentServerProps` | `ListViewServerProps`   |
+
+```diff
+- import type { Column, ListViewSlots, ListPreferences } from '@payloadcms/ui'
+- import { mergeListSearchAndWhere } from '@payloadcms/ui/shared'
+- import { headersWithCors, mergeHeaders } from '@payloadcms/next/utilities'
++ import type { Column, ListViewSlots, CollectionPreferences } from 'payload'
++ import { headersWithCors, mergeHeaders } from 'payload'
++ import { mergeListSearchAndWhere } from 'payload/shared'
+```
+
+Run `npx @payloadcms/codemod --transform migrate-deduped-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
