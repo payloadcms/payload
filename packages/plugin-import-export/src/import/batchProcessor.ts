@@ -250,22 +250,19 @@ async function processImportBatch({
             user,
           })
 
-          // Update for other locales
           if (savedDocument && Object.keys(localeUpdates).length > 0) {
             for (const [locale, localeData] of Object.entries(localeUpdates)) {
               try {
-                const localeReq = { ...req, locale }
                 await req.payload.update({
                   id: savedDocument.id as number | string,
                   collection: collectionSlug,
                   data: localeData,
                   draft: collectionHasVersions ? false : undefined,
                   overrideAccess: false,
-                  req: localeReq,
+                  req: { ...req, locale },
                   user,
                 })
               } catch (error) {
-                // Log but don't fail the entire import if a locale update fails
                 req.payload.logger.error({
                   err: error,
                   msg: `Failed to update locale ${locale} for document ${String(savedDocument.id)}`,
@@ -398,24 +395,19 @@ async function processImportBatch({
               user,
             })
 
-            // Update for other locales
             if (savedDocument && Object.keys(localeUpdates).length > 0) {
               for (const [locale, localeData] of Object.entries(localeUpdates)) {
                 try {
-                  // Clone the request with the specific locale
-                  const localeReq = { ...req, locale }
                   await req.payload.update({
                     id: existingDoc.id as number | string,
                     collection: collectionSlug,
                     data: localeData,
                     depth: 0,
-                    // Don't specify draft - this creates a new draft for versioned collections
                     overrideAccess: false,
-                    req: localeReq,
+                    req: { ...req, locale },
                     user,
                   })
                 } catch (error) {
-                  // Log but don't fail the entire import if a locale update fails
                   req.payload.logger.error({
                     err: error,
                     msg: `Failed to update locale ${locale} for document ${String(existingDoc.id)}`,
@@ -511,23 +503,19 @@ async function processImportBatch({
               user,
             })
 
-            // Update for other locales
             if (savedDocument && Object.keys(localeUpdates).length > 0) {
               for (const [locale, localeData] of Object.entries(localeUpdates)) {
                 try {
-                  // Clone the request with the specific locale
-                  const localeReq = { ...req, locale }
                   await req.payload.update({
                     id: savedDocument.id as number | string,
                     collection: collectionSlug,
                     data: localeData,
                     draft: collectionHasVersions ? false : undefined,
                     overrideAccess: false,
-                    req: localeReq,
+                    req: { ...req, locale },
                     user,
                   })
                 } catch (error) {
-                  // Log but don't fail the entire import if a locale update fails
                   req.payload.logger.error({
                     err: error,
                     msg: `Failed to update locale ${locale} for document ${String(savedDocument.id)}`,
@@ -680,18 +668,23 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
         user,
       })
 
-      // Update results
+      let batchImported = 0
+      let batchUpdated = 0
       for (const success of batchResult.successful) {
         if (success.operation === 'created') {
           result.imported++
+          batchImported++
         } else if (success.operation === 'updated') {
           result.updated++
+          batchUpdated++
         } else {
           // Fallback
           if (importMode === 'create') {
             result.imported++
+            batchImported++
           } else {
             result.updated++
+            batchUpdated++
           }
         }
       }
@@ -708,9 +701,9 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
         const batchHookResult: ImportResult = {
           errors:
             batchResult.failed.length > 0 ? result.errors.slice(-batchResult.failed.length) : [],
-          imported: batchResult.successful.filter((s) => s.operation === 'created').length,
+          imported: batchImported,
           total: batchToProcess.length,
-          updated: batchResult.successful.filter((s) => s.operation === 'updated').length,
+          updated: batchUpdated,
         }
         await hooks.after({
           batchNumber,
