@@ -70,7 +70,13 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
           params.append('limit', '250')
 
           const collection = collections.find((c) => c.slug === slug)
+
+          if (!collection) {
+            continue
+          }
+
           const fieldToSelect = collection.admin.useAsTitle ?? 'id'
+
           select[fieldToSelect] = true
 
           if (collection.upload) {
