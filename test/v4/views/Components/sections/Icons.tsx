@@ -65,7 +65,7 @@ const icons = [
 ]
 
 export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selectedComponent }) => (
-  <Section id="icons" selectedComponent={selectedComponent} title="Icons">
+  <Section columns={1} id="icons" selectedComponent={selectedComponent} title="Icons">
     <div className="components-view__icon-grid">
       {/* Chevron - direction + large */}
       <div className="components-view__icon-item components-view__icon-item--variants">

@@ -26,7 +26,7 @@ const StyleRow: React.FC<{
 }> = ({ disabled, size, style }) => (
   <div style={{ alignItems: 'center', display: 'flex', gap: '1rem' }}>
     <Button buttonStyle={style} disabled={disabled} size={size}>
-      Action
+      Click here
     </Button>
     <Button
       buttonStyle={style}
@@ -35,7 +35,7 @@ const StyleRow: React.FC<{
       iconPosition="left"
       size={size}
     >
-      Action
+      Click here
     </Button>
     <Button
       buttonStyle={style}
@@ -44,13 +44,13 @@ const StyleRow: React.FC<{
       iconPosition="right"
       size={size}
     >
-      Action
+      Click here
     </Button>
   </div>
 )
 
 export const ButtonSection: React.FC<{ selectedComponent: string }> = ({ selectedComponent }) => (
-  <Section id="button" selectedComponent={selectedComponent} title="Button">
+  <Section columns={1} id="button" selectedComponent={selectedComponent} title="Button">
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       {styles.map((style) => (
         <div key={style} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -63,7 +63,7 @@ export const ButtonSection: React.FC<{ selectedComponent: string }> = ({ selecte
                   <StyleRow size={size} style={style} />
                   <StyleRow disabled size={size} style={style} />
                   <Button buttonStyle={style} loading size={size}>
-                    Action
+                    Click here
                   </Button>
                 </div>
               </div>
@@ -71,6 +71,43 @@ export const ButtonSection: React.FC<{ selectedComponent: string }> = ({ selecte
           </div>
         </div>
       ))}
+
+      {/* SubMenu (Split Button) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <strong>With SubMenu (Split Button)</strong>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {(['medium', 'large'] as const).map((size) => (
+            <div key={size} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{size}</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
+                {(['primary', 'secondary', 'destructive', 'ghost'] as const).map((style) => (
+                  <Button
+                    buttonStyle={style}
+                    id={`submenu-${style}-${size}`}
+                    key={style}
+                    size={size}
+                    SubMenuPopupContent={({ close }) => (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <Button buttonStyle="ghost" onClick={close} size="medium">
+                          Option 1
+                        </Button>
+                        <Button buttonStyle="ghost" onClick={close} size="medium">
+                          Option 2
+                        </Button>
+                        <Button buttonStyle="ghost" onClick={close} size="medium">
+                          Option 3
+                        </Button>
+                      </div>
+                    )}
+                  >
+                    {style}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   </Section>
 )
