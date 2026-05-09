@@ -1,5 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
+  EntityType,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
@@ -7,14 +8,6 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-
-/**
- * @deprecated Import from `payload` instead
- */
-export enum EntityType {
-  collection = 'collections',
-  global = 'globals',
-}
 
 export type EntityToGroup =
   | {

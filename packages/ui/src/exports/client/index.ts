@@ -184,14 +184,6 @@ export {
   useListRelationships,
 } from '../../elements/Table/RelationshipProvider/index.js'
 export { Table } from '../../elements/Table/index.js'
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import { Column } from 'payload'` instead.
-   */
-  Column,
-} from 'payload'
 export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 export { Thumbnail } from '../../elements/Thumbnail/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
@@ -434,51 +426,6 @@ export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
 export { HierarchyListView } from '../../views/HierarchyList/index.js'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewSlots } from 'payload'` instead.
-   */
-  ListViewSlots,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewClientProps } from 'payload'` instead.
-   */
-  ListViewClientProps,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewClientProps } from 'payload'` instead.
-   */
-  ListViewClientProps as ListComponentClientProps,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewServerProps } from 'payload'` instead.
-   */
-  ListViewServerProps as ListComponentServerProps,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { CollectionPreferences } from 'payload'` instead.
-   */
-  ListPreferences,
-} from 'payload'
 
 export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 
