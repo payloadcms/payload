@@ -1,4 +1,4 @@
-import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { ResourceTemplate } from '@modelcontextprotocol/server'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import path from 'path'
 import { definePlugin } from 'payload'
@@ -20,8 +20,6 @@ import { seed } from './seed/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-export const capturedMcpEvents: unknown[] = []
 
 export default buildConfigWithDefaults({
   endpoints: [
@@ -195,10 +193,6 @@ export default buildConfigWithDefaults({
       mcp: {
         handlerOptions: {
           verboseLogs: true,
-          maxDuration: 60,
-          onEvent: (event: unknown) => {
-            capturedMcpEvents.push(event)
-          },
         },
         serverOptions: {
           serverInfo: {
@@ -241,22 +235,24 @@ export default buildConfigWithDefaults({
                 ],
               })
             },
-            parameters: z.object({
-              sides: z
-                .number()
-                .int()
-                .min(2)
-                .max(1000)
-                .optional()
-                .default(6)
-                .describe('Number of sides on the dice (default: 6)'),
-            }).shape,
+            parameters: z.toJSONSchema(
+              z.object({
+                sides: z
+                  .number()
+                  .int()
+                  .min(2)
+                  .max(1000)
+                  .optional()
+                  .default(6)
+                  .describe('Number of sides on the dice (default: 6)'),
+              }),
+            ),
           },
         ],
         prompts: [
           {
             name: 'echo',
-            argsSchema: { message: z.string() },
+            argsSchema: z.toJSONSchema(z.object({ message: z.string() })),
             description: 'Creates a prompt to process a message',
             title: 'Echo Prompt',
             handler: async ({ message }, req) => {
@@ -387,18 +383,6 @@ export default buildConfigWithDefaults({
       // Experimental MCP tools
       experimental: {
         tools: {
-          collections: {
-            collectionsDirPath: 'test/plugin-mcp/collections',
-            enabled: true,
-          },
-          config: {
-            configFilePath: path.resolve(dirname, 'test/plugin-mcp/config.ts'),
-            enabled: true,
-          },
-          jobs: {
-            enabled: true,
-            jobsDirPath: 'dev/jobs',
-          },
           auth: {
             enabled: true,
           },

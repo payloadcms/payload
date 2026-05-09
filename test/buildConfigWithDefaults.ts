@@ -1,5 +1,6 @@
 import type { Config, SanitizedConfig } from 'payload'
 
+import { mcpPlugin, type MCPPluginConfig } from '@payloadcms/plugin-mcp'
 import {
   AlignFeature,
   BlockquoteFeature,
@@ -171,6 +172,44 @@ export async function buildConfigWithDefaults(
       config.admin = {}
     }
     config.admin.disable = true
+  }
+
+  const hasMcpPlugin = (config.plugins ?? []).some((p) => p.slug === '@payloadcms/plugin-mcp')
+
+  if (!hasMcpPlugin) {
+    // Payload's sanitize step picks the first auth-enabled collection as admin.user when
+    // it's unset, so adding the MCP plugin's API keys collection (auth.useAPIKey) would
+    // otherwise hijack admin.user. Pre-populate a default users collection to keep that
+    // detection stable across suites that don't define one.
+    if (!config.admin.user && !(config.collections ?? []).some(({ auth }) => Boolean(auth))) {
+      config.collections = [
+        ...(config.collections ?? []),
+        {
+          slug: 'users',
+          auth: { tokenExpiration: 7200 },
+          fields: [],
+        },
+      ]
+      config.admin.user = 'users'
+    }
+
+    const userCollectionSlug = config.admin.user ?? 'users'
+    const mcpCollections: NonNullable<MCPPluginConfig['collections']> = {
+      [userCollectionSlug]: { enabled: true },
+    }
+    for (const collection of config.collections ?? []) {
+      mcpCollections[collection.slug] = { enabled: true }
+    }
+
+    const mcpGlobals: NonNullable<MCPPluginConfig['globals']> = {}
+    for (const global of config.globals ?? []) {
+      mcpGlobals[global.slug] = { enabled: true }
+    }
+
+    config.plugins = [
+      ...(config.plugins ?? []),
+      mcpPlugin({ collections: mcpCollections, globals: mcpGlobals }),
+    ]
   }
 
   return await buildConfig(config)

@@ -1,7 +1,7 @@
 {
-  "name": "@payloadcms/plugin-mcp-old",
+  "name": "@payloadcms/plugin-mcp",
   "version": "4.0.0-beta.0",
-  "description": "MCP (Model Context Protocol) capabilities with Payload — pre-rewrite snapshot, kept for diffing only",
+  "description": "MCP (Model Context Protocol) capabilities with Payload",
   "keywords": [
     "plugin",
     "mcp",
@@ -48,11 +48,9 @@
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.27.1",
-    "@types/json-schema": "7.0.15",
-    "json-schema-to-zod": "2.6.1",
-    "mcp-handler": "^1.0.7",
-    "zod": "^3.25.50"
+    "@cfworker/json-schema": "^4.1.1",
+    "@modelcontextprotocol/server": "2.0.0-alpha.2",
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -71,6 +69,10 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
+  },
+  "//deps_notes": {
+    "@cfworker/json-schema": "Should be able to remove in next @modelcontextprotocol/server alpha release. Marked as an optional peer of @modelcontextprotocol/server, but its bundle does an eager top-level `import { Validator } from '@cfworker/json-schema'`, so it must be installed even when only zod-registered tools are used. Drop once upstream lazy-loads the validator. See: https://github.com/modelcontextprotocol/typescript-sdk",
+    "zod": "Internal use only — for the plugin's own tool/prompt schemas. Plugin consumers no longer pass zod schemas; they provide JSON Schema (`MCPInputSchema`) and may bring their own validator (zod 4: `z.toJSONSchema(...)`)."
   },
   "homepage:": "https://payloadcms.com"
 }
