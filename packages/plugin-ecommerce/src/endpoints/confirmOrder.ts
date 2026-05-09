@@ -1,4 +1,11 @@
-import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
+import {
+  addDataAndFileToRequest,
+  type DefaultDocumentIDType,
+  type Endpoint,
+  type Payload,
+  type PayloadRequest,
+} from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 
 import type { CurrenciesConfig, PaymentAdapter, ProductsValidation } from '../types/index.js'
 
@@ -36,6 +43,60 @@ type Args = {
 }
 
 type ConfirmOrderHandler = (args: Args) => Endpoint['handler']
+
+type DecrementInventoryArgs = {
+  collectionSlug: string
+  id: DefaultDocumentIDType
+  payload: Payload
+  quantity: number
+  req: PayloadRequest
+}
+
+async function decrementInventoryForOrder({
+  id,
+  collectionSlug,
+  payload,
+  quantity,
+  req,
+}: DecrementInventoryArgs) {
+  const inventoryUpdate = {
+    inventory: {
+      $inc: quantity * -1,
+    },
+  }
+
+  await payload.db.updateOne({
+    id,
+    collection: collectionSlug,
+    data: inventoryUpdate,
+    req,
+  })
+
+  const collectionConfig = payload.collections[collectionSlug]?.config
+  if (!collectionConfig || !hasDraftsEnabled(collectionConfig)) {
+    return
+  }
+
+  if (payload.db.name !== 'mongoose') {
+    return
+  }
+
+  await payload.db.updateVersion({
+    collection: collectionSlug,
+    req,
+    returning: false,
+    versionData: {
+      version: {
+        inventory: {
+          $inc: quantity * -1,
+        },
+      },
+    },
+    where: {
+      and: [{ latest: { equals: true } }, { parent: { equals: id } }],
+    },
+  })
+}
 
 /**
  * Handles the endpoint for initiating payments. We will handle checking the amount and product and variant prices here before it is sent to the payment provider.
@@ -184,26 +245,22 @@ export const confirmOrderHandler: ConfirmOrderHandler =
             if (item.variant) {
               const id = typeof item.variant === 'object' ? item.variant.id : item.variant
 
-              await payload.db.updateOne({
+              await decrementInventoryForOrder({
                 id,
-                collection: variantsSlug,
-                data: {
-                  inventory: {
-                    $inc: item.quantity * -1,
-                  },
-                },
+                collectionSlug: variantsSlug,
+                payload,
+                quantity: item.quantity,
+                req,
               })
             } else if (item.product) {
               const id = typeof item.product === 'object' ? item.product.id : item.product
 
-              await payload.db.updateOne({
+              await decrementInventoryForOrder({
                 id,
-                collection: productsSlug,
-                data: {
-                  inventory: {
-                    $inc: item.quantity * -1,
-                  },
-                },
+                collectionSlug: productsSlug,
+                payload,
+                quantity: item.quantity,
+                req,
               })
             }
           }
