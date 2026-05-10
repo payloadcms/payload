@@ -51,7 +51,7 @@ import {
   SubmittedContext,
   useDocumentForm,
 } from './context.js'
-import { errorMessages } from './errorMessages.js'
+import { buildPayloadTooLargeMessage, errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
 
@@ -517,7 +517,10 @@ export const Form: React.FC<FormProps> = (props) => {
             return
           }
 
-          const message = errorMessages?.[res.status] || res?.statusText || t('error:unknown')
+          const message =
+            res.status === 413
+              ? buildPayloadTooLargeMessage({ body: formData })
+              : errorMessages?.[res.status] || res?.statusText || t('error:unknown')
 
           errorToast(message)
         }
