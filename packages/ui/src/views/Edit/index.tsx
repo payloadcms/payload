@@ -185,6 +185,7 @@ export function DefaultEditView({
 
   const hasCheckedForStaleDataRef = useRef(false)
   const originalUpdatedAtRef = useRef(data?.updatedAt)
+  const lastServerRefreshRef = useRef<number>(Date.now())
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
   const isLockExpired = Date.now() > lockExpiryTime
@@ -315,6 +316,7 @@ export function DefaultEditView({
       // This allows detecting if another user modifies the document after this save
       originalUpdatedAtRef.current = updatedAt
       hasCheckedForStaleDataRef.current = false
+      lastServerRefreshRef.current = Date.now()
 
       if (context?.incrementVersionCount !== false) {
         incrementVersionCount()
@@ -579,6 +581,36 @@ export function DefaultEditView({
       }
     }
   }, [isInitializing])
+
+  // Fix #14217: Refresh document when user returns to tab after being away
+  // This prevents stale data from being displayed after publish
+  useEffect(() => {
+    if (typeof window === 'undefined' || !id) return
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const timeSinceLastRefresh = Date.now() - lastServerRefreshRef.current
+        if (timeSinceLastRefresh >= 5000) {
+          router.refresh()
+        }
+      }
+    }
+
+    const handleFocus = () => {
+      const timeSinceLastRefresh = Date.now() - lastServerRefreshRef.current
+      if (timeSinceLastRefresh >= 5000) {
+        router.refresh()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [id, router])
 
   const shouldShowDocumentLockedModal =
     documentIsLocked &&
