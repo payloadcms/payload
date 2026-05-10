@@ -1,31 +1,33 @@
 import type { McpServer } from '@modelcontextprotocol/server'
-import type { PayloadRequest, SelectType, TypedUser } from 'payload'
+import type { PayloadRequest, SelectType } from 'payload'
 
 import { fromJsonSchema } from '@modelcontextprotocol/server'
 
-import type { JsonSchemaObject, MCPPluginConfig } from '../../../types.js'
+import type { JsonSchemaObject, MCPAccess, MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import {
-  getGlobalVirtualFieldNames,
+  getCollectionVirtualFieldNames,
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
+import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { prepareCollectionSchema } from '../../../utils/schemaConversion/prepareCollectionSchema.js'
+import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { toolSchemas } from '../schemas.js'
 
-export const updateGlobalTool = (
+export const createDocumentTool = (
   server: McpServer,
   req: PayloadRequest,
-  user: TypedUser,
-  globalSlug: string,
-  globals: MCPPluginConfig['globals'],
+  mcpAccess: MCPAccess,
+  collectionSlug: string,
+  collections: MCPPluginConfig['collections'],
   schema: JsonSchemaObject,
 ) => {
   const tool = async (
     data: string,
-    draft: boolean = false,
     depth: number = 0,
+    draft: boolean,
     locale?: string,
     fallbackLocale?: string,
     select?: string,
@@ -39,7 +41,7 @@ export const updateGlobalTool = (
     const logger = getLogger({ payload })
 
     logger.info(
-      `Updating global: ${globalSlug}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
+      `Creating document in collection: ${collectionSlug}${locale ? ` with locale: ${locale}` : ''}`,
     )
 
     try {
@@ -48,20 +50,17 @@ export const updateGlobalTool = (
       try {
         parsedData = JSON.parse(data)
 
-        const virtualFieldNames = getGlobalVirtualFieldNames(payload.config, globalSlug)
+        // Transform point fields from object format to tuple array
+        parsedData = transformPointDataToPayload(parsedData)
+
+        const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
         parsedData = stripVirtualFields(parsedData, virtualFieldNames)
 
-        logger.info(`Parsed data for ${globalSlug}: ${JSON.stringify(parsedData)}`)
+        logger.info(`Parsed data for ${collectionSlug}: ${JSON.stringify(parsedData)}`)
       } catch (_parseError) {
         logger.error(`Invalid JSON data provided: ${data}`)
-        const response = {
+        return {
           content: [{ type: 'text' as const, text: 'Error: Invalid JSON data provided' }],
-        }
-        return (globals?.[globalSlug]?.overrideResponse?.(response, {}, req) || response) as {
-          content: Array<{
-            text: string
-            type: 'text'
-          }>
         }
       }
 
@@ -70,11 +69,12 @@ export const updateGlobalTool = (
         try {
           selectClause = JSON.parse(select) as SelectType
         } catch (_parseError) {
-          logger.warn(`Invalid select clause JSON for global: ${select}`)
+          logger.warn(`Invalid select clause JSON: ${select}`)
           const response = {
             content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
           }
-          return (globals?.[globalSlug]?.overrideResponse?.(response, {}, req) || response) as {
+          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+            response) as {
             content: Array<{
               text: string
               type: 'text'
@@ -83,34 +83,27 @@ export const updateGlobalTool = (
         }
       }
 
-      const updateOptions: Parameters<typeof payload.updateGlobal>[0] = {
-        slug: globalSlug,
+      // Create the document
+      const result = await payload.create({
+        collection: collectionSlug,
         data: parsedData,
         depth,
         draft,
-        user,
-      }
+        req,
+        ...localAPIDefaults(mcpAccess),
+        ...(locale && { locale }),
+        ...(fallbackLocale && { fallbackLocale }),
+        ...(selectClause && { select: selectClause }),
+      })
 
-      // Add locale parameters if provided
-      if (locale) {
-        updateOptions.locale = locale
-      }
-      if (fallbackLocale) {
-        updateOptions.fallbackLocale = fallbackLocale
-      }
-      if (selectClause) {
-        updateOptions.select = selectClause
-      }
-
-      const result = await payload.updateGlobal(updateOptions)
-
-      logger.info(`Successfully updated global: ${globalSlug}`)
+      logger.info(`Successfully created document in ${collectionSlug} with ID: ${result.id}`)
 
       const response = {
         content: [
           {
             type: 'text' as const,
-            text: `Global "${globalSlug}" updated successfully!
+            text: `Document created successfully in collection "${collectionSlug}"!
+Created document:
 \`\`\`json
 ${JSON.stringify(result)}
 \`\`\``,
@@ -118,7 +111,8 @@ ${JSON.stringify(result)}
         ],
       }
 
-      return (globals?.[globalSlug]?.overrideResponse?.(response, result, req) || response) as {
+      return (collections?.[collectionSlug]?.overrideResponse?.(response, result, req) ||
+        response) as {
         content: Array<{
           text: string
           type: 'text'
@@ -126,18 +120,18 @@ ${JSON.stringify(result)}
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Error updating global ${globalSlug}: ${errorMessage}`)
+      logger.error(`Error creating document in ${collectionSlug}: ${errorMessage}`)
 
       const response = {
         content: [
           {
             type: 'text' as const,
-            text: `Error updating global "${globalSlug}": ${errorMessage}`,
+            text: `Error creating document in collection "${collectionSlug}": ${errorMessage}`,
           },
         ],
       }
 
-      return (globals?.[globalSlug]?.overrideResponse?.(response, {}, req) || response) as {
+      return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) || response) as {
         content: Array<{
           text: string
           type: 'text'
@@ -146,18 +140,24 @@ ${JSON.stringify(result)}
     }
   }
 
-  if (globals?.[globalSlug]?.enabled) {
-    const globalFields = prepareCollectionSchema(schema)
+  {
+    const collectionFields = prepareCollectionSchema(schema)
 
-    // Update is partial — drop the global's `required` so all collection fields are optional.
     const inputSchemaJson: JsonSchemaObject = {
       type: 'object',
       properties: {
-        ...(globalFields.properties ?? {}),
-        depth: { type: 'number', description: 'Optional: Depth of relationships to populate' },
+        ...(collectionFields.properties ?? {}),
+        depth: {
+          type: 'integer',
+          default: 0,
+          description: 'How many levels deep to populate relationships in response',
+          maximum: 10,
+          minimum: 0,
+        },
         draft: {
           type: 'boolean',
-          description: 'Optional: Whether to save as draft (default: false)',
+          default: false,
+          description: 'Whether to create the document as a draft',
         },
         fallbackLocale: {
           type: 'string',
@@ -167,32 +167,33 @@ ${JSON.stringify(result)}
         locale: {
           type: 'string',
           description:
-            'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
+            'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
         },
         select: {
           type: 'string',
           description:
-            'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"siteName": "My Site"}\'',
+            'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
         },
       },
+      ...(collectionFields.required ? { required: collectionFields.required } : {}),
     }
 
     server.registerTool(
-      `update${globalSlug.charAt(0).toUpperCase() + toCamelCase(globalSlug).slice(1)}`,
+      `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       {
-        description: `${toolSchemas.updateGlobal.description.trim()}\n\n${globals?.[globalSlug]?.description || ''}`,
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.createDocument.description.trim()}`,
         inputSchema: fromJsonSchema(inputSchemaJson as Parameters<typeof fromJsonSchema>[0]),
       },
       async (rawParams: unknown) => {
         const params = (rawParams ?? {}) as Record<string, unknown>
-        const { depth, draft, fallbackLocale, locale, select, ...rest } = params
-        const data = JSON.stringify(rest)
+        const { depth, draft, fallbackLocale, locale, select, ...fieldData } = params
+        const data = JSON.stringify(fieldData)
         return await tool(
           data,
-          draft as boolean,
           depth as number,
-          locale as string,
-          fallbackLocale as string,
+          draft as boolean,
+          locale as string | undefined,
+          fallbackLocale as string | undefined,
           select as string | undefined,
         )
       },

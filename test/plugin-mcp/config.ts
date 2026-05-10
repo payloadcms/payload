@@ -119,7 +119,7 @@ export default buildConfigWithDefaults({
       //       data: true,
       //       dataByID: true,
       //     },
-      //   } as MCPAccessSettings
+      //   } as MCPAccess
       // },
       overrideApiKeyCollection: (collection) => {
         collection.fields.push({
@@ -133,34 +133,13 @@ export default buildConfigWithDefaults({
         return collection
       },
       collections: {
-        [Products.slug]: {
-          enabled: true,
-        },
         'field-types': {
-          enabled: {
-            find: true,
-            create: true,
-            update: true,
-            delete: true,
-          },
           description: 'A collection covering all Payload field types for MCP schema testing.',
         },
         pages: {
-          enabled: {
-            find: true,
-            create: true,
-            update: true,
-            delete: true,
-          },
           description: 'Pages with block-based layouts.',
         },
         posts: {
-          enabled: {
-            find: true,
-            create: true,
-            update: true,
-            delete: true,
-          },
           description: 'This is a Payload collection with Post documents.',
           overrideResponse: (response, doc, req) => {
             req.payload.logger.info('[Override MCP response for Posts]:')
@@ -172,21 +151,13 @@ export default buildConfigWithDefaults({
           },
         },
         media: {
-          enabled: {
-            find: true,
-            create: false,
-            update: true,
-            delete: false,
-          },
           description: 'This is a Payload collection with Media documents.',
+          // Test the partial-disable path — find/update remain enabled, create/delete blocked.
+          disabled: { create: true, delete: true },
         },
       },
       globals: {
         'site-settings': {
-          enabled: {
-            find: true,
-            update: true,
-          },
           description: 'Site-wide configuration settings.',
         },
       },

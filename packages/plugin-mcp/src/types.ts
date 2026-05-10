@@ -1,3 +1,4 @@
+import type { McpServer, ResourceTemplate } from '@modelcontextprotocol/server'
 import type {
   CollectionConfig,
   CollectionSlug,
@@ -5,8 +6,6 @@ import type {
   PayloadRequest,
   TypedUser,
 } from 'payload'
-
-import { type ResourceTemplate } from '@modelcontextprotocol/server'
 
 /**
  * A JSON Schema describing tool / prompt input parameters. The plugin no longer
@@ -48,7 +47,19 @@ export type JsonSchemaObject = {
 
 export type MCPPluginConfig = {
   /**
-   * Set the collections that should be available as resources via MCP.
+   * Per-collection MCP overrides. Every collection in your Payload config is exposed
+   * via MCP by default (with all four operations: create / find / update / delete) —
+   * use this map to opt-out specific collections or operations and to attach
+   * descriptions / response overrides.
+   *
+   * @example
+   * ```ts
+   * collections: {
+   *   posts: { description: 'Blog posts' },          // exposed, all ops
+   *   secrets: { disabled: true },                   // not exposed at all
+   *   users: { disabled: { delete: true } },         // delete blocked, others enabled
+   * }
+   * ```
    */
   collections?: Partial<
     Record<
@@ -59,9 +70,10 @@ export type MCPPluginConfig = {
          */
         description?: string
         /**
-         * Set the enabled capabilities of the collection. Admins can then allow or disallow the use of the capability by MCP clients.
+         * Disable the whole collection (`true`) or specific operations. Anything not
+         * listed here remains enabled.
          */
-        enabled:
+        disabled?:
           | {
               create?: boolean
               delete?: boolean
@@ -118,9 +130,10 @@ export type MCPPluginConfig = {
     }
   }
   /**
-   * Set the globals that should be available as resources via MCP.
-   * Globals are singleton configuration objects (e.g., site settings, navigation).
-   * Note: Globals only support find and update operations.
+   * Per-global MCP overrides. Every global in your Payload config is exposed via MCP
+   * by default (with `find` and `update` — globals are singletons, so there's no
+   * create / delete) — use this map to opt-out specific globals or operations and to
+   * attach descriptions / response overrides.
    */
   globals?: Partial<
     Record<
@@ -131,10 +144,10 @@ export type MCPPluginConfig = {
          */
         description?: string
         /**
-         * Set the enabled capabilities of the global. Admins can then allow or disallow the use of the capability by MCP clients.
-         * Note: Globals only support find and update operations as they are singletons.
+         * Disable the whole global (`true`) or specific operations. Anything not
+         * listed here remains enabled.
          */
-        enabled:
+        disabled?:
           | {
               find?: boolean
               update?: boolean
@@ -325,8 +338,8 @@ export type MCPPluginConfig = {
    */
   overrideAuth?: (
     req: PayloadRequest,
-    getDefaultMcpAccessSettings: (overrideApiKey?: null | string) => Promise<MCPAccessSettings>,
-  ) => MCPAccessSettings | Promise<MCPAccessSettings>
+    getDefaultMCPAccess: (overrideApiKey?: null | string) => Promise<MCPAccess>,
+  ) => MCPAccess | Promise<MCPAccess>
 
   /**
    * Set the users collection that API keys should be associated with.
@@ -335,31 +348,22 @@ export type MCPPluginConfig = {
 }
 
 /**
- * MCP Server options.
+ * Configure the arguments passed to the MCPServer constructor.
  */
 export type MCPServerOptions = {
   /**
-   * Optional instructions describing how to use the server and its features.
+   * Server options passed as the second argument to the MCP Server constructor.
+   *
+   * You can use it to pass instructions describing how to use the server and its features.
    */
-  instructions?: string
+  options?: ConstructorParameters<typeof McpServer>[1]
   /**
-   * Set the server info of the MCP server.
+   * Server info passed as the first argument to the MCP Server constructor.
    */
-  serverInfo?: {
-    /**
-     * Set the name of the MCP server.
-     * @default 'Payload MCP Server'
-     */
-    name: string
-    /**
-     * Set the version of the MCP server.
-     * @default '1.0.0'
-     */
-    version: string
-  }
+  serverInfo?: Partial<ConstructorParameters<typeof McpServer>[0]>
 }
 
-export type MCPAccessSettings = {
+export type MCPAccess = {
   auth?: {
     auth?: boolean
     forgotPassword?: boolean
@@ -379,7 +383,7 @@ export type MCPAccessSettings = {
   /**
    * The user associated with the API key, passed to local API calls
    */
-  user: TypedUser
+  user: null | TypedUser
 } & Record<string, unknown>
 
 export type EntityConfig = MCPPluginConfig['collections'] | MCPPluginConfig['globals']

@@ -553,16 +553,16 @@ mcpPlugin({
 You can create an MCP access strategy using the `overrideAuth` option:
 
 ```ts
-import { type MCPAccessSettings, mcpPlugin } from '@payloadcms/plugin-mcp'
+import { type MCPAccess, mcpPlugin } from '@payloadcms/plugin-mcp'
 
 // ... other config
 
 mcpPlugin({
-  overrideAuth: (req, getDefaultMcpAccessSettings) => {
+  overrideAuth: (req, getDefaultMCPAccess) => {
     const { payload } = req
 
-    // This will return the default MCPAccessSettings
-    // getDefaultMcpAccessSettings()
+    // This will return the default MCPAccess
+    // getDefaultMCPAccess()
 
     payload.logger.info('Custom access Settings for all MCP traffic')
     return {
@@ -572,14 +572,14 @@ mcpPlugin({
       products: {
         find: true,
       },
-    } as MCPAccessSettings
+    } as MCPAccess
   },
   // ... other options
 })
 ```
 
-If you want the default `MCPAccessSettings`, you can use the additional argument `getDefaultMcpAccessSettings`.
-This will use the Bearer token found in the headers on the req to return the `MCPAccessSettings` related to the user assigned to the API key.
+If you want the default `MCPAccess`, you can use the additional argument `getDefaultMCPAccess`.
+This will use the Bearer token found in the headers on the req to return the `MCPAccess` related to the user assigned to the API key.
 
 ## Hooks
 

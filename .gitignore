@@ -53,7 +53,6 @@ test/media
 *payloadtests.db-journal
 *payloadtests.db-shm
 *payloadtests.db-wal
-*payload.db
 /versions
 no-restrict-file-*
 
@@ -362,6 +361,7 @@ licenses.csv
 
 # SQLite DB
 payload.db
+test/payload.db
 
 # Screenshots created by Playwright MCP
 .playwright-mcp

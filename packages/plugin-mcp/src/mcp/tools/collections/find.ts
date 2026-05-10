@@ -1,17 +1,18 @@
 import type { McpServer } from '@modelcontextprotocol/server'
-import type { PayloadRequest, SelectType, TypedUser } from 'payload'
+import type { PayloadRequest, SelectType } from 'payload'
 
-import type { MCPPluginConfig } from '../../../types.js'
+import type { MCPAccess, MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import { getLogger } from '../../../utils/getLogger.js'
+import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { zodToInputSchema } from '../../helpers/zodToInputSchema.js'
 import { toolSchemas } from '../schemas.js'
 
-export const findResourceTool = (
+export const findDocumentTool = (
   server: McpServer,
   req: PayloadRequest,
-  user: TypedUser,
+  mcpAccess: MCPAccess,
   collectionSlug: string,
   collections: MCPPluginConfig['collections'],
 ) => {
@@ -36,7 +37,7 @@ export const findResourceTool = (
     const logger = getLogger({ payload })
 
     logger.info(
-      `Reading resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}${locale ? `, locale: ${locale}` : ''}`,
+      `Reading document from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}${locale ? `, locale: ${locale}` : ''}`,
     )
 
     try {
@@ -89,9 +90,8 @@ export const findResourceTool = (
             collection: collectionSlug,
             depth,
             ...(selectClause && { select: selectClause }),
-            overrideAccess: false,
             req,
-            user,
+            ...localAPIDefaults(mcpAccess),
             ...(locale && { locale }),
             ...(fallbackLocale && { fallbackLocale }),
             ...(draft !== undefined && { draft }),
@@ -103,7 +103,7 @@ export const findResourceTool = (
             content: [
               {
                 type: 'text' as const,
-                text: `Resource from collection "${collectionSlug}":
+                text: `Document from collection "${collectionSlug}":
 ${JSON.stringify(doc)}`,
               },
             ],
@@ -141,10 +141,9 @@ ${JSON.stringify(doc)}`,
         collection: collectionSlug,
         depth,
         limit,
-        overrideAccess: false,
         page,
         req,
-        user,
+        ...localAPIDefaults(mcpAccess),
         ...(selectClause && { select: selectClause }),
         ...(locale && { locale }),
         ...(fallbackLocale && { fallbackLocale }),
@@ -190,12 +189,12 @@ Page: ${result.page} of ${result.totalPages}
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Error reading resources from collection ${collectionSlug}: ${errorMessage}`)
+      logger.error(`Error reading documents from collection ${collectionSlug}: ${errorMessage}`)
       const response = {
         content: [
           {
             type: 'text' as const,
-            text: `❌ **Error reading resources from collection "${collectionSlug}":** ${errorMessage}`,
+            text: `❌ **Error reading documents from collection "${collectionSlug}":** ${errorMessage}`,
           },
         ],
       }
@@ -208,12 +207,12 @@ Page: ${result.page} of ${result.totalPages}
     }
   }
 
-  if (collections?.[collectionSlug]?.enabled) {
+  {
     server.registerTool(
       `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       {
-        description: `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
-        inputSchema: zodToInputSchema(toolSchemas.findResources.parameters),
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.findDocuments.description.trim()}`,
+        inputSchema: zodToInputSchema(toolSchemas.findDocuments.parameters),
       },
       async ({
         id,

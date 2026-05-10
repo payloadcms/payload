@@ -1,9 +1,9 @@
 import type { McpServer } from '@modelcontextprotocol/server'
-import type { PayloadRequest, SelectType, TypedUser } from 'payload'
+import type { PayloadRequest, SelectType } from 'payload'
 
 import { fromJsonSchema } from '@modelcontextprotocol/server'
 
-import type { JsonSchemaObject, MCPPluginConfig } from '../../../types.js'
+import type { JsonSchemaObject, MCPAccess, MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import { getLogger } from '../../../utils/getLogger.js'
@@ -11,13 +11,14 @@ import {
   getCollectionVirtualFieldNames,
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
+import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { prepareCollectionSchema } from '../../../utils/schemaConversion/prepareCollectionSchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { toolSchemas } from '../schemas.js'
-export const updateResourceTool = (
+export const updateDocumentTool = (
   server: McpServer,
   req: PayloadRequest,
-  user: TypedUser,
+  mcpAccess: MCPAccess,
   collectionSlug: string,
   collections: MCPPluginConfig['collections'],
   schema: JsonSchemaObject,
@@ -44,7 +45,7 @@ export const updateResourceTool = (
     const logger = getLogger({ payload })
 
     logger.info(
-      `Updating resource in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
+      `Updating document in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
     )
 
     try {
@@ -140,10 +141,9 @@ export const updateResourceTool = (
           data: parsedData,
           depth,
           draft,
-          overrideAccess: false,
           overrideLock,
           req,
-          user,
+          ...localAPIDefaults(mcpAccess),
           ...(filePath && { filePath }),
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
           ...(locale && { locale }),
@@ -186,10 +186,9 @@ ${JSON.stringify(result)}
           data: parsedData,
           depth,
           draft,
-          overrideAccess: false,
           overrideLock,
           req,
-          user,
+          ...localAPIDefaults(mcpAccess),
           where: whereClause,
           ...(filePath && { filePath }),
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
@@ -251,13 +250,13 @@ ${JSON.stringify(errors)}
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Error updating resource in ${collectionSlug}: ${errorMessage}`)
+      logger.error(`Error updating document in ${collectionSlug}: ${errorMessage}`)
 
       const response = {
         content: [
           {
             type: 'text' as const,
-            text: `Error updating resource in collection "${collectionSlug}": ${errorMessage}`,
+            text: `Error updating document in collection "${collectionSlug}": ${errorMessage}`,
           },
         ],
       }
@@ -271,7 +270,7 @@ ${JSON.stringify(errors)}
     }
   }
 
-  if (collections?.[collectionSlug]?.enabled) {
+  {
     const collectionFields = prepareCollectionSchema(schema)
 
     // Update is a partial update — all collection fields are optional, no `required`.
@@ -329,7 +328,7 @@ ${JSON.stringify(errors)}
     server.registerTool(
       `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       {
-        description: `${collections?.[collectionSlug]?.description || toolSchemas.updateResource.description.trim()}`,
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.updateDocument.description.trim()}`,
         inputSchema: fromJsonSchema(inputSchemaJson as Parameters<typeof fromJsonSchema>[0]),
       },
       async (rawParams: unknown) => {

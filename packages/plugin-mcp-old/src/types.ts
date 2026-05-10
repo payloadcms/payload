@@ -324,8 +324,8 @@ export type MCPPluginConfig = {
    */
   overrideAuth?: (
     req: PayloadRequest,
-    getDefaultMcpAccessSettings: (overrideApiKey?: null | string) => Promise<MCPAccessSettings>,
-  ) => MCPAccessSettings | Promise<MCPAccessSettings>
+    getDefaultMCPAccess: (overrideApiKey?: null | string) => Promise<MCPAccess>,
+  ) => MCPAccess | Promise<MCPAccess>
 
   /**
    * Set the users collection that API keys should be associated with.
@@ -394,7 +394,7 @@ export type MCPServerOptions = {
   }
 }
 
-export type MCPAccessSettings = {
+export type MCPAccess = {
   auth?: {
     auth?: boolean
     forgotPassword?: boolean

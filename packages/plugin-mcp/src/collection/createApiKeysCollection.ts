@@ -1,61 +1,20 @@
-import type { CollectionConfig, CollectionSlug } from 'payload'
+import type { CollectionConfig, Field, GlobalConfig } from 'payload'
 
 import type { MCPPluginConfig } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
-import { createApiKeyFields } from '../utils/createApiKeyFields.js'
+import { createApiKeyFields } from './createApiKeyFields.js'
 
-export const createAPIKeysCollection = (
-  collections: MCPPluginConfig['collections'],
-  globals: MCPPluginConfig['globals'],
-  customTools: Array<{ description: string; name: string }> = [],
-  experimentalTools: NonNullable<MCPPluginConfig['experimental']>['tools'] = {},
-  pluginOptions: MCPPluginConfig,
-): CollectionConfig => {
-  const customToolsFields = customTools.map((tool) => {
-    const camelCasedName = toCamelCase(tool.name)
-    return {
-      name: camelCasedName,
-      type: 'checkbox' as const,
-      admin: {
-        description: tool.description,
-      },
-      defaultValue: true,
-      label: camelCasedName,
-    }
-  })
-
-  const customResourceFields =
-    pluginOptions.mcp?.resources?.map((resource) => {
-      const camelCasedName = toCamelCase(resource.name)
-      return {
-        name: camelCasedName,
-        type: 'checkbox' as const,
-        admin: {
-          description: resource.description,
-        },
-        defaultValue: true,
-        label: camelCasedName,
-      }
-    }) || []
-
-  const customPromptFields =
-    pluginOptions.mcp?.prompts?.map((prompt) => {
-      const camelCasedName = toCamelCase(prompt.name)
-      return {
-        name: camelCasedName,
-        type: 'checkbox' as const,
-        admin: {
-          description: prompt.description,
-        },
-        defaultValue: true,
-        label: camelCasedName,
-      }
-    }) || []
-
-  const userCollection = pluginOptions.userCollection
-
-  return {
+export const createAPIKeysCollection = ({
+  payloadCollections,
+  payloadGlobals,
+  pluginConfig,
+}: {
+  payloadCollections: CollectionConfig[] | undefined
+  payloadGlobals: GlobalConfig[] | undefined
+  pluginConfig: MCPPluginConfig
+}): CollectionConfig => {
+  const collection: CollectionConfig = {
     slug: 'payload-mcp-api-keys',
     admin: {
       description:
@@ -74,7 +33,7 @@ export const createAPIKeysCollection = (
         admin: {
           description: 'The user that the API key is associated with.',
         },
-        relationTo: userCollection as CollectionSlug,
+        relationTo: pluginConfig.userCollection!,
         required: true,
       },
       {
@@ -93,97 +52,132 @@ export const createAPIKeysCollection = (
       },
 
       ...createApiKeyFields({
-        config: collections,
         configType: 'collection',
+        payloadEntities: payloadCollections,
+        pluginConfig,
       }),
 
       ...createApiKeyFields({
-        config: globals,
         configType: 'global',
+        payloadEntities: payloadGlobals,
+        pluginConfig,
       }),
 
-      ...(customTools.length > 0
-        ? [
+      ...(pluginConfig.mcp?.tools?.length
+        ? ([
             {
-              type: 'collapsible' as const,
+              type: 'collapsible',
               admin: {
                 description: 'Manage client access to tools',
-                position: 'sidebar' as const,
+                position: 'sidebar',
               },
               fields: [
                 {
                   name: 'payload-mcp-tool',
-                  type: 'group' as const,
-                  fields: customToolsFields,
-                  label: false as const,
+                  type: 'group',
+                  fields: pluginConfig.mcp.tools.map((tool) => {
+                    const camelCasedName = toCamelCase(tool.name)
+                    return {
+                      name: camelCasedName,
+                      type: 'checkbox',
+                      admin: {
+                        description: tool.description,
+                      },
+                      defaultValue: true,
+                      label: camelCasedName,
+                    }
+                  }),
+                  label: false,
                 },
               ],
               label: 'Tools',
             },
-          ]
+          ] satisfies Field[])
         : []),
 
-      ...(pluginOptions.mcp?.resources && pluginOptions.mcp?.resources.length > 0
-        ? [
+      ...(pluginConfig.mcp?.resources?.length
+        ? ([
             {
-              type: 'collapsible' as const,
+              type: 'collapsible',
               admin: {
                 description: 'Manage client access to resources',
-                position: 'sidebar' as const,
+                position: 'sidebar',
               },
               fields: [
                 {
                   name: 'payload-mcp-resource',
-                  type: 'group' as const,
-                  fields: customResourceFields,
-                  label: false as const,
+                  type: 'group',
+                  fields: pluginConfig.mcp.resources.map((resource) => {
+                    const camelCasedName = toCamelCase(resource.name)
+                    return {
+                      name: camelCasedName,
+                      type: 'checkbox',
+                      admin: {
+                        description: resource.description,
+                      },
+                      defaultValue: true,
+                      label: camelCasedName,
+                    }
+                  }),
+                  label: false,
                 },
               ],
               label: 'Resources',
             },
-          ]
+          ] satisfies Field[])
         : []),
 
-      ...(pluginOptions.mcp?.prompts && pluginOptions.mcp?.prompts.length > 0
-        ? [
+      ...(pluginConfig.mcp?.prompts?.length
+        ? ([
             {
-              type: 'collapsible' as const,
+              type: 'collapsible',
               admin: {
                 description: 'Manage client access to prompts',
-                position: 'sidebar' as const,
+                position: 'sidebar',
               },
               fields: [
                 {
                   name: 'payload-mcp-prompt',
-                  type: 'group' as const,
-                  fields: customPromptFields,
-                  label: false as const,
+                  type: 'group',
+                  fields: pluginConfig.mcp.prompts.map((prompt) => {
+                    const camelCasedName = toCamelCase(prompt.name)
+                    return {
+                      name: camelCasedName,
+                      type: 'checkbox',
+                      admin: {
+                        description: prompt.description,
+                      },
+                      defaultValue: true,
+                      label: camelCasedName,
+                    }
+                  }),
+                  label: false,
                 },
               ],
               label: 'Prompts',
             },
-          ]
+          ] satisfies Field[])
         : []),
 
       // Experimental Tools
-      ...(process.env.NODE_ENV === 'development' && experimentalTools?.auth?.enabled
-        ? [
+      ...(process.env.NODE_ENV === 'development' && pluginConfig?.experimental?.tools?.auth?.enabled
+        ? ([
             {
-              type: 'collapsible' as const,
+              type: 'collapsible',
               admin: {
                 description: 'Manage client access to experimental tools',
-                position: 'sidebar' as const,
+                position: 'sidebar',
               },
               fields: [
-                ...(experimentalTools?.auth?.enabled
-                  ? [
+                ...(pluginConfig?.experimental?.tools?.auth?.enabled
+                  ? ([
                       {
                         name: 'auth',
-                        type: 'group' as const,
+                        type: 'group',
                         fields: [
                           {
                             name: 'auth',
-                            type: 'checkbox' as const,
+                            type: 'checkbox',
                             admin: {
                               description:
                                 'Allow LLMs to check authentication status for a user by setting custom headers. (e.g. {"Authorization": "Bearer <token>"})',
@@ -193,7 +187,7 @@ export const createAPIKeysCollection = (
                           },
                           {
                             name: 'login',
-                            type: 'checkbox' as const,
+                            type: 'checkbox',
                             admin: {
                               description:
                                 'Allow LLMs to authenticate a user with email and password.',
@@ -203,7 +197,7 @@ export const createAPIKeysCollection = (
                           },
                           {
                             name: 'verify',
-                            type: 'checkbox' as const,
+                            type: 'checkbox',
                             admin: {
                               description:
                                 'Allow LLMs to verify a user email with a verification token.',
@@ -213,7 +207,7 @@ export const createAPIKeysCollection = (
                           },
                           {
                             name: 'resetPassword',
-                            type: 'checkbox' as const,
+                            type: 'checkbox',
                             admin: {
                               description:
                                 'Allow LLMs to reset a user password with a reset token.',
@@ -223,7 +217,7 @@ export const createAPIKeysCollection = (
                           },
                           {
                             name: 'forgotPassword',
-                            type: 'checkbox' as const,
+                            type: 'checkbox',
                             admin: {
                               description: 'Allow LLMs to send a password reset email to a user.',
                             },
@@ -232,7 +226,7 @@ export const createAPIKeysCollection = (
                           },
                           {
                             name: 'unlock',
-                            type: 'checkbox' as const,
+                            type: 'checkbox',
                             admin: {
                               description:
                                 'Allow LLMs to unlock a user account that has been locked due to failed login attempts.',
@@ -242,12 +236,12 @@ export const createAPIKeysCollection = (
                           },
                         ],
                       },
-                    ]
+                    ] satisfies Field[])
                   : []),
               ],
               label: 'Experimental Tools',
             },
-          ]
+          ] satisfies Field[])
         : []),
     ],
     labels: {
@@ -255,4 +249,8 @@ export const createAPIKeysCollection = (
       singular: 'API Key',
     },
   }
+
+  return pluginConfig.overrideApiKeyCollection
+    ? pluginConfig.overrideApiKeyCollection(collection)
+    : collection
 }

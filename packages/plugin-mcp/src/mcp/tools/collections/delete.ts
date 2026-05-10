@@ -1,17 +1,18 @@
 import type { McpServer } from '@modelcontextprotocol/server'
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest } from 'payload'
 
-import type { MCPPluginConfig } from '../../../types.js'
+import type { MCPAccess, MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import { getLogger } from '../../../utils/getLogger.js'
+import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { zodToInputSchema } from '../../helpers/zodToInputSchema.js'
 import { toolSchemas } from '../schemas.js'
 
-export const deleteResourceTool = (
+export const deleteDocumentTool = (
   server: McpServer,
   req: PayloadRequest,
-  user: TypedUser,
+  mcpAccess: MCPAccess,
   collectionSlug: string,
   collections: MCPPluginConfig['collections'],
 ) => {
@@ -31,7 +32,7 @@ export const deleteResourceTool = (
     const logger = getLogger({ payload })
 
     logger.info(
-      `Deleting resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}${locale ? `, locale: ${locale}` : ''}`,
+      `Deleting document from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}${locale ? `, locale: ${locale}` : ''}`,
     )
 
     try {
@@ -77,9 +78,8 @@ export const deleteResourceTool = (
       const deleteOptions: Record<string, unknown> = {
         collection: collectionSlug,
         depth,
-        overrideAccess: false,
         req,
-        user,
+        ...localAPIDefaults(mcpAccess),
         ...(locale && { locale }),
         ...(fallbackLocale && { fallbackLocale }),
       }
@@ -169,13 +169,13 @@ ${JSON.stringify(errors)}
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Error deleting resource from ${collectionSlug}: ${errorMessage}`)
+      logger.error(`Error deleting document from ${collectionSlug}: ${errorMessage}`)
 
       const response = {
         content: [
           {
             type: 'text' as const,
-            text: `Error deleting resource from collection "${collectionSlug}": ${errorMessage}`,
+            text: `Error deleting document from collection "${collectionSlug}": ${errorMessage}`,
           },
         ],
       }
@@ -189,12 +189,12 @@ ${JSON.stringify(errors)}
     }
   }
 
-  if (collections?.[collectionSlug]?.enabled) {
+  {
     server.registerTool(
       `delete${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       {
-        description: `${collections?.[collectionSlug]?.description || toolSchemas.deleteResource.description.trim()}`,
-        inputSchema: zodToInputSchema(toolSchemas.deleteResource.parameters),
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.deleteDocument.description.trim()}`,
+        inputSchema: zodToInputSchema(toolSchemas.deleteDocument.parameters),
       },
       async ({ id, depth, fallbackLocale, locale, where }: any) => {
         return await tool(id, where, depth, locale, fallbackLocale)

@@ -1,8 +1,8 @@
 import { definePlugin } from 'payload'
 
-import type { MCPAccessSettings, MCPPluginConfig } from './types.js'
+import type { MCPAccess, MCPPluginConfig } from './types.js'
 
-import { createAPIKeysCollection } from './collections/createApiKeysCollection.js'
+import { createAPIKeysCollection } from './collection/createApiKeysCollection.js'
 import { mcpEndpoint } from './endpoints/mcp.js'
 
 declare module 'payload' {
@@ -14,90 +14,57 @@ declare module 'payload' {
   }
 }
 
-import { defaults } from './defaults.js'
-
-export type { MCPAccessSettings, MCPPluginConfig }
+export type { MCPAccess, MCPPluginConfig }
 
 /**
- * The MCP Plugin for Payload. This plugin allows you to add MCP capabilities to your Payload project.
- *
- * @param pluginOptions - The options for the MCP plugin.
+ * The MCP Plugin for Payload.
  */
 export const mcpPlugin = definePlugin<MCPPluginConfig>({
   slug: '@payloadcms/plugin-mcp',
   order: 10,
-  plugin: ({ config, plugins: _plugins, ...pluginOptions }) => {
-    if (!config.collections) {
-      config.collections = []
-    }
-
-    // Collections
-    const collections = pluginOptions.collections || {}
-    // Globals
-    const globals = pluginOptions.globals || {}
-    // Extract custom tools for the global config
-    const customTools =
-      pluginOptions.mcp?.tools?.map((tool) => ({
-        name: tool.name,
-        description: tool.description,
-      })) || []
-
-    // User Collection
-    pluginOptions.userCollection =
-      pluginOptions.userCollection ?? config?.admin?.user ?? defaults.userCollection
-
-    const experimentalTools = pluginOptions?.experimental?.tools || {}
+  plugin: ({ config, plugins: _plugins, ...pluginConfig }) => {
+    pluginConfig.userCollection = pluginConfig.userCollection ?? config?.admin?.user ?? 'users'
 
     /**
      * API Keys
      * --------
-     * High resolution control over MCP capabilities is crucial when using Payload with LLMs.
-     *
-     * This API Keys collection has ways for admins to create API keys and allow or disallow the MCP capabilities.
-     * This is useful when Admins want to allow or disallow the use of the MCP capabilities in real time.
-     * For example:
-     *  - If a collection has all of its capabilities enabled, admins can allow or disallow the create, update, delete, and find capabilities on that collection.
-     *  - If a collection only has the find capability enabled, admins can only allow or disallow the find capability on that collection.
-     *  - If a global has all of its capabilities enabled, admins can allow or disallow the find and update capabilities on that global.
-     *  - If a custom tool has gone haywire, admins can disallow that tool.
-     *
+     * Every collection / global in the Payload config is exposed via MCP by default.
+     * The API key collection generates a checkbox group for each one so admins can
+     * uncheck individual operations to restrict a specific key. The plugin's own
+     * `payload-mcp-api-keys` collection is hard-excluded
      */
-    const apiKeyCollection = createAPIKeysCollection(
-      collections,
-      globals,
-      customTools,
-      experimentalTools,
-      pluginOptions,
+    ;(config.collections ??= []).push(
+      createAPIKeysCollection({
+        payloadCollections: config.collections,
+        payloadGlobals: config.globals,
+        pluginConfig,
+      }),
     )
-    if (pluginOptions.overrideApiKeyCollection) {
-      config.collections.push(pluginOptions.overrideApiKeyCollection(apiKeyCollection))
-    } else {
-      config.collections.push(apiKeyCollection)
-    }
 
     /**
-     * If the plugin is disabled, we still want to keep added collections/fields so the database schema is consistent which is important for migrations.
-     * If your plugin heavily modifies the database schema, you may want to remove this property.
+     * If the plugin is disabled, we still want to keep added collections,
+     * to ensure that generated types and the database schema do not drift
+     * between environments where the plugin is enabled and disabled.
      */
-    if (pluginOptions.disabled) {
+    if (pluginConfig.disabled) {
       return config
     }
 
-    if (!config.endpoints) {
-      config.endpoints = []
+    return {
+      ...config,
+      endpoints: [
+        ...(config.endpoints ?? []),
+        /**
+         * This is the primary MCP Server Endpoint.
+         * Payload will automatically add the /api prefix,
+         * so the full path is `/api/mcp`
+         */
+        {
+          handler: mcpEndpoint,
+          method: 'post',
+          path: '/mcp',
+        },
+      ],
     }
-
-    /**
-     * This is the primary MCP Server Endpoint.
-     * Payload will automatically add the /api prefix to the path, so the full path is `/api/mcp`
-     * NOTE: This is only transport method until we add full support for SSE which will be another endpoint at `/api/sse`
-     */
-    config.endpoints.push({
-      handler: mcpEndpoint,
-      method: 'post',
-      path: '/mcp',
-    })
-
-    return config
   },
 })

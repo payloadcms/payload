@@ -1,17 +1,18 @@
 import type { McpServer } from '@modelcontextprotocol/server'
-import type { PayloadRequest, SelectType, TypedUser } from 'payload'
+import type { PayloadRequest, SelectType } from 'payload'
 
-import type { MCPPluginConfig } from '../../../types.js'
+import type { MCPAccess, MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import { getLogger } from '../../../utils/getLogger.js'
+import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { zodToInputSchema } from '../../helpers/zodToInputSchema.js'
 import { toolSchemas } from '../schemas.js'
 
 export const findGlobalTool = (
   server: McpServer,
   req: PayloadRequest,
-  user: TypedUser,
+  mcpAccess: MCPAccess,
   globalSlug: string,
   globals: MCPPluginConfig['globals'],
 ) => {
@@ -37,7 +38,7 @@ export const findGlobalTool = (
       const findOptions: Parameters<typeof payload.findGlobal>[0] = {
         slug: globalSlug,
         depth,
-        user,
+        ...localAPIDefaults(mcpAccess),
       }
 
       let selectClause: SelectType | undefined
@@ -111,7 +112,7 @@ ${JSON.stringify(result)}
     }
   }
 
-  if (globals?.[globalSlug]?.enabled) {
+  {
     server.registerTool(
       `find${globalSlug.charAt(0).toUpperCase() + toCamelCase(globalSlug).slice(1)}`,
       {

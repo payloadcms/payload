@@ -31,7 +31,7 @@ export const toolSchemas = {
     }),
   },
 
-  findResources: {
+  findDocuments: {
     description: 'Find documents in a collection by ID or where clause using Find or FindByID.',
     parameters: z.object({
       id: z
@@ -98,7 +98,7 @@ export const toolSchemas = {
     }),
   },
 
-  createResource: {
+  createDocument: {
     description: 'Create a document in a collection.',
     parameters: z.object({
       data: z.string().describe('JSON string containing the data for the new document'),
@@ -134,7 +134,7 @@ export const toolSchemas = {
     }),
   },
 
-  updateResource: {
+  updateDocument: {
     description: 'Update documents in a collection by ID or where clause.',
     parameters: z.object({
       id: z
@@ -185,7 +185,7 @@ export const toolSchemas = {
     }),
   },
 
-  deleteResource: {
+  deleteDocument: {
     description: 'Delete documents in a collection by ID or where clause.',
     parameters: z.object({
       id: z

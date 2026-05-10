@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { getLogger } from '../utils/getLogger.js'
+import { getLogger } from '../../utils/getLogger.js'
 
 export const registerTool = ({
   isEnabled,

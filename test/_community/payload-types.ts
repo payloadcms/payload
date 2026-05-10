@@ -258,24 +258,6 @@ export interface PayloadMcpApiKey {
    * The purpose of the API key.
    */
   description?: string | null;
-  users?: {
-    /**
-     * Allow clients to find users.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create users.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update users.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete users.
-     */
-    delete?: boolean | null;
-  };
   posts?: {
     /**
      * Allow clients to find posts.
@@ -309,6 +291,24 @@ export interface PayloadMcpApiKey {
     update?: boolean | null;
     /**
      * Allow clients to delete media.
+     */
+    delete?: boolean | null;
+  };
+  users?: {
+    /**
+     * Allow clients to find users.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create users.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update users.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete users.
      */
     delete?: boolean | null;
   };
@@ -512,14 +512,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
   user?: T;
   label?: T;
   description?: T;
-  users?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
   posts?:
     | T
     | {
@@ -529,6 +521,14 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         delete?: T;
       };
   media?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  users?:
     | T
     | {
         find?: T;

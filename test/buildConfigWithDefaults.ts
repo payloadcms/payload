@@ -1,6 +1,6 @@
 import type { Config, SanitizedConfig } from 'payload'
 
-import { mcpPlugin, type MCPPluginConfig } from '@payloadcms/plugin-mcp'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import {
   AlignFeature,
   BlockquoteFeature,
@@ -193,23 +193,11 @@ export async function buildConfigWithDefaults(
       config.admin.user = 'users'
     }
 
-    const userCollectionSlug = config.admin.user ?? 'users'
-    const mcpCollections: NonNullable<MCPPluginConfig['collections']> = {
-      [userCollectionSlug]: { enabled: true },
-    }
-    for (const collection of config.collections ?? []) {
-      mcpCollections[collection.slug] = { enabled: true }
-    }
-
-    const mcpGlobals: NonNullable<MCPPluginConfig['globals']> = {}
-    for (const global of config.globals ?? []) {
-      mcpGlobals[global.slug] = { enabled: true }
-    }
-
-    config.plugins = [
-      ...(config.plugins ?? []),
-      mcpPlugin({ collections: mcpCollections, globals: mcpGlobals }),
-    ]
+    // Opt-out model — every collection / global is exposed by default; suites can pass
+    // their own `mcpPlugin({ collections: { foo: { disabled: true } } })` if they want
+    // finer-grained control, in which case we'll see the plugin in `config.plugins`
+    // and skip this block.
+    config.plugins = [...(config.plugins ?? []), mcpPlugin({})]
   }
 
   return await buildConfig(config)

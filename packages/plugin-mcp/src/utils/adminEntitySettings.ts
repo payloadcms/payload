@@ -1,6 +1,6 @@
 /**
- * Defines the default admin entity settings for Collections and Globals.
- * This is used to create the MCP API key permission fields for the API Keys collection.
+ * Default admin entity settings for collections and globals.
+ * Used to generate the MCP API key permission fields.
  */
 export const adminEntitySettings = {
   collection: [

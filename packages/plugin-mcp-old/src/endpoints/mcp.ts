@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { type PayloadHandler, type TypedUser, UnauthorizedError, type Where } from 'payload'
 
-import type { MCPAccessSettings, MCPPluginConfig } from '../types.js'
+import type { MCPAccess, MCPPluginConfig } from '../types.js'
 
 import { createRequestFromPayloadRequest } from '../mcp/createRequest.js'
 import { getMCPHandler } from '../mcp/getMcpHandler.js'
@@ -15,7 +15,7 @@ export const initializeMCPHandler = (pluginOptions: MCPPluginConfig) => {
 
     req.payloadAPI = 'MCP' as const
 
-    const getDefaultMcpAccessSettings = async (overrideApiKey?: null | string) => {
+    const getDefaultMCPAccess = async (overrideApiKey?: null | string) => {
       const apiKey =
         (overrideApiKey ?? req.headers.get('Authorization')?.startsWith('Bearer '))
           ? req.headers.get('Authorization')?.replace('Bearer ', '').trim()
@@ -56,12 +56,12 @@ export const initializeMCPHandler = (pluginOptions: MCPPluginConfig) => {
       user.collection = pluginOptions.userCollection as string
       user._strategy = 'mcp-api-key' as const
 
-      return docs[0] as unknown as MCPAccessSettings
+      return docs[0] as unknown as MCPAccess
     }
 
-    const mcpAccessSettings = pluginOptions.overrideAuth
-      ? await pluginOptions.overrideAuth(req, getDefaultMcpAccessSettings)
-      : await getDefaultMcpAccessSettings()
+    const mcpAccess = pluginOptions.overrideAuth
+      ? await pluginOptions.overrideAuth(req, getDefaultMCPAccess)
+      : await getDefaultMCPAccess()
 
     // @modelcontextprotocol/sdk's StreamableHTTPServerTransport uses @hono/node-server's
     // getRequestListener, which replaces global.Request and global.Response with Hono
@@ -73,7 +73,7 @@ export const initializeMCPHandler = (pluginOptions: MCPPluginConfig) => {
     const originalResponse = globals['Response']
     const originalRequest = globals['Request']
 
-    const handler = getMCPHandler(pluginOptions, mcpAccessSettings, req)
+    const handler = getMCPHandler(pluginOptions, mcpAccess, req)
     const request = createRequestFromPayloadRequest(req)
 
     try {
