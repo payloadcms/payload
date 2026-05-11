@@ -20,6 +20,7 @@ import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import { miniChalk } from '../../utilities/miniChalk.js'
+import { endSpan, startSpan } from '../../utilities/sanitizeProfiler.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
@@ -79,6 +80,8 @@ export const sanitizeCollection = async (
     return collection as SanitizedCollectionConfig
   }
 
+  const __profSpan = startSpan('sanitizeCollection', collection.slug)
+  try {
   collection._sanitized = true
 
   warnOnInvalidCustomViews(collection)
@@ -388,4 +391,7 @@ export const sanitizeCollection = async (
   })
 
   return sanitizedConfig
+  } finally {
+    endSpan(__profSpan)
+  }
 }

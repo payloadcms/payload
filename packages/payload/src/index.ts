@@ -152,6 +152,11 @@ import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js
 import { formatAdminURL } from './utilities/formatAdminURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
+import {
+  aggregateByName as aggregateSanitizeProfile,
+  getProfilerRecords as getSanitizeProfilerRecords,
+  profilerEnabled as sanitizeProfilerEnabled,
+} from './utilities/sanitizeProfiler.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
@@ -834,8 +839,32 @@ export class BasePayload {
       throw new Error('Error: the payload config is required to initialize payload.')
     }
 
+    const __payloadInitStartedAt = sanitizeProfilerEnabled ? Date.now() : 0
+
     this.config = await options.config
     this.logger = getLogger('payload', this.config.logger)
+
+    if (sanitizeProfilerEnabled) {
+      const completedAt = Date.now()
+      const aggregates = aggregateSanitizeProfile()
+      const rootSanitize = aggregates.find((a) => a.name === 'sanitizeConfig')
+      const sanitizeConfigMs = rootSanitize?.totalTime ?? 0
+
+      this.logger.info(
+        {
+          aggregates,
+          completedAt,
+          completedAtIso: new Date(completedAt).toISOString(),
+          durationMs: completedAt - __payloadInitStartedAt,
+          event: 'payload.sanitize.profile',
+          sanitizeConfigMs,
+          startedAt: __payloadInitStartedAt,
+          startedAtIso: new Date(__payloadInitStartedAt).toISOString(),
+          totalRecords: getSanitizeProfilerRecords().length,
+        },
+        'sanitize profile snapshot (PAYLOAD_PROFILE_SANITIZE=1)',
+      )
+    }
 
     if (!this.config.secret) {
       throw new Error('Error: missing secret key. A secret key is needed to secure Payload.')

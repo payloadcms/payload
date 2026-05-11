@@ -8,6 +8,9 @@ import type {
 } from '../fields/config/types.js'
 
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
+import { endSpan, startSpan } from './sanitizeProfiler.js'
+
+let __flattenDepth = 0
 
 export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   return {
@@ -31,6 +34,10 @@ export const flattenAllFields = ({
   cache?: boolean
   fields: Field[]
 }): FlattenedField[] => {
+  const __profSpan = __flattenDepth === 0 ? startSpan('flattenAllFields', String(fields.length)) : -1
+  __flattenDepth++
+  try {
+
   if (cache) {
     const maybeFields = flattenedFieldsCache.get(fields)
     if (maybeFields) {
@@ -127,4 +134,8 @@ export const flattenAllFields = ({
   flattenedFieldsCache.set(fields, result)
 
   return result
+  } finally {
+    __flattenDepth--
+    endSpan(__profSpan)
+  }
 }

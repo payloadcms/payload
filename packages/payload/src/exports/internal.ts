@@ -7,4 +7,11 @@ export { getRangeRequestInfo } from '../uploads/getRangeRequestInfo.js'
 export { getSafeFileName } from '../uploads/getSafeFilename.js'
 export { parseRangeHeader } from '../uploads/parseRangeHeader.js'
 export { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
+export {
+  aggregateByName as aggregateSanitizeProfile,
+  getProfilerRecords as getSanitizeProfilerRecords,
+  profilerEnabled as sanitizeProfilerEnabled,
+  resetProfiler as resetSanitizeProfiler,
+  type SpanRecord as SanitizeProfileSpanRecord,
+} from '../utilities/sanitizeProfiler.js'
 export { sanitizePermissions } from '../utilities/sanitizePermissions.js'

@@ -21,6 +21,7 @@ import {
 import { ReservedFieldName } from '../../errors/ReservedFieldName.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
+import { endSpan, startSpan } from '../../utilities/sanitizeProfiler.js'
 import { validateTimezones } from '../../utilities/validateTimezones.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
@@ -158,6 +159,9 @@ export const sanitizeField = async ({
   if ('_sanitized' in field && field._sanitized === true) {
     return result
   }
+
+  const __profSpan = startSpan(`sanitizeField:${field.type}`)
+  try {
 
   if ('_sanitized' in field) {
     field._sanitized = true
@@ -607,6 +611,9 @@ export const sanitizeField = async ({
   }
 
   return result
+  } finally {
+    endSpan(__profSpan)
+  }
 }
 
 export const sanitizeFields = async ({
@@ -630,6 +637,9 @@ export const sanitizeFields = async ({
   if (!fields) {
     return []
   }
+
+  const __profSpan = startSpan('sanitizeFields', String(fields.length))
+  try {
 
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]!
@@ -663,4 +673,7 @@ export const sanitizeFields = async ({
   }
 
   return fields
+  } finally {
+    endSpan(__profSpan)
+  }
 }

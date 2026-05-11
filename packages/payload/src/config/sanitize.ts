@@ -35,6 +35,7 @@ import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/c
 import { getJobStatsGlobal } from '../queues/config/global.js'
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
+import { endSpan, startSpan } from '../utilities/sanitizeProfiler.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
@@ -114,6 +115,8 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
+  const __profSpan = startSpan('sanitizeConfig')
+  try {
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
@@ -347,7 +350,12 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   // Resolve hierarchy relationships across collections (also adds sidebar tabs)
-  resolveHierarchyCollections(config as unknown as Config)
+  const __hierSpan = startSpan('resolveHierarchyCollections')
+  try {
+    resolveHierarchyCollections(config as unknown as Config)
+  } finally {
+    endSpan(__hierSpan)
+  }
 
   if (schedulePublishCollections.length || schedulePublishGlobals.length) {
     ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(
@@ -486,13 +494,18 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     Execute richText sanitization
    */
   if (typeof incomingConfig.editor === 'function') {
-    config.editor = await incomingConfig.editor({
-      config: config as SanitizedConfig,
-      isRoot: true,
-      parentIsLocalized: false,
-    })
-    if (config.editor.i18n && Object.keys(config.editor.i18n).length >= 0) {
-      config.i18n.translations = deepMergeSimple(config.i18n.translations, config.editor.i18n)
+    const __editorSpan = startSpan('rootEditorFunction')
+    try {
+      config.editor = await incomingConfig.editor({
+        config: config as SanitizedConfig,
+        isRoot: true,
+        parentIsLocalized: false,
+      })
+      if (config.editor.i18n && Object.keys(config.editor.i18n).length >= 0) {
+        config.i18n.translations = deepMergeSimple(config.i18n.translations, config.editor.i18n)
+      }
+    } finally {
+      endSpan(__editorSpan)
     }
   }
 
@@ -502,7 +515,15 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     promises.push(sanitizeFunction(config as SanitizedConfig))
   }
 
-  await Promise.all(promises)
+  const __richtextSpan = startSpan('richTextDeferredBatch', String(promises.length))
+  try {
+    await Promise.all(promises)
+  } finally {
+    endSpan(__richtextSpan)
+  }
 
   return config as SanitizedConfig
+  } finally {
+    endSpan(__profSpan)
+  }
 }

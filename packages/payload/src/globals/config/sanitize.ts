@@ -7,6 +7,7 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
+import { endSpan, startSpan } from '../../utilities/sanitizeProfiler.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
@@ -25,6 +26,8 @@ export const sanitizeGlobal = async (
     return global as SanitizedGlobalConfig
   }
 
+  const __profSpan = startSpan('sanitizeGlobal', global.slug)
+  try {
   global._sanitized = true
 
   global.label = global.label || toWords(global.slug)
@@ -192,4 +195,7 @@ export const sanitizeGlobal = async (
   ;(global as SanitizedGlobalConfig).flattenedFields = flattenAllFields({ fields: global.fields })
 
   return global as SanitizedGlobalConfig
+  } finally {
+    endSpan(__profSpan)
+  }
 }
