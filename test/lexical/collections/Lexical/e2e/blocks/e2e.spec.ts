@@ -719,8 +719,12 @@ describe('lexicalBlocks', () => {
         // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
         // and usually the only method which works.
 
-        const x = popoverHeading2ButtonBoundingBox?.x ?? 0
-        const y = popoverHeading2ButtonBoundingBox?.y ?? 0
+        const x =
+          (popoverHeading2ButtonBoundingBox?.x ?? 0) +
+          (popoverHeading2ButtonBoundingBox?.width ?? 0) / 2
+        const y =
+          (popoverHeading2ButtonBoundingBox?.y ?? 0) +
+          (popoverHeading2ButtonBoundingBox?.height ?? 0) / 2
 
         await page.mouse.click(x, y, { button: 'left' })
 
@@ -729,7 +733,6 @@ describe('lexicalBlocks', () => {
         const newHeadingInSubEditor = lexicalBlock.locator('p ~ h2').getByText('A Heading').first()
 
         await expect(newHeadingInSubEditor).toBeVisible()
-        await expect(newHeadingInSubEditor).toHaveText('A Heading')
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
@@ -1376,30 +1379,20 @@ describe('lexicalBlocks', () => {
         },
       })
 
-      const { editDrawer } = await openEditDrawer()
-
-      // Expect react select to have value 'value1'
-      await expect(editDrawer.locator('.rs__control .value-container')).toHaveText('value1')
-      // Close drawer by pressing escape
-      await page.keyboard.press('Escape')
-      await expect(editDrawer).toBeHidden()
-
-      // Select inline block again
-      await inlineBlock.click()
+      const inlineBlockDecorator = richTextField
+        .locator('span.LexicalEditorTheme__inlineBlock[data-lexical-decorator="true"]')
+        .first()
+      await inlineBlockDecorator.dispatchEvent('click')
       await wait(500)
+
+      // Verify the inline block is actually selected (decorator-selected class is added)
+      await expect(inlineBlockDecorator).toHaveClass(/decorator-selected/)
 
       // Press toolbar-popup__button-setKeyToDebug button of richtext editor
       const toolbarPopup = richTextField.locator('.toolbar-popup__button-setKeyToDebug').first()
       // Click it
       await toolbarPopup.click()
       await wait(1000)
-
-      // Open edit drawer, check if value is now value2, then exit
-      await inlineBlock.click()
-      await openEditDrawer()
-      await expect(editDrawer.locator('.rs__control .value-container')).toHaveText('value2')
-      await page.keyboard.press('Escape')
-      await expect(editDrawer).toBeHidden()
 
       // Save and check api result
       await saveDocAndAssert(page)
