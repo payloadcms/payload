@@ -118,6 +118,7 @@ export const buildFormState = async (
     schemaPath = collectionSlug || globalSlug || widgetSlug,
     select,
     skipClientConfigAuth,
+    skipConditionChecks,
     skipValidation,
     updateLastEdited,
   } = args
@@ -228,6 +229,7 @@ export const buildFormState = async (
     schemaPath,
     select,
     selectMode,
+    skipConditionChecks,
     skipValidation,
   })
 
