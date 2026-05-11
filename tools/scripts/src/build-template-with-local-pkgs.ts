@@ -56,8 +56,7 @@ async function main() {
 
   await fs.writeFile(packageJsonPath, JSON.stringify(initialPackageJsonObj, null, 2))
 
-  execSync('pnpm add ./*.tgz --ignore-workspace', execOpts)
-  execSync('pnpm install --ignore-workspace', execOpts)
+  execSync('pnpm add ./*.tgz --ignore-workspace --ignore-scripts', execOpts)
 
   const packageJson = await fs.readFile(packageJsonPath, 'utf-8')
   const packageJsonObj = JSON.parse(packageJson) as {
