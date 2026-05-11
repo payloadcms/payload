@@ -44,9 +44,10 @@ export const NavProvider: React.FC<{
   children: React.ReactNode
   initialIsOpen?: boolean
 }> = ({ children, initialIsOpen }) => {
-  const {
-    breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
-  } = useWindowInfo()
+  const windowInfo = useWindowInfo()
+  const largeBreak = windowInfo?.breakpoints?.l
+  const midBreak = windowInfo?.breakpoints?.m
+  const smallBreak = windowInfo?.breakpoints?.s
 
   const pathname = usePathname()
 

@@ -4,7 +4,7 @@ import { dataOnlyServerFunctions } from '@payloadcms/ui/utilities/dataOnlyServer
 import { sharedServerFunctions } from '@payloadcms/ui/utilities/serverFunctionRegistry'
 
 import { RenderRSCComponent } from '../rsc/renderPayloadRSC.js'
-import { initReq } from './initReq.js'
+import { initReq } from './initReq.server.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   ...sharedServerFunctions,

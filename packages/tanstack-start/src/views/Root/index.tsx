@@ -42,7 +42,7 @@ import * as qs from 'qs-esm'
 
 import { RenderRSCComponent } from '../../rsc/renderPayloadRSC.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
-import { initReq } from '../../utilities/initReq.js'
+import { initReq } from '../../utilities/initReq.server.js'
 import { getRouteData } from './getRouteData.js'
 
 export type SerializableRouteData = {

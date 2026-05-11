@@ -39,6 +39,7 @@ import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
 import { UploadHandlersProvider } from '../UploadHandlers/index.js'
+import { WindowInfoProvider } from '../WindowInfo/index.js'
 
 type Props = {
   readonly children: React.ReactNode
@@ -97,44 +98,57 @@ export const RootProvider: React.FC<Props> = ({
                     switchLanguageServerAction={switchLanguageServerAction}
                     translations={translations}
                   >
-                    <ScrollInfoProvider>
-                      <SearchParamsProvider>
-                        <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                          <CloseModalOnRouteChange />
-                          <AuthProvider permissions={permissions} user={user}>
-                            <PreferencesProvider>
-                              <HierarchyProvider>
-                                <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
-                                  <ParamsProvider>
-                                    <LocaleProvider locale={locale}>
-                                      <StepNavProvider>
-                                        <LoadingOverlayProvider>
-                                          <DocumentEventsProvider>
-                                            <NavProvider initialIsOpen={isNavOpen}>
-                                              <UploadHandlersProvider>
-                                                <DndContext
-                                                  collisionDetection={pointerWithin}
-                                                  // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                  id={dndContextID}
-                                                >
-                                                  {children}
-                                                </DndContext>
-                                              </UploadHandlersProvider>
-                                            </NavProvider>
-                                          </DocumentEventsProvider>
-                                        </LoadingOverlayProvider>
-                                      </StepNavProvider>
-                                    </LocaleProvider>
-                                  </ParamsProvider>
-                                </ThemeProvider>
-                              </HierarchyProvider>
-                            </PreferencesProvider>
-                            <ModalContainer />
-                            <StayLoggedInModal />
-                          </AuthProvider>
-                        </ModalProvider>
-                      </SearchParamsProvider>
-                    </ScrollInfoProvider>
+                    <WindowInfoProvider
+                      breakpoints={{
+                        l: '(max-width: 1440px)',
+                        m: '(max-width: 1024px)',
+                        s: '(max-width: 768px)',
+                        xs: '(max-width: 400px)',
+                      }}
+                    >
+                      <ScrollInfoProvider>
+                        <SearchParamsProvider>
+                          <ModalProvider
+                            classPrefix="payload"
+                            transTime={0}
+                            zIndex="var(--z-modal)"
+                          >
+                            <CloseModalOnRouteChange />
+                            <AuthProvider permissions={permissions} user={user}>
+                              <PreferencesProvider>
+                                <HierarchyProvider>
+                                  <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
+                                    <ParamsProvider>
+                                      <LocaleProvider locale={locale}>
+                                        <StepNavProvider>
+                                          <LoadingOverlayProvider>
+                                            <DocumentEventsProvider>
+                                              <NavProvider initialIsOpen={isNavOpen}>
+                                                <UploadHandlersProvider>
+                                                  <DndContext
+                                                    collisionDetection={pointerWithin}
+                                                    // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                    id={dndContextID}
+                                                  >
+                                                    {children}
+                                                  </DndContext>
+                                                </UploadHandlersProvider>
+                                              </NavProvider>
+                                            </DocumentEventsProvider>
+                                          </LoadingOverlayProvider>
+                                        </StepNavProvider>
+                                      </LocaleProvider>
+                                    </ParamsProvider>
+                                  </ThemeProvider>
+                                </HierarchyProvider>
+                              </PreferencesProvider>
+                              <ModalContainer />
+                              <StayLoggedInModal />
+                            </AuthProvider>
+                          </ModalProvider>
+                        </SearchParamsProvider>
+                      </ScrollInfoProvider>
+                    </WindowInfoProvider>
                   </TranslationProvider>
                 </ClientFunctionProvider>
               </ConfigProvider>

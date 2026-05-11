@@ -1,11 +1,6 @@
-import {
-  type ComponentRenderer,
-  deepMerge,
-  type Field,
-  type FieldState,
-  type ServerFunction,
-  UnauthorizedError,
-} from 'payload'
+import type { ComponentRenderer, Field, FieldState, ServerFunction } from 'payload'
+
+import { deepMerge, UnauthorizedError } from 'payload/shared'
 
 import { RenderClientComponent } from '../../../elements/RenderServerComponent/clientOnly.js'
 import { getClientConfig } from '../../../utilities/getClientConfig.js'

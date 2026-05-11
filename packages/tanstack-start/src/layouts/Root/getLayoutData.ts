@@ -8,7 +8,7 @@ import { applyLocaleFiltering } from 'payload/shared'
 import type { RootLayoutData } from './index.js'
 
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
-import { initReq } from '../../utilities/initReq.js'
+import { initReq } from '../../utilities/initReq.server.js'
 
 export type GetLayoutDataArgs = {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig

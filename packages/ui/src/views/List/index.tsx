@@ -101,9 +101,8 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const { setStepNav } = useStepNav()
 
-  const {
-    breakpoints: { s: smallBreak },
-  } = useWindowInfo()
+  const windowInfo = useWindowInfo()
+  const smallBreak = windowInfo?.breakpoints?.s
 
   const docs = React.useMemo(() => {
     if (isUploadCollection) {
