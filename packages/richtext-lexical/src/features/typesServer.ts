@@ -28,7 +28,6 @@ import type {
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { Transformer } from '../packages/@lexical/markdown/index.js'
 import type { LexicalRichTextField } from '../types.js'
-import type { HTMLConverter } from './converters/lexicalToHtml_deprecated/converter/types.js'
 import type { BaseClientFeatureProps } from './typesClient.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = (args: {
@@ -220,18 +219,6 @@ export type BeforeValidateNodeHook<T extends SerializedLexicalNode> = (
 // Define the node with hooks that use the node's exportJSON return type
 export type NodeWithHooks<T extends LexicalNode = any> = {
   /**
-   * Allows you to define how a node can be serialized into different formats. Currently, only supports html.
-   * Markdown converters are defined in `markdownTransformers` and not here.
-   *
-   * @deprecated - will be removed in 4.0
-   */
-  converters?: {
-    /**
-     * @deprecated - will be removed in 4.0
-     */
-    html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
-  }
-  /**
    * If a node includes sub-fields (e.g. block and link nodes), passing those subFields here will make payload
    * automatically populate, run hooks, and generate component import maps for them
    */
@@ -367,10 +354,6 @@ export type ResolvedServerFeatureMap = Map<string, ResolvedServerFeature<any, an
 export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<any, any, any>>
 
 export type SanitizedServerFeatures = {
-  /**  The node types mapped to their converters */
-  converters: {
-    html: HTMLConverter[]
-  }
   /** The keys of all enabled features */
   enabledFeatures: string[]
   generatedTypes: {
