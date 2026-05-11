@@ -25,6 +25,7 @@ type BlocksFieldProps = {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ClientBlock
   blocks: (ClientBlock | string)[] | ClientBlock[]
+  blocksFiltered: (ClientBlock | string)[] | ClientBlock[]
   copyRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
   errorCount: number
@@ -53,6 +54,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   attributes,
   block,
   blocks,
+  blocksFiltered,
   copyRow,
   duplicateRow,
   errorCount,
@@ -150,6 +152,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             <RowActions
               addRow={addRow}
               blocks={blocks}
+              blocksFiltered={blocksFiltered}
               blockType={row.blockType}
               copyRow={copyRow}
               duplicateRow={duplicateRow}
