@@ -1555,12 +1555,9 @@ export type BlocksField = {
     isSortable?: boolean
   } & FieldAdmin
   /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   * Slugs of blocks registered in `config.blocks`. Inline block definitions are not allowed.
    */
-  blockReferences?: (Block | BlockSlug)[]
-  blocks: Block[]
+  blocks: BlockSlug[]
   defaultValue?: DefaultValue
   /**
    * Blocks can be conditionally enabled using the `filterOptions` property on the blocks field.
@@ -1603,12 +1600,9 @@ export type BlocksFieldClient = {
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
   /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   * Slugs of blocks registered in `config.blocks`. Resolved to `ClientBlock` on the client at render time.
    */
-  blockReferences?: (ClientBlock | string)[]
-  blocks: ClientBlock[]
+  blocks: BlockSlug[]
   labels?: LabelsClient
 } & FieldBaseClient &
   Pick<BlocksField, 'maxRows' | 'minRows' | 'type'>
@@ -1730,13 +1724,10 @@ export type FlattenedBlock = {
 
 export type FlattenedBlocksField = {
   /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   * Resolved block definitions, hydrated from `config.blocks` at sanitization/flatten time.
    */
-  blockReferences?: (FlattenedBlock | string)[]
   blocks: FlattenedBlock[]
-} & Omit<BlocksField, 'blockReferences' | 'blocks'>
+} & Omit<BlocksField, 'blocks'>
 
 export type FlattenedGroupField = {
   flattenedFields: FlattenedField[]
