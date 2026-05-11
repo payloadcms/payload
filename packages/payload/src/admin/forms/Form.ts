@@ -168,6 +168,7 @@ export type BuildFormStateArgs = {
    * @experimental This property is experimental and may change in the future. Use at your own risk.
    */
   skipClientConfigAuth?: boolean
+  skipConditionChecks?: boolean
   skipValidation?: boolean
   updateLastEdited?: boolean
 } & (
