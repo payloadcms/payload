@@ -1,6 +1,6 @@
 @layer payload-default {
   .LexicalEditorTheme {
-    --lexical-indent-base-value: var(--spacer-3);
+    --lexical-indent-base-value: var(--spacer-6);
 
     /* Lexical heading typography scale */
     --lexical-h1-font-size: 2rem; /* 32px */
@@ -255,7 +255,7 @@
   .LexicalEditorTheme__listItem {
     font-family: var(--text-body-large-font-family);
     font-size: var(--text-body-large-font-size);
-    margin: 0 0 var(--spacer-3) var(--spacer-3);
+    margin: 0 0 var(--spacer-3) var(--spacer-6);
   }
 
   .LexicalEditorTheme__listItem[style*='text-align: center'],
@@ -272,13 +272,14 @@
   }
 
   .LexicalEditorTheme__listItem[dir='rtl'] {
-    margin: 0 var(--spacer-3) 0.4em 0;
+    margin: 0 var(--spacer-6) 0.4em 0;
   }
 
   .LexicalEditorTheme__listItemChecked,
   .LexicalEditorTheme__listItemUnchecked {
     position: relative;
-    padding-left: var(--spacer-4);
+    padding-right: var(--spacer-4);
+    margin-right: var(--spacer-3);
     list-style-type: none;
     outline: none;
   }
@@ -288,6 +289,7 @@
     margin-left: 0;
     padding-left: 0;
     padding-right: var(--spacer-4);
+    margin-right: var(--spacer-3);
   }
 
   .LexicalEditorTheme__listItemChecked {
