@@ -21,7 +21,11 @@ export function calculateBackoffWaitUntil({
       } else if (retriesConfig.backoff.type === 'exponential') {
         // 2 ^ (attempts - 1) * delay (current attempt is not included in totalTried, thus no need for -1)
         const delay = retriesConfig.backoff.delay ? retriesConfig.backoff.delay : 0
-        waitUntil = new Date(now.getTime() + Math.pow(2, totalTried) * delay)
+        const baseDelay = Math.pow(2, totalTried) * delay
+        // Add decorrelated jitter (±50%) to prevent thundering-herd retry storms
+        // when many concurrent jobs fail at the same time.
+        const jitter = baseDelay * (0.5 + Math.random() * 0.5)
+        waitUntil = new Date(now.getTime() + jitter)
       }
     }
   }
