@@ -31,7 +31,12 @@ pnpm test:eval:collections:agent            # single suite, agent + skill
 pnpm test:eval:collections:agent:baseline   # single suite, agent, no skill
 ```
 
-## Env knobs
+## Required env vars
+
+- `OPENAI_API_KEY` — required for **all** variants. The LLM scorer is OpenAI-based even when the runner is an agent.
+- `ANTHROPIC_API_KEY` — required for agent variants. The Claude Code CLI runs inside a sandboxed `CLAUDE_CONFIG_DIR`, so OAuth/keychain auth from your global `~/.claude/` is intentionally not used.
+
+## Optional env knobs
 
 - `EVAL_AGENT_MODEL` — model passed to `claude --model`. Default `claude-opus-4-6`.
 - `EVAL_AGENT_CONCURRENCY` — max concurrent agent processes. Default `2`.
