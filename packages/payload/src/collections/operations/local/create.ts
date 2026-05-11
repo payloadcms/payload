@@ -218,7 +218,10 @@ export async function createLocal<
 
   const req = await createLocalReq(options as CreateLocalReqOptions, payload)
 
-  req.file = file ?? (await getFileByPath(filePath!))
+  const collectionConfig = collection.config
+  if (collectionConfig.upload) {
+    req.file = file ?? (await getFileByPath(filePath!))
+  }
 
   return createOperation<TSlug, TSelect>({
     collection,
