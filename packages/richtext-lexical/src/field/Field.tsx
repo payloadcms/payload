@@ -1,5 +1,6 @@
 'use client'
 import type { EditorState, SerializedEditorState } from 'lexical'
+import type { FallbackProps } from 'react-error-boundary'
 
 import {
   BulkUploadProvider,
@@ -239,13 +240,11 @@ const RichTextComponent: React.FC<
   )
 }
 
-function fallbackRender({ error }: { error: Error }) {
-  // Call resetErrorBoundary() to reset the error boundary and retry the render.
-
+function fallbackRender({ error }: FallbackProps) {
   return (
     <div className="errorBoundary" role="alert">
       <p>Something went wrong:</p>
-      <pre style={{ color: 'red' }}>{error.message}</pre>
+      <pre style={{ color: 'red' }}>{error instanceof Error ? error.message : String(error)}</pre>
     </div>
   )
 }
