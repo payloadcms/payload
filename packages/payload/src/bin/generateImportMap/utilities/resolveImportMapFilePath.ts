@@ -11,14 +11,28 @@ async function pathOrFileExists(path: string): Promise<boolean> {
 }
 
 /**
+ * Default directory patterns for Next.js import map resolution.
+ * Other framework adapters can provide their own patterns via `candidateDirectories`.
+ */
+const defaultCandidateDirectories = (rootDir: string, adminRoute: string): string[] => [
+  path.resolve(rootDir, `app/(payload)${adminRoute}/`),
+  path.resolve(rootDir, `src/app/(payload)${adminRoute}/`),
+]
+
+/**
  * Returns the path to the import map file. If the import map file is not found, it throws an error.
+ *
+ * @param candidateDirectories - Optional array of directory paths to search for the import map.
+ *   Defaults to Next.js app directory convention. Framework adapters can provide their own.
  */
 export async function resolveImportMapFilePath({
   adminRoute = '/admin',
+  candidateDirectories,
   importMapFile,
   rootDir,
 }: {
   adminRoute?: string
+  candidateDirectories?: string[]
   importMapFile?: string
   rootDir: string
 }): Promise<Error | string> {
@@ -36,22 +50,21 @@ export async function resolveImportMapFilePath({
     }
     importMapFilePath = importMapFile
   } else {
-    const appLocation = path.resolve(rootDir, `app/(payload)${adminRoute}/`)
-    const srcAppLocation = path.resolve(rootDir, `src/app/(payload)${adminRoute}/`)
+    const directories = candidateDirectories ?? defaultCandidateDirectories(rootDir, adminRoute)
 
-    if (appLocation && (await pathOrFileExists(appLocation))) {
-      importMapFilePath = path.resolve(appLocation, 'importMap.js')
-      if (!(await pathOrFileExists(importMapFilePath))) {
-        await fs.writeFile(importMapFilePath, '', { flag: 'wx' })
+    for (const dir of directories) {
+      if (await pathOrFileExists(dir)) {
+        importMapFilePath = path.resolve(dir, 'importMap.js')
+        if (!(await pathOrFileExists(importMapFilePath))) {
+          await fs.writeFile(importMapFilePath, '', { flag: 'wx' })
+        }
+        break
       }
-    } else if (srcAppLocation && (await pathOrFileExists(srcAppLocation))) {
-      importMapFilePath = path.resolve(srcAppLocation, 'importMap.js')
-      if (!(await pathOrFileExists(importMapFilePath))) {
-        await fs.writeFile(importMapFilePath, '', { flag: 'wx' })
-      }
-    } else {
+    }
+
+    if (!importMapFilePath) {
       return new Error(
-        `Could not find Payload import map folder. Looked in ${appLocation} and ${srcAppLocation}`,
+        `Could not find Payload import map folder. Looked in ${directories.join(' and ')}`,
       )
     }
   }
