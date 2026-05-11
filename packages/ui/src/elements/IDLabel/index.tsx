@@ -1,11 +1,11 @@
 'use client'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import './index.scss'
 import { Link } from '../../elements/Link/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { sanitizeID } from '../../utilities/sanitizeID.js'
 import { useDrawerDepth } from '../Drawer/index.js'
 

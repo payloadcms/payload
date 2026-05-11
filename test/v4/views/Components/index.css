@@ -76,6 +76,14 @@
   gap: var(--spacer-6);
 }
 
+.components-view__category-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  padding-bottom: var(--spacer-3);
+  border-bottom: 1px solid var(--border-default);
+}
+
 .components-view__section .collapsible {
   border: none;
   background: transparent;
@@ -205,6 +213,11 @@
   width: 24px;
   height: 24px;
   color: var(--icon-default);
+  margin: var(--spacer-3);
+}
+
+/* TextState icon is a span, not svg */
+.components-view__icon-item > span + span {
   margin: var(--spacer-3);
 }
 

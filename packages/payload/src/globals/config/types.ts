@@ -24,7 +24,7 @@ import type {
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
-import type { PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
+import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
@@ -205,12 +205,6 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   dbName?: DBIdentifierName
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
-  /**
-   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
-   */
-  forceSelect?: IsAny<SelectFromGlobalSlug<TSlug>> extends true
-    ? SelectIncludeType
-    : SelectFromGlobalSlug<TSlug>
   graphQL?:
     | {
         disableMutations?: true
@@ -247,7 +241,14 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     interface?: string
   }
   versions?: boolean | IncomingGlobalVersions
-}
+} & Pick<
+  WithSelectFn<
+    IsAny<SelectFromGlobalSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromGlobalSlug<TSlug>
+  >,
+  'select'
+>
 
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {

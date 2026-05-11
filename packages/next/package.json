@@ -123,7 +123,7 @@
     "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
     "sass": "1.77.4",
-    "uuid": "11.1.0"
+    "uuid": "14.0.0"
   },
   "devDependencies": {
     "@babel/cli": "7.27.2",
@@ -131,10 +131,10 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@next/eslint-plugin-next": "16.2.3",
+    "@next/eslint-plugin-next": "16.2.6",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.27.1",
@@ -144,11 +144,11 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": ">=15.2.9 <15.3.0 || >=15.3.9 <15.4.0 || >=15.4.11 <15.5.0 || >=16.2.2 <17.0.0",
+    "next": ">=16.2.6 <17.0.0",
     "payload": "workspace:*"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=24.15.0"
   },
   "publishConfig": {
     "exports": {

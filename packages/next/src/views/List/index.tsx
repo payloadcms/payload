@@ -24,6 +24,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
+  appendDateTimezoneSelectFields,
   appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
@@ -253,15 +254,30 @@ export const renderListView = async (
     permissions,
   })
 
-  const select = collectionConfig.admin.enableListViewSelectAPI
-    ? transformColumnsToSelect(columns)
-    : undefined
+  /** Automatically force select active columns. */
+  const select = transformColumnsToSelect(columns)
 
   /** Force select image fields for list view thumbnails */
   appendUploadSelectFields({
     collectionConfig,
     select,
   })
+
+  /** Force select `_tz` siblings for any timezone-enabled date fields in select */
+  appendDateTimezoneSelectFields({
+    fields: collectionConfig.flattenedFields,
+    select,
+  })
+
+  /** Force select `_order` for orderable collections — OrderableTable needs it to compute reorder targets */
+  if (collectionConfig.orderable === true) {
+    select._order = true
+  }
+
+  /** Force select `_status` for drafts-enabled collections — needed by `enrichDocsWithVersionStatus` and `formatDocURL` */
+  if (collectionConfig.versions?.drafts) {
+    select._status = true
+  }
 
   // Check for hierarchy parent param
   const isHierarchyCollection = Boolean(collectionConfig.hierarchy)

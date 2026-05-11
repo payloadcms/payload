@@ -304,7 +304,7 @@ describe('General', () => {
   })
 
   describe('theme', () => {
-    test('should render light theme by default', async () => {
+    test('should default to automatic theme mode', async () => {
       await page.goto(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
       await page.goto(`${postsUrl.admin}/account`)
@@ -316,43 +316,65 @@ describe('General', () => {
     test('should explicitly change to light theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-light"]').click()
-      await expect(page.locator('#field-theme-auto')).not.toBeChecked()
       await expect(page.locator('#field-theme-light')).toBeChecked()
       await expect(page.locator('#field-theme-dark')).not.toBeChecked()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 
-      // reload the page an ensure theme is retained
+      // reload the page and ensure theme is retained
       await page.reload()
-      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
-
-      // go back to auto theme
-      await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-auto"]').click()
-      await expect(page.locator('#field-theme-auto')).toBeChecked()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
     })
 
     test('should explicitly change to dark theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-dark"]').click()
-      await expect(page.locator('#field-theme-auto')).not.toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
       await expect(page.locator('#field-theme-dark')).toBeChecked()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
-      // reload the page an ensure theme is retained
+      // reload the page and ensure theme is retained
       await page.reload()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
-      // go back to auto theme
+      // reset to light
       await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-auto"]').click()
-      await expect(page.locator('#field-theme-auto')).toBeChecked()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
+      await page.locator('label[for="field-theme-light"]').click()
+      await expect(page.locator('#field-theme-light')).toBeChecked()
       await expect(page.locator('#field-theme-dark')).not.toBeChecked()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    })
+  })
+
+  describe('enhanced contrast mode', () => {
+    test('should not have data-enhanced-contrast attribute by default', async () => {
+      await page.goto(postsUrl.admin)
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+      await page.goto(`${postsUrl.admin}/account`)
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+    })
+
+    test('should add data-enhanced-contrast when enabled and persist after reload', async () => {
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-highContrastMode"]').click()
+      await expect(page.locator('#field-highContrastMode')).toBeChecked()
+      await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+
+      await page.reload()
+      await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-highContrastMode"]').click()
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+    })
+
+    test('should not have data-enhanced-contrast attribute after reload when off', async () => {
+      await page.goto(`${postsUrl.admin}/account`)
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+
+      await page.reload()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
     })
   })
 

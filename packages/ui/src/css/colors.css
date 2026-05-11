@@ -6,7 +6,7 @@
   :root {
     /* Special */
     --special-bg-hover-on-light-canvas: var(--ramp-black-300);
-    --special-text-highlight: rgba(13, 153, 255, 0.4);
+    --special-text-highlight: var(--color-blue-300);
 
     --special-multiplayer-blue: var(--ramp-blue-600);
     --special-multiplayer-purple: var(--ramp-purple-500);
@@ -84,6 +84,9 @@
     --color-bg-inverse: var(--ramp-grey-800);
     --color-bg-inverse-hover: var(--ramp-grey-700);
     --color-bg-inverse-pressed: var(--ramp-grey-600);
+    --bg-menu-default: var(--ramp-grey-900);
+    --bg-menu-hover: var(--ramp-grey-700);
+    --bg-tooltip-default: var(--ramp-grey-900);
 
     --color-bg-menu: var(--ramp-grey-900);
     --color-bg-tooltip: var(--ramp-grey-900);

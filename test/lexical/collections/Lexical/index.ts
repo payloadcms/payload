@@ -248,7 +248,6 @@ export const getLexicalFieldsCollection: (args: {
       ...defaultEditorFeatures,
       //TestRecorderFeature(),
       TreeViewFeature(),
-      //HTMLConverterFeature(),
       FixedToolbarFeature(),
       LinkFeature({
         fields: ({ defaultFields }) => [

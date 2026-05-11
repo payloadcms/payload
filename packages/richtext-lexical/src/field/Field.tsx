@@ -22,9 +22,9 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 
-import '../lexical/theme/EditorTheme.scss'
+import '../lexical/theme/EditorTheme.css'
 import './bundled.css'
-import './index.scss'
+import './index.css'
 
 import type { LexicalRichTextFieldProps } from '../types.js'
 

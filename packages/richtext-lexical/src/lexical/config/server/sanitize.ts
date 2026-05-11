@@ -12,9 +12,6 @@ export const sanitizeServerFeatures = (
   features: ResolvedServerFeatureMap,
 ): SanitizedServerFeatures => {
   const sanitized: SanitizedServerFeatures = {
-    converters: {
-      html: [],
-    },
     enabledFeatures: [],
     generatedTypes: {
       modifyOutputSchemas: [],
@@ -91,9 +88,6 @@ export const sanitizeServerFeatures = (
         }
         if (node?.validations?.length) {
           sanitized.validations.set(nodeType, node.validations)
-        }
-        if (node?.converters?.html) {
-          sanitized.converters.html.push(node.converters.html)
         }
         if (node?.hooks?.afterChange) {
           sanitized.nodeHooks?.afterChange?.set(nodeType, node.hooks.afterChange)

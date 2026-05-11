@@ -40,7 +40,7 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
 When updating or creating icons, reference the Figma icon library at:
 
 ```
-~/figma/figma/fpl/icons/src/icons/
+~/figma/figma/fpl/components/src/icons/
 ```
 
 Icon naming convention: `icon-{size}-{name}.tsx` (e.g., `icon-16-close.tsx`, `icon-24-chevron-down.tsx`)
@@ -105,6 +105,85 @@ To find the correct icon:
 3. Update import: `import './index.scss'` → `import './index.css'`
 4. Delete `index.scss`
 5. Wrap in `@layer payload-default {}`
+6. **Convert legacy `var(--base)` to `--spacer` tokens** (see below)
+
+---
+
+#### Legacy Token Migration: `var(--base)` → `--spacer`
+
+**What is `--base`?** A legacy spacing token equal to `20px` (1.25rem). It must be replaced with `--spacer-*` tokens.
+
+**Spacer token values:**
+
+| Token          | Value | Pixels |
+| -------------- | ----- | ------ |
+| `--spacer-0`   | 0     | 0px    |
+| `--spacer-1`   | 4px   | 4px    |
+| `--spacer-2`   | 8px   | 8px    |
+| `--spacer-2-5` | 12px  | 12px   |
+| `--spacer-3`   | 16px  | 16px   |
+| `--spacer-4`   | 24px  | 24px   |
+| `--spacer-5`   | 32px  | 32px   |
+| `--spacer-6`   | 40px  | 40px   |
+
+**Conversion strategy:**
+
+1. **Direct match:** If the result equals a spacer token, use it directly:
+
+   ```css
+   /* Before: var(--base) = 20px → closest is --spacer-3 (16px) or --spacer-4 (24px) */
+   padding: var(--base);
+
+   /* After: Choose semantically correct size */
+   padding: var(--spacer-4); /* if 24px is acceptable */
+   ```
+
+2. **Calculated values:** When exact pixel value is important, use `calc()`:
+
+   ```css
+   /* Before: calc(var(--base) * 0.5) = 10px */
+   gap: calc(var(--base) * 0.5);
+
+   /* After: calc(var(--spacer-1) * 2.5) = 10px */
+   gap: calc(var(--spacer-1) * 2.5);
+   ```
+
+3. **ALWAYS round to nearest spacer token.** Never use `calc()` to preserve non-standard pixel values. Round all calculated values to the nearest token:
+
+   | Pixel Range | Token                 | Notes                         |
+   | ----------- | --------------------- | ----------------------------- |
+   | 0-2px       | `--spacer-0`          | Use 0                         |
+   | 3-6px       | `--spacer-1` (4px)    | 5-6px rounds to 4px           |
+   | 7-10px      | `--spacer-2` (8px)    | 10px rounds DOWN to 8px       |
+   | 11-14px     | `--spacer-2-5` (12px) | 13.33px rounds to 12px        |
+   | 15-20px     | `--spacer-3` (16px)   | 15px, 20px both round to 16px |
+   | 21-28px     | `--spacer-4` (24px)   |                               |
+   | 29-36px     | `--spacer-5` (32px)   | 30px rounds to 32px           |
+   | 37-48px     | `--spacer-6` (40px)   |                               |
+
+4. **Common `var(--base)` conversions** (base = 20px):
+
+   | Original             | Pixels | Rounded Token                                                   |
+   | -------------------- | ------ | --------------------------------------------------------------- |
+   | `var(--base) * 0.25` | 5px    | `--spacer-1` (4px)                                              |
+   | `var(--base) * 0.3`  | 6px    | `--spacer-1` (4px)                                              |
+   | `var(--base) * 0.4`  | 8px    | `--spacer-2`                                                    |
+   | `var(--base) * 0.5`  | 10px   | `--spacer-2` (8px)                                              |
+   | `var(--base) * 0.6`  | 12px   | `--spacer-2-5`                                                  |
+   | `var(--base) / 1.5`  | 13.3px | `--spacer-2-5` (12px)                                           |
+   | `var(--base) * 0.75` | 15px   | `--spacer-3` (16px)                                             |
+   | `var(--base) * 0.8`  | 16px   | `--spacer-3`                                                    |
+   | `var(--base)`        | 20px   | `--spacer-3` (16px) or `--spacer-4` (24px)                      |
+   | `var(--base) * 1.2`  | 24px   | `--spacer-4`                                                    |
+   | `var(--base) * 1.5`  | 30px   | `--spacer-5` (32px)                                             |
+   | `var(--base) * 2`    | 40px   | `--spacer-6`                                                    |
+   | `var(--base) * 3`    | 60px   | `calc(var(--spacer-4) * 2.5)` — only use calc for values > 40px |
+
+   **Rule:** For values ≤ 40px, ALWAYS use a single token. For values > 40px, use `calc()` with a spacer token.
+
+5. **Check Figma design:** The best approach is to check the Figma design for the intended spacing value and use the matching `--spacer-*` token directly.
+
+---
 
 **CRITICAL: SCSS nesting patterns that DON'T work in CSS:**
 
@@ -509,6 +588,7 @@ This will:
 
 - Example migrated component: `packages/ui/src/elements/Button/index.css`
 - Token files: `packages/ui/src/css/*.css`
+- **Legacy token migration:** See Step 1 for `var(--base)` → `--spacer` conversion table
 - **v4 test suite:** `test/v4/` — dedicated collections per field type
   - Each collection should have: default, required, disabled, readOnly field variants
   - Disabled/readOnly fields need `defaultValue` for visible content

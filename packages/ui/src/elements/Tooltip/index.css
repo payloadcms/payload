@@ -7,7 +7,7 @@
     position: absolute;
     z-index: 3;
     left: 50%;
-    padding: var(--spacer-1);
+    padding: var(--spacer-1) var(--spacer-2);
     color: var(--color-text-oninverse);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
@@ -15,7 +15,6 @@
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-letter-spacing);
     white-space: nowrap;
-    max-width: 11.25rem;
     border-radius: var(--radius-medium);
     box-shadow:
       0 0 0.5px rgba(0, 0, 0, 0.15),
@@ -84,7 +83,7 @@
   }
 
   .tooltip--position-top {
-    top: calc(var(--spacer-4) * -1);
+    top: calc(-100% - var(--caret-size));
     transform: translate3d(-50%, calc(var(--caret-size) * -1), 0);
 
     &::after {
@@ -94,7 +93,7 @@
   }
 
   .tooltip--position-bottom {
-    bottom: calc(var(--spacer-4) * -1);
+    bottom: calc(100% + var(--caret-size));
     transform: translate3d(-50%, var(--caret-size), 0);
 
     &::after {

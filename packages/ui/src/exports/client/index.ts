@@ -184,14 +184,6 @@ export {
   useListRelationships,
 } from '../../elements/Table/RelationshipProvider/index.js'
 export { Table } from '../../elements/Table/index.js'
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import { Column } from 'payload'` instead.
-   */
-  Column,
-} from 'payload'
 export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 export { Thumbnail } from '../../elements/Thumbnail/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
@@ -372,6 +364,7 @@ export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/C
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
+export type { DocumentTitleContext } from '../../providers/DocumentTitle/index.js'
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
 export { useUploadControls } from '../../providers/UploadControls/index.js'
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
@@ -410,7 +403,13 @@ export { HierarchyProvider, useHierarchy } from '../../providers/Hierarchy/index
 export type { AllowedCollection } from '../../providers/Hierarchy/types.js'
 export { UploadHandlersProvider, useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
-export { defaultTheme, type Theme, ThemeProvider, useTheme } from '../../providers/Theme/index.js'
+export {
+  defaultTheme,
+  type Theme,
+  type ThemeContext,
+  ThemeProvider,
+  useTheme,
+} from '../../providers/Theme/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 export { useControllableState } from '../../hooks/useControllableState.js'
@@ -427,51 +426,6 @@ export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
 export { HierarchyListView } from '../../views/HierarchyList/index.js'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewSlots } from 'payload'` instead.
-   */
-  ListViewSlots,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewClientProps } from 'payload'` instead.
-   */
-  ListViewClientProps,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewClientProps } from 'payload'` instead.
-   */
-  ListViewClientProps as ListComponentClientProps,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewServerProps } from 'payload'` instead.
-   */
-  ListViewServerProps as ListComponentServerProps,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { CollectionPreferences } from 'payload'` instead.
-   */
-  ListPreferences,
-} from 'payload'
 
 export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 

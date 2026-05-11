@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { IndentationText, Project } from 'ts-morph'
+import { IndentationText, Project, QuoteKind } from 'ts-morph'
 
 import type { TransformRunResult } from './runner.js'
 import type { Transform } from './types.js'
@@ -75,7 +75,11 @@ function printList(): void {
 }
 
 function loadProject(path: string): Project {
-  const manipulationSettings = { indentationText: IndentationText.TwoSpaces }
+  const manipulationSettings = {
+    indentationText: IndentationText.TwoSpaces,
+    quoteKind: QuoteKind.Single,
+    useTrailingCommas: true,
+  }
   const tsconfigPath = resolve(path, 'tsconfig.json')
   if (existsSync(tsconfigPath)) {
     return new Project({ manipulationSettings, tsConfigFilePath: tsconfigPath })
