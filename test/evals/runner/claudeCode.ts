@@ -143,13 +143,16 @@ async function initOnce(): Promise<{ sandboxDir: string; version: string }> {
     }
   })
 
-  const probeOk = await authProbe(sandboxDir)
-  if (!probeOk) {
+  const probe = await authProbe(sandboxDir)
+  if (!probe.ok) {
     await copyCredentialsInto(sandboxDir)
-    const retryOk = await authProbe(sandboxDir)
-    if (!retryOk) {
+    const retry = await authProbe(sandboxDir)
+    if (!retry.ok) {
       throw new Error(
-        'Claude Code authentication failed. Run `claude login` or set ANTHROPIC_API_KEY.',
+        `Claude Code authentication failed in sandbox ${sandboxDir}.\n` +
+          `Probe stderr: ${retry.stderr.trim() || '(empty)'}\n` +
+          `Probe stdout: ${retry.stdout.trim() || '(empty)'}\n` +
+          `Fix: run \`claude login\` or set ANTHROPIC_API_KEY in the test shell.`,
       )
     }
   }
@@ -167,19 +170,29 @@ function captureVersion(): string {
   return result.stdout.trim() || 'unknown'
 }
 
-async function authProbe(sandboxDir: string): Promise<boolean> {
+async function authProbe(
+  sandboxDir: string,
+): Promise<{ ok: boolean; stderr: string; stdout: string }> {
   return new Promise((resolve) => {
     const child = spawn('claude', ['--print', '--model', 'haiku', 'reply with the word ok'], {
       env: { ...process.env, CLAUDE_CONFIG_DIR: sandboxDir },
       stdio: ['ignore', 'pipe', 'pipe'],
     })
+    let stdout = ''
+    let stderr = ''
+    child.stdout.on('data', (b: Buffer) => {
+      stdout += b.toString()
+    })
+    child.stderr.on('data', (b: Buffer) => {
+      stderr += b.toString()
+    })
     const timer = setTimeout(() => {
       child.kill('SIGKILL')
-      resolve(false)
+      resolve({ ok: false, stderr: stderr + '\n[probe timeout]', stdout })
     }, 30_000)
     child.on('exit', (code) => {
       clearTimeout(timer)
-      resolve(code === 0)
+      resolve({ ok: code === 0, stderr, stdout })
     })
   })
 }
