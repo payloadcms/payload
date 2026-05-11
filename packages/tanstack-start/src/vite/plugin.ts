@@ -136,7 +136,9 @@ function ssrStripDistStyleImports(): PluginOption {
       }
     },
     resolveId(id, importer, options) {
-      if (!options?.ssr) {
+      const isServerEnv =
+        options?.ssr || ((this as any).environment && (this as any).environment.name !== 'client')
+      if (!isServerEnv) {
         return
       }
       const isStyleFile = /\.(?:s?css|less)$/.test(id)
@@ -305,7 +307,12 @@ function stubServerOnlyImportMapEntries(): PluginOption {
         return stubPrefix + id
       }
       if (id === 'payload' && importer && !importer.includes('/node_modules/')) {
-        return this.resolve('payload/shared', importer, { ...options, skipSelf: true })
+        const isPayloadPackage = /\/packages\/(?:payload|ui|richtext-|tanstack-start|next)\//.test(
+          importer,
+        )
+        if (!isPayloadPackage) {
+          return this.resolve('payload/shared', importer, { ...options, skipSelf: true })
+        }
       }
     },
   }
@@ -523,13 +530,23 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
       },
       plugins: [
         {
-          name: 'payload:rsc-client-boundaries',
+          name: 'payload:server-resolve-boundaries',
           config() {
             return {
               environments: {
                 rsc: {
                   resolve: {
                     noExternal: ['@payloadcms/ui', '@payloadcms/richtext-lexical'],
+                  },
+                },
+                ssr: {
+                  resolve: {
+                    noExternal: [
+                      '@payloadcms/ui',
+                      '@payloadcms/translations',
+                      '@payloadcms/tanstack-start',
+                      /^@payloadcms\/richtext-lexical/,
+                    ],
                   },
                 },
               },
@@ -687,7 +704,14 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           'console-table-printer',
           ...additionalSsrExternal,
         ],
-        noExternal: [/^@payloadcms\/plugin-/, /^@payloadcms\/storage-/],
+        noExternal: [
+          '@payloadcms/ui',
+          '@payloadcms/translations',
+          '@payloadcms/tanstack-start',
+          /^@payloadcms\/richtext-lexical/,
+          /^@payloadcms\/plugin-/,
+          /^@payloadcms\/storage-/,
+        ],
       },
     }
   }

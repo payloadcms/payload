@@ -94,6 +94,7 @@ export { formatAdminURL } from '../utilities/formatAdminURL.js'
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
 
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
+export { getBlockSelect } from '../utilities/getBlockSelect.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
@@ -146,6 +147,8 @@ export { sanitizeUserDataForEmail } from '../utilities/sanitizeUserDataForEmail.
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
 
 export { slugify } from '../utilities/slugify.js'
+
+export { stripUnselectedFields } from '../utilities/stripUnselectedFields.js'
 
 export { toKebabCase } from '../utilities/toKebabCase.js'
 
