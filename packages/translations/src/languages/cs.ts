@@ -315,6 +315,7 @@ export const csTranslations: DefaultTranslationsObject = {
     error: 'Chyba',
     errors: 'Chyby',
     exitLivePreview: 'Opustit živý náhled',
+    expand: 'Rozšířit',
     export: 'Vývoz',
     fallbackToDefaultLocale: 'Zpětné přepnutí do výchozího locale',
     false: 'Nepravda',

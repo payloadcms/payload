@@ -6,7 +6,7 @@
   :root {
     /* Special */
     --special-bg-hover-on-light-canvas: var(--color-black-300);
-    --special-text-highlight: rgba(13, 153, 255, 0.4);
+    --special-text-highlight: var(--color-blue-300);
 
     --special-multiplayer-blue: var(--color-blue-600);
     --special-multiplayer-purple: var(--color-purple-500);
@@ -74,6 +74,7 @@
     --bg-inverse-pressed: var(--color-grey-600);
 
     --bg-menu-default: var(--color-grey-900);
+    --bg-menu-hover: var(--color-grey-700);
     --bg-tooltip-default: var(--color-grey-900);
 
     --bg-selected-default: var(--color-blue-200);

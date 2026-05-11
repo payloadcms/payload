@@ -315,6 +315,7 @@ export const etTranslations: DefaultTranslationsObject = {
     error: 'Viga',
     errors: 'Vead',
     exitLivePreview: 'Välju otsevaatest',
+    expand: 'Laienda',
     export: 'Eksport',
     fallbackToDefaultLocale: 'Kasuta vaikekeelt',
     false: 'Väär',

@@ -2,11 +2,25 @@ import type { CollectionConfig, Config } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { getFileByPath } from 'payload'
 
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
 import { blocksSeedData } from './seed/blocksSeedData.js'
-import { blocksFieldsSlug, collectionSlugs, textFieldsSlug } from './slugs.js'
+import {
+  codeContent,
+  getRichTextContent,
+  getTypographyContent,
+  listsContent,
+  tableContent,
+} from './seed/richTextData.js'
+import {
+  blocksFieldsSlug,
+  collectionSlugs,
+  richTextFieldsSlug,
+  textFieldsSlug,
+  uploadsSlug,
+} from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -28,6 +42,7 @@ import PasswordFields from './collections/Password/index.js'
 import PointFields from './collections/Point/index.js'
 import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
+import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import SlugFields from './collections/Slug/index.js'
@@ -62,6 +77,7 @@ export const collections: CollectionConfig[] = [
   PointFields,
   RadioFields,
   RelationshipFields,
+  RichTextFields,
   RowFields,
   SelectFields,
   SlugFields,
@@ -127,6 +143,54 @@ export const baseConfig: Partial<Config> = {
       { title: 'GraphQL vs REST API' },
     ]
 
+    for (const post of posts) {
+      await payload.create({
+        collection: textFieldsSlug,
+        data: post,
+      })
+    }
+
+    const richTextCount = await payload.count({ collection: richTextFieldsSlug })
+    if (richTextCount.totalDocs === 0) {
+      const imagePath = path.resolve(dirname, '../lexical/collections/Upload/payload.jpg')
+      const imageFile = await getFileByPath(imagePath)
+
+      const uploadDoc = await payload.create({
+        collection: uploadsSlug,
+        data: { alt: 'Farming image' },
+        file: imageFile,
+      })
+
+      const formattedUploadID =
+        payload.db.defaultIDType === 'number' ? uploadDoc.id : `"${uploadDoc.id}"`
+
+      const devUserDoc = await payload.find({
+        collection: 'users',
+        where: { email: { equals: devUser.email } },
+        limit: 1,
+      })
+      const userId = devUserDoc.docs[0]?.id
+      const formattedUserID =
+        userId !== undefined
+          ? payload.db.defaultIDType === 'number'
+            ? userId
+            : `"${userId}"`
+          : undefined
+
+      const richTextContent = getRichTextContent(formattedUploadID, formattedUserID)
+
+      await payload.create({
+        collection: richTextFieldsSlug,
+        data: {
+          title: 'Data harvest \u2013 how AI and sensors are revolutionizing farming',
+          content: richTextContent,
+          lists: listsContent,
+          typography: getTypographyContent(formattedUserID),
+          table: tableContent,
+          code: codeContent,
+        },
+      })
+    }
     // Seed blocks collection
     await payload.create({
       collection: blocksFieldsSlug,

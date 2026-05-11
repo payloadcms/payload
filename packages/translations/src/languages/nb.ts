@@ -318,6 +318,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     error: 'Feil',
     errors: 'Feil',
     exitLivePreview: 'Avslutt live forhåndsvisning',
+    expand: 'Utvid',
     export: 'Eksport',
     fallbackToDefaultLocale: 'Tilbakestilling til standard språk',
     false: 'Falsk',

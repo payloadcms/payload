@@ -299,6 +299,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     error: '錯誤',
     errors: '錯誤',
     exitLivePreview: '離開即時預覽',
+    expand: '展開',
     export: '匯出',
     fallbackToDefaultLocale: '回復至預設語言',
     false: '否',

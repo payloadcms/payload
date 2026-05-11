@@ -320,6 +320,7 @@ export const trTranslations: DefaultTranslationsObject = {
     error: 'Hata',
     errors: 'Hatalar',
     exitLivePreview: 'Canlı Önizlemeyi Kapat',
+    expand: 'Genişlet',
     export: 'İhracat',
     fallbackToDefaultLocale: 'Varsayılan yerel ayara geri dönme',
     false: 'Yanlış',

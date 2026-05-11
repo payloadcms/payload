@@ -84,6 +84,7 @@ export interface Config {
     'point-fields': PointField;
     'radio-fields': RadioField;
     'relationship-fields': RelationshipField;
+    'rich-text-fields': RichTextField;
     'row-fields': RowField;
     'select-fields': SelectField;
     'slug-fields': SlugField;
@@ -117,6 +118,7 @@ export interface Config {
     'point-fields': PointFieldsSelect<false> | PointFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
+    'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'row-fields': RowFieldsSelect<false> | RowFieldsSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
@@ -750,6 +752,90 @@ export interface TextField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rich-text-fields".
+ */
+export interface RichTextField {
+  id: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  table?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  code?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  typography?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  lists?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "row-fields".
  */
 export interface RowField {
@@ -1085,6 +1171,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationship-fields';
         value: string | RelationshipField;
+      } | null)
+    | ({
+        relationTo: 'rich-text-fields';
+        value: string | RichTextField;
       } | null)
     | ({
         relationTo: 'row-fields';
@@ -1568,6 +1658,19 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   authorDisabled?: T;
   authorReadOnly?: T;
   polymorphic?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rich-text-fields_select".
+ */
+export interface RichTextFieldsSelect<T extends boolean = true> {
+  content?: T;
+  table?: T;
+  code?: T;
+  typography?: T;
+  lists?: T;
   updatedAt?: T;
   createdAt?: T;
 }

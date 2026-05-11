@@ -320,6 +320,7 @@ export const itTranslations: DefaultTranslationsObject = {
     error: 'Errore',
     errors: 'Errori',
     exitLivePreview: "Esci dall'Anteprima dal Vivo",
+    expand: 'Espandi',
     export: 'Esportazione',
     fallbackToDefaultLocale: 'Fallback al locale predefinito',
     false: 'Falso',
