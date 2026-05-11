@@ -415,6 +415,162 @@ test.describe('Bulk Edit', () => {
     await expect(page.locator('.row-1 .cell-title')).toContainText(updatedTitle)
   })
 
+  test.describe('preserves URL where filter on bulk actions across pages', () => {
+    // Regression coverage for the URL `where` filter being dropped on
+    // "Select all N across pages" + bulk Publish / Unpublish / Edit.
+    // Existing "filters and across pages" tests use the search bar (?search=),
+    // which propagates via a separate code path. The structured ?where[...]
+    // param was silently dropped between the List view and the bulk drawers.
+    const filteredTitlePrefix = 'ATM'
+    const otherTitlePrefix = 'Other'
+    const seedCount = 6 // exceeds defaultLimit of 5, forces the across-pages button
+
+    async function seedFilteredAndOtherPosts({
+      filteredDraft = false,
+      otherDraft = false,
+    }: { filteredDraft?: boolean; otherDraft?: boolean } = {}) {
+      // `_status` defaults to 'draft' (versions/baseFields.ts), so a `draft: false`
+      // arg alone does NOT publish the doc. Set `_status` explicitly per seed.
+      await deleteAllPosts()
+      for (let i = 1; i <= seedCount; i++) {
+        await createPost(
+          {
+            _status: filteredDraft ? 'draft' : 'published',
+            title: `${filteredTitlePrefix} page ${i}`,
+          },
+          { draft: filteredDraft },
+        )
+        await wait(50)
+      }
+      for (let i = 1; i <= seedCount; i++) {
+        await createPost(
+          {
+            _status: otherDraft ? 'draft' : 'published',
+            title: `${otherTitlePrefix} page ${i}`,
+          },
+          { draft: otherDraft },
+        )
+        await wait(50)
+      }
+    }
+
+    // Force `limit=5` in the URL so the assertion below is independent of
+    // collection/user-prefs defaultLimit (which can shift across UI refactors).
+    const filteredListUrl = () =>
+      `${postsUrl.list}?limit=5&where[and][0][title][like]=${encodeURIComponent(filteredTitlePrefix)}`
+
+    test('should preserve URL where filter on bulk unpublish across pages', async () => {
+      await seedFilteredAndOtherPosts()
+
+      await page.goto(filteredListUrl())
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('where')
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
+
+      await page.locator('input#select-all').check()
+      await page.locator('button#select-all-across-pages').click()
+
+      await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
+      await page.locator('#unpublish-posts #confirm-action').click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        `Updated ${seedCount} Posts successfully.`,
+      )
+
+      const stillPublishedOthers = await payload.find({
+        collection: postsSlug,
+        where: {
+          and: [{ title: { like: otherTitlePrefix } }, { _status: { equals: 'published' } }],
+        },
+      })
+      expect(stillPublishedOthers.totalDocs).toBe(seedCount)
+
+      const draftedFiltered = await payload.find({
+        collection: postsSlug,
+        where: {
+          and: [{ title: { like: filteredTitlePrefix } }, { _status: { equals: 'draft' } }],
+        },
+      })
+      expect(draftedFiltered.totalDocs).toBe(seedCount)
+    })
+
+    test('should preserve URL where filter on bulk publish across pages', async () => {
+      await seedFilteredAndOtherPosts({ filteredDraft: true, otherDraft: true })
+
+      await page.goto(filteredListUrl())
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('where')
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
+
+      await page.locator('input#select-all').check()
+      await page.locator('button#select-all-across-pages').click()
+
+      await page.locator('.list-selection__button[aria-label="Publish"]').click()
+      await page.locator('#publish-posts #confirm-action').click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        `Updated ${seedCount} Posts successfully.`,
+      )
+
+      const stillDraftOthers = await payload.find({
+        collection: postsSlug,
+        where: {
+          and: [{ title: { like: otherTitlePrefix } }, { _status: { equals: 'draft' } }],
+        },
+      })
+      expect(stillDraftOthers.totalDocs).toBe(seedCount)
+
+      const publishedFiltered = await payload.find({
+        collection: postsSlug,
+        where: {
+          and: [{ title: { like: filteredTitlePrefix } }, { _status: { equals: 'published' } }],
+        },
+      })
+      expect(publishedFiltered.totalDocs).toBe(seedCount)
+    })
+
+    test('should preserve URL where filter on bulk edit across pages', async () => {
+      await seedFilteredAndOtherPosts()
+      const editedDescription = 'Edited via filtered bulk edit'
+
+      await page.goto(filteredListUrl())
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('where')
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
+
+      await page.locator('input#select-all').check()
+      await page.locator('button#select-all-across-pages').click()
+
+      const { field, modal } = await selectFieldToEdit(page, {
+        fieldID: 'description',
+        fieldLabel: 'Description',
+      })
+      await field.fill(editedDescription)
+      await modal.locator('.form-submit button[type="submit"].edit-many__publish').click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        `Updated ${seedCount} Posts successfully.`,
+      )
+
+      const editedFiltered = await payload.find({
+        collection: postsSlug,
+        where: { description: { equals: editedDescription } },
+      })
+      expect(editedFiltered.totalDocs).toBe(seedCount)
+      expect(editedFiltered.docs.every((doc) => doc.title?.startsWith(filteredTitlePrefix))).toBe(
+        true,
+      )
+
+      const untouchedOthers = await payload.find({
+        collection: postsSlug,
+        where: {
+          and: [
+            { title: { like: otherTitlePrefix } },
+            { description: { not_equals: editedDescription } },
+          ],
+        },
+      })
+      expect(untouchedOthers.totalDocs).toBe(seedCount)
+    })
+  })
+
   test('should not override un-edited values if it has a defaultValue', async () => {
     await deleteAllPosts()
 
