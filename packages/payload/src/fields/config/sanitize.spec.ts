@@ -15,6 +15,7 @@ import {
   InvalidFieldRelationship,
   MissingFieldType,
 } from '../../errors/index.js'
+import { sanitizeConfig } from '../../config/sanitize.js'
 import { sanitizeFields } from './sanitize.js'
 import { CollectionConfig } from '../../index.js'
 import { describe, it, expect } from 'vitest'
@@ -785,5 +786,79 @@ describe('sanitizeFields', () => {
 
       expect(sanitizedField.admin?.readOnly).toBeUndefined()
     })
+  })
+})
+
+describe('blocks field sanitization — slug-only enforcement', () => {
+  it('throws when blockReferences key is present on a blocks field', async () => {
+    const config: Config = {
+      secret: 'test',
+      blocks: [{ slug: 'hero', fields: [{ name: 'title', type: 'text' }] }],
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'content',
+              type: 'blocks',
+              // @ts-expect-error — removed key, asserting runtime guard
+              blockReferences: ['hero'],
+              blocks: [],
+            },
+          ],
+        },
+      ],
+    }
+    await expect(sanitizeConfig(config)).rejects.toThrow(/blockReferences/)
+  })
+
+  it('throws when an inline Block object appears in field.blocks', async () => {
+    const config: Config = {
+      secret: 'test',
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'content',
+              type: 'blocks',
+              // @ts-expect-error — inline objects are no longer allowed
+              blocks: [{ slug: 'hero', fields: [{ name: 'title', type: 'text' }] }],
+            },
+          ],
+        },
+      ],
+    }
+    await expect(sanitizeConfig(config)).rejects.toThrow(/inline block definitions were removed/)
+  })
+
+  it('throws when a slug in field.blocks is not registered in config.blocks', async () => {
+    const config: Config = {
+      secret: 'test',
+      blocks: [],
+      collections: [
+        {
+          slug: 'posts',
+          fields: [{ name: 'content', type: 'blocks', blocks: ['hero'] as any }],
+        },
+      ],
+    }
+    await expect(sanitizeConfig(config)).rejects.toThrow(/not registered in config\.blocks/)
+  })
+
+  it('accepts slug-only references that resolve to registered blocks', async () => {
+    const config: Config = {
+      secret: 'test',
+      blocks: [{ slug: 'hero', fields: [{ name: 'title', type: 'text' }] }],
+      collections: [
+        {
+          slug: 'posts',
+          fields: [{ name: 'content', type: 'blocks', blocks: ['hero'] as any }],
+        },
+      ],
+    }
+    const result = await sanitizeConfig(config)
+    expect(result.blocks).toHaveLength(1)
+    expect(result.blocks?.[0]?.slug).toBe('hero')
   })
 })
