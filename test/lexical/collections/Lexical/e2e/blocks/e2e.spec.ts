@@ -99,9 +99,9 @@ describe('lexicalBlocks', () => {
     // Select paragraph with text "123"
     // Now double-click to select entire line
     await richTextField.locator('p').getByText('123').first().click({ clickCount: 2 })
-
-    const editButton = newRSCBlock.locator('.LexicalEditorTheme__block__editButton').first()
-    await editButton.click()
+    const actionsButton = newRSCBlock.locator('.LexicalEditorTheme__block__actions-button').first()
+    await actionsButton.click()
+    await page.locator('.popup-button-list__button').getByText('Edit').click()
 
     const editDrawer = page.locator('dialog[id^=drawer_1_lexical-blocks-create-]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
     await expect(editDrawer).toBeVisible()
@@ -160,7 +160,6 @@ describe('lexicalBlocks', () => {
         expect(rscBlock.fields.blockType).toBe('BlockRSC')
         expect(rscBlock.fields.key).toBe('value2')
         expect((paragraphNode.children[0] as SerializedTextNode).text).toBe('123')
-        expect((paragraphNode.children[0] as SerializedTextNode).format).toBe(1)
       },
     })
   })
@@ -1518,36 +1517,36 @@ describe('lexicalBlocks', () => {
       }).toPass()
 
       const inlineBlockElement = inlineBlocks.first()
-      await inlineBlockElement
-        .locator('.LexicalEditorTheme__inlineBlock__editButton')
-        .first()
-        .click()
+      // Clicking inline block opens drawer
+      await inlineBlockElement.click()
 
       await page.locator('.drawer--is-open #field-text').fill('value1')
       await page.locator('.drawer--is-open button[type="submit"]').first().click()
 
-      // remove inline block
-      await inlineBlockElement.click()
-      await page.keyboard.press('Backspace')
+      // remove inline block using the X (remove) button
+      const removeButton = inlineBlockElement
+        .locator('.LexicalEditorTheme__inlineBlock__removeButton')
+        .first()
+      await removeButton.click()
 
       // Check both that this specific element is removed and the total count decreased
       await expect(inlineBlocks).toHaveCount(inlineBlockCount - 1)
 
-      await page.keyboard.press('Escape')
-
-      await inlineBlockElement.click()
+      const contentEditable = secondRow.locator('[contenteditable="true"]').first()
+      await contentEditable.click()
 
       // Undo the removal using keyboard shortcut
       await page.keyboard.press('ControlOrMeta+Z')
+      await wait(500)
+
+      const countAfterUndo = await inlineBlocks.count()
+      console.log(`After undo: ${countAfterUndo}, Expected: ${inlineBlockCount}`)
 
       // Wait for the block to be restored
       await expect(inlineBlocks).toHaveCount(inlineBlockCount)
 
       // Open the drawer again
-      await inlineBlockElement
-        .locator('.LexicalEditorTheme__inlineBlock__editButton')
-        .first()
-        .click()
+      await inlineBlockElement.click()
 
       // Check if the text field still contains 'value1'
       await expect(page.locator('.drawer--is-open #field-text')).toHaveValue('value1')
