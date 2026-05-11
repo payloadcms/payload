@@ -321,6 +321,7 @@ export const frTranslations: DefaultTranslationsObject = {
     emailAddress: 'Adresse e-mail',
     emptyTrash: 'Vider la corbeille',
     emptyTrashLabel: 'Vider la corbeille {{label}}',
+    enhancedContrastMode: 'Mode de contraste amélioré',
     enterANumber: 'Saisissez un numéro',
     enterAValue: 'Entrez une valeur',
     error: 'Erreur',

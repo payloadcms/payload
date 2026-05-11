@@ -309,6 +309,7 @@ export const koTranslations: DefaultTranslationsObject = {
     emailAddress: '이메일 주소',
     emptyTrash: '휴지통 비우기',
     emptyTrashLabel: '{{label}} 휴지통 비우기',
+    enhancedContrastMode: '향상된 대비 모드',
     enterANumber: '숫자를 입력하십시오.',
     enterAValue: '값을 입력하세요',
     error: '오류',

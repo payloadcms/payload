@@ -314,6 +314,7 @@ export const itTranslations: DefaultTranslationsObject = {
     emailAddress: 'Indirizzo Email',
     emptyTrash: 'Svuota cestino',
     emptyTrashLabel: 'Svuota il cestino {{label}}',
+    enhancedContrastMode: 'Modalità Contrasto Migliorato',
     enterANumber: 'Inserire un numero',
     enterAValue: 'Inserisci un valore',
     error: 'Errore',

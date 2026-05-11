@@ -301,6 +301,7 @@ export const heTranslations: DefaultTranslationsObject = {
     emailAddress: 'כתובת דוא"ל',
     emptyTrash: 'רוקן את הזבל',
     emptyTrashLabel: 'רוקן את האשפה {{label}}',
+    enhancedContrastMode: 'מצב ניגודיות מוגברת',
     enterANumber: 'הזן מספר',
     enterAValue: 'הזן ערך',
     error: 'שגיאה',

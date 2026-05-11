@@ -302,6 +302,7 @@ export const arTranslations: DefaultTranslationsObject = {
     emailAddress: 'عنوان البريد الإلكتروني',
     emptyTrash: 'أفرغ القمامة',
     emptyTrashLabel: 'أفرغ سلة المحذوفات {{label}}',
+    enhancedContrastMode: 'وضع التباين المحسن',
     enterANumber: 'أدخل رقماً',
     enterAValue: 'أدخل قيمة',
     error: 'خطأ',

@@ -264,6 +264,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:globals',
   'general:goBack',
   'general:groupByLabel',
+  'general:enhancedContrastMode',
   'general:increment',
   'general:isEditing',
   'general:item',

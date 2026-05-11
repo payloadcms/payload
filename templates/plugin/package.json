@@ -56,7 +56,7 @@
     "@playwright/test": "1.58.2",
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.6.0",
-    "@types/node": "22.19.9",
+    "@types/node": "24.12.3",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "copyfiles": "2.4.1",
@@ -83,7 +83,7 @@
     "payload": "^3.82.1"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0",
+    "node": ">=24.15.0",
     "pnpm": "^9 || ^10"
   },
   "publishConfig": {

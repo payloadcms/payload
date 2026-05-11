@@ -23,7 +23,6 @@ import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
-import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
@@ -47,6 +46,7 @@ type Props = {
   readonly dateFNSKey: Language['dateFNSKey']
   readonly enableRouterCacheRefresh?: boolean
   readonly fallbackLang: I18nOptions['fallbackLanguage']
+  readonly highContrastMode: boolean
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
@@ -66,6 +66,7 @@ export const RootProvider: React.FC<Props> = ({
   dateFNSKey,
   enableRouterCacheRefresh = false,
   fallbackLang,
+  highContrastMode,
   isNavOpen,
   languageCode,
   languageOptions,
@@ -96,57 +97,44 @@ export const RootProvider: React.FC<Props> = ({
                     switchLanguageServerAction={switchLanguageServerAction}
                     translations={translations}
                   >
-                    <WindowInfoProvider
-                      breakpoints={{
-                        l: '(max-width: 1440px)',
-                        m: '(max-width: 1024px)',
-                        s: '(max-width: 768px)',
-                        xs: '(max-width: 400px)',
-                      }}
-                    >
-                      <ScrollInfoProvider>
-                        <SearchParamsProvider>
-                          <ModalProvider
-                            classPrefix="payload"
-                            transTime={0}
-                            zIndex="var(--z-modal)"
-                          >
-                            <CloseModalOnRouteChange />
-                            <AuthProvider permissions={permissions} user={user}>
-                              <PreferencesProvider>
-                                <HierarchyProvider>
-                                  <ThemeProvider theme={theme}>
-                                    <ParamsProvider>
-                                      <LocaleProvider locale={locale}>
-                                        <StepNavProvider>
-                                          <LoadingOverlayProvider>
-                                            <DocumentEventsProvider>
-                                              <NavProvider initialIsOpen={isNavOpen}>
-                                                <UploadHandlersProvider>
-                                                  <DndContext
-                                                    collisionDetection={pointerWithin}
-                                                    // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                    id={dndContextID}
-                                                  >
-                                                    {children}
-                                                  </DndContext>
-                                                </UploadHandlersProvider>
-                                              </NavProvider>
-                                            </DocumentEventsProvider>
-                                          </LoadingOverlayProvider>
-                                        </StepNavProvider>
-                                      </LocaleProvider>
-                                    </ParamsProvider>
-                                  </ThemeProvider>
-                                </HierarchyProvider>
-                              </PreferencesProvider>
-                              <ModalContainer />
-                              <StayLoggedInModal />
-                            </AuthProvider>
-                          </ModalProvider>
-                        </SearchParamsProvider>
-                      </ScrollInfoProvider>
-                    </WindowInfoProvider>
+                    <ScrollInfoProvider>
+                      <SearchParamsProvider>
+                        <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
+                          <CloseModalOnRouteChange />
+                          <AuthProvider permissions={permissions} user={user}>
+                            <PreferencesProvider>
+                              <HierarchyProvider>
+                                <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
+                                  <ParamsProvider>
+                                    <LocaleProvider locale={locale}>
+                                      <StepNavProvider>
+                                        <LoadingOverlayProvider>
+                                          <DocumentEventsProvider>
+                                            <NavProvider initialIsOpen={isNavOpen}>
+                                              <UploadHandlersProvider>
+                                                <DndContext
+                                                  collisionDetection={pointerWithin}
+                                                  // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                  id={dndContextID}
+                                                >
+                                                  {children}
+                                                </DndContext>
+                                              </UploadHandlersProvider>
+                                            </NavProvider>
+                                          </DocumentEventsProvider>
+                                        </LoadingOverlayProvider>
+                                      </StepNavProvider>
+                                    </LocaleProvider>
+                                  </ParamsProvider>
+                                </ThemeProvider>
+                              </HierarchyProvider>
+                            </PreferencesProvider>
+                            <ModalContainer />
+                            <StayLoggedInModal />
+                          </AuthProvider>
+                        </ModalProvider>
+                      </SearchParamsProvider>
+                    </ScrollInfoProvider>
                   </TranslationProvider>
                 </ClientFunctionProvider>
               </ConfigProvider>

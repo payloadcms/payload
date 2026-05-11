@@ -12,6 +12,7 @@ import React, { Suspense } from 'react'
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { NextRouterAdapter } from '../../elements/RouterAdapter/index.js'
+import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
@@ -37,6 +38,23 @@ export const metadata = {
 type RootLayoutProps = {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
+  /**
+   * Custom content to render inside the admin panel's `<head>` element.
+   *
+   * Use this to inject scripts, meta tags, or links — for example, analytics
+   * snippets via `next/script`, custom favicons, or preconnect hints.
+   *
+   * @example
+   * ```tsx
+   * import Script from 'next/script'
+   *
+   * <RootLayout
+   *   head={<Script src="https://example.com/analytics.js" strategy="afterInteractive" />}
+   *   {...rest}
+   * />
+   * ```
+   */
+  readonly head?: React.ReactNode
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
@@ -45,6 +63,7 @@ type RootLayoutProps = {
 export const RootLayout = ({
   children,
   config: configPromise,
+  head,
   htmlProps,
   importMap,
   serverFunction,
@@ -54,6 +73,7 @@ export const RootLayout = ({
   const content = (
     <RootLayoutContent
       config={configPromise}
+      head={head}
       htmlProps={htmlProps}
       importMap={importMap}
       serverFunction={serverFunction}
@@ -72,6 +92,7 @@ export const RootLayout = ({
 const RootLayoutContent = async ({
   children,
   config: configPromise,
+  head: headFromProps,
   htmlProps = {},
   importMap,
   serverFunction,
@@ -88,6 +109,12 @@ const RootLayoutContent = async ({
   } = await initReq({ configPromise, importMap, key: 'RootLayout' })
 
   const theme = getRequestTheme({
+    config,
+    cookies,
+    headers,
+  })
+
+  const highContrastMode = getRequestHighContrast({
     config,
     cookies,
     headers,
@@ -138,6 +165,7 @@ const RootLayoutContent = async ({
       className={[inter.variable, robotoMono.variable, htmlProps?.className]
         .filter(Boolean)
         .join(' ')}
+      data-enhanced-contrast={highContrastMode ? '' : undefined}
       data-theme={theme}
       dir={dir}
       lang={languageCode}
@@ -145,6 +173,7 @@ const RootLayoutContent = async ({
     >
       <head>
         <style>{`@layer payload-default, payload;`}</style>
+        {headFromProps}
       </head>
       <body>
         <RootProvider
@@ -152,6 +181,7 @@ const RootLayoutContent = async ({
           dateFNSKey={req.i18n.dateFNSKey}
           enableRouterCacheRefresh={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
           fallbackLang={config.i18n.fallbackLanguage}
+          highContrastMode={highContrastMode}
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}

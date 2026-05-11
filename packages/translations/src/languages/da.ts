@@ -310,6 +310,7 @@ export const daTranslations: DefaultTranslationsObject = {
     emailAddress: 'e-mailadresse',
     emptyTrash: 'Tøm skraldespanden',
     emptyTrashLabel: 'Tøm {{label}} skraldespanden',
+    enhancedContrastMode: 'Forbedret kontrasttilstand',
     enterANumber: 'Indtast et tal',
     enterAValue: 'Indtast en værdi',
     error: 'Fejl',
