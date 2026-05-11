@@ -9,8 +9,8 @@ import {
   isOperationDisabled,
 } from '../utils/disabledHelpers.js'
 
-const collectionOperations = ['find', 'create', 'update', 'delete'] as const
-const globalOperations = ['find', 'update'] as const
+export const collectionOperations = ['find', 'create', 'update', 'delete'] as const
+export const globalOperations = ['find', 'update'] as const
 
 /**
  * Returns MCP API key permission fields. One collapsible group per active

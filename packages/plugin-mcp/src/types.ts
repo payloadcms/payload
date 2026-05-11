@@ -7,6 +7,8 @@ import type {
   TypedUser,
 } from 'payload'
 
+import type { collectionOperations, globalOperations } from './collection/getAccessFields.js'
+
 /**
  * A JSON Schema describing tool / prompt input parameters. The plugin no longer
  * accepts zod schemas directly — bring your own zod (or any validator) and produce
@@ -363,7 +365,13 @@ export type MCPServerOptions = {
   serverInfo?: Partial<ConstructorParameters<typeof McpServer>[0]>
 }
 
+/**
+ * Shape of the 'payload-mcp-api-keys' collection, which stores API keys and their permissions.
+ */
 export type MCPAccess = {
+  /**
+   * Access for experimental auth tools
+   */
   auth?: {
     auth?: boolean
     forgotPassword?: boolean
@@ -372,18 +380,31 @@ export type MCPAccess = {
     unlock?: boolean
     verify?: boolean
   }
-  custom?: Record<string, boolean>
   /**
    * This is passed to all local API calls.
    */
   overrideAccess: boolean
+  /**
+   * Access for custom prompts
+   */
   'payload-mcp-prompt'?: Record<string, boolean>
+  /**
+   * Access for custom resources
+   */
   'payload-mcp-resource'?: Record<string, boolean>
+  /**
+   * Access for custom tools
+   */
   'payload-mcp-tool'?: Record<string, boolean>
   /**
    * The user associated with the API key, passed to local API calls
    */
   user: null | TypedUser
-} & Record<string, unknown>
-
-export type EntityConfig = MCPPluginConfig['collections'] | MCPPluginConfig['globals']
+} & Record<
+  string,
+  {
+    [operation in
+      | (typeof collectionOperations)[number]
+      | (typeof globalOperations)[number]]: boolean
+  }
+>
