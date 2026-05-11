@@ -5,7 +5,7 @@ import { APIError, configToJSONSchema, type PayloadRequest } from 'payload'
 import type { JsonSchemaObject, MCPAccess } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
-import { getActiveCollectionSlugs, isOperationDisabled } from '../utils/disabledHelpers.js'
+import { getEnabledCollectionSlugs, isOperationDisabled } from '../utils/disabledHelpers.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 import { getCollectionVirtualFieldNames } from '../utils/getVirtualFieldNames.js'
 import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
@@ -32,13 +32,13 @@ export const registerCollectionTools: (args: {
   try {
     {
       // Every collection is exposed by default — opt-out via plugin config or per-key checkboxes.
-      const activeCollectionSlugs = getActiveCollectionSlugs(
+      const activeCollectionSlugs = getEnabledCollectionSlugs(
         payload.config.collections,
         collectionsPluginConfig,
       )
 
       // Collection Operation Tools
-      activeCollectionSlugs.forEach((enabledCollectionSlug) => {
+      for (const enabledCollectionSlug of activeCollectionSlugs) {
         try {
           const rawSchema = configSchema.definitions?.[enabledCollectionSlug] as JsonSchemaObject
 
@@ -133,7 +133,7 @@ export const registerCollectionTools: (args: {
             500,
           )
         }
-      })
+      }
     }
   } catch (error) {
     throw new APIError(`Error initializing MCP handler: ${String(error)}`, 500)

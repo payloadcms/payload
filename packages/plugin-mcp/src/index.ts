@@ -2,7 +2,7 @@ import { definePlugin } from 'payload'
 
 import type { MCPAccess, MCPPluginConfig } from './types.js'
 
-import { createAPIKeysCollection } from './collection/createApiKeysCollection.js'
+import { getAPIKeysCollection } from './collection/index.js'
 import { mcpEndpoint } from './endpoints/mcp.js'
 
 declare module 'payload' {
@@ -34,9 +34,8 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
      * `payload-mcp-api-keys` collection is hard-excluded
      */
     ;(config.collections ??= []).push(
-      createAPIKeysCollection({
-        payloadCollections: config.collections,
-        payloadGlobals: config.globals,
+      getAPIKeysCollection({
+        config,
         pluginConfig,
       }),
     )

@@ -5,7 +5,7 @@ import { APIError, configToJSONSchema, type PayloadRequest } from 'payload'
 import type { JsonSchemaObject, MCPAccess } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
-import { getActiveGlobalSlugs, isOperationDisabled } from '../utils/disabledHelpers.js'
+import { getEnabledGlobalSlugs, isOperationDisabled } from '../utils/disabledHelpers.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 import { getGlobalVirtualFieldNames } from '../utils/getVirtualFieldNames.js'
 import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
@@ -28,7 +28,7 @@ export const registerGlobalTools: (args: {
   const globalsPluginConfig = pluginConfig.globals || {}
 
   // Global Operation Tools — also opt-out by default
-  const activeGlobalSlugs = getActiveGlobalSlugs(payload.config.globals, globalsPluginConfig)
+  const activeGlobalSlugs = getEnabledGlobalSlugs(payload.config.globals, globalsPluginConfig)
 
   activeGlobalSlugs.forEach((enabledGlobalSlug) => {
     try {

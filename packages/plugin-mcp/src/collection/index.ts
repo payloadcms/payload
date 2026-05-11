@@ -1,17 +1,15 @@
-import type { CollectionConfig, Field, GlobalConfig } from 'payload'
+import type { CollectionConfig, Config, Field, SanitizedConfig } from 'payload'
 
 import type { MCPPluginConfig } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
-import { createApiKeyFields } from './createApiKeyFields.js'
+import { getAccessFields } from './getAccessFields.js'
 
-export const createAPIKeysCollection = ({
-  payloadCollections,
-  payloadGlobals,
+export const getAPIKeysCollection = ({
+  config,
   pluginConfig,
 }: {
-  payloadCollections: CollectionConfig[] | undefined
-  payloadGlobals: GlobalConfig[] | undefined
+  config: Config | SanitizedConfig
   pluginConfig: MCPPluginConfig
 }): CollectionConfig => {
   const collection: CollectionConfig = {
@@ -51,15 +49,15 @@ export const createAPIKeysCollection = ({
         },
       },
 
-      ...createApiKeyFields({
-        configType: 'collection',
-        payloadEntities: payloadCollections,
+      ...getAccessFields({
+        config,
+        entityType: 'collection',
         pluginConfig,
       }),
 
-      ...createApiKeyFields({
-        configType: 'global',
-        payloadEntities: payloadGlobals,
+      ...getAccessFields({
+        config,
+        entityType: 'global',
         pluginConfig,
       }),
 

@@ -13,8 +13,6 @@ type EntityConfigEntry = {
   disabled?: boolean | Record<string, boolean | undefined>
 }
 
-const isFullyDisabled = (entry: EntityConfigEntry | undefined): boolean => entry?.disabled === true
-
 /**
  * Returns whether a specific operation on a collection / global is disabled in
  * the plugin config. Treats `undefined` and `false` as "not disabled" (allowed).
@@ -42,22 +40,23 @@ export const isOperationDisabled = (
  * everything except the API keys collection and any explicitly fully-disabled
  * collections in the plugin config.
  */
-export const getActiveCollectionSlugs = (
+export const getEnabledCollectionSlugs = (
   payloadCollections: CollectionConfig[] | undefined,
   pluginCollections: MCPPluginConfig['collections'],
 ): string[] =>
   (payloadCollections ?? [])
     .map((c) => c.slug)
-    .filter((slug) => !HARD_EXCLUDED_SLUGS.has(slug))
-    .filter((slug) => !isFullyDisabled(pluginCollections?.[slug]))
+    .filter(
+      (slug) => !HARD_EXCLUDED_SLUGS.has(slug) && pluginCollections?.[slug]?.disabled !== true,
+    )
 
 /**
  * Returns the slugs of every Payload global that should be exposed via MCP.
  */
-export const getActiveGlobalSlugs = (
+export const getEnabledGlobalSlugs = (
   payloadGlobals: { slug: string }[] | undefined,
   pluginGlobals: MCPPluginConfig['globals'],
 ): string[] =>
   (payloadGlobals ?? [])
     .map((g) => g.slug)
-    .filter((slug) => !isFullyDisabled(pluginGlobals?.[slug]))
+    .filter((slug) => pluginGlobals?.[slug]?.disabled !== true)
