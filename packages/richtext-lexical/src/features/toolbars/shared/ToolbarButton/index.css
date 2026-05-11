@@ -14,27 +14,27 @@
     padding: 0;
 
     &:hover:not(.active):not([data-pressing]) {
-      background-color: var(--bg-transparent-hover);
+      background-color: var(--color-bg-transparent-hover);
     }
 
     &:active:not(.active),
     &[data-pressing]:not(.active) {
-      background-color: var(--bg-transparent-pressed);
+      background-color: var(--color-bg-transparent-pressed);
     }
 
     &.active {
-      background-color: var(--bg-selected);
+      background-color: var(--color-bg-selected);
 
       &:hover {
-        background-color: var(--bg-selected-hover);
+        background-color: var(--color-bg-selected-hover);
       }
 
       &:active {
-        background-color: var(--bg-selected-pressed);
+        background-color: var(--color-bg-selected-pressed);
       }
 
       svg {
-        color: var(--icon-selected-default);
+        color: var(--color-icon-selected);
       }
 
       .icon {

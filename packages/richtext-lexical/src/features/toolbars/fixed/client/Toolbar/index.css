@@ -15,7 +15,7 @@
     position: sticky;
     z-index: 2;
     top: var(--doc-controls-height);
-    border: var(--stroke-width-small) solid var(--border-default);
+    border: var(--stroke-width-small) solid var(--lexical-border-color);
     border-collapse: unset;
     border-radius: var(--radius-medium) var(--radius-medium) 0 0;
     transform: translateY(var(--stroke-width-small));
@@ -34,7 +34,7 @@
     }
 
     &:before {
-      background: var(--bg-default);
+      background: var(--color-bg);
       opacity: 0.75;
     }
 
@@ -52,7 +52,7 @@
       }
 
       > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder {
-        top: var(--spacer-2);
+        top: var(--spacer-4);
       }
     }
   }
@@ -68,7 +68,7 @@
     .divider {
       width: var(--stroke-width-small);
       align-self: stretch;
-      background-color: var(--border-default);
+      background-color: var(--lexical-border-color);
     }
   }
 

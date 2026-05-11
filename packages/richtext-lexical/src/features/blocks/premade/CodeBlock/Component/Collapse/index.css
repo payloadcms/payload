@@ -7,20 +7,20 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-medium);
-  color: var(--icon-secondary);
+  color: var(--color-icon-secondary);
   box-sizing: border-box;
 
   &:hover {
-    color: var(--icon-default);
-    background-color: var(--bg-transparent-hover);
+    color: var(--color-icon);
+    background-color: var(--color-bg-transparent-hover);
   }
 
   &:active {
-    background-color: var(--bg-transparent-pressed);
+    background-color: var(--color-bg-transparent-pressed);
   }
 
   &:focus-visible {
-    outline: 1px solid var(--border-brand-strong);
+    outline: 1px solid var(--color-border-brand-strong);
     outline-offset: calc(var(--stroke-width-small) / -1);
   }
 }

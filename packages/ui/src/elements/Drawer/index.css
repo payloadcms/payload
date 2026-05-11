@@ -99,8 +99,8 @@
     display: flex;
     align-items: center;
     width: 100%;
-    border-bottom: 1px solid var(--border-default);
-    background: var(--bg-default);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
   }
 
   .drawer__header__title {

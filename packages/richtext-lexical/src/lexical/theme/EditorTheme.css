@@ -21,6 +21,14 @@
     color: var(--color-text);
   }
 
+  .LexicalEditorTheme > :first-child {
+    margin-top: 0;
+  }
+
+  .LexicalEditorTheme > :last-child {
+    margin-bottom: 0;
+  }
+
   .LexicalEditorTheme__ltr {
     text-align: left;
   }
@@ -46,7 +54,7 @@
     color: var(--color-text);
     margin-block: var(--spacer-3);
     margin-inline: var(--spacer-1);
-    border-inline-start-color: var(--border-default);
+    border-inline-start-color: var(--color-border);
     border-inline-start-width: var(--spacer-1);
     border-inline-start-style: solid;
     padding-inline-start: var(--spacer-2-5);
@@ -167,8 +175,8 @@
   }
 
   .LexicalEditorTheme__textCode {
-    border: var(--stroke-width-small) solid var(--border-default);
-    color: var(--text-default);
+    border: var(--stroke-width-small) solid var(--color-border);
+    color: var(--color-text);
     padding: var(--spacer-1);
     font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace;
     font-size: var(--text-body-medium-font-size);
@@ -179,7 +187,7 @@
   }
 
   .LexicalEditorTheme__link {
-    color: var(--text-brand);
+    color: var(--color-text-brand);
     text-decoration: underline;
     pointer-events: none;
   }
@@ -195,7 +203,7 @@
       position: absolute;
       top: -2px;
       width: var(--spacer-3);
-      border-top: var(--stroke-width-small) solid var(--text-default);
+      border-top: var(--stroke-width-small) solid var(--color-text);
       animation: CursorBlink 1.1s steps(2, start) infinite;
     }
   }
@@ -319,17 +327,17 @@
   .LexicalEditorTheme__listItemUnchecked:focus:before,
   .LexicalEditorTheme__listItemChecked:focus:before {
     outline: 0;
-    box-shadow: 0 0 0 2px var(--border-selected);
+    box-shadow: 0 0 0 2px var(--color-border-selected);
   }
 
   .LexicalEditorTheme__listItemUnchecked:before {
-    border: 1px solid var(--text-default);
-    background-color: var(--bg-default);
+    border: 1px solid var(--color-text);
+    background-color: var(--color-bg);
   }
 
   .LexicalEditorTheme__listItemChecked:before {
     border: none;
-    background-color: var(--bg-brand);
+    background-color: var(--color-bg-brand);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M11.5839 3.72266C11.7371 3.49298 12.0476 3.43085 12.2773 3.58399C12.5069 3.73716 12.569 4.04762 12.416 4.27735L7.41596 11.7773C7.33289 11.9019 7.19778 11.9833 7.04877 11.998C6.8999 12.0126 6.75223 11.9593 6.64642 11.8535L3.64642 8.85352C3.4512 8.65826 3.45119 8.34174 3.64642 8.14649C3.84169 7.95133 4.15822 7.95128 4.35346 8.14649L6.92182 10.7148L11.5839 3.72266Z' fill='white'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
@@ -347,5 +355,5 @@
 }
 
 .ContentEditable__root *::selection {
-  background: var(--bg-selected-hover) !important;
+  background: var(--color-bg-selected-hover) !important;
 }

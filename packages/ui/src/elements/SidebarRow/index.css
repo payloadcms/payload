@@ -32,17 +32,17 @@
     color: inherit;
 
     &:hover {
-      background: var(--bg-secondary);
+      background: var(--color-bg-secondary);
       text-decoration: none;
     }
   }
 
   .sidebar-row--selected {
     font-weight: var(--text-body-medium-strong-font-weight);
-    background: var(--bg-selected);
+    background: var(--color-bg-selected);
 
     &:hover {
-      background: var(--bg-selected);
+      background: var(--color-bg-selected);
     }
   }
 
@@ -51,7 +51,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: var(--icon-secondary);
+    color: var(--color-icon-secondary);
     width: var(--spacer-3);
     height: var(--spacer-3);
   }
@@ -61,10 +61,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: var(--text-default);
+    color: var(--color-text);
   }
 
   .sidebar-row--selected > .sidebar-row__title {
-    color: var(--text-default);
+    color: var(--color-text);
   }
 }

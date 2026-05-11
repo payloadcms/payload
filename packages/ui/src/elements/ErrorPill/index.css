@@ -12,8 +12,8 @@
     font-weight: var(--text-body-medium-font-weight);
     letter-spacing: var(--text-letter-spacing);
     text-align: center;
-    background: var(--bg-danger-default);
-    color: var(--text-danger-ondanger);
+    background: var(--color-bg-danger);
+    color: var(--color-text-ondanger);
     height: var(--spacer-3);
   }
 

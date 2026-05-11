@@ -32,7 +32,7 @@
     margin-bottom: var(--spacer-5);
 
     ::selection {
-      background: var(--bg-selected);
+      background: var(--color-bg-selected);
     }
 
     br::selection {
@@ -41,13 +41,13 @@
   }
 
   .LexicalEditorTheme__tableFrozenColumn tr > td:first-child {
-    background-color: var(--bg-default);
+    background-color: var(--color-bg);
     position: sticky;
     z-index: 2;
     left: 0;
   }
   .LexicalEditorTheme__tableFrozenColumn tr > th:first-child {
-    background-color: var(--bg-secondary);
+    background-color: var(--color-bg-secondary);
     position: sticky;
     z-index: 2;
     left: 0;
@@ -59,7 +59,7 @@
     top: 0;
     right: 0;
     height: 100%;
-    border-right: var(--stroke-width-small) solid var(--border-default);
+    border-right: var(--stroke-width-small) solid var(--color-border);
   }
 
   .LexicalEditorTheme__tableFrozenColumn
@@ -73,15 +73,15 @@
   }
 
   .LexicalEditorTheme__tableRowStriping tr:nth-child(even) {
-    background-color: var(--bg-hover);
+    background-color: var(--color-bg-hover);
   }
 
   .LexicalEditorTheme__tableSelected {
-    outline: 2px solid var(--border-selected);
+    outline: 2px solid var(--color-border-selected);
   }
 
   .LexicalEditorTheme__tableCell {
-    border: var(--stroke-width-small) solid var(--border-default);
+    border: var(--stroke-width-small) solid var(--color-border);
     vertical-align: top;
     text-align: start;
     padding: var(--spacer-2);
@@ -115,7 +115,7 @@
   }
 
   .LexicalEditorTheme__tableCellHeader {
-    background-color: var(--bg-secondary);
+    background-color: var(--color-bg-secondary);
     text-align: start;
   }
 
@@ -129,15 +129,15 @@
     right: calc(var(--stroke-width-small) / -1);
     bottom: calc(var(--stroke-width-small) / -1);
     top: calc(var(--stroke-width-small) / -1);
-    background-color: var(--bg-selected-default);
-    border: var(--stroke-width-small) solid var(--border-selected);
+    background-color: var(--color-bg-selected);
+    border: var(--stroke-width-small) solid var(--color-border-selected);
     opacity: 0.5;
     content: '';
     pointer-events: none;
   }
 
   .LexicalEditorTheme__tableCellHeader.LexicalEditorTheme__tableCellSelected::after {
-    background-color: var(--bg-selected-hover);
+    background-color: var(--color-bg-selected-hover);
   }
 
   .LexicalEditorTheme__tableAddColumns {
@@ -147,7 +147,7 @@
   .LexicalEditorTheme__tableAddColumns,
   .LexicalEditorTheme__tableAddRows {
     position: absolute;
-    background-color: var(--bg-secondary);
+    background-color: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
     animation: table-controls 0.2s ease;
     border: 0;
@@ -160,7 +160,7 @@
 
   .LexicalEditorTheme__tableAddColumns:hover,
   .LexicalEditorTheme__tableAddRows:hover {
-    background-color: var(--bg-default-secondary-hover);
+    background-color: var(--color-bg-secondary-hover);
   }
 
   .LexicalEditorTheme__tableAddRows {
@@ -181,7 +181,7 @@
     display: block;
     position: absolute;
     width: var(--stroke-width-small);
-    background-color: var(--border-selected);
+    background-color: var(--color-border-selected);
     height: 100%;
     top: 0;
   }
@@ -197,39 +197,39 @@
   }
 
   .LexicalEditorTheme__tableCellActionButton {
-    background-color: var(--bg-secondary);
+    background-color: var(--color-bg-secondary);
     display: block;
     border: 0;
     border-radius: var(--radius-full);
     width: var(--spacer-3);
     height: var(--spacer-3);
-    color: var(--text-default);
+    color: var(--color-text);
     cursor: pointer;
   }
 
   .LexicalEditorTheme__tableCellActionButton:hover {
-    background-color: var(--border-default);
+    background-color: var(--color-border);
   }
 
   html[data-theme='dark'] {
     .LexicalEditorTheme__tableCellHeader {
-      background-color: var(--bg-secondary);
+      background-color: var(--color-bg-secondary);
     }
 
     .LexicalEditorTheme__tableCellSelected::after {
-      background-color: var(--bg-selected-default);
+      background-color: var(--color-bg-selected);
       opacity: 0.5;
     }
 
     .LexicalEditorTheme__tableAddColumns,
     .LexicalEditorTheme__tableAddRows {
-      background-color: var(--bg-secondary);
+      background-color: var(--color-bg-secondary);
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M8 3C8.27614 3 8.5 3.22386 8.5 3.5V7.5H12.5C12.7761 7.5 13 7.72386 13 8C13 8.27614 12.7761 8.5 12.5 8.5H8.5V12.5C8.5 12.7761 8.27614 13 8 13C7.72386 13 7.5 12.7761 7.5 12.5V8.5H3.5C3.22386 8.5 3 8.27614 3 8C3 7.72386 3.22386 7.5 3.5 7.5H7.5V3.5C7.5 3.22386 7.72386 3 8 3Z' fill='white' fill-opacity='0.9'/%3E%3C/svg%3E");
     }
 
     .LexicalEditorTheme__tableAddColumns:hover,
     .LexicalEditorTheme__tableAddRows:hover {
-      background-color: var(--bg-default-secondary-hover);
+      background-color: var(--color-bg-secondary-hover);
     }
   }
 }

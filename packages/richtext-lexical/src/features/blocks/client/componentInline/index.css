@@ -9,7 +9,7 @@
       outline: unset !important;
 
       .LexicalEditorTheme__inlineBlock__container {
-        box-shadow: 0 0 0 2px var(--border-selected);
+        box-shadow: 0 0 0 2px var(--color-border-selected);
         outline: none;
       }
     }
@@ -25,8 +25,8 @@
     margin-left: var(--spacer-1);
     padding: 0;
     padding-inline-start: var(--spacer-2);
-    background: var(--bg-default);
-    outline: var(--stroke-width-small) solid var(--border-default);
+    background: var(--color-bg);
+    outline: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
     max-width: var(--inline-block-max-width);
     font-family: var(--font-body);
@@ -35,13 +35,13 @@
     cursor: pointer;
 
     &:hover {
-      outline: var(--stroke-width-small) solid var(--border-default);
+      outline: var(--stroke-width-small) solid var(--color-border);
     }
   }
 
   .LexicalEditorTheme__inlineBlock-not-found {
     max-width: var(--inline-block-not-found-max-width);
-    color: var(--text-danger);
+    color: var(--color-text-danger);
   }
 
   .LexicalEditorTheme__inlineBlock__wrap {
@@ -59,7 +59,7 @@
       margin: 2px;
 
       &:not(:disabled):hover {
-        background: var(--bg-hover);
+        background: var(--color-bg-hover);
       }
 
       & > * {
@@ -71,14 +71,14 @@
   .LexicalEditorTheme__inlineBlock__removeButton.btn {
     padding: 0;
     margin: 2px;
-    color: var(--icon-secondary);
+    color: var(--color-icon-secondary);
 
     line {
       stroke-width: var(--stroke-width-small);
     }
 
     &:disabled {
-      color: var(--icon-tertiary);
+      color: var(--color-icon-tertiary);
       pointer-events: none;
     }
   }
