@@ -377,47 +377,41 @@ export const sanitizeField = async ({
     }
   }
 
-  if (field.type === 'blocks' && field.blocks) {
-    if (field.blockReferences && field.blocks?.length) {
-      throw new Error('You cannot have both blockReferences and blocks in the same blocks field')
+  if (field.type === 'blocks') {
+    if ('blockReferences' in field) {
+      throw new InvalidConfiguration(
+        `Field "${field.name}": "blockReferences" was removed. Use "blocks: BlockSlug[]" with slugs registered in config.blocks.`,
+      )
     }
 
-    const blockSlugs: string[] = []
+    if (!Array.isArray(field.blocks)) {
+      throw new InvalidConfiguration(
+        `Field "${field.name}": "blocks" must be an array of registered block slugs.`,
+      )
+    }
 
-    for (const block of field.blockReferences ?? field.blocks) {
-      const blockSlug = typeof block === 'string' ? block : block.slug
-
-      if (blockSlugs.includes(blockSlug)) {
-        throw new DuplicateFieldName(blockSlug)
+    const seenSlugs = new Set<string>()
+    for (const entry of field.blocks) {
+      if (typeof entry !== 'string') {
+        const got =
+          entry && typeof entry === 'object' && 'slug' in entry
+            ? `inline block object with slug "${(entry as { slug: string }).slug}"`
+            : typeof entry
+        throw new InvalidConfiguration(
+          `Field "${field.name}": inline block definitions were removed. Register the block in config.blocks and reference it by slug. Got ${got}.`,
+        )
       }
 
-      blockSlugs.push(blockSlug)
-
-      if (typeof block === 'string') {
-        continue
+      if (seenSlugs.has(entry)) {
+        throw new DuplicateFieldName(entry)
       }
+      seenSlugs.add(entry)
 
-      if (block._sanitized === true) {
-        continue
+      if (!config.blocks?.some((b) => b.slug === entry)) {
+        throw new InvalidConfiguration(
+          `Field "${field.name}": block "${entry}" is not registered in config.blocks.`,
+        )
       }
-
-      block._sanitized = true
-      block.fields = block.fields.concat(baseBlockFields)
-      block.labels = !block.labels ? formatLabels(block.slug) : block.labels
-
-      block.fields = await sanitizeFields({
-        collectionConfig,
-        config,
-        existingFieldNames: new Set(),
-        fields: block.fields,
-        isTopLevelField: false,
-        parentIndexPath: '',
-        parentIsLocalized: (parentIsLocalized || field.localized)!,
-        parentSchemaPath: schemaPath + '.' + block.slug,
-        requireFieldLevelRichTextEditor,
-        richTextSanitizationPromises,
-        validRelationships,
-      })
     }
   }
 

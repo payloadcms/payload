@@ -1,14 +1,6 @@
 import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
-import type {
-  ArrayField,
-  Block,
-  BlocksField,
-  CheckboxField,
-  Field,
-  NumberField,
-  TextField,
-} from './types.js'
+import type { ArrayField, BlocksField, CheckboxField, Field, TextField } from './types.js'
 
 import { describe, expect, it } from 'vitest'
 
@@ -22,7 +14,34 @@ import { sanitizeConfig } from '../../config/sanitize.js'
 import { sanitizeFields } from './sanitize.js'
 
 describe('sanitizeFields', () => {
-  const config = {} as Config
+  const config: Config = {
+    blocks: [
+      {
+        slug: 'block',
+        fields: [{ name: 'blockField', type: 'text' }],
+      },
+      {
+        slug: 'number',
+        fields: [{ name: 'testNumber', type: 'number' }],
+      },
+      {
+        slug: 'number-with-disabled-block-name',
+        admin: { disableBlockName: true },
+        fields: [{ name: 'testNumber', type: 'number' }],
+      },
+      {
+        slug: 'relationshipBlock',
+        fields: [
+          {
+            name: 'My Relationship',
+            type: 'relationship',
+            label: 'my-relationship',
+            relationTo: 'some-collection',
+          },
+        ],
+      },
+    ],
+  } as unknown as Config
   const collectionConfig = {} as CollectionConfig
 
   it('should throw on missing type field', async () => {
@@ -92,26 +111,8 @@ describe('sanitizeFields', () => {
       {
         name: 'blocks',
         type: 'blocks',
-        blocks: [
-          {
-            slug: 'block',
-            fields: [
-              {
-                name: 'blockField',
-                type: 'text',
-              },
-            ],
-          },
-          {
-            slug: 'block',
-            fields: [
-              {
-                name: 'blockField',
-                type: 'text',
-              },
-            ],
-          },
-        ],
+        // @ts-expect-error — testing runtime duplicate-slug guard
+        blocks: ['block', 'block'],
       },
     ]
 
@@ -228,17 +229,8 @@ describe('sanitizeFields', () => {
           {
             name: 'noLabelBlock',
             type: 'blocks',
-            blocks: [
-              {
-                slug: 'number',
-                fields: [
-                  {
-                    name: 'testNumber',
-                    type: 'number',
-                  },
-                ],
-              },
-            ],
+            // @ts-expect-error — BlocksField.blocks is BlockSlug[]
+            blocks: ['number'],
             label: false,
           },
         ]
@@ -293,12 +285,8 @@ describe('sanitizeFields', () => {
         {
           name: 'specialBlock',
           type: 'blocks',
-          blocks: [
-            {
-              slug: 'number',
-              fields: [{ name: 'testNumber', type: 'number' }],
-            },
-          ],
+          // @ts-expect-error — BlocksField.blocks is BlockSlug[]
+          blocks: ['number'],
         },
       ]
 
@@ -318,8 +306,6 @@ describe('sanitizeFields', () => {
         plural: 'Special Blocks',
         singular: 'Special Block',
       })
-
-      expect((sanitizedField.blocks[0].fields[0] as NumberField).label).toStrictEqual('Test Number')
     })
   })
 
@@ -358,23 +344,13 @@ describe('sanitizeFields', () => {
 
     it('should not throw on valid relationship inside blocks', async () => {
       const validRelationships = ['some-collection']
-      const relationshipBlock: Block = {
-        slug: 'relationshipBlock',
-        fields: [
-          {
-            name: 'My Relationship',
-            type: 'relationship',
-            label: 'my-relationship',
-            relationTo: 'some-collection',
-          },
-        ],
-      }
 
       const fields: Field[] = [
         {
           name: 'layout',
           type: 'blocks',
-          blocks: [relationshipBlock],
+          // @ts-expect-error — BlocksField.blocks is BlockSlug[]
+          blocks: ['relationshipBlock'],
           label: 'Layout Blocks',
         },
       ]
@@ -416,32 +392,21 @@ describe('sanitizeFields', () => {
       }).rejects.toThrow(InvalidFieldRelationship)
     })
 
-    it('should throw on invalid relationship inside blocks', async () => {
+    it('should throw on unregistered block slug inside blocks field', async () => {
       const validRelationships = ['some-collection']
-      const relationshipBlock: Block = {
-        slug: 'relationshipBlock',
-        fields: [
-          {
-            name: 'My Relationship',
-            type: 'relationship',
-            label: 'my-relationship',
-            relationTo: 'not-valid',
-          },
-        ],
-      }
-
       const fields: Field[] = [
         {
           name: 'layout',
           type: 'blocks',
-          blocks: [relationshipBlock],
+          // @ts-expect-error — BlocksField.blocks is BlockSlug[]
+          blocks: ['unregisteredBlock'],
           label: 'Layout Blocks',
         },
       ]
 
       await expect(async () => {
         await sanitizeFields({ config, collectionConfig, fields, validRelationships })
-      }).rejects.toThrow(InvalidFieldRelationship)
+      }).rejects.toThrow(/not registered in config\.blocks/)
     })
 
     it('should throw on empty relationTo array', async () => {
@@ -476,32 +441,21 @@ describe('sanitizeFields', () => {
       }).rejects.toThrow('has an empty relationTo array')
     })
 
-    it('should throw on empty relationTo array inside blocks', async () => {
+    it('should throw on inline block object inside blocks field', async () => {
       const validRelationships = ['some-collection']
-      const relationshipBlock: Block = {
-        slug: 'relationshipBlock',
-        fields: [
-          {
-            name: 'My Relationship',
-            type: 'relationship',
-            label: 'my-relationship',
-            relationTo: [],
-          },
-        ],
-      }
-
       const fields: Field[] = [
         {
           name: 'layout',
           type: 'blocks',
-          blocks: [relationshipBlock],
+          // @ts-expect-error — inline block objects are no longer allowed
+          blocks: [{ slug: 'relationshipBlock', fields: [] }],
           label: 'Layout Blocks',
         },
       ]
 
       await expect(async () => {
         await sanitizeFields({ config, collectionConfig, fields, validRelationships })
-      }).rejects.toThrow('has an empty relationTo array')
+      }).rejects.toThrow(/inline block definitions were removed/)
     })
 
     it('should defaultValue of checkbox to false if required and undefined', async () => {
@@ -537,25 +491,13 @@ describe('sanitizeFields', () => {
     })
   })
   describe('blocks', () => {
-    it('should maintain admin.blockName true after sanitization', async () => {
+    it('should accept a block slug referencing a block with admin.disableBlockName: true', async () => {
       const fields: Field[] = [
         {
           name: 'noLabelBlock',
           type: 'blocks',
-          blocks: [
-            {
-              slug: 'number',
-              admin: {
-                disableBlockName: true,
-              },
-              fields: [
-                {
-                  name: 'testNumber',
-                  type: 'number',
-                },
-              ],
-            },
-          ],
+          // @ts-expect-error — BlocksField.blocks is BlockSlug[]
+          blocks: ['number-with-disabled-block-name'],
           label: false,
         },
       ]
@@ -569,26 +511,21 @@ describe('sanitizeFields', () => {
         })
       )[0] as BlocksField
 
-      const sanitizedBlock = sanitizedField.blocks[0]
+      // After Task 3, blocks field stores slug strings; block config is in config.blocks
+      const registeredBlock = config.blocks?.find(
+        (b) => b.slug === 'number-with-disabled-block-name',
+      )
 
-      expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(true)
+      expect(sanitizedField.name).toStrictEqual('noLabelBlock')
+      expect(registeredBlock?.admin?.disableBlockName).toStrictEqual(true)
     })
-    it('should default admin.disableBlockName to true after sanitization', async () => {
+    it('should accept a block slug referencing a block without admin.disableBlockName', async () => {
       const fields: Field[] = [
         {
           name: 'noLabelBlock',
           type: 'blocks',
-          blocks: [
-            {
-              slug: 'number',
-              fields: [
-                {
-                  name: 'testNumber',
-                  type: 'number',
-                },
-              ],
-            },
-          ],
+          // @ts-expect-error — BlocksField.blocks is BlockSlug[]
+          blocks: ['number'],
           label: false,
         },
       ]
@@ -602,9 +539,11 @@ describe('sanitizeFields', () => {
         })
       )[0] as BlocksField
 
-      const sanitizedBlock = sanitizedField.blocks[0]
+      // After Task 3, blocks field stores slug strings; block config is in config.blocks
+      const registeredBlock = config.blocks?.find((b) => b.slug === 'number')
 
-      expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(undefined)
+      expect(sanitizedField.name).toStrictEqual('noLabelBlock')
+      expect(registeredBlock?.admin?.disableBlockName).toStrictEqual(undefined)
     })
   })
 
