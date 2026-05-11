@@ -1,14 +1,17 @@
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import fs, { mkdtempSync } from 'node:fs'
-import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import fs from 'node:fs'
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const SKILL_SRC = path.resolve(process.cwd(), 'tools/claude-plugin/skills/payload')
+// Resolve the skill source relative to this file so behavior is independent of cwd.
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const SKILL_SRC = path.resolve(__dirname, '../../../tools/claude-plugin/skills/payload')
 
 export async function materialize({ starterConfig }: { starterConfig: string }): Promise<string> {
-  const workdir = mkdtempSync(path.join(os.tmpdir(), 'payload-eval-'))
+  const workdir = await mkdtemp(path.join(os.tmpdir(), 'payload-eval-'))
   await writeFile(path.join(workdir, 'payload.config.ts'), starterConfig, 'utf-8')
   return workdir
 }

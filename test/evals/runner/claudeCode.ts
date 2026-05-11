@@ -106,6 +106,14 @@ async function spawnAgent({
     child.stderr.on('data', (b: Buffer) => {
       log += b.toString()
     })
+    let resolved = false
+    const finish = (result: { exitCode: number; log: string }) => {
+      if (resolved) {
+        return
+      }
+      resolved = true
+      resolve(result)
+    }
     const timer = setTimeout(() => {
       try {
         if (child.pid !== undefined) {
@@ -114,20 +122,34 @@ async function spawnAgent({
           child.kill('SIGKILL')
         }
       } catch {
-        child.kill('SIGKILL')
+        try {
+          child.kill('SIGKILL')
+        } catch {
+          // child already gone
+        }
       }
       log += `\n[runner] killed after ${timeoutMs}ms timeout`
+      finish({ exitCode: -1, log })
     }, timeoutMs)
+    child.on('error', (err) => {
+      clearTimeout(timer)
+      log += `\n[runner] spawn error: ${err.message}`
+      finish({ exitCode: -1, log })
+    })
     child.on('exit', (code) => {
       clearTimeout(timer)
-      resolve({ exitCode: code ?? -1, log })
+      finish({ exitCode: code ?? -1, log })
     })
   })
 }
 
 async function ensureInit(): Promise<{ sandboxDir: string; version: string }> {
   if (initPromise === null) {
-    initPromise = initOnce()
+    initPromise = initOnce().catch((err: unknown) => {
+      // Reset so the next caller retries instead of seeing a cached rejection.
+      initPromise = null
+      throw err
+    })
   }
   return initPromise
 }
@@ -186,13 +208,29 @@ async function authProbe(
     child.stderr.on('data', (b: Buffer) => {
       stderr += b.toString()
     })
+    let resolved = false
+    const finish = (result: { ok: boolean; stderr: string; stdout: string }) => {
+      if (resolved) {
+        return
+      }
+      resolved = true
+      resolve(result)
+    }
     const timer = setTimeout(() => {
-      child.kill('SIGKILL')
-      resolve({ ok: false, stderr: stderr + '\n[probe timeout]', stdout })
+      try {
+        child.kill('SIGKILL')
+      } catch {
+        // child already gone
+      }
+      finish({ ok: false, stderr: stderr + '\n[probe timeout]', stdout })
     }, 30_000)
+    child.on('error', (err) => {
+      clearTimeout(timer)
+      finish({ ok: false, stderr: stderr + `\n[probe spawn error]: ${err.message}`, stdout })
+    })
     child.on('exit', (code) => {
       clearTimeout(timer)
-      resolve({ ok: code === 0, stderr, stdout })
+      finish({ ok: code === 0, stderr, stdout })
     })
   })
 }
