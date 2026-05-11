@@ -23,17 +23,17 @@
     top: var(--spacer-2);
     right: var(--spacer-2);
     border-radius: var(--radius-medium);
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     background: transparent;
     display: inline-block;
     cursor: pointer;
 
     &:hover {
-      background-color: var(--bg-default-secondary-hover);
+      background-color: var(--color-bg-secondary-hover);
     }
 
     &:active {
-      background-color: var(--bg-default-secondary-pressed);
+      background-color: var(--color-bg-secondary-pressed);
     }
   }
 
@@ -43,7 +43,7 @@
     display: flex;
     flex-direction: column;
     position: fixed;
-    background: var(--bg-menu);
+    background: var(--color-bg-menu);
     min-width: var(--menu-min-width);
     border-radius: var(--radius-large);
     padding: var(--spacer-2);
@@ -78,12 +78,12 @@
       text-align: left;
 
       &:hover {
-        background: var(--bg-brand-default);
+        background: var(--color-bg-brand);
         color: var(--color-white-1000);
       }
 
       &:active {
-        background: var(--bg-brand-pressed);
+        background: var(--color-bg-brand-pressed);
         color: var(--color-white-1000);
       }
     }

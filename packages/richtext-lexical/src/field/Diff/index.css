@@ -23,15 +23,15 @@
         bottom: 0;
         inset-inline-start: 0;
         width: var(--spacer-1);
-        background-color: var(--bg-secondary);
+        background-color: var(--color-bg-secondary);
       }
 
       &:has([data-match-type='create'])::after {
-        background-color: var(--bg-success-tertiary);
+        background-color: var(--color-bg-success-tertiary);
       }
 
       &:has([data-match-type='delete'])::after {
-        background-color: var(--bg-danger-tertiary);
+        background-color: var(--color-bg-danger-tertiary);
       }
     }
 

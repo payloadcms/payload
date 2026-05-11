@@ -9,21 +9,21 @@
     left: 0;
     top: 0;
     will-change: transform;
-    background-color: var(--bg-default);
+    background-color: var(--color-bg);
 
     &:active {
       cursor: grabbing;
     }
 
     &:hover {
-      background-color: var(--bg-hover);
+      background-color: var(--color-bg-hover);
       .icon {
         opacity: 1;
       }
     }
 
     &:active {
-      background-color: var(--bg-default-pressed);
+      background-color: var(--color-bg-pressed);
     }
 
     .icon {
@@ -56,7 +56,7 @@
 
   .draggable-block-target-line {
     pointer-events: none;
-    background: var(--border-selected);
+    background: var(--color-border-selected);
     border-radius: var(--radius-small);
     height: var(--spacer-1);
     position: absolute;

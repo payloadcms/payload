@@ -2,7 +2,7 @@
   .LexicalEditorTheme__block {
     margin: var(--spacer-3) 0;
     z-index: 1;
-    color: var(--text-default);
+    color: var(--color-text);
 
     &[data-lexical-decorator='true'] {
       width: auto;
@@ -45,13 +45,13 @@
 
   .LexicalEditorTheme__block--has-no-error {
     > .array-field__header .array-field__heading-with-error {
-      color: var(--text-default);
+      color: var(--color-text);
     }
   }
 
   .LexicalEditorTheme__block--has-error {
     > .array-field__header {
-      color: var(--text-danger);
+      color: var(--color-text-danger);
     }
   }
 
@@ -79,7 +79,7 @@
   .LexicalEditorTheme__block__removeButton.btn {
     margin: 0;
     &:hover {
-      background-color: var(--bg-secondary);
+      background-color: var(--color-bg-secondary);
     }
   }
 
@@ -88,7 +88,7 @@
     width: var(--spacer-4);
 
     &:hover {
-      background-color: var(--bg-secondary);
+      background-color: var(--color-bg-secondary);
     }
   }
 
@@ -118,7 +118,7 @@
 
   .LexicalEditorTheme__block__block-number {
     flex-shrink: 0;
-    color: var(--text-default);
+    color: var(--color-text);
   }
 
   .LexicalEditorTheme__block__block-number {
@@ -145,24 +145,24 @@
     align-self: flex-start;
 
     .btn {
-      color: var(--icon-tertiary);
+      color: var(--color-icon-tertiary);
       margin: 0;
 
       &:hover {
-        color: var(--text-default);
+        color: var(--color-text);
       }
     }
   }
 
   .LexicalEditorTheme__block-not-found {
-    color: var(--text-danger);
+    color: var(--color-text-danger);
   }
 
   html[data-theme='light'] {
     .blocks-field--has-error {
       .section-title__input,
       .blocks-field__heading-with-error {
-        color: var(--text-danger);
+        color: var(--color-text-danger);
       }
     }
   }
@@ -171,7 +171,7 @@
     .blocks-field--has-error {
       .section-title__input,
       .blocks-field__heading-with-error {
-        color: var(--text-danger);
+        color: var(--color-text-danger);
       }
     }
   }

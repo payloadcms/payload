@@ -17,7 +17,7 @@
       width: var(--spacer-3);
       height: var(--spacer-3);
       margin-right: var(--spacer-2);
-      border: var(--stroke-width-small) solid var(--text-default);
+      border: var(--stroke-width-small) solid var(--color-text);
       border-radius: var(--radius-medium);
       display: flex;
       align-items: center;

@@ -2,7 +2,7 @@
   .inline-toolbar-popup {
     display: flex;
     align-items: center;
-    background: var(--bg-default);
+    background: var(--color-bg);
     padding: 0 var(--spacer-1);
     gap: var(--spacer-1);
     vertical-align: middle;
@@ -29,7 +29,7 @@
     .divider {
       width: var(--stroke-width-small);
       align-self: stretch;
-      background-color: var(--border-default);
+      background-color: var(--lexical-border-color);
     }
   }
 

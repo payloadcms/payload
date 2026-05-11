@@ -83,8 +83,8 @@
   }
 
   .tooltip--position-top {
-    top: calc(-100% - var(--caret-size));
-    transform: translate3d(-50%, calc(var(--caret-size) * -1), 0);
+    top: 0;
+    transform: translate3d(-50%, calc(-1 * (100% + var(--caret-size))), 0);
 
     &::after {
       bottom: 1px;
