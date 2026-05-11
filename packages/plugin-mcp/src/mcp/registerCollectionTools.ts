@@ -51,10 +51,8 @@ export const registerCollectionTools: (args: {
             virtualFieldNames,
           )
 
-          const toolCapabilities = mcpAccess?.[`${toCamelCase(enabledCollectionSlug)}`] as Record<
-            string,
-            unknown
-          >
+          const toolCapabilities = mcpAccess?.[`${toCamelCase(enabledCollectionSlug)}`]
+
           // Allowed unless either layer says otherwise: plugin config disables the op,
           // or the API key explicitly unchecks it (`false`). `undefined` = allowed.
           const isAllowed = (op: 'create' | 'delete' | 'find' | 'update'): boolean =>
