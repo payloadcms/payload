@@ -312,6 +312,7 @@ export const caTranslations: DefaultTranslationsObject = {
     emailAddress: 'Addressa de correu electrònic',
     emptyTrash: 'Buida la paperera',
     emptyTrashLabel: 'Buideu la paperera {{label}}',
+    enhancedContrastMode: 'Mode de contrast augmentat',
     enterANumber: 'Introdueixi un nombre',
     enterAValue: 'Introdueix un valor',
     error: 'Error',

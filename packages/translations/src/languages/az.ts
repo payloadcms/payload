@@ -314,6 +314,7 @@ export const azTranslations: DefaultTranslationsObject = {
     emailAddress: 'Elektron poçt ünvanı',
     emptyTrash: 'Zibil qutusunu boşaltın',
     emptyTrashLabel: '{{label}} zibilini boşaltın',
+    enhancedContrastMode: 'Təkmilləşdirilmiş Kontrast Rejimi',
     enterANumber: 'Bir rəqəm daxil edin',
     enterAValue: 'Bir dəyər daxil edin',
     error: 'Xəta',

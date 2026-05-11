@@ -1,3 +1,5 @@
+export { EntityType } from '../admin/views/dashboard.js'
+
 export {
   generateCookie,
   generateExpiredPayloadCookie,
@@ -5,12 +7,12 @@ export {
   getCookieExpiration,
   parseCookies,
 } from '../auth/cookies.js'
-
 export { getLoginOptions } from '../auth/getLoginOptions.js'
 export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
 export { getFromImportMap } from '../bin/generateImportMap/utilities/getFromImportMap.js'
 export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
+
 export {
   BASE_36_DIGITS,
   generateKeyBetween,
@@ -64,6 +66,7 @@ export { validOperators, validOperatorSet } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 export { isImage } from '../uploads/isImage.js'
+export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
 export { applyLocaleFiltering } from '../utilities/applyLocaleFiltering.js'
 

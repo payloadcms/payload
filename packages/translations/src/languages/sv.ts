@@ -312,6 +312,7 @@ export const svTranslations: DefaultTranslationsObject = {
     emailAddress: 'E-postadress',
     emptyTrash: 'Töm papperskorgen',
     emptyTrashLabel: 'Töm {{label}} papperskorgen',
+    enhancedContrastMode: 'Förbättrat kontrastläge',
     enterANumber: 'Ange ett nummer',
     enterAValue: 'Ange ett värde',
     error: 'Fel',

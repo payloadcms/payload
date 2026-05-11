@@ -315,6 +315,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     emailAddress: 'ইমেইল ঠিকানা',
     emptyTrash: 'ট্র্যাশ খালি করুন',
     emptyTrashLabel: '{{label}} ট্র্যাশ খালি করুন',
+    enhancedContrastMode: 'উন্নত কন্ট্রাস্ট মোড',
     enterANumber: 'একটি সংখ্যা লিখুন',
     enterAValue: 'একটি মান লিখুন',
     error: 'ত্রুটি',

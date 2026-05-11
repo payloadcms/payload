@@ -314,6 +314,7 @@ export const myTranslations: DefaultTranslationsObject = {
     emailAddress: 'အီးမေးလ် လိပ်စာ',
     emptyTrash: 'Kosongkan tong sampah',
     emptyTrashLabel: 'Kosongkan {{label}} sampah',
+    enhancedContrastMode: 'အရောင်ကွဲပြားမှု တိုးမြှင့်ထားသော အခြေအနေ 모드',
     enterANumber: 'နံပါတ်တစ်ခု ထည့်ပါ',
     enterAValue: 'တန်ဖိုးတစ်ခုထည့်ပါ။',
     error: 'အမှား',

@@ -314,6 +314,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     emailAddress: 'ইমেইল ঠিকানা',
     emptyTrash: 'ট্র্যাশ খালি করুন',
     emptyTrashLabel: '{{label}} ফাঁকা করুন',
+    enhancedContrastMode: 'উন্নত কনট্রাস্ট মোড',
     enterANumber: 'একটি সংখ্যা প্রবেশ করুন',
     enterAValue: 'একটি মান লিখুন',
     error: 'ত্রুটি',

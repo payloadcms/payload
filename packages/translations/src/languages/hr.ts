@@ -310,6 +310,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     emailAddress: 'Email adresa',
     emptyTrash: 'Isprazni smeće',
     emptyTrashLabel: 'Isprazni {{label}} kantu za smeće',
+    enhancedContrastMode: 'Način poboljšanog kontrasta',
     enterANumber: 'Unesite broj',
     enterAValue: 'Unesi vrijednost',
     error: 'Greška',

@@ -315,6 +315,7 @@ export const esTranslations: DefaultTranslationsObject = {
     emailAddress: 'Dirección de Correo Electrónico',
     emptyTrash: 'Vaciar la papelera',
     emptyTrashLabel: 'Vaciar la basura {{label}}',
+    enhancedContrastMode: 'Modo de Contraste Mejorado',
     enterANumber: 'Ingrese un número',
     enterAValue: 'Introduce un valor',
     error: 'Error',

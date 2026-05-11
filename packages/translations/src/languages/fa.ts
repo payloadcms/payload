@@ -305,6 +305,7 @@ export const faTranslations: DefaultTranslationsObject = {
     emailAddress: 'آدرس ایمیل',
     emptyTrash: 'خالی کردن سطل زباله',
     emptyTrashLabel: 'خالی کردن سطل زباله {{label}}',
+    enhancedContrastMode: 'حالت کنتراست پیشرفته',
     enterANumber: 'یک عدد وارد کنید',
     enterAValue: 'یک مقدار وارد کنید',
     error: 'خطا',

@@ -313,6 +313,7 @@ export const idTranslations: DefaultTranslationsObject = {
     emailAddress: 'Alamat Email',
     emptyTrash: 'Kosongkan tempat sampah',
     emptyTrashLabel: 'Kosongkan tempat sampah {{label}}',
+    enhancedContrastMode: 'Mode Kontras Tinggi',
     enterANumber: 'Masukkan angka',
     enterAValue: 'Masukkan nilai',
     error: 'Kesalahan',

@@ -312,6 +312,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     emailAddress: 'Endereço de Email',
     emptyTrash: 'Esvaziar lixo',
     emptyTrashLabel: 'Esvazie o lixo {{label}}',
+    enhancedContrastMode: 'Modo de Contraste Aprimorado',
     enterANumber: 'Insira um número',
     enterAValue: 'Insira um valor',
     error: 'Erro',

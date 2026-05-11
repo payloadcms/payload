@@ -293,6 +293,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     emailAddress: '電子郵件地址',
     emptyTrash: '清空垃圾桶',
     emptyTrashLabel: '清空 {{label}} 垃圾桶',
+    enhancedContrastMode: '增強對比模式',
     enterANumber: '請輸入一個數字',
     enterAValue: '請輸入數值',
     error: '錯誤',

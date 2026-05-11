@@ -309,6 +309,7 @@ export const isTranslations: DefaultTranslationsObject = {
     emailAddress: 'Netfang',
     emptyTrash: 'Tæma rusl',
     emptyTrashLabel: 'Tæma {{label}} rusl',
+    enhancedContrastMode: 'Bætt andstæðurhamur',
     enterANumber: 'Sláðu inn tölu',
     enterAValue: 'Sláðu inn gildi',
     error: 'Villa',

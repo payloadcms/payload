@@ -309,6 +309,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     emailAddress: 'Адреса електронної пошти',
     emptyTrash: 'Очистити кошик',
     emptyTrashLabel: 'Очистити кошик для {{label}}',
+    enhancedContrastMode: 'Режим підвищеного контрасту',
     enterANumber: 'Введіть число',
     enterAValue: 'Введіть значення',
     error: 'Помилка',

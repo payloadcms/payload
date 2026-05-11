@@ -314,6 +314,7 @@ export const trTranslations: DefaultTranslationsObject = {
     emailAddress: 'E-posta adresi',
     emptyTrash: 'Çöpü Boşalt',
     emptyTrashLabel: '{{label}} çöp kutusunu boşaltın',
+    enhancedContrastMode: 'Gelişmiş Kontrast Modu',
     enterANumber: 'Bir sayı giriniz',
     enterAValue: 'Değer girin',
     error: 'Hata',

@@ -310,6 +310,7 @@ export const plTranslations: DefaultTranslationsObject = {
     emailAddress: 'Adres email',
     emptyTrash: 'Opróżnij kosz',
     emptyTrashLabel: 'Opróżnij śmieci {{label}}',
+    enhancedContrastMode: 'Tryb zwiększonego kontrastu',
     enterANumber: 'Wprowadź liczbę',
     enterAValue: 'Wpisz wartość',
     error: 'Błąd',

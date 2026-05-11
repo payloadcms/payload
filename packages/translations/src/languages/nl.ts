@@ -318,6 +318,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     emailAddress: 'E-maildres',
     emptyTrash: 'Prullenbak legen',
     emptyTrashLabel: 'Leeg de prullenbak van {{label}}',
+    enhancedContrastMode: 'Verbeterde Contrastmodus',
     enterANumber: 'Voer een getal in',
     enterAValue: 'Waarde invoeren',
     error: 'Fout',

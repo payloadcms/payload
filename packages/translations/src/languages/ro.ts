@@ -316,6 +316,7 @@ export const roTranslations: DefaultTranslationsObject = {
     emailAddress: 'Adresa de email',
     emptyTrash: 'Golește coșul de gunoi',
     emptyTrashLabel: 'Goliți coșul {{label}}',
+    enhancedContrastMode: 'Mod de contrast îmbunătățit',
     enterANumber: 'Introduceți un număr',
     enterAValue: 'Introduceți o valoare',
     error: 'Eroare',

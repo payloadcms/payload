@@ -295,6 +295,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     emailAddress: '电子邮件地址',
     emptyTrash: '清空垃圾箱',
     emptyTrashLabel: '清空 {{label}} 垃圾箱',
+    enhancedContrastMode: '增强对比度模式',
     enterANumber: '请输入一个数字',
     enterAValue: '输入一个值',
     error: '错误',

@@ -309,6 +309,7 @@ export const csTranslations: DefaultTranslationsObject = {
     emailAddress: 'E-mailová adresa',
     emptyTrash: 'Vyprázdnit koš',
     emptyTrashLabel: 'Vyprázdnit {{label}} koš',
+    enhancedContrastMode: 'Režim zvýšeného kontrastu',
     enterANumber: 'Zadejte číslo',
     enterAValue: 'Zadejte hodnotu',
     error: 'Chyba',

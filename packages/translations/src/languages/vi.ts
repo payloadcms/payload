@@ -311,6 +311,7 @@ export const viTranslations: DefaultTranslationsObject = {
     emailAddress: 'Địa chỉ Email',
     emptyTrash: 'Dọn thùng rác',
     emptyTrashLabel: 'Dọn thùng rác {{label}}',
+    enhancedContrastMode: 'Chế độ Tăng cường Độ tương phản',
     enterANumber: 'Nhập một số',
     enterAValue: 'Nhập một giá trị',
     error: 'Lỗi',

@@ -405,7 +405,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
-    "@types/node": "22.15.30",
+    "@types/node": "24.12.3",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
@@ -424,7 +424,7 @@
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=24.15.0"
   },
   "publishConfig": {
     "exports": {

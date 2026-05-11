@@ -309,6 +309,7 @@ export const taTranslations: DefaultTranslationsObject = {
     emailAddress: 'மின்னஞ்சல் முகவரி',
     emptyTrash: 'குப்பையை காலி செய்',
     emptyTrashLabel: '{{label}} குப்பையை காலி செய்',
+    enhancedContrastMode: 'மேம்படுத்தப்பட்ட எதிர்மை பயன்முறை',
     enterANumber: 'ஒரு எண்ணை உள்ளிடவும்',
     enterAValue: 'ஒரு மதிப்பை உள்ளிடவும்',
     error: 'பிழை',

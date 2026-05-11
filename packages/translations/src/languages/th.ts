@@ -305,6 +305,7 @@ export const thTranslations: DefaultTranslationsObject = {
     emailAddress: 'อีเมล',
     emptyTrash: 'ลบถังขยะ',
     emptyTrashLabel: 'ลบ {{label}} ที่อยู่ในถังขยะ',
+    enhancedContrastMode: 'โหมดความเปรียบต่างที่เพิ่มขึ้น',
     enterANumber: 'กรุณากรอกตัวเลข',
     enterAValue: 'ระบุค่า',
     error: 'ข้อผิดพลาด',

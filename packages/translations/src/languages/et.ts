@@ -309,6 +309,7 @@ export const etTranslations: DefaultTranslationsObject = {
     emailAddress: 'E-posti aadress',
     emptyTrash: 'Tühjenda prügikast',
     emptyTrashLabel: 'Tühjenda {{label}} prügikast',
+    enhancedContrastMode: 'Tõhustatud kontrastsuse režiim',
     enterANumber: 'Sisestage number',
     enterAValue: 'Sisesta väärtus',
     error: 'Viga',

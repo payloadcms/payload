@@ -70,13 +70,17 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
           params.append('limit', '250')
 
           const collection = collections.find((c) => c.slug === slug)
-          if (collection.admin.enableListViewSelectAPI) {
-            const fieldToSelect = collection.admin.useAsTitle ?? 'id'
-            select[fieldToSelect] = true
 
-            if (collection.upload) {
-              appendUploadSelectFields({ collectionConfig: collection, select })
-            }
+          if (!collection) {
+            return
+          }
+
+          const fieldToSelect = collection.admin.useAsTitle ?? 'id'
+
+          select[fieldToSelect] = true
+
+          if (collection.upload) {
+            appendUploadSelectFields({ collectionConfig: collection, select })
           }
 
           if (locale) {

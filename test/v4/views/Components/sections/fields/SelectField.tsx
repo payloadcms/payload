@@ -12,7 +12,7 @@ const options = [
 ]
 
 export const SelectFieldSection: React.FC = () => (
-  <Section id="select-field" selectedComponent="select-field" title="Select Field">
+  <Section id="select-field" selectedComponent="select-field" title="Select">
     <Variant>
       <SelectInput
         label="Default"

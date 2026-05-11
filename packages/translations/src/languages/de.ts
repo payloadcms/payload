@@ -319,6 +319,7 @@ export const deTranslations: DefaultTranslationsObject = {
     emailAddress: 'E-Mail-Adresse',
     emptyTrash: 'Papierkorb leeren',
     emptyTrashLabel: '{{label}} Papierkorb leeren',
+    enhancedContrastMode: 'Modus für erhöhten Kontrast',
     enterANumber: 'Geben Sie eine Zahl ein',
     enterAValue: 'Gib einen Wert ein',
     error: 'Fehler',
