@@ -26,6 +26,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import ArrayFields from './collections/Array/index.js'
+import Autosave from './collections/Autosave/index.js'
 import BlocksFields from './collections/Blocks/index.js'
 import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
@@ -87,6 +88,7 @@ export const collections: CollectionConfig[] = [
   Uploads,
   UploadFields,
   DraftVersions,
+  Autosave,
 ]
 
 export const baseConfig: Partial<Config> = {

@@ -74,6 +74,10 @@
       display: flex;
       align-items: center;
       margin: 0;
+
+      &:empty {
+        display: none;
+      }
     }
 
     &__value-wrap {

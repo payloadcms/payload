@@ -94,6 +94,7 @@ export interface Config {
     uploads: Upload;
     'upload-fields': UploadField;
     'draft-versions': DraftVersion;
+    autosave: Autosave;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -128,6 +129,7 @@ export interface Config {
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'upload-fields': UploadFieldsSelect<false> | UploadFieldsSelect<true>;
     'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
+    autosave: AutosaveSelect<false> | AutosaveSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1082,6 +1084,17 @@ export interface DraftVersion {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave".
+ */
+export interface Autosave {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1211,6 +1224,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'draft-versions';
         value: string | DraftVersion;
+      } | null)
+    | ({
+        relationTo: 'autosave';
+        value: string | Autosave;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1845,6 +1862,16 @@ export interface DraftVersionsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   author?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave_select".
+ */
+export interface AutosaveSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
