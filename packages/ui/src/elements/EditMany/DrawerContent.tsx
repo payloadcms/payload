@@ -204,6 +204,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
         schemaPath: collection.slug,
         select,
         signal: controller.signal,
+        skipConditionChecks: true,
         skipValidation: !submitted,
       })
 
@@ -303,6 +304,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
             return acc
           }, {} as SelectType),
         ),
+        skipConditionChecks: true,
         skipValidation: true,
       })
 
