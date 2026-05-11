@@ -2,27 +2,19 @@
 
 import React, { useMemo, useState } from 'react'
 
+import type { Variant } from '../../variant.js'
 import type { Audience } from './audience.js'
 import type { RenderedCode } from './codeDiff.js'
 import type { EvalEntry, RunSnapshot } from './index.js'
 
+import { getVariant as getVariantFromResult } from '../../variant.js'
 import { AUDIENCE_CONFIG } from './audience.js'
 import { CompareTable } from './CompareTable.js'
 
-export type Variant = 'agent-baseline' | 'agent-skill' | 'baseline' | 'skill'
+export type { Variant }
 
 export function getVariant(entry: EvalEntry): null | Variant {
-  const r = entry.result
-  if (r.runnerKind === 'claude-code') {
-    return r.skillInstall === 'embedded' ? 'agent-skill' : 'agent-baseline'
-  }
-  if (r.systemPromptKey === 'codegenNoSkill') {
-    return 'baseline'
-  }
-  if (!r.modelId) {
-    return null
-  }
-  return 'skill'
+  return getVariantFromResult(entry.result)
 }
 
 function VariantBadge({ variant }: { variant: null | Variant }) {

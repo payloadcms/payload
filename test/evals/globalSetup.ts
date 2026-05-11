@@ -4,6 +4,10 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+import type { Variant } from './variant.js'
+
+import { getVariant } from './variant.js'
+
 type CacheEntry = {
   result: {
     assertionErrors?: string[]
@@ -29,26 +33,11 @@ type SnapshotResult = {
   type: 'codegen'
 }
 
-type Variant = 'agent-baseline' | 'agent-skill' | 'baseline' | 'skill'
-
 const ENV_VARIANT_TO_INTERNAL: Record<string, Variant> = {
   'agent-claude-code': 'agent-skill',
   'agent-claude-code-baseline': 'agent-baseline',
   baseline: 'baseline',
   skill: 'skill',
-}
-
-function getEntryVariant(result: CacheEntry['result']): null | Variant {
-  if (result.runnerKind === 'claude-code') {
-    return result.skillInstall === 'embedded' ? 'agent-skill' : 'agent-baseline'
-  }
-  if (result.systemPromptKey === 'codegenNoSkill') {
-    return 'baseline'
-  }
-  if (!result.modelId) {
-    return null
-  }
-  return 'skill'
 }
 
 export function setup() {
@@ -79,7 +68,7 @@ export function teardown() {
       if (raw.version !== 1) {
         continue
       }
-      const entryVariant = getEntryVariant(raw.result)
+      const entryVariant = getVariant(raw.result)
       if (entryVariant !== variant) {
         continue
       }
