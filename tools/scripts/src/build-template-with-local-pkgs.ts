@@ -56,7 +56,7 @@ async function main() {
 
   await fs.writeFile(packageJsonPath, JSON.stringify(initialPackageJsonObj, null, 2))
 
-  execSync('pnpm add ./*.tgz --ignore-workspace', execOpts)
+  execSync('pnpm add ./*.tgz --ignore-workspace --ignore-scripts', execOpts)
   execSync('pnpm install --ignore-workspace', execOpts)
 
   const packageJson = await fs.readFile(packageJsonPath, 'utf-8')
@@ -79,7 +79,7 @@ async function main() {
   })
 
   // Write package.json back to disk
-  packageJsonObj.pnpm = { overrides }
+  packageJsonObj.pnpm = { ...packageJsonObj.pnpm, overrides }
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
 
   execSync('pnpm install --no-frozen-lockfile --ignore-workspace', execOpts)

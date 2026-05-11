@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "ci": "payload migrate && pnpm build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
@@ -15,21 +16,20 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
-    "ci": "payload migrate && pnpm build"
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@payloadcms/db-vercel-postgres": "3.84.1",
     "@payloadcms/next": "3.84.1",
     "@payloadcms/richtext-lexical": "3.84.1",
+    "@payloadcms/storage-vercel-blob": "3.84.1",
     "@payloadcms/ui": "3.84.1",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "16.2.6",
     "payload": "3.84.1",
     "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "@payloadcms/db-vercel-postgres": "3.84.1",
-    "@payloadcms/storage-vercel-blob": "3.84.1"
+    "react-dom": "19.2.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -48,15 +48,16 @@
     "vite-tsconfig-paths": "6.0.5",
     "vitest": "4.0.18"
   },
+  "packageManager": "pnpm@11.0.8",
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "sharp",
+      "bufferutil",
       "esbuild",
+      "sharp",
       "unrs-resolver"
     ]
-  },
-  "packageManager": "pnpm@11.0.8"
+  }
 }
