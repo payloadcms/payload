@@ -27,6 +27,7 @@
 
     &__localizer-spacing {
       visibility: hidden;
+      width: calc(var(--base) * 0.5);
     }
 
     &__bg {
@@ -188,6 +189,13 @@
       &__actions {
         max-width: 150px;
         margin-right: 0;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+      }
+
+      &__actions-wrapper {
+        gap: calc(var(--base) / 4);
+        margin-right: calc(var(--base) / 2);
       }
     }
   }
