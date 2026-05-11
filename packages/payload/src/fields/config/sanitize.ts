@@ -552,7 +552,10 @@ export const sanitizeField = async ({
     const virtualField = field
     const configFields = (collectionConfig || globalConfig)?.fields
     if (configFields) {
-      let flattenFields = flattenAllFields({ fields: configFields })
+      let flattenFields = flattenAllFields({
+        config: config as unknown as SanitizedConfig,
+        fields: configFields,
+      })
       const paths = field.virtual.split('.')
       let isHasMany = false
 
@@ -592,7 +595,10 @@ export const sanitizeField = async ({
             (e) => e.slug === foundField.relationTo,
           )
           if (relatedCollection) {
-            flattenFields = flattenAllFields({ fields: relatedCollection.fields })
+            flattenFields = flattenAllFields({
+              config: config as unknown as SanitizedConfig,
+              fields: relatedCollection.fields,
+            })
           }
         }
       }

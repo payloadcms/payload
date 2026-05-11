@@ -1,10 +1,32 @@
 import { assert } from 'ts-essentials'
 import { describe, it, expect } from 'vitest'
+import type {
+  FlattenedArrayField,
+  FlattenedBlock,
+  FlattenedGroupField,
+} from '../fields/config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
 import { flattenAllFields } from './flattenAllFields.js'
 import { getFieldByPath } from './getFieldByPath.js'
-import type { FlattenedArrayField, FlattenedGroupField } from '../fields/config/types.js'
+
+const block1: FlattenedBlock = {
+  slug: 'block1',
+  fields: [{ name: 'text1', type: 'text' }],
+  flattenedFields: [{ name: 'text1', type: 'text' }],
+}
+
+const block2: FlattenedBlock = {
+  slug: 'block2',
+  fields: [{ name: 'text2', type: 'text' }],
+  flattenedFields: [{ name: 'text2', type: 'text' }],
+}
+
+const mockConfig = {
+  blocks: [block1, block2],
+} as unknown as SanitizedConfig
 
 const fields = flattenAllFields({
+  config: mockConfig,
   fields: [
     {
       type: 'text',
@@ -64,26 +86,7 @@ const fields = flattenAllFields({
     {
       type: 'blocks',
       name: 'blocks',
-      blocks: [
-        {
-          slug: 'block1',
-          fields: [
-            {
-              name: 'text1',
-              type: 'text',
-            },
-          ],
-        },
-        {
-          slug: 'block2',
-          fields: [
-            {
-              name: 'text2',
-              type: 'text',
-            },
-          ],
-        },
-      ],
+      blocks: ['block1', 'block2'],
     },
   ],
 })

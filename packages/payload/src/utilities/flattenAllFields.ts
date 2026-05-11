@@ -1,5 +1,5 @@
+import type { SanitizedConfig } from '../config/types.js'
 import type {
-  Block,
   Field,
   FlattenedBlock,
   FlattenedBlocksField,
@@ -9,11 +9,17 @@ import type {
 
 import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 
-export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
+export const flattenBlock = ({
+  block,
+  config,
+}: {
+  block: { [key: string]: unknown; fields: Field[]; slug: string }
+  config: SanitizedConfig
+}): FlattenedBlock => {
   return {
     ...block,
-    flattenedFields: flattenAllFields({ fields: block.fields }),
-  }
+    flattenedFields: flattenAllFields({ config, fields: block.fields }),
+  } as FlattenedBlock
 }
 
 const flattenedFieldsCache = new Map<Field[], FlattenedField[]>()
@@ -21,14 +27,17 @@ const flattenedFieldsCache = new Map<Field[], FlattenedField[]>()
 /**
  * Flattens all fields in a collection, preserving the nested field structure.
  * @param cache
+ * @param config
  * @param fields
  */
 export const flattenAllFields = ({
   cache,
+  config,
   fields,
 }: {
   /** Allows you to get FlattenedField[] from Field[] anywhere without performance overhead by caching. */
   cache?: boolean
+  config: SanitizedConfig
   fields: Field[]
 }): FlattenedField[] => {
   if (cache) {
@@ -45,9 +54,12 @@ export const flattenAllFields = ({
       case 'array':
       case 'group': {
         if (fieldAffectsData(field)) {
-          result.push({ ...field, flattenedFields: flattenAllFields({ fields: field.fields }) })
+          result.push({
+            ...field,
+            flattenedFields: flattenAllFields({ config, fields: field.fields }),
+          })
         } else {
-          for (const nestedField of flattenAllFields({ fields: field.fields })) {
+          for (const nestedField of flattenAllFields({ config, fields: field.fields })) {
             result.push(nestedField)
           }
         }
@@ -56,29 +68,23 @@ export const flattenAllFields = ({
 
       case 'blocks': {
         const blocks: FlattenedBlock[] = []
-        let blockReferences: (FlattenedBlock | string)[] | undefined = undefined
-        if (field.blockReferences) {
-          blockReferences = []
-          for (const block of field.blockReferences) {
-            if (typeof block === 'string') {
-              blockReferences.push(block)
-              continue
-            }
-            blockReferences.push(flattenBlock({ block }))
+        for (const entry of field.blocks) {
+          if (typeof entry !== 'string') {
+            throw new Error(
+              `flattenAllFields: expected block slug string in field "${field.name}", got ${typeof entry}`,
+            )
           }
-        } else {
-          for (const block of field.blocks) {
-            if (typeof block === 'string') {
-              blocks.push(block)
-              continue
-            }
-            blocks.push(flattenBlock({ block }))
+          const registeredBlock = config.blocks?.find((b) => b.slug === entry)
+          if (!registeredBlock) {
+            throw new Error(
+              `flattenAllFields: block "${entry}" referenced by field "${field.name}" is not registered in config.blocks`,
+            )
           }
+          blocks.push(registeredBlock)
         }
 
         const resultField: FlattenedBlocksField = {
           ...field,
-          blockReferences,
           blocks,
         }
 
@@ -88,7 +94,7 @@ export const flattenAllFields = ({
 
       case 'collapsible':
       case 'row': {
-        for (const nestedField of flattenAllFields({ fields: field.fields })) {
+        for (const nestedField of flattenAllFields({ config, fields: field.fields })) {
           result.push(nestedField)
         }
         break
@@ -102,14 +108,14 @@ export const flattenAllFields = ({
       case 'tabs': {
         for (const tab of field.tabs) {
           if (!tabHasName(tab)) {
-            for (const nestedField of flattenAllFields({ fields: tab.fields })) {
+            for (const nestedField of flattenAllFields({ config, fields: tab.fields })) {
               result.push(nestedField)
             }
           } else {
             result.push({
               ...tab,
               type: 'tab',
-              flattenedFields: flattenAllFields({ fields: tab.fields }),
+              flattenedFields: flattenAllFields({ config, fields: tab.fields }),
             })
           }
         }

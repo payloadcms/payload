@@ -189,7 +189,10 @@ export const sanitizeGlobal = async (
     })
   }
 
-  ;(global as SanitizedGlobalConfig).flattenedFields = flattenAllFields({ fields: global.fields })
+  ;(global as SanitizedGlobalConfig).flattenedFields = flattenAllFields({
+    config: config as unknown as SanitizedConfig,
+    fields: global.fields,
+  })
 
   return global as SanitizedGlobalConfig
 }

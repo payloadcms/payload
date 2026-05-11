@@ -109,7 +109,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
               blocks: blockConfigs.map((block) => {
                 return {
                   ...block,
-                  flattenedFields: flattenAllFields({ fields: block.fields }),
+                  flattenedFields: flattenAllFields({ config: config!, fields: block.fields }),
                 }
               }),
             })
@@ -121,7 +121,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
               blocks: inlineBlockConfigs.map((block) => {
                 return {
                   ...block,
-                  flattenedFields: flattenAllFields({ fields: block.fields }),
+                  flattenedFields: flattenAllFields({ config: config!, fields: block.fields }),
                 }
               }),
             })

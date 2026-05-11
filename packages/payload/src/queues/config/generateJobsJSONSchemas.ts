@@ -41,7 +41,7 @@ export function generateJobsJSONSchemas(
       if (task?.inputSchema?.length) {
         const inputJsonSchema = fieldsToJSONSchema(
           collectionIDFieldTypes,
-          flattenAllFields({ fields: task.inputSchema }),
+          flattenAllFields({ config, fields: task.inputSchema }),
           interfaceNameDefinitions,
           config,
           i18n,
@@ -60,7 +60,7 @@ export function generateJobsJSONSchemas(
       if (task?.outputSchema?.length) {
         const outputJsonSchema = fieldsToJSONSchema(
           collectionIDFieldTypes,
-          flattenAllFields({ fields: task.outputSchema }),
+          flattenAllFields({ config, fields: task.outputSchema }),
           interfaceNameDefinitions,
           config,
           i18n,
@@ -127,7 +127,7 @@ export function generateJobsJSONSchemas(
       if (workflow?.inputSchema?.length) {
         const inputJsonSchema = fieldsToJSONSchema(
           collectionIDFieldTypes,
-          flattenAllFields({ fields: workflow.inputSchema }),
+          flattenAllFields({ config, fields: workflow.inputSchema }),
           interfaceNameDefinitions,
           config,
           i18n,

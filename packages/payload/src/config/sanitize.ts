@@ -246,7 +246,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         validRelationships,
       })
 
-      const flattenedSanitizedBlock = flattenBlock({ block })
+      const flattenedSanitizedBlock = flattenBlock({
+        block,
+        config: config as unknown as SanitizedConfig,
+      })
 
       config.blocks.push(flattenedSanitizedBlock)
     }
@@ -323,7 +326,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       joinFieldPathsByCollection,
     )
     // Regenerate flattenedFields since we added new fields
-    collection.flattenedFields = flattenAllFields({ fields: collection.fields })
+    collection.flattenedFields = flattenAllFields({
+      config: config as unknown as SanitizedConfig,
+      fields: collection.fields,
+    })
   }
 
   // Add endpoint if any orderable features exist

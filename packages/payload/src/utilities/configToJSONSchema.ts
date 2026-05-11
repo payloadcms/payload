@@ -183,7 +183,7 @@ function generateWidgetSchemas({
     if (widget.fields?.length) {
       const widgetFieldSchemas = fieldsToJSONSchema(
         collectionIDFieldTypes,
-        flattenAllFields({ fields: widget.fields }),
+        flattenAllFields({ config, fields: widget.fields }),
         interfaceNameDefinitions,
         config,
         i18n,

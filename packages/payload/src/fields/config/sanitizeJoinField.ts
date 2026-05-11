@@ -1,5 +1,5 @@
 import type { SanitizedJoin, SanitizedJoins } from '../../collections/config/types.js'
-import type { Config } from '../../config/types.js'
+import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { FlattenedJoinField, JoinField } from './types.js'
 
 import { APIError } from '../../errors/index.js'
@@ -96,7 +96,11 @@ export const sanitizeJoinField = ({
   }
 
   const relationshipField = getFieldByPath({
-    fields: flattenAllFields({ cache: true, fields: joinCollection.fields }),
+    fields: flattenAllFields({
+      cache: true,
+      config: config as unknown as SanitizedConfig,
+      fields: joinCollection.fields,
+    }),
     path: field.on,
   })
 

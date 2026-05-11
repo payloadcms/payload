@@ -1,5 +1,5 @@
 import type { CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types.js'
-import type { Config } from '../config/types.js'
+import type { Config, SanitizedConfig } from '../config/types.js'
 import type {
   JoinField,
   Option,
@@ -316,6 +316,7 @@ function injectTypeField({
   // This is required for the field to be queryable
   if ('flattenedFields' in hierarchyCollection) {
     hierarchyCollection.flattenedFields = flattenAllFields({
+      config: config as unknown as SanitizedConfig,
       fields: hierarchyCollection.fields,
     })
   }
@@ -376,6 +377,7 @@ function injectJoinField({
 
   // Recompute flattenedFields since we added a field after initial sanitization
   hierarchyCollection.flattenedFields = flattenAllFields({
+    config: config as unknown as SanitizedConfig,
     fields: hierarchyCollection.fields,
   })
 }

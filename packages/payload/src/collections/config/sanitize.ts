@@ -380,7 +380,10 @@ export const sanitizeCollection = async (
   sanitizedConfig.joins = joins
   sanitizedConfig.polymorphicJoins = polymorphicJoins
 
-  sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
+  sanitizedConfig.flattenedFields = flattenAllFields({
+    config: config as unknown as SanitizedConfig,
+    fields: sanitizedConfig.fields,
+  })
 
   sanitizedConfig.sanitizedIndexes = sanitizeCompoundIndexes({
     fields: sanitizedConfig.flattenedFields,
