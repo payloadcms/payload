@@ -646,7 +646,7 @@ describe('lexicalMain', () => {
       'payload.jpg',
     )
 
-    // Click on button with class lexical-upload__upload-drawer-toggler
+    // Click on button with class LexicalEditorTheme__upload__upload-drawer-toggler
     const drawerToggler = newUploadNode
       .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
       .first()

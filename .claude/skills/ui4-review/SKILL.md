@@ -34,7 +34,7 @@ grep -nE ':\s*[0-9]+px|:\s*[0-9.]+rem' "$FILE"
 grep -nE '#[0-9a-fA-F]{3,8}|rgba?\(' "$FILE"
 
 # 4. Legacy Theme Variables
-grep -nE 'var\(--theme-|var\(--style-' "$FILE"
+grep -nE 'var\(--theme-|var\(--style-|var\(--base\)' "$FILE"
 
 # 5. Long-form Token Names (should use shorthands)
 grep -nE '\-\-icon-default-default|\-\-text-default-default|\-\-bg-default-default|\-\-border-default-default' "$FILE"
@@ -85,6 +85,21 @@ After fixing, report:
 | 32px / 2rem    | `--spacer-5`   |
 | 40px / 2.5rem  | `--spacer-6`   |
 
+**Rounding rules — ALWAYS round to nearest token:**
+
+| Pixel Range | Token                 | Notes                         |
+| ----------- | --------------------- | ----------------------------- |
+| 0-2px       | `--spacer-0`          | Use 0                         |
+| 3-6px       | `--spacer-1` (4px)    | 5-6px rounds to 4px           |
+| 7-10px      | `--spacer-2` (8px)    | 10px rounds DOWN to 8px       |
+| 11-14px     | `--spacer-2-5` (12px) | 13.33px rounds to 12px        |
+| 15-20px     | `--spacer-3` (16px)   | 15px, 20px both round to 16px |
+| 21-28px     | `--spacer-4` (24px)   |                               |
+| 29-36px     | `--spacer-5` (32px)   | 30px rounds to 32px           |
+| 37-48px     | `--spacer-6` (40px)   |                               |
+
+**Rule:** For values ≤ 40px, ALWAYS use a single token (no `calc()`). For values > 40px, use `calc()` with a spacer token.
+
 **Exceptions:** `1px` borders, `0`, percentages, `auto`, `inherit`, `-1px` (for clip offsets)
 
 ---
@@ -122,13 +137,26 @@ After fixing, report:
 
 ### Legacy Variables (Replace Immediately)
 
-| Legacy                  | Replacement        |
-| ----------------------- | ------------------ |
-| `--theme-elevation-0`   | `--bg-default`     |
-| `--theme-elevation-50`  | `--bg-secondary`   |
-| `--theme-elevation-100` | `--border-default` |
-| `--theme-text`          | `--text-default`   |
-| `--style-radius-m`      | `--radius-medium`  |
+| Legacy                  | Replacement                         |
+| ----------------------- | ----------------------------------- |
+| `var(--base)`           | `--spacer-*` (see conversion table) |
+| `--theme-elevation-0`   | `--bg-default`                      |
+| `--theme-elevation-50`  | `--bg-secondary`                    |
+| `--theme-elevation-100` | `--border-default`                  |
+| `--theme-text`          | `--text-default`                    |
+| `--style-radius-m`      | `--radius-medium`                   |
+
+**`var(--base)` Conversion:** Legacy token = 20px. Convert using:
+
+| Original            | Pixels | Replacement                     |
+| ------------------- | ------ | ------------------------------- |
+| `var(--base) * 0.4` | 8px    | `var(--spacer-2)`               |
+| `var(--base) * 0.5` | 10px   | `calc(var(--spacer-1) * 2.5)`   |
+| `var(--base) * 0.6` | 12px   | `var(--spacer-2-5)`             |
+| `var(--base)`       | 20px   | `calc(var(--spacer-4) * 0.833)` |
+| `var(--base) * 2`   | 40px   | `var(--spacer-6)`               |
+
+See ui4 skill Step 1 for full conversion table.
 
 ---
 

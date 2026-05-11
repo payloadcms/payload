@@ -1,0 +1,26 @@
+.code-block-collapse-button {
+  all: unset;
+  cursor: pointer;
+  min-width: var(--spacer-4);
+  min-height: var(--spacer-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-medium);
+  color: var(--icon-secondary);
+  box-sizing: border-box;
+
+  &:hover {
+    color: var(--icon-default);
+    background-color: var(--bg-transparent-hover);
+  }
+
+  &:active {
+    background-color: var(--bg-transparent-pressed);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--border-brand-strong);
+    outline-offset: calc(var(--stroke-width-small) / -1);
+  }
+}

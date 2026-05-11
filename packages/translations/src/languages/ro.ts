@@ -322,6 +322,7 @@ export const roTranslations: DefaultTranslationsObject = {
     error: 'Eroare',
     errors: 'Erori',
     exitLivePreview: 'Ieși din Previzualizarea Live',
+    expand: 'Extinde',
     export: 'Export',
     fallbackToDefaultLocale: 'Revenire la locația implicită',
     false: 'Fals',

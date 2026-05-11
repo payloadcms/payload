@@ -2,8 +2,6 @@
 
 import { ShimmerEffect } from '@payloadcms/ui'
 
-import '../index.scss'
-
 export const PendingUploadComponent = (): React.ReactNode => {
   return (
     <div className={'lexical-upload'}>

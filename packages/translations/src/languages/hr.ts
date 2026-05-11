@@ -316,6 +316,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     error: 'Greška',
     errors: 'Greške',
     exitLivePreview: 'Izađi iz Pregleda uživo',
+    expand: 'Proširi',
     export: 'Izvoz',
     fallbackToDefaultLocale: 'Vraćanje na zadani jezik',
     false: 'Netočno',

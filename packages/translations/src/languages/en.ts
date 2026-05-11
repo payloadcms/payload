@@ -318,6 +318,7 @@ export const enTranslations = {
     error: 'Error',
     errors: 'Errors',
     exitLivePreview: 'Exit Live Preview',
+    expand: 'Expand',
     export: 'Export',
     fallbackToDefaultLocale: 'Fallback to default locale',
     false: 'False',

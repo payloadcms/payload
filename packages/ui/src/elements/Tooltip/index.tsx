@@ -33,8 +33,6 @@ export const Tooltip: React.FC<Props> = (props) => {
   const [show, setShow] = React.useState(showFromProps)
   const [position, setPosition] = React.useState<'bottom' | 'top'>('top')
 
-  const getTitleAttribute = (content) => (typeof content === 'string' ? content : '')
-
   const [ref, intersectionEntry] = useIntersect(
     {
       root: boundingRef?.current || null,
@@ -95,7 +93,6 @@ export const Tooltip: React.FC<Props> = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        title={getTitleAttribute(children)}
       >
         <div className="tooltip-content">{children}</div>
       </aside>

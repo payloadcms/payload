@@ -20,9 +20,11 @@ export const rowFieldsSlug = 'row-fields'
 export const arrayFieldsSlug = 'array-fields'
 export const blocksFieldsSlug = 'blocks-fields'
 export const dateFieldsSlug = 'date-fields'
+export const richTextFieldsSlug = 'rich-text-fields'
 export const foldersSlug = 'folders'
 export const folderItemsSlug = 'folder-items'
 export const draftVersionsSlug = 'draft-versions'
+export const autosaveSlug = 'autosave'
 
 export const collectionSlugs = [
   'users',
@@ -51,4 +53,5 @@ export const collectionSlugs = [
   foldersSlug,
   folderItemsSlug,
   draftVersionsSlug,
+  autosaveSlug,
 ]

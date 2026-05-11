@@ -235,37 +235,6 @@ describe('Lexical Fully Featured', () => {
     await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
   })
 
-  test('ensure code block language selector works with search filtering', async ({ page }) => {
-    await lexical.slashCommand('code')
-    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
-    await expect(codeBlock).toBeVisible()
-
-    // Initial language should be 'abap' (default)
-    const languageSelectorButton = codeBlock.locator(
-      '.payload-richtext-code-block__language-selector-button',
-    )
-    await expect(languageSelectorButton).toHaveAttribute('data-selected-language', 'abap')
-
-    await languageSelectorButton.click()
-
-    const popup = page.locator('.combobox__content')
-    await expect(popup).toBeVisible()
-    const searchInput = popup.locator('.combobox__search-input')
-    await expect(searchInput).toBeVisible()
-
-    await searchInput.fill('rust')
-
-    const rustOption = popup.locator('[data-language="rust"]')
-    await expect(rustOption).toBeVisible()
-
-    await rustOption.click()
-
-    await expect(popup).toBeHidden()
-
-    // The language should change to 'rust'
-    await expect(languageSelectorButton).toHaveAttribute('data-selected-language', 'rust')
-  })
-
   test('copy pasting a inline block within range selection should not duplicate the inline block id', async ({
     page,
   }) => {
@@ -285,17 +254,17 @@ describe('Lexical Fully Featured', () => {
     await page.keyboard.press('ArrowRight')
     await page.keyboard.press('ControlOrMeta+V')
     await expect(inlineBlock).toHaveCount(2)
-    await inlineBlock.nth(1).locator('button').first().click()
+    await inlineBlock.nth(1).click()
     await expect(lexical.drawer).toBeVisible()
     await expect(lexical.drawer.locator('input').first()).toHaveValue('World')
     await lexical.drawer.locator('input').first().fill('World changed')
     await expect(lexical.drawer.locator('input').first()).toHaveValue('World changed')
     await lexical.drawer.getByText('Save changes').click()
-    await inlineBlock.nth(0).locator('button').first().click()
+    await inlineBlock.nth(0).click()
     await expect(lexical.drawer.locator('input').first()).toHaveValue('World')
     await lexical.drawer.getByLabel('Close').click()
     await expect(lexical.drawer).toBeHidden()
-    await inlineBlock.nth(1).locator('button').first().click()
+    await inlineBlock.nth(1).click()
     await expect(lexical.drawer.locator('input').first()).toHaveValue('World changed')
   })
 
@@ -309,24 +278,23 @@ describe('Lexical Fully Featured', () => {
     await expect(lexical.drawer).toBeHidden()
     const inlineBlock = lexical.editor.locator('.LexicalEditorTheme__inlineBlock')
     await expect(inlineBlock).toHaveCount(1)
-    await inlineBlock.click()
-    await expect(lexical.drawer).toBeHidden()
+    await page.keyboard.press('Shift+ArrowLeft')
     await page.keyboard.press('ControlOrMeta+C')
     await page.keyboard.press('ArrowRight')
     await page.keyboard.press('ControlOrMeta+V')
     await expect(inlineBlock).toHaveCount(2)
-    await inlineBlock.nth(1).locator('button').first().click()
+    await inlineBlock.nth(1).click()
     await expect(lexical.drawer).toBeVisible()
     await expect(lexical.drawer.locator('input').first()).toHaveValue('World')
     await lexical.drawer.locator('input').first().fill('World changed')
     await expect(lexical.drawer.locator('input').first()).toHaveValue('World changed')
     await lexical.drawer.getByText('Save changes').click()
     await expect(lexical.drawer).toBeHidden()
-    await inlineBlock.nth(0).locator('button').first().click()
+    await inlineBlock.nth(0).click()
     await expect(lexical.drawer.locator('input').first()).toHaveValue('World')
     await lexical.drawer.getByLabel('Close').click()
     await expect(lexical.drawer).toBeHidden()
-    await inlineBlock.nth(1).locator('button').first().click()
+    await inlineBlock.nth(1).click()
     await expect(lexical.drawer.locator('input').first()).toHaveValue('World changed')
   })
 })

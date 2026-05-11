@@ -1,0 +1,51 @@
+@layer payload-default {
+  .test-recorder-output {
+    margin: var(--spacer-4) auto var(--spacer-4) auto;
+    width: 100%;
+  }
+  .test-recorder-toolbar {
+    display: flex;
+  }
+
+  .test-recorder-button {
+    position: relative;
+    display: block;
+    font-size: var(--text-body-small-font-size);
+    padding: var(--spacer-1);
+    border-radius: var(--radius-medium);
+    border: none;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.4);
+    background-color: #222;
+    color: white;
+    transition: box-shadow 50ms ease-out;
+  }
+
+  .test-recorder-button:active {
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  .test-recorder-button + .test-recorder-button {
+    margin-left: var(--spacer-1);
+  }
+
+  .test-recorder-button::after {
+    content: '';
+    position: absolute;
+    top: var(--spacer-2);
+    right: var(--spacer-2);
+    bottom: var(--spacer-2);
+    left: var(--spacer-2);
+    display: block;
+    background-size: contain;
+    filter: invert(1);
+  }
+  #test-recorder-button {
+    position: relative;
+  }
+
+  #test-recorder-button-snapshot {
+    margin-right: auto;
+  }
+}

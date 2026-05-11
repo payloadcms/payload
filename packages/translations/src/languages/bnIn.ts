@@ -320,6 +320,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     error: 'ত্রুটি',
     errors: 'ত্রুটিগুলি',
     exitLivePreview: 'লাইভ প্রিভিউ থেকে বের হন',
+    expand: 'বিস্তৃত করুন',
     export: 'এক্সপোর্ট করুন',
     fallbackToDefaultLocale: 'ডিফল্ট লোকেলে ফিরে যান',
     false: 'মিথ্যা',
