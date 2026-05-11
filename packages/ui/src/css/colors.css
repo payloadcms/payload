@@ -84,9 +84,6 @@
     --color-bg-inverse: var(--ramp-grey-800);
     --color-bg-inverse-hover: var(--ramp-grey-700);
     --color-bg-inverse-pressed: var(--ramp-grey-600);
-    --bg-menu-default: var(--ramp-grey-900);
-    --bg-menu-hover: var(--ramp-grey-700);
-    --bg-tooltip-default: var(--ramp-grey-900);
 
     --color-bg-menu: var(--ramp-grey-900);
     --color-bg-tooltip: var(--ramp-grey-900);
