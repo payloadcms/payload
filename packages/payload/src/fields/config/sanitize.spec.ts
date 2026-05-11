@@ -1,3 +1,4 @@
+import type { CollectionConfig } from '../../collections/config/types.js'
 import type { Config } from '../../config/types.js'
 import type {
   ArrayField,
@@ -9,6 +10,8 @@ import type {
   TextField,
 } from './types.js'
 
+import { describe, expect, it } from 'vitest'
+
 import {
   DuplicateFieldName,
   InvalidFieldName,
@@ -17,8 +20,6 @@ import {
 } from '../../errors/index.js'
 import { sanitizeConfig } from '../../config/sanitize.js'
 import { sanitizeFields } from './sanitize.js'
-import { CollectionConfig } from '../../index.js'
-import { describe, it, expect } from 'vitest'
 
 describe('sanitizeFields', () => {
   const config = {} as Config
@@ -790,7 +791,9 @@ describe('sanitizeFields', () => {
 })
 
 describe('blocks field sanitization — slug-only enforcement', () => {
-  it('throws when blockReferences key is present on a blocks field', async () => {
+  it('should throw when blockReferences key is present on a blocks field', async () => {
+    // blocks: [] is required by the current type definition (Block[]); the new guard fires on the
+    // *presence* of the blockReferences key regardless of blocks content.
     const config: Config = {
       secret: 'test',
       blocks: [{ slug: 'hero', fields: [{ name: 'title', type: 'text' }] }],
@@ -812,7 +815,7 @@ describe('blocks field sanitization — slug-only enforcement', () => {
     await expect(sanitizeConfig(config)).rejects.toThrow(/blockReferences/)
   })
 
-  it('throws when an inline Block object appears in field.blocks', async () => {
+  it('should throw when an inline Block object appears in field.blocks', async () => {
     const config: Config = {
       secret: 'test',
       collections: [
@@ -832,7 +835,7 @@ describe('blocks field sanitization — slug-only enforcement', () => {
     await expect(sanitizeConfig(config)).rejects.toThrow(/inline block definitions were removed/)
   })
 
-  it('throws when a slug in field.blocks is not registered in config.blocks', async () => {
+  it('should throw when a slug in field.blocks is not registered in config.blocks', async () => {
     const config: Config = {
       secret: 'test',
       blocks: [],
@@ -846,7 +849,7 @@ describe('blocks field sanitization — slug-only enforcement', () => {
     await expect(sanitizeConfig(config)).rejects.toThrow(/not registered in config\.blocks/)
   })
 
-  it('accepts slug-only references that resolve to registered blocks', async () => {
+  it('should accept slug-only references that resolve to registered blocks', async () => {
     const config: Config = {
       secret: 'test',
       blocks: [{ slug: 'hero', fields: [{ name: 'title', type: 'text' }] }],
@@ -860,5 +863,32 @@ describe('blocks field sanitization — slug-only enforcement', () => {
     const result = await sanitizeConfig(config)
     expect(result.blocks).toHaveLength(1)
     expect(result.blocks?.[0]?.slug).toBe('hero')
+
+    const collection = result.collections.find((c) => c.slug === 'posts')!
+    const field = collection.fields.find(
+      (f): f is Extract<typeof f, { type: 'blocks' }> => 'name' in f && f.name === 'content',
+    )!
+    expect(field).toBeDefined()
+    expect(field.type).toBe('blocks')
+  })
+
+  it('should throw when field.blocks contains duplicate slugs', async () => {
+    const config: Config = {
+      secret: 'test',
+      blocks: [{ slug: 'hero', fields: [{ name: 'title', type: 'text' }] }],
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'content',
+              type: 'blocks',
+              blocks: ['hero', 'hero'] as any,
+            },
+          ],
+        },
+      ],
+    }
+    await expect(sanitizeConfig(config)).rejects.toThrow(/hero/)
   })
 })
