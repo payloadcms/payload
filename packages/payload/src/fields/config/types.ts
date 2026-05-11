@@ -1579,14 +1579,10 @@ export type BlocksField = {
    *       ? [siblingData.enabledBlocks] // allow only the matching block
    *       : true // allow all blocks if no value is set
    *   },
-   *   blocks: [
-   *     { slug: 'block1', fields: [{ type: 'text', name: 'block1Text' }] },
-   *     { slug: 'block2', fields: [{ type: 'text', name: 'block2Text' }] },
-   *     { slug: 'block3', fields: [{ type: 'text', name: 'block3Text' }] },
-   *   ],
+   *   blocks: ['block1', 'block2', 'block3'],
    * }
    * ```
-   * In this example, the list of available blocks is determined by the enabledBlocks sibling field. If no value is set, all blocks remain available.
+   * Block definitions (`block1`, `block2`, `block3`) must be registered in `config.blocks`. In this example, the list of available blocks is determined by the enabledBlocks sibling field. If no value is set, all blocks remain available.
    */
   filterOptions?: BlocksFilterOptions
   labels?: Labels
