@@ -256,7 +256,10 @@ async function updateLocal<
   }
 
   const req = await createLocalReq(options as CreateLocalReqOptions, payload)
-  req.file = file ?? (await getFileByPath(filePath!))
+  const collectionConfig = collection.config
+  if (collectionConfig.upload) {
+    req.file = file ?? (await getFileByPath(filePath!))
+  }
 
   const args = {
     id,
