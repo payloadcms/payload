@@ -148,29 +148,38 @@ To find the correct icon:
    gap: calc(var(--spacer-1) * 2.5);
    ```
 
-3. **Common conversion formulas:**
+3. **ALWAYS round to nearest spacer token.** Never use `calc()` to preserve non-standard pixel values. Round all calculated values to the nearest token:
 
-   | Original             | Pixels | Conversion                       |
-   | -------------------- | ------ | -------------------------------- |
-   | `var(--base) * 0.25` | 5px    | `calc(var(--spacer-1) * 1.25)`   |
-   | `var(--base) * 0.3`  | 6px    | `calc(var(--spacer-1) * 1.5)`    |
-   | `var(--base) * 0.4`  | 8px    | `var(--spacer-2)`                |
-   | `var(--base) * 0.5`  | 10px   | `calc(var(--spacer-1) * 2.5)`    |
-   | `var(--base) * 0.6`  | 12px   | `var(--spacer-2-5)`              |
-   | `var(--base) * 0.75` | 15px   | `calc(var(--spacer-2-5) * 1.25)` |
-   | `var(--base)`        | 20px   | `calc(var(--spacer-4) * 0.833)`  |
-   | `var(--base) * 1.5`  | 30px   | `calc(var(--spacer-5) * 0.9375)` |
-   | `var(--base) * 2`    | 40px   | `var(--spacer-6)`                |
-   | `var(--base) * 3`    | 60px   | `calc(var(--spacer-4) * 2.5)`    |
-   | `var(--base) * 10`   | 200px  | `calc(var(--spacer-5) * 6.25)`   |
+   | Pixel Range | Token                 | Notes                         |
+   | ----------- | --------------------- | ----------------------------- |
+   | 0-2px       | `--spacer-0`          | Use 0                         |
+   | 3-6px       | `--spacer-1` (4px)    | 5-6px rounds to 4px           |
+   | 7-10px      | `--spacer-2` (8px)    | 10px rounds DOWN to 8px       |
+   | 11-14px     | `--spacer-2-5` (12px) | 13.33px rounds to 12px        |
+   | 15-20px     | `--spacer-3` (16px)   | 15px, 20px both round to 16px |
+   | 21-28px     | `--spacer-4` (24px)   |                               |
+   | 29-36px     | `--spacer-5` (32px)   | 30px rounds to 32px           |
+   | 37-48px     | `--spacer-6` (40px)   |                               |
 
-4. **Prefer semantic sizing:** When visually acceptable, round to nearest spacer token rather than preserving exact pixels:
+4. **Common `var(--base)` conversions** (base = 20px):
 
-   ```css
-   /* Before: calc(var(--base) * 0.55) = 11px */
-   /* After: Use --spacer-2-5 (12px) if 1px difference is acceptable */
-   padding: var(--spacer-2-5);
-   ```
+   | Original             | Pixels | Rounded Token                                                   |
+   | -------------------- | ------ | --------------------------------------------------------------- |
+   | `var(--base) * 0.25` | 5px    | `--spacer-1` (4px)                                              |
+   | `var(--base) * 0.3`  | 6px    | `--spacer-1` (4px)                                              |
+   | `var(--base) * 0.4`  | 8px    | `--spacer-2`                                                    |
+   | `var(--base) * 0.5`  | 10px   | `--spacer-2` (8px)                                              |
+   | `var(--base) * 0.6`  | 12px   | `--spacer-2-5`                                                  |
+   | `var(--base) / 1.5`  | 13.3px | `--spacer-2-5` (12px)                                           |
+   | `var(--base) * 0.75` | 15px   | `--spacer-3` (16px)                                             |
+   | `var(--base) * 0.8`  | 16px   | `--spacer-3`                                                    |
+   | `var(--base)`        | 20px   | `--spacer-3` (16px) or `--spacer-4` (24px)                      |
+   | `var(--base) * 1.2`  | 24px   | `--spacer-4`                                                    |
+   | `var(--base) * 1.5`  | 30px   | `--spacer-5` (32px)                                             |
+   | `var(--base) * 2`    | 40px   | `--spacer-6`                                                    |
+   | `var(--base) * 3`    | 60px   | `calc(var(--spacer-4) * 2.5)` — only use calc for values > 40px |
+
+   **Rule:** For values ≤ 40px, ALWAYS use a single token. For values > 40px, use `calc()` with a spacer token.
 
 5. **Check Figma design:** The best approach is to check the Figma design for the intended spacing value and use the matching `--spacer-*` token directly.
 

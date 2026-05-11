@@ -85,6 +85,21 @@ After fixing, report:
 | 32px / 2rem    | `--spacer-5`   |
 | 40px / 2.5rem  | `--spacer-6`   |
 
+**Rounding rules — ALWAYS round to nearest token:**
+
+| Pixel Range | Token                 | Notes                         |
+| ----------- | --------------------- | ----------------------------- |
+| 0-2px       | `--spacer-0`          | Use 0                         |
+| 3-6px       | `--spacer-1` (4px)    | 5-6px rounds to 4px           |
+| 7-10px      | `--spacer-2` (8px)    | 10px rounds DOWN to 8px       |
+| 11-14px     | `--spacer-2-5` (12px) | 13.33px rounds to 12px        |
+| 15-20px     | `--spacer-3` (16px)   | 15px, 20px both round to 16px |
+| 21-28px     | `--spacer-4` (24px)   |                               |
+| 29-36px     | `--spacer-5` (32px)   | 30px rounds to 32px           |
+| 37-48px     | `--spacer-6` (40px)   |                               |
+
+**Rule:** For values ≤ 40px, ALWAYS use a single token (no `calc()`). For values > 40px, use `calc()` with a spacer token.
+
 **Exceptions:** `1px` borders, `0`, percentages, `auto`, `inherit`, `-1px` (for clip offsets)
 
 ---
