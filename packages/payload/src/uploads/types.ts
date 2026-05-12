@@ -10,19 +10,9 @@ export type FileSize = {
   filesize: null | number
   height: null | number
   mimeType: null | string
-  url?: null | string // TODO V4: make non-optional
+  url: null | string
   width: null | number
 }
-
-// TODO: deprecate in Payload v4.
-/**
- * FileSizeImproved is a more precise type, and will replace FileSize in Payload v4.
- * This type is for internal use only as it will be deprecated in the future.
- * @internal
- */
-export type FileSizeImproved = {
-  url: null | string
-} & FileSize
 
 export type FileSizes = {
   [size: string]: FileSize
@@ -72,28 +62,26 @@ export type GenerateImageName = (args: {
 export type ImageSize = {
   /**
    * Admin UI options that control how this image size appears in list views.
-   *
-   * NOTE: In Payload v4, these options (`disableGroupBy`, `disableListColumn` and `disableListFilter`)
-   * should default to `true` so image size subfields are hidden from list columns
-   * and filters by default, reducing noise in the admin UI.
+   * Image size subfields are hidden from list columns, filters, and group-by by default
+   * to reduce noise in the admin UI.
    */
   admin?: {
     /**
      * If set to true, this image size will not be available
      * as a selectable groupBy option in the collection list view.
-     * @default false
+     * @default true
      */
     disableGroupBy?: boolean
     /**
      * If set to true, this image size will not be available
      * as a selectable column in the collection list view.
-     * @default false
+     * @default true
      */
     disableListColumn?: boolean
     /**
      * If set to true, this image size will not be available
      * as a filter option in the collection list view.
-     * @default false
+     * @default true
      */
     disableListFilter?: boolean
   }

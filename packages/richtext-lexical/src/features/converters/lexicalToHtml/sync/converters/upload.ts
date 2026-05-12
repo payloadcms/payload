@@ -1,4 +1,4 @@
-import type { FileData, FileSizeImproved, TypeWithID } from 'payload'
+import type { FileData, FileSize, TypeWithID } from 'payload'
 
 import escapeHTML from 'escape-html'
 
@@ -50,7 +50,7 @@ export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
     let pictureHTML = ''
 
     for (const size in uploadDoc.sizes) {
-      const imageSize = uploadDoc.sizes[size] as FileSizeImproved
+      const imageSize = uploadDoc.sizes[size] as FileSize
 
       if (
         !imageSize ||
