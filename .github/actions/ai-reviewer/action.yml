@@ -15,6 +15,14 @@ inputs:
     description: Maximum diff characters to send to the AI (larger diffs are rejected)
     required: false
     default: '100000'
+  ai-model:
+    description: AI model to use for the review
+    required: false
+    default: 'claude-sonnet-4-6'
+  ai-prompt-path:
+    description: Path to the review prompt file relative to workspace root
+    required: false
+    default: '.github/ai-reviewer-prompt.md'
 runs:
   using: node24
   main: dist/index.js
