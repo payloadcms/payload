@@ -147,7 +147,7 @@ plugin-<name>/
     "@swc/cli": "^0.1.62",
     "@swc/core": "^1.3.0",
     "copyfiles": "^2.4.1",
-    "cross-env": "^7.0.3",
+    "cross-env": "10.1.0",
     "eslint": "^9.0.0",
     "next": "^15.4.10",
     "payload": "^3.0.0",
@@ -155,7 +155,7 @@ plugin-<name>/
     "react-dom": "^19.2.1",
     "rimraf": "^5.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^3.0.0"
+    "vitest": "4.1.6"
   },
   "peerDependencies": {
     "payload": "^3.0.0"
