@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     'array-fields': ArrayField;
     'blocks-fields': BlocksField;
+    hierarchy: Hierarchy;
     'checkbox-fields': CheckboxField;
     'code-fields': CodeField;
     'collapsible-fields': CollapsibleField;
@@ -84,6 +85,7 @@ export interface Config {
     'point-fields': PointField;
     'radio-fields': RadioField;
     'relationship-fields': RelationshipField;
+    'rich-text-fields': RichTextField;
     'row-fields': RowField;
     'select-fields': SelectField;
     'slug-fields': SlugField;
@@ -93,6 +95,7 @@ export interface Config {
     uploads: Upload;
     'upload-fields': UploadField;
     'draft-versions': DraftVersion;
+    autosave: Autosave;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -103,6 +106,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
+    hierarchy: HierarchySelect<false> | HierarchySelect<true>;
     'checkbox-fields': CheckboxFieldsSelect<false> | CheckboxFieldsSelect<true>;
     'code-fields': CodeFieldsSelect<false> | CodeFieldsSelect<true>;
     'collapsible-fields': CollapsibleFieldsSelect<false> | CollapsibleFieldsSelect<true>;
@@ -117,6 +121,7 @@ export interface Config {
     'point-fields': PointFieldsSelect<false> | PointFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
+    'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'row-fields': RowFieldsSelect<false> | RowFieldsSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
@@ -126,6 +131,7 @@ export interface Config {
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'upload-fields': UploadFieldsSelect<false> | UploadFieldsSelect<true>;
     'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
+    autosave: AutosaveSelect<false> | AutosaveSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -360,6 +366,19 @@ export interface BlocksField {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy".
+ */
+export interface Hierarchy {
+  id: string;
+  parent?: (string | null) | Hierarchy;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -750,6 +769,90 @@ export interface TextField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rich-text-fields".
+ */
+export interface RichTextField {
+  id: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  table?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  code?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  typography?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  lists?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "row-fields".
  */
 export interface RowField {
@@ -996,6 +1099,17 @@ export interface DraftVersion {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave".
+ */
+export interface Autosave {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1029,6 +1143,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'blocks-fields';
         value: string | BlocksField;
+      } | null)
+    | ({
+        relationTo: 'hierarchy';
+        value: string | Hierarchy;
       } | null)
     | ({
         relationTo: 'checkbox-fields';
@@ -1087,6 +1205,10 @@ export interface PayloadLockedDocument {
         value: string | RelationshipField;
       } | null)
     | ({
+        relationTo: 'rich-text-fields';
+        value: string | RichTextField;
+      } | null)
+    | ({
         relationTo: 'row-fields';
         value: string | RowField;
       } | null)
@@ -1121,6 +1243,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'draft-versions';
         value: string | DraftVersion;
+      } | null)
+    | ({
+        relationTo: 'autosave';
+        value: string | Autosave;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1372,6 +1498,18 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy_select".
+ */
+export interface HierarchySelect<T extends boolean = true> {
+  parent?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "checkbox-fields_select".
  */
 export interface CheckboxFieldsSelect<T extends boolean = true> {
@@ -1573,6 +1711,19 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rich-text-fields_select".
+ */
+export interface RichTextFieldsSelect<T extends boolean = true> {
+  content?: T;
+  table?: T;
+  code?: T;
+  typography?: T;
+  lists?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "row-fields_select".
  */
 export interface RowFieldsSelect<T extends boolean = true> {
@@ -1742,6 +1893,16 @@ export interface DraftVersionsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   author?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave_select".
+ */
+export interface AutosaveSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

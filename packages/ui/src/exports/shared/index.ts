@@ -11,7 +11,6 @@ export { getInitialColumns } from '../../providers/TableColumns/getInitialColumn
 export { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 export { requests } from '../../utilities/api.js'
 export { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
-export { formatAdminURL } from '../../utilities/formatAdminURL.js'
 export { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 export { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 export { getGlobalData } from '../../utilities/getGlobalData.js'
@@ -19,7 +18,6 @@ export { getNavGroups } from '../../utilities/getNavGroups.js'
 export { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 export {
   type EntityToGroup,
-  EntityType,
   groupNavItems,
   type NavGroupType,
 } from '../../utilities/groupNavItems.js'
@@ -31,9 +29,3 @@ export { isClientUserObject } from '../../utilities/isClientUserObject.js'
 export { isEditing } from '../../utilities/isEditing.js'
 export { sanitizeID } from '../../utilities/sanitizeID.js'
 export { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
-/**
- * @deprecated
- * The `mergeListSearchAndWhere` function is deprecated.
- * Import this from `payload/shared` instead.
- */
-export { mergeListSearchAndWhere } from 'payload/shared'

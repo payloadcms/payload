@@ -116,7 +116,7 @@
     right: 0;
     width: var(--base);
     height: var(--base);
-    background: linear-gradient(to right, transparent, var(--bg-default));
+    background: linear-gradient(to right, transparent, var(--color-bg));
   }
 
   .app-header__actions {

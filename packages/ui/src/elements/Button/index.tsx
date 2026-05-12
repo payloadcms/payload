@@ -135,7 +135,7 @@ export const Button: React.FC<Props> = (props) => {
     onPointerLeave: tooltip ? () => setShowTooltip(false) : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
-    title: ariaLabel,
+    title: tooltip ? undefined : ariaLabel,
     ...extraButtonProps,
   }
 

@@ -101,11 +101,13 @@ export function DropDownItem({
 
 function DropDownItems({
   children,
+  dropdownKey,
   dropDownRef,
   itemsContainerClassNames,
   onClose,
 }: {
   children: React.ReactNode
+  dropdownKey?: string
   dropDownRef: React.Ref<HTMLDivElement>
   itemsContainerClassNames?: string[]
   onClose: () => void
@@ -173,6 +175,8 @@ function DropDownItems({
     <DropDownContext value={contextValue}>
       <div
         className={(itemsContainerClassNames ?? ['toolbar-popup__dropdown-items']).join(' ')}
+        data-dropdown-key={dropdownKey}
+        data-theme="dark"
         onKeyDown={handleKeyDown}
         ref={dropDownRef}
       >
@@ -254,6 +258,7 @@ export function DropDown({
 
   const portal = createPortal(
     <DropDownItems
+      dropdownKey={dropdownKey}
       dropDownRef={dropDownRef}
       itemsContainerClassNames={itemsContainerClassNames}
       onClose={handleClose}

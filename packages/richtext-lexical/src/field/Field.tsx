@@ -22,9 +22,9 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 
-import '../lexical/theme/EditorTheme.scss'
+import '../lexical/theme/EditorTheme.css'
 import './bundled.css'
-import './index.scss'
+import './index.css'
 
 import type { LexicalRichTextFieldProps } from '../types.js'
 
@@ -199,10 +199,6 @@ const RichTextComponent: React.FC<
       key={pathWithEditDepth}
       style={styles}
     >
-      <RenderCustomComponent
-        CustomComponent={Error}
-        Fallback={<FieldError path={path} showError={showError} />}
-      />
       <div className={`${baseClass}__label-row`}>
         {Label || (
           <FieldLabel label={label} localized={localized} path={path} required={required} />
@@ -210,6 +206,10 @@ const RichTextComponent: React.FC<
         {!isControlledByParent && <ViewSelector />}
       </div>
       <div className={`${baseClass}__wrap`}>
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
           {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer

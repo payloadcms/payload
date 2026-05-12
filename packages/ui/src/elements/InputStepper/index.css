@@ -18,12 +18,12 @@
       margin: 0;
       border: none;
       background: transparent;
-      color: var(--icon-secondary);
+      color: var(--color-icon-secondary);
       cursor: pointer;
       transition: color 100ms;
 
       &:hover:not(:disabled) {
-        color: var(--icon-default);
+        color: var(--color-icon);
       }
 
       &:disabled {

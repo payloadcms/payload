@@ -4,7 +4,7 @@ import React, { useMemo, useRef, useState } from 'react'
 import type { PopupProps } from '../Popup/index.js'
 
 import { Popup, PopupList } from '../Popup/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'combobox'
 

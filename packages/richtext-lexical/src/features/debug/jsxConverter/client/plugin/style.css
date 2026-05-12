@@ -1,0 +1,9 @@
+.debug-jsx-converter {
+  padding-left: var(--spacer-5);
+
+  ul,
+  ol {
+    padding-left: revert;
+    margin: revert;
+  }
+}
