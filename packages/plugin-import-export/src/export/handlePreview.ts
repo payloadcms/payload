@@ -210,7 +210,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       localeCodes,
     })
 
-    // Flatten docs without padding yet. This preserves the exact keys produced by toCSV hooks,
+    // Flatten docs without padding yet. This preserves the exact keys produced by beforeExport hooks,
     // allowing mergeColumns to detect which schema columns were replaced with derived ones.
     transformed = docs.map((doc) =>
       flattenObject({
