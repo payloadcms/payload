@@ -1,41 +1,34 @@
-import type { Payload } from '../../../types/index.js'
+import { existsSync, mkdirSync } from 'fs'
+import fs from 'fs/promises'
+import path from 'path'
+
 import type { ConfigSnapshot } from './types.js'
 
-const CONFIG_STATE_SLUG = 'payload-config-state'
+const SNAPSHOT_FILENAME = 'payload-config-snapshot.json'
 
-export async function readConfigState(payload: Payload): Promise<ConfigSnapshot | null> {
+function snapshotPath(migrationDir: string): string {
+  return path.join(migrationDir, SNAPSHOT_FILENAME)
+}
+
+export async function readConfigState(migrationDir: string): Promise<ConfigSnapshot | null> {
+  const filePath = snapshotPath(migrationDir)
+  if (!existsSync(filePath)) {
+    return null
+  }
   try {
-    const result = await payload.find({
-      collection: CONFIG_STATE_SLUG,
-      limit: 1,
-      pagination: false,
-    })
-    if (result.docs.length === 0) {
-      return null
-    }
-    return result.docs[0]!.state as ConfigSnapshot
+    const content = await fs.readFile(filePath, 'utf8')
+    return JSON.parse(content) as ConfigSnapshot
   } catch {
     return null
   }
 }
 
-export async function writeConfigState(payload: Payload, snapshot: ConfigSnapshot): Promise<void> {
-  const existing = await payload.find({
-    collection: CONFIG_STATE_SLUG,
-    limit: 1,
-    pagination: false,
-  })
-
-  if (existing.docs.length === 0) {
-    await payload.create({
-      collection: CONFIG_STATE_SLUG,
-      data: { state: snapshot },
-    })
-  } else {
-    await payload.update({
-      id: existing.docs[0]!.id,
-      collection: CONFIG_STATE_SLUG,
-      data: { state: snapshot },
-    })
+export async function writeConfigState(
+  migrationDir: string,
+  snapshot: ConfigSnapshot,
+): Promise<void> {
+  if (!existsSync(migrationDir)) {
+    mkdirSync(migrationDir, { recursive: true })
   }
+  await fs.writeFile(snapshotPath(migrationDir), JSON.stringify(snapshot, null, 2))
 }

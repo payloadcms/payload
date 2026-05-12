@@ -84,7 +84,7 @@ export const buildCreateMigration = ({
     }
 
     // Config-diff: compute data migrations before DDL to inform empty-migration check
-    const prevSnapshot = await readConfigState(payload)
+    const prevSnapshot = await readConfigState(dir)
     const nextSnapshot = serializeConfig(payload.config)
     let dataUpCode = ''
     let dataDownCode = ''
@@ -104,7 +104,7 @@ export const buildCreateMigration = ({
         dataDownCode = downCode
       }
     } else {
-      await bootstrapConfigState(payload)
+      await bootstrapConfigState(payload, dir)
     }
 
     let drizzleJsonBefore = this.defaultDrizzleSnapshot as DrizzleSnapshotJSON

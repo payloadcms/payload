@@ -89,7 +89,7 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
   }
 
   // Update config snapshot after all migrations succeed
-  await writeConfigState(payload, serializeConfig(payload.config))
+  await writeConfigState(payload.db.migrationDir, serializeConfig(payload.config))
 }
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {

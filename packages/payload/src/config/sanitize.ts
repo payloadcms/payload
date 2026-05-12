@@ -19,7 +19,6 @@ import type {
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
-import { configStateCollection } from '../database/migrations/configStateCollection.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
@@ -445,14 +444,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     ]
   }
   configWithDefaults.collections!.push(migrations)
-
-  const configState = await sanitizeCollection(
-    config as unknown as Config,
-    configStateCollection,
-    richTextSanitizationPromises,
-    validRelationships,
-  )
-  configWithDefaults.collections!.push(configState)
 
   if (queryPresetsCollections.length > 0) {
     configWithDefaults.collections!.push(

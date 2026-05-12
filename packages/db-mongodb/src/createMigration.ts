@@ -49,7 +49,7 @@ export const createMigration: CreateMigration = async function createMigration({
   })
 
   // Config-diff: compute data migrations to append
-  const prevSnapshot = await readConfigState(payload)
+  const prevSnapshot = await readConfigState(dir)
   const nextSnapshot = serializeConfig(payload.config)
   let dataUpCode = ''
   let dataDownCode = ''
@@ -69,7 +69,7 @@ export const createMigration: CreateMigration = async function createMigration({
       dataDownCode = downCode
     }
   } else {
-    await bootstrapConfigState(payload)
+    await bootstrapConfigState(payload, dir)
   }
 
   const hasContent = predefinedMigration.upSQL || predefinedMigration.downSQL || dataUpCode

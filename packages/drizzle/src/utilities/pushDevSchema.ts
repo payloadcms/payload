@@ -89,7 +89,7 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   await apply()
 
   // Warn if config changes require a data migration that dev push cannot handle
-  const prevSnapshot = await readConfigState(adapter.payload)
+  const prevSnapshot = await readConfigState(adapter.migrationDir)
   if (prevSnapshot !== null) {
     const changes = diffConfig(prevSnapshot, serializeConfig(adapter.payload.config))
     const dataChanges = changes.filter(
