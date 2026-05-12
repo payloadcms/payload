@@ -13,9 +13,9 @@ const disabledFromImageSize = (
 ): { disabled: { column: boolean; filter: boolean; groupBy: boolean } } => {
   return {
     disabled: {
-      column: sizeAdmin?.disableListColumn !== false,
-      filter: sizeAdmin?.disableListFilter !== false,
-      groupBy: sizeAdmin?.disableGroupBy !== false,
+      column: Boolean(sizeAdmin?.disableListColumn),
+      filter: Boolean(sizeAdmin?.disableListFilter),
+      groupBy: Boolean(sizeAdmin?.disableGroupBy),
     },
   }
 }
