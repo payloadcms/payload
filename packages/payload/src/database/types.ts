@@ -98,22 +98,53 @@ export interface BaseDatabaseAdapter {
    */
   migrateDown: () => Promise<void>
 
+  migrateFieldDelocalized?: (args: {
+    defaultLocale: string
+    entity: 'collection' | 'global'
+    fieldPath: string
+    req: PayloadRequest
+    slug: string
+  }) => Promise<void>
+  migrateFieldLocalized?: (args: {
+    defaultLocale: string
+    entity: 'collection' | 'global'
+    fieldPath: string
+    req: PayloadRequest
+    slug: string
+  }) => Promise<void>
   /**
    * Drop the current database and run all migrate up functions
    */
   migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
+  migrateLocaleRemoved?: (args: { locale: string; req: PayloadRequest }) => Promise<void>
+
   /**
    * Run all migration down functions before running up
    */
   migrateRefresh: () => Promise<void>
+
   /**
    * Run all migrate down functions
    */
   migrateReset: () => Promise<void>
+
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
   migrateStatus: () => Promise<void>
+
+  migrateVersionsDisabled?: (args: {
+    entity: 'collection' | 'global'
+    req: PayloadRequest
+    slug: string
+  }) => Promise<void>
+
+  migrateVersionsEnabled?: (args: {
+    entity: 'collection' | 'global'
+    initialStatus: 'draft' | 'published'
+    req: PayloadRequest
+    slug: string
+  }) => Promise<void>
 
   /**
    * Path to read and write migration files from
