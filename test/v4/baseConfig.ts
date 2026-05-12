@@ -18,6 +18,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import ArrayFields from './collections/Array/index.js'
+import Autosave from './collections/Autosave/index.js'
 import BlocksFields from './collections/Blocks/index.js'
 import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
@@ -34,6 +35,7 @@ import PasswordFields from './collections/Password/index.js'
 import PointFields from './collections/Point/index.js'
 import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
+import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import SlugFields from './collections/Slug/index.js'
@@ -69,6 +71,7 @@ export const collections: CollectionConfig[] = [
   PointFields,
   RadioFields,
   RelationshipFields,
+  RichTextFields,
   RowFields,
   SelectFields,
   SlugFields,
@@ -79,6 +82,7 @@ export const collections: CollectionConfig[] = [
   Uploads,
   UploadFields,
   DraftVersions,
+  Autosave,
 ]
 
 export const baseConfig: Partial<Config> = {

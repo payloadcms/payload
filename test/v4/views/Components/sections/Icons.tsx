@@ -60,7 +60,6 @@ const icons = [
   { name: 'SortDown', Icon: SortDownIcon },
   { name: 'Swap', Icon: SwapIcon },
   { name: 'ThreeDots', Icon: ThreeDotsIcon },
-  { name: 'Trash', Icon: TrashIcon },
   { name: 'Write', Icon: WriteIcon },
 ]
 
@@ -535,6 +534,25 @@ export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selected
             <span>size: 24</span>
             <div className="components-view__icon-variants">
               <AlignJustifiedIcon size={24} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Trash - small */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>Trash</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>default</span>
+            <div className="components-view__icon-variants">
+              <TrashIcon />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>small: true</span>
+            <div className="components-view__icon-variants">
+              <TrashIcon small />
             </div>
           </div>
         </div>

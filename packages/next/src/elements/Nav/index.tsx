@@ -3,7 +3,8 @@ import type { PayloadRequest, ServerProps } from 'payload'
 
 import { AlignJustifiedIcon, Logout } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
+import { groupNavItems } from '@payloadcms/ui/shared'
+import { EntityType } from 'payload'
 import React from 'react'
 
 import { DefaultNavClient } from './index.client.js'

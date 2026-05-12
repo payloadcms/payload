@@ -1,12 +1,12 @@
 @layer payload-default {
   .doc-drawer__header {
     width: 100%;
-    margin-top: calc(var(--base) * 2);
+    margin-top: var(--spacer-6);
     display: flex;
     flex-direction: column;
-    gap: calc(var(--base) * 0.5);
-    border-bottom: 1px solid var(--theme-elevation-100);
-    padding-bottom: var(--base);
+    gap: var(--spacer-2);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--spacer-3);
   }
 
   .doc-drawer__header-content {
@@ -56,21 +56,20 @@
   }
 
   .doc-drawer__after-header {
-    padding-top: calc(var(--base) / 4);
+    padding-top: var(--spacer-1);
   }
 
   .doc-drawer__divider {
     height: 1px;
-    background: var(--theme-elevation-100);
+    background: var(--color-border);
     width: 100%;
   }
 
   @media (max-width: 1024px) {
-    .doc-drawer__header {
-      margin-top: calc(var(--base) * 1.5);
-      margin-bottom: calc(var(--base) * 0.5);
-      padding-left: var(--gutter-h);
-      padding-right: var(--gutter-h);
+    .doc-drawer .doc-drawer__header {
+      margin-top: var(--spacer-5);
+      margin-bottom: var(--spacer-2);
+      padding-inline: var(--gutter-h);
     }
   }
 }

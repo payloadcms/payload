@@ -20,7 +20,7 @@
   }
 
   .radio-input__styled-radio {
-    border: 1px solid var(--border-default-strong);
+    border: 1px solid var(--color-border-strong);
     background-color: transparent;
     width: 1rem;
     height: 1rem;
@@ -37,7 +37,7 @@
       content: '';
       display: block;
       border-radius: var(--radius-full);
-      background-color: var(--border-default-strong);
+      background-color: var(--color-border-strong);
       width: 0.5rem;
       height: 0.5rem;
       opacity: 0;
@@ -45,10 +45,10 @@
   }
 
   .radio-input__styled-radio--disabled {
-    border-color: var(--border-disabled-default);
+    border-color: var(--color-border-disabled);
 
     &::before {
-      background-color: var(--border-disabled-default);
+      background-color: var(--color-border-disabled);
     }
   }
 
@@ -58,7 +58,7 @@
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-letter-spacing);
-    color: var(--text-default-default);
+    color: var(--color-text);
   }
 
   .radio-input--is-selected {

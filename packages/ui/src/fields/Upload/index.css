@@ -20,7 +20,7 @@
   }
 
   .upload__dropzoneContent__orText {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     text-transform: lowercase;
   }
 
@@ -28,7 +28,7 @@
     flex-shrink: 0;
     margin: 0;
     text-transform: lowercase;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
   }
 
   .upload__loadingRows {
@@ -39,10 +39,7 @@
 
   .upload .shimmer-effect {
     border-radius: var(--radius-medium);
-  }
-
-  .upload.error .dropzone {
-    border-color: var(--border-danger-strong);
+    border: 1px solid var(--color-border);
   }
 
   @media (max-width: 768px) {

@@ -36,6 +36,7 @@ import { SuperscriptIcon } from '../../../../../packages/richtext-lexical/src/le
 import { TableIcon } from '../../../../../packages/richtext-lexical/src/lexical/ui/icons/Table/index.js'
 import { TextIcon } from '../../../../../packages/richtext-lexical/src/lexical/ui/icons/Text/index.js'
 import { TextStateIcon } from '../../../../../packages/richtext-lexical/src/lexical/ui/icons/TextState/index.js'
+import { TrashIcon } from '../../../../../packages/richtext-lexical/src/lexical/ui/icons/Trash/index.js'
 import { UnderlineIcon } from '../../../../../packages/richtext-lexical/src/lexical/ui/icons/Underline/index.js'
 import { UnorderedListIcon } from '../../../../../packages/richtext-lexical/src/lexical/ui/icons/UnorderedList/index.js'
 import { UploadIcon } from '../../../../../packages/richtext-lexical/src/lexical/ui/icons/Upload/index.js'
@@ -230,6 +231,25 @@ export const LexicalIconsSection: React.FC<{ selectedComponent: string }> = ({
             <span>size: 16</span>
             <div className="components-view__icon-variants">
               <TextIcon size={16} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Trash - small */}
+      <div className="components-view__icon-item components-view__icon-item--variants">
+        <span>Trash</span>
+        <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>default</span>
+            <div className="components-view__icon-variants">
+              <TrashIcon />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>small: true</span>
+            <div className="components-view__icon-variants">
+              <TrashIcon small />
             </div>
           </div>
         </div>

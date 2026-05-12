@@ -24,7 +24,7 @@ import {
 import { abortAndIgnore } from '@payloadcms/ui/shared'
 import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 
-import './index.scss'
+import './index.css'
 
 import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
@@ -421,6 +421,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         icon="x"
         onClick={(e) => {
           e.preventDefault()
+          e.stopPropagation()
           removeInlineBlock()
         }}
         round
@@ -457,12 +458,25 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           className={[`${baseClass}__container`, baseClass + '-' + formData.blockType, className]
             .filter(Boolean)
             .join(' ')}
+          {...(isEditable
+            ? {
+                onClick: () => toggleDrawer(),
+                onKeyDown: (e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    toggleDrawer()
+                  }
+                },
+                role: 'button',
+                tabIndex: 0,
+              }
+            : {})}
           ref={inlineBlockElemElemRef}
         >
           {children}
         </div>
       ),
-    [baseClass, formData.blockType],
+    [baseClass, formData.blockType, isEditable, toggleDrawer],
   )
 
   const Label = useMemo(() => {
@@ -549,7 +563,6 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}
           {isEditable ? (
             <div className={`${baseClass}__actions`}>
-              <EditButton />
               <RemoveButton />
             </div>
           ) : null}

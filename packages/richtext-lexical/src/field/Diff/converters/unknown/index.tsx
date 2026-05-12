@@ -3,7 +3,7 @@ import type { PayloadRequest } from 'payload'
 
 import { type I18nClient } from '@payloadcms/translations'
 
-import './index.scss'
+import './index.css'
 
 import { createHash } from 'crypto'
 

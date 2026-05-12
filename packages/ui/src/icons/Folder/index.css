@@ -1,8 +1,8 @@
 @layer payload-default {
   .icon--folder--muted {
-    color: var(--icon-secondary);
+    color: var(--color-icon-secondary);
   }
   .icon--folder--dark {
-    color: var(--icon-default);
+    color: var(--color-icon);
   }
 }

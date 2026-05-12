@@ -1,0 +1,81 @@
+@layer payload-default {
+  .tree-view-output {
+    --tree-view-max-height: 25rem;
+    display: block;
+    background: #222;
+    color: #fff;
+    padding: 0;
+    font-size: var(--text-body-medium-font-size);
+    margin: 1px auto var(--spacer-2) auto;
+    position: relative;
+    overflow: hidden;
+    border-bottom-left-radius: var(--radius-medium);
+    border-bottom-right-radius: var(--radius-medium);
+
+    pre {
+      line-height: 1.1;
+      background: #222;
+      color: #fff;
+      margin: 0;
+      padding: var(--spacer-2);
+      font-size: var(--text-body-medium-font-size);
+      overflow: auto;
+      max-height: var(--tree-view-max-height);
+    }
+
+    .debug-treetype-button {
+      border: 0;
+      padding: 0;
+      font-size: var(--text-body-medium-font-size);
+      top: var(--spacer-2);
+      right: calc(var(--spacer-6) * 2);
+      position: absolute;
+      background: none;
+      color: #fff;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .debug-timetravel-button {
+      border: 0;
+      padding: 0;
+      font-size: var(--text-body-medium-font-size);
+      top: var(--spacer-2);
+      right: var(--spacer-3);
+      position: absolute;
+      background: none;
+      color: #fff;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .debug-timetravel-panel {
+      overflow: hidden;
+      padding: 0 0 var(--spacer-2);
+      margin: auto;
+      display: flex;
+    }
+
+    .debug-timetravel-panel-button {
+      padding: 0;
+      border: 0;
+      background: none;
+      flex: 1;
+      color: #fff;
+      font-size: var(--text-body-large-font-size);
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .debug-timetravel-panel-slider {
+      padding: 0;
+      flex: 8;
+    }
+  }
+}

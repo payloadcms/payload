@@ -9,7 +9,7 @@ import { Button } from '../../../Button/index.js'
 import { LoadMoreRow } from '../../../LoadMoreRow/index.js'
 import { Spinner } from '../../../Spinner/index.js'
 import { ColumnItem } from '../ColumnItem/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-column'
 

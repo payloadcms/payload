@@ -30,12 +30,12 @@
   }
 
   .section-title__input {
-    color: var(--text-default);
+    color: var(--color-text);
     border: 1px solid transparent;
     border-radius: var(--radius-medium);
 
     &::placeholder {
-      color: var(--text-default-tertiary);
+      color: var(--color-text-tertiary);
       font-family: var(--text-body-medium-font-family);
       font-weight: var(--text-body-medium-font-weight);
     }
@@ -54,7 +54,7 @@
     left: 0;
 
     &:hover:not([readonly]) {
-      background-color: var(--bg-transparent-hover);
+      background-color: var(--color-bg-transparent-hover);
     }
 
     &:hover,

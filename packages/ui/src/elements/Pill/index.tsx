@@ -36,7 +36,7 @@ export type PillProps = {
 }
 
 import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'pill'
 

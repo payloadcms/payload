@@ -73,7 +73,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/react": "16.3.0",
     "@types/jsonwebtoken": "^9.0.7",
-    "@types/node": "22.19.9",
+    "@types/node": "24.12.3",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vercel/git-hooks": "^1.0.0",
@@ -96,7 +96,7 @@
     "vitest": "4.0.18"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=24.15.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

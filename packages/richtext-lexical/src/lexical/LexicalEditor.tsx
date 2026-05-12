@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react'
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
 import { useEditorConfigContext } from './config/client/EditorConfigProvider.js'
-import './LexicalEditor.scss'
+import './LexicalEditor.css'
 import { EditorPlugin } from './EditorPlugin.js'
 import { ClipboardPlugin } from './plugins/ClipboardPlugin/index.js'
 import { DecoratorPlugin } from './plugins/DecoratorPlugin/index.js'

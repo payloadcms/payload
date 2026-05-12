@@ -1,6 +1,7 @@
 @layer payload-default {
   .upload-field-card {
-    background: var(--bg-secondary);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-medium);
     display: flex;
     align-items: center;
