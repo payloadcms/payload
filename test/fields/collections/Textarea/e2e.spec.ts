@@ -22,8 +22,8 @@ import {
   selectTableRow,
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { textareaFieldsSlug } from '../../slugs.js'
@@ -85,7 +85,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__pill', {
+        columnContainer.locator('.pill-selector__draggable-item', {
           hasText: exactText('Hidden Text Field'),
         }),
       ).toBeHidden()
@@ -111,7 +111,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__pill', {
+        columnContainer.locator('.pill-selector__draggable-item', {
           hasText: exactText('Disabled Text Field'),
         }),
       ).toBeHidden()
@@ -139,7 +139,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__pill', {
+        columnContainer.locator('.pill-selector__draggable-item', {
           hasText: exactText('Admin Hidden Text Field'),
         }),
       ).toBeVisible()
@@ -180,7 +180,7 @@ describe('Textarea', () => {
     await page.goto(url.list)
     await openListColumns(page, {})
     await expect(
-      page.locator(`.pill-selector .pill-selector__pill`, {
+      page.locator(`.pill-selector .pill-selector__draggable-item`, {
         hasText: exactText('Disable List Column Text'),
       }),
     ).toBeHidden()

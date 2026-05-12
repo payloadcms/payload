@@ -931,14 +931,14 @@ describe('Access Control', () => {
 
         // Should hide restrictedTopLevel field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Restricted Top Level'),
           }),
         ).toBeHidden()
 
         // Should show visibleTopLevel field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Visible Top Level'),
           }),
         ).toBeVisible()
@@ -952,14 +952,14 @@ describe('Access Control', () => {
 
         // Should hide secretPhone field inside contactInfo group
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Contact Info > Secret Phone'),
           }),
         ).toBeHidden()
 
         // Should show publicPhone field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Contact Info > Public Phone'),
           }),
         ).toBeVisible()
@@ -973,14 +973,14 @@ describe('Access Control', () => {
 
         // Should hide restrictedInRow field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Restricted In Row'),
           }),
         ).toBeHidden()
 
         // Should show visibleInRow field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Visible In Row'),
           }),
         ).toBeVisible()
@@ -994,14 +994,14 @@ describe('Access Control', () => {
 
         // Should hide restrictedInCollapsible field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Restricted In Collapsible'),
           }),
         ).toBeHidden()
 
         // Should show visibleInCollapsible field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Visible In Collapsible'),
           }),
         ).toBeVisible()
@@ -1015,14 +1015,14 @@ describe('Access Control', () => {
 
         // Should hide metadata.analytics.restrictedMetric field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Metadata > Analytics > Restricted Metric'),
           }),
         ).toBeHidden()
 
         // Should show metadata.analytics.visibleMetric field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Metadata > Analytics > Visible Metric'),
           }),
         ).toBeVisible()
@@ -1036,14 +1036,14 @@ describe('Access Control', () => {
 
         // Should hide secretInPublicTab field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Secret In Public Tab'),
           }),
         ).toBeHidden()
 
         // Should show publicData field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Public Data'),
           }),
         ).toBeVisible()
@@ -1057,14 +1057,14 @@ describe('Access Control', () => {
 
         // Should hide restrictedSetting field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Settings > Restricted Setting'),
           }),
         ).toBeHidden()
 
         // Should show visibleSetting field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Settings > Visible Setting'),
           }),
         ).toBeVisible()
@@ -1078,14 +1078,14 @@ describe('Access Control', () => {
 
         // Should hide secretPostalCode field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Address > Secret Postal Code'),
           }),
         ).toBeHidden()
 
         // Should show city field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Address > City'),
           }),
         ).toBeVisible()
@@ -1099,14 +1099,14 @@ describe('Access Control', () => {
 
         // Should hide restrictedAdvanced field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Advanced > Restricted Advanced'),
           }),
         ).toBeHidden()
 
         // Should show visibleAdvanced field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
+          page.locator(`.pill-selector .pill-selector__draggable-item`, {
             hasText: exactText('Advanced > Visible Advanced'),
           }),
         ).toBeVisible()

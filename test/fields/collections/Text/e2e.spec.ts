@@ -84,7 +84,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__pill', {
+        columnContainer.locator('.pill-selector__draggable-item', {
           hasText: exactText('Hidden Text Field'),
         }),
       ).toBeHidden()
@@ -110,7 +110,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__pill', {
+        columnContainer.locator('.pill-selector__draggable-item', {
           hasText: exactText('Disabled Text Field'),
         }),
       ).toBeHidden()
@@ -138,7 +138,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__pill', {
+        columnContainer.locator('.pill-selector__draggable-item', {
           hasText: exactText('Admin Hidden Text Field'),
         }),
       ).toBeVisible()
@@ -184,7 +184,7 @@ describe('Text', () => {
     await page.goto(url.list)
     await openListColumns(page, {})
     await expect(
-      page.locator(`.pill-selector .pill-selector__pill`, {
+      page.locator(`.pill-selector .pill-selector__draggable-item`, {
         hasText: exactText('Disable List Column Text'),
       }),
     ).toBeHidden()

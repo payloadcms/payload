@@ -118,7 +118,7 @@ describe('Query Presets', () => {
     // Verify the Columns field is visible and has 4 selected pills (same as default columns in list view)
     const columnsField = editModal.locator('.query-preset-columns-field')
     await expect(columnsField).toBeVisible()
-    await expect(columnsField.locator('.pill-selector__pill--selected')).toHaveCount(4)
+    await expect(columnsField.locator('.pill-selector__draggable-item--selected')).toHaveCount(4)
 
     await editModal.locator('button.doc-drawer__header-close').click()
     await expect(editModal).toBeHidden()
@@ -307,14 +307,14 @@ describe('Query Presets', () => {
 
     const { columnContainer } = await toggleColumn(page, { columnLabel: 'ID' })
 
-    const column = columnContainer.locator(`.pill-selector .pill-selector__pill`, {
+    const column = columnContainer.locator(`.pill-selector .pill-selector__draggable-item`, {
       hasText: exactText('ID'),
     })
 
     await page.locator('#reset-preset').click()
 
     await openListColumns(page, {})
-    await expect(column).toHaveClass(/pill-selector__pill--selected/)
+    await expect(column).toHaveClass(/pill-selector__draggable-item--selected/)
   })
 
   test.skip('should only enter modified state when changes are made to an active preset', async ({
@@ -664,17 +664,19 @@ describe('Query Presets', () => {
 
     const columnsField = modal.locator('.query-preset-columns-field')
     await expect(columnsField).toBeVisible()
-    let selectedCount = await columnsField.locator('.pill-selector__pill--selected').count()
+    let selectedCount = await columnsField
+      .locator('.pill-selector__draggable-item--selected')
+      .count()
     while (selectedCount > 0) {
-      await columnsField.locator('.pill-selector__pill--selected').first().click()
-      selectedCount = await columnsField.locator('.pill-selector__pill--selected').count()
+      await columnsField.locator('.pill-selector__draggable-item--selected').first().click()
+      selectedCount = await columnsField.locator('.pill-selector__draggable-item--selected').count()
     }
     await columnsField
-      .locator('.pill-selector__pill', { hasText: exactText('Text') })
+      .locator('.pill-selector__draggable-item', { hasText: exactText('Text') })
       .first()
       .click()
     await columnsField
-      .locator('.pill-selector__pill', { hasText: exactText('ID') })
+      .locator('.pill-selector__draggable-item', { hasText: exactText('ID') })
       .first()
       .click()
 

@@ -31,12 +31,12 @@ export const toggleColumn = async (
     columnContainerSelector,
   })
 
-  const column = columnContainer.locator(`.pill-selector .pill-selector__pill`, {
+  const column = columnContainer.locator(`.pill-selector .pill-selector__draggable-item`, {
     hasText: exactText(columnLabel),
   })
 
   const isActiveBeforeClick = await column.evaluate((el) =>
-    el.classList.contains('pill-selector__pill--selected'),
+    el.classList.contains('pill-selector__draggable-item--selected'),
   )
 
   const targetState =
@@ -53,10 +53,10 @@ export const toggleColumn = async (
 
   if (targetState === 'off') {
     // no class
-    await expect(column).not.toHaveClass(/pill-selector__pill--selected/)
+    await expect(column).not.toHaveClass(/pill-selector__draggable-item--selected/)
   } else {
     // has class
-    await expect(column).toHaveClass(/pill-selector__pill--selected/)
+    await expect(column).toHaveClass(/pill-selector__draggable-item--selected/)
   }
 
   if (expectURLChange && columnName && requiresToggle) {

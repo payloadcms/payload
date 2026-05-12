@@ -53,35 +53,40 @@ export const PillSelector: React.FC<Props> = ({ draggable, onClick, pills }) => 
       >
         {pills.map((pill, i) => (
           <DraggableSortableItem id={pill.name} key={pill.key ?? `${pill.name}-${i}`}>
-            {({ attributes, isDragging, listeners, setNodeRef, transform }) => (
-              <Chip
-                aria-label={pill.name}
-                className={[
-                  `${baseClass}__draggable-item`,
-                  isDragging && `${baseClass}__draggable-item--is-dragging`,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                elementProps={{
-                  ...listeners,
-                  ...attributes,
-                  ref: setNodeRef,
-                  style: {
-                    ...attributes.style,
-                    transform,
-                  },
-                }}
-                icon={pill.selected ? <XIcon /> : <PlusIcon />}
-                onClick={() => {
-                  if (onClick) {
-                    void onClick({ pill })
-                  }
-                }}
-                selected={pill.selected}
-              >
-                {pill.Label ?? <span className={`${baseClass}__pill-label`}>{pill.name}</span>}
-              </Chip>
-            )}
+            {({ attributes, isDragging, listeners, setNodeRef, transform }) => {
+              // Exclude tabIndex from attributes - the action button inside handles focus
+              const { tabIndex: _tabIndex, ...restAttributes } = attributes
+              return (
+                <Chip
+                  aria-label={pill.name}
+                  className={[
+                    `${baseClass}__draggable-item`,
+                    isDragging && `${baseClass}__draggable-item--is-dragging`,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  elementProps={{
+                    ...listeners,
+                    ...restAttributes,
+                    ref: setNodeRef,
+                    style: {
+                      ...restAttributes.style,
+                      transform,
+                    },
+                  }}
+                  icon={pill.selected ? <XIcon /> : <PlusIcon />}
+                  id={pill.name}
+                  onClick={() => {
+                    if (onClick) {
+                      void onClick({ pill })
+                    }
+                  }}
+                  selected={pill.selected}
+                >
+                  {pill.Label ?? <span className={`${baseClass}__pill-label`}>{pill.name}</span>}
+                </Chip>
+              )
+            }}
           </DraggableSortableItem>
         ))}
       </DraggableSortable>
@@ -94,6 +99,7 @@ export const PillSelector: React.FC<Props> = ({ draggable, onClick, pills }) => 
         <Chip
           aria-label={pill.name}
           icon={pill.selected ? <XIcon /> : <PlusIcon />}
+          id={pill.name}
           key={pill.key ?? `${pill.name}-${i}`}
           onClick={() => {
             if (onClick) {
