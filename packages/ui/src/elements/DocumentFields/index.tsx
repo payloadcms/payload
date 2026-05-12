@@ -7,7 +7,7 @@ import React, { useMemo } from 'react'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { TrashBanner } from '../TrashBanner/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'document-fields'
 
