@@ -1,4 +1,6 @@
 'use client'
+import type { HTMLAttributes } from 'react'
+
 import React from 'react'
 
 import { XIcon } from '../../icons/X/index.js'
@@ -7,16 +9,23 @@ import './index.css'
 
 const baseClass = 'chip'
 
+export type ChipVariant = 'danger' | 'default' | 'success' | 'warning'
+
 export type ChipProps = {
   'aria-label'?: string
   children: React.ReactNode
   className?: string
   disabled?: boolean
+  elementProps?: {
+    ref?: React.RefCallback<HTMLElement>
+  } & HTMLAttributes<HTMLElement>
   icon?: React.ReactNode
   id?: string
   onClick?: () => void
   onRemove?: () => void
+  selected?: boolean
   size?: 'large' | 'medium'
+  variant?: ChipVariant
 }
 
 export const Chip: React.FC<ChipProps> = ({
@@ -25,17 +34,28 @@ export const Chip: React.FC<ChipProps> = ({
   children,
   className,
   disabled,
+  elementProps,
   icon,
   onClick,
   onRemove,
+  selected,
   size = 'medium',
+  variant = 'default',
 }) => {
   const { t } = useTranslation()
 
-  const classes = [baseClass, `${baseClass}--size-${size}`, className].filter(Boolean).join(' ')
+  const classes = [
+    baseClass,
+    `${baseClass}--size-${size}`,
+    `${baseClass}--variant-${variant}`,
+    selected && `${baseClass}--selected`,
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
-    <div className={classes} id={id}>
+    <div {...elementProps} className={classes} id={id} ref={elementProps?.ref}>
       {onClick ? (
         <button
           aria-label={ariaLabel}
