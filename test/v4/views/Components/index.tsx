@@ -22,6 +22,7 @@ import { TooltipSection } from './sections/Tooltip.js'
 // Field sections
 import { CodeFieldSection } from './sections/fields/CodeField.js'
 import { DateFieldSection } from './sections/fields/DateField.js'
+import { EmailAndUsernameFieldSection } from './sections/fields/EmailAndUsernameField.js'
 import { EmailFieldSection } from './sections/fields/EmailField.js'
 import { JSONFieldSection } from './sections/fields/JSONField.js'
 import { NumberFieldSection } from './sections/fields/NumberField.js'
@@ -45,6 +46,7 @@ type ComponentId =
   | 'date-field'
   | 'drawer'
   | 'email-field'
+  | 'email-username-field'
   | 'icons'
   | 'input'
   | 'json-field'
@@ -100,6 +102,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'fields', label: 'Code Field', value: 'code-field' },
   { category: 'fields', label: 'Date Field', value: 'date-field' },
   { category: 'fields', label: 'Email Field', value: 'email-field' },
+  { category: 'fields', label: 'Email & Username', value: 'email-username-field' },
   { category: 'fields', label: 'JSON Field', value: 'json-field' },
   { category: 'fields', label: 'Number Field', value: 'number-field' },
   { category: 'fields', label: 'Password Field', value: 'password-field' },
@@ -237,6 +240,7 @@ export const ComponentsView: React.FC = () => {
           )}
         {shouldShow('text-field', 'fields') && <TextFieldSection />}
         {shouldShow('email-field', 'fields') && <EmailFieldSection />}
+        {shouldShow('email-username-field', 'fields') && <EmailAndUsernameFieldSection />}
         {shouldShow('number-field', 'fields') && <NumberFieldSection />}
         {shouldShow('password-field', 'fields') && <PasswordFieldSection />}
         {shouldShow('point-field', 'fields') && <PointFieldSection />}
