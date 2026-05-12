@@ -32,6 +32,8 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 - `migrate-hide-api-url` — migrates `admin.hideAPIURL: true` to `admin.components.views.edit.api.tab.condition: () => false` on collection and global configs.
 - `migrate-aliased-exports` — rewrites imports of types and utilities that used to be re-exported from `@payloadcms/ui` and `@payloadcms/next/utilities` to their canonical sources in `payload` / `payload/shared`.
 - `migrate-document-title-context` — migrates `title` and `setDocumentTitle` destructured from `useDocumentInfo()` to `useDocumentTitle()`. They were removed from `DocumentInfoContext` in v4 and now live on `DocumentTitleContext`.
+- `migrate-multi-tenant-use-base-list-filter` — renames `useBaseListFilter` to `useBaseFilter` in `@payloadcms/plugin-multi-tenant` collection config. Only renames the property when it appears inside a `collections` sub-object; unrelated occurrences elsewhere in the file are left untouched.
+- `migrate-multi-tenant-tenant-selector-label` — migrates `tenantSelectorLabel: { [locale]: string }` in `@payloadcms/plugin-multi-tenant` config to `i18n.translations[locale]['nav-tenantSelector-label']`. Object values with locale keys are auto-migrated when no sibling `i18n` property exists; string values and configs with an existing `i18n` property are removed with a note for manual migration.
 
 ## Contributing
 
