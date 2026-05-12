@@ -109,6 +109,8 @@ export { Gutter } from '../../elements/Gutter/index.js'
 export { Hamburger } from '../../elements/Hamburger/index.js'
 export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
 export { HydrateHierarchyProvider } from '../../elements/Hierarchy/HydrateProvider/index.js'
+export { InputStepper } from '../../elements/InputStepper/index.js'
+export type { InputStepperProps } from '../../elements/InputStepper/index.js'
 
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
