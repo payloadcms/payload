@@ -14,7 +14,7 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
+import './index.css'
 
 export const TextInput: React.FC<TextInputProps> = (props) => {
   const {
@@ -154,6 +154,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
           />
         ) : (
           <input
+            className="form-input"
             data-rtl={rtl}
             disabled={readOnly}
             id={`field-${path?.replace(/\./g, '__')}`}

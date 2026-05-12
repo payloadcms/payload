@@ -124,14 +124,7 @@ const getInitialDrawerData = ({
 const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
-    field: {
-      admin: { allowCreate, description },
-      collection,
-      label,
-      localized,
-      on,
-      required,
-    },
+    field: { admin: { allowCreate, description } = {}, collection, label, localized, on, required },
     path: pathFromProps,
   } = props
 

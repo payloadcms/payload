@@ -1,0 +1,11 @@
+@layer payload-default {
+  .field-description {
+    display: flex;
+    color: var(--color-text-secondary);
+  }
+
+  .field-description--margin-bottom {
+    margin-top: 0;
+    margin-bottom: var(--spacer-3);
+  }
+}

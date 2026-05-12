@@ -103,8 +103,10 @@ export interface Config {
     'lexical-localized-fields': LexicalLocalizedField;
     lexicalObjectReferenceBug: LexicalObjectReferenceBug;
     LexicalInBlock: LexicalInBlock;
+    'lexical-autosave-block': LexicalAutosaveBlock;
     'lexical-access-control': LexicalAccessControl;
     'lexical-relationship-fields': LexicalRelationshipField;
+    collision: Collision;
     'lexical-nested-blocks': LexicalNestedBlock;
     'rich-text-fields': RichTextField;
     'text-fields': TextField;
@@ -139,8 +141,10 @@ export interface Config {
     'lexical-localized-fields': LexicalLocalizedFieldsSelect<false> | LexicalLocalizedFieldsSelect<true>;
     lexicalObjectReferenceBug: LexicalObjectReferenceBugSelect<false> | LexicalObjectReferenceBugSelect<true>;
     LexicalInBlock: LexicalInBlockSelect<false> | LexicalInBlockSelect<true>;
+    'lexical-autosave-block': LexicalAutosaveBlockSelect<false> | LexicalAutosaveBlockSelect<true>;
     'lexical-access-control': LexicalAccessControlSelect<false> | LexicalAccessControlSelect<true>;
     'lexical-relationship-fields': LexicalRelationshipFieldsSelect<false> | LexicalRelationshipFieldsSelect<true>;
+    collision: CollisionSelect<false> | CollisionSelect<true>;
     'lexical-nested-blocks': LexicalNestedBlocksSelect<false> | LexicalNestedBlocksSelect<true>;
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
@@ -749,6 +753,31 @@ export interface LexicalInBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-autosave-block".
+ */
+export interface LexicalAutosaveBlock {
+  id: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lexical-access-control".
  */
 export interface LexicalAccessControl {
@@ -841,6 +870,30 @@ export interface LexicalRelationshipField {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collision".
+ */
+export interface Collision {
+  id: string;
+  collision?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1308,12 +1361,20 @@ export interface PayloadLockedDocument {
         value: string | LexicalInBlock;
       } | null)
     | ({
+        relationTo: 'lexical-autosave-block';
+        value: string | LexicalAutosaveBlock;
+      } | null)
+    | ({
         relationTo: 'lexical-access-control';
         value: string | LexicalAccessControl;
       } | null)
     | ({
         relationTo: 'lexical-relationship-fields';
         value: string | LexicalRelationshipField;
+      } | null)
+    | ({
+        relationTo: 'collision';
+        value: string | Collision;
       } | null)
     | ({
         relationTo: 'lexical-nested-blocks';
@@ -1590,6 +1651,16 @@ export interface LexicalInBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-autosave-block_select".
+ */
+export interface LexicalAutosaveBlockSelect<T extends boolean = true> {
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lexical-access-control_select".
  */
 export interface LexicalAccessControlSelect<T extends boolean = true> {
@@ -1610,6 +1681,15 @@ export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collision_select".
+ */
+export interface CollisionSelect<T extends boolean = true> {
+  collision?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

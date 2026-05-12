@@ -6,7 +6,7 @@ export const GlobalCustomDocumentControls: GlobalConfig = {
   slug: customGlobalDocumentControlsSlug,
   admin: {
     components: {
-      elements: {
+      edit: {
         Status: '/components/Status/index.tsx#Status',
       },
     },

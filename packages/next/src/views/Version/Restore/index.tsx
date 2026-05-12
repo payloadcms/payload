@@ -126,7 +126,7 @@ export const Restore: React.FC<Props> = ({
             .filter(Boolean)
             .join(' ')}
           onClick={() => toggleModal(modalSlug)}
-          size="xsmall"
+          size="medium"
           SubMenuPopupContent={
             canRestoreAsDraft
               ? () => (

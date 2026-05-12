@@ -1,0 +1,25 @@
+@layer payload-default {
+  .error-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0 var(--spacer-1);
+    border-radius: var(--radius-medium);
+    line-height: var(--text-body-medium-line-height);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    letter-spacing: var(--text-letter-spacing);
+    text-align: center;
+    background: var(--color-bg-danger);
+    color: var(--color-text-ondanger);
+    height: var(--spacer-3);
+  }
+
+  .error-pill--fixed-width {
+    width: var(--spacer-3);
+    padding: 0;
+    position: relative;
+  }
+}

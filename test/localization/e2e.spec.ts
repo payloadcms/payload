@@ -337,8 +337,7 @@ describe('Localization', () => {
       await changeLocale(page, defaultLocale)
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('button.tabs-field__tab-button', { hasText: 'Main Nav' }).click()
-      await page.locator('#field-nav__layout .blocks-field__drawer-toggler').click()
-      await page.locator('button[title="Text"]').click()
+      await addBlock({ page, fieldName: 'nav__layout', blockToSelect: 'Text' })
       await page.locator('#field-nav__layout__0__text').waitFor({ state: 'visible' })
       await page.locator('#field-nav__layout__0__text').fill('test')
       await expect(page.locator('#field-nav__layout__0__text')).toHaveValue('test')
@@ -1035,8 +1034,7 @@ describe('Localization', () => {
       await page.locator('#field-title').fill('Second doc title')
 
       await page.locator('button.tabs-field__tab-button', { hasText: 'Main Nav' }).click()
-      await page.locator('#field-nav__layout .blocks-field__drawer-toggler').click()
-      await page.locator('button[title="Text"]').click()
+      await addBlock({ page, fieldName: 'nav__layout', blockToSelect: 'Text' })
       await page.locator('#field-nav__layout__0__text').waitFor({ state: 'visible' })
       await page.locator('#field-nav__layout__0__text').fill('test block')
 

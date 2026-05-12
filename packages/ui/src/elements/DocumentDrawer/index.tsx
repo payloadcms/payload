@@ -1,6 +1,6 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import React, { useCallback, useId, useMemo, useRef } from 'react'
 
 import type {
   DocumentDrawerProps,
@@ -91,35 +91,43 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
 export const useDocumentDrawer: UseDocumentDrawer = ({
   id,
   collectionSlug,
+  drawerSlug: drawerSlugFromProps,
   overrideEntityVisibility,
 }) => {
   const editDepth = useEditDepth()
   const uuid = useId()
-  const { closeModal, modalState, openModal, toggleModal } = useModal()
-  const [isOpen, setIsOpen] = useState(false)
+  const { closeModal, openModal, toggleModal } = useModal()
 
-  const drawerSlug = formatDocumentDrawerSlug({
-    id,
-    collectionSlug,
-    depth: editDepth,
-    uuid,
-  })
+  // Use provided slug or generate one
+  const drawerSlug =
+    drawerSlugFromProps ||
+    formatDocumentDrawerSlug({
+      id,
+      collectionSlug,
+      depth: editDepth,
+      uuid,
+    })
 
-  useEffect(() => {
-    setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
-  }, [modalState, drawerSlug])
+  // Store modal functions in refs to ensure stable callbacks
+  // This prevents re-renders when other modals change state
+  const closeModalRef = useRef(closeModal)
+  const openModalRef = useRef(openModal)
+  const toggleModalRef = useRef(toggleModal)
+  closeModalRef.current = closeModal
+  openModalRef.current = openModal
+  toggleModalRef.current = toggleModal
 
   const toggleDrawer = useCallback(() => {
-    toggleModal(drawerSlug)
-  }, [toggleModal, drawerSlug])
+    toggleModalRef.current(drawerSlug)
+  }, [drawerSlug])
 
   const closeDrawer = useCallback(() => {
-    closeModal(drawerSlug)
-  }, [closeModal, drawerSlug])
+    closeModalRef.current(drawerSlug)
+  }, [drawerSlug])
 
   const openDrawer = useCallback(() => {
-    openModal(drawerSlug)
-  }, [openModal, drawerSlug])
+    openModalRef.current(drawerSlug)
+  }, [drawerSlug])
 
   const MemoizedDrawer = useMemo<React.FC<DocumentDrawerProps>>(() => {
     return (props) => (
@@ -150,11 +158,12 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
       closeDrawer,
       drawerDepth: editDepth,
       drawerSlug,
-      isDrawerOpen: isOpen,
+      // Note: Not tracking isDrawerOpen to prevent re-renders when modals change state
+      isDrawerOpen: false,
       openDrawer,
       toggleDrawer,
     }),
-    [editDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer, openDrawer],
+    [editDepth, drawerSlug, toggleDrawer, closeDrawer, openDrawer],
   )
 
   return [MemoizedDrawer, MemoizedDrawerToggler, MemoizedDrawerState]

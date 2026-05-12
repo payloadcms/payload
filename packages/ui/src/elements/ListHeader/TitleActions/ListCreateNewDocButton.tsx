@@ -33,7 +33,7 @@ export function ListCreateNewButton({
       className={`${baseClass}__create-new-button`}
       el={'link'}
       key="create-new-button"
-      size="small"
+      size="medium"
       to={newDocumentURL}
     >
       {t('general:createNew')}

@@ -3,7 +3,6 @@
 @layer payload-default {
   .list-drawer {
     .list-header__title {
-      @extend %h2;
     }
 
     &__header {

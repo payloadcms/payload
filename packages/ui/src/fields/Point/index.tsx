@@ -4,6 +4,7 @@ import type { PointFieldClientComponent, PointFieldValidation } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
 
+import { InputStepper } from '../../elements/InputStepper/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
@@ -12,7 +13,7 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
+import './index.css'
 import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'point'
@@ -67,6 +68,21 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
     [setValue, value],
   )
 
+  const handleStep = useCallback(
+    (index: 0 | 1, direction: 'down' | 'up') => {
+      if (readOnly || disabled) {
+        return
+      }
+      const stepValue = step ?? 1
+      const currentValue = typeof value[index] === 'number' ? value[index] : 0
+      const newValue = direction === 'up' ? currentValue + stepValue : currentValue - stepValue
+      const coordinates = [...value]
+      coordinates[index] = newValue
+      setValue(coordinates)
+    },
+    [disabled, readOnly, setValue, step, value],
+  )
+
   const getCoordinateFieldLabel = (type: 'latitude' | 'longitude') => {
     const suffix = type === 'longitude' ? t('fields:longitude') : t('fields:latitude')
     const fieldLabel = label ? getTranslation(label, i18n) : ''
@@ -102,11 +118,12 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
               />
             }
           />
-          <div className="input-wrapper">
-            {BeforeInput}
+          {BeforeInput}
+          <div className="form-input-group">
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
+              className="form-input"
               disabled={readOnly || disabled}
               id={`field-longitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.longitude`}
@@ -116,8 +133,13 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
               type="number"
               value={value && typeof value[0] === 'number' ? value[0] : ''}
             />
-            {AfterInput}
+            <InputStepper
+              disabled={readOnly || disabled}
+              onDecrement={() => handleStep(0, 'down')}
+              onIncrement={() => handleStep(0, 'up')}
+            />
           </div>
+          {AfterInput}
         </li>
         <li>
           <RenderCustomComponent
@@ -131,7 +153,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
               />
             }
           />
-          <div className="input-wrapper">
+          <div className="form-input-group">
             <RenderCustomComponent
               CustomComponent={Error}
               Fallback={<FieldError path={path} showError={showError} />}
@@ -140,6 +162,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
+              className="form-input"
               disabled={readOnly || disabled}
               id={`field-latitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.latitude`}
@@ -149,8 +172,13 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
               type="number"
               value={value && typeof value[1] === 'number' ? value[1] : ''}
             />
-            {AfterInput}
+            <InputStepper
+              disabled={readOnly || disabled}
+              onDecrement={() => handleStep(1, 'down')}
+              onIncrement={() => handleStep(1, 'up')}
+            />
           </div>
+          {AfterInput}
         </li>
       </ul>
       <RenderCustomComponent

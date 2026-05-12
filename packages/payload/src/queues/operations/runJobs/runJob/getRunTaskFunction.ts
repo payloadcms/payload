@@ -1,7 +1,7 @@
 import ObjectIdImport from 'bson-objectid'
 
 import type { Job } from '../../../../index.js'
-import type { JsonObject, PayloadRequest } from '../../../../types/index.js'
+import type { PayloadRequest } from '../../../../types/index.js'
 import type {
   RetryConfig,
   RunInlineTaskFunction,
@@ -128,23 +128,24 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         })
       }
 
-      let taskHandlerResult: TaskHandlerResult<string>
-      let output: JsonObject | undefined = {}
+      let output: TaskHandlerResult<string>['output']
 
       try {
-        taskHandlerResult = await runner({
-          inlineTask: getRunTaskFunction(job, workflowConfig, req, true, updateJob, {
-            taskID,
-            taskSlug,
-          }),
-          input,
-          job: job as unknown as Job<WorkflowTypes>,
-          req,
-          tasks: getRunTaskFunction(job, workflowConfig, req, false, updateJob, {
-            taskID,
-            taskSlug,
-          }),
-        })
+        output = (
+          await runner({
+            inlineTask: getRunTaskFunction(job, workflowConfig, req, true, updateJob, {
+              taskID,
+              taskSlug,
+            }),
+            input,
+            job: job as unknown as Job<WorkflowTypes>,
+            req,
+            tasks: getRunTaskFunction(job, workflowConfig, req, false, updateJob, {
+              taskID,
+              taskSlug,
+            }),
+          })
+        )?.output
       } catch (err: any) {
         if (err instanceof JobCancelledError) {
           // Re-throw JobCancelledError to be handled by the top-level error handler
@@ -164,25 +165,6 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           taskStatus,
           workflowConfig,
         })
-      }
-
-      if (taskHandlerResult.state === 'failed') {
-        throw new TaskError({
-          executedAt,
-          input: input!,
-          job,
-          message: taskHandlerResult.errorMessage ?? 'Task handler returned a failed state',
-          output,
-          parent,
-          retriesConfig: finalRetriesConfig,
-          taskConfig,
-          taskID,
-          taskSlug,
-          taskStatus,
-          workflowConfig,
-        })
-      } else {
-        output = taskHandlerResult.output
       }
 
       if (taskConfig?.onSuccess) {

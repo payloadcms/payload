@@ -16,7 +16,9 @@ export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
 export const lexicalRelationshipFieldsSlug = 'lexical-relationship-fields'
 export const lexicalAccessControlSlug = 'lexical-access-control'
 export const lexicalAutosaveSlug = 'lexical-autosave'
+export const lexicalAutosaveBlockSlug = 'lexical-autosave-block'
 export const richTextFieldsSlug = 'rich-text-fields'
+export const lexicalSlugFieldNameCollisionSlug = 'collision'
 
 // Auxiliary slugs
 export const textFieldsSlug = 'text-fields'

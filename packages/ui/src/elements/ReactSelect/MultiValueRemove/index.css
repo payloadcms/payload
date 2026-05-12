@@ -1,0 +1,27 @@
+@layer payload-default {
+  .multi-value-remove {
+    cursor: pointer;
+    min-width: 1.125rem;
+    min-height: 1.125rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-small);
+    padding: 0;
+    color: var(--color-icon-secondary);
+
+    &:hover {
+      color: var(--color-text);
+      background: var(--color-bg-hover);
+    }
+
+    &:focus-visible {
+      outline: none;
+      border: var(--accessibility-outline);
+    }
+  }
+}

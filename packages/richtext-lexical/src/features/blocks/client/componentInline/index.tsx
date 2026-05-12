@@ -22,9 +22,9 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { $getNodeByKey } from 'lexical'
+import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 
-import './index.scss'
+import './index.css'
 
 import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
@@ -264,15 +264,20 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         ) as InlineBlockFields
 
         // Things like default values may come back from the server => update the node with the new data
-        editor.update(() => {
-          const node = $getNodeByKey(nodeKey)
-          if (node && $isInlineBlockNode(node)) {
-            const newData = newFormStateData
-            newData.blockType = formData.blockType
+        editor.update(
+          () => {
+            const node = $getNodeByKey(nodeKey)
+            if (node && $isInlineBlockNode(node)) {
+              const newData = newFormStateData
+              newData.blockType = formData.blockType
 
-            node.setFields(newData, true)
-          }
-        })
+              node.setFields(newData, true)
+            }
+          },
+          // Without this, the outer editor's reconciler resets DOM selection
+          // back into its own root, kicking focus out of any nested richText.
+          { tag: SKIP_DOM_SELECTION_TAG },
+        )
 
         setInitialState(state)
         if (!CustomLabelFromProps) {
@@ -392,12 +397,17 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     (formState: FormState, newData: Data) => {
       newData.blockType = formData.blockType
 
-      editor.update(() => {
-        const node = $getNodeByKey(nodeKey)
-        if (node && $isInlineBlockNode(node)) {
-          node.setFields(newData as InlineBlockFields, true)
-        }
-      })
+      editor.update(
+        () => {
+          const node = $getNodeByKey(nodeKey)
+          if (node && $isInlineBlockNode(node)) {
+            node.setFields(newData as InlineBlockFields, true)
+          }
+        },
+        // Without this, the outer editor's reconciler resets DOM selection
+        // back into its own root, kicking focus out of any nested richText.
+        { tag: SKIP_DOM_SELECTION_TAG },
+      )
     },
     [editor, nodeKey, formData],
   )
@@ -411,10 +421,11 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         icon="x"
         onClick={(e) => {
           e.preventDefault()
+          e.stopPropagation()
           removeInlineBlock()
         }}
         round
-        size="small"
+        size="medium"
         tooltip={t('lexical:blocks:inlineBlocks:remove', { label: blockDisplayName })}
       />
     ),
@@ -433,7 +444,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           toggleDrawer()
         }}
         round
-        size="small"
+        size="medium"
         tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
       />
     ),
@@ -447,12 +458,25 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           className={[`${baseClass}__container`, baseClass + '-' + formData.blockType, className]
             .filter(Boolean)
             .join(' ')}
+          {...(isEditable
+            ? {
+                onClick: () => toggleDrawer(),
+                onKeyDown: (e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    toggleDrawer()
+                  }
+                },
+                role: 'button',
+                tabIndex: 0,
+              }
+            : {})}
           ref={inlineBlockElemElemRef}
         >
           {children}
         </div>
       ),
-    [baseClass, formData.blockType],
+    [baseClass, formData.blockType, isEditable, toggleDrawer],
   )
 
   const Label = useMemo(() => {
@@ -539,7 +563,6 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}
           {isEditable ? (
             <div className={`${baseClass}__actions`}>
-              <EditButton />
               <RemoveButton />
             </div>
           ) : null}

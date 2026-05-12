@@ -69,6 +69,7 @@ if (enableTurbo) {
 
 await assertDbReachable(getCurrentDatabaseAdapter())
 
+// eslint-disable-next-line @typescript-eslint/await-thenable
 const { beforeTest } = await createTestHooks(testSuiteArg, testSuiteConfigOverride)
 await beforeTest()
 

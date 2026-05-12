@@ -1,0 +1,29 @@
+.hierarchy-cell {
+  display: flex;
+  align-items: center;
+
+  &__pill {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--base) / 3);
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}

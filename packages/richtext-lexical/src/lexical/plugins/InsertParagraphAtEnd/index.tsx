@@ -5,7 +5,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { $createParagraphNode, $getRoot } from 'lexical'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
 const baseClass = 'insert-paragraph-at-end'
 

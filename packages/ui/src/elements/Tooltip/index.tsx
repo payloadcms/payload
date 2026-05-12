@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
-import './index.scss'
+import './index.css'
 
 export type Props = {
   alignCaret?: 'center' | 'left' | 'right'
@@ -24,7 +24,7 @@ export const Tooltip: React.FC<Props> = (props) => {
     boundingRef,
     children,
     className,
-    delay = 350,
+    delay = 500,
     position: positionFromProps,
     show: showFromProps = true,
     staticPositioning = false,
@@ -32,8 +32,6 @@ export const Tooltip: React.FC<Props> = (props) => {
 
   const [show, setShow] = React.useState(showFromProps)
   const [position, setPosition] = React.useState<'bottom' | 'top'>('top')
-
-  const getTitleAttribute = (content) => (typeof content === 'string' ? content : '')
 
   const [ref, intersectionEntry] = useIntersect(
     {
@@ -95,7 +93,6 @@ export const Tooltip: React.FC<Props> = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        title={getTitleAttribute(children)}
       >
         <div className="tooltip-content">{children}</div>
       </aside>

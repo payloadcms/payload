@@ -33,6 +33,7 @@ import {
   adminUploadControlSlug,
   animatedTypeMedia,
   audioSlug,
+  bulkUploadsHookErrorSlug,
   bulkUploadsSlug,
   constructorOptionsSlug,
   customFileNameMediaSlug,
@@ -109,6 +110,7 @@ let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
 let bulkUploadsURL: AdminUrlUtil
+let bulkUploadsHookErrorURL: AdminUrlUtil
 let fileMimeTypeURL: AdminUrlUtil
 let svgOnlyURL: AdminUrlUtil
 let mediaWithoutDeleteAccessURL: AdminUrlUtil
@@ -153,6 +155,7 @@ describe('Uploads', () => {
     threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
     constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
     bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
+    bulkUploadsHookErrorURL = new AdminUrlUtil(serverURL, bulkUploadsHookErrorSlug)
     fileMimeTypeURL = new AdminUrlUtil(serverURL, fileMimeTypeSlug)
     svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
     mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
@@ -262,7 +265,7 @@ describe('Uploads', () => {
     const filename = page.locator('.upload-relationship-details__filename a').nth(0)
     await expect(filename).toContainText('image.png')
 
-    await page.locator('.upload-relationship-details__edit').nth(0).click()
+    await page.locator('.field-type.upload').nth(0).getByRole('button', { name: 'Edit' }).click()
     await page.locator('.file-details__remove').click()
 
     await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
@@ -510,7 +513,7 @@ describe('Uploads', () => {
     await page.locator('.row-1 a').click()
 
     // edit the versioned image
-    await page.locator('.field-type:nth-of-type(2) .icon--edit').click()
+    await page.locator('.field-type:nth-of-type(2) .icon--write').click()
 
     // fill the title with 'draft'
     await page.locator('#field-title').fill('draft')
@@ -560,7 +563,7 @@ describe('Uploads', () => {
 
       // remove the selection and open the list drawer
       await wait(500) // flake workaround
-      await page.locator('#field-audio .upload-relationship-details__remove').click()
+      await page.locator('#field-audio').getByRole('button', { name: 'Remove' }).click()
 
       await openDocDrawer({ page, selector: '#field-audio .upload__listToggler' })
 
@@ -605,7 +608,7 @@ describe('Uploads', () => {
 
       // remove the selection and open the list drawer
       await wait(500) // flake workaround
-      await page.locator('#field-audio .upload-relationship-details__remove').click()
+      await page.locator('#field-audio').getByRole('button', { name: 'Remove' }).click()
 
       await openDocDrawer({ page, selector: '.upload__listToggler' })
 
@@ -1671,6 +1674,51 @@ describe('Uploads', () => {
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
     })
+
+    test('should report failure when beforeChange hook throws non-field error', async () => {
+      await page.goto(bulkUploadsHookErrorURL.list)
+
+      await expect(page.locator('.list-header__title')).toBeVisible()
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeEnabled()
+
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ timeout: 5000, intervals: [500] })
+
+      await page
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([path.resolve(dirname, './image.png'), path.resolve(dirname, './small.png')])
+
+      const nextButton = page.locator('.bulk-upload--actions-bar__controls button:nth-of-type(2)')
+      await nextButton.click()
+
+      await page.locator('#field-shouldFail').check()
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Successfully saved 1 files',
+      )
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
+      ).toBeVisible()
+      await expect(
+        page.locator(
+          '.payload-toast-container .toast-error:has-text("Simulated hook error in beforeChange")',
+        ),
+      ).toBeVisible()
+
+      await expect(page.locator('.file-selections .file-selections__fileRowContainer')).toHaveCount(
+        1,
+      )
+    })
   })
 
   describe('remote url fetching', () => {
@@ -2233,7 +2281,7 @@ describe('Uploads', () => {
 
     await expect(page.locator('#field-uploadField')).toBeVisible()
 
-    await page.locator('#field-uploadField .upload-relationship-details__edit').click()
+    await page.locator('#field-uploadField').getByRole('button', { name: 'Edit' }).click()
 
     const drawer = page.locator('[id^=doc-drawer_no-files-required_]')
     await expect(drawer).toBeVisible()

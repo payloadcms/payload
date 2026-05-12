@@ -304,7 +304,7 @@ describe('General', () => {
   })
 
   describe('theme', () => {
-    test('should render light theme by default', async () => {
+    test('should default to automatic theme mode', async () => {
       await page.goto(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
       await page.goto(`${postsUrl.admin}/account`)
@@ -316,43 +316,65 @@ describe('General', () => {
     test('should explicitly change to light theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-light"]').click()
-      await expect(page.locator('#field-theme-auto')).not.toBeChecked()
       await expect(page.locator('#field-theme-light')).toBeChecked()
       await expect(page.locator('#field-theme-dark')).not.toBeChecked()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 
-      // reload the page an ensure theme is retained
+      // reload the page and ensure theme is retained
       await page.reload()
-      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
-
-      // go back to auto theme
-      await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-auto"]').click()
-      await expect(page.locator('#field-theme-auto')).toBeChecked()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
     })
 
     test('should explicitly change to dark theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-dark"]').click()
-      await expect(page.locator('#field-theme-auto')).not.toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
       await expect(page.locator('#field-theme-dark')).toBeChecked()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
-      // reload the page an ensure theme is retained
+      // reload the page and ensure theme is retained
       await page.reload()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
-      // go back to auto theme
+      // reset to light
       await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-auto"]').click()
-      await expect(page.locator('#field-theme-auto')).toBeChecked()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
+      await page.locator('label[for="field-theme-light"]').click()
+      await expect(page.locator('#field-theme-light')).toBeChecked()
       await expect(page.locator('#field-theme-dark')).not.toBeChecked()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    })
+  })
+
+  describe('enhanced contrast mode', () => {
+    test('should not have data-enhanced-contrast attribute by default', async () => {
+      await page.goto(postsUrl.admin)
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+      await page.goto(`${postsUrl.admin}/account`)
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+    })
+
+    test('should add data-enhanced-contrast when enabled and persist after reload', async () => {
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-highContrastMode"]').click()
+      await expect(page.locator('#field-highContrastMode')).toBeChecked()
+      await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+
+      await page.reload()
+      await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-highContrastMode"]').click()
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+    })
+
+    test('should not have data-enhanced-contrast attribute after reload when off', async () => {
+      await page.goto(`${postsUrl.admin}/account`)
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+
+      await page.reload()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
     })
   })
 
@@ -397,8 +419,8 @@ describe('General', () => {
         )
 
       // Should show warning banner about document not found
-      await expect(page.locator('.banner--type-error')).toBeVisible()
-      await expect(page.locator('.banner--type-error')).toContainText('999999')
+      await expect(page.locator('.banner--type-danger')).toBeVisible()
+      await expect(page.locator('.banner--type-danger')).toContainText('999999')
     })
 
     test('should not redirect `${adminRoute}/collections` to `${adminRoute} if there is a custom view', async () => {
@@ -525,7 +547,7 @@ describe('General', () => {
     test('should disable active nav item', async () => {
       await page.goto(postsUrl.list)
       await openNav(page)
-      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
       const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
       expect(tagName).toBe('div')
@@ -534,7 +556,7 @@ describe('General', () => {
     test('should keep active nav item enabled in the edit view', async () => {
       await page.goto(postsUrl.create)
       await openNav(page)
-      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
       const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
       expect(tagName).toBe('a')
@@ -552,10 +574,8 @@ describe('General', () => {
       await expect(uploadsNavItem).toBeVisible()
       await expect(uploadsTwoNavItem).toBeVisible()
 
-      // Locate all nav items containing the nav__link-indicator
-      const activeNavItems = page.locator(
-        '.nav-group__content .nav__link:has(.nav__link-indicator), .nav-group__content div.nav__link:has(.nav__link-indicator)',
-      )
+      // Locate all nav items with the selected state
+      const activeNavItems = page.locator('.nav-group__content .nav__link--selected')
 
       // Expect exactly one nav item to have the indicator
       await expect(activeNavItems).toHaveCount(1)
@@ -564,7 +584,7 @@ describe('General', () => {
     test('settings menu — should show gear icon when settingsMenu is configured', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
-      const gearIcon = page.locator('.nav__controls .popup#settings-menu .gear')
+      const gearIcon = page.locator('.nav__controls .popup#settings-menu .icon--gear')
       await expect(gearIcon).toBeVisible()
     })
 

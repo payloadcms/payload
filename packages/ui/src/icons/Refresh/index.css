@@ -1,0 +1,11 @@
+@layer payload-default {
+  .icon--refresh {
+    .stroke {
+      stroke: currentColor;
+    }
+
+    .fill {
+      fill: currentColor;
+    }
+  }
+}

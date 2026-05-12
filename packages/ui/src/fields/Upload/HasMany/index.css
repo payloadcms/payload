@@ -1,0 +1,22 @@
+@layer payload-default {
+  .upload--has-many {
+    position: relative;
+    max-width: 100%;
+  }
+
+  .upload--has-many__drag[aria-disabled='true']:hover {
+    cursor: default;
+  }
+
+  .upload--has-many__draggable-rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .upload--has-many__dragItem {
+    .icon--drag-handle {
+      color: var(--color-text-tertiary);
+    }
+  }
+}

@@ -28,7 +28,7 @@ export const RenderDefaultCell: React.FC<{
     columnIndex,
   }
 
-  if (isLinkedColumn && drawerSlug) {
+  if (isLinkedColumn && drawerSlug && clientProps.link !== false) {
     propsToPass.className = `${baseClass}__first-cell`
     propsToPass.link = false
     propsToPass.onClick = ({ collectionSlug: rowColl, rowData }) => {

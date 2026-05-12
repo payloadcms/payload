@@ -1,0 +1,41 @@
+@layer payload-default {
+  .value-container {
+    flex-grow: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--spacer-1);
+
+    .rs__value-container {
+      overflow: visible;
+      padding: 0;
+      gap: var(--spacer-1);
+
+      > * {
+        margin: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        color: currentColor;
+
+        .field-label {
+          padding-bottom: 0;
+        }
+      }
+    }
+  }
+
+  .value-container__label {
+    color: var(--color-text-secondary);
+  }
+
+  .react-select .rs__value-container--is-multi {
+    width: 100%;
+    flex-wrap: wrap;
+
+    &.rs__value-container--has-value {
+      padding: 0;
+    }
+  }
+}

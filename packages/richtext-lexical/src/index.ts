@@ -85,15 +85,25 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
     }
 
     const featureI18n: Partial<GenericLanguages> = finalSanitizedEditorConfig.features.i18n
-    for (const _lang in i18n) {
+    const supportedLanguages = config.i18n?.supportedLanguages
+    const supportedLanguagesToMerge: Partial<GenericLanguages> = {}
+    for (const _lang in supportedLanguages) {
+      if (!(_lang in i18n)) {
+        if (featureI18n[_lang as keyof typeof i18n]) {
+          supportedLanguagesToMerge[_lang as keyof typeof i18n] =
+            featureI18n[_lang as keyof typeof i18n]
+        }
+        continue
+      }
       const lang = _lang as keyof typeof i18n
       const lexicalI18nForLang = ((featureI18n[lang] ??= {}).lexical ??=
         {}) as GenericTranslationsObject
 
       lexicalI18nForLang.general = i18n[lang] ?? {}
+      supportedLanguagesToMerge[lang] = featureI18n[lang]
     }
 
-    config.i18n.translations = deepMergeSimple(config.i18n.translations, featureI18n)
+    config.i18n.translations = deepMergeSimple(config.i18n.translations, supportedLanguagesToMerge)
 
     return {
       CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
@@ -896,27 +906,7 @@ export {
 export { convertHTMLToLexical } from './features/converters/htmlToLexical/index.js'
 
 export { lexicalHTMLField } from './features/converters/lexicalToHtml/async/field/index.js'
-export { LinebreakHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/linebreak.js'
 
-export { ParagraphHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/paragraph.js'
-
-export { TabHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/tab.js'
-export { TextHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/text.js'
-export { defaultHTMLConverters } from './features/converters/lexicalToHtml_deprecated/converter/defaultConverters.js'
-
-export {
-  convertLexicalNodesToHTML,
-  convertLexicalToHTML,
-} from './features/converters/lexicalToHtml_deprecated/converter/index.js'
-export type { HTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/types.js'
-export {
-  consolidateHTMLConverters,
-  lexicalHTML,
-} from './features/converters/lexicalToHtml_deprecated/field/index.js'
-export {
-  HTMLConverterFeature,
-  type HTMLConverterFeatureProps,
-} from './features/converters/lexicalToHtml_deprecated/index.js'
 export { convertLexicalToMarkdown } from './features/converters/lexicalToMarkdown/index.js'
 export { convertMarkdownToLexical } from './features/converters/markdownToLexical/index.js'
 export { getPayloadPopulateFn } from './features/converters/utilities/payloadPopulateFn.js'

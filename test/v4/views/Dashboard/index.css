@@ -1,0 +1,45 @@
+.custom-dashboard__tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--theme-elevation-150);
+}
+
+.custom-dashboard__tab {
+  padding: 8px 20px;
+  background: var(--theme-elevation-100);
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--theme-elevation-700);
+  transition: all 0.15s ease;
+}
+
+.custom-dashboard__tab:hover {
+  background: var(--theme-elevation-150);
+  border-color: var(--theme-elevation-300);
+  color: var(--theme-elevation-900);
+}
+
+.custom-dashboard__tab--active {
+  background: var(--theme-elevation-900);
+  border-color: var(--theme-elevation-900);
+  color: var(--theme-elevation-0);
+}
+
+.custom-dashboard__tab--active:hover {
+  background: var(--theme-elevation-800);
+  border-color: var(--theme-elevation-800);
+  color: var(--theme-elevation-0);
+}
+
+.custom-dashboard__welcome h1 {
+  margin-bottom: var(--spacing-sm);
+}
+
+.custom-dashboard__welcome p {
+  color: var(--theme-elevation-600);
+}

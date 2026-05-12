@@ -1,0 +1,52 @@
+@layer payload-default {
+  .field-type.password {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+
+    .field-type__wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
+    }
+
+    .password__input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password__toggle-button {
+      position: absolute;
+      right: calc(
+        var(--spacer-2) - 5px
+      ); /* 8px input padding - 5px icon viewBox internal padding */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-small);
+      color: var(--color-icon-secondary);
+      cursor: pointer;
+
+      &:hover {
+        color: var(--color-icon-secondary-hover);
+      }
+
+      &:disabled {
+        color: var(--color-icon-disabled);
+        cursor: not-allowed;
+      }
+    }
+
+    &.error input:not(:focus) {
+      border-color: var(--color-border-danger-strong);
+
+      &:hover {
+        border-color: var(--color-border-danger-strong);
+      }
+    }
+  }
+}

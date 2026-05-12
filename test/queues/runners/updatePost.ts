@@ -5,10 +5,7 @@ export const updatePostStep1: TaskHandler<'UpdatePost'> = async ({ req, input })
     typeof input.post === 'string' || typeof input.post === 'number' ? input.post : input.post.id
 
   if (!postID) {
-    return {
-      state: 'failed',
-      output: null,
-    }
+    throw new Error('No post ID provided')
   }
 
   await req.payload.update({
@@ -21,7 +18,6 @@ export const updatePostStep1: TaskHandler<'UpdatePost'> = async ({ req, input })
   })
 
   return {
-    state: 'succeeded',
     output: {
       messageTwice: input.message + input.message,
     },
@@ -33,10 +29,7 @@ export const updatePostStep2: TaskHandler<'UpdatePostStep2'> = async ({ req, inp
     typeof input.post === 'string' || typeof input.post === 'number' ? input.post : input.post.id
 
   if (!postID) {
-    return {
-      state: 'failed',
-      output: null,
-    }
+    throw new Error('No post ID provided')
   }
 
   await req.payload.update({
@@ -49,7 +42,6 @@ export const updatePostStep2: TaskHandler<'UpdatePostStep2'> = async ({ req, inp
   })
 
   return {
-    state: 'succeeded',
     output: null,
   }
 }
