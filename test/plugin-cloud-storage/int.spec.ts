@@ -3,6 +3,7 @@ import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import fs from 'fs'
 import path from 'path'
 import { APIError } from 'payload'
 import { sanitizeFilename } from 'payload/shared'
@@ -18,6 +19,7 @@ import {
   mediaWithCustomURLSlug,
   mediaWithGenerateFileURLSlug,
   mediaWithPrefixSlug,
+  mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
@@ -641,6 +643,71 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           storageIdChanged: storageIdsAreDifferent,
           timestampChanged: timestampsAreDifferent,
         })
+      })
+    })
+
+    describe('User afterChange hook propagation', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          try {
+            await payload.delete({ id, collection: mediaWithThrowingHookSlug })
+          } catch (_) {
+            // Ignore
+          }
+        }
+        createdIDs.length = 0
+      })
+
+      it('should surface user afterChange errors that throw during the plugin internal update on create', async () => {
+        await expect(
+          payload.create({
+            collection: mediaWithThrowingHookSlug,
+            context: { simulateUserHookError: true },
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          }),
+        ).rejects.toThrow('User afterChange hook throws error')
+      })
+
+      it('should surface user afterChange errors during reupload and preserve the previous file in S3', async () => {
+        const imagePath = path.resolve(dirname, '../uploads/image.png')
+        const buildFile = (name: string) => ({
+          data: fs.readFileSync(imagePath),
+          mimetype: 'image/png',
+          name,
+          size: fs.statSync(imagePath).size,
+        })
+
+        const initial = await payload.create({
+          collection: mediaWithThrowingHookSlug,
+          data: {},
+          file: buildFile('initial.png'),
+        })
+
+        createdIDs.push(initial.id)
+
+        const initialKey = `${initial.filename}`
+        const before = await client.send(
+          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
+        )
+        expect(before.$metadata.httpStatusCode).toBe(200)
+
+        await expect(
+          payload.update({
+            id: initial.id,
+            collection: mediaWithThrowingHookSlug,
+            context: { simulateUserHookError: true },
+            data: {},
+            file: buildFile('replacement.png'),
+          }),
+        ).rejects.toThrow('User afterChange hook throws error')
+
+        const after = await client.send(
+          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
+        )
+        expect(after.$metadata.httpStatusCode).toBe(200)
       })
     })
 
