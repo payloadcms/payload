@@ -28,45 +28,43 @@ const reviewTool: Anthropic.Tool = {
   },
 }
 
-export class AnthropicProvider implements AIProvider {
-  private client: Anthropic
+export function createAnthropicProvider(apiKey: string, model: string): AIProvider {
+  const client = new Anthropic({ apiKey })
 
-  constructor(apiKey: string) {
-    this.client = new Anthropic({ apiKey })
-  }
+  return {
+    async review({
+      systemPrompt,
+      diff,
+    }: {
+      systemPrompt: string
+      diff: string
+    }): Promise<ReviewResult> {
+      const response = await client.messages.create({
+        model,
+        max_tokens: 4096,
+        system: [
+          {
+            type: 'text' as const,
+            text: systemPrompt,
+            cache_control: { type: 'ephemeral' as const },
+          },
+        ],
+        tools: [reviewTool],
+        tool_choice: { type: 'tool' as const, name: 'submit_review' },
+        messages: [
+          {
+            role: 'user',
+            content: `Please review the following pull request diff:\n\n\`\`\`diff\n${diff}\n\`\`\``,
+          },
+        ],
+      })
 
-  async review({
-    systemPrompt,
-    diff,
-  }: {
-    systemPrompt: string
-    diff: string
-  }): Promise<ReviewResult> {
-    const response = await this.client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 4096,
-      system: [
-        {
-          type: 'text' as const,
-          text: systemPrompt,
-          cache_control: { type: 'ephemeral' as const },
-        },
-      ],
-      tools: [reviewTool],
-      tool_choice: { type: 'tool' as const, name: 'submit_review' },
-      messages: [
-        {
-          role: 'user',
-          content: `Please review the following pull request diff:\n\n\`\`\`diff\n${diff}\n\`\`\``,
-        },
-      ],
-    })
+      const toolUse = response.content.find((block) => block.type === 'tool_use')
+      if (!toolUse || toolUse.type !== 'tool_use') {
+        throw new Error('AI did not return a structured review')
+      }
 
-    const toolUse = response.content.find((block) => block.type === 'tool_use')
-    if (!toolUse || toolUse.type !== 'tool_use') {
-      throw new Error('AI did not return a structured review')
-    }
-
-    return toolUse.input as ReviewResult
+      return toolUse.input as ReviewResult
+    },
   }
 }

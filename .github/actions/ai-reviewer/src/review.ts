@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import type { ReviewResult } from './providers/types'
 
-export function readSystemPrompt(promptFilePath: string): string {
+function readSystemPrompt(promptFilePath: string): string {
   const absolutePath = path.resolve(process.env.GITHUB_WORKSPACE ?? process.cwd(), promptFilePath)
   if (!fs.existsSync(absolutePath)) {
     throw new Error(`Reviewer prompt file not found: ${promptFilePath}`)

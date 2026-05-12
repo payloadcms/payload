@@ -1,38 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as fs from 'fs'
-import { buildSystemPrompt, mergeReviewResults, readSystemPrompt } from './review'
+import { buildSystemPrompt, mergeReviewResults } from './review'
 import type { ReviewResult } from './providers/types'
 
 vi.mock('fs')
 const mockFs = vi.mocked(fs)
-
-describe('readSystemPrompt', () => {
-  beforeEach(() => {
-    process.env.GITHUB_WORKSPACE = '/workspace'
-  })
-
-  afterEach(() => {
-    delete process.env.GITHUB_WORKSPACE
-    vi.resetAllMocks()
-  })
-
-  it('should return the contents of the prompt file', () => {
-    mockFs.existsSync.mockReturnValue(true)
-    mockFs.readFileSync.mockReturnValue('You are a helpful code reviewer.')
-
-    const result = readSystemPrompt('.github/ai-reviewer-prompt.md')
-
-    expect(result).toBe('You are a helpful code reviewer.')
-  })
-
-  it('should throw when the prompt file does not exist', () => {
-    mockFs.existsSync.mockReturnValue(false)
-
-    expect(() => readSystemPrompt('.github/ai-reviewer-prompt.md')).toThrow(
-      'Reviewer prompt file not found: .github/ai-reviewer-prompt.md',
-    )
-  })
-})
 
 describe('mergeReviewResults', () => {
   it('should return empty summary and comments for an empty array', () => {
@@ -114,6 +86,14 @@ describe('buildSystemPrompt', () => {
     expect(result).toContain('You are a reviewer.')
     expect(result.indexOf('# Project guidelines')).toBeLessThan(
       result.indexOf('You are a reviewer.'),
+    )
+  })
+
+  it('should throw when the prompt file does not exist', () => {
+    mockFs.existsSync.mockReturnValue(false)
+
+    expect(() => buildSystemPrompt('.github/ai-reviewer-prompt.md')).toThrow(
+      'Reviewer prompt file not found: .github/ai-reviewer-prompt.md',
     )
   })
 })

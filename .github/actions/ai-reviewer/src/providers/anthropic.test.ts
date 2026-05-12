@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { AnthropicProvider } from './anthropic'
+import { createAnthropicProvider } from './anthropic'
+import type { AIProvider } from './types'
 
 vi.mock('@anthropic-ai/sdk', () => ({
   default: vi.fn().mockImplementation(() => ({
@@ -9,16 +10,16 @@ vi.mock('@anthropic-ai/sdk', () => ({
 
 import Anthropic from '@anthropic-ai/sdk'
 
-describe('AnthropicProvider', () => {
+describe('createAnthropicProvider', () => {
   let mockCreate: ReturnType<typeof vi.fn>
-  let provider: AnthropicProvider
+  let provider: AIProvider
 
   beforeEach(() => {
     mockCreate = vi.fn()
     vi.mocked(Anthropic).mockImplementation(() => ({
       messages: { create: mockCreate },
     }))
-    provider = new AnthropicProvider('test-api-key')
+    provider = createAnthropicProvider('test-api-key', 'claude-sonnet-4-6')
   })
 
   it('should return a ReviewResult parsed from the tool_use block', async () => {
