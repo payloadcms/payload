@@ -34,7 +34,7 @@ export default buildConfigWithDefaults({
       },
     })
   },
-  plugins: [
+  storageAdapters: [
     s3Storage({
       collections: {
         [mediaSlug]: true,

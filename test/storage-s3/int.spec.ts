@@ -257,6 +257,22 @@ describe('@payloadcms/storage-s3', () => {
     })
   })
 
+  describe('storageAdapters config', () => {
+    it('should expose storageAdapters on the sanitized config', () => {
+      expect(payload.config.storageAdapters).toBeDefined()
+      expect(Array.isArray(payload.config.storageAdapters)).toBe(true)
+    })
+
+    it('should expose adapter name and collections on each storageAdapter', () => {
+      const s3Adapter = payload.config.storageAdapters.find((a) => a.name === 's3')
+
+      expect(s3Adapter).toBeDefined()
+      expect(s3Adapter!.name).toBe('s3')
+      expect(Array.isArray(s3Adapter!.collections)).toBe(true)
+      expect(s3Adapter!.collections).toContain(mediaSlug)
+    })
+  })
+
   describe('R2', () => {
     it.todo('can upload')
   })

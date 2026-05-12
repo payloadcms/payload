@@ -337,6 +337,8 @@ export default buildConfigWithDefaults({
         },
       ],
     }),
+  ],
+  storageAdapters: [
     s3Storage({
       collections: {
         'posts-with-s3-import': true,
