@@ -13,9 +13,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
   req.payloadAPI = 'MCP' as const
 
   const pluginConfig = getPluginConfig({ config: req.payload.config })
-  const mcpAccess = await getMCPAccess({
-    req,
-  })
+  const mcpAccess = await getMCPAccess({ req })
   const serverOptions = pluginConfig.mcp?.serverOptions || {}
 
   const server = new McpServer(

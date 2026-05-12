@@ -5,7 +5,7 @@ import { APIError, configToJSONSchema, type PayloadRequest } from 'payload'
 import type { JsonSchemaObject, MCPAccess } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
-import { getEnabledGlobalSlugs, isOperationDisabled } from '../utils/disabledHelpers.js'
+import { getEnabledGlobalSlugs } from '../utils/disabledHelpers.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 import { getGlobalVirtualFieldNames } from '../utils/getVirtualFieldNames.js'
 import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
@@ -40,13 +40,13 @@ export const registerGlobalTools: (args: {
         virtualFieldNames,
       )
 
-      const toolCapabilities = mcpAccess?.[`${toCamelCase(enabledGlobalSlug)}`] as Record<
-        string,
-        unknown
-      >
-      const isAllowed = (op: 'find' | 'update'): boolean =>
-        !isOperationDisabled(globalsPluginConfig, enabledGlobalSlug, op) &&
-        toolCapabilities?.[op] !== false
+      // Plugin-config disables are already folded into `mcpAccess` (see
+      // `applyPluginDisables` in the endpoint), so the only check left here is
+      // whether the merged access has explicitly disabled the op.
+      const slugAccess = mcpAccess?.[`${toCamelCase(enabledGlobalSlug)}`] as
+        | Record<string, unknown>
+        | undefined
+      const isAllowed = (op: 'find' | 'update'): boolean => slugAccess?.[op] !== false
       const allowFind = isAllowed('find')
       const allowUpdate = isAllowed('update')
 

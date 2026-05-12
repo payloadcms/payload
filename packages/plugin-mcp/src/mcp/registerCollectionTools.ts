@@ -5,7 +5,7 @@ import { APIError, configToJSONSchema, type PayloadRequest } from 'payload'
 import type { JsonSchemaObject, MCPAccess } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
-import { getEnabledCollectionSlugs, isOperationDisabled } from '../utils/disabledHelpers.js'
+import { getEnabledCollectionSlugs } from '../utils/disabledHelpers.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 import { getCollectionVirtualFieldNames } from '../utils/getVirtualFieldNames.js'
 import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
@@ -51,13 +51,12 @@ export const registerCollectionTools: (args: {
             virtualFieldNames,
           )
 
-          const toolCapabilities = mcpAccess?.[`${toCamelCase(enabledCollectionSlug)}`]
-
-          // Allowed unless either layer says otherwise: plugin config disables the op,
-          // or the API key explicitly unchecks it (`false`). `undefined` = allowed.
+          // Plugin-config disables are already folded into `mcpAccess` (see
+          // `applyPluginDisables` in the endpoint), so the only check left here is
+          // whether the merged access has explicitly disabled the op.
+          const slugAccess = mcpAccess?.[`${toCamelCase(enabledCollectionSlug)}`]
           const isAllowed = (op: 'create' | 'delete' | 'find' | 'update'): boolean =>
-            !isOperationDisabled(collectionsPluginConfig, enabledCollectionSlug, op) &&
-            toolCapabilities?.[op] !== false
+            slugAccess?.[op] !== false
           const allowCreate = isAllowed('create')
           const allowUpdate = isAllowed('update')
           const allowFind = isAllowed('find')
