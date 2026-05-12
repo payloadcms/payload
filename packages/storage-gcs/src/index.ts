@@ -4,7 +4,7 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { Storage } from '@google-cloud/storage'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
@@ -75,13 +75,16 @@ export interface GcsStorageOptions {
   useCompositePrefixes?: boolean
 }
 
-type GcsStoragePlugin = (gcsStorageArgs: GcsStorageOptions) => Plugin
+type GcsStorageFactory = (gcsStorageArgs: GcsStorageOptions) => StorageAdapter
 
 const gcsClients = new Map<string, Storage>()
 
-export const gcsStorage: GcsStoragePlugin =
-  (gcsStorageOptions: GcsStorageOptions) =>
-  (incomingConfig: Config): Config => {
+export const gcsStorage: GcsStorageFactory = (
+  gcsStorageOptions: GcsStorageOptions,
+): StorageAdapter => ({
+  name: 'gcs',
+  collections: Object.keys(gcsStorageOptions.collections),
+  init: (incomingConfig: Config): Config => {
     const cacheKey = gcsStorageOptions.clientCacheKey || `gcs:${gcsStorageOptions.bucket}`
 
     const getStorageClient = (): Storage => {
@@ -162,4 +165,5 @@ export const gcsStorage: GcsStoragePlugin =
       collections: collectionsWithAdapter,
       useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
     })(config)
-  }
+  },
+})

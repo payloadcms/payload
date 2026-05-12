@@ -3,7 +3,7 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 import type { createUploadthing } from 'uploadthing/server'
 import type { UTApiOptions } from 'uploadthing/types'
 
@@ -63,14 +63,19 @@ export type UploadthingStorageOptions = {
   } & UTApiOptions
 }
 
-type UploadthingPlugin = (uploadthingStorageOptions: UploadthingStorageOptions) => Plugin
+type UploadthingStorageFactory = (
+  uploadthingStorageOptions: UploadthingStorageOptions,
+) => StorageAdapter
 
 /** NOTE: not synced with uploadthing's internal types. Need to modify if more options added */
 export type ACL = 'private' | 'public-read'
 
-export const uploadthingStorage: UploadthingPlugin =
-  (uploadthingStorageOptions: UploadthingStorageOptions) =>
-  (incomingConfig: Config): Config => {
+export const uploadthingStorage: UploadthingStorageFactory = (
+  uploadthingStorageOptions: UploadthingStorageOptions,
+): StorageAdapter => ({
+  name: 'uploadthing',
+  collections: Object.keys(uploadthingStorageOptions.collections),
+  init: (incomingConfig: Config): Config => {
     const isPluginDisabled = uploadthingStorageOptions.enabled === false
 
     initClientUploads({
@@ -145,4 +150,5 @@ export const uploadthingStorage: UploadthingPlugin =
       collections: collectionsWithAdapter,
       useCompositePrefixes: false, // uploadthing does not support prefixes
     })(config)
-  }
+  },
+})

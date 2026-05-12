@@ -3,7 +3,7 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -86,11 +86,14 @@ export type AzureStorageOptions = {
   useCompositePrefixes?: boolean
 }
 
-type AzureStoragePlugin = (azureStorageArgs: AzureStorageOptions) => Plugin
+type AzureStorageFactory = (azureStorageArgs: AzureStorageOptions) => StorageAdapter
 
-export const azureStorage: AzureStoragePlugin =
-  (azureStorageOptions: AzureStorageOptions) =>
-  (incomingConfig: Config): Config => {
+export const azureStorage: AzureStorageFactory = (
+  azureStorageOptions: AzureStorageOptions,
+): StorageAdapter => ({
+  name: 'azure',
+  collections: Object.keys(azureStorageOptions.collections),
+  init: (incomingConfig: Config): Config => {
     const getStorageClient = () =>
       getStorageClientFunc({
         connectionString: azureStorageOptions.connectionString,
@@ -177,6 +180,7 @@ export const azureStorage: AzureStoragePlugin =
       collections: collectionsWithAdapter,
       useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
     })(config)
-  }
+  },
+})
 
 export { getStorageClientFunc as getStorageClient }

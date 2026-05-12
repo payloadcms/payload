@@ -469,6 +469,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
+  if (!config.storageAdapters) {
+    config.storageAdapters = []
+  }
+
   if (!config.upload) {
     config.upload = { adapters: [] }
   }

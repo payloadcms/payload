@@ -161,6 +161,19 @@ export type Plugin = ((config: Config) => Config | Promise<Config>) & {
 }
 
 /**
+ * A first-class storage adapter that runs before plugins during config initialization.
+ * Use this instead of placing storage adapter packages (e.g. s3Storage, gcsStorage) in `plugins`.
+ */
+export interface StorageAdapter {
+  /** Collection slugs this adapter is configured to handle. */
+  collections: string[]
+  /** Initializes the adapter and returns the modified config with hooks and fields injected. */
+  init: (config: Config) => Config | Promise<Config>
+  /** Unique identifier for this adapter (e.g. 's3', 'gcs', 'azure'). Used for telemetry and inspection. */
+  name: string
+}
+
+/**
  * A map of plugin slugs to Plugin instances, built from `config.plugins`.
  * Registered slugs (via `RegisteredPlugins` module augmentation) return typed options.
  *
@@ -1500,6 +1513,13 @@ export type Config = {
    *
    */
   sharp?: SharpDependency
+  /**
+   * Storage adapters applied before plugins. Use instead of placing storage adapter packages
+   * (e.g. s3Storage, gcsStorage) in `plugins`.
+   *
+   * @see https://payloadcms.com/docs/uploads/storage-adapters
+   */
+  storageAdapters?: StorageAdapter[]
   /** Send anonymous telemetry data about general usage. */
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
@@ -1598,6 +1618,7 @@ export type SanitizedConfig = {
     configDir: string
     rawConfig: string
   }
+  storageAdapters: StorageAdapter[]
   upload: {
     /**
      * Deduped list of adapters used in the project
@@ -1618,6 +1639,7 @@ export type SanitizedConfig = {
   | 'i18n'
   | 'jobs'
   | 'localization'
+  | 'storageAdapters'
   | 'upload'
 >
 

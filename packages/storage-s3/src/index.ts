@@ -4,7 +4,7 @@ import type {
   CollectionOptions,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { NodeHttpHandlerOptions } from '@smithy/node-http-handler'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
@@ -104,7 +104,7 @@ export type S3StorageOptions = {
   useCompositePrefixes?: boolean
 }
 
-type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
+type S3StorageFactory = (storageS3Args: S3StorageOptions) => StorageAdapter
 
 const s3Clients = new Map<string, AWS.S3>()
 
@@ -119,9 +119,12 @@ const defaultRequestHandlerOpts: NodeHttpHandlerOptions = {
   },
 }
 
-export const s3Storage: S3StoragePlugin =
-  (s3StorageOptions: S3StorageOptions) =>
-  (incomingConfig: Config): Config => {
+export const s3Storage: S3StorageFactory = (
+  s3StorageOptions: S3StorageOptions,
+): StorageAdapter => ({
+  name: 's3',
+  collections: Object.keys(s3StorageOptions.collections),
+  init: (incomingConfig: Config): Config => {
     const cacheKey = s3StorageOptions.clientCacheKey || `s3:${s3StorageOptions.bucket}`
 
     const getStorageClient: () => AWS.S3 = () => {
@@ -250,4 +253,5 @@ export const s3Storage: S3StoragePlugin =
       collections: collectionsWithAdapter,
       useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
     })(config)
-  }
+  },
+})
