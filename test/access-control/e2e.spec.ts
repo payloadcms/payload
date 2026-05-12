@@ -16,6 +16,7 @@ import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import {
   ensureCompilationIsDone,
+  exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
