@@ -7,6 +7,7 @@ import { getFileByPath } from 'payload'
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
 import { blocksSeedData } from './seed/blocksSeedData.js'
+import { seedHierarchy } from './seed/categoriesSeedData.js'
 import {
   codeContent,
   getRichTextContent,
@@ -28,6 +29,7 @@ const dirname = path.dirname(filename)
 import ArrayFields from './collections/Array/index.js'
 import Autosave from './collections/Autosave/index.js'
 import BlocksFields from './collections/Blocks/index.js'
+import Hierarchy from './collections/Categories/index.js'
 import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
@@ -64,6 +66,7 @@ export const collections: CollectionConfig[] = [
   },
   ArrayFields,
   BlocksFields,
+  Hierarchy,
   CheckboxFields,
   CodeFields,
   CollapsibleFields,
@@ -198,6 +201,8 @@ export const baseConfig: Partial<Config> = {
       collection: blocksFieldsSlug,
       data: blocksSeedData,
     })
+
+    await seedHierarchy(payload)
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

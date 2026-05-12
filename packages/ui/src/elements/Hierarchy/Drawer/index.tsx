@@ -22,7 +22,7 @@ import { Drawer, DrawerDepthProvider } from '../../Drawer/index.js'
 import { DrawerActionHeader } from '../../DrawerActionHeader/index.js'
 import { HierarchyColumnBrowser } from '../ColumnBrowser/index.js'
 import { fetchAncestorPath } from './fetchAncestorPath.js'
-import './index.scss'
+import './index.css'
 
 export const baseClass = 'hierarchy-drawer'
 

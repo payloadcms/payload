@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     'array-fields': ArrayField;
     'blocks-fields': BlocksField;
+    hierarchy: Hierarchy;
     'checkbox-fields': CheckboxField;
     'code-fields': CodeField;
     'collapsible-fields': CollapsibleField;
@@ -105,6 +106,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
+    hierarchy: HierarchySelect<false> | HierarchySelect<true>;
     'checkbox-fields': CheckboxFieldsSelect<false> | CheckboxFieldsSelect<true>;
     'code-fields': CodeFieldsSelect<false> | CodeFieldsSelect<true>;
     'collapsible-fields': CollapsibleFieldsSelect<false> | CollapsibleFieldsSelect<true>;
@@ -364,6 +366,19 @@ export interface BlocksField {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy".
+ */
+export interface Hierarchy {
+  id: string;
+  parent?: (string | null) | Hierarchy;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1130,6 +1145,10 @@ export interface PayloadLockedDocument {
         value: string | BlocksField;
       } | null)
     | ({
+        relationTo: 'hierarchy';
+        value: string | Hierarchy;
+      } | null)
+    | ({
         relationTo: 'checkbox-fields';
         value: string | CheckboxField;
       } | null)
@@ -1476,6 +1495,18 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy_select".
+ */
+export interface HierarchySelect<T extends boolean = true> {
+  parent?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

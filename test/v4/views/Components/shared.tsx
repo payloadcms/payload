@@ -42,3 +42,13 @@ export const Variant: React.FC<{
     <div className="components-view__variant-content">{children}</div>
   </div>
 )
+
+export const VariantRow: React.FC<{
+  children: React.ReactNode
+  label?: string
+}> = ({ children, label }) => (
+  <div className="components-view__variant-row">
+    {label && <span className="components-view__variant-label">{label}</span>}
+    <div className="components-view__variant-row-content">{children}</div>
+  </div>
+)
