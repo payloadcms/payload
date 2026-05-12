@@ -95,7 +95,7 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
             </DocumentDrawerToggler>
             {!hideRemoveFile && removeItem && (
               <Button
-                buttonStyle="icon-label"
+                buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"
                 onClick={() => removeItem(rowIndex)}

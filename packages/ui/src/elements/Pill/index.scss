@@ -50,11 +50,6 @@
       text-overflow: ellipsis;
     }
 
-    &--has-action {
-      cursor: pointer;
-      text-decoration: none;
-    }
-
     &--is-dragging {
       cursor: grabbing;
     }
@@ -75,43 +70,9 @@
       --pill-padding-inline-end: base(0.4);
     }
 
-    &--style-white {
-      &.pill--has-action {
-        &:hover {
-          background: var(--bg-default-secondary-hover);
-        }
-
-        &:active {
-          background: var(--bg-default-secondary-pressed);
-        }
-      }
-    }
-
     &--style-always-white {
       background: var(--bg-inverse-default);
       color: var(--text-inverse-oninverse);
-
-      &.pill--has-action {
-        &:hover {
-          background: var(--bg-inverse-hover);
-        }
-
-        &:active {
-          background: var(--bg-inverse-pressed);
-        }
-      }
-    }
-
-    &--style-light {
-      &.pill--has-action {
-        &:hover {
-          background: var(--bg-default-secondary-hover);
-        }
-
-        &:active {
-          background: var(--bg-default-secondary-pressed);
-        }
-      }
     }
 
     &--style-light-gray {
@@ -141,16 +102,6 @@
       svg {
         @include color-svg(var(--text-inverse-oninverse));
       }
-
-      &.pill--has-action {
-        &:hover {
-          background: var(--bg-inverse-hover);
-        }
-
-        &:active {
-          background: var(--bg-inverse-pressed);
-        }
-      }
     }
 
     &--size-medium {
@@ -173,16 +124,6 @@
         background: var(--bg-default-default);
         color: var(--text-default);
         border: 1px solid var(--border-default-default);
-
-        &.pill--has-action {
-          &:hover {
-            background: var(--bg-default-secondary-hover);
-          }
-
-          &:active {
-            background: var(--bg-default-secondary-pressed);
-          }
-        }
       }
     }
   }

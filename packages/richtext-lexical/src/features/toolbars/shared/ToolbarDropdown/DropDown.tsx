@@ -63,7 +63,7 @@ export function DropDownItem({
   return (
     <Button
       aria-label={tooltip}
-      buttonStyle="none"
+      buttonStyle="ghost"
       className={className}
       disabled={enabled === false}
       extraButtonProps={{

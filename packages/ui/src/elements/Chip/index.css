@@ -1,0 +1,121 @@
+@layer payload-default {
+  .chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    border-radius: var(--radius-medium);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--text-default);
+    background-color: var(--bg-default-secondary);
+    user-select: none;
+
+    &:has(.chip__action:focus-visible) {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
+
+    &:has(.chip__action:hover) {
+      background-color: var(--bg-default-secondary-hover);
+    }
+
+    &:has(.chip__action:active) {
+      background-color: var(--bg-default-secondary-pressed);
+    }
+  }
+
+  .chip__action {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: inherit;
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  .chip--size-medium {
+    height: var(--spacer-4);
+    padding: 0 var(--spacer-2);
+
+    &:has(.chip__remove) {
+      padding-inline-end: var(--spacer-1);
+    }
+
+    &:has(.chip__icon) {
+      padding-inline-start: var(--spacer-1);
+    }
+  }
+
+  .chip--size-large {
+    height: var(--spacer-5);
+    padding: 0 var(--spacer-3);
+
+    &:has(.chip__remove) {
+      padding-inline-end: var(--spacer-2);
+    }
+
+    &:has(.chip__icon) {
+      padding-inline-start: var(--spacer-2);
+    }
+  }
+
+  .chip__icon {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    pointer-events: none;
+
+    .icon {
+      width: 1em;
+      height: 1em;
+    }
+  }
+
+  .chip__label {
+    position: relative;
+    z-index: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+  }
+
+  .chip__remove {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    border-radius: var(--radius-small);
+
+    &:hover {
+      background-color: var(--bg-transparent-hover);
+    }
+
+    &:active {
+      background-color: var(--bg-transparent-pressed);
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
+  }
+}

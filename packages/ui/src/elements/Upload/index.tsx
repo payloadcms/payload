@@ -477,7 +477,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 </div>
               </div>
               <Button
-                buttonStyle="icon-label"
+                buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"
                 onClick={() => {
@@ -516,7 +516,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 />
               </div>
               <Button
-                buttonStyle="icon-label"
+                buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"
                 onClick={handleFileRemoval}

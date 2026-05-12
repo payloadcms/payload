@@ -100,7 +100,7 @@ export const RelationshipComponent: React.FC<Props> = (props) => {
       {isEditable && (
         <div className={`${baseClass}__actions`}>
           <Button
-            buttonStyle="icon-label"
+            buttonStyle="ghost"
             className={`${baseClass}__swapButton`}
             disabled={!isEditable}
             el="button"
@@ -116,7 +116,7 @@ export const RelationshipComponent: React.FC<Props> = (props) => {
             tooltip={t('fields:swapRelationship')}
           />
           <Button
-            buttonStyle="icon-label"
+            buttonStyle="ghost"
             className={`${baseClass}__removeButton`}
             disabled={!isEditable}
             icon="x"

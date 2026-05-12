@@ -4,8 +4,6 @@
   }
 
   .group-field--top-level {
-    padding-top: var(--spacer-5);
-
     &::before {
       content: '';
       position: absolute;

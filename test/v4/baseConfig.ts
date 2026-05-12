@@ -6,7 +6,13 @@ import path from 'path'
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
 import { blocksSeedData } from './seed/blocksSeedData.js'
-import { blocksFieldsSlug, collectionSlugs, textFieldsSlug } from './slugs.js'
+import {
+  blocksFieldsSlug,
+  collectionSlugs,
+  relationshipFieldsSlug,
+  tagsSlug,
+  textFieldsSlug,
+} from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -32,6 +38,7 @@ import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import SlugFields from './collections/Slug/index.js'
 import TabsFields from './collections/Tabs/index.js'
+import Tags from './collections/Tags/index.js'
 import TextFields from './collections/Text/index.js'
 import TextareaFields from './collections/Textarea/index.js'
 import Uploads from './collections/Upload/index.js'
@@ -66,6 +73,7 @@ export const collections: CollectionConfig[] = [
   SelectFields,
   SlugFields,
   TabsFields,
+  Tags,
   TextFields,
   TextareaFields,
   Uploads,
@@ -94,7 +102,7 @@ export const baseConfig: Partial<Config> = {
     await resetDB(payload, collectionSlugs)
 
     // Seed users
-    await payload.create({
+    const devUserDoc = await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
@@ -127,10 +135,76 @@ export const baseConfig: Partial<Config> = {
       { title: 'GraphQL vs REST API' },
     ]
 
+    const createdPosts: { id: number | string }[] = []
+    for (const post of posts) {
+      const created = await payload.create({
+        collection: textFieldsSlug,
+        data: post,
+      })
+      createdPosts.push(created)
+    }
+
+    // Seed relationship-fields to test join field
+    await payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        authorRequired: devUserDoc.id,
+        relatedPosts: createdPosts.slice(0, 3).map((p) => p.id) as string[],
+      },
+    })
+    await payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        authorRequired: devUserDoc.id,
+        relatedPosts: createdPosts.slice(3, 6).map((p) => p.id) as string[],
+      },
+    })
+
     // Seed blocks collection
     await payload.create({
       collection: blocksFieldsSlug,
       data: blocksSeedData,
+    })
+
+    // Seed tags hierarchy for testing hierarchy field
+    const techTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Technology' },
+    })
+
+    const frontendTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Frontend', parent: techTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'React', parent: frontendTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Vue', parent: frontendTag.id },
+    })
+
+    const backendTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Backend', parent: techTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Node.js', parent: backendTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Python', parent: backendTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Design' },
     })
   },
   typescript: {

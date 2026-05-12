@@ -4,8 +4,8 @@ import React from 'react'
 
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
+import { Button } from '../Button/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
-import { Pill } from '../Pill/index.js'
 import './index.scss'
 
 const baseClass = 'pill-selector'
@@ -38,14 +38,15 @@ export const PillSelector: React.FC<Props> = ({ draggable, onClick, pills }) => 
   const pillElements = React.useMemo(() => {
     return pills.map((pill, i) => {
       return (
-        <Pill
-          alignIcon="left"
+        <Button
           aria-checked={pill.selected}
+          buttonStyle="pill"
           className={[`${baseClass}__pill`, pill.selected && `${baseClass}__pill--selected`]
             .filter(Boolean)
             .join(' ')}
-          draggable={Boolean(draggable)}
+          extraButtonProps={{ draggable: Boolean(draggable) }}
           icon={pill.selected ? <XIcon /> : <PlusIcon />}
+          iconPosition="left"
           id={pill.name}
           key={pill.key ?? `${pill.name}-${i}`}
           onClick={() => {
@@ -53,10 +54,10 @@ export const PillSelector: React.FC<Props> = ({ draggable, onClick, pills }) => 
               void onClick({ pill })
             }
           }}
-          size="small"
+          size="medium"
         >
           {pill.Label ?? <span className={`${baseClass}__pill-label`}>{pill.name}</span>}
-        </Pill>
+        </Button>
       )
     })
   }, [pills, onClick, draggable])
