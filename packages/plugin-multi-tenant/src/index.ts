@@ -308,8 +308,8 @@ export const multiTenantPlugin =
           )
         }
 
-        const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
-        if (useBaseFilter ?? useBaseListFilter ?? true) {
+        const { useBaseFilter } = pluginConfig.collections[collection.slug] || {}
+        if (useBaseFilter ?? true) {
           /**
            * Add list filter to enabled collections
            * - filters results by selected tenant
@@ -409,7 +409,6 @@ export const multiTenantPlugin =
           adminUsersCollection.slug,
           tenantCollection.slug,
         ],
-        label: pluginConfig.tenantSelectorLabel || undefined,
       },
       path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelector',
     })

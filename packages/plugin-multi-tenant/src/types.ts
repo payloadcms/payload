@@ -57,18 +57,6 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
        */
       useBaseFilter?: boolean
       /**
-       * @deprecated Use `useBaseFilter` instead. If both are defined,
-       * `useBaseFilter` will take precedence. This property remains only
-       * for backward compatibility and may be removed in a future version.
-       *
-       * Originally, `baseListFilter` was intended to filter only the List View
-       * in the admin panel. However, base filtering is often required in other areas
-       * such as internal link relationships in the Lexical editor.
-       *
-       * @default true
-       */
-      useBaseListFilter?: boolean
-      /**
        * Set to `false` if you want to handle collection access manually without the multi-tenant constraints applied
        *
        * @default true
@@ -175,18 +163,6 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
         tenantFieldAccess?: never
       }
   /**
-   * Customize tenant selector label
-   *
-   * Either a string or an object where the keys are i18n codes and the values are the string labels
-   *
-   * @deprecated Use `i18n.translations` instead.
-   */
-  tenantSelectorLabel?:
-    | Partial<{
-        [key in AcceptedLanguages]?: string
-      }>
-    | string
-  /**
    * The slug for the tenant collection
    *
    * @default 'tenants'
@@ -239,6 +215,7 @@ export type RootTenantFieldConfigOverrides = Partial<
     | 'required'
     | 'type'
     | 'unique'
+    | 'validate'
     | 'virtual'
   >
 >
