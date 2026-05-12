@@ -1809,7 +1809,7 @@ describe('Access Control', () => {
       })
 
       await page.goto(blocksFieldAccessUrl.edit(doc.id))
-      await expect(page.locator('.doc-header__title')).toContainText('ID: ')
+      await expect(page.locator('.doc-header__title .id-label')).toBeVisible()
 
       // Editable blocks - fields should be editable
       await expect(page.locator('#field-editableBlocks__0__title')).toBeEnabled()
