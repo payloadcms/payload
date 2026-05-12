@@ -22,7 +22,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { isSuperset } from '../../../utilities/isSuperset.js'
 import { Spinner } from '../../Spinner/index.js'
 import { Column } from './Column/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-column-browser'
 
