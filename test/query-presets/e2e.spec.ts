@@ -104,7 +104,7 @@ describe('Query Presets', () => {
     await page.waitForURL(() => page.url() !== currentURL)
 
     await expect(
-      page.locator('button#select-preset', {
+      page.locator('#select-preset', {
         hasText: exactText(presetTitle),
       }),
     ).toBeVisible()
@@ -176,7 +176,7 @@ describe('Query Presets', () => {
     await page.waitForURL((url) => !regex.test(url.search), { timeout: TEST_TIMEOUT_LONG })
 
     await expect(
-      page.locator('button#select-preset', {
+      page.locator('#select-preset', {
         hasText: exactText('Select Preset'),
       }),
     ).toBeVisible()
@@ -198,7 +198,7 @@ describe('Query Presets', () => {
     })
 
     await expect(
-      page.locator('button#select-preset', {
+      page.locator('#select-preset', {
         hasText: exactText('Select Preset'),
       }),
     ).toBeVisible()
@@ -361,7 +361,7 @@ describe('Query Presets', () => {
     await drawer.locator('button.doc-drawer__header-close').click()
     await expect(drawer).toBeHidden()
 
-    await expect(page.locator('button#select-preset')).toHaveText(newTitle)
+    await expect(page.locator('#select-preset')).toHaveText(newTitle)
   })
 
   test('should not display query presets when admin.enableQueryPresets is not true', async ({
@@ -395,7 +395,7 @@ describe('Query Presets', () => {
     await page.waitForURL(() => page.url() !== currentURL)
 
     await expect(
-      page.locator('button#select-preset', {
+      page.locator('#select-preset', {
         hasText: exactText(presetTitle),
       }),
     ).toBeVisible()
@@ -693,9 +693,7 @@ describe('Query Presets', () => {
 
     await expect(page).toHaveURL(/preset=/)
     await expect(page).toHaveURL(/groupBy=text/)
-    await expect(
-      page.locator('button#select-preset', { hasText: exactText(presetTitle) }),
-    ).toBeVisible()
+    await expect(page.locator('#select-preset', { hasText: exactText(presetTitle) })).toBeVisible()
     await expect(page.locator('.group-by-header').first()).toBeVisible()
     await expect(
       page.locator('.collection-list .table th', { hasText: exactText('Text') }).first(),
@@ -714,7 +712,7 @@ describe('Query Presets', () => {
 
     // 2. Reload page
     await page.reload()
-    await expect(page.locator('button#select-preset')).toContainText(seededData.onlyMe.title)
+    await expect(page.locator('#select-preset')).toContainText(seededData.onlyMe.title)
 
     // 3. #save-preset button should NOT show (no modifications yet)
     await expect(page.locator('#save-preset')).toBeHidden()
@@ -781,7 +779,7 @@ describe('Query Presets', () => {
 
     // Verify the preset is selected in the preset selector
     await expect(
-      page.locator('button#select-preset', {
+      page.locator('#select-preset', {
         hasText: exactText(seededData.everyone.title),
       }),
     ).toBeVisible()

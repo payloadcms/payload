@@ -9,7 +9,11 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { openListColumns, toggleColumn } from '../__helpers/e2e/columns/index.js'
+import {
+  getPillSelectorItem,
+  openListColumns,
+  toggleColumn,
+} from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import {
   closeAllToasts,
@@ -2147,19 +2151,39 @@ describe('Uploads', () => {
 
     await openListColumns(page, {})
 
-    await expect(page.locator('button:has-text("Sizes > one > URL")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > one > Width")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > one > Height")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > one > MIME Type")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > one > File Size")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > one > File Name")')).toBeHidden()
+    await expect(getPillSelectorItem({ container: page, label: 'Sizes > one > URL' })).toBeHidden()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > one > Width' }),
+    ).toBeHidden()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > one > Height' }),
+    ).toBeHidden()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > one > MIME Type' }),
+    ).toBeHidden()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > one > File Size' }),
+    ).toBeHidden()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > one > File Name' }),
+    ).toBeHidden()
 
-    await expect(page.locator('button:has-text("Sizes > two > URL")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > two > Width")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > two > Height")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > two > MIME Type")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > two > File Size")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > two > File Name")')).toBeHidden()
+    await expect(getPillSelectorItem({ container: page, label: 'Sizes > two > URL' })).toBeHidden()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > two > Width' }),
+    ).toBeHidden()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > two > Height' }),
+    ).toBeHidden()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > two > MIME Type' }),
+    ).toBeHidden()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > two > File Size' }),
+    ).toBeHidden()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > two > File Name' }),
+    ).toBeHidden()
   })
 
   test('should show image size in column selector in list view if imageSize has admin.disableListColumn false', async () => {
@@ -2167,19 +2191,43 @@ describe('Uploads', () => {
 
     await openListColumns(page, {})
 
-    await expect(page.locator('button:has-text("Sizes > three > URL")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > three > Width")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > three > Height")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > three > MIME Type")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > three > File Size")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > three > File Name")')).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > three > URL' }),
+    ).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > three > Width' }),
+    ).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > three > Height' }),
+    ).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > three > MIME Type' }),
+    ).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > three > File Size' }),
+    ).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > three > File Name' }),
+    ).toBeVisible()
 
-    await expect(page.locator('button:has-text("Sizes > four > URL")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > four > Width")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > four > Height")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > four > MIME Type")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > four > File Size")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > four > File Name")')).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > four > URL' }),
+    ).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > four > Width' }),
+    ).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > four > Height' }),
+    ).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > four > MIME Type' }),
+    ).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > four > File Size' }),
+    ).toBeVisible()
+    await expect(
+      getPillSelectorItem({ container: page, label: 'Sizes > four > File Name' }),
+    ).toBeVisible()
   })
 
   test('should not show image size in where filter drodown in list view if imageSize has admin.disableListFilter true', async () => {
