@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--info {
+    /* Uses currentColor, no additional styles needed */
+  }
+}

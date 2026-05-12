@@ -57,7 +57,7 @@
   .LexicalEditorTheme__relationship__title {
     font-family: var(--text-body-medium-strong-font-family);
     font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--font-weight-strong);
+    font-weight: var(--text-body-medium-strong-font-weight);
     line-height: var(--text-body-medium-strong-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
     color: var(--color-text);

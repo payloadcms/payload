@@ -1,13 +1,15 @@
 @layer payload-default {
   .banner {
-    display: block;
-    font-family: var(--text-body-medium-font-family);
-    font-size: var(--text-body-medium-font-size);
-    font-weight: var(--text-body-medium-font-weight);
-    line-height: var(--text-body-medium-line-height);
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
     letter-spacing: var(--text-letter-spacing);
     border-radius: var(--radius-medium);
-    padding: var(--spacer-2) var(--spacer-2-5);
+    padding: var(--spacer-2);
     color: var(--color-text);
     background: var(--color-bg-secondary);
   }
@@ -25,19 +27,13 @@
     }
   }
 
-  .banner--has-icon {
+  .banner__icon {
     display: flex;
-    align-items: center;
-    gap: var(--spacer-1);
-
-    svg {
-      display: block;
-    }
+    flex-shrink: 0;
   }
 
-  .banner--type-error {
+  .banner--type-danger {
     background: var(--color-bg-danger-tertiary);
-    color: var(--color-text);
 
     &.banner--has-action:hover {
       background: var(--color-bg-danger-tertiary-hover);
@@ -48,29 +44,27 @@
     }
   }
 
-  .banner--type-success {
-    background: var(--color-bg-success-tertiary);
-    color: var(--color-text-success);
-
-    &.banner--has-action:hover {
-      background: var(--color-bg-success-tertiary-hover);
-    }
-
-    &.banner--has-action:active {
-      background: var(--color-bg-success-tertiary-pressed);
-    }
-  }
-
-  .banner--type-info {
+  .banner--type-brand {
     background: var(--color-bg-brand-tertiary);
-    color: var(--color-text-brand);
 
     &.banner--has-action:hover {
       background: var(--color-bg-brand-tertiary-hover);
     }
+  }
 
-    &.banner--has-action:active {
-      background: var(--color-bg-brand-tertiary-pressed);
+  .banner--type-success {
+    background: var(--color-bg-success-tertiary);
+
+    &.banner--has-action:hover {
+      background: var(--color-bg-success-tertiary-hover);
+    }
+  }
+
+  .banner--type-warning {
+    background: var(--color-bg-warning-tertiary);
+
+    &.banner--has-action:hover {
+      background: var(--color-bg-warning-tertiary-hover);
     }
   }
 }
