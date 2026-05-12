@@ -32,6 +32,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 - `migrate-hide-api-url` — migrates `admin.hideAPIURL: true` to `admin.components.views.edit.api.tab.condition: () => false` on collection and global configs.
 - `migrate-aliased-exports` — rewrites imports of types and utilities that used to be re-exported from `@payloadcms/ui` and `@payloadcms/next/utilities` to their canonical sources in `payload` / `payload/shared`.
 - `migrate-document-title-context` — migrates `title` and `setDocumentTitle` destructured from `useDocumentInfo()` to `useDocumentTitle()`. They were removed from `DocumentInfoContext` in v4 and now live on `DocumentTitleContext`.
+- `migrate-storage-adapters-to-config` — moves storage adapter factory calls (`s3Storage`, `gcsStorage`, `azureStorage`, `r2Storage`, `vercelBlobStorage`, `uploadthingStorage`) from `plugins` to the new top-level `storageAdapters` array. Removes `plugins` if it becomes empty after the move.
 
 ## Contributing
 
