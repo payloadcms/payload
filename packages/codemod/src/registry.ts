@@ -7,6 +7,7 @@ import { migrateDisabledFields } from './transforms/migrate-disabled-fields/inde
 import { migrateDocumentTitleContext } from './transforms/migrate-document-title-context/index.js'
 import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
 import { migrateHideAPIURL } from './transforms/migrate-hide-api-url/index.js'
+import { migrateImportExportHooks } from './transforms/migrate-import-export-hooks/index.js'
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
 
 export const transforms: Transform[] = [
@@ -18,4 +19,5 @@ export const transforms: Transform[] = [
   migrateForceSelect,
   migrateAliasedExports,
   migrateDocumentTitleContext,
+  migrateImportExportHooks,
 ]
