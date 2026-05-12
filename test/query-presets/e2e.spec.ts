@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test'
-import { openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
+import {
+  clickPillSelectorItem,
+  getPillSelectorItem,
+  openListColumns,
+  toggleColumn,
+} from '__helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from '__helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy } from '__helpers/e2e/groupBy/index.js'
 import { openNav } from '__helpers/e2e/toggleNav.js'
@@ -307,9 +312,7 @@ describe('Query Presets', () => {
 
     const { columnContainer } = await toggleColumn(page, { columnLabel: 'ID' })
 
-    const column = columnContainer.locator(`.pill-selector .pill-selector__draggable-item`, {
-      hasText: exactText('ID'),
-    })
+    const column = getPillSelectorItem({ container: columnContainer, label: 'ID' })
 
     await page.locator('#reset-preset').click()
 
@@ -669,16 +672,8 @@ describe('Query Presets', () => {
       await columnsField.locator('.chip--selected').first().locator('.chip__action').click()
       selectedCount = await columnsField.locator('.chip--selected').count()
     }
-    await columnsField
-      .locator('.pill-selector__draggable-item', { hasText: exactText('Text') })
-      .first()
-      .locator('.chip__action')
-      .click()
-    await columnsField
-      .locator('.pill-selector__draggable-item', { hasText: exactText('ID') })
-      .first()
-      .locator('.chip__action')
-      .click()
+    await clickPillSelectorItem({ container: columnsField, label: 'Text' })
+    await clickPillSelectorItem({ container: columnsField, label: 'ID' })
 
     const groupByField = modal.locator('.query-preset-group-by-field')
     await expect(groupByField).toBeVisible()

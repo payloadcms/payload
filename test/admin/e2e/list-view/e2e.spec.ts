@@ -910,11 +910,7 @@ describe('List View', () => {
 
       await expect(page.locator('.pill-selector')).toBeVisible()
 
-      await expect(
-        page.locator(`.pill-selector .pill-selector__draggable-item`, {
-          hasText: exactText('Hidden Field'),
-        }),
-      ).toBeHidden()
+      await expect(getPillSelectorItem({ container: page, label: 'Hidden Field' })).toBeHidden()
     })
 
     test('should show field column despite admin.hidden being true', async () => {
@@ -924,9 +920,7 @@ describe('List View', () => {
       await expect(page.locator('.pill-selector')).toBeVisible()
 
       await expect(
-        page.locator(`.pill-selector .pill-selector__draggable-item`, {
-          hasText: exactText('Admin Hidden Field'),
-        }),
+        getPillSelectorItem({ container: page, label: 'Admin Hidden Field' }),
       ).toBeVisible()
     })
 
@@ -938,9 +932,7 @@ describe('List View', () => {
 
       // Check if "Disable List Column Text" is not present in the column options
       await expect(
-        page.locator(`.pill-selector .pill-selector__draggable-item`, {
-          hasText: exactText('Disable List Column Text'),
-        }),
+        getPillSelectorItem({ container: page, label: 'Disable List Column Text' }),
       ).toBeHidden()
     })
 
@@ -952,9 +944,7 @@ describe('List View', () => {
 
       // Check if "Disable List Filter Text" is present in the column options
       await expect(
-        page.locator(`.pill-selector .pill-selector__draggable-item`, {
-          hasText: exactText('Disable List Filter Text'),
-        }),
+        getPillSelectorItem({ container: page, label: 'Disable List Filter Text' }),
       ).toBeVisible()
     })
 
@@ -1169,11 +1159,7 @@ describe('List View', () => {
       await createPost({ namedGroup: { someTextField: 'nested group text field' } })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await expect(
-        page.locator('.pill-selector .pill-selector__draggable-item', {
-          hasText: exactText('Named Group'),
-        }),
-      ).toBeHidden()
+      await expect(getPillSelectorItem({ container: page, label: 'Named Group' })).toBeHidden()
     })
 
     test('should render group field as top level column when custom cell is defined', async () => {
@@ -1185,9 +1171,7 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
       await expect(
-        page.locator('.pill-selector .pill-selector__draggable-item', {
-          hasText: exactText('Group With Custom Cell'),
-        }),
+        getPillSelectorItem({ container: page, label: 'Group With Custom Cell' }),
       ).toBeVisible()
     })
 
@@ -1337,9 +1321,7 @@ describe('List View', () => {
 
       const columnContainer = page.locator('.list-controls__columns').first()
 
-      const column = columnContainer.locator(`.pill-selector .pill-selector__draggable-item`, {
-        hasText: exactText('ID'),
-      })
+      const column = getPillSelectorItem({ container: columnContainer, label: 'ID' })
 
       await expect(column).not.toHaveClass(/chip--selected/)
     })
@@ -1713,12 +1695,10 @@ describe('List View', () => {
       await page.locator('#heading-title button.sort-column__asc').click()
       await page.waitForURL(/sort=title/)
 
-      const columnAfterSort = page.locator(
-        `.list-controls__columns .pill-selector .pill-selector__draggable-item`,
-        {
-          hasText: exactText('ID'),
-        },
-      )
+      const columnAfterSort = getPillSelectorItem({
+        container: page.locator('.list-controls__columns'),
+        label: 'ID',
+      })
 
       await expect(columnAfterSort).not.toHaveClass('chip--selected')
       await expect(page.locator('#heading-id')).toBeHidden()
@@ -1758,12 +1738,10 @@ describe('List View', () => {
 
       await page.locator('#heading-_status').waitFor({ state: 'visible' })
 
-      const columnAfterSort = page.locator(
-        `.list-controls__columns .pill-selector .pill-selector__draggable-item`,
-        {
-          hasText: exactText('Status'),
-        },
-      )
+      const columnAfterSort = getPillSelectorItem({
+        container: page.locator('.list-controls__columns'),
+        label: 'Status',
+      })
 
       await expect(columnAfterSort).toHaveClass(/chip--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
@@ -1804,12 +1782,10 @@ describe('List View', () => {
       await wait(500)
 
       // ensure the column is still visible
-      const columnAfterSecondSort = page.locator(
-        `.list-controls__columns .pill-selector .pill-selector__draggable-item`,
-        {
-          hasText: exactText('Status'),
-        },
-      )
+      const columnAfterSecondSort = getPillSelectorItem({
+        container: page.locator('.list-controls__columns'),
+        label: 'Status',
+      })
 
       await expect(columnAfterSecondSort).toHaveClass(/chip--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()

@@ -3,7 +3,7 @@ import type { GeneratedTypes } from '__helpers/shared/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
 import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
-import { openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
+import { getPillSelectorItem, openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
 import { addListFilter } from '__helpers/e2e/filters/index.js'
 import { upsertPreferences } from '__helpers/e2e/preferences.js'
 import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
@@ -85,9 +85,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__draggable-item', {
-          hasText: exactText('Hidden Text Field'),
-        }),
+        getPillSelectorItem({ container: columnContainer, label: 'Hidden Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -111,9 +109,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__draggable-item', {
-          hasText: exactText('Disabled Text Field'),
-        }),
+        getPillSelectorItem({ container: columnContainer, label: 'Disabled Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -139,9 +135,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        columnContainer.locator('.pill-selector__draggable-item', {
-          hasText: exactText('Admin Hidden Text Field'),
-        }),
+        getPillSelectorItem({ container: columnContainer, label: 'Admin Hidden Text Field' }),
       ).toBeVisible()
 
       await selectTableRow(page, 'Seeded text document')
@@ -180,9 +174,7 @@ describe('Textarea', () => {
     await page.goto(url.list)
     await openListColumns(page, {})
     await expect(
-      page.locator(`.pill-selector .pill-selector__draggable-item`, {
-        hasText: exactText('Disable List Column Text'),
-      }),
+      getPillSelectorItem({ container: page, label: 'Disable List Column Text' }),
     ).toBeHidden()
 
     await expect(page.locator('#heading-disableListColumnText')).toBeHidden()
