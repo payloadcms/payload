@@ -72,6 +72,7 @@ export interface Config {
     'media-with-custom-url': MediaWithCustomUrl;
     'media-with-generate-file-url': MediaWithGenerateFileUrl;
     'media-with-prefix': MediaWithPrefix;
+    'media-with-throwing-hook': MediaWithThrowingHook;
     'restricted-media': RestrictedMedia;
     'test-metadata': TestMetadatum;
     users: User;
@@ -87,6 +88,7 @@ export interface Config {
     'media-with-custom-url': MediaWithCustomUrlSelect<false> | MediaWithCustomUrlSelect<true>;
     'media-with-generate-file-url': MediaWithGenerateFileUrlSelect<false> | MediaWithGenerateFileUrlSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
+    'media-with-throwing-hook': MediaWithThrowingHookSelect<false> | MediaWithThrowingHookSelect<true>;
     'restricted-media': RestrictedMediaSelect<false> | RestrictedMediaSelect<true>;
     'test-metadata': TestMetadataSelect<false> | TestMetadataSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -136,7 +138,6 @@ export interface UserAuthOperations {
 export interface Media {
   id: string;
   alt?: string | null;
-  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -245,12 +246,30 @@ export interface MediaWithPrefix {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-throwing-hook".
+ */
+export interface MediaWithThrowingHook {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "restricted-media".
  */
 export interface RestrictedMedia {
   id: string;
   title?: string | null;
-  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -273,7 +292,6 @@ export interface TestMetadatum {
    * Test note to identify this upload
    */
   testNote?: string | null;
-  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -366,6 +384,10 @@ export interface PayloadLockedDocument {
         value: string | MediaWithPrefix;
       } | null)
     | ({
+        relationTo: 'media-with-throwing-hook';
+        value: string | MediaWithThrowingHook;
+      } | null)
+    | ({
         relationTo: 'restricted-media';
         value: string | RestrictedMedia;
       } | null)
@@ -425,7 +447,6 @@ export interface PayloadMigration {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -536,11 +557,28 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-throwing-hook_select".
+ */
+export interface MediaWithThrowingHookSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "restricted-media_select".
  */
 export interface RestrictedMediaSelect<T extends boolean = true> {
   title?: T;
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -559,7 +597,6 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
  */
 export interface TestMetadataSelect<T extends boolean = true> {
   testNote?: T;
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

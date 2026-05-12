@@ -16,6 +16,7 @@ import { MediaWithCompositePrefixes } from './collections/MediaWithCompositePref
 import { MediaWithCustomURL } from './collections/MediaWithCustomURL.js'
 import { MediaWithGenerateFileURL } from './collections/MediaWithGenerateFileURL.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
+import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
@@ -26,6 +27,7 @@ import {
   mediaWithCustomURLSlug,
   mediaWithGenerateFileURLSlug,
   mediaWithPrefixSlug,
+  mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
@@ -116,6 +118,7 @@ export function buildPluginCloudStorageIntConfig({
         [mediaWithPrefixSlug]: {
           prefix,
         },
+        [mediaWithThrowingHookSlug]: true,
         [restrictedMediaSlug]: true,
       },
       config: {
@@ -189,6 +192,7 @@ export function buildPluginCloudStorageIntConfig({
       MediaWithCustomURL,
       MediaWithGenerateFileURL,
       MediaWithPrefix,
+      MediaWithThrowingHook,
       RestrictedMedia,
       TestMetadata,
       Users,
