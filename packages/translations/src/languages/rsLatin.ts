@@ -317,6 +317,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     error: 'Greška',
     errors: 'Greške',
     exitLivePreview: 'Izađite iz Live pregleda',
+    expand: 'Proširi',
     export: 'Izvoz',
     fallbackToDefaultLocale: 'Vraćanje na zadati jezik',
     false: 'Lažno',

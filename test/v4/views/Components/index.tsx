@@ -12,6 +12,7 @@ import { CardSection } from './sections/Card.js'
 import { CheckboxSection } from './sections/Checkbox.js'
 import { DrawerSection } from './sections/DrawerSection.js'
 import { IconsSection } from './sections/Icons.js'
+import { InputStepperSection } from './sections/InputStepper.js'
 import { LexicalIconsSection } from './sections/LexicalIcons.js'
 import { LoadingSection } from './sections/LoadingSection.js'
 import { ModalSection } from './sections/ModalSection.js'
@@ -22,6 +23,7 @@ import { TooltipSection } from './sections/Tooltip.js'
 // Field sections
 import { CodeFieldSection } from './sections/fields/CodeField.js'
 import { DateFieldSection } from './sections/fields/DateField.js'
+import { EmailAndUsernameFieldSection } from './sections/fields/EmailAndUsernameField.js'
 import { EmailFieldSection } from './sections/fields/EmailField.js'
 import { JSONFieldSection } from './sections/fields/JSONField.js'
 import { NumberFieldSection } from './sections/fields/NumberField.js'
@@ -45,8 +47,9 @@ type ComponentId =
   | 'date-field'
   | 'drawer'
   | 'email-field'
+  | 'email-username-field'
   | 'icons'
-  | 'input'
+  | 'input-stepper'
   | 'json-field'
   | 'lexical-icons'
   | 'loading-overlay'
@@ -82,7 +85,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Card', value: 'card' },
   { category: 'primitives', label: 'Checkbox', value: 'checkbox' },
   { category: 'primitives', label: 'Icons', value: 'icons' },
-  { category: 'primitives', label: 'Input', value: 'input' },
+  { category: 'primitives', label: 'Input Stepper', value: 'input-stepper' },
   { category: 'primitives', label: 'Lexical Icons', value: 'lexical-icons' },
   { category: 'primitives', label: 'Pill', value: 'pill' },
   { category: 'primitives', label: 'Popup', value: 'popup' },
@@ -100,6 +103,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'fields', label: 'Code Field', value: 'code-field' },
   { category: 'fields', label: 'Date Field', value: 'date-field' },
   { category: 'fields', label: 'Email Field', value: 'email-field' },
+  { category: 'fields', label: 'Email & Username', value: 'email-username-field' },
   { category: 'fields', label: 'JSON Field', value: 'json-field' },
   { category: 'fields', label: 'Number Field', value: 'number-field' },
   { category: 'fields', label: 'Password Field', value: 'password-field' },
@@ -217,6 +221,9 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('popup', 'primitives') && <PopupSection selectedComponent="popup" />}
         {shouldShow('card', 'primitives') && <CardSection selectedComponent="card" />}
         {shouldShow('banner', 'primitives') && <BannerSection selectedComponent="banner" />}
+        {shouldShow('input-stepper', 'primitives') && (
+          <InputStepperSection selectedComponent="input-stepper" />
+        )}
 
         {/* Patterns */}
         {(selectedCategory === 'all' || selectedCategory === 'patterns') &&
@@ -237,6 +244,7 @@ export const ComponentsView: React.FC = () => {
           )}
         {shouldShow('text-field', 'fields') && <TextFieldSection />}
         {shouldShow('email-field', 'fields') && <EmailFieldSection />}
+        {shouldShow('email-username-field', 'fields') && <EmailAndUsernameFieldSection />}
         {shouldShow('number-field', 'fields') && <NumberFieldSection />}
         {shouldShow('password-field', 'fields') && <PasswordFieldSection />}
         {shouldShow('point-field', 'fields') && <PointFieldSection />}

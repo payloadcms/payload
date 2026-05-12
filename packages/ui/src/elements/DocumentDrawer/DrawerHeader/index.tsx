@@ -13,7 +13,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { IDLabel } from '../../IDLabel/index.js'
 import { LeaveWithoutSavingModal } from '../../LeaveWithoutSaving/index.js'
 import { documentDrawerBaseClass } from '../index.js'
-import './index.scss'
+import './index.css'
 
 const leaveWithoutSavingModalSlug = 'leave-without-saving-doc-drawer'
 

@@ -316,6 +316,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     error: 'Грешка',
     errors: 'Грешки',
     exitLivePreview: 'Излезте от Визуализация в Реално Време',
+    expand: 'Разгънете',
     export: 'Износ',
     fallbackToDefaultLocale: 'Използвай локализацията, която е по подразбиране',
     false: 'Невярно',

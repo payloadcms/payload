@@ -311,6 +311,7 @@ export const faTranslations: DefaultTranslationsObject = {
     error: 'خطا',
     errors: 'خطاها',
     exitLivePreview: 'خروج از پیش‌نمایش زنده',
+    expand: 'گسترش دهید',
     export: 'خروجی گرفتن',
     fallbackToDefaultLocale: 'استفاده از زبان پیش‌فرض',
     false: 'خیر',

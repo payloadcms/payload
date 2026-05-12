@@ -316,6 +316,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     error: 'Սխալ',
     errors: 'Սխալներ',
     exitLivePreview: 'Դուրս գալ Live Preview-ից',
+    expand: 'Ընդլայնել',
     export: 'Արտարժույթ',
     fallbackToDefaultLocale: 'Վերադառնալ լռելյայն լոկալին',
     false: 'Կեղծ',

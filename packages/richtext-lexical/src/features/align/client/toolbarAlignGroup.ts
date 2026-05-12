@@ -7,6 +7,7 @@ export const toolbarAlignGroupWithItems = (items: ToolbarGroupItem[]): ToolbarGr
   return {
     type: 'dropdown',
     ChildComponent: AlignLeftIcon,
+    iconOnly: true,
     items,
     key: 'align',
     order: 30,

@@ -16,7 +16,11 @@ const removeCSSImports = {
     build.onLoad({ filter: /.*/ }, async (args) => {
       if (args.path.includes('node_modules') || !args.path.includes(dirname)) return
       const contents = await fs.promises.readFile(args.path, 'utf8')
-      const withRemovedImports = contents.replace(/import\s+.*\.scss';?[\r\n\s]*/g, '')
+      // Remove both .scss and .css imports - all styles are bundled into bundled.css
+      // Preserve bundled.css import since that's the combined stylesheet
+      const withRemovedImports = contents
+        .replace(/import\s+['"][^'"]*\.scss['"];?[\r\n\s]*/g, '')
+        .replace(/import\s+['"][^'"]*(?<!bundled)\.css['"];?[\r\n\s]*/g, '')
       return { contents: withRemovedImports, loader: 'default' }
     })
   },
@@ -44,9 +48,10 @@ async function build() {
       `dist/field/bundled.css`,
       `${directoryArg}/exports/client_optimized/bundled.css`,
     )
+
     fs.rmSync(`${directoryArg}/bundled_scss`, { recursive: true })
   } catch (err) {
-    console.error(`Error while renaming index.css: ${err}`)
+    console.error(`Error while copying CSS files: ${err}`)
     throw err
   }
 

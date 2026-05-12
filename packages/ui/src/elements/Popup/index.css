@@ -23,8 +23,8 @@
 
     position: absolute;
     z-index: var(--z-popup);
-    background: var(--bg-elevated-default);
-    color: var(--text-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-text);
     border-radius: var(--radius-large);
     padding: var(--spacer-2);
     min-width: 80px;

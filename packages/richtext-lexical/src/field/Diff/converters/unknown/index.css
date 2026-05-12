@@ -1,0 +1,37 @@
+@layer payload-default {
+  .lexical-diff .lexical-unknown-diff {
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+    max-width: fit-content;
+    display: flex;
+    align-items: center;
+    background: var(--color-bg);
+    border-radius: var(--radius-medium);
+    border: var(--stroke-width-small) solid var(--color-border);
+    position: relative;
+    font-family: var(--font-body);
+    margin-block: calc(var(--spacer-1) * 2.5);
+    max-height: calc(var(--spacer-5) * 2.5);
+    padding: calc(var(--spacer-1) * 1.25);
+
+    &[data-match-type='create'] {
+      border-color: var(--diff-create-pill-border);
+      color: var(--diff-create-parent-color);
+    }
+
+    &[data-match-type='delete'] {
+      border-color: var(--diff-delete-pill-border);
+      color: var(--diff-delete-parent-color);
+      text-decoration-line: none;
+      background-color: var(--diff-delete-pill-bg);
+
+      * {
+        text-decoration-line: none;
+        color: var(--diff-delete-parent-color);
+      }
+    }
+  }
+
+  .lexical-diff .lexical-unknown-diff__specifier {
+    font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace;
+  }
+}

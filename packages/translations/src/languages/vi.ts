@@ -317,6 +317,7 @@ export const viTranslations: DefaultTranslationsObject = {
     error: 'Lỗi',
     errors: 'Lỗi',
     exitLivePreview: 'Thoát xem trực tiếp',
+    expand: 'Mở rộng',
     export: 'Xuất',
     fallbackToDefaultLocale: 'Ngôn ngữ mặc định',
     false: 'Sai',

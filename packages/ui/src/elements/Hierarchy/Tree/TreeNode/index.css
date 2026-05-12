@@ -31,14 +31,14 @@
     align-items: center;
     justify-content: center;
     cursor: default;
-    color: var(--icon-tertiary);
+    color: var(--color-icon-tertiary);
     width: var(--tree-chevron-width);
     height: var(--tree-chevron-width);
     flex-shrink: 0;
     border-radius: var(--radius-medium);
 
     &:hover {
-      color: var(--icon-default);
+      color: var(--color-icon);
     }
   }
 

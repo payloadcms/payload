@@ -419,8 +419,8 @@ describe('General', () => {
         )
 
       // Should show warning banner about document not found
-      await expect(page.locator('.banner--type-error')).toBeVisible()
-      await expect(page.locator('.banner--type-error')).toContainText('999999')
+      await expect(page.locator('.banner--type-danger')).toBeVisible()
+      await expect(page.locator('.banner--type-danger')).toContainText('999999')
     })
 
     test('should not redirect `${adminRoute}/collections` to `${adminRoute} if there is a custom view', async () => {

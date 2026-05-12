@@ -514,7 +514,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           {!valid && (
             <React.Fragment>
               {showMinRows && (
-                <Banner type="error">
+                <Banner type="danger">
                   {t('validation:requiresAtLeast', {
                     count: minRows,
                     label:

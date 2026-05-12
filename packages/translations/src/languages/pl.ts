@@ -316,6 +316,7 @@ export const plTranslations: DefaultTranslationsObject = {
     error: 'Błąd',
     errors: 'Błędy',
     exitLivePreview: 'Wyjdź z Podglądu na Żywo',
+    expand: 'Rozwiń',
     export: 'Eksport',
     fallbackToDefaultLocale: 'Powrót do domyślnych ustawień regionalnych',
     false: 'Fałszywe',

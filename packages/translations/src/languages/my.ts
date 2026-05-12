@@ -320,6 +320,7 @@ export const myTranslations: DefaultTranslationsObject = {
     error: 'အမှား',
     errors: 'အမှားများ',
     exitLivePreview: 'Keluar dari Pratinjau Langsung',
+    expand: 'ချဲ့ထွင်၍',
     export: 'တင်ပို့',
     fallbackToDefaultLocale: 'မူရင်းဒေသသို့ ပြန်ပြောင်းပါ။',
     false: 'မှား',
