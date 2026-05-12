@@ -320,12 +320,6 @@ export const ecommercePlugin =
       incomingConfig.i18n?.translations,
     )
 
-    /**
-     * Merge plugin translations
-     */
-    if (!incomingConfig.i18n) {
-      incomingConfig.i18n = {}
-    }
     Object.entries(translations).forEach(([locale, pluginI18nObject]) => {
       const typedLocale = locale as AcceptedLanguages
       if (!incomingConfig.i18n!.translations) {
@@ -334,17 +328,15 @@ export const ecommercePlugin =
       if (!(typedLocale in incomingConfig.i18n!.translations)) {
         incomingConfig.i18n!.translations[typedLocale] = {}
       }
-      if (!('plugin-ecommerce' in incomingConfig.i18n!.translations[typedLocale]!)) {
-        ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
-          'plugin-ecommerce'
-        ] = {} as PluginDefaultTranslationsObject['plugin-ecommerce']
-      }
 
-      ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
-        'plugin-ecommerce'
-      ] = {
-        ...pluginI18nObject.translations['plugin-ecommerce'],
-      }
+      const localeTranslations = incomingConfig.i18n!.translations[
+        typedLocale
+      ] as PluginDefaultTranslationsObject
+
+      const existing = localeTranslations['plugin-ecommerce'] ?? {}
+      const defaults = pluginI18nObject.translations['plugin-ecommerce']
+
+      localeTranslations['plugin-ecommerce'] = deepMergeSimple(defaults, existing)
     })
 
     if (!incomingConfig.typescript) {
