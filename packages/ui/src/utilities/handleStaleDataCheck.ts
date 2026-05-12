@@ -23,47 +23,82 @@ export const handleStaleDataCheck = async ({
   req,
 }: Args): Promise<Result> => {
   let currentUpdatedAt: string
+  let draftUpdatedAt: string
+  let publishedUpdatedAt: string
 
   try {
     if (collectionSlug && id) {
       const collection = req.payload.config.collections.find((c) => c.slug === collectionSlug)
       const collectionHasDrafts = collection ? hasDraftsEnabled(collection) : false
 
-      // Fetch current document to compare updatedAt
-      const currentDoc = await req.payload.findByID({
-        id,
-        collection: collectionSlug,
-        depth: 0,
-        draft: collectionHasDrafts,
-        overrideAccess: false,
-        select: {
-          updatedAt: true,
-        },
-        user: req.user,
-      })
+      const [draftDoc, publishedDoc] = await Promise.all([
+        req.payload.findByID({
+          id,
+          collection: collectionSlug,
+          depth: 0,
+          draft: collectionHasDrafts,
+          overrideAccess: false,
+          select: {
+            updatedAt: true,
+          },
+          user: req.user,
+        }),
+        collectionHasDrafts
+          ? req.payload.findByID({
+              id,
+              collection: collectionSlug,
+              depth: 0,
+              draft: false,
+              overrideAccess: false,
+              select: {
+                updatedAt: true,
+              },
+              user: req.user,
+            })
+          : Promise.resolve(null),
+      ])
 
-      currentUpdatedAt = currentDoc?.updatedAt as string
+      draftUpdatedAt = draftDoc?.updatedAt as string
+      publishedUpdatedAt = publishedDoc?.updatedAt as string
+      currentUpdatedAt = draftUpdatedAt || publishedUpdatedAt
     } else if (globalSlug) {
       const global = req.payload.config.globals.find((g) => g.slug === globalSlug)
       const globalHasDrafts = global ? hasDraftsEnabled(global) : false
 
-      // Fetch current global to compare updatedAt
-      const currentGlobal = await req.payload.findGlobal({
-        slug: globalSlug,
-        depth: 0,
-        draft: globalHasDrafts,
-        overrideAccess: false,
-        select: {
-          updatedAt: true,
-        },
-        user: req.user,
-      })
+      const [draftGlobal, publishedGlobal] = await Promise.all([
+        req.payload.findGlobal({
+          slug: globalSlug,
+          depth: 0,
+          draft: globalHasDrafts,
+          overrideAccess: false,
+          select: {
+            updatedAt: true,
+          },
+          user: req.user,
+        }),
+        globalHasDrafts
+          ? req.payload.findGlobal({
+              slug: globalSlug,
+              depth: 0,
+              draft: false,
+              overrideAccess: false,
+              select: {
+                updatedAt: true,
+              },
+              user: req.user,
+            })
+          : Promise.resolve(null),
+      ])
 
-      currentUpdatedAt = currentGlobal?.updatedAt as string
+      draftUpdatedAt = draftGlobal?.updatedAt as string
+      publishedUpdatedAt = publishedGlobal?.updatedAt as string
+      currentUpdatedAt = draftUpdatedAt || publishedUpdatedAt
     }
 
     // Compare timestamps
-    const isStale = currentUpdatedAt && currentUpdatedAt !== originalUpdatedAt
+    const matchesDraft = draftUpdatedAt && draftUpdatedAt === originalUpdatedAt
+    const matchesPublished = publishedUpdatedAt && publishedUpdatedAt === originalUpdatedAt
+    const isStale = currentUpdatedAt && !matchesDraft && !matchesPublished
 
     return {
       currentUpdatedAt,
