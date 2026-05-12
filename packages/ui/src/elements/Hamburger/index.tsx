@@ -1,42 +1,31 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 
-import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
-import { ChevronIcon } from '../../icons/Chevron/index.js'
-import { CloseMenuIcon } from '../../icons/CloseMenu/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import { SidebarIcon } from '../../icons/Sidebar/index.js'
+import { Tooltip } from '../Tooltip/index.js'
+import './index.css'
 
 const baseClass = 'hamburger'
 
 export const Hamburger: React.FC<{
-  readonly closeIcon?: 'collapse' | 'x'
   readonly isActive?: boolean
-}> = (props) => {
-  const { t } = useTranslation()
-  const { closeIcon = 'x', isActive = false } = props
+}> = ({ isActive = false }) => {
+  const [showTooltip, setShowTooltip] = useState(false)
+
+  // TODO: translations
+  const label = isActive ? 'Hide Sidebar' : 'Show Sidebar'
 
   return (
-    <div className={baseClass}>
-      {!isActive && (
-        <div
-          aria-label={t('general:open')}
-          className={`${baseClass}__open-icon`}
-          title={t('general:open')}
-        >
-          <AlignJustifiedIcon size={16} />
-        </div>
-      )}
-      {isActive && (
-        <div
-          aria-label={closeIcon === 'collapse' ? t('general:collapse') : t('general:close')}
-          className={`${baseClass}__close-icon`}
-          title={closeIcon === 'collapse' ? t('general:collapse') : t('general:close')}
-        >
-          {closeIcon === 'x' && <CloseMenuIcon />}
-          {closeIcon === 'collapse' && <ChevronIcon direction="left" />}
-        </div>
-      )}
+    <div
+      className={baseClass}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+      role="presentation"
+    >
+      <SidebarIcon />
+      <Tooltip alignCaret="left" delay={300} position="bottom" show={showTooltip} staticPositioning>
+        {label}
+      </Tooltip>
     </div>
   )
 }
