@@ -15,6 +15,7 @@ import { IconsSection } from './sections/Icons.js'
 import { LexicalIconsSection } from './sections/LexicalIcons.js'
 import { LoadingSection } from './sections/LoadingSection.js'
 import { ModalSection } from './sections/ModalSection.js'
+import { NoListResultsSection } from './sections/NoListResults.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
 import { ToastSection } from './sections/ToastSection.js'
@@ -54,6 +55,7 @@ type ComponentId =
   | 'loading-overlay'
   // Patterns
   | 'modal'
+  | 'no-list-results'
   | 'number-field'
   | 'password-field'
   | 'pill'
@@ -96,6 +98,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'patterns', label: 'Drawer', value: 'drawer' },
   { category: 'patterns', label: 'Loading Overlay', value: 'loading-overlay' },
   { category: 'patterns', label: 'Modal', value: 'modal' },
+  { category: 'patterns', label: 'No List Results', value: 'no-list-results' },
   { category: 'patterns', label: 'Shimmer / Loading', value: 'shimmer' },
   { category: 'patterns', label: 'Toast', value: 'toast' },
   // Fields
@@ -232,6 +235,9 @@ export const ComponentsView: React.FC = () => {
         )}
         {shouldShow('modal', 'patterns') && <ModalSection selectedComponent="modal" />}
         {shouldShow('toast', 'patterns') && <ToastSection selectedComponent="toast" />}
+        {shouldShow('no-list-results', 'patterns') && (
+          <NoListResultsSection selectedComponent="no-list-results" />
+        )}
 
         {/* Fields */}
         {(selectedCategory === 'all' || selectedCategory === 'fields') &&
