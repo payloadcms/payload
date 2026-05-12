@@ -113,7 +113,7 @@
     "shiki": "^4.0.2",
     "tempy": "^1.0.1",
     "ts-essentials": "10.0.3",
-    "typescript": "5.7.3",
+    "typescript": "6.0.3",
     "uuid": "14.0.0",
     "vitest": "4.1.6",
     "wrangler": "~4.61.1",
