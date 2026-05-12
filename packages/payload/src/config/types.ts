@@ -161,15 +161,37 @@ export type Plugin = ((config: Config) => Config | Promise<Config>) & {
 }
 
 /**
- * A first-class storage adapter that runs before plugins during config initialization.
- * Use this instead of placing storage adapter packages (e.g. s3Storage, gcsStorage) in `plugins`.
+ * Configures where uploaded files are stored (S3, GCS, Azure, Vercel Blob, etc.).
+ *
+ * Storage adapters run **before plugins**, so upload hooks, static file handlers,
+ * and presigned-URL endpoints are guaranteed to be in place before any plugin
+ * modifies the config.
+ *
+ * Pass the return value of a storage adapter factory to `storageAdapters` in your
+ * Payload config:
+ *
+ * ```ts
+ * import { s3Storage } from '@payloadcms/storage-s3'
+ *
+ * export default buildConfig({
+ *   storageAdapters: [
+ *     s3Storage({
+ *       bucket: process.env.S3_BUCKET,
+ *       collections: { media: true },
+ *       config: { region: process.env.S3_REGION },
+ *     }),
+ *   ],
+ * })
+ * ```
+ *
+ * @see https://payloadcms.com/docs/uploads/storage-adapters
  */
 export interface StorageAdapter {
   /** Collection slugs this adapter is configured to handle. */
   collections: string[]
-  /** Initializes the adapter and returns the modified config with hooks and fields injected. */
+  /** Initializes the adapter and returns the modified config with upload hooks and handlers injected. */
   init: (config: Config) => Config | Promise<Config>
-  /** Unique identifier for this adapter (e.g. 's3', 'gcs', 'azure'). Used for telemetry and inspection. */
+  /** Unique identifier for this adapter (e.g. `'s3'`, `'gcs'`, `'azure'`). Surfaced in telemetry and on `payload.config.upload.adapters`. */
   name: string
 }
 
@@ -1514,8 +1536,15 @@ export type Config = {
    */
   sharp?: SharpDependency
   /**
-   * Storage adapters applied before plugins. Use instead of placing storage adapter packages
-   * (e.g. s3Storage, gcsStorage) in `plugins`.
+   * Storage adapters that handle where uploaded files are stored (S3, GCS, Azure, Vercel Blob, etc.).
+   *
+   * Adapters are initialized **before** `plugins`, so file handling is fully wired before any plugin
+   * runs. Use this instead of placing storage adapter packages in `plugins`.
+   *
+   * Migrate existing `plugins` usage automatically with:
+   * ```sh
+   * npx @payloadcms/codemod --transform migrate-storage-adapters-to-config
+   * ```
    *
    * @see https://payloadcms.com/docs/uploads/storage-adapters
    */
