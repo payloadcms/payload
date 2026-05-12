@@ -251,6 +251,10 @@ export interface MediaWithPrefix {
 export interface MediaWithThrowingHook {
   id: string;
   alt?: string | null;
+  /**
+   * When enabled, the afterChange hook throws during the cloud-storage plugin internal update. Used to reproduce the swallowed-error bug in the admin panel and integration tests.
+   */
+  shouldThrow?: boolean | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -561,6 +565,7 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
  */
 export interface MediaWithThrowingHookSelect<T extends boolean = true> {
   alt?: T;
+  shouldThrow?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
