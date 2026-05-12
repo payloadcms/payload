@@ -104,6 +104,10 @@
   }
 }
 
+.components-view__variants--full-width {
+  grid-template-columns: 1fr;
+}
+
 .components-view__variant-label {
   font-size: 12px;
   font-weight: 500;
