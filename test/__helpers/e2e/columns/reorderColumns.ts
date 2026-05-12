@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
-import { exactText } from '../helpers.js'
+import { getPillSelectorItem } from './clickPillSelectorItem.js'
 
 export const reorderColumns = async (
   page: Page,
@@ -28,17 +28,15 @@ export const reorderColumns = async (
 
   await expect(page.locator(`${columnContainerSelector}.rah-static--height-auto`)).toBeVisible()
 
-  const fromBoundingBox = await columnContainer
-    .locator(`.pill-selector .pill-selector__draggable-item`, {
-      hasText: exactText(fromColumn),
-    })
-    .boundingBox()
+  const fromBoundingBox = await getPillSelectorItem({
+    container: columnContainer,
+    label: fromColumn,
+  }).boundingBox()
 
-  const toBoundingBox = await columnContainer
-    .locator(`.pill-selector .pill-selector__draggable-item`, {
-      hasText: exactText(toColumn),
-    })
-    .boundingBox()
+  const toBoundingBox = await getPillSelectorItem({
+    container: columnContainer,
+    label: toColumn,
+  }).boundingBox()
 
   if (!fromBoundingBox || !toBoundingBox) {
     return
