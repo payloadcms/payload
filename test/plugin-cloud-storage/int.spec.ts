@@ -664,8 +664,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         await expect(
           payload.create({
             collection: mediaWithThrowingHookSlug,
-            context: { simulateUserHookError: true },
-            data: {},
+            data: { shouldThrow: true },
             filePath: path.resolve(dirname, '../uploads/image.png'),
           }),
         ).rejects.toThrow('User afterChange hook throws error')
@@ -682,7 +681,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
         const initial = await payload.create({
           collection: mediaWithThrowingHookSlug,
-          data: {},
+          data: { shouldThrow: false },
           file: buildFile('initial.png'),
         })
 
@@ -698,8 +697,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           payload.update({
             id: initial.id,
             collection: mediaWithThrowingHookSlug,
-            context: { simulateUserHookError: true },
-            data: {},
+            data: { shouldThrow: true },
             file: buildFile('replacement.png'),
           }),
         ).rejects.toThrow('User afterChange hook throws error')
