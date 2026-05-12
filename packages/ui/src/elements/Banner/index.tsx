@@ -3,7 +3,7 @@ import type { MouseEvent } from 'react'
 
 import React from 'react'
 
-import { Info as InfoIcon } from '../../providers/ToastContainer/icons/Info.js'
+import { InfoIcon } from '../../icons/Info/index.js'
 import { Link } from '../Link/index.js'
 import './index.css'
 

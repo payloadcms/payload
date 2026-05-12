@@ -108,8 +108,6 @@
   grid-template-columns: 1fr;
 }
 
-<<<<<<< HEAD
-=======
 .components-view__variant-row {
   grid-column: 1 / -1;
 }
@@ -120,7 +118,6 @@
   gap: var(--spacer-4);
 }
 
->>>>>>> main
 .components-view__variant-label {
   font-size: 12px;
   font-weight: 500;
