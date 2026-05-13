@@ -31,13 +31,13 @@ export const migrateDisabledFields: Transform = {
         if (!initializer || !Node.isObjectLiteralExpression(initializer)) {
           return
         }
-        // Only treat this as a field admin object when the parent has a `type` sibling
-        // (fields always have `type`; collection-level admin and imageSize.admin don't).
+        // Match field admin objects (parent has `type`) and imageSize admin objects (parent has `name`).
+        // Collection-level admin objects have neither, and also never carry the old disable* props.
         const parent = node.getParent()
         if (!parent || !Node.isObjectLiteralExpression(parent)) {
           return
         }
-        if (!parent.getProperty('type')) {
+        if (!parent.getProperty('type') && !parent.getProperty('name')) {
           return
         }
 
@@ -123,7 +123,7 @@ export const migrateDisabledFields: Transform = {
     return { filesChanged: [...filesChanged], notes }
   },
   description:
-    'Migrate field.admin.disable* props (disableListColumn, disableListFilter, disableGroupBy, disableBulkEdit) into the consolidated disabled object form.',
+    'Migrate field.admin and imageSize.admin disable* props (disableListColumn, disableListFilter, disableGroupBy, disableBulkEdit) into the consolidated disabled object form.',
 }
 
 const mergeAndSortObject = (existing: ObjectLiteralExpression, newKeys: string[]): void => {

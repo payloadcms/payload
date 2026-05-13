@@ -62,28 +62,21 @@ export type GenerateImageName = (args: {
 export type ImageSize = {
   /**
    * Admin UI options that control how this image size appears in list views.
-   * Image size subfields are hidden from list columns, filters, and group-by by default
-   * to reduce noise in the admin UI.
    */
   admin?: {
     /**
-     * If set to true, this image size will not be available
-     * as a selectable groupBy option in the collection list view.
-     * @default true
+     * Controls visibility of this image size in the collection list view.
+     * Defaults to hiding the image size from columns, filters, and group-by to reduce noise.
+     *
+     * - `column` — whether to hide this size from selectable list columns. @default false
+     * - `filter` — whether to hide this size from filter options. @default false
+     * - `groupBy` — whether to hide this size from group-by options. @default false
      */
-    disableGroupBy?: boolean
-    /**
-     * If set to true, this image size will not be available
-     * as a selectable column in the collection list view.
-     * @default true
-     */
-    disableListColumn?: boolean
-    /**
-     * If set to true, this image size will not be available
-     * as a filter option in the collection list view.
-     * @default true
-     */
-    disableListFilter?: boolean
+    disabled?: {
+      column?: boolean
+      filter?: boolean
+      groupBy?: boolean
+    }
   }
   /**
    * @deprecated prefer position

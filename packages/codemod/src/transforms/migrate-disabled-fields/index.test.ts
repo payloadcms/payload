@@ -45,6 +45,23 @@ describe('migrate-disabled-fields', () => {
     expect(result).toBe(output)
   })
 
+  it('migrates imageSize admin disable* props', async () => {
+    const input = await fixture('imagesize.input.ts')
+    const output = await fixture('imagesize.output.ts')
+
+    const result = await runTransform({ source: input, transform: migrateDisabledFields })
+
+    expect(result).toBe(output)
+  })
+
+  it('is idempotent on imageSize output', async () => {
+    const output = await fixture('imagesize.output.ts')
+
+    const result = await runTransform({ source: output, transform: migrateDisabledFields })
+
+    expect(result).toBe(output)
+  })
+
   it('no-ops on code without old props', async () => {
     const input = await fixture('non-matching.input.ts')
     const output = await fixture('non-matching.output.ts')

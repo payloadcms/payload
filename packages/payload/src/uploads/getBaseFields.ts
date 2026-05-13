@@ -7,15 +7,13 @@ import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
 
 const disabledFromImageSize = (
-  sizeAdmin:
-    | { disableGroupBy?: boolean; disableListColumn?: boolean; disableListFilter?: boolean }
-    | undefined,
+  sizeAdmin: { disabled?: { column?: boolean; filter?: boolean; groupBy?: boolean } } | undefined,
 ): { disabled: { column: boolean; filter: boolean; groupBy: boolean } } => {
   return {
     disabled: {
-      column: Boolean(sizeAdmin?.disableListColumn),
-      filter: Boolean(sizeAdmin?.disableListFilter),
-      groupBy: Boolean(sizeAdmin?.disableGroupBy),
+      column: sizeAdmin?.disabled?.column ?? false,
+      filter: sizeAdmin?.disabled?.filter ?? false,
+      groupBy: sizeAdmin?.disabled?.groupBy ?? false,
     },
   }
 }
