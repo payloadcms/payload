@@ -10,6 +10,7 @@ import { BannerSection } from './sections/Banner.js'
 import { ButtonSection } from './sections/Button.js'
 import { CardSection } from './sections/Card.js'
 import { CheckboxSection } from './sections/Checkbox.js'
+import { CopyToClipboardSection } from './sections/CopyToClipboard.js'
 import { DrawerSection } from './sections/DrawerSection.js'
 import { IconsSection } from './sections/Icons.js'
 import { IDLabelSection } from './sections/IDLabel.js'
@@ -18,8 +19,10 @@ import { LexicalIconsSection } from './sections/LexicalIcons.js'
 import { LoadingSection } from './sections/LoadingSection.js'
 import { LockedSection } from './sections/Locked.js'
 import { ModalSection } from './sections/ModalSection.js'
+import { NoListResultsSection } from './sections/NoListResults.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
+import { ThumbnailCardSection } from './sections/ThumbnailCard.js'
 import { ToastSection } from './sections/ToastSection.js'
 import { TooltipSection } from './sections/Tooltip.js'
 // Field sections
@@ -46,6 +49,7 @@ type ComponentId =
   | 'card'
   | 'checkbox'
   | 'code-field'
+  | 'copy-to-clipboard'
   | 'date-field'
   | 'drawer'
   | 'email-field'
@@ -60,6 +64,7 @@ type ComponentId =
   | 'locked'
   // Patterns
   | 'modal'
+  | 'no-list-results'
   | 'number-field'
   | 'password-field'
   | 'pill'
@@ -74,6 +79,7 @@ type ComponentId =
   | 'text-field'
   | 'textarea'
   | 'textarea-field'
+  | 'thumbnail-card'
   | 'toast'
   | 'tooltip'
 
@@ -89,6 +95,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Button', value: 'button' },
   { category: 'primitives', label: 'Card', value: 'card' },
   { category: 'primitives', label: 'Checkbox', value: 'checkbox' },
+  { category: 'primitives', label: 'Copy to Clipboard', value: 'copy-to-clipboard' },
   { category: 'primitives', label: 'Icons', value: 'icons' },
   { category: 'primitives', label: 'ID Label', value: 'id-label' },
   { category: 'primitives', label: 'Input', value: 'input' },
@@ -105,7 +112,9 @@ const componentOptions: ComponentOption[] = [
   { category: 'patterns', label: 'Drawer', value: 'drawer' },
   { category: 'patterns', label: 'Loading Overlay', value: 'loading-overlay' },
   { category: 'patterns', label: 'Modal', value: 'modal' },
+  { category: 'patterns', label: 'No List Results', value: 'no-list-results' },
   { category: 'patterns', label: 'Shimmer / Loading', value: 'shimmer' },
+  { category: 'patterns', label: 'Thumbnail Card', value: 'thumbnail-card' },
   { category: 'patterns', label: 'Toast', value: 'toast' },
   // Fields
   { category: 'fields', label: 'Code Field', value: 'code-field' },
@@ -229,6 +238,9 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('tooltip', 'primitives') && <TooltipSection selectedComponent="tooltip" />}
         {shouldShow('popup', 'primitives') && <PopupSection selectedComponent="popup" />}
         {shouldShow('card', 'primitives') && <CardSection selectedComponent="card" />}
+        {shouldShow('copy-to-clipboard', 'primitives') && (
+          <CopyToClipboardSection selectedComponent="copy-to-clipboard" />
+        )}
         {shouldShow('banner', 'primitives') && <BannerSection selectedComponent="banner" />}
         {shouldShow('locked', 'primitives') && <LockedSection selectedComponent="locked" />}
         {shouldShow('input-stepper', 'primitives') && (
@@ -245,7 +257,13 @@ export const ComponentsView: React.FC = () => {
           <LoadingSection selectedComponent="loading-overlay" />
         )}
         {shouldShow('modal', 'patterns') && <ModalSection selectedComponent="modal" />}
+        {shouldShow('thumbnail-card', 'patterns') && (
+          <ThumbnailCardSection selectedComponent="thumbnail-card" />
+        )}
         {shouldShow('toast', 'patterns') && <ToastSection selectedComponent="toast" />}
+        {shouldShow('no-list-results', 'patterns') && (
+          <NoListResultsSection selectedComponent="no-list-results" />
+        )}
 
         {/* Fields */}
         {(selectedCategory === 'all' || selectedCategory === 'fields') &&

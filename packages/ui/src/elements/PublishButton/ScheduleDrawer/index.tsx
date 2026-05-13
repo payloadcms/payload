@@ -374,9 +374,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
       <Gutter className={`${baseClass}__upcoming`}>
         <h4>{t('general:upcomingEvents')}</h4>
         {!upcoming && <ShimmerEffect />}
-        {upcoming?.length === 0 && (
-          <Banner>{t('general:noUpcomingEventsScheduled')}</Banner>
-        )}
+        {upcoming?.length === 0 && <Banner>{t('general:noUpcomingEventsScheduled')}</Banner>}
         {upcoming?.length > 0 && (
           <Table appearance="condensed" columns={upcomingColumns} data={upcoming} />
         )}

@@ -1,12 +1,12 @@
-import { ChevronIcon, Pill, useTranslation } from '@payloadcms/ui'
+import { Button, ChevronIcon, useTranslation } from '@payloadcms/ui'
 
 export const ReindexButtonLabel = () => {
   const {
     i18n: { t },
   } = useTranslation()
   return (
-    <Pill className="pill--has-action" icon={<ChevronIcon />} pillStyle="light" size="small">
+    <Button buttonStyle="pill" icon="chevron" iconPosition="right" size="medium">
       {t('general:reindex')}
-    </Pill>
+    </Button>
   )
 }
