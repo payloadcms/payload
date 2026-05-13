@@ -12,6 +12,7 @@ import { CardSection } from './sections/Card.js'
 import { CheckboxSection } from './sections/Checkbox.js'
 import { DrawerSection } from './sections/DrawerSection.js'
 import { IconsSection } from './sections/Icons.js'
+import { InputStepperSection } from './sections/InputStepper.js'
 import { LexicalIconsSection } from './sections/LexicalIcons.js'
 import { LoadingSection } from './sections/LoadingSection.js'
 import { ModalSection } from './sections/ModalSection.js'
@@ -49,7 +50,7 @@ type ComponentId =
   | 'email-field'
   | 'email-username-field'
   | 'icons'
-  | 'input'
+  | 'input-stepper'
   | 'json-field'
   | 'lexical-icons'
   | 'loading-overlay'
@@ -86,7 +87,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Card', value: 'card' },
   { category: 'primitives', label: 'Checkbox', value: 'checkbox' },
   { category: 'primitives', label: 'Icons', value: 'icons' },
-  { category: 'primitives', label: 'Input', value: 'input' },
+  { category: 'primitives', label: 'Input Stepper', value: 'input-stepper' },
   { category: 'primitives', label: 'Lexical Icons', value: 'lexical-icons' },
   { category: 'primitives', label: 'Pill', value: 'pill' },
   { category: 'primitives', label: 'Popup', value: 'popup' },
@@ -223,6 +224,9 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('popup', 'primitives') && <PopupSection selectedComponent="popup" />}
         {shouldShow('card', 'primitives') && <CardSection selectedComponent="card" />}
         {shouldShow('banner', 'primitives') && <BannerSection selectedComponent="banner" />}
+        {shouldShow('input-stepper', 'primitives') && (
+          <InputStepperSection selectedComponent="input-stepper" />
+        )}
 
         {/* Patterns */}
         {(selectedCategory === 'all' || selectedCategory === 'patterns') &&

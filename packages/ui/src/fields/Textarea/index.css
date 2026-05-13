@@ -38,7 +38,7 @@
       textarea {
         border-color: var(--color-border-danger-strong);
 
-        &:hover {
+        &:hover:not(:focus):not(:disabled) {
           border-color: var(--color-border-danger-strong);
         }
       }
