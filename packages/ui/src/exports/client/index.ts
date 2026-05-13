@@ -106,7 +106,7 @@ export { ErrorPill } from '../../elements/ErrorPill/index.js'
 export { FullscreenModal } from '../../elements/FullscreenModal/index.js'
 export { GenerateConfirmation } from '../../elements/GenerateConfirmation/index.js'
 export { Gutter } from '../../elements/Gutter/index.js'
-export { Hamburger } from '../../elements/Hamburger/index.js'
+export { SidebarToggle } from '../../elements/SidebarToggle/index.js'
 export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
 export { HydrateHierarchyProvider } from '../../elements/Hierarchy/HydrateProvider/index.js'
 

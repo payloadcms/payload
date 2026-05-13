@@ -1,5 +1,5 @@
 @layer payload-default {
-  .hamburger {
+  .sidebar-toggle {
     position: relative;
     display: flex;
     align-items: center;
@@ -27,14 +27,14 @@
     }
   }
 
-  .hamburger .tooltip {
+  .sidebar-toggle .tooltip {
     left: 0;
     top: 100%;
     bottom: auto;
     transform: translate3d(0, var(--spacer-1), 0);
   }
 
-  .hamburger .tooltip::after {
+  .sidebar-toggle .tooltip::after {
     top: 0;
     left: var(--spacer-3);
     bottom: auto;

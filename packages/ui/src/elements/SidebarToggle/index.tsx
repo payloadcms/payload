@@ -5,9 +5,9 @@ import { SidebarIcon } from '../../icons/Sidebar/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.css'
 
-const baseClass = 'hamburger'
+const baseClass = 'sidebar-toggle'
 
-export const Hamburger: React.FC<{
+export const SidebarToggle: React.FC<{
   readonly isActive?: boolean
 }> = ({ isActive = false }) => {
   const [showTooltip, setShowTooltip] = useState(false)
