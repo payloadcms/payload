@@ -24,10 +24,9 @@ export const connect: Connect = async function connect(
 
   const urlToConnect = this.url
 
-  const connectionOptions: { useFacet: undefined } & ConnectOptions = {
+  const connectionOptions: ConnectOptions = {
     autoIndex: true,
     ...this.connectOptions,
-    useFacet: undefined,
   }
 
   if (hotReload) {
