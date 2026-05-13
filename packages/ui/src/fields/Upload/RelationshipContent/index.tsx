@@ -136,10 +136,9 @@ export function RelationshipContent(props: Props) {
           {allowEdit !== false ? (
             <Button
               aria-label={t('general:edit')}
-              buttonStyle="icon-subtle"
+              buttonStyle="ghost"
               className={`${baseClass}__action-btn`}
               icon={<WriteIcon />}
-              iconStyle="none"
               margin={false}
               onClick={openDrawer}
             />
@@ -147,10 +146,9 @@ export function RelationshipContent(props: Props) {
           {allowRemove !== false ? (
             <Button
               aria-label={t('general:remove')}
-              buttonStyle="icon-subtle"
+              buttonStyle="ghost"
               className={`${baseClass}__action-btn`}
               icon={<XIcon size={24} />}
-              iconStyle="none"
               margin={false}
               onClick={() => onRemove()}
             />

@@ -132,7 +132,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   return (
     <>
       <Button
-        buttonStyle="subtle"
+        buttonStyle="pill"
         className={[baseClass, readOnly && `${baseClass}--read-only`].filter(Boolean).join(' ')}
         disabled={readOnly}
         icon={Icon}

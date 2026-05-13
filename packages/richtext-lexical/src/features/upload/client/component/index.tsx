@@ -212,7 +212,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
 
               {hasExtraFields ? (
                 <Button
-                  buttonStyle="icon-label"
+                  buttonStyle="ghost"
                   className={`${baseClass}__upload-drawer-toggler`}
                   disabled={!isEditable}
                   el="button"
@@ -227,7 +227,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
               <div className={`${baseClass}__divider`} />
 
               <Button
-                buttonStyle="icon-label"
+                buttonStyle="ghost"
                 className={`${baseClass}__swap-drawer-toggler`}
                 disabled={!isEditable}
                 el="button"
@@ -243,7 +243,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
               />
 
               <Button
-                buttonStyle="icon-label"
+                buttonStyle="ghost"
                 className={`${baseClass}__removeButton`}
                 disabled={!isEditable}
                 icon="x"
