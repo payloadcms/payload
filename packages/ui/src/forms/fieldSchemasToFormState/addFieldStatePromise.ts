@@ -897,7 +897,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     // If the tab has no admin.condition provided then fallback to passesCondition and let that decide the result
     let tabPassesCondition = passesCondition
 
-    if (passesCondition && typeof field.admin?.condition === 'function') {
+    if (!skipConditionChecks && passesCondition && typeof field.admin?.condition === 'function') {
       tabPassesCondition = field.admin.condition(fullData, data, {
         blockData,
         operation,
