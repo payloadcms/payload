@@ -15,31 +15,31 @@
     textarea {
       overflow-y: auto;
       resize: vertical;
-      min-height: 3.75rem;
+      min-height: calc(var(--spacer-5) * 2);
       height: auto;
       display: flex;
       field-sizing: content;
       padding: var(--spacer-2);
 
       &:hover:not(:focus):not(:disabled) {
-        border-color: var(--border-default-default);
+        border-color: var(--color-border);
       }
     }
 
     &.read-only {
       textarea {
-        background: var(--bg-default-default);
-        border-color: var(--border-default-default);
-        color: var(--text-default);
+        background: var(--color-bg);
+        border-color: var(--color-border);
+        color: var(--color-text);
       }
     }
 
     &.error {
       textarea {
-        border-color: var(--border-danger-strong);
+        border-color: var(--color-border-danger-strong);
 
-        &:hover {
-          border-color: var(--border-danger-strong);
+        &:hover:not(:focus):not(:disabled) {
+          border-color: var(--color-border-danger-strong);
         }
       }
     }

@@ -476,7 +476,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                 </Banner>
               )}
               {showMinRows && (
-                <Banner type="error">
+                <Banner type="danger">
                   {t('validation:requiresAtLeast', {
                     count: minRows,
                     label:

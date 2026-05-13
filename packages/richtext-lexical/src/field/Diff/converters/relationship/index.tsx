@@ -2,7 +2,7 @@ import type { FileData, PayloadRequest, TypeWithID } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 
-import './index.scss'
+import './index.css'
 
 import { formatAdminURL } from 'payload/shared'
 

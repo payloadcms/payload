@@ -81,7 +81,6 @@ const nextSuites: TestConfig[] = [
   { file: 'lexical__collections__Lexical__e2e__main', shards: 2 },
   { file: 'lexical__collections__Lexical__e2e__blocks', shards: 2 },
   { file: 'lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts', shards: 2 },
-  { file: 'lexical__collections__RichText', shards: 1 },
   { file: 'query-presets', shards: 1 },
   { file: 'form-state', shards: 1 },
   { file: 'live-preview', shards: 2 },

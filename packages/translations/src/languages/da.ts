@@ -316,6 +316,7 @@ export const daTranslations: DefaultTranslationsObject = {
     error: 'Fejl',
     errors: 'Fejl',
     exitLivePreview: 'Afslut Live Preview',
+    expand: 'Udvid',
     export: 'Eksport',
     fallbackToDefaultLocale: 'Tilbagefald til standardlokalitet',
     false: 'Falsk',

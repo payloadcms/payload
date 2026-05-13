@@ -30,7 +30,7 @@ import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reI
 import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
-import { lexicalCustomCellSlug, lexicalFieldsSlug } from '../../../../slugs.js'
+import { lexicalCustomCellSlug, lexicalFieldsSlug, richTextFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -654,7 +654,7 @@ describe('lexicalMain', () => {
       'payload.jpg',
     )
 
-    // Click on button with class lexical-upload__upload-drawer-toggler
+    // Click on button with class LexicalEditorTheme__upload__upload-drawer-toggler
     const drawerToggler = newUploadNode
       .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
       .first()
@@ -1473,25 +1473,44 @@ describe('lexicalMain', () => {
     await page.goto(`${serverURL}${href}`)
     await waitForFormReady(page)
     await page.getByLabel('Title*').click()
-    await page.getByLabel('Title*').fill('Indent and Text-align')
+    const docTitle = 'Indent and Text-align'
+    await page.getByLabel('Title*').fill(docTitle)
     await page.getByRole('paragraph').nth(1).click()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-    const htmlContent = `<p style='text-align: center;'>paragraph centered</p><h1 style='text-align: right;'>Heading right</h1><p>paragraph without indent</p><p style='padding-inline-start: 40px;'>paragraph indent 1</p><h2 style='padding-inline-start: 80px;'>heading indent 2</h2><blockquote style='padding-inline-start: 120px;'>quote indent 3</blockquote>`
+    const pastedHTML = `<p style='text-align: center;'>paragraph centered</p><h1 style='text-align: right;'>Heading right</h1><p>paragraph without indent</p><p style='padding-inline-start: 40px;'>paragraph indent 1</p><h2 style='padding-inline-start: 80px;'>heading indent 2</h2><blockquote style='padding-inline-start: 120px;'>quote indent 3</blockquote>`
     await page.evaluate(
-      async ([htmlContent]) => {
-        const blob = new Blob([htmlContent], { type: 'text/html' })
+      async ([html]) => {
+        const blob = new Blob([html], { type: 'text/html' })
         const clipboardItem = new ClipboardItem({ 'text/html': blob })
         await navigator.clipboard.write([clipboardItem])
       },
-      [htmlContent],
+      [pastedHTML],
     )
     // eslint-disable-next-line playwright/no-conditional-in-test
     const pasteKey = process.platform === 'darwin' ? 'Meta' : 'Control'
     await page.keyboard.press(`${pasteKey}+v`)
-    await page.getByRole('button', { name: 'Save' }).click()
-    await page.getByRole('link', { name: 'API' }).click()
-    const htmlOutput = page.getByText(htmlContent)
-    await expect(htmlOutput).toBeVisible()
+    await saveDocAndAssert(page)
+
+    const expectedHTMLFragment = `<p style="text-align: center;">paragraph centered</p><h1 style="text-align: right;">Heading right</h1><p>paragraph without indent</p><p style="padding-inline-start: 40px;">paragraph indent 1</p><h2 style="padding-inline-start: 80px;">heading indent 2</h2><blockquote style="padding-inline-start: 120px;">quote indent 3</blockquote>`
+
+    await expect(async () => {
+      const richTextDoc = (
+        await payload.find({
+          collection: richTextFieldsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: docTitle,
+            },
+          },
+        })
+      ).docs[0] as { lexicalCustomFields_html?: string }
+
+      expect(richTextDoc?.lexicalCustomFields_html).toContain(expectedHTMLFragment)
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
   })
 
   test('ensure lexical fields in blocks have correct value when moving blocks', async () => {

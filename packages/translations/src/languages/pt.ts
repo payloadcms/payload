@@ -318,6 +318,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     error: 'Erro',
     errors: 'Erros',
     exitLivePreview: 'Sair da Visualização ao Vivo',
+    expand: 'Expandir',
     export: 'Exportação',
     fallbackToDefaultLocale: 'Recuo para o local padrão',
     false: 'Falso',

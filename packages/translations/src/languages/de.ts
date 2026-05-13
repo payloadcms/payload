@@ -325,6 +325,7 @@ export const deTranslations: DefaultTranslationsObject = {
     error: 'Fehler',
     errors: 'Fehler',
     exitLivePreview: 'Live-Vorschau beenden',
+    expand: 'Erweitern',
     export: 'Export',
     fallbackToDefaultLocale: 'Auf die Standardsprache zurückfallen',
     false: 'Falsch',

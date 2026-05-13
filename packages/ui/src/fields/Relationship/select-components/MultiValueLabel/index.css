@@ -34,7 +34,7 @@
     border: 1px solid transparent;
 
     &:hover {
-      background-color: var(--bg-transparent-hover);
+      background-color: var(--color-bg-transparent-hover);
     }
 
     &:focus-visible {

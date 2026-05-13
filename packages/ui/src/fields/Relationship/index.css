@@ -27,18 +27,18 @@
   }
 
   .relationship__error-loading {
-    border: 1px solid var(--border-danger-strong);
+    border: 1px solid var(--color-border-danger-strong);
     min-height: var(--spacer-6);
     padding: var(--spacer-2) var(--spacer-3);
-    background-color: var(--bg-danger);
-    color: var(--text-danger-ondanger);
+    background-color: var(--color-bg-danger);
+    color: var(--color-text-ondanger);
   }
 
   .relationship.error > .relationship__wrap .rs__control {
-    border-color: var(--border-danger-strong);
+    border-color: var(--color-border-danger-strong);
 
     &:hover {
-      border-color: var(--border-danger-strong);
+      border-color: var(--color-border-danger-strong);
     }
   }
 }

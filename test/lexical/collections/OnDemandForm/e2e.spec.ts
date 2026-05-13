@@ -53,11 +53,18 @@ describe('Lexical On Demand', () => {
       await expect(paragraph).toHaveText('Hello')
     })
 
-    test('on-demand editor within form can render nested fields', async () => {
+    test('on-demand editor within form can render nested fields', async ({ page }) => {
       await lexical.slashCommand('table', false)
 
-      await expect(lexical.drawer.locator('#field-rows')).toHaveValue('5')
-      await expect(lexical.drawer.locator('#field-columns')).toHaveValue('5')
+      const popup = page.locator('.table-grid-popup')
+      await expect(popup.getByRole('spinbutton', { name: 'Rows' })).toHaveAttribute(
+        'placeholder',
+        '5',
+      )
+      await expect(popup.getByRole('spinbutton', { name: 'Columns' })).toHaveAttribute(
+        'placeholder',
+        '5',
+      )
     })
   })
 
@@ -100,11 +107,18 @@ describe('Lexical On Demand', () => {
       await expect(paragraph).toHaveText('state default')
     })
 
-    test('on-demand editor outside form can render nested fields', async () => {
+    test('on-demand editor outside form can render nested fields', async ({ page }) => {
       await lexical.slashCommand('table', false)
 
-      await expect(lexical.drawer.locator('#field-rows')).toHaveValue('5')
-      await expect(lexical.drawer.locator('#field-columns')).toHaveValue('5')
+      const popup = page.locator('.table-grid-popup')
+      await expect(popup.getByRole('spinbutton', { name: 'Rows' })).toHaveAttribute(
+        'placeholder',
+        '5',
+      )
+      await expect(popup.getByRole('spinbutton', { name: 'Columns' })).toHaveAttribute(
+        'placeholder',
+        '5',
+      )
     })
 
     test('on-demand editor renders label', async ({ page }) => {

@@ -315,6 +315,7 @@ export const isTranslations: DefaultTranslationsObject = {
     error: 'Villa',
     errors: 'Villur',
     exitLivePreview: 'Fara úr beinni forskoðun',
+    expand: 'Stækka',
     export: 'Flytja út',
     fallbackToDefaultLocale: 'Nota sjálfgefna staðfærslu',
     false: 'Ósatt',

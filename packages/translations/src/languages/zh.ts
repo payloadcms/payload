@@ -301,6 +301,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     error: '错误',
     errors: '错误',
     exitLivePreview: '退出实时预览',
+    expand: '展开',
     export: '导出',
     fallbackToDefaultLocale: '回退到默认语言环境',
     false: '否',
