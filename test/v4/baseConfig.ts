@@ -1,26 +1,18 @@
 import type { CollectionConfig, Config } from 'payload'
 
+import fs from 'fs'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { getFileByPath } from 'payload'
 
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
 import { blocksSeedData } from './seed/blocksSeedData.js'
-import { seedHierarchy } from './seed/categoriesSeedData.js'
-import {
-  codeContent,
-  getRichTextContent,
-  getTypographyContent,
-  listsContent,
-  tableContent,
-} from './seed/richTextData.js'
 import {
   blocksFieldsSlug,
   collectionSlugs,
-  richTextFieldsSlug,
+  relationshipFieldsSlug,
+  tagsSlug,
   textFieldsSlug,
-  uploadsSlug,
 } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -29,7 +21,6 @@ const dirname = path.dirname(filename)
 import ArrayFields from './collections/Array/index.js'
 import Autosave from './collections/Autosave/index.js'
 import BlocksFields from './collections/Blocks/index.js'
-import Hierarchy from './collections/Categories/index.js'
 import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
@@ -50,8 +41,10 @@ import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import SlugFields from './collections/Slug/index.js'
 import TabsFields from './collections/Tabs/index.js'
+import Tags from './collections/Tags/index.js'
 import TextFields from './collections/Text/index.js'
 import TextareaFields from './collections/Textarea/index.js'
+import Rubbish from './collections/Trash/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
 
@@ -66,7 +59,6 @@ export const collections: CollectionConfig[] = [
   },
   ArrayFields,
   BlocksFields,
-  Hierarchy,
   CheckboxFields,
   CodeFields,
   CollapsibleFields,
@@ -86,12 +78,14 @@ export const collections: CollectionConfig[] = [
   SelectFields,
   SlugFields,
   TabsFields,
+  Tags,
   TextFields,
   TextareaFields,
   Uploads,
   UploadFields,
   DraftVersions,
   Autosave,
+  Rubbish,
 ]
 
 export const baseConfig: Partial<Config> = {
@@ -115,7 +109,7 @@ export const baseConfig: Partial<Config> = {
     await resetDB(payload, collectionSlugs)
 
     // Seed users
-    await payload.create({
+    const devUserDoc = await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
@@ -148,61 +142,77 @@ export const baseConfig: Partial<Config> = {
       { title: 'GraphQL vs REST API' },
     ]
 
+    const createdPosts: { id: number | string }[] = []
     for (const post of posts) {
-      await payload.create({
+      const created = await payload.create({
         collection: textFieldsSlug,
         data: post,
       })
+      createdPosts.push(created)
     }
 
-    const richTextCount = await payload.count({ collection: richTextFieldsSlug })
-    if (richTextCount.totalDocs === 0) {
-      const imagePath = path.resolve(dirname, '../lexical/collections/Upload/payload.jpg')
-      const imageFile = await getFileByPath(imagePath)
+    // Seed relationship-fields to test join field
+    await payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        authorRequired: devUserDoc.id,
+        relatedPosts: createdPosts.slice(0, 3).map((p) => p.id) as string[],
+      },
+    })
+    await payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        authorRequired: devUserDoc.id,
+        relatedPosts: createdPosts.slice(3, 6).map((p) => p.id) as string[],
+      },
+    })
 
-      const uploadDoc = await payload.create({
-        collection: uploadsSlug,
-        data: { alt: 'Farming image' },
-        file: imageFile,
-      })
-
-      const formattedUploadID =
-        payload.db.defaultIDType === 'number' ? uploadDoc.id : `"${uploadDoc.id}"`
-
-      const devUserDoc = await payload.find({
-        collection: 'users',
-        where: { email: { equals: devUser.email } },
-        limit: 1,
-      })
-      const userId = devUserDoc.docs[0]?.id
-      const formattedUserID =
-        userId !== undefined
-          ? payload.db.defaultIDType === 'number'
-            ? userId
-            : `"${userId}"`
-          : undefined
-
-      const richTextContent = getRichTextContent(formattedUploadID, formattedUserID)
-
-      await payload.create({
-        collection: richTextFieldsSlug,
-        data: {
-          title: 'Data harvest \u2013 how AI and sensors are revolutionizing farming',
-          content: richTextContent,
-          lists: listsContent,
-          typography: getTypographyContent(formattedUserID),
-          table: tableContent,
-          code: codeContent,
-        },
-      })
-    }
     // Seed blocks collection
     await payload.create({
       collection: blocksFieldsSlug,
       data: blocksSeedData,
     })
 
-    await seedHierarchy(payload)
+    // Seed tags hierarchy for testing hierarchy field
+    const techTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Technology' },
+    })
+
+    const frontendTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Frontend', parent: techTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'React', parent: frontendTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Vue', parent: frontendTag.id },
+    })
+
+    const backendTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Backend', parent: techTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Node.js', parent: backendTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Python', parent: backendTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Design' },
+    })
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

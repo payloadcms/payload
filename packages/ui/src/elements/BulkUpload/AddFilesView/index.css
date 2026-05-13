@@ -4,27 +4,27 @@
     display: flex;
     flex-direction: column;
 
-    &__dropArea {
-      height: 100%;
-      padding: calc(var(--base) * 2) var(--gutter-h);
-    }
-
     .dropzone {
       flex-direction: column;
       justify-content: center;
       display: flex;
-      gap: var(--base);
+      gap: var(--spacer-4);
       background-color: var(--theme-elevation-50);
 
       p {
         margin: 0;
       }
     }
+  }
 
-    &__dragAndDropText {
-      margin: 0;
-      text-transform: lowercase;
-      align-self: center;
-    }
+  .bulk-upload--add-files__dropArea {
+    height: 100%;
+    padding: var(--spacer-6) var(--gutter-h);
+  }
+
+  .bulk-upload--add-files__dragAndDropText {
+    margin: 0;
+    text-transform: lowercase;
+    align-self: center;
   }
 }

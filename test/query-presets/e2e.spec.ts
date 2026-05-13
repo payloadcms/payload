@@ -1,7 +1,13 @@
 import { expect, test } from '@playwright/test'
-import { openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
+import {
+  clickPillSelectorItem,
+  getPillSelectorItem,
+  openListColumns,
+  toggleColumn,
+} from '__helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from '__helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy } from '__helpers/e2e/groupBy/index.js'
+import { navigateToListView } from '__helpers/e2e/navigateToListView.js'
 import { openNav } from '__helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
@@ -82,7 +88,7 @@ describe('Query Presets', () => {
   })
 
   test('can create and view preset with no filters or columns', async ({ page }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     const presetTitle = 'Empty Preset'
 
@@ -99,7 +105,7 @@ describe('Query Presets', () => {
     await page.waitForURL(() => page.url() !== currentURL)
 
     await expect(
-      page.locator('button#select-preset', {
+      page.locator('#select-preset', {
         hasText: exactText(presetTitle),
       }),
     ).toBeVisible()
@@ -118,7 +124,7 @@ describe('Query Presets', () => {
     // Verify the Columns field is visible and has 4 selected pills (same as default columns in list view)
     const columnsField = editModal.locator('.query-preset-columns-field')
     await expect(columnsField).toBeVisible()
-    await expect(columnsField.locator('.pill-selector__pill--selected')).toHaveCount(4)
+    await expect(columnsField.locator('.chip--selected')).toHaveCount(4)
 
     await editModal.locator('button.doc-drawer__header-close').click()
     await expect(editModal).toBeHidden()
@@ -142,7 +148,7 @@ describe('Query Presets', () => {
   })
 
   test('should select preset and apply filters', async ({ page }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
@@ -154,7 +160,7 @@ describe('Query Presets', () => {
   })
 
   test('should clear selected preset and reset filters', async ({ page }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
@@ -162,7 +168,7 @@ describe('Query Presets', () => {
 
     // ensure that the preset was cleared from preferences by navigating without the `?preset=` param
     // e.g. do not do `page.reload()`
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     // poll url to ensure that `?preset=` param is not present
     // this is first set to an empty string to clear from the user's preferences
@@ -171,14 +177,14 @@ describe('Query Presets', () => {
     await page.waitForURL((url) => !regex.test(url.search), { timeout: TEST_TIMEOUT_LONG })
 
     await expect(
-      page.locator('button#select-preset', {
+      page.locator('#select-preset', {
         hasText: exactText('Select Preset'),
       }),
     ).toBeVisible()
   })
 
   test('should delete a preset, clear selection, and reset changes', async ({ page }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     await page.locator('#delete-preset').click()
@@ -193,7 +199,7 @@ describe('Query Presets', () => {
     })
 
     await expect(
-      page.locator('button#select-preset', {
+      page.locator('#select-preset', {
         hasText: exactText('Select Preset'),
       }),
     ).toBeVisible()
@@ -212,11 +218,11 @@ describe('Query Presets', () => {
   test('should save last used preset to preferences and load on initial render', async ({
     page,
   }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     await assertURLParams({
       columns: seededData.everyone.columns,
@@ -241,7 +247,7 @@ describe('Query Presets', () => {
   test('should only show "edit" and "delete" controls when there is an active preset', async ({
     page,
   }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
     await expect(page.locator('#edit-preset')).toBeHidden()
     await expect(page.locator('#delete-preset')).toBeHidden()
     await selectPreset({ page, presetTitle: seededData.everyone.title })
@@ -252,7 +258,7 @@ describe('Query Presets', () => {
   test('should only show "reset" and "save" controls when there is an active preset and changes have been made', async ({
     page,
   }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     await expect(page.locator('#reset-preset')).toBeHidden()
 
@@ -274,7 +280,7 @@ describe('Query Presets', () => {
   test('should conditionally render "update for everyone" label based on if preset is shared', async ({
     page,
   }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     await selectPreset({ page, presetTitle: seededData.onlyMe.title })
 
@@ -302,25 +308,23 @@ describe('Query Presets', () => {
   })
 
   test('should reset active changes', async ({ page }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     const { columnContainer } = await toggleColumn(page, { columnLabel: 'ID' })
 
-    const column = columnContainer.locator(`.pill-selector .pill-selector__pill`, {
-      hasText: exactText('ID'),
-    })
+    const column = getPillSelectorItem({ container: columnContainer, label: 'ID' })
 
     await page.locator('#reset-preset').click()
 
     await openListColumns(page, {})
-    await expect(column).toHaveClass(/pill-selector__pill--selected/)
+    await expect(column).toHaveClass(/chip--selected/)
   })
 
   test.skip('should only enter modified state when changes are made to an active preset', async ({
     page,
   }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
     await expect(page.locator('.list-controls__modified')).toBeHidden()
     await selectPreset({ page, presetTitle: seededData.everyone.title })
     await expect(page.locator('.list-controls__modified')).toBeHidden()
@@ -341,7 +345,7 @@ describe('Query Presets', () => {
   test('can edit a preset through the document drawer', async ({ page }) => {
     const presetTitle = 'New Preset'
 
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
     await page.locator('#edit-preset').click()
@@ -358,7 +362,7 @@ describe('Query Presets', () => {
     await drawer.locator('button.doc-drawer__header-close').click()
     await expect(drawer).toBeHidden()
 
-    await expect(page.locator('button#select-preset')).toHaveText(newTitle)
+    await expect(page.locator('#select-preset')).toHaveText(newTitle)
   })
 
   test('should not display query presets when admin.enableQueryPresets is not true', async ({
@@ -366,7 +370,7 @@ describe('Query Presets', () => {
   }) => {
     // go to users list view and ensure the query presets select is not visible
     const usersURL = new AdminUrlUtil(serverURL, 'users')
-    await page.goto(usersURL.list)
+    await navigateToListView({ page, url: usersURL.list })
     await expect(page.locator('#select-preset')).toBeHidden()
   })
 
@@ -376,7 +380,7 @@ describe('Query Presets', () => {
   })
 
   test('can create new preset', async ({ page }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     const presetTitle = 'New Preset'
 
@@ -392,7 +396,7 @@ describe('Query Presets', () => {
     await page.waitForURL(() => page.url() !== currentURL)
 
     await expect(
-      page.locator('button#select-preset', {
+      page.locator('#select-preset', {
         hasText: exactText(presetTitle),
       }),
     ).toBeVisible()
@@ -401,20 +405,20 @@ describe('Query Presets', () => {
   test('only shows query presets related to the underlying collection', async ({ page }) => {
     // no results on `posts` collection
     const postsURL = new AdminUrlUtil(serverURL, 'posts')
-    await page.goto(postsURL.list)
+    await navigateToListView({ page, url: postsURL.list })
     const drawer = await openQueryPresetDrawer({ page })
     await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(0)
     await expect(drawer.locator('.no-results')).toBeVisible()
 
     // results on `pages` collection
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
     await openQueryPresetDrawer({ page })
     await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(3)
     await drawer.locator('.no-results').isHidden()
   })
 
   test('should display single relationship value in query preset modal', async ({ page }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     // Get a post to use for filtering
     const posts = await payload.find({
@@ -460,7 +464,7 @@ describe('Query Presets', () => {
   })
 
   test('should display multiple relationship values in query preset modal', async ({ page }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     // Get posts to use for filtering
     const posts = await payload.find({
@@ -534,7 +538,7 @@ describe('Query Presets', () => {
 
   test('should save groupBy when creating a new preset', async ({ page }) => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
-    await page.goto(postsUrl.list)
+    await navigateToListView({ page, url: postsUrl.list })
 
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
@@ -563,7 +567,7 @@ describe('Query Presets', () => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
 
     // First, create a preset with groupBy
-    await page.goto(postsUrl.list)
+    await navigateToListView({ page, url: postsUrl.list })
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
     await page.locator('#create-new-preset').click()
@@ -578,7 +582,7 @@ describe('Query Presets', () => {
     // Clear the preset
     await clearSelectedPreset({ page })
 
-    await page.goto(postsUrl.list)
+    await navigateToListView({ page, url: postsUrl.list })
     await expect(page).not.toHaveURL(/groupBy=/)
 
     await selectPreset({ page, presetTitle })
@@ -592,7 +596,7 @@ describe('Query Presets', () => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
 
     // Create a preset with groupBy
-    await page.goto(postsUrl.list)
+    await navigateToListView({ page, url: postsUrl.list })
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
     await page.locator('#create-new-preset').click()
@@ -619,7 +623,7 @@ describe('Query Presets', () => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
 
     // Create a preset without groupBy
-    await page.goto(postsUrl.list)
+    await navigateToListView({ page, url: postsUrl.list })
     await wait(1000)
 
     await page.locator('#create-new-preset').click()
@@ -641,7 +645,7 @@ describe('Query Presets', () => {
 
     // Clear and reselect the preset to verify groupBy was saved
     await clearSelectedPreset({ page })
-    await page.goto(postsUrl.list)
+    await navigateToListView({ page, url: postsUrl.list })
     await selectPreset({ page, presetTitle })
 
     // Verify groupBy is applied from the preset
@@ -653,7 +657,7 @@ describe('Query Presets', () => {
     page,
   }) => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
-    await page.goto(postsUrl.list)
+    await navigateToListView({ page, url: postsUrl.list })
 
     await page.locator('#create-new-preset').click()
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
@@ -664,19 +668,13 @@ describe('Query Presets', () => {
 
     const columnsField = modal.locator('.query-preset-columns-field')
     await expect(columnsField).toBeVisible()
-    let selectedCount = await columnsField.locator('.pill-selector__pill--selected').count()
+    let selectedCount = await columnsField.locator('.chip--selected').count()
     while (selectedCount > 0) {
-      await columnsField.locator('.pill-selector__pill--selected').first().click()
-      selectedCount = await columnsField.locator('.pill-selector__pill--selected').count()
+      await columnsField.locator('.chip--selected').first().locator('.chip__action').click()
+      selectedCount = await columnsField.locator('.chip--selected').count()
     }
-    await columnsField
-      .locator('.pill-selector__pill', { hasText: exactText('Text') })
-      .first()
-      .click()
-    await columnsField
-      .locator('.pill-selector__pill', { hasText: exactText('ID') })
-      .first()
-      .click()
+    await clickPillSelectorItem({ container: columnsField, label: 'Text' })
+    await clickPillSelectorItem({ container: columnsField, label: 'ID' })
 
     const groupByField = modal.locator('.query-preset-group-by-field')
     await expect(groupByField).toBeVisible()
@@ -696,9 +694,7 @@ describe('Query Presets', () => {
 
     await expect(page).toHaveURL(/preset=/)
     await expect(page).toHaveURL(/groupBy=text/)
-    await expect(
-      page.locator('button#select-preset', { hasText: exactText(presetTitle) }),
-    ).toBeVisible()
+    await expect(page.locator('#select-preset', { hasText: exactText(presetTitle) })).toBeVisible()
     await expect(page.locator('.group-by-header').first()).toBeVisible()
     await expect(
       page.locator('.collection-list .table th', { hasText: exactText('Text') }).first(),
@@ -710,14 +706,14 @@ describe('Query Presets', () => {
   })
 
   test('should not show save button after page reload with preset applied', async ({ page }) => {
-    await page.goto(pagesUrl.list)
+    await navigateToListView({ page, url: pagesUrl.list })
 
     // 1. Apply query preset
     await selectPreset({ page, presetTitle: seededData.onlyMe.title })
 
     // 2. Reload page
     await page.reload()
-    await expect(page.locator('button#select-preset')).toContainText(seededData.onlyMe.title)
+    await expect(page.locator('#select-preset')).toContainText(seededData.onlyMe.title)
 
     // 3. #save-preset button should NOT show (no modifications yet)
     await expect(page.locator('#save-preset')).toBeHidden()
@@ -733,7 +729,7 @@ describe('Query Presets', () => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
 
     // Create a preset with groupBy
-    await page.goto(postsUrl.list)
+    await navigateToListView({ page, url: postsUrl.list })
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
     await page.locator('#create-new-preset').click()
@@ -784,7 +780,7 @@ describe('Query Presets', () => {
 
     // Verify the preset is selected in the preset selector
     await expect(
-      page.locator('button#select-preset', {
+      page.locator('#select-preset', {
         hasText: exactText(seededData.everyone.title),
       }),
     ).toBeVisible()
@@ -803,7 +799,7 @@ describe('Query Presets', () => {
     const expectedDefaultColumns = ['ID', 'Field1', 'Field2', 'Default Column Field']
 
     // Step 1: Go to list view and verify default columns are shown initially
-    await page.goto(defaultColumnsUrl.list)
+    await navigateToListView({ page, url: defaultColumnsUrl.list })
 
     const tableHeaders = page.locator('table > thead > tr > th')
 
@@ -826,7 +822,7 @@ describe('Query Presets', () => {
 
     // Step 5: Navigate away and back (fresh navigation without URL params)
     await page.goto(defaultColumnsUrl.admin)
-    await page.goto(defaultColumnsUrl.list)
+    await navigateToListView({ page, url: defaultColumnsUrl.list })
 
     // Step 6: Verify default columns are STILL shown after fresh page load
     // BUG: Currently shows columns in field order instead of defaultColumns order

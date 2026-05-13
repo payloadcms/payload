@@ -57,7 +57,7 @@ export const Column: React.FC<ColumnProps> = ({
         <span className={`${baseClass}__header-title`}>{headerTitle}</span>
         {canCreate && (
           <Button
-            buttonStyle="muted-text"
+            buttonStyle="ghost"
             className={`${baseClass}__add-button`}
             disabled={disabled}
             icon={<PlusIcon />}

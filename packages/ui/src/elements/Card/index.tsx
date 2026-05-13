@@ -39,7 +39,7 @@ export const Card: React.FC<Props> = (props) => {
       {(onClick || href) && (
         <Button
           aria-label={buttonAriaLabel}
-          buttonStyle="none"
+          buttonStyle="ghost"
           className={`${baseClass}__click`}
           el="link"
           onClick={onClick}

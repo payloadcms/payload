@@ -448,12 +448,8 @@ export function HierarchyTable({
               ]
             : undefined
         }
-        Message={
-          <>
-            <h3>{t('general:noResultsFound')}</h3>
-            <p>{t('general:noResultsDescription')}</p>
-          </>
-        }
+        description={t('general:noResultsDescription')}
+        title={t('general:noResultsFound')}
       />
     )
   }

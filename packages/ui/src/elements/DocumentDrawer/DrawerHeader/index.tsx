@@ -46,7 +46,7 @@ export const DocumentDrawerHeader: React.FC<{
           onClick={handleOnClose}
           type="button"
         >
-          <XIcon />
+          <XIcon size={24} />
         </button>
       </div>
       {showDocumentID && <DocumentID />}

@@ -7,7 +7,7 @@ import type { OnDrawerOpen } from '../../index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useCellProps } from '../../../../providers/TableColumns/RenderDefaultCell/index.js'
 import { DefaultCell } from '../../../Table/DefaultCell/index.js'
-import './index.scss'
+import './index.css'
 
 export const DrawerLink: React.FC<{
   currentDrawerID?: string

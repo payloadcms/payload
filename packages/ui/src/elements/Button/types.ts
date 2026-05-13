@@ -9,19 +9,7 @@ type secondaryAction = {
 export type Props = {
   'aria-label'?: string
   buttonId?: string
-  buttonStyle?:
-    | 'dashed'
-    | 'destructive'
-    | 'ghost'
-    | 'icon-label'
-    | 'icon-subtle'
-    | 'muted-text'
-    | 'none'
-    | 'pill'
-    | 'primary'
-    | 'secondary'
-    | 'subtle'
-    | 'tab'
+  buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
   children?: React.ReactNode
   className?: string
   disabled?: boolean
@@ -33,7 +21,6 @@ export type Props = {
   extraButtonProps?: Record<string, any>
   icon?: ['chevron' | 'edit' | 'plus' | 'x'] | React.ReactNode
   iconPosition?: 'left' | 'right'
-  iconStyle?: 'none' | 'with-border' | 'without-border'
   id?: string
   /**
    * @deprecated
@@ -41,6 +28,10 @@ export type Props = {
    * Components now import their own `Link` directly from `next/link`.
    */
   Link?: React.ElementType
+  /**
+   * Shows a loading spinner and hides content. Disables interactions.
+   */
+  loading?: boolean
   margin?: boolean
   newTab?: boolean
   onClick?: (event: MouseEvent) => void

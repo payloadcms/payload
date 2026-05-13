@@ -14,11 +14,11 @@ import { PlusIcon } from '../../../icons/Plus/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/context.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { Button } from '../../Button/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 import { useListDrawer } from '../../ListDrawer/index.js'
 import { ListSelectionButton } from '../../ListSelection/index.js'
-import { Pill } from '../../Pill/index.js'
 import { Translation } from '../../Translation/index.js'
 import { QueryPresetToggler } from '../QueryPresetToggler/index.js'
 import './index.scss'
@@ -216,15 +216,16 @@ export const QueryPresetBar: React.FC<{
             openPresetListDrawer={openListDrawer}
             resetPreset={resetQueryPreset}
           />
-          <Pill
+          <Button
             aria-label={t('general:newLabel', { label: presetConfig?.labels?.singular })}
+            buttonStyle="pill"
             className={`${baseClass}__create-new-preset`}
             icon={<PlusIcon />}
             id="create-new-preset"
             onClick={() => {
               openCreateNewDrawer()
             }}
-            size="small"
+            size="medium"
           />
         </div>
         <div className={`${baseClass}__menu-items`}>

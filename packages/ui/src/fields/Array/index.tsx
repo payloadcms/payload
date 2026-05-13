@@ -481,7 +481,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       )}
       {!hasMaxRows && !readOnly && (
         <Button
-          buttonStyle="icon-label"
+          buttonStyle="ghost"
           className={`${baseClass}__add-row`}
           disabled={disabled}
           icon={<CirclePlusIcon />}
