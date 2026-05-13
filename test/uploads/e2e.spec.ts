@@ -1452,11 +1452,8 @@ describe('Uploads', () => {
 
       await expect(bulkUploadModal).toBeVisible()
 
-      // Navigate back to first file to fix it
-      const prevImageChevronButton = bulkUploadModal.locator(
-        '.bulk-upload--actions-bar__controls button:nth-of-type(1)',
-      )
-      await prevImageChevronButton.click()
+      // After the successful file is saved and removed, only the failed file remains.
+      // It should already be active (no need to navigate).
 
       // Should show "A file name is required" error message
       await expect(bulkUploadModal.locator('.field-error')).toContainText('A file name is required')
@@ -1668,12 +1665,9 @@ describe('Uploads', () => {
         page.locator('.payload-toast-container .toast-error:has-text("File size limit")'),
       ).toBeVisible()
       await closeAllToasts(page)
-      // The file that exceeded the size limit should have exactly 1 error
-      // Navigate back to check the second file (2mb.jpg)
-      const prevButton = bulkUploadModal.locator(
-        '.bulk-upload--actions-bar__controls button:nth-of-type(1)',
-      )
-      await prevButton.click()
+      // The file that exceeded the size limit should have exactly 1 error.
+      // After the 2 successful files are saved and removed, only the failed file (2mb.jpg) remains.
+      // It should already be active (no need to navigate).
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
