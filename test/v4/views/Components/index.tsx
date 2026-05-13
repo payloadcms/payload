@@ -12,6 +12,7 @@ import { CardSection } from './sections/Card.js'
 import { CheckboxSection } from './sections/Checkbox.js'
 import { DrawerSection } from './sections/DrawerSection.js'
 import { IconsSection } from './sections/Icons.js'
+import { IDLabelSection } from './sections/IDLabel.js'
 import { InputStepperSection } from './sections/InputStepper.js'
 import { LexicalIconsSection } from './sections/LexicalIcons.js'
 import { LoadingSection } from './sections/LoadingSection.js'
@@ -49,6 +50,8 @@ type ComponentId =
   | 'email-field'
   | 'email-username-field'
   | 'icons'
+  | 'id-label'
+  | 'input'
   | 'input-stepper'
   | 'json-field'
   | 'lexical-icons'
@@ -85,6 +88,8 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Card', value: 'card' },
   { category: 'primitives', label: 'Checkbox', value: 'checkbox' },
   { category: 'primitives', label: 'Icons', value: 'icons' },
+  { category: 'primitives', label: 'ID Label', value: 'id-label' },
+  { category: 'primitives', label: 'Input', value: 'input' },
   { category: 'primitives', label: 'Input Stepper', value: 'input-stepper' },
   { category: 'primitives', label: 'Lexical Icons', value: 'lexical-icons' },
   { category: 'primitives', label: 'Pill', value: 'pill' },
@@ -214,6 +219,7 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('button', 'primitives') && <ButtonSection selectedComponent="button" />}
         {shouldShow('pill', 'primitives') && <PillSection selectedComponent="pill" />}
         {shouldShow('icons', 'primitives') && <IconsSection selectedComponent="icons" />}
+        {shouldShow('id-label', 'primitives') && <IDLabelSection selectedComponent="id-label" />}
         {shouldShow('lexical-icons', 'primitives') && (
           <LexicalIconsSection selectedComponent="lexical-icons" />
         )}
