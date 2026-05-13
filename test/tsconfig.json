@@ -28,7 +28,6 @@
         "name": "@payloadcms/typescript-plugin"
       }
     ],
-    "baseUrl": ".",
     "paths": {
       "@payload-config": ["./tags/config.ts"]
     }

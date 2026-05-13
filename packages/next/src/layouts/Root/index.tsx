@@ -4,7 +4,7 @@ import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient 
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
-import { Inter, Roboto_Mono } from 'next/font/google'
+import { Inter, Roboto_Mono } from 'next/font/google/index.js'
 import { cookies as nextCookies } from 'next/headers.js'
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'

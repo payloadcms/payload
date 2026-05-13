@@ -1,7 +1,6 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@payload-config": ["./config.ts"],
       "@payload-types": ["./payload-types.ts"],
