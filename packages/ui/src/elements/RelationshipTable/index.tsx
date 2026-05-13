@@ -357,18 +357,12 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     ]
                   : []
               }
-              Message={
-                <>
-                  <h3>{i18n.t('general:noResultsFound')}</h3>
-                  <p>
-                    {i18n.t('general:noResults', {
-                      label: isPolymorphic
-                        ? i18n.t('general:documents')
-                        : getTranslation(collectionConfig?.labels?.plural, i18n),
-                    })}
-                  </p>
-                </>
-              }
+              description={i18n.t('general:noResults', {
+                label: isPolymorphic
+                  ? i18n.t('general:documents')
+                  : getTranslation(collectionConfig?.labels?.plural, i18n),
+              })}
+              title={i18n.t('general:noResultsFound')}
             />
           )}
           {data?.docs && data.docs.length > 0 && (

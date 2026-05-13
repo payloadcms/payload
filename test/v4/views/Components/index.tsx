@@ -10,6 +10,7 @@ import { BannerSection } from './sections/Banner.js'
 import { ButtonSection } from './sections/Button.js'
 import { CardSection } from './sections/Card.js'
 import { CheckboxSection } from './sections/Checkbox.js'
+import { CopyToClipboardSection } from './sections/CopyToClipboard.js'
 import { DrawerSection } from './sections/DrawerSection.js'
 import { IconsSection } from './sections/Icons.js'
 import { IDLabelSection } from './sections/IDLabel.js'
@@ -17,6 +18,7 @@ import { InputStepperSection } from './sections/InputStepper.js'
 import { LexicalIconsSection } from './sections/LexicalIcons.js'
 import { LoadingSection } from './sections/LoadingSection.js'
 import { ModalSection } from './sections/ModalSection.js'
+import { NoListResultsSection } from './sections/NoListResults.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
 import { ThumbnailCardSection } from './sections/ThumbnailCard.js'
@@ -46,6 +48,7 @@ type ComponentId =
   | 'card'
   | 'checkbox'
   | 'code-field'
+  | 'copy-to-clipboard'
   | 'date-field'
   | 'drawer'
   | 'email-field'
@@ -59,6 +62,7 @@ type ComponentId =
   | 'loading-overlay'
   // Patterns
   | 'modal'
+  | 'no-list-results'
   | 'number-field'
   | 'password-field'
   | 'pill'
@@ -89,6 +93,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Button', value: 'button' },
   { category: 'primitives', label: 'Card', value: 'card' },
   { category: 'primitives', label: 'Checkbox', value: 'checkbox' },
+  { category: 'primitives', label: 'Copy to Clipboard', value: 'copy-to-clipboard' },
   { category: 'primitives', label: 'Icons', value: 'icons' },
   { category: 'primitives', label: 'ID Label', value: 'id-label' },
   { category: 'primitives', label: 'Input', value: 'input' },
@@ -104,6 +109,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'patterns', label: 'Drawer', value: 'drawer' },
   { category: 'patterns', label: 'Loading Overlay', value: 'loading-overlay' },
   { category: 'patterns', label: 'Modal', value: 'modal' },
+  { category: 'patterns', label: 'No List Results', value: 'no-list-results' },
   { category: 'patterns', label: 'Shimmer / Loading', value: 'shimmer' },
   { category: 'patterns', label: 'Thumbnail Card', value: 'thumbnail-card' },
   { category: 'patterns', label: 'Toast', value: 'toast' },
@@ -229,6 +235,9 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('tooltip', 'primitives') && <TooltipSection selectedComponent="tooltip" />}
         {shouldShow('popup', 'primitives') && <PopupSection selectedComponent="popup" />}
         {shouldShow('card', 'primitives') && <CardSection selectedComponent="card" />}
+        {shouldShow('copy-to-clipboard', 'primitives') && (
+          <CopyToClipboardSection selectedComponent="copy-to-clipboard" />
+        )}
         {shouldShow('banner', 'primitives') && <BannerSection selectedComponent="banner" />}
         {shouldShow('input-stepper', 'primitives') && (
           <InputStepperSection selectedComponent="input-stepper" />
@@ -248,6 +257,9 @@ export const ComponentsView: React.FC = () => {
           <ThumbnailCardSection selectedComponent="thumbnail-card" />
         )}
         {shouldShow('toast', 'patterns') && <ToastSection selectedComponent="toast" />}
+        {shouldShow('no-list-results', 'patterns') && (
+          <NoListResultsSection selectedComponent="no-list-results" />
+        )}
 
         {/* Fields */}
         {(selectedCategory === 'all' || selectedCategory === 'fields') &&

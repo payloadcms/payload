@@ -26,6 +26,7 @@ export const folderItemsSlug = 'folder-items'
 export const draftVersionsSlug = 'draft-versions'
 export const tagsSlug = 'tags'
 export const autosaveSlug = 'autosave'
+export const rubbishSlug = 'rubbish'
 
 export const collectionSlugs = [
   'users',
@@ -56,4 +57,5 @@ export const collectionSlugs = [
   draftVersionsSlug,
   tagsSlug,
   autosaveSlug,
+  rubbishSlug,
 ]

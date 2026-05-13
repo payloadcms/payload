@@ -158,6 +158,7 @@ export type { DelayedSpinnerProps } from '../../elements/DelayedSpinner/index.js
 export { Logout } from '../../elements/Logout/index.js'
 export { Modal, useModal } from '../../elements/Modal/index.js'
 export { NavToggler } from '../../elements/Nav/NavToggler/index.js'
+export { NoListResults } from '../../elements/NoListResults/index.js'
 export { NavContext, NavProvider, useNav } from '../../elements/Nav/context.js'
 export { NavGroup } from '../../elements/NavGroup/index.js'
 export { Pagination } from '../../elements/Pagination/index.js'

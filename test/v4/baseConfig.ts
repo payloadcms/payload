@@ -44,6 +44,7 @@ import TabsFields from './collections/Tabs/index.js'
 import Tags from './collections/Tags/index.js'
 import TextFields from './collections/Text/index.js'
 import TextareaFields from './collections/Textarea/index.js'
+import Rubbish from './collections/Trash/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
 
@@ -84,6 +85,7 @@ export const collections: CollectionConfig[] = [
   UploadFields,
   DraftVersions,
   Autosave,
+  Rubbish,
 ]
 
 export const baseConfig: Partial<Config> = {
