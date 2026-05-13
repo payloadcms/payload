@@ -125,6 +125,17 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       // WHY: without externalizing graphql, a graphql version error will be thrown
       // during runtime ("Ensure that there is only one instance of \"graphql\" in the node_modules\ndirectory.")
       'graphql',
+      'drizzle-kit',
+      'drizzle-kit/api',
+      'sharp',
+      'libsql',
+      'require-in-the-middle',
+      'json-schema-to-typescript',
+      // Prevents turbopack build errors by the thread-stream package which is installed by pino
+      'pino',
+      // file-type v22 uses `import(specifier)` with a non-literal specifier, which Turbopack rejects
+      // with "Cannot find module as expression is too dynamic"
+      'file-type',
       ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
         ? /**
            * Unless explicitly disabled by the user, by passing `devBundleServerPackages: true` to withPayload, we
@@ -253,20 +264,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     baseConfig.env.NEXT_BASE_PATH = nextConfig.basePath
   }
 
-  return {
-    ...baseConfig,
-    serverExternalPackages: [
-      ...(baseConfig.serverExternalPackages || []),
-      'drizzle-kit',
-      'drizzle-kit/api',
-      'sharp',
-      'libsql',
-      'require-in-the-middle',
-      'json-schema-to-typescript',
-      // Prevents turbopack build errors by the thread-stream package which is installed by pino
-      'pino',
-    ],
-  }
+  return baseConfig
 }
 
 export default withPayload
