@@ -1,5 +1,6 @@
 import type { CollectionConfig, Config } from 'payload'
 
+import fs from 'fs'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 

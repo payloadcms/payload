@@ -111,6 +111,9 @@ export { Gutter } from '../../elements/Gutter/index.js'
 export { Hamburger } from '../../elements/Hamburger/index.js'
 export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
 export { HydrateHierarchyProvider } from '../../elements/Hierarchy/HydrateProvider/index.js'
+export { IDLabel } from '../../elements/IDLabel/index.js'
+export { InputStepper } from '../../elements/InputStepper/index.js'
+export type { InputStepperProps } from '../../elements/InputStepper/index.js'
 
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
@@ -188,6 +191,8 @@ export {
 export { Table } from '../../elements/Table/index.js'
 export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 export { Thumbnail } from '../../elements/Thumbnail/index.js'
+export { ThumbnailCard } from '../../elements/ThumbnailCard/index.js'
+export type { ThumbnailCardProps } from '../../elements/ThumbnailCard/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
 import { toast } from 'sonner'
 export { toast }
