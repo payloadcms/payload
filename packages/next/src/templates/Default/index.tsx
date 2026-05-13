@@ -21,7 +21,7 @@ import './index.scss'
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
-import { NavHamburger } from './NavHamburger/index.js'
+import { NavSidebarToggle } from './NavSidebarToggle/index.js'
 import { Wrapper } from './Wrapper/index.js'
 
 const baseClass = 'template-default'
@@ -130,7 +130,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
               <div className={`${baseClass}__nav-toggler-container`} id="nav-toggler">
                 <NavToggler className={`${baseClass}__nav-toggler`}>
-                  <NavHamburger />
+                  <NavSidebarToggle />
                 </NavToggler>
               </div>
             </div>
