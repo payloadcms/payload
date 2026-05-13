@@ -96,6 +96,7 @@ export interface Config {
     'upload-fields': UploadField;
     'draft-versions': DraftVersion;
     autosave: Autosave;
+    rubbish: Rubbish;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -132,6 +133,7 @@ export interface Config {
     'upload-fields': UploadFieldsSelect<false> | UploadFieldsSelect<true>;
     'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
+    rubbish: RubbishSelect<false> | RubbishSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1110,6 +1112,17 @@ export interface Autosave {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish".
+ */
+export interface Rubbish {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1247,6 +1260,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave';
         value: string | Autosave;
+      } | null)
+    | ({
+        relationTo: 'rubbish';
+        value: string | Rubbish;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1906,6 +1923,16 @@ export interface AutosaveSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish_select".
+ */
+export interface RubbishSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
