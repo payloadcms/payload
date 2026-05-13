@@ -40143,7 +40143,23 @@ function splitDiffByFile(diff) {
     });
 }
 
+;// CONCATENATED MODULE: ./src/sanitize.ts
+const MAX_COMMENT_BODY_CHARS = 2000;
+const MAX_SUMMARY_CHARS = 4000;
+const MAX_REVIEW_COMMENTS = 20;
+function sanitizeMarkdown(text, maxLength = MAX_SUMMARY_CHARS) {
+    return text.replace(/@/g, '@​').slice(0, maxLength);
+}
+function capComments(comments, max = MAX_REVIEW_COMMENTS) {
+    return comments.slice(0, max);
+}
+function filterCommentsToChangedFiles(comments, changedPaths) {
+    return comments.filter((c) => changedPaths.has(c.path));
+}
+
+
 ;// CONCATENATED MODULE: ./src/index.ts
+
 
 
 
@@ -40176,12 +40192,13 @@ async function run() {
         else {
             throw new Error(`Unknown AI provider: ${aiProviderName}. Supported: anthropic`);
         }
+        const allFileDiffs = splitDiffByFile(diff);
+        const changedPaths = new Set(allFileDiffs.map((f) => f.path));
         let result;
         if (diff.length <= maxDiffChars) {
             result = await provider.review({ systemPrompt, diff });
         }
         else {
-            const allFileDiffs = splitDiffByFile(diff);
             const fileDiffs = allFileDiffs.filter((f) => f.diff.length <= maxDiffChars);
             const skippedCount = allFileDiffs.length - fileDiffs.length;
             if (fileDiffs.length === 0) {
@@ -40196,9 +40213,13 @@ async function run() {
             const fileResults = await Promise.all(fileDiffs.map((f) => provider.review({ systemPrompt, diff: f.diff })));
             result = mergeReviewResults(fileResults);
         }
-        const validComments = result.comments.filter((c) => c.line > 0 && c.path.length > 0 && c.body.length > 0);
+        const sanitizedSummary = sanitizeMarkdown(result.summary);
+        const validComments = capComments(filterCommentsToChangedFiles(result.comments.filter((c) => c.line > 0 && c.path.length > 0 && c.body.length > 0), changedPaths)).map((c) => ({
+            ...c,
+            body: sanitizeMarkdown(c.body, MAX_COMMENT_BODY_CHARS),
+        }));
         try {
-            await postPRReview(octokit, issueNumber, result.summary, validComments);
+            await postPRReview(octokit, issueNumber, sanitizedSummary, validComments);
             core.info(`AI review posted with ${validComments.length} inline comment(s)`);
         }
         catch (err) {
@@ -40206,7 +40227,7 @@ async function run() {
             if (status === 422) {
                 // GitHub rejects the entire review when any inline comment references an invalid line.
                 // Fall back to posting the summary as a plain comment so feedback is never lost.
-                await postComment(octokit, issueNumber, result.summary);
+                await postComment(octokit, issueNumber, sanitizedSummary);
                 core.info('AI review posted as comment (inline comments omitted due to invalid line references)');
             }
             else {

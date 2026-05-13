@@ -5,6 +5,12 @@ import { createAnthropicProvider } from './providers/anthropic'
 import type { AIProvider } from './providers/types'
 import { buildSystemPrompt, mergeReviewResults } from './review'
 import { splitDiffByFile } from './diff'
+import {
+  capComments,
+  filterCommentsToChangedFiles,
+  sanitizeMarkdown,
+  MAX_COMMENT_BODY_CHARS,
+} from './sanitize'
 
 const TOO_LARGE_MESSAGE =
   'This PR is too large to review automatically (all changed files exceed the configured limit). ' +
@@ -39,11 +45,13 @@ async function run(): Promise<void> {
       throw new Error(`Unknown AI provider: ${aiProviderName}. Supported: anthropic`)
     }
 
+    const allFileDiffs = splitDiffByFile(diff)
+    const changedPaths = new Set(allFileDiffs.map((f) => f.path))
+
     let result
     if (diff.length <= maxDiffChars) {
       result = await provider.review({ systemPrompt, diff })
     } else {
-      const allFileDiffs = splitDiffByFile(diff)
       const fileDiffs = allFileDiffs.filter((f) => f.diff.length <= maxDiffChars)
       const skippedCount = allFileDiffs.length - fileDiffs.length
 
@@ -70,19 +78,27 @@ async function run(): Promise<void> {
       result = mergeReviewResults(fileResults)
     }
 
-    const validComments = result.comments.filter(
-      (c) => c.line > 0 && c.path.length > 0 && c.body.length > 0,
-    )
+    const sanitizedSummary = sanitizeMarkdown(result.summary)
+
+    const validComments = capComments(
+      filterCommentsToChangedFiles(
+        result.comments.filter((c) => c.line > 0 && c.path.length > 0 && c.body.length > 0),
+        changedPaths,
+      ),
+    ).map((c) => ({
+      ...c,
+      body: sanitizeMarkdown(c.body, MAX_COMMENT_BODY_CHARS),
+    }))
 
     try {
-      await postPRReview(octokit, issueNumber, result.summary, validComments)
+      await postPRReview(octokit, issueNumber, sanitizedSummary, validComments)
       core.info(`AI review posted with ${validComments.length} inline comment(s)`)
     } catch (err) {
       const status = (err as { status?: number }).status
       if (status === 422) {
         // GitHub rejects the entire review when any inline comment references an invalid line.
         // Fall back to posting the summary as a plain comment so feedback is never lost.
-        await postComment(octokit, issueNumber, result.summary)
+        await postComment(octokit, issueNumber, sanitizedSummary)
         core.info(
           'AI review posted as comment (inline comments omitted due to invalid line references)',
         )
