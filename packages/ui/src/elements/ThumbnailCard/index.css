@@ -35,7 +35,6 @@
     background: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
     overflow: hidden;
-    transition: outline-color 100ms ease;
     outline: var(--stroke-width-small) solid transparent;
     outline-offset: calc(var(--stroke-width-small) * -1);
   }
