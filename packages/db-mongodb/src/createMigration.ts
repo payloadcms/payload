@@ -27,9 +27,8 @@ export const createMigration: CreateMigration = async function createMigration({
   payload,
   skipEmpty,
 }): Promise<MigrationCreateResult> {
-  // MongoDB has no schema diffs — dry-run always reports no changes
   if (dryRun) {
-    return { hasChanges: false, status: 'dry-run' }
+    return { hasChanges: false, status: 'no-changes' }
   }
 
   const filename = fileURLToPath(import.meta.url)
@@ -45,6 +44,14 @@ export const createMigration: CreateMigration = async function createMigration({
     if (file) {
       return {
         error: '--from-stdin and --file are mutually exclusive',
+        hasChanges: false,
+        status: 'error',
+      }
+    }
+
+    if (!migrationName) {
+      return {
+        error: 'Migration name is required when using --from-stdin',
         hasChanges: false,
         status: 'error',
       }

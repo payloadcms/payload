@@ -200,11 +200,11 @@ export const buildCreateMigration = ({
       }
 
       if (!upSQL?.length && !downSQL?.length) {
-        if (skipEmpty || forceAcceptWarning) {
-          if (dryRun) {
-            return { hasChanges: false, status: 'dry-run' }
-          }
+        if (dryRun) {
+          return { hasChanges: false, status: 'dry-run' }
+        }
 
+        if (skipEmpty || forceAcceptWarning) {
           if (!forceAcceptWarning) {
             return { hasChanges: false, status: 'no-changes' }
           }

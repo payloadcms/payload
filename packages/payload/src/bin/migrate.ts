@@ -1,9 +1,12 @@
 import type { ParsedArgs } from 'minimist'
 
+import { pino } from 'pino'
+
 import type { SanitizedConfig } from '../config/types.js'
 
 import payload from '../index.js'
 import { stderrSyncLoggerDestination, writeJsonResult } from '../utilities/jsonReporter.js'
+import { prettySyncLoggerDestination } from '../utilities/logger.js'
 
 /**
  * Read all data from stdin. Returns empty string if stdin is a TTY (no pipe).
@@ -85,18 +88,15 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
 
   process.env.PAYLOAD_MIGRATING = 'true'
 
-  // Barebones instance to access database adapter
   await payload.init({
     config,
     disableDBConnect: args[0] === 'migrate:create',
     disableOnInit: true,
   })
 
-  // When --json is active, redirect logger to stderr so JSON output on stdout is clean
-  if (json) {
-    const { pino } = await import('pino')
-    payload.logger = pino(stderrSyncLoggerDestination)
-  }
+  // Replace with sync logger so output flushes before process.exit.
+  // Redirect to stderr when --json is active so logger doesn't pollute stdout JSON.
+  payload.logger = pino(json ? stderrSyncLoggerDestination : prettySyncLoggerDestination)
 
   const adapter = payload.db
 
@@ -136,58 +136,84 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
         process.exit(1)
       }
       break
-    case 'migrate:create':
-      try {
-        let fromStdin: string | undefined
+    case 'migrate:create': {
+      let createResult: Awaited<ReturnType<typeof adapter.createMigration>> | undefined
 
-        if (fromStdinFlag) {
-          // Support string value passed directly (e.g. from tests) or read from stdin
-          fromStdin =
-            typeof fromStdinFromProps === 'string' ? fromStdinFromProps : await readStdin()
-          if (!fromStdin) {
-            if (json) {
-              writeJsonResult({
-                error: 'No data received on stdin',
-                hasChanges: false,
-                status: 'error',
-              })
-            }
-            payload.logger.error({
-              msg: 'No data received on stdin. Pipe JSON to stdin when using --from-stdin.',
+      if (fromStdinFlag) {
+        // Support string value passed directly (e.g. from tests) or read from stdin
+        const fromStdin =
+          typeof fromStdinFromProps === 'string' ? fromStdinFromProps : await readStdin()
+        if (!fromStdin) {
+          if (json) {
+            writeJsonResult({
+              error: 'No data received on stdin',
+              hasChanges: false,
+              status: 'error',
             })
+          }
+          payload.logger.error({
+            msg: 'No data received on stdin. Pipe JSON to stdin when using --from-stdin.',
+          })
+          process.exit(1)
+        } else {
+          try {
+            createResult = await adapter.createMigration({
+              dryRun,
+              file,
+              forceAcceptWarning,
+              fromStdin,
+              migrationName: args[1],
+              payload,
+              skipEmpty,
+            })
+          } catch (err) {
+            const error = err instanceof Error ? err.message : 'Unknown error'
+            if (json) {
+              writeJsonResult({ error, hasChanges: false, status: 'error' })
+            }
+            payload.logger.error({ msg: `Error creating migration: ${error}` })
             process.exit(1)
           }
         }
+      } else {
+        try {
+          createResult = await adapter.createMigration({
+            dryRun,
+            file,
+            forceAcceptWarning,
+            migrationName: args[1],
+            payload,
+            skipEmpty,
+          })
+        } catch (err) {
+          const error = err instanceof Error ? err.message : 'Unknown error'
+          if (json) {
+            writeJsonResult({ error, hasChanges: false, status: 'error' })
+          }
+          payload.logger.error({ msg: `Error creating migration: ${error}` })
+          process.exit(1)
+        }
+      }
 
-        const result = await adapter.createMigration({
-          dryRun,
-          file,
-          forceAcceptWarning,
-          fromStdin,
-          migrationName: args[1],
-          payload,
-          skipEmpty,
-        })
-
+      if (createResult) {
         if (json) {
-          writeJsonResult(result)
+          writeJsonResult(createResult)
         }
 
-        if (result.status === 'error') {
+        if (createResult.status === 'error') {
           process.exit(1)
         }
 
-        if (result.status === 'no-changes') {
+        if (
+          createResult.status === 'no-changes' ||
+          (createResult.status === 'dry-run' && !createResult.hasChanges)
+        ) {
           process.exit(2)
         }
-      } catch (err) {
-        const error = err instanceof Error ? err.message : 'Unknown error'
-        if (json) {
-          writeJsonResult({ error, hasChanges: false, status: 'error' })
-        }
-        throw new Error(`Error creating migration: ${error}`)
       }
+
       break
+    }
     case 'migrate:down':
       await adapter.migrateDown()
       break

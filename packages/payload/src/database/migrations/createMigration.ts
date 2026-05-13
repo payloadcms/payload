@@ -11,9 +11,9 @@ export const createMigration: CreateMigration = function createMigration({
   migrationName,
   payload,
 }): Promise<MigrationCreateResult> {
-  // MongoDB has no schema diffs — dry-run always reports no changes
+  // Generic fallback adapter has no schema diffs — dry-run always reports no changes
   if (dryRun) {
-    return Promise.resolve({ hasChanges: false, status: 'dry-run' })
+    return Promise.resolve({ hasChanges: false, status: 'no-changes' })
   }
 
   const dir = payload.db.migrationDir
@@ -44,7 +44,9 @@ export const createMigration: CreateMigration = function createMigration({
           status: 'error',
         })
       }
-      migrationContent = migrationTemplate.replace('// Migration code', stdinData.upSQL)
+      migrationContent = migrationTemplate
+        .replace('// Migration code', stdinData.upSQL)
+        .replace('// Migration code', stdinData.downSQL ?? '// Migration code')
     } catch {
       return Promise.resolve({
         error: 'Invalid JSON provided via --from-stdin',
