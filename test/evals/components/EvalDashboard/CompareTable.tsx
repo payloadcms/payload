@@ -900,12 +900,15 @@ export function CompareTable({
       const pair = byQuestion.get(key)!
 
       const variant = getVariant(entry)
+      // First-write-wins per lane. When the cache contains both an LLM and an
+      // agent result for the same question, iteration order decides which is
+      // shown; both rows still appear in list view distinguished by their badge.
       if (variant === 'baseline' || variant === 'agent-baseline') {
         if (!pair.baseline) {
           pair.baseline = entry
         }
       } else if (variant === 'skill' || variant === 'agent-skill') {
-        if (!pair.skill || entry.result.modelId) {
+        if (!pair.skill) {
           pair.skill = entry
         }
       }

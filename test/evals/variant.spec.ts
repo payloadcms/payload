@@ -21,6 +21,10 @@ describe('getVariant', () => {
     ).toBe('baseline')
   })
 
+  it('returns baseline for codegenNoSkill even without modelId', () => {
+    expect(getVariant({ runnerKind: 'llm', systemPromptKey: 'codegenNoSkill' })).toBe('baseline')
+  })
+
   it('returns skill for llm with a modelId and no codegenNoSkill', () => {
     expect(getVariant({ modelId: 'openai/gpt-5', runnerKind: 'llm' })).toBe('skill')
   })

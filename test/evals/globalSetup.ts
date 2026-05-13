@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+import type { RunnerKind, SkillInstallMode } from './runner/types.js'
 import type { Variant } from './variant.js'
 
 import { getVariant } from './variant.js'
@@ -16,9 +17,9 @@ type CacheEntry = {
     modelId?: string
     pass: boolean
     question: string
-    runnerKind?: 'claude-code' | 'llm'
+    runnerKind?: RunnerKind
     score?: number
-    skillInstall?: 'embedded' | 'none'
+    skillInstall?: SkillInstallMode
     systemPromptKey?: string
     tscErrors?: string[]
   }

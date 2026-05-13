@@ -69,8 +69,6 @@ export async function runCodegenCase(
       : r.modelId === resolvedModelId && r.skillInstall === skillInstall)
 
   const key = codegenKey({
-    agentModel: kind === 'claude-code' ? agentModel : undefined,
-    agentVersion,
     expected: testCase.expected,
     fixtureContent: starterConfig,
     input: testCase.input,

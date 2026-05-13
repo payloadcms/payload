@@ -98,14 +98,13 @@ export function pruneStaleEntries(
 /**
  * Generates a cache key for a codegen eval case.
  *
- * Keyed on instruction input, expected outcome, fixture content, runner identity,
+ * Keyed on instruction input, expected outcome, fixture content, runner kind,
+ * `modelId` (which for agent runs already encodes `agentModel` + `agentVersion`),
  * and runner-specific options. Includes the skill-tree fingerprint when the run
  * depends on the skill content (LLM `codegenWithSkill` or claude-code `embedded`
  * install), so any change to the skill files invalidates the relevant entries.
  */
 export function codegenKey(params: {
-  agentModel?: string
-  agentVersion?: string
   expected: string
   fixtureContent: string
   input: string
@@ -118,6 +117,8 @@ export function codegenKey(params: {
     (params.runnerKind === 'llm' && params.systemPromptKey === 'codegenWithSkill') ||
     (params.runnerKind === 'claude-code' && params.skillInstall === 'embedded')
 
+  // agentModel and agentVersion are deliberately omitted: for claude-code runs,
+  // modelId is `claude-code/<agentModel>/<version>`, so they're already in the hash.
   return hashKey({
     type: 'codegen',
     runnerKind: params.runnerKind,
@@ -126,8 +127,6 @@ export function codegenKey(params: {
     fixtureContent: params.fixtureContent,
     modelId: params.modelId,
     systemPromptKey: params.systemPromptKey,
-    agentModel: params.agentModel,
-    agentVersion: params.agentVersion,
     skillInstall: params.skillInstall,
     skillHash: skillIncluded ? getSkillTreeHash() : undefined,
   })

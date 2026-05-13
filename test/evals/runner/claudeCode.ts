@@ -1,4 +1,3 @@
-// test/evals/runner/claudeCode.ts
 import { spawn, spawnSync } from 'node:child_process'
 import { rmSync } from 'node:fs'
 import { copyFile, mkdtemp } from 'node:fs/promises'
@@ -121,11 +120,12 @@ async function spawnAgent({
         } else {
           child.kill('SIGKILL')
         }
-      } catch {
+      } catch (groupKillErr) {
+        log += `\n[runner] process-group kill failed: ${(groupKillErr as Error).message}`
         try {
           child.kill('SIGKILL')
-        } catch {
-          // child already gone
+        } catch (childKillErr) {
+          log += `\n[runner] child.kill fallback also failed: ${(childKillErr as Error).message}`
         }
       }
       log += `\n[runner] killed after ${timeoutMs}ms timeout`

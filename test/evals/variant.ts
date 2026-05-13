@@ -23,8 +23,10 @@ export function getVariant(result: VariantInput): null | Variant {
   if (result.systemPromptKey === 'codegenNoSkill') {
     return 'baseline'
   }
-  if (!result.modelId) {
-    return null
+  // Only classify as the LLM-skill lane if we're sure it's the LLM runner.
+  // Unknown future RunnerKind values fall through to `null` rather than silently bucket here.
+  if ((result.runnerKind === 'llm' || result.runnerKind === undefined) && result.modelId) {
+    return 'skill'
   }
-  return 'skill'
+  return null
 }
