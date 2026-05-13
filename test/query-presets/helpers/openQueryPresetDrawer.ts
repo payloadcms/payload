@@ -3,6 +3,9 @@ import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 
 export async function openQueryPresetDrawer({ page }: { page: Page }): Promise<Locator> {
+  // Wait for the initial redirect to complete (URL should contain limit param)
+  await page.waitForURL((url) => url.searchParams.has('limit'), { timeout: 10000 })
+
   await page.click('#select-preset')
   const drawer = page.locator('dialog[id^="list-drawer_0_"]')
   await expect(drawer).toBeVisible()
