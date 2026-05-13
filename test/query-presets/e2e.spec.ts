@@ -7,6 +7,7 @@ import {
 } from '__helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from '__helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy } from '__helpers/e2e/groupBy/index.js'
+import { navigateToListView } from '__helpers/e2e/navigateToListView.js'
 import { openNav } from '__helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
@@ -22,7 +23,6 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
-import { navigateToListView } from '../__helpers/e2e/navigateToListView.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
