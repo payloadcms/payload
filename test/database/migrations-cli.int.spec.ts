@@ -137,44 +137,107 @@ describe('migrations CLI', () => {
     )
   })
 
-  it('should report changes with --dry-run without writing files', async () => {
-    const config = await configPromise
+  it(
+    'should exit with code 2 via --dry-run when no schema changes',
+    { db: 'drizzle' },
+    async () => {
+      const config = await configPromise
 
-    // First create a baseline migration so there's a schema diff
-    await migrateCLI({
-      config,
-      migrationDir,
-      parsedArgs: {
-        _: ['migrate:create', 'baseline'],
-        forceAcceptWarning: true,
-      },
-    })
-
-    // Now dry-run should report no new changes (schema matches latest snapshot)
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
-      throw new Error('process.exit called')
-    })
-
-    try {
+      // First create a baseline migration so there's a schema snapshot
       await migrateCLI({
         config,
         migrationDir,
         parsedArgs: {
-          _: ['migrate:create', 'test_dry_run'],
-          dryRun: true,
-          skipEmpty: true,
+          _: ['migrate:create', 'baseline'],
+          forceAcceptWarning: true,
         },
       })
-    } catch {
-      // process.exit(2) expected for no-changes
-    }
 
-    // Verify no new migration files written (only baseline + index)
-    const migrationFiles = fs
-      .readdirSync(migrationDir)
-      .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
+        throw new Error(`process.exit(${code})`)
+      })
 
-    expect(migrationFiles.length).toBe(1) // only the baseline
+      await expect(
+        migrateCLI({
+          config,
+          migrationDir,
+          parsedArgs: {
+            _: ['migrate:create', 'test_dry_run'],
+            dryRun: true,
+            skipEmpty: true,
+          },
+        }),
+      ).rejects.toThrow('process.exit(2)')
+
+      // Verify no new migration files written (only baseline + index)
+      const migrationFiles = fs
+        .readdirSync(migrationDir)
+        .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
+
+      expect(migrationFiles.length).toBe(1) // only the baseline
+
+      exitSpy.mockRestore()
+    },
+  )
+
+  it(
+    'should exit with code 2 via --dry-run without --skip-empty when no schema changes',
+    { db: 'drizzle' },
+    async () => {
+      const config = await configPromise
+
+      // Create baseline so schema is in sync
+      await migrateCLI({
+        config,
+        migrationDir,
+        parsedArgs: {
+          _: ['migrate:create', 'baseline'],
+          forceAcceptWarning: true,
+        },
+      })
+
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
+        throw new Error(`process.exit(${code})`)
+      })
+
+      await expect(
+        migrateCLI({
+          config,
+          migrationDir,
+          parsedArgs: {
+            _: ['migrate:create', 'test_dry_run_no_flags'],
+            dryRun: true,
+          },
+        }),
+      ).rejects.toThrow('process.exit(2)')
+
+      const migrationFiles = fs
+        .readdirSync(migrationDir)
+        .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
+
+      expect(migrationFiles.length).toBe(1) // only the baseline
+
+      exitSpy.mockRestore()
+    },
+  )
+
+  it('should exit with code 2 via --dry-run on MongoDB', { db: 'mongo' }, async () => {
+    const config = await configPromise
+
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit(${code})`)
+    })
+
+    await expect(
+      migrateCLI({
+        config,
+        migrationDir,
+        parsedArgs: {
+          _: ['migrate:create', 'test_mongo_dryrun'],
+          dryRun: true,
+        },
+      }),
+    ).rejects.toThrow('process.exit(2)')
 
     exitSpy.mockRestore()
   })
@@ -269,6 +332,38 @@ describe('migrations CLI', () => {
 
     exitSpy.mockRestore()
   })
+
+  it(
+    'should return error for --from-stdin without migrationName on MongoDB',
+    { db: 'mongo' },
+    async () => {
+      const config = await configPromise
+
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
+        throw new Error(`process.exit(${code})`)
+      })
+
+      await expect(
+        migrateCLI({
+          config,
+          migrationDir,
+          parsedArgs: {
+            _: ['migrate:create'],
+            fromStdin: JSON.stringify({ upSQL: 'db.collection.insertOne({})' }),
+          },
+        }),
+      ).rejects.toThrow('process.exit(1)')
+
+      // No migration files created (not even timestamp_undefined.ts)
+      const migrationFiles = fs
+        .readdirSync(migrationDir)
+        .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
+
+      expect(migrationFiles.length).toBe(0)
+
+      exitSpy.mockRestore()
+    },
+  )
 
   it('should return error when --from-stdin and --file are both provided', async () => {
     const config = await configPromise
@@ -367,10 +462,9 @@ describe('migrations CLI', () => {
     },
   )
 
-  it('should output valid JSON with --json --dry-run combined', async () => {
+  it('should output valid JSON with --json --dry-run combined', { db: 'drizzle' }, async () => {
     const config = await configPromise
 
-    // Capture stdout
     const stdoutChunks: string[] = []
     const originalWrite = process.stdout.write
     process.stdout.write = (chunk: string | Uint8Array) => {
@@ -378,23 +472,23 @@ describe('migrations CLI', () => {
       return true
     }
 
-    // Create baseline first
-    await migrateCLI({
-      config,
-      migrationDir,
-      parsedArgs: {
-        _: ['migrate:create', 'json_baseline'],
-        forceAcceptWarning: true,
-      },
-    })
-
-    stdoutChunks.length = 0 // Clear baseline output
-
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('process.exit called')
     })
 
     try {
+      // Create baseline first
+      await migrateCLI({
+        config,
+        migrationDir,
+        parsedArgs: {
+          _: ['migrate:create', 'json_baseline'],
+          forceAcceptWarning: true,
+        },
+      })
+
+      stdoutChunks.length = 0 // Clear baseline output
+
       await migrateCLI({
         config,
         migrationDir,
@@ -406,19 +500,101 @@ describe('migrations CLI', () => {
         },
       })
     } catch {
-      // exit expected
+      // exit(2) expected for dry-run with no changes
+    } finally {
+      process.stdout.write = originalWrite
+      exitSpy.mockRestore()
     }
 
-    process.stdout.write = originalWrite
-    exitSpy.mockRestore()
-
-    // Find the JSON line in stdout
     const jsonLine = stdoutChunks.find((c) => c.startsWith('{'))
     expect(jsonLine).toBeDefined()
 
     const result = JSON.parse(jsonLine!)
 
-    expect(result.status).toBe('dry-run')
-    expect(typeof result.hasChanges).toBe('boolean')
+    expect(result.hasChanges).toBe(false)
+    expect(typeof result.status).toBe('string')
   })
+
+  it(
+    'should output JSON with correct shape when --json flag is used on creation',
+    { db: 'drizzle' },
+    async () => {
+      const config = await configPromise
+
+      const stdoutChunks: string[] = []
+      const originalWrite = process.stdout.write
+      process.stdout.write = (chunk: string | Uint8Array) => {
+        stdoutChunks.push(chunk.toString())
+        return true
+      }
+
+      try {
+        await migrateCLI({
+          config,
+          migrationDir,
+          parsedArgs: {
+            _: ['migrate:create', 'json_creation_test'],
+            forceAcceptWarning: true,
+            json: true,
+          },
+        })
+      } finally {
+        process.stdout.write = originalWrite
+      }
+
+      const jsonLine = stdoutChunks.find((c) => c.startsWith('{'))
+      expect(jsonLine).toBeDefined()
+
+      const result = JSON.parse(jsonLine!)
+
+      expect(result.status).toBe('created')
+      expect(result.filePath).toBeDefined()
+      expect(result.migrationName).toBeDefined()
+      expect(typeof result.hasChanges).toBe('boolean')
+    },
+  )
+
+  it(
+    'should output JSON error shape with --json flag when error occurs in migrate:create',
+    { db: 'drizzle' },
+    async () => {
+      const config = await configPromise
+
+      const stdoutChunks: string[] = []
+      const originalWrite = process.stdout.write
+      process.stdout.write = (chunk: string | Uint8Array) => {
+        stdoutChunks.push(chunk.toString())
+        return true
+      }
+
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
+        throw new Error(`process.exit(${code})`)
+      })
+
+      try {
+        await migrateCLI({
+          config,
+          migrationDir,
+          parsedArgs: {
+            _: ['migrate:create', 'json_error_test'],
+            fromStdin: 'invalid json{{{',
+            json: true,
+          },
+        })
+      } catch {
+        // process.exit(1) expected
+      } finally {
+        process.stdout.write = originalWrite
+        exitSpy.mockRestore()
+      }
+
+      const jsonLine = stdoutChunks.find((c) => c.startsWith('{'))
+      expect(jsonLine).toBeDefined()
+
+      const result = JSON.parse(jsonLine!)
+
+      expect(result.status).toBe('error')
+      expect(typeof result.error).toBe('string')
+    },
+  )
 })
