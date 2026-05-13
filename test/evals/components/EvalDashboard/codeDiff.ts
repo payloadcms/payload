@@ -8,7 +8,7 @@ export type RenderedCode = {
   removed?: number
 }
 
-const THEMES = { dark: 'github-dark', light: 'github-light' } as const
+const THEMES = { dark: 'github-dark', light: 'github-light' }
 const LANG = 'typescript'
 
 let highlighterPromise: null | Promise<Highlighter> = null

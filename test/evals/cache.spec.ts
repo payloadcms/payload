@@ -6,7 +6,7 @@ const base = {
   expected: 'expected',
   fixtureContent: 'starter',
   input: 'do the thing',
-} as const
+}
 
 describe('codegenKey', () => {
   it('produces stable hex keys', () => {
