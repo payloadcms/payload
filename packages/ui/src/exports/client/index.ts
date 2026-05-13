@@ -189,6 +189,8 @@ export {
 export { Table } from '../../elements/Table/index.js'
 export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 export { Thumbnail } from '../../elements/Thumbnail/index.js'
+export { ThumbnailCard } from '../../elements/ThumbnailCard/index.js'
+export type { ThumbnailCardProps } from '../../elements/ThumbnailCard/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
 import { toast } from 'sonner'
 export { toast }

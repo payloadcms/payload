@@ -19,6 +19,7 @@ import { LoadingSection } from './sections/LoadingSection.js'
 import { ModalSection } from './sections/ModalSection.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
+import { ThumbnailCardSection } from './sections/ThumbnailCard.js'
 import { ToastSection } from './sections/ToastSection.js'
 import { TooltipSection } from './sections/Tooltip.js'
 // Field sections
@@ -72,6 +73,7 @@ type ComponentId =
   | 'text-field'
   | 'textarea'
   | 'textarea-field'
+  | 'thumbnail-card'
   | 'toast'
   | 'tooltip'
 
@@ -103,6 +105,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'patterns', label: 'Loading Overlay', value: 'loading-overlay' },
   { category: 'patterns', label: 'Modal', value: 'modal' },
   { category: 'patterns', label: 'Shimmer / Loading', value: 'shimmer' },
+  { category: 'patterns', label: 'Thumbnail Card', value: 'thumbnail-card' },
   { category: 'patterns', label: 'Toast', value: 'toast' },
   // Fields
   { category: 'fields', label: 'Code Field', value: 'code-field' },
@@ -241,6 +244,9 @@ export const ComponentsView: React.FC = () => {
           <LoadingSection selectedComponent="loading-overlay" />
         )}
         {shouldShow('modal', 'patterns') && <ModalSection selectedComponent="modal" />}
+        {shouldShow('thumbnail-card', 'patterns') && (
+          <ThumbnailCardSection selectedComponent="thumbnail-card" />
+        )}
         {shouldShow('toast', 'patterns') && <ToastSection selectedComponent="toast" />}
 
         {/* Fields */}

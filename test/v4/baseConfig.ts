@@ -1,8 +1,8 @@
 import type { CollectionConfig, Config } from 'payload'
 
+import fs from 'fs'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { getFileByPath } from 'payload'
 
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
@@ -158,7 +158,12 @@ export const baseConfig: Partial<Config> = {
     const richTextCount = await payload.count({ collection: richTextFieldsSlug })
     if (richTextCount.totalDocs === 0) {
       const imagePath = path.resolve(dirname, '../lexical/collections/Upload/payload.jpg')
-      const imageFile = await getFileByPath(imagePath)
+      const imageFile = {
+        data: fs.readFileSync(imagePath),
+        mimetype: 'image/jpeg',
+        name: path.basename(imagePath),
+        size: fs.statSync(imagePath).size,
+      }
 
       const uploadDoc = await payload.create({
         collection: uploadsSlug,
