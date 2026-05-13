@@ -24,9 +24,9 @@ export const richTextFieldsSlug = 'rich-text-fields'
 export const foldersSlug = 'folders'
 export const folderItemsSlug = 'folder-items'
 export const draftVersionsSlug = 'draft-versions'
+export const tagsSlug = 'tags'
 export const autosaveSlug = 'autosave'
 export const rubbishSlug = 'rubbish'
-export const hierarchySlug = 'hierarchy'
 
 export const collectionSlugs = [
   'users',
@@ -55,7 +55,7 @@ export const collectionSlugs = [
   foldersSlug,
   folderItemsSlug,
   draftVersionsSlug,
+  tagsSlug,
   autosaveSlug,
   rubbishSlug,
-  hierarchySlug,
 ]

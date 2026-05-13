@@ -161,7 +161,7 @@ export const Status: React.FC = () => {
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
-                buttonStyle="none"
+                buttonStyle="ghost"
                 className={`${baseClass}__action`}
                 id="action-revert-to-published"
                 onClick={() => toggleModal(revertModalSlug)}

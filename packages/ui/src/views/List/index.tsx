@@ -33,7 +33,7 @@ import { ListSelection } from '../../views/List/ListSelection/index.js'
 import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/index.js'
 import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'collection-list'
 

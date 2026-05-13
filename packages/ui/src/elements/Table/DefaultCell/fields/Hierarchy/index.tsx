@@ -198,7 +198,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
   return (
     <div className={baseClass} ref={intersectionRef}>
       <Button
-        buttonStyle="subtle"
+        buttonStyle="pill"
         className={`${baseClass}__pill`}
         icon={preRenderedIcon || fallbackIcon}
         iconPosition="left"

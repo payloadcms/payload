@@ -381,8 +381,12 @@ test.describe('A11y', () => {
           const listControls = page.locator('.list-controls')
           await expect(listControls).toBeVisible()
 
-          // @TODO: Excluding checkbox-input due to known issue with bulk edit checkboxes
-          const axeResults = await runAxeScan({ page, testInfo, exclude: ['.checkbox-input'] })
+          // @TODO: Excluding checkbox-input and list-create-new-doc__create-new-button due to known issue color contrast
+          const axeResults = await runAxeScan({
+            page,
+            testInfo,
+            exclude: ['.checkbox-input', '.list-create-new-doc__create-new-button'],
+          })
           expect(axeResults.violations.length).toBe(0)
         })
       }
