@@ -21,6 +21,7 @@ import { ModalSection } from './sections/ModalSection.js'
 import { NoListResultsSection } from './sections/NoListResults.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
+import { StatusCellSection } from './sections/StatusCell.js'
 import { ThumbnailCardSection } from './sections/ThumbnailCard.js'
 import { ToastSection } from './sections/ToastSection.js'
 import { TooltipSection } from './sections/Tooltip.js'
@@ -74,6 +75,7 @@ type ComponentId =
   | 'select'
   | 'select-field'
   | 'shimmer'
+  | 'status-cell'
   | 'text-field'
   | 'textarea'
   | 'textarea-field'
@@ -111,6 +113,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'patterns', label: 'Modal', value: 'modal' },
   { category: 'patterns', label: 'No List Results', value: 'no-list-results' },
   { category: 'patterns', label: 'Shimmer / Loading', value: 'shimmer' },
+  { category: 'patterns', label: 'Status Cell', value: 'status-cell' },
   { category: 'patterns', label: 'Thumbnail Card', value: 'thumbnail-card' },
   { category: 'patterns', label: 'Toast', value: 'toast' },
   // Fields
@@ -259,6 +262,9 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('toast', 'patterns') && <ToastSection selectedComponent="toast" />}
         {shouldShow('no-list-results', 'patterns') && (
           <NoListResultsSection selectedComponent="no-list-results" />
+        )}
+        {shouldShow('status-cell', 'patterns') && (
+          <StatusCellSection selectedComponent="status-cell" />
         )}
 
         {/* Fields */}

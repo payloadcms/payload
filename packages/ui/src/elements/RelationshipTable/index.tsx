@@ -302,7 +302,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           <AddNewButton
             allowCreate={allowCreate !== false}
             baseClass={baseClass}
-            buttonStyle="pill"
+            buttonStyle="ghost"
             className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ''}`}
             collections={config.collections}
             i18n={i18n}
@@ -313,7 +313,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             relationTo={relationTo}
           />
           <Button
-            buttonStyle="pill"
+            buttonStyle="secondary"
             className={`${baseClass}__toggle-columns ${
               openColumnSelector ? `${baseClass}__buttons-active` : ''
             }`}

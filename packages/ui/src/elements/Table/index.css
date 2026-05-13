@@ -129,6 +129,13 @@
       &:first-child {
         padding-inline-start: var(--spacer-2-5);
       }
+
+      > span,
+      > a {
+        display: flex;
+        align-items: center;
+        height: 100%;
+      }
     }
 
     tbody td {

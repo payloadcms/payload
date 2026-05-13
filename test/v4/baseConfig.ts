@@ -187,11 +187,11 @@ export const baseConfig: Partial<Config> = {
     })
 
     const joinPosts = [
-      { title: 'First Post', status: 'published' },
-      { title: 'Second Post', status: 'draft' },
-      { title: 'Third Post', status: 'published' },
-      { title: 'Fourth Post', status: 'draft' },
-      { title: 'Fifth Post', status: 'published' },
+      { title: 'First Post', _status: 'published' },
+      { title: 'Second Post test', _status: 'published' },
+      { title: 'Third Post', _status: 'draft' },
+      { title: 'Fourth Post', _status: 'published' },
+      { title: 'Fifth Post', _status: 'draft' },
     ]
 
     for (const post of joinPosts) {

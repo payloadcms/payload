@@ -36,7 +36,7 @@ const JoinFields: CollectionConfig = {
       on: 'category',
       label: 'Posts (Custom Columns)',
       admin: {
-        defaultColumns: ['title', 'status', 'createdAt'],
+        defaultColumns: ['title', '_status', 'createdAt'],
         description: 'Join field with custom default columns',
       },
     },

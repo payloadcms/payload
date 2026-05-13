@@ -11,6 +11,9 @@ const JoinPosts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  versions: {
+    drafts: true,
+  },
   fields: [
     {
       name: 'title',
@@ -24,15 +27,6 @@ const JoinPosts: CollectionConfig = {
       admin: {
         description: 'The parent category (used by join fields)',
       },
-    },
-    {
-      name: 'status',
-      type: 'select',
-      defaultValue: 'draft',
-      options: [
-        { label: 'Draft', value: 'draft' },
-        { label: 'Published', value: 'published' },
-      ],
     },
   ],
 }

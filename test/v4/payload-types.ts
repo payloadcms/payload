@@ -617,9 +617,9 @@ export interface JoinPost {
    * The parent category (used by join fields)
    */
   category?: (string | null) | JoinField;
-  status?: ('draft' | 'published') | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1826,9 +1826,9 @@ export interface JoinFieldsSelect<T extends boolean = true> {
 export interface JoinPostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
-  status?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

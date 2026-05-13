@@ -18,5 +18,10 @@
     color: var(--color-text);
     font-size: inherit;
     line-height: inherit;
+    border-radius: var(--radius-small);
+
+    &:hover {
+      background-color: var(--color-bg-transparent-hover);
+    }
   }
 }
