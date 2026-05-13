@@ -1,6 +1,6 @@
 import type { JSX } from 'react'
 
-import type { I18n, I18nClient, TFunction } from '../types.js'
+import type { I18nClient, TFunction } from '../types.js'
 
 type LabelType =
   | (() => JSX.Element)
@@ -11,10 +11,7 @@ type LabelType =
 
 export const getTranslation = <T extends LabelType>(
   label: T,
-  /**
-   * @todo type as I18nClient in 4.0
-   */
-  i18n: Pick<I18n<any, any>, 'fallbackLanguage' | 'language' | 't'>,
+  i18n: I18nClient,
 ): T extends JSX.Element ? JSX.Element : string => {
   // If it's a Record, look for translation. If string or React Element, pass through
   if (typeof label === 'object' && !Object.prototype.hasOwnProperty.call(label, '$$typeof')) {
@@ -38,9 +35,7 @@ export const getTranslation = <T extends LabelType>(
   }
 
   if (typeof label === 'function') {
-    return label({ i18n: i18n as I18nClient, t: i18n.t }) as unknown as T extends JSX.Element
-      ? JSX.Element
-      : string
+    return label({ i18n, t: i18n.t }) as unknown as T extends JSX.Element ? JSX.Element : string
   }
 
   // If it's a React Element or string, then we should just pass it through

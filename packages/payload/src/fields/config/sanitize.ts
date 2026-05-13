@@ -1,5 +1,3 @@
-import { deepMergeSimple } from '@payloadcms/translations/utilities'
-
 import type {
   CollectionConfig,
   SanitizedJoin,
@@ -364,10 +362,6 @@ export const sanitizeField = async ({
           isRoot: requireFieldLevelRichTextEditor,
           parentIsLocalized: (parentIsLocalized || field.localized)!,
         })
-      }
-
-      if (field.editor.i18n && Object.keys(field.editor.i18n).length >= 0) {
-        config.i18n!.translations = deepMergeSimple(config.i18n!.translations!, field.editor.i18n)
       }
     }
     if (richTextSanitizationPromises) {

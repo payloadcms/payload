@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { GenericLanguages, I18n } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
@@ -244,11 +244,6 @@ type RichTextAdapterBase<
     siblingDoc: JsonObject
   }) => void
   hooks?: RichTextHooks
-  /**
-   * @deprecated - manually merge i18n translations into the config.i18n.translations object within the adapter provider instead.
-   * This property will be removed in v4.
-   */
-  i18n?: Partial<GenericLanguages>
   /**
    * Return the JSON schema for the field value. The JSON schema is read by
    * `json-schema-to-typescript` which is used to generate types for this richtext field
