@@ -79,6 +79,8 @@ export interface Config {
     'folder-items': FolderItem;
     folders: Folder;
     'group-fields': GroupField;
+    'join-fields': JoinField;
+    'join-posts': JoinPost;
     'json-fields': JsonField;
     'number-fields': NumberField;
     'password-fields': PasswordField;
@@ -101,7 +103,16 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'join-fields': {
+      relatedPosts: 'join-posts';
+      postsWithColumns: 'join-posts';
+      postsLimited: 'join-posts';
+      postsSorted: 'join-posts';
+      postsNoRowTypes: 'join-posts';
+      'group.groupedPosts': 'join-posts';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
@@ -115,6 +126,8 @@ export interface Config {
     'folder-items': FolderItemsSelect<false> | FolderItemsSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
     'group-fields': GroupFieldsSelect<false> | GroupFieldsSelect<true>;
+    'join-fields': JoinFieldsSelect<false> | JoinFieldsSelect<true>;
+    'join-posts': JoinPostsSelect<false> | JoinPostsSelect<true>;
     'json-fields': JsonFieldsSelect<false> | JsonFieldsSelect<true>;
     'number-fields': NumberFieldsSelect<false> | NumberFieldsSelect<true>;
     'password-fields': PasswordFieldsSelect<false> | PasswordFieldsSelect<true>;
@@ -536,6 +549,81 @@ export interface GroupField {
   unnamedGroup: {
     unnamedGroupField: string;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "join-fields".
+ */
+export interface JoinField {
+  id: string;
+  name: string;
+  /**
+   * Posts related to this category
+   */
+  relatedPosts?: {
+    docs?: (string | JoinPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Join field with custom default columns
+   */
+  postsWithColumns?: {
+    docs?: (string | JoinPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Join field with default limit of 3
+   */
+  postsLimited?: {
+    docs?: (string | JoinPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Join field sorted by title descending
+   */
+  postsSorted?: {
+    docs?: (string | JoinPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Join field with row types disabled
+   */
+  postsNoRowTypes?: {
+    docs?: (string | JoinPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  group?: {
+    /**
+     * Join field inside a group
+     */
+    groupedPosts?: {
+      docs?: (string | JoinPost)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "join-posts".
+ */
+export interface JoinPost {
+  id: string;
+  title: string;
+  /**
+   * The parent category (used by join fields)
+   */
+  category?: (string | null) | JoinField;
+  status?: ('draft' | 'published') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1181,6 +1269,14 @@ export interface PayloadLockedDocument {
         value: string | GroupField;
       } | null)
     | ({
+        relationTo: 'join-fields';
+        value: string | JoinField;
+      } | null)
+    | ({
+        relationTo: 'join-posts';
+        value: string | JoinPost;
+      } | null)
+    | ({
         relationTo: 'json-fields';
         value: string | JsonField;
       } | null)
@@ -1625,6 +1721,36 @@ export interface GroupFieldsSelect<T extends boolean = true> {
     | {
         unnamedGroupField?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "join-fields_select".
+ */
+export interface JoinFieldsSelect<T extends boolean = true> {
+  name?: T;
+  relatedPosts?: T;
+  postsWithColumns?: T;
+  postsLimited?: T;
+  postsSorted?: T;
+  postsNoRowTypes?: T;
+  group?:
+    | T
+    | {
+        groupedPosts?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "join-posts_select".
+ */
+export interface JoinPostsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

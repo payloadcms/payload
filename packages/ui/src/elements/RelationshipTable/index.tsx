@@ -30,7 +30,7 @@ import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { AddNewButton } from './AddNewButton.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'relationship-table'
 
@@ -318,7 +318,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             className={`${baseClass}__toggle-columns ${
               openColumnSelector ? `${baseClass}__buttons-active` : ''
             }`}
-            icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} />}
+            icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} size={16} />}
             onClick={() => setOpenColumnSelector(!openColumnSelector)}
             pillStyle="light"
             size="small"

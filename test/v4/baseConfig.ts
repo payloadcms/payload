@@ -18,6 +18,8 @@ import {
 import {
   blocksFieldsSlug,
   collectionSlugs,
+  joinFieldsSlug,
+  joinPostsSlug,
   richTextFieldsSlug,
   textFieldsSlug,
   uploadsSlug,
@@ -39,6 +41,8 @@ import EmailFields from './collections/Email/index.js'
 import FolderItems from './collections/FolderItems/index.js'
 import { Folders } from './collections/Folders/index.js'
 import GroupFields from './collections/Group/index.js'
+import JoinFields from './collections/Join/index.js'
+import JoinPosts from './collections/JoinPosts/index.js'
 import JSONFields from './collections/JSON/index.js'
 import NumberFields from './collections/Number/index.js'
 import PasswordFields from './collections/Password/index.js'
@@ -75,6 +79,8 @@ export const collections: CollectionConfig[] = [
   FolderItems,
   Folders,
   GroupFields,
+  JoinFields,
+  JoinPosts,
   JSONFields,
   NumberFields,
   PasswordFields,
@@ -201,6 +207,32 @@ export const baseConfig: Partial<Config> = {
       collection: blocksFieldsSlug,
       data: blocksSeedData,
     })
+
+    // Seed join fields collection
+    const joinCategory = await payload.create({
+      collection: joinFieldsSlug,
+      data: {
+        name: 'Example Category',
+      },
+    })
+
+    const joinPosts = [
+      { title: 'First Post', status: 'published' },
+      { title: 'Second Post', status: 'draft' },
+      { title: 'Third Post', status: 'published' },
+      { title: 'Fourth Post', status: 'draft' },
+      { title: 'Fifth Post', status: 'published' },
+    ]
+
+    for (const post of joinPosts) {
+      await payload.create({
+        collection: joinPostsSlug,
+        data: {
+          ...post,
+          category: joinCategory.id,
+        },
+      })
+    }
 
     await seedHierarchy(payload)
   },

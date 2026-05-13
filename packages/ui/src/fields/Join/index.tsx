@@ -23,6 +23,7 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../index.js'
+import './index.css'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
@@ -210,7 +211,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}
         initialDrawerData={initialDrawerData}
         Label={
-          <h4 style={{ margin: 0 }}>
+          <h4>
             {Label || (
               <FieldLabel label={label} localized={localized} path={path} required={required} />
             )}
