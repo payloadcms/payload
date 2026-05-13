@@ -77,13 +77,18 @@ async function run(): Promise<void> {
     try {
       await postPRReview(octokit, issueNumber, result.summary, validComments)
       core.info(`AI review posted with ${validComments.length} inline comment(s)`)
-    } catch {
-      // GitHub rejects the entire review when any inline comment references an invalid line.
-      // Fall back to posting the summary as a plain comment so feedback is never lost.
-      await postComment(octokit, issueNumber, result.summary)
-      core.info(
-        'AI review posted as comment (inline comments omitted due to invalid line references)',
-      )
+    } catch (err) {
+      const status = (err as { status?: number }).status
+      if (status === 422) {
+        // GitHub rejects the entire review when any inline comment references an invalid line.
+        // Fall back to posting the summary as a plain comment so feedback is never lost.
+        await postComment(octokit, issueNumber, result.summary)
+        core.info(
+          'AI review posted as comment (inline comments omitted due to invalid line references)',
+        )
+      } else {
+        throw err
+      }
     }
   } catch (error) {
     const internalMessage = error instanceof Error ? error.message : String(error)

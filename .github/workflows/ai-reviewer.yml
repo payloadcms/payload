@@ -17,6 +17,7 @@ concurrency:
 jobs:
   ai-review:
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     if: |
       github.event.comment.body == '/ai-review' &&
       github.event.issue.pull_request != null &&
@@ -25,7 +26,7 @@ jobs:
        github.event.comment.author_association == 'COLLABORATOR')
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Run AI reviewer
         uses: ./.github/actions/ai-reviewer
