@@ -1,4 +1,4 @@
-import type { SingleRelationshipField } from 'payload'
+import type { RelationshipFieldValidation, SingleRelationshipField } from 'payload'
 
 import type { RootTenantFieldConfigOverrides } from '../../types.js'
 
@@ -6,6 +6,11 @@ import { defaults } from '../../defaults.js'
 import { getCollectionIDType } from '../../utilities/getCollectionIDType.js'
 import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 import { getUserTenantIDs } from '../../utilities/getUserTenantIDs.js'
+
+const tenantFieldValidate: RelationshipFieldValidation = (value, options) => {
+  const isEmpty = options.hasMany ? !value || (Array.isArray(value) && value.length === 0) : !value
+  return isEmpty ? options.req.t('validation:required') : true
+}
 
 type Args = {
   debug?: boolean
@@ -109,6 +114,7 @@ export const tenantField = ({
     index: true,
     relationTo: tenantsCollectionSlug,
     unique,
+    validate: tenantFieldValidate,
     ...(hasMany
       ? {
           hasMany: true,
