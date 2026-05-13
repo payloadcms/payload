@@ -50,7 +50,7 @@ export const migrateStorageAdaptersToConfig: Transform = {
         }
 
         // Capture re-emitted text (context-free, clean indentation) before removal
-        const storageTexts = storageIndices.map((i) => arrayLiteral.getElements()[i].print())
+        const storageTexts = storageIndices.map((i) => arrayLiteral.getElements()[i]!.print())
 
         // Remove storage adapter elements from plugins (high-to-low to preserve indices)
         for (const i of [...storageIndices].reverse()) {
