@@ -213,11 +213,9 @@ payload migrate:create --dry-run --skip-empty
 **Full agent workflow:**
 
 ```bash
-# 1. Check if changes need a migration
-result=$(payload migrate:create --dry-run --json --skip-empty)
-
-# 2. If changes detected, create the migration
-if echo "$result" | jq -e '.hasChanges' > /dev/null; then
+# 1. Check if changes need a migration (exit code 0 = changes, 2 = no changes)
+if payload migrate:create --dry-run --skip-empty; then
+  # 2. Changes detected — create the migration
   payload migrate:create my_feature --json --force-accept-warning
 fi
 
