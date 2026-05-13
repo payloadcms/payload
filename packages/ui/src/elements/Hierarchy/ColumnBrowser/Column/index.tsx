@@ -88,7 +88,7 @@ export const Column: React.FC<ColumnProps> = ({
 
         {isLoading && (
           <div className={`${baseClass}__loading`}>
-            <Spinner loadingText={null} size="small" />
+            <Spinner loadingText={null} size="sm" />
           </div>
         )}
 

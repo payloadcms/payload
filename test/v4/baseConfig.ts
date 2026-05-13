@@ -1,6 +1,7 @@
+import fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { type CollectionConfig, type Config, getFileByPath } from 'payload'
+import { type CollectionConfig, type Config } from 'payload'
 
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
@@ -17,6 +18,17 @@ import {
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+// Load file at module level, manually construct to avoid file-type dynamic import issue
+const imagePath = path.resolve(dirname, '../lexical/collections/Upload/payload.jpg')
+const imageData = await fs.readFile(imagePath)
+const imageStat = await fs.stat(imagePath)
+const imageFile = {
+  name: path.basename(imagePath),
+  data: imageData,
+  mimetype: 'image/jpeg',
+  size: imageStat.size,
+}
 
 import ArrayFields from './collections/Array/index.js'
 import Autosave from './collections/Autosave/index.js'
@@ -160,9 +172,6 @@ export const baseConfig: Partial<Config> = {
 
     const richTextCount = await payload.count({ collection: richTextFieldsSlug })
     if (richTextCount.totalDocs === 0) {
-      const imagePath = path.resolve(dirname, '../lexical/collections/Upload/payload.jpg')
-      const imageFile = await getFileByPath(imagePath)
-
       const uploadDoc = await payload.create({
         collection: uploadsSlug,
         data: { alt: 'Farming image' },

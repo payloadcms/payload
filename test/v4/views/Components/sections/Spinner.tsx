@@ -8,14 +8,14 @@ import { Section, Variant } from '../shared.js'
 export const SpinnerSection: React.FC<{ selectedComponent: string }> = ({ selectedComponent }) => {
   return (
     <Section id="spinner" selectedComponent={selectedComponent} title="Spinner">
-      <Variant label="Small (16px)">
-        <SpinnerIcon size={16} />
+      <Variant label="Small (sm - 16px)">
+        <SpinnerIcon size="sm" />
       </Variant>
-      <Variant label="Medium (24px)">
-        <SpinnerIcon size={24} />
+      <Variant label="Medium (md - 24px small arc)">
+        <SpinnerIcon size="md" />
       </Variant>
-      <Variant label="Large (32px)">
-        <SpinnerIcon size={32} />
+      <Variant label="Large (lg - 24px large arc)">
+        <SpinnerIcon size="lg" />
       </Variant>
     </Section>
   )

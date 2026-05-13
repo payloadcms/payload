@@ -126,7 +126,7 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
   if (isInitialLoad) {
     return (
       <div className={`${baseClass}__loading`}>
-        <Spinner size="small" />
+        <Spinner size="sm" />
       </div>
     )
   }
