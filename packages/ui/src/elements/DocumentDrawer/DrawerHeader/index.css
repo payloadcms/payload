@@ -27,15 +27,15 @@
     padding: 0;
     cursor: pointer;
     color: inherit;
+  }
 
-    &:focus,
-    &:focus-within {
-      outline: none;
-    }
+  .doc-drawer__header-toggler:focus,
+  .doc-drawer__header-toggler:focus-within {
+    outline: none;
+  }
 
-    &:disabled {
-      pointer-events: none;
-    }
+  .doc-drawer__header-toggler:disabled {
+    pointer-events: none;
   }
 
   .doc-drawer__header-close {
@@ -44,19 +44,15 @@
     padding: 0;
     cursor: pointer;
     overflow: hidden;
-    width: var(--spacer-6);
-    height: var(--spacer-6);
+  }
 
-    svg {
-      width: var(--spacer-6);
-      height: var(--spacer-6);
-      position: relative;
+  .doc-drawer__header-close svg {
+    position: relative;
+  }
 
-      .stroke {
-        stroke-width: 2px;
-        vector-effect: non-scaling-stroke;
-      }
-    }
+  .doc-drawer__header-close svg .stroke {
+    stroke-width: 2px;
+    vector-effect: non-scaling-stroke;
   }
 
   .doc-drawer__after-header {

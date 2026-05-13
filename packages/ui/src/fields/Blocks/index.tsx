@@ -540,7 +540,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             slug={drawerSlug}
           >
             <Button
-              buttonStyle="icon-label"
+              buttonStyle="ghost"
               disabled={readOnly || disabled}
               el="span"
               icon={<CirclePlusIcon />}
