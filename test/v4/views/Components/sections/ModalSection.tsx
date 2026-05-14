@@ -13,15 +13,20 @@ export const ModalSection: React.FC<{ selectedComponent: string }> = ({ selected
 
   return (
     <Section id="modal" selectedComponent={selectedComponent} title="Modal">
-      <Variant label="Delete Confirmation">
+      <Variant label="Delete Action">
         <Button buttonStyle="destructive" onClick={() => openModal(MODAL_SLUG_DELETE)}>
-          Delete Item
+          Delete
         </Button>
         <ConfirmationModal
-          body="Are you sure you want to delete this item? This action cannot be undone."
+          body={
+            <span>
+              You&apos;re about to move the [label] <strong>[document title]</strong> to the trash.
+              Are you sure?
+            </span>
+          }
           cancelLabel="Cancel"
           confirmLabel="Delete"
-          heading="Delete Item"
+          heading="Move [collection singular label] to trash"
           modalSlug={MODAL_SLUG_DELETE}
           onConfirm={async () => {
             // Simulate async action
@@ -29,8 +34,7 @@ export const ModalSection: React.FC<{ selectedComponent: string }> = ({ selected
           }}
         />
       </Variant>
-
-      <Variant label="Generic Confirmation">
+      <Variant label="General Action">
         <Button buttonStyle="secondary" onClick={() => openModal(MODAL_SLUG_CONFIRM)}>
           Confirm Action
         </Button>
