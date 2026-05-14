@@ -3,9 +3,9 @@ import type {
   CollectionPreferences,
   Data,
   DocumentViewClientProps,
+  DocumentViewComponent,
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
-  EditViewComponent,
   PayloadComponent,
   RenderDocumentVersionsProperties,
 } from 'payload'
@@ -42,7 +42,7 @@ import { renderDocumentSlots } from './renderDocumentSlots.js'
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
 export type ViewToRender =
-  | EditViewComponent
+  | DocumentViewComponent
   | PayloadComponent<DocumentViewServerProps>
   | React.FC
   | React.FC<DocumentViewClientProps>

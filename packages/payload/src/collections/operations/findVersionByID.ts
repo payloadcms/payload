@@ -69,7 +69,10 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ id, disableErrors, req }, collectionConfig.access.readVersions)
+      ? await executeAccess(
+          { id, disableErrors, req },
+          collectionConfig.access.readVersions ?? collectionConfig.access.read,
+        )
       : true
 
     // If errors are disabled, and access returns false, return null

@@ -89,8 +89,11 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   user?: Document
 } & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
-  BaseOptions<TSlug, TSelect> & DraftFlagFromCollectionSlug<TSlug>
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 export async function duplicateLocal<
   TSlug extends CollectionSlug,
@@ -136,11 +139,11 @@ export async function duplicateLocal<
     data,
     depth,
     disableTransaction,
-    draft,
+    draft: draft as any,
     overrideAccess,
     populate,
     req,
-    select,
+    select: select as any,
     selectedLocales,
     showHiddenFields,
   })

@@ -14,7 +14,6 @@ import type { Metadata } from 'next'
 import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
-import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
@@ -225,11 +224,6 @@ export type OGImageConfig = {
   width?: number | string
 }
 
-/**
- * @todo find a way to remove the deep clone here.
- * It can probably be removed after the `DeepRequired` from `Config` to `SanitizedConfig` is removed.
- * Same with `CollectionConfig` to `SanitizedCollectionConfig`.
- */
 type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
 
 export type MetaConfig = {
@@ -393,21 +387,7 @@ export type Endpoint = {
   root?: never
 }
 
-/**
- * @deprecated
- * This type will be renamed in v4.
- * Use `DocumentViewComponent` instead.
- */
-export type EditViewComponent = DocumentViewComponent
-
 export type DocumentViewComponent = PayloadComponent<DocumentViewServerProps>
-
-/**
- * @deprecated
- * This type will be renamed in v4.
- * Use `DocumentViewConfig` instead.
- */
-export type EditViewConfig = DocumentViewConfig
 
 type BaseDocumentViewConfig = {
   actions?: CustomComponent[]
@@ -1168,21 +1148,6 @@ export type Config = {
    */
   collections?: CollectionConfig[]
   /**
-   * Compatibility flags for prior Payload versions
-   */
-  compatibility?: {
-    /**
-     * By default, Payload will remove the `localized: true` property
-     * from fields if a parent field is localized. Set this property
-     * to `true` only if you have an existing Payload database from pre-3.0
-     * that you would like to maintain without migrating. This is only
-     * relevant for MongoDB databases.
-     *
-     * @todo Remove in v4
-     */
-    allowLocalizedWithinLocalized: true
-  }
-  /**
    * Prefix a string to all cookies that Payload sets.
    *
    * @default "payload"
@@ -1559,16 +1524,6 @@ export type Config = {
         jsonSchema: JSONSchema4
       }) => JSONSchema4
     >
-
-    /**
-     * Enable strict type safety for draft operations. When enabled, the `draft` parameter is forbidden
-     * on collections without drafts, and query results with `draft: true` type required fields as optional.
-     * This prevents invalid draft usage at compile time and ensures type correctness across all Local API operations.
-     *
-     * @default false
-     * @todo Remove in v4. Strict draft types will become the default behavior.
-     */
-    strictDraftTypes?: boolean
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
@@ -1576,14 +1531,10 @@ export type Config = {
   upload?: FetchAPIFileUploadOptions
 }
 
-/**
- * @todo remove the `DeepRequired` in v4.
- * We don't actually guarantee that all properties are set when sanitizing configs.
- */
 export type SanitizedConfig = {
   admin: {
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']>
+  } & Required<NonNullable<Config['admin']>>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
@@ -1605,15 +1556,12 @@ export type SanitizedConfig = {
     adapters: string[]
   } & FetchAPIFileUploadOptions
 } & Omit<
-  // TODO: DeepRequired breaks certain, advanced TypeScript types / certain type information is lost. We should remove it when possible.
-  // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
-  // the result type is different
-  DeepRequired<Config>,
+  Required<Config>,
   | 'admin'
   | 'blocks'
   | 'collections'
   | 'editor'
-  | 'endpoint'
+  | 'endpoints'
   | 'globals'
   | 'i18n'
   | 'jobs'

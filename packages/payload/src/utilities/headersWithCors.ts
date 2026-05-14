@@ -29,7 +29,7 @@ export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
       if (typeof cors === 'object' && 'headers' in cors) {
         headers.set(
           'Access-Control-Allow-Headers',
-          [...defaultAllowedHeaders, ...cors.headers].filter(Boolean).join(', '),
+          [...defaultAllowedHeaders, ...(cors.headers ?? [])].filter(Boolean).join(', '),
         )
       } else {
         headers.set('Access-Control-Allow-Headers', defaultAllowedHeaders.join(', '))

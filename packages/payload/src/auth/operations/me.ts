@@ -51,12 +51,12 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       id: req.user.id,
       collection: collection.config.slug,
       depth: isGraphQL ? 0 : (depth ?? collection.config.auth.depth),
-      draft,
+      draft: draft as never,
       joins,
       overrideAccess: false,
       populate,
       req,
-      select,
+      select: select as never,
       showHiddenFields: false,
     })) as TypedUser
 

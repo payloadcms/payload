@@ -40,25 +40,16 @@ export type GlobalsWithoutDrafts = {
 }[GlobalSlug]
 
 /**
- * Conditionally allows or forbids the `draft` property based on global configuration.
- * When `strictDraftTypes` is enabled, the `draft` property is forbidden on globals without drafts.
+ * Allows or forbids the `draft` property based on whether the global has drafts enabled.
+ * The `draft` property is forbidden on globals without `versions.drafts` enabled.
  */
-export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
-  strictDraftTypes: true
-}
-  ? TSlug extends GlobalsWithoutDrafts
-    ? {
-        /**
-         * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
-         */
-        draft?: never
-      }
-    : {
-        /**
-         * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-         */
-        draft?: boolean
-      }
+export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = TSlug extends GlobalsWithoutDrafts
+  ? {
+      /**
+       * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
+       */
+      draft?: never
+    }
   : {
       /**
        * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)

@@ -32,6 +32,9 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 - `migrate-hide-api-url` — migrates `admin.hideAPIURL: true` to `admin.components.views.edit.api.tab.condition: () => false` on collection and global configs.
 - `migrate-aliased-exports` — rewrites imports of types and utilities that used to be re-exported from `@payloadcms/ui` and `@payloadcms/next/utilities` to their canonical sources in `payload` / `payload/shared`.
 - `migrate-document-title-context` — migrates `title` and `setDocumentTitle` destructured from `useDocumentInfo()` to `useDocumentTitle()`. They were removed from `DocumentInfoContext` in v4 and now live on `DocumentTitleContext`.
+- `rename-edit-view-types` — renames the deprecated `EditViewComponent` → `DocumentViewComponent` and `EditViewConfig` → `DocumentViewConfig` in import statements. When the local name differs from the new canonical name, an `as` alias is preserved so existing usages keep compiling.
+- `remove-allow-localized-within-localized` — removes the deprecated `compatibility.allowLocalizedWithinLocalized` flag from Payload configs. Localized-within-localized is now the default behaviour in v4. The entire `compatibility` object is removed if it would become empty.
+- `remove-strict-draft-types` — removes the `typescript.strictDraftTypes` option from Payload configs. Strict draft types are now the default behaviour in v4 and the flag no longer exists. The entire `typescript` object is removed if it would become empty.
 
 ## Contributing
 

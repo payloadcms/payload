@@ -19,7 +19,7 @@ export const deleteByIDHandler: PayloadHandler = async (req) => {
     overrideLock: overrideLock ?? false,
     populate,
     req,
-    select,
+    select: select as never,
     trash,
   })
 

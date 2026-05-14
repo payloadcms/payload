@@ -13,7 +13,7 @@ export const logError = ({ err, payload }: { err: unknown; payload: Payload }): 
     typeof payload.config.loggingLevels[err.name as keyof typeof payload.config.loggingLevels] !==
       'undefined'
   ) {
-    level = payload.config.loggingLevels[err.name as keyof typeof payload.config.loggingLevels]
+    level = payload.config.loggingLevels[err.name as keyof typeof payload.config.loggingLevels]!
   }
 
   if (level) {

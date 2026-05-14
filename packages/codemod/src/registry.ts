@@ -8,6 +8,9 @@ import { migrateDocumentTitleContext } from './transforms/migrate-document-title
 import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
 import { migrateHideAPIURL } from './transforms/migrate-hide-api-url/index.js'
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
+import { removeAllowLocalizedWithinLocalized } from './transforms/remove-allow-localized-within-localized/index.js'
+import { removeStrictDraftTypes } from './transforms/remove-strict-draft-types/index.js'
+import { renameEditViewTypes } from './transforms/rename-edit-view-types/index.js'
 
 export const transforms: Transform[] = [
   exampleNoop,
@@ -18,4 +21,7 @@ export const transforms: Transform[] = [
   migrateForceSelect,
   migrateAliasedExports,
   migrateDocumentTitleContext,
+  renameEditViewTypes,
+  removeAllowLocalizedWithinLocalized,
+  removeStrictDraftTypes,
 ]

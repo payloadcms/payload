@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
+import type { IsAny, MarkOptional } from 'ts-essentials'
 
 import type { CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
@@ -84,13 +84,11 @@ export type CollectionsWithoutDrafts = {
 }[CollectionSlug]
 
 /**
- * Conditionally allows or forbids the `draft` property based on collection configuration.
- * When `strictDraftTypes` is enabled, the `draft` property is forbidden on collections without drafts.
+ * Allows or forbids the `draft` property based on whether the collection has drafts enabled.
+ * The `draft` property is forbidden on collections without `versions.drafts` enabled.
  */
-export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = GeneratedTypes extends {
-  strictDraftTypes: true
-}
-  ? TSlug extends CollectionsWithoutDrafts
+export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> =
+  TSlug extends CollectionsWithoutDrafts
     ? {
         /**
          * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
@@ -103,12 +101,6 @@ export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = Generate
          */
         draft?: boolean
       }
-  : {
-      /**
-       * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-       */
-      draft?: boolean
-    }
 
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
@@ -780,13 +772,10 @@ export type SanitizedJoins = {
   [collectionSlug: string]: SanitizedJoin[]
 }
 
-/**
- * @todo remove the `DeepRequired` in v4.
- * We don't actually guarantee that all properties are set when sanitizing configs.
- */
 export interface SanitizedCollectionConfig
   extends Omit<
-    DeepRequired<CollectionConfig>,
+    Required<CollectionConfig>,
+    | 'access'
     | 'admin'
     | 'auth'
     | 'endpoints'
@@ -794,11 +783,22 @@ export interface SanitizedCollectionConfig
     | 'folder'
     | 'folders'
     | 'hierarchy'
+    | 'hooks'
+    | 'labels'
     | 'slug'
     | 'tags'
     | 'upload'
     | 'versions'
   > {
+  access: {
+    admin?: ({ req }: { req: PayloadRequest }) => boolean | Promise<boolean>
+    create: Access
+    delete: Access
+    read: Access
+    readVersions?: Access
+    unlock: Access
+    update: Access
+  }
   admin: CollectionAdminOptions
   auth: Auth
   endpoints: Endpoint[] | false
@@ -812,15 +812,39 @@ export interface SanitizedCollectionConfig
    * Hierarchy configuration (when collection is a hierarchy type like folders or tags)
    */
   hierarchy: false | SanitizedHierarchyConfig
+  hooks: {
+    afterChange: AfterChangeHook[]
+    afterDelete: AfterDeleteHook[]
+    afterError?: AfterErrorHook[]
+    afterForgotPassword: AfterForgotPasswordHook[]
+    afterLogin: AfterLoginHook[]
+    afterLogout: AfterLogoutHook[]
+    afterMe: AfterMeHook[]
+    afterOperation: AfterOperationHook[]
+    afterRead: AfterReadHook[]
+    afterRefresh: AfterRefreshHook[]
+    beforeChange: BeforeChangeHook[]
+    beforeDelete: BeforeDeleteHook[]
+    beforeLogin: BeforeLoginHook[]
+    beforeOperation: BeforeOperationHook[]
+    beforeRead: BeforeReadHook[]
+    beforeValidate: BeforeValidateHook[]
+    me: MeHook[]
+    refresh: RefreshHook[]
+  }
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
+
+  labels: {
+    plural: LabelFunction | StaticLabel
+    singular: LabelFunction | StaticLabel
+  }
   /**
    * List of all polymorphic join fields
    */
   polymorphicJoins: SanitizedJoin[]
-
   sanitizedIndexes: SanitizedCompoundIndex[]
 
   slug: CollectionSlug

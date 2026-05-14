@@ -2085,21 +2085,15 @@ export function fieldIsLocalized(field: Field | Tab): boolean {
 }
 
 /**
- * Similar to `fieldIsLocalized`, but returns `false` if any parent field is localized.
+ * Returns `true` if the field has `localized: true` set.
  */
 export function fieldShouldBeLocalized({
   field,
-  parentIsLocalized,
 }: {
   field: ClientField | ClientTab | Field | Tab
-  parentIsLocalized: boolean
+  parentIsLocalized?: boolean
 }): boolean {
-  return (
-    'localized' in field &&
-    field.localized! &&
-    (!parentIsLocalized ||
-      process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true')
-  )
+  return 'localized' in field && field.localized!
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {

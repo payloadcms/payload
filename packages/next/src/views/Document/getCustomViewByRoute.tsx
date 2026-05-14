@@ -1,4 +1,8 @@
-import type { EditViewComponent, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type {
+  DocumentViewComponent,
+  SanitizedCollectionConfig,
+  SanitizedGlobalConfig,
+} from 'payload'
 
 import { isPathMatchingRoute } from '../Root/isPathMatchingRoute.js'
 
@@ -13,7 +17,7 @@ export const getCustomViewByRoute = ({
     | SanitizedCollectionConfig['admin']['components']['views']
     | SanitizedGlobalConfig['admin']['components']['views']
 }): {
-  Component: EditViewComponent
+  Component: DocumentViewComponent
   viewKey?: string
 } => {
   if (typeof views?.edit === 'object') {
