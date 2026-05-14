@@ -30,7 +30,7 @@ export const DropdownIndicator: React.FC<
       }}
       type="button"
     >
-      <ChevronIcon bold={false} className={`${baseClass}__icon`} size={16} />
+      <ChevronIcon className={`${baseClass}__icon`} />
     </button>
   )
 }
