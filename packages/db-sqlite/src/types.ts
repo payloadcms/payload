@@ -1,7 +1,11 @@
 import type { Client, Config, ResultSet } from '@libsql/client'
-import type { extendDrizzleTable, Operators } from '@payloadcms/drizzle'
+import type {
+  BuildQueryJoinAliases,
+  DrizzleAdapter,
+  extendDrizzleTable,
+  Operators,
+} from '@payloadcms/drizzle'
 import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@payloadcms/drizzle/sqlite'
-import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
