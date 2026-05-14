@@ -68,6 +68,17 @@ export type PopupProps = {
    */
   portalClassName?: string
   render?: (args: { close: () => void }) => React.ReactNode
+  /**
+   * Render prop for custom trigger button. Receives onClick/onKeyDown/aria props.
+   * When provided, `button` and `buttonType` are ignored.
+   */
+  renderButton?: (props: {
+    active: boolean
+    'aria-expanded': boolean
+    'aria-haspopup': true
+    onClick: React.MouseEventHandler
+    onKeyDown: React.KeyboardEventHandler
+  }) => React.ReactNode
   showOnHover?: boolean
   /**
    * By default, the scrollbar is hidden. If you want to show it, set this to true.
@@ -114,6 +125,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     onToggleOpen,
     portalClassName,
     render,
+    renderButton,
     showOnHover = false,
     showScrollbar = false,
     size = 'medium',
@@ -348,7 +360,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     // /////////////////////////////////////
     // Initial Position
-    // Calculate and apply popup position immediately on open.
+    // Calculate and apply popup position.
+    // getBoundingClientRect() forces synchronous layout.
     // /////////////////////////////////////
 
     updatePosition()
@@ -403,6 +416,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       className={buttonClassName}
       disabled={disabled}
       noBackground={noBackground}
+      renderButton={renderButton}
       setActive={setActive}
       size={buttonSize}
     />
