@@ -73,12 +73,10 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
       type: 'text',
       required: true,
     },
-    /**
-     * @todo make required in 4.0
-     */
     {
       name: 'input',
       type: 'json',
+      required: true,
     },
     {
       name: 'output',

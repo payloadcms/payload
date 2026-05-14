@@ -27,7 +27,7 @@ export type JobLog = {
    * ID added by the array field when the log is saved in the database
    */
   id: string
-  input?: Record<string, any>
+  input: Record<string, any>
   output?: Record<string, any>
   /**
    * Sub-tasks (tasks that are run within a task) will have a parent task ID

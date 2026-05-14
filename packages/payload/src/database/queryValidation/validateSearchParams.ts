@@ -19,7 +19,7 @@ type Args = {
   globalConfig?: SanitizedGlobalConfig
   operator: string
   overrideAccess: boolean
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
   path: string
   // TODO: Rename to permissions or entityPermissions in 4.0
   policies: EntityPolicies

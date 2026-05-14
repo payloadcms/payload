@@ -24,10 +24,7 @@ type Args<T> = {
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
-  /**
-   * @todo make required in v4.0
-   */
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -74,7 +71,7 @@ export const traverseFields = async <T>({
         operation,
         overrideAccess,
         parentIndexPath,
-        parentIsLocalized: parentIsLocalized!,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         req,

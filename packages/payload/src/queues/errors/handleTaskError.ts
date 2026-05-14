@@ -96,7 +96,7 @@ export async function handleTaskError({
     completedAt: currentDate.toISOString(),
     error: errorJSON,
     executedAt: executedAt.toISOString(),
-    input,
+    input: input ?? {},
     output: output ?? {},
     parent: req.payload.config.jobs.addParentToTaskLog ? parent : undefined,
     state: 'failed',

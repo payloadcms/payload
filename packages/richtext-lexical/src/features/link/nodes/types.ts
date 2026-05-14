@@ -22,10 +22,7 @@ export type LinkFields = {
 
 export type SerializedLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
   fields: LinkFields
-  /**
-   * @todo make required in 4.0 and type AutoLinkNode differently
-   */
-  id?: string // optional if AutoLinkNode
+  id: string
 } & StronglyTypedElementNode<SerializedElementNode, 'link', T>
 
 export type SerializedAutoLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {

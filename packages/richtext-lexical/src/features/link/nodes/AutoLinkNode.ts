@@ -26,18 +26,6 @@ export class AutoLinkNode extends LinkNode {
   static override importJSON(serializedNode: SerializedAutoLinkNode): AutoLinkNode {
     const node = $createAutoLinkNode({}).updateFromJSON(serializedNode)
 
-    /**
-     * @todo remove in 4.0
-     */
-    if (
-      serializedNode.version === 1 &&
-      typeof serializedNode.fields?.doc?.value === 'object' &&
-      serializedNode.fields?.doc?.value?.id
-    ) {
-      serializedNode.fields.doc.value = serializedNode.fields.doc.value.id
-      serializedNode.version = 2
-    }
-
     return node
   }
 
@@ -66,7 +54,7 @@ export class AutoLinkNode extends LinkNode {
   }
 
   override updateFromJSON(serializedNode: LexicalUpdateJSON<SerializedAutoLinkNode>): this {
-    return super.updateFromJSON(serializedNode).setFields(serializedNode.fields)
+    return super.updateFromJSON({ ...serializedNode, id: '' }).setFields(serializedNode.fields)
   }
 }
 

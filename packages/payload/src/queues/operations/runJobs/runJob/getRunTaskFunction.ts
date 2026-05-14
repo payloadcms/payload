@@ -180,7 +180,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         id: new ObjectId().toHexString(),
         completedAt: getCurrentDate().toISOString(),
         executedAt: executedAt.toISOString(),
-        input,
+        input: input ?? {},
         output,
         parent: jobConfig.addParentToTaskLog ? parent : undefined,
         state: 'succeeded',

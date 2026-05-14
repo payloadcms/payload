@@ -403,6 +403,7 @@ export const traverseFields = ({
             !validateExistingBlockIsIdentical({
               block,
               localized: field.localized,
+              parentIsLocalized,
               rootTableName,
               table: adapter.rawTables[blockTableName],
               tableLocales: adapter.rawTables[`${blockTableName}${adapter.localesSuffix}`],

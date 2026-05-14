@@ -321,6 +321,7 @@ export type UpdateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
   select?: SelectType
@@ -361,6 +362,7 @@ export type CreateGlobalArgs<T extends Record<string, unknown> = any> = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
   slug: string
@@ -380,6 +382,7 @@ export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
   select?: SelectType
@@ -420,6 +423,7 @@ export type CreateVersionArgs<T extends JsonObject = JsonObject> = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
   select?: SelectType
@@ -446,6 +450,7 @@ export type CreateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
   select?: SelectType
@@ -476,6 +481,7 @@ export type UpdateVersionArgs<T extends JsonObject = JsonObject> = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
   select?: SelectType
@@ -516,6 +522,7 @@ export type CreateArgs = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
   select?: SelectType
@@ -566,6 +573,7 @@ export type UpdateOneArgs = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
   select?: SelectType
@@ -601,6 +609,7 @@ export type UpdateManyArgs = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
   select?: SelectType
@@ -617,6 +626,7 @@ export type UpdateJobsArgs = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
 } & (
@@ -646,6 +656,7 @@ export type UpsertArgs = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
   select?: SelectType
@@ -662,6 +673,7 @@ export type DeleteOneArgs = {
    * If true, returns the updated documents
    *
    * @default true
+   * @deprecated This parameter will be removed in the next major version.
    */
   returning?: boolean
   select?: SelectType
@@ -712,10 +724,8 @@ export type DatabaseAdapterResult<T = BaseDatabaseAdapter> = {
   init: (args: { payload: Payload }) => T
   /**
    * The name of the database adapter. For example, "postgres" or "mongoose".
-   *
-   * @todo make required in 4.0
    */
-  name?: string
+  name: string
 }
 
 export type DBIdentifierName =
