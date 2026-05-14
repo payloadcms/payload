@@ -296,7 +296,10 @@ function injectTypeField({
     admin: {
       components: {
         Field: {
-          path: '@payloadcms/next/rsc#HierarchyTypeFieldServer',
+          path:
+            process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
+              ? '@payloadcms/tanstack-start/rsc#HierarchyTypeFieldServer'
+              : '@payloadcms/next/rsc#HierarchyTypeFieldServer',
           serverProps: {
             collectionOptions,
             parentFieldName,

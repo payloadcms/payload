@@ -3,7 +3,6 @@ import type { PluginOption, UserConfigFnObject } from 'vite'
 import fs from 'node:fs'
 import { builtinModules } from 'node:module'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 export interface PayloadPluginOptions {
   /** Additional resolve aliases */
@@ -50,81 +49,6 @@ const serverOnlyClientSpecifiers: Array<RegExp | string> = [
   /^file-type/,
   /^react-dom\/server/,
 ]
-
-const dateFnsLocales = [
-  'ar',
-  'az',
-  'bg',
-  'bn',
-  'ca',
-  'cs',
-  'da',
-  'de',
-  'en-US',
-  'es',
-  'et',
-  'fa-IR',
-  'fr',
-  'he',
-  'hr',
-  'hu',
-  'id',
-  'is',
-  'it',
-  'ja',
-  'ko',
-  'lt',
-  'lv',
-  'nb',
-  'nl',
-  'pl',
-  'pt',
-  'ro',
-  'ru',
-  'sk',
-  'sl',
-  'sr',
-  'sr-Latn',
-  'sv',
-  'ta',
-  'th',
-  'tr',
-  'uk',
-  'vi',
-  'zh-CN',
-  'zh-TW',
-]
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-function resolveShimPath(shimName: string): string {
-  const tsPath = path.resolve(__dirname, 'shims', shimName + '.ts')
-  if (fs.existsSync(tsPath)) {
-    return tsPath
-  }
-  return path.resolve(__dirname, 'shims', shimName + '.js')
-}
-
-function safeSSRConsole(): PluginOption {
-  let patched = false
-  return {
-    name: 'payload:safe-ssr-console',
-    configureServer() {
-      if (patched) {
-        return
-      }
-      patched = true
-      const orig = console.error
-      console.error = function (...args: unknown[]) {
-        try {
-          orig.apply(console, args)
-        } catch {
-          // react-dom SSR dev mode passes non-stringifiable objects to console.error
-        }
-      }
-    },
-  }
-}
 
 function ssrStripDistStyleImports(): PluginOption {
   return {
@@ -258,12 +182,14 @@ function extractDeclaredIdentifiers(code: string): Set<string> {
 }
 
 /**
- * Handles server-only module resolution for the client bundle:
- * 1. Stubs RSC modules (payloadcms rsc entries) with no-op components
- * 2. Redirects bare 'payload' imports to 'payload/shared' to avoid loading
+ * Client-side module resolution:
+ * 1. Stubs RSC modules (payloadcms /rsc entries) with no-op components
+ * 2. Redirects bare 'payload' imports to 'payload/shared' to avoid
  *    payload/src/index.ts which has top-level side effects requiring Node.js APIs
+ * 3. Resolves `/client` subpath exports for plugin-* and storage-* packages
+ *    when normal Vite resolution fails in monorepo dev
  */
-function stubServerOnlyImportMapEntries(): PluginOption {
+function clientModuleResolution(): PluginOption {
   const stubPrefix = '\0payload:server-stub:'
   const serverOnlyPatterns = [
     /^@payloadcms\/richtext-lexical\/rsc$/,
@@ -272,21 +198,21 @@ function stubServerOnlyImportMapEntries(): PluginOption {
     /^@payloadcms\/tanstack-start\/rsc$/,
   ]
   const serverOnlyExports: Record<string, string[]> = {
-    '@payloadcms/next/rsc': ['CollectionCards'],
+    '@payloadcms/next/rsc': ['CollectionCards', 'HierarchyTypeFieldServer'],
     '@payloadcms/richtext-lexical/rsc': [
       'RscEntryLexicalCell',
       'RscEntryLexicalField',
       'LexicalDiffComponent',
     ],
-    '@payloadcms/tanstack-start/rsc': ['CollectionCards', 'renderPayloadComponentOnServer'],
-  }
-
-  function isServerOnlySpecifier(id: string): boolean {
-    return serverOnlyPatterns.some((p) => p.test(id))
+    '@payloadcms/tanstack-start/rsc': [
+      'CollectionCards',
+      'HierarchyTypeFieldServer',
+      'renderPayloadComponentOnServer',
+    ],
   }
 
   return {
-    name: 'payload:stub-server-only-import-map',
+    name: 'payload:client-module-resolution',
     enforce: 'pre',
     load(id) {
       if (!id.startsWith(stubPrefix)) {
@@ -303,9 +229,11 @@ function stubServerOnlyImportMapEntries(): PluginOption {
       if (options?.ssr) {
         return
       }
-      if (isServerOnlySpecifier(id)) {
+
+      if (serverOnlyPatterns.some((p) => p.test(id))) {
         return stubPrefix + id
       }
+
       if (id === 'payload' && importer && !importer.includes('/node_modules/')) {
         const isPayloadPackage = /\/packages\/(?:payload|ui|richtext-|tanstack-start|next)\//.test(
           importer,
@@ -314,39 +242,25 @@ function stubServerOnlyImportMapEntries(): PluginOption {
           return this.resolve('payload/shared', importer, { ...options, skipSelf: true })
         }
       }
-    },
-  }
-}
 
-/**
- * Resolves `/client` subpath exports for `@payloadcms/plugin-*` and `@payloadcms/storage-*`
- * packages when normal Vite resolution fails (common in monorepo dev where the package
- * `exports` field may not be picked up for pre-excluded dependencies).
- */
-function resolvePayloadPluginClientExports(): PluginOption {
-  return {
-    name: 'payload:resolve-plugin-client-exports',
-    enforce: 'pre',
-    async resolveId(id, importer, options) {
-      if (!/^@payloadcms\/(?:plugin|storage)-[^/]+\/client$/.test(id)) {
-        return
-      }
-      const resolved = await this.resolve(id, importer, { ...options, skipSelf: true })
-      if (resolved) {
-        return resolved
-      }
-      const pkgName = id.replace(/\/client$/, '')
-      const pkgResolved = await this.resolve(pkgName, importer, { ...options, skipSelf: true })
-      if (pkgResolved) {
-        const pkgDir = path.dirname(pkgResolved.id)
-        const candidates = [
-          path.resolve(pkgDir, 'src', 'exports', 'client.ts'),
-          path.resolve(pkgDir, 'src', 'exports', 'client.js'),
-          path.resolve(pkgDir, 'dist', 'exports', 'client.js'),
-        ]
-        for (const candidate of candidates) {
-          if (fs.existsSync(candidate)) {
-            return candidate
+      if (/^@payloadcms\/(?:plugin|storage)-[^/]+\/client$/.test(id)) {
+        const resolved = await this.resolve(id, importer, { ...options, skipSelf: true })
+        if (resolved) {
+          return resolved
+        }
+        const pkgName = id.replace(/\/client$/, '')
+        const pkgResolved = await this.resolve(pkgName, importer, { ...options, skipSelf: true })
+        if (pkgResolved) {
+          const pkgDir = path.dirname(pkgResolved.id)
+          const candidates = [
+            path.resolve(pkgDir, 'src', 'exports', 'client.ts'),
+            path.resolve(pkgDir, 'src', 'exports', 'client.js'),
+            path.resolve(pkgDir, 'dist', 'exports', 'client.js'),
+          ]
+          for (const candidate of candidates) {
+            if (fs.existsSync(candidate)) {
+              return candidate
+            }
           }
         }
       }
@@ -354,34 +268,12 @@ function resolvePayloadPluginClientExports(): PluginOption {
   }
 }
 
-function payloadTransforms(): PluginOption {
-  const headScriptsId = 'tanstack-start-injected-head-scripts:v'
-  const resolvedHeadScriptsId = '\0' + headScriptsId
-
-  return {
-    name: 'payload:transforms',
-    load(id) {
-      if (id === resolvedHeadScriptsId) {
-        return 'export const injectedHeadScripts = ""'
-      }
-    },
-    resolveId(id) {
-      if (id === headScriptsId) {
-        return resolvedHeadScriptsId
-      }
-    },
-    transform(code, id, options) {
-      if (options?.ssr) {
-        return
-      }
-      if (code.includes('process.cwd') && !id.includes('node_modules/.vite')) {
-        return code.replace(/process\.cwd\(\)/g, '"/"')
-      }
-    },
-  }
-}
-
-function injectViteDevScripts(): PluginOption {
+/**
+ * Combined plugin for dev-time transforms:
+ * - Replaces `process.cwd()` with `"/"` in client code (non-SSR, non-prebundled)
+ * - Injects Vite HMR + React Refresh preamble into SSR-rendered HTML (dev only)
+ */
+function payloadDevTransforms(): PluginOption {
   const devScripts = `<script type="module" src="/@vite/client"></script>
 <script type="module">
 import RefreshRuntime from "/@react-refresh"
@@ -392,7 +284,7 @@ window.__vite_plugin_react_preamble_installed__ = true
 </script>`
 
   return {
-    name: 'payload:inject-vite-dev-scripts',
+    name: 'payload:dev-transforms',
     configureServer(server) {
       server.middlewares.use((_req, res, next) => {
         let injected = false
@@ -431,6 +323,14 @@ window.__vite_plugin_react_preamble_installed__ = true
         next()
       })
     },
+    transform(code, id, options) {
+      if (options?.ssr) {
+        return
+      }
+      if (code.includes('process.cwd') && !id.includes('node_modules/.vite')) {
+        return code.replace(/process\.cwd\(\)/g, '"/"')
+      }
+    },
   }
 }
 
@@ -453,12 +353,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
 
   process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'true'
 
-  const hoistNonReactStaticsShimPath = resolveShimPath('hoistNonReactStatics')
-  const propTypesShimPath = resolveShimPath('propTypes')
-
-  return ({ command }) => {
-    const isServe = command === 'serve'
-
+  return (_env) => {
     return {
       css: {
         preprocessorOptions: {
@@ -471,11 +366,27 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
         global: 'globalThis',
         'process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED': JSON.stringify('true'),
       },
+      environments: {
+        rsc: {
+          resolve: {
+            noExternal: ['@payloadcms/ui', '@payloadcms/richtext-lexical'],
+          },
+        },
+        ssr: {
+          resolve: {
+            noExternal: [
+              '@payloadcms/ui',
+              '@payloadcms/translations',
+              '@payloadcms/tanstack-start',
+              /^@payloadcms\/richtext-lexical/,
+            ],
+          },
+        },
+      } as any,
       optimizeDeps: {
         exclude: [
           'sharp',
           '@payloadcms/ui',
-          '@payloadcms/translations',
           '@payloadcms/tanstack-start',
           'payload',
           'pino',
@@ -511,82 +422,15 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           '@payloadcms/ui > md5',
           'payload > deepmerge',
           'payload > pluralize',
-          'payload > ajv',
-          'payload > jose',
-          'payload > dataloader',
-          'payload > console-table-printer',
-          'payload > sanitize-filename',
-          'payload > image-size',
-          'payload > image-size/fromFile',
-          'payload > undici',
-          'payload > ipaddr.js',
-          'payload > path-to-regexp',
-          'payload > ci-info',
-          'payload > range-parser',
           'scheduler',
-          ...dateFnsLocales.map((l) => `@payloadcms/translations > date-fns/locale/${l}`),
           ...additionalOptimizeDepsInclude,
         ],
       },
       plugins: [
-        {
-          name: 'payload:server-resolve-boundaries',
-          config() {
-            return {
-              environments: {
-                rsc: {
-                  resolve: {
-                    noExternal: ['@payloadcms/ui', '@payloadcms/richtext-lexical'],
-                  },
-                },
-                ssr: {
-                  resolve: {
-                    noExternal: [
-                      '@payloadcms/ui',
-                      '@payloadcms/translations',
-                      '@payloadcms/tanstack-start',
-                      /^@payloadcms\/richtext-lexical/,
-                    ],
-                  },
-                },
-              },
-            }
-          },
-        },
-        {
-          name: 'payload:fix-ajv-namespace-mutation',
-          enforce: 'post' as const,
-          transform(code, id) {
-            const cleanId = id.replace(/\?.*$/, '')
-            if (
-              !cleanId.includes('ajv') ||
-              !/[\\/](?:lib|dist)[\\/]runtime[\\/](?:uri|equal|re2)\.(?:ts|js)$/.test(cleanId)
-            ) {
-              return
-            }
-            if (!code.includes('.code =') && !code.includes('.code=')) {
-              return
-            }
-            const patched = code.replace(
-              /(const|let|var)\s+(\w+)\s*=\s*\(?__cjs_interop__\(await\s+import\([^)]+\)\)\)?;/g,
-              (match, decl, name) => {
-                return (
-                  match.replace(`${decl} ${name}`, `${decl} __raw_${name}`) +
-                  `\nvar ${name} = typeof __raw_${name} === 'object' && __raw_${name} !== null ? { ...__raw_${name} } : __raw_${name};`
-                )
-              },
-            )
-            if (patched !== code) {
-              return { code: patched, map: null }
-            }
-          },
-        },
-        stubServerOnlyImportMapEntries(),
-        resolvePayloadPluginClientExports(),
+        clientModuleResolution(),
         wrapCjsForClient(),
         ssrStripDistStyleImports(),
-        safeSSRConsole(),
-        payloadTransforms(),
+        payloadDevTransforms(),
         rscPlugin,
         tanstackStart({
           importProtection: {
@@ -598,26 +442,16 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
             include: ['**/*'],
             mockAccess: 'warn',
             onViolation: (info) => {
+              const allowedClientFileImporters =
+                /\/richtext-lexical\/.*\/exports\/client\/|\/tanstack-start\/.*\/views\/AdminView|\/ui\//
               if (
                 info.envType === 'server' &&
-                info.importer.includes('/richtext-lexical/') &&
-                info.importer.includes('/exports/client/index.ts') &&
-                info.resolved?.includes('.client.')
+                info.resolved?.includes('.client.') &&
+                allowedClientFileImporters.test(info.importer)
               ) {
                 return false
               }
 
-              if (
-                info.envType === 'server' &&
-                ((info.importer.includes('/tanstack-start/') &&
-                  info.importer.includes('/views/AdminView.tsx')) ||
-                  info.importer.includes('/ui/')) &&
-                info.resolved.includes('.client.')
-              ) {
-                return false
-              }
-
-              // Diff converters are RSC-only (server components) and legitimately use Node.js crypto
               if (
                 info.importer.includes('/richtext-lexical/') &&
                 info.importer.includes('/field/Diff/')
@@ -625,14 +459,10 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
                 return false
               }
 
-              // Core payload package is server-only; its barrel export gets traced through
-              // RSC entry points but never actually runs on the client
               if (info.importer.includes('/packages/payload/')) {
                 return false
               }
 
-              // RSC client-reference facades legitimately import .client. files
-              // to create the client boundary references
               if (
                 info.envType === 'server' &&
                 info.importer.includes('vite-rsc/client-references')
@@ -649,7 +479,6 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           srcDirectory,
         }),
         reactPlugin,
-        isServe && injectViteDevScripts(),
         ...extraPlugins,
       ],
       resolve: {
@@ -658,21 +487,9 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
             find: '@payload-config',
             replacement: path.resolve(payloadConfigPath),
           },
-          ...(isServe
-            ? [
-                {
-                  find: 'hoist-non-react-statics',
-                  replacement: hoistNonReactStaticsShimPath,
-                },
-                {
-                  find: 'prop-types',
-                  replacement: propTypesShimPath,
-                },
-              ]
-            : []),
           ...additionalAliases,
         ],
-        dedupe: ['react', 'react-dom', 'scheduler', '@payloadcms/ui', 'ajv'],
+        dedupe: ['react', 'react-dom', 'scheduler', '@payloadcms/ui'],
         extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
         tsconfigPaths: true,
       } as any,
@@ -683,6 +500,8 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
       },
       ssr: {
         external: [
+          'ajv',
+          'fast-uri',
           'drizzle-kit',
           'drizzle-kit/api',
           'drizzle-orm',

@@ -127,6 +127,7 @@ export { HierarchyButtonClient } from '../../elements/Hierarchy/DocHeaderButton/
 export type { HierarchyButtonClientProps } from '../../elements/Hierarchy/DocHeaderButton/index.js'
 export { HierarchyFieldClient } from '../../elements/Hierarchy/Field/index.client.js'
 export type { HierarchyFieldClientProps } from '../../elements/Hierarchy/Field/index.client.js'
+export { HierarchyTypeField } from '../../elements/Hierarchy/TypeField/index.js'
 export {
   formatHierarchyDrawerSlug,
   HierarchyDrawerToggler,
