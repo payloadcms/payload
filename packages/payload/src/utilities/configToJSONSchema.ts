@@ -1409,10 +1409,6 @@ export function configToJSONSchema(
       globals: generateEntitySchemas(config.globals || []),
       globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
-      strictDraftTypes: {
-        type: 'boolean',
-        const: true,
-      },
       user: generateAuthEntitySchemas(config.collections),
       widgets: widgetSchemas.schema,
     },
@@ -1424,7 +1420,6 @@ export function configToJSONSchema(
       'collectionsSelect',
       'collectionsJoins',
       'globalsSelect',
-      'strictDraftTypes',
       'globals',
       'auth',
       'db',

@@ -14,6 +14,11 @@ export const renameEditViewTypes: Transform = {
       let mutated = false
 
       for (const importDecl of sourceFile.getImportDeclarations()) {
+        const moduleSpecifier = importDecl.getModuleSpecifierValue()
+        if (moduleSpecifier !== 'payload' && moduleSpecifier !== 'payload/shared') {
+          continue
+        }
+
         for (const spec of importDecl.getNamedImports()) {
           const name = spec.getName()
           const renamed = RENAMES[name]

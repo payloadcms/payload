@@ -3,5 +3,5 @@ import { buildConfig } from 'payload'
 export default buildConfig({
   collections: [],
   secret: 'secret',
-  db: {} as any,
+  db: {} as any
 })

@@ -78,12 +78,12 @@ export const registerFirstUserOperation = async <TSlug extends AuthCollectionSlu
     // Register first user
     // /////////////////////////////////////
 
-    const result = await (payload.create as any)({
+    const result = await payload.create<TSlug, SelectType>({
       collection: slug as TSlug,
-      data,
+      data: data as RequiredDataFromCollectionSlug<TSlug>,
       overrideAccess: true,
       req,
-    })
+    } as any)
 
     // auto-verify (if applicable)
     if (verify) {

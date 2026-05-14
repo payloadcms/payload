@@ -49,7 +49,10 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ id, disableErrors, req }, globalConfig.access.readVersions)
+      ? await executeAccess(
+          { id, disableErrors, req },
+          globalConfig.access.readVersions ?? globalConfig.access.read,
+        )
       : true
 
     // If errors are disabled, and access returns false, return null

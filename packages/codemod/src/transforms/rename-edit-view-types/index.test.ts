@@ -43,4 +43,12 @@ describe('rename-edit-view-types', () => {
 
     expect(result).toBe(input)
   })
+
+  it('does not rename matching type names imported from non-payload modules', async () => {
+    const input = await fixture('third-party.input.ts')
+
+    const result = await runTransform({ source: input, transform: renameEditViewTypes })
+
+    expect(result).toBe(input)
+  })
 })

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired, IsAny } from 'ts-essentials'
+import type { IsAny } from 'ts-essentials'
 
 import type {
   Access,
@@ -242,7 +242,28 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
 >
 
 export interface SanitizedGlobalConfig
-  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
+  extends Omit<
+    Required<GlobalConfig>,
+    | 'access'
+    | 'admin'
+    | 'dbName'
+    | 'endpoints'
+    | 'fields'
+    | 'graphQL'
+    | 'hooks'
+    | 'label'
+    | 'lockDocuments'
+    | 'slug'
+    | 'typescript'
+    | 'versions'
+  > {
+  access: {
+    read: Access
+    readVersions?: Access
+    update: Access
+  }
+  admin: GlobalAdminOptions
+  dbName?: DBIdentifierName
   endpoints: Endpoint[] | false
   fields: Field[]
   /**
@@ -250,7 +271,27 @@ export interface SanitizedGlobalConfig
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
+  graphQL?:
+    | {
+        disableMutations?: true
+        disableQueries?: true
+        name?: string
+      }
+    | false
+  hooks: {
+    afterChange: AfterChangeHook[]
+    afterRead: AfterReadHook[]
+    beforeChange: BeforeChangeHook[]
+    beforeOperation?: BeforeOperationHook[]
+    beforeRead: BeforeReadHook[]
+    beforeValidate: BeforeValidateHook[]
+  }
+  label: LabelFunction | StaticLabel
+  lockDocuments?: { duration: number } | false
   slug: GlobalSlug
+  typescript?: {
+    interface?: string
+  }
   versions?: SanitizedGlobalVersions
 }
 

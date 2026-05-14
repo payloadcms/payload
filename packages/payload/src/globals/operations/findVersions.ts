@@ -55,7 +55,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ req }, globalConfig.access.readVersions)
+      ? await executeAccess({ req }, globalConfig.access.readVersions ?? globalConfig.access.read)
       : true
 
     await validateQueryPaths({

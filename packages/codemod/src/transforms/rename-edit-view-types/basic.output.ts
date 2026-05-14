@@ -1,4 +1,4 @@
-import type { DocumentViewComponent, DocumentViewConfig } from 'payload'
+import type { DocumentViewComponent as EditViewComponent, DocumentViewConfig as EditViewConfig } from 'payload'
 
-export type MyComponent = DocumentViewComponent
-export type MyConfig = DocumentViewConfig
+export type MyComponent = EditViewComponent
+export type MyConfig = EditViewConfig

@@ -210,7 +210,7 @@ export async function createLocal<
     populate,
     publishAllLocales,
     req,
-    select: select as any,
+    select: select as never,
     showHiddenFields,
   })
 }

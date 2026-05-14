@@ -139,11 +139,11 @@ export async function duplicateLocal<
     data,
     depth,
     disableTransaction,
-    draft: draft as any,
+    draft: draft as never,
     overrideAccess,
     populate,
     req,
-    select: select as any,
+    select: select as never,
     selectedLocales,
     showHiddenFields,
   })
