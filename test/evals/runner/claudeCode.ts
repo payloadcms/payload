@@ -15,7 +15,7 @@ const DEFAULT_TIMEOUT_MS = 600_000
 const PROMPT_SUFFIX =
   'IMPORTANT: Do not run package managers (npm, pnpm, yarn) or build/test/dev commands. Modify only payload.config.ts. Just write the file.'
 
-const SKILL_SYSTEM_PROMPT =
+export const SKILL_SYSTEM_PROMPT =
   'A `payload` skill is available in this workdir under .claude/skills/payload/. You MUST invoke it via the Skill tool before modifying payload.config.ts. The skill provides authoritative reference for collections, fields, hooks, access control, and other Payload CMS patterns.'
 
 const limit = pLimit(Number(process.env.EVAL_AGENT_CONCURRENCY ?? '2'))
