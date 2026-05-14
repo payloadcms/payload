@@ -93,8 +93,7 @@ Out of the box, Payload templates pass the `process.env.DATABASE_URL` environmen
 ### DocumentDB
 
 When using AWS DocumentDB, you will need to configure connection options for authentication in the `connectOptions`
-passed to the `mongooseAdapter` . You also need to set `connectOptions.useFacet` to `false` to disable use of the
-unsupported `$facet` aggregation.
+passed to the `mongooseAdapter`.
 
 ### CosmosDB
 

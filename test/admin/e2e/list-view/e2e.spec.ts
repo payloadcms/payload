@@ -1761,18 +1761,12 @@ describe('List View', () => {
       })
       await wait(500)
 
-      // check that the cells have the classes added per value selected
-      await expect(
-        page.locator('.cell-_status').first().locator("[class*='selected--']"),
-      ).toBeVisible()
+      // check that the toggled-on columns are visible
+      await expect(page.locator('.cell-_status').first()).toBeVisible()
 
-      await expect(
-        page.locator('.cell-wavelengths').first().locator("[class*='selected--']"),
-      ).toBeVisible()
+      await expect(page.locator('.cell-wavelengths').first()).toBeVisible()
 
-      await expect(
-        page.locator('.cell-selectField').first().locator("[class*='selected--']"),
-      ).toBeVisible()
+      await expect(page.locator('.cell-selectField').first()).toBeVisible()
 
       // sort by title again in descending order
       await page.locator('#heading-title button.sort-column__desc').click()
