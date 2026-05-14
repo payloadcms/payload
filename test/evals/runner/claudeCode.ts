@@ -49,7 +49,7 @@ async function runOne(
     await installSkill({ mode: skillInstall, workdir })
 
     const prompt = `${instruction}\n\n${PROMPT_SUFFIX}`
-    const { exitCode, stderr, transcript } = await spawnAgent({
+    const { exitCode, stderr, transcript, usage } = await spawnAgent({
       agentModel,
       prompt,
       sandboxDir: init.sandboxDir,
@@ -65,7 +65,7 @@ async function runOne(
       confidence: 0,
       modifiedConfig,
       transcript: capTranscript(transcript),
-      usage: zeroUsage(),
+      usage: usage ?? zeroUsage(),
     }
     return result
   } finally {
@@ -85,7 +85,12 @@ async function spawnAgent({
   sandboxDir: string
   timeoutMs: number
   workdir: string
-}): Promise<{ exitCode: number; stderr: string; transcript: TranscriptEvent[] }> {
+}): Promise<{
+  exitCode: number
+  stderr: string
+  transcript: TranscriptEvent[]
+  usage?: TokenUsage
+}> {
   return new Promise((resolve) => {
     const child = spawn(
       'claude',
@@ -109,8 +114,21 @@ async function spawnAgent({
       },
     )
     const transcript: TranscriptEvent[] = []
+    let usage: TokenUsage | undefined
     let stdoutBuffer = ''
     let stderr = ''
+    const ingestLine = (line: string) => {
+      if (line.trim().length === 0) {
+        return
+      }
+      const { events, usage: lineUsage } = parseStreamJsonLine(line)
+      for (const event of events) {
+        transcript.push(event)
+      }
+      if (lineUsage) {
+        usage = lineUsage
+      }
+    }
     child.stdout.on('data', (b: Buffer) => {
       stdoutBuffer += b.toString()
       const newlineIdx = stdoutBuffer.lastIndexOf('\n')
@@ -120,13 +138,7 @@ async function spawnAgent({
       const complete = stdoutBuffer.slice(0, newlineIdx)
       stdoutBuffer = stdoutBuffer.slice(newlineIdx + 1)
       for (const line of complete.split('\n')) {
-        if (line.trim().length === 0) {
-          continue
-        }
-        const events = parseStreamJsonLine(line)
-        for (const event of events) {
-          transcript.push(event)
-        }
+        ingestLine(line)
       }
     })
     child.stderr.on('data', (b: Buffer) => {
@@ -137,6 +149,7 @@ async function spawnAgent({
       exitCode: number
       stderr: string
       transcript: TranscriptEvent[]
+      usage?: TokenUsage
     }) => {
       if (resolved) {
         return
@@ -160,21 +173,20 @@ async function spawnAgent({
         }
       }
       stderr += `\n[runner] killed after ${timeoutMs}ms timeout`
-      finish({ exitCode: -1, stderr, transcript })
+      finish({ exitCode: -1, stderr, transcript, usage })
     }, timeoutMs)
     child.on('error', (err) => {
       clearTimeout(timer)
       stderr += `\n[runner] spawn error: ${err.message}`
-      finish({ exitCode: -1, stderr, transcript })
+      finish({ exitCode: -1, stderr, transcript, usage })
     })
     child.on('exit', (code) => {
       clearTimeout(timer)
       if (stdoutBuffer.length > 0) {
-        const events = parseStreamJsonLine(stdoutBuffer)
-        transcript.push(...events)
+        ingestLine(stdoutBuffer)
         stdoutBuffer = ''
       }
-      finish({ exitCode: code ?? -1, stderr, transcript })
+      finish({ exitCode: code ?? -1, stderr, transcript, usage })
     })
   })
 }
@@ -301,24 +313,54 @@ function zeroUsage(): TokenUsage {
 const TEXT_TRUNCATE_LIMIT = 4_000
 const TRANSCRIPT_EVENT_CAP = 200
 
-function parseStreamJsonLine(line: string): TranscriptEvent[] {
+type ParsedStreamLine = { events: TranscriptEvent[]; usage?: TokenUsage }
+
+function parseStreamJsonLine(line: string): ParsedStreamLine {
   let parsed: unknown
   try {
     parsed = JSON.parse(line)
   } catch {
-    return []
+    return { events: [] }
   }
   if (parsed === null || typeof parsed !== 'object') {
-    return []
+    return { events: [] }
   }
-  const event = parsed as { message?: unknown; type?: string }
+  const event = parsed as { message?: unknown; type?: string; usage?: unknown }
   if (event.type === 'assistant') {
-    return extractAssistantBlocks(event.message)
+    return { events: extractAssistantBlocks(event.message) }
   }
   if (event.type === 'user') {
-    return extractUserBlocks(event.message)
+    return { events: extractUserBlocks(event.message) }
   }
-  return []
+  if (event.type === 'result') {
+    return { events: [], usage: extractResultUsage(event.usage) }
+  }
+  return { events: [] }
+}
+
+function extractResultUsage(raw: unknown): TokenUsage | undefined {
+  if (raw === null || typeof raw !== 'object') {
+    return undefined
+  }
+  const u = raw as {
+    cache_creation_input_tokens?: unknown
+    cache_read_input_tokens?: unknown
+    input_tokens?: unknown
+    output_tokens?: unknown
+  }
+  const inputTokens = asNumber(u.input_tokens) + asNumber(u.cache_creation_input_tokens)
+  const cachedInputTokens = asNumber(u.cache_read_input_tokens)
+  const outputTokens = asNumber(u.output_tokens)
+  return {
+    cachedInputTokens,
+    inputTokens,
+    outputTokens,
+    totalTokens: inputTokens + cachedInputTokens + outputTokens,
+  }
+}
+
+function asNumber(v: unknown): number {
+  return typeof v === 'number' && Number.isFinite(v) ? v : 0
 }
 
 function extractAssistantBlocks(message: unknown): TranscriptEvent[] {
