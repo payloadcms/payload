@@ -254,7 +254,7 @@ function TranscriptEventView({ event }: { event: TranscriptEvent }) {
   }
   if (event.type === 'thinking') {
     return (
-      <details>
+      <details open>
         <summary
           style={{
             color: 'var(--theme-elevation-500)',
@@ -285,7 +285,7 @@ function TranscriptEventView({ event }: { event: TranscriptEvent }) {
   }
   if (event.type === 'tool_use') {
     return (
-      <details>
+      <details open>
         <summary
           style={{
             color: 'var(--theme-elevation-700)',
@@ -319,7 +319,7 @@ function TranscriptEventView({ event }: { event: TranscriptEvent }) {
   }
   // tool_result
   return (
-    <details>
+    <details open>
       <summary
         style={{
           color: event.isError ? 'var(--theme-error-600)' : 'var(--theme-elevation-600)',
