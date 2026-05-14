@@ -1041,8 +1041,7 @@ export default buildConfigWithDefaults({
             height: 200,
             width: 200,
             admin: {
-              disableListFilter: true,
-              disableListColumn: true,
+              disabled: { column: true, filter: true },
             },
           },
           {
@@ -1050,7 +1049,7 @@ export default buildConfigWithDefaults({
             height: 300,
             width: 300,
             admin: {
-              disableListColumn: true,
+              disabled: { column: true },
             },
           },
           {
@@ -1058,8 +1057,7 @@ export default buildConfigWithDefaults({
             height: 400,
             width: 400,
             admin: {
-              disableListColumn: false,
-              disableListFilter: true,
+              disabled: { filter: true },
             },
           },
           {
