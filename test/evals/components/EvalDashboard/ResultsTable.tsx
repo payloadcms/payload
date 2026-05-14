@@ -15,6 +15,16 @@ export function getVariant(entry: EvalEntry): null | Variant {
   return getVariantFromResult(entry.result)
 }
 
+function variantLabel(variant: Variant): string {
+  const labels: Record<Variant, string> = {
+    'agent-baseline': 'Agent Baseline',
+    'agent-skill': 'Agent Skill',
+    baseline: 'Baseline',
+    skill: 'Skill',
+  }
+  return labels[variant]
+}
+
 function VariantBadge({ variant }: { variant: null | Variant }) {
   if (!variant) {
     return <span style={{ color: 'var(--theme-elevation-300)', fontSize: '0.72rem' }}>—</span>
@@ -388,6 +398,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
   const [compareMode, setCompareMode] = useState<'run' | 'variant'>('variant')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
+  const [variantFilter, setVariantFilter] = useState<'all' | Variant>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
   const [hoveredHash, setHoveredHash] = useState<null | string>(null)
@@ -398,6 +409,17 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
     () => ['all', ...Array.from(new Set(entries.map((e) => e.category))).sort()],
     [entries],
   )
+
+  const variantOptions = useMemo<('all' | Variant)[]>(() => {
+    const seen = new Set<Variant>()
+    for (const e of entries) {
+      const v = getVariant(e)
+      if (v) {
+        seen.add(v)
+      }
+    }
+    return ['all', ...Array.from(seen).sort()]
+  }, [entries])
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -432,6 +454,9 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
         return false
       }
       if (typeFilter !== 'all' && e.type !== typeFilter) {
+        return false
+      }
+      if (variantFilter !== 'all' && getVariant(e) !== variantFilter) {
         return false
       }
       if (categoryFilter !== 'all' && e.category !== categoryFilter) {
@@ -470,7 +495,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       }
       return aVal < bVal ? -dir : aVal > bVal ? dir : 0
     })
-  }, [entries, statusFilter, typeFilter, categoryFilter, sortKey, sortDir])
+  }, [entries, statusFilter, typeFilter, categoryFilter, variantFilter, sortKey, sortDir])
 
   // Summary stats from filtered set
   const stats = useMemo(() => {
@@ -705,6 +730,33 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                   {t === 'all' ? 'All' : 'Codegen'}
                 </button>
               ))}
+            </div>
+
+            <span
+              aria-hidden="true"
+              style={{
+                background: 'var(--theme-elevation-250)',
+                borderRadius: '1px',
+                display: 'inline-block',
+                height: '18px',
+                width: '1px',
+              }}
+            />
+
+            <div style={{ display: 'flex', gap: '4px' }}>
+              {variantOptions.map((v) => {
+                const isActive = variantFilter === v
+                return (
+                  <button
+                    key={v}
+                    onClick={() => setVariantFilter(v)}
+                    style={filterBtnStyle(isActive)}
+                    type="button"
+                  >
+                    {v === 'all' ? 'All' : variantLabel(v)}
+                  </button>
+                )
+              })}
             </div>
 
             <span
