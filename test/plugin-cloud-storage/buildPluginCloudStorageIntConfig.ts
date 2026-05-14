@@ -43,7 +43,7 @@ export type BuildPluginCloudStorageIntConfigArgs = {
 export function buildPluginCloudStorageIntConfig({
   useCompositePrefixes,
 }: BuildPluginCloudStorageIntConfigArgs) {
-  let storagePlugin: StorageAdapter = {} as StorageAdapter
+  let storagePlugin: StorageAdapter | undefined
   let uploadOptions
 
   dotenv.config({
@@ -227,7 +227,7 @@ export function buildPluginCloudStorageIntConfig({
       )
     },
     plugins: [testMetadataPlugin],
-    storageAdapters: [storagePlugin],
+    storageAdapters: storagePlugin ? [storagePlugin] : [],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },
