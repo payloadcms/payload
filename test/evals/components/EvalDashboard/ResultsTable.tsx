@@ -221,13 +221,12 @@ function SkillInvocationBadge({ invoked }: { invoked: boolean }) {
     <span
       style={{
         alignSelf: 'flex-start',
-        background: invoked ? 'var(--theme-success-100)' : 'var(--theme-error-100)',
-        border: `1px solid ${invoked ? 'var(--theme-success-300)' : 'var(--theme-error-300)'}`,
+        background: invoked ? 'var(--color-success-500)' : 'var(--color-error-500)',
         borderRadius: '4px',
-        color: invoked ? 'var(--theme-success-700)' : 'var(--theme-error-700)',
+        color: '#fff',
         fontSize: '0.7rem',
         fontWeight: 600,
-        padding: '2px 8px',
+        padding: '3px 8px',
         whiteSpace: 'nowrap',
       }}
     >
