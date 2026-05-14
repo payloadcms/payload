@@ -13,33 +13,19 @@ export const APIKeyAuthentication =
     if (authHeader?.startsWith(`${collectionConfig.slug} API-Key `)) {
       const apiKey = authHeader.replace(`${collectionConfig.slug} API-Key `, '')
 
-      // TODO: V4 remove extra algorithm check
-      // api keys saved prior to v3.46.0 will have sha1
-      const sha1APIKeyIndex = crypto.createHmac('sha1', payload.secret).update(apiKey).digest('hex')
       const sha256APIKeyIndex = crypto
         .createHmac('sha256', payload.secret)
         .update(apiKey)
         .digest('hex')
-
-      const apiKeyConstraints = [
-        {
-          apiKeyIndex: {
-            equals: sha1APIKeyIndex,
-          },
-        },
-        {
-          apiKeyIndex: {
-            equals: sha256APIKeyIndex,
-          },
-        },
-      ]
 
       try {
         const where: Where = {}
         if (collectionConfig.auth?.verify) {
           where.and = [
             {
-              or: apiKeyConstraints,
+              apiKeyIndex: {
+                equals: sha256APIKeyIndex,
+              },
             },
             {
               _verified: {
@@ -48,7 +34,7 @@ export const APIKeyAuthentication =
             },
           ]
         } else {
-          where.or = apiKeyConstraints
+          where.apiKeyIndex = { equals: sha256APIKeyIndex }
         }
 
         const userQuery = await payload.find({
