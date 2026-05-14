@@ -189,10 +189,9 @@ export const Condition: React.FC<Props> = (props) => {
         </div>
         <div className={`${baseClass}__actions`}>
           <Button
-            buttonStyle="icon-label"
+            buttonStyle="ghost"
             className={`${baseClass}__actions-remove`}
             icon="x"
-            iconStyle="with-border"
             onClick={() =>
               removeCondition({
                 andIndex,
@@ -202,10 +201,9 @@ export const Condition: React.FC<Props> = (props) => {
             round
           />
           <Button
-            buttonStyle="icon-label"
+            buttonStyle="ghost"
             className={`${baseClass}__actions-add`}
             icon="plus"
-            iconStyle="with-border"
             onClick={() =>
               addCondition({
                 andIndex: andIndex + 1,

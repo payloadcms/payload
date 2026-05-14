@@ -54,7 +54,7 @@
 
     @include mid-break {
       &__nav-toggler-wrapper {
-        .hamburger {
+        .sidebar-toggle {
           left: unset;
         }
       }
@@ -65,7 +65,7 @@
         width: unset;
         justify-content: unset;
 
-        .hamburger {
+        .sidebar-toggle {
           display: none;
         }
       }

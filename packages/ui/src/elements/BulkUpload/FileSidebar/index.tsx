@@ -14,13 +14,12 @@ import { AnimateHeight } from '../../AnimateHeight/index.js'
 import { Button } from '../../Button/index.js'
 import { Drawer } from '../../Drawer/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
-import { Pill } from '../../Pill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { Actions } from '../ActionsBar/index.js'
 import { AddFilesView } from '../AddFilesView/index.js'
-import './index.scss'
+import './index.css'
 import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
 
@@ -125,16 +124,17 @@ export function FileSidebar() {
 
           <div className={`${baseClass}__header__actions`}>
             {(typeof maxFiles === 'number' ? totalFileCount < maxFiles : true) ? (
-              <Pill
+              <Button
+                buttonStyle="secondary"
                 className={`${baseClass}__header__addFile`}
                 onClick={() => openModal(addMoreFilesDrawerSlug)}
-                size="small"
+                size="medium"
               >
                 {t('upload:addFile')}
-              </Pill>
+              </Button>
             ) : null}
             <Button
-              buttonStyle="ghost"
+              buttonStyle="secondary"
               className={`${baseClass}__toggler`}
               onClick={() => setShowFiles((prev) => !prev)}
             >

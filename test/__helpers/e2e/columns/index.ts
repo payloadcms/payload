@@ -1,3 +1,8 @@
+export {
+  clickPillSelectorItem,
+  getPillSelectorItem,
+  isPillSelectorItemSelected,
+} from './clickPillSelectorItem.js'
 export { openListColumns } from './openListColumns.js'
 export { reorderColumns } from './reorderColumns.js'
 export { sortColumn } from './sortColumn.js'

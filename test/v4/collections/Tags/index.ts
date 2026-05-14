@@ -1,11 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
-import { hierarchySlug } from '../../slugs.js'
+import { tagsSlug } from '../../slugs.js'
 
-const Hierarchy: CollectionConfig = {
-  slug: hierarchySlug,
+const Tags: CollectionConfig = {
+  slug: tagsSlug,
   admin: {
     useAsTitle: 'name',
+  },
+  labels: {
+    plural: 'Tags',
+    singular: 'Tag',
   },
   fields: [
     {
@@ -13,10 +17,14 @@ const Hierarchy: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'description',
+      type: 'textarea',
+    },
   ],
   hierarchy: {
     parentFieldName: 'parent',
   },
 }
 
-export default Hierarchy
+export default Tags

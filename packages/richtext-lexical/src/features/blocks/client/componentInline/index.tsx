@@ -415,7 +415,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
   const RemoveButton = useMemo(
     () => () => (
       <Button
-        buttonStyle="icon-label"
+        buttonStyle="ghost"
         className={`${baseClass}__removeButton`}
         disabled={!isEditable}
         icon="x"
@@ -435,7 +435,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
   const EditButton = useMemo(
     () => () => (
       <Button
-        buttonStyle="icon-label"
+        buttonStyle="ghost"
         className={`${baseClass}__editButton`}
         disabled={!isEditable}
         el="button"

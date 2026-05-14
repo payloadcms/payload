@@ -14,12 +14,12 @@ export const CollapseAllToggle: React.FC<CollapseAllToggleProps> = ({ onClick })
   return (
     <Fragment>
       <li>
-        <Button buttonStyle="icon-label" onClick={() => onClick(true)}>
+        <Button buttonStyle="ghost" onClick={() => onClick(true)}>
           {t('fields:collapseAll')}
         </Button>
       </li>
       <li>
-        <Button buttonStyle="icon-label" onClick={() => onClick(false)}>
+        <Button buttonStyle="ghost" onClick={() => onClick(false)}>
           {t('fields:showAll')}
         </Button>
       </li>
