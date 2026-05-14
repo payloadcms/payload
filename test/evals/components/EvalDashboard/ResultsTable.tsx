@@ -328,6 +328,40 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
         </div>
       )}
 
+      {/* Transcript (Claude Code runner) */}
+      {result.agentLog && result.agentLog.length > 0 && (
+        <div style={sectionStyle}>
+          <details>
+            <summary
+              style={{
+                ...labelStyle,
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              Transcript
+            </summary>
+            <pre
+              style={{
+                background: 'var(--theme-elevation-50)',
+                border: '1px solid var(--theme-elevation-150)',
+                borderRadius: '4px',
+                color: 'var(--theme-elevation-700)',
+                fontFamily: 'var(--font-mono, monospace)',
+                fontSize: '0.75rem',
+                margin: '6px 0 0',
+                maxHeight: '600px',
+                overflow: 'auto',
+                padding: '8px 10px',
+                whiteSpace: 'pre-wrap',
+              }}
+            >
+              {result.agentLog}
+            </pre>
+          </details>
+        </div>
+      )}
+
       {/* Usage breakdown */}
       {result.usage && (
         <div style={sectionStyle}>
