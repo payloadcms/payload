@@ -107,7 +107,40 @@
       gap: 8px;
     }
 
-    &__delete-btn,
+    &__delete-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      width: 28px;
+      height: 28px;
+
+      background: var(--color-bg-danger);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--color-text-ondanger);
+
+      transition: all 0.2s ease;
+
+      .icon {
+        width: 16px;
+        height: 16px;
+      }
+
+      &:hover {
+        background: var(--color-bg-danger-hover);
+      }
+
+      &:active {
+        background: var(--color-bg-danger-pressed);
+      }
+
+      svg {
+        pointer-events: none;
+      }
+    }
+
     &__edit-btn {
       display: flex;
       align-items: center;
@@ -120,17 +153,13 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      color: var(--theme-elevation-0);
 
       transition: all 0.2s ease;
 
       .icon {
         width: 16px;
         height: 16px;
-
-        .stroke {
-          stroke: var(--theme-elevation-0);
-          stroke-width: 2;
-        }
       }
 
       &:hover {
@@ -247,58 +276,12 @@
       }
     }
 
-    .dashboard-breadcrumb-select {
-      position: relative;
-      z-index: 10;
-
-      .rs__control {
-        background: transparent;
-        border: none;
-        box-shadow: none;
-        padding: 0;
-        cursor: pointer;
-
-        &:hover {
-          background: transparent;
-        }
+    .dashboard-breadcrumb-dropdown {
+      &__label {
+        display: flex;
+        align-items: center;
+        gap: var(--spacer-1);
       }
-
-      .rs__indicator-separator {
-        display: none;
-      }
-
-      .rs__dropdown-indicator {
-        padding: 0 4px;
-      }
-
-      .rs__menu {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        min-width: max-content;
-        width: max-content;
-        z-index: 9999;
-        border-radius: 4px;
-        padding: 5px;
-        box-shadow:
-          0 4px 6px -1px rgba(0, 0, 0, 0.1),
-          0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      }
-
-      .rs__menu-list {
-        padding: 0;
-      }
-
-      .rs__option {
-        padding: 4px 8px;
-        border-radius: 3px;
-        margin: 0;
-      }
-    }
-
-    .rs__control {
-      box-shadow: none !important;
-      cursor: pointer !important;
     }
 
     .drawer-toggler--unstyled {

@@ -5,34 +5,6 @@
     background-color: var(--theme-bg);
     color: var(--theme-text);
 
-    [dir='rtl'] &__nav-toggler-wrapper {
-      left: unset;
-      right: 1px;
-    }
-
-    &__nav-toggler-wrapper {
-      position: sticky;
-      z-index: var(--z-modal);
-      top: 0;
-      left: 1px;
-      height: 0;
-      width: fit-content;
-      display: flex;
-      justify-content: center;
-      padding-inline-start: var(--spacer-2-5);
-    }
-
-    &__nav-toggler-container {
-      height: var(--app-header-height);
-      display: flex;
-      align-items: center;
-    }
-
-    &__nav-toggler {
-      display: flex;
-      align-items: center;
-    }
-
     &__wrap {
       min-width: 0;
       width: 100%;
@@ -52,24 +24,7 @@
       }
     }
 
-    @include mid-break {
-      &__nav-toggler-wrapper {
-        .sidebar-toggle {
-          left: unset;
-        }
-      }
-    }
-
     @include small-break {
-      &__nav-toggler-wrapper {
-        width: unset;
-        justify-content: unset;
-
-        .sidebar-toggle {
-          display: none;
-        }
-      }
-
       .template-default {
         &__wrap {
           min-width: 100%;
