@@ -169,6 +169,11 @@ async function spawnAgent({
     })
     child.on('exit', (code) => {
       clearTimeout(timer)
+      if (stdoutBuffer.length > 0) {
+        const events = parseStreamJsonLine(stdoutBuffer)
+        transcript.push(...events)
+        stdoutBuffer = ''
+      }
       finish({ exitCode: code ?? -1, stderr, transcript })
     })
   })
