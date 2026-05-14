@@ -23,5 +23,9 @@
     &:hover {
       background-color: var(--color-bg-transparent-hover);
     }
+
+    &:active {
+      background-color: var(--color-bg-transparent-pressed);
+    }
   }
 }

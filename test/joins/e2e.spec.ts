@@ -168,7 +168,11 @@ describe('Join Field', () => {
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField.locator('.row-1 > .cell-title')).toContainText('z')
-    await expect(joinField.locator('.paginator > .clickable-arrow--right')).toBeVisible()
+    await expect(
+      joinField.locator(
+        '.relationship-table-pagination .relationship-table-pagination__nav .relationship-table-pagination__button',
+      ),
+    ).toBeVisible()
     const rows = joinField.locator('.relationship-table tbody tr')
     await expect(rows).toHaveCount(5)
   })

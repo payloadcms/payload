@@ -306,7 +306,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ''}`}
             collections={config.collections}
             i18n={i18n}
-            icon={isPolymorphic ? 'plus' : undefined}
             label={i18n.t('fields:addNew')}
             onClick={isPolymorphic ? setSelectedCollection : openDrawer}
             permissions={permissions}

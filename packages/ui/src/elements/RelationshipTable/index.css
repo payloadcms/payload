@@ -22,6 +22,14 @@
     padding-bottom: var(--spacer-3);
   }
 
+  .relationship-table__toggle-columns .btn__icon {
+    color: var(--color-icon-secondary);
+  }
+
+  .relationship-table__toggle-columns:hover .btn__icon {
+    color: var(--color-text);
+  }
+
   .relationship-table__columns[aria-hidden='true'] {
     display: none;
   }
