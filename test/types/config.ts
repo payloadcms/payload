@@ -170,7 +170,6 @@ export default buildConfigWithDefaults({
   ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
-    strictDraftTypes: true,
     postProcess: [
       ({ compiledTypes }) => {
         const genericType = `export type TestPluginGeneric<T> = { value: T };`

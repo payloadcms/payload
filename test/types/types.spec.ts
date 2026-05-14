@@ -1042,9 +1042,9 @@ describe('Types testing', () => {
     })
   })
 
-  describe('strictDraftTypes flag', () => {
+  describe('draft types', () => {
     describe('query operations', () => {
-      test('draft find query returns optional required fields when flag is enabled', async () => {
+      test('draft find query returns optional required fields', async () => {
         const result = await payload.find({
           collection: 'draft-posts',
           draft: true,
@@ -1052,7 +1052,7 @@ describe('Types testing', () => {
 
         const doc = result.docs[0]!
 
-        // With strictDraftTypes enabled, user-defined required fields should be optional in draft queries
+        // User-defined required fields are optional in draft queries
         expect(doc.description).type.toBe<string | undefined>()
         expect(doc.title).type.toBe<string | undefined>()
 

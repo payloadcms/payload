@@ -51,7 +51,6 @@ import {
   Config,
   defaults,
   EditView,
-  EditViewConfig,
   EmailOptions,
   EmailTransport,
   EmailTransportOptions,
