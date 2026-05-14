@@ -40,7 +40,7 @@
       &:focus-within,
       &:focus {
         .checkbox-input__input {
-          border-color: var(--color-border-selected-strong);
+          border-color: var(--accessibility-focus-color);
         }
       }
 
