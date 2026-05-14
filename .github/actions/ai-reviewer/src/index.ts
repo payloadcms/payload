@@ -1,16 +1,11 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { getPRDiff, postComment, postPRReview } from './github'
+import { getPRDiff, isForkPR, postComment, postPRReview } from './github'
 import { createAnthropicProvider } from './providers/anthropic'
 import type { AIProvider } from './providers/types'
 import { buildSystemPrompt, mergeReviewResults } from './review'
-import { splitDiffByFile } from './diff'
-import {
-  capComments,
-  filterCommentsToChangedFiles,
-  sanitizeMarkdown,
-  MAX_COMMENT_BODY_CHARS,
-} from './sanitize'
+import { parseChangedLineNumbers, splitDiffByFile } from './diff'
+import { capComments, sanitizeMarkdown, MAX_COMMENT_BODY_CHARS } from './sanitize'
 
 const TOO_LARGE_MESSAGE =
   'This PR is too large to review automatically (all changed files exceed the configured limit). ' +
@@ -35,8 +30,9 @@ async function run(): Promise<void> {
   }
 
   try {
+    const isFork = await isForkPR(octokit, issueNumber)
     const diff = await getPRDiff(octokit, issueNumber)
-    const systemPrompt = buildSystemPrompt(promptPath)
+    const systemPrompt = buildSystemPrompt(promptPath, isFork)
 
     let provider: AIProvider
     if (aiProviderName === 'anthropic') {
@@ -46,7 +42,7 @@ async function run(): Promise<void> {
     }
 
     const allFileDiffs = splitDiffByFile(diff)
-    const changedPaths = new Set(allFileDiffs.map((f) => f.path))
+    const changedLineNumbers = parseChangedLineNumbers(allFileDiffs)
 
     let result
     if (diff.length <= maxDiffChars) {
@@ -81,10 +77,11 @@ async function run(): Promise<void> {
     const sanitizedSummary = sanitizeMarkdown(result.summary)
 
     const validComments = capComments(
-      filterCommentsToChangedFiles(
-        result.comments.filter((c) => c.line > 0 && c.path.length > 0 && c.body.length > 0),
-        changedPaths,
-      ),
+      result.comments.filter((c) => {
+        if (c.line <= 0 || !c.path || !c.body) return false
+        const validLines = changedLineNumbers.get(c.path)
+        return validLines !== undefined && validLines.has(c.line)
+      }),
     ).map((c) => ({
       ...c,
       body: sanitizeMarkdown(c.body, MAX_COMMENT_BODY_CHARS),

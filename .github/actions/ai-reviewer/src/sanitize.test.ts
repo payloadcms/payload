@@ -46,6 +46,33 @@ describe('capComments', () => {
   })
 })
 
+describe('sanitizeMarkdown link normalisation', () => {
+  it('should normalise https links so display text becomes the URL', () => {
+    const result = sanitizeMarkdown('[click here](https://evil.example/phishing)')
+    expect(result).toBe('[https://evil.example/phishing](https://evil.example/phishing)')
+  })
+
+  it('should normalise http links so display text becomes the URL', () => {
+    const result = sanitizeMarkdown('[click here](http://example.com)')
+    expect(result).toBe('[http://example.com](http://example.com)')
+  })
+
+  it('should preserve anchor links unchanged', () => {
+    const result = sanitizeMarkdown('[see section](#heading)')
+    expect(result).toBe('[see section](#heading)')
+  })
+
+  it('should preserve relative path links unchanged', () => {
+    const result = sanitizeMarkdown('[see file](./src/foo.ts)')
+    expect(result).toBe('[see file](./src/foo.ts)')
+  })
+
+  it('should strip link syntax for dangerous schemes, keeping display text', () => {
+    const result = sanitizeMarkdown('[click](javascript:void(0))')
+    expect(result).toBe('click')
+  })
+})
+
 describe('filterCommentsToChangedFiles', () => {
   const changedPaths = new Set(['src/foo.ts', 'src/bar.ts'])
 

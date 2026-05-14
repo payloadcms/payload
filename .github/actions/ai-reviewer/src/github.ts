@@ -25,6 +25,14 @@ export async function postComment(
   })
 }
 
+export async function isForkPR(octokit: Octokit, prNumber: number): Promise<boolean> {
+  const { data } = await octokit.rest.pulls.get({
+    ...github.context.repo,
+    pull_number: prNumber,
+  })
+  return data.head.repo?.full_name !== data.base.repo.full_name
+}
+
 export async function postPRReview(
   octokit: Octokit,
   prNumber: number,

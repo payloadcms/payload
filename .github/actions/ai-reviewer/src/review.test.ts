@@ -64,13 +64,24 @@ describe('buildSystemPrompt', () => {
     vi.resetAllMocks()
   })
 
-  it('should return just the prompt when no CLAUDE.md exists', () => {
+  it('should return just the prompt when no CLAUDE.md exists and not a fork', () => {
     mockFs.existsSync.mockImplementation((p) => p === '/workspace/.github/ai-reviewer-prompt.md')
     mockFs.readFileSync.mockReturnValue('You are a reviewer.')
 
-    const result = buildSystemPrompt('.github/ai-reviewer-prompt.md')
+    const result = buildSystemPrompt('.github/ai-reviewer-prompt.md', false)
 
     expect(result).toBe('You are a reviewer.')
+  })
+
+  it('should append the injection notice when PR is from a fork', () => {
+    mockFs.existsSync.mockImplementation((p) => p === '/workspace/.github/ai-reviewer-prompt.md')
+    mockFs.readFileSync.mockReturnValue('You are a reviewer.')
+
+    const result = buildSystemPrompt('.github/ai-reviewer-prompt.md', true)
+
+    expect(result).toContain('You are a reviewer.')
+    expect(result).toContain('Security Notice')
+    expect(result.indexOf('You are a reviewer.')).toBeLessThan(result.indexOf('Security Notice'))
   })
 
   it('should prepend CLAUDE.md content when it exists', () => {
