@@ -4,6 +4,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { Categories } from './collections/Categories/index.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
@@ -13,7 +14,7 @@ const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  collections: [PostsCollection, MediaCollection],
+  collections: [PostsCollection, Categories, MediaCollection],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -30,6 +31,19 @@ export default buildConfigWithDefaults({
       data: {
         email: devUser.email,
         password: devUser.password,
+      },
+    })
+
+    await payload.create({
+      collection: 'categories',
+      data: {
+        title: 'One',
+      },
+    })
+    await payload.create({
+      collection: 'categories',
+      data: {
+        title: 'Two',
       },
     })
 
