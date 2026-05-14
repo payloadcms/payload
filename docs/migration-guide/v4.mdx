@@ -198,3 +198,44 @@ export const myRichTextAdapter = (): RichTextAdapterProvider => {
 ### `transactionIDPromise` removed from `PayloadRequest`
 
 The `transactionIDPromise` property on `PayloadRequest` has been removed. It was deprecated and unused — `transactionID` (which already supports `Promise<number | string>`) is the correct property to use for both resolved values and pending transactions.
+
+### Plugin Import/Export: `toCSV` and `fromCSV` removed
+
+The `toCSV` and `fromCSV` field options in `custom['plugin-import-export']` have been removed. Use `hooks.beforeExport` and `hooks.beforeImport` instead — they work for both CSV and JSON formats.
+
+The argument shapes differ slightly from the old API:
+
+| Old (`toCSV`) | New (`hooks.beforeExport`)          |
+| ------------- | ----------------------------------- |
+| `row`         | `siblingData`                       |
+| `doc`         | `data`                              |
+| `data`        | _(removed — was alias for `row`)_   |
+| —             | `format` (new: `'csv'` \| `'json'`) |
+
+The `fromCSV` → `hooks.beforeImport` change is non-breaking for the `data` parameter — both receive the full flat row.
+
+```diff
+{
+  name: 'author',
+  type: 'relationship',
+  relationTo: 'users',
+  custom: {
+    'plugin-import-export': {
+-     toCSV: ({ value, columnName, row, doc }) => {
+-       row[`${columnName}_id`] = (value as any).id
+-       return doc.title
+-     },
+-     fromCSV: ({ value, data }) => data[`${value}_key`],
++     hooks: {
++       beforeExport: ({ value, columnName, siblingData, data }) => {
++         siblingData[`${columnName}_id`] = (value as any).id
++         return data.title
++       },
++       beforeImport: ({ value, data }) => data[`${value}_key`],
++     },
+    },
+  },
+}
+```
+
+Run `npx @payloadcms/codemod --transform migrate-import-export-hooks` to migrate automatically. The codemod moves the function values into the correct hook positions and merges with any existing `hooks` object. Review argument names in the migrated functions — `row` references must be renamed to `siblingData` and `doc` references renamed to `data`.

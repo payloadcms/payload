@@ -213,6 +213,8 @@
     --color-text-oninverse: var(--ramp-white-800);
     --color-text-oninverse-secondary: var(--ramp-white-600);
 
+    --color-text-ontooltip: var(--ramp-white-800);
+
     --color-text-onselected-strong: var(--ramp-white-1000);
     --color-text-selected: var(--ramp-blue-600);
 
