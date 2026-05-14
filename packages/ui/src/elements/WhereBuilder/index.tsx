@@ -221,11 +221,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             })}
           </ul>
           <Button
-            buttonStyle="icon-label"
+            buttonStyle="ghost"
             className={`${baseClass}__add-or`}
             icon="plus"
             iconPosition="left"
-            iconStyle="with-border"
             onClick={async () => {
               await addCondition({
                 andIndex: 0,
@@ -243,11 +242,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         <div className={`${baseClass}__no-filters`}>
           <div className={`${baseClass}__label`}>{t('general:noFiltersSet')}</div>
           <Button
-            buttonStyle="icon-label"
+            buttonStyle="ghost"
             className={`${baseClass}__add-first-filter`}
             icon="plus"
             iconPosition="left"
-            iconStyle="with-border"
             onClick={async () => {
               if (reducedFields.length > 0) {
                 await addCondition({

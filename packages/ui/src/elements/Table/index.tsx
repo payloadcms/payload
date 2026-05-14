@@ -4,7 +4,7 @@ import type { Column } from 'payload'
 
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'table'
 

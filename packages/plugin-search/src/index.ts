@@ -22,11 +22,16 @@ export const searchPlugin =
     incomingPluginConfig.localize = shouldLocalize
 
     if (collections) {
-      const labels = Object.fromEntries(
-        collections
-          .filter(({ slug }) => incomingPluginConfig.collections?.includes(slug))
-          .map((collection) => [collection.slug, collection.labels]),
-      )
+      // O(1) slug lookup for enabled-collection checks; replaces an Array.indexOf in the
+      // hook-attachment pass that was O(M) per collection.
+      const enabledSlugSet = new Set(incomingPluginConfig.collections ?? [])
+
+      const labels: Record<string, (typeof collections)[number]['labels']> = {}
+      for (const collection of collections) {
+        if (enabledSlugSet.has(collection.slug)) {
+          labels[collection.slug] = collection.labels
+        }
+      }
 
       const pluginConfig: SanitizedSearchPluginConfig<ConfigTypes> = {
         // write any config defaults here
@@ -42,8 +47,7 @@ export const searchPlugin =
         ?.map((collection) => {
           const { hooks: existingHooks } = collection
 
-          const enabledCollections = pluginConfig.collections || []
-          const isEnabled = enabledCollections.indexOf(collection.slug) > -1
+          const isEnabled = enabledSlugSet.has(collection.slug)
           if (isEnabled) {
             return {
               ...collection,

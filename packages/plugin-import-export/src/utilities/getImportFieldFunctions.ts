@@ -25,15 +25,8 @@ const registerImportHandler = (
 ): void => {
   const beforeImport = field.custom?.['plugin-import-export']?.hooks?.beforeImport
 
-  const fromCSV = field.custom?.['plugin-import-export']?.fromCSV
-
   if (typeof beforeImport === 'function') {
     result[fullKey] = { type: 'beforeImport', fn: beforeImport }
-    return
-  }
-
-  if (typeof fromCSV === 'function') {
-    result[fullKey] = { type: 'fromCSV', fn: fromCSV }
     return
   }
 

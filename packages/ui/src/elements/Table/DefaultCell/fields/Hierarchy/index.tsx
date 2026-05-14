@@ -64,7 +64,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     }
     // Default based on allowHasMany: false = folder-like, true = tag-like
     const IconComponent = hierarchyConfig?.allowHasMany === false ? FolderIcon : TagIcon
-    return <IconComponent color="muted" />
+    return <IconComponent />
   }, [hierarchyConfig, preRenderedIcon])
 
   // Set up the hierarchy drawer
@@ -198,7 +198,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
   return (
     <div className={baseClass} ref={intersectionRef}>
       <Button
-        buttonStyle="subtle"
+        buttonStyle="pill"
         className={`${baseClass}__pill`}
         icon={preRenderedIcon || fallbackIcon}
         iconPosition="left"

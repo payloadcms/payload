@@ -1,0 +1,82 @@
+@layer payload-default {
+  .relationship-table {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .relationship-table__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .relationship-table__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .relationship-table__columns-inner {
+    padding-bottom: var(--spacer-3);
+  }
+
+  .relationship-table__toggle-columns .btn__icon {
+    color: var(--color-icon-secondary);
+  }
+
+  .relationship-table__toggle-columns:hover .btn__icon {
+    color: var(--color-text);
+  }
+
+  .relationship-table__columns[aria-hidden='true'] {
+    display: none;
+  }
+
+  .relationship-table__add-new-polymorphic-wrapper {
+    display: inline-flex;
+  }
+
+  .relationship-table__add-new-polymorphic .btn__label {
+    display: flex;
+    text-wrap: nowrap;
+    align-items: center;
+  }
+
+  .relationship-table .table {
+    margin-bottom: 0;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+    overflow: hidden;
+
+    table {
+      width: 100%;
+      overflow: auto;
+    }
+
+    &:not(.table--appearance-condensed) table {
+      [class^='cell'] > p,
+      [class^='cell'] > span,
+      [class^='cell'] > a {
+        line-clamp: 4;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        overflow: hidden;
+        display: -webkit-box;
+        max-width: 100vw;
+      }
+    }
+
+    th,
+    td:first-child {
+      min-width: 0;
+    }
+  }
+
+  /* Error state - table border changes to danger color */
+  .field-type.error .relationship-table .table {
+    border-color: var(--color-border-danger-strong);
+  }
+}
