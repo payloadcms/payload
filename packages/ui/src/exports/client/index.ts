@@ -72,6 +72,8 @@ export { Button } from '../../elements/Button/index.js'
 export { AnimateHeight } from '../../elements/AnimateHeight/index.js'
 export { PillSelector, type SelectablePill } from '../../elements/PillSelector/index.js'
 export { Card } from '../../elements/Card/index.js'
+export { Chip } from '../../elements/Chip/index.js'
+export type { ChipProps } from '../../elements/Chip/index.js'
 export { Collapsible, useCollapsible } from '../../elements/Collapsible/index.js'
 export { SidebarRow } from '../../elements/SidebarRow/index.js'
 export type { SidebarRowProps } from '../../elements/SidebarRow/index.js'
@@ -106,9 +108,12 @@ export { ErrorPill } from '../../elements/ErrorPill/index.js'
 export { FullscreenModal } from '../../elements/FullscreenModal/index.js'
 export { GenerateConfirmation } from '../../elements/GenerateConfirmation/index.js'
 export { Gutter } from '../../elements/Gutter/index.js'
-export { Hamburger } from '../../elements/Hamburger/index.js'
+export { SidebarToggle } from '../../elements/SidebarToggle/index.js'
 export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
 export { HydrateHierarchyProvider } from '../../elements/Hierarchy/HydrateProvider/index.js'
+export { IDLabel } from '../../elements/IDLabel/index.js'
+export { InputStepper } from '../../elements/InputStepper/index.js'
+export type { InputStepperProps } from '../../elements/InputStepper/index.js'
 
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
@@ -153,6 +158,7 @@ export type { DelayedSpinnerProps } from '../../elements/DelayedSpinner/index.js
 export { Logout } from '../../elements/Logout/index.js'
 export { Modal, useModal } from '../../elements/Modal/index.js'
 export { NavToggler } from '../../elements/Nav/NavToggler/index.js'
+export { NoListResults } from '../../elements/NoListResults/index.js'
 export { NavContext, NavProvider, useNav } from '../../elements/Nav/context.js'
 export { NavGroup } from '../../elements/NavGroup/index.js'
 export { Pagination } from '../../elements/Pagination/index.js'
@@ -184,16 +190,10 @@ export {
   useListRelationships,
 } from '../../elements/Table/RelationshipProvider/index.js'
 export { Table } from '../../elements/Table/index.js'
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import { Column } from 'payload'` instead.
-   */
-  Column,
-} from 'payload'
 export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 export { Thumbnail } from '../../elements/Thumbnail/index.js'
+export { ThumbnailCard } from '../../elements/ThumbnailCard/index.js'
+export type { ThumbnailCardProps } from '../../elements/ThumbnailCard/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
 import { toast } from 'sonner'
 export { toast }
@@ -340,10 +340,10 @@ export { RefreshIcon } from '../../icons/Refresh/index.js'
 export { SortDownIcon } from '../../icons/Sort/index.js'
 export { ThreeDotsIcon } from '../../icons/ThreeDots/index.js'
 export { TrashIcon } from '../../icons/Trash/index.js'
-export { Error as ErrorIcon } from '../../providers/ToastContainer/icons/Error.js'
-export { Info as InfoIcon } from '../../providers/ToastContainer/icons/Info.js'
-export { Success as SuccessIcon } from '../../providers/ToastContainer/icons/Success.js'
-export { Warning as WarningIcon } from '../../providers/ToastContainer/icons/Warning.js'
+export { ErrorIcon } from '../../icons/Error/index.js'
+export { InfoIcon } from '../../icons/Info/index.js'
+export { SuccessIcon } from '../../icons/Success/index.js'
+export { WarningIcon } from '../../icons/Warning/index.js'
 export { TagIcon } from '../../icons/Tag/index.js'
 
 // providers
@@ -372,6 +372,7 @@ export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/C
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
+export type { DocumentTitleContext } from '../../providers/DocumentTitle/index.js'
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
 export { useUploadControls } from '../../providers/UploadControls/index.js'
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
@@ -410,7 +411,13 @@ export { HierarchyProvider, useHierarchy } from '../../providers/Hierarchy/index
 export type { AllowedCollection } from '../../providers/Hierarchy/types.js'
 export { UploadHandlersProvider, useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
-export { defaultTheme, type Theme, ThemeProvider, useTheme } from '../../providers/Theme/index.js'
+export {
+  defaultTheme,
+  type Theme,
+  type ThemeContext,
+  ThemeProvider,
+  useTheme,
+} from '../../providers/Theme/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 export { useControllableState } from '../../hooks/useControllableState.js'
@@ -427,51 +434,6 @@ export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
 export { HierarchyListView } from '../../views/HierarchyList/index.js'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewSlots } from 'payload'` instead.
-   */
-  ListViewSlots,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewClientProps } from 'payload'` instead.
-   */
-  ListViewClientProps,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewClientProps } from 'payload'` instead.
-   */
-  ListViewClientProps as ListComponentClientProps,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { ListViewServerProps } from 'payload'` instead.
-   */
-  ListViewServerProps as ListComponentServerProps,
-} from 'payload'
-
-export type {
-  /**
-   * @deprecated
-   * This export will be removed in the next major version.
-   * Use `import type { CollectionPreferences } from 'payload'` instead.
-   */
-  ListPreferences,
-} from 'payload'
 
 export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 

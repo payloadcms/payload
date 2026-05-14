@@ -68,10 +68,10 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "^1.0.4",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "copyfiles": "^2.4.1",
-    "cross-env": "^7.0.3",
+    "cross-env": "10.1.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {

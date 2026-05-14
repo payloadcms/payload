@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { defaultJSXConverters, RichText } from '../../../../../exports/react/index.js'
-import './style.scss'
+import './style.css'
 
 export function RichTextPlugin() {
   const [editor] = useLexicalComposerContext()

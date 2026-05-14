@@ -5,16 +5,11 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: var(--icon-secondary);
+    color: var(--color-icon-secondary);
     transition: color 100ms;
 
     &:hover {
-      color: var(--icon-default);
+      color: var(--color-icon);
     }
-  }
-
-  .clear-indicator__icon {
-    width: var(--spacer-3);
-    height: var(--spacer-3);
   }
 }

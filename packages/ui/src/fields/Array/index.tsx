@@ -466,7 +466,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                 </Banner>
               )}
               {showMinRows && (
-                <Banner type="error">
+                <Banner type="danger">
                   {t('validation:requiresAtLeast', {
                     count: minRows,
                     label:
@@ -481,7 +481,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       )}
       {!hasMaxRows && !readOnly && (
         <Button
-          buttonStyle="icon-label"
+          buttonStyle="ghost"
           className={`${baseClass}__add-row`}
           disabled={disabled}
           icon={<CirclePlusIcon />}

@@ -39,6 +39,15 @@ export default defineConfig({
     },
     projects: [
       {
+        // Vite 8 / oxc reads `jsx: preserve` from the workspace tsconfig (needed by Next.js)
+        // and refuses to transform JSX. Set jsx explicitly here so oxc transforms it.
+        // Project vite options are NOT inherited from the root config.
+        oxc: {
+          jsx: {
+            runtime: 'automatic',
+            importSource: 'react',
+          },
+        },
         test: {
           include: ['packages/**/*.spec.ts'],
           name: 'unit',
@@ -52,6 +61,15 @@ export default defineConfig({
             { find: /^graphql$/, replacement: path.join(graphqlDir, 'index.js') },
             ...(hasFigma ? [{ find: '@payloadcms/figma', replacement: figmaPath }] : []),
           ],
+        },
+        // Vite 8 / oxc reads `jsx: preserve` from the workspace tsconfig (needed by Next.js)
+        // and refuses to transform JSX. Set jsx explicitly here so oxc transforms it.
+        // Project vite options are NOT inherited from the root config.
+        oxc: {
+          jsx: {
+            runtime: 'automatic',
+            importSource: 'react',
+          },
         },
         test: {
           include: ['test/**/*int.spec.ts'],

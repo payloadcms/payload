@@ -10,7 +10,6 @@ import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
-import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 import { useConfig } from '../Config/index.js'
 import { DocumentTitleProvider } from '../DocumentTitle/index.js'
 import { useLocale, useLocaleLoading } from '../Locale/index.js'
@@ -81,21 +80,6 @@ const DocumentInfo: React.FC<
   const { i18n } = useTranslation()
 
   const { uploadEdits } = useUploadEdits()
-
-  /**
-   * @deprecated This state will be removed in v4.
-   * This is for performance reasons. Use the `DocumentTitleContext` instead.
-   */
-  const [title, setDocumentTitle] = useState(() =>
-    formatDocTitle({
-      collectionConfig,
-      data: { ...(initialData || {}), id },
-      dateFormat,
-      fallback: id?.toString(),
-      globalConfig,
-      i18n,
-    }),
-  )
 
   const [mostRecentVersionIsAutosaved, setMostRecentVersionIsAutosaved] = useState(
     mostRecentVersionIsAutosavedFromProps,
@@ -326,23 +310,6 @@ const DocumentInfo: React.FC<
     }
   }, [collectionConfig, globalConfig, versionCount])
 
-  /**
-   * @todo: Remove this in v4
-   * Users should use the `DocumentTitleContext` instead.
-   */
-  useEffect(() => {
-    setDocumentTitle(
-      formatDocTitle({
-        collectionConfig,
-        data: { ...data, id },
-        dateFormat,
-        fallback: id?.toString(),
-        globalConfig,
-        i18n,
-      }),
-    )
-  }, [collectionConfig, globalConfig, data, dateFormat, i18n, id])
-
   // clean on unmount
   useEffect(() => {
     const re1 = abortControllerRef.current
@@ -400,13 +367,11 @@ const DocumentInfo: React.FC<
     setData,
     setDocFieldPreferences,
     setDocumentIsLocked,
-    setDocumentTitle,
     setHasPublishedDoc,
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     setUploadStatus: updateUploadStatus,
-    title,
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,

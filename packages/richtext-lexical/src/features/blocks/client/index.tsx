@@ -151,7 +151,6 @@ export const BlocksFeatureClient = createClientFeature(
                 ChildComponent: BlockIcon,
                 items: clientBlocks.map((block, index) => {
                   return {
-                    ChildComponent: getBlockImageComponent(block, BlockIcon),
                     isActive: undefined, // At this point, we would be inside a sub-richtext-editor. And at this point this will be run against the focused sub-editor, not the parent editor which has the actual block. Thus, no point in running this
                     key: 'block-' + block.slug,
                     label: ({ i18n }) => {
@@ -180,7 +179,6 @@ export const BlocksFeatureClient = createClientFeature(
                 ChildComponent: InlineBlocksIcon,
                 items: clientInlineBlocks.map((inlineBlock, index) => {
                   return {
-                    ChildComponent: getBlockImageComponent(inlineBlock, InlineBlocksIcon),
                     isActive: undefined,
                     key: 'inlineBlock-' + inlineBlock.slug,
                     label: ({ i18n }) => {

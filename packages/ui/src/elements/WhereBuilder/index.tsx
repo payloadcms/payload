@@ -3,7 +3,7 @@ import type { Operator } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { dequal } from 'dequal/lite'
-import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
+import { isFieldDisabled, transformWhereQuery, validateWhereQuery } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import type { AddCondition, RemoveCondition, UpdateCondition, WhereBuilderProps } from './types.js'
@@ -221,15 +221,14 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             })}
           </ul>
           <Button
-            buttonStyle="icon-label"
+            buttonStyle="ghost"
             className={`${baseClass}__add-or`}
             icon="plus"
             iconPosition="left"
-            iconStyle="with-border"
             onClick={async () => {
               await addCondition({
                 andIndex: 0,
-                field: reducedFields.find((field) => !field.field.admin?.disableListFilter),
+                field: reducedFields.find((field) => !isFieldDisabled(field.field, 'filter')),
                 orIndex: conditions.length,
                 relation: 'or',
               })
@@ -243,16 +242,15 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         <div className={`${baseClass}__no-filters`}>
           <div className={`${baseClass}__label`}>{t('general:noFiltersSet')}</div>
           <Button
-            buttonStyle="icon-label"
+            buttonStyle="ghost"
             className={`${baseClass}__add-first-filter`}
             icon="plus"
             iconPosition="left"
-            iconStyle="with-border"
             onClick={async () => {
               if (reducedFields.length > 0) {
                 await addCondition({
                   andIndex: 0,
-                  field: reducedFields.find((field) => !field.field.admin?.disableListFilter),
+                  field: reducedFields.find((field) => !isFieldDisabled(field.field, 'filter')),
                   orIndex: conditions.length,
                   relation: 'or',
                 })

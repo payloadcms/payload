@@ -844,7 +844,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         await expect(dateTimeLocator).toHaveText('August 12th 2027, 10:00 AM')
       }).toPass({ timeout: 10000, intervals: [100] })
 
-      // The timezone column should NOT be visible (hidden via disableListColumn override)
+      // The timezone column should NOT be visible (hidden via disabled.column override)
       const timezoneColumnCell = page.locator('.cell-dateWithTimezoneWithDisabledColumns_tz')
       await expect(timezoneColumnCell).toHaveCount(0)
 

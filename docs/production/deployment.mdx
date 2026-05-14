@@ -22,6 +22,22 @@ to consider these main aspects:
 
 Payload can be deployed _anywhere that Next.js can run_ - including Vercel, Netlify, SST, DigitalOcean, AWS, and more. Because it's open source, you can self-host it.
 
+<VideoDrawer
+  id="8jPNsLX7XGg"
+  label="Deploy Payload on Cloudflare Workers"
+  drawerTitle="Deploy Payload on Cloudflare Workers"
+/>
+<VideoDrawer
+  id="Teug6mTdRsg"
+  label="Deploy Payload with Cloudflare Workers (Full Guide)"
+  drawerTitle="Deploy Payload with Cloudflare Workers (Full Guide)"
+/>
+<VideoDrawer
+  id="7jAYKaRaI30"
+  label="Deploy Payload on Vercel"
+  drawerTitle="Deploy Payload on Vercel in minutes with our one click templates"
+/>
+
 But it's important to remember that most Payload projects will also need a database, file storage, an email provider, and a CDN. Make sure you have all of the requirements that your project needs, no matter what deployment platform you choose.
 
 ## Basics
@@ -77,13 +93,15 @@ Out of the box, Payload templates pass the `process.env.DATABASE_URL` environmen
 ### DocumentDB
 
 When using AWS DocumentDB, you will need to configure connection options for authentication in the `connectOptions`
-passed to the `mongooseAdapter` . You also need to set `connectOptions.useFacet` to `false` to disable use of the
-unsupported `$facet` aggregation.
+passed to the `mongooseAdapter`.
 
 ### CosmosDB
 
 <Banner type="warning">
-While Azure Cosmos DB offers a MongoDB API it is not fully compatible due to strict and limited indexing behavior and many core features may not work reliably. For more details, see the [MongoDB driver's CosmosDB compatibility documentation](https://www.mongodb.com/docs/drivers/cosmosdb-support/#compatibility).
+  While Azure Cosmos DB offers a MongoDB API it is not fully compatible due to
+  strict and limited indexing behavior and many core features may not work
+  reliably. For more details, see the [MongoDB driver's CosmosDB compatibility
+  documentation](https://www.mongodb.com/docs/drivers/cosmosdb-support/#compatibility).
 </Banner>
 
 To improve compatibility, spread the `compatibilityOptions.cosmosdb` preset into your adapter. This applies all recommended settings at once:

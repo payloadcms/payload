@@ -58,6 +58,7 @@ import type {
   Sort,
   TransformCollectionWithSelect,
   Where,
+  WithSelectFn,
 } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
@@ -461,15 +462,6 @@ export type CollectionAdminOptions = {
    * @default false
    */
   disableCopyToLocale?: boolean
-  /**
-   * Performance opt-in. If true, will use the [Select API](https://payloadcms.com/docs/queries/select) when
-   * loading the list view to query only the active columns, as opposed to the entire documents.
-   * If your cells require specific fields that may be unselected, such as within hooks, etc.,
-   * use `forceSelect` in conjunction with this property.
-   *
-   * @experimental This is an experimental feature and may change in the future. Use at your own risk.
-   */
-  enableListViewSelectAPI?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -608,12 +600,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Cannot be used together with `tags` or `hierarchy`.
    */
   folders?: boolean | FoldersConfig
-  /**
-   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
-   */
-  forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
-    ? SelectIncludeType
-    : SelectFromCollectionSlug<TSlug>
   /**
    * GraphQL configuration
    */
@@ -763,7 +749,14 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @default false // disable versioning
    */
   versions?: boolean | IncomingCollectionVersions
-}
+} & Pick<
+  WithSelectFn<
+    IsAny<SelectFromCollectionSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromCollectionSlug<TSlug>
+  >,
+  'select'
+>
 
 export type SanitizedJoin = {
   /**

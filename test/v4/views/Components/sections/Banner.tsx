@@ -3,18 +3,14 @@
 import { Banner } from '@payloadcms/ui'
 import React from 'react'
 
-import { Section, Variant } from '../shared.js'
+import { Section } from '../shared.js'
 
 export const BannerSection: React.FC<{ selectedComponent: string }> = ({ selectedComponent }) => (
-  <Section id="banner" selectedComponent={selectedComponent} title="Banner">
-    <Variant label="Default">
-      <Banner>Default banner message</Banner>
-    </Variant>
-    <Variant label="Success">
-      <Banner type="success">Success! Operation completed.</Banner>
-    </Variant>
-    <Variant label="Error">
-      <Banner type="error">Error! Something went wrong.</Banner>
-    </Variant>
+  <Section fullWidth id="banner" selectedComponent={selectedComponent} title="Banner">
+    <Banner>This is a default banner.</Banner>
+    <Banner type="brand">This is a brand banner.</Banner>
+    <Banner type="danger">This is a danger banner.</Banner>
+    <Banner type="success">This is a success banner.</Banner>
+    <Banner type="warning">This is a warning banner.</Banner>
   </Section>
 )

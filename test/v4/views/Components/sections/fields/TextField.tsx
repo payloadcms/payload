@@ -6,7 +6,7 @@ import React from 'react'
 import { Section, Variant } from '../../shared.js'
 
 export const TextFieldSection: React.FC = () => (
-  <Section id="text-field" selectedComponent="text-field" title="Text Field">
+  <Section id="text-field" selectedComponent="text-field" title="Text">
     <Variant>
       <TextInput label="Default" onChange={() => {}} path="text" value="" />
     </Variant>

@@ -1,0 +1,31 @@
+@layer payload-default {
+  .drawer-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
+  .drawer-link__doc-drawer-toggler {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    padding: 0;
+    margin-top: calc(-1 * var(--spacer-1));
+    margin-bottom: calc(-1 * var(--spacer-1));
+    cursor: pointer;
+    color: var(--color-text);
+    font-size: inherit;
+    line-height: inherit;
+    border-radius: var(--radius-small);
+
+    &:hover {
+      background-color: var(--color-bg-transparent-hover);
+    }
+
+    &:active {
+      background-color: var(--color-bg-transparent-pressed);
+    }
+  }
+}

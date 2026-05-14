@@ -4,10 +4,10 @@ import type { ClientConfig } from 'payload'
 import React from 'react'
 import { Toaster } from 'sonner'
 
-import { Error } from './icons/Error.js'
-import { Info } from './icons/Info.js'
-import { Success } from './icons/Success.js'
-import { Warning } from './icons/Warning.js'
+import { ErrorIcon } from '../../icons/Error/index.js'
+import { InfoIcon } from '../../icons/Info/index.js'
+import { SuccessIcon } from '../../icons/Success/index.js'
+import { WarningIcon } from '../../icons/Warning/index.js'
 
 export const ToastContainer: React.FC<{
   config: ClientConfig
@@ -24,10 +24,10 @@ export const ToastContainer: React.FC<{
       expand={expand ?? false}
       gap={8}
       icons={{
-        error: <Error />,
-        info: <Info />,
-        success: <Success />,
-        warning: <Warning />,
+        error: <ErrorIcon />,
+        info: <InfoIcon />,
+        success: <SuccessIcon />,
+        warning: <WarningIcon />,
       }}
       offset="calc(var(--gutter-h) / 2)"
       position={position ?? 'bottom-right'}

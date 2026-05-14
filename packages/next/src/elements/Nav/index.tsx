@@ -3,11 +3,12 @@ import type { PayloadRequest, ServerProps } from 'payload'
 
 import { AlignJustifiedIcon, Logout } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
+import { groupNavItems } from '@payloadcms/ui/shared'
+import { EntityType } from 'payload'
 import React from 'react'
 
 import { DefaultNavClient } from './index.client.js'
-import { NavHamburger } from './NavHamburger/index.js'
+import { NavSidebarToggle } from './NavSidebarToggle/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
 import { SettingsMenuButton } from './SettingsMenuButton/index.js'
 import { SidebarTabs } from './SidebarTabs/index.js'
@@ -238,7 +239,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
       {RenderedAfterNav}
       <div className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-content`}>
-          <NavHamburger baseClass={baseClass} />
+          <NavSidebarToggle baseClass={baseClass} />
         </div>
       </div>
     </NavWrapper>

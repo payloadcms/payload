@@ -2,18 +2,18 @@
 import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsID } from 'payload/shared'
+import { fieldAffectsData, fieldIsID, formatAdminURL } from 'payload/shared'
 import React from 'react' // TODO: abstract this out to support all routers
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { getDisplayedFieldValue } from '../../../utilities/getDisplayedFieldValue.js'
 import { isValidReactElement } from '../../../utilities/isValidReactElement.js'
 import { Link } from '../../Link/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { HierarchyCell } from './fields/Hierarchy/index.js'
 import { cellComponents } from './fields/index.js'
+import { StatusCell } from './fields/Status/index.js'
 
 export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   const {
@@ -125,6 +125,15 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   // For hierarchy fields, render the HierarchyCell directly (no wrapper needed)
   if (isHierarchyField && field.type === 'relationship') {
     return <HierarchyCell cellData={cellData} rowData={rowData} {...props} field={field} />
+  }
+
+  // For status fields, render the StatusCell directly
+  if (field.type === 'select' && 'name' in field && field.name === '_status') {
+    return (
+      <WrapElement {...wrapElementProps}>
+        <StatusCell cellData={cellData} rowData={rowData} {...props} field={field} />
+      </WrapElement>
+    )
   }
 
   const DefaultCellComponent: React.FC<DefaultCellComponentProps> =

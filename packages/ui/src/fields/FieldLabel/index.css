@@ -1,4 +1,8 @@
 @layer payload-default {
+  :root {
+    --field-label-letter-spacing: -0.032px;
+  }
+
   label.field-label {
     display: flex;
     align-items: center;
@@ -6,9 +10,10 @@
 
   label.field-label:not(.unstyled) {
     display: flex;
-    color: var(--text-default);
+    color: var(--color-text);
     font-family: var(--text-body-medium-strong-font-family);
     font-weight: var(--text-body-medium-strong-font-weight);
+    letter-spacing: var(--field-label-letter-spacing);
 
     html:not([dir='RTL']) & {
       margin-right: auto;
@@ -20,7 +25,7 @@
   }
 
   .field-label:not(.unstyled) .required {
-    color: var(--text-danger-default);
+    color: var(--color-text-danger);
 
     html:not([dir='RTL']) & {
       margin-left: var(--spacer-1);

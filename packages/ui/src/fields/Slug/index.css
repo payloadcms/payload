@@ -23,7 +23,7 @@
       overflow: hidden;
 
       &::placeholder {
-        color: var(--text-secondary);
+        color: var(--color-text-secondary);
       }
     }
 
@@ -44,25 +44,25 @@
       border: none;
       border-radius: var(--radius-small);
       background: transparent;
-      color: var(--icon-secondary);
+      color: var(--color-icon-secondary);
       cursor: pointer;
       transition: color 100ms;
 
       &:hover {
-        color: var(--icon-default);
+        color: var(--color-icon);
       }
     }
 
     /* Locked state - override form-input-group styles */
     &.slug-field-component--locked {
       .slug-field-component__input-container {
-        background: var(--bg-default);
-        border-color: var(--border-default);
+        background: var(--color-bg);
+        border-color: var(--color-border);
       }
 
       .slug-field-component__input:disabled {
-        color: var(--text-secondary);
-        -webkit-text-fill-color: var(--text-secondary);
+        color: var(--color-text-secondary);
+        -webkit-text-fill-color: var(--color-text-secondary);
       }
     }
 
@@ -71,20 +71,20 @@
       .slug-field-component__input-container,
       .slug-field-component__input-container:hover,
       .slug-field-component__input-container:focus-within {
-        border-color: var(--border-danger-strong);
+        border-color: var(--color-border-danger-strong);
       }
     }
 
     /* Read-only state (admin.readOnly) */
     &.slug-field-component--read-only {
       .slug-field-component__input-container {
-        background: var(--bg-default);
-        border-color: var(--border-default);
+        background: var(--color-bg);
+        border-color: var(--color-border);
       }
 
       .slug-field-component__input:disabled {
-        color: var(--text-secondary);
-        -webkit-text-fill-color: var(--text-secondary);
+        color: var(--color-text-secondary);
+        -webkit-text-fill-color: var(--color-text-secondary);
       }
     }
   }

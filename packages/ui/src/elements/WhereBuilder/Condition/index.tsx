@@ -25,6 +25,8 @@ export type Props = {
 
 import type { Operator, Option as PayloadOption, ResolvedFilterOptions } from 'payload'
 
+import { isFieldDisabled } from 'payload/shared'
+
 import type { Option } from '../../ReactSelect/index.js'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
@@ -93,7 +95,7 @@ export const Condition: React.FC<Props> = (props) => {
 
   const disabled =
     (!reducedField?.value && typeof reducedField?.value !== 'number') ||
-    reducedField?.field?.admin?.disableListFilter
+    isFieldDisabled(reducedField?.field, 'filter')
 
   const handleFieldChange = useCallback(
     async (field: Option<string>) => {
@@ -151,7 +153,7 @@ export const Condition: React.FC<Props> = (props) => {
               }
               isClearable={false}
               onChange={handleFieldChange}
-              options={reducedFields.filter((field) => !field.field.admin.disableListFilter)}
+              options={reducedFields.filter((field) => !isFieldDisabled(field.field, 'filter'))}
               value={
                 reducedField || {
                   value: reducedField?.value,
@@ -173,7 +175,7 @@ export const Condition: React.FC<Props> = (props) => {
               <DefaultFilter
                 booleanSelect={booleanSelect}
                 disabled={
-                  !operator || !reducedField || reducedField?.field?.admin?.disableListFilter
+                  !operator || !reducedField || isFieldDisabled(reducedField?.field, 'filter')
                 }
                 filterOptions={filterOptions}
                 internalField={reducedField}
@@ -187,10 +189,9 @@ export const Condition: React.FC<Props> = (props) => {
         </div>
         <div className={`${baseClass}__actions`}>
           <Button
-            buttonStyle="icon-label"
+            buttonStyle="ghost"
             className={`${baseClass}__actions-remove`}
             icon="x"
-            iconStyle="with-border"
             onClick={() =>
               removeCondition({
                 andIndex,
@@ -200,14 +201,13 @@ export const Condition: React.FC<Props> = (props) => {
             round
           />
           <Button
-            buttonStyle="icon-label"
+            buttonStyle="ghost"
             className={`${baseClass}__actions-add`}
             icon="plus"
-            iconStyle="with-border"
             onClick={() =>
               addCondition({
                 andIndex: andIndex + 1,
-                field: reducedFields.find((field) => !field.field.admin?.disableListFilter),
+                field: reducedFields.find((field) => !isFieldDisabled(field.field, 'filter')),
                 orIndex,
                 relation: 'and',
               })

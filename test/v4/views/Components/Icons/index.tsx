@@ -144,7 +144,15 @@ const icons: IconEntry[] = [
   { name: 'SortDownIcon', render: () => <SortDownIcon /> },
   { name: 'SortUpIcon', render: () => <SortUpIcon /> },
   { name: 'SwapIcon', render: () => <SwapIcon /> },
-  { name: 'TrashIcon', render: () => <TrashIcon /> },
+  {
+    name: 'TrashIcon',
+    render: () => (
+      <>
+        <TrashIcon />
+        <TrashIcon small />
+      </>
+    ),
+  },
   { name: 'WriteIcon', render: () => <WriteIcon /> },
   { name: 'XIcon', render: () => <XIcon /> },
 

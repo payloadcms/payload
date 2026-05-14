@@ -99,16 +99,14 @@ const EmailFields: CollectionConfig = {
       name: 'disableListColumnText',
       type: 'email',
       admin: {
-        disableListColumn: true,
-        disableListFilter: false,
+        disabled: { column: true },
       },
     },
     {
       name: 'disableListFilterText',
       type: 'email',
       admin: {
-        disableListColumn: false,
-        disableListFilter: true,
+        disabled: { filter: true },
       },
     },
   ],

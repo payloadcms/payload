@@ -1,16 +1,14 @@
 'use client'
 import type { MultiValueProps } from 'react-select'
 
-import React, { Fragment, useState } from 'react'
+import React, { Fragment } from 'react'
 import { components } from 'react-select'
 
 import type { ReactSelectAdapterProps } from '../../../../elements/ReactSelect/types.js'
 import type { Option } from '../../types.js'
 
-import { Tooltip } from '../../../../elements/Tooltip/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
-import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.css'
 
 const baseClass = 'relationship--multi-value-label'
@@ -29,8 +27,6 @@ export const MultiValueLabel: React.FC<
   } = props
 
   const { permissions } = useAuth()
-  const [showTooltip, setShowTooltip] = useState(false)
-  const { t } = useTranslation()
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read)
 
   return (
@@ -50,7 +46,6 @@ export const MultiValueLabel: React.FC<
             aria-label={`Edit ${label}`}
             className={`${baseClass}__drawer-toggler`}
             onClick={(event) => {
-              setShowTooltip(false)
               onDocumentOpen({
                 id: value,
                 collectionSlug: relationTo,
@@ -64,14 +59,9 @@ export const MultiValueLabel: React.FC<
               }
             }}
             onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
             onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
             type="button"
           >
-            <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-              {t('general:editLabel', { label: '' })}
-            </Tooltip>
             <EditIcon className={`${baseClass}__icon`} />
           </button>
         </Fragment>

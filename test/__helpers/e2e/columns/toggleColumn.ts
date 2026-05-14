@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { exactText } from '../helpers.js'
+import { getPillSelectorItem } from './clickPillSelectorItem.js'
 import { openListColumns } from './openListColumns.js'
 import { waitForColumnInURL } from './waitForColumnsInURL.js'
 
@@ -31,13 +31,9 @@ export const toggleColumn = async (
     columnContainerSelector,
   })
 
-  const column = columnContainer.locator(`.pill-selector .pill-selector__pill`, {
-    hasText: exactText(columnLabel),
-  })
+  const column = getPillSelectorItem({ container: columnContainer, label: columnLabel })
 
-  const isActiveBeforeClick = await column.evaluate((el) =>
-    el.classList.contains('pill-selector__pill--selected'),
-  )
+  const isActiveBeforeClick = await column.evaluate((el) => el.classList.contains('chip--selected'))
 
   const targetState =
     targetStateFromArgs !== undefined ? targetStateFromArgs : isActiveBeforeClick ? 'off' : 'on'
@@ -48,15 +44,15 @@ export const toggleColumn = async (
     (isActiveBeforeClick && targetState === 'off') || (!isActiveBeforeClick && targetState === 'on')
 
   if (requiresToggle) {
-    await column.click()
+    await column.locator('.chip__action').click()
   }
 
   if (targetState === 'off') {
     // no class
-    await expect(column).not.toHaveClass(/pill-selector__pill--selected/)
+    await expect(column).not.toHaveClass(/chip--selected/)
   } else {
     // has class
-    await expect(column).toHaveClass(/pill-selector__pill--selected/)
+    await expect(column).toHaveClass(/chip--selected/)
   }
 
   if (expectURLChange && columnName && requiresToggle) {
