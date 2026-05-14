@@ -7,6 +7,7 @@ import { migrateDisabledFields } from './transforms/migrate-disabled-fields/inde
 import { migrateDocumentTitleContext } from './transforms/migrate-document-title-context/index.js'
 import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
 import { migrateHideAPIURL } from './transforms/migrate-hide-api-url/index.js'
+import { migrateImportExportHooks } from './transforms/migrate-import-export-hooks/index.js'
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
 import { removeAllowLocalizedWithinLocalized } from './transforms/remove-allow-localized-within-localized/index.js'
 import { removeStrictDraftTypes } from './transforms/remove-strict-draft-types/index.js'
@@ -24,4 +25,5 @@ export const transforms: Transform[] = [
   renameEditViewTypes,
   removeAllowLocalizedWithinLocalized,
   removeStrictDraftTypes,
+  migrateImportExportHooks,
 ]

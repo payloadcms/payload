@@ -4,6 +4,11 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+import type { RunnerKind, SkillInstallMode } from './runner/types.js'
+import type { Variant } from './variant.js'
+
+import { getVariant } from './variant.js'
+
 type CacheEntry = {
   result: {
     assertionErrors?: string[]
@@ -12,7 +17,9 @@ type CacheEntry = {
     modelId?: string
     pass: boolean
     question: string
+    runnerKind?: RunnerKind
     score?: number
+    skillInstall?: SkillInstallMode
     systemPromptKey?: string
     tscErrors?: string[]
   }
@@ -27,16 +34,11 @@ type SnapshotResult = {
   type: 'codegen'
 }
 
-type Variant = 'baseline' | 'skill'
-
-function getEntryVariant(result: CacheEntry['result']): null | Variant {
-  if (result.systemPromptKey === 'codegenNoSkill') {
-    return 'baseline'
-  }
-  if (!result.modelId) {
-    return null
-  }
-  return 'skill'
+const ENV_VARIANT_TO_INTERNAL: Record<string, Variant> = {
+  'agent-claude-code': 'agent-skill',
+  'agent-claude-code-baseline': 'agent-baseline',
+  baseline: 'baseline',
+  skill: 'skill',
 }
 
 export function setup() {
@@ -46,10 +48,11 @@ export function setup() {
 }
 
 export function teardown() {
-  const variant = (process.env.EVAL_VARIANT ?? 'skill') as Variant
+  const envVariant = process.env.EVAL_VARIANT ?? 'skill'
+  const variant = ENV_VARIANT_TO_INTERNAL[envVariant] ?? 'skill'
 
   const cacheDir = path.resolve(__dirname, 'eval-results/cache')
-  const runsDir = path.resolve(__dirname, 'eval-results/runs', variant)
+  const runsDir = path.resolve(__dirname, 'eval-results/runs', envVariant)
 
   let cacheFiles: string[]
   try {
@@ -66,7 +69,7 @@ export function teardown() {
       if (raw.version !== 1) {
         continue
       }
-      const entryVariant = getEntryVariant(raw.result)
+      const entryVariant = getVariant(raw.result)
       if (entryVariant !== variant) {
         continue
       }

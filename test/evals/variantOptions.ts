@@ -1,17 +1,29 @@
 import type { SuiteOptions } from './suites/types.js'
 
-/**
- * Reads the EVAL_VARIANT env var and returns the matching SuiteOptions.
- *
- * EVAL_VARIANT=skill      (default) — codegen with SKILL.md injected
- * EVAL_VARIANT=baseline             — codegen with no skill context (uplift comparison)
- */
+const DEFAULT_AGENT_MODEL = 'claude-opus-4-6'
+
 export function resolveVariantOptions(): SuiteOptions {
   const variant = process.env.EVAL_VARIANT ?? 'skill'
+  const agentModel = process.env.EVAL_AGENT_MODEL ?? DEFAULT_AGENT_MODEL
 
-  if (variant === 'baseline') {
-    return { labelSuffix: ' (baseline)', systemPromptKey: 'codegenNoSkill' }
+  switch (variant) {
+    case 'agent-claude-code':
+      return {
+        agentModel,
+        kind: 'claude-code',
+        labelSuffix: ` (claude-code/${agentModel})`,
+        skillInstall: 'embedded',
+      }
+    case 'agent-claude-code-baseline':
+      return {
+        agentModel,
+        kind: 'claude-code',
+        labelSuffix: ` (claude-code/${agentModel}, no skill)`,
+        skillInstall: 'none',
+      }
+    case 'baseline':
+      return { labelSuffix: ' (baseline)', systemPromptKey: 'codegenNoSkill' }
+    default:
+      return {}
   }
-
-  return {}
 }

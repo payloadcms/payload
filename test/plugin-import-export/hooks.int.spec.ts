@@ -466,37 +466,6 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
     })
   })
 
-  // ─────────────────────────────────────────────
-  // Deprecation: toCSV/fromCSV still work
-  // ─────────────────────────────────────────────
-
-  describe('toCSV/fromCSV deprecation (still functional)', () => {
-    it('should still apply field-level toCSV during export without error', async () => {
-      // Pages collection has custom toCSV on its `custom` field per existing tests
-      const page = await payload.create({
-        collection: 'pages',
-        data: { title: 'toCSV Deprecation Test', custom: 'raw-value' } as any,
-      })
-
-      const exportDoc = await payload.create({
-        collection: 'exports',
-        user,
-        data: {
-          collectionSlug: 'pages',
-          format: 'csv',
-          where: { id: { equals: page.id } },
-        },
-      })
-
-      await payload.jobs.run()
-
-      const doc = await payload.findByID({ collection: 'exports', id: exportDoc.id })
-      expect(doc.filename).toBeDefined()
-
-      await payload.delete({ collection: 'pages', id: page.id })
-    })
-  })
-
   describe('column mapping — export', () => {
     const createdIDs: (number | string)[] = []
 

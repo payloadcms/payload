@@ -35,6 +35,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 - `rename-edit-view-types` — renames the deprecated `EditViewComponent` → `DocumentViewComponent` and `EditViewConfig` → `DocumentViewConfig` in import statements. When the local name differs from the new canonical name, an `as` alias is preserved so existing usages keep compiling.
 - `remove-allow-localized-within-localized` — removes the deprecated `compatibility.allowLocalizedWithinLocalized` flag from Payload configs. Localized-within-localized is now the default behaviour in v4. The entire `compatibility` object is removed if it would become empty.
 - `remove-strict-draft-types` — removes the `typescript.strictDraftTypes` option from Payload configs. Strict draft types are now the default behaviour in v4 and the flag no longer exists. The entire `typescript` object is removed if it would become empty.
+- `migrate-import-export-hooks` — migrates the deprecated `toCSV` and `fromCSV` field options in `custom['plugin-import-export']` to `hooks.beforeExport` and `hooks.beforeImport`. If a `hooks` object already exists it is merged into; if `hooks.beforeExport`/`hooks.beforeImport` already exist the deprecated sibling is dropped without overwriting. Review argument shapes after migration: `beforeExport` uses `siblingData` (not `row`) and `data` is the top-level document (previously `doc`).
 
 ## Contributing
 
