@@ -164,7 +164,7 @@ describe('Localization', () => {
     test('should disable control for active locale', async () => {
       await page.goto(url.create)
 
-      await page.locator('.localizer button.popup-button').first().click()
+      await openLocaleSelector(page)
 
       await expect(page.locator('.popup__content')).toBeVisible()
 
@@ -377,11 +377,10 @@ describe('Localization', () => {
 
       await page.goto(url.list)
 
-      const localeLabel = page.locator(
-        '.localizer.app-header__localizer .localizer-button__current-label',
-      )
+      // The localizer now shows just the locale code in .localizer__button-content
+      const localeLabel = page.locator('.localizer.app-header__localizer .localizer__button-content')
 
-      await expect(localeLabel).not.toHaveText('English')
+      await expect(localeLabel).not.toHaveText('en')
     })
   })
 
@@ -903,7 +902,7 @@ describe('Localization', () => {
       await page.waitForURL((url) => !url.toString().includes(id))
 
       // Wait for page to be ready after duplicate redirect
-      await expect(page.locator('.localizer button.popup-button')).toBeVisible()
+      await expect(page.locator('.localizer button')).toBeVisible()
       await waitForFormReady(page)
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toHaveValue('English Title')
