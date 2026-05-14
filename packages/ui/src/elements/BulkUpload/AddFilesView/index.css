@@ -9,7 +9,7 @@
       justify-content: center;
       display: flex;
       gap: var(--spacer-4);
-      background-color: var(--theme-elevation-50);
+      background-color: var(--color-bg-secondary);
 
       p {
         margin: 0;
@@ -19,7 +19,7 @@
 
   .bulk-upload--add-files__dropArea {
     height: 100%;
-    padding: var(--spacer-6) var(--gutter-h);
+    padding: var(--spacer-2-5);
   }
 
   .bulk-upload--add-files__dragAndDropText {

@@ -2,8 +2,10 @@
 
 import React from 'react'
 
-import { DrawerCloseButton } from '../DrawerCloseButton/index.js'
-import './index.scss'
+import { ChevronIcon } from '../../../icons/Chevron/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
+import { Button } from '../../Button/index.js'
+import './index.css'
 
 const baseClass = 'bulk-upload--drawer-header'
 
@@ -12,10 +14,17 @@ type Props = {
   readonly title: string
 }
 export function DrawerHeader({ onClose, title }: Props) {
+  const { t } = useTranslation()
+
   return (
     <div className={baseClass}>
+      <Button
+        aria-label={t('general:close')}
+        buttonStyle="ghost"
+        icon={<ChevronIcon direction="left" size={24} />}
+        onClick={onClose}
+      />
       <h2 title={title}>{title}</h2>
-      <DrawerCloseButton onClick={onClose} />
     </div>
   )
 }
