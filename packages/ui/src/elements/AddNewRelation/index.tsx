@@ -179,7 +179,7 @@ export const AddNewRelation: React.FC<Props> = ({
                 ButtonFromProps
               ) : (
                 <Button
-                  buttonStyle="none"
+                  buttonStyle="ghost"
                   className={`${baseClass}__add-button`}
                   tooltip={popupOpen ? undefined : t('fields:addNew')}
                 >

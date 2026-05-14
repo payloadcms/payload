@@ -191,7 +191,7 @@ export const TreeNode = ({
         </span>
         {isLoading && expanded && (
           <span className={`${baseClass}__loading`}>
-            <Spinner loadingText={null} size="small" />
+            <Spinner loadingText={null} size="sm" />
           </span>
         )}
       </div>

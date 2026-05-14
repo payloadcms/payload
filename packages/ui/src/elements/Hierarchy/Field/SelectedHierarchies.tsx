@@ -3,10 +3,9 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
-import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { Pill } from '../../Pill/index.js'
+import { Chip } from '../../Chip/index.js'
 import { Spinner } from '../../Spinner/index.js'
 import './SelectedHierarchies.scss'
 
@@ -127,7 +126,7 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
   if (isInitialLoad) {
     return (
       <div className={`${baseClass}__loading`}>
-        <Spinner size="small" />
+        <Spinner size="sm" />
       </div>
     )
   }
@@ -161,27 +160,15 @@ type SelectedPillProps = {
 }
 
 const SelectedPill: React.FC<SelectedPillProps> = ({ Icon, item, onRemove, readOnly }) => {
-  const { t } = useTranslation()
-
-  const handleRemove = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    onRemove({ id: item.id })
-  }
-
   return (
-    <Pill className={`${baseClass}__pill`} pillStyle="light" size="small">
-      {Boolean(Icon) && <span className={`${baseClass}__pill-icon`}>{Icon}</span>}
-      <span className={`${baseClass}__pill-label`}>{item.title}</span>
-      <button
-        aria-label={t('general:remove')}
-        className={`${baseClass}__pill-remove`}
-        disabled={readOnly}
-        onClick={readOnly ? undefined : handleRemove}
-        type="button"
-      >
-        <XIcon />
-      </button>
-    </Pill>
+    <Chip
+      className={`${baseClass}__pill`}
+      disabled={readOnly}
+      icon={Icon}
+      onRemove={() => onRemove({ id: item.id })}
+      size="medium"
+    >
+      {item.title}
+    </Chip>
   )
 }

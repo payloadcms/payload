@@ -1,11 +1,11 @@
 'use client'
-import { Hamburger, useNav } from '@payloadcms/ui'
+import { SidebarToggle, useNav } from '@payloadcms/ui'
 import React from 'react'
 
 /**
  * @internal
  */
-export const NavHamburger: React.FC<{
+export const NavSidebarToggle: React.FC<{
   baseClass?: string
 }> = ({ baseClass }) => {
   const { navOpen, setNavOpen } = useNav()
@@ -19,7 +19,7 @@ export const NavHamburger: React.FC<{
       tabIndex={!navOpen ? -1 : undefined}
       type="button"
     >
-      <Hamburger isActive />
+      <SidebarToggle isActive />
     </button>
   )
 }

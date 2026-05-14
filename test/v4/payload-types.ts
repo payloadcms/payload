@@ -70,7 +70,6 @@ export interface Config {
     users: User;
     'array-fields': ArrayField;
     'blocks-fields': BlocksField;
-    hierarchy: Hierarchy;
     'checkbox-fields': CheckboxField;
     'code-fields': CodeField;
     'collapsible-fields': CollapsibleField;
@@ -90,6 +89,7 @@ export interface Config {
     'select-fields': SelectField;
     'slug-fields': SlugField;
     'tabs-fields': TabsField;
+    tags: Tag;
     'text-fields': TextField;
     'textarea-fields': TextareaField;
     uploads: Upload;
@@ -101,13 +101,17 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-query-presets': PayloadQueryPreset;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'text-fields': {
+      relatedFrom: 'relationship-fields';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
-    hierarchy: HierarchySelect<false> | HierarchySelect<true>;
     'checkbox-fields': CheckboxFieldsSelect<false> | CheckboxFieldsSelect<true>;
     'code-fields': CodeFieldsSelect<false> | CodeFieldsSelect<true>;
     'collapsible-fields': CollapsibleFieldsSelect<false> | CollapsibleFieldsSelect<true>;
@@ -127,6 +131,7 @@ export interface Config {
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
@@ -138,6 +143,7 @@ export interface Config {
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-query-presets': PayloadQueryPresetsSelect<false> | PayloadQueryPresetsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -368,19 +374,6 @@ export interface BlocksField {
     | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy".
- */
-export interface Hierarchy {
-  id: string;
-  parent?: (string | null) | Hierarchy;
-  name: string;
-  updatedAt: string;
-  createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -714,6 +707,10 @@ export interface RelationshipField {
    */
   author?: (string | null) | User;
   /**
+   * Relationship with drawer appearance
+   */
+  authorWithDrawer?: (string | null) | User;
+  /**
    * The author of this post
    */
   authorRequired: string | User;
@@ -766,8 +763,34 @@ export interface TextField {
    * This field is read-only
    */
   textReadOnly?: string | null;
+  /**
+   * Documents that reference this post
+   */
+  relatedFrom?: {
+    docs?: (string | RelationshipField)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Tags for this post (hierarchy field)
+   */
+  _h_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: string;
+  parent?: (string | null) | Tag;
+  name: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1158,10 +1181,6 @@ export interface PayloadLockedDocument {
         value: string | BlocksField;
       } | null)
     | ({
-        relationTo: 'hierarchy';
-        value: string | Hierarchy;
-      } | null)
-    | ({
         relationTo: 'checkbox-fields';
         value: string | CheckboxField;
       } | null)
@@ -1238,6 +1257,10 @@ export interface PayloadLockedDocument {
         value: string | TabsField;
       } | null)
     | ({
+        relationTo: 'tags';
+        value: string | Tag;
+      } | null)
+    | ({
         relationTo: 'text-fields';
         value: string | TextField;
       } | null)
@@ -1304,6 +1327,55 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-query-presets".
+ */
+export interface PayloadQueryPreset {
+  id: string;
+  title: string;
+  isShared?: boolean | null;
+  access?: {
+    read?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (string | User)[] | null;
+    };
+    update?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (string | User)[] | null;
+    };
+    delete?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (string | User)[] | null;
+    };
+  };
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  columns?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  groupBy?: string | null;
+  relatedCollection: 'select-fields';
+  /**
+   * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
+   */
+  isTemp?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1515,18 +1587,6 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy_select".
- */
-export interface HierarchySelect<T extends boolean = true> {
-  parent?: T;
-  name?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "checkbox-fields_select".
  */
 export interface CheckboxFieldsSelect<T extends boolean = true> {
@@ -1718,6 +1778,7 @@ export interface RadioFieldsSelect<T extends boolean = true> {
  */
 export interface RelationshipFieldsSelect<T extends boolean = true> {
   author?: T;
+  authorWithDrawer?: T;
   authorRequired?: T;
   relatedPosts?: T;
   authorDisabled?: T;
@@ -1849,6 +1910,19 @@ export interface TabsFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_select".
+ */
+export interface TagsSelect<T extends boolean = true> {
+  parent?: T;
+  name?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "text-fields_select".
  */
 export interface TextFieldsSelect<T extends boolean = true> {
@@ -1856,6 +1930,8 @@ export interface TextFieldsSelect<T extends boolean = true> {
   favoriteFruit?: T;
   textDisabled?: T;
   textReadOnly?: T;
+  relatedFrom?: T;
+  _h_tags?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1971,6 +2047,43 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
 export interface PayloadMigrationsSelect<T extends boolean = true> {
   name?: T;
   batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-query-presets_select".
+ */
+export interface PayloadQueryPresetsSelect<T extends boolean = true> {
+  title?: T;
+  isShared?: T;
+  access?:
+    | T
+    | {
+        read?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+        update?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+        delete?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+      };
+  where?: T;
+  columns?: T;
+  groupBy?: T;
+  relatedCollection?: T;
+  isTemp?: T;
   updatedAt?: T;
   createdAt?: T;
 }

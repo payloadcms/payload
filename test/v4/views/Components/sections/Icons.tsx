@@ -64,7 +64,7 @@ const icons = [
 ]
 
 export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selectedComponent }) => (
-  <Section id="icons" selectedComponent={selectedComponent} title="Icons">
+  <Section columns={1} id="icons" selectedComponent={selectedComponent} title="Icons">
     <div className="components-view__icon-grid">
       {/* Chevron - direction + large */}
       <div className="components-view__icon-item components-view__icon-item--variants">
@@ -167,15 +167,21 @@ export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selected
         <span>Spinner</span>
         <div className="components-view__icon-content">
           <div className="components-view__icon-size-row">
-            <span>size: 16 (default)</span>
+            <span>size: sm (16px)</span>
             <div className="components-view__icon-variants">
-              <SpinnerIcon size={16} />
+              <SpinnerIcon size="sm" />
             </div>
           </div>
           <div className="components-view__icon-size-row">
-            <span>size: 24</span>
+            <span>size: md (24px small arc)</span>
             <div className="components-view__icon-variants">
-              <SpinnerIcon size={24} />
+              <SpinnerIcon size="md" />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: lg (24px large arc)</span>
+            <div className="components-view__icon-variants">
+              <SpinnerIcon size="lg" />
             </div>
           </div>
         </div>

@@ -20,6 +20,7 @@ export { useDrawerSlug } from './useDrawerSlug.js'
 
 export const DrawerToggler: React.FC<TogglerProps> = ({
   slug,
+  buttonStyle,
   children,
   className,
   disabled,
@@ -37,6 +38,20 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
     },
     [openModal, slug, onClick],
   )
+
+  if (buttonStyle) {
+    return (
+      <Button
+        buttonStyle={buttonStyle}
+        className={className}
+        disabled={disabled}
+        onClick={handleClick}
+        {...rest}
+      >
+        {children}
+      </Button>
+    )
+  }
 
   return (
     <button className={className} disabled={disabled} onClick={handleClick} type="button" {...rest}>
@@ -111,7 +126,7 @@ export const Drawer: React.FC<Props> = ({
                   */}
                   <Button
                     aria-label={t('general:close')}
-                    buttonStyle="icon-label"
+                    buttonStyle="ghost"
                     className={`${baseClass}__header__close`}
                     id={`close-drawer__${slug}`}
                     onClick={() => closeModal(slug)}

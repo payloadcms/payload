@@ -106,10 +106,9 @@ export async function CollectionCards(props: WidgetServerProps) {
                                 aria-label={t('general:createNewLabel', {
                                   label,
                                 })}
-                                buttonStyle="icon-label"
+                                buttonStyle="ghost"
                                 el="link"
                                 icon="plus"
-                                iconStyle="with-border"
                                 round
                                 to={createHREF}
                               />
