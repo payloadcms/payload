@@ -38,7 +38,7 @@ export const migrateDbTypesSubpath: Transform = {
 
       // Handle `declare module '@payloadcms/.../types' { }` augmentations.
       // getName() on an ambient module declaration includes the surrounding quotes.
-      for (const moduleDecl of file.getModuleDeclarations()) {
+      for (const moduleDecl of file.getModules()) {
         const rawName = moduleDecl.getName()
         const specifier = rawName.replace(/^['"`]|['"`]$/g, '')
         const main = SUBPATH_TO_MAIN[specifier]
