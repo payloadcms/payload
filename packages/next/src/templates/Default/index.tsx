@@ -15,7 +15,7 @@ import {
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 
-import './index.scss'
+import './index.css'
 
 import React from 'react'
 
