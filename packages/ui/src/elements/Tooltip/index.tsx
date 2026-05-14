@@ -18,10 +18,8 @@ export type Props = {
   staticPositioning?: boolean
 }
 
-let caretIdCounter = 0
-
 const TooltipCaret: React.FC = () => {
-  const [clipId] = React.useState(() => `tooltip-caret-clip-${caretIdCounter++}`)
+  const clipId = React.useId()
 
   return (
     <svg aria-hidden="true" className="tooltip__caret" height="14" viewBox="0 0 14 14" width="15">
