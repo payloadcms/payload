@@ -44,7 +44,7 @@
     }
 
     &:has(.card__click:focus-visible) {
-      border-color: var(--color-border-selected);
+      border-color: var(--accessibility-focus-color);
     }
   }
 
