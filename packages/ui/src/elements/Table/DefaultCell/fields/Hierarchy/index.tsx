@@ -64,7 +64,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     }
     // Default based on allowHasMany: false = folder-like, true = tag-like
     const IconComponent = hierarchyConfig?.allowHasMany === false ? FolderIcon : TagIcon
-    return <IconComponent color="muted" />
+    return <IconComponent />
   }, [hierarchyConfig, preRenderedIcon])
 
   // Set up the hierarchy drawer
