@@ -22,6 +22,7 @@ import { ModalSection } from './sections/ModalSection.js'
 import { NoListResultsSection } from './sections/NoListResults.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
+import { SpinnerSection } from './sections/Spinner.js'
 import { ThumbnailCardSection } from './sections/ThumbnailCard.js'
 import { ToastSection } from './sections/ToastSection.js'
 import { TooltipSection } from './sections/Tooltip.js'
@@ -76,6 +77,7 @@ type ComponentId =
   | 'select'
   | 'select-field'
   | 'shimmer'
+  | 'spinner'
   | 'text-field'
   | 'textarea'
   | 'textarea-field'
@@ -106,6 +108,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Popup', value: 'popup' },
   { category: 'primitives', label: 'Radio', value: 'radio' },
   { category: 'primitives', label: 'Select', value: 'select' },
+  { category: 'primitives', label: 'Spinner', value: 'spinner' },
   { category: 'primitives', label: 'Textarea', value: 'textarea' },
   { category: 'primitives', label: 'Tooltip', value: 'tooltip' },
   // Patterns
@@ -246,6 +249,7 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('input-stepper', 'primitives') && (
           <InputStepperSection selectedComponent="input-stepper" />
         )}
+        {shouldShow('spinner', 'primitives') && <SpinnerSection selectedComponent="spinner" />}
 
         {/* Patterns */}
         {(selectedCategory === 'all' || selectedCategory === 'patterns') &&

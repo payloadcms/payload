@@ -1,8 +1,7 @@
-import type { CollectionConfig, Config } from 'payload'
-
-import fs from 'fs'
+import fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { type CollectionConfig, type Config } from 'payload'
 
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
@@ -11,12 +10,25 @@ import {
   blocksFieldsSlug,
   collectionSlugs,
   relationshipFieldsSlug,
+  richTextFieldsSlug,
   tagsSlug,
   textFieldsSlug,
+  uploadsSlug,
 } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+// Load file at module level, manually construct to avoid file-type dynamic import issue
+const imagePath = path.resolve(dirname, '../lexical/collections/Upload/payload.jpg')
+const imageData = await fs.readFile(imagePath)
+const imageStat = await fs.stat(imagePath)
+const imageFile = {
+  name: path.basename(imagePath),
+  data: imageData,
+  mimetype: 'image/jpeg',
+  size: imageStat.size,
+}
 
 import ArrayFields from './collections/Array/index.js'
 import Autosave from './collections/Autosave/index.js'
@@ -47,6 +59,13 @@ import TextareaFields from './collections/Textarea/index.js'
 import Rubbish from './collections/Trash/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
+import {
+  codeContent,
+  getRichTextContent,
+  getTypographyContent,
+  listsContent,
+  tableContent,
+} from './seed/richTextData.js'
 
 export const collections: CollectionConfig[] = [
   {
@@ -149,6 +168,45 @@ export const baseConfig: Partial<Config> = {
         data: post,
       })
       createdPosts.push(created)
+    }
+
+    const richTextCount = await payload.count({ collection: richTextFieldsSlug })
+    if (richTextCount.totalDocs === 0) {
+      const uploadDoc = await payload.create({
+        collection: uploadsSlug,
+        data: { alt: 'Farming image' },
+        file: imageFile,
+      })
+
+      const formattedUploadID =
+        payload.db.defaultIDType === 'number' ? uploadDoc.id : `"${uploadDoc.id}"`
+
+      const devUserDoc = await payload.find({
+        collection: 'users',
+        where: { email: { equals: devUser.email } },
+        limit: 1,
+      })
+      const userId = devUserDoc.docs[0]?.id
+      const formattedUserID =
+        userId !== undefined
+          ? payload.db.defaultIDType === 'number'
+            ? userId
+            : `"${userId}"`
+          : undefined
+
+      const richTextContent = getRichTextContent(formattedUploadID, formattedUserID)
+
+      await payload.create({
+        collection: richTextFieldsSlug,
+        data: {
+          title: 'Data harvest \u2013 how AI and sensors are revolutionizing farming',
+          content: richTextContent,
+          lists: listsContent,
+          typography: getTypographyContent(formattedUserID),
+          table: tableContent,
+          code: codeContent,
+        },
+      })
     }
 
     // Seed relationship-fields to test join field
