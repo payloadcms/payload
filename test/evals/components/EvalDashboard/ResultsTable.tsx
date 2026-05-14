@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react'
 
+import type { TranscriptEvent } from '../../types.js'
 import type { Variant } from '../../variant.js'
 import type { RenderedCode } from './codeDiff.js'
 import type { EvalEntry, RunSnapshot } from './index.js'
@@ -190,6 +191,145 @@ function TokenDisplay({
   )
 }
 
+function TranscriptView({ events }: { events: TranscriptEvent[] }) {
+  return (
+    <div
+      style={{
+        background: 'var(--theme-elevation-50)',
+        border: '1px solid var(--theme-elevation-150)',
+        borderRadius: '4px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        margin: '6px 0 0',
+        maxHeight: '600px',
+        overflow: 'auto',
+        padding: '10px',
+      }}
+    >
+      {events.map((event, i) => (
+        <TranscriptEventView event={event} key={i} />
+      ))}
+    </div>
+  )
+}
+
+function TranscriptEventView({ event }: { event: TranscriptEvent }) {
+  if (event.type === 'text') {
+    return (
+      <div
+        style={{
+          color: 'var(--theme-elevation-800)',
+          fontSize: '0.8rem',
+          lineHeight: 1.55,
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+        }}
+      >
+        {event.text}
+      </div>
+    )
+  }
+  if (event.type === 'thinking') {
+    return (
+      <details>
+        <summary
+          style={{
+            color: 'var(--theme-elevation-500)',
+            cursor: 'pointer',
+            fontSize: '0.72rem',
+            fontStyle: 'italic',
+            userSelect: 'none',
+          }}
+        >
+          Thinking
+        </summary>
+        <div
+          style={{
+            color: 'var(--theme-elevation-600)',
+            fontSize: '0.78rem',
+            fontStyle: 'italic',
+            lineHeight: 1.5,
+            marginTop: '4px',
+            paddingLeft: '12px',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >
+          {event.text}
+        </div>
+      </details>
+    )
+  }
+  if (event.type === 'tool_use') {
+    return (
+      <details>
+        <summary
+          style={{
+            color: 'var(--theme-elevation-700)',
+            cursor: 'pointer',
+            fontFamily: 'var(--font-mono, monospace)',
+            fontSize: '0.78rem',
+            userSelect: 'none',
+          }}
+        >
+          → {event.name}
+        </summary>
+        <pre
+          style={{
+            background: 'var(--theme-elevation-0)',
+            border: '1px solid var(--theme-elevation-100)',
+            borderRadius: '3px',
+            color: 'var(--theme-elevation-700)',
+            fontFamily: 'var(--font-mono, monospace)',
+            fontSize: '0.72rem',
+            margin: '4px 0 0',
+            maxHeight: '300px',
+            overflow: 'auto',
+            padding: '6px 8px',
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          {JSON.stringify(event.input, null, 2)}
+        </pre>
+      </details>
+    )
+  }
+  // tool_result
+  return (
+    <details>
+      <summary
+        style={{
+          color: event.isError ? 'var(--theme-error-600)' : 'var(--theme-elevation-600)',
+          cursor: 'pointer',
+          fontFamily: 'var(--font-mono, monospace)',
+          fontSize: '0.78rem',
+          userSelect: 'none',
+        }}
+      >
+        ← result{event.isError ? ' (error)' : ''}
+      </summary>
+      <pre
+        style={{
+          background: 'var(--theme-elevation-0)',
+          border: '1px solid var(--theme-elevation-100)',
+          borderRadius: '3px',
+          color: event.isError ? 'var(--theme-error-700)' : 'var(--theme-elevation-700)',
+          fontFamily: 'var(--font-mono, monospace)',
+          fontSize: '0.72rem',
+          margin: '4px 0 0',
+          maxHeight: '300px',
+          overflow: 'auto',
+          padding: '6px 8px',
+          whiteSpace: 'pre-wrap',
+        }}
+      >
+        {event.content}
+      </pre>
+    </details>
+  )
+}
+
 function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: RenderedCode }) {
   const { result } = entry
   const sectionStyle: React.CSSProperties = {
@@ -329,7 +469,7 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
       )}
 
       {/* Transcript (Claude Code runner) */}
-      {result.agentLog && result.agentLog.length > 0 && (
+      {(result.transcript?.length || result.agentLog) && (
         <div style={sectionStyle}>
           <details>
             <summary
@@ -341,23 +481,27 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
             >
               Transcript
             </summary>
-            <pre
-              style={{
-                background: 'var(--theme-elevation-50)',
-                border: '1px solid var(--theme-elevation-150)',
-                borderRadius: '4px',
-                color: 'var(--theme-elevation-700)',
-                fontFamily: 'var(--font-mono, monospace)',
-                fontSize: '0.75rem',
-                margin: '6px 0 0',
-                maxHeight: '600px',
-                overflow: 'auto',
-                padding: '8px 10px',
-                whiteSpace: 'pre-wrap',
-              }}
-            >
-              {result.agentLog}
-            </pre>
+            {result.transcript && result.transcript.length > 0 ? (
+              <TranscriptView events={result.transcript} />
+            ) : result.agentLog ? (
+              <pre
+                style={{
+                  background: 'var(--theme-elevation-50)',
+                  border: '1px solid var(--theme-elevation-150)',
+                  borderRadius: '4px',
+                  color: 'var(--theme-elevation-700)',
+                  fontFamily: 'var(--font-mono, monospace)',
+                  fontSize: '0.75rem',
+                  margin: '6px 0 0',
+                  maxHeight: '600px',
+                  overflow: 'auto',
+                  padding: '8px 10px',
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
+                {result.agentLog}
+              </pre>
+            ) : null}
           </details>
         </div>
       )}
