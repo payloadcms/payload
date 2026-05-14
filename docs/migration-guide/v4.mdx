@@ -184,3 +184,44 @@ Lexical `LinkNode` content stored in the v1 format (Payload 2.x and early 3.x) i
 **How to fix:** Run a one-time migration script that finds all documents containing Lexical rich text fields, walks the editor state, and for any node where `type === 'link'` and `version === 1`, replaces `fields.doc.value` with `fields.doc.value.id` (if it is an object) and sets `version` to `2`. Save each updated document back. After saving, Payload 4.0 will automatically upgrade v2 nodes to v3 (adding the required `id` field) on the next read/save cycle.
 
 Payload 3.x ran this migration automatically on every read. If your project was already running on Payload 3.x without v1 link node warnings, you are not affected.
+
+### Plugin Import/Export: `toCSV` and `fromCSV` removed
+
+The `toCSV` and `fromCSV` field options in `custom['plugin-import-export']` have been removed. Use `hooks.beforeExport` and `hooks.beforeImport` instead — they work for both CSV and JSON formats.
+
+The argument shapes differ slightly from the old API:
+
+| Old (`toCSV`) | New (`hooks.beforeExport`)          |
+| ------------- | ----------------------------------- |
+| `row`         | `siblingData`                       |
+| `doc`         | `data`                              |
+| `data`        | _(removed — was alias for `row`)_   |
+| —             | `format` (new: `'csv'` \| `'json'`) |
+
+The `fromCSV` → `hooks.beforeImport` change is non-breaking for the `data` parameter — both receive the full flat row.
+
+```diff
+{
+  name: 'author',
+  type: 'relationship',
+  relationTo: 'users',
+  custom: {
+    'plugin-import-export': {
+-     toCSV: ({ value, columnName, row, doc }) => {
+-       row[`${columnName}_id`] = (value as any).id
+-       return doc.title
+-     },
+-     fromCSV: ({ value, data }) => data[`${value}_key`],
++     hooks: {
++       beforeExport: ({ value, columnName, siblingData, data }) => {
++         siblingData[`${columnName}_id`] = (value as any).id
++         return data.title
++       },
++       beforeImport: ({ value, data }) => data[`${value}_key`],
++     },
+    },
+  },
+}
+```
+
+Run `npx @payloadcms/codemod --transform migrate-import-export-hooks` to migrate automatically. The codemod moves the function values into the correct hook positions and merges with any existing `hooks` object. Review argument names in the migrated functions — `row` references must be renamed to `siblingData` and `doc` references renamed to `data`.
