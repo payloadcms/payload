@@ -8,7 +8,6 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Link } from '../Link/index.js'
 import { Localizer } from '../Localizer/index.js'
-import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
 import { useNav } from '../Nav/context.js'
 import { NavToggler } from '../Nav/NavToggler/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
@@ -88,9 +87,7 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
               </div>
               {isScrollable && <div className={`${baseClass}__gradient-placeholder`} />}
             </div>
-            {localization && (
-              <LocalizerLabel ariaLabel="invisible" className={`${baseClass}__localizer-spacing`} />
-            )}
+            {localization && <Localizer className={`${baseClass}__localizer`} />}
             <Link
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
@@ -103,7 +100,6 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
           </div>
         </div>
       </div>
-      <Localizer className={`${baseClass}__localizer`} />
     </header>
   )
 }

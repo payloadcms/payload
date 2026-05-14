@@ -11,19 +11,7 @@
   }
 
   .app-header__localizer.localizer {
-    position: absolute;
-    top: 50%;
-    right: calc(var(--base) * 4.5);
-    transform: translate3d(0, -50%, 0);
-  }
-
-  [dir='rtl'] .app-header__localizer {
-    right: unset;
-    left: calc(var(--base) * 4.5);
-  }
-
-  .app-header__localizer-spacing {
-    visibility: hidden;
+    flex-shrink: 0;
   }
 
   .app-header__bg {
@@ -88,6 +76,7 @@
   .app-header__controls-wrapper {
     display: flex;
     align-items: center;
+    gap: var(--spacer-2);
     flex: 1;
     min-width: 0;
   }
@@ -107,7 +96,6 @@
     display: flex;
     align-items: center;
     gap: var(--spacer-2);
-    margin-right: var(--base);
   }
 
   .app-header__gradient-placeholder {
