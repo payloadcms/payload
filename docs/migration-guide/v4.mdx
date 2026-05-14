@@ -170,3 +170,17 @@ const Heading: React.FC = () => {
 If you only used `useDocumentInfo` for `title` / `setDocumentTitle`, drop the import entirely. If you used it for other properties as well, leave the original `useDocumentInfo()` call in place and add a separate `useDocumentTitle()` call alongside it.
 
 Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migrate automatically. The codemod splits mixed destructures, removes the `useDocumentInfo` import when no other properties are still used, and preserves any rename aliases (e.g. `{ title: docTitle }`).
+
+### Lexical `LinkNode`: v1 internal link format no longer auto-migrated
+
+Lexical `LinkNode` content stored in the v1 format (Payload 2.x and early 3.x) is no longer automatically migrated on read. V1 nodes stored `fields.doc.value` as the full populated document object rather than just the document ID. If your database contains v1 link nodes, internal links on those nodes will not resolve correctly.
+
+**How to tell if you are affected:** If you see the following warning in your browser console, you have v1 link nodes in your content:
+
+```
+[richtext-lexical] Encountered a v1 LinkNode. Automatic migration of v1 link nodes was removed in Payload 4.0.
+```
+
+**How to fix:** Run a one-time migration script that finds all documents containing Lexical rich text fields, walks the editor state, and for any node where `type === 'link'` and `version === 1`, replaces `fields.doc.value` with `fields.doc.value.id` (if it is an object) and sets `version` to `2`. Save each updated document back. After saving, Payload 4.0 will automatically upgrade v2 nodes to v3 (adding the required `id` field) on the next read/save cycle.
+
+Payload 3.x ran this migration automatically on every read. If your project was already running on Payload 3.x without v1 link node warnings, you are not affected.
