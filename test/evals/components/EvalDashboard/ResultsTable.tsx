@@ -192,6 +192,7 @@ function TokenDisplay({
 }
 
 function TranscriptView({ events }: { events: TranscriptEvent[] }) {
+  const skillInvoked = events.some((event) => event.type === 'tool_use' && event.name === 'Skill')
   return (
     <div
       style={{
@@ -207,10 +208,31 @@ function TranscriptView({ events }: { events: TranscriptEvent[] }) {
         padding: '10px',
       }}
     >
+      <SkillInvocationBadge invoked={skillInvoked} />
       {events.map((event, i) => (
         <TranscriptEventView event={event} key={i} />
       ))}
     </div>
+  )
+}
+
+function SkillInvocationBadge({ invoked }: { invoked: boolean }) {
+  return (
+    <span
+      style={{
+        alignSelf: 'flex-start',
+        background: invoked ? 'var(--theme-success-100)' : 'var(--theme-elevation-100)',
+        border: `1px solid ${invoked ? 'var(--theme-success-300)' : 'var(--theme-elevation-200)'}`,
+        borderRadius: '4px',
+        color: invoked ? 'var(--theme-success-700)' : 'var(--theme-elevation-500)',
+        fontSize: '0.7rem',
+        fontWeight: 600,
+        padding: '2px 8px',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {invoked ? '✓ Skill invoked' : '✗ Skill not invoked'}
+    </span>
   )
 }
 
