@@ -221,9 +221,9 @@ function SkillInvocationBadge({ invoked }: { invoked: boolean }) {
     <span
       style={{
         alignSelf: 'flex-start',
-        background: invoked ? 'var(--color-success-500)' : 'var(--color-error-500)',
+        background: invoked ? 'var(--color-bg-success)' : 'var(--color-bg-danger)',
         borderRadius: '4px',
-        color: '#fff',
+        color: invoked ? 'var(--color-text-onsuccess)' : 'var(--color-text-ondanger)',
         fontSize: '0.7rem',
         fontWeight: 600,
         padding: '3px 8px',
