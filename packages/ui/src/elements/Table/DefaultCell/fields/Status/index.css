@@ -1,5 +1,5 @@
 @layer payload-default {
-  .bool-cell {
+  .status-cell {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -10,6 +10,24 @@
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     white-space: nowrap;
+  }
+
+  .status-cell--published {
+    background: var(--color-bg-selected);
+    color: var(--color-text-brand);
+  }
+
+  .status-cell--draft {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+  }
+
+  .status-cell--changed {
+    background: var(--color-bg-warning-tertiary);
+    color: var(--color-text-warning);
+  }
+
+  .status-cell--previously-published {
     background: var(--color-bg-tertiary);
     color: var(--color-text);
   }

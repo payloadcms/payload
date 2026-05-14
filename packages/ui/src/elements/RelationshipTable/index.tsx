@@ -302,18 +302,17 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           <AddNewButton
             allowCreate={allowCreate !== false}
             baseClass={baseClass}
-            buttonStyle="pill"
+            buttonStyle="ghost"
             className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ''}`}
             collections={config.collections}
             i18n={i18n}
-            icon={isPolymorphic ? 'plus' : undefined}
             label={i18n.t('fields:addNew')}
             onClick={isPolymorphic ? setSelectedCollection : openDrawer}
             permissions={permissions}
             relationTo={relationTo}
           />
           <Button
-            buttonStyle="pill"
+            buttonStyle="secondary"
             className={`${baseClass}__toggle-columns ${
               openColumnSelector ? `${baseClass}__buttons-active` : ''
             }`}
@@ -321,7 +320,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
               'aria-controls': `${baseClass}-columns`,
               'aria-expanded': openColumnSelector,
             }}
-            icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} />}
+            icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} size={16} />}
             onClick={() => setOpenColumnSelector(!openColumnSelector)}
             size="medium"
           >
