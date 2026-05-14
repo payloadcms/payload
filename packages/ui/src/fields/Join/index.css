@@ -7,6 +7,12 @@
     gap: var(--spacer-2);
   }
 
+  .field-type.join .join__header-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
   .field-type.join .relationship-table__header h4 {
     margin: 0;
     font-family: var(--text-body-large-strong-font-family);

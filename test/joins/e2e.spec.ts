@@ -692,7 +692,7 @@ describe('Join Field', () => {
     await page.locator('#field-enableErrorOnJoin').click()
     await page.locator('#action-save').click()
 
-    await expect(page.locator('#field-joinWithError')).toContainText('enableErrorOnJoin is true')
+    await expect(page.locator('#field-joinWithError .error-pill')).toBeVisible()
   })
 
   test('should render localized data in table when locale changes', async () => {
