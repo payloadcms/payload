@@ -15,7 +15,9 @@ export function getVariant(entry: EvalEntry): null | Variant {
   return getVariantFromResult(entry.result)
 }
 
-function variantLabel(variant: Variant): string {
+type VariantFilter = 'all' | Variant
+
+function getVariantLabel(variant: Variant): string {
   const labels: Record<Variant, string> = {
     'agent-baseline': 'Agent Baseline',
     'agent-skill': 'Agent Skill',
@@ -398,7 +400,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
   const [compareMode, setCompareMode] = useState<'run' | 'variant'>('variant')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
-  const [variantFilter, setVariantFilter] = useState<'all' | Variant>('all')
+  const [variantFilter, setVariantFilter] = useState<VariantFilter>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
   const [hoveredHash, setHoveredHash] = useState<null | string>(null)
@@ -410,7 +412,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
     [entries],
   )
 
-  const variantOptions = useMemo<('all' | Variant)[]>(() => {
+  const variantOptions = useMemo<VariantFilter[]>(() => {
     const seen = new Set<Variant>()
     for (const e of entries) {
       const v = getVariant(e)
@@ -753,7 +755,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                     style={filterBtnStyle(isActive)}
                     type="button"
                   >
-                    {v === 'all' ? 'All' : variantLabel(v)}
+                    {v === 'all' ? 'All' : getVariantLabel(v)}
                   </button>
                 )
               })}
