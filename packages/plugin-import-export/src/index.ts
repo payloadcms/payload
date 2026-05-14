@@ -8,13 +8,11 @@ import type {
   ExportBeforeHook,
   FieldBeforeExportHook,
   FieldBeforeImportHook,
-  FromCSVFunction,
   ImportAfterHook,
   ImportBeforeHook,
   ImportExportPluginConfig,
   Limit,
   PluginCollectionConfig,
-  ToCSVFunction,
 } from './types.js'
 
 import { getCreateCollectionExportTask } from './export/getCreateExportCollectionTask.js'
@@ -241,11 +239,6 @@ declare module 'payload' {
        */
       disabled?: boolean
       /**
-       * @deprecated use `hooks.beforeImport` instead.
-       * Still functional, but will be removed in a future major version.
-       */
-      fromCSV?: FromCSVFunction
-      /**
        * Field-level lifecycle hooks for import/export transformations.
        * Works for both CSV and JSON formats.
        */
@@ -261,11 +254,6 @@ declare module 'payload' {
          */
         beforeImport?: FieldBeforeImportHook
       }
-      /**
-       * @deprecated use `hooks.beforeExport` instead.
-       * Still functional, but will be removed in a future major version.
-       */
-      toCSV?: ToCSVFunction
     }
   }
 

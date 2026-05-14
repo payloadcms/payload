@@ -125,7 +125,7 @@ export const createImport = async ({
 
   const importHooks = collectionConfig.custom?.['plugin-import-export']?.importHooks
 
-  // Get fromCSV functions for field transformations
+  // Get beforeImport functions for field transformations
   const importFieldHooks = getImportFieldFunctions({
     fields: collectionConfig.flattenedFields || [],
   })
