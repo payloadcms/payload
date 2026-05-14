@@ -14,8 +14,8 @@ export const RelationshipTablePagination: React.FC = () => {
 
   const { hasNextPage, hasPrevPage, limit, nextPage, page, prevPage, totalDocs, totalPages } = data
 
-  // Don't render pagination if there's only one page or no docs
-  if (totalPages <= 1) {
+  // Don't render pagination if there's only one page, no docs, or missing data
+  if (!totalPages || totalPages <= 1 || !totalDocs || !page || !limit) {
     return null
   }
 
