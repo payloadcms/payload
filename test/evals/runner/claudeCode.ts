@@ -15,6 +15,9 @@ const DEFAULT_TIMEOUT_MS = 600_000
 const PROMPT_SUFFIX =
   'IMPORTANT: Do not run package managers (npm, pnpm, yarn) or build/test/dev commands. Modify only payload.config.ts. Just write the file.'
 
+const SKILL_SYSTEM_PROMPT =
+  'A `payload` skill is available in this workdir under .claude/skills/payload/. You MUST invoke it via the Skill tool before modifying payload.config.ts. The skill provides authoritative reference for collections, fields, hooks, access control, and other Payload CMS patterns.'
+
 const limit = pLimit(Number(process.env.EVAL_AGENT_CONCURRENCY ?? '2'))
 
 let initPromise: null | Promise<{ sandboxDir: string; version: string }> = null
@@ -49,8 +52,10 @@ async function runOne(
     await installSkill({ mode: skillInstall, workdir })
 
     const prompt = `${instruction}\n\n${PROMPT_SUFFIX}`
+    const appendSystemPrompt = skillInstall === 'embedded' ? SKILL_SYSTEM_PROMPT : undefined
     const { exitCode, stderr, transcript, usage } = await spawnAgent({
       agentModel,
+      appendSystemPrompt,
       prompt,
       sandboxDir: init.sandboxDir,
       timeoutMs,
@@ -75,12 +80,14 @@ async function runOne(
 
 async function spawnAgent({
   agentModel,
+  appendSystemPrompt,
   prompt,
   sandboxDir,
   timeoutMs,
   workdir,
 }: {
   agentModel: string
+  appendSystemPrompt?: string
   prompt: string
   sandboxDir: string
   timeoutMs: number
@@ -91,28 +98,28 @@ async function spawnAgent({
   transcript: TranscriptEvent[]
   usage?: TokenUsage
 }> {
+  const args = [
+    '--print',
+    '--output-format',
+    'stream-json',
+    '--verbose',
+    '--model',
+    agentModel,
+    '--dangerously-skip-permissions',
+  ]
+  if (appendSystemPrompt) {
+    args.push('--append-system-prompt', appendSystemPrompt)
+  }
+  args.push(prompt)
   return new Promise((resolve) => {
-    const child = spawn(
-      'claude',
-      [
-        '--print',
-        '--output-format',
-        'stream-json',
-        '--verbose',
-        '--model',
-        agentModel,
-        '--dangerously-skip-permissions',
-        prompt,
-      ],
-      {
-        cwd: workdir,
-        // detached so timeout can kill the whole process group via -pid;
-        // otherwise grandchild processes (agent's tool subprocesses) leak.
-        detached: true,
-        env: { ...process.env, CLAUDE_CONFIG_DIR: sandboxDir },
-        stdio: ['ignore', 'pipe', 'pipe'],
-      },
-    )
+    const child = spawn('claude', args, {
+      cwd: workdir,
+      // detached so timeout can kill the whole process group via -pid;
+      // otherwise grandchild processes (agent's tool subprocesses) leak.
+      detached: true,
+      env: { ...process.env, CLAUDE_CONFIG_DIR: sandboxDir },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
     const transcript: TranscriptEvent[] = []
     let usage: TokenUsage | undefined
     let stdoutBuffer = ''
