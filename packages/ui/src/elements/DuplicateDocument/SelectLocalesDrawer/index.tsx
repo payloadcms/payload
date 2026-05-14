@@ -78,7 +78,6 @@ export const SelectLocalesDrawer: React.FC<SelectLocalesDrawerProps> = ({
   return (
     <Drawer
       className={baseClass}
-      gutter={false}
       Header={
         <DrawerHeader
           onClose={() => {

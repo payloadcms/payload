@@ -291,7 +291,6 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
   return (
     <Drawer
       className={baseClass}
-      gutter={false}
       Header={
         <div className={`${baseClass}__drawer-header`}>
           <h2 title={modalTitle}>{modalTitle}</h2>

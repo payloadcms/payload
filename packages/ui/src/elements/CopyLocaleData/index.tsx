@@ -133,7 +133,6 @@ export const CopyLocaleData: React.FC = () => {
       </PopupList.Button>
       <Drawer
         className={baseClass}
-        gutter={false}
         Header={
           <DrawerHeader
             onClose={() => {

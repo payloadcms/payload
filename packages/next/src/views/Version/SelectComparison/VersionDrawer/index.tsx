@@ -123,12 +123,7 @@ export const VersionDrawer: React.FC<{
   const { t } = useTranslation()
 
   return (
-    <Drawer
-      className={baseClass}
-      gutter={true}
-      slug={drawerSlug}
-      title={t('version:selectVersionToCompare')}
-    >
+    <Drawer className={baseClass} slug={drawerSlug} title={t('version:selectVersionToCompare')}>
       <VersionDrawerContent
         collectionSlug={collectionSlug}
         docID={docID}
