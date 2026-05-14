@@ -209,15 +209,21 @@ export const importExportPlugin =
     }
 
     /**
-     * Merge plugin translations
+     * Merge plugin translations — only for languages the user has enabled.
+     * Plugins run before sanitize, so `supportedLanguages` may be undefined; sanitize will
+     * default it to `{ en }`, so we mirror that here to avoid merging 30+ unused tables.
      */
-    const simplifiedTranslations = Object.entries(translations).reduce(
-      (acc, [key, value]) => {
-        acc[key] = value.translations
-        return acc
-      },
-      {} as Record<string, PluginDefaultTranslationsObject>,
-    )
+    const supportedLanguageKeys = config.i18n?.supportedLanguages
+      ? Object.keys(config.i18n.supportedLanguages)
+      : ['en']
+
+    const simplifiedTranslations: Record<string, PluginDefaultTranslationsObject> = {}
+    for (const lang of supportedLanguageKeys) {
+      const entry = translations[lang as keyof typeof translations]
+      if (entry) {
+        simplifiedTranslations[lang] = entry.translations
+      }
+    }
 
     config.i18n = {
       ...config.i18n,
