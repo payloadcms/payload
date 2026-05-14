@@ -3,7 +3,7 @@ import type { Payload, User, Where } from 'payload'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
@@ -2078,6 +2078,89 @@ describe('Localization', () => {
       })
     })
 
+    describe('localized fields within localized parents — CRUD behaviour', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          await payload.delete({ collection: 'localized-within-localized', id })
+        }
+        createdIDs.length = 0
+      })
+
+      it('should store and retrieve locale-specific data in a localized group with a localized child field', async () => {
+        const enDoc = await payload.create({
+          collection: 'localized-within-localized',
+          data: {
+            myGroup: { shouldNotBeLocalized: 'EN group text' },
+          },
+          locale: 'en',
+        })
+
+        createdIDs.push(enDoc.id)
+
+        await payload.update({
+          collection: 'localized-within-localized',
+          id: enDoc.id,
+          data: {
+            myGroup: { shouldNotBeLocalized: 'ES group text' },
+          },
+          locale: 'es',
+        })
+
+        const enResult = await payload.findByID({
+          collection: 'localized-within-localized',
+          id: enDoc.id,
+          locale: 'en',
+        })
+
+        const esResult = await payload.findByID({
+          collection: 'localized-within-localized',
+          id: enDoc.id,
+          locale: 'es',
+        })
+
+        expect(enResult.myGroup?.shouldNotBeLocalized).toBe('EN group text')
+        expect(esResult.myGroup?.shouldNotBeLocalized).toBe('ES group text')
+      })
+
+      it('should store and retrieve locale-specific data in a localized array with a localized child field', async () => {
+        const enDoc = await payload.create({
+          collection: 'localized-within-localized',
+          data: {
+            myArray: [{ shouldNotBeLocalized: 'EN array item' }],
+          },
+          locale: 'en',
+        })
+
+        createdIDs.push(enDoc.id)
+
+        await payload.update({
+          collection: 'localized-within-localized',
+          id: enDoc.id,
+          data: {
+            myArray: [{ shouldNotBeLocalized: 'ES array item' }],
+          },
+          locale: 'es',
+        })
+
+        const enResult = await payload.findByID({
+          collection: 'localized-within-localized',
+          id: enDoc.id,
+          locale: 'en',
+        })
+
+        const esResult = await payload.findByID({
+          collection: 'localized-within-localized',
+          id: enDoc.id,
+          locale: 'es',
+        })
+
+        expect(enResult.myArray?.[0]?.shouldNotBeLocalized).toBe('EN array item')
+        expect(esResult.myArray?.[0]?.shouldNotBeLocalized).toBe('ES array item')
+      })
+    })
+
     describe('nested blocks', () => {
       let id
       it('should allow creating nested blocks per locale', async () => {
@@ -3870,7 +3953,7 @@ describe('Localization', () => {
       expect((allLocalesDoc.number as any).en).toBe(100)
       expect((allLocalesDoc.select as any).en).toBe('option1')
 
-      // Verify localized group has locale keys at top level, children do not
+      // Verify localized group has locale keys at top level; plain children are stored under the group's locale key
       expect((allLocalesDoc.localizedGroup as any).en).toBeDefined()
       expect((allLocalesDoc.localizedGroup as any).en.title).toBe('EN Title')
       expect((allLocalesDoc.localizedGroup as any).en.description).toBe('EN Description')

@@ -122,7 +122,6 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  strictDraftTypes: true;
   user: User;
   jobs: {
     tasks: unknown;

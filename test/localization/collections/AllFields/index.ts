@@ -62,7 +62,7 @@ export const AllFieldsLocalized: CollectionConfig = {
       localized: true,
     },
 
-    // Localized group with localized children
+    // Localized group — children do not need localized: true since the group handles localization
     {
       name: 'localizedGroup',
       type: 'group',
@@ -70,12 +70,10 @@ export const AllFieldsLocalized: CollectionConfig = {
         {
           name: 'title',
           type: 'text',
-          localized: true,
         },
         {
           name: 'description',
           type: 'textarea',
-          localized: true,
         },
       ],
       localized: true,
@@ -98,7 +96,7 @@ export const AllFieldsLocalized: CollectionConfig = {
       ],
     },
 
-    // Localized array with localized children
+    // Localized array — children do not need localized: true since the array handles localization
     {
       name: 'localizedArray',
       type: 'array',
@@ -106,7 +104,6 @@ export const AllFieldsLocalized: CollectionConfig = {
         {
           name: 'item',
           type: 'text',
-          localized: true,
         },
       ],
       localized: true,
@@ -125,7 +122,7 @@ export const AllFieldsLocalized: CollectionConfig = {
       ],
     },
 
-    // Localized blocks with nested localized fields
+    // Localized blocks — children do not need localized: true since the blocks field handles localization
     {
       name: 'localizedBlocks',
       type: 'blocks',
@@ -136,7 +133,6 @@ export const AllFieldsLocalized: CollectionConfig = {
             {
               name: 'text',
               type: 'text',
-              localized: true,
             },
           ],
         },
@@ -152,7 +148,6 @@ export const AllFieldsLocalized: CollectionConfig = {
                   type: 'text',
                 },
               ],
-              localized: true,
             },
           ],
         },
@@ -160,7 +155,7 @@ export const AllFieldsLocalized: CollectionConfig = {
       localized: true,
     },
 
-    // Named tabs with localized tab
+    // Named tabs with localized tab — children do not need localized: true since the tab handles localization
     {
       type: 'tabs',
       tabs: [
@@ -170,7 +165,6 @@ export const AllFieldsLocalized: CollectionConfig = {
             {
               name: 'tabText',
               type: 'text',
-              localized: true,
             },
           ],
           label: 'Localized Tab',
@@ -207,7 +201,7 @@ export const AllFieldsLocalized: CollectionConfig = {
       ],
     },
 
-    // Deeply nested: localized tab
+    // Deeply nested: localized tab — inner fields do not need localized: true since t1 handles localization
     {
       type: 'tabs',
       tabs: [
@@ -226,7 +220,6 @@ export const AllFieldsLocalized: CollectionConfig = {
                     {
                       name: 'text',
                       type: 'text',
-                      localized: true,
                     },
                   ],
                 },
@@ -237,7 +230,8 @@ export const AllFieldsLocalized: CollectionConfig = {
       ],
     },
 
-    // Deeply nested: localized group > non-localized group > localized array
+    // Deeply nested: localized group > non-localized group > array
+    // Inner fields do not need localized: true since g1 handles localization
     {
       name: 'g1',
       type: 'group',
@@ -254,10 +248,8 @@ export const AllFieldsLocalized: CollectionConfig = {
                 {
                   name: 'text',
                   type: 'text',
-                  localized: true,
                 },
               ],
-              localized: true,
             },
           ],
         },
