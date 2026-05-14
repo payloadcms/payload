@@ -1,10 +1,10 @@
 import type { JSX } from 'react'
 
-import type { I18nClient, TFunction } from '../types.js'
+import type { I18nClient } from '../types.js'
 
 type LabelType =
   | (() => JSX.Element)
-  | ((args: { i18n: I18nClient; t: TFunction }) => string)
+  | ((args: { i18n: I18nClient; t: I18nClient['t'] }) => string)
   | JSX.Element
   | Record<string, string>
   | string

@@ -108,7 +108,6 @@ export const handleEndpoints = async ({
     }
 
     const req = new Request(url, {
-      cache: request.cache,
       credentials: request.credentials,
       headers: request.headers,
       method: 'GET',
