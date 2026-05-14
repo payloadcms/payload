@@ -493,7 +493,7 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
       {/* Transcript (Claude Code runner) */}
       {(result.transcript?.length || result.agentLog) && (
         <div style={sectionStyle}>
-          <details>
+          <details open>
             <summary
               style={{
                 ...labelStyle,
