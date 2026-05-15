@@ -39,7 +39,7 @@
       background: var(--color-bg-secondary-hover);
     }
 
-    &:active {
+    &:has(.card__click:active) {
       background: var(--color-bg-secondary-pressed);
     }
   }
@@ -52,6 +52,11 @@
     height: auto;
     width: auto;
     border-radius: inherit;
+
+    &:hover,
+    &:active {
+      background-color: transparent;
+    }
 
     &:focus-visible {
       outline: 1px solid var(--accessibility-focus-color);
