@@ -418,7 +418,6 @@ describe('Document View', () => {
 
       const drawer1Box = await drawer1Content.boundingBox()
       await expect.poll(() => drawer1Box).not.toBeNull()
-      const drawerLeft = drawer1Box!.x
 
       await drawer1Content
         .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
@@ -429,9 +428,13 @@ describe('Document View', () => {
 
       const drawer2Box = await drawer2Content.boundingBox()
       await expect.poll(() => drawer2Box).not.toBeNull()
-      const drawer2Left = drawer2Box!.x
 
-      await expect.poll(() => drawer2Left > drawerLeft).toBe(true)
+      // Stacking is done via padding-right on the outer wrapper, which pushes
+      // the content inward from the right. Compare right edges of the content:
+      const drawer1Right = drawer1Box!.x + drawer1Box!.width
+      const drawer2Right = drawer2Box!.x + drawer2Box!.width
+
+      await expect.poll(() => drawer2Right < drawer1Right).toBe(true)
     })
 
     test('document drawer displays a link to document', async () => {
