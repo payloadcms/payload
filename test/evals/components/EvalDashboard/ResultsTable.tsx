@@ -2,23 +2,19 @@
 
 import React, { useMemo, useState } from 'react'
 
+import type { Variant } from '../../variant.js'
 import type { Audience } from './audience.js'
 import type { RenderedCode } from './codeDiff.js'
 import type { EvalEntry, RunSnapshot } from './index.js'
 
+import { getVariant as getVariantFromResult } from '../../variant.js'
 import { AUDIENCE_CONFIG } from './audience.js'
 import { CompareTable } from './CompareTable.js'
 
-type Variant = 'baseline' | 'skill'
+export type { Variant }
 
-function getVariant(entry: EvalEntry): null | Variant {
-  if (entry.result.systemPromptKey === 'codegenNoSkill') {
-    return 'baseline'
-  }
-  if (!entry.result.modelId) {
-    return null
-  }
-  return 'skill'
+export function getVariant(entry: EvalEntry): null | Variant {
+  return getVariantFromResult(entry.result)
 }
 
 function VariantBadge({ variant }: { variant: null | Variant }) {
@@ -26,6 +22,16 @@ function VariantBadge({ variant }: { variant: null | Variant }) {
     return <span style={{ color: 'var(--theme-elevation-300)', fontSize: '0.72rem' }}>—</span>
   }
   const config: Record<Variant, { bg: string; color: string; label: string }> = {
+    'agent-baseline': {
+      bg: 'var(--theme-elevation-100)',
+      color: 'var(--theme-warning-700)',
+      label: 'Agent Baseline',
+    },
+    'agent-skill': {
+      bg: 'var(--theme-success-100)',
+      color: 'var(--theme-warning-700)',
+      label: 'Agent Skill',
+    },
     baseline: {
       bg: 'var(--theme-elevation-100)',
       color: 'var(--theme-elevation-600)',

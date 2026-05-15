@@ -17,7 +17,7 @@ export const ColoredFolderIcon: React.FC<ColoredFolderIconProps> = ({ color }) =
       className={[baseClass, color ? `${baseClass}--custom-color` : ''].join(' ')}
       style={{ color }}
     >
-      <FolderIcon color={color ? undefined : 'muted'} />
+      <FolderIcon />
     </span>
   )
 }

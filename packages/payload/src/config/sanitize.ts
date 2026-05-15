@@ -460,15 +460,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config.csrf!.push(config.serverURL!)
   }
 
-  const uploadAdapters = new Set<string>()
-  // interact with all collections
-  for (const collection of config.collections!) {
-    // deduped upload adapters
-    if (collection.upload?.adapter) {
-      uploadAdapters.add(collection.upload.adapter)
-    }
-  }
-
   if (!config.upload) {
     config.upload = { adapters: [] }
   }

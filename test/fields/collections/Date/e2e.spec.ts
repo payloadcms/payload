@@ -155,7 +155,7 @@ describe('Date', () => {
 
     await dateWithTz.fill('08/12/2027 10:00 AM')
 
-    const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+    const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
     const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
 
     await page.click(dropdownControlSelector)
@@ -187,7 +187,7 @@ describe('Date', () => {
 
     await dateWithTz.fill('08/12/2027 10:00 AM')
 
-    const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+    const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
     const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
 
     await page.click(dropdownControlSelector)
@@ -232,7 +232,7 @@ describe('Date', () => {
 
         await dateWithTz.fill('08/12/2027 10:00 AM')
 
-        const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+        const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
 
         const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
         await page.click(dropdownControlSelector)
@@ -276,7 +276,7 @@ describe('Date', () => {
 
         await dateWithTz.fill('08/12/2027 10:00 AM')
 
-        const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+        const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
 
         const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
         await page.click(dropdownControlSelector)
@@ -320,7 +320,7 @@ describe('Date', () => {
 
         await dateWithTz.fill('08/12/2027 10:00 AM')
 
-        const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+        const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
 
         const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
         await page.click(dropdownControlSelector)
@@ -392,7 +392,7 @@ describe('Date', () => {
 
       const initialDateValue = await dateTimeLocator.inputValue()
 
-      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
 
       const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
 
@@ -421,7 +421,7 @@ describe('Date', () => {
 
       const initialDateValue = await dateTimeLocator.inputValue()
 
-      const dropdownControlSelector = `#field-timezoneBlocks__0__dayAndTime .rs__control`
+      const dropdownControlSelector = `#field-timezoneBlocks__0__dayAndTime .rs__input`
       const timezoneOptionSelector = `#field-timezoneBlocks__0__dayAndTime .rs__menu .rs__option:has-text("London")`
 
       await page.click(dropdownControlSelector)
@@ -447,7 +447,7 @@ describe('Date', () => {
 
       const initialDateValue = await dateTimeLocator.inputValue()
 
-      const dropdownControlSelector = `#field-timezoneArray__0__dayAndTime .rs__control`
+      const dropdownControlSelector = `#field-timezoneArray__0__dayAndTime .rs__input`
 
       const timezoneOptionSelector = `#field-timezoneArray__0__dayAndTime .rs__menu .rs__option:has-text("London")`
 
@@ -469,7 +469,7 @@ describe('Date', () => {
 
       await page.goto(url.edit(existingDoc!.id))
 
-      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
 
       const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Monterrey")`
 
@@ -587,7 +587,7 @@ describe('Date', () => {
         '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
       )
 
-      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
       const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Tokyo")`
 
       await page.click(dropdownControlSelector)
@@ -643,7 +643,7 @@ describe('Date', () => {
     test('can see UTC offset timezone options in picker', async () => {
       await page.goto(url.create)
 
-      const dropdownControlSelector = `#field-dateWithOffsetTimezone .rs__control`
+      const dropdownControlSelector = `#field-dateWithOffsetTimezone .rs__input`
 
       await page.click(dropdownControlSelector)
 
@@ -672,7 +672,7 @@ describe('Date', () => {
     test('can see mixed IANA and offset timezone options', async () => {
       await page.goto(url.create)
 
-      const dropdownControlSelector = `#field-dateWithMixedTimezones .rs__control`
+      const dropdownControlSelector = `#field-dateWithMixedTimezones .rs__input`
 
       await page.click(dropdownControlSelector)
 
@@ -720,7 +720,7 @@ describe('Date', () => {
 
       const initialDateValue = await dateTimeLocator.inputValue()
 
-      const dropdownControlSelector = `#field-dateWithOffsetTimezone .rs__control`
+      const dropdownControlSelector = `#field-dateWithOffsetTimezone .rs__input`
       const timezoneOptionSelector = `#field-dateWithOffsetTimezone .rs__menu .rs__option:has-text("UTC-8 (PST)")`
 
       await page.click(dropdownControlSelector)
@@ -870,7 +870,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
       )
 
-      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
       const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Custom UTC")`
 
       await page.click(dropdownControlSelector)
@@ -912,7 +912,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
       )
 
-      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
       const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Paris")`
 
       await page.click(dropdownControlSelector)
@@ -954,7 +954,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
       )
 
-      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
       const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Paris")`
 
       await page.click(dropdownControlSelector)
@@ -1002,13 +1002,13 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         '#field-defaultWithTimezone .react-datepicker-wrapper input',
       )
 
-      const dateOnlyDropdownSelector = `#field-defaultWithTimezone .rs__control`
+      const dateOnlyDropdownSelector = `#field-defaultWithTimezone .rs__input`
       const dateOnlytimezoneSelector = `#field-defaultWithTimezone .rs__menu .rs__option:has-text("Auckland")`
       await page.click(dateOnlyDropdownSelector)
       await page.click(dateOnlytimezoneSelector)
       await dateOnlyLocator.fill(expectedDateOnlyInput)
 
-      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
       const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Auckland")`
       await page.click(dropdownControlSelector)
       await page.click(timezoneOptionSelector)
@@ -1056,13 +1056,13 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         '#field-defaultWithTimezone .react-datepicker-wrapper input',
       )
 
-      const dateOnlyDropdownSelector = `#field-defaultWithTimezone .rs__control`
+      const dateOnlyDropdownSelector = `#field-defaultWithTimezone .rs__input`
       const dateOnlytimezoneSelector = `#field-defaultWithTimezone .rs__menu .rs__option:has-text("Auckland")`
       await page.click(dateOnlyDropdownSelector)
       await page.click(dateOnlytimezoneSelector)
       await dateOnlyLocator.fill(expectedDateOnlyInput)
 
-      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__input`
       const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Auckland")`
       await page.click(dropdownControlSelector)
       await page.click(timezoneOptionSelector)
@@ -1186,7 +1186,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         )
         await requiredDateWithTz.fill('01/01/2025 10:00 AM')
 
-        const requiredTzDropdown = `#field-dayAndTimeWithTimezone .rs__control`
+        const requiredTzDropdown = `#field-dayAndTimeWithTimezone .rs__input`
         const requiredTzOption = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Tokyo")`
         await page.click(requiredTzDropdown)
         await page.click(requiredTzOption)
@@ -1196,7 +1196,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
           '#field-dateWithOffsetTimezone .react-datepicker-wrapper input',
         )
 
-        const dropdownControlSelector = `#field-dateWithOffsetTimezone .rs__control`
+        const dropdownControlSelector = `#field-dateWithOffsetTimezone .rs__input`
         const timezoneOptionSelector = `#field-dateWithOffsetTimezone .rs__menu .rs__option:has-text("UTC+5:30 (India)")`
 
         await page.click(dropdownControlSelector)
@@ -1245,7 +1245,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         )
         await requiredDateWithTz.fill('01/01/2025 10:00 AM')
 
-        const requiredTzDropdown = `#field-dayAndTimeWithTimezone .rs__control`
+        const requiredTzDropdown = `#field-dayAndTimeWithTimezone .rs__input`
         const requiredTzOption = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Tokyo")`
         await page.click(requiredTzDropdown)
         await page.click(requiredTzOption)
@@ -1255,7 +1255,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
           '#field-dateWithOffsetTimezone .react-datepicker-wrapper input',
         )
 
-        const dropdownControlSelector = `#field-dateWithOffsetTimezone .rs__control`
+        const dropdownControlSelector = `#field-dateWithOffsetTimezone .rs__input`
         const timezoneOptionSelector = `#field-dateWithOffsetTimezone .rs__menu .rs__option:has-text("UTC-8 (PST)")`
 
         await page.click(dropdownControlSelector)
@@ -1300,7 +1300,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         )
         await requiredDateWithTz.fill('01/01/2025 10:00 AM')
 
-        const requiredTzDropdown = `#field-dayAndTimeWithTimezone .rs__control`
+        const requiredTzDropdown = `#field-dayAndTimeWithTimezone .rs__input`
         const requiredTzOption = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Tokyo")`
         await page.click(requiredTzDropdown)
         await page.click(requiredTzOption)
@@ -1309,7 +1309,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         const dateTimeLocator = page.locator(
           '#field-dateWithMixedTimezones .react-datepicker-wrapper input',
         )
-        const dropdownControlSelector = `#field-dateWithMixedTimezones .rs__control`
+        const dropdownControlSelector = `#field-dateWithMixedTimezones .rs__input`
 
         // Select IANA timezone first
         const ianaOptionSelector = `#field-dateWithMixedTimezones .rs__menu .rs__option:has-text("New York")`
