@@ -1,0 +1,64 @@
+{
+  "name": "@actimi/ovok-cms",
+  "version": "0.1.0",
+  "description": "Ovok CMS — multi-tenant Payload deploy fronted by the Ovok backend.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "ci": "payload migrate && pnpm build",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "test": "pnpm run test:int && pnpm run test:e2e",
+    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+  },
+  "dependencies": {
+    "@payloadcms/db-postgres": "3.82.1",
+    "@payloadcms/plugin-multi-tenant": "3.82.1",
+    "@payloadcms/next": "3.82.1",
+    "@payloadcms/richtext-lexical": "3.82.1",
+    "@payloadcms/ui": "3.82.1",
+    "cross-env": "10.1.0",
+    "graphql": "^16.8.1",
+    "next": "16.2.6",
+    "payload": "3.82.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "sharp": "0.34.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@playwright/test": "1.59.1",
+    "@testing-library/react": "16.3.0",
+    "@types/node": "24.12.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "4.5.2",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "16.2.6",
+    "jsdom": "28.0.0",
+    "prettier": "^3.4.2",
+    "tsx": "4.21.0",
+    "typescript": "5.7.3",
+    "vite-tsconfig-paths": "6.0.5",
+    "vitest": "4.1.6"
+  },
+  "engines": {
+    "node": ">=24.15.0",
+    "pnpm": "^9 || ^10"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild",
+      "unrs-resolver"
+    ]
+  }
+}
