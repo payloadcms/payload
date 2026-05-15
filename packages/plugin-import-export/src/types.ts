@@ -375,43 +375,11 @@ export type FieldBeforeImportHook = (args: {
   value: unknown
 }) => unknown
 
-/**
- * @deprecated use `hooks.beforeExport`. Will be removed in a future major version.
- * Original arg shape preserved for backwards compatibility.
- */
-export type ToCSVFunction = (args: {
-  columnName: string
-  /** Alias for `row`. */
-  data: Record<string, unknown>
-  /** The top-level document being exported. */
-  doc: Record<string, unknown>
-  /** Flat row accumulator at the current level. Mutate to add columns. */
-  row: Record<string, unknown>
-  /** Source document at the current level. */
-  siblingDoc: Record<string, unknown>
-  value: unknown
-}) => unknown
-
-/**
- * @deprecated use `hooks.beforeImport`. Will be removed in a future major version.
- * Original arg shape preserved for backwards compatibility.
- */
-export type FromCSVFunction = (args: {
-  columnName: string
-  /** The full flat row being imported. */
-  data: Record<string, unknown>
-  value: unknown
-}) => unknown
+/** @internal */
+export type ExportFieldHookEntry = { fn: FieldBeforeExportHook; type: 'beforeExport' }
 
 /** @internal */
-export type ExportFieldHookEntry =
-  | { fn: FieldBeforeExportHook; type: 'beforeExport' }
-  | { fn: ToCSVFunction; type: 'toCSV' }
-
-/** @internal */
-export type ImportFieldHookEntry =
-  | { fn: FieldBeforeImportHook; type: 'beforeImport' }
-  | { fn: FromCSVFunction; type: 'fromCSV' }
+export type ImportFieldHookEntry = { fn: FieldBeforeImportHook; type: 'beforeImport' }
 
 /**
  * Base pagination data returned from preview endpoints

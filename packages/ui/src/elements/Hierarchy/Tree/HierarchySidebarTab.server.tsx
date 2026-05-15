@@ -52,7 +52,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
       key: `hierarchy-sidebar-icon-${hierarchyCollectionSlug}`,
     })
   ) : (
-    <TagIcon color="muted" />
+    <TagIcon />
   )
 
   try {

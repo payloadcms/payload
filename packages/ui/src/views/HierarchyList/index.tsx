@@ -113,7 +113,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       const baseLabel: StepNavItem = {
         label: (
           <div className={`${baseClass}__step-nav-icon-label`}>
-            {HierarchyIcon || <TagIcon color="muted" />}
+            {HierarchyIcon || <TagIcon />}
             {collectionLabel}
           </div>
         ),
