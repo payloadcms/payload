@@ -237,7 +237,7 @@ export interface IncomingAuthType {
         enableFields?: true
         optionalPassword?: true
       }
-    | true
+    | boolean
   /**
    * Customize the way that the forgotPassword operation functions.
    * @link https://payloadcms.com/docs/authentication/email#forgot-password
