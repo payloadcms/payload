@@ -4,6 +4,7 @@
     --caret-height: 7px;
     --caret-offset: 4px;
     --caret-border-color: var(--color-border);
+    --tooltip-x: -50%;
 
     opacity: 0;
     background-color: var(--color-bg-tooltip);
@@ -86,7 +87,7 @@
 
   .tooltip--position-top {
     top: 0;
-    transform: translate3d(-50%, calc(-100% - var(--caret-height) - var(--caret-offset) + 1px), 0);
+    transform: translate3d(var(--tooltip-x), calc(-100% - var(--caret-height) - var(--caret-offset) + 1px), 0);
 
     .tooltip__caret {
       --color-border: var(--ramp-grey-700);
