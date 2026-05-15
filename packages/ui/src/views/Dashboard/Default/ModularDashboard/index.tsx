@@ -5,7 +5,7 @@ import React from 'react'
 import type { WidgetInstanceClient } from './index.client.js'
 
 import { ModularDashboardClient } from './index.client.js'
-import './index.scss'
+import './index.css'
 
 export type ModularDashboardProps = {
   clientLayout: WidgetInstanceClient[]

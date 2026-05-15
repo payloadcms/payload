@@ -13,10 +13,6 @@
       background: linear-gradient(to right, transparent, var(--color-bg));
     }
 
-    * {
-      display: block;
-    }
-
     a {
       border: 0;
       display: flex;
@@ -40,7 +36,7 @@
       overflow: hidden;
       white-space: nowrap;
 
-      &:has(.dashboard-breadcrumb-select, .dashboard-breadcrumb-dropdown__editing) {
+      &:has(.dashboard-breadcrumb-dropdown, .dashboard-breadcrumb-dropdown__editing) {
         max-width: none;
         overflow: visible;
         white-space: normal;
@@ -49,16 +45,12 @@
   }
 
   .step-nav__home {
-    width: var(--spacer-4);
-    height: var(--spacer-4);
-    position: relative;
+    display: flex;
+    align-items: center;
   }
 
-  @media (max-width: 1024px) {
-    .step-nav__home {
-      width: var(--spacer-3);
-      height: var(--spacer-3);
-    }
+  .step-nav__home-label {
+    max-width: none;
   }
 
   @media (max-width: 768px) {

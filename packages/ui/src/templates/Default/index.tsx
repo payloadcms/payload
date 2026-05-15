@@ -7,7 +7,7 @@ import { BulkUploadProvider } from '../../elements/BulkUpload/index.js'
 import { NavToggler } from '../../elements/Nav/NavToggler/index.js'
 import { ActionsProvider } from '../../providers/Actions/index.js'
 import { EntityVisibilityProvider } from '../../providers/EntityVisibility/index.js'
-import './index.scss'
+import './index.css'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
 
@@ -52,7 +52,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             <Wrapper baseClass={baseClass} className={className}>
               {NavComponent}
               <div className={`${baseClass}__wrap`}>
-                <AppHeader CustomAvatar={CustomAvatar} CustomIcon={CustomIcon} />
+                <AppHeader CustomAvatar={CustomAvatar} />
                 {children}
               </div>
             </Wrapper>

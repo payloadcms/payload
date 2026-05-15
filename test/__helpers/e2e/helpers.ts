@@ -275,7 +275,7 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
 }
 
 export async function openLocaleSelector(page: Page): Promise<void> {
-  const button = page.locator('.localizer button.popup-button')
+  const button = page.locator('.localizer button')
   const popup = page.locator('.popup__content')
 
   if (!(await popup.isVisible())) {
@@ -296,11 +296,11 @@ export async function closeLocaleSelector(page: Page): Promise<void> {
 export async function changeLocale(page: Page, newLocale: string) {
   await openLocaleSelector(page)
 
-  const currentlySelectedLocale = await page
-    .locator(`.popup__content .popup-button-list__button--selected .localizer__locale-code`)
-    .textContent()
+  const selectedLocale = await page
+    .locator(`.popup__content .popup-button-list__button--selected [data-locale]`)
+    .getAttribute('data-locale')
 
-  if (currentlySelectedLocale !== `(${newLocale})`) {
+  if (selectedLocale !== newLocale) {
     const localeButton = page
       .locator('.popup__content .popup-button-list__button')
       .filter({ has: page.locator(`[data-locale="${newLocale}"]`) })
