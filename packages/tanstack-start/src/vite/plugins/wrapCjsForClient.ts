@@ -49,9 +49,24 @@ export function wrapCjsForClient(): PluginOption {
       const declaredIdentifiers = extractDeclaredIdentifiers(code)
       const safeNames = names.filter((name) => !declaredIdentifiers.has(name))
 
+      // If the module already declares its own top-level `require` (rare but
+      // possible for hand-written CJS), skip injecting our stub so we don't
+      // produce a `SyntaxError: Identifier 'require' has already been declared`.
+      const injectRequireStub = !declaredIdentifiers.has('require')
+
       const wrapped = [
         `var module = { exports: {} };`,
         `var exports = module.exports;`,
+        // Expose a `require` stub so UMD wrappers that gate their CJS branch on
+        // `typeof require === 'function'` (e.g. pluralize) take that branch and
+        // assign to our `module.exports` instead of falling through to the
+        // browser-globals branch (`root.foo = ...`), which throws in strict ESM
+        // because the IIFE receives `this === undefined`.
+        // The stub throws on actual invocation so any module that *really* needs
+        // require fails loudly instead of silently misbehaving.
+        injectRequireStub
+          ? `var require = function require() { throw new Error("require() is not available in the browser bundle"); };`
+          : ``,
         ``,
         code,
         ``,
