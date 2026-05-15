@@ -105,6 +105,15 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           include: ['**/*'],
           mockAccess: 'warn',
           onViolation: onImportProtectionViolation,
+          // Disable TanStack Start's default `**/*.client.*` file-based denial in
+          // the SSR environment. Payload uses the `.client.tsx` filename suffix
+          // for React Client Components (with a `'use client'` directive) that
+          // MUST be server-rendered to HTML during SSR. The default rule would
+          // otherwise replace those files with an `import-protection mock` Proxy
+          // during SSR, which crashes React (TypeError: Cannot convert object to
+          // primitive value) the moment React tries to format a warning that
+          // mentions one of these components.
+          server: { files: [] },
         },
         router: { autoCodeSplitting: true, routesDirectory } as any,
         rsc: { enabled: true },

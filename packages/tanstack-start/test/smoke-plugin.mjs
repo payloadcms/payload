@@ -48,6 +48,13 @@ const tanstackMock = config.plugins.find((p) => p?.name === 'tanstack-start-mock
 if (!tanstackMock?.__options?.importProtection?.client?.specifiers?.length) {
   errors.push('importProtection.client.specifiers not wired')
 }
+if (
+  !tanstackMock?.__options?.importProtection?.server ||
+  !Array.isArray(tanstackMock.__options.importProtection.server.files) ||
+  tanstackMock.__options.importProtection.server.files.length !== 0
+) {
+  errors.push('importProtection.server.files must be [] (disables *.client.* SSR self-denial)')
+}
 if (!tanstackMock?.__options?.rsc?.enabled) {
   errors.push('rsc.enabled not set')
 }
