@@ -10,7 +10,7 @@ import {
   COLLECTION_BUILTIN_TOOL_KEYS,
   GLOBAL_BUILTIN_TOOL_KEYS,
   HARD_EXCLUDED_COLLECTION_SLUGS,
-} from '../mcp/buildTools.js'
+} from '../mcp/constants.js'
 import { getLogger } from '../utils/getLogger.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 
