@@ -14,8 +14,10 @@ import {
   onImportProtectionViolation,
   serverOnlyClientSpecifiers,
 } from './importProtection.js'
+import { clientModuleResolution } from './plugins/clientModuleResolution.js'
 import { payloadDevTransforms } from './plugins/devTransforms.js'
 import { ssrStripDistStyleImports } from './plugins/stripDistStyleImports.js'
+import { wrapCjsForClient } from './plugins/wrapCjsForClient.js'
 
 export interface PayloadPluginOptions {
   /** Additional resolve aliases */
@@ -88,6 +90,8 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
       include: [...optimizeDepsIncludeDefaults, ...additionalOptimizeDepsInclude],
     },
     plugins: [
+      clientModuleResolution(),
+      wrapCjsForClient(),
       ssrStripDistStyleImports(),
       payloadDevTransforms(),
       rscPlugin,

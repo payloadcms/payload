@@ -4,8 +4,8 @@
  */
 
 /**
- * Server-only packages (Node-only or only ever used by the server bundle). These
- * are the Vite equivalent of Next.js's `serverExternalPackages`.
+ * Server-only packages (Node-only or only ever used by the server bundle).
+ * These are the Vite equivalent of Next.js's `serverExternalPackages`.
  */
 export const ssrExternalPackages: string[] = [
   'ajv',
@@ -59,15 +59,16 @@ export const payloadRscNoExternalPatterns: Array<RegExp | string> = [
 ]
 
 /**
- * Vite auto-discovers most `@payloadcms/ui` transitive deps now that
- * `@payloadcms/ui` itself is no longer in `optimizeDeps.exclude`. `scheduler`
- * stays explicit because it is a React-internal that the discovery walk does
- * not always pick up.
+ * Packages we know contain Node-only code or top-level side effects requiring
+ * Node APIs. Excluding them from the client optimizer prevents Vite from
+ * walking into their main entries and trying to bundle server-only imports
+ * for the browser.
  */
-export const optimizeDepsIncludeDefaults: string[] = ['scheduler']
-
 export const optimizeDepsExcludeDefaults: string[] = [
   'sharp',
+  '@payloadcms/ui',
+  '@payloadcms/tanstack-start',
+  'payload',
   'pino',
   'pino-pretty',
   'busboy',
@@ -76,4 +77,37 @@ export const optimizeDepsExcludeDefaults: string[] = [
   'croner',
   'prompts',
   'file-type',
+]
+
+/**
+ * Transitive dependencies of `@payloadcms/ui` and `payload` that need to be
+ * pre-bundled for the client. Vite's auto-discovery doesn't reliably pick
+ * these up because their parent packages are in `optimizeDeps.exclude`, so we
+ * list them explicitly using the `parent > child` syntax.
+ */
+export const optimizeDepsIncludeDefaults: string[] = [
+  '@payloadcms/ui > sonner',
+  '@payloadcms/ui > @faceless-ui/modal',
+  '@payloadcms/ui > @faceless-ui/window-info',
+  '@payloadcms/ui > @faceless-ui/scroll-info',
+  '@payloadcms/ui > @dnd-kit/core',
+  '@payloadcms/ui > @dnd-kit/sortable',
+  '@payloadcms/ui > @dnd-kit/utilities',
+  '@payloadcms/ui > react-datepicker',
+  '@payloadcms/ui > react-select',
+  '@payloadcms/ui > react-select/creatable',
+  '@payloadcms/ui > react-image-crop',
+  '@payloadcms/ui > @monaco-editor/react',
+  '@payloadcms/ui > date-fns',
+  '@payloadcms/ui > date-fns/transpose',
+  '@payloadcms/ui > @date-fns/tz/date/mini',
+  '@payloadcms/ui > uuid',
+  '@payloadcms/ui > use-context-selector',
+  '@payloadcms/ui > bson-objectid',
+  '@payloadcms/ui > dequal',
+  '@payloadcms/ui > object-to-formdata',
+  '@payloadcms/ui > md5',
+  'payload > deepmerge',
+  'payload > pluralize',
+  'scheduler',
 ]

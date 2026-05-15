@@ -33,6 +33,8 @@ expectKey(config, 'ssr')
 
 const pluginNames = config.plugins.filter(Boolean).map((p) => p.name)
 for (const expected of [
+  'payload:client-module-resolution',
+  'payload:wrap-cjs-client',
   'payload:ssr-strip-dist-style-imports',
   'payload:dev-transforms',
   'rsc',
@@ -59,6 +61,12 @@ if (!config.ssr.noExternal.some((p) => p === '@payloadcms/ui'))
 
 if (!config.optimizeDeps.include.includes('scheduler')) {
   errors.push('optimizeDeps.include missing scheduler')
+}
+if (!config.optimizeDeps.exclude.includes('payload')) {
+  errors.push("optimizeDeps.exclude missing 'payload'")
+}
+if (!config.optimizeDeps.exclude.includes('@payloadcms/ui')) {
+  errors.push("optimizeDeps.exclude missing '@payloadcms/ui'")
 }
 
 if (process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED !== 'true') {
