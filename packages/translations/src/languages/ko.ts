@@ -590,7 +590,7 @@ export const koTranslations: DefaultTranslationsObject = {
     draft: '초안',
     draftHasPublishedVersion: '발행된 버전이 있는 초안',
     draftSavedSuccessfully: '초안이 저장되었습니다.',
-    lastSavedAgo: '마지막으로 저장한지 {{distance}} 전',
+    lastSavedAgo: '{{distance}} 전에 저장됨',
     modifiedOnly: '수정된 것만',
     moreVersions: '더 많은 버전...',
     noFurtherVersionsFound: '더 이상의 버전을 찾을 수 없습니다.',

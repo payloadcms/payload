@@ -598,7 +598,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     draft: 'Melnraksts',
     draftHasPublishedVersion: 'Projekts (ir publicēta versija)',
     draftSavedSuccessfully: 'Melnraksts veiksmīgi saglabāts.',
-    lastSavedAgo: 'Pēdējo reizi saglabāts pirms {{distance}}',
+    lastSavedAgo: 'Saglabāts pirms {{distance}}',
     modifiedOnly: 'Tikai modificētie',
     moreVersions: 'Vairāk versijas...',
     noFurtherVersionsFound: 'Papildu versijas nav atrastas',

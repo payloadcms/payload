@@ -5,7 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 import pLimit from 'p-limit'
 
-import type { CodegenRunnerResult, TokenUsage } from '../types.js'
+import type { CodegenRunnerResult, TokenUsage, TranscriptEvent } from '../types.js'
 import type { CodegenRunner, CodegenRunnerOptions } from './types.js'
 
 import { cleanup, gitInit, installSkill, materialize, readEntry } from './workdir.js'
@@ -14,6 +14,9 @@ const DEFAULT_AGENT_MODEL = 'claude-opus-4-6'
 const DEFAULT_TIMEOUT_MS = 600_000
 const PROMPT_SUFFIX =
   'IMPORTANT: Do not run package managers (npm, pnpm, yarn) or build/test/dev commands. Modify only payload.config.ts. Just write the file.'
+
+export const SKILL_SYSTEM_PROMPT =
+  'A `payload` skill is available in this workdir under .claude/skills/payload/. You MUST invoke it via the Skill tool before modifying payload.config.ts. The skill provides authoritative reference for collections, fields, hooks, access control, and other Payload CMS patterns.'
 
 const limit = pLimit(Number(process.env.EVAL_AGENT_CONCURRENCY ?? '2'))
 
@@ -49,8 +52,10 @@ async function runOne(
     await installSkill({ mode: skillInstall, workdir })
 
     const prompt = `${instruction}\n\n${PROMPT_SUFFIX}`
-    const { exitCode, log } = await spawnAgent({
+    const appendSystemPrompt = skillInstall === 'embedded' ? SKILL_SYSTEM_PROMPT : undefined
+    const { exitCode, stderr, transcript, usage } = await spawnAgent({
       agentModel,
+      appendSystemPrompt,
       prompt,
       sandboxDir: init.sandboxDir,
       timeoutMs,
@@ -61,10 +66,11 @@ async function runOne(
 
     const result: CodegenRunnerResult = {
       agentExitCode: exitCode,
-      agentLog: truncate(log, 10_000),
+      agentLog: stderr.length > 0 ? truncate(stderr, 10_000) : undefined,
       confidence: 0,
       modifiedConfig,
-      usage: zeroUsage(),
+      transcript: capTranscript(transcript),
+      usage: usage ?? zeroUsage(),
     }
     return result
   } finally {
@@ -74,39 +80,84 @@ async function runOne(
 
 async function spawnAgent({
   agentModel,
+  appendSystemPrompt,
   prompt,
   sandboxDir,
   timeoutMs,
   workdir,
 }: {
   agentModel: string
+  appendSystemPrompt?: string
   prompt: string
   sandboxDir: string
   timeoutMs: number
   workdir: string
-}): Promise<{ exitCode: number; log: string }> {
+}): Promise<{
+  exitCode: number
+  stderr: string
+  transcript: TranscriptEvent[]
+  usage?: TokenUsage
+}> {
+  const args = [
+    '--print',
+    '--output-format',
+    'stream-json',
+    '--verbose',
+    '--model',
+    agentModel,
+    '--dangerously-skip-permissions',
+  ]
+  if (appendSystemPrompt) {
+    args.push('--append-system-prompt', appendSystemPrompt)
+  }
+  args.push(prompt)
   return new Promise((resolve) => {
-    const child = spawn(
-      'claude',
-      ['--print', '--model', agentModel, '--dangerously-skip-permissions', prompt],
-      {
-        cwd: workdir,
-        // detached so timeout can kill the whole process group via -pid;
-        // otherwise grandchild processes (agent's tool subprocesses) leak.
-        detached: true,
-        env: { ...process.env, CLAUDE_CONFIG_DIR: sandboxDir },
-        stdio: ['ignore', 'pipe', 'pipe'],
-      },
-    )
-    let log = ''
+    const child = spawn('claude', args, {
+      cwd: workdir,
+      // detached so timeout can kill the whole process group via -pid;
+      // otherwise grandchild processes (agent's tool subprocesses) leak.
+      detached: true,
+      env: { ...process.env, CLAUDE_CONFIG_DIR: sandboxDir },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    const transcript: TranscriptEvent[] = []
+    let usage: TokenUsage | undefined
+    let stdoutBuffer = ''
+    let stderr = ''
+    const ingestLine = (line: string) => {
+      if (line.trim().length === 0) {
+        return
+      }
+      const { events, usage: lineUsage } = parseStreamJsonLine(line)
+      for (const event of events) {
+        transcript.push(event)
+      }
+      if (lineUsage) {
+        usage = lineUsage
+      }
+    }
     child.stdout.on('data', (b: Buffer) => {
-      log += b.toString()
+      stdoutBuffer += b.toString()
+      const newlineIdx = stdoutBuffer.lastIndexOf('\n')
+      if (newlineIdx === -1) {
+        return
+      }
+      const complete = stdoutBuffer.slice(0, newlineIdx)
+      stdoutBuffer = stdoutBuffer.slice(newlineIdx + 1)
+      for (const line of complete.split('\n')) {
+        ingestLine(line)
+      }
     })
     child.stderr.on('data', (b: Buffer) => {
-      log += b.toString()
+      stderr += b.toString()
     })
     let resolved = false
-    const finish = (result: { exitCode: number; log: string }) => {
+    const finish = (result: {
+      exitCode: number
+      stderr: string
+      transcript: TranscriptEvent[]
+      usage?: TokenUsage
+    }) => {
       if (resolved) {
         return
       }
@@ -121,24 +172,28 @@ async function spawnAgent({
           child.kill('SIGKILL')
         }
       } catch (groupKillErr) {
-        log += `\n[runner] process-group kill failed: ${(groupKillErr as Error).message}`
+        stderr += `\n[runner] process-group kill failed: ${(groupKillErr as Error).message}`
         try {
           child.kill('SIGKILL')
         } catch (childKillErr) {
-          log += `\n[runner] child.kill fallback also failed: ${(childKillErr as Error).message}`
+          stderr += `\n[runner] child.kill fallback also failed: ${(childKillErr as Error).message}`
         }
       }
-      log += `\n[runner] killed after ${timeoutMs}ms timeout`
-      finish({ exitCode: -1, log })
+      stderr += `\n[runner] killed after ${timeoutMs}ms timeout`
+      finish({ exitCode: -1, stderr, transcript, usage })
     }, timeoutMs)
     child.on('error', (err) => {
       clearTimeout(timer)
-      log += `\n[runner] spawn error: ${err.message}`
-      finish({ exitCode: -1, log })
+      stderr += `\n[runner] spawn error: ${err.message}`
+      finish({ exitCode: -1, stderr, transcript, usage })
     })
     child.on('exit', (code) => {
       clearTimeout(timer)
-      finish({ exitCode: code ?? -1, log })
+      if (stdoutBuffer.length > 0) {
+        ingestLine(stdoutBuffer)
+        stdoutBuffer = ''
+      }
+      finish({ exitCode: code ?? -1, stderr, transcript, usage })
     })
   })
 }
@@ -260,4 +315,180 @@ function truncate(s: string, max: number): string {
 
 function zeroUsage(): TokenUsage {
   return { cachedInputTokens: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0 }
+}
+
+const TEXT_TRUNCATE_LIMIT = 4_000
+const TRANSCRIPT_EVENT_CAP = 200
+
+type ParsedStreamLine = { events: TranscriptEvent[]; usage?: TokenUsage }
+
+function parseStreamJsonLine(line: string): ParsedStreamLine {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(line)
+  } catch {
+    return { events: [] }
+  }
+  if (parsed === null || typeof parsed !== 'object') {
+    return { events: [] }
+  }
+  const event = parsed as { message?: unknown; type?: string; usage?: unknown }
+  if (event.type === 'assistant') {
+    return { events: extractAssistantBlocks(event.message) }
+  }
+  if (event.type === 'user') {
+    return { events: extractUserBlocks(event.message) }
+  }
+  if (event.type === 'result') {
+    return { events: [], usage: extractResultUsage(event.usage) }
+  }
+  return { events: [] }
+}
+
+function extractResultUsage(raw: unknown): TokenUsage | undefined {
+  if (raw === null || typeof raw !== 'object') {
+    return undefined
+  }
+  const u = raw as {
+    cache_creation_input_tokens?: unknown
+    cache_read_input_tokens?: unknown
+    input_tokens?: unknown
+    output_tokens?: unknown
+  }
+  const inputTokens = asNumber(u.input_tokens) + asNumber(u.cache_creation_input_tokens)
+  const cachedInputTokens = asNumber(u.cache_read_input_tokens)
+  const outputTokens = asNumber(u.output_tokens)
+  return {
+    cachedInputTokens,
+    inputTokens,
+    outputTokens,
+    totalTokens: inputTokens + cachedInputTokens + outputTokens,
+  }
+}
+
+function asNumber(v: unknown): number {
+  return typeof v === 'number' && Number.isFinite(v) ? v : 0
+}
+
+function extractAssistantBlocks(message: unknown): TranscriptEvent[] {
+  const content = getContentArray(message)
+  const events: TranscriptEvent[] = []
+  for (const raw of content) {
+    if (raw === null || typeof raw !== 'object') {
+      continue
+    }
+    const block = raw as {
+      id?: unknown
+      input?: unknown
+      name?: unknown
+      text?: unknown
+      thinking?: unknown
+      type?: unknown
+    }
+    if (block.type === 'text' && typeof block.text === 'string') {
+      events.push({ text: truncateText(block.text), type: 'text' })
+      continue
+    }
+    if (block.type === 'thinking' && typeof block.thinking === 'string') {
+      events.push({ text: truncateText(block.thinking), type: 'thinking' })
+      continue
+    }
+    if (
+      block.type === 'tool_use' &&
+      typeof block.id === 'string' &&
+      typeof block.name === 'string'
+    ) {
+      events.push({
+        id: block.id,
+        input: normalizeToolInput(block.input),
+        name: block.name,
+        type: 'tool_use',
+      })
+    }
+  }
+  return events
+}
+
+function extractUserBlocks(message: unknown): TranscriptEvent[] {
+  const content = getContentArray(message)
+  const events: TranscriptEvent[] = []
+  for (const raw of content) {
+    if (raw === null || typeof raw !== 'object') {
+      continue
+    }
+    const block = raw as {
+      content?: unknown
+      is_error?: unknown
+      tool_use_id?: unknown
+      type?: unknown
+    }
+    if (block.type !== 'tool_result' || typeof block.tool_use_id !== 'string') {
+      continue
+    }
+    events.push({
+      content: normalizeToolResultContent(block.content),
+      isError: block.is_error === true ? true : undefined,
+      toolUseId: block.tool_use_id,
+      type: 'tool_result',
+    })
+  }
+  return events
+}
+
+function getContentArray(message: unknown): unknown[] {
+  if (message === null || typeof message !== 'object') {
+    return []
+  }
+  const content = (message as { content?: unknown }).content
+  return Array.isArray(content) ? content : []
+}
+
+function normalizeToolInput(input: unknown): unknown {
+  if (input === undefined) {
+    return {}
+  }
+  const serialized = JSON.stringify(input)
+  if (typeof serialized === 'string' && serialized.length > TEXT_TRUNCATE_LIMIT) {
+    return { __truncated: true, preview: `${serialized.slice(0, TEXT_TRUNCATE_LIMIT)}…` }
+  }
+  return input
+}
+
+function normalizeToolResultContent(content: unknown): string {
+  if (typeof content === 'string') {
+    return truncateText(content)
+  }
+  if (Array.isArray(content)) {
+    const joined = content
+      .map((part) => {
+        if (part !== null && typeof part === 'object') {
+          const text = (part as { text?: unknown }).text
+          if (typeof text === 'string') {
+            return text
+          }
+        }
+        return ''
+      })
+      .join('')
+    return truncateText(joined)
+  }
+  return ''
+}
+
+function truncateText(s: string): string {
+  return s.length <= TEXT_TRUNCATE_LIMIT ? s : `${s.slice(0, TEXT_TRUNCATE_LIMIT)}… [truncated]`
+}
+
+function capTranscript(events: TranscriptEvent[]): TranscriptEvent[] {
+  if (events.length <= TRANSCRIPT_EVENT_CAP) {
+    return events
+  }
+  const head = events.slice(0, 100)
+  const tail = events.slice(events.length - 100)
+  const omitted = events.length - 200
+  const marker: TranscriptEvent = {
+    text: `… [transcript truncated: ${omitted} events omitted]`,
+    type: 'text',
+  }
+  return [...head, marker, ...tail]
 }

@@ -584,7 +584,7 @@ export const thTranslations: DefaultTranslationsObject = {
     draft: 'ฉบับร่าง',
     draftHasPublishedVersion: 'ร่าง (มีรุ่นที่เผยแพร่แล้ว)',
     draftSavedSuccessfully: 'บันทึกร่างสำเร็จ',
-    lastSavedAgo: 'บันทึกครั้งล่าสุด {{distance}} ที่ผ่านมา',
+    lastSavedAgo: 'บันทึกเมื่อ {{distance}} ที่ผ่านมา',
     modifiedOnly: 'แก้ไขเท่านั้น',
     moreVersions: 'เพิ่มเวอร์ชั่น...',
     noFurtherVersionsFound: 'ไม่พบเวอร์ชันอื่น ๆ',

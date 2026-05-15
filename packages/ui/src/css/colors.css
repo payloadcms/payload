@@ -24,10 +24,16 @@
     --special-text-on-multiplayer-green: var(--ramp-white-1000);
     --special-text-on-multiplayer-grey: var(--ramp-white-1000);
 
+    /* Drawer */
+    --color-drawer-backdrop: rgba(0, 0, 0, 0.1);
+
     /* Fullscreen */
     --fullscreen-default-icon: var(--ramp-black-800);
     --fullscreen-default-icon-tertiary: var(--ramp-black-400);
     --fullscreen-special-autofill-highlight: rgba(13, 153, 255, 0.2);
+
+    /* Modal */
+    --color-modalbackdrop: rgba(0, 0, 0, 0.5);
   }
 
   /* ——————————————————————————————————————————————

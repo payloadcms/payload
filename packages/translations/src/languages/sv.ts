@@ -598,7 +598,7 @@ export const svTranslations: DefaultTranslationsObject = {
     draft: 'Utkast',
     draftHasPublishedVersion: 'Utkast (har publicerad version)',
     draftSavedSuccessfully: 'Utkastet sparades',
-    lastSavedAgo: 'Senast sparad för {{distance}} sedan',
+    lastSavedAgo: 'Sparad för {{distance}} sedan',
     modifiedOnly: 'Endast ändringar',
     moreVersions: 'Fler versioner...',
     noFurtherVersionsFound: 'Inga fler versioner hittades',

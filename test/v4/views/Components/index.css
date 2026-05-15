@@ -121,6 +121,7 @@
   color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-bottom: var(--spacer-2);
 }
 
 .components-view__variant-content {

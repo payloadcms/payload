@@ -22,8 +22,10 @@ import { ModalSection } from './sections/ModalSection.js'
 import { NoListResultsSection } from './sections/NoListResults.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
+import { RenderTitleSection } from './sections/RenderTitle.js'
 import { SearchBarSection } from './sections/SearchBar.js'
 import { SpinnerSection } from './sections/Spinner.js'
+import { StatusSection } from './sections/Status.js'
 import { StatusCellSection } from './sections/StatusCell.js'
 import { ThumbnailCardSection } from './sections/ThumbnailCard.js'
 import { ToastSection } from './sections/ToastSection.js'
@@ -76,11 +78,13 @@ type ComponentId =
   | 'popup'
   | 'radio'
   | 'radiogroup-field'
+  | 'render-title'
   | 'search-bar'
   | 'select'
   | 'select-field'
   | 'shimmer'
   | 'spinner'
+  | 'status'
   | 'status-cell'
   | 'text-field'
   | 'textarea'
@@ -112,6 +116,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Popup', value: 'popup' },
   { category: 'primitives', label: 'Radio', value: 'radio' },
   { category: 'primitives', label: 'Search Bar', value: 'search-bar' },
+  { category: 'primitives', label: 'Render Title', value: 'render-title' },
   { category: 'primitives', label: 'Select', value: 'select' },
   { category: 'primitives', label: 'Spinner', value: 'spinner' },
   { category: 'primitives', label: 'Textarea', value: 'textarea' },
@@ -122,6 +127,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'patterns', label: 'Modal', value: 'modal' },
   { category: 'patterns', label: 'No List Results', value: 'no-list-results' },
   { category: 'patterns', label: 'Shimmer / Loading', value: 'shimmer' },
+  { category: 'patterns', label: 'Status', value: 'status' },
   { category: 'patterns', label: 'Status Cell', value: 'status-cell' },
   { category: 'patterns', label: 'Thumbnail Card', value: 'thumbnail-card' },
   { category: 'patterns', label: 'Toast', value: 'toast' },
@@ -241,6 +247,9 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('pill', 'primitives') && <PillSection selectedComponent="pill" />}
         {shouldShow('icons', 'primitives') && <IconsSection selectedComponent="icons" />}
         {shouldShow('id-label', 'primitives') && <IDLabelSection selectedComponent="id-label" />}
+        {shouldShow('render-title', 'primitives') && (
+          <RenderTitleSection selectedComponent="render-title" />
+        )}
         {shouldShow('lexical-icons', 'primitives') && (
           <LexicalIconsSection selectedComponent="lexical-icons" />
         )}
@@ -277,6 +286,7 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('no-list-results', 'patterns') && (
           <NoListResultsSection selectedComponent="no-list-results" />
         )}
+        {shouldShow('status', 'patterns') && <StatusSection selectedComponent="status" />}
         {shouldShow('status-cell', 'patterns') && (
           <StatusCellSection selectedComponent="status-cell" />
         )}
