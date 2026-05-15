@@ -301,7 +301,7 @@
   }
 
   .btn--withPopup.btn--style-primary {
-    --separator-color: var(--color-border-brand-strong);
+    --separator-color: var(--color-bg);
     .btn,
     .popup-button {
       color: var(--color-text-onbrand);
