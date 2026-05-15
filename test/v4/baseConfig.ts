@@ -115,11 +115,20 @@ export const collections: CollectionConfig[] = [
 
 export const baseConfig: Partial<Config> = {
   collections,
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: ['en', 'es', 'de'],
+  },
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
     components: {
+      actions: [
+        './components/HeaderAction.tsx#HeaderAction',
+        './components/HeaderAction.tsx#HeaderAction2',
+      ],
       afterNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
       views: {
         components: {
