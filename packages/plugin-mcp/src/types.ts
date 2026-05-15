@@ -1,4 +1,4 @@
-import type { McpServer, ResourceTemplate } from '@modelcontextprotocol/server'
+import type { McpServer, ResourceTemplate, ServerContext } from '@modelcontextprotocol/server'
 import type {
   AuthCollectionSlug,
   CollectionConfig,
@@ -46,27 +46,27 @@ export type MCPResponseOverride = (
   req: PayloadRequest,
 ) => MCPToolResponse
 
-export type MCPToolContext = {
-  _extra: unknown
+export type ToolHandlerArgs = {
   authorizedMCP: AuthorizedMCP
   input: Record<string, unknown>
   payload: Payload
   req: PayloadRequest
+  serverContext: ServerContext
 }
 
-export type MCPCollectionToolContext = { collectionSlug: CollectionSlug } & MCPToolContext
+export type CollectionToolHandlerArgs = { collectionSlug: CollectionSlug } & ToolHandlerArgs
 
-export type MCPGlobalToolContext = { globalSlug: GlobalSlug } & MCPToolContext
+export type GlobalToolHandlerArgs = { globalSlug: GlobalSlug } & ToolHandlerArgs
 
-export type Tool<Ctx = MCPToolContext> = {
+export type Tool<Args extends ToolHandlerArgs = ToolHandlerArgs> = {
   description: string
-  handler: (ctx: Ctx) => MaybePromise<MCPToolResponse>
+  handler: (args: Args) => MaybePromise<MCPToolResponse>
   input?: JsonSchemaObject
   overrideResponse?: MCPResponseOverride
 }
 
-export type CollectionTool = Tool<MCPCollectionToolContext>
-export type GlobalTool = Tool<MCPGlobalToolContext>
+export type CollectionTool = Tool<CollectionToolHandlerArgs>
+export type GlobalTool = Tool<GlobalToolHandlerArgs>
 
 /** Configures (or disables) a built-in tool without replacing it. No handler. */
 export type MCPBuiltInToolOverride = {
@@ -124,22 +124,34 @@ export type MCPGlobalToolsMap = {
 
 export type MCPTopLevelToolsMap = Record<string, Tool>
 
-export type MCPPromptDef = {
+export type PromptHandlerArgs = {
+  input: Record<string, unknown>
+  req: PayloadRequest
+  serverContext: ServerContext
+}
+
+export type Prompt = {
   argsSchema: JsonSchemaObject
   description: string
-  handler: (
-    args: Record<string, unknown>,
-    req: PayloadRequest,
-    _extra: unknown,
-  ) => MaybePromise<{
+  handler: (args: PromptHandlerArgs) => MaybePromise<{
     messages: Array<{ content: { text: string; type: 'text' }; role: 'assistant' | 'user' }>
   }>
   title: string
 }
 
-export type MCPResourceDef = {
+export type ResourceHandlerArgs = {
+  /** Variables extracted from a `ResourceTemplate` URI. Empty for static-URI resources. */
+  params: Record<string, string>
+  req: PayloadRequest
+  serverContext: ServerContext
+  uri: URL
+}
+
+export type Resource = {
   description: string
-  handler: (...args: any[]) => MaybePromise<{ contents: Array<{ text: string; uri: string }> }>
+  handler: (args: ResourceHandlerArgs) => MaybePromise<{
+    contents: Array<{ text: string; uri: string }>
+  }>
   mimeType: string
   title: string
   uri: ResourceTemplate | string
@@ -178,8 +190,8 @@ export type MCPPluginConfig = {
     pluginConfig: MCPPluginConfig
     req: PayloadRequest
   }) => MaybePromise<AuthorizedMCP>
-  prompts?: Record<string, MCPPromptDef>
-  resources?: Record<string, MCPResourceDef>
+  prompts?: Record<string, Prompt>
+  resources?: Record<string, Resource>
   /** Cross-cutting tools (not scoped to any collection or global). */
   tools?: MCPTopLevelToolsMap
   userCollection?: CollectionSlug
@@ -248,10 +260,10 @@ export type AuthorizedMCP = {
   }
   overrideAccess: boolean
   prompts: {
-    [PromptKey: string]: MCPPromptDef
+    [PromptKey: string]: Prompt
   }
   resources: {
-    [ResourceKey: string]: MCPResourceDef
+    [ResourceKey: string]: Resource
   }
   tools: {
     [ToolKey: string]: Tool

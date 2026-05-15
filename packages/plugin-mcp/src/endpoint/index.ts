@@ -1,6 +1,7 @@
 import {
   fromJsonSchema,
   McpServer,
+  type ServerContext,
   WebStandardStreamableHTTPServerTransport,
 } from '@modelcontextprotocol/server'
 import { APIError, AuthenticationError, type PayloadHandler, type PayloadRequest } from 'payload'
@@ -8,11 +9,11 @@ import { APIError, AuthenticationError, type PayloadHandler, type PayloadRequest
 import type {
   AuthorizedMCP,
   CollectionTool,
+  CollectionToolHandlerArgs,
   GlobalTool,
-  MCPCollectionToolContext,
-  MCPGlobalToolContext,
-  MCPToolContext,
+  GlobalToolHandlerArgs,
   Tool,
+  ToolHandlerArgs,
 } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
@@ -47,12 +48,12 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
 
     for (const [slug, tools] of Object.entries(authorizedMCP.globals)) {
       for (const [key, tool] of Object.entries(tools)) {
-        registerGlobalTool({ slug, key, authorizedMCP, req, server, tool })
+        registerGlobalTool({ slug, authorizedMCP, key, req, server, tool })
       }
     }
 
     for (const [key, tool] of Object.entries(authorizedMCP.tools)) {
-      registerTopLevelTool({ key, authorizedMCP, req, server, tool })
+      registerTopLevelTool({ authorizedMCP, key, req, server, tool })
     }
 
     for (const [name, prompt] of Object.entries(authorizedMCP.prompts)) {
@@ -60,12 +61,19 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
         name,
         {
           argsSchema: fromJsonSchema(
-            (prompt.argsSchema ?? { type: 'object', properties: {} }) as Parameters<typeof fromJsonSchema>[0],
+            (prompt.argsSchema ?? { type: 'object', properties: {} }) as Parameters<
+              typeof fromJsonSchema
+            >[0],
           ),
           description: prompt.description,
           title: prompt.title,
         },
-        wrapHandlerWithReq(prompt.handler, req),
+        async (input: unknown, ctx: ServerContext) =>
+          prompt.handler({
+            input: (input ?? {}) as Record<string, unknown>,
+            req,
+            serverContext: ctx,
+          }),
       )
       logger.info(`✅ Prompt: ${prompt.title} Registered.`)
     }
@@ -80,7 +88,14 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
           mimeType: resource.mimeType,
           title: resource.title,
         },
-        wrapHandlerWithReq(resource.handler, req),
+        // Static URIs call (uri, ctx); ResourceTemplates call (uri, params, ctx).
+        // The rest-params shape lets us collect either signature uniformly.
+        async (...sdkArgs: unknown[]) => {
+          const ctx = sdkArgs[sdkArgs.length - 1] as ServerContext
+          const uri = sdkArgs[0] as URL
+          const params = (sdkArgs.length > 2 ? sdkArgs[1] : {}) as Record<string, string>
+          return resource.handler({ params, req, serverContext: ctx, uri })
+        },
       )
       logger.info(`✅ Resource: ${resource.title} Registered.`)
     }
@@ -107,14 +122,14 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
 
 const registerCollectionTool = ({
   slug,
-  key,
   authorizedMCP,
+  key,
   req,
   server,
   tool,
 }: {
-  key: string
   authorizedMCP: AuthorizedMCP
+  key: string
   req: PayloadRequest
   server: McpServer
   slug: string
@@ -129,16 +144,16 @@ const registerCollectionTool = ({
         (tool.input ?? { type: 'object', properties: {} }) as Parameters<typeof fromJsonSchema>[0],
       ),
     },
-    async (rawParams: unknown, _extra: unknown) => {
-      const ctx: MCPCollectionToolContext = {
-        _extra,
-        collectionSlug: slug,
-        input: (rawParams ?? {}) as Record<string, unknown>,
+    async (input: unknown, ctx: ServerContext) => {
+      const args: CollectionToolHandlerArgs = {
         authorizedMCP,
+        collectionSlug: slug,
+        input: (input ?? {}) as Record<string, unknown>,
         payload: req.payload,
         req,
+        serverContext: ctx,
       }
-      return tool.handler(ctx)
+      return tool.handler(args)
     },
   )
   getLogger({ payload: req.payload }).info(`✅ Tool: ${toolName} Registered.`)
@@ -146,14 +161,14 @@ const registerCollectionTool = ({
 
 const registerGlobalTool = ({
   slug,
-  key,
   authorizedMCP,
+  key,
   req,
   server,
   tool,
 }: {
-  key: string
   authorizedMCP: AuthorizedMCP
+  key: string
   req: PayloadRequest
   server: McpServer
   slug: string
@@ -168,30 +183,30 @@ const registerGlobalTool = ({
         (tool.input ?? { type: 'object', properties: {} }) as Parameters<typeof fromJsonSchema>[0],
       ),
     },
-    async (rawParams: unknown, _extra: unknown) => {
-      const ctx: MCPGlobalToolContext = {
-        _extra,
-        globalSlug: slug,
-        input: (rawParams ?? {}) as Record<string, unknown>,
+    async (input: unknown, ctx: ServerContext) => {
+      const args: GlobalToolHandlerArgs = {
         authorizedMCP,
+        globalSlug: slug,
+        input: (input ?? {}) as Record<string, unknown>,
         payload: req.payload,
         req,
+        serverContext: ctx,
       }
-      return tool.handler(ctx)
+      return tool.handler(args)
     },
   )
   getLogger({ payload: req.payload }).info(`✅ Tool: ${toolName} Registered.`)
 }
 
 const registerTopLevelTool = ({
-  key,
   authorizedMCP,
+  key,
   req,
   server,
   tool,
 }: {
-  key: string
   authorizedMCP: AuthorizedMCP
+  key: string
   req: PayloadRequest
   server: McpServer
   tool: Tool
@@ -204,26 +219,18 @@ const registerTopLevelTool = ({
         (tool.input ?? { type: 'object', properties: {} }) as Parameters<typeof fromJsonSchema>[0],
       ),
     },
-    async (rawParams: unknown, _extra: unknown) => {
-      const ctx: MCPToolContext = {
-        _extra,
-        input: (rawParams ?? {}) as Record<string, unknown>,
+    async (input: unknown, ctx: ServerContext) => {
+      const args: ToolHandlerArgs = {
         authorizedMCP,
+        input: (input ?? {}) as Record<string, unknown>,
         payload: req.payload,
         req,
+        serverContext: ctx,
       }
-      return tool.handler(ctx)
+      return tool.handler(args)
     },
   )
   getLogger({ payload: req.payload }).info(`✅ Tool: ${key} Registered.`)
-}
-
-const wrapHandlerWithReq = (handler: (...args: any[]) => any, req: PayloadRequest) => {
-  return async (...args: any[]) => {
-    const _extra = args[args.length - 1]
-    const handlerArgs = args.slice(0, -1)
-    return await handler(...handlerArgs, req, _extra)
-  }
 }
 
 /**
