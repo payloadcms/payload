@@ -318,7 +318,7 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
 
   return (
     <>
-      <Drawer className={baseClass} gutter={false} Header={null} slug={drawerSlug}>
+      <Drawer className={baseClass} Header={null} slug={drawerSlug}>
         {drawerContent}
       </Drawer>
       <DrawerDepthProvider>

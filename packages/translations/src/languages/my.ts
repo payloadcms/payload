@@ -608,7 +608,7 @@ export const myTranslations: DefaultTranslationsObject = {
     draft: 'မူကြမ်း',
     draftHasPublishedVersion: 'Draf (mempunyai versi yang diterbitkan)',
     draftSavedSuccessfully: 'မူကြမ်းကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။',
-    lastSavedAgo: 'နောက်ဆုံး သိမ်းချက် {{distance}} ကြာပြီး',
+    lastSavedAgo: 'သိမ်းချက် {{distance}} ကြာပြီး',
     modifiedOnly: 'Hanya diubah',
     moreVersions: 'ပိုမိုများသော ဗားရှင်းများ...',
     noFurtherVersionsFound: 'နောက်ထပ်ဗားရှင်းများ မတွေ့ပါ။',

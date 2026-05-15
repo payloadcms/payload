@@ -595,7 +595,7 @@ export const skTranslations: DefaultTranslationsObject = {
     draft: 'Návrh',
     draftHasPublishedVersion: 'Koncept (má publikovanú verziu)',
     draftSavedSuccessfully: 'Návrh úspešne uložený.',
-    lastSavedAgo: 'Naposledy uložené pred {{distance}}',
+    lastSavedAgo: 'Uložené pred {{distance}}',
     modifiedOnly: 'Iba upravené',
     moreVersions: 'Viac verzií...',
     noFurtherVersionsFound: 'Nenájdené ďalšie verzie',

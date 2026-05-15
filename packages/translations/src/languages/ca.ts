@@ -601,7 +601,7 @@ export const caTranslations: DefaultTranslationsObject = {
     draft: 'Borrador',
     draftHasPublishedVersion: 'Esborrany (té versió publicada)',
     draftSavedSuccessfully: 'Borrador desat amb èxit.',
-    lastSavedAgo: 'Últim desament fa {{distance}}',
+    lastSavedAgo: 'Desat fa {{distance}}',
     modifiedOnly: 'Només modificat',
     moreVersions: 'Més versions...',
     noFurtherVersionsFound: "No s'han trobat més versions",

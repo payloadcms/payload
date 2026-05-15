@@ -568,7 +568,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     draft: '草稿',
     draftHasPublishedVersion: '草稿（有已发布版本）',
     draftSavedSuccessfully: '草稿成功保存。',
-    lastSavedAgo: '上次保存 {{distance}} 之前',
+    lastSavedAgo: '{{distance}} 前已保存',
     modifiedOnly: '仅修改过的',
     moreVersions: '更多版本...',
     noFurtherVersionsFound: '没有发现其他版本',

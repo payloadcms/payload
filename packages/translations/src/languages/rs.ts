@@ -592,7 +592,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     draft: 'Нацрт',
     draftHasPublishedVersion: 'Nacrt (ima objavljenu verziju)',
     draftSavedSuccessfully: 'Нацрт успешно сачуван.',
-    lastSavedAgo: 'Задњи пут сачувано пре {{distance}',
+    lastSavedAgo: 'Сачувано пре {{distance}}',
     modifiedOnly: 'Samo izmenjen',
     moreVersions: 'Više verzija...',
     noFurtherVersionsFound: 'Нису пронађене наредне верзије',

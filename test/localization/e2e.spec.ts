@@ -411,7 +411,7 @@ describe('Localization', () => {
       await navigateToDoc(page, url)
       await openCopyToLocaleDrawer(page)
       await expect(page.locator('.copy-locale-data__content')).toBeVisible()
-      await page.locator('.drawer-close-button').click()
+      await page.locator('#close-drawer__copy-locale').click()
     })
 
     test('should copy data to correct locale', async () => {
@@ -448,7 +448,7 @@ describe('Localization', () => {
       await openCopyToLocaleDrawer(page)
       const fromLocaleField = page.locator('#field-fromLocale')
       await expect(fromLocaleField).toContainText('Spanish')
-      await page.locator('.drawer-close-button').click()
+      await page.locator('#close-drawer__copy-locale').click()
     })
 
     test('should not overwrite existing data when overwrite is unchecked', async () => {
@@ -498,7 +498,7 @@ describe('Localization', () => {
         .evaluateAll((els) => els.map((el) => el.textContent))
 
       await expect.poll(() => options).not.toContain('English')
-      await page.locator('.drawer-close-button').click()
+      await page.locator('#close-drawer__copy-locale').click()
     })
 
     test('should handle back to back copies', async () => {

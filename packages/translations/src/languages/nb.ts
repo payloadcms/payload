@@ -600,7 +600,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     draft: 'Utkast',
     draftHasPublishedVersion: 'Utkast (har publisert versjon)',
     draftSavedSuccessfully: 'Utkast lagret.',
-    lastSavedAgo: 'Sist lagret {{distance}} siden',
+    lastSavedAgo: 'Lagret {{distance}} siden',
     modifiedOnly: 'Kun endret',
     moreVersions: 'Flere versjoner...',
     noFurtherVersionsFound: 'Ingen flere versjoner funnet',

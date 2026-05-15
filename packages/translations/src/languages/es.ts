@@ -603,7 +603,7 @@ export const esTranslations: DefaultTranslationsObject = {
     draft: 'Borrador',
     draftHasPublishedVersion: 'Borrador (tiene versión publicada)',
     draftSavedSuccessfully: 'Borrador guardado con éxito.',
-    lastSavedAgo: 'Guardado por última vez hace {{distance}}',
+    lastSavedAgo: 'Guardado hace {{distance}}',
     modifiedOnly: 'Modificado solamente',
     moreVersions: 'Más versiones...',
     noFurtherVersionsFound: 'No se encontraron más versiones',

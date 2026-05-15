@@ -604,7 +604,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     draft: 'Սևագիր',
     draftHasPublishedVersion: 'Սրաց (ունի հրատարակված տարբերակ)',
     draftSavedSuccessfully: 'Սևագիրը հաջողությամբ պահպանվել է։',
-    lastSavedAgo: 'Վերջին անգամ պահպանվել է {{distance}} առաջ',
+    lastSavedAgo: 'Պահպանվել է {{distance}} առաջ',
     modifiedOnly: 'Միայն փոփոխված',
     moreVersions: 'Ավելի շատ տարբերակներ...',
     noFurtherVersionsFound: 'Այլ տարբերակներ չեն գտնվել',

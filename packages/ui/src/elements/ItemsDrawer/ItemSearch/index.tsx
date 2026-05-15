@@ -2,7 +2,7 @@
 import React, { useId } from 'react'
 
 import { SearchIcon } from '../../../icons/Search/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'item-search'
 
@@ -24,6 +24,7 @@ export const ItemSearch: React.FC<Props> = ({ placeholder, setSearchTerm }) => {
       <label className="sr-only" htmlFor={inputId} id={labelId}>
         {placeholder}
       </label>
+      <SearchIcon />
       <input
         aria-labelledby={labelId}
         className={`${baseClass}__input`}
@@ -32,7 +33,6 @@ export const ItemSearch: React.FC<Props> = ({ placeholder, setSearchTerm }) => {
         placeholder={placeholder}
         type="text"
       />
-      <SearchIcon />
     </div>
   )
 }
