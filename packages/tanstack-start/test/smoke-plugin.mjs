@@ -58,8 +58,8 @@ if (
 if (!tanstackMock?.__options?.rsc?.enabled) {
   errors.push('rsc.enabled not set')
 }
-if (tanstackMock?.__options?.router?.autoCodeSplitting !== true) {
-  errors.push('router.autoCodeSplitting not true')
+if (tanstackMock?.__options?.router?.autoCodeSplitting !== false) {
+  errors.push('router.autoCodeSplitting must be false (so SSR routes hydrate eagerly)')
 }
 
 if (!config.ssr.external.includes('drizzle-kit')) errors.push('ssr.external missing drizzle-kit')

@@ -25,6 +25,25 @@ export {
 } from '../collections/config/client.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 
+// `docAccessOperation` (and the global variant exported below) is a
+// server-only payload operation, but `@payloadcms/ui` server-only utilities
+// such as `getDocumentPermissions` do `import { docAccessOperation } from
+// 'payload'`. The browser condition of the `payload` package resolves to
+// this file, so without an export here the dev server crashes the moment a
+// client chunk that has `getDocumentPermissions` in its import graph hits
+// the browser. Pulling the real implementation in would drag the entire
+// server graph (including `getEntityPermissions`, transactions, etc.) into
+// the client bundle, so we expose runtime-throwing stubs - if anything ever
+// actually invokes them on the client we want a loud, traceable failure
+// rather than a silent `undefined`.
+const __serverOnlyStub =
+  (name: string) =>
+  (..._args: unknown[]): never => {
+    throw new Error(
+      `\`${name}\` from "payload" is a server-only operation and cannot be invoked in the client/browser bundle.`,
+    )
+  }
+export const docAccessOperation = __serverOnlyStub('docAccessOperation') as any
 export {
   type ClientConfig,
   createClientConfig,
@@ -39,11 +58,11 @@ export {
   generateKeyBetween,
   generateNKeysBetween,
 } from '../config/orderable/fractional-indexing.js'
+
 export { serverProps } from '../config/types.js'
-
 export { combineQueries } from '../database/combineQueries.js'
-export { APIError, APIErrorName } from '../errors/APIError.js'
 
+export { APIError, APIErrorName } from '../errors/APIError.js'
 export { MissingEditorProp } from '../errors/MissingEditorProp.js'
 
 export { UnauthorizedError } from '../errors/UnauthorizedError.js'
@@ -57,6 +76,7 @@ export {
   createClientField,
   createClientFields,
 } from '../fields/config/client.js'
+
 export {
   fieldAffectsData,
   fieldHasMaxDepth,
@@ -82,7 +102,6 @@ export {
 export { getDefaultValue } from '../fields/getDefaultValue.js'
 export { getFieldPaths } from '../fields/getFieldPaths.js'
 export { isFieldDisabled } from '../fields/isFieldDisabled.js'
-
 export type { DisabledArea, DisabledOptions } from '../fields/isFieldDisabled.js'
 
 export * from '../fields/validations.js'
@@ -94,6 +113,8 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from '../globals/config/client.js'
+
+export const docAccessOperationGlobal = __serverOnlyStub('docAccessOperationGlobal') as any
 
 export {
   DEFAULT_HIERARCHY_LIST_LIMIT,

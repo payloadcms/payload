@@ -115,7 +115,24 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           // mentions one of these components.
           server: { files: [] },
         },
-        router: { autoCodeSplitting: true, routesDirectory } as any,
+        // Disable TanStack Router's automatic per-route code-splitting.
+        //
+        // With `autoCodeSplitting: true` each route's `component` is fetched
+        // lazily via `?tsr-split=component` after the initial SSR HTML is
+        // streamed. Until that lazy chunk lands the rendered admin tree has
+        // no client React attached, so any button clicks (e.g. the
+        // `#toggle-list-filters` chevron in `<ListControls />`) hit a static
+        // DOM, the click is dropped, and once the chunk finally loads the
+        // component re-mounts with its initial `useState` instead of the
+        // toggled value. That single behaviour was the root cause of the
+        // "page renders but nothing is interactive" tanstack-start E2E
+        // failures (`#list-controls-where`, `[data-lexical-editor]`, etc.) -
+        // playwright traces show "Download the React DevTools" landing
+        // *after* the playwright click, confirming late hydration.
+        //
+        // Eager-loading routes ships a slightly larger initial bundle but
+        // makes the admin actually interactive on first paint.
+        router: { autoCodeSplitting: false, routesDirectory } as any,
         rsc: { enabled: true },
         srcDirectory,
       }),
