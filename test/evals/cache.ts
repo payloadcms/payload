@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 import type { RunnerKind, SkillInstallMode } from './runner/types.js'
 import type { EvalResult, SystemPromptKey } from './types.js'
 
+import { SKILL_SYSTEM_PROMPT } from './runner/claudeCode.js'
 import { getSkillTreeHash } from './runner/workdir.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -117,6 +118,14 @@ export function codegenKey(params: {
     (params.runnerKind === 'llm' && params.systemPromptKey === 'codegenWithSkill') ||
     (params.runnerKind === 'claude-code' && params.skillInstall === 'embedded')
 
+  // For claude-code embedded runs the runner appends a system-prompt directive
+  // nudging the agent to invoke the skill. Any tweak to that text changes
+  // observable behavior, so factor it into the cache key.
+  const agentSystemPrompt =
+    params.runnerKind === 'claude-code' && params.skillInstall === 'embedded'
+      ? SKILL_SYSTEM_PROMPT
+      : undefined
+
   // agentModel and agentVersion are deliberately omitted: for claude-code runs,
   // modelId is `claude-code/<agentModel>/<version>`, so they're already in the hash.
   return hashKey({
@@ -129,5 +138,6 @@ export function codegenKey(params: {
     systemPromptKey: params.systemPromptKey,
     skillInstall: params.skillInstall,
     skillHash: skillIncluded ? getSkillTreeHash() : undefined,
+    agentSystemPrompt,
   })
 }
