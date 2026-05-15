@@ -3,6 +3,7 @@
 // Keep perfectionist/sort-switch-case disabled - it incorrectly messes up the ordering of the switch cases, causing it to break
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 
+import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type {
   AdminClient,
   ArrayFieldClient,
@@ -26,7 +27,7 @@ import type { Payload } from '../../types/index.js'
 import { getFromImportMap } from '../../bin/generateImportMap/utilities/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { flattenTopLevelFields, type ImportMap } from '../../index.js'
+import { flattenTopLevelFields } from '../../utilities/flattenTopLevelFields.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused

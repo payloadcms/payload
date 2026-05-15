@@ -7,13 +7,23 @@ export {
   getCookieExpiration,
   parseCookies,
 } from '../auth/cookies.js'
+
 export { extractJWT } from '../auth/extractJWT.js'
 export { getLoginOptions } from '../auth/getLoginOptions.js'
 export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
-
 export { getFromImportMap } from '../bin/generateImportMap/utilities/getFromImportMap.js'
+
 export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
+export {
+  type ClientConfig,
+  createClientConfig,
+  type CreateClientConfigArgs,
+  createUnauthenticatedClientConfig,
+  type ServerOnlyRootAdminProperties,
+  type ServerOnlyRootProperties,
+  type UnauthenticatedClientConfig,
+} from '../config/client.js'
 
 export {
   BASE_36_DIGITS,
