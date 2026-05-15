@@ -26,4 +26,16 @@
     vertical-align: middle;
     position: relative;
   }
+
+  @media (max-width: 768px) {
+    .render-title {
+      --render-title-letter-spacing: -0.075px;
+
+      min-height: var(--text-heading-medium-line-height);
+      font-family: var(--text-heading-medium-font-family);
+      font-size: var(--text-heading-medium-font-size);
+      font-weight: var(--text-heading-medium-font-weight);
+      line-height: var(--text-heading-medium-line-height);
+    }
+  }
 }
