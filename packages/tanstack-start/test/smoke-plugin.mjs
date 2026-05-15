@@ -61,6 +61,12 @@ if (!tanstackMock?.__options?.rsc?.enabled) {
 if (tanstackMock?.__options?.router?.autoCodeSplitting !== false) {
   errors.push('router.autoCodeSplitting must be false (so SSR routes hydrate eagerly)')
 }
+const splitGroupings = tanstackMock?.__options?.router?.codeSplittingOptions?.defaultBehavior
+if (!Array.isArray(splitGroupings) || splitGroupings.length !== 0) {
+  errors.push(
+    'router.codeSplittingOptions.defaultBehavior must be [] (the autoCodeSplitting flag is silently dropped by tanstackStart, so this is the actual mechanism that disables ?tsr-split=component lazy chunks)',
+  )
+}
 
 if (!config.ssr.external.includes('drizzle-kit')) errors.push('ssr.external missing drizzle-kit')
 if (!config.ssr.noExternal.some((p) => p === '@payloadcms/ui'))

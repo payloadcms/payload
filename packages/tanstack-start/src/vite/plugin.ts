@@ -117,10 +117,10 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
         },
         // Disable TanStack Router's automatic per-route code-splitting.
         //
-        // With `autoCodeSplitting: true` each route's `component` is fetched
-        // lazily via `?tsr-split=component` after the initial SSR HTML is
-        // streamed. Until that lazy chunk lands the rendered admin tree has
-        // no client React attached, so any button clicks (e.g. the
+        // With splitting enabled each route's `component` is fetched lazily
+        // via `?tsr-split=component` after the initial SSR HTML is streamed.
+        // Until that lazy chunk lands the rendered admin tree has no client
+        // React attached, so any button clicks (e.g. the
         // `#toggle-list-filters` chevron in `<ListControls />`) hit a static
         // DOM, the click is dropped, and once the chunk finally loads the
         // component re-mounts with its initial `useState` instead of the
@@ -130,9 +130,29 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
         // playwright traces show "Download the React DevTools" landing
         // *after* the playwright click, confirming late hydration.
         //
+        // We pass BOTH knobs because `tanstackStart`'s schema silently
+        // strips the user-supplied `autoCodeSplitting` (its `tsrConfig`
+        // does `configSchema.omit({ autoCodeSplitting: true, target: true
+        // })`) and then leaves the value `undefined` — which is fine for
+        // the conditional inside `unpluginRouterComposedFactory`, but the
+        // TanStack Start vite plugin *unconditionally* installs the router
+        // code-splitter via `tanStackRouterCodeSplitter(...)` regardless.
+        // The only knob that survives all of that and is honoured by the
+        // splitter is `router.codeSplittingOptions.defaultBehavior` — set
+        // to an empty array, the splitter still walks each `createFileRoute`
+        // file but produces no virtual `?tsr-split=...` modules, so every
+        // route component ships in the initial bundle and hydration starts
+        // immediately on first paint. We keep `autoCodeSplitting: false` as
+        // a belt-and-braces signal in case the start plugin ever stops
+        // dropping it.
+        //
         // Eager-loading routes ships a slightly larger initial bundle but
         // makes the admin actually interactive on first paint.
-        router: { autoCodeSplitting: false, routesDirectory } as any,
+        router: {
+          autoCodeSplitting: false,
+          codeSplittingOptions: { defaultBehavior: [] },
+          routesDirectory,
+        } as any,
         rsc: { enabled: true },
         srcDirectory,
       }),
