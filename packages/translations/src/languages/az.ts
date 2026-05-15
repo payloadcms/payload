@@ -601,7 +601,7 @@ export const azTranslations: DefaultTranslationsObject = {
     draft: 'Qaralama',
     draftHasPublishedVersion: 'Qaralamalar (nəşr olunmuş versiyası var)',
     draftSavedSuccessfully: 'Qaralama uğurla yadda saxlandı.',
-    lastSavedAgo: '{{distance}} əvvəl son yadda saxlanıldı',
+    lastSavedAgo: '{{distance}} əvvəl saxlanıldı',
     modifiedOnly: 'Yalnızca dəyişdirilmişdir',
     moreVersions: 'Daha çox versiyalar...',
     noFurtherVersionsFound: 'Başqa versiyalar tapılmadı',

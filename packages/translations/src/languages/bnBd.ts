@@ -602,7 +602,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     draft: 'খসড়া',
     draftHasPublishedVersion: 'খসড়া (প্রকাশিত সংস্করণ রয়েছে)',
     draftSavedSuccessfully: 'খসড়া সফলভাবে সংরক্ষিত হয়েছে।',
-    lastSavedAgo: 'সর্বশেষ সংরক্ষণ করা হয়েছে {{distance}} আগে',
+    lastSavedAgo: '{{distance}} আগে সংরক্ষণ করা হয়েছে',
     modifiedOnly: 'শুধুমাত্র পরিবর্তিত',
     moreVersions: 'আরও সংস্করণ...',
     noFurtherVersionsFound: 'আর কোনো সংস্করণ পাওয়া যায়নি',

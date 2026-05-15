@@ -593,7 +593,7 @@ export const viTranslations: DefaultTranslationsObject = {
     draft: 'Bản nháp',
     draftHasPublishedVersion: 'Bản nháp (có phiên bản đã xuất bản)',
     draftSavedSuccessfully: 'Bản nháp đã được lưu thành công.',
-    lastSavedAgo: 'Lần lưu cuối cùng {{distance}} trước đây',
+    lastSavedAgo: 'Đã lưu {{distance}} trước',
     modifiedOnly: 'Chỉ được sửa đổi',
     moreVersions: 'Thêm phiên bản...',
     noFurtherVersionsFound: 'Không tìm thấy phiên bản cũ hơn',

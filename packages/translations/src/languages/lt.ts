@@ -600,7 +600,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     draft: 'Projektas',
     draftHasPublishedVersion: 'Juodraštis (turi publikuotą versiją)',
     draftSavedSuccessfully: 'Juosmuo sėkmingai išsaugotas.',
-    lastSavedAgo: 'Paskutinį kartą išsaugota prieš {{distance}}',
+    lastSavedAgo: 'Išsaugota prieš {{distance}}',
     modifiedOnly: 'Tik modifikuotas',
     moreVersions: 'Daugiau versijų...',
     noFurtherVersionsFound: 'Nerasta daugiau versijų',

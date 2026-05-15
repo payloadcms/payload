@@ -597,7 +597,7 @@ export const enTranslations = {
     draft: 'Draft',
     draftHasPublishedVersion: 'Draft (has published version)',
     draftSavedSuccessfully: 'Draft saved successfully.',
-    lastSavedAgo: 'Last saved {{distance}} ago',
+    lastSavedAgo: 'Saved {{distance}} ago',
     modifiedOnly: 'Modified only',
     moreVersions: 'More versions...',
     noFurtherVersionsFound: 'No further versions found',

@@ -544,7 +544,7 @@ describe('Document View', () => {
       await navigateToDoc(page, postsUrl)
       const statusComponent = page.locator('.doc-controls__status > .status')
       await expect(statusComponent).toBeVisible()
-      await expect(statusComponent).toContainText('Status: Draft')
+      await expect(statusComponent).toContainText('Draft')
     })
 
     test('should render custom status component', async () => {
@@ -560,7 +560,7 @@ describe('Document View', () => {
       await page.goto(globalURL.global(globalSlug))
       const statusComponent = page.locator('.doc-controls__status > .status')
       await expect(statusComponent).toBeVisible()
-      await expect(statusComponent).toContainText('Status: Draft')
+      await expect(statusComponent).toContainText('Draft')
     })
 
     test('should render custom status component', async () => {
