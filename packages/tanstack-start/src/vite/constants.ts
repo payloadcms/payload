@@ -84,6 +84,16 @@ export const optimizeDepsExcludeDefaults: string[] = [
  * pre-bundled for the client. Vite's auto-discovery doesn't reliably pick
  * these up because their parent packages are in `optimizeDeps.exclude`, so we
  * list them explicitly using the `parent > child` syntax.
+ *
+ * The `@tanstack/*` entries below are not strictly necessary for the import
+ * graph to resolve - Vite is happy to walk into the unbundled dist of each
+ * package - but each TanStack dist file is a separate ESM module (the
+ * libraries are intentionally fine-grained for tree-shaking). Without these
+ * entries Vite serves ~150 individual `dist/esm/*.js?v=...` requests when the
+ * router boots, which on a cold dev server in CI delays React hydration by
+ * 1-2s. Listing the package roots (and the deeper subpaths actually imported
+ * from `tanstack-app`) makes Vite roll them into a handful of pre-bundled
+ * chunks so hydration finishes before Playwright's first click.
  */
 export const optimizeDepsIncludeDefaults: string[] = [
   '@payloadcms/ui > sonner',
@@ -110,4 +120,12 @@ export const optimizeDepsIncludeDefaults: string[] = [
   'payload > deepmerge',
   'payload > pluralize',
   'scheduler',
+  '@tanstack/react-router',
+  '@tanstack/react-start',
+  '@tanstack/react-start-client',
+  '@tanstack/router-core',
+  '@tanstack/start-client-core',
+  '@tanstack/history',
+  '@tanstack/react-store',
+  '@tanstack/store',
 ]
