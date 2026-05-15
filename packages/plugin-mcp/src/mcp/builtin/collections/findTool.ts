@@ -1,0 +1,159 @@
+import type { SelectType } from 'payload'
+
+import type { CollectionTool, MCPResponseOverride, MCPToolResponse } from '../../../types.js'
+
+import { normalizeInput } from '../../normalizeInput.js'
+import { getLogger } from '../../../utils/getLogger.js'
+import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
+import { toolSchemas } from '../schemas.js'
+
+export const buildFindCollectionTool = ({
+  collectionSlug,
+  description,
+  overrideResponse,
+}: {
+  collectionSlug: string
+  description?: string
+  overrideResponse?: MCPResponseOverride
+}): CollectionTool => ({
+  description: description || toolSchemas.findDocuments.description.trim(),
+  handler: async ({ input, authorizedMCP, req }) => {
+    const payload = req.payload
+    const logger = getLogger({ payload })
+
+    const id = input.id as number | string | undefined
+    const limit = (input.limit as number | undefined) ?? 10
+    const page = (input.page as number | undefined) ?? 1
+    const sort = input.sort as string | undefined
+    const where = input.where as string | undefined
+    const select = input.select as string | undefined
+    const depth = (input.depth as number | undefined) ?? 0
+    const locale = input.locale as string | undefined
+    const fallbackLocale = input.fallbackLocale as string | undefined
+    const draft = input.draft as boolean | undefined
+
+    const applyOverride = (response: MCPToolResponse, doc: Record<string, unknown>) =>
+      overrideResponse?.(response, doc, req) || response
+
+    logger.info(
+      `Reading document from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}${locale ? `, locale: ${locale}` : ''}`,
+    )
+
+    try {
+      let whereClause: Record<string, unknown> = {}
+      if (where) {
+        try {
+          whereClause = JSON.parse(where) as Record<string, unknown>
+        } catch {
+          logger.warn(`Invalid where clause JSON: ${where}`)
+          return applyOverride(
+            { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] },
+            {},
+          )
+        }
+      }
+
+      let selectClause: SelectType | undefined
+      if (select) {
+        try {
+          selectClause = JSON.parse(select) as SelectType
+        } catch {
+          logger.warn(`Invalid select clause JSON: ${select}`)
+          return applyOverride(
+            { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] },
+            {},
+          )
+        }
+      }
+
+      if (id) {
+        try {
+          const doc = await payload.findByID({
+            id,
+            collection: collectionSlug,
+            depth,
+            req,
+            ...localAPIDefaults(authorizedMCP),
+            ...(selectClause && { select: selectClause }),
+            ...(locale && { locale }),
+            ...(fallbackLocale && { fallbackLocale }),
+            ...(draft !== undefined && { draft }),
+          })
+
+          return applyOverride(
+            {
+              content: [
+                {
+                  type: 'text',
+                  text: `Document from collection "${collectionSlug}":\n${JSON.stringify(doc)}`,
+                },
+              ],
+            },
+            doc as Record<string, unknown>,
+          )
+        } catch {
+          logger.warn(`Document not found with ID: ${id} in collection: ${collectionSlug}`)
+          return applyOverride(
+            {
+              content: [
+                {
+                  type: 'text',
+                  text: `Error: Document with ID "${id}" not found in collection "${collectionSlug}"`,
+                },
+              ],
+            },
+            {},
+          )
+        }
+      }
+
+      const findOptions: Parameters<typeof payload.find>[0] = {
+        collection: collectionSlug,
+        depth,
+        limit,
+        page,
+        req,
+        ...localAPIDefaults(authorizedMCP),
+        ...(selectClause && { select: selectClause }),
+        ...(locale && { locale }),
+        ...(fallbackLocale && { fallbackLocale }),
+        ...(draft !== undefined && { draft }),
+      }
+
+      if (sort) {
+        findOptions.sort = sort
+      }
+      if (Object.keys(whereClause).length > 0) {
+        findOptions.where = whereClause as Parameters<typeof payload.find>[0]['where']
+      }
+
+      const result = await payload.find(findOptions)
+
+      let responseText = `Collection: "${collectionSlug}"\nTotal: ${result.totalDocs} documents\nPage: ${result.page} of ${result.totalPages}\n`
+      for (const doc of result.docs) {
+        responseText += `\n\`\`\`json\n${JSON.stringify(doc)}\n\`\`\``
+      }
+
+      return applyOverride(
+        { content: [{ type: 'text', text: responseText }] },
+        result as unknown as Record<string, unknown>,
+      )
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error(`Error reading documents from collection ${collectionSlug}: ${errorMessage}`)
+      return applyOverride(
+        {
+          content: [
+            {
+              type: 'text',
+              text: `❌ **Error reading documents from collection "${collectionSlug}":** ${errorMessage}`,
+            },
+          ],
+        },
+        {},
+      )
+    }
+  },
+  input: normalizeInput(toolSchemas.findDocuments.parameters),
+  overrideResponse,
+})

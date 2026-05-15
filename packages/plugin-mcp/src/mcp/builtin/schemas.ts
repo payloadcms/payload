@@ -1,9 +1,15 @@
 import { z } from 'zod'
 
+/**
+ * zod schemas for the meta-args of built-in CRUD tools (pagination, locale,
+ * depth, where / select clauses, …). Plugin-internal — these are converted to
+ * JSON Schema before being handed to the MCP server.
+ */
 export const toolSchemas = {
-  findGlobal: {
-    description: 'Find a Payload global singleton configuration.',
+  createDocument: {
+    description: 'Create a document in a collection.',
     parameters: z.object({
+      data: z.string().describe('JSON string containing the data for the new document'),
       depth: z
         .number()
         .int()
@@ -11,7 +17,12 @@ export const toolSchemas = {
         .max(10)
         .optional()
         .default(0)
-        .describe('Depth of population for relationships'),
+        .describe('How many levels deep to populate relationships in response (default: 0)'),
+      draft: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe('Whether to create the document as a draft'),
       fallbackLocale: z
         .string()
         .optional()
@@ -20,7 +31,7 @@ export const toolSchemas = {
         .string()
         .optional()
         .describe(
-          'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
+          'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
         ),
       select: z
         .string()
@@ -28,6 +39,38 @@ export const toolSchemas = {
         .describe(
           "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
         ),
+    }),
+  },
+
+  deleteDocument: {
+    description: 'Delete documents in a collection by ID or where clause.',
+    parameters: z.object({
+      id: z
+        .union([z.string(), z.number()])
+        .optional()
+        .describe('Optional: specific document ID to delete'),
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('Depth of population for relationships in response'),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code for the operation (e.g., "en", "es"). Defaults to the default locale',
+        ),
+      where: z
+        .string()
+        .optional()
+        .describe('Optional: JSON string for where clause to delete multiple documents'),
     }),
   },
 
@@ -98,10 +141,9 @@ export const toolSchemas = {
     }),
   },
 
-  createDocument: {
-    description: 'Create a document in a collection.',
+  findGlobal: {
+    description: 'Find a Payload global singleton configuration.',
     parameters: z.object({
-      data: z.string().describe('JSON string containing the data for the new document'),
       depth: z
         .number()
         .int()
@@ -109,12 +151,7 @@ export const toolSchemas = {
         .max(10)
         .optional()
         .default(0)
-        .describe('How many levels deep to populate relationships in response (default: 0)'),
-      draft: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe('Whether to create the document as a draft'),
+        .describe('Depth of population for relationships'),
       fallbackLocale: z
         .string()
         .optional()
@@ -123,7 +160,7 @@ export const toolSchemas = {
         .string()
         .optional()
         .describe(
-          'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+          'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
         ),
       select: z
         .string()
@@ -185,38 +222,6 @@ export const toolSchemas = {
     }),
   },
 
-  deleteDocument: {
-    description: 'Delete documents in a collection by ID or where clause.',
-    parameters: z.object({
-      id: z
-        .union([z.string(), z.number()])
-        .optional()
-        .describe('Optional: specific document ID to delete'),
-      depth: z
-        .number()
-        .int()
-        .min(0)
-        .max(10)
-        .optional()
-        .default(0)
-        .describe('Depth of population for relationships in response'),
-      fallbackLocale: z
-        .string()
-        .optional()
-        .describe('Optional: fallback locale code to use when requested locale is not available'),
-      locale: z
-        .string()
-        .optional()
-        .describe(
-          'Optional: locale code for the operation (e.g., "en", "es"). Defaults to the default locale',
-        ),
-      where: z
-        .string()
-        .optional()
-        .describe('Optional: JSON string for where clause to delete multiple documents'),
-    }),
-  },
-
   updateGlobal: {
     description: 'Update a Payload global singleton configuration.',
     parameters: z.object({
@@ -261,54 +266,9 @@ export const toolSchemas = {
     }),
   },
 
-  login: {
-    description: 'Authenticates a user with email and password.',
-    parameters: z.object({
-      collection: z.string().describe('The collection containing the user (e.g., "users")'),
-      depth: z
-        .number()
-        .int()
-        .min(0)
-        .max(10)
-        .optional()
-        .default(0)
-        .describe('Depth of population for relationships'),
-      email: z.email().describe('The user email address'),
-      overrideAccess: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe('Whether to override access controls'),
-      password: z.string().describe('The user password'),
-      showHiddenFields: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe('Whether to show hidden fields in the response'),
-    }),
-  },
-
-  verify: {
-    description: 'Verifies a user email with a verification token.',
-    parameters: z.object({
-      collection: z.string().describe('The collection containing the user (e.g., "users")'),
-      token: z.string().describe('The verification token sent to the user email'),
-    }),
-  },
-
-  resetPassword: {
-    description: 'Resets a user password with a reset token.',
-    parameters: z.object({
-      collection: z.string().describe('The collection containing the user (e.g., "users")'),
-      password: z.string().describe('The new password for the user'),
-      token: z.string().describe('The password reset token sent to the user email'),
-    }),
-  },
-
   forgotPassword: {
     description: 'Sends a password reset email to a user.',
     parameters: z.object({
-      collection: z.string().describe('The collection containing the user (e.g., "users")'),
       disableEmail: z
         .boolean()
         .optional()
@@ -318,11 +278,46 @@ export const toolSchemas = {
     }),
   },
 
+  login: {
+    description: 'Authenticates a user with email and password.',
+    parameters: z.object({
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('Depth of population for relationships'),
+      email: z.email().describe('The user email address'),
+      password: z.string().describe('The user password'),
+      showHiddenFields: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe('Whether to show hidden fields in the response'),
+    }),
+  },
+
+  resetPassword: {
+    description: 'Resets a user password with a reset token.',
+    parameters: z.object({
+      password: z.string().describe('The new password for the user'),
+      token: z.string().describe('The password reset token sent to the user email'),
+    }),
+  },
+
   unlock: {
     description: 'Unlocks a user account that has been locked due to failed login attempts.',
     parameters: z.object({
-      collection: z.string().describe('The collection containing the user (e.g., "users")'),
       email: z.email().describe('The user email address'),
+    }),
+  },
+
+  verify: {
+    description: 'Verifies a user email with a verification token.',
+    parameters: z.object({
+      token: z.string().describe('The verification token sent to the user email'),
     }),
   },
 }

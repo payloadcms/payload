@@ -1,9 +1,9 @@
 import { definePlugin } from 'payload'
 
-import type { MCPAccess, MCPPluginConfig } from './types.js'
+import type { AuthorizedMCP, MCPPluginConfig } from './types.js'
 
 import { getAPIKeysCollection } from './collection/index.js'
-import { mcpEndpoint } from './endpoints/mcp.js'
+import { mcpEndpoint } from './endpoint/index.js'
 
 declare module 'payload' {
   export interface PayloadRequest {
@@ -14,7 +14,7 @@ declare module 'payload' {
   }
 }
 
-export type { MCPAccess, MCPPluginConfig }
+export type { AuthorizedMCP, MCPPluginConfig }
 
 /**
  * The MCP Plugin for Payload.
