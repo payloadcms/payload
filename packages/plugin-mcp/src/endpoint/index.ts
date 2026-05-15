@@ -15,7 +15,6 @@ import type {
   Tool,
 } from '../types.js'
 
-import { normalizeInput } from '../mcp/normalizeInput.js'
 import { toCamelCase } from '../utils/camelCase.js'
 import { getLogger } from '../utils/getLogger.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
@@ -61,7 +60,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
         name,
         {
           argsSchema: fromJsonSchema(
-            normalizeInput(prompt.argsSchema) as Parameters<typeof fromJsonSchema>[0],
+            (prompt.argsSchema ?? { type: 'object', properties: {} }) as Parameters<typeof fromJsonSchema>[0],
           ),
           description: prompt.description,
           title: prompt.title,
@@ -127,7 +126,7 @@ const registerCollectionTool = ({
     {
       description: tool.description,
       inputSchema: fromJsonSchema(
-        normalizeInput(tool.input) as Parameters<typeof fromJsonSchema>[0],
+        (tool.input ?? { type: 'object', properties: {} }) as Parameters<typeof fromJsonSchema>[0],
       ),
     },
     async (rawParams: unknown, _extra: unknown) => {
@@ -166,7 +165,7 @@ const registerGlobalTool = ({
     {
       description: tool.description,
       inputSchema: fromJsonSchema(
-        normalizeInput(tool.input) as Parameters<typeof fromJsonSchema>[0],
+        (tool.input ?? { type: 'object', properties: {} }) as Parameters<typeof fromJsonSchema>[0],
       ),
     },
     async (rawParams: unknown, _extra: unknown) => {
@@ -202,7 +201,7 @@ const registerTopLevelTool = ({
     {
       description: tool.description,
       inputSchema: fromJsonSchema(
-        normalizeInput(tool.input) as Parameters<typeof fromJsonSchema>[0],
+        (tool.input ?? { type: 'object', properties: {} }) as Parameters<typeof fromJsonSchema>[0],
       ),
     },
     async (rawParams: unknown, _extra: unknown) => {

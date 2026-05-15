@@ -1,11 +1,43 @@
 import type { SelectType } from 'payload'
 
-import type { GlobalTool, MCPResponseOverride, MCPToolResponse } from '../../../types.js'
+import type {
+  GlobalTool,
+  JsonSchemaObject,
+  MCPResponseOverride,
+  MCPToolResponse,
+} from '../../../types.js'
 
-import { normalizeInput } from '../../normalizeInput.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
-import { toolSchemas } from '../schemas.js'
+
+const DEFAULT_DESCRIPTION = 'Find a Payload global singleton configuration.'
+
+const inputSchema: JsonSchemaObject = {
+  type: 'object',
+  properties: {
+    depth: {
+      type: 'integer',
+      default: 0,
+      description: 'Depth of population for relationships',
+      maximum: 10,
+      minimum: 0,
+    },
+    fallbackLocale: {
+      type: 'string',
+      description: 'Optional: fallback locale code to use when requested locale is not available',
+    },
+    locale: {
+      type: 'string',
+      description:
+        'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
+    },
+    select: {
+      type: 'string',
+      description:
+        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+    },
+  },
+}
 
 export const buildFindGlobalTool = ({
   description,
@@ -16,7 +48,7 @@ export const buildFindGlobalTool = ({
   globalSlug: string
   overrideResponse?: MCPResponseOverride
 }): GlobalTool => ({
-  description: `${toolSchemas.findGlobal.description.trim()}${description ? `\n\n${description}` : ''}`,
+  description: `${DEFAULT_DESCRIPTION}${description ? `\n\n${description}` : ''}`,
   handler: async ({ input, authorizedMCP, req }) => {
     const payload = req.payload
     const logger = getLogger({ payload })
@@ -89,6 +121,6 @@ export const buildFindGlobalTool = ({
       )
     }
   },
-  input: normalizeInput(toolSchemas.findGlobal.parameters),
+  input: inputSchema,
   overrideResponse,
 })

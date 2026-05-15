@@ -1,9 +1,44 @@
-import type { CollectionTool, MCPResponseOverride, MCPToolResponse } from '../../../types.js'
+import type {
+  CollectionTool,
+  JsonSchemaObject,
+  MCPResponseOverride,
+  MCPToolResponse,
+} from '../../../types.js'
 
-import { normalizeInput } from '../../normalizeInput.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
-import { toolSchemas } from '../schemas.js'
+
+const DEFAULT_DESCRIPTION = 'Delete documents in a collection by ID or where clause.'
+
+const inputSchema: JsonSchemaObject = {
+  type: 'object',
+  properties: {
+    depth: {
+      type: 'integer',
+      default: 0,
+      description: 'Depth of population for relationships in response',
+      maximum: 10,
+      minimum: 0,
+    },
+    fallbackLocale: {
+      type: 'string',
+      description: 'Optional: fallback locale code to use when requested locale is not available',
+    },
+    id: {
+      type: ['string', 'number'],
+      description: 'Optional: specific document ID to delete',
+    },
+    locale: {
+      type: 'string',
+      description:
+        'Optional: locale code for the operation (e.g., "en", "es"). Defaults to the default locale',
+    },
+    where: {
+      type: 'string',
+      description: 'Optional: JSON string for where clause to delete multiple documents',
+    },
+  },
+}
 
 export const buildDeleteCollectionTool = ({
   collectionSlug,
@@ -14,7 +49,7 @@ export const buildDeleteCollectionTool = ({
   description?: string
   overrideResponse?: MCPResponseOverride
 }): CollectionTool => ({
-  description: description || toolSchemas.deleteDocument.description.trim(),
+  description: description || DEFAULT_DESCRIPTION,
   handler: async ({ input, authorizedMCP, req }) => {
     const payload = req.payload
     const logger = getLogger({ payload })
@@ -118,6 +153,6 @@ export const buildDeleteCollectionTool = ({
       )
     }
   },
-  input: normalizeInput(toolSchemas.deleteDocument.parameters),
+  input: inputSchema,
   overrideResponse,
 })

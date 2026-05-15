@@ -116,7 +116,7 @@ const buildCollectionsGroup = ({
       continue
     }
     const entry = pluginConfig.collections?.[slug]
-    const tools: AnyToolsMap = (entry?.tools ?? {}) as AnyToolsMap
+    const tools = entry?.tools ?? {}
 
     const checkboxes: Field[] = []
     for (const op of COLLECTION_BUILTIN_TOOL_KEYS) {

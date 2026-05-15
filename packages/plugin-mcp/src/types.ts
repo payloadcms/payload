@@ -11,11 +11,6 @@ import type {
   TypedUser,
 } from 'payload'
 
-/** Standard Schema brand — zod 4 schemas qualify; we run `z.toJSONSchema` on them. */
-export type StandardSchemaLike = { '~standard': unknown }
-
-export type MCPInputSchema = JsonSchemaObject | StandardSchemaLike
-
 /** Permissive — the schema is consumed by `fromJsonSchema()` and validated at runtime. */
 export type JsonSchemaObject = {
   $ref?: string
@@ -66,7 +61,7 @@ export type MCPGlobalToolContext = { globalSlug: GlobalSlug } & MCPToolContext
 export type Tool<Ctx = MCPToolContext> = {
   description: string
   handler: (ctx: Ctx) => MaybePromise<MCPToolResponse>
-  input?: MCPInputSchema
+  input?: JsonSchemaObject
   overrideResponse?: MCPResponseOverride
 }
 
@@ -130,7 +125,7 @@ export type MCPGlobalToolsMap = {
 export type MCPTopLevelToolsMap = Record<string, Tool>
 
 export type MCPPromptDef = {
-  argsSchema: MCPInputSchema
+  argsSchema: JsonSchemaObject
   description: string
   handler: (
     args: Record<string, unknown>,

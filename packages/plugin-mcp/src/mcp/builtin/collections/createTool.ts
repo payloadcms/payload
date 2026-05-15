@@ -15,7 +15,8 @@ import {
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { prepareCollectionSchema } from '../../../utils/schemaConversion/prepareCollectionSchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
-import { toolSchemas } from '../schemas.js'
+
+const DEFAULT_DESCRIPTION = 'Create a document in a collection.'
 
 export const buildCreateCollectionTool = ({
   collectionSlug,
@@ -65,7 +66,7 @@ export const buildCreateCollectionTool = ({
   }
 
   return {
-    description: description || toolSchemas.createDocument.description.trim(),
+    description: description || DEFAULT_DESCRIPTION,
     handler: async ({ input, authorizedMCP, req }) => {
       const payload = req.payload
       const logger = getLogger({ payload })

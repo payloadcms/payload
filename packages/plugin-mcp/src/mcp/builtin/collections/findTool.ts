@@ -1,11 +1,76 @@
 import type { SelectType } from 'payload'
 
-import type { CollectionTool, MCPResponseOverride, MCPToolResponse } from '../../../types.js'
+import type {
+  CollectionTool,
+  JsonSchemaObject,
+  MCPResponseOverride,
+  MCPToolResponse,
+} from '../../../types.js'
 
-import { normalizeInput } from '../../normalizeInput.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
-import { toolSchemas } from '../schemas.js'
+
+const DEFAULT_DESCRIPTION =
+  'Find documents in a collection by ID or where clause using Find or FindByID.'
+
+const inputSchema: JsonSchemaObject = {
+  type: 'object',
+  properties: {
+    depth: {
+      type: 'integer',
+      default: 0,
+      description: 'How many levels deep to populate relationships (default: 0)',
+      maximum: 10,
+      minimum: 0,
+    },
+    draft: {
+      type: 'boolean',
+      description:
+        'Optional: whether the document should be queried from the versions table/collection or not.',
+    },
+    fallbackLocale: {
+      type: 'string',
+      description: 'Optional: fallback locale code to use when requested locale is not available',
+    },
+    id: {
+      type: ['string', 'number'],
+      description:
+        'Optional: specific document ID to retrieve. If not provided, returns all documents',
+    },
+    limit: {
+      type: 'integer',
+      default: 10,
+      description: 'Maximum number of documents to return (default: 10, max: 100)',
+      maximum: 100,
+      minimum: 1,
+    },
+    locale: {
+      type: 'string',
+      description:
+        'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
+    },
+    page: {
+      type: 'integer',
+      default: 1,
+      description: 'Page number for pagination (default: 1)',
+      minimum: 1,
+    },
+    select: {
+      type: 'string',
+      description:
+        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+    },
+    sort: {
+      type: 'string',
+      description: 'Field to sort by (e.g., "createdAt", "-updatedAt" for descending)',
+    },
+    where: {
+      type: 'string',
+      description:
+        'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
+    },
+  },
+}
 
 export const buildFindCollectionTool = ({
   collectionSlug,
@@ -16,7 +81,7 @@ export const buildFindCollectionTool = ({
   description?: string
   overrideResponse?: MCPResponseOverride
 }): CollectionTool => ({
-  description: description || toolSchemas.findDocuments.description.trim(),
+  description: description || DEFAULT_DESCRIPTION,
   handler: async ({ input, authorizedMCP, req }) => {
     const payload = req.payload
     const logger = getLogger({ payload })
@@ -154,6 +219,6 @@ export const buildFindCollectionTool = ({
       )
     }
   },
-  input: normalizeInput(toolSchemas.findDocuments.parameters),
+  input: inputSchema,
   overrideResponse,
 })

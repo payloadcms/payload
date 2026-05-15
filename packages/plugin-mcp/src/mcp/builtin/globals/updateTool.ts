@@ -11,7 +11,8 @@ import { getLogger } from '../../../utils/getLogger.js'
 import { getGlobalVirtualFieldNames, stripVirtualFields } from '../../../utils/getVirtualFieldNames.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { prepareCollectionSchema } from '../../../utils/schemaConversion/prepareCollectionSchema.js'
-import { toolSchemas } from '../schemas.js'
+
+const DEFAULT_DESCRIPTION = 'Update a Payload global singleton configuration.'
 
 export const buildUpdateGlobalTool = ({
   description,
@@ -53,7 +54,7 @@ export const buildUpdateGlobalTool = ({
   }
 
   return {
-    description: `${toolSchemas.updateGlobal.description.trim()}${description ? `\n\n${description}` : ''}`,
+    description: `${DEFAULT_DESCRIPTION}${description ? `\n\n${description}` : ''}`,
     handler: async ({ input, authorizedMCP, req }) => {
       const payload = req.payload
       const logger = getLogger({ payload })

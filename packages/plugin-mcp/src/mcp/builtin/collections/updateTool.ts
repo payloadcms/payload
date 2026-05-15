@@ -15,7 +15,8 @@ import {
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { prepareCollectionSchema } from '../../../utils/schemaConversion/prepareCollectionSchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
-import { toolSchemas } from '../schemas.js'
+
+const DEFAULT_DESCRIPTION = 'Update documents in a collection by ID or where clause.'
 
 export const buildUpdateCollectionTool = ({
   collectionSlug,
@@ -81,7 +82,7 @@ export const buildUpdateCollectionTool = ({
   }
 
   return {
-    description: description || toolSchemas.updateDocument.description.trim(),
+    description: description || DEFAULT_DESCRIPTION,
     handler: async ({ input, authorizedMCP, req }) => {
       const payload = req.payload
       const logger = getLogger({ payload })

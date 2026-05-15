@@ -2,8 +2,6 @@ import type { CollectionTool, JsonSchemaObject, MCPToolResponse } from '../../..
 import type { CollectionBuiltinAuthToolKey } from '../../constants.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
-import { normalizeInput } from '../../normalizeInput.js'
-import { toolSchemas } from '../schemas.js'
 
 /**
  * Auth tools surfaced under `collections.<auth-collection>.tools`. Opt-in: they
@@ -38,28 +36,98 @@ const AUTH_TOOL_META: Record<
   { description: string; inputSchema: JsonSchemaObject }
 > = {
   auth: {
-    description: toolSchemas.auth.description,
-    inputSchema: normalizeInput(toolSchemas.auth.parameters),
+    description: 'Checks authentication status for the current user.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        headers: {
+          type: 'string',
+          description:
+            'Optional JSON string containing custom headers to send with the authentication request',
+        },
+      },
+    },
   },
   forgotPassword: {
-    description: toolSchemas.forgotPassword.description,
-    inputSchema: normalizeInput(toolSchemas.forgotPassword.parameters),
+    description: 'Sends a password reset email to a user.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        disableEmail: {
+          type: 'boolean',
+          default: false,
+          description: 'Whether to disable sending the email (for testing)',
+        },
+        email: {
+          type: 'string',
+          description: 'The user email address',
+          format: 'email',
+        },
+      },
+      required: ['email'],
+    },
   },
   login: {
-    description: toolSchemas.login.description,
-    inputSchema: normalizeInput(toolSchemas.login.parameters),
+    description: 'Authenticates a user with email and password.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        depth: {
+          type: 'integer',
+          default: 0,
+          description: 'Depth of population for relationships',
+          maximum: 10,
+          minimum: 0,
+        },
+        email: {
+          type: 'string',
+          description: 'The user email address',
+          format: 'email',
+        },
+        password: { type: 'string', description: 'The user password' },
+        showHiddenFields: {
+          type: 'boolean',
+          default: false,
+          description: 'Whether to show hidden fields in the response',
+        },
+      },
+      required: ['email', 'password'],
+    },
   },
   resetPassword: {
-    description: toolSchemas.resetPassword.description,
-    inputSchema: normalizeInput(toolSchemas.resetPassword.parameters),
+    description: 'Resets a user password with a reset token.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        password: { type: 'string', description: 'The new password for the user' },
+        token: { type: 'string', description: 'The password reset token sent to the user email' },
+      },
+      required: ['password', 'token'],
+    },
   },
   unlock: {
-    description: toolSchemas.unlock.description,
-    inputSchema: normalizeInput(toolSchemas.unlock.parameters),
+    description: 'Unlocks a user account that has been locked due to failed login attempts.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        email: {
+          type: 'string',
+          description: 'The user email address',
+          format: 'email',
+        },
+      },
+      required: ['email'],
+    },
   },
   verify: {
-    description: toolSchemas.verify.description,
-    inputSchema: normalizeInput(toolSchemas.verify.parameters),
+    description: 'Verifies a user email with a verification token.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        token: { type: 'string', description: 'The verification token sent to the user email' },
+      },
+      required: ['token'],
+    },
   },
 }
 

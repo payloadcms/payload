@@ -49,8 +49,7 @@
   },
   "dependencies": {
     "@cfworker/json-schema": "^4.1.1",
-    "@modelcontextprotocol/server": "2.0.0-alpha.2",
-    "zod": "^4.0.0"
+    "@modelcontextprotocol/server": "2.0.0-alpha.2"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -71,8 +70,7 @@
     "types": "./dist/index.d.ts"
   },
   "//deps_notes": {
-    "@cfworker/json-schema": "Should be able to remove in next @modelcontextprotocol/server alpha release. Marked as an optional peer of @modelcontextprotocol/server, but its bundle does an eager top-level `import { Validator } from '@cfworker/json-schema'`, so it must be installed even when only zod-registered tools are used. Drop once upstream lazy-loads the validator. See: https://github.com/modelcontextprotocol/typescript-sdk",
-    "zod": "Internal use only — for the plugin's own tool/prompt schemas. Plugin consumers no longer pass zod schemas; they provide JSON Schema (`MCPInputSchema`) and may bring their own validator (zod 4: `z.toJSONSchema(...)`)."
+    "@cfworker/json-schema": "Should be able to remove in next @modelcontextprotocol/server alpha release. Marked as an optional peer of @modelcontextprotocol/server, but its bundle does an eager top-level `import { Validator } from '@cfworker/json-schema'`, so it must be installed even when only zod-registered tools are used. Drop once upstream lazy-loads the validator. See: https://github.com/modelcontextprotocol/typescript-sdk"
   },
   "homepage:": "https://payloadcms.com"
 }
