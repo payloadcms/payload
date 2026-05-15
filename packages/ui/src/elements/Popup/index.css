@@ -15,13 +15,19 @@
   }
 
   .popup__hidden-content {
-    display: none;
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .popup__content {
     --popup-caret-size: 8px;
 
     position: absolute;
+    top: -9999px;
+    left: -9999px;
     z-index: var(--z-popup);
     background: var(--color-bg-elevated);
     color: var(--color-text);
