@@ -5,7 +5,6 @@
     overflow: hidden;
     position: fixed;
     inset: 0;
-    height: 100vh;
 
     --gutter-h: var(--spacer-2-5);
     --gutter-v: var(--spacer-2-5);
@@ -14,13 +13,10 @@
   .drawer__blur-bg {
     position: absolute;
     z-index: 1;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    inset: 0;
     opacity: 0;
     transition: opacity 200ms linear;
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--color-drawer-backdrop);
   }
 
   .drawer__content {
@@ -39,7 +35,6 @@
     z-index: 1;
     overflow: auto;
     height: 100%;
-    padding: 0;
     display: flex;
     flex-direction: column;
   }
@@ -63,14 +58,12 @@
     position: relative;
     z-index: 2;
     flex-shrink: 0;
-    text-indent: -9999px;
     cursor: pointer;
     opacity: 0;
-    will-change: opacity;
     transition: none;
     transition-delay: 0ms;
     flex-grow: 1;
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--color-drawer-backdrop);
     border: 0;
 
     &:active,
@@ -82,9 +75,8 @@
   .drawer__header {
     display: flex;
     align-items: center;
-    width: 100%;
     padding: var(--spacer-2-5);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
     background: var(--color-bg);
     gap: var(--spacer-2);
   }
@@ -114,16 +106,5 @@
     display: flex;
     gap: var(--spacer-2);
     align-items: center;
-    margin-left: auto;
-  }
-
-  html[data-theme='dark'] {
-    .drawer__close {
-      background: rgba(0, 0, 0, 0.25);
-    }
-
-    .drawer--is-open .drawer__close {
-      opacity: 0.25;
-    }
   }
 }
