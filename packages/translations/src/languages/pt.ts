@@ -599,7 +599,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     draft: 'Rascunho',
     draftHasPublishedVersion: 'Rascunho (tem versão publicada)',
     draftSavedSuccessfully: 'Rascunho salvo com sucesso.',
-    lastSavedAgo: 'Última gravação há {{distance}}',
+    lastSavedAgo: 'Gravado há {{distance}}',
     modifiedOnly: 'Modificado apenas',
     moreVersions: 'Mais versões...',
     noFurtherVersionsFound: 'Nenhuma outra versão encontrada',

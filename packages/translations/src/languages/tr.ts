@@ -600,7 +600,7 @@ export const trTranslations: DefaultTranslationsObject = {
     draft: 'Taslak',
     draftHasPublishedVersion: 'Taslak (yayınlanmış versiyonu var)',
     draftSavedSuccessfully: 'Taslak başarıyla kaydedildi.',
-    lastSavedAgo: 'Son kaydedildi {{distance}} önce',
+    lastSavedAgo: '{{distance}} önce kaydedildi',
     modifiedOnly: 'Yalnızca değiştirilmiş',
     moreVersions: 'Daha fazla versiyon...',
     noFurtherVersionsFound: 'Başka sürüm bulunamadı.',
