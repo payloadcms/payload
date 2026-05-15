@@ -1,0 +1,71 @@
+@layer payload-default {
+  .sort-column {
+    display: flex;
+    gap: var(--spacer-1);
+    align-items: center;
+  }
+
+  .sort-column__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
+  }
+
+  .sort-column__label,
+  .sort-column .btn {
+    vertical-align: middle;
+    display: inline-block;
+  }
+
+  /* Sorted column label styling */
+  .sort-column--sorted .sort-column__label {
+    color: var(--color-text);
+    font-weight: var(--text-body-medium-strong-font-weight);
+  }
+
+  .sort-column__buttons {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .sort-column__button {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius-medium);
+    color: var(--color-icon-tertiary);
+
+    &.sort-column--active {
+      color: var(--color-icon);
+      visibility: visible;
+    }
+
+    &:hover {
+      color: var(--color-icon);
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+      color: var(--color-icon);
+    }
+  }
+
+  .sort-column:hover .btn {
+    visibility: visible;
+  }
+
+  .sort-column--appearance-condensed {
+    gap: var(--spacer-1);
+  }
+
+  .sort-column--appearance-condensed .sort-column__buttons {
+    gap: 0;
+  }
+}

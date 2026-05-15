@@ -28,7 +28,7 @@
       gap: var(--spacer-1);
 
       &.rs__control--is-focused {
-        border-color: var(--color-border-selected);
+        border-color: var(--accessibility-focus-color);
       }
 
       &:has(.clear-indicator) {
@@ -149,7 +149,7 @@
 
   .react-select--error:focus-within {
     div.rs__control {
-      border-color: var(--color-border-selected);
+      border-color: var(--accessibility-focus-color);
     }
   }
 }

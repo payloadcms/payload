@@ -24,7 +24,7 @@
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
     &:focus-within {
-      border-color: var(--color-border-selected-strong);
+      border-color: var(--accessibility-focus-color);
     }
 
     &.read-only {

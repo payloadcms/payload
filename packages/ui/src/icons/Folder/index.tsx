@@ -9,13 +9,10 @@ const paths = {
 
 export const FolderIcon: React.FC<{
   readonly className?: string
-  color?: 'dark' | 'default' | 'muted'
   readonly size?: 16 | 24
-}> = ({ className, color, size = 24 }) => (
+}> = ({ className, size = 24 }) => (
   <svg
-    className={['icon', 'icon--folder', color ? `icon--folder--${color}` : '', className]
-      .filter(Boolean)
-      .join(' ')}
+    className={['icon', 'icon--folder', className].filter(Boolean).join(' ')}
     fill="none"
     height={size}
     viewBox={`0 0 ${size} ${size}`}

@@ -40,7 +40,7 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
 When updating or creating icons, reference the Figma icon library at:
 
 ```
-~/figma/figma/fpl/components/src/icons/
+~/figma/figma/fpl/icons/src/icons/
 ```
 
 Icon naming convention: `icon-{size}-{name}.tsx` (e.g., `icon-16-close.tsx`, `icon-24-chevron-down.tsx`)

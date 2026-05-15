@@ -31,7 +31,7 @@ export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (
       role="button"
       tabIndex={0}
     >
-      <CircledXIcon className={`${baseClass}__icon`} />
+      <CircledXIcon className={`${baseClass}__icon`} size={24} />
     </div>
   )
 }
