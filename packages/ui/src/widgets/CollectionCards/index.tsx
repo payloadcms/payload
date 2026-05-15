@@ -3,7 +3,7 @@ import React from 'react'
 import type { CollectionCardsData } from './getCollectionCardsData.js'
 
 import { CollectionCardsClient } from './index.client.js'
-import './index.scss'
+import './index.css'
 
 export type { CollectionCardsData }
 
