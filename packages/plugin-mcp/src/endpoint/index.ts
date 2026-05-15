@@ -6,15 +6,7 @@ import {
 } from '@modelcontextprotocol/server'
 import { APIError, AuthenticationError, type PayloadHandler, type PayloadRequest } from 'payload'
 
-import type {
-  AuthorizedMCP,
-  CollectionTool,
-  CollectionToolHandlerArgs,
-  GlobalTool,
-  GlobalToolHandlerArgs,
-  Tool,
-  ToolHandlerArgs,
-} from '../types.js'
+import type { AuthorizedMCP, CollectionTool, GlobalTool, Tool } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
 import { getLogger } from '../utils/getLogger.js'
@@ -145,15 +137,13 @@ const registerCollectionTool = ({
       ),
     },
     async (input: unknown, ctx: ServerContext) => {
-      const args: CollectionToolHandlerArgs = {
+      return tool.handler({
         authorizedMCP,
         collectionSlug: slug,
         input: (input ?? {}) as Record<string, unknown>,
-        payload: req.payload,
         req,
         serverContext: ctx,
-      }
-      return tool.handler(args)
+      })
     },
   )
   getLogger({ payload: req.payload }).info(`✅ Tool: ${toolName} Registered.`)
@@ -184,15 +174,13 @@ const registerGlobalTool = ({
       ),
     },
     async (input: unknown, ctx: ServerContext) => {
-      const args: GlobalToolHandlerArgs = {
+      return tool.handler({
         authorizedMCP,
         globalSlug: slug,
         input: (input ?? {}) as Record<string, unknown>,
-        payload: req.payload,
         req,
         serverContext: ctx,
-      }
-      return tool.handler(args)
+      })
     },
   )
   getLogger({ payload: req.payload }).info(`✅ Tool: ${toolName} Registered.`)
@@ -220,14 +208,12 @@ const registerTopLevelTool = ({
       ),
     },
     async (input: unknown, ctx: ServerContext) => {
-      const args: ToolHandlerArgs = {
+      return tool.handler({
         authorizedMCP,
         input: (input ?? {}) as Record<string, unknown>,
-        payload: req.payload,
         req,
         serverContext: ctx,
-      }
-      return tool.handler(args)
+      })
     },
   )
   getLogger({ payload: req.payload }).info(`✅ Tool: ${key} Registered.`)

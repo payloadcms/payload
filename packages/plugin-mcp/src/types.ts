@@ -49,7 +49,6 @@ export type MCPResponseOverride = (
 export type ToolHandlerArgs = {
   authorizedMCP: AuthorizedMCP
   input: Record<string, unknown>
-  payload: Payload
   req: PayloadRequest
   serverContext: ServerContext
 }

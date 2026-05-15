@@ -49,7 +49,7 @@ export const buildFindGlobalTool = ({
   overrideResponse?: MCPResponseOverride
 }): GlobalTool => ({
   description: `${DEFAULT_DESCRIPTION}${description ? `\n\n${description}` : ''}`,
-  handler: async ({ input, authorizedMCP, req }) => {
+  handler: async ({ authorizedMCP, input, req }) => {
     const payload = req.payload
     const logger = getLogger({ payload })
 
