@@ -1,10 +1,39 @@
 import { spawn } from 'child_process'
+import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import type { DevServerResult } from './nextDevServer.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+/**
+ * Resolve `@payloadcms/tanstack-start/node/cssLoader.mjs` from the dev-server
+ * root. We resolve it manually rather than importing the module here so the
+ * file path can be passed straight to Node's `--import` flag in the spawned
+ * Vite process.
+ *
+ * The loader is what allows CSS/SCSS/LESS statements that survive into the
+ * SSR/RSC bundle (e.g. from a prod-packed `@payloadcms/ui/dist/...` tarball
+ * that Vite ends up externalizing) to be silently swallowed instead of
+ * crashing every admin route with `ERR_UNKNOWN_FILE_EXTENSION`.
+ */
+function resolveCssLoaderUrl(rootDir: string): null | string {
+  const candidates = [
+    path.resolve(
+      rootDir,
+      'node_modules/@payloadcms/tanstack-start/dist/node/registerCssLoader.mjs',
+    ),
+    path.resolve(__dirname, '../../packages/tanstack-start/dist/node/registerCssLoader.mjs'),
+    path.resolve(__dirname, '../../packages/tanstack-start/src/node/registerCssLoader.mjs'),
+  ]
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return pathToFileURL(candidate).href
+    }
+  }
+  return null
+}
 
 export async function startTanStackStartDevServer({
   port,
@@ -18,6 +47,12 @@ export async function startTanStackStartDevServer({
 
   const viteBin = path.resolve(rootDir, 'node_modules/.bin/vite')
 
+  const cssLoaderUrl = resolveCssLoaderUrl(rootDir)
+  const previousNodeOptions = process.env.NODE_OPTIONS ?? ''
+  const nodeOptions = cssLoaderUrl
+    ? `${previousNodeOptions} --import ${cssLoaderUrl}`.trim()
+    : previousNodeOptions
+
   return new Promise<DevServerResult>((resolve, reject) => {
     const child = spawn(
       viteBin,
@@ -26,6 +61,7 @@ export async function startTanStackStartDevServer({
         cwd: rootDir,
         env: {
           ...process.env,
+          NODE_OPTIONS: nodeOptions,
           PORT: String(port),
           NODE_ENV: 'development',
           PAYLOAD_CORE_DEV: 'true',
