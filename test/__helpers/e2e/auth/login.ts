@@ -111,10 +111,7 @@ export async function loginClientSide(args: LoginArgs): Promise<void> {
   await wait(500)
   await page.click('[type=submit]')
 
-  await expect(page.locator('.step-nav__home')).toBeVisible()
-  if ((await page.locator('a.step-nav__home').count()) > 0) {
-    await page.locator('a.step-nav__home').click()
-  }
+  await expect(page.locator('.app-header')).toBeVisible()
 
   await page.waitForURL(adminRoute)
 
