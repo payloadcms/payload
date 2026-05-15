@@ -9,6 +9,7 @@ import {
   COLLECTION_BUILTIN_AUTH_TOOL_KEYS,
   COLLECTION_BUILTIN_TOOL_KEYS,
   GLOBAL_BUILTIN_TOOL_KEYS,
+  HARD_EXCLUDED_COLLECTION_SLUGS,
 } from '../mcp/buildTools.js'
 import { getLogger } from '../utils/getLogger.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
@@ -22,7 +23,7 @@ export const getMCPAccess: (args: { req: PayloadRequest }) => Promise<MCPAccess>
   const authHeader = req.headers.get('Authorization')
   const hasBearerToken = authHeader?.startsWith('Bearer ')
 
-  const getAPIKeyDoc = async (overrideApiKey?: null | string): Promise<MCPAPIKeysDoc> => {
+  const getAPIKeyDoc = async (overrideApiKey?: string): Promise<MCPAPIKeysDoc> => {
     const apiKey =
       overrideApiKey ?? (hasBearerToken ? authHeader?.replace('Bearer ', '').trim() || null : null)
 
@@ -32,18 +33,18 @@ export const getMCPAccess: (args: { req: PayloadRequest }) => Promise<MCPAccess>
 
     const sha256APIKeyIndex = crypto
       .createHmac('sha256', req.payload.secret)
-      .update(apiKey || '')
+      .update(apiKey)
       .digest('hex')
 
-    const doc = (await req.payload.db.findOne({
+    const doc = await req.payload.db.findOne<MCPAPIKeysDoc>({
       collection: 'payload-mcp-api-keys',
       req,
       where: {
         apiKeyIndex: { equals: sha256APIKeyIndex },
       },
-    })) as MCPAPIKeysDoc | null
+    })
 
-    if (!doc) {
+    if (!doc || !doc.user) {
       throw new UnauthorizedError()
     }
 
@@ -53,31 +54,44 @@ export const getMCPAccess: (args: { req: PayloadRequest }) => Promise<MCPAccess>
     const userID =
       typeof userRef === 'object' && userRef !== null && 'id' in userRef
         ? userRef.id
-        : (userRef! as unknown as DefaultDocumentIDType)
+        : (userRef as unknown as DefaultDocumentIDType)
 
-    const user: TypedUser = (await req.payload.findByID({
+    const user = (await req.payload.findByID({
       id: userID,
       collection: pluginConfig.userCollection!,
       depth: 0,
+      disableErrors: true,
       req,
-    })) as TypedUser
+    })) as null | TypedUser
 
-    user.collection = pluginConfig.userCollection as string
-    user._strategy = 'mcp-api-key' as const
+    if (!user) {
+      throw new UnauthorizedError()
+    }
 
-    doc.user = user
-
-    return doc
+    return {
+      ...doc,
+      user: {
+        ...user,
+        _strategy: 'mcp-api-key' as const,
+        collection: pluginConfig.userCollection as string,
+      },
+    }
   }
 
   if (pluginConfig.overrideAuth) {
-    return await pluginConfig.overrideAuth({ getAPIKeyDoc, getSanitizedAccess, req })
+    return await pluginConfig.overrideAuth({
+      getAPIKeyDoc,
+      getSanitizedAccess: ({ apiKeyDoc }) => getSanitizedAccess({ apiKeyDoc, pluginConfig, req }),
+      pluginConfig,
+      req,
+    })
   }
 
   let apiKeyDoc: MCPAPIKeysDoc
   if (process.env.NODE_ENV === 'development' && !hasBearerToken) {
     logger.info('Dev mode: skipping API key check, using session user')
     apiKeyDoc = {
+      id: -1,
       access: {},
       overrideAccess: true,
       user: req.user ?? null,
@@ -89,18 +103,17 @@ export const getMCPAccess: (args: { req: PayloadRequest }) => Promise<MCPAccess>
   return getSanitizedAccess({ apiKeyDoc, pluginConfig, req })
 }
 
-export type GetSanitizedAccessFn = (args: {
-  apiKeyDoc: MCPAPIKeysDoc
-  pluginConfig: MCPPluginConfig
-  req: PayloadRequest
-}) => MCPAccess
 /**
  * Ensures mcpAccess is complete, so every single collection / global / tool has an explicit `true` or `false` in the access tree.
  * It also merges in config-level access rules from the pluginConfig.
  * That way, further runtime checks do not have to worry about whether something is opt-in or opt-out, or
  * have to check both pluginConfig and mcpAccess to decide if a tool is enabled.
  */
-const getSanitizedAccess: GetSanitizedAccessFn = ({ apiKeyDoc, pluginConfig, req }) => {
+const getSanitizedAccess: (args: {
+  apiKeyDoc: MCPAPIKeysDoc
+  pluginConfig: MCPPluginConfig
+  req: PayloadRequest
+}) => MCPAccess = ({ apiKeyDoc, pluginConfig, req }) => {
   const mcpAccess: MCPAccess = {
     access: {
       collections: {},
@@ -115,7 +128,10 @@ const getSanitizedAccess: GetSanitizedAccessFn = ({ apiKeyDoc, pluginConfig, req
   }
 
   for (const collection of req.payload.config.collections) {
-    const collectionAccess = ((mcpAccess.access.collections ??= {})[collection.slug] ??= {})
+    if (HARD_EXCLUDED_COLLECTION_SLUGS.has(collection.slug)) {
+      continue
+    }
+    const collectionAccess = (mcpAccess.access.collections[collection.slug] ??= {})
     const apiKeyDocCollectionAccess = apiKeyDoc.access.collections?.[collection.slug] ?? {}
 
     // TODO: consider having just a COLLECTION_BUILTIN_TOOLS list that is a list of the actual tools, not just the keys
@@ -132,12 +148,13 @@ const getSanitizedAccess: GetSanitizedAccessFn = ({ apiKeyDoc, pluginConfig, req
     if (collection.auth) {
       for (const authToolKey of COLLECTION_BUILTIN_AUTH_TOOL_KEYS) {
         const matchedConfigEntry = pluginConfig.collections?.[collection.slug]?.tools?.[authToolKey]
-        if (matchedConfigEntry === true || apiKeyDocCollectionAccess[authToolKey] === true) {
+
+        if (apiKeyDocCollectionAccess[authToolKey] !== false && matchedConfigEntry) {
           collectionAccess[authToolKey] = true
           continue
         }
 
-        // auth is opt-out
+        // auth is opt-in
         collectionAccess[authToolKey] = false
       }
     }
@@ -159,12 +176,12 @@ const getSanitizedAccess: GetSanitizedAccessFn = ({ apiKeyDoc, pluginConfig, req
   }
 
   for (const global of req.payload.config.globals) {
-    const globalAccess = ((mcpAccess.access.globals ??= {})[global.slug] ??= {})
-    const apiKeyDocCollectionAccess = apiKeyDoc.access.globals?.[global.slug] ?? {}
+    const globalAccess = (mcpAccess.access.globals[global.slug] ??= {})
+    const apiKeyDocGlobalAccess = apiKeyDoc.access.globals?.[global.slug] ?? {}
 
     for (const toolKey of GLOBAL_BUILTIN_TOOL_KEYS) {
       const matchedConfigEntry = pluginConfig.globals?.[global.slug]?.tools?.[toolKey]
-      if (matchedConfigEntry === false || apiKeyDocCollectionAccess[toolKey] === false) {
+      if (matchedConfigEntry === false || apiKeyDocGlobalAccess[toolKey] === false) {
         globalAccess[toolKey] = false
         continue
       }
@@ -177,7 +194,7 @@ const getSanitizedAccess: GetSanitizedAccessFn = ({ apiKeyDoc, pluginConfig, req
     )
 
     for (const [key, customTool] of customTools) {
-      if (customTool === false || apiKeyDocCollectionAccess[key] === false) {
+      if (customTool === false || apiKeyDocGlobalAccess[key] === false) {
         globalAccess[key] = false
         continue
       }
