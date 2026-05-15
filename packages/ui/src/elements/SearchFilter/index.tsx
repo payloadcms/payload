@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import type { SearchFilterProps } from './types.js'
 
 import { useDebounce } from '../../hooks/useDebounce.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'search-filter'
 

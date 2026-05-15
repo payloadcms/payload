@@ -1,6 +1,8 @@
+import React from 'react'
+
 import { SearchIcon } from '../../icons/Search/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'search-bar'
 
