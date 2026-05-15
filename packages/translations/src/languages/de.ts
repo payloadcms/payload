@@ -608,7 +608,7 @@ export const deTranslations: DefaultTranslationsObject = {
     draft: 'Entwurf',
     draftHasPublishedVersion: 'Entwurf (hat veröffentlichte Version)',
     draftSavedSuccessfully: 'Entwurf erfolgreich gespeichert.',
-    lastSavedAgo: 'Zuletzt vor {{distance}} gespeichert',
+    lastSavedAgo: 'Vor {{distance}} gespeichert',
     modifiedOnly: 'Nur modifiziert',
     moreVersions: 'Mehr Versionen...',
     noFurtherVersionsFound: 'Keine weiteren Versionen vorhanden',

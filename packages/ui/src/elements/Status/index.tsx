@@ -12,7 +12,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'status'
 
@@ -154,7 +154,6 @@ export const Status: React.FC = () => {
         title={`${t('version:status')}: ${t(`version:${displayStatusKey}`)}`}
       >
         <div className={`${baseClass}__value-wrap`}>
-          <span className={`${baseClass}__label`}>{t('version:status')}:&nbsp;</span>
           <span className={`${baseClass}__value`}>{t(`version:${displayStatusKey}`)}</span>
 
           {!isTrashed && canUpdate && hasPublishedDoc && statusToRender === 'changed' && (

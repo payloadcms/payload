@@ -607,7 +607,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     draft: 'Concept',
     draftHasPublishedVersion: 'Concept (heeft gepubliceerde versie)',
     draftSavedSuccessfully: 'Concept succesvol bewaard.',
-    lastSavedAgo: 'Laatst opgeslagen {{distance}} geleden',
+    lastSavedAgo: 'Opgeslagen {{distance}} geleden',
     modifiedOnly: 'Alleen gewijzigd',
     moreVersions: 'Meer versies...',
     noFurtherVersionsFound: 'Geen verdere versies gevonden',

@@ -1,0 +1,85 @@
+@layer payload-default {
+  dialog.confirmation-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-modalbackdrop);
+  }
+
+  .confirmation-modal__wrapper {
+    z-index: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    max-width: calc(100vw - var(--spacer-5));
+    background: var(--color-bg);
+    border-radius: var(--radius-large);
+    overflow: clip;
+  }
+
+  .confirmation-modal__header {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+    padding: var(--spacer-2) var(--spacer-2) var(--spacer-2) var(--spacer-3);
+    gap: var(--spacer-2);
+    overflow: clip;
+  }
+
+  .confirmation-modal__header-title {
+    flex: 1 0 0;
+    min-width: 0;
+    margin: 0;
+    color: var(--color-text);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+  }
+
+  .confirmation-modal__header-close {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+
+    .btn {
+      padding: 0;
+    }
+  }
+
+  .confirmation-modal__content {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacer-2) var(--spacer-3);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    color: var(--color-text);
+
+    > * {
+      margin: 0;
+    }
+
+    strong {
+      font-weight: var(--text-body-medium-strong-font-weight);
+    }
+  }
+
+  .confirmation-modal__controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacer-2);
+    padding: var(--spacer-2);
+
+    .btn {
+      margin: 0;
+    }
+  }
+}

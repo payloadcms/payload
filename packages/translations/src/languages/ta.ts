@@ -599,7 +599,7 @@ export const taTranslations: DefaultTranslationsObject = {
     draft: 'வரைவு',
     draftHasPublishedVersion: 'வரைவு (வெளியிடப்பட்ட பதிப்பு உள்ளது)',
     draftSavedSuccessfully: 'வரைவு வெற்றிகரமாக சேமிக்கப்பட்டது.',
-    lastSavedAgo: 'கடைசியாக {{distance}} முன்பு சேமிக்கப்பட்டது',
+    lastSavedAgo: '{{distance}} முன்பு சேமிக்கப்பட்டது',
     modifiedOnly: 'மாற்றப்பட்டவை மட்டும்',
     moreVersions: 'மேலும் பதிப்புகள்...',
     noFurtherVersionsFound: 'மேலும் பதிப்புகள் எதுவும் கிடைக்கவில்லை',

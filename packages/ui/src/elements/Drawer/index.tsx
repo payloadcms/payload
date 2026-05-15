@@ -4,9 +4,9 @@ import React, { createContext, use, useCallback, useLayoutEffect, useState } fro
 
 import type { Props, TogglerProps } from './types.js'
 
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import { Gutter } from '../Gutter/index.js'
 import './index.css'
 
 const baseClass = 'drawer'
@@ -64,7 +64,6 @@ export const Drawer: React.FC<Props> = ({
   slug,
   children,
   className,
-  gutter = true,
   Header,
   headerActions,
   hoverTitle,
@@ -99,6 +98,8 @@ export const Drawer: React.FC<Props> = ({
           closeOnBlur={false}
           slug={slug}
           style={{
+            paddingRight:
+              drawerDepth > 1 ? `calc(${drawerDepth - 1} * var(--spacer-3))` : undefined,
             zIndex: drawerZBase + drawerDepth,
           }}
         >
@@ -110,14 +111,9 @@ export const Drawer: React.FC<Props> = ({
             onClick={() => closeModal(slug)}
             type="button"
           />
-          <div
-            className={`${baseClass}__content`}
-            style={{
-              width: `calc(100% - (${drawerDepth} * var(--gutter-h)))`,
-            }}
-          >
+          <div className={`${baseClass}__content`}>
             <div className={`${baseClass}__blur-bg-content`} />
-            <Gutter className={`${baseClass}__content-children`} left={gutter} right={gutter}>
+            <div className={`${baseClass}__content-children`}>
               {Header}
               {Header === undefined && (
                 <div className={`${baseClass}__header`}>
@@ -128,12 +124,9 @@ export const Drawer: React.FC<Props> = ({
                     aria-label={t('general:close')}
                     buttonStyle="ghost"
                     className={`${baseClass}__header__close`}
-                    id={`close-drawer__${slug}`}
+                    icon={<ChevronIcon direction="left" size={24} />}
                     onClick={() => closeModal(slug)}
-                  >
-                    {/* TODO: add icon */}
-                    &lsaquo;
-                  </Button>
+                  />
                   <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
                     {title}
                   </h2>
@@ -156,7 +149,7 @@ export const Drawer: React.FC<Props> = ({
                 </div>
               )}
               {children}
-            </Gutter>
+            </div>
           </div>
         </Modal>
       </DrawerDepthProvider>

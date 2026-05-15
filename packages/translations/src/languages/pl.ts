@@ -595,7 +595,7 @@ export const plTranslations: DefaultTranslationsObject = {
     draft: 'Szkic',
     draftHasPublishedVersion: 'Szkic (ma opublikowaną wersję)',
     draftSavedSuccessfully: 'Wersja robocza została pomyślnie zapisana.',
-    lastSavedAgo: 'Ostatnio zapisane {{distance}} temu',
+    lastSavedAgo: 'Zapisane {{distance}} temu',
     modifiedOnly: 'Tylko zmodyfikowany',
     moreVersions: 'Więcej wersji...',
     noFurtherVersionsFound: 'Nie znaleziono dalszych wersji',

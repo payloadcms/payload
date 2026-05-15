@@ -590,7 +590,7 @@ export const etTranslations: DefaultTranslationsObject = {
     draft: 'Mustand',
     draftHasPublishedVersion: 'Mustand (on avaldatud versioon)',
     draftSavedSuccessfully: 'Mustand edukalt salvestatud.',
-    lastSavedAgo: 'Viimati salvestatud {{distance}} tagasi',
+    lastSavedAgo: 'Salvestatud {{distance}} tagasi',
     modifiedOnly: 'Muudetud ainult',
     moreVersions: 'Rohkem versioone...',
     noFurtherVersionsFound: 'Rohkem versioone ei leitud',

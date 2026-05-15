@@ -576,7 +576,7 @@ export const heTranslations: DefaultTranslationsObject = {
     draft: 'טיוטה',
     draftHasPublishedVersion: 'טיוטה (יש גרסה שפורסמה)',
     draftSavedSuccessfully: 'טיוטה נשמרה בהצלחה.',
-    lastSavedAgo: 'נשמר לאחרונה לפני {{distance}}',
+    lastSavedAgo: 'נשמר לפני {{distance}}',
     modifiedOnly: 'מותאם בלבד',
     moreVersions: 'עוד גרסאות...',
     noFurtherVersionsFound: 'לא נמצאו עוד גרסאות',

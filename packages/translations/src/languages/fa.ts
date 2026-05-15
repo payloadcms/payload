@@ -587,7 +587,7 @@ export const faTranslations: DefaultTranslationsObject = {
     draft: 'پیش‌نویس',
     draftHasPublishedVersion: 'پیش‌نویس (نسخه منتشر شده دارد)',
     draftSavedSuccessfully: 'پیش‌نویس با موفقیت ذخیره شد.',
-    lastSavedAgo: 'آخرین ذخیره {{distance}} پیش',
+    lastSavedAgo: 'ذخیره شده {{distance}} پیش',
     modifiedOnly: 'فقط موارد تغییر کرده',
     moreVersions: 'نسخه‌های بیشتر...',
     noFurtherVersionsFound: 'نسخه دیگری پیدا نشد.',
