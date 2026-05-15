@@ -2,14 +2,11 @@ import type { Config, Field, GroupField, SanitizedConfig } from 'payload'
 
 import type { MCPPluginConfig } from '../types.js'
 
-/** Loose shape walker uses to iterate any scope's tools map without caring about variant. */
-type AnyToolsMap = Record<string, unknown>
-
-import { classifyEntry, getCustomToolNames } from '../mcp/classifyEntry.js'
 import {
   COLLECTION_BUILTIN_AUTH_TOOL_KEYS,
   COLLECTION_BUILTIN_TOOL_KEYS,
   GLOBAL_BUILTIN_TOOL_KEYS,
+  HARD_EXCLUDED_COLLECTION_SLUGS,
 } from '../mcp/constants.js'
 import { toCamelCase } from '../utils/camelCase.js'
 
@@ -21,8 +18,6 @@ const AUTH_TOOL_LABELS: Record<string, string> = {
   unlock: 'Unlock Account',
   verify: 'Email Verification',
 }
-
-const HARD_EXCLUDED_SLUGS = new Set(['payload-mcp-api-keys'])
 
 /**
  * Returns the API key collection's `access` field — a single top-level `group`
@@ -60,32 +55,17 @@ export const getAccessGroupField = ({
     fields.push(globalsGroup)
   }
 
-  const topToolsGroup = buildTopLevelGroup({
-    name: 'tools',
-    description: 'Top-level (cross-cutting) tools',
-    label: 'Tools',
-    map: pluginConfig.tools,
-  })
+  const topToolsGroup = buildTopLevelGroup({ pluginConfig })
   if (topToolsGroup) {
     fields.push(topToolsGroup)
   }
 
-  const promptsGroup = buildPromptsResourcesGroup({
-    name: 'prompts',
-    description: 'Manage client access to prompts',
-    items: pluginConfig.prompts,
-    label: 'Prompts',
-  })
+  const promptsGroup = buildPromptsGroup({ pluginConfig })
   if (promptsGroup) {
     fields.push(promptsGroup)
   }
 
-  const resourcesGroup = buildPromptsResourcesGroup({
-    name: 'resources',
-    description: 'Manage client access to resources',
-    items: pluginConfig.resources,
-    label: 'Resources',
-  })
+  const resourcesGroup = buildResourcesGroup({ pluginConfig })
   if (resourcesGroup) {
     fields.push(resourcesGroup)
   }
@@ -111,83 +91,86 @@ const buildCollectionsGroup = ({
   const slugFields: Field[] = []
 
   for (const collection of config.collections ?? []) {
-    const slug = collection.slug
-    if (HARD_EXCLUDED_SLUGS.has(slug)) {
+    if (HARD_EXCLUDED_COLLECTION_SLUGS.includes(collection.slug)) {
       continue
     }
-    const entry = pluginConfig.collections?.[slug]
-    const tools = entry?.tools ?? {}
-
+    const tools = (pluginConfig.collections?.[collection.slug]?.tools ?? {}) as Record<
+      string,
+      unknown
+    >
     const checkboxes: Field[] = []
-    for (const op of COLLECTION_BUILTIN_TOOL_KEYS) {
-      const classified = classifyEntry(tools[op])
-      if (classified.kind === 'disabled') {
+
+    for (const toolKey of COLLECTION_BUILTIN_TOOL_KEYS) {
+      const matchedConfigEntry = tools[toolKey]
+      if (matchedConfigEntry === false) {
         continue
       }
+      // Built-in tools are opt-out
       checkboxes.push({
-        name: op,
+        name: toolKey,
         type: 'checkbox',
-        admin: { description: `Allow clients to ${op} ${slug}.` },
+        admin: { description: `Allow clients to ${toolKey} ${collection.slug}.` },
         defaultValue: true,
-        label: op.charAt(0).toUpperCase() + op.slice(1),
+        label: toolKey.charAt(0).toUpperCase() + toolKey.slice(1),
       })
     }
 
-    // Opt-in auth tools — only show a checkbox if the plugin config enabled the tool.
     if (collection.auth) {
-      for (const authToolName of COLLECTION_BUILTIN_AUTH_TOOL_KEYS) {
-        const classified = classifyEntry(tools[authToolName])
-        const enabled = classified.kind === 'enabled' || classified.kind === 'override'
-        if (!enabled) {
+      for (const authToolKey of COLLECTION_BUILTIN_AUTH_TOOL_KEYS) {
+        const matchedConfigEntry = tools[authToolKey]
+        if (!matchedConfigEntry) {
+          // auth is opt-in — skip if plugin config didn't enable it
           continue
         }
-        const override = classified.kind === 'override' ? classified.value : undefined
+        const override =
+          typeof matchedConfigEntry === 'object'
+            ? (matchedConfigEntry as { description?: string })
+            : undefined
         checkboxes.push({
-          name: authToolName,
+          name: authToolKey,
           type: 'checkbox',
           admin: {
             description:
-              override?.description ?? `Allow clients to use ${authToolName} on ${slug}.`,
+              override?.description ?? `Allow clients to use ${authToolKey} on ${collection.slug}.`,
           },
           defaultValue: true,
-          label: AUTH_TOOL_LABELS[authToolName] ?? authToolName,
+          label: AUTH_TOOL_LABELS[authToolKey] ?? authToolKey,
         })
       }
     }
 
-    for (const toolName of getCustomToolNames(tools)) {
-      if (COLLECTION_BUILTIN_TOOL_KEYS.includes(toolName)) {
+    const customTools = Object.entries(tools).filter(
+      ([key]) =>
+        !COLLECTION_BUILTIN_TOOL_KEYS.includes(key) && !COLLECTION_BUILTIN_AUTH_TOOL_KEYS.includes(key),
+    )
+    for (const [key, customTool] of customTools) {
+      if (customTool === false) {
         continue
       }
-      if (collection.auth && COLLECTION_BUILTIN_AUTH_TOOL_KEYS.includes(toolName)) {
-        continue
-      }
-      const tool = (tools[toolName] as { description?: string }) ?? {}
+      const description = (customTool as { description?: string })?.description
       checkboxes.push({
-        name: toolName,
+        name: key,
         type: 'checkbox',
-        admin: { description: tool.description ?? `Allow clients to call ${toolName}.` },
+        admin: { description: description ?? `Allow clients to call ${key}.` },
         defaultValue: true,
-        label: toolName,
+        label: key,
       })
     }
 
     if (checkboxes.length === 0) {
       continue
     }
-
     slugFields.push({
-      name: toCamelCase(slug),
+      name: toCamelCase(collection.slug),
       type: 'group',
       fields: checkboxes,
-      label: slug.charAt(0).toUpperCase() + toCamelCase(slug).slice(1),
+      label: collection.slug.charAt(0).toUpperCase() + toCamelCase(collection.slug).slice(1),
     })
   }
 
   if (slugFields.length === 0) {
     return null
   }
-
   return {
     name: 'collections',
     type: 'group',
@@ -206,55 +189,53 @@ const buildGlobalsGroup = ({
   const slugFields: Field[] = []
 
   for (const global of config.globals ?? []) {
-    const slug = global.slug
-    const entry = pluginConfig.globals?.[slug]
-    const tools: AnyToolsMap = (entry?.tools ?? {}) as AnyToolsMap
-
+    const tools = (pluginConfig.globals?.[global.slug]?.tools ?? {}) as Record<string, unknown>
     const checkboxes: Field[] = []
-    for (const tool of GLOBAL_BUILTIN_TOOL_KEYS) {
-      const classified = classifyEntry(tools[tool])
-      if (classified.kind === 'disabled') {
+
+    for (const toolKey of GLOBAL_BUILTIN_TOOL_KEYS) {
+      const matchedConfigEntry = tools[toolKey]
+      if (matchedConfigEntry === false) {
         continue
       }
+      // Built-in tools are opt-out
       checkboxes.push({
-        name: tool,
+        name: toolKey,
         type: 'checkbox',
-        admin: { description: `Allow clients to ${tool} ${slug} global.` },
+        admin: { description: `Allow clients to ${toolKey} ${global.slug} global.` },
         defaultValue: true,
-        label: tool.charAt(0).toUpperCase() + tool.slice(1),
+        label: toolKey.charAt(0).toUpperCase() + toolKey.slice(1),
       })
     }
 
-    for (const toolName of getCustomToolNames(tools)) {
-      if (GLOBAL_BUILTIN_TOOL_KEYS.includes(toolName)) {
+    const customTools = Object.entries(tools).filter(([key]) => !GLOBAL_BUILTIN_TOOL_KEYS.includes(key))
+    for (const [key, customTool] of customTools) {
+      if (customTool === false) {
         continue
       }
-      const tool = (tools[toolName] as { description?: string }) ?? {}
+      const description = (customTool as { description?: string })?.description
       checkboxes.push({
-        name: toolName,
+        name: key,
         type: 'checkbox',
-        admin: { description: tool.description ?? `Allow clients to call ${toolName}.` },
+        admin: { description: description ?? `Allow clients to call ${key}.` },
         defaultValue: true,
-        label: toolName,
+        label: key,
       })
     }
 
     if (checkboxes.length === 0) {
       continue
     }
-
     slugFields.push({
-      name: toCamelCase(slug),
+      name: toCamelCase(global.slug),
       type: 'group',
       fields: checkboxes,
-      label: slug.charAt(0).toUpperCase() + toCamelCase(slug).slice(1),
+      label: global.slug.charAt(0).toUpperCase() + toCamelCase(global.slug).slice(1),
     })
   }
 
   if (slugFields.length === 0) {
     return null
   }
-
   return {
     name: 'globals',
     type: 'group',
@@ -264,63 +245,86 @@ const buildGlobalsGroup = ({
 }
 
 const buildTopLevelGroup = ({
-  name,
-  description,
-  label,
-  map,
+  pluginConfig,
 }: {
-  description: string
-  label: string
-  map: AnyToolsMap | undefined
-  name: string
+  pluginConfig: MCPPluginConfig
 }): GroupField | null => {
-  const customNames = getCustomToolNames(map)
-  if (customNames.length === 0) {
+  const checkboxes: Field[] = []
+  for (const [key, customTool] of Object.entries(pluginConfig.tools ?? {})) {
+    if ((customTool as unknown) === false) {
+      continue
+    }
+    const description = customTool?.description
+    checkboxes.push({
+      name: key,
+      type: 'checkbox',
+      admin: { description: description ?? `Allow clients to call ${key}.` },
+      defaultValue: true,
+      label: key,
+    })
+  }
+  if (checkboxes.length === 0) {
     return null
   }
   return {
-    name,
+    name: 'tools',
     type: 'group',
-    admin: { description },
-    fields: customNames.map((toolName) => {
-      const tool = (map?.[toolName] as { description?: string }) ?? {}
-      return {
-        name: toolName,
-        type: 'checkbox',
-        admin: { description: tool.description ?? `Allow clients to call ${toolName}.` },
-        defaultValue: true,
-        label: toolName,
-      }
-    }),
-    label,
+    admin: { description: 'Top-level (cross-cutting) tools' },
+    fields: checkboxes,
+    label: 'Tools',
   }
 }
 
-const buildPromptsResourcesGroup = <T extends { description?: string; title?: string }>({
-  name,
-  description,
-  items,
-  label,
+const buildPromptsGroup = ({
+  pluginConfig,
 }: {
-  description: string
-  items: Record<string, T> | undefined
-  label: string
-  name: string
+  pluginConfig: MCPPluginConfig
 }): GroupField | null => {
-  if (!items || Object.keys(items).length === 0) {
+  const checkboxes: Field[] = []
+  for (const [key, prompt] of Object.entries(pluginConfig.prompts ?? {})) {
+    checkboxes.push({
+      name: key,
+      type: 'checkbox',
+      admin: { description: prompt.description ?? `Allow clients to use ${key}.` },
+      defaultValue: true,
+      label: prompt.title ?? key,
+    })
+  }
+  if (checkboxes.length === 0) {
     return null
   }
   return {
-    name,
+    name: 'prompts',
     type: 'group',
-    admin: { description },
-    fields: Object.entries(items).map(([itemName, item]) => ({
-      name: itemName,
+    admin: { description: 'Manage client access to prompts' },
+    fields: checkboxes,
+    label: 'Prompts',
+  }
+}
+
+const buildResourcesGroup = ({
+  pluginConfig,
+}: {
+  pluginConfig: MCPPluginConfig
+}): GroupField | null => {
+  const checkboxes: Field[] = []
+  for (const [key, resource] of Object.entries(pluginConfig.resources ?? {})) {
+    checkboxes.push({
+      name: key,
       type: 'checkbox',
-      admin: { description: item.description ?? `Allow clients to use ${itemName}.` },
+      admin: { description: resource.description ?? `Allow clients to use ${key}.` },
       defaultValue: true,
-      label: item.title ?? itemName,
-    })),
-    label,
+      label: resource.title ?? key,
+    })
+  }
+  if (checkboxes.length === 0) {
+    return null
+  }
+  return {
+    name: 'resources',
+    type: 'group',
+    admin: { description: 'Manage client access to resources' },
+    fields: checkboxes,
+    label: 'Resources',
   }
 }
