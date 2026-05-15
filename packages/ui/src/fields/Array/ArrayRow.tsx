@@ -168,7 +168,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             className={`${baseClass}__fields`}
             fields={fields}
             forceRender={forceRender}
-            margins="small"
             parentIndexPath=""
             parentPath={path}
             parentSchemaPath={schemaPath}
