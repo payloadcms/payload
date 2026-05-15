@@ -110,9 +110,7 @@ export const updateDocument = async <
       ? unpublishAllLocalesArg === 'true'
       : !!unpublishAllLocalesArg
   const isSavingDraft =
-    Boolean(draftArg && hasDraftsEnabled(collectionConfig)) &&
-    data._status !== 'published' &&
-    !publishAllLocales
+    Boolean(draftArg && hasDraftsEnabled(collectionConfig)) && !publishAllLocales
   const shouldSavePassword = Boolean(
     password &&
       collectionConfig.auth &&
@@ -124,6 +122,13 @@ export const updateDocument = async <
 
   if (isSavingDraft) {
     data._status = 'draft'
+
+    if (!req.context) {
+      req.context = {}
+    }
+
+    // Used by storage plugins to persist adapter metadata without updating the published document
+    req.context.internalSavingDraft = true
   }
 
   // /////////////////////////////////////

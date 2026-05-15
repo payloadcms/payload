@@ -2571,6 +2571,46 @@ describe('Versions', () => {
       expect(jsonByID.parent).toBe(autosavePost.id)
     })
 
+    it('should preserve published main document when saving a draft with _status published', async () => {
+      const initialDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'Published title',
+          description: 'Published description',
+          _status: 'published',
+        },
+      })
+
+      await payload.update({
+        id: initialDoc.id,
+        collection: draftCollectionSlug,
+        data: {
+          title: 'Draft title',
+          _status: 'published',
+        },
+        draft: true,
+      })
+
+      const mainDoc = await payload.findByID({
+        collection: draftCollectionSlug,
+        id: initialDoc.id,
+      })
+
+      expect(mainDoc.title).toBe('Published title')
+      expect(mainDoc._status).toBe('published')
+
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: {
+            equals: initialDoc.id,
+          },
+        },
+      })
+
+      expect(versions.docs.some((doc) => doc.version.title === 'Draft title')).toBe(true)
+    })
+
     it('should allow query by latest', async () => {
       async function createVersion({ title }: { title: string }) {
         return payload.create({

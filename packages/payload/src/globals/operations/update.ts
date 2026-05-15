@@ -113,10 +113,7 @@ export const updateOperation = async <
       typeof unpublishAllLocalesArg === 'string'
         ? unpublishAllLocalesArg === 'true'
         : !!unpublishAllLocalesArg
-    const isSavingDraft =
-      Boolean(draftArg && hasDraftsEnabled(globalConfig)) &&
-      data._status !== 'published' &&
-      !publishAllLocales
+    const isSavingDraft = Boolean(draftArg && hasDraftsEnabled(globalConfig)) && !publishAllLocales
 
     if (isSavingDraft) {
       data._status = 'draft'
