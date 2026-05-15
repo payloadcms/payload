@@ -600,7 +600,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     draft: 'Черновик',
     draftHasPublishedVersion: 'Черновик (имеет опубликованную версию)',
     draftSavedSuccessfully: 'Черновик успешно сохранен.',
-    lastSavedAgo: 'Последний раз сохранено {{distance}} назад',
+    lastSavedAgo: 'Сохранено {{distance}} назад',
     modifiedOnly: 'Модифицирован только',
     moreVersions: 'Больше версий...',
     noFurtherVersionsFound: 'Другие версии не найдены',

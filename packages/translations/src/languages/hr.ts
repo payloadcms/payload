@@ -594,7 +594,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     draft: 'Nacrt',
     draftHasPublishedVersion: 'Nacrt (ima objavljenu verziju)',
     draftSavedSuccessfully: 'Nacrt uspješno spremljen.',
-    lastSavedAgo: 'Zadnji put spremljeno prije {{distance}',
+    lastSavedAgo: 'Spremljeno prije {{distance}}',
     modifiedOnly: 'Samo modificirano',
     moreVersions: 'Više verzija...',
     noFurtherVersionsFound: 'Nisu pronađene daljnje verzije',

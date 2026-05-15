@@ -607,7 +607,7 @@ export const roTranslations: DefaultTranslationsObject = {
     draft: 'Proiect',
     draftHasPublishedVersion: 'Proiect (are versiune publicată)',
     draftSavedSuccessfully: 'Proiect salvat cu succes.',
-    lastSavedAgo: 'Ultima salvare acum {{distance}}',
+    lastSavedAgo: 'Salvat acum {{distance}}',
     modifiedOnly: 'Modificat doar',
     moreVersions: 'Mai multe versiuni...',
     noFurtherVersionsFound: 'Nu s-au găsit alte versiuni',

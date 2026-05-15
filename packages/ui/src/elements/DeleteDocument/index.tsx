@@ -22,7 +22,7 @@ import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 import { Translation } from '../Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'delete-document'
 

@@ -597,7 +597,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     draft: 'Чернова',
     draftHasPublishedVersion: 'Чернова (има публикувана версия)',
     draftSavedSuccessfully: 'Чернова запазена успешно.',
-    lastSavedAgo: 'последно запазено преди {{distance}}',
+    lastSavedAgo: 'Запazeno преди {{distance}}',
     modifiedOnly: 'Само променени',
     moreVersions: 'Още версии...',
     noFurtherVersionsFound: 'Не са открити повече версии',

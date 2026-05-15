@@ -605,7 +605,7 @@ export const huTranslations: DefaultTranslationsObject = {
     draft: 'Piszkozat',
     draftHasPublishedVersion: 'Piszkozat (van közzétett verziója)',
     draftSavedSuccessfully: 'A piszkozat sikeresen mentve.',
-    lastSavedAgo: 'Utoljára mentve {{distance}} órája',
+    lastSavedAgo: 'Mentve {{distance}}',
     modifiedOnly: 'Módosítva csak',
     moreVersions: 'További verziók...',
     noFurtherVersionsFound: 'További verziók nem találhatók',

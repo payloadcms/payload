@@ -1,0 +1,8 @@
+@layer payload-default {
+  .drawer-content-container {
+    padding: var(--spacer-2-5);
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+  }
+}
