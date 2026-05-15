@@ -5,8 +5,8 @@ import React, { type FormEventHandler, useCallback, useEffect, useMemo, useState
 import type { SelectablePill } from '../../../elements/PillSelector/index.js'
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
+import { Button } from '../../../elements/Button/index.js'
 import { Gutter } from '../../../elements/Gutter/index.js'
-import { Pill } from '../../../elements/Pill/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -192,14 +192,14 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
               />
             </span>
             {localization && (
-              <Pill
+              <Button
                 aria-controls={`${baseClass}-locales`}
                 aria-expanded={localeSelectorOpen}
+                buttonStyle="pill"
                 className={`${baseClass}__toggle-locales`}
                 icon={<ChevronIcon direction={localeSelectorOpen ? 'up' : 'down'} />}
                 onClick={() => setLocaleSelectorOpen((localeSelectorOpen) => !localeSelectorOpen)}
-                pillStyle="light"
-                size="small"
+                size="medium"
               >
                 <span className={`${baseClass}__toggle-locales-label`}>
                   {t('general:locales')}:{' '}
@@ -210,7 +210,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                     .map((locale) => locale.name)
                     .join(', ')}
                 </span>
-              </Pill>
+              </Button>
             )}
           </div>
         </div>

@@ -50,8 +50,9 @@
       "default": "./src/exports/views-server.ts"
     },
     "./rsc": {
-      "import": "./src/exports/rsc.ts",
       "types": "./src/exports/rsc.ts",
+      "browser": "./src/exports/rsc.browser.ts",
+      "import": "./src/exports/rsc.ts",
       "default": "./src/exports/rsc.ts"
     },
     "./vite": {
@@ -144,8 +145,9 @@
         "default": "./dist/exports/views-server.js"
       },
       "./rsc": {
-        "import": "./dist/exports/rsc.js",
         "types": "./dist/exports/rsc.d.ts",
+        "browser": "./dist/exports/rsc.browser.js",
+        "import": "./dist/exports/rsc.js",
         "default": "./dist/exports/rsc.js"
       },
       "./vite": {

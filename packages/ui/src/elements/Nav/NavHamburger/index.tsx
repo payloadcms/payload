@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import { Hamburger } from '../../Hamburger/index.js'
+import { SidebarToggle } from '../../SidebarToggle/index.js'
 import { useNav } from '../context.js'
 
 /**
@@ -21,7 +21,7 @@ export const NavHamburger: React.FC<{
       tabIndex={!navOpen ? -1 : undefined}
       type="button"
     >
-      <Hamburger isActive />
+      <SidebarToggle isActive />
     </button>
   )
 }

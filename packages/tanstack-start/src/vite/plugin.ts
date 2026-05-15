@@ -1,8 +1,21 @@
 import type { PluginOption, UserConfigFnObject } from 'vite'
 
-import fs from 'node:fs'
-import { builtinModules } from 'node:module'
 import path from 'node:path'
+
+import {
+  optimizeDepsExcludeDefaults,
+  optimizeDepsIncludeDefaults,
+  payloadNoExternalPatterns,
+  payloadRscNoExternalPatterns,
+  ssrExternalPackages,
+} from './constants.js'
+import {
+  defaultImportProtectionIgnoreImporters,
+  onImportProtectionViolation,
+  serverOnlyClientSpecifiers,
+} from './importProtection.js'
+import { payloadDevTransforms } from './plugins/devTransforms.js'
+import { ssrStripDistStyleImports } from './plugins/stripDistStyleImports.js'
 
 export interface PayloadPluginOptions {
   /** Additional resolve aliases */
@@ -29,313 +42,14 @@ export interface PayloadPluginOptions {
   tanstackStart: typeof import('@tanstack/react-start/plugin/vite').tanstackStart
 }
 
-const serverOnlyClientSpecifiers: Array<RegExp | string> = [
-  /^node:/,
-  new RegExp(`^(${builtinModules.join('|')})(\\/|$)`),
-  '@payload-config',
-  /^@payloadcms\/next\/rsc/,
-  /^@payloadcms\/richtext-lexical\/rsc/,
-  /^@payloadcms\/richtext-slate\/rsc/,
-  /^@payloadcms\/tanstack-start\/(layouts|rsc|server|views\/server)/,
-  'sharp',
-  'busboy',
-  'croner',
-  'pino',
-  'pino-pretty',
-  'prompts',
-  'ws',
-  'undici',
-  'get-tsconfig',
-  /^file-type/,
-  /^react-dom\/server/,
-]
-
-function ssrStripDistStyleImports(): PluginOption {
-  return {
-    name: 'payload:ssr-strip-dist-style-imports',
-    enforce: 'pre',
-    load(id) {
-      if (id === '\0ssr-empty-style') {
-        return ''
-      }
-    },
-    resolveId(id, importer, options) {
-      const isServerEnv =
-        options?.ssr || ((this as any).environment && (this as any).environment.name !== 'client')
-      if (!isServerEnv) {
-        return
-      }
-      const isStyleFile = /\.(?:s?css|less)$/.test(id)
-      if (!isStyleFile) {
-        return
-      }
-      if (importer && /\/dist\//.test(importer)) {
-        return '\0ssr-empty-style'
-      }
-      if (/^@?[a-z]/.test(id) && !id.startsWith('.') && !id.startsWith('/')) {
-        return '\0ssr-empty-style'
-      }
-    },
-  }
-}
-
 /**
- * Wraps CJS `node_modules` files in ESM-compatible code when served to the client.
- *
- * Packages in `optimizeDeps.exclude` (like `payload`, `@payloadcms/ui`) import CJS
- * dependencies that Vite serves via raw `/@fs/` URLs, bypassing pre-bundling. The
- * browser fails to parse them because they use `module.exports` / `exports.X` syntax.
- *
- * This plugin detects CJS patterns in the transform phase and wraps them with a
- * CommonJS-like runtime shim so the browser can execute them as ESM.
+ * Vite plugin for Payload + TanStack Start. The Vite-side counterpart to
+ * `withPayload` for Next.js: it configures the Vite environment so the Payload
+ * admin can run, then composes the TanStack Start plugin with two small
+ * Payload-specific workarounds (dev HMR injection, SSR style stripping). Each
+ * remaining workaround lives in its own file under `./plugins/` so it can be
+ * deleted individually once the corresponding upstream fix lands.
  */
-function wrapCjsForClient(): PluginOption {
-  return {
-    name: 'payload:wrap-cjs-client',
-    apply: 'serve',
-    enforce: 'post',
-    transform(code, id, options) {
-      if (options?.ssr) {
-        return
-      }
-
-      if (!id.includes('/node_modules/') || id.includes('/node_modules/.vite/')) {
-        return
-      }
-
-      const cleanId = id.replace(/\?.*$/, '')
-      if (!cleanId.endsWith('.js') && !cleanId.endsWith('.cjs')) {
-        return
-      }
-
-      if (code.includes('import ') || code.includes('export ')) {
-        return
-      }
-
-      if (
-        !code.includes('module.exports') &&
-        !code.includes('exports.') &&
-        !code.includes('Object.defineProperty(exports')
-      ) {
-        return
-      }
-
-      const namedExports = extractCjsExports(code)
-      const names = Object.keys(namedExports)
-
-      const declaredIdentifiers = extractDeclaredIdentifiers(code)
-      const safeNames = names.filter((name) => !declaredIdentifiers.has(name))
-
-      const wrapped = [
-        `var module = { exports: {} };`,
-        `var exports = module.exports;`,
-        ``,
-        code,
-        ``,
-        `var __cjs_result__ = module.exports;`,
-        `export default __cjs_result__;`,
-        ...safeNames.map(
-          (name) =>
-            `export var ${name} = typeof __cjs_result__ === 'object' && __cjs_result__ !== null ? __cjs_result__["${name}"] : undefined;`,
-        ),
-      ].join('\n')
-
-      return { code: wrapped, map: null }
-    },
-  }
-}
-
-function extractCjsExports(code: string): Record<string, true> {
-  const found: Record<string, true> = {}
-  const patterns = [
-    /exports\.(\w+)\s*=/g,
-    /exports\[["'](\w+)["']\]\s*=/g,
-    /Object\.defineProperty\(exports,\s*["'](\w+)["']/g,
-  ]
-  for (const re of patterns) {
-    let m
-    while ((m = re.exec(code)) !== null) {
-      const name = m[1]!
-      if (name !== '__esModule' && name !== 'default') {
-        found[name] = true
-      }
-    }
-  }
-  return found
-}
-
-/**
- * Detects top-level identifiers declared with class/function/var/let/const in CJS code.
- * Used to avoid re-declaring them via `export var` in the CJS wrapper, which would cause
- * `SyntaxError: Identifier has already been declared` in strict mode (ESM).
- */
-function extractDeclaredIdentifiers(code: string): Set<string> {
-  const identifiers = new Set<string>()
-  const patterns = [/\bclass\s+(\w+)/g, /\bfunction\s+(\w+)/g, /\b(?:var|let|const)\s+(\w+)/g]
-  for (const re of patterns) {
-    let m
-    while ((m = re.exec(code)) !== null) {
-      identifiers.add(m[1]!)
-    }
-  }
-  return identifiers
-}
-
-/**
- * Client-side module resolution:
- * 1. Stubs RSC modules (payloadcms /rsc entries) with no-op components
- * 2. Redirects bare 'payload' imports to 'payload/shared' to avoid
- *    payload/src/index.ts which has top-level side effects requiring Node.js APIs
- * 3. Resolves `/client` subpath exports for plugin-* and storage-* packages
- *    when normal Vite resolution fails in monorepo dev
- */
-function clientModuleResolution(): PluginOption {
-  const stubPrefix = '\0payload:server-stub:'
-  const serverOnlyPatterns = [
-    /^@payloadcms\/richtext-lexical\/rsc$/,
-    /^@payloadcms\/richtext-slate\/rsc$/,
-    /^@payloadcms\/next\/rsc$/,
-    /^@payloadcms\/tanstack-start\/rsc$/,
-  ]
-  const serverOnlyExports: Record<string, string[]> = {
-    '@payloadcms/next/rsc': ['CollectionCards', 'HierarchyTypeFieldServer'],
-    '@payloadcms/richtext-lexical/rsc': [
-      'RscEntryLexicalCell',
-      'RscEntryLexicalField',
-      'LexicalDiffComponent',
-    ],
-    '@payloadcms/tanstack-start/rsc': [
-      'CollectionCards',
-      'HierarchyTypeFieldServer',
-      'renderPayloadComponentOnServer',
-    ],
-  }
-
-  return {
-    name: 'payload:client-module-resolution',
-    enforce: 'pre',
-    load(id) {
-      if (!id.startsWith(stubPrefix)) {
-        return
-      }
-      const specifier = id.slice(stubPrefix.length)
-      const exports = serverOnlyExports[specifier]
-      if (exports) {
-        return exports.map((name) => `export const ${name} = () => null;`).join('\n')
-      }
-      return `export default null;`
-    },
-    async resolveId(id, importer, options) {
-      if (options?.ssr) {
-        return
-      }
-
-      if (serverOnlyPatterns.some((p) => p.test(id))) {
-        return stubPrefix + id
-      }
-
-      if (id === 'payload' && importer && !importer.includes('/node_modules/')) {
-        const isPayloadPackage = /\/packages\/(?:payload|ui|richtext-|tanstack-start|next)\//.test(
-          importer,
-        )
-        if (!isPayloadPackage) {
-          return this.resolve('payload/shared', importer, { ...options, skipSelf: true })
-        }
-      }
-
-      if (/^@payloadcms\/(?:plugin|storage)-[^/]+\/client$/.test(id)) {
-        const resolved = await this.resolve(id, importer, { ...options, skipSelf: true })
-        if (resolved) {
-          return resolved
-        }
-        const pkgName = id.replace(/\/client$/, '')
-        const pkgResolved = await this.resolve(pkgName, importer, { ...options, skipSelf: true })
-        if (pkgResolved) {
-          const pkgDir = path.dirname(pkgResolved.id)
-          const candidates = [
-            path.resolve(pkgDir, 'src', 'exports', 'client.ts'),
-            path.resolve(pkgDir, 'src', 'exports', 'client.js'),
-            path.resolve(pkgDir, 'dist', 'exports', 'client.js'),
-          ]
-          for (const candidate of candidates) {
-            if (fs.existsSync(candidate)) {
-              return candidate
-            }
-          }
-        }
-      }
-    },
-  }
-}
-
-/**
- * Combined plugin for dev-time transforms:
- * - Replaces `process.cwd()` with `"/"` in client code (non-SSR, non-prebundled)
- * - Injects Vite HMR + React Refresh preamble into SSR-rendered HTML (dev only)
- */
-function payloadDevTransforms(): PluginOption {
-  const devScripts = `<script type="module" src="/@vite/client"></script>
-<script type="module">
-import RefreshRuntime from "/@react-refresh"
-RefreshRuntime.injectIntoGlobalHook(window)
-window.$RefreshReg$ = () => {}
-window.$RefreshSig$ = () => (type) => type
-window.__vite_plugin_react_preamble_installed__ = true
-</script>`
-
-  return {
-    name: 'payload:dev-transforms',
-    configureServer(server) {
-      server.middlewares.use((_req, res, next) => {
-        let injected = false
-        const origWrite = res.write
-        const origEnd = res.end
-
-        function tryInject(chunk: any): any {
-          if (injected || chunk == null) {
-            return chunk
-          }
-          const ct = res.getHeader('content-type')
-          if (typeof ct !== 'string' || !ct.includes('text/html')) {
-            return chunk
-          }
-          const str =
-            typeof chunk === 'string'
-              ? chunk
-              : Buffer.isBuffer(chunk)
-                ? chunk.toString()
-                : chunk instanceof Uint8Array
-                  ? Buffer.from(chunk).toString()
-                  : null
-          if (str && str.includes('<head>')) {
-            injected = true
-            return str.replace('<head>', `<head>${devScripts}`)
-          }
-          return chunk
-        }
-
-        res.write = function (this: any, chunk: any, encodingOrCb?: any, cb?: any) {
-          return origWrite.call(this, tryInject(chunk), encodingOrCb, cb)
-        } as typeof res.write
-        res.end = function (this: any, chunk?: any, encodingOrCb?: any, cb?: any) {
-          return origEnd.call(this, tryInject(chunk), encodingOrCb, cb)
-        } as typeof res.end
-        next()
-      })
-    },
-    transform(code, id, options) {
-      if (options?.ssr) {
-        return
-      }
-      if (code.includes('process.cwd') && !id.includes('node_modules/.vite')) {
-        return code.replace(/process\.cwd\(\)/g, '"/"')
-      }
-    },
-  }
-}
-
-// --- Main export ---
-
 export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject {
   const {
     additionalAliases = [],
@@ -353,185 +67,63 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
 
   process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'true'
 
-  return (_env) => {
-    return {
-      css: {
-        preprocessorOptions: {
-          scss: {
-            silenceDeprecations: ['import', 'global-builtin'],
-          } as any,
-        },
+  return (_env) => ({
+    css: {
+      preprocessorOptions: {
+        scss: {
+          silenceDeprecations: ['import', 'global-builtin'],
+        } as any,
       },
-      define: {
-        global: 'globalThis',
-        'process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED': JSON.stringify('true'),
-      },
-      environments: {
-        rsc: {
-          resolve: {
-            noExternal: ['@payloadcms/ui', '@payloadcms/richtext-lexical'],
-          },
+    },
+    define: {
+      global: 'globalThis',
+      'process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED': JSON.stringify('true'),
+    },
+    environments: {
+      rsc: { resolve: { noExternal: payloadRscNoExternalPatterns } },
+      ssr: { resolve: { noExternal: payloadNoExternalPatterns } },
+    } as any,
+    optimizeDeps: {
+      exclude: optimizeDepsExcludeDefaults,
+      include: [...optimizeDepsIncludeDefaults, ...additionalOptimizeDepsInclude],
+    },
+    plugins: [
+      ssrStripDistStyleImports(),
+      payloadDevTransforms(),
+      rscPlugin,
+      tanstackStart({
+        importProtection: {
+          client: { excludeFiles: [], specifiers: serverOnlyClientSpecifiers },
+          ignoreImporters: [
+            ...defaultImportProtectionIgnoreImporters,
+            ...additionalIgnoreImporters,
+          ],
+          include: ['**/*'],
+          mockAccess: 'warn',
+          onViolation: onImportProtectionViolation,
         },
-        ssr: {
-          resolve: {
-            noExternal: [
-              '@payloadcms/ui',
-              '@payloadcms/translations',
-              '@payloadcms/tanstack-start',
-              /^@payloadcms\/richtext-lexical/,
-            ],
-          },
-        },
-      } as any,
-      optimizeDeps: {
-        exclude: [
-          'sharp',
-          '@payloadcms/ui',
-          '@payloadcms/tanstack-start',
-          'payload',
-          'pino',
-          'pino-pretty',
-          'busboy',
-          'get-tsconfig',
-          'ws',
-          'croner',
-          'prompts',
-          'file-type',
-        ],
-        include: [
-          '@payloadcms/ui > sonner',
-          '@payloadcms/ui > @faceless-ui/modal',
-          '@payloadcms/ui > @faceless-ui/window-info',
-          '@payloadcms/ui > @faceless-ui/scroll-info',
-          '@payloadcms/ui > @dnd-kit/core',
-          '@payloadcms/ui > @dnd-kit/sortable',
-          '@payloadcms/ui > @dnd-kit/utilities',
-          '@payloadcms/ui > react-datepicker',
-          '@payloadcms/ui > react-select',
-          '@payloadcms/ui > react-select/creatable',
-          '@payloadcms/ui > react-image-crop',
-          '@payloadcms/ui > @monaco-editor/react',
-          '@payloadcms/ui > date-fns',
-          '@payloadcms/ui > date-fns/transpose',
-          '@payloadcms/ui > @date-fns/tz/date/mini',
-          '@payloadcms/ui > uuid',
-          '@payloadcms/ui > use-context-selector',
-          '@payloadcms/ui > bson-objectid',
-          '@payloadcms/ui > dequal',
-          '@payloadcms/ui > object-to-formdata',
-          '@payloadcms/ui > md5',
-          'payload > deepmerge',
-          'payload > pluralize',
-          'scheduler',
-          ...additionalOptimizeDepsInclude,
-        ],
-      },
-      plugins: [
-        clientModuleResolution(),
-        wrapCjsForClient(),
-        ssrStripDistStyleImports(),
-        payloadDevTransforms(),
-        rscPlugin,
-        tanstackStart({
-          importProtection: {
-            client: {
-              excludeFiles: [],
-              specifiers: serverOnlyClientSpecifiers,
-            },
-            ignoreImporters: [/^src\/importMap\.js(?:\?.*)?$/, ...additionalIgnoreImporters],
-            include: ['**/*'],
-            mockAccess: 'warn',
-            onViolation: (info) => {
-              const allowedClientFileImporters =
-                /\/richtext-lexical\/.*\/exports\/client\/|\/tanstack-start\/.*\/views\/AdminView|\/ui\//
-              if (
-                info.envType === 'server' &&
-                info.resolved?.includes('.client.') &&
-                allowedClientFileImporters.test(info.importer)
-              ) {
-                return false
-              }
-
-              if (
-                info.importer.includes('/richtext-lexical/') &&
-                info.importer.includes('/field/Diff/')
-              ) {
-                return false
-              }
-
-              if (info.importer.includes('/packages/payload/')) {
-                return false
-              }
-
-              if (
-                info.envType === 'server' &&
-                info.importer.includes('vite-rsc/client-references')
-              ) {
-                return false
-              }
-            },
-          },
-          router: {
-            autoCodeSplitting: true,
-            routesDirectory,
-          } as any,
-          rsc: { enabled: true },
-          srcDirectory,
-        }),
-        reactPlugin,
-        ...extraPlugins,
+        router: { autoCodeSplitting: true, routesDirectory } as any,
+        rsc: { enabled: true },
+        srcDirectory,
+      }),
+      reactPlugin,
+      ...extraPlugins,
+    ],
+    resolve: {
+      alias: [
+        { find: '@payload-config', replacement: path.resolve(payloadConfigPath) },
+        ...additionalAliases,
       ],
-      resolve: {
-        alias: [
-          {
-            find: '@payload-config',
-            replacement: path.resolve(payloadConfigPath),
-          },
-          ...additionalAliases,
-        ],
-        dedupe: ['react', 'react-dom', 'scheduler', '@payloadcms/ui'],
-        extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
-        tsconfigPaths: true,
-      } as any,
-      server: {
-        warmup: {
-          clientFiles: ['./src/importMap.js'],
-        },
-      },
-      ssr: {
-        external: [
-          'ajv',
-          'fast-uri',
-          'drizzle-kit',
-          'drizzle-kit/api',
-          'drizzle-orm',
-          'sharp',
-          'libsql',
-          'require-in-the-middle',
-          'json-schema-to-typescript',
-          'pino',
-          'pino-pretty',
-          'graphql',
-          'mongodb',
-          'mongoose',
-          'better-sqlite3',
-          'pg',
-          'pg-native',
-          'nodemailer',
-          'aws4',
-          'pluralize',
-          'console-table-printer',
-          ...additionalSsrExternal,
-        ],
-        noExternal: [
-          '@payloadcms/ui',
-          '@payloadcms/translations',
-          '@payloadcms/tanstack-start',
-          /^@payloadcms\/richtext-lexical/,
-          /^@payloadcms\/plugin-/,
-          /^@payloadcms\/storage-/,
-        ],
-      },
-    }
-  }
+      dedupe: ['react', 'react-dom', 'scheduler', '@payloadcms/ui'],
+      extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
+      tsconfigPaths: true,
+    } as any,
+    server: {
+      warmup: { clientFiles: ['./src/importMap.js'] },
+    },
+    ssr: {
+      external: [...ssrExternalPackages, ...additionalSsrExternal],
+      noExternal: payloadNoExternalPatterns,
+    },
+  })
 }

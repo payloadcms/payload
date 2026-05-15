@@ -1,1 +1,1 @@
-export { NavHamburger } from '@payloadcms/ui/elements/Nav/NavHamburger'
+export { NavHamburger as NavSidebarToggle } from '@payloadcms/ui/elements/Nav/NavHamburger'
