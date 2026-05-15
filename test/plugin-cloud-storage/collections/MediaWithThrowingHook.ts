@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import { APIError, type CollectionConfig } from 'payload'
 
 import { mediaWithThrowingHookSlug } from '../shared.js'
 
@@ -31,8 +31,9 @@ export const MediaWithThrowingHook: CollectionConfig = {
     afterChange: [
       ({ doc, operation, req }) => {
         if (operation === 'update' && req.context?.skipCloudStorage && doc.shouldThrow) {
-          throw new Error(throwingHookError)
+          throw new APIError(throwingHookError, 500, null, true)
         }
+
         return doc
       },
     ],
