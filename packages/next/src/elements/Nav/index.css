@@ -11,7 +11,7 @@
     overflow: hidden;
     --nav-padding-inline-start: var(--spacer-2-5);
     --nav-padding-inline-end: var(--spacer-2-5);
-    --nav-padding-block-start: var(--app-header-height);
+    --nav-padding-block-start: var(--spacer-2-5);
     --nav-padding-block-end: var(--spacer-5);
   }
 
@@ -26,20 +26,6 @@
 
   .nav--nav-open {
     opacity: 1;
-  }
-
-  .nav__header {
-    position: absolute;
-    top: 0;
-    width: 100vw;
-    height: var(--app-header-height);
-  }
-
-  .nav__header-content {
-    z-index: 1;
-    position: relative;
-    height: 100%;
-    width: 100%;
   }
 
   .nav__mobile-close {

@@ -92,7 +92,7 @@ export async function loginClientSide(args: LoginArgs): Promise<void> {
     path: createFirstUser,
   })
 
-  if ((await page.locator('#nav-toggler').count()) > 0) {
+  if ((await page.locator('.app-header__sidebar-toggle').count()) > 0) {
     // a user is already logged in - log them out
     await openNav(page)
     await expect(page.locator('.nav__controls [aria-label="Log out"]')).toBeVisible()
@@ -111,10 +111,7 @@ export async function loginClientSide(args: LoginArgs): Promise<void> {
   await wait(500)
   await page.click('[type=submit]')
 
-  await expect(page.locator('.step-nav__home')).toBeVisible()
-  if ((await page.locator('a.step-nav__home').count()) > 0) {
-    await page.locator('a.step-nav__home').click()
-  }
+  await expect(page.locator('.app-header')).toBeVisible()
 
   await page.waitForURL(adminRoute)
 
