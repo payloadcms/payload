@@ -19,8 +19,13 @@
       outline-color: var(--color-border);
     }
 
-    &:has(:focus-visible) {
+    &:focus-within {
       outline-color: var(--color-border-selected);
+    }
+
+    &:has(:disabled) {
+      opacity: 0.5;
+      pointer-events: none;
     }
 
     .icon--search {

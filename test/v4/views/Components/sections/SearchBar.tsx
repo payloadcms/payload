@@ -17,13 +17,12 @@ export const SearchBarSection: React.FC<{ selectedComponent: string }> = ({
         <SearchBar label="Search..." onSearchChange={() => {}} searchQueryParam="Example value" />
       </Variant>
       <Variant label="Disabled">
-        <div style={{ opacity: 0.5, pointerEvents: 'none' }}>
-          <SearchBar
-            label="Search..."
-            onSearchChange={() => {}}
-            searchQueryParam="Disabled value"
-          />
-        </div>
+        <SearchBar
+          disabled
+          label="Search..."
+          onSearchChange={() => {}}
+          searchQueryParam="Disabled value"
+        />
       </Variant>
       <Variant label="Focused">
         <SearchBar

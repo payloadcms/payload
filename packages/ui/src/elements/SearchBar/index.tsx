@@ -9,6 +9,7 @@ const baseClass = 'search-bar'
 type SearchBarProps = {
   Actions?: React.ReactNode[]
   className?: string
+  disabled?: boolean
   label?: string
   onSearchChange: (search: string) => void
   searchQueryParam?: string
@@ -16,6 +17,7 @@ type SearchBarProps = {
 export function SearchBar({
   Actions,
   className,
+  disabled,
   label = 'Search...',
   onSearchChange,
   searchQueryParam,
@@ -24,6 +26,7 @@ export function SearchBar({
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       <SearchIcon />
       <SearchFilter
+        disabled={disabled}
         handleChange={onSearchChange}
         label={label}
         searchQueryParam={searchQueryParam}

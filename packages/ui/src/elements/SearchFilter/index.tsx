@@ -10,7 +10,7 @@ import './index.css'
 const baseClass = 'search-filter'
 
 export function SearchFilter(props: SearchFilterProps) {
-  const { handleChange, initialParams, label, searchQueryParam } = props
+  const { disabled, handleChange, initialParams, label, searchQueryParam } = props
   const searchParam = initialParams?.search || searchQueryParam
   const [search, setSearch] = useState(typeof searchParam === 'string' ? searchParam : undefined)
 
@@ -55,6 +55,7 @@ export function SearchFilter(props: SearchFilterProps) {
       <input
         aria-label={label}
         className={`${baseClass}__input`}
+        disabled={disabled}
         id="search-filter-input"
         onChange={(e) => {
           shouldUpdateState.current = true
