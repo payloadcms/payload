@@ -11,7 +11,7 @@ import { ModularDashboardClient } from './index.client.js'
 import { getItemsFromConfig } from './utils/getItemsFromConfig.js'
 import { getItemsFromPreferences } from './utils/getItemsFromPreferences.js'
 import { extractLocaleData } from './utils/localeUtils.js'
-import './index.scss'
+import './index.css'
 
 type ServerLayout = WidgetInstanceClient[]
 

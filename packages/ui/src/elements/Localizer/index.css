@@ -1,0 +1,17 @@
+@layer payload-default {
+  .localizer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .localizer__button-content {
+    display: flex;
+    align-items: center;
+  }
+
+  .localizer__locale-code {
+    color: var(--text-default-tertiary);
+  }
+}
