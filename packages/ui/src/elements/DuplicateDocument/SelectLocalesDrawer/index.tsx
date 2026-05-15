@@ -13,7 +13,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { DrawerHeader } from '../../BulkUpload/Header/index.js'
 import { Button } from '../../Button/index.js'
 import { Drawer } from '../../Drawer/index.js'
-import './index.scss'
+import './index.css'
 
 export type LocaleOption = {
   label: string
