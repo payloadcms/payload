@@ -42,10 +42,6 @@
     &:active {
       background: var(--color-bg-secondary-pressed);
     }
-
-    &:has(.card__click:focus-visible) {
-      border-color: var(--accessibility-focus-color);
-    }
   }
 
   .card__click {
@@ -55,9 +51,11 @@
     margin: 0;
     height: auto;
     width: auto;
+    border-radius: inherit;
 
     &:focus-visible {
-      outline: none;
+      outline: 1px solid var(--accessibility-focus-color);
+      outline-offset: 0;
     }
   }
 }
