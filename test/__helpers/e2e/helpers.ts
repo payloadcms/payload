@@ -412,8 +412,13 @@ export async function switchTab(page: Page, selector: string) {
 }
 
 export const openColumnControls = async (page: Page) => {
-  await page.locator('.list-controls__toggle-columns').click()
-  await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+  const expanded = page.locator('.list-controls__columns.rah-static--height-auto')
+  await expect(async () => {
+    if (!(await expanded.isVisible())) {
+      await page.locator('.list-controls__toggle-columns').click()
+    }
+    await expect(expanded).toBeVisible({ timeout: 1500 })
+  }).toPass({ timeout: 18000 })
 }
 
 /**
@@ -429,6 +434,33 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
   const consoleErrors: string[] = []
 
   let shouldCollectErrors = false
+
+  // Each `page.goto()` triggers a fresh SSR + hydration cycle, and on the
+  // TanStack Start adapter (which serves a Vite dev server) hydration can lag
+  // a click by 0.5-2s in CI. When that happens the click reaches the SSR'd
+  // button and focuses it, but React's `onClick` handler is not attached yet
+  // so the underlying state never updates and any follow-up `toBeVisible`
+  // assertion times out. We patch `goto` here to wait for the hydration
+  // marker that the TanStack root component installs (see
+  // `tanstack-app/src/app/__root.tsx`). The wait is a best-effort no-op for
+  // the Next.js adapter where the marker is never set.
+  if (process.env.PAYLOAD_FRAMEWORK === 'tanstack-start') {
+    const originalGoto = page.goto.bind(page)
+    page.goto = (async (...args: Parameters<Page['goto']>) => {
+      const response = await originalGoto(...args)
+      try {
+        await page.waitForFunction(
+          () => (window as unknown as { __TANSTACK_HYDRATED__?: boolean }).__TANSTACK_HYDRATED__,
+          undefined,
+          { timeout: 15000 },
+        )
+      } catch {
+        // Don't fail navigation if the marker never shows up; the underlying
+        // assertion in the test will still surface the real failure.
+      }
+      return response
+    }) as Page['goto']
+  }
 
   page.on('console', (msg) => {
     if (
