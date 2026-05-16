@@ -43,6 +43,7 @@ const __serverOnlyStub =
       `\`${name}\` from "payload" is a server-only operation and cannot be invoked in the client/browser bundle.`,
     )
   }
+export const createLocalReq = __serverOnlyStub('createLocalReq') as any
 export const docAccessOperation = __serverOnlyStub('docAccessOperation') as any
 export const isolateObjectProperty = __serverOnlyStub('isolateObjectProperty') as any
 export {
