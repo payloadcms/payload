@@ -453,9 +453,7 @@ export function installTanStackHydrationGotoWait(page: Page) {
   }
   patched.__payloadGotoPatched = true
 
-  const originalGoto = page.goto.bind(page)
-  page.goto = (async (...args: Parameters<Page['goto']>) => {
-    const response = await originalGoto(...args)
+  const waitForHydration = async () => {
     try {
       await page.waitForFunction(
         () => (window as unknown as { __TANSTACK_HYDRATED__?: boolean }).__TANSTACK_HYDRATED__,
@@ -467,8 +465,24 @@ export function installTanStackHydrationGotoWait(page: Page) {
       // the underlying assertion in the test will still surface the real
       // failure.
     }
+  }
+
+  const originalGoto = page.goto.bind(page)
+  page.goto = (async (...args: Parameters<Page['goto']>) => {
+    const response = await originalGoto(...args)
+    await waitForHydration()
     return response
   }) as Page['goto']
+
+  // `page.reload()` also re-triggers SSR + hydration, so apply the same
+  // wait. Without it, raw `.click()` calls after a reload land on the
+  // unhydrated DOM, focus the button, and the React `onClick` never fires.
+  const originalReload = page.reload.bind(page)
+  page.reload = (async (...args: Parameters<Page['reload']>) => {
+    const response = await originalReload(...args)
+    await waitForHydration()
+    return response
+  }) as Page['reload']
 }
 
 export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
