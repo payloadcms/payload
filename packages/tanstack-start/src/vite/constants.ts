@@ -29,6 +29,10 @@ export const ssrExternalPackages: string[] = [
   'aws4',
   'pluralize',
   'console-table-printer',
+  '@azure/storage-blob',
+  '@aws-sdk/client-s3',
+  '@aws-sdk/s3-request-presigner',
+  '@google-cloud/storage',
 ]
 
 /**
@@ -77,6 +81,15 @@ export const optimizeDepsExcludeDefaults: string[] = [
   'croner',
   'prompts',
   'file-type',
+  // Server-only SDKs used by `@payloadcms/storage-*` adapters. Vite
+  // sometimes walks these from the main package entry while scanning
+  // workspace deps, and the browser sub-bundles do not expose the
+  // server-only APIs (e.g. `BlobSASPermissions`), which crashes the dev
+  // server with a `MISSING_EXPORT` error before any test runs.
+  '@azure/storage-blob',
+  '@aws-sdk/client-s3',
+  '@aws-sdk/s3-request-presigner',
+  '@google-cloud/storage',
 ]
 
 /**
