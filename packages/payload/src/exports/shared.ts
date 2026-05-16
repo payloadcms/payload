@@ -44,6 +44,7 @@ const __serverOnlyStub =
     )
   }
 export const docAccessOperation = __serverOnlyStub('docAccessOperation') as any
+export const isolateObjectProperty = __serverOnlyStub('isolateObjectProperty') as any
 export {
   type ClientConfig,
   createClientConfig,
