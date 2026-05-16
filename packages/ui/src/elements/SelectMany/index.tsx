@@ -2,7 +2,7 @@ import React from 'react'
 
 import { useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { Pill } from '../Pill/index.js'
+import { Button } from '../Button/index.js'
 
 export const SelectMany: React.FC<{
   onClick?: (ids: ReturnType<typeof useSelection>['selected']) => void
@@ -17,16 +17,16 @@ export const SelectMany: React.FC<{
   }
 
   return (
-    <Pill
+    <Button
+      buttonStyle="pill"
       onClick={() => {
         if (typeof onClick === 'function') {
           onClick(selected)
         }
       }}
-      pillStyle="white"
-      size="small"
+      size="medium"
     >
       {t('general:select')} {count}
-    </Pill>
+    </Button>
   )
 }

@@ -1227,20 +1227,19 @@ test.describe('Import Export Plugin', () => {
     })
   })
 
-  test.describe('toCSV Preview Customizations', () => {
+  test.describe('beforeExport Preview Customizations', () => {
     let pagesURL: AdminUrlUtil
 
     test.beforeAll(async () => {
       pagesURL = new AdminUrlUtil(serverURL, 'pages')
 
-      // Create a page with custom relationship fields for toCSV testing
       const users = await payload.find({ collection: 'users', limit: 1 })
       const userId = users.docs[0]!.id
 
       await payload.create({
         collection: 'pages',
         data: {
-          title: 'E2E toCSV Preview Test',
+          title: 'E2E beforeExport Preview Test',
           customRelationship: userId,
           customRelNameEmail: userId,
           customRelIdName: userId,
@@ -1252,7 +1251,7 @@ test.describe('Import Export Plugin', () => {
     test.afterAll(async () => {
       await payload.delete({
         collection: 'pages',
-        where: { title: { equals: 'E2E toCSV Preview Test' } },
+        where: { title: { equals: 'E2E beforeExport Preview Test' } },
       })
     })
 
@@ -1282,7 +1281,7 @@ test.describe('Import Export Plugin', () => {
         const headerCells = page.locator('.export-preview table thead th')
         const headerTexts = await headerCells.allTextContents()
 
-        // Derived columns from toCSV should be present in the preview headers
+        // Derived columns from beforeExport hooks should be present in the preview headers
         expect(headerTexts).not.toContain('customRelationship')
         expect(headerTexts).toContain('customRelationship_id')
         expect(headerTexts).toContain('customRelationship_email')

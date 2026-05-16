@@ -95,13 +95,10 @@
 }
 
 .components-view__variants {
+  --columns: 4;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(var(--columns), 1fr);
   gap: var(--spacer-4);
-
-  &:has(.components-view__icon-grid) {
-    grid-template-columns: 1fr;
-  }
 }
 
 .components-view__variants--full-width {
@@ -124,6 +121,7 @@
   color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-bottom: var(--spacer-2);
 }
 
 .components-view__variant-content {

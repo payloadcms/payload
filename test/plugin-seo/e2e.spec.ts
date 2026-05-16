@@ -101,13 +101,13 @@ describe('SEO Plugin', () => {
     })
 
     // todo: Re-enable this test once required attributes are fixed
-    /* test('Title should be required as per custom override', async () => {
+    test.skip('Title should be required as per custom override', async () => {
       const metaTitleClass = '#field-title'
 
       const metaTitle = page.locator(metaTitleClass).nth(0)
 
       await expect(metaTitle).toHaveAttribute('required', '')
-    }) */
+    })
 
     test('Indicator should be orangered and characters counted', async () => {
       await page.goto(url.edit(id))
@@ -119,9 +119,9 @@ describe('SEO Plugin', () => {
       await autoGenButton.click()
 
       const indicatorClass =
-        '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(3) > div'
+        '#field-meta > div > div.render-fields > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(3) > div'
       const indicatorLabelClass =
-        '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2)'
+        '#field-meta > div > div.render-fields > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2)'
 
       const indicator = page.locator(indicatorClass)
       const indicatorLabel = page.locator(indicatorLabelClass)
@@ -133,8 +133,7 @@ describe('SEO Plugin', () => {
     test('Should generate a search result preview based on content', async () => {
       await page.goto(url.edit(id))
       const metaDescriptionClass = '#field-meta__description'
-      const previewClass =
-        '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(5)'
+      const previewClass = '#field-meta > div > div.render-fields > div:nth-child(5)'
 
       await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
 

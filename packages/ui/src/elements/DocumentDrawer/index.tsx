@@ -14,7 +14,6 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { DocumentDrawerContent } from './DrawerContent.js'
-import './index.scss'
 
 export const documentDrawerBaseClass = 'doc-drawer'
 
@@ -31,6 +30,7 @@ const formatDocumentDrawerSlug = ({
 }) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
+  buttonStyle,
   children,
   className,
   collectionSlug,
@@ -48,6 +48,7 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
       aria-label={t(operation === 'create' ? 'fields:addNewLabel' : 'general:editLabel', {
         label: collectionConfig?.labels.singular,
       })}
+      buttonStyle={buttonStyle}
       className={[className, `${documentDrawerBaseClass}__toggler`].filter(Boolean).join(' ')}
       disabled={disabled}
       onClick={onClick}
@@ -63,7 +64,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
   const { drawerSlug } = props
 
   return (
-    <Drawer className={documentDrawerBaseClass} gutter={false} Header={null} slug={drawerSlug}>
+    <Drawer className={documentDrawerBaseClass} Header={null} slug={drawerSlug}>
       <DocumentDrawerContent {...props} />
     </Drawer>
   )

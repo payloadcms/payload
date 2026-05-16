@@ -1,0 +1,25 @@
+@layer payload-default {
+  .list-selection {
+    display: flex;
+    margin-left: auto;
+    color: var(--theme-elevation-500);
+    gap: var(--spacer-1);
+    align-items: center;
+  }
+
+  .list-selection__count {
+    margin-right: var(--spacer-2);
+  }
+
+  .list-selection__actions {
+    display: flex;
+    gap: var(--spacer-1);
+  }
+
+  .list-selection__button,
+  .list-selection__button.btn {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

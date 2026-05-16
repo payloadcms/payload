@@ -1,20 +1,9 @@
 @layer payload-default {
-  a.btn {
-    display: inline-block;
-  }
-
   /* Base button */
 
   .btn {
-    --btn-padding-block-start: 0;
-    --btn-padding-inline-end: 0;
-    --btn-padding-block-end: 0;
-    --btn-padding-inline-start: 0;
-    --btn-icon-size: 1rem;
-    --btn-icon-border-color: currentColor;
-    --btn-icon-padding: 0;
-    --btn-icon-content-gap: var(--spacer-1);
-    --margin-block: 0.25rem;
+    display: flex;
+    align-items: center;
 
     * {
       pointer-events: none;
@@ -25,12 +14,9 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    margin-block: var(--margin-block);
     border: 1px solid transparent;
     cursor: pointer;
     text-decoration: none;
-    padding: var(--btn-padding-block-start) var(--btn-padding-inline-end)
-      var(--btn-padding-block-end) var(--btn-padding-inline-start);
     color: inherit;
     background-color: transparent;
 
@@ -47,265 +33,120 @@
   /* Style variants */
 
   .btn--style-primary {
-    color: var(--text-onbrand);
-    background-color: var(--bg-brand);
+    color: var(--color-text-onbrand);
+    background-color: var(--color-bg-brand);
 
-    &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled) {
-      background-color: var(--bg-brand-hover);
+    &:hover:not(.btn--disabled) {
+      background-color: var(--color-bg-brand-hover);
     }
 
     &:active:not(.btn--disabled) {
-      background-color: var(--bg-brand-pressed);
+      background-color: var(--color-bg-brand-pressed);
     }
 
-    &.btn--disabled {
-      color: var(--text-disabled-ondisabled);
-      background-color: var(--bg-disabled-default);
+    &.btn--disabled:not(.btn--loading) {
+      color: var(--color-text-ondisabled);
+      background-color: var(--color-bg-disabled);
     }
   }
 
-  .btn--style-secondary {
-    color: var(--text-default);
-    background-color: var(--bg-default-default);
+  .btn.btn--style-secondary {
+    color: var(--color-text);
+    background-color: var(--color-bg);
     border: 1px solid var(--special-border-translucent);
 
-    &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled) {
-      background-color: var(--bg-transparent-hover);
+    &:hover:not(.btn--disabled) {
+      background-color: var(--color-bg-transparent-hover);
     }
 
     &:active:not(.btn--disabled) {
-      background-color: var(--bg-transparent-pressed);
+      background-color: var(--color-bg-transparent-pressed);
     }
 
     &.btn--disabled {
-      color: var(--text-disabled-default);
+      color: var(--color-text-disabled);
     }
   }
 
   .btn--style-dashed {
-    color: var(--text-default);
+    color: var(--color-text);
     background-color: transparent;
     border: 1px dashed var(--special-border-translucent);
 
-    &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled) {
-      border-color: var(--border-default);
+    &:hover:not(.btn--disabled) {
+      background-color: var(--color-bg-transparent-hover);
     }
 
     &:active:not(.btn--disabled) {
-      border-color: var(--border-default);
-      background-color: var(--bg-transparent-pressed);
+      background-color: var(--color-bg-transparent-pressed);
     }
 
     &.btn--disabled {
-      color: var(--text-disabled-default);
-      border-color: var(--border-disabled-default);
+      color: var(--color-text-disabled);
+      border-color: var(--color-border-disabled);
     }
   }
 
   .btn--style-pill {
-    color: var(--text-default);
-    background-color: var(--bg-default-secondary);
+    color: var(--color-text);
+    background-color: var(--color-bg-secondary);
 
-    &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled) {
-      background-color: var(--bg-default-secondary-hover);
+    &:hover:not(.btn--disabled) {
+      background-color: var(--color-bg-secondary-hover);
     }
 
     &:active:not(.btn--disabled) {
-      background-color: var(--bg-default-secondary-pressed);
+      background-color: var(--color-bg-secondary-pressed);
     }
 
     &.btn--disabled {
-      color: var(--text-disabled-default);
+      color: var(--color-text-disabled);
     }
   }
 
   .btn--style-destructive {
-    color: var(--text-danger-ondanger);
-    background-color: var(--bg-danger);
+    color: var(--color-text-ondanger);
+    background-color: var(--color-bg-danger);
 
-    &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled) {
-      background-color: var(--bg-danger-hover);
+    &:hover:not(.btn--disabled) {
+      background-color: var(--color-bg-danger-hover);
     }
 
     &:active:not(.btn--disabled) {
-      background-color: var(--bg-danger-pressed);
+      background-color: var(--color-bg-danger-pressed);
     }
 
-    &.btn--disabled {
-      color: var(--text-disabled-ondisabled);
-      background-color: var(--bg-disabled-default);
+    &.btn--disabled:not(.btn--loading) {
+      color: var(--color-text-ondisabled);
+      background-color: var(--color-bg-disabled);
     }
   }
 
   .btn--style-ghost {
-    color: var(--text-default);
+    color: var(--color-text);
     background-color: transparent;
-
-    &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled) {
-      background-color: var(--bg-transparent-hover);
-    }
-
-    &:active:not(.btn--disabled) {
-      background-color: var(--bg-transparent-pressed);
-    }
-
-    &.btn--disabled {
-      color: var(--text-disabled-default);
-    }
-  }
-
-  .btn--style-icon-label,
-  .btn--style-icon-label.btn--icon-position-left,
-  .btn--style-icon-label.btn--icon-position-right {
-    --margin-block: 0;
-    padding: 0 var(--spacer-2) 0 var(--spacer-1);
-    min-height: var(--spacer-4);
-    border-width: 0;
-    font-weight: var(--text-body-medium-font-weight);
-    color: var(--text-default);
-    background-color: transparent;
-    border-radius: var(--radius-medium);
-
-    &:not(.btn--icon) {
-      padding: 0 var(--spacer-2);
-    }
 
     &:hover:not(.btn--disabled) {
-      background: var(--bg-transparent-hover);
+      background-color: var(--color-bg-transparent-hover);
     }
 
     &:active:not(.btn--disabled) {
-      background: var(--bg-transparent-pressed);
+      background-color: var(--color-bg-transparent-pressed);
     }
 
     &.btn--disabled {
-      color: var(--text-disabled-default);
+      color: var(--color-text-disabled);
     }
-
-    .btn__content {
-      --btn-icon-content-gap: 0;
-    }
-
-    /* temp until icons setup */
-    .btn__icon {
-      width: var(--spacer-4);
-      height: var(--spacer-4);
-    }
-    .btn__icon svg {
-      min-width: var(--spacer-4);
-      min-height: var(--spacer-4);
-    }
-
-    /* temp until icons setup */
-    .btn__icon {
-      width: var(--spacer-4);
-      height: var(--spacer-4);
-    }
-    .btn__icon svg {
-      min-width: var(--spacer-4);
-      min-height: var(--spacer-4);
-    }
-  }
-
-  .btn--style-icon-subtle,
-  .btn--style-icon-subtle.btn--icon-position-left,
-  .btn--style-icon-subtle.btn--icon-position-right {
-    --margin-block: 0;
-    padding: 0;
-    border-width: 0;
-    color: var(--icon-secondary);
-    border-radius: var(--radius-medium);
-    transition: color 100ms;
-
-    &:hover:not(.btn--disabled) {
-      color: var(--icon-default);
-    }
-
-    &:active:not(.btn--disabled) {
-      color: var(--icon-default);
-    }
-
-    &.btn--disabled {
-      color: var(--icon-disabled);
-    }
-
-    .btn__content {
-      --btn-icon-content-gap: 0;
-    }
-
-    .btn__icon {
-      width: auto;
-      height: auto;
-      border: none;
-    }
-  }
-
-  .btn--style-subtle {
-    color: var(--text-default);
-    background-color: var(--bg-default-secondary);
-    border: 1px solid var(--border-default);
-
-    &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled) {
-      background-color: var(--bg-default-secondary-hover);
-    }
-
-    &:active:not(.btn--disabled) {
-      background-color: var(--bg-default-secondary-pressed);
-    }
-
-    &.btn--disabled {
-      color: var(--text-disabled-default);
-    }
-  }
-
-  .btn--style-tab {
-    color: var(--text-default);
-    background-color: transparent;
-    font-weight: 500;
-
-    &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled) {
-      background-color: var(--bg-transparent-hover);
-    }
-
-    &:active:not(.btn--disabled) {
-      background-color: var(--bg-transparent-pressed);
-    }
-
-    &.btn--disabled {
-      font-weight: 600;
-      background-color: var(--bg-default-secondary);
-    }
-  }
-
-  .btn--style-none {
-    padding: 0;
   }
 
   /* Icon */
 
   .btn__icon {
-    width: var(--btn-icon-size);
-    height: var(--btn-icon-size);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--btn-icon-border-color);
     border-radius: 100%;
-    padding: var(--btn-icon-padding);
     color: inherit;
-
-    svg {
-      width: 100%;
-      height: 100%;
-    }
 
     .stroke {
       stroke: currentColor;
@@ -329,13 +170,8 @@
 
   .btn--icon {
     .btn__content {
-      gap: var(--btn-icon-content-gap);
+      gap: 2px;
     }
-  }
-
-  .btn--icon-style-without-border,
-  .btn--icon-style-none {
-    --btn-icon-border-color: transparent;
   }
 
   .btn--icon-position-left {
@@ -347,51 +183,93 @@
   /* Sizes */
 
   .btn--size-medium {
-    --btn-icon-size: 1rem;
-    --btn-icon-content-gap: var(--spacer-1);
-    --btn-padding-block-start: var(--spacer-1);
-    --btn-padding-inline-end: var(--spacer-2);
-    --btn-padding-block-end: var(--spacer-1);
-    --btn-padding-inline-start: var(--spacer-2);
+    height: var(--spacer-4, 1.5rem);
+    padding: 0 var(--spacer-2);
 
     &:not(.btn--icon-only).btn--icon-position-left {
-      --btn-padding-inline-start: var(--spacer-1);
+      padding-inline-start: var(--spacer-1);
     }
 
     &:not(.btn--icon-only).btn--icon-position-right {
-      --btn-padding-inline-end: var(--spacer-1);
+      padding-inline-end: var(--spacer-1);
     }
   }
 
   .btn--size-large {
-    --btn-icon-size: 1rem;
-    --btn-icon-content-gap: var(--spacer-1);
-    --btn-padding-block-start: var(--spacer-2);
-    --btn-padding-inline-end: var(--spacer-2-5);
-    --btn-padding-inline-start: var(--spacer-2-5);
-    --btn-padding-block-end: var(--spacer-2);
+    height: var(--spacer-5, 2rem);
+    padding: 0 var(--spacer-3);
 
     &:not(.btn--icon-only).btn--icon-position-left {
-      --btn-padding-inline-start: var(--spacer-2);
+      padding-inline-start: var(--spacer-2);
     }
 
     &:not(.btn--icon-only).btn--icon-position-right {
-      --btn-padding-inline-end: var(--spacer-2);
+      padding-inline-end: var(--spacer-2);
     }
   }
 
-  .btn--no-margin {
-    --margin-block: 0;
+  /* Round (square icon button) */
+
+  .btn--round {
+    aspect-ratio: 1;
+    padding: 0;
+    border-radius: var(--radius-medium);
+    justify-content: center;
+
+    &.btn--size-medium {
+      width: var(--spacer-4);
+    }
+
+    &.btn--size-large {
+      width: var(--spacer-5);
+    }
+  }
+
+  /* Loading state */
+
+  .btn--loading {
+    position: relative;
+    cursor: wait;
+
+    .btn__content {
+      opacity: 0;
+    }
+  }
+
+  .btn__loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Popup split-button pattern */
 
   .btn--withPopup {
+    --separator-color: var(--color-border);
     display: flex;
-    margin-block: 0.25rem;
+
+    &:has(.btn--size-medium) {
+      border-radius: var(--radius-medium);
+
+      .popup-button {
+        height: var(--spacer-4, 1.5rem);
+      }
+    }
+
+    &:has(.btn--size-large) {
+      border-radius: var(--radius-medium);
+
+      .popup-button {
+        height: var(--spacer-5, 2rem);
+      }
+    }
 
     .btn {
       margin: 0;
+      border-radius: inherit;
+      border-radius: var(--radius-medium) 0 0 var(--radius-medium);
 
       html:not([dir='RTL']) & {
         border-top-right-radius: 0;
@@ -409,13 +287,13 @@
       align-items: center;
 
       html:not([dir='RTL']) & {
-        border-left: 1px solid var(--bg-default);
+        border-left: 1px solid var(--separator-color);
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
       }
 
       html[dir='RTL'] & {
-        border-right: 1px solid var(--bg-default);
+        border-right: 1px solid var(--separator-color);
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
       }
@@ -423,102 +301,120 @@
   }
 
   .btn--withPopup.btn--style-primary {
+    --separator-color: var(--color-bg);
     .btn,
     .popup-button {
-      color: var(--text-onbrand);
-      background-color: var(--bg-brand);
+      color: var(--color-text-onbrand);
+      background-color: var(--color-bg-brand);
 
       &:hover,
-      &:focus-visible,
       &:active {
-        background-color: var(--bg-brand-hover);
+        background-color: var(--color-bg-brand-hover);
       }
     }
 
     &.btn--disabled .btn,
     &.btn--disabled .popup-button {
-      color: var(--text-disabled-ondisabled);
-      background-color: var(--bg-disabled-default);
+      color: var(--color-text-ondisabled);
+      background-color: var(--color-bg-disabled);
 
       &:hover,
-      &:focus-visible,
       &:active {
-        background-color: var(--bg-disabled-default);
+        background-color: var(--color-bg-disabled);
       }
     }
   }
 
   .btn--withPopup.btn--style-secondary {
+    --separator-color: var(--special-border-translucent);
     .btn,
     .popup-button {
-      color: var(--text-default);
-      background-color: var(--bg-default-default);
-      border-color: var(--special-border-translucent);
+      color: var(--color-text);
+      background-color: var(--color-bg);
+      border: 1px solid var(--special-border-translucent);
 
       &:hover,
-      &:focus-visible,
       &:active {
-        background-color: var(--bg-transparent-hover);
+        background-color: var(--color-bg-transparent-hover);
+      }
+    }
+
+    .btn {
+      html:not([dir='RTL']) & {
+        border-right: none;
+      }
+
+      html[dir='RTL'] & {
+        border-left: none;
+      }
+    }
+
+    .popup-button {
+      html:not([dir='RTL']) & {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      html[dir='RTL'] & {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
       }
     }
 
     &.btn--disabled .btn,
     &.btn--disabled .popup-button {
-      color: var(--text-disabled-default);
+      color: var(--color-text-disabled);
 
       &:hover,
-      &:focus-visible,
       &:active {
-        background-color: var(--bg-default-default);
+        background-color: var(--color-bg);
       }
     }
   }
 
   .btn--withPopup.btn--style-destructive {
+    --separator-color: var(--color-border-danger-strong);
     .btn,
     .popup-button {
-      color: var(--text-danger-ondanger);
-      background-color: var(--bg-danger);
+      color: var(--color-text-ondanger);
+      background-color: var(--color-bg-danger);
 
       &:hover,
-      &:focus-visible,
       &:active {
-        background-color: var(--bg-danger-hover);
+        background-color: var(--color-bg-danger-hover);
       }
     }
 
     &.btn--disabled .btn,
     &.btn--disabled .popup-button {
-      color: var(--text-disabled-ondisabled);
-      background-color: var(--bg-disabled-default);
+      color: var(--color-text-ondisabled);
+      background-color: var(--color-bg-disabled);
 
       &:hover,
-      &:focus-visible,
       &:active {
-        background-color: var(--bg-disabled-default);
+        background-color: var(--color-bg-disabled);
       }
     }
   }
 
   .btn--withPopup.btn--style-ghost {
+    --separator-color: transparent;
     .btn,
     .popup-button {
-      color: var(--text-default);
+      color: var(--color-text);
       background-color: transparent;
 
       &:hover,
-      &:focus-visible,
       &:active {
-        background-color: var(--bg-transparent-hover);
+        background-color: var(--color-bg-transparent-hover);
       }
     }
 
     &.btn--disabled .btn,
     &.btn--disabled .popup-button {
-      color: var(--text-disabled-default);
+      color: var(--color-text-disabled);
 
       &:hover,
-      &:focus-visible,
       &:active {
         background-color: transparent;
       }

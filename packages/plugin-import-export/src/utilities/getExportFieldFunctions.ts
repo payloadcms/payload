@@ -26,15 +26,8 @@ const registerExportHandler = (
 ): void => {
   const beforeExport = field.custom?.['plugin-import-export']?.hooks?.beforeExport
 
-  const toCSV = field.custom?.['plugin-import-export']?.toCSV
-
   if (typeof beforeExport === 'function') {
     result[fullKey] = { type: 'beforeExport', fn: beforeExport }
-    return
-  }
-
-  if (typeof toCSV === 'function') {
-    result[fullKey] = { type: 'toCSV', fn: toCSV }
     return
   }
 

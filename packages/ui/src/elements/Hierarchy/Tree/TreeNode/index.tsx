@@ -174,7 +174,7 @@ export const TreeNode = ({
             tabIndex={-1}
             type="button"
           >
-            <ChevronIcon direction={expanded ? 'down' : 'right'} large />
+            <ChevronIcon direction={expanded ? 'down' : 'right'} />
           </button>
         ) : (
           <div className={`${baseClass}__toggle-spacer`} />
@@ -191,7 +191,7 @@ export const TreeNode = ({
         </span>
         {isLoading && expanded && (
           <span className={`${baseClass}__loading`}>
-            <Spinner loadingText={null} size="small" />
+            <Spinner loadingText={null} size="sm" />
           </span>
         )}
       </div>

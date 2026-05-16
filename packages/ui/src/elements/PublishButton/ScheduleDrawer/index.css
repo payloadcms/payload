@@ -1,0 +1,35 @@
+@layer payload-default {
+  .schedule-publish__scheduler {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacer-2-5);
+    gap: var(--spacer-2-5);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .schedule-publish__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .schedule-publish__type {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: var(--spacer-2-5);
+  }
+
+  .schedule-publish__upcoming {
+    padding: var(--spacer-2-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2-5);
+  }
+
+  .schedule-publish__delete {
+    margin: 0;
+    padding: 0;
+  }
+}

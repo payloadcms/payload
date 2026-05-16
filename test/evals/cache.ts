@@ -3,9 +3,11 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import type { EvalResult } from './types.js'
+import type { RunnerKind, SkillInstallMode } from './runner/types.js'
+import type { EvalResult, SystemPromptKey } from './types.js'
 
-import { loadSkillContext } from './skillContent.js'
+import { SKILL_SYSTEM_PROMPT } from './runner/claudeCode.js'
+import { getSkillTreeHash } from './runner/workdir.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const cacheDir = path.join(__dirname, 'eval-results', 'cache')
@@ -23,27 +25,6 @@ function hashKey(parts: Record<string, string | undefined>): string {
 
 function cacheFilePath(key: string): string {
   return path.join(cacheDir, `${key}.json`)
-}
-
-/**
- * Prompt keys that inject SKILL.md content into the system prompt.
- * Cache entries for these keys must be invalidated when the skill file changes.
- */
-const SKILL_PROMPT_KEYS = new Set(['codegenWithSkill'])
-
-/** Lazy-loaded 8-char prefix of the full skill context (SKILL.md + every reference/*.md). Computed once per process. */
-let _skillHash: null | string = null
-
-function getSkillHash(): string {
-  if (_skillHash !== null) {
-    return _skillHash
-  }
-  try {
-    _skillHash = createHash('sha256').update(loadSkillContext()).digest('hex').slice(0, 8)
-  } catch {
-    _skillHash = 'unknown'
-  }
-  return _skillHash
 }
 
 /** Returns true when EVAL_NO_CACHE=true is set, meaning cache reads are bypassed. */
@@ -117,24 +98,46 @@ export function pruneStaleEntries(
 
 /**
  * Generates a cache key for a codegen eval case.
- * Keyed on: instruction input, expected outcome, fixture *content* (not path), model ID,
- * and systemPromptKey. Using content instead of path means the cache is automatically
- * invalidated when a fixture changes. systemPromptKey distinguishes skill vs baseline runs.
+ *
+ * Keyed on instruction input, expected outcome, fixture content, runner kind,
+ * `modelId` (which for agent runs already encodes `agentModel` + `agentVersion`),
+ * and runner-specific options. Includes the skill-tree fingerprint when the run
+ * depends on the skill content (LLM `codegenWithSkill` or claude-code `embedded`
+ * install), so any change to the skill files invalidates the relevant entries.
  */
 export function codegenKey(params: {
   expected: string
   fixtureContent: string
   input: string
-  modelId: string
-  systemPromptKey: string
+  modelId?: string
+  runnerKind: RunnerKind
+  skillInstall?: SkillInstallMode
+  systemPromptKey?: SystemPromptKey
 }): string {
+  const skillIncluded =
+    (params.runnerKind === 'llm' && params.systemPromptKey === 'codegenWithSkill') ||
+    (params.runnerKind === 'claude-code' && params.skillInstall === 'embedded')
+
+  // For claude-code embedded runs the runner appends a system-prompt directive
+  // nudging the agent to invoke the skill. Any tweak to that text changes
+  // observable behavior, so factor it into the cache key.
+  const agentSystemPrompt =
+    params.runnerKind === 'claude-code' && params.skillInstall === 'embedded'
+      ? SKILL_SYSTEM_PROMPT
+      : undefined
+
+  // agentModel and agentVersion are deliberately omitted: for claude-code runs,
+  // modelId is `claude-code/<agentModel>/<version>`, so they're already in the hash.
   return hashKey({
     type: 'codegen',
+    runnerKind: params.runnerKind,
     input: params.input,
     expected: params.expected,
     fixtureContent: params.fixtureContent,
     modelId: params.modelId,
     systemPromptKey: params.systemPromptKey,
-    skillHash: SKILL_PROMPT_KEYS.has(params.systemPromptKey) ? getSkillHash() : undefined,
+    skillInstall: params.skillInstall,
+    skillHash: skillIncluded ? getSkillTreeHash() : undefined,
+    agentSystemPrompt,
   })
 }

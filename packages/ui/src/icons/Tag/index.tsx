@@ -1,7 +1,5 @@
 import React from 'react'
 
-import './index.scss'
-
 // Path data from Figma fpl/icons/src/icons/
 const paths = {
   // icon-16-tag.tsx
@@ -12,16 +10,13 @@ const paths = {
 
 export type TagIconProps = {
   className?: string
-  color?: 'dark' | 'default' | 'muted'
   size?: 16 | 24
 }
 
-export function TagIcon({ className, color, size = 24 }: TagIconProps) {
-  const colorClass = color ? `icon--tag--${color}` : ''
-
+export function TagIcon({ className, size = 24 }: TagIconProps) {
   return (
     <svg
-      className={[className, 'icon icon--tag', colorClass].filter(Boolean).join(' ')}
+      className={[className, 'icon icon--tag'].filter(Boolean).join(' ')}
       fill="none"
       height={size}
       viewBox={`0 0 ${size} ${size}`}
