@@ -95,6 +95,52 @@ describe('mergeLocalizedData', () => {
 
       expect(updatedData.title).toBe('Updated Title')
     })
+
+    it('should not write an empty object when localized field has no value in any locale', () => {
+      const fields: Field[] = [
+        {
+          name: 'subtitle',
+          type: 'text',
+          localized: true,
+        },
+      ]
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales: {
+          subtitle: undefined,
+        },
+        docWithLocales: {},
+        fields,
+        selectedLocales,
+      })
+
+      expect('subtitle' in result).toBe(false)
+    })
+
+    it('should preserve existing locale data on a localized field when new value is undefined', () => {
+      const fields: Field[] = [
+        {
+          name: 'subtitle',
+          type: 'text',
+          localized: true,
+        },
+      ]
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales: {
+          subtitle: undefined,
+        },
+        docWithLocales: {
+          subtitle: { es: 'Spanish Subtitle' },
+        },
+        fields,
+        selectedLocales,
+      })
+
+      expect(result.subtitle).toEqual({ es: 'Spanish Subtitle' })
+    })
   })
 
   describe('groups', () => {
