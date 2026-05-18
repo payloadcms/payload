@@ -15,7 +15,7 @@
     }
 
     &:focus-within {
-      outline-color: var(--color-border-selected);
+      outline-color: var(--accessibility-focus-color);
     }
 
     &:has(:disabled) {
