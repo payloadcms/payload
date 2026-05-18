@@ -343,7 +343,7 @@ export const plTranslations: DefaultTranslationsObject = {
     loadMore: 'Wczytaj więcej',
     locale: 'Ustawienia regionalne',
     locales: 'Ustawienia regionalne',
-    lock: 'Zamek',
+    lock: 'Zablokuj',
     menu: 'Menu',
     moreOptions: 'Więcej opcji',
     move: 'Przesuń',
