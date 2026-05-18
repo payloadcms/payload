@@ -1432,7 +1432,7 @@ type DatabaseSchema = {
   relations_payload_migrations: typeof relations_payload_migrations
 }
 
-declare module '@payloadcms/db-postgres/types' {
+declare module '@payloadcms/db-postgres' {
   export interface GeneratedDatabaseSchema {
     schema: DatabaseSchema
   }
