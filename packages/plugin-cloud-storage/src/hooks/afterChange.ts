@@ -91,8 +91,23 @@ export const getAfterChangeHook =
             )
           }
 
+          // Collect new filenames (main + sizes) so we don't delete a
+          // file that the new upload reused (e.g. same filename on reupload
+          // where Payload overwrites in place).
+          const newFilenames = new Set<string>()
+          if (typeof docWithMetadata.filename === 'string') {
+            newFilenames.add(docWithMetadata.filename)
+          }
+          if (typeof docWithMetadata.sizes === 'object') {
+            for (const size of Object.values(docWithMetadata.sizes || {})) {
+              if (size?.filename && typeof size.filename === 'string') {
+                newFilenames.add(size.filename)
+              }
+            }
+          }
+
           const deletionPromises = filesToDelete.map(async (filename) => {
-            if (filename && filename !== docWithMetadata.filename) {
+            if (filename && !newFilenames.has(filename)) {
               await adapter.handleDelete({ collection, doc: previousDoc, filename, req })
             }
           })
