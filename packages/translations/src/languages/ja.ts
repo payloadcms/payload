@@ -596,7 +596,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     draft: 'ドラフト',
     draftHasPublishedVersion: 'ドラフト（公開版が存在する）',
     draftSavedSuccessfully: '下書きは正常に保存されました。',
-    lastSavedAgo: '{{distance}}前に最後に保存されました',
+    lastSavedAgo: '{{distance}}前に保存されました',
     modifiedOnly: '変更済みのみ',
     moreVersions: 'さらに多くのバージョン...',
     noFurtherVersionsFound: 'その他のバージョンは見つかりませんでした。',

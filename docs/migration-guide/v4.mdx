@@ -211,3 +211,41 @@ The `fromCSV` → `hooks.beforeImport` change is non-breaking for the `data` par
 ```
 
 Run `npx @payloadcms/codemod --transform migrate-import-export-hooks` to migrate automatically. The codemod moves the function values into the correct hook positions and merges with any existing `hooks` object. Review argument names in the migrated functions — `row` references must be renamed to `siblingData` and `doc` references renamed to `data`.
+
+### DB Adapter `/types` Subpath Exports Removed
+
+The `/types` subpath export has been removed from all Drizzle-based database adapter packages. All types are available directly from the main package entry point.
+
+| Old import                             | New import                       |
+| -------------------------------------- | -------------------------------- |
+| `@payloadcms/drizzle/types`            | `@payloadcms/drizzle`            |
+| `@payloadcms/db-postgres/types`        | `@payloadcms/db-postgres`        |
+| `@payloadcms/db-sqlite/types`          | `@payloadcms/db-sqlite`          |
+| `@payloadcms/db-vercel-postgres/types` | `@payloadcms/db-vercel-postgres` |
+| `@payloadcms/db-d1-sqlite/types`       | `@payloadcms/db-d1-sqlite`       |
+
+```diff
+- import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+- import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+- import type { SQLiteAdapter } from '@payloadcms/db-sqlite/types'
+- import type { VercelPostgresAdapter } from '@payloadcms/db-vercel-postgres/types'
+- import type { SQLiteD1Adapter } from '@payloadcms/db-d1-sqlite/types'
++ import type { DrizzleAdapter } from '@payloadcms/drizzle'
++ import type { PostgresAdapter } from '@payloadcms/db-postgres'
++ import type { SQLiteAdapter } from '@payloadcms/db-sqlite'
++ import type { VercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
++ import type { SQLiteD1Adapter } from '@payloadcms/db-d1-sqlite'
+```
+
+If you use a `declare module` augmentation to extend `GeneratedDatabaseSchema` (typically found in generated schema files), update the module path as well:
+
+```diff
+- declare module '@payloadcms/db-postgres/types' {
++ declare module '@payloadcms/db-postgres' {
+    export interface GeneratedDatabaseSchema {
+      schema: DatabaseSchema
+    }
+  }
+```
+
+Run `npx @payloadcms/codemod --transform migrate-db-types-subpath` to migrate automatically. The codemod handles import declarations, re-export declarations, and `declare module` augmentations.

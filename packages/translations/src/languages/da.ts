@@ -597,7 +597,7 @@ export const daTranslations: DefaultTranslationsObject = {
     draft: 'Kladde',
     draftHasPublishedVersion: 'Udkast (har offentliggjort version)',
     draftSavedSuccessfully: 'Kladde gemt.',
-    lastSavedAgo: 'Sidst gemt {{distance}}',
+    lastSavedAgo: 'Gemt for {{distance}} siden',
     modifiedOnly: 'Kun ændret',
     moreVersions: 'Flere versioner...',
     noFurtherVersionsFound: 'Ingen yderligere versioner fundet',

@@ -593,7 +593,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     draft: 'Чернетка',
     draftHasPublishedVersion: 'Чернетка (має опубліковану версію)',
     draftSavedSuccessfully: 'Чернетку успішно збережено.',
-    lastSavedAgo: 'Востаннє збережено {{distance}} тому',
+    lastSavedAgo: 'Збережено {{distance}} тому',
     modifiedOnly: 'Модифіковано тільки',
     moreVersions: 'Більше версій...',
     noFurtherVersionsFound: 'Інших версій не знайдено',

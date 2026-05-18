@@ -603,7 +603,7 @@ export const itTranslations: DefaultTranslationsObject = {
     draft: 'Bozza',
     draftHasPublishedVersion: 'Bozza (ha una versione pubblicata)',
     draftSavedSuccessfully: 'Bozza salvata con successo.',
-    lastSavedAgo: 'Ultimo salvataggio {{distance}} fa',
+    lastSavedAgo: 'Salvato {{distance}} fa',
     modifiedOnly: 'Modificato solo',
     moreVersions: 'Altre versioni...',
     noFurtherVersionsFound: 'Non sono state trovate ulteriori versioni',

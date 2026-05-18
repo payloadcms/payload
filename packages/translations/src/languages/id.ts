@@ -600,7 +600,7 @@ export const idTranslations: DefaultTranslationsObject = {
     draft: 'Draf',
     draftHasPublishedVersion: 'Draf (memiliki versi yang dipublikasikan)',
     draftSavedSuccessfully: 'Draf berhasil disimpan.',
-    lastSavedAgo: 'Terakhir disimpan {{distance}} yang lalu',
+    lastSavedAgo: 'Disimpan {{distance}} yang lalu',
     modifiedOnly: 'Hanya yang diubah',
     moreVersions: 'Versi lainnya...',
     noFurtherVersionsFound: 'Tidak ada versi lebih lanjut yang ditemukan',

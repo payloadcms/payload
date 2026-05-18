@@ -10,7 +10,6 @@ export type DrawerHeaderAction = {
 export type Props = {
   readonly children: React.ReactNode
   readonly className?: string
-  readonly gutter?: boolean
   readonly Header?: React.ReactNode
   readonly headerActions?: ReadonlyArray<DrawerHeaderAction>
   readonly hoverTitle?: boolean

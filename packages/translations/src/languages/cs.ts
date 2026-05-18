@@ -595,7 +595,7 @@ export const csTranslations: DefaultTranslationsObject = {
     draft: 'Koncept',
     draftHasPublishedVersion: 'Koncept (má publikovanou verzi)',
     draftSavedSuccessfully: 'Koncept úspěšně uložen.',
-    lastSavedAgo: 'Naposledy uloženo před {{distance}}',
+    lastSavedAgo: 'Uloženo před {{distance}}',
     modifiedOnly: 'Pouze upraveno',
     moreVersions: 'Více verzí...',
     noFurtherVersionsFound: 'Nenalezeny další verze',

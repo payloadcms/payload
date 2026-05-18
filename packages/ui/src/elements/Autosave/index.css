@@ -1,6 +1,6 @@
 @layer payload-default {
   .autosave {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     white-space: nowrap;
   }
 }

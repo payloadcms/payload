@@ -17,7 +17,7 @@ export const ColoredTagIcon: React.FC<ColoredTagIconProps> = ({ color }) => {
       className={[baseClass, color ? `${baseClass}--custom-color` : ''].join(' ')}
       style={{ color }}
     >
-      <TagIcon color={color ? undefined : 'muted'} />
+      <TagIcon />
     </span>
   )
 }
