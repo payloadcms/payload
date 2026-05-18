@@ -45,6 +45,11 @@ const __serverOnlyStub =
   }
 export const createLocalReq = __serverOnlyStub('createLocalReq') as any
 export const docAccessOperation = __serverOnlyStub('docAccessOperation') as any
+export const docAccessOperationGlobal = __serverOnlyStub('docAccessOperationGlobal') as any
+export const executeAuthStrategies = __serverOnlyStub('executeAuthStrategies') as any
+export const getAccessResults = __serverOnlyStub('getAccessResults') as any
+export const getPayload = __serverOnlyStub('getPayload') as any
+export const getRequestLanguage = __serverOnlyStub('getRequestLanguage') as any
 export const isolateObjectProperty = __serverOnlyStub('isolateObjectProperty') as any
 export {
   type ClientConfig,
@@ -115,8 +120,6 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from '../globals/config/client.js'
-
-export const docAccessOperationGlobal = __serverOnlyStub('docAccessOperationGlobal') as any
 
 export {
   DEFAULT_HIERARCHY_LIST_LIMIT,

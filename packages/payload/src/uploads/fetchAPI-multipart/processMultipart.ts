@@ -49,6 +49,9 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     busboyFinishedResolve = resolve
     busboyFinishedReject = reject
   })
+  // Prevent unhandled rejection when abortOnLimit rejects allFilesComplete
+  // (which throws at line ~241) before execution reaches `await busboyFinished`.
+  busboyFinished.catch(() => {})
 
   const result: FetchAPIFileUploadResponse = {
     fields: undefined!,
