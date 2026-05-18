@@ -1,4 +1,5 @@
 import type { SendMailOptions as NodemailerSendMailOptions } from 'nodemailer'
+import type { Address } from 'nodemailer/lib/mailer'
 
 import type { Payload } from '../types/index.js'
 
@@ -7,9 +8,15 @@ type Prettify<T> = {
 } & NonNullable<unknown>
 
 /**
- * Options for sending an email. Allows access to the PayloadRequest object
+ * Options for sending an email. Allows access to the PayloadRequest object.
+ *
+ * @todo: Remove in v4. See `normalizeSendEmailOptions` for details.
  */
-export type SendEmailOptions = Prettify<NodemailerSendMailOptions>
+export type SendEmailOptions = Prettify<
+  {
+    from?: Address | string
+  } & Omit<NodemailerSendMailOptions, 'from'>
+>
 
 /**
  * Email adapter after it has been initialized. This is used internally by Payload.
