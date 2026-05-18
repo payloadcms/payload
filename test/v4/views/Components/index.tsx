@@ -12,6 +12,7 @@ import { CardSection } from './sections/Card.js'
 import { CheckboxSection } from './sections/Checkbox.js'
 import { CopyToClipboardSection } from './sections/CopyToClipboard.js'
 import { DrawerSection } from './sections/DrawerSection.js'
+import { DropzoneSection } from './sections/Dropzone.js'
 import { IconsSection } from './sections/Icons.js'
 import { IDLabelSection } from './sections/IDLabel.js'
 import { InputStepperSection } from './sections/InputStepper.js'
@@ -57,6 +58,7 @@ type ComponentId =
   | 'copy-to-clipboard'
   | 'date-field'
   | 'drawer'
+  | 'dropzone'
   | 'email-field'
   | 'email-username-field'
   | 'icons'
@@ -106,6 +108,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Card', value: 'card' },
   { category: 'primitives', label: 'Checkbox', value: 'checkbox' },
   { category: 'primitives', label: 'Copy to Clipboard', value: 'copy-to-clipboard' },
+  { category: 'primitives', label: 'Dropzone', value: 'dropzone' },
   { category: 'primitives', label: 'Icons', value: 'icons' },
   { category: 'primitives', label: 'ID Label', value: 'id-label' },
   { category: 'primitives', label: 'Input', value: 'input' },
@@ -256,6 +259,7 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('tooltip', 'primitives') && <TooltipSection selectedComponent="tooltip" />}
         {shouldShow('popup', 'primitives') && <PopupSection selectedComponent="popup" />}
         {shouldShow('card', 'primitives') && <CardSection selectedComponent="card" />}
+        {shouldShow('dropzone', 'primitives') && <DropzoneSection selectedComponent="dropzone" />}
         {shouldShow('copy-to-clipboard', 'primitives') && (
           <CopyToClipboardSection selectedComponent="copy-to-clipboard" />
         )}
