@@ -506,7 +506,7 @@ describe('Date', () => {
       await dateWithTz.fill('08/12/2027 10:00 AM')
 
       const timezoneClearButton = page.locator(
-        `#field-dayAndTimeWithTimezone .rs__control .clear-indicator`,
+        `#field-dayAndTimeWithTimezone .rs__control .timezone-picker__clear-indicator`,
       )
 
       await expect(timezoneClearButton).toBeHidden()
@@ -521,20 +521,17 @@ describe('Date', () => {
 
       await page.goto(url.edit(existingDoc!.id))
 
-      const dateField = page.locator('#field-defaultWithTimezone .react-datepicker-wrapper input')
-
-      const initialDate = await dateField.inputValue()
+      // Verify timezone has a value initially
+      const timezoneValue = page.locator('#field-defaultWithTimezone .rs__single-value')
+      await expect(timezoneValue).toBeVisible()
 
       const timezoneClearButton = page.locator(
-        `#field-defaultWithTimezone .rs__control .clear-indicator`,
+        `#field-defaultWithTimezone .rs__control .timezone-picker__clear-indicator`,
       )
       await timezoneClearButton.click()
 
-      const updatedDate = dateField.inputValue()
-
-      await expect(() => {
-        expect(updatedDate).not.toEqual(initialDate)
-      }).toPass({ timeout: 10000, intervals: [100] })
+      // Verify timezone value was cleared (single-value element should be hidden/removed)
+      await expect(timezoneValue).toBeHidden({ timeout: 10000 })
     })
 
     // This test should pass but it does not currently due to a11y issues with date fields - will fix in follow up PR
@@ -555,7 +552,7 @@ describe('Date', () => {
       await expect(dateField).toHaveAttribute('required')
 
       const timezoneClearButton = page.locator(
-        `#field-dayAndTimeWithTimezone .rs__control .clear-indicator`,
+        `#field-dayAndTimeWithTimezone .rs__control .timezone-picker__clear-indicator`,
       )
       await expect(timezoneClearButton).toBeHidden()
 
@@ -567,7 +564,7 @@ describe('Date', () => {
       await expect(dateFieldRequiredOnlyTz).not.toHaveAttribute('required')
 
       const timezoneClearButtonOnlyTz = page.locator(
-        `#field-dayAndTimeWithTimezoneRequired .rs__control .clear-indicator`,
+        `#field-dayAndTimeWithTimezoneRequired .rs__control .timezone-picker__clear-indicator`,
       )
       await expect(timezoneClearButtonOnlyTz).toBeHidden()
     })
