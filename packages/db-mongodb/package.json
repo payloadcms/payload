@@ -52,7 +52,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "mongoose": "8.15.1",
+    "mongoose": "8.22.1",
     "mongoose-paginate-v2": "1.9.4",
     "prompts": "2.4.2",
     "uuid": "13.0.2"
