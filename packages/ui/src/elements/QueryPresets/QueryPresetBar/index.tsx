@@ -332,6 +332,7 @@ export const QueryPresetBar: React.FC<{
                   {queryPresetPermissions?.update && (
                     <PopupList.Button
                       icon={<EditIcon />}
+                      id="edit-preset"
                       onClick={() => {
                         close()
                         openPresetDrawer()
@@ -346,6 +347,7 @@ export const QueryPresetBar: React.FC<{
                     <PopupList.Button
                       className={`${baseClass}__delete`}
                       icon={<TrashIcon small />}
+                      id="delete-preset"
                       onClick={() => {
                         close()
                         openModal(deletePresetModalSlug)
@@ -362,6 +364,7 @@ export const QueryPresetBar: React.FC<{
               {queryPresetPermissions?.create && (
                 <PopupList.Button
                   icon={<PlusIcon />}
+                  id="create-new-preset"
                   onClick={() => {
                     close()
                     openCreateNewDrawer()
@@ -374,6 +377,7 @@ export const QueryPresetBar: React.FC<{
               )}
               <PopupList.Button
                 icon={<GearIcon />}
+                id="manage-presets"
                 onClick={() => {
                   close()
                   openListDrawer()

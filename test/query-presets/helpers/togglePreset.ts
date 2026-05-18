@@ -61,7 +61,7 @@ export async function openCreatePreset({ page }: { page: Page }) {
   await page.click('#select-preset')
   const popup = page.locator('.popup__content')
   await expect(popup).toBeVisible()
-  await popup.locator('.popup-button-list__button', { hasText: /Create New/i }).click()
+  await popup.locator('#create-new-preset').click()
 }
 
 /**
@@ -71,7 +71,7 @@ export async function openEditPreset({ page }: { page: Page }) {
   await page.click('#select-preset')
   const popup = page.locator('.popup__content')
   await expect(popup).toBeVisible()
-  await popup.locator('.popup-button-list__button', { hasText: /Edit/i }).click()
+  await popup.locator('#edit-preset').click()
 }
 
 /**
@@ -81,7 +81,7 @@ export async function openDeletePreset({ page }: { page: Page }) {
   await page.click('#select-preset')
   const popup = page.locator('.popup__content')
   await expect(popup).toBeVisible()
-  await popup.locator('.popup-button-list__button', { hasText: /Delete/i }).click()
+  await popup.locator('#delete-preset').click()
 }
 
 /**
@@ -140,6 +140,16 @@ export async function checkPresetModifiedOptions({
 }
 
 /**
+ * Opens the popup and clicks "Manage Presets" to open the list drawer
+ */
+export async function openManagePresets({ page }: { page: Page }) {
+  await page.click('#select-preset')
+  const popup = page.locator('.popup__content')
+  await expect(popup).toBeVisible()
+  await popup.locator('#manage-presets').click()
+}
+
+/**
  * Check if edit/delete options are visible in the popup menu
  */
 export async function checkPresetMenuOptions({
@@ -155,8 +165,8 @@ export async function checkPresetMenuOptions({
   const popup = page.locator('.popup__content')
   await expect(popup).toBeVisible()
 
-  const editButton = popup.locator('.popup-button-list__button', { hasText: /Edit/i })
-  const deleteButton = popup.locator('.popup-button-list__button', { hasText: /Delete/i })
+  const editButton = popup.locator('#edit-preset')
+  const deleteButton = popup.locator('#delete-preset')
 
   if (expectEdit) {
     await expect(editButton).toBeVisible()
