@@ -9,6 +9,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: var(--spacer-2-5);
     gap: var(--spacer-2);
     width: 100%;
   }
@@ -39,7 +40,7 @@
 
   .upload .shimmer-effect {
     border-radius: var(--radius-medium);
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
   }
 
   @media (max-width: 768px) {
