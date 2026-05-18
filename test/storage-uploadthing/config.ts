@@ -34,7 +34,7 @@ export default buildConfigWithDefaults({
       },
     })
   },
-  storageAdapters: [
+  storage: [
     uploadthingStorage({
       clientUploads: true,
       collections: {

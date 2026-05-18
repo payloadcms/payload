@@ -35,7 +35,7 @@ export default buildConfigWithDefaults({
       },
     })
   },
-  storageAdapters: [
+  storage: [
     azureStorage({
       collections: {
         [mediaSlug]: true,

@@ -34,7 +34,7 @@ export default buildConfigWithDefaults({
       },
     })
   },
-  storageAdapters: [
+  storage: [
     vercelBlobStorage({
       clientUploads: {
         access: ({ req }) => (req.headers.get('x-disallow-access') ? false : true),

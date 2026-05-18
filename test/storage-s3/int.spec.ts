@@ -257,17 +257,17 @@ describe('@payloadcms/storage-s3', () => {
     })
   })
 
-  describe('storageAdapters config', () => {
-    it('should default storageAdapters to an empty array when the key is omitted', () => {
-      // sanitize.ts sets storageAdapters = [] when the key is absent from the raw config
+  describe('storage config', () => {
+    it('should default storage to an empty array when the key is omitted', () => {
+      // sanitize.ts sets storage = [] when the key is absent from the raw config
       // (packages/payload/src/config/sanitize.ts). Verified here because the sanitized
       // config must always expose a defined array regardless of what the user configured.
-      expect(payload.config.storageAdapters).toBeDefined()
-      expect(Array.isArray(payload.config.storageAdapters)).toBe(true)
+      expect(payload.config.storage).toBeDefined()
+      expect(Array.isArray(payload.config.storage)).toBe(true)
     })
 
-    it('should expose adapter name and collections on each storageAdapter', () => {
-      const s3Adapter = payload.config.storageAdapters.find((a) => a.name === 's3')
+    it('should expose adapter name and collections on each storage adapter', () => {
+      const s3Adapter = payload.config.storage.find((a) => a.name === 's3')
 
       expect(s3Adapter).toBeDefined()
       expect(s3Adapter!.name).toBe('s3')

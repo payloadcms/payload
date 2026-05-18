@@ -227,7 +227,7 @@ export function buildPluginCloudStorageIntConfig({
       )
     },
     plugins: [testMetadataPlugin],
-    storageAdapters: storagePlugin ? [storagePlugin] : [],
+    storage: storagePlugin ? [storagePlugin] : [],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },

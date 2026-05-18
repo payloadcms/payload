@@ -45,7 +45,7 @@ export default buildConfigWithDefaults({
       },
     })
   },
-  storageAdapters: [
+  storage: [
     r2Storage({
       bucket: cloudflare.env.R2,
       collections: {

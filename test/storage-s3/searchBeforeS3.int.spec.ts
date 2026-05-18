@@ -14,9 +14,9 @@ const dirname = path.dirname(filename)
 let payload: Payload
 
 /**
- * Verifies that storageAdapters initialises before plugins.
- * The config places searchPlugin in `plugins` and s3Storage in `storageAdapters`.
- * Because storageAdapters run first, the S3 upload hooks are present when
+ * Verifies that storage adapters initialise before plugins.
+ * The config places searchPlugin in `plugins` and s3Storage in `storage`.
+ * Because storage adapters run first, the S3 upload hooks are present when
  * searchPlugin processes the collection config — fixing the silent upload failure
  * that occurred when s3Storage appeared after searchPlugin in the old `plugins` array.
  */
@@ -55,7 +55,7 @@ describe('Search plugin before S3 - Issue #15431', () => {
     // The S3 adapter must have run its init before searchPlugin consumed the collection
     // config. If it didn't, upload hooks would be absent and the next test's S3 writes
     // would silently fail. Verify the adapter is wired up on the sanitized config.
-    const s3Adapter = payload.config.storageAdapters.find((a) => a.name === 's3')
+    const s3Adapter = payload.config.storage.find((a) => a.name === 's3')
 
     expect(s3Adapter).toBeDefined()
     expect(s3Adapter!.collections).toContain(mediaSlug)
