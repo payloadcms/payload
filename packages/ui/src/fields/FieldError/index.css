@@ -1,9 +1,9 @@
 @layer payload-default {
   .field-error.tooltip {
+    --tooltip-x: 0%;
     left: auto;
     max-width: 75%;
     right: 0;
-    transform: translate3d(0%, calc(-1 * (100% + var(--caret-size))), 0);
     color: var(--color-text-ondanger);
     background-color: var(--color-bg-danger);
 
