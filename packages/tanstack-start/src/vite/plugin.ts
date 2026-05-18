@@ -151,6 +151,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
         router: {
           autoCodeSplitting: false,
           codeSplittingOptions: { defaultBehavior: [] },
+          routeFileIgnorePattern: '(?:importMap\\.(?:js|server\\.ts)|.*\\.server-function\\.ts)$',
           routesDirectory,
         } as any,
         rsc: { enabled: true },

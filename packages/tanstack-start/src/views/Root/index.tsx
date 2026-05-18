@@ -83,6 +83,8 @@ export type SerializableDashboardData = {
 }
 
 export type SerializableLoginData = {
+  afterLogin?: CustomComponent[]
+  beforeLogin?: CustomComponent[]
   isLocalStrategyDisabled: boolean
   prefillEmail?: string
   prefillPassword?: string
@@ -644,6 +646,8 @@ export async function getAdminPageData({
     }
 
     adminPageData.loginData = {
+      afterLogin: loginData.afterLogin,
+      beforeLogin: loginData.beforeLogin,
       isLocalStrategyDisabled: loginData.isLocalStrategyDisabled,
       prefillEmail: loginData.prefillEmail,
       prefillPassword: loginData.prefillPassword,

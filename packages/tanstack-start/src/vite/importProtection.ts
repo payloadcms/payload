@@ -52,7 +52,14 @@ export function onImportProtectionViolation(info: {
     return false
   }
 
-  if (info.importer.includes('/packages/payload/')) {
+  if (info.importer.includes('/packages/payload/') || info.importer.includes('/payload/dist/')) {
+    return false
+  }
+
+  if (
+    info.importer.includes('@payloadcms/ui') &&
+    (info.importer.includes('/exports/rsc/') || info.importer.includes('/rsc/index'))
+  ) {
     return false
   }
 

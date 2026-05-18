@@ -290,7 +290,7 @@ function ViewRenderer({
   const { viewType } = viewProps
 
   if (routeData.templateClassName === 'login') {
-    return <LoginViewContent loginData={loginData} />
+    return <LoginViewContent importMap={importMap} loginData={loginData} />
   }
 
   switch (viewType) {
@@ -670,7 +670,13 @@ function LogoutViewContent({
   )
 }
 
-function LoginViewContent({ loginData }: { loginData?: SerializableLoginData }) {
+function LoginViewContent({
+  importMap,
+  loginData,
+}: {
+  importMap: Record<string, unknown>
+  loginData?: SerializableLoginData
+}) {
   const location = useLocation()
 
   if (!loginData) {
@@ -692,6 +698,13 @@ function LoginViewContent({ loginData }: { loginData?: SerializableLoginData }) 
       >
         <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>Payload</span>
       </div>
+      {loginData.beforeLogin?.map((Component, index) =>
+        RenderClientComponent({
+          Component,
+          importMap: importMap as ImportMap,
+          key: String(index),
+        }),
+      )}
       {!loginData.isLocalStrategyDisabled && (
         <LoginForm
           prefillEmail={loginData.prefillEmail}
@@ -699,6 +712,13 @@ function LoginViewContent({ loginData }: { loginData?: SerializableLoginData }) 
           prefillUsername={loginData.prefillUsername}
           searchParams={searchParams}
         />
+      )}
+      {loginData.afterLogin?.map((Component, index) =>
+        RenderClientComponent({
+          Component,
+          importMap: importMap as ImportMap,
+          key: String(index),
+        }),
       )}
     </React.Fragment>
   )
