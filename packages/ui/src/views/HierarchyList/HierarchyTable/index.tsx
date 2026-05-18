@@ -221,8 +221,8 @@ export function HierarchyTable({
       }))
 
       try {
-        // Field name is always _t_{hierarchySlug} by convention
-        const fieldName = `_t_${collectionSlug}`
+        // Field name is always _h_{hierarchySlug} by convention (created by createTagField)
+        const fieldName = `_h_${collectionSlug}`
 
         // "in" operator works for both hasMany and single relationship fields
         const relationshipCondition = { [fieldName]: { in: [parentId] } }
