@@ -466,6 +466,12 @@ export interface DateField {
   monthOnly?: string | null;
   withTimezone?: string | null;
   withTimezone_tz?: SupportedTimezones;
+  withTimezoneRequired: string;
+  withTimezoneRequired_tz: SupportedTimezones;
+  withTimezoneDisabled?: string | null;
+  withTimezoneDisabled_tz?: SupportedTimezones;
+  withTimezoneReadOnly?: string | null;
+  withTimezoneReadOnly_tz?: SupportedTimezones;
   updatedAt: string;
   createdAt: string;
 }
@@ -1734,6 +1740,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
   monthOnly?: T;
   withTimezone?: T;
   withTimezone_tz?: T;
+  withTimezoneRequired?: T;
+  withTimezoneRequired_tz?: T;
+  withTimezoneDisabled?: T;
+  withTimezoneDisabled_tz?: T;
+  withTimezoneReadOnly?: T;
+  withTimezoneReadOnly_tz?: T;
   updatedAt?: T;
   createdAt?: T;
 }
