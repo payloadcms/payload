@@ -107,6 +107,16 @@ function mapFromAddress(
     return `${defaultFromName} <${defaultFromAddress}>`
   }
 
+  if (Array.isArray(address)) {
+    const first = address[0]
+
+    if (!first) {
+      return `${defaultFromName} <${defaultFromAddress}>`
+    }
+
+    return typeof first === 'string' ? first : `${first.name} <${first.address}>`
+  }
+
   if (typeof address === 'string') {
     return address
   }
