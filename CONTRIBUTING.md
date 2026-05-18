@@ -231,6 +231,12 @@ If you are committing to [templates](./templates) or [examples](./examples), use
 - `chore(templates): adds feature to template`
 - `chore(examples): fixes bug in example`
 
+### Allow edits from maintainers
+
+When opening a PR from a fork, please leave **"Allow edits and access to secrets by maintainers"** enabled on the pull request (it is on by default in the GitHub UI). This lets the Payload team push small fixes — rebases, lint/format cleanup, minor adjustments — directly to your branch so the PR can land without an extra round trip.
+
+If that permission is disabled and we need to push changes to move the PR forward, we may close your PR and re-open an equivalent branch directly in the Payload repository so the team can iterate on it. Your authorship and commit history will be preserved on the new branch.
+
 ## Previewing docs
 
 This is how you can preview changes you made locally to the docs:
