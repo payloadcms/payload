@@ -31,6 +31,7 @@ import {
   openDeletePreset,
   openEditPreset,
   resetPresetChanges,
+  savePresetChanges,
   selectPreset,
 } from './helpers/togglePreset.js'
 import { defaultColumnsSlug, pagesSlug } from './slugs.js'
@@ -287,22 +288,27 @@ describe('Query Presets', () => {
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
-    // When not shared, the label is "Save"
-    await expect(page.locator('#save-preset')).toBeVisible()
+    // When not shared, the label is "Save changes"
+    await page.click('#select-preset')
+    const popup = page.locator('.popup__content')
+    await expect(popup).toBeVisible()
 
     await expect(
-      page.locator('#save-preset', {
+      popup.locator('#save-preset', {
         hasText: exactText('Save changes'),
       }),
     ).toBeVisible()
+    await page.keyboard.press('Escape')
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
     // When shared, the label is "Update for everyone"
+    await page.click('#select-preset')
+    await expect(popup).toBeVisible()
     await expect(
-      page.locator('#save-preset', {
+      popup.locator('#save-preset', {
         hasText: exactText('Update for everyone'),
       }),
     ).toBeVisible()
@@ -654,10 +660,10 @@ describe('Query Presets', () => {
 
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
-    await page.locator('#save-preset').click()
+    await savePresetChanges({ page })
 
     // Wait for the modified indicator to disappear (indicates save completed)
-    await expect(page.locator('.list-controls__modified')).toBeHidden()
+    await expect(page.locator('.query-preset-bar__modified-indicator')).toBeHidden()
 
     // Clear and reselect the preset to verify groupBy was saved
     await clearSelectedPreset({ page })
@@ -731,14 +737,14 @@ describe('Query Presets', () => {
     await page.reload()
     await expect(page.locator('#select-preset')).toContainText(seededData.onlyMe.title)
 
-    // 3. #save-preset button should NOT show (no modifications yet)
-    await expect(page.locator('#save-preset')).toBeHidden()
+    // 3. Save button should NOT show in popup (no modifications yet)
+    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
 
     // 4. Make a change
     await toggleColumn(page, { columnLabel: 'ID' })
 
-    // 5. #save-preset button should show
-    await expect(page.locator('#save-preset')).toBeVisible()
+    // 5. Save button should show in popup
+    await checkPresetModifiedOptions({ page, expectReset: true, expectSave: true })
   })
 
   test('should reset groupBy when clicking reset button on modified preset', async ({ page }) => {
