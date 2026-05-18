@@ -6,6 +6,7 @@ import { cookies as getCookies, headers as nextHeaders } from 'next/headers.js'
 import { createLocalReq, getPayload, logoutOperation } from 'payload'
 
 import { getExistingAuthToken } from '../utilities/getExistingAuthToken.js'
+import { nextAppCronGetPayloadOptions } from '../utilities/nextAppCronGetPayloadOptions.js'
 
 export async function logout({
   allSessions = false,
@@ -14,7 +15,7 @@ export async function logout({
   allSessions?: boolean
   config: MaybePromise<SanitizedConfig>
 }) {
-  const payload = await getPayload({ config, cron: true })
+  const payload = await getPayload({ config, ...nextAppCronGetPayloadOptions })
   const headers = await nextHeaders()
   const authResult = await payload.auth({ headers })
 
