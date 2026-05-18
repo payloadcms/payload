@@ -10,10 +10,12 @@ import {
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
+import { CheckIcon } from '../../../icons/Check/index.js'
 import { EditIcon } from '../../../icons/Edit/index.js'
 import { FilterIcon } from '../../../icons/Filter/index.js'
 import { GearIcon } from '../../../icons/Gear/index.js'
 import { PlusIcon } from '../../../icons/Plus/index.js'
+import { RefreshIcon } from '../../../icons/Refresh/index.js'
 import { TrashIcon } from '../../../icons/Trash/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -39,7 +41,7 @@ export const QueryPresetBar: React.FC<{
   collectionSlug?: string
   queryPresetPermissions: SanitizedCollectionPermission
 }> = ({ activePreset, collectionSlug, queryPresetPermissions }) => {
-  const { query, refineListData } = useListQuery()
+  const { modified, query, refineListData, setModified: setQueryModified } = useListQuery()
   const { openModal } = useModal()
   const [presets, setPresets] = useState<QueryPreset[]>([])
 
@@ -186,6 +188,91 @@ export const QueryPresetBar: React.FC<{
     }
   }, [activePreset?.id, apiRoute, fetchPresets, refineListData, serverURL])
 
+  const handleResetPreset = useCallback(async () => {
+    if (!activePreset) {
+      return
+    }
+    // Use the same pattern as handlePresetChange for consistency
+    await refineListData(
+      {
+        columns: activePreset.columns ? transformColumnsToSearchParams(activePreset.columns) : [], // explicitly empty to clear user preferences fallback
+        groupBy: activePreset.groupBy || '',
+        preset: activePreset.id,
+        where: activePreset.where,
+      },
+      false, // not modified - we're resetting to preset's original state
+    )
+  }, [activePreset, refineListData])
+
+  const saveCurrentChanges = useCallback(async () => {
+    if (!activePreset?.id) {
+      return
+    }
+    try {
+      const url = formatAdminURL({
+        apiRoute,
+        path: `/${queryPresetsSlug}/${activePreset.id}`,
+        serverURL,
+      })
+
+      const response = await fetch(url, {
+        body: JSON.stringify({
+          columns: transformColumnsToPreferences(query.columns),
+          groupBy: query.groupBy,
+          where: query.where,
+        }),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'PATCH',
+      })
+
+      if (response.ok) {
+        setQueryModified(false)
+        void fetchPresets()
+      }
+    } catch (_error) {
+      // Silently fail
+    }
+  }, [
+    activePreset?.id,
+    apiRoute,
+    fetchPresets,
+    query.columns,
+    query.groupBy,
+    query.where,
+    serverURL,
+    setQueryModified,
+  ])
+
+  // Detect if current query differs from preset on initial load
+  useEffect(() => {
+    if (!activePreset) {
+      return
+    }
+
+    const presetColumns = activePreset.columns
+      ? transformColumnsToSearchParams(activePreset.columns)
+      : []
+    const presetWhere = activePreset.where
+    const presetGroupBy = activePreset.groupBy || ''
+
+    // Normalize query.columns to empty array if undefined for comparison
+    const queryColumns = query.columns || []
+
+    // Compare current query with preset values
+    const columnsMatch = JSON.stringify(queryColumns) === JSON.stringify(presetColumns)
+    const whereMatch = JSON.stringify(query.where) === JSON.stringify(presetWhere)
+    const groupByMatch = (query.groupBy || '') === presetGroupBy
+
+    if (!columnsMatch || !whereMatch || !groupByMatch) {
+      setQueryModified(true)
+    }
+  }, [activePreset, query.columns, query.where, query.groupBy, setQueryModified])
+
+  const hasModifiedPreset = activePreset && modified
+
   return (
     <Fragment>
       <div className={baseClass}>
@@ -210,6 +297,32 @@ export const QueryPresetBar: React.FC<{
               {activePreset && (
                 <Fragment>
                   <PopupList.Divider />
+                  {hasModifiedPreset && (
+                    <PopupList.Button
+                      icon={<RefreshIcon />}
+                      id="reset-preset"
+                      onClick={async () => {
+                        close()
+                        await handleResetPreset()
+                      }}
+                    >
+                      {t('general:reset')}
+                    </PopupList.Button>
+                  )}
+                  {hasModifiedPreset && queryPresetPermissions?.update && (
+                    <PopupList.Button
+                      icon={<CheckIcon />}
+                      id="save-preset"
+                      onClick={async () => {
+                        close()
+                        await saveCurrentChanges()
+                      }}
+                    >
+                      {activePreset?.isShared
+                        ? t('general:updateForEveryone')
+                        : t('fields:saveChanges')}
+                    </PopupList.Button>
+                  )}
                   {queryPresetPermissions?.update && (
                     <PopupList.Button
                       icon={<EditIcon />}
@@ -281,6 +394,7 @@ export const QueryPresetBar: React.FC<{
               >
                 {buttonLabel}
               </Button>
+              {hasModifiedPreset && <span className={`${baseClass}__modified-indicator`} />}
               {activePreset && (
                 <button className={`${baseClass}__clear`} onClick={handleClearPreset} type="button">
                   <XIcon size={16} />

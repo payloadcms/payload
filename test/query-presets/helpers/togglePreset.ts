@@ -85,6 +85,61 @@ export async function openDeletePreset({ page }: { page: Page }) {
 }
 
 /**
+ * Opens the popup and clicks "Reset" to revert changes (only visible when preset is modified)
+ */
+export async function resetPresetChanges({ page }: { page: Page }) {
+  await page.click('#select-preset')
+  const popup = page.locator('.popup__content')
+  await expect(popup).toBeVisible()
+  await popup.locator('#reset-preset').click()
+}
+
+/**
+ * Opens the popup and clicks "Save changes" (only visible when preset is modified)
+ */
+export async function savePresetChanges({ page }: { page: Page }) {
+  await page.click('#select-preset')
+  const popup = page.locator('.popup__content')
+  await expect(popup).toBeVisible()
+  await popup.locator('#save-preset').click()
+}
+
+/**
+ * Check if reset/save options are visible in the popup menu
+ */
+export async function checkPresetModifiedOptions({
+  page,
+  expectReset,
+  expectSave,
+}: {
+  expectReset: boolean
+  expectSave: boolean
+  page: Page
+}) {
+  await page.click('#select-preset')
+  const popup = page.locator('.popup__content')
+  await expect(popup).toBeVisible()
+
+  const resetButton = popup.locator('#reset-preset')
+  const saveButton = popup.locator('#save-preset')
+
+  if (expectReset) {
+    await expect(resetButton).toBeVisible()
+  } else {
+    await expect(resetButton).toBeHidden()
+  }
+
+  if (expectSave) {
+    await expect(saveButton).toBeVisible()
+  } else {
+    await expect(saveButton).toBeHidden()
+  }
+
+  // Close the popup by pressing Escape
+  await page.keyboard.press('Escape')
+}
+
+/**
  * Check if edit/delete options are visible in the popup menu
  */
 export async function checkPresetMenuOptions({
