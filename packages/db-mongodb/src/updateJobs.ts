@@ -81,7 +81,6 @@ export const updateJobs: UpdateJobs = async function updateMany(
   }
 
   const options: MongooseUpdateQueryOptions = {
-    lean: true,
     new: true,
     session: await getSession(this, req),
     // Timestamps are manually added by the write transform

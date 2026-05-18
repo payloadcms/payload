@@ -77,7 +77,6 @@ export const updateOne: UpdateOne = async function updateOne(
 
   const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
-    lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
