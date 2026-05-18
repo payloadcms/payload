@@ -93,7 +93,6 @@ export const updateMany: UpdateMany = async function updateMany(
 
   const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
-    lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,

@@ -46,7 +46,6 @@ export const updateVersion: UpdateVersion = async function updateVersion(
 
   const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
-    lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,

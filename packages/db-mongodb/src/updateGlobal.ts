@@ -20,7 +20,6 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
 
   const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
-    lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,

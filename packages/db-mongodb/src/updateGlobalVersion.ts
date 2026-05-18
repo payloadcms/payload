@@ -42,7 +42,6 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
 
   const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
-    lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
