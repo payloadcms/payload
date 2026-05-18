@@ -8,7 +8,6 @@ import { EntityType } from 'payload'
 import React from 'react'
 
 import { DefaultNavClient } from './index.client.js'
-import { NavSidebarToggle } from './NavSidebarToggle/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
 import { SettingsMenuButton } from './SettingsMenuButton/index.js'
 import { SidebarTabs } from './SidebarTabs/index.js'
@@ -237,11 +236,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
         </div>
       </nav>
       {RenderedAfterNav}
-      <div className={`${baseClass}__header`}>
-        <div className={`${baseClass}__header-content`}>
-          <NavSidebarToggle baseClass={baseClass} />
-        </div>
-      </div>
     </NavWrapper>
   )
 }

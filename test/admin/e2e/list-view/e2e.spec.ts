@@ -335,7 +335,7 @@ describe('List View', () => {
 
       await expect(page.locator('#search-filter-input')).toHaveValue('test')
 
-      await page.locator('.nav-toggler.template-default__nav-toggler').click()
+      await page.locator('.app-header__sidebar-toggle').click()
       await expect(page.locator('#nav-uploads')).toContainText('Uploads')
 
       const uploadsUrl = await page.locator('#nav-uploads').getAttribute('href')

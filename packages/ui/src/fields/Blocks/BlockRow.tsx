@@ -217,7 +217,6 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
           <RenderFields
             className={`${baseClass}__fields`}
             fields={fields}
-            margins="small"
             parentIndexPath=""
             parentPath={path}
             parentSchemaPath={schemaPath}

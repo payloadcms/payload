@@ -28,23 +28,7 @@
       &:last-of-type {
         margin-bottom: 0;
       }
-    }
 
-    @media (max-width: 768px) {
-      --spacing-field: var(--spacer-2-5);
-    }
-  }
-
-  .render-fields--margins-small {
-    --spacing-field: var(--spacer-2);
-  }
-
-  .render-fields--margins-none {
-    --spacing-field: 0;
-  }
-
-  .render-fields:not(.render-fields--margins-small):not(.render-fields--margins-none) {
-    & > .field-type {
       &.blocks-field,
       &.array-field,
       &.collapsible-field,
@@ -73,6 +57,10 @@
           margin-bottom: 0;
         }
       }
+    }
+
+    @media (max-width: 768px) {
+      --spacing-field: var(--spacer-2-5);
     }
   }
 }

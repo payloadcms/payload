@@ -3,6 +3,7 @@ import type { Transform } from './types.js'
 import { exampleNoop } from './transforms/example-noop/index.js'
 import { globalsComponentsEdit } from './transforms/globals-components-edit/index.js'
 import { migrateAliasedExports } from './transforms/migrate-aliased-exports/index.js'
+import { migrateDbTypesSubpath } from './transforms/migrate-db-types-subpath/index.js'
 import { migrateDisabledFields } from './transforms/migrate-disabled-fields/index.js'
 import { migrateDocumentTitleContext } from './transforms/migrate-document-title-context/index.js'
 import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
@@ -20,4 +21,5 @@ export const transforms: Transform[] = [
   migrateAliasedExports,
   migrateDocumentTitleContext,
   migrateImportExportHooks,
+  migrateDbTypesSubpath,
 ]

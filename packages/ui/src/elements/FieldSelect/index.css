@@ -1,0 +1,5 @@
+@layer payload-default {
+  .field-select {
+    margin-bottom: var(--spacer-3);
+  }
+}

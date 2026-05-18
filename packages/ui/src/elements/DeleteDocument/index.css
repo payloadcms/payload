@@ -1,0 +1,11 @@
+@layer payload-default {
+  .delete-document__checkbox {
+    padding: var(--spacer-1) 0;
+
+    .checkbox-input {
+      label {
+        padding-bottom: 0;
+      }
+    }
+  }
+}
