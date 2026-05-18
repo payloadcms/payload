@@ -15,7 +15,7 @@ if (disableTranspile) {
     await bin()
   }
 
-  void start()
+  await start()
 } else {
   const filename = fileURLToPath(import.meta.url)
   const dirname = path.dirname(filename)
@@ -30,7 +30,7 @@ if (disableTranspile) {
       await bin()
     }
 
-    void start()
+    await start()
   } else if (useSwc) {
     const { register } = await import('node:module')
     // Remove --use-swc from arguments
@@ -49,6 +49,6 @@ if (disableTranspile) {
       await bin()
     }
 
-    void start()
+    await start()
   }
 }
