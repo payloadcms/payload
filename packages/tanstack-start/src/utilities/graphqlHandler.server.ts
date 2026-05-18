@@ -69,7 +69,8 @@ const getGraphql = async (config: Promise<SanitizedConfig> | SanitizedConfig) =>
 
   if (!cached.promise) {
     const resolvedConfig = await config
-    const { configToSchema } = await import('@payloadcms/graphql' as string)
+    const graphqlPackage = '@payloadcms/graphql'
+    const { configToSchema } = await import(/* @vite-ignore */ graphqlPackage)
     cached.promise = new Promise((resolve) => {
       const schema = configToSchema(resolvedConfig)
       resolve(cached.graphql || schema)
@@ -114,7 +115,8 @@ export const handleGraphQL = async ({
 
   const { payload } = req
 
-  const { createHandler } = await import('graphql-http/lib/use/fetch' as string)
+  const graphqlHttpHandlerPath = 'graphql-http/lib/use/fetch'
+  const { createHandler } = await import(/* @vite-ignore */ graphqlHttpHandlerPath)
 
   const headers: Record<string, string> = {}
   const apiResponse = await createHandler({
