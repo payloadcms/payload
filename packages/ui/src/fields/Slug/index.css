@@ -37,6 +37,20 @@
       gap: var(--spacer-1);
     }
 
+    .field-error.tooltip {
+      pointer-events: none;
+    }
+
+    html:not([dir='RTL']) & .field-error.tooltip {
+      inset-inline-start: 0;
+      inset-inline-end: auto;
+    }
+
+    html[dir='RTL'] & .field-error.tooltip {
+      inset-inline-end: 0;
+      inset-inline-start: auto;
+    }
+
     .slug-field-component__action-btn {
       display: flex;
       align-items: center;

@@ -2,7 +2,7 @@
 
 import type { SlugFieldClientProps } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation, rtlLanguages } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
 import { Button } from '../../elements/Button/index.js'
@@ -29,6 +29,8 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
   const { description, placeholder, readOnly: readOnlyFromProps } = admin || {}
 
   const { i18n, t } = useTranslation()
+
+  const isRTL = (rtlLanguages as readonly string[]).includes(i18n.language)
 
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
@@ -116,7 +118,7 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
     >
       <FieldLabel htmlFor={`field-${fieldPath}`} label={label} required={required} />
       <div className={`${baseClass}__wrap`}>
-        <FieldError path={fieldPath} showError={showError} />
+        <FieldError alignCaret={isRTL ? 'right' : 'left'} path={fieldPath} showError={showError} />
 
         <div
           className={[
