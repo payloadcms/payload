@@ -141,6 +141,7 @@ import {
   type CountVersionsOptions,
 } from './collections/operations/local/countVersions.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
+import { normalizeSendEmailOptions } from './email/normalizeSendEmailOptions.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
@@ -953,7 +954,12 @@ export class BasePayload {
       }
     }
 
-    this.sendEmail = this.email['sendEmail']
+    /**
+     * @todo: Remove in v4.
+     * See `normalizeSendEmailOptions` for details.
+     */
+    const adapterSendEmail = this.email['sendEmail']
+    this.sendEmail = (message) => adapterSendEmail(normalizeSendEmailOptions(message))
 
     serverInitTelemetry(this)
 
