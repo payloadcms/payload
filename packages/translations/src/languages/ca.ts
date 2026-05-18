@@ -346,6 +346,7 @@ export const caTranslations: DefaultTranslationsObject = {
     locale: 'Idioma',
     locales: 'Idiomes',
     lock: 'Bloqueig',
+    manageLabel: 'Manage {{label}}',
     menu: 'Menu',
     moreOptions: 'Més opcions',
     move: 'Mou-te',

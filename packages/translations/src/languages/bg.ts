@@ -344,6 +344,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     locale: 'Локализация',
     locales: 'Локализации',
     lock: 'Заключване',
+    manageLabel: 'Управление на {{label}}',
     menu: 'Меню',
     moreOptions: 'Повече опции',
     move: 'Премести',

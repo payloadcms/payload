@@ -1,0 +1,37 @@
+@layer payload-default {
+  .search-filter {
+    position: relative;
+  }
+
+  .search-filter__input {
+    font-family: var(--font-family-sans);
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: var(--color-text);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+    height: auto;
+    padding: var(--spacer-1) 0;
+    padding-inline-end: var(--spacer-2);
+    box-shadow: none;
+    -webkit-appearance: none;
+
+    &:not(:disabled) {
+      &:hover,
+      &:focus {
+        box-shadow: none;
+      }
+    }
+
+    &:focus {
+      outline: 0;
+    }
+
+    &::placeholder {
+      color: var(--color-text-tertiary);
+      font-weight: normal;
+    }
+  }
+}
