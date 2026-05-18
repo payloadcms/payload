@@ -9,7 +9,7 @@ export default buildConfig({
       collections: ['posts'],
     })
   ],
-  storageAdapters: [s3Storage({
+  storage: [s3Storage({
         bucket: process.env.S3_BUCKET,
         collections: { media: true },
         config: { region: process.env.S3_REGION },

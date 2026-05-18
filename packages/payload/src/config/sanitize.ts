@@ -460,8 +460,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config.csrf!.push(config.serverURL!)
   }
 
-  if (!config.storageAdapters) {
-    config.storageAdapters = []
+  if (!config.storage) {
+    config.storage = []
   }
 
   if (!config.upload) {

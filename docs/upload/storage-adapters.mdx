@@ -19,14 +19,14 @@ Payload offers additional storage adapters to handle file uploads. These adapter
 
 ## Configuration
 
-Storage adapters are registered under the top-level `storageAdapters` key in your Payload config. This placement ensures that upload hooks, static file handlers, and presigned-URL endpoints are wired up before any plugin modifies the config.
+Storage adapters are registered under the top-level `storage` key in your Payload config. This placement ensures that upload hooks, static file handlers, and presigned-URL endpoints are wired up before any plugin modifies the config.
 
 ```ts
 import { s3Storage } from '@payloadcms/storage-s3'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  storageAdapters: [
+  storage: [
     s3Storage({
       bucket: process.env.S3_BUCKET,
       collections: { media: true },
@@ -71,7 +71,7 @@ import { MediaWithPrefix } from './collections/MediaWithPrefix'
 
 export default buildConfig({
   collections: [Media, MediaWithPrefix],
-  storageAdapters: [
+  storage: [
     vercelBlobStorage({
       enabled: true, // Optional, defaults to true
       // Specify which collections should use Vercel Blob
@@ -126,7 +126,7 @@ import { MediaWithPrefix } from './collections/MediaWithPrefix'
 
 export default buildConfig({
   collections: [Media, MediaWithPrefix],
-  storageAdapters: [
+  storage: [
     s3Storage({
       collections: {
         media: true,
@@ -188,7 +188,7 @@ import { s3Storage } from '@payloadcms/storage-s3'
 
 export default buildConfig({
   collections: [Media],
-  storageAdapters: [
+  storage: [
     s3Storage({
       enabled: Boolean(process.env.R2_BUCKET),
       collections: {
@@ -255,7 +255,7 @@ import { MediaWithPrefix } from './collections/MediaWithPrefix'
 
 export default buildConfig({
   collections: [Media, MediaWithPrefix],
-  storageAdapters: [
+  storage: [
     azureStorage({
       collections: {
         media: true,
@@ -309,7 +309,7 @@ import { MediaWithPrefix } from './collections/MediaWithPrefix'
 
 export default buildConfig({
   collections: [Media, MediaWithPrefix],
-  storageAdapters: [
+  storage: [
     gcsStorage({
       collections: {
         media: true,
@@ -359,7 +359,7 @@ pnpm add @payloadcms/storage-uploadthing
 ```ts
 export default buildConfig({
   collections: [Media],
-  storageAdapters: [
+  storage: [
     uploadthingStorage({
       collections: {
         media: true,
@@ -410,7 +410,7 @@ pnpm add @payloadcms/storage-r2
 ```ts
 export default buildConfig({
   collections: [Media],
-  storageAdapters: [
+  storage: [
     r2Storage({
       collections: {
         media: true,
@@ -458,9 +458,9 @@ import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 export default buildConfig({
   plugins: [
-    // cloudStoragePlugin is a low-level building block — place it in plugins, not storageAdapters.
+    // cloudStoragePlugin is a low-level building block — place it in plugins, not storage.
     // The built-in adapter packages (s3Storage, gcsStorage, etc.) wrap this internally
-    // and are used via storageAdapters instead.
+    // and are used via storage instead.
     cloudStoragePlugin({
       collections: {
         'my-collection-slug': {
@@ -519,7 +519,7 @@ Result: media-folder/user-123/image.jpg
 This is useful when you want a base folder structure (collection prefix) while still allowing per-document organization (document prefix).
 
 ```ts
-storageAdapters: [
+storage: [
   s3Storage({
     collections: {
       media: {

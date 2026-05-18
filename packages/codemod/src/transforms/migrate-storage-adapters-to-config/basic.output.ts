@@ -3,7 +3,7 @@ import { buildConfig } from 'payload'
 
 export default buildConfig({
   collections: [],
-  storageAdapters: [s3Storage({
+  storage: [s3Storage({
         bucket: process.env.S3_BUCKET,
         collections: { media: true },
         config: {

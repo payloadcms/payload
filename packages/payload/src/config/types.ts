@@ -167,14 +167,14 @@ export type Plugin = ((config: Config) => Config | Promise<Config>) & {
  * and presigned-URL endpoints are guaranteed to be in place before any plugin
  * modifies the config.
  *
- * Pass the return value of a storage adapter factory to `storageAdapters` in your
+ * Pass the return value of a storage adapter factory to `storage` in your
  * Payload config:
  *
  * ```ts
  * import { s3Storage } from '@payloadcms/storage-s3'
  *
  * export default buildConfig({
- *   storageAdapters: [
+ *   storage: [
  *     s3Storage({
  *       bucket: process.env.S3_BUCKET,
  *       collections: { media: true },
@@ -1548,7 +1548,7 @@ export type Config = {
    *
    * @see https://payloadcms.com/docs/uploads/storage-adapters
    */
-  storageAdapters?: StorageAdapter[]
+  storage?: StorageAdapter[]
   /** Send anonymous telemetry data about general usage. */
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
@@ -1647,7 +1647,7 @@ export type SanitizedConfig = {
     configDir: string
     rawConfig: string
   }
-  storageAdapters: StorageAdapter[]
+  storage: StorageAdapter[]
   upload: {
     /**
      * Deduped list of adapters used in the project
@@ -1668,7 +1668,7 @@ export type SanitizedConfig = {
   | 'i18n'
   | 'jobs'
   | 'localization'
-  | 'storageAdapters'
+  | 'storage'
   | 'upload'
 >
 

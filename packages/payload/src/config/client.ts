@@ -39,7 +39,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'queryPresets'
   | 'secret'
   | 'sharp'
-  | 'storageAdapters'
+  | 'storage'
   | 'typescript'
 >
 
@@ -100,7 +100,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'logger',
   'kv',
   'queryPresets',
-  'storageAdapters',
+  'storage',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 

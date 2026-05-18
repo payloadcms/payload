@@ -62,8 +62,8 @@ export const migrateStorageAdaptersToConfig: Transform = {
           pluginsProp.remove()
         }
 
-        // Append to existing storageAdapters or create it
-        const existingProp = obj.getProperty('storageAdapters')
+        // Append to existing storage or create it
+        const existingProp = obj.getProperty('storage')
         if (existingProp && Node.isPropertyAssignment(existingProp)) {
           const arr = existingProp.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression)
           if (arr) {
@@ -72,7 +72,7 @@ export const migrateStorageAdaptersToConfig: Transform = {
             }
           }
         } else {
-          const added = obj.addPropertyAssignment({ name: 'storageAdapters', initializer: '[]' })
+          const added = obj.addPropertyAssignment({ name: 'storage', initializer: '[]' })
           const arr = added.getInitializerIfKindOrThrow(SyntaxKind.ArrayLiteralExpression)
           for (const text of storageTexts) {
             arr.addElement(text)
@@ -86,5 +86,5 @@ export const migrateStorageAdaptersToConfig: Transform = {
     return { filesChanged: Array.from(filesChanged) }
   },
   description:
-    'Move storage adapter factory calls (s3Storage, gcsStorage, azureStorage, r2Storage, vercelBlobStorage, uploadthingStorage) from `plugins` to the top-level `storageAdapters` array. Removes `plugins` if it becomes empty after the move.',
+    'Move storage adapter factory calls (s3Storage, gcsStorage, azureStorage, r2Storage, vercelBlobStorage, uploadthingStorage) from `plugins` to the top-level `storage` array. Removes `plugins` if it becomes empty after the move.',
 }
