@@ -1,7 +1,5 @@
 import type { Address } from 'nodemailer/lib/mailer'
 
-import type { SendEmailOptions } from './types.js'
-
 /**
  * @todo: Remove in v4.
  *
@@ -22,5 +20,3 @@ export function normalizeSendEmailOptions<T extends { from?: unknown }>(message:
     from: typeof first === 'string' || (first && typeof first === 'object') ? first : undefined,
   } as { from?: Address | string } & T
 }
-
-export type { SendEmailOptions }
