@@ -10,8 +10,8 @@ import {
   HydrateAuthProvider,
   LivePreviewProvider,
 } from '@payloadcms/ui'
+import { getDocumentViewData } from '@payloadcms/ui/server'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
-import { getDocumentViewData } from '@payloadcms/ui/views/Document/getDocumentViewData'
 import { notFound, redirect } from 'next/navigation.js'
 import { logError } from 'payload'
 import React from 'react'

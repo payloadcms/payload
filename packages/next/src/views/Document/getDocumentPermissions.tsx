@@ -1,1 +1,1 @@
-export { getDocumentPermissions } from '@payloadcms/ui/views/Document/getDocumentPermissions'
+export { getDocumentPermissions } from '@payloadcms/ui/server'

@@ -12,6 +12,7 @@ export const serverOnlyClientSpecifiers: Array<RegExp | string> = [
   /^@payloadcms\/next\/rsc/,
   /^@payloadcms\/richtext-lexical\/rsc/,
   /^@payloadcms\/richtext-slate\/rsc/,
+  '@payloadcms/ui/server',
   /^@payloadcms\/tanstack-start\/(layouts|rsc|server|views\/server)/,
   'sharp',
   'busboy',

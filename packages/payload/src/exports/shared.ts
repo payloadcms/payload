@@ -25,32 +25,6 @@ export {
 } from '../collections/config/client.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 
-// `docAccessOperation` (and the global variant exported below) is a
-// server-only payload operation, but `@payloadcms/ui` server-only utilities
-// such as `getDocumentPermissions` do `import { docAccessOperation } from
-// 'payload'`. The browser condition of the `payload` package resolves to
-// this file, so without an export here the dev server crashes the moment a
-// client chunk that has `getDocumentPermissions` in its import graph hits
-// the browser. Pulling the real implementation in would drag the entire
-// server graph (including `getEntityPermissions`, transactions, etc.) into
-// the client bundle, so we expose runtime-throwing stubs - if anything ever
-// actually invokes them on the client we want a loud, traceable failure
-// rather than a silent `undefined`.
-const __serverOnlyStub =
-  (name: string) =>
-  (..._args: unknown[]): never => {
-    throw new Error(
-      `\`${name}\` from "payload" is a server-only operation and cannot be invoked in the client/browser bundle.`,
-    )
-  }
-export const createLocalReq = __serverOnlyStub('createLocalReq') as any
-export const docAccessOperation = __serverOnlyStub('docAccessOperation') as any
-export const docAccessOperationGlobal = __serverOnlyStub('docAccessOperationGlobal') as any
-export const executeAuthStrategies = __serverOnlyStub('executeAuthStrategies') as any
-export const getAccessResults = __serverOnlyStub('getAccessResults') as any
-export const getPayload = __serverOnlyStub('getPayload') as any
-export const getRequestLanguage = __serverOnlyStub('getRequestLanguage') as any
-export const isolateObjectProperty = __serverOnlyStub('isolateObjectProperty') as any
 export {
   type ClientConfig,
   createClientConfig,

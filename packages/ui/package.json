@@ -32,6 +32,11 @@
       "types": "./src/exports/shared/index.ts",
       "default": "./src/exports/shared/index.ts"
     },
+    "./server": {
+      "import": "./src/exports/server.ts",
+      "types": "./src/exports/server.ts",
+      "default": "./src/exports/server.ts"
+    },
     "./scss": {
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
@@ -886,6 +891,11 @@
         "import": "./dist/exports/shared/index.js",
         "types": "./dist/exports/shared/index.d.ts",
         "default": "./dist/exports/shared/index.js"
+      },
+      "./server": {
+        "import": "./dist/exports/server.js",
+        "types": "./dist/exports/server.d.ts",
+        "default": "./dist/exports/server.js"
       },
       "./css": {
         "import": "./dist/styles.css",
