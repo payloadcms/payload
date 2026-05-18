@@ -85,6 +85,12 @@ export async function ensureCompilationIsDone({
 
   const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
 
+  // Disable the hydration wait during compilation polling — the page won't
+  // have the React tree mounted yet, so waiting 15s per attempt for the
+  // hydration marker would exhaust the beforeAll hook timeout.
+  const patchedPage = page as unknown as { __payloadSkipHydrationWait?: boolean }
+  patchedPage.__payloadSkipHydrationWait = true
+
   const maxAttempts = 15
   let attempt = 1
 
@@ -121,12 +127,14 @@ export async function ensureCompilationIsDone({
       }
 
       console.log('Successfully compiled')
+      patchedPage.__payloadSkipHydrationWait = false
       if (browser) {
         await page.close()
       }
       return
     } catch (error) {
       if (attempt === maxAttempts) {
+        patchedPage.__payloadSkipHydrationWait = false
         console.error(
           'Compilation not done yet. Giving up. The dev server is probably not running or crashed.',
         )
@@ -138,6 +146,8 @@ export async function ensureCompilationIsDone({
       attempt++
     }
   }
+
+  patchedPage.__payloadSkipHydrationWait = false
 
   if (noAutoLogin) {
     if (browser) {
@@ -447,13 +457,19 @@ export function installTanStackHydrationGotoWait(page: Page) {
   if (process.env.PAYLOAD_FRAMEWORK !== 'tanstack-start') {
     return
   }
-  const patched = page as unknown as { __payloadGotoPatched?: boolean }
-  if (patched.__payloadGotoPatched) {
+  const patchedPage = page as unknown as {
+    __payloadGotoPatched?: boolean
+    __payloadSkipHydrationWait?: boolean
+  }
+  if (patchedPage.__payloadGotoPatched) {
     return
   }
-  patched.__payloadGotoPatched = true
+  patchedPage.__payloadGotoPatched = true
 
   const waitForHydration = async () => {
+    if (patchedPage.__payloadSkipHydrationWait) {
+      return
+    }
     try {
       await page.waitForFunction(
         () => (window as unknown as { __TANSTACK_HYDRATED__?: boolean }).__TANSTACK_HYDRATED__,
@@ -474,9 +490,6 @@ export function installTanStackHydrationGotoWait(page: Page) {
     return response
   }) as Page['goto']
 
-  // `page.reload()` also re-triggers SSR + hydration, so apply the same
-  // wait. Without it, raw `.click()` calls after a reload land on the
-  // unhydrated DOM, focus the button, and the React `onClick` never fires.
   const originalReload = page.reload.bind(page)
   page.reload = (async (...args: Parameters<Page['reload']>) => {
     const response = await originalReload(...args)
