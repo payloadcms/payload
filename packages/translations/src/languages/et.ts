@@ -343,6 +343,7 @@ export const etTranslations: DefaultTranslationsObject = {
     locale: 'Keel',
     locales: 'Keeled',
     lock: 'Lukk',
+    manageLabel: 'Halda {{label}}',
     menu: 'Menüü',
     moreOptions: 'Rohkem valikuid',
     move: 'Liiguta',

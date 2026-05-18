@@ -346,6 +346,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     locale: 'Lokalizācija',
     locales: 'Lokalizācijas',
     lock: 'Slēdzene',
+    manageLabel: 'Pārvaldīt {{label}}',
     menu: 'Izvēlne',
     moreOptions: 'Vairāk opciju',
     move: 'Pārvietoties',

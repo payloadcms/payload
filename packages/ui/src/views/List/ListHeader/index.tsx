@@ -12,7 +12,6 @@ import { ListDrawerCreateNewDocButton } from '../../../elements/ListHeader/Drawe
 import { ListHeader } from '../../../elements/ListHeader/index.js'
 import {
   ListBulkUploadButton,
-  ListCreateNewButton,
   ListEmptyTrashButton,
 } from '../../../elements/ListHeader/TitleActions/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -129,14 +128,6 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
       className={className}
       title={getTranslation(collectionConfig?.labels?.plural, i18n)}
       TitleActions={[
-        hasCreatePermission && !isTrashRoute && (
-          <ListCreateNewButton
-            collectionConfig={collectionConfig}
-            hasCreatePermission={hasCreatePermission}
-            key="list-header-create-new-doc"
-            newDocumentURL={newDocumentURL}
-          />
-        ),
         hasCreatePermission && isBulkUploadEnabled && !isTrashRoute && (
           <ListBulkUploadButton
             collectionSlug={collectionConfig.slug}

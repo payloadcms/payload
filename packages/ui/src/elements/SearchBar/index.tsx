@@ -7,7 +7,6 @@ import './index.css'
 const baseClass = 'search-bar'
 
 type SearchBarProps = {
-  Actions?: React.ReactNode[]
   className?: string
   disabled?: boolean
   label?: string
@@ -15,7 +14,6 @@ type SearchBarProps = {
   searchQueryParam?: string
 }
 export function SearchBar({
-  Actions,
   className,
   disabled,
   label = 'Search...',
@@ -31,9 +29,6 @@ export function SearchBar({
         label={label}
         searchQueryParam={searchQueryParam}
       />
-      {Actions && Actions.length > 0 ? (
-        <div className={`${baseClass}__actions`}>{Actions}</div>
-      ) : null}
     </div>
   )
 }

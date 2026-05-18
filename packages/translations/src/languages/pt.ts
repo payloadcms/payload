@@ -346,6 +346,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     locale: 'Local',
     locales: 'Localizações',
     lock: 'Bloquear',
+    manageLabel: 'Gerenciar {{label}}',
     menu: 'Cardápio',
     moreOptions: 'Mais opções',
     move: 'Mova',

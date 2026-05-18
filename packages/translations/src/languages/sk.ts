@@ -346,6 +346,7 @@ export const skTranslations: DefaultTranslationsObject = {
     locale: 'Jazyk',
     locales: 'Jazyky',
     lock: 'Zámok',
+    manageLabel: 'Manage {{label}}',
     menu: 'Menu',
     moreOptions: 'Viac možností',
     move: 'Presuňte sa',

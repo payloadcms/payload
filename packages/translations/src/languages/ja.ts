@@ -347,6 +347,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     locale: 'ロケール',
     locales: 'ロケール',
     lock: 'ロック',
+    manageLabel: '{{label}}を管理する',
     menu: 'メニュー',
     moreOptions: 'より多くのオプション',
     move: '移動します',

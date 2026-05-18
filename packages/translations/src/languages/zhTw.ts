@@ -327,6 +327,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     locale: '語言地區',
     locales: '語言地區',
     lock: '鎖定',
+    manageLabel: '管理 {{label}}',
     menu: '選單',
     moreOptions: '更多選項',
     move: '移動',

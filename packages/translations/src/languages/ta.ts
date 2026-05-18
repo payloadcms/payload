@@ -343,6 +343,7 @@ export const taTranslations: DefaultTranslationsObject = {
     locale: 'மொழி அமைவு',
     locales: 'மொழி அமைவுகள்',
     lock: 'பூட்டு',
+    manageLabel: '{{label}}-ஐ நிர்வகிக்கவும்',
     menu: 'மெனு',
     moreOptions: 'மேலும் விருப்பங்கள்',
     move: 'நகர்த்து',

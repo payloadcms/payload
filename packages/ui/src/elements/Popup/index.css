@@ -32,7 +32,6 @@
     background: var(--color-bg-elevated);
     color: var(--color-text);
     border-radius: var(--radius-large);
-    padding: var(--spacer-2);
     min-width: 80px;
     max-width: 400px;
     box-shadow:
@@ -55,8 +54,10 @@
   }
 
   .popup__scroll-container {
+    overflow-x: hidden;
     overflow-y: auto;
-    max-height: calc(var(--base) * 10);
+    max-height: calc(var(--spacer-5) * 10);
+    padding: var(--spacer-2) 0;
   }
 
   .popup__scroll-container:not(.popup__scroll-container--show-scrollbar) {

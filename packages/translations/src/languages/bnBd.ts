@@ -349,6 +349,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     locale: 'লোকেল',
     locales: 'লোকেলগুলি',
     lock: 'লক',
+    manageLabel: '{{label}} পরিচালনা করুন',
     menu: 'মেনু',
     moreOptions: 'আরও বিকল্পগুলি',
     move: 'স্থানান্তর করুন',

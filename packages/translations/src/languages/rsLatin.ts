@@ -345,6 +345,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     locale: 'Jezik',
     locales: 'Prevodi',
     lock: 'Zaključaj',
+    manageLabel: 'Upravljajte {{label}}',
     menu: 'Meni',
     moreOptions: 'Više opcija',
     move: 'Pomeri',

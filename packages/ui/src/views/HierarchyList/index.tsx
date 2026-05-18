@@ -353,20 +353,18 @@ export function HierarchyListView(props: ListViewClientProps) {
 
             <div className={`${baseClass}__controls`}>
               <SearchBar
-                Actions={[
-                  <TypeFilter
-                    i18n={i18n}
-                    key={`type-filter-${hierarchyData.parent ? hierarchyData.parent.id : 'root'}`}
-                    onChange={handleTypeFilterChange}
-                    options={typeOptions}
-                    selectedValues={selectedTypes}
-                  />,
-                ]}
                 label={t('general:searchBy', {
                   label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
                 })}
                 onSearchChange={handleSearchChange}
                 searchQueryParam={searchFromURL}
+              />
+              <TypeFilter
+                i18n={i18n}
+                key={`type-filter-${hierarchyData.parent ? hierarchyData.parent.id : 'root'}`}
+                onChange={handleTypeFilterChange}
+                options={typeOptions}
+                selectedValues={selectedTypes}
               />
             </div>
 

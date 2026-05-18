@@ -352,6 +352,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     locale: 'Taal',
     locales: 'Talen',
     lock: 'Slot',
+    manageLabel: 'Manage {{label}}',
     menu: 'Menu',
     moreOptions: 'Meer opties',
     move: 'Verplaatsen',

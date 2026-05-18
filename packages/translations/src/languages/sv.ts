@@ -346,6 +346,7 @@ export const svTranslations: DefaultTranslationsObject = {
     locale: 'Språk',
     locales: 'Språk',
     lock: 'Lås',
+    manageLabel: 'Hantera {{label}}',
     menu: 'Meny',
     moreOptions: 'Fler alternativ',
     move: 'Flytta',

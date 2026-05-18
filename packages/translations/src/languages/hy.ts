@@ -344,6 +344,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     locale: 'Լոկալ',
     locales: 'Լոկալներ',
     lock: 'Կողպել',
+    manageLabel: 'Կառավարել {{label}}',
     menu: 'Մենյու',
     moreOptions: 'Լրացուցիչ ընտրանքներ',
     move: 'Տեղափոխվել',

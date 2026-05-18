@@ -344,6 +344,7 @@ export const daTranslations: DefaultTranslationsObject = {
     locale: 'Lokalitet',
     locales: 'Lokaliteter',
     lock: 'Lås',
+    manageLabel: 'Manage {{label}}',
     menu: 'Menu',
     moreOptions: 'Flere muligheder',
     move: 'Flyt',

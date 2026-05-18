@@ -345,6 +345,7 @@ export const viTranslations: DefaultTranslationsObject = {
     locale: 'Ngôn ngữ',
     locales: 'Ngôn ngữ',
     lock: 'Khóa',
+    manageLabel: 'Manage {{label}}',
     menu: 'Menu',
     moreOptions: 'Tùy chọn khác',
     move: 'Di chuyển',

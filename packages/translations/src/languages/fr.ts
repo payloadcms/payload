@@ -355,6 +355,7 @@ export const frTranslations: DefaultTranslationsObject = {
     locale: 'Paramètres régionaux',
     locales: 'Paramètres régionaux',
     lock: 'Verrou',
+    manageLabel: 'Manage {{label}}',
     menu: 'Menu',
     moreOptions: "Plus d'options",
     move: 'Déplacer',

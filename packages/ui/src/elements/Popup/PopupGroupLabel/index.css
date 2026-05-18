@@ -1,0 +1,9 @@
+@layer payload-default {
+  .popup-list-group-label {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    line-height: 1;
+    margin-top: var(--spacer-1);
+    margin-bottom: var(--spacer-2);
+  }
+}

@@ -348,6 +348,7 @@ export const itTranslations: DefaultTranslationsObject = {
     locale: 'Locale',
     locales: 'Localizzazioni',
     lock: 'Serratura',
+    manageLabel: 'Gestisci {{label}}',
     menu: 'Menù',
     moreOptions: 'Più opzioni',
     move: 'Muoviti',

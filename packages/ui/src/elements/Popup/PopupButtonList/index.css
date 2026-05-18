@@ -27,11 +27,12 @@
 
   .popup-button-list__button {
     padding: 0 var(--spacer-2);
+    margin: 0 var(--spacer-2);
     cursor: pointer;
     text-align: inherit;
     text-decoration: none;
     border-radius: var(--radius-medium);
-    width: 100%;
+    width: calc(100% - var(--spacer-2) * 2);
     height: 24px;
     display: flex;
     align-items: center;
@@ -58,12 +59,26 @@
     gap: var(--spacer-1);
     min-height: var(--spacer-4);
     padding: var(--spacer-1) var(--spacer-2) var(--spacer-1) var(--spacer-1);
+    /* Reserve space for icon column so text aligns consistently */
+    padding-left: calc(var(--spacer-1) + 20px + var(--spacer-1));
   }
 
   .popup-button-list__button-size--medium .popup-button-list__button svg {
     width: 20px;
     height: 20px;
     flex-shrink: 0;
+    /* Pull icon into reserved space */
+    margin-left: calc(-20px - var(--spacer-1));
+  }
+
+  [dir='rtl'] .popup-button-list__button-size--medium .popup-button-list__button {
+    padding-left: var(--spacer-2);
+    padding-right: calc(var(--spacer-1) + 20px + var(--spacer-1));
+  }
+
+  [dir='rtl'] .popup-button-list__button-size--medium .popup-button-list__button svg {
+    margin-left: 0;
+    margin-right: calc(-20px - var(--spacer-1));
   }
 
   .popup-button-list__disabled {
@@ -76,5 +91,36 @@
   .popup-button-list__disabled:focus-within {
     background-color: transparent;
     color: var(--color-text-disabled);
+  }
+
+  .popup-button-list__button--selected {
+    background-color: var(--color-bg-selected);
+    color: var(--color-text);
+  }
+
+  .popup-button-list__button--selected:hover {
+    background-color: var(--color-bg-selected-strong);
+    color: var(--color-text-onselected-strong);
+  }
+
+  /* IconButtonGroup - reserves space for icons so text aligns consistently */
+  .popup-button-list--with-icons .popup-button-list__button {
+    gap: var(--spacer-1);
+    min-height: var(--spacer-4);
+    padding: var(--spacer-1) var(--spacer-2) var(--spacer-1) var(--spacer-1);
+  }
+
+  .popup-button-list--with-icons .popup-button-list__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .popup-button-list--with-icons .popup-button-list__icon svg {
+    width: 16px;
+    height: 16px;
   }
 }

@@ -343,6 +343,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     locale: 'Локалізація',
     locales: 'Локалізації',
     lock: 'Замок',
+    manageLabel: 'Керувати {{label}}',
     menu: 'Меню',
     moreOptions: 'Додатково',
     move: 'Перемістити',

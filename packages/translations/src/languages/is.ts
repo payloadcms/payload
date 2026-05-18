@@ -343,6 +343,7 @@ export const isTranslations: DefaultTranslationsObject = {
     locale: 'Staðfærsla',
     locales: 'Staðfærslur',
     lock: 'Lás',
+    manageLabel: 'Stjórna {{label}}',
     menu: 'Valmynd',
     moreOptions: 'Fleiri valkostir',
     move: 'Færa',

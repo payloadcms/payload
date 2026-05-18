@@ -347,6 +347,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     locale: 'Локаль',
     locales: 'Локали',
     lock: 'Замок',
+    manageLabel: 'Управление {{label}}',
     menu: 'Меню',
     moreOptions: 'Больше вариантов',
     move: 'Переместить',

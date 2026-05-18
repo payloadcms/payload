@@ -335,6 +335,7 @@ export const heTranslations: DefaultTranslationsObject = {
     locale: 'שפה',
     locales: 'שפות',
     lock: 'נעילה',
+    manageLabel: 'נהל את {{label}}',
     menu: 'תפריט',
     moreOptions: 'אפשרויות נוספות',
     move: 'הזוז',

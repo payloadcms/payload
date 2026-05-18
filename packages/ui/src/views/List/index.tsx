@@ -229,7 +229,9 @@ export function DefaultListView(props: ListViewClientProps) {
                 disableQueryPresets={
                   collectionConfig?.enableQueryPresets !== true || disableQueryPresets
                 }
+                hasCreatePermission={hasCreatePermission && viewType !== 'trash'}
                 listMenuItems={listMenuItems}
+                newDocumentURL={newDocumentURL}
                 queryPreset={queryPreset}
                 queryPresetPermissions={queryPresetPermissions}
                 renderedFilters={renderedFilters}

@@ -336,6 +336,7 @@ export const arTranslations: DefaultTranslationsObject = {
     locale: 'اللّغة',
     locales: 'اللّغات',
     lock: 'قفل',
+    manageLabel: 'إدارة {{label}}',
     menu: 'قائمة',
     moreOptions: 'خيارات أكثر',
     move: 'تحرك',

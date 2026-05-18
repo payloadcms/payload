@@ -348,6 +348,7 @@ export const azTranslations: DefaultTranslationsObject = {
     locale: 'Lokal',
     locales: 'Dillər',
     lock: 'Kilid',
+    manageLabel: '{{label}} idarə et',
     menu: 'Menyu',
     moreOptions: 'Daha çox seçimlər',
     move: 'Hərəkət et',

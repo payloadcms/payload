@@ -349,6 +349,7 @@ export const huTranslations: DefaultTranslationsObject = {
     locale: 'Nyelv',
     locales: 'Nyelvek',
     lock: 'Zár',
+    manageLabel: '{{label}} kezelése',
     menu: 'Menü',
     moreOptions: 'Több opció',
     move: 'Mozdulj',

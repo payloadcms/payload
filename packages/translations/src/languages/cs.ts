@@ -343,6 +343,7 @@ export const csTranslations: DefaultTranslationsObject = {
     locale: 'Místní verze',
     locales: 'Lokality',
     lock: 'Zámek',
+    manageLabel: 'Spravovat {{label}}',
     menu: 'Jídelní lístek',
     moreOptions: 'Více možností',
     move: 'Pohnout',
