@@ -397,7 +397,7 @@ describe('Query Presets', () => {
   })
 
   // eslint-disable-next-line playwright/no-skipped-test, playwright/expect-expect
-  test.skip('can save a preset', ({ _page }) => {
+  test.skip('can save a preset', ({ page }) => {
     // select a preset, make a change to the presets, click "save for everyone" or "save", and ensure the changes persist
   })
 
@@ -735,6 +735,7 @@ describe('Query Presets', () => {
 
     // 2. Reload page
     await page.reload()
+    await page.waitForURL(/preset=/)
     await expect(page.locator('#select-preset')).toContainText(seededData.onlyMe.title)
 
     // 3. Save button should NOT show in popup (no modifications yet)

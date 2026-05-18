@@ -258,17 +258,23 @@ export const QueryPresetBar: React.FC<{
     const presetWhere = activePreset.where
     const presetGroupBy = activePreset.groupBy || ''
 
-    // Normalize query.columns to empty array if undefined for comparison
-    const queryColumns = query.columns || []
+    // Normalize query.columns - it may be a JSON string from URL or an array
+    let queryColumns = query.columns || []
+    if (typeof queryColumns === 'string') {
+      try {
+        queryColumns = JSON.parse(queryColumns)
+      } catch {
+        queryColumns = []
+      }
+    }
 
     // Compare current query with preset values
     const columnsMatch = JSON.stringify(queryColumns) === JSON.stringify(presetColumns)
     const whereMatch = JSON.stringify(query.where) === JSON.stringify(presetWhere)
     const groupByMatch = (query.groupBy || '') === presetGroupBy
 
-    if (!columnsMatch || !whereMatch || !groupByMatch) {
-      setQueryModified(true)
-    }
+    const isModified = !columnsMatch || !whereMatch || !groupByMatch
+    setQueryModified(isModified)
   }, [activePreset, query.columns, query.where, query.groupBy, setQueryModified])
 
   const hasModifiedPreset = activePreset && modified
