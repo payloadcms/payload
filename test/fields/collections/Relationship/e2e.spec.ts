@@ -614,7 +614,7 @@ describe('relationship', () => {
       await page.locator('.popup__content #action-delete').click()
 
       await page
-        .locator('[id^=delete-].payload__modal-item.confirmation-modal[open] button#confirm-action')
+        .locator('[id^=delete-].payload__modal-item.alert-modal[open] button#confirm-action')
         .click()
 
       await expect(drawer1Content).toBeHidden()

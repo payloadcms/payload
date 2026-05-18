@@ -367,7 +367,7 @@ describe('Auth', () => {
 
         // Click the "Leave anyway" button
         await page
-          .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+          .locator('#leave-without-saving .alert-modal__controls .btn--style-primary')
           .click()
 
         await expect(page.locator('.login')).toBeVisible()
@@ -573,7 +573,7 @@ describe('Auth', () => {
       // Resume clock so timers can execute
       await page.clock.resume()
 
-      await expect(page.locator('.confirmation-modal')).toBeHidden()
+      await expect(page.locator('.alert-modal')).toBeHidden()
 
       await expect(page.locator('.nav')).toBeVisible()
     })

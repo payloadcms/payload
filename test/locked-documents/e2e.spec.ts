@@ -210,7 +210,7 @@ describe('Locked Documents', () => {
       await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
       await page.locator('.delete-documents__toggle').click()
       await expect(
-        page.locator('#confirm-delete-many-docs .confirmation-modal__content p'),
+        page.locator('#confirm-delete-many-docs .alert-modal__content p'),
       ).toHaveText('You are about to delete 2 Posts')
     })
 
@@ -510,7 +510,7 @@ describe('Locked Documents', () => {
 
       // Click the "Leave anyway" button
       await page
-        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+        .locator('#leave-without-saving .alert-modal__controls .btn--style-primary')
         .click()
 
       // eslint-disable-next-line payload/no-wait-function
@@ -563,7 +563,7 @@ describe('Locked Documents', () => {
 
       // Click the "Leave anyway" button
       await page
-        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+        .locator('#leave-without-saving .alert-modal__controls .btn--style-primary')
         .click()
 
       // eslint-disable-next-line payload/no-wait-function

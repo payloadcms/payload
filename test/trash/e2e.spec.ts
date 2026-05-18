@@ -333,9 +333,9 @@ describe('Trash', () => {
         await page.locator('#empty-trash-button').click()
 
         await expect(page.locator('#confirm-empty-trash')).toBeVisible()
-        await expect(
-          page.locator('#confirm-empty-trash .confirmation-modal__content'),
-        ).toContainText('You are about to permanently delete 3 Posts from the trash. Are you sure?')
+        await expect(page.locator('#confirm-empty-trash .alert-modal__content')).toContainText(
+          'You are about to permanently delete 3 Posts from the trash. Are you sure?',
+        )
 
         await page.locator('#confirm-empty-trash #confirm-action').click()
 
@@ -364,7 +364,7 @@ describe('Trash', () => {
         await expect(page.locator('#confirm-restore-many-docs')).toBeVisible()
 
         await expect(
-          page.locator('#confirm-restore-many-docs .confirmation-modal__content'),
+          page.locator('#confirm-restore-many-docs .alert-modal__content'),
         ).toContainText('You are about to restore 2 Posts as draft')
 
         await page.locator('#confirm-restore-many-docs #confirm-action').click()
@@ -437,7 +437,7 @@ describe('Trash', () => {
         await expect(page.locator('#confirm-restore-many-docs')).toBeVisible()
 
         await expect(
-          page.locator('#confirm-restore-many-docs .confirmation-modal__content'),
+          page.locator('#confirm-restore-many-docs .alert-modal__content'),
         ).toContainText('You are about to restore 2 Posts as draft')
 
         await page.locator('#restore-as-published-many').check()
@@ -513,9 +513,9 @@ describe('Trash', () => {
 
         await expect(page.locator('#confirm-delete-many-docs')).toBeVisible()
 
-        await expect(
-          page.locator('#confirm-delete-many-docs .confirmation-modal__content'),
-        ).toContainText('You are about to permanently delete 2 Posts from the trash. Are you sure?')
+        await expect(page.locator('#confirm-delete-many-docs .alert-modal__content')).toContainText(
+          'You are about to permanently delete 2 Posts from the trash. Are you sure?',
+        )
 
         await page.locator('#confirm-delete-many-docs #confirm-action').click()
 
@@ -673,7 +673,7 @@ describe('Trash', () => {
 
         await expect(page.locator(`#perma-delete-${trashedPostDocOne.id}`)).toBeVisible()
         await expect(
-          page.locator(`#perma-delete-${trashedPostDocOne.id} .confirmation-modal__content`),
+          page.locator(`#perma-delete-${trashedPostDocOne.id} .alert-modal__content`),
         ).toContainText('You are about to permanently delete the Post')
 
         await page.locator(`#perma-delete-${trashedPostDocOne.id} #confirm-action`).click()
@@ -718,7 +718,7 @@ describe('Trash', () => {
 
         await expect(page.locator(`#restore-${trashedPostDocOne.id}`)).toBeVisible()
         await expect(
-          page.locator(`#restore-${trashedPostDocOne.id} .confirmation-modal__content`),
+          page.locator(`#restore-${trashedPostDocOne.id} .alert-modal__content`),
         ).toContainText('You are about to restore the Post Trashed Post as a draft. Are you sure?')
 
         await page.locator(`#restore-${trashedPostDocOne.id} #confirm-action`).click()
@@ -1156,9 +1156,9 @@ describe('Trash', () => {
       await page.locator('.doc-controls__controls #action-restore').click()
 
       await expect(page.locator(`#restore-${devUserID} #confirm-action`)).toBeVisible()
-      await expect(
-        page.locator(`#restore-${devUserID} .confirmation-modal__content`),
-      ).toContainText('You are about to restore the User')
+      await expect(page.locator(`#restore-${devUserID} .alert-modal__content`)).toContainText(
+        'You are about to restore the User',
+      )
 
       await page.locator(`#restore-${devUserID} #confirm-action`).click()
 
