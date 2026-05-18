@@ -28,7 +28,14 @@ import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConf
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
 import { openQueryPresetDrawer } from './helpers/openQueryPresetDrawer.js'
-import { clearSelectedPreset, selectPreset } from './helpers/togglePreset.js'
+import {
+  checkPresetMenuOptions,
+  clearSelectedPreset,
+  openCreatePreset,
+  openDeletePreset,
+  openEditPreset,
+  selectPreset,
+} from './helpers/togglePreset.js'
 import { defaultColumnsSlug, pagesSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -93,7 +100,7 @@ describe('Query Presets', () => {
     const presetTitle = 'Empty Preset'
 
     // Create a new preset without setting any filters or columns
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
     await modal.locator('input[name="title"]').fill(presetTitle)
@@ -111,7 +118,7 @@ describe('Query Presets', () => {
     ).toBeVisible()
 
     // Open the edit modal to verify where/columns fields handle null values
-    await page.locator('#edit-preset').click()
+    await openEditPreset({ page })
     const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(editModal).toBeVisible()
 
@@ -187,9 +194,9 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: pagesUrl.list })
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
-    await page.locator('#delete-preset').click()
+    await openDeletePreset({ page })
 
-    await page.locator('#confirm-delete-preset #confirm-action').click()
+    await page.locator('[id="delete-preset-confirmation"] #confirm-action').click()
 
     // columns can either be omitted or an empty string after being cleared
     const regex = /columns=(?:\[\]|$)/
@@ -244,15 +251,14 @@ describe('Query Presets', () => {
     })
   })
 
+  // eslint-disable-next-line playwright/expect-expect -- assertions are inside checkPresetMenuOptions helper
   test('should only show "edit" and "delete" controls when there is an active preset', async ({
     page,
   }) => {
     await navigateToListView({ page, url: pagesUrl.list })
-    await expect(page.locator('#edit-preset')).toBeHidden()
-    await expect(page.locator('#delete-preset')).toBeHidden()
+    await checkPresetMenuOptions({ page, expectEdit: false, expectDelete: false })
     await selectPreset({ page, presetTitle: seededData.everyone.title })
-    await expect(page.locator('#edit-preset')).toBeVisible()
-    await expect(page.locator('#delete-preset')).toBeVisible()
+    await checkPresetMenuOptions({ page, expectEdit: true, expectDelete: true })
   })
 
   test('should only show "reset" and "save" controls when there is an active preset and changes have been made', async ({
@@ -348,7 +354,7 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: pagesUrl.list })
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
-    await page.locator('#edit-preset').click()
+    await openEditPreset({ page })
 
     const drawer = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     const titleValue = drawer.locator('input[name="title"]')
@@ -384,7 +390,7 @@ describe('Query Presets', () => {
 
     const presetTitle = 'New Preset'
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
     await modal.locator('input[name="title"]').fill(presetTitle)
@@ -435,7 +441,7 @@ describe('Query Presets', () => {
     })
 
     // Create a new preset with this filter
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -449,7 +455,7 @@ describe('Query Presets', () => {
     await page.waitForURL((url) => url.searchParams.has('preset'))
 
     // Open the edit preset modal to check the filter display
-    await page.locator('#edit-preset').click()
+    await openEditPreset({ page })
     const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(editModal).toBeVisible()
 
@@ -508,7 +514,7 @@ describe('Query Presets', () => {
     )
 
     // Create a new preset with this filter
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -522,7 +528,7 @@ describe('Query Presets', () => {
     await page.waitForURL((url) => url.searchParams.has('preset'))
 
     // Open the edit preset modal to check the filter display
-    await page.locator('#edit-preset').click()
+    await openEditPreset({ page })
     const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(editModal).toBeVisible()
 
@@ -543,7 +549,7 @@ describe('Query Presets', () => {
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
     // Create a new preset
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -570,7 +576,7 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: postsUrl.list })
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -599,7 +605,7 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: postsUrl.list })
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -626,7 +632,7 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: postsUrl.list })
     await wait(1000)
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -659,7 +665,7 @@ describe('Query Presets', () => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
     await navigateToListView({ page, url: postsUrl.list })
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -732,7 +738,7 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: postsUrl.list })
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 

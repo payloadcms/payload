@@ -788,7 +788,7 @@ describe('Localization', () => {
     await page.goto(url.list)
     const searchInput = page.locator('.search-filter__input')
     await expect(searchInput).toBeVisible()
-    await expect(searchInput).toHaveAttribute('placeholder', 'Search by Full title')
+    await expect(searchInput).toHaveAttribute('placeholder', 'Search')
   })
 
   describe('publish specific locale', () => {
