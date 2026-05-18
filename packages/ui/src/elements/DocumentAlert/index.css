@@ -1,0 +1,67 @@
+@layer payload-default {
+  dialog.document-alert {
+    // TODO: check with design on max width when three actions are present
+    --document-alert-width: 420px;
+
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-modalbackdrop);
+  }
+
+  dialog.document-alert--compact {
+    --document-alert-width: 320px;
+  }
+
+  .document-alert__wrapper {
+    z-index: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: var(--document-alert-width);
+    max-width: calc(100vw - var(--spacer-5));
+    background: var(--color-bg);
+    border-radius: var(--radius-large);
+    overflow: clip;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    color: var(--color-text);
+
+    > h4 {
+      font-weight: var(--text-body-medium-strong-font-weight);
+      letter-spacing: var(--text-body-medium-strong-letter-spacing);
+      min-height: var(--spacer-6);
+      align-content: center;
+      border-bottom: var(--stroke-width-small) solid var(--color-border);
+      padding: var(--spacer-2) var(--spacer-3);
+      margin: 0;
+    }
+  }
+
+  .document-alert__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2-5);
+    padding: var(--spacer-2) var(--spacer-3);
+
+    > * {
+      margin: 0;
+    }
+  }
+
+  .document-alert__controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacer-2);
+    padding: var(--spacer-2);
+
+    .btn {
+      margin: 0;
+    }
+  }
+}

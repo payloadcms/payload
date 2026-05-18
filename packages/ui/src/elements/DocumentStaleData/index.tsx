@@ -5,11 +5,11 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Modal, useModal } from '../Modal/index.js'
-import './index.scss'
+import '../DocumentAlert/index.css'
 
 const modalSlug = 'document-stale-data'
 
-const baseClass = 'document-stale-data'
+const baseClass = 'document-alert'
 
 export const DocumentStaleData: React.FC<{
   isActive: boolean
@@ -28,23 +28,21 @@ export const DocumentStaleData: React.FC<{
   }, [isActive, openModal, closeModal])
 
   return (
-    <Modal className={baseClass} closeOnBlur={false} slug={modalSlug}>
+    <Modal className={`${baseClass} ${baseClass}--compact`} closeOnBlur={false} slug={modalSlug}>
       <div className={`${baseClass}__wrapper`}>
+        <h4>{t('general:documentModified')}</h4>
         <div className={`${baseClass}__content`}>
-          <h1>{t('general:documentModified')}</h1>
           <p>{t('general:documentOutOfDate')}</p>
         </div>
         <div className={`${baseClass}__controls`}>
           <Button
             buttonStyle="primary"
             id={`${modalSlug}-reload`}
-            margin={false}
             onClick={async () => {
               closeModal(modalSlug)
               clearRouteCache()
               await onReload()
             }}
-            size="medium"
           >
             {t('general:reloadDocument')}
           </Button>

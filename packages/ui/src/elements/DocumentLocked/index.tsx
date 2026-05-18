@@ -9,11 +9,11 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { isClientUserObject } from '../../utilities/isClientUserObject.js'
 import { Button } from '../Button/index.js'
 import { Modal, useModal } from '../Modal/index.js'
-import './index.scss'
+import '../DocumentAlert/index.css'
 
 const modalSlug = 'document-locked'
 
-const baseClass = 'document-locked'
+const baseClass = 'document-alert'
 
 const formatDate = (date) => {
   if (!date) {
@@ -61,8 +61,8 @@ export const DocumentLocked: React.FC<{
       slug={modalSlug}
     >
       <div className={`${baseClass}__wrapper`}>
+        <h4>{t('general:documentLocked')}</h4>
         <div className={`${baseClass}__content`}>
-          <h1>{t('general:documentLocked')}</h1>
           <p>
             <strong>
               {isClientUserObject(user) ? (user.email ?? user.id) : `${t('general:user')}: ${user}`}
@@ -81,7 +81,6 @@ export const DocumentLocked: React.FC<{
               closeModal(modalSlug)
               startRouteTransition(() => handleGoBack())
             }}
-            size="large"
           >
             {t('general:goBack')}
           </Button>
@@ -93,7 +92,6 @@ export const DocumentLocked: React.FC<{
               closeModal(modalSlug)
               clearRouteCache()
             }}
-            size="large"
           >
             {t('general:viewReadOnly')}
           </Button>
@@ -104,7 +102,6 @@ export const DocumentLocked: React.FC<{
               onTakeOver()
               closeModal(modalSlug)
             }}
-            size="large"
           >
             {t('general:takeOver')}
           </Button>
