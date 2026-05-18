@@ -1,6 +1,5 @@
 @layer payload-default {
   dialog.document-alert {
-    // TODO: check with design on max width when three actions are present
     --document-alert-width: 420px;
 
     position: fixed;
