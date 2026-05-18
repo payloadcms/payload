@@ -5,12 +5,9 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import { Modal, useModal } from '../Modal/index.js'
-import '../DocumentAlert/index.css'
+import { AlertModal, useModal } from '../Modal/index.js'
 
 const modalSlug = 'document-take-over'
-
-const baseClass = 'document-alert'
 
 export const DocumentTakeOver: React.FC<{
   handleBackToDashboard: () => void
@@ -31,18 +28,9 @@ export const DocumentTakeOver: React.FC<{
   }, [isActive, openModal, closeModal])
 
   return (
-    <Modal
-      className={`${baseClass} ${baseClass}--compact`}
-      // Fixes https://github.com/payloadcms/payload/issues/13778
-      closeOnBlur={false}
-      slug={modalSlug}
-    >
-      <div className={`${baseClass}__wrapper`}>
-        <h4>{t('general:editingTakenOver')}</h4>
-        <div className={`${baseClass}__content`}>
-          <p>{t('general:anotherUserTakenOver')}</p>
-        </div>
-        <div className={`${baseClass}__controls`}>
+    <AlertModal
+      actions={
+        <>
           <Button
             buttonStyle="primary"
             id={`${modalSlug}-back-to-dashboard`}
@@ -63,8 +51,13 @@ export const DocumentTakeOver: React.FC<{
           >
             {t('general:viewReadOnly')}
           </Button>
-        </div>
-      </div>
-    </Modal>
+        </>
+      }
+      compact
+      slug={modalSlug}
+      title={t('general:editingTakenOver')}
+    >
+      <p>{t('general:anotherUserTakenOver')}</p>
+    </AlertModal>
   )
 }

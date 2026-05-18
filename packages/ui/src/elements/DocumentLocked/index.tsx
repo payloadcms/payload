@@ -8,14 +8,11 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isClientUserObject } from '../../utilities/isClientUserObject.js'
 import { Button } from '../Button/index.js'
-import { Modal, useModal } from '../Modal/index.js'
-import '../DocumentAlert/index.css'
+import { AlertModal, useModal } from '../Modal/index.js'
 
 const modalSlug = 'document-locked'
 
-const baseClass = 'document-alert'
-
-const formatDate = (date) => {
+const formatDate = (date: null | number | undefined) => {
   if (!date) {
     return ''
   }
@@ -51,29 +48,9 @@ export const DocumentLocked: React.FC<{
   }, [isActive, openModal, closeModal])
 
   return (
-    <Modal
-      className={baseClass}
-      // Fixes https://github.com/payloadcms/payload/issues/13778
-      closeOnBlur={false}
-      onClose={() => {
-        startRouteTransition(() => handleGoBack())
-      }}
-      slug={modalSlug}
-    >
-      <div className={`${baseClass}__wrapper`}>
-        <h4>{t('general:documentLocked')}</h4>
-        <div className={`${baseClass}__content`}>
-          <p>
-            <strong>
-              {isClientUserObject(user) ? (user.email ?? user.id) : `${t('general:user')}: ${user}`}
-            </strong>{' '}
-            {t('general:currentlyEditing')}
-          </p>
-          <p>
-            {t('general:editedSince')} <strong>{formatDate(updatedAt)}</strong>
-          </p>
-        </div>
-        <div className={`${baseClass}__controls`}>
+    <AlertModal
+      actions={
+        <>
           <Button
             buttonStyle="secondary"
             id={`${modalSlug}-go-back`}
@@ -105,8 +82,23 @@ export const DocumentLocked: React.FC<{
           >
             {t('general:takeOver')}
           </Button>
-        </div>
-      </div>
-    </Modal>
+        </>
+      }
+      onClose={() => {
+        startRouteTransition(() => handleGoBack())
+      }}
+      slug={modalSlug}
+      title={t('general:documentLocked')}
+    >
+      <p>
+        <strong>
+          {isClientUserObject(user) ? (user.email ?? user.id) : `${t('general:user')}: ${user}`}
+        </strong>{' '}
+        {t('general:currentlyEditing')}
+      </p>
+      <p>
+        {t('general:editedSince')} <strong>{formatDate(updatedAt)}</strong>
+      </p>
+    </AlertModal>
   )
 }

@@ -1,6 +1,6 @@
 @layer payload-default {
-  dialog.document-alert {
-    --document-alert-width: 420px;
+  dialog.alert-modal {
+    --alert-modal-width: 480px;
 
     position: fixed;
     inset: 0;
@@ -10,16 +10,16 @@
     background: var(--color-modalbackdrop);
   }
 
-  dialog.document-alert--compact {
-    --document-alert-width: 320px;
+  dialog.alert-modal--compact {
+    --alert-modal-width: 320px;
   }
 
-  .document-alert__wrapper {
+  .alert-modal__wrapper {
     z-index: 1;
     position: relative;
     display: flex;
     flex-direction: column;
-    width: var(--document-alert-width);
+    width: var(--alert-modal-width);
     max-width: calc(100vw - var(--spacer-5));
     background: var(--color-bg);
     border-radius: var(--radius-large);
@@ -30,19 +30,30 @@
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
     color: var(--color-text);
+  }
 
-    > h4 {
-      font-weight: var(--text-body-medium-strong-font-weight);
-      letter-spacing: var(--text-body-medium-strong-letter-spacing);
-      min-height: var(--spacer-6);
-      align-content: center;
-      border-bottom: var(--stroke-width-small) solid var(--color-border);
-      padding: var(--spacer-2) var(--spacer-3);
-      margin: 0;
+  .alert-modal__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    min-height: var(--spacer-6);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    padding: var(--spacer-2) var(--spacer-3);
+
+    .btn {
+      padding: 0;
     }
   }
 
-  .document-alert__content {
+  .alert-modal__title {
+    flex: 1 0 0;
+    min-width: 0;
+    margin: 0;
+    font-weight: var(--text-body-medium-strong-font-weight);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+  }
+
+  .alert-modal__content {
     display: flex;
     flex-direction: column;
     gap: var(--spacer-2-5);
@@ -53,7 +64,7 @@
     }
   }
 
-  .document-alert__controls {
+  .alert-modal__controls {
     display: flex;
     justify-content: flex-end;
     gap: var(--spacer-2);

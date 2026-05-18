@@ -4,12 +4,9 @@ import React, { useEffect } from 'react'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import { Modal, useModal } from '../Modal/index.js'
-import '../DocumentAlert/index.css'
+import { AlertModal, useModal } from '../Modal/index.js'
 
 const modalSlug = 'document-stale-data'
-
-const baseClass = 'document-alert'
 
 export const DocumentStaleData: React.FC<{
   isActive: boolean
@@ -28,26 +25,25 @@ export const DocumentStaleData: React.FC<{
   }, [isActive, openModal, closeModal])
 
   return (
-    <Modal className={`${baseClass} ${baseClass}--compact`} closeOnBlur={false} slug={modalSlug}>
-      <div className={`${baseClass}__wrapper`}>
-        <h4>{t('general:documentModified')}</h4>
-        <div className={`${baseClass}__content`}>
-          <p>{t('general:documentOutOfDate')}</p>
-        </div>
-        <div className={`${baseClass}__controls`}>
-          <Button
-            buttonStyle="primary"
-            id={`${modalSlug}-reload`}
-            onClick={async () => {
-              closeModal(modalSlug)
-              clearRouteCache()
-              await onReload()
-            }}
-          >
-            {t('general:reloadDocument')}
-          </Button>
-        </div>
-      </div>
-    </Modal>
+    <AlertModal
+      actions={
+        <Button
+          buttonStyle="primary"
+          id={`${modalSlug}-reload`}
+          onClick={async () => {
+            closeModal(modalSlug)
+            clearRouteCache()
+            await onReload()
+          }}
+        >
+          {t('general:reloadDocument')}
+        </Button>
+      }
+      compact
+      slug={modalSlug}
+      title={t('general:documentModified')}
+    >
+      <p>{t('general:documentOutOfDate')}</p>
+    </AlertModal>
   )
 }
