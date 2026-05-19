@@ -209,9 +209,9 @@ describe('Locked Documents', () => {
       // Should be partial since one doc is locked and cannot be selected
       await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
       await page.locator('.delete-documents__toggle').click()
-      await expect(
-        page.locator('#confirm-delete-many-docs .alert-modal__content p'),
-      ).toHaveText('You are about to delete 2 Posts')
+      await expect(page.locator('#confirm-delete-many-docs .alert-modal__content p')).toHaveText(
+        'You are about to delete 2 Posts',
+      )
     })
 
     test('should only allow bulk delete on unlocked documents on all pages', async () => {
@@ -509,9 +509,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page
-        .locator('#leave-without-saving .alert-modal__controls .btn--style-primary')
-        .click()
+      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
@@ -562,9 +560,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page
-        .locator('#leave-without-saving .alert-modal__controls .btn--style-primary')
-        .click()
+      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
@@ -1478,7 +1474,9 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+        await expect(user2Page.locator('#document-stale-data .alert-modal__title')).toHaveText(
+          'Document modified',
+        )
       })
 
       test('should reload document and show latest data when clicking reload button', async () => {
@@ -1876,7 +1874,9 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+        await expect(user2Page.locator('#document-stale-data .alert-modal__title')).toHaveText(
+          'Document modified',
+        )
       })
 
       test('should reload global and show latest data when clicking reload button', async () => {
@@ -2065,7 +2065,9 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+        await expect(user2Page.locator('#document-stale-data .alert-modal__title')).toHaveText(
+          'Document modified',
+        )
       })
 
       test('should detect stale data across multiple save cycles for global with drafts', async () => {
