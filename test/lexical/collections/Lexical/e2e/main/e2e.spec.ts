@@ -1459,7 +1459,7 @@ describe('lexicalMain', () => {
 
     await expect(page.locator('tbody tr').first()).toBeVisible()
 
-    const createButton = page.getByLabel('Create new Rich Text Field')
+    const createButton = page.locator('#create-new-doc')
     await expect(createButton).toBeEnabled()
     const href = await createButton.getAttribute('href')
     await page.goto(`${serverURL}${href}`)

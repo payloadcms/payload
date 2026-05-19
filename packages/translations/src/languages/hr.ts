@@ -344,6 +344,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     locale: 'Jezik',
     locales: 'Prijevodi',
     lock: 'Brava',
+    manageLabel: 'Upravljajte {{label}}',
     menu: 'Izbornik',
     moreOptions: 'Više opcija',
     move: 'Pomakni',

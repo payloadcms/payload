@@ -153,7 +153,8 @@ export const renderListView = async (
   })
 
   let queryPreset: QueryPreset | undefined
-  let queryPresetPermissions: SanitizedCollectionPermission | undefined
+  let queryPresetPermissions: SanitizedCollectionPermission | undefined =
+    permissions?.collections?.['payload-query-presets']
 
   if (collectionPreferences?.preset) {
     try {

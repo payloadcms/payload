@@ -39,7 +39,7 @@ export type PopupProps = {
    */
   buttonClassName?: string
   buttonSize?: 'large' | 'medium'
-  buttonType?: 'custom' | 'default' | 'none'
+  buttonType?: 'custom' | 'default'
   caret?: boolean
   children?: React.ReactNode
   /**

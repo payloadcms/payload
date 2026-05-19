@@ -67,9 +67,9 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    posts: Post;
-    categories: Category;
-    articles: Article;
+    tickets: Ticket;
+    revenue: Revenue;
+    events: Event;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -78,9 +78,9 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    posts: PostsSelect<false> | PostsSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
-    articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    tickets: TicketsSelect<false> | TicketsSelect<true>;
+    revenue: RevenueSelect<false> | RevenueSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -90,11 +90,16 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es';
   widgets: {
+    count: CountWidget;
+    private: PrivateWidget;
+    revenue: RevenueWidget;
+    'page-query': PageQueryWidget;
+    configurable: ConfigurableWidget;
     collections: CollectionsWidget;
   };
   user: User;
@@ -123,51 +128,17 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "tickets".
  */
-export interface Post {
+export interface Ticket {
   id: string;
-  title?: string | null;
+  title: string;
+  description?: string | null;
+  status: 'open' | 'in-progress' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  assignee?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "articles".
- */
-export interface Article {
-  id: string;
-  title?: string | null;
-  category?: (string | null) | Category;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -196,22 +167,70 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "revenue".
+ */
+export interface Revenue {
+  id: string;
+  amount: number;
+  description: string;
+  date: string;
+  category: 'sales' | 'subscriptions' | 'services' | 'other';
+  source?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: string;
+  title: string;
+  description?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  location?: string | null;
+  type: 'meeting' | 'conference' | 'workshop' | 'webinar' | 'other';
+  organizer?: (string | null) | User;
+  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'posts';
-        value: string | Post;
+        relationTo: 'tickets';
+        value: string | Ticket;
       } | null)
     | ({
-        relationTo: 'categories';
-        value: string | Category;
+        relationTo: 'revenue';
+        value: string | Revenue;
       } | null)
     | ({
-        relationTo: 'articles';
-        value: string | Article;
+        relationTo: 'events';
+        value: string | Event;
       } | null)
     | ({
         relationTo: 'users';
@@ -261,29 +280,43 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
+ * via the `definition` "tickets_select".
  */
-export interface PostsSelect<T extends boolean = true> {
+export interface TicketsSelect<T extends boolean = true> {
   title?: T;
+  description?: T;
+  status?: T;
+  priority?: T;
+  assignee?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
+ * via the `definition` "revenue_select".
  */
-export interface CategoriesSelect<T extends boolean = true> {
-  name?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "articles_select".
- */
-export interface ArticlesSelect<T extends boolean = true> {
-  title?: T;
+export interface RevenueSelect<T extends boolean = true> {
+  amount?: T;
+  description?: T;
+  date?: T;
   category?: T;
+  source?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  startDate?: T;
+  endDate?: T;
+  location?: T;
+  type?: T;
+  organizer?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -351,6 +384,62 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "count_widget".
+ */
+export interface CountWidget {
+  data?: {
+    title: string;
+    collection?: ('tickets' | 'events') | null;
+  };
+  width: 'x-small' | 'small' | 'medium';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "private_widget".
+ */
+export interface PrivateWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "revenue_widget".
+ */
+export interface RevenueWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "page-query_widget".
+ */
+export interface PageQueryWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "configurable_widget".
+ */
+export interface ConfigurableWidget {
+  data?: {
+    title: string;
+    description?: string | null;
+    relatedTicket?: (string | null) | Ticket;
+    nestedGroup?: {
+      nestedText?: string | null;
+    };
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -369,5 +458,6 @@ export interface Auth {
 
 
 declare module 'payload' {
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

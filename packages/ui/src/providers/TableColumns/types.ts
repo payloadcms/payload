@@ -8,6 +8,7 @@ export interface ITableColumns {
   moveColumn: (args: { fromIndex: number; toIndex: number }) => Promise<void>
   resetColumnsState: () => Promise<void>
   setActiveColumns: (columns: string[]) => Promise<void>
+  setColumns: (columns: Column[]) => Promise<void>
   toggleColumn: (column: string) => Promise<void>
 }
 

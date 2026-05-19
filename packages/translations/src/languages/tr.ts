@@ -348,6 +348,7 @@ export const trTranslations: DefaultTranslationsObject = {
     locale: 'Yerel ayar',
     locales: 'Diller',
     lock: 'Kilitle',
+    manageLabel: "{{label}}'i Yönet",
     menu: 'Menü',
     moreOptions: 'Daha fazla seçenek',
     move: 'Hareket et',

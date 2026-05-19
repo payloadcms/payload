@@ -350,6 +350,7 @@ export const roTranslations: DefaultTranslationsObject = {
     locale: 'Localitate',
     locales: 'Localuri',
     lock: 'Încuietoare',
+    manageLabel: 'Gestionați {{label}}',
     menu: 'Meniu',
     moreOptions: 'Mai multe opțiuni',
     move: 'Mutați',

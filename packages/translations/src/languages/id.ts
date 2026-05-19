@@ -347,6 +347,7 @@ export const idTranslations: DefaultTranslationsObject = {
     locale: 'Lokal',
     locales: 'Lokal',
     lock: 'Kunci',
+    manageLabel: 'Manage {{label}}',
     menu: 'Menu',
     moreOptions: 'Opsi lainnya',
     move: 'Pindah',

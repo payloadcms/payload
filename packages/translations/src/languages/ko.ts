@@ -343,6 +343,7 @@ export const koTranslations: DefaultTranslationsObject = {
     locale: 'locale',
     locales: 'locale',
     lock: '잠금',
+    manageLabel: '{{label}} 관리',
     menu: '메뉴',
     moreOptions: '더 많은 옵션',
     move: '움직이세요',
