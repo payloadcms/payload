@@ -1,3 +1,5 @@
+import type { QueryOptions } from 'mongoose'
+
 import { buildVersionCollectionFields, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -53,7 +55,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     session: await getSession(this, req),
     // Timestamps are manually added by the write transform
     timestamps: false,
-  }
+  } satisfies QueryOptions
 
   if (returning === false) {
     await Model.updateOne(query, versionData, options)

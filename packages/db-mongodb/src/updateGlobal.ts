@@ -1,3 +1,4 @@
+import type { QueryOptions } from 'mongoose'
 import type { UpdateGlobal } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -28,7 +29,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
     session: await getSession(this, req),
     // Timestamps are manually added by the write transform
     timestamps: false,
-  }
+  } satisfies QueryOptions
 
   if (returning === false) {
     await Model.updateOne({ globalType: globalSlug }, data, options)
