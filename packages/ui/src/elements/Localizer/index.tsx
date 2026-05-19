@@ -46,7 +46,6 @@ export const Localizer: React.FC<{
 
                 return (
                   <PopupList.Button
-                    active={locale.code === localeOption.code}
                     disabled={locale.code === localeOption.code}
                     key={localeOption.code}
                     onClick={() => {
