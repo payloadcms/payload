@@ -1,3 +1,4 @@
+import type { QueryOptions } from 'mongoose'
 import type { DeleteOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -28,7 +29,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
       select,
     }),
     session: await getSession(this, req),
-  }
+  } satisfies QueryOptions
 
   if (returning === false) {
     await Model.deleteOne(query, options)?.lean()

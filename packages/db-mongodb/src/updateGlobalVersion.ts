@@ -1,3 +1,4 @@
+import type { QueryOptions } from 'mongoose'
 import type { JsonObject, UpdateGlobalVersionArgs } from 'payload'
 
 import { buildVersionGlobalFields } from 'payload'
@@ -50,7 +51,7 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
     session: await getSession(this, req),
     // Timestamps are manually added by the write transform
     timestamps: false,
-  }
+  } satisfies QueryOptions
 
   if (returning === false) {
     await Model.updateOne(query, versionData, options)

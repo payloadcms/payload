@@ -1,4 +1,4 @@
-import type { UpdateQuery } from 'mongoose'
+import type { QueryOptions, UpdateQuery } from 'mongoose'
 
 import { flattenWhereToOperators, type UpdateMany } from 'payload'
 
@@ -102,7 +102,7 @@ export const updateMany: UpdateMany = async function updateMany(
     session: await getSession(this, req),
     // Timestamps are manually added by the write transform
     timestamps: false,
-  }
+  } satisfies QueryOptions
 
   try {
     if (typeof limit === 'number' && limit > 0) {
