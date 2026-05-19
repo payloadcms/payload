@@ -106,6 +106,7 @@
     max-height: calc(100vh - 200px);
     width: calc(100% + var(--nav-padding-inline-start) + var(--nav-padding-inline-end));
     margin-left: calc(-1 * var(--nav-padding-inline-start));
+    margin-top: var(--spacer-2);
   }
 
   .hierarchy-search-results__list {

@@ -7,11 +7,6 @@
 
   .hierarchy-column-browser__column-wrapper {
     flex-shrink: 0;
-
-    &:first-child {
-      margin-left: var(--gutter-h);
-      border-left: 1px solid var(--color-border);
-    }
   }
 
   .hierarchy-column-browser__column-wrapper--loading {
