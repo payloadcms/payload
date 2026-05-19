@@ -139,7 +139,7 @@
         color: var(--color-text-secondary);
 
         &:focus-visible {
-          outline: 1px solid var(--accessibility-focus-color);
+          outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
           outline-offset: -1px;
         }
       }
@@ -151,12 +151,12 @@
         padding-inline: -1px;
         cursor: pointer;
         margin-left: calc(var(--spacer-1) / 2);
-        height: 16px;
+        height: var(--spacer-3);
         overflow: visible;
         border-radius: var(--radius-medium);
 
         &:focus-visible {
-          outline: 1px solid var(--accessibility-focus-color);
+          outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
         }
       }
     }
