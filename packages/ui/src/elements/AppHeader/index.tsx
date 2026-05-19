@@ -7,6 +7,7 @@ import { SidebarIcon } from '../../icons/Sidebar/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
 import { Link } from '../Link/index.js'
 import { Localizer } from '../Localizer/index.js'
 import { useNav } from '../Nav/context.js'
@@ -66,14 +67,14 @@ export function AppHeader({ CustomAvatar }: Props) {
           <NavToggler className={`${baseClass}__mobile-nav-toggler`} tabIndex={-1} />
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
-              <button
+              <Button
                 aria-label={`${navOpen ? t('general:close') : t('general:open')} ${t('general:menu')}`}
+                buttonStyle="ghost"
                 className={`${baseClass}__sidebar-toggle`}
+                icon={<SidebarIcon />}
                 onClick={() => setNavOpen(!navOpen)}
                 type="button"
-              >
-                <SidebarIcon />
-              </button>
+              />
               <div className={`${baseClass}__step-nav-wrapper`}>
                 <StepNav className={`${baseClass}__step-nav`} />
               </div>
