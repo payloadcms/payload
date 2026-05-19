@@ -221,11 +221,8 @@ export function HierarchyTable({
       }))
 
       try {
-        // Field name is always _h_{hierarchySlug} by convention (created by createTagField)
-        const fieldName = `_h_${collectionSlug}`
-
         // "in" operator works for both hasMany and single relationship fields
-        const relationshipCondition = { [fieldName]: { in: [parentId] } }
+        const relationshipCondition = { [parentFieldName]: { in: [parentId] } }
 
         const relatedConfig = getEntityConfig({ collectionSlug: relatedSlug })
         const relatedUseAsTitle = relatedConfig?.admin?.useAsTitle || 'id'
@@ -277,6 +274,7 @@ export function HierarchyTable({
       apiRoute,
       collectionSlug,
       getEntityConfig,
+      parentFieldName,
       parentId,
       relatedBaseFilters,
       relatedGroups,
