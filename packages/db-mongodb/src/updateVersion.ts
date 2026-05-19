@@ -51,7 +51,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     timestamps: false,
   } satisfies QueryOptions
 
-  const findOptions = {
+  const findOptions: QueryOptions = {
     ...baseOptions,
     lean: true,
     new: true,
@@ -60,7 +60,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
       fields: flattenedFields,
       select,
     }),
-  } satisfies QueryOptions
+  }
 
   if (returning === false) {
     await Model.updateOne(query, versionData, baseOptions)

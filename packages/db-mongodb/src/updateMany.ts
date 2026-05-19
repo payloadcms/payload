@@ -98,7 +98,7 @@ export const updateMany: UpdateMany = async function updateMany(
     timestamps: false,
   } satisfies QueryOptions
 
-  const findOptions = {
+  const findOptions: QueryOptions = {
     ...baseOptions,
     lean: true,
     new: true,
@@ -107,7 +107,7 @@ export const updateMany: UpdateMany = async function updateMany(
       fields: collectionConfig.flattenedFields,
       select,
     }),
-  } satisfies QueryOptions
+  }
 
   try {
     if (typeof limit === 'number' && limit > 0) {

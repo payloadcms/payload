@@ -47,7 +47,7 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
     timestamps: false,
   } satisfies QueryOptions
 
-  const findOptions = {
+  const findOptions: QueryOptions = {
     ...baseOptions,
     lean: true,
     new: true,
@@ -56,7 +56,7 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
       fields: flattenedFields,
       select,
     }),
-  } satisfies QueryOptions
+  }
 
   if (returning === false) {
     await Model.updateOne(query, versionData, baseOptions)

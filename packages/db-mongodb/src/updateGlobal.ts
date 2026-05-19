@@ -25,7 +25,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
     timestamps: false,
   } satisfies QueryOptions
 
-  const findOptions = {
+  const findOptions: QueryOptions = {
     ...baseOptions,
     lean: true,
     new: true,
@@ -34,7 +34,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
       fields: globalConfig.flattenedFields,
       select,
     }),
-  } satisfies QueryOptions
+  }
 
   if (returning === false) {
     await Model.updateOne({ globalType: globalSlug }, data, baseOptions)

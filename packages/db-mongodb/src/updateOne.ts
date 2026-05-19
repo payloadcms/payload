@@ -82,7 +82,7 @@ export const updateOne: UpdateOne = async function updateOne(
     timestamps: false,
   } satisfies QueryOptions
 
-  const findOptions = {
+  const findOptions: QueryOptions = {
     ...baseOptions,
     lean: true,
     new: true,
@@ -91,7 +91,7 @@ export const updateOne: UpdateOne = async function updateOne(
       fields: collectionConfig.flattenedFields,
       select,
     }),
-  } satisfies QueryOptions
+  }
 
   try {
     if (returning === false) {
