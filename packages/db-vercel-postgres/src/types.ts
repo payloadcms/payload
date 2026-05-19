@@ -1,3 +1,4 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type {
   BasePostgresAdapter,
   GenericEnum,
@@ -6,7 +7,6 @@ import type {
   PostgresDB,
   PostgresSchemaHook,
 } from '@payloadcms/drizzle/postgres'
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { VercelPool, VercelPostgresPoolConfig } from '@vercel/postgres'
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'

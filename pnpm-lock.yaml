@@ -146,8 +146,8 @@ importers:
         specifier: 1.2.8
         version: 1.2.8
       mongoose:
-        specifier: 8.15.1
-        version: 8.15.1(@aws-sdk/credential-providers@3.1045.0)
+        specifier: 8.22.1
+        version: 8.22.1(@aws-sdk/credential-providers@3.1045.0)
       next:
         specifier: 16.2.6
         version: 16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0)
@@ -366,11 +366,11 @@ importers:
   packages/db-mongodb:
     dependencies:
       mongoose:
-        specifier: 8.15.1
-        version: 8.15.1(@aws-sdk/credential-providers@3.1045.0)
+        specifier: 8.22.1
+        version: 8.22.1(@aws-sdk/credential-providers@3.1045.0)
       mongoose-paginate-v2:
         specifier: 1.9.4
-        version: 1.9.4(mongoose@8.15.1(@aws-sdk/credential-providers@3.1045.0))
+        version: 1.9.4(mongoose@8.22.1(@aws-sdk/credential-providers@3.1045.0))
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -388,8 +388,8 @@ importers:
         specifier: ^2.4.5
         version: 2.4.9
       mongodb:
-        specifier: 6.16.0
-        version: 6.16.0(@aws-sdk/credential-providers@3.1045.0)
+        specifier: 6.20.0
+        version: 6.20.0(@aws-sdk/credential-providers@3.1045.0)
       mongodb-memory-server:
         specifier: 10.1.4
         version: 10.1.4(@aws-sdk/credential-providers@3.1045.0)
@@ -572,12 +572,12 @@ importers:
   packages/email-nodemailer:
     dependencies:
       nodemailer:
-        specifier: 7.0.12
-        version: 7.0.12
+        specifier: ^8.0.5
+        version: 8.0.7
     devDependencies:
       '@types/nodemailer':
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: ^8.0.0
+        version: 8.0.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -999,8 +999,8 @@ importers:
         specifier: 1.2.5
         version: 1.2.5
       '@types/nodemailer':
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: ^8.0.0
+        version: 8.0.0
       '@types/pluralize':
         specifier: 0.0.33
         version: 0.0.33
@@ -1059,12 +1059,12 @@ importers:
         specifier: ^6.1.2
         version: 6.3.16
       nodemailer:
-        specifier: 7.0.12
-        version: 7.0.12
+        specifier: ^8.0.5
+        version: 8.0.7
     devDependencies:
       '@types/nodemailer':
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: ^8.0.0
+        version: 8.0.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1299,7 +1299,7 @@ importers:
     dependencies:
       '@sentry/nextjs':
         specifier: ^9.5.0
-        version: 9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0))(react@19.2.6)(webpack@5.106.2(@swc/core@1.15.3)(esbuild@0.25.12)(postcss@8.5.14))
+        version: 9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0))(react@19.2.6)(webpack@5.106.2(@swc/core@1.15.3)(esbuild@0.25.12)(postcss@8.5.14))
       '@sentry/types':
         specifier: ^9.5.0
         version: 9.47.1
@@ -1859,7 +1859,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: 4.5.2
-        version: 4.5.2(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.5.2(vite@8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
       eslint:
         specifier: ^9.16.0
         version: 9.39.2(jiti@2.7.0)
@@ -1880,10 +1880,10 @@ importers:
         version: 6.0.3
       vite-tsconfig-paths:
         specifier: 6.0.5
-        version: 6.0.5(typescript@6.0.3)(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
+        version: 6.0.5(typescript@5.7.3)(vite@8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
       vitest:
         specifier: 4.1.6
-        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@24.12.3)(@vitest/ui@4.1.6)(happy-dom@20.9.0(bufferutil@4.1.0))(jsdom@28.0.0(@noble/hashes@1.8.0))(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@24.12.3)(@vitest/ui@4.1.6)(happy-dom@20.9.0(bufferutil@4.1.0))(jsdom@28.0.0(@noble/hashes@1.8.0))(vite@8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
 
   templates/ecommerce:
     dependencies:
@@ -2049,7 +2049,7 @@ importers:
         version: 1.0.0
       '@vitejs/plugin-react':
         specifier: 4.5.2
-        version: 4.5.2(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.5.2(vite@8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
       eslint:
         specifier: ^9.16.0
         version: 9.39.2(jiti@2.7.0)
@@ -2094,10 +2094,10 @@ importers:
         version: 6.0.3
       vite-tsconfig-paths:
         specifier: 6.0.5
-        version: 6.0.5(typescript@6.0.3)(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
+        version: 6.0.5(typescript@5.7.3)(vite@8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
       vitest:
         specifier: 4.1.6
-        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@24.12.3)(@vitest/ui@4.1.6)(happy-dom@20.9.0(bufferutil@4.1.0))(jsdom@28.0.0(@noble/hashes@1.8.0))(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@24.12.3)(@vitest/ui@4.1.6)(happy-dom@20.9.0(bufferutil@4.1.0))(jsdom@28.0.0(@noble/hashes@1.8.0))(vite@8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
 
   templates/website:
     dependencies:
@@ -2224,7 +2224,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: 4.5.2
-        version: 4.5.2(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.5.2(vite@8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
       autoprefixer:
         specifier: ^10.4.19
         version: 10.5.0(postcss@8.5.14)
@@ -2257,16 +2257,16 @@ importers:
         version: 6.0.3
       vite-tsconfig-paths:
         specifier: 6.0.5
-        version: 6.0.5(typescript@6.0.3)(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
+        version: 6.0.5(typescript@5.7.3)(vite@8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
       vitest:
         specifier: 4.1.6
-        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@24.12.3)(@vitest/ui@4.1.6)(happy-dom@20.9.0(bufferutil@4.1.0))(jsdom@28.0.0(@noble/hashes@1.8.0))(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@24.12.3)(@vitest/ui@4.1.6)(happy-dom@20.9.0(bufferutil@4.1.0))(jsdom@28.0.0(@noble/hashes@1.8.0))(vite@8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
 
   test:
     dependencies:
       recharts:
         specifier: 3.2.1
-        version: 3.2.1(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-is@16.13.1)(react@19.2.6)(redux@5.0.1)
+        version: 3.2.1(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1)
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.614.0
@@ -2488,14 +2488,14 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       mongoose:
-        specifier: 8.15.1
-        version: 8.15.1(@aws-sdk/credential-providers@3.1045.0)
+        specifier: 8.22.1
+        version: 8.22.1(@aws-sdk/credential-providers@3.1045.0)
       next:
         specifier: 16.2.6
         version: 16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.77.4)
       nodemailer:
-        specifier: 8.0.4
-        version: 8.0.4
+        specifier: ^8.0.5
+        version: 8.0.7
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
@@ -2813,10 +2813,6 @@ packages:
 
   '@aws-sdk/client-s3@3.1045.0':
     resolution: {integrity: sha512-fsuO3Y6t+3Ro9Bsg41DKj4Sfy53CGSrhnMldNplWmG8Tx0UbYk+YDa4RD1hVlJpERw4JBmPkl0+J9qlxMh1pcA==}
-    engines: {node: '>=20.0.0'}
-
-  '@aws-sdk/client-sesv2@3.1045.0':
-    resolution: {integrity: sha512-Ae6oKWTod06687mIdKPnHPG5tolx/g68tqIbySMoWCs56OmRqn+7JiS3pOlpQeqjhbJlukfrXbsTMgZcXO9cSQ==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/client-sqs@3.1045.0':
@@ -8035,8 +8031,8 @@ packages:
   '@types/node@24.12.3':
     resolution: {integrity: sha512-8oljBDGun9cIsZRJR6fkihn0TSXJI0UDOOhncYaERq6M0JMDoPLxyscwruJcb4GKS6dvK/d8xebYBg27h/duaQ==}
 
-  '@types/nodemailer@7.0.2':
-    resolution: {integrity: sha512-Zo6uOA9157WRgBk/ZhMpTQ/iCWLMk7OIs/Q9jvHarMvrzUUP/MDdPHL2U1zpf57HrrWGv4nYQn5uIxna0xY3xw==}
+  '@types/nodemailer@8.0.0':
+    resolution: {integrity: sha512-fyf8jWULsCo0d0BuoQ75i6IeoHs47qcqxWc7yUdUcV0pOZGjUTTOvwdG1PRXUDqN/8A64yQdQdnA2pZgcdi+cA==}
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
@@ -12092,8 +12088,8 @@ packages:
     resolution: {integrity: sha512-+oKQ/kc3CX+816oPFRtaF0CN4vNcGKNjpOQe4bHo/21A3pMD+lC7Xz1EX5HP7siCX4iCpVchDMmCOFXVQSGkUg==}
     engines: {node: '>=16.20.1'}
 
-  mongodb@6.16.0:
-    resolution: {integrity: sha512-D1PNcdT0y4Grhou5Zi/qgipZOYeWrhLEpk33n3nm6LGtz61jvO88WlrWCK/bigMjpnOdAUKKQwsGIl0NtWMyYw==}
+  mongodb@6.20.0:
+    resolution: {integrity: sha512-Tl6MEIU3K4Rq3TSHd+sZQqRBoGlFsOgNrH5ltAcFBV62Re3Fd+FcaVf8uSEQFOJ51SDowDVttBTONMfoYWrWlQ==}
     engines: {node: '>=16.20.1'}
     peerDependencies:
       '@aws-sdk/credential-providers': ^3.188.0
@@ -12101,7 +12097,7 @@ packages:
       gcp-metadata: ^5.2.0
       kerberos: ^2.0.1
       mongodb-client-encryption: '>=6.0.0 <7'
-      snappy: ^7.2.2
+      snappy: ^7.3.2
       socks: ^2.7.1
     peerDependenciesMeta:
       '@aws-sdk/credential-providers':
@@ -12129,8 +12125,8 @@ packages:
     resolution: {integrity: sha512-0LOsVEQmjrbJKVDi/IvFEhIezmuRjUE4loGgslv57j9nK/NMC+mbKT0QnaPSPpib4lByKVBcy3VbDa1TvlHZjA==}
     engines: {node: '>=4.0.0'}
 
-  mongoose@8.15.1:
-    resolution: {integrity: sha512-RhQ4DzmBi5BNGcS0w4u1vdMRIKcteXTCNzDt1j7XRcdWYBz1MjMjulBhPaeC5jBCHOD1yinuOFTTSOWLLGexWw==}
+  mongoose@8.22.1:
+    resolution: {integrity: sha512-c0bzt7ElI1CwWiyFSgg9bfhlFcblAoPwr+gmDcLCryClyKaeixWhP9KDGnr13kRPE8KPAuUN3ZZ3jSDxSPvoTg==}
     engines: {node: '>=16.20.1'}
 
   mpath@0.8.4:
@@ -12270,12 +12266,8 @@ packages:
   node-releases@2.0.44:
     resolution: {integrity: sha512-5WUyunoPMsvvEhS8AxHtRzP+oA8UCkJ7YRxatWKjngndhDGLiqEVAQKWjFAiAiuL8zMRGzGSJxFnLetoa43qGQ==}
 
-  nodemailer@7.0.12:
-    resolution: {integrity: sha512-H+rnK5bX2Pi/6ms3sN4/jRQvYSMltV6vqup/0SFOrxYYY/qoNvhXPlYq3e+Pm9RFJRwrMGbMIwi81M4dxpomhA==}
-    engines: {node: '>=6.0.0'}
-
-  nodemailer@8.0.4:
-    resolution: {integrity: sha512-k+jf6N8PfQJ0Fe8ZhJlgqU5qJU44Lpvp2yvidH3vp1lPnVQMgi4yEEMPXg5eJS1gFIJTVq1NHBk7Ia9ARdSBdQ==}
+  nodemailer@8.0.7:
+    resolution: {integrity: sha512-pkjE4mkBzQjdJT4/UmlKl3pX0rC9fZmjh7c6C9o7lv66Ac6w9WCnzPzhbPNxwZAzlF4mdq4CSWB5+FbK6FWCow==}
     engines: {node: '>=6.0.0'}
 
   noms@0.0.0:
@@ -14476,46 +14468,6 @@ packages:
     peerDependencies:
       vite: '*'
 
-  vite@7.3.3:
-    resolution: {integrity: sha512-/4XH147Ui7OGTjg3HbdWe5arnZQSbfuRzdr9Ec7TQi5I7R+ir0Rlc9GIvD4v0XZurELqA035KVXJXpR61xhiTA==}
-    engines: {node: ^20.19.0 || >=22.12.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': ^20.19.0 || >=22.12.0
-      jiti: '>=1.21.0'
-      less: ^4.0.0
-      lightningcss: ^1.21.0
-      sass: ^1.70.0
-      sass-embedded: ^1.70.0
-      stylus: '>=0.54.8'
-      sugarss: ^5.0.0
-      terser: ^5.16.0
-      tsx: ^4.8.1
-      yaml: ^2.4.2
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      jiti:
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      sass-embedded:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-      tsx:
-        optional: true
-      yaml:
-        optional: true
-
   vite@8.0.12:
     resolution: {integrity: sha512-w2dDofOWv2QB09ZITZBsvKTVAlYvPR4IAmrY/v0ir9KvLs0xybR7i48wxhM1/oyBWO34wPns+bPGw5ZrZqDpZg==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -15342,51 +15294,6 @@ snapshots:
       '@smithy/util-stream': 4.6.1
       '@smithy/util-utf8': 4.3.1
       '@smithy/util-waiter': 4.4.1
-      tslib: 2.8.1
-    transitivePeerDependencies:
-      - aws-crt
-
-  '@aws-sdk/client-sesv2@3.1045.0':
-    dependencies:
-      '@aws-crypto/sha256-browser': 5.2.0
-      '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/core': 3.974.8
-      '@aws-sdk/credential-provider-node': 3.972.39
-      '@aws-sdk/middleware-host-header': 3.972.10
-      '@aws-sdk/middleware-logger': 3.972.10
-      '@aws-sdk/middleware-recursion-detection': 3.972.11
-      '@aws-sdk/middleware-user-agent': 3.972.38
-      '@aws-sdk/region-config-resolver': 3.972.13
-      '@aws-sdk/signature-v4-multi-region': 3.996.25
-      '@aws-sdk/types': 3.973.8
-      '@aws-sdk/util-endpoints': 3.996.8
-      '@aws-sdk/util-user-agent-browser': 3.972.10
-      '@aws-sdk/util-user-agent-node': 3.973.24
-      '@smithy/config-resolver': 4.5.1
-      '@smithy/core': 3.24.1
-      '@smithy/fetch-http-handler': 5.4.1
-      '@smithy/hash-node': 4.3.1
-      '@smithy/invalid-dependency': 4.3.1
-      '@smithy/middleware-content-length': 4.3.1
-      '@smithy/middleware-endpoint': 4.5.1
-      '@smithy/middleware-retry': 4.6.1
-      '@smithy/middleware-serde': 4.3.1
-      '@smithy/middleware-stack': 4.3.1
-      '@smithy/node-config-provider': 4.4.1
-      '@smithy/node-http-handler': 4.7.1
-      '@smithy/protocol-http': 5.4.1
-      '@smithy/smithy-client': 4.13.1
-      '@smithy/types': 4.14.1
-      '@smithy/url-parser': 4.3.1
-      '@smithy/util-base64': 4.4.1
-      '@smithy/util-body-length-browser': 4.3.1
-      '@smithy/util-body-length-node': 4.3.1
-      '@smithy/util-defaults-mode-browser': 4.4.1
-      '@smithy/util-defaults-mode-node': 4.3.1
-      '@smithy/util-endpoints': 3.5.1
-      '@smithy/util-middleware': 4.3.1
-      '@smithy/util-retry': 4.4.1
-      '@smithy/util-utf8': 4.3.1
       tslib: 2.8.1
     transitivePeerDependencies:
       - aws-crt
@@ -20258,7 +20165,7 @@ snapshots:
       - supports-color
       - webpack
 
-  '@sentry/nextjs@9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0))(react@19.2.6)(webpack@5.106.2(@swc/core@1.15.3)(esbuild@0.25.12)(postcss@8.5.14))':
+  '@sentry/nextjs@9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0))(react@19.2.6)(webpack@5.106.2(@swc/core@1.15.3)(esbuild@0.25.12)(postcss@8.5.14))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.41.1
@@ -20271,7 +20178,7 @@ snapshots:
       '@sentry/vercel-edge': 9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))
       '@sentry/webpack-plugin': 3.6.1(webpack@5.106.2(@swc/core@1.15.3)(esbuild@0.25.12)(postcss@8.5.14))
       chalk: 3.0.0
-      next: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0)
+      next: 16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0)
       resolve: 1.22.8
       rollup: 4.59.0
       stacktrace-parser: 0.1.11
@@ -21448,7 +21355,7 @@ snapshots:
   '@types/mongoose-aggregate-paginate-v2@1.0.12(@aws-sdk/credential-providers@3.1045.0)':
     dependencies:
       '@types/node': 24.12.3
-      mongoose: 8.15.1(@aws-sdk/credential-providers@3.1045.0)
+      mongoose: 8.22.1(@aws-sdk/credential-providers@3.1045.0)
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
       - '@mongodb-js/zstd'
@@ -21478,12 +21385,9 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
-  '@types/nodemailer@7.0.2':
+  '@types/nodemailer@8.0.0':
     dependencies:
-      '@aws-sdk/client-sesv2': 3.1045.0
       '@types/node': 24.12.3
-    transitivePeerDependencies:
-      - aws-crt
 
   '@types/parse-json@4.0.2': {}
 
@@ -21842,7 +21746,7 @@ snapshots:
     transitivePeerDependencies:
       - utf-8-validate
 
-  '@vitejs/plugin-react@4.5.2(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))':
+  '@vitejs/plugin-react@4.5.2(vite@8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.0)
@@ -21850,7 +21754,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-beta.11
       '@types/babel__core': 7.20.5
       react-refresh: 0.17.0
-      vite: 7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0)
+      vite: 8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -21873,14 +21777,6 @@ snapshots:
       '@vitest/utils': 4.1.6
       chai: 6.2.2
       tinyrainbow: 3.1.0
-
-  '@vitest/mocker@4.1.6(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))':
-    dependencies:
-      '@vitest/spy': 4.1.6
-      estree-walker: 3.0.3
-      magic-string: 0.30.21
-    optionalDependencies:
-      vite: 7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0)
 
   '@vitest/mocker@4.1.6(vite@8.0.12(@types/node@24.12.3)(esbuild@0.25.12)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))':
     dependencies:
@@ -26220,7 +26116,7 @@ snapshots:
       find-cache-dir: 3.3.2
       follow-redirects: 1.16.0(debug@4.4.3)
       https-proxy-agent: 7.0.6
-      mongodb: 6.16.0(@aws-sdk/credential-providers@3.1045.0)
+      mongodb: 6.20.0(@aws-sdk/credential-providers@3.1045.0)
       new-find-package-json: 2.0.0
       semver: 7.8.0
       tar-stream: 3.2.0
@@ -26256,7 +26152,7 @@ snapshots:
       - socks
       - supports-color
 
-  mongodb@6.16.0(@aws-sdk/credential-providers@3.1045.0):
+  mongodb@6.20.0(@aws-sdk/credential-providers@3.1045.0):
     dependencies:
       '@mongodb-js/saslprep': 1.4.11
       bson: 6.10.4
@@ -26264,22 +26160,22 @@ snapshots:
     optionalDependencies:
       '@aws-sdk/credential-providers': 3.1045.0
 
-  mongoose-lean-virtuals@1.1.1(mongoose@8.15.1(@aws-sdk/credential-providers@3.1045.0)):
+  mongoose-lean-virtuals@1.1.1(mongoose@8.22.1(@aws-sdk/credential-providers@3.1045.0)):
     dependencies:
-      mongoose: 8.15.1(@aws-sdk/credential-providers@3.1045.0)
+      mongoose: 8.22.1(@aws-sdk/credential-providers@3.1045.0)
       mpath: 0.8.4
 
-  mongoose-paginate-v2@1.9.4(mongoose@8.15.1(@aws-sdk/credential-providers@3.1045.0)):
+  mongoose-paginate-v2@1.9.4(mongoose@8.22.1(@aws-sdk/credential-providers@3.1045.0)):
     dependencies:
-      mongoose-lean-virtuals: 1.1.1(mongoose@8.15.1(@aws-sdk/credential-providers@3.1045.0))
+      mongoose-lean-virtuals: 1.1.1(mongoose@8.22.1(@aws-sdk/credential-providers@3.1045.0))
     transitivePeerDependencies:
       - mongoose
 
-  mongoose@8.15.1(@aws-sdk/credential-providers@3.1045.0):
+  mongoose@8.22.1(@aws-sdk/credential-providers@3.1045.0):
     dependencies:
       bson: 6.10.4
       kareem: 2.6.3
-      mongodb: 6.16.0(@aws-sdk/credential-providers@3.1045.0)
+      mongodb: 6.20.0(@aws-sdk/credential-providers@3.1045.0)
       mpath: 0.9.0
       mquery: 5.0.0
       ms: 2.1.3
@@ -26530,9 +26426,7 @@ snapshots:
 
   node-releases@2.0.44: {}
 
-  nodemailer@7.0.12: {}
-
-  nodemailer@8.0.4: {}
+  nodemailer@8.0.7: {}
 
   noms@0.0.0:
     dependencies:
@@ -27304,7 +27198,7 @@ snapshots:
 
   real-require@1.0.0: {}
 
-  recharts@3.2.1(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-is@16.13.1)(react@19.2.6)(redux@5.0.1):
+  recharts@3.2.1(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1):
     dependencies:
       '@reduxjs/toolkit': 2.11.2(react-redux@9.2.0(@types/react@19.2.14)(react@19.2.6)(redux@5.0.1))(react@19.2.6)
       clsx: 2.1.1
@@ -27314,7 +27208,7 @@ snapshots:
       immer: 10.2.0
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
-      react-is: 16.13.1
+      react-is: 17.0.2
       react-redux: 9.2.0(@types/react@19.2.14)(react@19.2.6)(redux@5.0.1)
       reselect: 5.1.1
       tiny-invariant: 1.3.3
@@ -28958,34 +28852,15 @@ snapshots:
       d3-time: 3.1.0
       d3-timer: 3.0.1
 
-  vite-tsconfig-paths@6.0.5(typescript@6.0.3)(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0)):
+  vite-tsconfig-paths@6.0.5(typescript@5.7.3)(vite@8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0)):
     dependencies:
       debug: 4.4.3
       globrex: 0.1.2
-      tsconfck: 3.1.6(typescript@6.0.3)
-      vite: 7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0)
+      tsconfck: 3.1.6(typescript@5.7.3)
+      vite: 8.0.12(@types/node@24.12.3)(esbuild@0.27.1)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0)
     transitivePeerDependencies:
       - supports-color
       - typescript
-
-  vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0):
-    dependencies:
-      esbuild: 0.27.1
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
-      postcss: 8.5.14
-      rollup: 4.59.0
-      tinyglobby: 0.2.16
-    optionalDependencies:
-      '@types/node': 24.12.3
-      fsevents: 2.3.3
-      jiti: 2.7.0
-      lightningcss: 1.32.0
-      sass: 1.99.0
-      sass-embedded: 1.99.0
-      terser: 5.47.1
-      tsx: 4.21.0
-      yaml: 2.9.0
 
   vite@8.0.12(@types/node@24.12.3)(esbuild@0.25.12)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0):
     dependencies:
@@ -29040,37 +28915,6 @@ snapshots:
       terser: 5.47.1
       tsx: 4.21.0
       yaml: 2.9.0
-
-  vitest@4.1.6(@opentelemetry/api@1.9.1)(@types/node@24.12.3)(@vitest/ui@4.1.6)(happy-dom@20.9.0(bufferutil@4.1.0))(jsdom@28.0.0(@noble/hashes@1.8.0))(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0)):
-    dependencies:
-      '@vitest/expect': 4.1.6
-      '@vitest/mocker': 4.1.6(vite@7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
-      '@vitest/pretty-format': 4.1.6
-      '@vitest/runner': 4.1.6
-      '@vitest/snapshot': 4.1.6
-      '@vitest/spy': 4.1.6
-      '@vitest/utils': 4.1.6
-      es-module-lexer: 2.1.0
-      expect-type: 1.3.0
-      magic-string: 0.30.21
-      obug: 2.1.1
-      pathe: 2.0.3
-      picomatch: 4.0.4
-      std-env: 4.1.0
-      tinybench: 2.9.0
-      tinyexec: 1.1.2
-      tinyglobby: 0.2.16
-      tinyrainbow: 3.1.0
-      vite: 7.3.3(@types/node@24.12.3)(jiti@2.7.0)(lightningcss@1.32.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0)
-      why-is-node-running: 2.3.0
-    optionalDependencies:
-      '@opentelemetry/api': 1.9.1
-      '@types/node': 24.12.3
-      '@vitest/ui': 4.1.6(vitest@4.1.6)
-      happy-dom: 20.9.0(bufferutil@4.1.0)
-      jsdom: 28.0.0(@noble/hashes@1.8.0)
-    transitivePeerDependencies:
-      - msw
 
   vitest@4.1.6(@opentelemetry/api@1.9.1)(@types/node@24.12.3)(@vitest/ui@4.1.6)(happy-dom@20.9.0(bufferutil@4.1.0))(jsdom@28.0.0(@noble/hashes@1.8.0))(vite@8.0.12(@types/node@24.12.3)(esbuild@0.25.12)(jiti@2.7.0)(sass-embedded@1.99.0)(sass@1.99.0)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0)):
     dependencies:

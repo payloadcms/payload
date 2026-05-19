@@ -1,10 +1,5 @@
 import { expect, test } from '@playwright/test'
-import {
-  clickPillSelectorItem,
-  getPillSelectorItem,
-  openListColumns,
-  toggleColumn,
-} from '__helpers/e2e/columns/index.js'
+import { clickPillSelectorItem, toggleColumn } from '__helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from '__helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy } from '__helpers/e2e/groupBy/index.js'
 import { navigateToListView } from '__helpers/e2e/navigateToListView.js'
@@ -28,7 +23,17 @@ import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConf
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
 import { openQueryPresetDrawer } from './helpers/openQueryPresetDrawer.js'
-import { clearSelectedPreset, selectPreset } from './helpers/togglePreset.js'
+import {
+  checkPresetMenuOptions,
+  checkPresetModifiedOptions,
+  clearSelectedPreset,
+  openCreatePreset,
+  openDeletePreset,
+  openEditPreset,
+  resetPresetChanges,
+  savePresetChanges,
+  selectPreset,
+} from './helpers/togglePreset.js'
 import { defaultColumnsSlug, pagesSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -93,7 +98,7 @@ describe('Query Presets', () => {
     const presetTitle = 'Empty Preset'
 
     // Create a new preset without setting any filters or columns
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
     await modal.locator('input[name="title"]').fill(presetTitle)
@@ -111,7 +116,7 @@ describe('Query Presets', () => {
     ).toBeVisible()
 
     // Open the edit modal to verify where/columns fields handle null values
-    await page.locator('#edit-preset').click()
+    await openEditPreset({ page })
     const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(editModal).toBeVisible()
 
@@ -187,9 +192,9 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: pagesUrl.list })
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
-    await page.locator('#delete-preset').click()
+    await openDeletePreset({ page })
 
-    await page.locator('#confirm-delete-preset #confirm-action').click()
+    await page.locator('[id="delete-preset-confirmation"] #confirm-action').click()
 
     // columns can either be omitted or an empty string after being cleared
     const regex = /columns=(?:\[\]|$)/
@@ -244,37 +249,34 @@ describe('Query Presets', () => {
     })
   })
 
+  // eslint-disable-next-line playwright/expect-expect -- assertions are inside checkPresetMenuOptions helper
   test('should only show "edit" and "delete" controls when there is an active preset', async ({
     page,
   }) => {
     await navigateToListView({ page, url: pagesUrl.list })
-    await expect(page.locator('#edit-preset')).toBeHidden()
-    await expect(page.locator('#delete-preset')).toBeHidden()
+    await checkPresetMenuOptions({ page, expectEdit: false, expectDelete: false })
     await selectPreset({ page, presetTitle: seededData.everyone.title })
-    await expect(page.locator('#edit-preset')).toBeVisible()
-    await expect(page.locator('#delete-preset')).toBeVisible()
+    await checkPresetMenuOptions({ page, expectEdit: true, expectDelete: true })
   })
 
+  // eslint-disable-next-line playwright/expect-expect -- assertions are in checkPresetModifiedOptions helper
   test('should only show "reset" and "save" controls when there is an active preset and changes have been made', async ({
     page,
   }) => {
     await navigateToListView({ page, url: pagesUrl.list })
 
-    await expect(page.locator('#reset-preset')).toBeHidden()
-
-    await expect(page.locator('#save-preset')).toBeHidden()
+    // Before selecting a preset, reset/save should not be visible in popup
+    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
 
     await selectPreset({ page, presetTitle: seededData.onlyMe.title })
 
+    // After selecting preset but before changes, should still not show reset/save
+    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+
     await toggleColumn(page, { columnLabel: 'ID' })
 
-    await expect(page.locator('#reset-preset')).toBeVisible()
-
-    await expect(
-      page.locator('#save-preset', {
-        hasText: exactText('Save changes'),
-      }),
-    ).toBeVisible()
+    // After making changes, reset/save should be visible
+    await checkPresetModifiedOptions({ page, expectReset: true, expectSave: true })
   })
 
   test('should conditionally render "update for everyone" label based on if preset is shared', async ({
@@ -286,22 +288,27 @@ describe('Query Presets', () => {
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
-    // When not shared, the label is "Save"
-    await expect(page.locator('#save-preset')).toBeVisible()
+    // When not shared, the label is "Save changes"
+    await page.click('#select-preset')
+    const popup = page.locator('.popup__content')
+    await expect(popup).toBeVisible()
 
     await expect(
-      page.locator('#save-preset', {
+      popup.locator('#save-preset', {
         hasText: exactText('Save changes'),
       }),
     ).toBeVisible()
+    await page.keyboard.press('Escape')
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
     // When shared, the label is "Update for everyone"
+    await page.click('#select-preset')
+    await expect(popup).toBeVisible()
     await expect(
-      page.locator('#save-preset', {
+      popup.locator('#save-preset', {
         hasText: exactText('Update for everyone'),
       }),
     ).toBeVisible()
@@ -311,44 +318,59 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: pagesUrl.list })
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
-    const { columnContainer } = await toggleColumn(page, { columnLabel: 'ID' })
+    // Check the ID column is initially hidden (not in table headers)
+    const idColumnHeader = page.locator('.table th', { hasText: 'ID' })
+    await expect(idColumnHeader).toBeHidden()
 
-    const column = getPillSelectorItem({ container: columnContainer, label: 'ID' })
+    // Toggle the ID column to show it
+    await toggleColumn(page, { columnLabel: 'ID' })
 
-    await page.locator('#reset-preset').click()
+    // Verify the ID column is now visible
+    await expect(idColumnHeader).toBeVisible()
 
-    await openListColumns(page, {})
-    await expect(column).toHaveClass(/chip--selected/)
+    // Reset the preset changes using the popup menu
+    await resetPresetChanges({ page })
+
+    // Wait for the ID column to be hidden (indicates reset completed)
+    await expect(idColumnHeader).toBeHidden()
+
+    // Verify the modified indicator is hidden
+    await expect(page.locator('.icon--filter__badge')).toBeHidden()
+
+    // Verify the reset/save options are hidden (no longer modified)
+    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
   })
 
-  test.skip('should only enter modified state when changes are made to an active preset', async ({
+  test('should only enter modified state when changes are made to an active preset', async ({
     page,
   }) => {
     await navigateToListView({ page, url: pagesUrl.list })
-    await expect(page.locator('.list-controls__modified')).toBeHidden()
+
+    // No modified indicator when no preset selected
+    await expect(page.locator('.icon--filter__badge')).toBeHidden()
+
     await selectPreset({ page, presetTitle: seededData.everyone.title })
-    await expect(page.locator('.list-controls__modified')).toBeHidden()
+
+    // No modified indicator after selecting preset
+    await expect(page.locator('.icon--filter__badge')).toBeHidden()
+
     await toggleColumn(page, { columnLabel: 'ID' })
-    await expect(page.locator('.list-controls__modified')).toBeVisible()
 
-    await page.locator('#save-preset').click()
+    // Modified indicator visible after change
+    await expect(page.locator('.icon--filter__badge')).toBeVisible()
 
-    await expect(page.locator('.list-controls__modified')).toBeHidden()
-    await toggleColumn(page, { columnLabel: 'ID' })
-    await expect(page.locator('.list-controls__modified')).toBeVisible()
+    // Reset changes
+    await resetPresetChanges({ page })
 
-    await page.locator('#reset-preset').click()
-
-    await expect(page.locator('.list-controls__modified')).toBeHidden()
+    // Modified indicator hidden after reset
+    await expect(page.locator('.icon--filter__badge')).toBeHidden()
   })
 
   test('can edit a preset through the document drawer', async ({ page }) => {
-    const presetTitle = 'New Preset'
-
     await navigateToListView({ page, url: pagesUrl.list })
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
-    await page.locator('#edit-preset').click()
+    await openEditPreset({ page })
 
     const drawer = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     const titleValue = drawer.locator('input[name="title"]')
@@ -384,7 +406,7 @@ describe('Query Presets', () => {
 
     const presetTitle = 'New Preset'
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
     await modal.locator('input[name="title"]').fill(presetTitle)
@@ -435,7 +457,7 @@ describe('Query Presets', () => {
     })
 
     // Create a new preset with this filter
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -449,7 +471,7 @@ describe('Query Presets', () => {
     await page.waitForURL((url) => url.searchParams.has('preset'))
 
     // Open the edit preset modal to check the filter display
-    await page.locator('#edit-preset').click()
+    await openEditPreset({ page })
     const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(editModal).toBeVisible()
 
@@ -508,7 +530,7 @@ describe('Query Presets', () => {
     )
 
     // Create a new preset with this filter
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -522,7 +544,7 @@ describe('Query Presets', () => {
     await page.waitForURL((url) => url.searchParams.has('preset'))
 
     // Open the edit preset modal to check the filter display
-    await page.locator('#edit-preset').click()
+    await openEditPreset({ page })
     const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(editModal).toBeVisible()
 
@@ -543,7 +565,7 @@ describe('Query Presets', () => {
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
     // Create a new preset
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -570,7 +592,7 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: postsUrl.list })
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -599,7 +621,7 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: postsUrl.list })
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -626,7 +648,7 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: postsUrl.list })
     await wait(1000)
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -638,10 +660,10 @@ describe('Query Presets', () => {
 
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
-    await page.locator('#save-preset').click()
+    await savePresetChanges({ page })
 
     // Wait for the modified indicator to disappear (indicates save completed)
-    await expect(page.locator('.list-controls__modified')).toBeHidden()
+    await expect(page.locator('.icon--filter__badge')).toBeHidden()
 
     // Clear and reselect the preset to verify groupBy was saved
     await clearSelectedPreset({ page })
@@ -659,7 +681,7 @@ describe('Query Presets', () => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
     await navigateToListView({ page, url: postsUrl.list })
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -713,16 +735,17 @@ describe('Query Presets', () => {
 
     // 2. Reload page
     await page.reload()
+    await page.waitForURL(/preset=/)
     await expect(page.locator('#select-preset')).toContainText(seededData.onlyMe.title)
 
-    // 3. #save-preset button should NOT show (no modifications yet)
-    await expect(page.locator('#save-preset')).toBeHidden()
+    // 3. Save button should NOT show in popup (no modifications yet)
+    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
 
     // 4. Make a change
     await toggleColumn(page, { columnLabel: 'ID' })
 
-    // 5. #save-preset button should show
-    await expect(page.locator('#save-preset')).toBeVisible()
+    // 5. Save button should show in popup
+    await checkPresetModifiedOptions({ page, expectReset: true, expectSave: true })
   })
 
   test('should reset groupBy when clicking reset button on modified preset', async ({ page }) => {
@@ -732,7 +755,7 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: postsUrl.list })
     await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
 
-    await page.locator('#create-new-preset').click()
+    await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
 
@@ -745,8 +768,8 @@ describe('Query Presets', () => {
     await expect(page).toHaveURL(/groupBy=text/)
     await expect(page.locator('.group-by-header').first()).toBeVisible()
 
-    // Verify reset button is not visible initially
-    await expect(page.locator('#reset-preset')).toBeHidden()
+    // Verify reset/save buttons are not visible initially (no modifications)
+    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
 
     // Clear the groupBy (modify the preset)
     await clearGroupBy(page)
@@ -754,16 +777,17 @@ describe('Query Presets', () => {
     await expect(page.locator('.group-by-header')).toHaveCount(0)
 
     // Verify reset button becomes visible after modification
-    await expect(page.locator('#reset-preset')).toBeVisible()
+    await checkPresetModifiedOptions({ page, expectReset: true, expectSave: true })
 
-    await page.locator('#reset-preset').click()
+    // Reset the preset changes
+    await resetPresetChanges({ page })
 
     // Verify groupBy is restored from preset
     await expect(page).toHaveURL(/groupBy=text/)
     await expect(page.locator('.group-by-header').first()).toBeVisible()
 
     // Verify reset button is hidden again after reset
-    await expect(page.locator('#reset-preset')).toBeHidden()
+    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
   })
 
   test('should apply preset from URL query param', async ({ page }) => {

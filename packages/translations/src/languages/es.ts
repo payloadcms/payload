@@ -349,6 +349,7 @@ export const esTranslations: DefaultTranslationsObject = {
     locale: 'Idioma',
     locales: 'Idiomas',
     lock: 'Bloquear',
+    manageLabel: 'Administrar {{label}}',
     menu: 'Menú',
     moreOptions: 'Más opciones',
     move: 'Mover',

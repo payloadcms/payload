@@ -58,6 +58,13 @@ const TextFields: CollectionConfig = {
         description: 'This field is read-only',
       },
     },
+    createTagField({
+      relationTo: tagsSlug,
+      admin: {
+        position: 'sidebar',
+        description: 'Tags for this post (hierarchy field)',
+      },
+    }),
     {
       type: 'group',
       label: 'Relationship/Tags Group',
@@ -75,13 +82,6 @@ const TextFields: CollectionConfig = {
             description: 'Documents that reference this post',
           },
         },
-        createTagField({
-          relationTo: tagsSlug,
-          admin: {
-            description: 'Tags for this post (hierarchy field)',
-            position: undefined,
-          },
-        }),
       ],
     },
   ],

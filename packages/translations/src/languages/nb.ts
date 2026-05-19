@@ -346,6 +346,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     locale: 'Språk',
     locales: 'Språk',
     lock: 'Lås',
+    manageLabel: 'Administrer {{label}}',
     menu: 'Meny',
     moreOptions: 'Flere alternativer',
     move: 'Flytt',

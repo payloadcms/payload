@@ -1,0 +1,37 @@
+name: AI PR Reviewer
+
+on:
+  issue_comment:
+    types:
+      - created
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: ai-review-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  ai-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    if: |
+      github.event.comment.body == '/ai-review' &&
+      github.event.issue.pull_request != null &&
+      (github.event.comment.author_association == 'OWNER' ||
+       github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'COLLABORATOR')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Run AI reviewer
+        uses: ./.github/actions/ai-reviewer
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          ai-provider: anthropic
+          ai-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          max-diff-chars: '100000'

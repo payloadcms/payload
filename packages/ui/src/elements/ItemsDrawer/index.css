@@ -1,6 +1,6 @@
 @layer payload-default {
   .items-drawer__items-wrapper {
-    padding: 0 var(--spacer-2-5);
+    padding: var(--spacer-2-5);
   }
 
   .items-drawer__items {

@@ -2,7 +2,6 @@
   .app-header {
     position: relative;
     width: 100%;
-    padding: var(--spacer-2-5) 0;
     z-index: var(--z-modal);
   }
 
@@ -12,12 +11,17 @@
 
   .app-header__localizer.localizer {
     flex-shrink: 0;
+
+    .btn {
+      padding: 0 var(--spacer-1) 0 0;
+    }
   }
 
   .app-header__content {
     display: flex;
     align-items: center;
-    padding: 0 var(--gutter-h);
+    padding: var(--spacer-2-5) var(--gutter-h);
+    gap: var(--spacer-2-5);
     position: relative;
     flex-grow: 1;
   }
@@ -57,6 +61,15 @@
     }
   }
 
+  .app-header__step-nav-wrapper {
+    display: flex;
+    margin-right: auto;
+    margin-left: calc(-1 * var(--spacer-1));
+    flex-grow: 0;
+    gap: var(--spacer-1);
+    width: 100%;
+  }
+
   .app-header__controls-wrapper {
     display: flex;
     align-items: center;
@@ -70,16 +83,14 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: var(--spacer-4);
-    height: var(--spacer-4);
-    padding: 0;
-    margin-left: calc((var(--spacer-1) + 1px) * -1);
     background: transparent;
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
     border-radius: var(--radius-medium);
     cursor: pointer;
     color: var(--color-icon);
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease;
 
     &:hover {
       background-color: var(--color-bg-transparent-hover);
@@ -91,29 +102,19 @@
     }
   }
 
-  .app-header__step-nav-wrapper {
-    flex-grow: 0;
-    display: flex;
-    width: 100%;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-
   .app-header__actions-wrapper {
     position: relative;
     display: flex;
     align-items: center;
-    gap: var(--spacer-2);
+    gap: var(--spacer-2-5);
   }
 
   .app-header__gradient-placeholder {
     position: absolute;
     top: 0;
     right: 0;
-    width: var(--base);
-    height: var(--base);
+    width: var(--spacer-3);
+    height: var(--spacer-3);
     background: linear-gradient(to right, transparent, var(--color-bg));
   }
 
@@ -131,7 +132,7 @@
   }
 
   .app-header__last-action {
-    margin-right: var(--base);
+    margin-right: var(--spacer-3);
   }
 
   @media (max-width: 1440px) {
@@ -142,18 +143,18 @@
 
   @media (max-width: 1024px) {
     .app-header__gradient-placeholder {
-      right: var(--base);
+      right: var(--spacer-3);
     }
 
     .app-header__actions {
       max-width: 300px;
-      margin-right: var(--base);
+      margin-right: var(--spacer-3);
     }
   }
 
   @media (max-width: 768px) {
     .app-header__localizer.localizer {
-      right: calc(var(--base) * 2);
+      right: var(--spacer-6);
     }
 
     .app-header--nav-open .app-header__localizer {

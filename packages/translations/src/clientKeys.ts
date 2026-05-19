@@ -284,6 +284,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:loadMore',
   'general:locale',
   'general:locales',
+  'general:manageLabel',
   'general:menu',
   'general:moreOptions',
   'general:move',
