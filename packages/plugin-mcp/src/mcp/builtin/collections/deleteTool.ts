@@ -1,9 +1,4 @@
-import type {
-  CollectionTool,
-  JsonSchemaObject,
-  MCPResponseOverride,
-  MCPToolResponse,
-} from '../../../types.js'
+import type { CollectionTool, JsonSchemaObject, MCPToolResponse } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
@@ -40,17 +35,9 @@ const inputSchema: JsonSchemaObject = {
   },
 }
 
-export const buildDeleteCollectionTool = ({
-  collectionSlug,
-  description,
-  overrideResponse,
-}: {
-  collectionSlug: string
-  description?: string
-  overrideResponse?: MCPResponseOverride
-}): CollectionTool => ({
-  description: description || DEFAULT_DESCRIPTION,
-  handler: async ({ input, authorizedMCP, req }) => {
+export const deleteCollectionTool: CollectionTool = {
+  description: DEFAULT_DESCRIPTION,
+  handler: async ({ authorizedMCP, collectionSlug, input, overrideResponse, req }) => {
     const payload = req.payload
     const logger = getLogger({ payload })
 
@@ -154,5 +141,4 @@ export const buildDeleteCollectionTool = ({
     }
   },
   input: inputSchema,
-  overrideResponse,
-})
+}

@@ -1,20 +1,22 @@
 import { definePlugin } from 'payload'
 
-import type { AuthorizedMCP, MCPPluginConfig } from './types.js'
+import type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig } from './types.js'
 
 import { getAPIKeysCollection } from './collection/index.js'
 import { mcpEndpoint } from './endpoint/index.js'
+import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
 
 declare module 'payload' {
   export interface PayloadRequest {
     payloadAPI: 'GraphQL' | 'local' | 'MCP' | 'REST'
   }
   interface RegisteredPlugins {
-    '@payloadcms/plugin-mcp': MCPPluginConfig
+    /** After the plugin's `plugin` callback runs, `options` holds the sanitized config. */
+    '@payloadcms/plugin-mcp': SanitizedMCPPluginConfig
   }
 }
 
-export type { AuthorizedMCP, MCPPluginConfig }
+export type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig }
 
 /**
  * The MCP Plugin for Payload.
@@ -22,8 +24,15 @@ export type { AuthorizedMCP, MCPPluginConfig }
 export const mcpPlugin = definePlugin<MCPPluginConfig>({
   slug: '@payloadcms/plugin-mcp',
   order: 10,
-  plugin: ({ config, plugins: _plugins, ...pluginConfig }) => {
-    pluginConfig.userCollection = pluginConfig.userCollection ?? config?.admin?.user ?? 'users'
+  plugin: ({ config, plugins, ...rawConfig }) => {
+    const pluginConfig = sanitizeMCPConfig({ config, pluginConfig: rawConfig })
+
+    // Replace the registered options so that the sanitized config is
+    // read via `getPluginConfig()` (matches our type augmentation above).
+    const registered = plugins['@payloadcms/plugin-mcp']
+    if (registered) {
+      registered.options = pluginConfig as unknown as typeof registered.options
+    }
 
     /**
      * API Keys
@@ -35,7 +44,6 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
      */
     ;(config.collections ??= []).push(
       getAPIKeysCollection({
-        config,
         pluginConfig,
       }),
     )

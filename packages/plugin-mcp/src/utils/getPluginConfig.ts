@@ -1,11 +1,14 @@
 import type { PluginsMap, SanitizedConfig } from 'payload'
 
-import type { MCPPluginConfig } from '../types.js'
+import type { SanitizedMCPPluginConfig } from '../types.js'
 
 /**
- * Get the mcp plugin config from the payload config.
+ * Returns the sanitized plugin config — the form produced by
+ * `sanitizeMCPConfig` and stashed back on the plugin's `options` during init.
+ * Callers downstream of plugin init can rely on `items`, `userCollection`, etc.
+ * being fully resolved.
  */
-export const getPluginConfig: (args: { config: SanitizedConfig }) => MCPPluginConfig = ({
+export const getPluginConfig: (args: { config: SanitizedConfig }) => SanitizedMCPPluginConfig = ({
   config,
 }) => {
   const plugin = config.plugins?.find(
@@ -16,5 +19,5 @@ export const getPluginConfig: (args: { config: SanitizedConfig }) => MCPPluginCo
     throw new Error('MCP Plugin not found in config.plugins.')
   }
 
-  return plugin?.options
+  return plugin.options
 }

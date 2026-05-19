@@ -6,10 +6,17 @@ import type {
   DefaultDocumentIDType,
   GlobalSlug,
   MaybePromise,
-  Payload,
   PayloadRequest,
   TypedUser,
 } from 'payload'
+
+import type {
+  MCPCollectionAuthToolName,
+  MCPCollectionBuiltinName,
+  MCPGlobalBuiltinName,
+} from './mcp/builtinTools.js'
+
+export type { MCPCollectionAuthToolName, MCPCollectionBuiltinName, MCPGlobalBuiltinName }
 
 /** Permissive — the schema is consumed by `fromJsonSchema()` and validated at runtime. */
 export type JsonSchemaObject = {
@@ -49,6 +56,8 @@ export type MCPResponseOverride = (
 export type ToolHandlerArgs = {
   authorizedMCP: AuthorizedMCP
   input: Record<string, unknown>
+  /** Set by the endpoint when registering a tool; the tool's handler can wrap its response. */
+  overrideResponse?: MCPResponseOverride
   req: PayloadRequest
   serverContext: ServerContext
 }
@@ -57,58 +66,54 @@ export type CollectionToolHandlerArgs = { collectionSlug: CollectionSlug } & Too
 
 export type GlobalToolHandlerArgs = { globalSlug: GlobalSlug } & ToolHandlerArgs
 
-export type Tool<Args extends ToolHandlerArgs = ToolHandlerArgs> = {
+export type Tool = {
   description: string
-  handler: (args: Args) => MaybePromise<MCPToolResponse>
+  handler: (args: ToolHandlerArgs) => MaybePromise<MCPToolResponse>
   input?: JsonSchemaObject
   overrideResponse?: MCPResponseOverride
 }
 
-export type CollectionTool = Tool<CollectionToolHandlerArgs>
-export type GlobalTool = Tool<GlobalToolHandlerArgs>
+export type CollectionTool = {
+  description: string
+  handler: (args: CollectionToolHandlerArgs) => MaybePromise<MCPToolResponse>
+  input?: ((args: { collectionSchema: JsonSchemaObject }) => JsonSchemaObject) | JsonSchemaObject
+  overrideResponse?: MCPResponseOverride
+}
 
-/** Configures (or disables) a built-in tool without replacing it. No handler. */
-export type MCPBuiltInToolOverride = {
-  description?: string
+export type GlobalTool = {
+  description: string
+  handler: (args: GlobalToolHandlerArgs) => MaybePromise<MCPToolResponse>
+  input?: ((args: { globalSchema: JsonSchemaObject }) => JsonSchemaObject) | JsonSchemaObject
   overrideResponse?: MCPResponseOverride
 }
 
 /**
- * Tool-map entry value.
- *
- * - `false` disables (built-ins only)
- * - `true` enables an opt-in built-in (auth tools)
- * - object with `handler` defines a custom tool
- * - object without `handler` overrides a built-in
+ * Configures (or disables) a built-in tool without replacing it.
+ * `handler?: never` prevents a full `CollectionTool`/`GlobalTool` (which has a
+ * required handler) from being silently accepted at a built-in key slot.
  */
-export type MCPCollectionToolEntry = boolean | CollectionTool | MCPBuiltInToolOverride
-export type MCPGlobalToolEntry = boolean | GlobalTool | MCPBuiltInToolOverride
+export type MCPBuiltInToolOverride = {
+  description?: string
+  handler?: never
+  overrideResponse?: MCPResponseOverride
+}
+
+/**
+ * Value at a custom (non-built-in) tool key. Either the tool itself, or `false`
+ * to disable it (useful when one plugin defines a custom tool and another
+ * wants to opt out per-collection).
+ */
 export type MCPTopLevelToolEntry = Tool
 
-export type MCPCollectionBuiltinName = 'create' | 'delete' | 'find' | 'update'
-
-/** Auth ops on auth-enabled collections. Opt-in: set to `true` (or an override) to enable. */
-export type MCPCollectionAuthToolName =
-  | 'auth'
-  | 'forgotPassword'
-  | 'login'
-  | 'resetPassword'
-  | 'unlock'
-  | 'verify'
-
-export type MCPGlobalBuiltinName = 'find' | 'update'
-
 export type MCPCollectionToolsMap = {
-  [customToolName: string]: MCPCollectionToolEntry | undefined
+  [customToolName: string]: CollectionTool | undefined
 } & {
-  [K in MCPCollectionBuiltinName]?: boolean | MCPBuiltInToolOverride
+  [K in MCPCollectionBuiltinName]?: false | MCPBuiltInToolOverride
 }
 
 export type MCPAuthCollectionToolsMap = {
-  [customToolName: string]: MCPCollectionToolEntry | undefined
-} & {
-  [K in MCPCollectionAuthToolName | MCPCollectionBuiltinName]?: boolean | MCPBuiltInToolOverride
-}
+  [K in MCPCollectionAuthToolName]?: MCPBuiltInToolOverride | true
+} & MCPCollectionToolsMap
 
 /** Auth-enabled collections get auth-tool name autocomplete; others get CRUD-only. */
 export type MCPToolsMapForCollection<Slug extends CollectionSlug> = Slug extends AuthCollectionSlug
@@ -116,9 +121,9 @@ export type MCPToolsMapForCollection<Slug extends CollectionSlug> = Slug extends
   : MCPCollectionToolsMap
 
 export type MCPGlobalToolsMap = {
-  [customToolName: string]: MCPGlobalToolEntry | undefined
+  [customToolName: string]: GlobalTool | undefined
 } & {
-  [K in MCPGlobalBuiltinName]?: boolean | MCPBuiltInToolOverride
+  [K in MCPGlobalBuiltinName]?: false | MCPBuiltInToolOverride
 }
 
 export type MCPTopLevelToolsMap = Record<string, Tool>
@@ -156,27 +161,35 @@ export type Resource = {
   uri: ResourceTemplate | string
 }
 
+export type MCPPluginCollectionConfig<TSlug extends CollectionSlug> = {
+  description?: string
+  /** Fallback for built-in tools that don't set their own `overrideResponse`. */
+  overrideResponse?: MCPResponseOverride
+  tools?: MCPToolsMapForCollection<TSlug>
+}
+
+export type MCPPluginGlobalConfig = {
+  description?: string
+  overrideResponse?: MCPResponseOverride
+  tools?: MCPGlobalToolsMap
+}
+
+/**
+ * The user-facing config shape passed to `mcpPlugin({ ... })`. Tools, prompts,
+ * resources, and per-collection/global tool maps live in their own nested
+ * fields. `sanitizeMCPConfig` flattens those into `items` and applies defaults
+ * to produce a `SanitizedMCPPluginConfig` — the form every internal consumer
+ * actually works with.
+ */
 export type MCPPluginConfig = {
   collections?: {
-    [Slug in CollectionSlug]?: {
-      description?: string
-      /** Fallback for built-in tools that don't set their own `overrideResponse`. */
-      overrideResponse?: MCPResponseOverride
-      tools?: MCPToolsMapForCollection<Slug>
-    }
+    [Slug in CollectionSlug]?: MCPPluginCollectionConfig<Slug>
   }
-  /** Skip MCP registration. The API key collection is still added (so DB / type stay stable). */
+  /** Skip MCP registration. The API key collection is still added (so DB / types stay stable). */
   disabled?: boolean
-  globals?: Partial<
-    Record<
-      GlobalSlug,
-      {
-        description?: string
-        overrideResponse?: MCPResponseOverride
-        tools?: MCPGlobalToolsMap
-      }
-    >
-  >
+  globals?: {
+    [Slug in GlobalSlug]?: MCPPluginGlobalConfig
+  }
   mcp?: {
     serverOptions?: MCPServerOptions
     verboseLogs?: boolean
@@ -186,7 +199,7 @@ export type MCPPluginConfig = {
   overrideAuth?: (args: {
     getAPIKeyDoc: (overrideApiKey?: string) => Promise<MCPAPIKeysDoc>
     getAuthorizedMCP: (args: { apiKeyDoc: MCPAPIKeysDoc }) => AuthorizedMCP
-    pluginConfig: MCPPluginConfig
+    pluginConfig: SanitizedMCPPluginConfig
     req: PayloadRequest
   }) => MaybePromise<AuthorizedMCP>
   prompts?: Record<string, Prompt>
@@ -195,6 +208,11 @@ export type MCPPluginConfig = {
   tools?: MCPTopLevelToolsMap
   userCollection?: CollectionSlug
 }
+
+export type SanitizedMCPPluginConfig = {
+  items: MCPItem[]
+  userCollection: CollectionSlug
+} & Pick<MCPPluginConfig, 'disabled' | 'mcp' | 'overrideApiKeyCollection' | 'overrideAuth'>
 
 export type MCPServerOptions = {
   options?: ConstructorParameters<typeof McpServer>[1]
@@ -239,33 +257,55 @@ export type MCPAPIKeysDoc = {
 }
 
 /**
- * The caller's identity + the MCP primitives (tools, prompts, resources) they
- * can use for this request. Returned by `getAuthorizedMCP` — every entry is a
- * fully-resolved object; denied primitives are simply absent. The endpoint
- * iterates this directly and registers each, and handlers receive it via
- * `ctx.authorizedMCP` so they can spread `localAPIDefaults(authorizedMCP)`
- * into every local API call (`user` + `overrideAccess` propagate).
+ * One MCP primitive — tool, prompt, or resource — paired with the metadata both
+ * the endpoint and the API key collection need. Built by `sanitizeMCPConfig`,
+ * filtered by `getAuthorizedMCP`, registered by the MCP endpoint.
+ *
+ *  - `key`: the config identifier (`find`, `echo`). Used for the API-key deny
+ *    lookup and as the admin checkbox field name. For collection/global tools,
+ *    the MCP wire name (`findPosts`) is derived from `key + slug` at
+ *    registration time.
+ *  - `label`: human-readable admin-UI display text for the checkbox.
+ *  - `tool` / `prompt` / `resource`: the live primitive (its own
+ *    `description` is what both MCP clients and the admin UI surface).
+ */
+export type MCPItemBase = {
+  key: string
+  label: string
+}
+
+export type MCPItem =
+  | ({
+      collectionSlug: CollectionSlug
+      tool: CollectionTool
+      type: 'collectionTool'
+    } & MCPItemBase)
+  | ({
+      globalSlug: GlobalSlug
+      tool: GlobalTool
+      type: 'globalTool'
+    } & MCPItemBase)
+  | ({
+      prompt: Prompt
+      type: 'prompt'
+    } & MCPItemBase)
+  | ({
+      resource: Resource
+      type: 'resource'
+    } & MCPItemBase)
+  | ({
+      tool: Tool
+      type: 'tool'
+    } & MCPItemBase)
+
+/**
+ * The caller's identity + the MCP items they can use for this request. Returned
+ * by `getAuthorizedMCP`; denied items are simply absent from `items`. Handlers
+ * receive this via `args.authorizedMCP` so they can spread
+ * `localAPIDefaults(authorizedMCP)` into every local API call.
  */
 export type AuthorizedMCP = {
-  collections: {
-    [CollectionSlug: CollectionSlug]: {
-      [ToolKey: string]: CollectionTool
-    }
-  }
-  globals: {
-    [GlobalSlug: GlobalSlug]: {
-      [ToolKey: string]: GlobalTool
-    }
-  }
+  items: MCPItem[]
   overrideAccess: boolean
-  prompts: {
-    [PromptKey: string]: Prompt
-  }
-  resources: {
-    [ResourceKey: string]: Resource
-  }
-  tools: {
-    [ToolKey: string]: Tool
-  }
   user: null | TypedUser
 }

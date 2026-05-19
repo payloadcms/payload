@@ -4,14 +4,27 @@ import {
   type ServerContext,
   WebStandardStreamableHTTPServerTransport,
 } from '@modelcontextprotocol/server'
-import { APIError, AuthenticationError, type PayloadHandler, type PayloadRequest } from 'payload'
+import { APIError, AuthenticationError, configToJSONSchema, type PayloadHandler } from 'payload'
 
-import type { AuthorizedMCP, CollectionTool, GlobalTool, Tool } from '../types.js'
+import type { JsonSchemaObject } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
 import { getLogger } from '../utils/getLogger.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
+import {
+  getCollectionVirtualFieldNames,
+  getGlobalVirtualFieldNames,
+} from '../utils/getVirtualFieldNames.js'
+import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
 import { getAuthorizedMCP } from './access.js'
+
+const EMPTY_SCHEMA: JsonSchemaObject = { type: 'object', properties: {} }
+
+/** `findPosts`, `updateSiteSettings` — auto-prefixed wire name for collection/global tools. */
+const wireName = (key: string, slug: string): string => {
+  const camel = toCamelCase(slug)
+  return `${key}${camel.charAt(0).toUpperCase()}${camel.slice(1)}`
+}
 
 export const mcpEndpoint: PayloadHandler = async (req) => {
   if (!req.url) {
@@ -31,65 +44,136 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
 
   const logger = getLogger({ payload: req.payload })
 
+  const configSchema = configToJSONSchema(
+    req.payload.config,
+    req.payload.db.defaultIDType,
+    req.i18n,
+    { forceInlineBlocks: true },
+  ) as JsonSchemaObject
+
   try {
-    for (const [slug, tools] of Object.entries(authorizedMCP.collections)) {
-      for (const [key, tool] of Object.entries(tools)) {
-        registerCollectionTool({ slug, authorizedMCP, key, req, server, tool })
+    for (const item of authorizedMCP.items) {
+      switch (item.type) {
+        case 'collectionTool': {
+          const tool = item.tool
+          const name = wireName(item.key, item.collectionSlug)
+          let inputSchema = tool.input
+          if (typeof inputSchema === 'function') {
+            const raw = configSchema.definitions?.[item.collectionSlug]
+            const collectionSchema = raw
+              ? removeVirtualFieldsFromSchema(
+                  JSON.parse(JSON.stringify(raw)) as JsonSchemaObject,
+                  getCollectionVirtualFieldNames(req.payload.config, item.collectionSlug),
+                )
+              : EMPTY_SCHEMA
+            inputSchema = inputSchema({ collectionSchema })
+          }
+          server.registerTool(
+            name,
+            { description: tool.description, inputSchema: toJsonSchema(inputSchema) },
+            async (input: unknown, ctx: ServerContext) =>
+              tool.handler({
+                authorizedMCP,
+                collectionSlug: item.collectionSlug,
+                input: (input ?? {}) as Record<string, unknown>,
+                overrideResponse: tool.overrideResponse,
+                req,
+                serverContext: ctx,
+              }),
+          )
+          logger.info(`✅ Tool: ${name} Registered.`)
+          break
+        }
+        case 'globalTool': {
+          const tool = item.tool
+          const name = wireName(item.key, item.globalSlug)
+          let inputSchema = tool.input
+          if (typeof inputSchema === 'function') {
+            const raw = configSchema.definitions?.[item.globalSlug]
+            const globalSchema = raw
+              ? removeVirtualFieldsFromSchema(
+                  JSON.parse(JSON.stringify(raw)) as JsonSchemaObject,
+                  getGlobalVirtualFieldNames(req.payload.config, item.globalSlug),
+                )
+              : EMPTY_SCHEMA
+            inputSchema = inputSchema({ globalSchema })
+          }
+          server.registerTool(
+            name,
+            { description: tool.description, inputSchema: toJsonSchema(inputSchema) },
+            async (input: unknown, ctx: ServerContext) =>
+              tool.handler({
+                authorizedMCP,
+                globalSlug: item.globalSlug,
+                input: (input ?? {}) as Record<string, unknown>,
+                overrideResponse: tool.overrideResponse,
+                req,
+                serverContext: ctx,
+              }),
+          )
+          logger.info(`✅ Tool: ${name} Registered.`)
+          break
+        }
+        case 'prompt': {
+          const prompt = item.prompt
+          server.registerPrompt(
+            item.key,
+            {
+              argsSchema: toJsonSchema(prompt.argsSchema),
+              description: prompt.description,
+              title: prompt.title,
+            },
+            async (input: unknown, ctx: ServerContext) =>
+              prompt.handler({
+                input: (input ?? {}) as Record<string, unknown>,
+                req,
+                serverContext: ctx,
+              }),
+          )
+          logger.info(`✅ Prompt: ${prompt.title} Registered.`)
+          break
+        }
+        case 'resource': {
+          const resource = item.resource
+          server.registerResource(
+            item.key,
+            // @ts-expect-error - Overload type ambiguity (string OR ResourceTemplate is valid)
+            resource.uri,
+            {
+              description: resource.description,
+              mimeType: resource.mimeType,
+              title: resource.title,
+            },
+            // Static URIs call (uri, ctx); ResourceTemplates call (uri, params, ctx).
+            // The rest-params shape lets us collect either signature uniformly.
+            async (...sdkArgs: unknown[]) => {
+              const ctx = sdkArgs[sdkArgs.length - 1] as ServerContext
+              const uri = sdkArgs[0] as URL
+              const params = (sdkArgs.length > 2 ? sdkArgs[1] : {}) as Record<string, string>
+              return resource.handler({ params, req, serverContext: ctx, uri })
+            },
+          )
+          logger.info(`✅ Resource: ${resource.title} Registered.`)
+          break
+        }
+        case 'tool': {
+          const tool = item.tool
+          server.registerTool(
+            item.key,
+            { description: tool.description, inputSchema: toJsonSchema(tool.input) },
+            async (input: unknown, ctx: ServerContext) =>
+              tool.handler({
+                authorizedMCP,
+                input: (input ?? {}) as Record<string, unknown>,
+                overrideResponse: tool.overrideResponse,
+                req,
+                serverContext: ctx,
+              }),
+          )
+          logger.info(`✅ Tool: ${item.key} Registered.`)
+          break
+        }
       }
-    }
-
-    for (const [slug, tools] of Object.entries(authorizedMCP.globals)) {
-      for (const [key, tool] of Object.entries(tools)) {
-        registerGlobalTool({ slug, authorizedMCP, key, req, server, tool })
-      }
-    }
-
-    for (const [key, tool] of Object.entries(authorizedMCP.tools)) {
-      registerTopLevelTool({ authorizedMCP, key, req, server, tool })
-    }
-
-    for (const [name, prompt] of Object.entries(authorizedMCP.prompts)) {
-      server.registerPrompt(
-        name,
-        {
-          argsSchema: fromJsonSchema(
-            (prompt.argsSchema ?? { type: 'object', properties: {} }) as Parameters<
-              typeof fromJsonSchema
-            >[0],
-          ),
-          description: prompt.description,
-          title: prompt.title,
-        },
-        async (input: unknown, ctx: ServerContext) =>
-          prompt.handler({
-            input: (input ?? {}) as Record<string, unknown>,
-            req,
-            serverContext: ctx,
-          }),
-      )
-      logger.info(`✅ Prompt: ${prompt.title} Registered.`)
-    }
-
-    for (const [name, resource] of Object.entries(authorizedMCP.resources)) {
-      server.registerResource(
-        name,
-        // @ts-expect-error - Overload type ambiguity (string OR ResourceTemplate is valid)
-        resource.uri,
-        {
-          description: resource.description,
-          mimeType: resource.mimeType,
-          title: resource.title,
-        },
-        // Static URIs call (uri, ctx); ResourceTemplates call (uri, params, ctx).
-        // The rest-params shape lets us collect either signature uniformly.
-        async (...sdkArgs: unknown[]) => {
-          const ctx = sdkArgs[sdkArgs.length - 1] as ServerContext
-          const uri = sdkArgs[0] as URL
-          const params = (sdkArgs.length > 2 ? sdkArgs[1] : {}) as Record<string, string>
-          return resource.handler({ params, req, serverContext: ctx, uri })
-        },
-      )
-      logger.info(`✅ Resource: ${resource.title} Registered.`)
     }
   } catch (error) {
     throw new APIError(`Error initializing MCP handler: ${String(error)}`, 500)
@@ -112,122 +196,5 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
   return await transport.handleRequest(mcpRequest)
 }
 
-const registerCollectionTool = ({
-  slug,
-  authorizedMCP,
-  key,
-  req,
-  server,
-  tool,
-}: {
-  authorizedMCP: AuthorizedMCP
-  key: string
-  req: PayloadRequest
-  server: McpServer
-  slug: string
-  tool: CollectionTool
-}): void => {
-  const toolName = getToolName(key, slug)
-  server.registerTool(
-    toolName,
-    {
-      description: tool.description,
-      inputSchema: fromJsonSchema(
-        (tool.input ?? { type: 'object', properties: {} }) as Parameters<typeof fromJsonSchema>[0],
-      ),
-    },
-    async (input: unknown, ctx: ServerContext) => {
-      return tool.handler({
-        authorizedMCP,
-        collectionSlug: slug,
-        input: (input ?? {}) as Record<string, unknown>,
-        req,
-        serverContext: ctx,
-      })
-    },
-  )
-  getLogger({ payload: req.payload }).info(`✅ Tool: ${toolName} Registered.`)
-}
-
-const registerGlobalTool = ({
-  slug,
-  authorizedMCP,
-  key,
-  req,
-  server,
-  tool,
-}: {
-  authorizedMCP: AuthorizedMCP
-  key: string
-  req: PayloadRequest
-  server: McpServer
-  slug: string
-  tool: GlobalTool
-}): void => {
-  const toolName = getToolName(key, slug)
-  server.registerTool(
-    toolName,
-    {
-      description: tool.description,
-      inputSchema: fromJsonSchema(
-        (tool.input ?? { type: 'object', properties: {} }) as Parameters<typeof fromJsonSchema>[0],
-      ),
-    },
-    async (input: unknown, ctx: ServerContext) => {
-      return tool.handler({
-        authorizedMCP,
-        globalSlug: slug,
-        input: (input ?? {}) as Record<string, unknown>,
-        req,
-        serverContext: ctx,
-      })
-    },
-  )
-  getLogger({ payload: req.payload }).info(`✅ Tool: ${toolName} Registered.`)
-}
-
-const registerTopLevelTool = ({
-  authorizedMCP,
-  key,
-  req,
-  server,
-  tool,
-}: {
-  authorizedMCP: AuthorizedMCP
-  key: string
-  req: PayloadRequest
-  server: McpServer
-  tool: Tool
-}): void => {
-  server.registerTool(
-    key,
-    {
-      description: tool.description,
-      inputSchema: fromJsonSchema(
-        (tool.input ?? { type: 'object', properties: {} }) as Parameters<typeof fromJsonSchema>[0],
-      ),
-    },
-    async (input: unknown, ctx: ServerContext) => {
-      return tool.handler({
-        authorizedMCP,
-        input: (input ?? {}) as Record<string, unknown>,
-        req,
-        serverContext: ctx,
-      })
-    },
-  )
-  getLogger({ payload: req.payload }).info(`✅ Tool: ${key} Registered.`)
-}
-
-/**
- * Produces the name MCP clients see for a tool,
- * e.g. `findPosts` / `createPosts` / `sendPosts`, etc.
- *
- * @example
- *   getToolName('find', 'posts')         // 'findPosts'
- *   getToolName('update', 'site-settings') // 'updateSiteSettings'
- */
-export const getToolName = (tool: string, slug: string): string => {
-  const camel = toCamelCase(slug)
-  return `${tool}${camel.charAt(0).toUpperCase()}${camel.slice(1)}`
-}
+const toJsonSchema = (schema: JsonSchemaObject | undefined): ReturnType<typeof fromJsonSchema> =>
+  fromJsonSchema((schema ?? EMPTY_SCHEMA) as Parameters<typeof fromJsonSchema>[0])

@@ -1,15 +1,13 @@
-import type { CollectionConfig, Config, SanitizedConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-import type { MCPPluginConfig } from '../types.js'
+import type { SanitizedMCPPluginConfig } from '../types.js'
 
 import { getAccessGroupField } from './getAccessFields.js'
 
 export const getAPIKeysCollection = ({
-  config,
   pluginConfig,
 }: {
-  config: Config | SanitizedConfig
-  pluginConfig: MCPPluginConfig
+  pluginConfig: SanitizedMCPPluginConfig
 }): CollectionConfig => {
   const collection: CollectionConfig = {
     slug: 'payload-mcp-api-keys',
@@ -28,7 +26,7 @@ export const getAPIKeysCollection = ({
         name: 'user',
         type: 'relationship',
         admin: { description: 'The user that the API key is associated with.' },
-        relationTo: pluginConfig.userCollection!,
+        relationTo: pluginConfig.userCollection,
         required: true,
       },
       {
@@ -51,7 +49,7 @@ export const getAPIKeysCollection = ({
         defaultValue: false,
         label: 'Override access control',
       },
-      getAccessGroupField({ config, pluginConfig }),
+      getAccessGroupField({ pluginConfig }),
     ],
     labels: {
       plural: 'API Keys',

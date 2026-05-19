@@ -1,11 +1,6 @@
 import type { SelectType } from 'payload'
 
-import type {
-  GlobalTool,
-  JsonSchemaObject,
-  MCPResponseOverride,
-  MCPToolResponse,
-} from '../../../types.js'
+import type { GlobalTool, JsonSchemaObject, MCPToolResponse } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
@@ -39,17 +34,9 @@ const inputSchema: JsonSchemaObject = {
   },
 }
 
-export const buildFindGlobalTool = ({
-  description,
-  globalSlug,
-  overrideResponse,
-}: {
-  description?: string
-  globalSlug: string
-  overrideResponse?: MCPResponseOverride
-}): GlobalTool => ({
-  description: `${DEFAULT_DESCRIPTION}${description ? `\n\n${description}` : ''}`,
-  handler: async ({ authorizedMCP, input, req }) => {
+export const findGlobalTool: GlobalTool = {
+  description: DEFAULT_DESCRIPTION,
+  handler: async ({ authorizedMCP, globalSlug, input, overrideResponse, req }) => {
     const payload = req.payload
     const logger = getLogger({ payload })
 
@@ -122,5 +109,4 @@ export const buildFindGlobalTool = ({
     }
   },
   input: inputSchema,
-  overrideResponse,
-})
+}
