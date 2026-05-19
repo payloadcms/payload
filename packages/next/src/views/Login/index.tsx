@@ -7,7 +7,7 @@ import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
 import { LoginForm } from './LoginForm/index.js'
-import './index.scss'
+import './index.css'
 export const loginBaseClass = 'login'
 
 export function LoginView({ initPageResult, params, searchParams }: AdminViewServerProps) {
