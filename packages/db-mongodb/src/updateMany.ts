@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
+import type { QueryOptions, UpdateQuery } from 'mongoose'
 
 import { flattenWhereToOperators, type UpdateMany } from 'payload'
 
@@ -91,8 +91,15 @@ export const updateMany: UpdateMany = async function updateMany(
     data = updateOps
   }
 
-  const options: MongooseUpdateQueryOptions = {
+  const baseOptions = {
     ...optionsArgs,
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  } satisfies QueryOptions
+
+  const findOptions: QueryOptions = {
+    ...baseOptions,
     lean: true,
     new: true,
     projection: buildProjectionFromSelect({
@@ -100,9 +107,6 @@ export const updateMany: UpdateMany = async function updateMany(
       fields: collectionConfig.flattenedFields,
       select,
     }),
-    session: await getSession(this, req),
-    // Timestamps are manually added by the write transform
-    timestamps: false,
   }
 
   try {
@@ -110,7 +114,7 @@ export const updateMany: UpdateMany = async function updateMany(
       const documentsToUpdate = await Model.find(
         query,
         {},
-        { ...options, limit, projection: { _id: 1 }, sort },
+        { ...findOptions, limit, projection: { _id: 1 }, sort },
       )
       if (documentsToUpdate.length === 0) {
         return null
@@ -119,7 +123,7 @@ export const updateMany: UpdateMany = async function updateMany(
       query = { _id: { $in: documentsToUpdate.map((doc) => doc._id) } }
     }
 
-    await Model.updateMany(query, data, options)
+    await Model.updateMany(query, data, baseOptions)
   } catch (error) {
     handleError({ collection: collectionSlug, error, req })
   }
@@ -132,7 +136,7 @@ export const updateMany: UpdateMany = async function updateMany(
     query,
     {},
     {
-      ...options,
+      ...findOptions,
       sort,
     },
   )
