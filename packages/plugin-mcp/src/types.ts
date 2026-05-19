@@ -1,4 +1,9 @@
-import type { McpServer, ResourceTemplate, ServerContext } from '@modelcontextprotocol/server'
+import type {
+  JsonSchemaType,
+  McpServer,
+  ResourceTemplate,
+  ServerContext,
+} from '@modelcontextprotocol/server'
 import type {
   AuthCollectionSlug,
   CollectionConfig,
@@ -18,30 +23,8 @@ import type {
 
 export type { MCPCollectionAuthToolName, MCPCollectionBuiltinName, MCPGlobalBuiltinName }
 
-/** Permissive — the schema is consumed by `fromJsonSchema()` and validated at runtime. */
-export type JsonSchemaObject = {
-  $ref?: string
-  $schema?: string
-  [key: string]: unknown
-  additionalProperties?: boolean | JsonSchemaObject
-  allOf?: JsonSchemaObject[]
-  anyOf?: JsonSchemaObject[]
-  default?: unknown
-  definitions?: Record<string, JsonSchemaObject>
-  description?: string
-  enum?: unknown[]
-  format?: string
-  items?: JsonSchemaObject | JsonSchemaObject[]
-  maximum?: number
-  maxLength?: number
-  minimum?: number
-  minLength?: number
-  oneOf?: JsonSchemaObject[]
-  pattern?: string
-  properties?: Record<string, JsonSchemaObject>
-  required?: string[]
-  type?: string | string[]
-}
+/** Re-exported from `@modelcontextprotocol/server` — the JSON Schema shape the MCP runtime validates against. */
+export type { JsonSchemaType }
 
 export type MCPToolResponse = {
   content: Array<{ text: string; type: 'text' }>
@@ -69,21 +52,21 @@ export type GlobalToolHandlerArgs = { globalSlug: GlobalSlug } & ToolHandlerArgs
 export type Tool = {
   description: string
   handler: (args: ToolHandlerArgs) => MaybePromise<MCPToolResponse>
-  input?: JsonSchemaObject
+  input?: JsonSchemaType
   overrideResponse?: MCPResponseOverride
 }
 
 export type CollectionTool = {
   description: string
   handler: (args: CollectionToolHandlerArgs) => MaybePromise<MCPToolResponse>
-  input?: ((args: { collectionSchema: JsonSchemaObject }) => JsonSchemaObject) | JsonSchemaObject
+  input?: ((args: { collectionSchema: JsonSchemaType }) => JsonSchemaType) | JsonSchemaType
   overrideResponse?: MCPResponseOverride
 }
 
 export type GlobalTool = {
   description: string
   handler: (args: GlobalToolHandlerArgs) => MaybePromise<MCPToolResponse>
-  input?: ((args: { globalSchema: JsonSchemaObject }) => JsonSchemaObject) | JsonSchemaObject
+  input?: ((args: { globalSchema: JsonSchemaType }) => JsonSchemaType) | JsonSchemaType
   overrideResponse?: MCPResponseOverride
 }
 
@@ -135,7 +118,7 @@ export type PromptHandlerArgs = {
 }
 
 export type Prompt = {
-  argsSchema: JsonSchemaObject
+  argsSchema: JsonSchemaType
   description: string
   handler: (args: PromptHandlerArgs) => MaybePromise<{
     messages: Array<{ content: { text: string; type: 'text' }; role: 'assistant' | 'user' }>

@@ -1,13 +1,13 @@
-import type { JsonSchemaObject } from '../../types.js'
+import type { JsonSchemaType } from '../../types.js'
 
 /**
  * Removes virtual fields from a JSON Schema by name so they don't appear
  * in the generated MCP tool input schema.
  */
 export function removeVirtualFieldsFromSchema(
-  schema: JsonSchemaObject,
+  schema: JsonSchemaType,
   virtualFieldNames: string[],
-): JsonSchemaObject {
+): JsonSchemaType {
   if (virtualFieldNames.length === 0) {
     return schema
   }

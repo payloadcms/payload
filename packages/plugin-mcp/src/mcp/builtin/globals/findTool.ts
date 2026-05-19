@@ -1,13 +1,13 @@
 import type { SelectType } from 'payload'
 
-import type { GlobalTool, JsonSchemaObject, MCPToolResponse } from '../../../types.js'
+import type { GlobalTool, JsonSchemaType, MCPToolResponse } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
 const DEFAULT_DESCRIPTION = 'Find a Payload global singleton configuration.'
 
-const inputSchema: JsonSchemaObject = {
+const inputSchema: JsonSchemaType = {
   type: 'object',
   properties: {
     depth: {

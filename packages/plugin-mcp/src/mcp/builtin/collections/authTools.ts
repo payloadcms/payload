@@ -1,4 +1,4 @@
-import type { CollectionTool, JsonSchemaObject, MCPToolResponse } from '../../../types.js'
+import type { CollectionTool, JsonSchemaType, MCPToolResponse } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 
@@ -13,7 +13,7 @@ import { getLogger } from '../../../utils/getLogger.js'
  * users collection so all auth-shaped tools live in one place.
  */
 
-const authInput: JsonSchemaObject = {
+const authInput: JsonSchemaType = {
   type: 'object',
   properties: {
     headers: {
@@ -24,7 +24,7 @@ const authInput: JsonSchemaObject = {
   },
 }
 
-const forgotPasswordInput: JsonSchemaObject = {
+const forgotPasswordInput: JsonSchemaType = {
   type: 'object',
   properties: {
     disableEmail: {
@@ -41,7 +41,7 @@ const forgotPasswordInput: JsonSchemaObject = {
   required: ['email'],
 }
 
-const loginInput: JsonSchemaObject = {
+const loginInput: JsonSchemaType = {
   type: 'object',
   properties: {
     depth: {
@@ -66,7 +66,7 @@ const loginInput: JsonSchemaObject = {
   required: ['email', 'password'],
 }
 
-const resetPasswordInput: JsonSchemaObject = {
+const resetPasswordInput: JsonSchemaType = {
   type: 'object',
   properties: {
     password: { type: 'string', description: 'The new password for the user' },
@@ -75,7 +75,7 @@ const resetPasswordInput: JsonSchemaObject = {
   required: ['password', 'token'],
 }
 
-const unlockInput: JsonSchemaObject = {
+const unlockInput: JsonSchemaType = {
   type: 'object',
   properties: {
     email: {
@@ -87,7 +87,7 @@ const unlockInput: JsonSchemaObject = {
   required: ['email'],
 }
 
-const verifyInput: JsonSchemaObject = {
+const verifyInput: JsonSchemaType = {
   type: 'object',
   properties: {
     token: { type: 'string', description: 'The verification token sent to the user email' },

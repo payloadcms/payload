@@ -1,11 +1,11 @@
-import type { CollectionTool, JsonSchemaObject, MCPToolResponse } from '../../../types.js'
+import type { CollectionTool, JsonSchemaType, MCPToolResponse } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
 const DEFAULT_DESCRIPTION = 'Delete documents in a collection by ID or where clause.'
 
-const inputSchema: JsonSchemaObject = {
+const inputSchema: JsonSchemaType = {
   type: 'object',
   properties: {
     depth: {

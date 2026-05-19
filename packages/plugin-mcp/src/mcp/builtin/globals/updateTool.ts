@@ -1,6 +1,6 @@
 import type { SelectType } from 'payload'
 
-import type { GlobalTool, JsonSchemaObject, MCPToolResponse } from '../../../types.js'
+import type { GlobalTool, MCPToolResponse } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import {
@@ -80,7 +80,9 @@ export const updateGlobalTool: GlobalTool = {
       logger.error(`Error updating global ${globalSlug}: ${errorMessage}`)
       return applyOverride(
         {
-          content: [{ type: 'text', text: `Error updating global "${globalSlug}": ${errorMessage}` }],
+          content: [
+            { type: 'text', text: `Error updating global "${globalSlug}": ${errorMessage}` },
+          ],
         },
         {},
       )
@@ -100,7 +102,8 @@ export const updateGlobalTool: GlobalTool = {
         },
         fallbackLocale: {
           type: 'string',
-          description: 'Optional: fallback locale code to use when requested locale is not available',
+          description:
+            'Optional: fallback locale code to use when requested locale is not available',
         },
         locale: {
           type: 'string',

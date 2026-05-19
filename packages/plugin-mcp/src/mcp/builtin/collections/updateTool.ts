@@ -1,6 +1,6 @@
 import type { SelectType } from 'payload'
 
-import type { CollectionTool, JsonSchemaObject, MCPToolResponse } from '../../../types.js'
+import type { CollectionTool, MCPToolResponse } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import {
@@ -189,7 +189,8 @@ export const updateCollectionTool: CollectionTool = {
         },
         fallbackLocale: {
           type: 'string',
-          description: 'Optional: fallback locale code to use when requested locale is not available',
+          description:
+            'Optional: fallback locale code to use when requested locale is not available',
         },
         filePath: { type: 'string', description: 'File path for file uploads' },
         locale: {

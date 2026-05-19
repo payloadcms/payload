@@ -6,7 +6,7 @@ import {
 } from '@modelcontextprotocol/server'
 import { APIError, AuthenticationError, configToJSONSchema, type PayloadHandler } from 'payload'
 
-import type { JsonSchemaObject } from '../types.js'
+import type { JsonSchemaType } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
 import { getLogger } from '../utils/getLogger.js'
@@ -17,8 +17,6 @@ import {
 } from '../utils/getVirtualFieldNames.js'
 import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
 import { getAuthorizedMCP } from './access.js'
-
-const EMPTY_SCHEMA: JsonSchemaObject = { type: 'object', properties: {} }
 
 /** `findPosts`, `updateSiteSettings` — auto-prefixed wire name for collection/global tools. */
 const wireName = (key: string, slug: string): string => {
@@ -49,7 +47,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
     req.payload.db.defaultIDType,
     req.i18n,
     { forceInlineBlocks: true },
-  ) as JsonSchemaObject
+  ) as JsonSchemaType
 
   try {
     for (const item of authorizedMCP.items) {
@@ -60,17 +58,24 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
           let inputSchema = tool.input
           if (typeof inputSchema === 'function') {
             const raw = configSchema.definitions?.[item.collectionSlug]
-            const collectionSchema = raw
-              ? removeVirtualFieldsFromSchema(
-                  JSON.parse(JSON.stringify(raw)) as JsonSchemaObject,
-                  getCollectionVirtualFieldNames(req.payload.config, item.collectionSlug),
-                )
-              : EMPTY_SCHEMA
+            if (!raw) {
+              throw new APIError(
+                `Collection schema not found for slug: ${item.collectionSlug}`,
+                500,
+              )
+            }
+            const collectionSchema = removeVirtualFieldsFromSchema(
+              JSON.parse(JSON.stringify(raw)) as JsonSchemaType,
+              getCollectionVirtualFieldNames(req.payload.config, item.collectionSlug),
+            )
             inputSchema = inputSchema({ collectionSchema })
           }
           server.registerTool(
             name,
-            { description: tool.description, inputSchema: toJsonSchema(inputSchema) },
+            {
+              description: tool.description,
+              inputSchema: inputSchema ? fromJsonSchema(inputSchema) : undefined,
+            },
             async (input: unknown, ctx: ServerContext) =>
               tool.handler({
                 authorizedMCP,
@@ -90,17 +95,22 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
           let inputSchema = tool.input
           if (typeof inputSchema === 'function') {
             const raw = configSchema.definitions?.[item.globalSlug]
-            const globalSchema = raw
-              ? removeVirtualFieldsFromSchema(
-                  JSON.parse(JSON.stringify(raw)) as JsonSchemaObject,
-                  getGlobalVirtualFieldNames(req.payload.config, item.globalSlug),
-                )
-              : EMPTY_SCHEMA
+            if (!raw) {
+              throw new APIError(`Global schema not found for slug: ${item.globalSlug}`, 500)
+            }
+            const globalSchema = removeVirtualFieldsFromSchema(
+              JSON.parse(JSON.stringify(raw)) as JsonSchemaType,
+              getGlobalVirtualFieldNames(req.payload.config, item.globalSlug),
+            )
+
             inputSchema = inputSchema({ globalSchema })
           }
           server.registerTool(
             name,
-            { description: tool.description, inputSchema: toJsonSchema(inputSchema) },
+            {
+              description: tool.description,
+              inputSchema: inputSchema ? fromJsonSchema(inputSchema) : undefined,
+            },
             async (input: unknown, ctx: ServerContext) =>
               tool.handler({
                 authorizedMCP,
@@ -119,7 +129,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
           server.registerPrompt(
             item.key,
             {
-              argsSchema: toJsonSchema(prompt.argsSchema),
+              argsSchema: prompt.argsSchema ? fromJsonSchema(prompt.argsSchema) : undefined,
               description: prompt.description,
               title: prompt.title,
             },
@@ -160,7 +170,10 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
           const tool = item.tool
           server.registerTool(
             item.key,
-            { description: tool.description, inputSchema: toJsonSchema(tool.input) },
+            {
+              description: tool.description,
+              inputSchema: tool.input ? fromJsonSchema(tool.input) : undefined,
+            },
             async (input: unknown, ctx: ServerContext) =>
               tool.handler({
                 authorizedMCP,
@@ -195,6 +208,3 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
 
   return await transport.handleRequest(mcpRequest)
 }
-
-const toJsonSchema = (schema: JsonSchemaObject | undefined): ReturnType<typeof fromJsonSchema> =>
-  fromJsonSchema((schema ?? EMPTY_SCHEMA) as Parameters<typeof fromJsonSchema>[0])

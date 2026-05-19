@@ -1,6 +1,6 @@
 import type { SelectType } from 'payload'
 
-import type { CollectionTool, JsonSchemaObject, MCPToolResponse } from '../../../types.js'
+import type { CollectionTool, JsonSchemaType, MCPToolResponse } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
@@ -8,7 +8,7 @@ import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 const DEFAULT_DESCRIPTION =
   'Find documents in a collection by ID or where clause using Find or FindByID.'
 
-const inputSchema: JsonSchemaObject = {
+const inputSchema: JsonSchemaType = {
   type: 'object',
   properties: {
     depth: {

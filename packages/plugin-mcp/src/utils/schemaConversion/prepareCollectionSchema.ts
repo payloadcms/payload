@@ -1,4 +1,4 @@
-import type { JsonSchemaObject } from '../../types.js'
+import type { JsonSchemaType } from '../../types.js'
 
 import { sanitizeJsonSchema } from './sanitizeJsonSchema.js'
 import { simplifyRelationshipFields } from './simplifyRelationshipFields.js'
@@ -15,9 +15,9 @@ const PAYLOAD_MANAGED_FIELDS = new Set(['_status', 'createdAt', 'id', 'updatedAt
  * Sanitizes Payload's auto-generated collection JSON Schema so it can be safely
  * fed into the MCP server's `fromJsonSchema()` adapter (no zod intermediate step).
  */
-export const prepareCollectionSchema = (schema: JsonSchemaObject): JsonSchemaObject => {
+export const prepareCollectionSchema = (schema: JsonSchemaType): JsonSchemaType => {
   // Clone to avoid mutating the original schema (used elsewhere for tool listing)
-  const schemaClone = JSON.parse(JSON.stringify(schema)) as JsonSchemaObject
+  const schemaClone = JSON.parse(JSON.stringify(schema)) as JsonSchemaType
 
   const sanitized = sanitizeJsonSchema(schemaClone)
   const pointTransformed = transformPointFieldsForMCP(sanitized)

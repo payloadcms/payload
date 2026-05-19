@@ -1,4 +1,4 @@
-import type { JsonSchemaObject } from '../../types.js'
+import type { JsonSchemaType } from '../../types.js'
 
 /**
  * Recursively processes JSON schema properties to simplify relationship fields
@@ -17,7 +17,7 @@ import type { JsonSchemaObject } from '../../types.js'
  * NOTE: This function must operate on a cloned schema to avoid mutating
  * the original JSON schema used for tool listing.
  */
-export function simplifyRelationshipFields(schema: JsonSchemaObject): JsonSchemaObject {
+export function simplifyRelationshipFields(schema: JsonSchemaType): JsonSchemaType {
   if (!schema || typeof schema !== 'object') {
     return schema
   }
@@ -29,21 +29,26 @@ export function simplifyRelationshipFields(schema: JsonSchemaObject): JsonSchema
       (option) => option && typeof option === 'object' && '$ref' in option,
     )
 
+    const recurse = (option: JsonSchemaType | boolean): JsonSchemaType | boolean =>
+      typeof option === 'object' ? simplifyRelationshipFields(option) : option
+
     if (hasRef) {
       const nonRefOptions = processed.oneOf
         .filter((option) => !(option && typeof option === 'object' && '$ref' in option))
-        .map((option) => simplifyRelationshipFields(option))
+        .map(recurse)
 
       if (nonRefOptions.length === 1) {
         const single = nonRefOptions[0]!
         delete processed.oneOf
-        Object.assign(processed, single)
+        if (typeof single === 'object') {
+          Object.assign(processed, single)
+        }
       } else if (nonRefOptions.length > 1) {
         delete processed.oneOf
         processed.anyOf = nonRefOptions
       }
     } else {
-      processed.anyOf = processed.oneOf.map((option) => simplifyRelationshipFields(option))
+      processed.anyOf = processed.oneOf.map(recurse)
       delete processed.oneOf
     }
   }
@@ -52,7 +57,7 @@ export function simplifyRelationshipFields(schema: JsonSchemaObject): JsonSchema
     processed.properties = Object.fromEntries(
       Object.entries(processed.properties).map(([key, value]) => [
         key,
-        simplifyRelationshipFields(value),
+        typeof value === 'object' ? simplifyRelationshipFields(value) : value,
       ]),
     )
   }
