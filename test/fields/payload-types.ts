@@ -1577,6 +1577,8 @@ export interface RelationshipField {
     relationTo: 'text-fields';
     value: string | TextField;
   } | null;
+  relationshipDrawerFilterBySibling1?: (string | null) | TextField;
+  relationshipDrawerFilterBySibling2?: (string | null) | TextField;
   updatedAt: string;
   createdAt: string;
 }
@@ -3353,6 +3355,8 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relationshipDrawerHasManyPolymorphic?: T;
   relationshipDrawerWithAllowCreateFalse?: T;
   relationshipDrawerWithFilterOptions?: T;
+  relationshipDrawerFilterBySibling1?: T;
+  relationshipDrawerFilterBySibling2?: T;
   updatedAt?: T;
   createdAt?: T;
 }

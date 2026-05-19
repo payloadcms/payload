@@ -1,6 +1,6 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types.js'
 
@@ -119,6 +119,12 @@ export const useListDrawer: UseListDrawer = ({
     openModal(drawerSlug)
   }, [drawerSlug, openModal])
 
+  // Use a ref so that filterOptions updates don't recreate MemoizedDrawer.
+  // A new MemoizedDrawer reference causes React to unmount/remount ListDrawerContent,
+  // which resets its internal state (e.g. selectedOption) — breaking polymorphic drawers.
+  const filterOptionsRef = useRef(filterOptions)
+  filterOptionsRef.current = filterOptions
+
   const MemoizedDrawer = useMemo(() => {
     return (props) => (
       <ListDrawer
@@ -126,13 +132,13 @@ export const useListDrawer: UseListDrawer = ({
         closeDrawer={closeDrawer}
         collectionSlugs={collectionSlugs}
         drawerSlug={drawerSlug}
-        filterOptions={filterOptions}
+        filterOptions={filterOptionsRef.current}
         key={drawerSlug}
         selectedCollection={selectedCollection}
         uploads={uploads}
       />
     )
-  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection, filterOptions])
+  }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection])
 
   const MemoizedDrawerToggler = useMemo(() => {
     return (props) => <ListDrawerToggler {...props} drawerSlug={drawerSlug} />

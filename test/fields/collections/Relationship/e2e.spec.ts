@@ -1111,6 +1111,36 @@ describe('relationship', () => {
     ).toHaveText('new text')
   })
 
+  test('should re-evaluate `filterOptions` on subsequent drawer opens when a value has already been set', async () => {
+    const doc1 = await createTextFieldDoc({ text: 'filterBySibling doc 1' })
+    const doc2 = await createTextFieldDoc({ text: 'filterBySibling doc 2' })
+    await loadCreatePage()
+
+    const listDrawerContent = page.locator('.list-drawer').locator('.drawer__content')
+
+    // Select doc1 in sibling1 drawer
+    await page.locator('#field-relationshipDrawerFilterBySibling1').click()
+    await expect(listDrawerContent).toBeVisible()
+    await listDrawerContent.getByText(doc1.text, { exact: true }).click()
+    await expect(listDrawerContent).toBeHidden()
+
+    // First open of sibling2 drawer: doc1 should be filtered out by filterOptions
+    await page.locator('#field-relationshipDrawerFilterBySibling2').click()
+    await expect(listDrawerContent).toBeVisible()
+    await expect(listDrawerContent.getByText(doc1.text)).toBeHidden()
+    await expect(listDrawerContent.getByText(doc2.text)).toBeVisible()
+
+    // Select doc2 and close drawer
+    await listDrawerContent.getByText(doc2.text, { exact: true }).click()
+    await expect(listDrawerContent).toBeHidden()
+
+    // Second open: filterOptions must be re-evaluated
+    // Without the fix, the cached ListView reappears and doc1 would be visible again
+    await page.locator('#field-relationshipDrawerFilterBySibling2').click()
+    await expect(listDrawerContent).toBeVisible()
+    await expect(listDrawerContent.getByText(doc1.text)).toBeHidden()
+  })
+
   describe('A11y', () => {
     test.fixme('Create view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)

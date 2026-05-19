@@ -136,10 +136,17 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   )
 
   useEffect(() => {
-    if (!ListView) {
+    if (!ListView && isOpen) {
       void refresh({ slug: selectedOption?.value })
     }
-  }, [refresh, ListView, selectedOption.value])
+  }, [refresh, ListView, selectedOption.value, isOpen])
+
+  useEffect(() => {
+    if (!isOpen) {
+      setListView(undefined)
+      setIsLoading(true)
+    }
+  }, [isOpen])
 
   const onCreateNew = useCallback(
     ({ doc }) => {

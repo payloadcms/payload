@@ -191,6 +191,27 @@ const RelationshipFields: CollectionConfig = {
         }
       },
     },
+    {
+      name: 'relationshipDrawerFilterBySibling1',
+      admin: { appearance: 'drawer' },
+      type: 'relationship',
+      relationTo: 'text-fields',
+    },
+    {
+      name: 'relationshipDrawerFilterBySibling2',
+      admin: { appearance: 'drawer' },
+      type: 'relationship',
+      relationTo: 'text-fields',
+      filterOptions: ({ siblingData }) => {
+        const sibling1 = siblingData?.relationshipDrawerFilterBySibling1 as string | undefined
+
+        if (sibling1) {
+          return { id: { not_equals: sibling1 } }
+        }
+
+        return true
+      },
+    },
   ],
   slug: relationshipFieldsSlug,
 }
