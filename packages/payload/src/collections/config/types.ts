@@ -435,6 +435,7 @@ export type CollectionAdminOptions = {
        */
       Upload?: CustomUpload
     } & SharedEditViewComponents
+    listHeaderActions?: CustomComponent[]
     listMenuItems?: CustomComponent[]
     views?: {
       /**

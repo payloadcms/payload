@@ -44,6 +44,7 @@ export type ListViewSlots = {
   BeforeList?: React.ReactNode
   BeforeListTable?: React.ReactNode
   Description?: React.ReactNode
+  ListHeaderActions?: React.ReactNode
   listMenuItems?: React.ReactNode[]
   Table: React.ReactNode | React.ReactNode[]
 }
@@ -127,3 +128,9 @@ export type AfterListServerProps = AfterListClientProps & AfterListServerPropsOn
 export type AfterListTableClientProps = ListViewSlotSharedClientProps
 export type AfterListTableServerPropsOnly = {} & ListViewServerPropsOnly
 export type AfterListTableServerProps = AfterListTableClientProps & AfterListTableServerPropsOnly
+
+// ListHeaderActions
+export type ListHeaderActionsClientProps = ListViewSlotSharedClientProps
+export type ListHeaderActionsServerPropsOnly = {} & ListViewServerPropsOnly
+export type ListHeaderActionsServerProps = ListHeaderActionsClientProps &
+  ListHeaderActionsServerPropsOnly

@@ -55,6 +55,7 @@ export function DefaultListView(props: ListViewClientProps) {
     hasDeletePermission,
     hasTrashPermission,
     hierarchyData,
+    ListHeaderActions,
     listMenuItems,
     newDocumentURL,
     queryPreset,
@@ -211,6 +212,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 i18n={i18n}
                 isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
                 isTrashEnabled={isTrashEnabled}
+                ListHeaderActions={ListHeaderActions}
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}

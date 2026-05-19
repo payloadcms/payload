@@ -34,6 +34,7 @@ export type ListHeaderProps = {
   i18n: I18nClient
   isBulkUploadEnabled: boolean
   isTrashEnabled?: boolean
+  ListHeaderActions?: React.ReactNode
   newDocumentURL: string
   onBulkUploadSuccess?: () => void
   /** @deprecated This prop will be removed in the next major version.
@@ -62,6 +63,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   i18n,
   isBulkUploadEnabled,
   isTrashEnabled,
+  ListHeaderActions,
   newDocumentURL,
   onBulkUploadSuccess,
   openBulkUpload,
@@ -145,6 +147,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             key="list-header-empty-trash"
           />
         ),
+        ListHeaderActions,
       ].filter(Boolean)}
     />
   )
