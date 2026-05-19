@@ -45,6 +45,7 @@ import { RadioGroupFieldSection } from './sections/fields/RadioGroupField.js'
 import { SelectFieldSection } from './sections/fields/SelectField.js'
 import { TextareaFieldSection } from './sections/fields/TextareaField.js'
 import { TextFieldSection } from './sections/fields/TextField.js'
+import { TimezonePickerFieldSection } from './sections/fields/TimezonePickerField.js'
 
 type CategoryId = 'all' | 'fields' | 'patterns' | 'primitives'
 
@@ -94,6 +95,7 @@ type ComponentId =
   | 'textarea'
   | 'textarea-field'
   | 'thumbnail-card'
+  | 'timezone-picker'
   | 'toast'
   | 'tooltip'
 
@@ -150,6 +152,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'fields', label: 'Select Field', value: 'select-field' },
   { category: 'fields', label: 'Text Field', value: 'text-field' },
   { category: 'fields', label: 'Textarea Field', value: 'textarea-field' },
+  { category: 'fields', label: 'Timezone Picker', value: 'timezone-picker' },
 ]
 
 const categories: { label: string; value: CategoryId }[] = [
@@ -319,6 +322,7 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('radiogroup-field', 'fields') && <RadioGroupFieldSection />}
         {shouldShow('json-field', 'fields') && <JSONFieldSection />}
         {shouldShow('code-field', 'fields') && <CodeFieldSection />}
+        {shouldShow('timezone-picker', 'fields') && <TimezonePickerFieldSection />}
       </div>
     </div>
   )
