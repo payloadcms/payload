@@ -3,10 +3,6 @@
     padding: calc(var(--spacer-2-5) / 2);
   }
 
-  .modular-dashboard .widget-content > .card {
-    align-items: stretch;
-  }
-
   .modular-dashboard .widget-content {
     height: 100%;
   }
