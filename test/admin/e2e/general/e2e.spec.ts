@@ -1086,7 +1086,7 @@ describe('General', () => {
 
       // Click the "Leave anyway" button
       await page
-        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+        .locator('#leave-without-saving .alert-modal__controls .btn--style-primary')
         .click()
 
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'

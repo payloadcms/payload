@@ -11,6 +11,7 @@ import { ButtonSection } from './sections/Button.js'
 import { CardSection } from './sections/Card.js'
 import { CheckboxSection } from './sections/Checkbox.js'
 import { CopyToClipboardSection } from './sections/CopyToClipboard.js'
+import { DocumentAlertSection } from './sections/DocumentAlert.js'
 import { DrawerSection } from './sections/DrawerSection.js'
 import { DropzoneSection } from './sections/Dropzone.js'
 import { IconsSection } from './sections/Icons.js'
@@ -57,6 +58,7 @@ type ComponentId =
   | 'code-field'
   | 'copy-to-clipboard'
   | 'date-field'
+  | 'document-alert'
   | 'drawer'
   | 'dropzone'
   | 'email-field'
@@ -125,6 +127,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Textarea', value: 'textarea' },
   { category: 'primitives', label: 'Tooltip', value: 'tooltip' },
   // Patterns
+  { category: 'patterns', label: 'Document Alert', value: 'document-alert' },
   { category: 'patterns', label: 'Drawer', value: 'drawer' },
   { category: 'patterns', label: 'Loading Overlay', value: 'loading-overlay' },
   { category: 'patterns', label: 'Modal', value: 'modal' },
@@ -278,6 +281,9 @@ export const ComponentsView: React.FC = () => {
           selectedComponent === 'all' && (
             <h2 className="components-view__category-title">Patterns</h2>
           )}
+        {shouldShow('document-alert', 'patterns') && (
+          <DocumentAlertSection selectedComponent="document-alert" />
+        )}
         {shouldShow('drawer', 'patterns') && <DrawerSection selectedComponent="drawer" />}
         {shouldShow('loading-overlay', 'patterns') && (
           <LoadingSection selectedComponent="loading-overlay" />
