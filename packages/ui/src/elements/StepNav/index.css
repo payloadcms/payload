@@ -42,15 +42,6 @@
     }
   }
 
-  .step-nav__home {
-    display: flex;
-    align-items: center;
-  }
-
-  .step-nav__home-label {
-    max-width: none;
-  }
-
   .step-nav__separator {
     color: var(--color-text-tertiary);
     width: var(--spacer-2);
