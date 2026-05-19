@@ -217,7 +217,7 @@
     "husky": "9.0.11",
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
-    "mongoose": "8.15.1",
+    "mongoose": "8.22.1",
     "next": "16.2.3",
     "node-gyp": "12.2.0",
     "open": "^10.1.0",

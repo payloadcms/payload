@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
+import type { QueryOptions, UpdateQuery } from 'mongoose'
 import type { Job, UpdateJobs, Where } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -80,13 +80,12 @@ export const updateJobs: UpdateJobs = async function updateMany(
     updateData = updateOps
   }
 
-  const options: MongooseUpdateQueryOptions = {
-    lean: true,
+  const options = {
     new: true,
     session: await getSession(this, req),
     // Timestamps are manually added by the write transform
     timestamps: false,
-  }
+  } satisfies QueryOptions
 
   let result: Job[] = []
 

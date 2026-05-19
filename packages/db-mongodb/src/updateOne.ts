@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
+import type { QueryOptions, UpdateQuery } from 'mongoose'
 import type { UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -75,9 +75,8 @@ export const updateOne: UpdateOne = async function updateOne(
     updateData = updateOps
   }
 
-  const options: MongooseUpdateQueryOptions = {
+  const options = {
     ...optionsArgs,
-    lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
@@ -87,7 +86,7 @@ export const updateOne: UpdateOne = async function updateOne(
     session: await getSession(this, req),
     // Timestamps are manually added by the write transform
     timestamps: false,
-  }
+  } satisfies QueryOptions
 
   try {
     if (returning === false) {
