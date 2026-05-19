@@ -8,6 +8,14 @@ import { sanitizeConfig } from './sanitize.js'
  * @returns Built and sanitized Payload Config
  */
 export async function buildConfig(config: Config): Promise<SanitizedConfig> {
+  if (Array.isArray(config.plugins)) {
+    const sorted = [...config.plugins].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+    for (const plugin of sorted) {
+      config = await plugin(config)
+    }
+  }
+
   if (Array.isArray(config.storage)) {
     for (const adapter of config.storage) {
       if (typeof adapter?.init !== 'function') {
@@ -18,14 +26,6 @@ export async function buildConfig(config: Config): Promise<SanitizedConfig> {
         )
       }
       config = await adapter.init(config)
-    }
-  }
-
-  if (Array.isArray(config.plugins)) {
-    const sorted = [...config.plugins].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-
-    for (const plugin of sorted) {
-      config = await plugin(config)
     }
   }
 
