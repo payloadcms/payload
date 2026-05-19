@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
+import type { UpdateQuery } from 'mongoose'
 import type { UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -75,7 +75,7 @@ export const updateOne: UpdateOne = async function updateOne(
     updateData = updateOps
   }
 
-  const options: MongooseUpdateQueryOptions = {
+  const options = {
     ...optionsArgs,
     new: true,
     projection: buildProjectionFromSelect({

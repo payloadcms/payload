@@ -1,5 +1,3 @@
-import type { MongooseUpdateQueryOptions } from 'mongoose'
-
 import { buildVersionCollectionFields, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -44,7 +42,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
 
   transform({ adapter: this, data: versionData, fields, operation: 'write' })
 
-  const options: MongooseUpdateQueryOptions = {
+  const options = {
     ...optionsArgs,
     new: true,
     projection: buildProjectionFromSelect({
