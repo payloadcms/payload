@@ -1,5 +1,5 @@
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 
 import path from 'path'
 import { BasePayload, buildConfig, type DatabaseAdapterObj, type Payload } from 'payload'

@@ -97,6 +97,7 @@ export async function runCodegenCase(
   const { confidence, modifiedConfig, usage: runnerUsage } = runnerOutput
   const agentLog = runnerOutput.agentLog
   const agentExitCode = runnerOutput.agentExitCode
+  const transcript = runnerOutput.transcript
 
   const { errors: tscErrors, valid } = await validateConfigTypes(
     modifiedConfig,
@@ -121,6 +122,7 @@ export async function runCodegenCase(
       skillInstall: kind === 'claude-code' ? skillInstall : undefined,
       starterContent: starterConfig,
       systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+      transcript,
       tscErrors,
       usage: {
         runner: runnerUsage,
@@ -169,6 +171,7 @@ export async function runCodegenCase(
       skillInstall: kind === 'claude-code' ? skillInstall : undefined,
       starterContent: starterConfig,
       systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+      transcript,
       usage: {
         runner: runnerUsage,
         total: {
@@ -229,6 +232,7 @@ export async function runCodegenCase(
     skillInstall: kind === 'claude-code' ? skillInstall : undefined,
     starterContent: starterConfig,
     systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+    transcript,
     usage: {
       runner: runnerUsage,
       scorer: scorerUsage,

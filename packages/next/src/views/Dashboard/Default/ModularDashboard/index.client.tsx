@@ -153,7 +153,6 @@ export function ModularDashboardClient({
                 id={widget.item.id}
                 style={{
                   width: `${WIDTH_TO_PERCENTAGE[widget.item.width]}%`,
-                  padding: '6px',
                 }}
                 width={widget.item.width}
               >

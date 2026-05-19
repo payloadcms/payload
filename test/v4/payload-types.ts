@@ -88,6 +88,7 @@ export interface Config {
     'relationship-fields': RelationshipField;
     'rich-text-fields': RichTextField;
     'row-fields': RowField;
+    'search-bar-test': SearchBarTest;
     'select-fields': SelectField;
     'slug-fields': SlugField;
     'tabs-fields': TabsField;
@@ -140,6 +141,7 @@ export interface Config {
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'row-fields': RowFieldsSelect<false> | RowFieldsSelect<true>;
+    'search-bar-test': SearchBarTestSelect<false> | SearchBarTestSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
@@ -160,10 +162,10 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -851,6 +853,10 @@ export interface TextField {
    */
   textReadOnly?: string | null;
   /**
+   * Tags for this post (hierarchy field)
+   */
+  _h_tags?: (string | Tag)[] | null;
+  /**
    * Documents that reference this post
    */
   relatedFrom?: {
@@ -858,10 +864,6 @@ export interface TextField {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  /**
-   * Tags for this post (hierarchy field)
-   */
-  _h_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -871,13 +873,14 @@ export interface TextField {
  */
 export interface Tag {
   id: string;
-  parent?: (string | null) | Tag;
+  _h_tags?: (string | null) | Tag;
   name: string;
   description?: string | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
+  allowedCollections?: 'text-fields'[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -991,6 +994,20 @@ export interface RowField {
   billingCity?: string | null;
   shippingStreet?: string | null;
   shippingCity?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-bar-test".
+ */
+export interface SearchBarTest {
+  id: string;
+  title: string;
+  description?: string | null;
+  category?: ('news' | 'blog' | 'tutorial' | 'docs') | null;
+  status?: ('draft' | 'published' | 'archived') | null;
+  priority?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1340,6 +1357,10 @@ export interface PayloadLockedDocument {
         value: string | RowField;
       } | null)
     | ({
+        relationTo: 'search-bar-test';
+        value: string | SearchBarTest;
+      } | null)
+    | ({
         relationTo: 'select-fields';
         value: string | SelectField;
       } | null)
@@ -1466,7 +1487,7 @@ export interface PayloadQueryPreset {
     | boolean
     | null;
   groupBy?: string | null;
-  relatedCollection: 'select-fields';
+  relatedCollection: 'search-bar-test' | 'select-fields';
   /**
    * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
    */
@@ -1957,6 +1978,19 @@ export interface RowFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-bar-test_select".
+ */
+export interface SearchBarTestSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  category?: T;
+  status?: T;
+  priority?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "select-fields_select".
  */
 export interface SelectFieldsSelect<T extends boolean = true> {
@@ -2038,13 +2072,14 @@ export interface TabsFieldsSelect<T extends boolean = true> {
  * via the `definition` "tags_select".
  */
 export interface TagsSelect<T extends boolean = true> {
-  parent?: T;
+  _h_tags?: T;
   name?: T;
   description?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
   _h_titlePath?: T;
+  allowedCollections?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2055,8 +2090,8 @@ export interface TextFieldsSelect<T extends boolean = true> {
   favoriteFruit?: T;
   textDisabled?: T;
   textReadOnly?: T;
-  relatedFrom?: T;
   _h_tags?: T;
+  relatedFrom?: T;
   updatedAt?: T;
   createdAt?: T;
 }

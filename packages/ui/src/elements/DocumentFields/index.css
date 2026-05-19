@@ -219,4 +219,8 @@
       padding-top: var(--spacer-2);
     }
   }
+
+  .drawer .document-fields__edit {
+    padding: var(--spacer-2-5);
+  }
 }

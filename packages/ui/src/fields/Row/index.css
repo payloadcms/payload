@@ -5,6 +5,8 @@
     margin-bottom: 0;
 
     .row__fields {
+      --spacing-field: 0;
+
       display: flex;
       flex-wrap: wrap;
       row-gap: var(--row-gap);

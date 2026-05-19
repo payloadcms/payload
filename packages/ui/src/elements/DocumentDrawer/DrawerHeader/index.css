@@ -1,18 +1,17 @@
 @layer payload-default {
   .doc-drawer__header {
     width: 100%;
-    margin-top: var(--spacer-6);
     display: flex;
     flex-direction: column;
     gap: var(--spacer-2);
     border-bottom: 1px solid var(--color-border);
-    padding-bottom: var(--spacer-3);
+    padding: var(--spacer-2-5);
   }
 
   .doc-drawer__header-content {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    gap: var(--spacer-2);
     width: 100%;
   }
 
@@ -39,20 +38,8 @@
   }
 
   .doc-drawer__header-close {
-    border: 0;
-    background-color: transparent;
     padding: 0;
-    cursor: pointer;
-    overflow: hidden;
-  }
-
-  .doc-drawer__header-close svg {
-    position: relative;
-  }
-
-  .doc-drawer__header-close svg .stroke {
-    stroke-width: 2px;
-    vector-effect: non-scaling-stroke;
+    border: 0;
   }
 
   .doc-drawer__after-header {
@@ -63,13 +50,5 @@
     height: 1px;
     background: var(--color-border);
     width: 100%;
-  }
-
-  @media (max-width: 1024px) {
-    .doc-drawer .doc-drawer__header {
-      margin-top: var(--spacer-5);
-      margin-bottom: var(--spacer-2);
-      padding-inline: var(--gutter-h);
-    }
   }
 }

@@ -21,9 +21,7 @@ export async function waitForAutoSaveToRunAndComplete(
 
   if (expectation === 'success') {
     await expect(async () => {
-      await expect(
-        page.locator('.autosave:has-text("Last saved less than a minute ago")'),
-      ).toBeVisible()
+      await expect(page.locator('.autosave:has-text("Saved less than a minute ago")')).toBeVisible()
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })

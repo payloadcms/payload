@@ -51,13 +51,20 @@ export type EvalUsage = {
 
 // Runner
 export type SystemPromptKey = 'codegenNoSkill' | 'codegenWithSkill'
+export type TranscriptEvent =
+  | { content: string; isError?: boolean; toolUseId: string; type: 'tool_result' }
+  | { id: string; input: unknown; name: string; type: 'tool_use' }
+  | { text: string; type: 'text' }
+  | { text: string; type: 'thinking' }
 export type CodegenRunnerResult = {
   /** For agent results: process exit code. */
   agentExitCode?: number
-  /** For agent results: captured stdout+stderr from the CLI, truncated to ~10,000 characters. */
+  /** For agent results: captured stderr from the CLI (fallback when stream-json parsing yields no events), truncated to ~10,000 characters. */
   agentLog?: string
   confidence: number
   modifiedConfig: string
+  /** For agent results: structured per-event transcript parsed from stream-json output. */
+  transcript?: TranscriptEvent[]
   usage: TokenUsage
 }
 // Scorer
@@ -112,6 +119,8 @@ export type EvalResult = {
   starterContent?: string
   /** Which system prompt variant was used — enables skill vs. baseline comparison in the dashboard */
   systemPromptKey?: SystemPromptKey
+  /** For agent results: structured per-event transcript parsed from stream-json output. */
+  transcript?: TranscriptEvent[]
   /** Populated when TypeScript compilation fails */
   tscErrors?: string[]
   /** Token usage across all LLM calls for this eval case */

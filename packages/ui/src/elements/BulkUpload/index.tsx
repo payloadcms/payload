@@ -127,7 +127,7 @@ export function BulkUploadDrawer() {
   }, [modalState])
 
   return (
-    <Drawer gutter={false} Header={null} slug={drawerSlug}>
+    <Drawer Header={null} slug={drawerSlug}>
       <FormsManagerProvider>
         <UploadControlsProvider>
           <EditDepthProvider>

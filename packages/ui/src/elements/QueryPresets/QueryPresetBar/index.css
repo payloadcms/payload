@@ -1,0 +1,79 @@
+@layer payload-default {
+  .query-preset-bar {
+    display: flex;
+    align-items: center;
+  }
+
+  .query-preset-bar__trigger-wrap {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .query-preset-bar__trigger-wrap:has(.query-preset-bar__clear) .query-preset-bar__trigger {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+    padding-right: var(--spacer-1);
+  }
+
+  .query-preset-bar__trigger-wrap:has(.query-preset-bar__clear)
+    .query-preset-bar__trigger:focus-visible {
+    z-index: 1;
+  }
+
+  .query-preset-bar__trigger {
+    gap: var(--spacer-1);
+  }
+
+  .query-preset-bar__clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacer-1);
+    border: 1px solid var(--special-border-translucent);
+    border-left: none;
+    border-radius: 0 var(--radius-medium) var(--radius-medium) 0;
+    background: var(--color-bg);
+    cursor: pointer;
+  }
+
+  .query-preset-bar__clear:focus-visible {
+    border-radius: 0 var(--radius-medium) var(--radius-medium) 0;
+  }
+
+  .query-preset-bar__clear:hover {
+    background: var(--color-bg-transparent-hover);
+  }
+
+  .query-preset-bar__clear:active {
+    background: var(--color-bg-transparent-pressed);
+  }
+
+  .query-preset-bar__modified-indicator {
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ramp-red-500);
+    pointer-events: none;
+  }
+
+  .query-preset-bar__popup .popup-button-list__button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+}
+
+/* Destructive delete button - targets the portal content */
+.query-preset-bar__popup-content .popup-button-list__button.query-preset-bar__delete {
+  color: var(--color-text-danger);
+}
+
+.query-preset-bar__popup-content .popup-button-list__button.query-preset-bar__delete:hover {
+  color: var(--color-text-danger);
+  background-color: var(--color-bg-danger-tertiary);
+}

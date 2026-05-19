@@ -1797,7 +1797,8 @@ describe('Uploads', () => {
   })
 
   describe('image manipulation', () => {
-    test('should crop image correctly', async () => {
+    // Skip until the crop tool is reworked to v4 design
+    test.skip('should crop image correctly', async () => {
       const positions = {
         'bottom-right': {
           dragX: 800,

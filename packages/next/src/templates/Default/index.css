@@ -1,0 +1,32 @@
+@layer payload-default {
+  .template-default {
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+  }
+
+  .template-default__wrap {
+    min-width: 0;
+    width: 100%;
+    flex-grow: 1;
+    position: relative;
+    background-color: var(--theme-bg);
+
+    &:before {
+      content: '';
+      display: block;
+      position: absolute;
+      inset: 0;
+      background-color: inherit;
+      opacity: 0;
+      z-index: var(--z-status);
+      visibility: hidden;
+      transition: all var(--nav-trans-time) linear;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .template-default__wrap {
+      min-width: 100%;
+    }
+  }
+}

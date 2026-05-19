@@ -2,19 +2,30 @@
 
 import React, { useMemo, useState } from 'react'
 
+import type { TranscriptEvent } from '../../types.js'
 import type { Variant } from '../../variant.js'
-import type { Audience } from './audience.js'
 import type { RenderedCode } from './codeDiff.js'
 import type { EvalEntry, RunSnapshot } from './index.js'
 
 import { getVariant as getVariantFromResult } from '../../variant.js'
-import { AUDIENCE_CONFIG } from './audience.js'
 import { CompareTable } from './CompareTable.js'
 
 export type { Variant }
 
 export function getVariant(entry: EvalEntry): null | Variant {
   return getVariantFromResult(entry.result)
+}
+
+type VariantFilter = 'all' | Variant
+
+function getVariantLabel(variant: Variant): string {
+  const labels: Record<Variant, string> = {
+    'agent-baseline': 'Agent Baseline',
+    'agent-skill': 'Agent Skill',
+    baseline: 'Baseline',
+    skill: 'Skill',
+  }
+  return labels[variant]
 }
 
 function VariantBadge({ variant }: { variant: null | Variant }) {
@@ -68,7 +79,6 @@ type ViewMode = 'compare' | 'list'
 
 type FilterStatus = 'all' | 'fail' | 'pass'
 type FilterType = 'all' | 'codegen'
-type FilterAudience = 'all' | Audience
 
 function ScoreBadge({
   pass,
@@ -148,32 +158,6 @@ function TypeBadge({ type }: { type: 'codegen' }) {
   )
 }
 
-function AudienceBadges({ audiences }: { audiences: Audience[] }) {
-  return (
-    <span style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-      {audiences.map((a) => {
-        const { bg, color, label } = AUDIENCE_CONFIG[a]
-        return (
-          <span
-            key={a}
-            style={{
-              background: bg,
-              borderRadius: '4px',
-              color,
-              fontSize: '0.68rem',
-              fontWeight: 600,
-              padding: '2px 5px',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {label}
-          </span>
-        )
-      })}
-    </span>
-  )
-}
-
 function TokenDisplay({
   total,
 }: {
@@ -204,6 +188,166 @@ function TokenDisplay({
         </span>
       )}
     </span>
+  )
+}
+
+function TranscriptView({ events }: { events: TranscriptEvent[] }) {
+  const skillInvoked = events.some((event) => event.type === 'tool_use' && event.name === 'Skill')
+  return (
+    <div
+      style={{
+        background: 'var(--theme-elevation-50)',
+        border: '1px solid var(--theme-elevation-150)',
+        borderRadius: '4px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        margin: '6px 0 0',
+        maxHeight: '600px',
+        overflow: 'auto',
+        padding: '10px',
+      }}
+    >
+      <SkillInvocationBadge invoked={skillInvoked} />
+      {events.map((event, i) => (
+        <TranscriptEventView event={event} key={i} />
+      ))}
+    </div>
+  )
+}
+
+function SkillInvocationBadge({ invoked }: { invoked: boolean }) {
+  return (
+    <span
+      style={{
+        alignSelf: 'flex-start',
+        background: invoked ? 'var(--color-bg-success)' : 'var(--color-bg-danger)',
+        borderRadius: '4px',
+        color: invoked ? 'var(--color-text-onsuccess)' : 'var(--color-text-ondanger)',
+        fontSize: '0.7rem',
+        fontWeight: 600,
+        padding: '3px 8px',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {invoked ? '✓ Skill invoked' : '✗ Skill not invoked'}
+    </span>
+  )
+}
+
+function TranscriptEventView({ event }: { event: TranscriptEvent }) {
+  if (event.type === 'text') {
+    return (
+      <div
+        style={{
+          color: 'var(--theme-elevation-800)',
+          fontSize: '0.8rem',
+          lineHeight: 1.55,
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+        }}
+      >
+        {event.text}
+      </div>
+    )
+  }
+  if (event.type === 'thinking') {
+    return (
+      <details open>
+        <summary
+          style={{
+            color: 'var(--theme-elevation-500)',
+            cursor: 'pointer',
+            fontSize: '0.72rem',
+            fontStyle: 'italic',
+            userSelect: 'none',
+          }}
+        >
+          Thinking
+        </summary>
+        <div
+          style={{
+            color: 'var(--theme-elevation-600)',
+            fontSize: '0.78rem',
+            fontStyle: 'italic',
+            lineHeight: 1.5,
+            marginTop: '4px',
+            paddingLeft: '12px',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >
+          {event.text}
+        </div>
+      </details>
+    )
+  }
+  if (event.type === 'tool_use') {
+    return (
+      <details open>
+        <summary
+          style={{
+            color: 'var(--theme-elevation-700)',
+            cursor: 'pointer',
+            fontFamily: 'var(--font-mono, monospace)',
+            fontSize: '0.78rem',
+            userSelect: 'none',
+          }}
+        >
+          → {event.name}
+        </summary>
+        <pre
+          style={{
+            background: 'var(--theme-elevation-0)',
+            border: '1px solid var(--theme-elevation-100)',
+            borderRadius: '3px',
+            color: 'var(--theme-elevation-700)',
+            fontFamily: 'var(--font-mono, monospace)',
+            fontSize: '0.72rem',
+            margin: '4px 0 0',
+            maxHeight: '300px',
+            overflow: 'auto',
+            padding: '6px 8px',
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          {JSON.stringify(event.input, null, 2)}
+        </pre>
+      </details>
+    )
+  }
+  // tool_result
+  return (
+    <details open>
+      <summary
+        style={{
+          color: event.isError ? 'var(--theme-error-600)' : 'var(--theme-elevation-600)',
+          cursor: 'pointer',
+          fontFamily: 'var(--font-mono, monospace)',
+          fontSize: '0.78rem',
+          userSelect: 'none',
+        }}
+      >
+        ← result{event.isError ? ' (error)' : ''}
+      </summary>
+      <pre
+        style={{
+          background: 'var(--theme-elevation-0)',
+          border: '1px solid var(--theme-elevation-100)',
+          borderRadius: '3px',
+          color: event.isError ? 'var(--theme-error-700)' : 'var(--theme-elevation-700)',
+          fontFamily: 'var(--font-mono, monospace)',
+          fontSize: '0.72rem',
+          margin: '4px 0 0',
+          maxHeight: '300px',
+          overflow: 'auto',
+          padding: '6px 8px',
+          whiteSpace: 'pre-wrap',
+        }}
+      >
+        {event.content}
+      </pre>
+    </details>
   )
 }
 
@@ -345,6 +489,44 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
         </div>
       )}
 
+      {/* Transcript (Claude Code runner) */}
+      {(result.transcript?.length || result.agentLog) && (
+        <div style={sectionStyle}>
+          <details open>
+            <summary
+              style={{
+                ...labelStyle,
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              Transcript
+            </summary>
+            {result.transcript && result.transcript.length > 0 ? (
+              <TranscriptView events={result.transcript} />
+            ) : result.agentLog ? (
+              <pre
+                style={{
+                  background: 'var(--theme-elevation-50)',
+                  border: '1px solid var(--theme-elevation-150)',
+                  borderRadius: '4px',
+                  color: 'var(--theme-elevation-700)',
+                  fontFamily: 'var(--font-mono, monospace)',
+                  fontSize: '0.75rem',
+                  margin: '6px 0 0',
+                  maxHeight: '600px',
+                  overflow: 'auto',
+                  padding: '8px 10px',
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
+                {result.agentLog}
+              </pre>
+            ) : null}
+          </details>
+        </div>
+      )}
+
       {/* Usage breakdown */}
       {result.usage && (
         <div style={sectionStyle}>
@@ -399,7 +581,7 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
   )
 }
 
-type SortKey = 'audience' | 'category' | 'question' | 'result' | 'tokens' | 'type' | 'variant'
+type SortKey = 'category' | 'question' | 'result' | 'tokens' | 'type' | 'variant'
 type SortDir = 'asc' | 'desc'
 
 function cycleSort(current: null | SortDir): null | SortDir {
@@ -417,7 +599,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
   const [compareMode, setCompareMode] = useState<'run' | 'variant'>('variant')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
-  const [audienceFilter, setAudienceFilter] = useState<FilterAudience>('all')
+  const [variantFilter, setVariantFilter] = useState<VariantFilter>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
   const [hoveredHash, setHoveredHash] = useState<null | string>(null)
@@ -428,6 +610,17 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
     () => ['all', ...Array.from(new Set(entries.map((e) => e.category))).sort()],
     [entries],
   )
+
+  const variantOptions = useMemo<VariantFilter[]>(() => {
+    const seen = new Set<Variant>()
+    for (const e of entries) {
+      const v = getVariant(e)
+      if (v) {
+        seen.add(v)
+      }
+    }
+    return ['all', ...Array.from(seen).sort()]
+  }, [entries])
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -464,7 +657,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       if (typeFilter !== 'all' && e.type !== typeFilter) {
         return false
       }
-      if (audienceFilter !== 'all' && !e.audience.includes(audienceFilter)) {
+      if (variantFilter !== 'all' && getVariant(e) !== variantFilter) {
         return false
       }
       if (categoryFilter !== 'all' && e.category !== categoryFilter) {
@@ -487,9 +680,6 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       } else if (sortKey === 'category') {
         aVal = a.category.toLowerCase()
         bVal = b.category.toLowerCase()
-      } else if (sortKey === 'audience') {
-        aVal = [...a.audience].sort().join(',')
-        bVal = [...b.audience].sort().join(',')
       } else if (sortKey === 'type') {
         aVal = a.type
         bVal = b.type
@@ -506,7 +696,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       }
       return aVal < bVal ? -dir : aVal > bVal ? dir : 0
     })
-  }, [entries, statusFilter, typeFilter, audienceFilter, categoryFilter, sortKey, sortDir])
+  }, [entries, statusFilter, typeFilter, categoryFilter, variantFilter, sortKey, sortDir])
 
   // Summary stats from filtered set
   const stats = useMemo(() => {
@@ -755,31 +945,19 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
             />
 
             <div style={{ display: 'flex', gap: '4px' }}>
-              {(['all', 'users', 'admins', 'maintainers'] as FilterAudience[]).map((a) => (
-                <button
-                  key={a}
-                  onClick={() => setAudienceFilter(a)}
-                  style={
-                    audienceFilter === a && a !== 'all'
-                      ? {
-                          ...filterBtnStyle(true),
-                          background: AUDIENCE_CONFIG[a].bg,
-                          border: `1px solid ${AUDIENCE_CONFIG[a].color}`,
-                          color: AUDIENCE_CONFIG[a].color,
-                        }
-                      : filterBtnStyle(audienceFilter === a)
-                  }
-                  type="button"
-                >
-                  {a === 'all'
-                    ? 'All'
-                    : a === 'users'
-                      ? 'Users'
-                      : a === 'admins'
-                        ? 'Admins'
-                        : 'Maintainers'}
-                </button>
-              ))}
+              {variantOptions.map((v) => {
+                const isActive = variantFilter === v
+                return (
+                  <button
+                    key={v}
+                    onClick={() => setVariantFilter(v)}
+                    style={filterBtnStyle(isActive)}
+                    type="button"
+                  >
+                    {v === 'all' ? 'All' : getVariantLabel(v)}
+                  </button>
+                )
+              })}
             </div>
 
             <span
@@ -831,44 +1009,38 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                 fontSize: '0.7rem',
                 fontWeight: 700,
                 gap: '0 12px',
-                gridTemplateColumns: '1fr 100px 120px 70px 80px 100px 100px 32px',
+                gridTemplateColumns: '1fr 100px 70px 80px 100px 100px 32px',
                 letterSpacing: '0.05em',
                 padding: '8px 12px',
                 textTransform: 'uppercase',
               }}
             >
-              {(
-                [
-                  'question',
-                  'category',
-                  'audience',
-                  'type',
-                  'variant',
-                  'result',
-                  'tokens',
-                ] as SortKey[]
-              ).map((key) => (
-                <span
-                  key={key}
-                  onClick={() => handleSort(key)}
-                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSort(key)}
-                  role="button"
-                  style={{
-                    alignItems: 'center',
-                    color:
-                      sortKey === key ? 'var(--theme-elevation-800)' : 'var(--theme-elevation-500)',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    userSelect: 'none',
-                  }}
-                  tabIndex={0}
-                >
-                  {key === 'question'
-                    ? 'Question / Task'
-                    : key.charAt(0).toUpperCase() + key.slice(1)}
-                  {sortIndicator(key)}
-                </span>
-              ))}
+              {(['question', 'category', 'type', 'variant', 'result', 'tokens'] as SortKey[]).map(
+                (key) => (
+                  <span
+                    key={key}
+                    onClick={() => handleSort(key)}
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSort(key)}
+                    role="button"
+                    style={{
+                      alignItems: 'center',
+                      color:
+                        sortKey === key
+                          ? 'var(--theme-elevation-800)'
+                          : 'var(--theme-elevation-500)',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      userSelect: 'none',
+                    }}
+                    tabIndex={0}
+                  >
+                    {key === 'question'
+                      ? 'Question / Task'
+                      : key.charAt(0).toUpperCase() + key.slice(1)}
+                    {sortIndicator(key)}
+                  </span>
+                ),
+              )}
               <span />
             </div>
 
@@ -917,7 +1089,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                         cursor: 'pointer',
                         display: 'grid',
                         gap: '0 12px',
-                        gridTemplateColumns: '1fr 100px 120px 70px 80px 100px 100px 32px',
+                        gridTemplateColumns: '1fr 100px 70px 80px 100px 100px 32px',
                         padding: '10px 12px',
                         transition: 'background 0.1s',
                       }}
@@ -937,9 +1109,6 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                       </span>
                       <span>
                         <CategoryBadge category={entry.category} />
-                      </span>
-                      <span>
-                        <AudienceBadges audiences={entry.audience} />
                       </span>
                       <span>
                         <TypeBadge type={entry.type} />

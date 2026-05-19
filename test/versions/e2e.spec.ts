@@ -566,7 +566,7 @@ describe('Versions', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
 
       await page.goto(autosaveURL.list)
-      const createNewButton = page.locator('.list-header .btn:has-text("Create New")')
+      const createNewButton = page.locator('#create-new-doc')
       const href = await createNewButton.getAttribute('href')
       await page.goto(`${serverURL}${href}`)
 
@@ -1385,7 +1385,7 @@ describe('Versions', () => {
       await page.locator('#schedule-publish').click()
 
       // drawer should open
-      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      await expect(page.locator('.drawer__header')).toBeVisible()
       // nothing in scheduled
       await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
 
@@ -1420,7 +1420,7 @@ describe('Versions', () => {
       await page.locator('#schedule-publish').click()
 
       // drawer should open
-      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      await expect(page.locator('.drawer__header')).toBeVisible()
       // nothing in scheduled
       await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
 

@@ -54,6 +54,7 @@ import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
 import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
+import SearchBarTest from './collections/SearchBarTest/index.js'
 import SelectFields from './collections/Select/index.js'
 import SlugFields from './collections/Slug/index.js'
 import TabsFields from './collections/Tabs/index.js'
@@ -100,6 +101,7 @@ export const collections: CollectionConfig[] = [
   RelationshipFields,
   RichTextFields,
   RowFields,
+  SearchBarTest,
   SelectFields,
   SlugFields,
   TabsFields,
@@ -115,11 +117,20 @@ export const collections: CollectionConfig[] = [
 
 export const baseConfig: Partial<Config> = {
   collections,
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: ['en', 'es', 'de'],
+  },
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
     components: {
+      actions: [
+        './components/HeaderAction.tsx#HeaderAction',
+        './components/HeaderAction.tsx#HeaderAction2',
+      ],
       afterNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
       views: {
         components: {
@@ -302,6 +313,83 @@ export const baseConfig: Partial<Config> = {
     await payload.create({
       collection: tagsSlug,
       data: { name: 'Design' },
+    })
+
+    // Seed search-bar-test collection
+    const searchBarTestItems = [
+      { title: 'Welcome Post', description: 'First post', category: 'blog', status: 'published' },
+      {
+        title: 'API Documentation',
+        description: 'API docs',
+        category: 'docs',
+        status: 'published',
+      },
+      {
+        title: 'Tutorial Draft',
+        description: 'WIP tutorial',
+        category: 'tutorial',
+        status: 'draft',
+      },
+      {
+        title: 'Breaking News',
+        description: 'Important news',
+        category: 'news',
+        status: 'published',
+      },
+      { title: 'Old Announcement', description: 'Archived', category: 'news', status: 'archived' },
+    ]
+
+    for (const item of searchBarTestItems) {
+      await payload.create({
+        collection: 'search-bar-test',
+        data: item,
+      })
+    }
+
+    // Seed query presets for search-bar-test collection
+    const presetAccessEveryone = {
+      read: { constraint: 'everyone' },
+      update: { constraint: 'everyone' },
+      delete: { constraint: 'everyone' },
+    }
+
+    await payload.create({
+      collection: 'payload-query-presets',
+      data: {
+        title: 'Published Only',
+        relatedCollection: 'search-bar-test',
+        isShared: true,
+        access: presetAccessEveryone,
+        where: {
+          status: { equals: 'published' },
+        },
+      },
+    })
+
+    await payload.create({
+      collection: 'payload-query-presets',
+      data: {
+        title: 'News Articles',
+        relatedCollection: 'search-bar-test',
+        isShared: true,
+        access: presetAccessEveryone,
+        where: {
+          category: { equals: 'news' },
+        },
+      },
+    })
+
+    await payload.create({
+      collection: 'payload-query-presets',
+      data: {
+        title: 'Drafts',
+        relatedCollection: 'search-bar-test',
+        isShared: true,
+        access: presetAccessEveryone,
+        where: {
+          status: { equals: 'draft' },
+        },
+      },
     })
   },
   typescript: {

@@ -208,6 +208,23 @@
     }
   }
 
+  /* Round (square icon button) */
+
+  .btn--round {
+    aspect-ratio: 1;
+    padding: 0;
+    border-radius: var(--radius-medium);
+    justify-content: center;
+
+    &.btn--size-medium {
+      width: var(--spacer-4);
+    }
+
+    &.btn--size-large {
+      width: var(--spacer-5);
+    }
+  }
+
   /* Loading state */
 
   .btn--loading {
@@ -284,7 +301,7 @@
   }
 
   .btn--withPopup.btn--style-primary {
-    --separator-color: var(--color-border-brand-strong);
+    --separator-color: var(--color-bg);
     .btn,
     .popup-button {
       color: var(--color-text-onbrand);

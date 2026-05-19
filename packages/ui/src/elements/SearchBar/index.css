@@ -1,0 +1,37 @@
+@layer payload-default {
+  .search-bar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-medium);
+    outline: var(--stroke-width-small) solid transparent;
+    outline-offset: calc(var(--stroke-width-small) * -1);
+    position: relative;
+    isolation: isolate;
+
+    &:hover {
+      outline-color: var(--color-border);
+    }
+
+    &:focus-within {
+      outline-color: var(--accessibility-focus-color);
+    }
+
+    &:has(:disabled) {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .icon--search {
+      flex-shrink: 0;
+      pointer-events: none;
+      color: var(--color-icon-secondary);
+    }
+
+    .search-filter {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+}
