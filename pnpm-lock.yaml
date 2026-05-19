@@ -146,8 +146,8 @@ importers:
         specifier: 1.2.8
         version: 1.2.8
       mongoose:
-        specifier: 8.15.1
-        version: 8.15.1(@aws-sdk/credential-providers@3.1045.0)
+        specifier: 8.22.1
+        version: 8.22.1(@aws-sdk/credential-providers@3.1045.0)
       next:
         specifier: 16.2.6
         version: 16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0)
@@ -366,11 +366,11 @@ importers:
   packages/db-mongodb:
     dependencies:
       mongoose:
-        specifier: 8.15.1
-        version: 8.15.1(@aws-sdk/credential-providers@3.1045.0)
+        specifier: 8.22.1
+        version: 8.22.1(@aws-sdk/credential-providers@3.1045.0)
       mongoose-paginate-v2:
         specifier: 1.9.4
-        version: 1.9.4(mongoose@8.15.1(@aws-sdk/credential-providers@3.1045.0))
+        version: 1.9.4(mongoose@8.22.1(@aws-sdk/credential-providers@3.1045.0))
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -388,8 +388,8 @@ importers:
         specifier: ^2.4.5
         version: 2.4.9
       mongodb:
-        specifier: 6.16.0
-        version: 6.16.0(@aws-sdk/credential-providers@3.1045.0)
+        specifier: 6.20.0
+        version: 6.20.0(@aws-sdk/credential-providers@3.1045.0)
       mongodb-memory-server:
         specifier: 10.1.4
         version: 10.1.4(@aws-sdk/credential-providers@3.1045.0)
@@ -1819,7 +1819,7 @@ importers:
         version: 16.8.1
       next:
         specifier: 16.2.6
-        version: 16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0)
+        version: 16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0)
       payload:
         specifier: workspace:*
         version: link:../../packages/payload
@@ -2479,8 +2479,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       mongoose:
-        specifier: 8.15.1
-        version: 8.15.1(@aws-sdk/credential-providers@3.1045.0)
+        specifier: 8.22.1
+        version: 8.22.1(@aws-sdk/credential-providers@3.1045.0)
       next:
         specifier: 16.2.6
         version: 16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.77.4)
@@ -12006,8 +12006,8 @@ packages:
     resolution: {integrity: sha512-+oKQ/kc3CX+816oPFRtaF0CN4vNcGKNjpOQe4bHo/21A3pMD+lC7Xz1EX5HP7siCX4iCpVchDMmCOFXVQSGkUg==}
     engines: {node: '>=16.20.1'}
 
-  mongodb@6.16.0:
-    resolution: {integrity: sha512-D1PNcdT0y4Grhou5Zi/qgipZOYeWrhLEpk33n3nm6LGtz61jvO88WlrWCK/bigMjpnOdAUKKQwsGIl0NtWMyYw==}
+  mongodb@6.20.0:
+    resolution: {integrity: sha512-Tl6MEIU3K4Rq3TSHd+sZQqRBoGlFsOgNrH5ltAcFBV62Re3Fd+FcaVf8uSEQFOJ51SDowDVttBTONMfoYWrWlQ==}
     engines: {node: '>=16.20.1'}
     peerDependencies:
       '@aws-sdk/credential-providers': ^3.188.0
@@ -12015,7 +12015,7 @@ packages:
       gcp-metadata: ^5.2.0
       kerberos: ^2.0.1
       mongodb-client-encryption: '>=6.0.0 <7'
-      snappy: ^7.2.2
+      snappy: ^7.3.2
       socks: ^2.7.1
     peerDependenciesMeta:
       '@aws-sdk/credential-providers':
@@ -12043,8 +12043,8 @@ packages:
     resolution: {integrity: sha512-0LOsVEQmjrbJKVDi/IvFEhIezmuRjUE4loGgslv57j9nK/NMC+mbKT0QnaPSPpib4lByKVBcy3VbDa1TvlHZjA==}
     engines: {node: '>=4.0.0'}
 
-  mongoose@8.15.1:
-    resolution: {integrity: sha512-RhQ4DzmBi5BNGcS0w4u1vdMRIKcteXTCNzDt1j7XRcdWYBz1MjMjulBhPaeC5jBCHOD1yinuOFTTSOWLLGexWw==}
+  mongoose@8.22.1:
+    resolution: {integrity: sha512-c0bzt7ElI1CwWiyFSgg9bfhlFcblAoPwr+gmDcLCryClyKaeixWhP9KDGnr13kRPE8KPAuUN3ZZ3jSDxSPvoTg==}
     engines: {node: '>=16.20.1'}
 
   mpath@0.8.4:
@@ -21214,7 +21214,7 @@ snapshots:
   '@types/mongoose-aggregate-paginate-v2@1.0.12(@aws-sdk/credential-providers@3.1045.0)':
     dependencies:
       '@types/node': 24.12.3
-      mongoose: 8.15.1(@aws-sdk/credential-providers@3.1045.0)
+      mongoose: 8.22.1(@aws-sdk/credential-providers@3.1045.0)
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
       - '@mongodb-js/zstd'
@@ -24454,6 +24454,10 @@ snapshots:
     dependencies:
       next: 16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0)
 
+  geist@1.7.0(next@16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0)):
+    dependencies:
+      next: 16.2.6(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.99.0)
+
   generator-function@2.0.1: {}
 
   gensync@1.0.0-beta.2: {}
@@ -25939,7 +25943,7 @@ snapshots:
       find-cache-dir: 3.3.2
       follow-redirects: 1.16.0(debug@4.4.3)
       https-proxy-agent: 7.0.6
-      mongodb: 6.16.0(@aws-sdk/credential-providers@3.1045.0)
+      mongodb: 6.20.0(@aws-sdk/credential-providers@3.1045.0)
       new-find-package-json: 2.0.0
       semver: 7.8.0
       tar-stream: 3.2.0
@@ -25975,7 +25979,7 @@ snapshots:
       - socks
       - supports-color
 
-  mongodb@6.16.0(@aws-sdk/credential-providers@3.1045.0):
+  mongodb@6.20.0(@aws-sdk/credential-providers@3.1045.0):
     dependencies:
       '@mongodb-js/saslprep': 1.4.11
       bson: 6.10.4
@@ -25983,22 +25987,22 @@ snapshots:
     optionalDependencies:
       '@aws-sdk/credential-providers': 3.1045.0
 
-  mongoose-lean-virtuals@1.1.1(mongoose@8.15.1(@aws-sdk/credential-providers@3.1045.0)):
+  mongoose-lean-virtuals@1.1.1(mongoose@8.22.1(@aws-sdk/credential-providers@3.1045.0)):
     dependencies:
-      mongoose: 8.15.1(@aws-sdk/credential-providers@3.1045.0)
+      mongoose: 8.22.1(@aws-sdk/credential-providers@3.1045.0)
       mpath: 0.8.4
 
-  mongoose-paginate-v2@1.9.4(mongoose@8.15.1(@aws-sdk/credential-providers@3.1045.0)):
+  mongoose-paginate-v2@1.9.4(mongoose@8.22.1(@aws-sdk/credential-providers@3.1045.0)):
     dependencies:
-      mongoose-lean-virtuals: 1.1.1(mongoose@8.15.1(@aws-sdk/credential-providers@3.1045.0))
+      mongoose-lean-virtuals: 1.1.1(mongoose@8.22.1(@aws-sdk/credential-providers@3.1045.0))
     transitivePeerDependencies:
       - mongoose
 
-  mongoose@8.15.1(@aws-sdk/credential-providers@3.1045.0):
+  mongoose@8.22.1(@aws-sdk/credential-providers@3.1045.0):
     dependencies:
       bson: 6.10.4
       kareem: 2.6.3
-      mongodb: 6.16.0(@aws-sdk/credential-providers@3.1045.0)
+      mongodb: 6.20.0(@aws-sdk/credential-providers@3.1045.0)
       mpath: 0.9.0
       mquery: 5.0.0
       ms: 2.1.3

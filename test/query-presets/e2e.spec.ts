@@ -335,7 +335,7 @@ describe('Query Presets', () => {
     await expect(idColumnHeader).toBeHidden()
 
     // Verify the modified indicator is hidden
-    await expect(page.locator('.query-preset-bar__modified-indicator')).toBeHidden()
+    await expect(page.locator('.icon--filter__badge')).toBeHidden()
 
     // Verify the reset/save options are hidden (no longer modified)
     await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
@@ -347,23 +347,23 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: pagesUrl.list })
 
     // No modified indicator when no preset selected
-    await expect(page.locator('.query-preset-bar__modified-indicator')).toBeHidden()
+    await expect(page.locator('.icon--filter__badge')).toBeHidden()
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     // No modified indicator after selecting preset
-    await expect(page.locator('.query-preset-bar__modified-indicator')).toBeHidden()
+    await expect(page.locator('.icon--filter__badge')).toBeHidden()
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
     // Modified indicator visible after change
-    await expect(page.locator('.query-preset-bar__modified-indicator')).toBeVisible()
+    await expect(page.locator('.icon--filter__badge')).toBeVisible()
 
     // Reset changes
     await resetPresetChanges({ page })
 
     // Modified indicator hidden after reset
-    await expect(page.locator('.query-preset-bar__modified-indicator')).toBeHidden()
+    await expect(page.locator('.icon--filter__badge')).toBeHidden()
   })
 
   test('can edit a preset through the document drawer', async ({ page }) => {
@@ -663,7 +663,7 @@ describe('Query Presets', () => {
     await savePresetChanges({ page })
 
     // Wait for the modified indicator to disappear (indicates save completed)
-    await expect(page.locator('.query-preset-bar__modified-indicator')).toBeHidden()
+    await expect(page.locator('.icon--filter__badge')).toBeHidden()
 
     // Clear and reselect the preset to verify groupBy was saved
     await clearSelectedPreset({ page })

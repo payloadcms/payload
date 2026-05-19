@@ -11,23 +11,31 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacer-3);
+    padding-bottom: var(--spacer-6);
   }
 
   .collections__group {
     display: flex;
     flex-direction: column;
     gap: var(--gap);
+    padding-top: var(--spacer-2);
   }
 
   .collections__label {
     margin: 0;
+    font-family: var(--text-heading-medium-font-family);
+    font-size: var(--text-heading-medium-font-size);
+    font-weight: var(--text-heading-medium-font-weight);
+    line-height: var(--text-heading-medium-line-height);
+    letter-spacing: var(--text-heading-medium-letter-spacing);
+    color: var(--color-text);
   }
 
   .collections__card-list {
     padding: 0;
     margin: 0;
     list-style: none;
-    gap: var(--spacer-2-5);
+    gap: var(--spacer-3);
     display: grid;
     grid-template-columns: repeat(var(--cols), 1fr);
 

@@ -1,5 +1,10 @@
 import type { LabelFunction } from 'payload'
-import type { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select'
+import type {
+  CommonProps,
+  GroupBase,
+  Props as ReactSelectStateManagerProps,
+  StylesConfig,
+} from 'react-select'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
@@ -106,5 +111,6 @@ export type ReactSelectAdapterProps = {
   options: Option[] | OptionGroup[]
   placeholder?: LabelFunction | string
   showError?: boolean
+  styles?: StylesConfig<Option>
   value?: Option | Option[]
 }

@@ -7,24 +7,15 @@ import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
 
 const disabledFromImageSize = (
-  sizeAdmin:
-    | { disableGroupBy?: boolean; disableListColumn?: boolean; disableListFilter?: boolean }
-    | undefined,
-): { disabled?: { column?: boolean; filter?: boolean; groupBy?: boolean } } => {
-  if (!sizeAdmin) {
-    return {}
+  sizeAdmin: { disabled?: { column?: boolean; filter?: boolean; groupBy?: boolean } } | undefined,
+): { disabled: { column: boolean; filter: boolean; groupBy: boolean } } => {
+  return {
+    disabled: {
+      column: sizeAdmin?.disabled?.column ?? false,
+      filter: sizeAdmin?.disabled?.filter ?? false,
+      groupBy: sizeAdmin?.disabled?.groupBy ?? false,
+    },
   }
-  const disabled: { column?: boolean; filter?: boolean; groupBy?: boolean } = {}
-  if (sizeAdmin.disableGroupBy) {
-    disabled.groupBy = true
-  }
-  if (sizeAdmin.disableListColumn) {
-    disabled.column = true
-  }
-  if (sizeAdmin.disableListFilter) {
-    disabled.filter = true
-  }
-  return Object.keys(disabled).length ? { disabled } : {}
 }
 
 type Options = {
@@ -202,9 +193,6 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes)
   }
 
-  // In Payload v4, image size subfields (`url`, `width`, `height`, etc.) should
-  // default to `disabled: { groupBy, column, filter }` to avoid cluttering the
-  // collection list view and filters by default.
   if (uploadOptions.imageSizes) {
     uploadFields = uploadFields.concat([
       {
