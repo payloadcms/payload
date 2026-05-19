@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
+import type { UpdateQuery } from 'mongoose'
 
 import { flattenWhereToOperators, type UpdateMany } from 'payload'
 
@@ -91,7 +91,7 @@ export const updateMany: UpdateMany = async function updateMany(
     data = updateOps
   }
 
-  const options: MongooseUpdateQueryOptions = {
+  const options = {
     ...optionsArgs,
     new: true,
     projection: buildProjectionFromSelect({

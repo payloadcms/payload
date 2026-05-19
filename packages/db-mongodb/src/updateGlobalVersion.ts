@@ -1,4 +1,3 @@
-import type { MongooseUpdateQueryOptions } from 'mongoose'
 import type { JsonObject, UpdateGlobalVersionArgs } from 'payload'
 
 import { buildVersionGlobalFields } from 'payload'
@@ -40,7 +39,7 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
 
   transform({ adapter: this, data: versionData, fields, operation: 'write' })
 
-  const options: MongooseUpdateQueryOptions = {
+  const options = {
     ...optionsArgs,
     new: true,
     projection: buildProjectionFromSelect({

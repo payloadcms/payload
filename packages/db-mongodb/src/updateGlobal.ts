@@ -1,4 +1,3 @@
-import type { MongooseUpdateQueryOptions } from 'mongoose'
 import type { UpdateGlobal } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -18,7 +17,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
 
   transform({ adapter: this, data, fields, globalSlug, operation: 'write' })
 
-  const options: MongooseUpdateQueryOptions = {
+  const options = {
     ...optionsArgs,
     new: true,
     projection: buildProjectionFromSelect({
