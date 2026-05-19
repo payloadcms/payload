@@ -26,6 +26,7 @@
 
   .login__form__actions .form-submit .btn {
     width: 100%;
+    height: var(--spacer-4);
     justify-content: center;
   }
 
