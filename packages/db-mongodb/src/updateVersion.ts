@@ -44,25 +44,30 @@ export const updateVersion: UpdateVersion = async function updateVersion(
 
   transform({ adapter: this, data: versionData, fields, operation: 'write' })
 
-  const options = {
+  const baseOptions = {
     ...optionsArgs,
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  } satisfies QueryOptions
+
+  const findOptions = {
+    ...baseOptions,
+    lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
       fields: flattenedFields,
       select,
     }),
-    session: await getSession(this, req),
-    // Timestamps are manually added by the write transform
-    timestamps: false,
   } satisfies QueryOptions
 
   if (returning === false) {
-    await Model.updateOne(query, versionData, options)
+    await Model.updateOne(query, versionData, baseOptions)
     return null
   }
 
-  const doc = await Model.findOneAndUpdate(query, versionData, options)
+  const doc = await Model.findOneAndUpdate(query, versionData, findOptions)
 
   if (!doc) {
     return null

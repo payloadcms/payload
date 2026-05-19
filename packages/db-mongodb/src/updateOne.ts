@@ -75,26 +75,31 @@ export const updateOne: UpdateOne = async function updateOne(
     updateData = updateOps
   }
 
-  const options = {
+  const baseOptions = {
     ...optionsArgs,
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  } satisfies QueryOptions
+
+  const findOptions = {
+    ...baseOptions,
+    lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
       fields: collectionConfig.flattenedFields,
       select,
     }),
-    session: await getSession(this, req),
-    // Timestamps are manually added by the write transform
-    timestamps: false,
   } satisfies QueryOptions
 
   try {
     if (returning === false) {
-      await Model.updateOne(query, updateData, options)
+      await Model.updateOne(query, updateData, baseOptions)
       transform({ adapter: this, data, fields, operation: 'read' })
       return null
     } else {
-      result = await Model.findOneAndUpdate(query, updateData, options)
+      result = await Model.findOneAndUpdate(query, updateData, findOptions)
     }
   } catch (error) {
     handleError({ collection: collectionSlug, error, req })

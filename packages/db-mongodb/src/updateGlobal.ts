@@ -18,25 +18,30 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
 
   transform({ adapter: this, data, fields, globalSlug, operation: 'write' })
 
-  const options = {
+  const baseOptions = {
     ...optionsArgs,
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  } satisfies QueryOptions
+
+  const findOptions = {
+    ...baseOptions,
+    lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
       fields: globalConfig.flattenedFields,
       select,
     }),
-    session: await getSession(this, req),
-    // Timestamps are manually added by the write transform
-    timestamps: false,
   } satisfies QueryOptions
 
   if (returning === false) {
-    await Model.updateOne({ globalType: globalSlug }, data, options)
+    await Model.updateOne({ globalType: globalSlug }, data, baseOptions)
     return null
   }
 
-  const result: any = await Model.findOneAndUpdate({ globalType: globalSlug }, data, options)
+  const result: any = await Model.findOneAndUpdate({ globalType: globalSlug }, data, findOptions)
 
   transform({ adapter: this, data: result, fields, globalSlug, operation: 'read' })
 
