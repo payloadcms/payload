@@ -42,6 +42,7 @@ const connectWithReconnect = async function ({
       // swallow error
     }
   })
+  result.release()
 }
 
 export const connect: Connect = async function connect(
