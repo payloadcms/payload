@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { LexicalHelpers } from '../utils.js'
@@ -52,11 +52,18 @@ describe('Lexical On Demand', () => {
       await expect(paragraph).toHaveText('Hello')
     })
 
-    test('on-demand editor within form can render nested fields', async () => {
+    test('on-demand editor within form can render nested fields', async ({ page }) => {
       await lexical.slashCommand('table', false)
 
-      await expect(lexical.drawer.locator('#field-rows')).toHaveValue('5')
-      await expect(lexical.drawer.locator('#field-columns')).toHaveValue('5')
+      const popup = page.locator('.table-grid-popup')
+      await expect(popup.getByRole('spinbutton', { name: 'Rows' })).toHaveAttribute(
+        'placeholder',
+        '5',
+      )
+      await expect(popup.getByRole('spinbutton', { name: 'Columns' })).toHaveAttribute(
+        'placeholder',
+        '5',
+      )
     })
   })
 
@@ -98,11 +105,18 @@ describe('Lexical On Demand', () => {
       await expect(paragraph).toHaveText('state default')
     })
 
-    test('on-demand editor outside form can render nested fields', async () => {
+    test('on-demand editor outside form can render nested fields', async ({ page }) => {
       await lexical.slashCommand('table', false)
 
-      await expect(lexical.drawer.locator('#field-rows')).toHaveValue('5')
-      await expect(lexical.drawer.locator('#field-columns')).toHaveValue('5')
+      const popup = page.locator('.table-grid-popup')
+      await expect(popup.getByRole('spinbutton', { name: 'Rows' })).toHaveAttribute(
+        'placeholder',
+        '5',
+      )
+      await expect(popup.getByRole('spinbutton', { name: 'Columns' })).toHaveAttribute(
+        'placeholder',
+        '5',
+      )
     })
 
     test('on-demand editor renders label', async ({ page }) => {

@@ -13,6 +13,10 @@ export type ToolbarDropdownGroup = {
    */
   ChildComponent?: React.FC
   /**
+   * If true, the dropdown items will only show icons (text labels are hidden via CSS) and tooltips will be displayed on hover.
+   */
+  iconOnly?: boolean
+  /**
    * This is optional and controls if the toolbar group is highlighted or not.
    */
   isEnabled?: ({

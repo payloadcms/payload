@@ -199,6 +199,8 @@ export interface User {
   collection: 'users';
 }
 /**
+ * This collections does not use drafts or autosave. Changes are sent to the iframe window in real-time to use for fully client-side rendering.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -595,6 +597,8 @@ export interface Category {
   createdAt: string;
 }
 /**
+ * This collections has drafts enabled, but not autosave. Changes need to be saved to trigger a full router refresh, which fetches draft content on the server.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ssr".
  */
@@ -738,6 +742,8 @@ export interface Ssr {
   createdAt: string;
 }
 /**
+ * This collections has drafts and autosave enabled. Changes will automatically trigger a full router refresh, which fetches draft content on the server.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ssr-autosave".
  */

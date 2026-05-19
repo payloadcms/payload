@@ -27,11 +27,14 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     field: { admin = {}, hasMany, relationTo },
     filterOptions,
     onChange,
+    operator,
     value,
   } = props
 
   const placeholder = 'placeholder' in admin ? admin?.placeholder : undefined
   const isSortable = admin?.isSortable
+
+  const isMultiValue = hasMany || ['in', 'not_in'].includes(operator)
 
   const {
     config: {
@@ -184,7 +187,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
-      if (hasMany) {
+      if (isMultiValue) {
         if (Array.isArray(value)) {
           return value.map((val) => {
             if (hasMultipleRelations) {
@@ -237,7 +240,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     }
 
     return undefined
-  }, [hasMany, hasMultipleRelations, value, options])
+  }, [isMultiValue, hasMultipleRelations, value, options])
 
   const handleInputChange = useCallback(
     (input: string) => {
@@ -340,7 +343,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
    */
   useEffect(() => {
     if (value && hasLoadedFirstOptions) {
-      if (hasMany) {
+      if (isMultiValue) {
         const matchedOptions = findOptionsByValue()
 
         ;((matchedOptions as Option[]) || []).forEach((option, i) => {
@@ -368,7 +371,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   }, [
     addOptionByID,
     findOptionsByValue,
-    hasMany,
+    isMultiValue,
     hasMultipleRelations,
     relationTo,
     value,
@@ -388,7 +391,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
       ) : (
         <ReactSelect
           disabled={disabled}
-          isMulti={hasMany}
+          isMulti={isMultiValue}
           isSortable={isSortable}
           onChange={(selected) => {
             if (!selected) {
@@ -396,7 +399,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
               return
             }
 
-            if (hasMany && Array.isArray(selected)) {
+            if (isMultiValue && Array.isArray(selected)) {
               onChange(
                 selected
                   ? selected.map((option) => {

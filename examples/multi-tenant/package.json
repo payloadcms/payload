@@ -27,7 +27,7 @@
     "graphql": "^16.9.0",
     "next": "^15.4.10",
     "payload": "latest",
-    "qs-esm": "7.0.2",
+    "qs-esm": "8.0.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "sharp": "0.32.6"
@@ -35,7 +35,7 @@
   "devDependencies": {
     "@payloadcms/graphql": "latest",
     "@swc/core": "^1.6.13",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.0.0",

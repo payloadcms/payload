@@ -3,6 +3,7 @@ import type {
   CollectionPreferences,
   Column,
   ColumnPreference,
+  HierarchyViewData,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
@@ -12,11 +13,18 @@ import type {
   SanitizedCollectionPermission,
 } from 'payload'
 
-import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
+import {
+  DefaultListView,
+  HierarchyListView,
+  HydrateAuthProvider,
+  HydrateHierarchyProvider,
+  ListQueryProvider,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
+  appendDateTimezoneSelectFields,
   appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
@@ -30,6 +38,7 @@ import React, { Fragment } from 'react'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
+import { handleHierarchy } from './handleHierarchy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
@@ -144,7 +153,8 @@ export const renderListView = async (
   })
 
   let queryPreset: QueryPreset | undefined
-  let queryPresetPermissions: SanitizedCollectionPermission | undefined
+  let queryPresetPermissions: SanitizedCollectionPermission | undefined =
+    permissions?.collections?.['payload-query-presets']
 
   if (collectionPreferences?.preset) {
     try {
@@ -245,15 +255,48 @@ export const renderListView = async (
     permissions,
   })
 
-  const select = collectionConfig.admin.enableListViewSelectAPI
-    ? transformColumnsToSelect(columns)
-    : undefined
+  /** Automatically force select active columns. */
+  const select = transformColumnsToSelect(columns)
 
   /** Force select image fields for list view thumbnails */
   appendUploadSelectFields({
     collectionConfig,
     select,
   })
+
+  /** Force select `_tz` siblings for any timezone-enabled date fields in select */
+  appendDateTimezoneSelectFields({
+    fields: collectionConfig.flattenedFields,
+    select,
+  })
+
+  /** Force select `_order` for orderable collections — OrderableTable needs it to compute reorder targets */
+  if (collectionConfig.orderable === true) {
+    select._order = true
+  }
+
+  /** Force select `_status` for drafts-enabled collections — needed by `enrichDocsWithVersionStatus` and `formatDocURL` */
+  if (collectionConfig.versions?.drafts) {
+    select._status = true
+  }
+
+  // Check for hierarchy parent param
+  const isHierarchyCollection = Boolean(collectionConfig.hierarchy)
+  let hierarchyParentId: null | number | string = null
+
+  if (isHierarchyCollection) {
+    if (searchParams?.parent === 'null' || searchParams?.parent === undefined) {
+      hierarchyParentId = null
+    } else if (typeof searchParams?.parent === 'string') {
+      hierarchyParentId =
+        payload.db.defaultIDType === 'number' && isNumber(searchParams.parent)
+          ? Number(searchParams.parent)
+          : searchParams.parent
+    }
+  }
+
+  // Hierarchy data for client-side rendering
+  let hierarchyData: HierarchyViewData | undefined
 
   try {
     if (collectionConfig.admin.groupBy && query.groupBy) {
@@ -336,6 +379,43 @@ export const renderListView = async (
     }
   }
 
+  // Fetch hierarchy data only for hierarchy view
+  let HierarchyIcon: React.ReactNode | undefined
+  const isHierarchyView = viewType === 'hierarchy'
+
+  if (isHierarchyCollection && isHierarchyView) {
+    // Extract typeFilter from searchParams (comma-separated list of collection slugs)
+    const typeFilterParam = searchParams?.typeFilter
+    const typeFilter =
+      typeof typeFilterParam === 'string' && typeFilterParam.length > 0
+        ? typeFilterParam.split(',')
+        : undefined
+
+    hierarchyData = await handleHierarchy({
+      baseFilter: baseFilterConstraint,
+      collectionConfig,
+      collectionSlug,
+      parentId: hierarchyParentId,
+      permissions,
+      req,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      typeFilter,
+      user,
+    })
+
+    data = hierarchyData.childrenData
+
+    // Resolve hierarchy icon from collection config
+    const hierarchyConfig =
+      typeof collectionConfig.hierarchy === 'object' ? collectionConfig.hierarchy : undefined
+
+    HierarchyIcon = RenderServerComponent({
+      Component: hierarchyConfig?.admin?.components?.Icon,
+      importMap: payload.importMap,
+      key: `hierarchy-icon-${collectionSlug}`,
+    })
+  }
+
   const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
   const resolvedFilterOptions = await resolveAllFilterOptions({
@@ -401,45 +481,81 @@ export const renderListView = async (
   // Is there a way to avoid this? The `where` object is already seemingly plain, but is not bc it originates from the params.
   query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
 
+  const RenderedListViewComponent = RenderServerComponent({
+    clientProps: {
+      ...listViewSlots,
+      baseFilter: baseFilterConstraint,
+      collectionSlug,
+      columnState,
+      disableBulkDelete,
+      disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
+      disableQueryPresets,
+      enableRowSelections,
+      hasCreatePermission,
+      hasDeletePermission,
+      hasTrashPermission,
+      hierarchyData,
+      HierarchyIcon,
+      listPreferences: collectionPreferences,
+      newDocumentURL,
+      queryPreset,
+      queryPresetPermissions,
+      renderedFilters,
+      resolvedFilterOptions,
+      Table,
+      viewType,
+    } satisfies ListViewClientProps,
+    Component: ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
+    Fallback: viewType === 'hierarchy' ? HierarchyListView : DefaultListView,
+    importMap: payload.importMap,
+    key: `list-view-${collectionSlug}-${viewType}`,
+    serverProps,
+  })
+
   return {
     List: (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
-        <ListQueryProvider
-          collectionSlug={collectionSlug}
-          data={data}
-          modifySearchParams={!isInDrawer}
-          orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
-          query={query}
-        >
-          {RenderServerComponent({
-            clientProps: {
-              ...listViewSlots,
-              collectionSlug,
-              columnState,
-              disableBulkDelete,
-              disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
-              disableQueryPresets,
-              enableRowSelections,
-              hasCreatePermission,
-              hasDeletePermission,
-              hasTrashPermission,
-              listPreferences: collectionPreferences,
-              newDocumentURL,
-              queryPreset,
-              queryPresetPermissions,
-              renderedFilters,
-              resolvedFilterOptions,
-              Table,
-              viewType,
-            } satisfies ListViewClientProps,
-            Component:
-              ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
-            Fallback: DefaultListView,
-            importMap: payload.importMap,
-            serverProps,
-          })}
-        </ListQueryProvider>
+        {isHierarchyView ? (
+          <Fragment>
+            <HydrateHierarchyProvider
+              allowedCollections={hierarchyData?.allowedCollections}
+              baseFilter={baseFilterConstraint}
+              collectionSlug={collectionSlug}
+              expandedNodes={hierarchyData?.breadcrumbs?.slice(0, -1).map((b) => b.id)}
+              parent={hierarchyData?.parent}
+              parentFieldName={
+                typeof collectionConfig.hierarchy === 'object'
+                  ? collectionConfig.hierarchy?.parentFieldName
+                  : undefined
+              }
+              tableData={data}
+              treeLimit={
+                typeof collectionConfig.hierarchy === 'object'
+                  ? collectionConfig.hierarchy?.admin?.treeLimit
+                  : undefined
+              }
+              typeFieldName={
+                typeof collectionConfig.hierarchy === 'object' &&
+                collectionConfig.hierarchy?.collectionSpecific &&
+                typeof collectionConfig.hierarchy.collectionSpecific === 'object'
+                  ? collectionConfig.hierarchy.collectionSpecific.fieldName
+                  : undefined
+              }
+            />
+            {RenderedListViewComponent}
+          </Fragment>
+        ) : (
+          <ListQueryProvider
+            collectionSlug={collectionSlug}
+            data={data}
+            modifySearchParams={!isInDrawer}
+            orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
+            query={query}
+          >
+            {RenderedListViewComponent}
+          </ListQueryProvider>
+        )}
       </Fragment>
     ),
   }

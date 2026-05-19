@@ -71,6 +71,14 @@ export const APIViewClient: React.FC = () => {
   )
   const [authenticated, setAuthenticated] = React.useState<boolean>(true)
   const [fullscreen, setFullscreen] = React.useState<boolean>(false)
+  const [origin, setOrigin] = React.useState<string>(serverURL || '')
+
+  // Set the origin to the window.location.origin in useEffect to avoid hydration errors
+  React.useEffect(() => {
+    if (!serverURL) {
+      setOrigin(window.location.origin)
+    }
+  }, [serverURL])
 
   const trashParam = typeof initialData?.deletedAt === 'string'
 
@@ -84,7 +92,7 @@ export const APIViewClient: React.FC = () => {
   const fetchURL = formatAdminURL({
     apiRoute,
     path: `${docEndpoint}?${params}`,
-    serverURL: serverURL || window.location.origin,
+    serverURL: origin,
   })
 
   React.useEffect(() => {

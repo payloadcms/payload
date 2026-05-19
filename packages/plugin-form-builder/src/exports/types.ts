@@ -28,4 +28,6 @@ export type {
   SubmissionValue,
   TextAreaField,
   TextField,
+  UploadField,
+  UploadFieldMimeType,
 } from '../types.js'

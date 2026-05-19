@@ -11,14 +11,6 @@ export const HorizontalRuleFeature = createServerFeature({
     markdownTransformers: [MarkdownTransformer],
     nodes: [
       createNode({
-        converters: {
-          html: {
-            converter: () => {
-              return `<hr/>`
-            },
-            nodeTypes: [HorizontalRuleServerNode.getType()],
-          },
-        },
         node: HorizontalRuleServerNode,
       }),
     ],

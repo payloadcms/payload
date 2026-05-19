@@ -1,0 +1,376 @@
+import { buildDefaultEditorState, buildEditorState } from '@payloadcms/richtext-lexical'
+import { expect, test } from '@playwright/test'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
+import type { Config } from '../../payload-types.js'
+import type { LexicalViewsFrontendNodes } from './index.js'
+
+import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { lexicalViewsFrontendSlug, lexicalViewsSlug } from '../../slugs.js'
+
+const filename = fileURLToPath(import.meta.url)
+const currentFolder = path.dirname(filename)
+const dirname = path.resolve(currentFolder, '../../')
+
+let _payload: PayloadTestSDK<Config>
+let serverURL: string
+
+const { beforeAll, beforeEach, describe } = test
+
+// Unlike the other suites, this one runs in parallel, as they run on create URLs and are "pure" tests
+// PLEASE do not reset the database or perform any operations that modify it in this file.
+// TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
+// it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
+// test.describe.configure({ mode: 'parallel' })
+
+describe('Lexical Views', () => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
+    ;({ payload: _payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+
+    const page = await browser.newPage()
+    await ensureCompilationIsDone({ page, serverURL })
+    await page.close()
+  })
+
+  describe('LexicalViewsFrontend - view selector with frontend view', () => {
+    beforeEach(async ({ page }) => {
+      const url = new AdminUrlUtil(serverURL, lexicalViewsFrontendSlug)
+      await page.goto(url.create)
+      // Wait for the rich text field to be visible
+      await page.locator('.rich-text-lexical').first().waitFor({ state: 'visible' })
+    })
+
+    test('should show the view selector when a non-default view is configured', async ({
+      page,
+    }) => {
+      const viewSelector = page.locator('.lexical-view-selector')
+      await expect(viewSelector).toBeVisible()
+    })
+
+    test('should display Default as the initial view label', async ({ page }) => {
+      const viewLabel = page.locator('.lexical-view-selector__label')
+      await expect(viewLabel).toHaveText('Default')
+    })
+
+    test('should show Default and Frontend options in the view toggler popup', async ({ page }) => {
+      // Open the view selector popup
+      await page.locator('.lexical-view-selector__button').click()
+
+      // The popup renders inside .lexical-view-selector and contains .popup-button-list items
+      const viewSelectorPopup = page.locator(
+        '.popup__content .popup-button-list .popup-button-list__button',
+      )
+      await expect(viewSelectorPopup).toHaveCount(2)
+      await expect(viewSelectorPopup.nth(0)).toHaveText('Default')
+      await expect(viewSelectorPopup.nth(1)).toHaveText('Frontend')
+    })
+
+    test('should switch to Frontend view when clicking the Frontend option', async ({ page }) => {
+      await page.locator('.lexical-view-selector__button').click()
+
+      // Click the Frontend option (it's the non-disabled button in the popup)
+      await page
+        .locator('.popup__content .popup-button-list .popup-button-list__button')
+        .filter({ hasText: 'Frontend' })
+        .click()
+
+      // Verify label updated
+      await expect(page.locator('.lexical-view-selector__label')).toHaveText('Frontend')
+    })
+
+    test('should switch back to Default view after selecting Frontend', async ({ page }) => {
+      // Switch to Frontend
+      await page.locator('.lexical-view-selector__button').click()
+      await page
+        .locator('.popup__content .popup-button-list .popup-button-list__button')
+        .filter({ hasText: 'Frontend' })
+        .click()
+      await expect(page.locator('.lexical-view-selector__label')).toHaveText('Frontend')
+
+      // Switch back to Default
+      await page.locator('.lexical-view-selector__button').click()
+      await page
+        .locator('.popup__content .popup-button-list .popup-button-list__button')
+        .filter({ hasText: 'Default' })
+        .click()
+      await expect(page.locator('.lexical-view-selector__label')).toHaveText('Default')
+    })
+
+    test('nested richtext editor should inherit view from parent, if both have views configured', async ({
+      page,
+    }) => {
+      const url = new AdminUrlUtil(serverURL, lexicalViewsFrontendSlug)
+
+      const doc = await _payload.create({
+        collection: lexicalViewsFrontendSlug,
+        data: {
+          customFrontendViews: buildEditorState<LexicalViewsFrontendNodes>({
+            nodes: [
+              {
+                type: 'block',
+                fields: {
+                  id: 'e2e-banner-normal-1',
+                  type: 'normal',
+                  blockName: '',
+                  blockType: 'banner',
+                  content: buildDefaultEditorState({ text: 'Normal banner content' }),
+                  title: 'Normal Banner',
+                },
+                format: '',
+                version: 2,
+              },
+            ],
+          }),
+        },
+        depth: 0,
+      })
+
+      try {
+        await page.goto(url.edit(doc.id))
+        const editor = page.locator('.rich-text-lexical').first()
+        await expect(editor).toBeVisible()
+        await expect(editor.getByText('Normal banner content').first()).toBeVisible()
+
+        const viewSelectors = page.locator('.lexical-view-selector')
+        // Block view selector should not be visible since parent has one
+        await expect(viewSelectors).toHaveCount(1)
+
+        const parentViewSelector = page.locator(
+          ':not(.LexicalEditorTheme__block-Code) > .lexical-view-selector',
+        )
+
+        await expect(editor).toHaveAttribute('data-lexical-view', 'default')
+        await expect(
+          editor.locator('.LexicalEditorTheme__block .rich-text-lexical'),
+        ).toHaveAttribute('data-lexical-view', 'default')
+
+        await parentViewSelector.click()
+        await page
+          .locator('.popup__content .popup-button-list .popup-button-list__button')
+          .filter({ hasText: 'Frontend' })
+          .click()
+
+        await expect(page.locator('.lexical-view-selector__label').first()).toHaveText('Frontend')
+
+        await expect(editor).toHaveAttribute('data-lexical-view', 'frontend')
+        await expect(
+          editor.locator('.LexicalEditorTheme__block .rich-text-lexical'),
+        ).toHaveAttribute('data-lexical-view', 'frontend')
+      } finally {
+        await _payload.delete({
+          collection: lexicalViewsFrontendSlug,
+          id: doc.id,
+        })
+      }
+    })
+
+    test('should preserve custom Block component from viewMap after drawer save', async ({
+      page,
+    }) => {
+      const url = new AdminUrlUtil(serverURL, lexicalViewsFrontendSlug)
+
+      const doc = await _payload.create({
+        collection: lexicalViewsFrontendSlug,
+        data: {
+          customFrontendViews: buildEditorState<LexicalViewsFrontendNodes>({
+            nodes: [
+              {
+                type: 'block',
+                fields: {
+                  id: 'e2e-banner-drawer-save',
+                  type: 'normal',
+                  blockName: '',
+                  blockType: 'banner',
+                  content: buildDefaultEditorState({ text: 'Banner content for drawer test' }),
+                  title: 'Drawer Test Banner',
+                },
+                format: '',
+                version: 2,
+              },
+            ],
+          }),
+        },
+        depth: 0,
+      })
+
+      try {
+        await page.goto(url.edit(doc.id))
+        const editor = page.locator('.rich-text-lexical').first()
+        await expect(editor).toBeVisible()
+        await expect(editor.getByText('Banner content for drawer test').first()).toBeVisible()
+
+        // Switch to Frontend view
+        await page.locator('.lexical-view-selector__button').click()
+        await page
+          .locator('.popup__content .popup-button-list .popup-button-list__button')
+          .filter({ hasText: 'Frontend' })
+          .click()
+        await expect(page.locator('.lexical-view-selector__label').first()).toHaveText('Frontend')
+
+        const blockDecorator = editor.locator('[data-lexical-decorator="true"]').first()
+        await expect(blockDecorator).toBeVisible()
+
+        // Verify the custom Block component renders (no default collapsible toggle)
+        const toggleBlockButton = blockDecorator.getByRole('button', { name: 'Toggle block' })
+        await expect(toggleBlockButton).toHaveCount(0)
+
+        // Open the block's drawer via edit button
+        const editButton = blockDecorator.locator('.LexicalEditorTheme__block__editButton').first()
+        await expect(editButton).toBeVisible()
+        await editButton.click()
+
+        // Wait for drawer to open and click "Save changes"
+        const drawer = page.locator('.drawer__content').last()
+        await expect(drawer).toBeVisible()
+        await drawer.getByText('Save changes').click()
+
+        await expect(drawer).toBeHidden()
+
+        // The custom Block component should still be rendered after drawer save.
+        await expect(blockDecorator).toBeVisible()
+        const toggleBlockButtonAfterSave = blockDecorator.getByRole('button', {
+          name: 'Toggle block',
+        })
+        await expect(toggleBlockButtonAfterSave).toHaveCount(0)
+        await expect(blockDecorator.locator('.custom-banner-block-component')).toBeVisible()
+      } finally {
+        await _payload.delete({
+          collection: lexicalViewsFrontendSlug,
+          id: doc.id,
+        })
+      }
+    })
+
+    test('should update custom Block component formData after drawer save', async ({ page }) => {
+      const url = new AdminUrlUtil(serverURL, lexicalViewsFrontendSlug)
+
+      const doc = await _payload.create({
+        collection: lexicalViewsFrontendSlug,
+        data: {
+          customFrontendViews: buildEditorState<LexicalViewsFrontendNodes>({
+            nodes: [
+              {
+                type: 'block',
+                fields: {
+                  id: 'e2e-banner-stale-data',
+                  type: 'normal',
+                  blockName: '',
+                  blockType: 'banner',
+                  content: buildDefaultEditorState({ text: 'Stale data test content' }),
+                  title: 'Stale Data Banner',
+                },
+                format: '',
+                version: 2,
+              },
+            ],
+          }),
+        },
+        depth: 0,
+      })
+
+      try {
+        await page.goto(url.edit(doc.id))
+        const editor = page.locator('.rich-text-lexical').first()
+        await expect(editor).toBeVisible()
+
+        // Switch to Frontend view
+        await page.locator('.lexical-view-selector__button').click()
+        await page
+          .locator('.popup__content .popup-button-list .popup-button-list__button')
+          .filter({ hasText: 'Frontend' })
+          .click()
+        await expect(page.locator('.lexical-view-selector__label').first()).toHaveText('Frontend')
+
+        const bannerBlock = editor.locator('.custom-banner-block-component').first()
+        await expect(bannerBlock).toBeVisible()
+
+        // Verify initial type is "normal"
+        await expect(bannerBlock).toHaveAttribute('data-banner-type', 'normal')
+
+        // Open the block's drawer via edit button
+        const blockDecorator = editor.locator('[data-lexical-decorator="true"]').first()
+        const editButton = blockDecorator.locator('.LexicalEditorTheme__block__editButton').first()
+        await editButton.click()
+
+        // Change the type select from "Normal" to "Important" in the drawer
+        const drawer = page.locator('.drawer__content').last()
+        await expect(drawer).toBeVisible()
+        const typeSelect = drawer.locator('#field-type .rs__control')
+        await typeSelect.click()
+        await page.locator('.rs__option:has-text("Important")').click()
+
+        // Save the drawer
+        await drawer.getByText('Save changes').click()
+        await expect(drawer).toBeHidden()
+
+        // The custom Block component should reflect the updated type.
+        // Bug: CustomBlock stores pre-rendered JSX with formData baked in at mount time,
+        // so it still shows "normal" after saving "important" from the drawer.
+        await expect(bannerBlock).toHaveAttribute('data-banner-type', 'important')
+      } finally {
+        await _payload.delete({
+          collection: lexicalViewsFrontendSlug,
+          id: doc.id,
+        })
+      }
+    })
+
+    test('should hide fixed toolbar when switching to Frontend view with filterFeatures', async ({
+      page,
+    }) => {
+      const url = new AdminUrlUtil(serverURL, lexicalViewsFrontendSlug)
+      await page.goto(url.create)
+      const editor = page.locator('.rich-text-lexical').first()
+      await expect(editor).toBeVisible()
+
+      // Fixed toolbar should be visible in the Default view
+      const fixedToolbar = editor.locator('.fixed-toolbar')
+      await expect(fixedToolbar).toBeVisible()
+
+      // Switch to Frontend view (which filters out toolbarFixed and toolbarInline)
+      await page.locator('.lexical-view-selector__button').click()
+      await page
+        .locator('.popup__content .popup-button-list .popup-button-list__button')
+        .filter({ hasText: 'Frontend' })
+        .click()
+      await expect(page.locator('.lexical-view-selector__label')).toHaveText('Frontend')
+
+      // Fixed toolbar should no longer be visible
+      await expect(fixedToolbar).toBeHidden()
+
+      // Switch back to Default view
+      await page.locator('.lexical-view-selector__button').click()
+      await page
+        .locator('.popup__content .popup-button-list .popup-button-list__button')
+        .filter({ hasText: 'Default' })
+        .click()
+      await expect(page.locator('.lexical-view-selector__label')).toHaveText('Default')
+
+      // Fixed toolbar should reappear
+      await expect(fixedToolbar).toBeVisible()
+    })
+  })
+
+  describe('LexicalViews - only default view configured', () => {
+    beforeEach(async ({ page }) => {
+      const url = new AdminUrlUtil(serverURL, lexicalViewsSlug)
+      await page.goto(url.create)
+      await page.locator('.rich-text-lexical').first().waitFor({ state: 'visible' })
+    })
+
+    test('should not show the view selector when only the default view exists', async ({
+      page,
+    }) => {
+      // LexicalViews only has a "default" view, so the selector should be hidden
+      const viewSelector = page.locator('.lexical-view-selector')
+      await expect(viewSelector).toHaveCount(0)
+    })
+  })
+})

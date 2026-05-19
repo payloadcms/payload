@@ -26,7 +26,7 @@ import { createPortal } from 'react-dom'
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import { useDebounce } from '../../utils/useDebounce.js'
 
-const BUTTON_WIDTH_PX = 20
+const BUTTON_WIDTH_PX = 16
 
 function TableHoverActionsContainer({
   anchorElem,

@@ -94,12 +94,19 @@ export interface Config {
     'lexical-heading-feature': LexicalHeadingFeature;
     'lexical-jsx-converter': LexicalJsxConverter;
     'lexical-fields': LexicalField;
-    'lexical-migrate-fields': LexicalMigrateField;
+    'lexical-views': LexicalView;
+    'lexical-views-frontend': LexicalViewsFrontend;
+    'lexical-views-provider': LexicalViewsProvider;
+    'lexical-views-provider-default': LexicalViewsProviderDefault;
+    'lexical-views-provider-fallback': LexicalViewsProviderFallback;
+    'lexical-views-nested': LexicalViewsNested;
     'lexical-localized-fields': LexicalLocalizedField;
     lexicalObjectReferenceBug: LexicalObjectReferenceBug;
     LexicalInBlock: LexicalInBlock;
+    'lexical-autosave-block': LexicalAutosaveBlock;
     'lexical-access-control': LexicalAccessControl;
     'lexical-relationship-fields': LexicalRelationshipField;
+    collision: Collision;
     'lexical-nested-blocks': LexicalNestedBlock;
     'rich-text-fields': RichTextField;
     'text-fields': TextField;
@@ -125,12 +132,19 @@ export interface Config {
     'lexical-heading-feature': LexicalHeadingFeatureSelect<false> | LexicalHeadingFeatureSelect<true>;
     'lexical-jsx-converter': LexicalJsxConverterSelect<false> | LexicalJsxConverterSelect<true>;
     'lexical-fields': LexicalFieldsSelect<false> | LexicalFieldsSelect<true>;
-    'lexical-migrate-fields': LexicalMigrateFieldsSelect<false> | LexicalMigrateFieldsSelect<true>;
+    'lexical-views': LexicalViewsSelect<false> | LexicalViewsSelect<true>;
+    'lexical-views-frontend': LexicalViewsFrontendSelect<false> | LexicalViewsFrontendSelect<true>;
+    'lexical-views-provider': LexicalViewsProviderSelect<false> | LexicalViewsProviderSelect<true>;
+    'lexical-views-provider-default': LexicalViewsProviderDefaultSelect<false> | LexicalViewsProviderDefaultSelect<true>;
+    'lexical-views-provider-fallback': LexicalViewsProviderFallbackSelect<false> | LexicalViewsProviderFallbackSelect<true>;
+    'lexical-views-nested': LexicalViewsNestedSelect<false> | LexicalViewsNestedSelect<true>;
     'lexical-localized-fields': LexicalLocalizedFieldsSelect<false> | LexicalLocalizedFieldsSelect<true>;
     lexicalObjectReferenceBug: LexicalObjectReferenceBugSelect<false> | LexicalObjectReferenceBugSelect<true>;
     LexicalInBlock: LexicalInBlockSelect<false> | LexicalInBlockSelect<true>;
+    'lexical-autosave-block': LexicalAutosaveBlockSelect<false> | LexicalAutosaveBlockSelect<true>;
     'lexical-access-control': LexicalAccessControlSelect<false> | LexicalAccessControlSelect<true>;
     'lexical-relationship-fields': LexicalRelationshipFieldsSelect<false> | LexicalRelationshipFieldsSelect<true>;
+    collision: CollisionSelect<false> | CollisionSelect<true>;
     'lexical-nested-blocks': LexicalNestedBlocksSelect<false> | LexicalNestedBlocksSelect<true>;
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
@@ -199,14 +213,7 @@ export interface NestedBlock {
  * via the `definition` "blockWithBlockRef".
  */
 export interface BlockWithBlockRef {
-  nestedBlocks?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'nestedBlock';
-      }[]
-    | null;
+  nestedBlocks?: NestedBlock[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'blockWithBlockRef';
@@ -450,12 +457,11 @@ export interface LexicalField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "lexical-migrate-fields".
+ * via the `definition` "lexical-views".
  */
-export interface LexicalMigrateField {
+export interface LexicalView {
   id: string;
-  title: string;
-  lexicalWithLexicalPluginData?: {
+  customDefaultView?: {
     root: {
       type: string;
       children: {
@@ -470,7 +476,7 @@ export interface LexicalMigrateField {
     };
     [k: string]: unknown;
   } | null;
-  lexicalWithSlateData?: {
+  vanillaView?: {
     root: {
       type: string;
       children: {
@@ -485,7 +491,16 @@ export interface LexicalMigrateField {
     };
     [k: string]: unknown;
   } | null;
-  lexicalSimple?: {
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-frontend".
+ */
+export interface LexicalViewsFrontend {
+  id: string;
+  customFrontendViews?: {
     root: {
       type: string;
       children: {
@@ -500,9 +515,17 @@ export interface LexicalMigrateField {
     };
     [k: string]: unknown;
   } | null;
-  lexicalSimple_html?: string | null;
-  groupWithLexicalField?: {
-    lexicalInGroupField?: {
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-provider".
+ */
+export interface LexicalViewsProvider {
+  id: string;
+  viewProviderWrapper?: {
+    richTextField?: {
       root: {
         type: string;
         children: {
@@ -517,29 +540,83 @@ export interface LexicalMigrateField {
       };
       [k: string]: unknown;
     } | null;
-    lexicalInGroupField_html?: string | null;
   };
-  arrayWithLexicalField?:
-    | {
-        lexicalInArrayField?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-provider-default".
+ */
+export interface LexicalViewsProviderDefault {
+  id: string;
+  defaultViewWrapper?: {
+    richTextField?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
           [k: string]: unknown;
-        } | null;
-        lexicalInArrayField_html?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-provider-fallback".
+ */
+export interface LexicalViewsProviderFallback {
+  id: string;
+  fallbackViewWrapper?: {
+    richTextField?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-nested".
+ */
+export interface LexicalViewsNested {
+  id: string;
+  parentRichText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -676,6 +753,31 @@ export interface LexicalInBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-autosave-block".
+ */
+export interface LexicalAutosaveBlock {
+  id: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lexical-access-control".
  */
 export interface LexicalAccessControl {
@@ -771,6 +873,30 @@ export interface LexicalRelationshipField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collision".
+ */
+export interface Collision {
+  id: string;
+  collision?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lexical-nested-blocks".
  */
 export interface LexicalNestedBlock {
@@ -839,38 +965,13 @@ export interface RichTextField {
    * This select field is rendered here to ensure its options dropdown renders above the rich text toolbar.
    */
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
-  richText: {
-    [k: string]: unknown;
-  }[];
-  richTextCustomFields?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  richTextReadOnly?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
   blocks?:
-    | (
-        | {
-            text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textBlock';
-          }
-        | {
-            text?:
-              | {
-                  [k: string]: unknown;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'richTextBlockSlate';
-          }
-      )[]
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textBlock';
+      }[]
     | null;
   updatedAt: string;
   createdAt: string;
@@ -1224,8 +1325,28 @@ export interface PayloadLockedDocument {
         value: string | LexicalField;
       } | null)
     | ({
-        relationTo: 'lexical-migrate-fields';
-        value: string | LexicalMigrateField;
+        relationTo: 'lexical-views';
+        value: string | LexicalView;
+      } | null)
+    | ({
+        relationTo: 'lexical-views-frontend';
+        value: string | LexicalViewsFrontend;
+      } | null)
+    | ({
+        relationTo: 'lexical-views-provider';
+        value: string | LexicalViewsProvider;
+      } | null)
+    | ({
+        relationTo: 'lexical-views-provider-default';
+        value: string | LexicalViewsProviderDefault;
+      } | null)
+    | ({
+        relationTo: 'lexical-views-provider-fallback';
+        value: string | LexicalViewsProviderFallback;
+      } | null)
+    | ({
+        relationTo: 'lexical-views-nested';
+        value: string | LexicalViewsNested;
       } | null)
     | ({
         relationTo: 'lexical-localized-fields';
@@ -1240,12 +1361,20 @@ export interface PayloadLockedDocument {
         value: string | LexicalInBlock;
       } | null)
     | ({
+        relationTo: 'lexical-autosave-block';
+        value: string | LexicalAutosaveBlock;
+      } | null)
+    | ({
         relationTo: 'lexical-access-control';
         value: string | LexicalAccessControl;
       } | null)
     | ({
         relationTo: 'lexical-relationship-fields';
         value: string | LexicalRelationshipField;
+      } | null)
+    | ({
+        relationTo: 'collision';
+        value: string | Collision;
       } | null)
     | ({
         relationTo: 'lexical-nested-blocks';
@@ -1414,27 +1543,68 @@ export interface LexicalFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "lexical-migrate-fields_select".
+ * via the `definition` "lexical-views_select".
  */
-export interface LexicalMigrateFieldsSelect<T extends boolean = true> {
-  title?: T;
-  lexicalWithLexicalPluginData?: T;
-  lexicalWithSlateData?: T;
-  lexicalSimple?: T;
-  lexicalSimple_html?: T;
-  groupWithLexicalField?:
+export interface LexicalViewsSelect<T extends boolean = true> {
+  customDefaultView?: T;
+  vanillaView?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-frontend_select".
+ */
+export interface LexicalViewsFrontendSelect<T extends boolean = true> {
+  customFrontendViews?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-provider_select".
+ */
+export interface LexicalViewsProviderSelect<T extends boolean = true> {
+  viewProviderWrapper?:
     | T
     | {
-        lexicalInGroupField?: T;
-        lexicalInGroupField_html?: T;
+        richTextField?: T;
       };
-  arrayWithLexicalField?:
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-provider-default_select".
+ */
+export interface LexicalViewsProviderDefaultSelect<T extends boolean = true> {
+  defaultViewWrapper?:
     | T
     | {
-        lexicalInArrayField?: T;
-        lexicalInArrayField_html?: T;
-        id?: T;
+        richTextField?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-provider-fallback_select".
+ */
+export interface LexicalViewsProviderFallbackSelect<T extends boolean = true> {
+  fallbackViewWrapper?:
+    | T
+    | {
+        richTextField?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-nested_select".
+ */
+export interface LexicalViewsNestedSelect<T extends boolean = true> {
+  parentRichText?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1481,6 +1651,16 @@ export interface LexicalInBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-autosave-block_select".
+ */
+export interface LexicalAutosaveBlockSelect<T extends boolean = true> {
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lexical-access-control_select".
  */
 export interface LexicalAccessControlSelect<T extends boolean = true> {
@@ -1504,6 +1684,15 @@ export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collision_select".
+ */
+export interface CollisionSelect<T extends boolean = true> {
+  collision?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lexical-nested-blocks_select".
  */
 export interface LexicalNestedBlocksSelect<T extends boolean = true> {
@@ -1522,20 +1711,10 @@ export interface RichTextFieldsSelect<T extends boolean = true> {
   lexicalCustomFields_html?: T;
   lexical?: T;
   selectHasMany?: T;
-  richText?: T;
-  richTextCustomFields?: T;
-  richTextReadOnly?: T;
   blocks?:
     | T
     | {
         textBlock?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-        richTextBlockSlate?:
           | T
           | {
               text?: T;
@@ -1927,6 +2106,118 @@ export interface AvatarGroupBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'AvatarGroup';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ViewsTestBlock".
+ */
+export interface ViewsTestBlock {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'viewsTestBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BannerBlock".
+ */
+export interface BannerBlock {
+  type: 'normal' | 'important';
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'banner';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock".
+ */
+export interface ContentBlock {
+  title: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProviderBannerBlock".
+ */
+export interface ProviderBannerBlock {
+  type: 'normal' | 'important';
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'banner';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NestedContentBlock".
+ */
+export interface NestedContentBlock {
+  label: string;
+  nestedRichText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'nested-content';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

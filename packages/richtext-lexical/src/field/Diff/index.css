@@ -1,0 +1,101 @@
+@layer payload-default {
+  .lexical-diff .field-diff-content {
+    .html-diff {
+      font-family: var(--font-serif);
+      font-size: var(--text-body-large-font-size);
+      line-height: var(--text-body-large-line-height);
+      letter-spacing: 0.02em;
+    }
+
+    blockquote {
+      font-size: var(--text-body-large-font-size);
+      line-height: var(--text-body-large-line-height);
+      margin-block: var(--spacer-3);
+      margin-inline: 0;
+      padding-inline-start: var(--spacer-2-5);
+      padding-block: var(--spacer-1);
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        inset-inline-start: 0;
+        width: var(--spacer-1);
+        background-color: var(--color-bg-secondary);
+      }
+
+      &:has([data-match-type='create'])::after {
+        background-color: var(--color-bg-success-tertiary);
+      }
+
+      &:has([data-match-type='delete'])::after {
+        background-color: var(--color-bg-danger-tertiary);
+      }
+    }
+
+    a {
+      border-bottom: var(--stroke-width-small) dotted;
+      text-decoration: none;
+    }
+
+    h1 {
+      padding: calc(var(--spacer-2) * 1.75) 0px calc(var(--spacer-2) * 1.375);
+      line-height: var(--text-heading-large-line-height);
+      font-weight: 600;
+      font-size: var(--text-heading-large-font-size);
+      font-family: var(--font-body);
+    }
+    h2 {
+      padding: calc(var(--spacer-2) * 1.75) 0px calc(var(--spacer-1) * 2.5);
+      line-height: var(--text-heading-medium-line-height);
+      font-weight: 600;
+      font-size: var(--text-heading-medium-font-size);
+      font-family: var(--font-body);
+    }
+    h3 {
+      padding: var(--spacer-2-5) 0px calc(var(--spacer-1) * 2.25);
+      line-height: var(--text-heading-small-line-height);
+      font-weight: 600;
+      font-size: var(--text-heading-small-font-size);
+      font-family: var(--font-body);
+    }
+    h4 {
+      padding: var(--spacer-2) 0px calc(var(--spacer-1) * 1.75);
+      line-height: var(--text-body-large-line-height);
+      font-weight: 600;
+      font-size: var(--text-body-large-font-size);
+      font-family: var(--font-body);
+    }
+    h5 {
+      padding: calc(var(--spacer-1) * 1.5) 0px calc(var(--spacer-1) * 1.5);
+      line-height: var(--text-body-medium-line-height);
+      font-weight: 600;
+      font-size: var(--text-body-medium-font-size);
+      font-family: var(--font-body);
+    }
+
+    h6 {
+      padding: calc(var(--spacer-2) * 1.375) 0px calc(var(--spacer-1) * 1.25);
+      line-height: var(--text-body-small-line-height);
+      font-weight: 600;
+      font-size: var(--text-body-small-font-size);
+      font-family: var(--font-body);
+    }
+
+    p {
+      padding: var(--spacer-2) 0 var(--spacer-2);
+
+      &:first-child {
+        padding: 0 0 var(--spacer-2);
+      }
+    }
+
+    ul,
+    ol {
+      padding-top: var(--spacer-2);
+      padding-bottom: var(--spacer-2);
+    }
+  }
+}

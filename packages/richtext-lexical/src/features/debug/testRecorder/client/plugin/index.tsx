@@ -9,7 +9,7 @@ import { type JSX, useCallback, useEffect, useLayoutEffect, useRef, useState } f
 import type { PluginComponent } from '../../../../typesClient.js'
 
 import { IS_APPLE } from '../../../../../lexical/utils/environment.js'
-import './index.scss'
+import './index.css'
 
 const copy = (text: null | string) => {
   const textArea = document.createElement('textarea')

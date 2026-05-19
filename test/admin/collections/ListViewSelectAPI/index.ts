@@ -5,7 +5,6 @@ export const listViewSelectAPISlug = 'list-view-select-api'
 export const ListViewSelectAPI: CollectionConfig = {
   slug: listViewSelectAPISlug,
   admin: {
-    enableListViewSelectAPI: true,
     components: {
       beforeListTable: [
         './collections/ListViewSelectAPI/BeforeListTable/index.tsx#BeforeListTable',

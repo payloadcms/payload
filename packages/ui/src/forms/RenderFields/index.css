@@ -1,0 +1,66 @@
+@layer payload-default {
+  .field-type {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    flex-grow: 1;
+  }
+
+  .field-type__wrap {
+    position: relative;
+  }
+
+  .render-fields {
+    --spacing-field: var(--spacer-3);
+
+    & > .field-type {
+      margin-bottom: var(--spacing-field);
+      position: relative;
+
+      &[type='hidden'] {
+        margin-bottom: 0;
+      }
+
+      &:first-child {
+        margin-top: 0;
+      }
+
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+
+      &.blocks-field,
+      &.array-field,
+      &.collapsible-field,
+      &.rich-text {
+        margin-top: calc(var(--spacing-field) * 2);
+        margin-bottom: calc(var(--spacing-field) * 2);
+
+        &:first-child {
+          margin-top: 0;
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      &.group-field {
+        margin-top: calc(var(--spacing-field) * 2);
+        margin-bottom: calc(var(--spacing-field) * 3);
+
+        &:first-child {
+          margin-top: 0;
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    @media (max-width: 768px) {
+      --spacing-field: var(--spacer-2-5);
+    }
+  }
+}

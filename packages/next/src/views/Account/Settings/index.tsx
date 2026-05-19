@@ -6,6 +6,7 @@ import React from 'react'
 
 import { ResetPreferences } from '../ResetPreferences/index.js'
 import './index.scss'
+import { ToggleHighContrast } from '../ToggleHighContrast/index.js'
 import { ToggleTheme } from '../ToggleTheme/index.js'
 import { LanguageSelector } from './LanguageSelector.js'
 
@@ -29,6 +30,7 @@ export const Settings: React.FC<{
         <LanguageSelector languageOptions={languageOptions} />
       </div>
       {theme === 'all' && <ToggleTheme />}
+      <ToggleHighContrast />
       <ResetPreferences user={user} />
     </div>
   )

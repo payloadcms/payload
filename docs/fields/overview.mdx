@@ -292,6 +292,17 @@ export const MyField: Field = {
 }
 ```
 
+Since field names map directly to keys in API response objects and to column names in the database, they should follow JavaScript identifier conventions: start with a letter or underscore, and contain only letters, numbers, and underscores. Just like all Payload field names are strings, all Payload response objects use strings as their keys — so treat field names as you would a JavaScript variable name.
+
+<Banner type="warning">
+  Avoid field names that start with a digit (e.g. `'1'`, `'2field'`) or contain
+  hyphens (e.g. `'field-name'`). While these are valid strings in TypeScript,
+  they can cause unexpected behavior when Payload accesses data using
+  dot-notation paths, generates GraphQL schemas, or maps fields to database
+  columns. GraphQL identifiers do not allow hyphens, so hyphenated field names
+  will cause schema generation to fail.
+</Banner>
+
 Payload reserves various field names for internal use. Using reserved field names will result in your field being sanitized from the config.
 
 The following field names are forbidden and cannot be used:
@@ -604,22 +615,62 @@ export const CollectionConfig: CollectionConfig = {
 
 The following options are available:
 
-| Option                  | Description                                                                                                                                                                                                                      |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`condition`**         | Programmatically show / hide fields based on other fields. [More details](#conditional-logic).                                                                                                                                   |
-| **`components`**        | All Field Components can be swapped out for [Custom Components](../custom-components/overview) that you define.                                                                                                                  |
-| **`description`**       | Helper text to display alongside the field to provide more information for the editor. [More details](#description).                                                                                                             |
-| **`position`**          | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                        |
-| **`width`**             | Restrict the width of a field. You can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
-| **`style`**             | [CSS Properties](https://developer.mozilla.org/en-US/docs/Web/CSS) to inject into the root element of the field.                                                                                                                 |
-| **`className`**         | Attach a [CSS class attribute](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to the root DOM element of a field.                                                                                             |
-| **`readOnly`**          | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.                                                            |
-| **`disabled`**          | If a field is `disabled`, it is completely omitted from the [Admin Panel](../admin/overview) entirely.                                                                                                                           |
-| **`disableBulkEdit`**   | Set `disableBulkEdit` to `true` to prevent fields from appearing in the select options when making edits for multiple documents. Defaults to `true` for UI fields.                                                               |
-| **`disableGroupBy`**    | Set `disableGroupBy` to `true` to prevent fields from appearing in the list view groupBy options. Defaults to `false`.                                                                                                           |
-| **`disableListColumn`** | Set `disableListColumn` to `true` to prevent fields from appearing in the list view column selector. Defaults to `false`.                                                                                                        |
-| **`disableListFilter`** | Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options. Defaults to `false`.                                                                                                         |
-| **`hidden`**            | Will transform the field into a `hidden` input type. Its value will still submit with requests in the Admin Panel, but the field itself will not be visible to editors.                                                          |
+| Option            | Description                                                                                                                                                                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`condition`**   | Programmatically show / hide fields based on other fields. [More details](#conditional-logic).                                                                                                                                              |
+| **`components`**  | All Field Components can be swapped out for [Custom Components](../custom-components/overview) that you define.                                                                                                                             |
+| **`description`** | Helper text to display alongside the field to provide more information for the editor. [More details](#description).                                                                                                                        |
+| **`position`**    | Use `'sidebar'` to render the field in the sidebar or `'main'` (default) to keep it in the main area.                                                                                                                                       |
+| **`width`**       | Restrict the width of a field. You can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally.            |
+| **`style`**       | [CSS Properties](https://developer.mozilla.org/en-US/docs/Web/CSS) to inject into the root element of the field.                                                                                                                            |
+| **`className`**   | Attach a [CSS class attribute](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to the root DOM element of a field.                                                                                                        |
+| **`readOnly`**    | Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.                                                                       |
+| **`disabled`**    | Controls where the field is disabled in the [Admin Panel](../admin/overview). Pass `true` to disable everywhere, or an object `{ field?, column?, filter?, groupBy?, bulkEdit? }` for granular per-area control. [More details](#disabled). |
+| **`hidden`**      | Will transform the field into a `hidden` input type. Its value will still submit with requests in the Admin Panel, but the field itself will not be visible to editors.                                                                     |
+
+### Disabled
+
+The `admin.disabled` property controls where a field is disabled in the Admin Panel. It accepts either a boolean or an object.
+
+#### Disable everywhere (boolean)
+
+Pass `true` to disable the field across **all** Admin Panel surfaces — the edit form, list column selector, list filter dropdown, groupBy selector, and bulk edit modal:
+
+```ts
+fields: [
+  {
+    name: 'internalRef',
+    type: 'text',
+    admin: { disabled: true }, // hidden from every admin surface
+  },
+]
+```
+
+Pass `false` (or omit the property) to enable the field everywhere.
+
+#### Disable per area (object)
+
+Pass an object to disable the field in specific areas only. Any key not set defaults to enabled:
+
+| Key        | Disables                    |
+| ---------- | --------------------------- |
+| `field`    | Edit view form rendering.   |
+| `column`   | List view column selector.  |
+| `filter`   | List view filter dropdown.  |
+| `groupBy`  | List view groupBy selector. |
+| `bulkEdit` | Bulk edit modal.            |
+
+```ts
+fields: [
+  {
+    name: 'internalRef',
+    type: 'text',
+    admin: { disabled: { column: true, filter: true } },
+  },
+]
+```
+
+UI fields default to `disabled: { bulkEdit: true }` so they are excluded from bulk edit unless explicitly enabled.
 
 ### Field Descriptions
 

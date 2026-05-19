@@ -136,6 +136,34 @@ describe('Fields', () => {
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
 
+    it('should validate localized required text field with locale all', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: {
+            en: 'English text',
+            es: 'Spanish text',
+          },
+        },
+        locale: 'all',
+      })
+
+      const allLocales = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+      })
+
+      // @ts-expect-error
+      expect(allLocales.localizedRequiredText.en).toEqual('English text')
+      // @ts-expect-error
+      expect(allLocales.localizedRequiredText.es).toEqual('Spanish text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
     it('should query hasMany in', async () => {
       const hit = await payload.create({
         collection: 'text-fields',
@@ -2360,7 +2388,7 @@ describe('Fields', () => {
       const idFields = arrayWithNestedCustomIDField?.fields.filter((f) => f.name === 'id')
 
       expect(idFields).toHaveLength(1)
-      expect(idFields[0].admin?.disableListFilter).toBe(true)
+      expect((idFields[0].admin?.disabled as { filter?: boolean })?.filter).toBe(true)
     })
 
     it('should query exists true', { db: 'mongo' }, async () => {
@@ -3096,77 +3124,93 @@ describe('Fields', () => {
       )
     })
 
-    it('should query based on richtext data within a block', async () => {
-      const blockFieldsSuccess = await payload.find({
-        collection: 'block-fields',
-        where: {
-          'blocks.richText.children.text': {
-            like: 'fun',
+    // TODO: re-enable on sqlite once the drizzle sqlite adapter's createJSONQuery supports
+    // lexical's `{root: {children: [...]}}` shape
+    it(
+      'should query based on richtext data within a block',
+      { db: (adapter) => adapter.startsWith('sqlite') === false },
+      async () => {
+        const blockFieldsSuccess = await payload.find({
+          collection: 'block-fields',
+          where: {
+            'blocks.richText.root.children.children.text': {
+              like: 'fun',
+            },
           },
-        },
-      })
+        })
 
-      expect(blockFieldsSuccess.docs).toHaveLength(1)
+        expect(blockFieldsSuccess.docs).toHaveLength(1)
 
-      const blockFieldsFail = await payload.find({
-        collection: 'block-fields',
-        where: {
-          'blocks.richText.children.text': {
-            like: 'funny',
+        const blockFieldsFail = await payload.find({
+          collection: 'block-fields',
+          where: {
+            'blocks.richText.root.children.children.text': {
+              like: 'funny',
+            },
           },
-        },
-      })
+        })
 
-      expect(blockFieldsFail.docs).toHaveLength(0)
-    })
+        expect(blockFieldsFail.docs).toHaveLength(0)
+      },
+    )
 
-    it('should query based on richtext data within a localized block, specifying locale', async () => {
-      const blockFieldsSuccess = await payload.find({
-        collection: 'block-fields',
-        where: {
-          'localizedBlocks.en.richText.children.text': {
-            like: 'fun',
+    // TODO: re-enable on sqlite — see note above.
+    it(
+      'should query based on richtext data within a localized block, specifying locale',
+      { db: (adapter) => adapter.startsWith('sqlite') === false },
+      async () => {
+        const blockFieldsSuccess = await payload.find({
+          collection: 'block-fields',
+          where: {
+            'localizedBlocks.en.richText.root.children.children.text': {
+              like: 'fun',
+            },
           },
-        },
-      })
+        })
 
-      expect(blockFieldsSuccess.docs).toHaveLength(1)
+        expect(blockFieldsSuccess.docs).toHaveLength(1)
 
-      const blockFieldsFail = await payload.find({
-        collection: 'block-fields',
-        where: {
-          'localizedBlocks.en.richText.children.text': {
-            like: 'funny',
+        const blockFieldsFail = await payload.find({
+          collection: 'block-fields',
+          where: {
+            'localizedBlocks.en.richText.root.children.children.text': {
+              like: 'funny',
+            },
           },
-        },
-      })
+        })
 
-      expect(blockFieldsFail.docs).toHaveLength(0)
-    })
+        expect(blockFieldsFail.docs).toHaveLength(0)
+      },
+    )
 
-    it('should query based on richtext data within a localized block, without specifying locale', async () => {
-      const blockFieldsSuccess = await payload.find({
-        collection: 'block-fields',
-        where: {
-          'localizedBlocks.richText.children.text': {
-            like: 'fun',
+    // TODO: re-enable on sqlite — see note above.
+    it(
+      'should query based on richtext data within a localized block, without specifying locale',
+      { db: (adapter) => adapter.startsWith('sqlite') === false },
+      async () => {
+        const blockFieldsSuccess = await payload.find({
+          collection: 'block-fields',
+          where: {
+            'localizedBlocks.richText.root.children.children.text': {
+              like: 'fun',
+            },
           },
-        },
-      })
+        })
 
-      expect(blockFieldsSuccess.docs).toHaveLength(1)
+        expect(blockFieldsSuccess.docs).toHaveLength(1)
 
-      const blockFieldsFail = await payload.find({
-        collection: 'block-fields',
-        where: {
-          'localizedBlocks.richText.children.text': {
-            like: 'funny',
+        const blockFieldsFail = await payload.find({
+          collection: 'block-fields',
+          where: {
+            'localizedBlocks.richText.root.children.children.text': {
+              like: 'funny',
+            },
           },
-        },
-      })
+        })
 
-      expect(blockFieldsFail.docs).toHaveLength(0)
-    })
+        expect(blockFieldsFail.docs).toHaveLength(0)
+      },
+    )
 
     it('should filter based on nested block fields', async () => {
       await payload.create({
@@ -3779,6 +3823,68 @@ describe('Fields', () => {
         expect(docs[0].id).toBe(json_1.id)
       })
 
+      it('should query 2-level nested object properties', async () => {
+        const docId = '42'
+        const collectionSlug = 'posts'
+
+        const matchingDoc = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: docId, relationTo: collectionSlug } },
+          },
+        })
+
+        // different ID, same relationTo — should NOT match the and query
+        await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: '99', relationTo: collectionSlug } },
+          },
+        })
+
+        // same ID, different relationTo — should NOT match the and query
+        await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: docId, relationTo: 'other' } },
+          },
+        })
+
+        const { docs: equalsDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.doc.value': { equals: docId },
+          },
+        })
+
+        expect(equalsDocs.map(({ id }) => id)).toContain(matchingDoc.id)
+
+        const { docs: existsDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.doc.value': { exists: true },
+          },
+        })
+
+        expect(existsDocs.map(({ id }) => id)).toContain(matchingDoc.id)
+
+        // mirrors the pattern from scheduled jobs frontend query:
+        // where[and][2][input.doc.value][equals] = id
+        // where[and][3][input.doc.relationTo][equals] = collectionSlug
+        const { docs: andDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              { 'json.doc.value': { equals: docId } },
+              { 'json.doc.relationTo': { equals: collectionSlug } },
+            ],
+          },
+        })
+
+        expect(andDocs).toHaveLength(1)
+        expect(andDocs[0]?.id).toBe(matchingDoc.id)
+      })
+
       it('should disallow unsafe query paths', async () => {
         await expect(
           payload.find({
@@ -3862,6 +3968,39 @@ describe('Fields', () => {
             },
           }),
         ).rejects.toBeTruthy()
+      })
+
+      it('should reject disallowed characters in JSON field path segments', async () => {
+        // Path segments in JSON queries must only contain word characters.
+        const badPaths = [
+          "json.key'bad",
+          'json.key"bad',
+          'json.key;bad',
+          'json.key(bad',
+          'json.key)bad',
+        ]
+
+        for (const path of badPaths) {
+          await expect(
+            payload.find({
+              collection: 'json-fields',
+              where: {
+                [path]: { equals: 'test' },
+              },
+            }),
+          ).rejects.toBeTruthy()
+        }
+      })
+
+      it('should accept valid path segments in JSON field queries', async () => {
+        const result = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.valid_key': { equals: 'test' },
+          },
+        })
+
+        expect(result.docs).toBeDefined()
       })
     })
   })
@@ -4148,6 +4287,94 @@ describe('Fields', () => {
 
         expect(noMatchDocIDs).toContain(relDoc1.id)
         expect(noMatchDocIDs).not.toContain(relDoc2.id)
+      })
+
+      it('should not throw when querying hasMany relationship with equals array', async () => {
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const relDoc = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text1.id],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc.id)
+
+        try {
+          const equalsResult = await payload.find({
+            collection: 'relationship-fields',
+            where: {
+              relationshipHasMany: {
+                equals: [text1.id],
+              },
+            },
+          })
+
+          expect(equalsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(true)
+
+          const notEqualsResult = await payload.find({
+            collection: 'relationship-fields',
+            where: {
+              relationshipHasMany: {
+                not_equals: [text1.id],
+              },
+            },
+          })
+
+          expect(notEqualsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(false)
+        } finally {
+          await payload.delete({ collection: 'text-fields', id: text1.id })
+        }
+      })
+
+      it('should include docs with null relationship when using not_equals with array on non-hasMany field', async () => {
+        // Only SQL adapters are affected - MongoDB handles NOT IN / NULL differently
+        if (payload.db.name === 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        // relDocWithNull has no relationshipDrawer set (null)
+        const relDocWithNull = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDocWithNull.id)
+
+        try {
+          // Querying not_equals: [text2.id] should include relDocWithNull because
+          // its relationshipDrawer is null, which is "not equal to text2.id".
+          // Without OR IS NULL in the SQL, NULL NOT IN (text2.id) evaluates to NULL
+          // (not TRUE), so the document is incorrectly excluded.
+          const result = await payload.find({
+            collection: 'relationship-fields',
+            where: {
+              relationshipDrawer: {
+                not_equals: [text2.id],
+              },
+            },
+          })
+
+          expect(result.docs.some((doc) => doc.id === relDocWithNull.id)).toBe(true)
+        } finally {
+          await payload.delete({ collection: 'text-fields', id: text1.id })
+          await payload.delete({ collection: 'text-fields', id: text2.id })
+        }
       })
     })
   })
@@ -4771,7 +4998,7 @@ describe('Fields', () => {
     })
 
     it('should apply timezone override function to customize the field', async () => {
-      // The dateWithTimezoneWithDisabledColumns field has an override that sets disableListColumn: true
+      // The dateWithTimezoneWithDisabledColumns field has an override that sets disabled.column: true
       // We can verify this by checking the collection config has the modified field
       const dateCollection = payload.collections[dateFieldsSlug]
       const fields = dateCollection.config.flattenedFields
@@ -4779,7 +5006,7 @@ describe('Fields', () => {
       const timezoneField = fields.find((f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz')
       expect(timezoneField).toBeDefined()
       expect(timezoneField?.type).toEqual('select')
-      expect(timezoneField?.admin?.disableListColumn).toBe(true)
+      expect((timezoneField?.admin?.disabled as { column?: boolean })?.column).toBe(true)
       expect(timezoneField?.admin?.description).toEqual(
         'This timezone field was customized via override',
       )

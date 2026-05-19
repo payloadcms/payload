@@ -584,6 +584,7 @@ export const Form: React.FC<FormProps> = (props) => {
         if (typeof handler === 'function') {
           let filename = file.name
           const clientUploadContext = await handler({
+            docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
             file,
             updateFilename: (value) => {
               filename = value

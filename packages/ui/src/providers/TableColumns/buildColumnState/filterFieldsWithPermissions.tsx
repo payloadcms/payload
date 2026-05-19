@@ -5,11 +5,16 @@ import type {
   SanitizedFieldsPermissions,
 } from 'payload'
 
-import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldIsHiddenOrDisabled,
+  fieldIsID,
+  isFieldDisabled,
+} from 'payload/shared'
 
 const shouldSkipField = (field: ClientField | Field): boolean =>
   (field.type !== 'ui' && fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
-  field?.admin?.disableListColumn === true
+  isFieldDisabled(field, 'column')
 
 export const filterFieldsWithPermissions = <T extends ClientField | Field = ClientField>({
   fieldPermissions,

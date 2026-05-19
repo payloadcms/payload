@@ -29,7 +29,7 @@ export const testEslintConfig = [
     },
   },
   {
-    files: ['**/*.config.ts', '**/config.ts'],
+    files: ['**/*.config.ts', '**/config.ts', 'evals/eval-results/**'],
     rules: {
       'no-restricted-exports': 'off',
     },

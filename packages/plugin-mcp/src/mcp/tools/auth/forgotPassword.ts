@@ -36,7 +36,7 @@ export const forgotPasswordTool = (
         content: [
           {
             type: 'text' as const,
-            text: `# Password Reset Email Sent\n\n**User:** ${email}\n**Collection:** ${collection}\n**Email Disabled:** ${disableEmail}\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``,
+            text: `# Password Reset Email Sent\n\n**User:** ${email}\n**Collection:** ${collection}\n**Email Disabled:** ${disableEmail}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
       }

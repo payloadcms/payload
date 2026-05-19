@@ -1,0 +1,49 @@
+@layer payload-default {
+  .code-editor {
+    /* Base styles */
+    direction: ltr;
+    width: 100%;
+    height: auto;
+    padding: var(--spacer-2) 0;
+    -webkit-appearance: none;
+
+    /* Theme */
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+    box-shadow: none;
+
+    /* Typography */
+    font-family: var(--font-mono);
+    font-size: var(--text-body);
+    color: var(--color-text-default-primary);
+
+    /* Transitions */
+    transition-property: border, box-shadow, background-color;
+    transition-duration: 100ms, 100ms, 500ms;
+    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+
+    &:focus-within {
+      border-color: var(--accessibility-focus-color);
+    }
+
+    &.read-only {
+      background: var(--color-bg);
+      border-color: var(--color-border);
+    }
+
+    /* Monaco editor resets */
+    .monaco-editor {
+      .view-overlays .current-line {
+        max-width: calc(100% - 14px);
+        border: none;
+      }
+
+      &:focus-within {
+        .view-overlays .current-line {
+          border: none;
+        }
+      }
+    }
+  }
+}

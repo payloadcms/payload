@@ -79,6 +79,7 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
+  simpleDraftGlobalSlug,
   textCollectionSlug,
   versionCollectionSlug,
 } from './slugs.js'
@@ -565,7 +566,7 @@ describe('Versions', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
 
       await page.goto(autosaveURL.list)
-      const createNewButton = page.locator('.list-header .btn:has-text("Create New")')
+      const createNewButton = page.locator('#create-new-doc')
       const href = await createNewButton.getAttribute('href')
       await page.goto(`${serverURL}${href}`)
 
@@ -858,6 +859,35 @@ describe('Versions', () => {
       })
     })
 
+    test('collections — should not increment version count when unpublishing', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'unpublish version count test',
+          description: 'description',
+        },
+      })
+
+      await page.goto(url.edit(publishedDoc.id))
+
+      const versionsCountSelector = `.doc-tabs__tabs .pill-version-count`
+      await page.locator(versionsCountSelector).waitFor({ state: 'visible' })
+      const countBefore = await page.locator(versionsCountSelector).textContent()
+
+      await openDocControls(page)
+      await page.locator('#action-unpublish').click()
+      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
+      await expect(page.locator('.payload-toast-item')).toBeVisible()
+
+      await expect.poll(() => page.locator(versionsCountSelector).textContent()).toBe(countBefore)
+
+      await payload.delete({
+        collection: draftCollectionSlug,
+        id: publishedDoc.id,
+      })
+    })
+
     test('should show documents title in relationship even if draft document', async () => {
       await payload.create({
         collection: autosaveCollectionSlug,
@@ -872,9 +902,13 @@ describe('Versions', () => {
 
       const field = page.locator('#field-relationToAutosaves')
 
-      await field.click()
-
-      await expect(page.locator('.rs__option')).toHaveCount(1)
+      await expect(async () => {
+        const optionCount = await page.locator('.rs__option').count()
+        if (optionCount === 0) {
+          await field.click()
+        }
+        await expect(page.locator('.rs__option')).toHaveCount(1)
+      }).toPass({ timeout: 30000 })
 
       await expect(page.locator('.rs__option')).toHaveText('some title')
     })
@@ -1215,15 +1249,65 @@ describe('Versions', () => {
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
+    test('globals — should show unpublish button after publishing', async () => {
+      await payload.updateGlobal({
+        slug: simpleDraftGlobalSlug,
+        data: { title: 'published global', _status: 'published' },
+      })
+
+      const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
+      await page.goto(globalURL.global(simpleDraftGlobalSlug))
+
+      await openDocControls(page)
+      await expect(page.locator('#action-unpublish')).toBeVisible()
+    })
+
+    test('globals — dot menu should only contain unpublish and copy to locale options', async () => {
+      await payload.updateGlobal({
+        slug: simpleDraftGlobalSlug,
+        data: { title: 'published global', _status: 'published' },
+      })
+
+      const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
+      await page.goto(globalURL.global(simpleDraftGlobalSlug))
+
+      await openDocControls(page)
+
+      await expect(page.locator('#action-unpublish')).toBeVisible()
+      await expect(page.locator('#copy-locale-data__button')).toBeVisible()
+      await expect(page.locator('#action-create')).not.toBeAttached()
+      await expect(page.locator('#action-delete')).not.toBeAttached()
+      await expect(page.locator('#action-duplicate')).not.toBeAttached()
+    })
+
+    test('globals — should not increment version count when unpublishing', async () => {
+      await payload.updateGlobal({
+        slug: simpleDraftGlobalSlug,
+        data: { title: 'unpublish version count test', _status: 'published' },
+      })
+
+      const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
+      await page.goto(globalURL.global(simpleDraftGlobalSlug))
+
+      const versionsCountPill = page.locator(`.doc-tabs__tabs .pill-version-count`)
+      await versionsCountPill.waitFor({ state: 'visible' })
+      const countBefore = await versionsCountPill.textContent()
+
+      await openDocControls(page)
+      await page.locator('#action-unpublish').click()
+      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
+      await expect(page.locator('.payload-toast-item')).toBeVisible()
+
+      await expect.poll(() => versionsCountPill.textContent()).toBe(countBefore)
+    })
+
     test('globals — should hide unpublish button when access control prevents update', async () => {
-      // Then publish it with override access to create a published version
       await payload.updateGlobal({
         slug: disablePublishGlobalSlug,
         data: {
           _status: 'published',
           title: 'published global',
         },
-        overrideAccess: true,
       })
 
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
@@ -1301,7 +1385,7 @@ describe('Versions', () => {
       await page.locator('#schedule-publish').click()
 
       // drawer should open
-      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      await expect(page.locator('.drawer__header')).toBeVisible()
       // nothing in scheduled
       await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
 
@@ -1336,7 +1420,7 @@ describe('Versions', () => {
       await page.locator('#schedule-publish').click()
 
       // drawer should open
-      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      await expect(page.locator('.drawer__header')).toBeVisible()
       // nothing in scheduled
       await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
 

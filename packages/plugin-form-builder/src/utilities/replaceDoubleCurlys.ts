@@ -1,3 +1,5 @@
+import escapeHTML from 'escape-html'
+
 import { keyValuePairToHtmlTable } from './keyValuePairToHtmlTable.js'
 
 interface EmailVariable {
@@ -13,7 +15,9 @@ export const replaceDoubleCurlys = (str: string, variables?: EmailVariables): st
     return str.replace(regex, (_, variable: string) => {
       if (variable.includes('*')) {
         if (variable === '*') {
-          return variables.map(({ field, value }) => `${field} : ${value}`).join(' <br /> ')
+          return variables
+            .map(({ field, value }) => `${escapeHTML(field)} : ${escapeHTML(value)}`)
+            .join(' <br /> ')
         } else if (variable === '*:table') {
           return keyValuePairToHtmlTable(
             variables.reduce<Record<string, string>>((acc, { field, value }) => {
@@ -27,7 +31,7 @@ export const replaceDoubleCurlys = (str: string, variables?: EmailVariables): st
           return variable === fieldName
         })
         if (foundVariable) {
-          return foundVariable.value
+          return escapeHTML(foundVariable.value)
         }
       }
 

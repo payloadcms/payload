@@ -1,0 +1,91 @@
+@layer payload-default {
+  .table-cell-action-button-container {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    left: 0;
+    will-change: transform;
+  }
+
+  .table-cell-action-button-container.table-cell-action-button-container--active {
+    pointer-events: auto;
+    opacity: 1;
+  }
+  .table-cell-action-button-container.table-cell-action-button-container--inactive {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .table-cell-action-button {
+    border: 0;
+    padding: 0;
+    position: absolute;
+    top: var(--spacer-2);
+    right: var(--spacer-2);
+    border-radius: var(--radius-medium);
+    color: var(--color-text-secondary);
+    background: transparent;
+    display: inline-block;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--color-bg-secondary-hover);
+    }
+
+    &:active {
+      background-color: var(--color-bg-secondary-pressed);
+    }
+  }
+
+  .table-action-menu-dropdown {
+    --menu-min-width: 10rem;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    background: var(--color-bg-menu);
+    min-width: var(--menu-min-width);
+    border-radius: var(--radius-large);
+    padding: var(--spacer-2);
+    overflow-y: auto;
+    box-shadow:
+      0px 0px 0.5px 0px rgba(0, 0, 0, 0.18),
+      0px 2px 6px 0px rgba(0, 0, 0, 0.12),
+      0px 10px 16px 0px rgba(0, 0, 0, 0.08);
+
+    hr {
+      border: none;
+      height: var(--stroke-width-small);
+      margin: var(--spacer-2) calc(var(--spacer-2) * -1);
+      background-color: var(--color-white-200);
+    }
+
+    .item {
+      padding: var(--spacer-2);
+      color: var(--color-white-800);
+      background: transparent;
+      cursor: pointer;
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      border: 0;
+      border-radius: var(--radius-medium);
+      width: 100%;
+      text-align: left;
+
+      &:hover {
+        background: var(--color-bg-brand);
+        color: var(--color-white-1000);
+      }
+
+      &:active {
+        background: var(--color-bg-brand-pressed);
+        color: var(--color-white-1000);
+      }
+    }
+  }
+}

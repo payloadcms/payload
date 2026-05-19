@@ -11,7 +11,7 @@ import type { SanitizedConfig } from 'payload'
 
 import { fileURLToPath } from 'url'
 
-import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
+import { generateDatabaseAdapter } from './dbAdapters.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

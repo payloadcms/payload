@@ -18,6 +18,7 @@ import type {
 import { createTableName } from '../createTableName.js'
 import { buildForeignKeyName } from '../utilities/buildForeignKeyName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { isUUIDType } from '../utilities/isUUIDType.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -619,8 +620,9 @@ export const buildTable = ({
           config: relationshipConfig,
           throwValidationError: true,
         })
-        let colType: 'integer' | 'numeric' | 'uuid' | 'varchar' =
-          adapter.idType === 'uuid' ? 'uuid' : 'integer'
+        let colType: 'integer' | 'numeric' | 'uuid' | 'varchar' = isUUIDType(adapter.idType)
+          ? 'uuid'
+          : 'integer'
         const relatedCollectionCustomIDType =
           adapter.payload.collections[relationshipConfig.slug]?.customIDType
 

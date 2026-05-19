@@ -1,5 +1,3 @@
-import { URL } from 'url'
-
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { InitializedEmailAdapter } from '../email/types.js'
@@ -8,6 +6,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { VerifyConfig } from './types.js'
 
 import { formatAdminURL } from '../utilities/formatAdminURL.js'
+import { getRequestOrigin } from '../utilities/getRequestOrigin.js'
 
 type Args = {
   collection: Collection
@@ -32,11 +31,7 @@ export async function sendVerificationEmail(args: Args): Promise<void> {
   } = args
 
   if (!disableEmail) {
-    const protocol = new URL(req.url!).protocol // includes the final :
-    const serverURL =
-      config.serverURL !== null && config.serverURL !== ''
-        ? config.serverURL
-        : `${protocol}//${req.headers.get('host')}`
+    const serverURL = getRequestOrigin({ config, req })
 
     const verificationURL = formatAdminURL({
       adminRoute: config.routes.admin,

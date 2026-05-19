@@ -20,7 +20,7 @@ import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
-import './index.scss'
+import './index.css'
 import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
@@ -76,7 +76,7 @@ export const UploadActions = ({
               onClick={() => {
                 openModal(sizePreviewSlug)
               }}
-              size="small"
+              size="medium"
             >
               {t('upload:previewSizes')}
             </Button>
@@ -89,7 +89,7 @@ export const UploadActions = ({
               onClick={() => {
                 openModal(editDrawerSlug)
               }}
-              size="small"
+              size="medium"
             >
               {t('upload:editImage')}
             </Button>
@@ -407,7 +407,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                         inputRef.current.click()
                       }
                     }}
-                    size="small"
+                    size="medium"
                   >
                     {t('upload:selectFile')}
                   </Button>
@@ -435,7 +435,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                           setUploadControlFile(null)
                           setUploadControlFileName(null)
                         }}
-                        size="small"
+                        size="medium"
                       >
                         {t('upload:pasteURL')}
                       </Button>
@@ -477,10 +477,9 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 </div>
               </div>
               <Button
-                buttonStyle="icon-label"
+                buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"
-                iconStyle="with-border"
                 onClick={() => {
                   setShowUrlInput(false)
                   setUploadControlFileUrl('')
@@ -517,10 +516,9 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 />
               </div>
               <Button
-                buttonStyle="icon-label"
+                buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"
-                iconStyle="with-border"
                 onClick={handleFileRemoval}
                 round
                 tooltip={t('general:cancel')}

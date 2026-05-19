@@ -85,6 +85,20 @@ export function buildEditorState<T extends SerializedLexicalNode>({
     editorJSON.root.children.push(...(nodes as any))
   }
 
+  if (editorJSON.root.children.length === 0) {
+    // An error will be thrown if the root node has no children
+    editorJSON.root.children.push({
+      type: 'paragraph',
+      children: [],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      textFormat: 0,
+      textStyle: '',
+      version: 1,
+    })
+  }
+
   return editorJSON as TypedEditorState<T>
 }
 

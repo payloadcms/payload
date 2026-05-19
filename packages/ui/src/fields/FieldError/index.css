@@ -1,0 +1,15 @@
+@layer payload-default {
+  .field-error.tooltip {
+    --tooltip-x: 0%;
+    left: auto;
+    max-width: 75%;
+    right: 0;
+    color: var(--color-text-ondanger);
+    background-color: var(--color-bg-danger);
+
+    &::after {
+      border-top-color: var(--color-bg-danger);
+      border-bottom-color: var(--color-bg-danger);
+    }
+  }
+}

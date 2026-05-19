@@ -1,0 +1,386 @@
+@layer payload-default {
+  /* ——————————————————————————————————————————————
+     Non-themed Tokens
+     ————————————————————————————————————————————— */
+
+  :root {
+    /* Special */
+    --special-bg-hover-on-light-canvas: var(--ramp-black-300);
+    --special-text-highlight: var(--color-blue-300);
+
+    --special-multiplayer-blue: var(--ramp-blue-600);
+    --special-multiplayer-purple: var(--ramp-purple-500);
+    --special-multiplayer-pink: var(--ramp-pink-500);
+    --special-multiplayer-red: var(--ramp-red-500);
+    --special-multiplayer-yellow: var(--ramp-yellow-500);
+    --special-multiplayer-green: var(--ramp-green-500);
+    --special-multiplayer-grey: var(--ramp-pale-blue-500);
+
+    --special-text-on-multiplayer-blue: var(--ramp-white-1000);
+    --special-text-on-multiplayer-purple: var(--ramp-white-1000);
+    --special-text-on-multiplayer-pink: var(--ramp-white-1000);
+    --special-text-on-multiplayer-red: var(--ramp-white-1000);
+    --special-text-on-multiplayer-yellow: var(--ramp-black-800);
+    --special-text-on-multiplayer-green: var(--ramp-white-1000);
+    --special-text-on-multiplayer-grey: var(--ramp-white-1000);
+
+    /* Drawer */
+    --color-drawer-backdrop: rgba(0, 0, 0, 0.1);
+
+    /* Fullscreen */
+    --fullscreen-default-icon: var(--ramp-black-800);
+    --fullscreen-default-icon-tertiary: var(--ramp-black-400);
+    --fullscreen-special-autofill-highlight: rgba(13, 153, 255, 0.2);
+
+    /* Modal */
+    --color-modalbackdrop: rgba(0, 0, 0, 0.5);
+  }
+
+  /* ——————————————————————————————————————————————
+     Light Theme (default)
+
+     Naming rules (UI3 parity — matches fpl/tokens):
+     - Every semantic color is prefixed with `--color-`.
+     - The `default` category is implicit. `--color-bg-secondary` (not `--color-bg-default-secondary`).
+     - The `default` variant is implicit. `--color-bg` (not `--color-bg-default`); `--color-bg-brand` (not `--color-bg-brand-default`).
+     - `on{X}` is one segment. `--color-text-onbrand`, `--color-icon-ondisabled`.
+     - Palette tokens live in the `--ramp-*` namespace.
+     ————————————————————————————————————————————— */
+
+  :root {
+    /* Background */
+    --color-bg-assistive: var(--ramp-pink-500);
+    --color-bg-assistive-hover: var(--ramp-pink-600);
+    --color-bg-assistive-pressed: var(--ramp-pink-600);
+    --color-bg-assistive-secondary: var(--ramp-pink-700);
+    --color-bg-assistive-tertiary: var(--ramp-pink-200);
+
+    --color-bg-brand: var(--ramp-blue-500);
+    --color-bg-brand-hover: var(--ramp-blue-600);
+    --color-bg-brand-pressed: var(--ramp-blue-700);
+    --color-bg-brand-secondary: var(--ramp-blue-700);
+    --color-bg-brand-tertiary: var(--ramp-blue-200);
+    --color-bg-brand-tertiary-hover: var(--ramp-blue-300);
+
+    --color-bg-component: var(--ramp-purple-500);
+    --color-bg-component-tertiary: var(--ramp-purple-200);
+    --color-bg-component-tertiary-hover: var(--ramp-purple-300);
+
+    --color-bg-danger: var(--ramp-red-500);
+    --color-bg-danger-hover: var(--ramp-red-600);
+    --color-bg-danger-pressed: var(--ramp-red-700);
+    --color-bg-danger-tertiary: var(--ramp-red-200);
+    --color-bg-danger-tertiary-hover: var(--ramp-red-300);
+    --color-bg-danger-tertiary-pressed: var(--ramp-red-400);
+
+    --color-bg: var(--ramp-white-1000);
+    --color-bg-hover: var(--ramp-grey-100);
+    --color-bg-pressed: var(--ramp-grey-200);
+    --color-bg-secondary: var(--ramp-grey-100);
+    --color-bg-secondary-hover: var(--ramp-grey-200);
+    --color-bg-secondary-pressed: var(--ramp-grey-300);
+    --color-bg-tertiary: var(--ramp-grey-200);
+
+    --color-bg-disabled: var(--ramp-grey-300);
+
+    --color-bg-elevated: var(--ramp-white-1000);
+
+    --color-bg-info: var(--ramp-blue-200);
+
+    --color-bg-inverse: var(--ramp-grey-800);
+    --color-bg-inverse-hover: var(--ramp-grey-700);
+    --color-bg-inverse-pressed: var(--ramp-grey-600);
+
+    --color-bg-menu: var(--ramp-grey-900);
+    --color-bg-tooltip: var(--ramp-grey-900);
+
+    --color-bg-selected: var(--ramp-blue-200);
+    --color-bg-selected-hover: var(--ramp-blue-300);
+    --color-bg-selected-pressed: var(--ramp-blue-400);
+    --color-bg-selected-strong: var(--ramp-blue-500);
+    --color-bg-selected-strong-hover: var(--ramp-blue-600);
+    --color-bg-selected-strong-pressed: var(--ramp-blue-700);
+
+    --color-bg-success: var(--ramp-green-500);
+    --color-bg-success-hover: var(--ramp-green-600);
+    --color-bg-success-pressed: var(--ramp-green-700);
+    --color-bg-success-tertiary: var(--ramp-green-200);
+    --color-bg-success-tertiary-hover: var(--ramp-green-300);
+
+    --color-bg-transparent-hover: var(--ramp-black-100);
+    --color-bg-transparent-pressed: var(--ramp-black-200);
+
+    --color-bg-warning: var(--ramp-yellow-500);
+    --color-bg-warning-tertiary: var(--ramp-yellow-200);
+    --color-bg-warning-tertiary-hover: var(--ramp-yellow-300);
+
+    /* Border */
+    --color-border-assistive: var(--ramp-pink-300);
+    --color-border-assistive-strong: var(--ramp-pink-600);
+    --color-border-onassistive: var(--ramp-pink-600);
+    --color-border-onassistive-strong: var(--ramp-pink-700);
+
+    --color-border-brand: var(--ramp-blue-300);
+    --color-border-brand-strong: var(--ramp-blue-600);
+    --color-border-onbrand-strong: var(--ramp-white-1000);
+
+    --color-border-component: var(--ramp-purple-300);
+    --color-border-component-strong: var(--ramp-purple-600);
+
+    --color-border-danger: var(--ramp-red-300);
+    --color-border-danger-strong: var(--ramp-red-600);
+
+    --color-border: var(--ramp-grey-200);
+    --color-border-strong: var(--ramp-grey-800);
+
+    --color-border-disabled: var(--ramp-grey-200);
+
+    --color-border-selected: var(--ramp-blue-500);
+    --color-border-selected-strong: var(--ramp-blue-600);
+
+    --color-border-success: var(--ramp-green-300);
+    --color-border-success-strong: var(--ramp-green-600);
+
+    --color-border-warning: var(--ramp-pale-yellow-300);
+    --color-border-warning-strong: var(--ramp-yellow-1000);
+
+    /* Icon */
+    --color-icon-assistive: var(--ramp-pink-600);
+    --color-icon-assistive-pressed: var(--ramp-pink-700);
+    --color-icon-onassistive: var(--ramp-white-1000);
+    --color-icon-onassistive-secondary: var(--ramp-white-600);
+    --color-icon-onassistive-tertiary: var(--ramp-white-400);
+
+    --color-icon-brand: var(--ramp-blue-600);
+    --color-icon-onbrand: var(--ramp-white-1000);
+    --color-icon-onbrand-secondary: var(--ramp-white-600);
+
+    --color-icon-component: var(--ramp-purple-600);
+    --color-icon-component-pressed: var(--ramp-purple-700);
+    --color-icon-component-secondary: var(--ramp-pale-purple-400);
+    --color-icon-component-tertiary: var(--ramp-pale-purple-400);
+    --color-icon-oncomponent: var(--ramp-white-1000);
+
+    --color-icon-danger: var(--ramp-red-600);
+    --color-icon-ondanger: var(--ramp-white-1000);
+    --color-icon-ondanger-secondary: var(--ramp-white-600);
+
+    --color-icon: var(--ramp-black-800);
+    --color-icon-hover: var(--ramp-black-800);
+    --color-icon-secondary: var(--ramp-black-500);
+    --color-icon-secondary-hover: var(--ramp-black-800);
+    --color-icon-tertiary: var(--ramp-black-400);
+
+    --color-icon-disabled: var(--ramp-black-400);
+    --color-icon-ondisabled: var(--ramp-white-1000);
+
+    --color-icon-oninverse: var(--ramp-white-800);
+
+    --color-icon-onselected-strong: var(--ramp-white-1000);
+    --color-icon-selected: var(--ramp-blue-600);
+
+    --color-icon-onsuccess: var(--ramp-white-1000);
+    --color-icon-onsuccess-secondary: var(--ramp-white-600);
+    --color-icon-success: var(--ramp-green-600);
+
+    --color-icon-warning: var(--ramp-yellow-1000);
+    --color-icon-warning-pressed: var(--ramp-yellow-1000);
+
+    /* Text */
+    --color-text-assistive: var(--ramp-pink-600);
+    --color-text-assistive-pressed: var(--ramp-pink-700);
+    --color-text-onassistive: var(--ramp-white-1000);
+    --color-text-onassistive-secondary: var(--ramp-white-600);
+    --color-text-onassistive-tertiary: var(--ramp-white-400);
+
+    --color-text-brand: var(--ramp-blue-600);
+    --color-text-brand-secondary: var(--ramp-blue-600);
+    --color-text-onbrand: var(--ramp-white-1000);
+    --color-text-onbrand-secondary: var(--ramp-white-600);
+
+    --color-text-component: var(--ramp-purple-600);
+    --color-text-component-pressed: var(--ramp-purple-700);
+    --color-text-component-secondary: var(--ramp-pale-purple-400);
+    --color-text-component-tertiary: var(--ramp-pale-purple-400);
+    --color-text-oncomponent: var(--ramp-white-1000);
+
+    --color-text-danger: var(--ramp-red-600);
+    --color-text-danger-secondary: var(--ramp-red-600);
+    --color-text-ondanger: var(--ramp-white-1000);
+    --color-text-ondanger-secondary: var(--ramp-white-600);
+
+    --color-text: var(--ramp-black-800);
+    --color-text-secondary: var(--ramp-black-500);
+    --color-text-tertiary: var(--ramp-black-400);
+
+    --color-text-disabled: var(--ramp-black-400);
+    --color-text-ondisabled: var(--ramp-white-1000);
+
+    --color-text-oninverse: var(--ramp-white-800);
+    --color-text-oninverse-secondary: var(--ramp-white-600);
+
+    --color-text-ontooltip: var(--ramp-white-800);
+
+    --color-text-onselected-strong: var(--ramp-white-1000);
+    --color-text-selected: var(--ramp-blue-600);
+
+    --color-text-onsuccess: var(--ramp-white-1000);
+    --color-text-onsuccess-secondary: var(--ramp-white-600);
+    --color-text-success: var(--ramp-green-600);
+
+    --color-text-onwarning: var(--ramp-black-800);
+    --color-text-warning: var(--ramp-yellow-1000);
+
+    /* Special (themed) */
+    --special-bg-hover-transparent: var(--ramp-black-100);
+    --special-bg-transparent: rgba(255, 255, 255, 0.6);
+    --special-bg-transparent-secondary-hover: var(--ramp-black-200);
+    --special-border-translucent: var(--ramp-black-200);
+
+    /* Multiplayer */
+    --multiplayer-blue: var(--special-multiplayer-blue);
+    --multiplayer-purple: var(--special-multiplayer-purple);
+    --multiplayer-pink: var(--special-multiplayer-pink);
+    --multiplayer-red: var(--special-multiplayer-red);
+    --multiplayer-yellow: var(--special-multiplayer-yellow);
+    --multiplayer-green: var(--special-multiplayer-green);
+    --multiplayer-grey: var(--special-multiplayer-grey);
+  }
+
+  /* ——————————————————————————————————————————————
+     Dark Theme
+     Only overrides where the palette reference changes.
+     ————————————————————————————————————————————— */
+
+  html[data-theme='dark'],
+  [data-theme='dark'] {
+    /* Background */
+    --color-bg-assistive: var(--ramp-pink-500);
+    --color-bg-assistive-hover: var(--ramp-pink-600);
+    --color-bg-assistive-pressed: var(--ramp-pink-600);
+    --color-bg-assistive-secondary: var(--ramp-pink-700);
+    --color-bg-assistive-tertiary: var(--ramp-pink-800);
+
+    --color-bg-brand-tertiary: var(--ramp-pale-blue-800);
+    --color-bg-brand-tertiary-hover: var(--ramp-pale-blue-700);
+
+    --color-bg-component-tertiary: var(--ramp-pale-purple-800);
+    --color-bg-component-tertiary-hover: var(--ramp-pale-purple-700);
+
+    --color-bg-danger-tertiary: var(--ramp-pale-red-800);
+    --color-bg-danger-tertiary-hover: var(--ramp-pale-red-700);
+    --color-bg-danger-tertiary-pressed: var(--ramp-pale-red-600);
+
+    --color-bg: var(--ramp-grey-800);
+    --color-bg-hover: var(--ramp-grey-700);
+    --color-bg-pressed: var(--ramp-grey-600);
+    --color-bg-secondary: var(--ramp-grey-700);
+    --color-bg-secondary-hover: var(--ramp-grey-600);
+    --color-bg-secondary-pressed: var(--ramp-grey-500);
+    --color-bg-tertiary: var(--ramp-grey-600);
+
+    --color-bg-disabled: var(--ramp-grey-500);
+
+    --color-bg-elevated: var(--ramp-grey-900);
+
+    --color-bg-inverse: var(--ramp-white-1000);
+    --color-bg-inverse-hover: var(--ramp-grey-100);
+    --color-bg-inverse-pressed: var(--ramp-grey-200);
+
+    --color-bg-selected: var(--ramp-pale-blue-700);
+    --color-bg-selected-hover: var(--ramp-pale-blue-600);
+    --color-bg-selected-pressed: var(--ramp-pale-blue-700);
+
+    --color-bg-success-tertiary: var(--ramp-pale-green-900);
+    --color-bg-success-tertiary-hover: var(--ramp-pale-green-800);
+
+    --color-bg-transparent-hover: var(--ramp-white-100);
+    --color-bg-transparent-pressed: var(--ramp-white-200);
+
+    --color-bg-warning-tertiary: var(--ramp-pale-yellow-800);
+    --color-bg-warning-tertiary-hover: var(--ramp-pale-yellow-700);
+
+    /* Border */
+    --color-border-brand: var(--ramp-pale-blue-600);
+    --color-border-brand-strong: var(--ramp-blue-400);
+
+    --color-border-component: var(--ramp-pale-purple-700);
+    --color-border-component-strong: var(--ramp-purple-300);
+
+    --color-border-danger: var(--ramp-pale-red-700);
+    --color-border-danger-strong: var(--ramp-red-400);
+
+    --color-border: var(--ramp-grey-600);
+    --color-border-strong: var(--ramp-white-800);
+
+    --color-border-disabled: var(--ramp-grey-600);
+
+    --color-border-selected-strong: var(--ramp-blue-400);
+
+    --color-border-success: var(--ramp-pale-green-700);
+    --color-border-success-strong: var(--ramp-green-400);
+
+    --color-border-warning: var(--ramp-pale-yellow-700);
+    --color-border-warning-strong: var(--ramp-yellow-400);
+
+    /* Icon */
+    --color-icon-brand: var(--ramp-blue-400);
+
+    --color-icon-component: var(--ramp-purple-400);
+    --color-icon-component-pressed: var(--ramp-purple-300);
+    --color-icon-component-secondary: var(--ramp-pale-purple-500);
+    --color-icon-component-tertiary: var(--ramp-pale-purple-500);
+
+    --color-icon-danger: var(--ramp-red-400);
+
+    --color-icon: var(--ramp-white-1000);
+    --color-icon-hover: var(--ramp-white-1000);
+    --color-icon-secondary: var(--ramp-white-500);
+    --color-icon-secondary-hover: var(--ramp-white-1000);
+    --color-icon-tertiary: var(--ramp-white-400);
+
+    --color-icon-disabled: var(--ramp-white-400);
+    --color-icon-ondisabled: var(--ramp-grey-800);
+
+    --color-icon-oninverse: var(--ramp-black-800);
+
+    --color-icon-selected: var(--ramp-blue-400);
+
+    --color-icon-success: var(--ramp-green-400);
+
+    --color-icon-warning: var(--ramp-yellow-400);
+    --color-icon-warning-pressed: var(--ramp-yellow-400);
+
+    /* Text */
+    --color-text-brand: var(--ramp-blue-400);
+
+    --color-text-component: var(--ramp-purple-400);
+    --color-text-component-pressed: var(--ramp-purple-300);
+    --color-text-component-secondary: var(--ramp-pale-purple-500);
+    --color-text-component-tertiary: var(--ramp-pale-purple-500);
+
+    --color-text-danger: var(--ramp-red-400);
+
+    --color-text: var(--ramp-white-1000);
+    --color-text-secondary: var(--ramp-white-500);
+    --color-text-tertiary: var(--ramp-white-400);
+
+    --color-text-disabled: var(--ramp-white-400);
+    --color-text-ondisabled: var(--ramp-grey-800);
+
+    --color-text-oninverse: var(--ramp-black-800);
+    --color-text-oninverse-secondary: var(--ramp-black-600);
+
+    --color-text-selected: var(--ramp-blue-400);
+
+    --color-text-success: var(--ramp-green-400);
+
+    --color-text-warning: var(--ramp-yellow-400);
+
+    /* Special (themed) */
+    --special-bg-hover-transparent: var(--ramp-white-100);
+    --special-bg-transparent: rgba(0, 0, 0, 0.6);
+    --special-bg-transparent-secondary-hover: var(--ramp-white-200);
+    --special-border-translucent: var(--ramp-white-200);
+  }
+}

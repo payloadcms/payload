@@ -34,7 +34,7 @@ import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.j
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import './index.scss'
-import '../../forms/RenderFields/index.scss'
+import '../../forms/RenderFields/index.css'
 import { baseClass, type EditManyProps } from './index.js'
 
 const Submit: React.FC<{

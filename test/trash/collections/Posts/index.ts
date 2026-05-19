@@ -14,6 +14,11 @@ export const Posts: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'localizedField',
+      type: 'text',
+      localized: true,
+    },
   ],
   versions: {
     drafts: true,

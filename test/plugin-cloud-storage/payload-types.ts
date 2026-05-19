@@ -68,7 +68,9 @@ export interface Config {
   blocks: {};
   collections: {
     media: Media;
+    'media-with-composite-prefixes': MediaWithCompositePrefix;
     'media-with-custom-url': MediaWithCustomUrl;
+    'media-with-generate-file-url': MediaWithGenerateFileUrl;
     'media-with-prefix': MediaWithPrefix;
     'restricted-media': RestrictedMedia;
     'test-metadata': TestMetadatum;
@@ -81,7 +83,9 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
+    'media-with-composite-prefixes': MediaWithCompositePrefixesSelect<false> | MediaWithCompositePrefixesSelect<true>;
     'media-with-custom-url': MediaWithCustomUrlSelect<false> | MediaWithCustomUrlSelect<true>;
+    'media-with-generate-file-url': MediaWithGenerateFileUrlSelect<false> | MediaWithGenerateFileUrlSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     'restricted-media': RestrictedMediaSelect<false> | RestrictedMediaSelect<true>;
     'test-metadata': TestMetadataSelect<false> | TestMetadataSelect<true>;
@@ -98,6 +102,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -129,6 +136,7 @@ export interface UserAuthOperations {
 export interface Media {
   id: string;
   alt?: string | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -161,9 +169,47 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-composite-prefixes".
+ */
+export interface MediaWithCompositePrefix {
+  id: string;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-custom-url".
  */
 export interface MediaWithCustomUrl {
+  id: string;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-generate-file-url".
+ */
+export interface MediaWithGenerateFileUrl {
   id: string;
   prefix?: string | null;
   updatedAt: string;
@@ -204,6 +250,7 @@ export interface MediaWithPrefix {
 export interface RestrictedMedia {
   id: string;
   title?: string | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -226,6 +273,7 @@ export interface TestMetadatum {
    * Test note to identify this upload
    */
   testNote?: string | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -302,8 +350,16 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
+        relationTo: 'media-with-composite-prefixes';
+        value: string | MediaWithCompositePrefix;
+      } | null)
+    | ({
         relationTo: 'media-with-custom-url';
         value: string | MediaWithCustomUrl;
+      } | null)
+    | ({
+        relationTo: 'media-with-generate-file-url';
+        value: string | MediaWithGenerateFileUrl;
       } | null)
     | ({
         relationTo: 'media-with-prefix';
@@ -369,6 +425,7 @@ export interface PayloadMigration {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -407,9 +464,45 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-composite-prefixes_select".
+ */
+export interface MediaWithCompositePrefixesSelect<T extends boolean = true> {
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-custom-url_select".
  */
 export interface MediaWithCustomUrlSelect<T extends boolean = true> {
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-generate-file-url_select".
+ */
+export interface MediaWithGenerateFileUrlSelect<T extends boolean = true> {
   prefix?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -447,6 +540,7 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
  */
 export interface RestrictedMediaSelect<T extends boolean = true> {
   title?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -465,6 +559,7 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
  */
 export interface TestMetadataSelect<T extends boolean = true> {
   testNote?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -552,6 +647,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -20,6 +20,8 @@ export const SSR: CollectionConfig = {
     delete: () => true,
   },
   admin: {
+    description:
+      'This collections has drafts enabled, but not autosave. Changes need to be saved to trigger a full router refresh, which fetches draft content on the server.',
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
     preview: (doc) => `/live-preview/ssr/${doc?.slug}`,

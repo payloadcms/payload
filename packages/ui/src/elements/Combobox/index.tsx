@@ -4,7 +4,7 @@ import React, { useMemo, useRef, useState } from 'react'
 import type { PopupProps } from '../Popup/index.js'
 
 import { Popup, PopupList } from '../Popup/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'combobox'
 
@@ -114,6 +114,7 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
               return (
                 <div
                   className={`${baseClass}__entry`}
+                  data-popup-prevent-close
                   key={`${entry.name}-${index}`}
                   onClick={handleClick}
                   onKeyDown={(e) => {

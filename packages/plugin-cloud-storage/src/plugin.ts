@@ -19,7 +19,12 @@ import { getPreserveFileDataHook } from './hooks/preserveFileData.js'
 export const cloudStoragePlugin =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
-    const { alwaysInsertFields, collections: allCollectionOptions, enabled } = pluginOptions
+    const {
+      alwaysInsertFields,
+      collections: allCollectionOptions,
+      enabled,
+      useCompositePrefixes,
+    } = pluginOptions
     const config = { ...incomingConfig }
 
     // If disabled but alwaysInsertFields is true, only insert fields without full plugin functionality
@@ -46,6 +51,7 @@ export const cloudStoragePlugin =
                 disablePayloadAccessControl: options.disablePayloadAccessControl,
                 generateFileURL: options.generateFileURL,
                 prefix: options.prefix,
+                useCompositePrefixes,
               })
 
               return {
@@ -85,6 +91,7 @@ export const cloudStoragePlugin =
             disablePayloadAccessControl: options.disablePayloadAccessControl,
             generateFileURL: options.generateFileURL,
             prefix: options.prefix,
+            useCompositePrefixes,
           })
 
           const handlers = [

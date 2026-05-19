@@ -134,49 +134,60 @@ Set `PAYLOAD_DATABASE` in your `.env` file to choose the database adapter:
 - `postgres` - PostgreSQL with pgvector and PostGIS
 - `postgres-custom-schema` - PostgreSQL with custom schema
 - `postgres-uuid` - PostgreSQL with UUID primary keys
+- `postgres-uuidv7` - PostgreSQL with UUID V7 primary keys
 - `postgres-read-replica` - PostgreSQL with read replica
 - `sqlite` - SQLite
 - `sqlite-uuid` - SQLite with UUID primary keys
+- `sqlite-uuidv7` - SQLite with UUID V7 primary keys
 - `supabase` - Supabase (PostgreSQL)
 - `d1` - D1 (SQLite)
 
-Then use Docker to start your database.
+Then use Docker to start your databases and storage emulators.
 
-On MacOS, the easiest way to install Docker is to use brew. Simply run `pnpm install --cask docker`, open the docker desktop app, apply the recommended settings and you're good to go.
-
-### PostgreSQL
+On MacOS, the easiest way to install Docker is to use brew. Simply run `brew install --cask docker`, open the docker desktop app, apply the recommended settings and you're good to go.
 
 ```bash
-pnpm docker:postgres:start         # Start (persists data)
-pnpm docker:postgres:restart:clean # Start fresh (removes data)
-pnpm docker:postgres:stop          # Stop
+pnpm docker:start  # Clean + start all services (PostgreSQL, MongoDB, storage emulators) with fresh data
+pnpm docker:clean  # Stop and remove all services
+pnpm docker:test   # Test database connections
 ```
 
-URL: `postgres://payload:payload@127.0.0.1:5433/payload`
+Every `docker:start` automatically removes old data and starts fresh, so you always get a clean environment.
 
-### MongoDB (with vector search)
+All services are defined in a single `test/docker-compose.yml` using Docker Compose profiles (`postgres`, `mongodb`, `mongodb-atlas`, `storage`, `all`).
 
-```bash
-pnpm docker:mongodb:start          # Start (persists data)
-pnpm docker:mongodb:restart:clean  # Start fresh (removes data)
-pnpm docker:mongodb:stop           # Stop
-```
+**Connection URLs:**
 
-URL: `mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0`
+| Database            | URL                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| PostgreSQL          | `postgres://payload:payload@127.0.0.1:5433/payload`                                                       |
+| MongoDB             | `mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0` |
+| MongoDB Atlas Local | `mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local` (no auth)        |
 
-### MongoDB Atlas Local
+SQLite databases don't require Docker — they're stored as files in the project.
 
-```bash
-pnpm docker:mongodb-atlas:start         # Start (persists data)
-pnpm docker:mongodb-atlas:restart:clean # Start fresh (removes data)
-pnpm docker:mongodb-atlas:stop          # Stop
-```
+### Development with Devcontainers
 
-URL: `mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local` (no auth required)
+You can run the entire development environment inside a devcontainer.
 
-### SQLite
+**Prerequisites:**
 
-SQLite databases don't require Docker - they're stored as files in the project.
+- Docker or [OrbStack](https://orbstack.dev) (recommended on macOS for better performance)
+- One of:
+  - VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers), or
+  - The [`@devcontainers/cli`](https://github.com/devcontainers/cli)
+
+**Start the container — pick one:**
+
+- **VS Code:** Open the repo and click "Reopen in Container" when prompted (or run `Dev Containers: Reopen in Container` from the command palette).
+- **CLI (any editor):** From the repo root, run `devcontainer up`, then `devcontainer exec zsh` for a shell. To attach an editor, point it at the running container - e.g. JetBrains "Dev Containers" plugin, Cursor / VS Code "Attach to Running Container", or just use the terminal.
+
+**Then, inside the container:**
+
+1. Run `pnpm docker:start` if you're not using sqlite
+2. Run `pnpm dev <test suite name>`
+
+The default `PAYLOAD_DATABASE` inside the devcontainer is `sqlite`, so the `pnpm docker:start` step is only needed when you switch to mongodb/postgres.
 
 ### Testing with your own database
 
@@ -219,6 +230,12 @@ If you are committing to [templates](./templates) or [examples](./examples), use
 
 - `chore(templates): adds feature to template`
 - `chore(examples): fixes bug in example`
+
+### Allow edits from maintainers
+
+When opening a PR from a fork, please leave **"Allow edits and access to secrets by maintainers"** enabled on the pull request (it is on by default in the GitHub UI). This lets the Payload team push small fixes — rebases, lint/format cleanup, minor adjustments — directly to your branch so the PR can land without an extra round trip.
+
+If that permission is disabled and we need to push changes to move the PR forward, we may close your PR and re-open an equivalent branch directly in the Payload repository so the team can iterate on it.
 
 ## Previewing docs
 

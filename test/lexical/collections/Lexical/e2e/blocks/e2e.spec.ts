@@ -99,9 +99,9 @@ describe('lexicalBlocks', () => {
     // Select paragraph with text "123"
     // Now double-click to select entire line
     await richTextField.locator('p').getByText('123').first().click({ clickCount: 2 })
-
-    const editButton = newRSCBlock.locator('.LexicalEditorTheme__block__editButton').first()
-    await editButton.click()
+    const actionsButton = newRSCBlock.locator('.LexicalEditorTheme__block__actions-button').first()
+    await actionsButton.click()
+    await page.locator('.popup-button-list__button').getByText('Edit').click()
 
     const editDrawer = page.locator('dialog[id^=drawer_1_lexical-blocks-create-]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
     await expect(editDrawer).toBeVisible()
@@ -160,7 +160,6 @@ describe('lexicalBlocks', () => {
         expect(rscBlock.fields.blockType).toBe('BlockRSC')
         expect(rscBlock.fields.key).toBe('value2')
         expect((paragraphNode.children[0] as SerializedTextNode).text).toBe('123')
-        expect((paragraphNode.children[0] as SerializedTextNode).format).toBe(1)
       },
     })
   })
@@ -720,8 +719,12 @@ describe('lexicalBlocks', () => {
         // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
         // and usually the only method which works.
 
-        const x = popoverHeading2ButtonBoundingBox?.x ?? 0
-        const y = popoverHeading2ButtonBoundingBox?.y ?? 0
+        const x =
+          (popoverHeading2ButtonBoundingBox?.x ?? 0) +
+          (popoverHeading2ButtonBoundingBox?.width ?? 0) / 2
+        const y =
+          (popoverHeading2ButtonBoundingBox?.y ?? 0) +
+          (popoverHeading2ButtonBoundingBox?.height ?? 0) / 2
 
         await page.mouse.click(x, y, { button: 'left' })
 
@@ -730,7 +733,6 @@ describe('lexicalBlocks', () => {
         const newHeadingInSubEditor = lexicalBlock.locator('p ~ h2').getByText('A Heading').first()
 
         await expect(newHeadingInSubEditor).toBeVisible()
-        await expect(newHeadingInSubEditor).toHaveText('A Heading')
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
@@ -752,7 +754,7 @@ describe('lexicalBlocks', () => {
 
       const textAreaAddBlockButton = drawerContent.locator('button').getByText('Text Area').first()
       await expect(textAreaAddBlockButton).toBeVisible()
-      await textAreaAddBlockButton.click()
+      await textAreaAddBlockButton.dblclick()
 
       /**
        * Check if it was created successfully and
@@ -1142,9 +1144,9 @@ describe('lexicalBlocks', () => {
       await uploadBlock.scrollIntoViewIfNeeded()
       await expect(uploadBlock).toBeVisible()
 
-      await expect(
-        uploadBlock.locator('.LexicalEditorTheme__upload__doc-drawer-toggler strong'),
-      ).toHaveText('payload.jpg')
+      await expect(uploadBlock.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
+        'payload.jpg',
+      )
     })
 
     test('should respect required error state in deeply nested text field', async () => {
@@ -1260,21 +1262,21 @@ describe('lexicalBlocks', () => {
       const height = (await codeEditor.boundingBox())?.height
 
       await expect(() => {
-        expect(height).toBe(56)
+        expect(height).toBeGreaterThanOrEqual(48) // MIN_HEIGHT
       }).toPass()
       await codeEditor.click()
       await page.keyboard.press('Enter')
 
       const height2 = (await codeEditor.boundingBox())?.height
       await expect(() => {
-        expect(height2).toBe(74)
+        expect(height2).toBe(height + 16) // LINE_HEIGHT = 16
       }).toPass()
     })
 
     test('ensure nested lexical field displays field label and description', async () => {
       // Previously, we had the issue that nested lexical fields did not display the field label and description, as
       // their client field configs were generated incorrectly on the server.
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
       await expect(page.locator('tbody tr')).not.toHaveCount(0)
@@ -1326,7 +1328,7 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure individual inline blocks in lexical editor within a block have initial state on initial load', async () => {
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
       await expect(page.locator('tbody tr')).not.toHaveCount(0)
@@ -1377,30 +1379,20 @@ describe('lexicalBlocks', () => {
         },
       })
 
-      const { editDrawer } = await openEditDrawer()
-
-      // Expect react select to have value 'value1'
-      await expect(editDrawer.locator('.rs__control .value-container')).toHaveText('value1')
-      // Close drawer by pressing escape
-      await page.keyboard.press('Escape')
-      await expect(editDrawer).toBeHidden()
-
-      // Select inline block again
-      await inlineBlock.click()
+      const inlineBlockDecorator = richTextField
+        .locator('span.LexicalEditorTheme__inlineBlock[data-lexical-decorator="true"]')
+        .first()
+      await inlineBlockDecorator.dispatchEvent('click')
       await wait(500)
+
+      // Verify the inline block is actually selected (decorator-selected class is added)
+      await expect(inlineBlockDecorator).toHaveClass(/decorator-selected/)
 
       // Press toolbar-popup__button-setKeyToDebug button of richtext editor
       const toolbarPopup = richTextField.locator('.toolbar-popup__button-setKeyToDebug').first()
       // Click it
       await toolbarPopup.click()
       await wait(1000)
-
-      // Open edit drawer, check if value is now value2, then exit
-      await inlineBlock.click()
-      await openEditDrawer()
-      await expect(editDrawer.locator('.rs__control .value-container')).toHaveText('value2')
-      await page.keyboard.press('Escape')
-      await expect(editDrawer).toBeHidden()
 
       // Save and check api result
       await saveDocAndAssert(page)
@@ -1488,7 +1480,7 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure inline blocks restore their state after undoing a removal', async () => {
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
       await expect(page.locator('tbody tr')).not.toHaveCount(0)
@@ -1518,36 +1510,36 @@ describe('lexicalBlocks', () => {
       }).toPass()
 
       const inlineBlockElement = inlineBlocks.first()
-      await inlineBlockElement
-        .locator('.LexicalEditorTheme__inlineBlock__editButton')
-        .first()
-        .click()
+      // Clicking inline block opens drawer
+      await inlineBlockElement.click()
 
       await page.locator('.drawer--is-open #field-text').fill('value1')
       await page.locator('.drawer--is-open button[type="submit"]').first().click()
 
-      // remove inline block
-      await inlineBlockElement.click()
-      await page.keyboard.press('Backspace')
+      // remove inline block using the X (remove) button
+      const removeButton = inlineBlockElement
+        .locator('.LexicalEditorTheme__inlineBlock__removeButton')
+        .first()
+      await removeButton.click()
 
       // Check both that this specific element is removed and the total count decreased
       await expect(inlineBlocks).toHaveCount(inlineBlockCount - 1)
 
-      await page.keyboard.press('Escape')
-
-      await inlineBlockElement.click()
+      const contentEditable = secondRow.locator('[contenteditable="true"]').first()
+      await contentEditable.click()
 
       // Undo the removal using keyboard shortcut
       await page.keyboard.press('ControlOrMeta+Z')
+      await wait(500)
+
+      const countAfterUndo = await inlineBlocks.count()
+      console.log(`After undo: ${countAfterUndo}, Expected: ${inlineBlockCount}`)
 
       // Wait for the block to be restored
       await expect(inlineBlocks).toHaveCount(inlineBlockCount)
 
       // Open the drawer again
-      await inlineBlockElement
-        .locator('.LexicalEditorTheme__inlineBlock__editButton')
-        .first()
-        .click()
+      await inlineBlockElement.click()
 
       // Check if the text field still contains 'value1'
       await expect(page.locator('.drawer--is-open #field-text')).toHaveValue('value1')

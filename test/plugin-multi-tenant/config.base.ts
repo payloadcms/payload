@@ -10,6 +10,7 @@ const dirname = path.dirname(filename)
 import type { Config as ConfigType } from './payload-types.js'
 
 import { AutosaveGlobal } from './collections/AutosaveGlobal.js'
+import { Media } from './collections/Media.js'
 import { Menu } from './collections/Menu.js'
 import { MenuItems } from './collections/MenuItems.js'
 import { MultiTenantPosts } from './collections/MultiTenantPosts.js'
@@ -19,6 +20,8 @@ import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
 import {
   autosaveGlobalSlug,
+  foldersSlug,
+  mediaSlug,
   menuItemsSlug,
   menuSlug,
   multiTenantPostsSlug,
@@ -34,6 +37,7 @@ export const baseConfig: Partial<Config> = {
     AutosaveGlobal,
     Relationships,
     MultiTenantPosts,
+    Media,
     {
       slug: notTenantedSlug,
       admin: {
@@ -43,6 +47,22 @@ export const baseConfig: Partial<Config> = {
         {
           name: 'name',
           type: 'text',
+        },
+      ],
+    },
+    {
+      slug: foldersSlug,
+      hierarchy: {
+        parentFieldName: 'folder',
+      },
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
         },
       ],
     },
@@ -74,7 +94,28 @@ export const baseConfig: Partial<Config> = {
       tenantField: {
         access: {},
       },
+      tenantsArrayField: {
+        rowFields: [
+          {
+            name: 'tenantRole',
+            type: 'select',
+            defaultValue: 'admin',
+            options: [
+              {
+                label: 'Admin',
+                value: 'admin',
+              },
+              {
+                label: 'Member',
+                value: 'member',
+              },
+            ],
+            saveToJWT: true,
+          },
+        ],
+      },
       collections: {
+        [foldersSlug]: {},
         [menuItemsSlug]: {
           useTenantAccess: false,
         },
@@ -90,6 +131,7 @@ export const baseConfig: Partial<Config> = {
             hasMany: true,
           },
         },
+        [mediaSlug]: {},
       },
       i18n: {
         translations: {
@@ -120,7 +162,9 @@ export const baseConfig: Partial<Config> = {
           if (fullTenant.selectedLocales.includes('allLocales')) {
             return locales
           }
-          return locales.filter((locale) => fullTenant.selectedLocales?.includes(locale.code))
+          return locales.filter((locale) =>
+            fullTenant.selectedLocales?.includes(locale.code as any),
+          )
         }
       }
       return locales

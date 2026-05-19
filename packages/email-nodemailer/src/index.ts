@@ -9,6 +9,14 @@ import { InvalidConfiguration } from 'payload'
 export type NodemailerAdapterArgs = {
   defaultFromAddress: string
   defaultFromName: string
+  /**
+   * Override all emails to be sent to this address.
+   * Useful for testing.
+   */
+  overrideRecipientAddress?: string
+  /**
+   * Skip verifying the email SMTP transport.
+   */
   skipVerify?: boolean
   transport?: Transporter
   transportOptions?: SMTPConnection.Options
@@ -25,6 +33,7 @@ export const nodemailerAdapter = async (
   args?: NodemailerAdapterArgs,
 ): Promise<NodemailerAdapter> => {
   const { defaultFromAddress, defaultFromName, transport } = await buildEmail(args)
+  const overrideRecipientAddress = args?.overrideRecipientAddress
 
   const adapter: NodemailerAdapter = () => ({
     name: 'nodemailer',
@@ -34,6 +43,7 @@ export const nodemailerAdapter = async (
       return await transport.sendMail({
         from: `${defaultFromName} <${defaultFromAddress}>`,
         ...message,
+        ...(overrideRecipientAddress ? { to: overrideRecipientAddress } : {}),
       })
     },
   })

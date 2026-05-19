@@ -12,6 +12,9 @@ export function deepMergeSimple<T = object>(obj1: object, obj2: object): T {
   const output = { ...obj1 }
 
   for (const key in obj2) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      continue
+    }
     if (Object.prototype.hasOwnProperty.call(obj2, key)) {
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       if (typeof obj2[key] === 'object' && !Array.isArray(obj2[key]) && obj1[key]) {

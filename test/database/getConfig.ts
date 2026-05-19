@@ -832,6 +832,26 @@ export const getConfig: () => Partial<Config> = () => ({
             },
           ],
         },
+        {
+          name: 'blockWithVirtual',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'blockWithVirtual',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+                {
+                  name: 'virtualField',
+                  type: 'text',
+                  virtual: true,
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -1030,6 +1050,59 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'select',
           hasMany: true,
           options: ['apple', 'bananabread', 'banana'],
+        },
+      ],
+    },
+    {
+      slug: 'virtual-linked-tenants',
+      fields: [
+        {
+          name: 'slug',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    {
+      slug: 'virtual-linked-roles',
+      access: {
+        read: () => ({
+          tenantSlug: {
+            exists: true,
+          },
+        }),
+      },
+      fields: [
+        {
+          name: 'project',
+          type: 'relationship',
+          relationTo: 'virtual-linked-projects',
+          required: true,
+        },
+        {
+          name: 'tenant',
+          type: 'relationship',
+          relationTo: 'virtual-linked-tenants',
+          required: true,
+        },
+        {
+          name: 'tenantSlug',
+          type: 'text',
+          virtual: 'tenant.slug',
+        },
+      ],
+    },
+    {
+      slug: 'virtual-linked-projects',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'roles',
+          type: 'join',
+          collection: 'virtual-linked-roles',
+          on: 'project',
         },
       ],
     },

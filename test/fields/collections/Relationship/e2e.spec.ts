@@ -3,10 +3,11 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
 import { openCreateDocDrawer } from '__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
-import { addListFilter } from '__helpers/e2e/filters/index.js'
+import { addListFilter, openListFilters } from '__helpers/e2e/filters/index.js'
 import { navigateToDoc } from '__helpers/e2e/navigateToDoc.js'
 import { openDocControls } from '__helpers/e2e/openDocControls.js'
 import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
+import { getSelectInputOptions, selectInput } from '__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '__helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -24,8 +25,8 @@ import {
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
 
@@ -793,6 +794,58 @@ describe('relationship', () => {
     })
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
+  })
+
+  test('should not duplicate relationship filter options when switching operators', async () => {
+    await page.goto(url.list)
+    await wait(1000)
+
+    await openListFilters(page, {})
+    const whereBuilder = page.locator('.where-builder')
+
+    // Add first filter
+    await whereBuilder.locator('.where-builder__add-first-filter').click()
+    const condition = whereBuilder.locator('.where-builder__or-filters > li').last()
+
+    // Select relationship field
+    await selectInput({
+      selectLocator: condition.locator('.condition__field'),
+      multiSelect: false,
+      option: 'Relationship',
+    })
+
+    // Select equals operator (default)
+    await selectInput({
+      selectLocator: condition.locator('.condition__operator'),
+      multiSelect: false,
+      option: 'equals',
+    })
+
+    // Select a value
+    const valueLocator = condition.locator('.condition__value')
+    await selectInput({
+      selectLocator: valueLocator,
+      multiSelect: false,
+      option: 'Seeded text document',
+      selectType: 'relationship',
+    })
+
+    // Switch to "is not equal to" operator
+    await selectInput({
+      selectLocator: condition.locator('.condition__operator'),
+      multiSelect: false,
+      option: 'is not equal to',
+    })
+
+    // Wait for options to reload
+    await wait(500)
+
+    // Get all options in the value dropdown
+    const options = await getSelectInputOptions({ selectLocator: valueLocator })
+
+    // Verify no duplicates - each option should appear only once
+    const uniqueOptions = [...new Set(options)]
+    expect(options.length).toBe(uniqueOptions.length)
   })
 
   test('should be able to select relationship with drawer appearance', async () => {

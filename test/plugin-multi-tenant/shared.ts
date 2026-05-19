@@ -13,3 +13,6 @@ export const relationshipsSlug = 'relationships'
 export const notTenantedSlug = 'notTenanted'
 
 export const multiTenantPostsSlug = 'multi-tenant-posts'
+
+export const foldersSlug = 'folders'
+export const mediaSlug = 'media'

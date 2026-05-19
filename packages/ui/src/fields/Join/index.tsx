@@ -13,16 +13,18 @@ import ObjectIdImport from 'bson-objectid'
 import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
 import React, { useMemo } from 'react'
 
+import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
-import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../index.js'
+import './index.css'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
@@ -124,14 +126,7 @@ const getInitialDrawerData = ({
 const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   const {
     field,
-    field: {
-      admin: { allowCreate, description },
-      collection,
-      label,
-      localized,
-      on,
-      required,
-    },
+    field: { admin: { allowCreate, description } = {}, collection, label, localized, on, required },
     path: pathFromProps,
   } = props
 
@@ -139,14 +134,20 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   const { config, getEntityConfig } = useConfig()
 
+  const { i18n } = useTranslation()
+
   const {
-    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Label } = {},
+    errorPaths,
     path,
     showError,
     value,
   } = useField<PaginatedDocs>({
     potentiallyStalePath: pathFromProps,
   })
+
+  const fieldErrorCount = errorPaths?.length || (showError ? 1 : 0)
+  const fieldHasErrors = fieldErrorCount > 0
 
   const filterOptions: null | Where = useMemo(() => {
     if (!docID) {
@@ -199,13 +200,9 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   return (
     <div
-      className={[fieldBaseClass, showError && 'error', 'join'].filter(Boolean).join(' ')}
+      className={[fieldBaseClass, fieldHasErrors && 'error', 'join'].filter(Boolean).join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
     >
-      <RenderCustomComponent
-        CustomComponent={Error}
-        Fallback={<FieldError path={path} showError={showError} />}
-      />
       <RelationshipTable
         AfterInput={AfterInput}
         allowCreate={typeof docID !== 'undefined' && allowCreate}
@@ -217,11 +214,14 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
         initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}
         initialDrawerData={initialDrawerData}
         Label={
-          <h4 style={{ margin: 0 }}>
-            {Label || (
-              <FieldLabel label={label} localized={localized} path={path} required={required} />
-            )}
-          </h4>
+          <div className="join__header-wrapper">
+            <h4>
+              {Label || (
+                <FieldLabel label={label} localized={localized} path={path} required={required} />
+              )}
+            </h4>
+            {fieldHasErrors && <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />}
+          </div>
         }
         parent={
           typeof docID !== 'undefined'

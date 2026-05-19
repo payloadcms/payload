@@ -76,6 +76,9 @@ export interface Config {
     'posts-no-jobs-queue': PostsNoJobsQueue;
     'posts-with-limits': PostsWithLimit;
     'posts-with-s3': PostsWithS3;
+    'posts-with-hooks': PostsWithHook;
+    'posts-with-field-hooks': PostsWithFieldHook;
+    'posts-with-column-map': PostsWithColumnMap;
     media: Media;
     'custom-id-pages': CustomIdPage;
     exports: Export;
@@ -83,10 +86,16 @@ export interface Config {
     'posts-no-jobs-queue-export': PostsNoJobsQueueExport;
     'posts-with-s3-export': PostsWithS3Export;
     'posts-with-limits-export': PostsWithLimitsExport;
+    'posts-with-hooks-export': PostsWithHooksExport;
+    'posts-with-field-hooks-export': PostsWithFieldHooksExport;
+    'posts-with-column-map-export': PostsWithColumnMapExport;
     imports: Import;
     'posts-import': PostsImport;
     'posts-with-s3-import': PostsWithS3Import;
     'posts-with-limits-import': PostsWithLimitsImport;
+    'posts-with-hooks-import': PostsWithHooksImport;
+    'posts-with-field-hooks-import': PostsWithFieldHooksImport;
+    'posts-with-column-map-import': PostsWithColumnMapImport;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -103,6 +112,9 @@ export interface Config {
     'posts-no-jobs-queue': PostsNoJobsQueueSelect<false> | PostsNoJobsQueueSelect<true>;
     'posts-with-limits': PostsWithLimitsSelect<false> | PostsWithLimitsSelect<true>;
     'posts-with-s3': PostsWithS3Select<false> | PostsWithS3Select<true>;
+    'posts-with-hooks': PostsWithHooksSelect<false> | PostsWithHooksSelect<true>;
+    'posts-with-field-hooks': PostsWithFieldHooksSelect<false> | PostsWithFieldHooksSelect<true>;
+    'posts-with-column-map': PostsWithColumnMapSelect<false> | PostsWithColumnMapSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'custom-id-pages': CustomIdPagesSelect<false> | CustomIdPagesSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
@@ -110,10 +122,16 @@ export interface Config {
     'posts-no-jobs-queue-export': PostsNoJobsQueueExportSelect<false> | PostsNoJobsQueueExportSelect<true>;
     'posts-with-s3-export': PostsWithS3ExportSelect<false> | PostsWithS3ExportSelect<true>;
     'posts-with-limits-export': PostsWithLimitsExportSelect<false> | PostsWithLimitsExportSelect<true>;
+    'posts-with-hooks-export': PostsWithHooksExportSelect<false> | PostsWithHooksExportSelect<true>;
+    'posts-with-field-hooks-export': PostsWithFieldHooksExportSelect<false> | PostsWithFieldHooksExportSelect<true>;
+    'posts-with-column-map-export': PostsWithColumnMapExportSelect<false> | PostsWithColumnMapExportSelect<true>;
     imports: ImportsSelect<false> | ImportsSelect<true>;
     'posts-import': PostsImportSelect<false> | PostsImportSelect<true>;
     'posts-with-s3-import': PostsWithS3ImportSelect<false> | PostsWithS3ImportSelect<true>;
     'posts-with-limits-import': PostsWithLimitsImportSelect<false> | PostsWithLimitsImportSelect<true>;
+    'posts-with-hooks-import': PostsWithHooksImportSelect<false> | PostsWithHooksImportSelect<true>;
+    'posts-with-field-hooks-import': PostsWithFieldHooksImportSelect<false> | PostsWithFieldHooksImportSelect<true>;
+    'posts-with-column-map-import': PostsWithColumnMapImportSelect<false> | PostsWithColumnMapImportSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -488,6 +506,77 @@ export interface PostsWithS3 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-hooks".
+ */
+export interface PostsWithHook {
+  id: string;
+  title: string;
+  secret?: string | null;
+  count?: number | null;
+  email?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-field-hooks".
+ */
+export interface PostsWithFieldHook {
+  id: string;
+  title: string;
+  secret?: string | null;
+  count?: number | null;
+  customExport?: string | null;
+  customImport?: string | null;
+  email?: string | null;
+  group?: {
+    namedTab?: {
+      deepField?: string | null;
+    };
+  };
+  legacyToCSV?: string | null;
+  legacyToCSVArgs?: string | null;
+  legacyFromCSV?: string | null;
+  legacyFromCSVArgs?: string | null;
+  items?:
+    | {
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  content?:
+    | {
+        body?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textBlock';
+      }[]
+    | null;
+  mayCrash?: string | null;
+  rowField?: string | null;
+  collapsibleField?: string | null;
+  metadata?: {
+    slugFromTitle?: string | null;
+    siblingEcho?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-column-map".
+ */
+export interface PostsWithColumnMap {
+  id: string;
+  title: string;
+  excerpt?: string | null;
+  count?: number | null;
+  sharedName?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-id-pages".
  */
 export interface CustomIdPage {
@@ -688,6 +777,120 @@ export interface PostsWithLimitsExport {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-hooks-export".
+ */
+export interface PostsWithHooksExport {
+  id: string;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-field-hooks-export".
+ */
+export interface PostsWithFieldHooksExport {
+  id: string;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-column-map-export".
+ */
+export interface PostsWithColumnMapExport {
+  id: string;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "imports".
  */
 export interface Import {
@@ -802,6 +1005,117 @@ export interface PostsWithS3Import {
  * via the `definition` "posts-with-limits-import".
  */
 export interface PostsWithLimitsImport {
+  id: string;
+  collectionSlug: string;
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-hooks-import".
+ */
+export interface PostsWithHooksImport {
+  id: string;
+  collectionSlug: string;
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-field-hooks-import".
+ */
+export interface PostsWithFieldHooksImport {
+  id: string;
+  collectionSlug: string;
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-column-map-import".
+ */
+export interface PostsWithColumnMapImport {
   id: string;
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
@@ -981,6 +1295,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts-with-s3';
         value: string | PostsWithS3;
+      } | null)
+    | ({
+        relationTo: 'posts-with-hooks';
+        value: string | PostsWithHook;
+      } | null)
+    | ({
+        relationTo: 'posts-with-field-hooks';
+        value: string | PostsWithFieldHook;
+      } | null)
+    | ({
+        relationTo: 'posts-with-column-map';
+        value: string | PostsWithColumnMap;
       } | null)
     | ({
         relationTo: 'media';
@@ -1207,6 +1533,83 @@ export interface PostsWithS3Select<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-hooks_select".
+ */
+export interface PostsWithHooksSelect<T extends boolean = true> {
+  title?: T;
+  secret?: T;
+  count?: T;
+  email?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-field-hooks_select".
+ */
+export interface PostsWithFieldHooksSelect<T extends boolean = true> {
+  title?: T;
+  secret?: T;
+  count?: T;
+  customExport?: T;
+  customImport?: T;
+  email?: T;
+  group?:
+    | T
+    | {
+        namedTab?:
+          | T
+          | {
+              deepField?: T;
+            };
+      };
+  legacyToCSV?: T;
+  legacyToCSVArgs?: T;
+  legacyFromCSV?: T;
+  legacyFromCSVArgs?: T;
+  items?:
+    | T
+    | {
+        note?: T;
+        id?: T;
+      };
+  content?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              body?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  mayCrash?: T;
+  rowField?: T;
+  collapsibleField?: T;
+  metadata?:
+    | T
+    | {
+        slugFromTitle?: T;
+        siblingEcho?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-column-map_select".
+ */
+export interface PostsWithColumnMapSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  count?: T;
+  sharedName?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -1380,6 +1783,93 @@ export interface PostsWithLimitsExportSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-hooks-export_select".
+ */
+export interface PostsWithHooksExportSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  page?: T;
+  sort?: T;
+  sortOrder?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-field-hooks-export_select".
+ */
+export interface PostsWithFieldHooksExportSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  page?: T;
+  sort?: T;
+  sortOrder?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-column-map-export_select".
+ */
+export interface PostsWithColumnMapExportSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  page?: T;
+  sort?: T;
+  sortOrder?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "imports_select".
  */
 export interface ImportsSelect<T extends boolean = true> {
@@ -1473,6 +1963,96 @@ export interface PostsWithS3ImportSelect<T extends boolean = true> {
  * via the `definition` "posts-with-limits-import_select".
  */
 export interface PostsWithLimitsImportSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  importMode?: T;
+  matchField?: T;
+  status?: T;
+  summary?:
+    | T
+    | {
+        imported?: T;
+        updated?: T;
+        total?: T;
+        issues?: T;
+        issueDetails?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-hooks-import_select".
+ */
+export interface PostsWithHooksImportSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  importMode?: T;
+  matchField?: T;
+  status?: T;
+  summary?:
+    | T
+    | {
+        imported?: T;
+        updated?: T;
+        total?: T;
+        issues?: T;
+        issueDetails?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-field-hooks-import_select".
+ */
+export interface PostsWithFieldHooksImportSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  importMode?: T;
+  matchField?: T;
+  status?: T;
+  summary?:
+    | T
+    | {
+        imported?: T;
+        updated?: T;
+        total?: T;
+        issues?: T;
+        issueDetails?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-column-map-import_select".
+ */
+export interface PostsWithColumnMapImportSelect<T extends boolean = true> {
   collectionSlug?: T;
   importMode?: T;
   matchField?: T;
@@ -1597,6 +2177,9 @@ export interface TaskCreateCollectionExport {
       | 'posts-no-jobs-queue'
       | 'posts-with-limits'
       | 'posts-with-s3'
+      | 'posts-with-hooks'
+      | 'posts-with-field-hooks'
+      | 'posts-with-column-map'
       | 'media'
       | 'custom-id-pages'
       | 'exports'
@@ -1604,10 +2187,16 @@ export interface TaskCreateCollectionExport {
       | 'posts-no-jobs-queue-export'
       | 'posts-with-s3-export'
       | 'posts-with-limits-export'
+      | 'posts-with-hooks-export'
+      | 'posts-with-field-hooks-export'
+      | 'posts-with-column-map-export'
       | 'imports'
       | 'posts-import'
       | 'posts-with-s3-import'
-      | 'posts-with-limits-import';
+      | 'posts-with-limits-import'
+      | 'posts-with-hooks-import'
+      | 'posts-with-field-hooks-import'
+      | 'posts-with-column-map-import';
     drafts?: ('yes' | 'no') | null;
     exportCollection: string;
     fields?: string[] | null;

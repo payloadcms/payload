@@ -27,6 +27,7 @@ import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
+import { sanitizePathSegment } from '../utilities/sanitizePathSegment.js'
 import {
   InternalBlockTableNameIndex,
   resolveBlockTableName,
@@ -63,6 +64,9 @@ const buildSQLWhere = (where: Where, alias: string) => {
 
       const value = where[k][payloadOperator]
       if (payloadOperator === '$raw') {
+        if (typeof value !== 'string') {
+          return undefined
+        }
         return sql.raw(value)
       }
 
@@ -75,7 +79,16 @@ const buildSQLWhere = (where: Where, alias: string) => {
         payloadOperator = 'isNull'
       }
 
-      return operatorMap[payloadOperator](sql.raw(`"${alias}"."${k.split('.').join('_')}"`), value)
+      if (!(payloadOperator in operatorMap)) {
+        return undefined
+      }
+
+      const sanitizedColumnName = k
+        .split('.')
+        .map((s) => sanitizePathSegment(s))
+        .join('_')
+
+      return operatorMap[payloadOperator](sql.raw(`"${alias}"."${sanitizedColumnName}"`), value)
     }
   }
 }

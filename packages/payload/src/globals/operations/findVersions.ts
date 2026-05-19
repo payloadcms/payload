@@ -9,10 +9,10 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
-import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
 export type Arguments = {
   depth?: number
@@ -70,8 +70,12 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
 
     const select = sanitizeSelect({
       fields: buildVersionGlobalFields(payload.config, globalConfig, true),
-      forceSelect: getQueryDraftsSelect({ select: globalConfig.forceSelect }),
-      select: incomingSelect,
+      select: resolveSelect({
+        config: globalConfig.select,
+        operation: 'read',
+        req,
+        select: incomingSelect,
+      }),
       versions: true,
     })
 

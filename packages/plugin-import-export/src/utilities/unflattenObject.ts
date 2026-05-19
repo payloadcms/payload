@@ -1,14 +1,47 @@
 import type { FlattenedField, PayloadRequest } from 'payload'
 
-import type { FromCSVFunction } from '../types.js'
+import type { ImportFieldHookEntry } from '../types.js'
 
-import { processRichTextField } from './processRichTextField.js'
+import { getNestedFlattenedFields } from './flattenedFields.js'
+import { postProcessDocument } from './unflattenPostProcess.js'
 
 type UnflattenArgs = {
   data: Record<string, unknown>
   fields: FlattenedField[]
-  fromCSVFunctions?: Record<string, FromCSVFunction>
+  format?: 'csv' | 'json' | ({} & string)
+  importFieldHooks?: Record<string, ImportFieldHookEntry>
   req: PayloadRequest
+}
+
+const indexSegment = /^\d+$/
+
+const collectArrayLikeNames = (fields: FlattenedField[], into: Set<string>): void => {
+  for (const field of fields) {
+    if (!('name' in field) || !field.name) {
+      continue
+    }
+    if (field.type === 'array' || field.type === 'blocks') {
+      into.add(field.name)
+    }
+    const nested = getNestedFlattenedFields(field)
+    if (nested) {
+      collectArrayLikeNames(nested, into)
+    }
+  }
+}
+
+/**
+ * Drops numeric array-index segments from a flat key so a runtime key like
+ * `items_0_note` matches the static, index-free key a user hook is registered
+ * under. A digit-only segment is only stripped when the segment immediately
+ * before it names an array or blocks field, so a literal field name like
+ * `2024` is preserved.
+ */
+const toLogicalKey = (flatKey: string, arrayLikeNames: Set<string>): string => {
+  const segments = flatKey.split('_')
+  return segments
+    .filter((seg, i) => !indexSegment.test(seg) || !arrayLikeNames.has(segments[i - 1] ?? ''))
+    .join('_')
 }
 
 /**
@@ -27,7 +60,8 @@ type UnflattenArgs = {
 export const unflattenObject = ({
   data,
   fields,
-  fromCSVFunctions = {},
+  format = 'csv',
+  importFieldHooks = {},
   req,
 }: UnflattenArgs): Record<string, unknown> => {
   if (!data || typeof data !== 'object') {
@@ -35,6 +69,9 @@ export const unflattenObject = ({
   }
 
   const result: Record<string, unknown> = {}
+
+  const arrayLikeNames = new Set<string>()
+  collectArrayLikeNames(fields, arrayLikeNames)
 
   // Sort keys to ensure array indices are processed in order
   const sortedKeys = Object.keys(data).sort((a, b) => {
@@ -118,13 +155,26 @@ export const unflattenObject = ({
       }
     }
 
-    // Apply fromCSV function if available
-    if (fromCSVFunctions[flatKey]) {
-      value = fromCSVFunctions[flatKey]({
-        columnName: flatKey,
-        data,
-        value,
-      })
+    const importHookEntry =
+      importFieldHooks[flatKey] ?? importFieldHooks[toLogicalKey(flatKey, arrayLikeNames)]
+    if (importHookEntry) {
+      try {
+        value = importHookEntry.fn({
+          columnName: flatKey,
+          data,
+          format,
+          siblingData: data,
+          siblingDoc: data,
+          value,
+        })
+      } catch (error) {
+        req.payload.logger.error({
+          err: error,
+          msg: `[plugin-import-export] Field-level beforeImport hook for "${flatKey}" threw — falling back to original value`,
+        })
+        // Keep the original value so the row is not dropped — downstream
+        // validation will surface any deeper issue per-row.
+      }
     }
 
     // Example: "blocks_0_content_text" -> ["blocks", "0", "content", "text"]
@@ -364,209 +414,4 @@ const getParentObject = (
   }
 
   return current
-}
-
-/**
- * Post-processes the unflattened document to handle special field types:
- * - Localized fields: transforms field_locale keys to nested { field: { locale: value } }
- * - Number hasMany: converts comma-separated strings or arrays to number arrays
- * - Relationship hasMany: converts comma-separated IDs to arrays
- * - Polymorphic relationships: transforms flat {relationTo, id} to {relationTo, value}
- * - Rich text fields: ensures proper data structure
- */
-const postProcessDocument = (doc: Record<string, unknown>, fields: FlattenedField[]): void => {
-  const localizedFields = fields.filter((field) => field.localized)
-  const processedLocalizedFields = new Set<string>()
-
-  for (const field of localizedFields) {
-    if (processedLocalizedFields.has(field.name)) {
-      continue
-    }
-
-    // Look for all locale-specific keys for this field
-    const localePattern = new RegExp(`^${field.name}_([a-z]{2}(?:_[A-Z]{2})?)$`)
-    const localeData: Record<string, unknown> = {}
-    const keysToDelete: string[] = []
-
-    for (const [key, value] of Object.entries(doc)) {
-      const match = key.match(localePattern)
-      if (match && match[1]) {
-        const locale = match[1]
-        localeData[locale] = value
-        keysToDelete.push(key)
-      }
-    }
-
-    // If we found locale-specific data, restructure it as Payload expects
-    if (Object.keys(localeData).length > 0) {
-      // Payload stores localized fields as nested objects: { field: { en: 'value', es: 'value' } }
-      doc[field.name] = localeData
-      keysToDelete.forEach((key) => delete doc[key])
-      processedLocalizedFields.add(field.name)
-    }
-  }
-
-  // Handle number fields with hasMany - convert string arrays to number arrays
-  const numberFields = fields.filter((field) => field.type === 'number' && field.hasMany)
-  for (const field of numberFields) {
-    const value = doc[field.name]
-
-    // Skip if field doesn't exist in document
-    if (!(field.name in doc)) {
-      continue
-    }
-
-    // Handle comma-separated string (e.g., "1,2,3,4,5")
-    if (typeof value === 'string' && value.includes(',')) {
-      doc[field.name] = value
-        .split(',')
-        .map((v) => v.trim())
-        .filter((v) => v !== '')
-        .map((v) => {
-          const num = parseFloat(v)
-          return isNaN(num) ? 0 : num
-        })
-    }
-    // Handle array of values from indexed columns (e.g., field_0, field_1, etc.)
-    else if (Array.isArray(value)) {
-      // Filter out null, undefined, and empty string values, then convert to numbers
-      doc[field.name] = value
-        .filter((v) => v !== null && v !== undefined && v !== '')
-        .map((v) => {
-          if (typeof v === 'string') {
-            const num = parseFloat(v)
-            return isNaN(num) ? 0 : num
-          }
-          return v
-        })
-    }
-    // Handle single value for hasMany (convert to array)
-    else if (value !== null && value !== undefined && value !== '') {
-      const num = typeof value === 'string' ? parseFloat(value) : value
-      doc[field.name] = isNaN(num as number) ? [] : [num]
-    }
-    // Handle empty/null values - convert to empty array for hasMany
-    else {
-      doc[field.name] = []
-    }
-  }
-
-  // Handle relationship fields with hasMany - convert comma-separated IDs to arrays
-  const relationshipFields = fields.filter(
-    (field) =>
-      (field.type === 'relationship' || field.type === 'upload') &&
-      field.hasMany === true &&
-      !Array.isArray(field.relationTo), // Skip polymorphic for now, handled separately
-  )
-  for (const field of relationshipFields) {
-    const value = doc[field.name]
-
-    // Handle comma-separated string of IDs (e.g., "id1,id2,id3")
-    if (typeof value === 'string' && value.includes(',')) {
-      doc[field.name] = value
-        .split(',')
-        .map((v) => v.trim())
-        .filter((v) => v !== '')
-    }
-    // Keep array as-is if already an array
-    else if (Array.isArray(value)) {
-      doc[field.name] = value.filter((v) => v !== null && v !== undefined && v !== '')
-    }
-    // Convert single value to array for hasMany
-    else if (value !== null && value !== undefined && value !== '') {
-      doc[field.name] = [value]
-    }
-  }
-
-  // Handle polymorphic relationships - transform from flat structure to proper format
-  for (const [key, value] of Object.entries(doc)) {
-    // Handle arrays of polymorphic relationships
-    if (Array.isArray(value)) {
-      // Check if this array contains polymorphic relationship objects
-      const hasPolymorphicItems = value.some(
-        (item) => typeof item === 'object' && item !== null && 'relationTo' in item,
-      )
-
-      if (hasPolymorphicItems) {
-        // Filter out null/invalid polymorphic items and transform valid ones
-        const processedArray = []
-        for (let i = 0; i < value.length; i++) {
-          const item = value[i]
-          if (typeof item === 'object' && item !== null && 'relationTo' in item) {
-            const typedItem = item as Record<string, unknown>
-
-            // Skip if both relationTo and value/id are null/empty
-            if (!typedItem.relationTo || (!typedItem.id && !typedItem.value)) {
-              continue
-            }
-
-            // Transform from {relationTo: 'collection', id: '123'} to {relationTo: 'collection', value: '123'}
-            if ('id' in typedItem) {
-              typedItem.value = typedItem.id
-              delete typedItem.id
-            }
-
-            processedArray.push(typedItem)
-          } else if (item !== null && item !== undefined) {
-            processedArray.push(item)
-          }
-        }
-
-        // Update the array with filtered results
-        if (value.length !== processedArray.length) {
-          doc[key] = processedArray.length > 0 ? processedArray : []
-        }
-      }
-      // For non-polymorphic arrays, preserve null placeholders for sparse arrays
-    }
-    // Handle single polymorphic relationships
-    else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      // Check if this is a single polymorphic relationship
-      if ('relationTo' in value && ('id' in value || 'value' in value)) {
-        const typedValue = value as Record<string, unknown>
-
-        // If both relationTo and value are null/empty, set the whole field to null
-        if (!typedValue.relationTo || (!typedValue.id && !typedValue.value)) {
-          doc[key] = null
-        } else {
-          // If it has 'id', transform to 'value'
-          if ('id' in typedValue && !('value' in typedValue)) {
-            typedValue.value = typedValue.id
-            delete typedValue.id
-          }
-        }
-      } else {
-        // Recursively process nested objects
-        postProcessDocument(value as Record<string, unknown>, fields)
-      }
-    }
-  }
-
-  // Process rich text fields to ensure proper data types
-  const richTextFields = fields.filter((field) => field.type === 'richText')
-  for (const field of richTextFields) {
-    if (field.name in doc && doc[field.name]) {
-      doc[field.name] = processRichTextField(doc[field.name])
-    }
-  }
-
-  // Also process rich text fields in blocks
-  const blockFields = fields.filter((field) => field.type === 'blocks')
-  for (const field of blockFields) {
-    if (field.name in doc && Array.isArray(doc[field.name])) {
-      const blocks = doc[field.name] as any[]
-      for (const block of blocks) {
-        if (!block || typeof block !== 'object') {
-          continue
-        }
-
-        // Look for richText fields directly in the block
-        for (const [key, value] of Object.entries(block)) {
-          if (key === 'richText' || (typeof key === 'string' && key.includes('richText'))) {
-            block[key] = processRichTextField(value)
-          }
-        }
-      }
-    }
-  }
 }

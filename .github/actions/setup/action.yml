@@ -15,9 +15,9 @@ inputs:
     default: 'true'
   pnpm-install-cache-key:
     description: The cache key override for the pnpm install cache
-  cache-propagation-delay:
-    description: Seconds to wait after setup for cache propagation (workaround for https://github.com/actions/cache/issues/1710)
-    default: '0'
+  restore-build:
+    description: Whether to restore the build cache (polls for availability, falls back to full build on miss)
+    default: 'false'
 
 outputs:
   pnpm-install-cache-key:
@@ -67,7 +67,7 @@ runs:
         node-version: ${{ env.NODE_VERSION }}
 
     - name: Install pnpm
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
       with:
         version: ${{ env.PNPM_VERSION }}
         run_install: false
@@ -92,8 +92,8 @@ runs:
         echo "PNPM_INSTALL_CACHE_KEY=$PNPM_INSTALL_CACHE_KEY" >> $GITHUB_ENV
 
     - name: Restore pnpm install cache
-      if: ${{ inputs.pnpm-restore-cache == 'true' }}
-      uses: actions/cache@v4
+      if: ${{ inputs.pnpm-restore-cache == 'true' || inputs.restore-build == 'true' }}
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: ${{ env.STORE_PATH }}
         key: ${{ env.PNPM_INSTALL_CACHE_KEY }}
@@ -102,7 +102,7 @@ runs:
           pnpm-store-
 
     - name: Run pnpm install
-      if: ${{ inputs.pnpm-run-install == 'true' }}
+      if: ${{ inputs.pnpm-run-install == 'true' && inputs.restore-build != 'true' }}
       shell: bash
       run: pnpm install
 
@@ -112,9 +112,54 @@ runs:
       shell: bash
       id: compute-output
 
-    - name: Wait for cache propagation
-      if: ${{ inputs.cache-propagation-delay != '0' }}
+    - name: Poll for build cache
+      if: ${{ inputs.restore-build == 'true' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        CACHE_KEY="${{ github.sha }}"
+        POLL_INTERVAL=10
+        TIMEOUT=120
+        ELAPSED=0
+        CACHE_FOUND=false
+
+        echo "Polling for build cache key: $CACHE_KEY"
+
+        while [ $ELAPSED -lt $TIMEOUT ]; do
+          if ! RESULT=$(gh cache list --repo "$GITHUB_REPOSITORY" --key "$CACHE_KEY" --json key --jq "[.[] | select(.key == \"$CACHE_KEY\")] | length"); then
+            echo "::warning::gh cache list failed, falling back to full build"
+            break
+          fi
+          if [ "$RESULT" -gt 0 ]; then
+            echo "Cache found after ${ELAPSED}s"
+            CACHE_FOUND=true
+            break
+          fi
+          echo "Cache not found yet (${ELAPSED}s elapsed), retrying in ${POLL_INTERVAL}s..."
+          sleep $POLL_INTERVAL
+          ELAPSED=$((ELAPSED + POLL_INTERVAL))
+        done
+
+        if [ "$CACHE_FOUND" = "false" ]; then
+          echo "::warning::Build cache not found after ${TIMEOUT}s — will run full build as fallback"
+        fi
+
+        echo "CACHE_FOUND=$CACHE_FOUND" >> $GITHUB_ENV
+
+    - name: Restore build cache
+      if: ${{ inputs.restore-build == 'true' && env.CACHE_FOUND == 'true' }}
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ./*
+        key: ${{ github.sha }}
+
+    - name: Fallback — install and build
+      if: ${{ inputs.restore-build == 'true' && env.CACHE_FOUND != 'true' }}
       shell: bash
       run: |
-        echo "Waiting ${{ inputs.cache-propagation-delay }}s for cache propagation..."
-        sleep ${{ inputs.cache-propagation-delay }}
+        echo "::warning::Build cache miss — running full build as fallback"
+        pnpm install
+        pnpm run build:all
+      env:
+        DO_NOT_TRACK: 1

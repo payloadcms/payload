@@ -3,7 +3,7 @@ import { CheckIcon } from '@payloadcms/ui/rsc'
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedListItemNode } from '../../../../nodeTypes.js'
 
-import './index.scss'
+import './index.css'
 
 export const ListItemDiffHTMLConverterAsync: HTMLConvertersAsync<SerializedListItemNode> = {
   listitem: async ({ node, nodesToHTML, parent, providedCSSString }) => {

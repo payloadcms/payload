@@ -54,8 +54,8 @@ export default buildConfigWithDefaults({
       globals: ['header', 'footer'],
     },
   },
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
-  csrf: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
+  csrf: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
   collections: [
     Users,
     Pages,

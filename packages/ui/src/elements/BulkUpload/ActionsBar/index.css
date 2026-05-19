@@ -1,0 +1,51 @@
+@layer payload-default {
+  .bulk-upload--actions-bar {
+    display: flex;
+    padding-inline: var(--gutter-h);
+    align-items: center;
+    border-bottom: 1px solid var(--theme-border-color);
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    background-color: var(--theme-bg);
+    height: var(--doc-controls-height);
+  }
+
+  .bulk-upload--actions-bar__navigation {
+    display: flex;
+    gap: var(--spacer-4);
+    align-items: center;
+    width: 100%;
+  }
+
+  .bulk-upload--actions-bar__locationText {
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+
+  .bulk-upload--actions-bar__controls {
+    display: flex;
+    gap: var(--spacer-2-5);
+
+    .btn {
+      padding: 0;
+    }
+  }
+
+  .bulk-upload--actions-bar__buttons {
+    display: flex;
+    gap: var(--spacer-4);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 1024px) {
+    .bulk-upload--actions-bar__navigation {
+      justify-content: space-between;
+    }
+
+    .bulk-upload--actions-bar__saveButtons {
+      display: none;
+    }
+  }
+}

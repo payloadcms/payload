@@ -23,7 +23,11 @@ export const isCustomAdminView = ({
           return true
         }
       } else {
-        if (routeWithoutAdmin.startsWith(view.path)) {
+        if (
+          view.path &&
+          view.path !== '/' &&
+          (routeWithoutAdmin === view.path || routeWithoutAdmin.startsWith(view.path + '/'))
+        ) {
           return true
         }
       }

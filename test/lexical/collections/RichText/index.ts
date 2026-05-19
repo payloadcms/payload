@@ -2,14 +2,12 @@ import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
-  HTMLConverterFeature,
   lexicalEditor,
-  lexicalHTML,
+  lexicalHTMLField,
   LinkFeature,
   TreeViewFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
-import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { richTextFieldsSlug } from '../../slugs.js'
 import { RelationshipBlock, SelectFieldBlock, TextBlock, UploadAndRichTextBlock } from './blocks.js'
@@ -36,7 +34,6 @@ const RichTextFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           TreeViewFeature(),
-          HTMLConverterFeature({}),
           LinkFeature({
             fields: ({ defaultFields }) => [
               ...defaultFields,
@@ -72,7 +69,22 @@ const RichTextFields: CollectionConfig = {
         ],
       }),
     },
-    lexicalHTML('lexicalCustomFields', { name: 'lexicalCustomFields_html' }),
+    lexicalHTMLField({
+      htmlFieldName: 'lexicalCustomFields_html',
+      lexicalFieldName: 'lexicalCustomFields',
+      converters: ({ defaultConverters }) => ({
+        ...defaultConverters,
+        link: async ({ node, nodesToHTML, providedStyleTag }) => {
+          const children = (await nodesToHTML({ nodes: node.children })).join('')
+          const href =
+            node.fields.linkType === 'internal' ? '#' : (node.fields.url ?? '')
+          const newTabAttrs = node.fields.newTab
+            ? ' rel="noopener noreferrer" target="_blank"'
+            : ''
+          return `<a${providedStyleTag} href="${href}"${newTabAttrs}>${children}</a>`
+        },
+      }),
+    }),
     {
       name: 'lexical',
       type: 'richText',
@@ -143,157 +155,6 @@ const RichTextFields: CollectionConfig = {
       ],
     },
     {
-      name: 'richText',
-      type: 'richText',
-      editor: slateEditor({
-        admin: {
-          elements: [
-            'h1',
-            'h2',
-            'h3',
-            'h4',
-            'h5',
-            'h6',
-            'ul',
-            'ol',
-            'textAlign',
-            'indent',
-            'link',
-            'relationship',
-            'upload',
-          ],
-          link: {
-            fields: [
-              {
-                name: 'rel',
-                label: 'Rel Attribute',
-                type: 'select',
-                hasMany: true,
-                options: ['noopener', 'noreferrer', 'nofollow'],
-                admin: {
-                  description:
-                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
-                },
-              },
-            ],
-          },
-          upload: {
-            collections: {
-              uploads: {
-                fields: [
-                  {
-                    name: 'caption',
-                    type: 'richText',
-                    editor: slateEditor({}),
-                  },
-                ],
-              },
-            },
-          },
-        },
-      }),
-      required: true,
-    },
-    {
-      name: 'richTextCustomFields',
-      type: 'richText',
-      editor: slateEditor({
-        admin: {
-          elements: [
-            'h1',
-            'h2',
-            'h3',
-            'h4',
-            'h5',
-            'h6',
-            'ul',
-            'ol',
-            'indent',
-            'link',
-            'relationship',
-            'upload',
-          ],
-          link: {
-            fields: ({ defaultFields }) => {
-              return [
-                ...defaultFields,
-                {
-                  label: 'Custom',
-                  name: 'customLinkField',
-                  type: 'text',
-                },
-              ]
-            },
-          },
-          upload: {
-            collections: {
-              uploads: {
-                fields: [
-                  {
-                    name: 'caption',
-                    type: 'richText',
-                    editor: slateEditor({}),
-                  },
-                ],
-              },
-            },
-          },
-        },
-      }),
-    },
-    {
-      name: 'richTextReadOnly',
-      type: 'richText',
-      admin: {
-        readOnly: true,
-      },
-      editor: slateEditor({
-        admin: {
-          elements: [
-            'h1',
-            'h2',
-            'h3',
-            'h4',
-            'h5',
-            'h6',
-            'ul',
-            'ol',
-            'indent',
-            'link',
-            'relationship',
-            'upload',
-          ],
-          link: {
-            fields: [
-              {
-                name: 'rel',
-                label: 'Rel Attribute',
-                type: 'select',
-                hasMany: true,
-                options: ['noopener', 'noreferrer', 'nofollow'],
-                admin: {
-                  description:
-                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
-                },
-              },
-            ],
-          },
-          upload: {
-            collections: {
-              uploads: {
-                fields: [
-                  {
-                    name: 'caption',
-                    type: 'richText',
-                  },
-                ],
-              },
-            },
-          },
-        },
-      }),
-    },
-    {
       name: 'blocks',
       type: 'blocks',
       blocks: [
@@ -303,16 +164,6 @@ const RichTextFields: CollectionConfig = {
             {
               name: 'text',
               type: 'text',
-            },
-          ],
-        },
-        {
-          slug: 'richTextBlockSlate',
-          fields: [
-            {
-              editor: slateEditor({}),
-              name: 'text',
-              type: 'richText',
             },
           ],
         },

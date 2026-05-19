@@ -21,7 +21,7 @@ services:
     restart: always
     image: postgres:latest
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
     ports:
       - '5432:5432'
     environment:

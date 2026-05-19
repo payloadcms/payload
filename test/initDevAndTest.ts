@@ -3,10 +3,10 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { generateImportMap, type SanitizedConfig } from 'payload'
 
-import type { allDatabaseAdapters } from './generateDatabaseAdapter.js'
+import type { DatabaseAdapterType } from './dbAdapters.js'
 
 import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
-import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
+import { generateDatabaseAdapter } from './dbAdapters.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -31,8 +31,8 @@ export async function initDevAndTest(
   }
 
   if (writeDBAdapter === 'true') {
-    const dbAdapter: keyof typeof allDatabaseAdapters =
-      (process.env.PAYLOAD_DATABASE as keyof typeof allDatabaseAdapters) || 'mongodb'
+    const dbAdapter: DatabaseAdapterType =
+      (process.env.PAYLOAD_DATABASE as DatabaseAdapterType) || 'mongodb'
     generateDatabaseAdapter(dbAdapter)
   }
 

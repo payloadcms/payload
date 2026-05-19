@@ -4,7 +4,7 @@ import type { EditViewProps } from 'payload'
 import { useDraggable } from '@dnd-kit/core'
 import React from 'react'
 
-import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
+import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { ToolbarControls } from './Controls/index.js'
 import './index.scss'
@@ -40,7 +40,7 @@ const DraggableToolbar: React.FC<EditViewProps> = (props) => {
         ref={setNodeRef}
         type="button"
       >
-        <DragHandleIcon />
+        <AlignJustifiedIcon />
       </button>
       <ToolbarControls {...props} />
     </div>

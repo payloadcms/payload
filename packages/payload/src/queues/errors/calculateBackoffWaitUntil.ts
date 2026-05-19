@@ -9,30 +9,22 @@ export function calculateBackoffWaitUntil({
   retriesConfig: number | RetryConfig
   totalTried: number
 }): Date {
-  let waitUntil: Date = getCurrentDate()
+  const now = getCurrentDate()
+  let waitUntil: Date = now
+
   if (typeof retriesConfig === 'object') {
     if (retriesConfig.backoff) {
       if (retriesConfig.backoff.type === 'fixed') {
         waitUntil = retriesConfig.backoff.delay
-          ? new Date(getCurrentDate().getTime() + retriesConfig.backoff.delay)
-          : getCurrentDate()
+          ? new Date(now.getTime() + retriesConfig.backoff.delay)
+          : now
       } else if (retriesConfig.backoff.type === 'exponential') {
         // 2 ^ (attempts - 1) * delay (current attempt is not included in totalTried, thus no need for -1)
         const delay = retriesConfig.backoff.delay ? retriesConfig.backoff.delay : 0
-        waitUntil = new Date(getCurrentDate().getTime() + Math.pow(2, totalTried) * delay)
+        waitUntil = new Date(now.getTime() + Math.pow(2, totalTried) * delay)
       }
     }
   }
 
-  /*
-  const differenceInMSBetweenNowAndWaitUntil = waitUntil.getTime() - getCurrentDate().getTime()
-
-  const differenceInSBetweenNowAndWaitUntil = differenceInMSBetweenNowAndWaitUntil / 1000
-  console.log('Calculated backoff', {
-    differenceInMSBetweenNowAndWaitUntil,
-    differenceInSBetweenNowAndWaitUntil,
-    retriesConfig,
-    totalTried,
-  })*/
   return waitUntil
 }

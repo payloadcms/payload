@@ -170,7 +170,7 @@ export function ListEmptyTrashButton({
         onClick={() => {
           openModal(confirmEmptyTrashSlug)
         }}
-        size="small"
+        size="medium"
       >
         {t('general:emptyTrash')}
       </Button>

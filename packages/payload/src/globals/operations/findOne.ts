@@ -18,6 +18,7 @@ import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
@@ -28,6 +29,7 @@ export type GlobalFindOneArgs = {
    */
   data?: Record<string, unknown>
   depth?: number
+  disableErrors?: boolean
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   includeLockStatus?: boolean
@@ -45,6 +47,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   const {
     slug,
     depth,
+    disableErrors,
     draft: replaceWithVersion = false,
     flattenLocales,
     globalConfig,
@@ -86,17 +89,24 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     let accessResult!: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, globalConfig.access.read)
+      accessResult = await executeAccess({ disableErrors, req }, globalConfig.access.read)
     }
 
     if (accessResult === false) {
-      throw new NotFound(req.t)
+      if (!disableErrors) {
+        throw new NotFound(req.t)
+      }
+      return null!
     }
 
     const select = sanitizeSelect({
       fields: globalConfig.flattenedFields,
-      forceSelect: globalConfig.forceSelect,
-      select: incomingSelect,
+      select: resolveSelect({
+        config: globalConfig.select,
+        operation: 'read',
+        req,
+        select: incomingSelect,
+      }),
     })
 
     // /////////////////////////////////////
@@ -125,7 +135,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
 
     if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
-      return {} as any
+      if (!disableErrors) {
+        return {} as any
+      }
+      return null!
     }
 
     let doc = (args.data as any) ?? (hasDoc ? docFromDB : null) ?? {}

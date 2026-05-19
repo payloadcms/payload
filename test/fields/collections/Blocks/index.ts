@@ -1,6 +1,6 @@
 import type { BlocksField, CollectionConfig } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { blockFieldsSlug, textFieldsSlug } from '../../slugs.js'
 import { getBlocksFieldSeedData } from './shared.js'
@@ -27,7 +27,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
         {
           name: 'richText',
           type: 'richText',
-          editor: slateEditor({}),
+          editor: lexicalEditor({}),
         },
       ],
     },

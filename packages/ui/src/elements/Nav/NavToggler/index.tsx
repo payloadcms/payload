@@ -6,7 +6,7 @@ import React from 'react'
 import { usePreferences } from '../../../providers/Preferences/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useNav } from '../context.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'nav-toggler'
 

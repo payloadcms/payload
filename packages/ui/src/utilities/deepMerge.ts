@@ -5,6 +5,8 @@
  *
  * obj2 takes precedence over obj1 - thus if obj2 has a key that obj1 also has, obj2's value will be used.
  *
+ * NOTE: This must remain a 1:1 copy of `deepMergeSimple` in `@payloadcms/translations/utilities`.
+ *
  * @param obj1 base object
  * @param obj2 object to merge "into" obj1
  */
@@ -12,6 +14,9 @@ export function deepMergeSimple<T = object>(obj1: object, obj2: object): T {
   const output = { ...obj1 }
 
   for (const key in obj2) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      continue
+    }
     if (Object.prototype.hasOwnProperty.call(obj2, key)) {
       if (typeof obj2[key] === 'object' && !Array.isArray(obj2[key]) && obj1[key]) {
         output[key] = deepMergeSimple(obj1[key], obj2[key])

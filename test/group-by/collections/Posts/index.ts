@@ -28,7 +28,7 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
       virtual: 'category.title',
       admin: {
-        disableGroupBy: true,
+        disabled: { groupBy: true },
       },
     },
     {

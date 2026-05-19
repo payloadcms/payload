@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import './index.scss'
+import './index.css'
 import { PopupTrigger } from './PopupTrigger/index.js'
 
 const baseClass = 'popup'
@@ -38,8 +38,8 @@ export type PopupProps = {
    * The class name to apply to the button that triggers the popup.
    */
   buttonClassName?: string
-  buttonSize?: 'large' | 'medium' | 'small' | 'xsmall'
-  buttonType?: 'custom' | 'default' | 'none'
+  buttonSize?: 'large' | 'medium'
+  buttonType?: 'custom' | 'default'
   caret?: boolean
   children?: React.ReactNode
   /**
@@ -68,6 +68,17 @@ export type PopupProps = {
    */
   portalClassName?: string
   render?: (args: { close: () => void }) => React.ReactNode
+  /**
+   * Render prop for custom trigger button. Receives onClick/onKeyDown/aria props.
+   * When provided, `button` and `buttonType` are ignored.
+   */
+  renderButton?: (props: {
+    active: boolean
+    'aria-expanded': boolean
+    'aria-haspopup': true
+    onClick: React.MouseEventHandler
+    onKeyDown: React.KeyboardEventHandler
+  }) => React.ReactNode
   showOnHover?: boolean
   /**
    * By default, the scrollbar is hidden. If you want to show it, set this to true.
@@ -114,6 +125,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     onToggleOpen,
     portalClassName,
     render,
+    renderButton,
     showOnHover = false,
     showScrollbar = false,
     size = 'medium',
@@ -348,7 +360,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
     // /////////////////////////////////////
     // Initial Position
-    // Calculate and apply popup position immediately on open.
+    // Calculate and apply popup position.
+    // getBoundingClientRect() forces synchronous layout.
     // /////////////////////////////////////
 
     updatePosition()
@@ -403,6 +416,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
       className={buttonClassName}
       disabled={disabled}
       noBackground={noBackground}
+      renderButton={renderButton}
       setActive={setActive}
       size={buttonSize}
     />
@@ -448,6 +462,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
                     `${baseClass}__hidden-content`
               }
               data-popup-id={id || undefined}
+              data-theme="dark"
               ref={popupRef}
             >
               <div

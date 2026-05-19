@@ -3,7 +3,7 @@ import type { RichTextFieldDiffServerComponent } from 'payload'
 
 import { FieldDiffContainer, getHTMLDiffComponents } from '@payloadcms/ui/rsc'
 
-import './index.scss'
+import './index.css'
 import '../bundled.css'
 
 import { formatAdminURL } from 'payload/shared'

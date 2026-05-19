@@ -13,7 +13,7 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
-import { Pill } from '../../elements/Pill/index.js'
+import { Button } from '../../elements/Button/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -25,11 +25,12 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { NoListResults } from '../NoListResults/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { AddNewButton } from './AddNewButton.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'relationship-table'
 
@@ -137,7 +138,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       }
 
       // map columns from string[] to CollectionPreferences['columns']
-      const defaultColumns = field.admin.defaultColumns
+      const defaultColumns = field.admin?.defaultColumns
         ? field.admin.defaultColumns.map((accessor) => ({
             accessor,
             active: true,
@@ -145,7 +146,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         : undefined
 
       const renderRowTypes =
-        typeof field.admin.disableRowTypes === 'boolean'
+        typeof field.admin?.disableRowTypes === 'boolean'
           ? !field.admin.disableRowTypes
           : Array.isArray(relationTo)
 
@@ -176,8 +177,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [
       field.defaultLimit,
       field.defaultSort,
-      field.admin.defaultColumns,
-      field.admin.disableRowTypes,
+      field.admin?.defaultColumns,
+      field.admin?.disableRowTypes,
       field.collection,
       field.name,
       field.orderable,
@@ -301,29 +302,30 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           <AddNewButton
             allowCreate={allowCreate !== false}
             baseClass={baseClass}
-            buttonStyle="none"
-            className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ' doc-drawer__toggler'}`}
+            buttonStyle="ghost"
+            className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ''}`}
             collections={config.collections}
             i18n={i18n}
-            icon={isPolymorphic ? 'plus' : undefined}
             label={i18n.t('fields:addNew')}
             onClick={isPolymorphic ? setSelectedCollection : openDrawer}
             permissions={permissions}
             relationTo={relationTo}
           />
-          <Pill
-            aria-controls={`${baseClass}-columns`}
-            aria-expanded={openColumnSelector}
+          <Button
+            buttonStyle="secondary"
             className={`${baseClass}__toggle-columns ${
               openColumnSelector ? `${baseClass}__buttons-active` : ''
             }`}
-            icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} />}
+            extraButtonProps={{
+              'aria-controls': `${baseClass}-columns`,
+              'aria-expanded': openColumnSelector,
+            }}
+            icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} size={16} />}
             onClick={() => setOpenColumnSelector(!openColumnSelector)}
-            pillStyle="light"
-            size="small"
+            size="medium"
           >
             {t('general:columns')}
-          </Pill>
+          </Button>
         </div>
       </div>
       {BeforeInput}
@@ -332,29 +334,35 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       ) : (
         <Fragment>
           {data?.docs && data.docs.length === 0 && (
-            <div className={`${baseClass}__no-results`}>
-              <p>
-                {i18n.t('general:noResults', {
-                  label: isPolymorphic
-                    ? i18n.t('general:documents')
-                    : getTranslation(collectionConfig?.labels?.plural, i18n),
-                })}
-              </p>
-              <AddNewButton
-                allowCreate={canCreate}
-                baseClass={baseClass}
-                collections={config.collections}
-                i18n={i18n}
-                label={i18n.t('general:createNewLabel', {
-                  label: isPolymorphic
-                    ? i18n.t('general:document')
-                    : getTranslation(collectionConfig?.labels?.singular, i18n),
-                })}
-                onClick={isPolymorphic ? setSelectedCollection : openDrawer}
-                permissions={permissions}
-                relationTo={relationTo}
-              />
-            </div>
+            <NoListResults
+              Actions={
+                canCreate
+                  ? [
+                      <AddNewButton
+                        allowCreate={canCreate}
+                        baseClass={baseClass}
+                        collections={config.collections}
+                        i18n={i18n}
+                        key="create"
+                        label={i18n.t('general:createNewLabel', {
+                          label: isPolymorphic
+                            ? i18n.t('general:document')
+                            : getTranslation(collectionConfig?.labels?.singular, i18n),
+                        })}
+                        onClick={isPolymorphic ? setSelectedCollection : openDrawer}
+                        permissions={permissions}
+                        relationTo={relationTo}
+                      />,
+                    ]
+                  : []
+              }
+              description={i18n.t('general:noResults', {
+                label: isPolymorphic
+                  ? i18n.t('general:documents')
+                  : getTranslation(collectionConfig?.labels?.plural, i18n),
+              })}
+              title={i18n.t('general:noResultsFound')}
+            />
           )}
           {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>

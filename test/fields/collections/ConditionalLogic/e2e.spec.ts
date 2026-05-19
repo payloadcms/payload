@@ -2,12 +2,14 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { addArrayRow } from '__helpers/e2e/fields/array/index.js'
+import { addBlock } from '__helpers/e2e/fields/blocks/index.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
+import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
@@ -15,9 +17,8 @@ import {
   // throttleTest,
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { conditionalLogicSlug } from '../../slugs.js'
@@ -286,5 +287,37 @@ describe('Conditional Logic', () => {
     await saveDocAndAssert(page)
 
     await expect(fieldWithOperationCondition).toBeHidden()
+  })
+
+  test('should toggle conditional field when radio changes inside a block', async () => {
+    await page.goto(url.create)
+
+    await addBlock({
+      page,
+      fieldName: 'blocksWithRadioCondition',
+      blockToSelect: 'Block With Radio Condition',
+    })
+
+    // Conditional field should be hidden (defaultValue: 'hide')
+    const conditionalField = page.locator(
+      '#field-blocksWithRadioCondition__0__conditionalTextField',
+    )
+    await expect(conditionalField).toBeHidden()
+
+    // Click "Show" radio and wait for form state response
+    const showRadio = page.locator('label:has(input[id*="radioTrigger-show"])')
+    await showRadio.click()
+
+    await expect(async () => {
+      await expect(conditionalField).toBeVisible()
+    }).toPass()
+
+    // Click "Hide" radio
+    const hideRadio = page.locator('label:has(input[id*="radioTrigger-hide"])')
+    await hideRadio.click()
+
+    await expect(async () => {
+      await expect(conditionalField).toBeHidden()
+    }).toPass()
   })
 })

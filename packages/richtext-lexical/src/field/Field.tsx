@@ -1,15 +1,19 @@
 'use client'
 import type { EditorState, SerializedEditorState } from 'lexical'
+import type { FallbackProps } from 'react-error-boundary'
 
 import {
   BulkUploadProvider,
   FieldDescription,
   FieldError,
   FieldLabel,
+  isFieldRTL,
   RenderCustomComponent,
+  useConfig,
   useEditDepth,
   useEffectEvent,
   useField,
+  useLocale,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { dequal } from 'dequal/lite'
@@ -19,14 +23,16 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 
-import '../lexical/theme/EditorTheme.scss'
+import '../lexical/theme/EditorTheme.css'
 import './bundled.css'
-import './index.scss'
+import './index.css'
 
 import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'
+import { useRichTextView } from './RichTextViewProvider.js'
+import { ViewSelector } from './ViewSelector.js'
 
 const baseClass = 'rich-text-lexical'
 
@@ -46,12 +52,25 @@ const RichTextComponent: React.FC<
     },
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
+    schemaPath,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
+  const locale = useLocale()
+  const {
+    config: { localization: localizationConfig },
+  } = useConfig()
+
+  const rtl = isFieldRTL({
+    fieldLocalized: localized,
+    locale,
+    localizationConfig: localizationConfig || undefined,
+  })
+
   const editDepth = useEditDepth()
+  const { isControlledByParent } = useRichTextView()
 
   const memoizedValidate = useCallback<Validate>(
     (value, validationOptions) => {
@@ -105,8 +124,8 @@ const RichTextComponent: React.FC<
   }, [isSmallWidthViewport])
 
   const classes = [
-    baseClass,
     'field-type',
+    baseClass,
     className,
     showError && 'error',
     disabled && `${baseClass}--read-only`,
@@ -173,18 +192,31 @@ const RichTextComponent: React.FC<
   }, [initialValue])
 
   return (
-    <div className={classes} key={pathWithEditDepth} style={styles}>
-      <RenderCustomComponent
-        CustomComponent={Error}
-        Fallback={<FieldError path={path} showError={showError} />}
-      />
-      {Label || <FieldLabel label={label} localized={localized} path={path} required={required} />}
+    <div
+      className={classes}
+      data-field-path={path}
+      data-field-schemapath={schemaPath}
+      data-lexical-view={editorConfig?.view}
+      key={pathWithEditDepth}
+      style={styles}
+    >
+      <div className={`${baseClass}__label-row`}>
+        {Label || (
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        )}
+        {!isControlledByParent && <ViewSelector />}
+      </div>
       <div className={`${baseClass}__wrap`}>
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
           {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
-          is rendered in the correct depth (not displayed *behind* the current drawer)*/}
-          <BulkUploadProvider drawerSlugPrefix={path}>
+          is rendered in the correct depth (not displayed *behind* the current drawer).
+          The `lexical-` prefix prevents drawer-slug collisions with non-lexical `BulkUploadProvider`s up the tree. */}
+          <BulkUploadProvider drawerSlugPrefix={`lexical-${path}`}>
             <LexicalProvider
               composerKey={pathWithEditDepth}
               editorConfig={editorConfig}
@@ -193,6 +225,7 @@ const RichTextComponent: React.FC<
               key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
               onChange={handleChange}
               readOnly={disabled}
+              rtl={rtl}
               value={value}
             />
           </BulkUploadProvider>
@@ -207,13 +240,11 @@ const RichTextComponent: React.FC<
   )
 }
 
-function fallbackRender({ error }: { error: Error }) {
-  // Call resetErrorBoundary() to reset the error boundary and retry the render.
-
+function fallbackRender({ error }: FallbackProps) {
   return (
     <div className="errorBoundary" role="alert">
       <p>Something went wrong:</p>
-      <pre style={{ color: 'red' }}>{error.message}</pre>
+      <pre style={{ color: 'red' }}>{error instanceof Error ? error.message : String(error)}</pre>
     </div>
   )
 }

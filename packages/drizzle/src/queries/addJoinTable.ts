@@ -9,11 +9,13 @@ import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js
 export const addJoinTable = ({
   type,
   condition,
+  isOneToMany,
   joins,
   queryPath,
   table,
 }: {
   condition: SQL
+  isOneToMany?: boolean
   joins: BuildQueryJoinAliases
   queryPath?: string
   table: GenericTable | PgTableWithColumns<any>
@@ -22,6 +24,6 @@ export const addJoinTable = ({
   const name = getNameFromDrizzleTable(table)
 
   if (!joins.some((eachJoin) => getNameFromDrizzleTable(eachJoin.table) === name)) {
-    joins.push({ type, condition, queryPath, table })
+    joins.push({ type, condition, isOneToMany, queryPath, table })
   }
 }

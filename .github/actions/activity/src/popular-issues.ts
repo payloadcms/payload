@@ -2,7 +2,6 @@ import { info, setFailed } from '@actions/core'
 import { getOctokit } from '@actions/github'
 import { WebClient } from '@slack/web-api'
 
-import { CHANNELS } from './constants'
 import { daysAgo } from './lib/utils'
 import { SlimIssue } from './types'
 
@@ -51,9 +50,12 @@ export async function run() {
   try {
     if (!process.env.GITHUB_TOKEN) throw new TypeError('GITHUB_TOKEN not set')
     if (!process.env.SLACK_TOKEN) throw new TypeError('SLACK_TOKEN not set')
+    if (!process.env.SLACK_CHANNEL) throw new TypeError('SLACK_CHANNEL not set')
 
-    const octoClient = getOctokit(process.env.GITHUB_TOKEN)
-    const slackClient = new WebClient(process.env.SLACK_TOKEN)
+    const { GITHUB_TOKEN, SLACK_TOKEN, SLACK_CHANNEL } = process.env
+
+    const octoClient = getOctokit(GITHUB_TOKEN)
+    const slackClient = new WebClient(SLACK_TOKEN)
 
     const { data } = await octoClient.rest.search.issuesAndPullRequests({
       order: 'desc',
@@ -79,7 +81,7 @@ export async function run() {
 
     await slackClient.chat.postMessage({
       text: messageText,
-      channel: process.env.DEBUG === 'true' ? CHANNELS.DEBUG : CHANNELS.DEV,
+      channel: SLACK_CHANNEL,
       icon_emoji: ':github:',
       username: 'GitHub Notifier',
     })

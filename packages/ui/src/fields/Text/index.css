@@ -1,0 +1,22 @@
+@layer payload-default {
+  .field-type.text {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+
+    .field-type__wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
+    }
+
+    &.error input:not(:focus) {
+      border-color: var(--color-border-danger-strong);
+
+      &:hover {
+        border-color: var(--color-border-danger-strong);
+      }
+    }
+  }
+}

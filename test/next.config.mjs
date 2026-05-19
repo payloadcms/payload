@@ -14,6 +14,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 export default withBundleAnalyzer(
   withPayload(
     {
+      cacheComponents: process.env.PAYLOAD_CACHE_COMPONENTS === 'true',
       devIndicators: {
         position: 'bottom-right',
       },

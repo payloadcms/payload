@@ -8,7 +8,9 @@
         "@playwright/mcp@latest",
         "--caps=vision,verify,tracing,devtools",
         "--isolated",
-        "--headless"
+        "--headless",
+        "--browser",
+        "chromium"
       ]
     }
   }

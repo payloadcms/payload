@@ -61,7 +61,7 @@ export const PerPage: React.FC<PerPageProps> = ({
               >
                 {limitNumber === limitToUse && (
                   <div className={`${baseClass}__chevron`}>
-                    <ChevronIcon direction="right" size="small" />
+                    <ChevronIcon direction="right" size={16} />
                   </div>
                 )}
                 &nbsp;

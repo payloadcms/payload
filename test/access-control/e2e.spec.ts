@@ -11,6 +11,7 @@ import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-ty
 
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { login } from '../__helpers/e2e/auth/login.js'
+import { getPillSelectorItem } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import {
@@ -243,7 +244,7 @@ describe('Access Control', () => {
       await page.goto(richTextUrl.create)
 
       await page.locator('.blocks-field__drawer-toggler').click()
-      await page.locator('.thumbnail-card').click()
+      await page.locator('.thumbnail-card').dblclick()
       const richTextField = page.locator('.rich-text-lexical')
       const contentEditable = richTextField.locator('.ContentEditable__root').first()
       await expect(contentEditable).toBeVisible()
@@ -324,8 +325,8 @@ describe('Access Control', () => {
       const regression1URL = new AdminUrlUtil(serverURL, 'regression1')
       await page.goto(regression1URL.list)
 
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/regression1/**`)
+      const href = await page.locator('.cell-id a').first().getAttribute('href')
+      await page.goto(`${serverURL}${href}`)
 
       await ensureRegression1FieldsHaveCorrectAccess()
 
@@ -368,8 +369,9 @@ describe('Access Control', () => {
       const regression2URL = new AdminUrlUtil(serverURL, 'regression2')
       await page.goto(regression2URL.list)
 
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/regression2/**`)
+      const href = await page.locator('.cell-id a').first().getAttribute('href')
+      await page.goto(`${serverURL}${href}`)
+      await wait(500)
 
       await ensureRegression2FieldsHaveCorrectAccess()
 
@@ -717,8 +719,8 @@ describe('Access Control', () => {
       await wait(1000)
 
       // Ensure admin user cannot unlock other users
-      await adminUserRow.locator('.cell-id a').click()
-      await page.waitForURL(`**/collections/users/**`)
+      const adminUserHref = await adminUserRow.locator('.cell-id a').getAttribute('href')
+      await page.goto(`${serverURL}${adminUserHref}`)
 
       const unlockButton = page.locator('#force-unlock')
       await expect(unlockButton).toBeVisible()
@@ -731,8 +733,8 @@ describe('Access Control', () => {
       await wait(1000)
 
       // Ensure non-admin user cannot see unlock button
-      await nonAdminUserRow.locator('.cell-id a').click()
-      await page.waitForURL(`**/collections/users/**`)
+      const nonAdminUserHref = await nonAdminUserRow.locator('.cell-id a').getAttribute('href')
+      await page.goto(`${serverURL}${nonAdminUserHref}`)
       await expect(page.locator('#force-unlock')).toBeHidden()
     })
   })
@@ -778,6 +780,30 @@ describe('Access Control', () => {
       )
 
       await expect(page.locator('form.login__form')).toBeVisible()
+    })
+
+    test('non-admin users should not be able to bypass admin access by navigating directly to a collection with a custom dashboard view set', async () => {
+      await page.goto(url.logout)
+
+      await login({
+        data: {
+          email: nonAdminEmail,
+          password: 'test',
+        },
+        page,
+        serverURL,
+      })
+
+      // Navigate directly to a collection URL, bypassing the dashboard
+      await page.goto(new AdminUrlUtil(serverURL, readOnlySlug).list)
+
+      // Should be redirected to unauthorized, not the collection list
+      await page.waitForURL(/\/unauthorized/)
+      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
+        'Unauthorized, this user does not have access to the admin panel.',
+      )
+
+      await page.goto(url.logout)
     })
 
     test('public users should not have access to access admin', async () => {
@@ -906,16 +932,12 @@ describe('Access Control', () => {
 
         // Should hide restrictedTopLevel field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Restricted Top Level'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Restricted Top Level' }),
         ).toBeHidden()
 
         // Should show visibleTopLevel field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Visible Top Level'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Visible Top Level' }),
         ).toBeVisible()
       })
 
@@ -927,16 +949,12 @@ describe('Access Control', () => {
 
         // Should hide secretPhone field inside contactInfo group
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Contact Info > Secret Phone'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Contact Info > Secret Phone' }),
         ).toBeHidden()
 
         // Should show publicPhone field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Contact Info > Public Phone'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Contact Info > Public Phone' }),
         ).toBeVisible()
       })
 
@@ -948,16 +966,12 @@ describe('Access Control', () => {
 
         // Should hide restrictedInRow field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Restricted In Row'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Restricted In Row' }),
         ).toBeHidden()
 
         // Should show visibleInRow field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Visible In Row'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Visible In Row' }),
         ).toBeVisible()
       })
 
@@ -969,16 +983,12 @@ describe('Access Control', () => {
 
         // Should hide restrictedInCollapsible field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Restricted In Collapsible'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Restricted In Collapsible' }),
         ).toBeHidden()
 
         // Should show visibleInCollapsible field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Visible In Collapsible'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Visible In Collapsible' }),
         ).toBeVisible()
       })
 
@@ -990,16 +1000,15 @@ describe('Access Control', () => {
 
         // Should hide metadata.analytics.restrictedMetric field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Metadata > Analytics > Restricted Metric'),
+          getPillSelectorItem({
+            container: page,
+            label: 'Metadata > Analytics > Restricted Metric',
           }),
         ).toBeHidden()
 
         // Should show metadata.analytics.visibleMetric field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Metadata > Analytics > Visible Metric'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Metadata > Analytics > Visible Metric' }),
         ).toBeVisible()
       })
 
@@ -1011,17 +1020,11 @@ describe('Access Control', () => {
 
         // Should hide secretInPublicTab field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Secret In Public Tab'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Secret In Public Tab' }),
         ).toBeHidden()
 
         // Should show publicData field
-        await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Public Data'),
-          }),
-        ).toBeVisible()
+        await expect(getPillSelectorItem({ container: page, label: 'Public Data' })).toBeVisible()
       })
 
       test('should hide field with read: false inside named tab in column selector', async () => {
@@ -1032,16 +1035,12 @@ describe('Access Control', () => {
 
         // Should hide restrictedSetting field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Settings > Restricted Setting'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Settings > Restricted Setting' }),
         ).toBeHidden()
 
         // Should show visibleSetting field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Settings > Visible Setting'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Settings > Visible Setting' }),
         ).toBeVisible()
       })
 
@@ -1053,16 +1052,12 @@ describe('Access Control', () => {
 
         // Should hide secretPostalCode field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Address > Secret Postal Code'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Address > Secret Postal Code' }),
         ).toBeHidden()
 
         // Should show city field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Address > City'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Address > City' }),
         ).toBeVisible()
       })
 
@@ -1074,16 +1069,12 @@ describe('Access Control', () => {
 
         // Should hide restrictedAdvanced field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Advanced > Restricted Advanced'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Advanced > Restricted Advanced' }),
         ).toBeHidden()
 
         // Should show visibleAdvanced field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Advanced > Visible Advanced'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Advanced > Visible Advanced' }),
         ).toBeVisible()
       })
     })
@@ -1197,13 +1188,13 @@ describe('Access Control', () => {
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = initialField.locator('.rs__option', {
-          hasText: 'Public Tab > Public Data',
+          hasText: 'Public Data',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretInPublicTab field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Public Tab > Secret In Public Tab' }),
+          initialField.locator('.rs__option', { hasText: 'Secret In Public Tab' }),
         ).toBeHidden()
       })
 
@@ -1367,14 +1358,12 @@ describe('Access Control', () => {
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = field.locator('.rs__option', {
-          hasText: 'Public Tab > Public Data',
+          hasText: 'Public Data',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretInPublicTab field
-        await expect(
-          field.locator('.rs__option', { hasText: 'Public Tab > Secret In Public Tab' }),
-        ).toBeHidden()
+        await expect(field.locator('.rs__option', { hasText: 'Secret In Public Tab' })).toBeHidden()
       })
 
       test('should hide field with read: false inside named tab in groupBy dropdown', async () => {
@@ -1786,7 +1775,7 @@ describe('Access Control', () => {
       })
 
       await page.goto(blocksFieldAccessUrl.edit(doc.id))
-      await expect(page.locator('.doc-header__title')).toContainText('ID: ')
+      await expect(page.locator('.doc-header__title .id-label')).toBeVisible()
 
       // Editable blocks - fields should be editable
       await expect(page.locator('#field-editableBlocks__0__title')).toBeEnabled()

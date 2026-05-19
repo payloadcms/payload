@@ -11,18 +11,22 @@ keywords: documentation, getting started, guide, Content Management System, cms,
 Payload requires the following software:
 
 - Any JavaScript package manager (pnpm, npm, or yarn 2+ - pnpm is preferred, yarn 1.x is not supported)
-- Node.js version 20.9.0+
-- Next.js (one of the following version ranges):
-  - `15.2.9` - `15.2.x`
-  - `15.3.9` - `15.3.x`
-  - `15.4.11` - `15.4.x`
-  - `16.2.0-canary.10`+
+- Node.js version 24.15.0+
+- Next.js `16.2.6`+
 - Any [compatible database](/docs/database/overview) (MongoDB, Postgres or SQLite)
 
 <Banner type="warning">
   **Important:** Before proceeding any further, please ensure that you have the
   above requirements met. Not all Next.js 15/16 releases are compatible — make
   sure you're using one of the supported version ranges listed above.
+</Banner>
+
+<Banner type="info">
+  **Cache Components:** While Next.js `cacheComponents` can be enabled alongside
+  Payload without causing errors in the admin panel, full compatibility is not
+  guaranteed. See this [GitHub pull
+  request](https://github.com/payloadcms/payload/pull/16020) for the latest
+  status.
 </Banner>
 
 ## Quickstart with create-payload-app

@@ -95,7 +95,10 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   }
 
   if (this.collation) {
-    const defaultLocale = 'en'
+    const localizationConfig = this.payload.config.localization
+    const defaultLocale =
+      (typeof localizationConfig === 'object' && localizationConfig?.defaultLocale) || 'en'
+
     paginationOptions.collation = {
       locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
       ...this.collation,
@@ -114,7 +117,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(versionQuery, {
+          collation: paginationOptions.collation,
           hint: { _id: 1 },
+          session,
         }),
       )
     }
@@ -140,7 +145,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     versions: true,
   })
 
-  // build join aggregation
   if (aggregate || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,

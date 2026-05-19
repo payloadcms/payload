@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
@@ -169,7 +169,7 @@ describe('Locked Documents', () => {
     test('should show lock icon on document row if locked', async () => {
       await page.goto(postsUrl.list)
 
-      await expect(page.locator('.table .row-2 .locked svg')).toBeVisible()
+      await expect(page.locator('.table .row-2 .locked svg.icon--lock')).toBeVisible()
     })
 
     test('should not show lock icon on document row if unlocked', async () => {
@@ -390,8 +390,8 @@ describe('Locked Documents', () => {
     test('should delete all expired locked documents upon initial editing of unlocked document', async () => {
       await page.goto(testsUrl.list)
 
-      await expect(page.locator('.table .row-2 .locked svg')).toBeVisible()
-      await expect(page.locator('.table .row-3 .locked svg')).toBeVisible()
+      await expect(page.locator('.table .row-2 .locked svg.icon--lock')).toBeVisible()
+      await expect(page.locator('.table .row-3 .locked svg.icon--lock')).toBeVisible()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(5000)
@@ -1320,7 +1320,9 @@ describe('Locked Documents', () => {
     test('should show lock on document card in dashboard view if locked', async () => {
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.collections__card-list #card-menu .locked svg')).toBeVisible()
+      await expect(
+        page.locator('.collections__card-list #card-menu .locked svg.icon--lock'),
+      ).toBeVisible()
     })
 
     test('should not show lock on document card in dashboard view if unlocked', async () => {
@@ -1358,7 +1360,9 @@ describe('Locked Documents', () => {
     test('should not show lock on document card in dashboard view if lock expired', async () => {
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.collections__card-list #card-admin .locked svg')).toBeVisible()
+      await expect(
+        page.locator('.collections__card-list #card-admin .locked svg.icon--lock'),
+      ).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
       // eslint-disable-next-line payload/no-wait-function
@@ -1389,7 +1393,9 @@ describe('Locked Documents', () => {
 
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.collections__card-list #card-admin .locked svg')).toBeVisible()
+      await expect(
+        page.locator('.collections__card-list #card-admin .locked svg.icon--lock'),
+      ).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
       // eslint-disable-next-line payload/no-wait-function
@@ -1757,38 +1763,83 @@ describe('Locked Documents', () => {
         const client = await page.context().newCDPSession(page)
         await client.send('Emulation.setCPUThrottlingRate', { rate: 50 })
 
+        try {
+          const fieldA = page.locator('#field-fieldA')
+          const modalContainer = page.locator('.payload__modal-container')
+
+          // Make many rapid edits to create multiple queued autosaves
+          for (let i = 1; i <= 10; i++) {
+            await fieldA.fill(`Edit ${i}`)
+            // eslint-disable-next-line payload/no-wait-function
+            await wait(30)
+          }
+
+          // Wait for all autosaves to process
+          // eslint-disable-next-line payload/no-wait-function
+          await wait(2000)
+
+          // Make one more edit to trigger stale data check
+          await fieldA.fill('Final Edit')
+          // eslint-disable-next-line payload/no-wait-function
+          await wait(500)
+
+          // Modal should NOT appear because it's the same user
+          await expect(modalContainer).toBeHidden()
+        } finally {
+          await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+          await client.detach()
+
+          // Clean up created autosave document
+          for (const id of createdAutosaveIDs) {
+            await payload.delete({ collection: 'autosave', id }).catch(() => {
+              // Ignore deletion errors (document might already be deleted)
+            })
+          }
+        }
+      })
+
+      test('should not show stale data modal when user types and immediately saves (race condition)', async () => {
+        await page.goto(simpleUrl.edit(simpleDoc.id))
+
         const fieldA = page.locator('#field-fieldA')
+        const editUrl = simpleUrl.edit(simpleDoc.id)
         const modalContainer = page.locator('.payload__modal-container')
 
-        // Make many rapid edits to create multiple queued autosaves
-        for (let i = 1; i <= 10; i++) {
-          await fieldA.fill(`Edit ${i}`)
-          // eslint-disable-next-line payload/no-wait-function
-          await wait(30)
-        }
+        // Delay only the first POST (form-state from typing) by 3s to simulate the race:
+        // type → form-state starts (delayed) → save → DB updatedAt advances → delayed
+        // form-state reaches server and sees newer updatedAt → would incorrectly show modal.
+        // The second POST (post-save form-state from onSave) is not delayed so the toast works.
+        let firstPostDelayed = false
+        await page.route(editUrl, async (route) => {
+          if (route.request().method() === 'POST' && !firstPostDelayed) {
+            firstPostDelayed = true
+            // eslint-disable-next-line payload/no-wait-function
+            await wait(3000)
+          }
+          try {
+            await route.continue()
+          } catch (_e) {
+            // route may have already been handled (e.g. after page.unroute)
+          }
+        })
 
-        // Wait for all autosaves to process
+        // Wait for the form-state POST to be in-flight before saving — if the save
+        // completes first, modified is reset and the POST never fires at all.
+        const formStateInFlight = page.waitForRequest(
+          (req) => req.method() === 'POST' && req.url() === editUrl,
+          { timeout: 2000 },
+        )
+        await fieldA.fill('Race condition test')
+        await formStateInFlight
+
+        await page.click('#action-save')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+        await page.unroute(editUrl)
         // eslint-disable-next-line payload/no-wait-function
-        await wait(2000)
+        await wait(4000)
 
-        // Make one more edit to trigger stale data check
-        await fieldA.fill('Final Edit')
-        // eslint-disable-next-line payload/no-wait-function
-        await wait(500)
-
-        // Modal should NOT appear because it's the same user
         await expect(modalContainer).toBeHidden()
-
-        // Clean up
-        await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
-        await client.detach()
-
-        // Clean up created autosave document
-        for (const id of createdAutosaveIDs) {
-          await payload.delete({ collection: 'autosave', id }).catch(() => {
-            // Ignore deletion errors (document might already be deleted)
-          })
-        }
       })
     })
 
@@ -2136,31 +2187,32 @@ describe('Locked Documents', () => {
         const client = await page.context().newCDPSession(page)
         await client.send('Emulation.setCPUThrottlingRate', { rate: 50 })
 
-        const textField = page.locator('#field-text')
-        const modalContainer = page.locator('.payload__modal-container')
+        try {
+          const textField = page.locator('#field-text')
+          const modalContainer = page.locator('.payload__modal-container')
 
-        // Make many rapid edits to create multiple queued autosaves
-        for (let i = 1; i <= 10; i++) {
-          await textField.fill(`Edit ${i}`)
+          // Make many rapid edits to create multiple queued autosaves
+          for (let i = 1; i <= 10; i++) {
+            await textField.fill(`Edit ${i}`)
+            // eslint-disable-next-line payload/no-wait-function
+            await wait(30)
+          }
+
+          // Wait for all autosaves to process
           // eslint-disable-next-line payload/no-wait-function
-          await wait(30)
+          await wait(2000)
+
+          // Make one more edit to trigger stale data check
+          await textField.fill('Final Edit')
+          // eslint-disable-next-line payload/no-wait-function
+          await wait(500)
+
+          // Modal should NOT appear because stale check is disabled for autosave-enabled globals
+          await expect(modalContainer).toBeHidden()
+        } finally {
+          await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+          await client.detach()
         }
-
-        // Wait for all autosaves to process
-        // eslint-disable-next-line payload/no-wait-function
-        await wait(2000)
-
-        // Make one more edit to trigger stale data check
-        await textField.fill('Final Edit')
-        // eslint-disable-next-line payload/no-wait-function
-        await wait(500)
-
-        // Modal should NOT appear because stale check is disabled for autosave-enabled globals
-        await expect(modalContainer).toBeHidden()
-
-        // Clean up
-        await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
-        await client.detach()
       })
     })
   })

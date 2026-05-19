@@ -257,7 +257,9 @@ export const updateDocument = async <
       // only skip validation for drafts when draft validation is false
       (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
       // Skip validation for trash operations since they're just metadata updates
-      (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)),
+      (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
+      // Skip validation for unpublish operations — they only change _status, not document data
+      unpublishAllLocales,
   }
 
   // /////////////////////////////////////
@@ -357,10 +359,12 @@ export const updateDocument = async <
   // Update
   // /////////////////////////////////////
 
+  let resultWithLocales: JsonObject = result
+
   if (!isSavingDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
-    result = await req.payload.db.updateOne({
+    resultWithLocales = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
       data: dataToUpdate,
@@ -374,17 +378,18 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   if (collectionConfig.versions) {
-    result = await saveVersion({
+    resultWithLocales = await saveVersion({
       id,
       autosave,
       collection: collectionConfig,
-      docWithLocales: result,
+      docWithLocales: resultWithLocales,
       draft: isSavingDraft,
       operation: 'update',
       payload,
       publishSpecificLocale,
       req,
       snapshot: snapshotToSave,
+      unpublish: unpublishAllLocales,
     })
   }
 
@@ -396,7 +401,7 @@ export const updateDocument = async <
     collection: collectionConfig,
     context: req.context,
     depth,
-    doc: result,
+    doc: resultWithLocales,
     draft: draftArg,
     fallbackLocale,
     global: null,

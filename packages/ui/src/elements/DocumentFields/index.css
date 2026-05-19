@@ -1,0 +1,226 @@
+@layer payload-default {
+  .document-fields {
+    width: 100%;
+    display: flex;
+    --doc-sidebar-width: 325px;
+    --sidebar-gutter-h-right: var(--gutter-h);
+    --sidebar-gutter-h-left: var(--spacer-6);
+    --main-gutter-h-left: var(--gutter-h);
+    --main-gutter-h-right: var(--spacer-6);
+  }
+
+  [dir='rtl'] .document-fields:not(.document-fields--force-sidebar-wrap) {
+    --sidebar-gutter-h-left: var(--gutter-h);
+    --sidebar-gutter-h-right: var(--spacer-6);
+    --main-gutter-h-left: var(--spacer-6);
+    --main-gutter-h-right: var(--gutter-h);
+  }
+
+  .document-fields--force-sidebar-wrap,
+  .document-fields:has(
+      .document-fields__sidebar-wrap .document-fields__sidebar-fields > .render-fields:empty
+    ) {
+    --sidebar-gutter-h-left: var(--gutter-h);
+    --sidebar-gutter-h-right: var(--gutter-h);
+    --main-gutter-h-left: var(--gutter-h);
+    --main-gutter-h-right: var(--gutter-h);
+  }
+
+  .document-fields--has-sidebar {
+    --main-width: 66.66%;
+    --main-border: 1px solid var(--color-border);
+    --main-field-margin: calc(var(--spacer-6) * -1);
+  }
+
+  .document-fields--has-sidebar:has(
+      .document-fields__sidebar-wrap .document-fields__sidebar-fields > .render-fields:empty
+    ) {
+    --main-width: 100%;
+    --main-border: none;
+    --main-field-margin: initial;
+  }
+
+  .document-fields--has-sidebar .document-fields__main {
+    width: var(--main-width);
+  }
+
+  .document-fields--has-sidebar .document-fields__edit {
+    padding-left: var(--main-gutter-h-left);
+    padding-right: var(--main-gutter-h-right);
+  }
+
+  [dir='ltr'] .document-fields--has-sidebar .document-fields__edit {
+    top: 0;
+    right: 0;
+    border-right: var(--main-border);
+  }
+
+  [dir='rtl'] .document-fields--has-sidebar .document-fields__edit {
+    top: 0;
+    left: 0;
+    border-left: var(--main-border);
+  }
+
+  .document-fields--has-sidebar .document-fields__fields > .tabs-field,
+  .document-fields--has-sidebar .document-fields__fields > .group-field {
+    margin-right: var(--main-field-margin);
+  }
+
+  .document-fields__main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    flex-grow: 1;
+  }
+
+  .document-fields__edit {
+    padding-top: var(--spacer-5);
+    padding-bottom: var(--spacing-view-bottom);
+    flex-grow: 1;
+  }
+
+  .document-fields__sidebar-wrap {
+    position: var(--sidebar-wrap-position, sticky);
+    top: var(--sidebar-wrap-top, var(--doc-controls-height));
+    width: var(--sidebar-wrap-width, 33.33%);
+    height: var(--sidebar-wrap-height, calc(100vh - var(--doc-controls-height)));
+    min-width: var(--sidebar-wrap-min-width, var(--doc-sidebar-width));
+    flex-shrink: var(--sidebar-wrap-flex-shrink, 0);
+  }
+
+  .document-fields__sidebar-wrap:has(.document-fields__sidebar-fields > .render-fields:empty) {
+    --sidebar-wrap-width: 0;
+    --sidebar-wrap-min-width: 0;
+    --sidebar-wrap-position: initial;
+    --sidebar-wrap-top: initial;
+    --sidebar-wrap-height: initial;
+    --sidebar-wrap-flex-shrink: initial;
+  }
+
+  .document-fields__sidebar {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+
+  .document-fields__sidebar-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-3);
+    padding-top: var(--spacer-5);
+    padding-left: var(--sidebar-gutter-h-left);
+    padding-right: var(--sidebar-gutter-h-right);
+    padding-bottom: var(--spacing-view-bottom);
+  }
+
+  .document-fields__label {
+    color: var(--color-text-tertiary);
+  }
+
+  .document-fields--force-sidebar-wrap {
+    display: block;
+    isolation: isolate;
+  }
+
+  .document-fields--force-sidebar-wrap .document-fields__main {
+    width: 100%;
+    min-height: initial;
+  }
+
+  .document-fields--force-sidebar-wrap .document-fields__sidebar-wrap {
+    position: static;
+    width: 100%;
+    height: initial;
+    border-left: 0;
+  }
+
+  .document-fields--force-sidebar-wrap .document-fields__sidebar {
+    padding-bottom: calc(var(--spacer-5) * 2);
+    overflow: visible;
+  }
+
+  .document-fields--force-sidebar-wrap .document-fields__sidebar-fields {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  @media (max-width: 1024px) {
+    .document-fields {
+      display: block;
+      --main-gutter-h-left: var(--gutter-h);
+      --main-gutter-h-right: var(--gutter-h);
+      --sidebar-gutter-h-left: var(--gutter-h);
+      --sidebar-gutter-h-right: var(--gutter-h);
+    }
+
+    [dir='rtl'] .document-fields:not(.document-fields--force-sidebar-wrap) {
+      --sidebar-gutter-h-left: var(--gutter-h);
+      --sidebar-gutter-h-right: var(--gutter-h);
+      --main-gutter-h-left: var(--gutter-h);
+      --main-gutter-h-right: var(--gutter-h);
+    }
+
+    .document-fields--has-sidebar .document-fields__main {
+      width: 100%;
+    }
+
+    [dir='ltr'] .document-fields--has-sidebar .document-fields__edit {
+      border-right: 0;
+    }
+
+    [dir='rtl'] .document-fields--has-sidebar .document-fields__edit {
+      border-left: 0;
+    }
+
+    .document-fields--has-sidebar .document-fields__fields > .tabs-field,
+    .document-fields--has-sidebar .document-fields__fields > .group-field {
+      margin-right: calc(var(--gutter-h) * -1);
+    }
+
+    .document-fields__main {
+      width: 100%;
+      min-height: initial;
+    }
+
+    .document-fields__sidebar-wrap {
+      position: static;
+      width: 100%;
+      height: initial;
+      border-left: 0;
+    }
+
+    .document-fields__form {
+      display: block;
+    }
+
+    .document-fields__sidebar-fields {
+      padding-top: 0;
+      padding-bottom: 0;
+      gap: var(--spacer-2);
+    }
+
+    .document-fields__sidebar {
+      padding-bottom: calc(var(--spacer-5) * 2);
+      overflow: visible;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .document-fields__sidebar-wrap {
+      min-width: initial;
+      width: 100%;
+    }
+
+    .document-fields__edit {
+      padding-top: var(--spacer-2);
+    }
+  }
+
+  .drawer .document-fields__edit {
+    padding: var(--spacer-2-5);
+  }
+}

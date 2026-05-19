@@ -7,6 +7,7 @@ import {
   type FlattenedField,
 } from '../fields/config/types.js'
 import { APIError, type Payload, type SanitizedCollectionConfig } from '../index.js'
+import { SAFE_FIELD_PATH_REGEX } from '../types/constants.js'
 
 export function getLocalizedPaths({
   collectionSlug,
@@ -209,7 +210,7 @@ export function getLocalizedPaths({
           case 'richText': {
             const upcomingSegments = pathSegments.slice(i + 1).join('.')
             pathSegments.forEach((path) => {
-              if (!/^\w+(?:\.\w+)*$/.test(path)) {
+              if (!SAFE_FIELD_PATH_REGEX.test(path)) {
                 lastIncompletePath.invalid = true
               }
             })

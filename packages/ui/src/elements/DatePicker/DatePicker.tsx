@@ -11,11 +11,10 @@ const ReactDatePicker =
 import type { Props } from './types.js'
 
 import { CalendarIcon } from '../../icons/Calendar/index.js'
-import { XIcon } from '../../icons/X/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './library.scss'
-import './index.scss'
 import { getFormattedLocale } from './getFormattedLocale.js'
+import './index.css'
 
 const baseClass = 'date-time-picker'
 
@@ -91,13 +90,17 @@ const DatePicker: React.FC<Props> = (props) => {
     minDate,
     minTime,
     monthsShown: Math.min(2, monthsToShow),
+    nextMonthButtonLabel: <ChevronIcon direction="right" />,
     onChange,
     placeholderText,
     popperPlacement: 'bottom-start',
+    previousMonthButtonLabel: <ChevronIcon direction="left" />,
     selected: value && new Date(value),
+    shouldCloseOnSelect: false,
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
+    showTimeSelectOnly: pickerAppearance === 'timeOnly',
     timeFormat,
     timeIntervals,
     ...(overrides as Extract<
@@ -125,18 +128,6 @@ const DatePicker: React.FC<Props> = (props) => {
 
   return (
     <div className={classes} id={id}>
-      <div className={`${baseClass}__icon-wrap`}>
-        {dateTimePickerProps.selected && (
-          <button
-            className={`${baseClass}__clear-button`}
-            onClick={() => onChange(null)}
-            type="button"
-          >
-            <XIcon />
-          </button>
-        )}
-        <CalendarIcon />
-      </div>
       <div className={`${baseClass}__input-wrapper`}>
         <ReactDatePicker
           {...dateTimePickerProps}
@@ -144,6 +135,7 @@ const DatePicker: React.FC<Props> = (props) => {
           showMonthDropdown
           showYearDropdown
         />
+        <CalendarIcon />
       </div>
     </div>
   )

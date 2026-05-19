@@ -30,7 +30,15 @@ import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
-import { autosaveGlobalSlug, menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
+import {
+  autosaveGlobalSlug,
+  foldersSlug,
+  mediaSlug,
+  menuItemsSlug,
+  menuSlug,
+  tenantsSlug,
+  usersSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -40,6 +48,8 @@ test.describe('Multi Tenant', () => {
   let serverURL: string
   let globalMenuURL: AdminUrlUtil
   let autosaveGlobalURL: AdminUrlUtil
+  let foldersURL: AdminUrlUtil
+  let mediaURL: AdminUrlUtil
   let menuItemsURL: AdminUrlUtil
   let usersURL: AdminUrlUtil
   let tenantsURL: AdminUrlUtil
@@ -53,6 +63,8 @@ test.describe('Multi Tenant', () => {
       await initPayloadE2ENoConfig<Config>({ dirname })
     serverURL = serverFromInit
     globalMenuURL = new AdminUrlUtil(serverURL, menuSlug)
+    foldersURL = new AdminUrlUtil(serverURL, foldersSlug)
+    mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     menuItemsURL = new AdminUrlUtil(serverURL, menuItemsSlug)
     usersURL = new AdminUrlUtil(serverURL, usersSlug)
     tenantsURL = new AdminUrlUtil(serverURL, tenantsSlug)
@@ -137,7 +149,7 @@ test.describe('Multi Tenant', () => {
           serverURL,
         })
 
-        await page.goto(menuItemsURL.list)
+        await page.goto(`${menuItemsURL.list}?limit=100`)
         await clearTenantFilter({ page })
 
         await expect(
@@ -311,6 +323,7 @@ test.describe('Multi Tenant', () => {
       await goToListDoc({
         cellClass: '.cell-name',
         page,
+        search: 'Spicy Mac',
         textToMatch: 'Spicy Mac',
         urlUtil: menuItemsURL,
       })
@@ -339,6 +352,7 @@ test.describe('Multi Tenant', () => {
       await goToListDoc({
         cellClass: '.cell-name',
         page,
+        search: 'Spicy Mac',
         textToMatch: 'Spicy Mac',
         urlUtil: menuItemsURL,
       })
@@ -373,7 +387,8 @@ test.describe('Multi Tenant', () => {
       await goToListDoc({
         cellClass: '.cell-name',
         page,
-        textToMatch: 'Spicy Mac',
+        search: 'Veggie Wrap',
+        textToMatch: 'Veggie Wrap',
         urlUtil: menuItemsURL,
       })
 
@@ -458,6 +473,64 @@ test.describe('Multi Tenant', () => {
       await expect(page.getByText('Steel Cat Menu')).toBeHidden()
       await expect(page.getByText('Anchor Bar Menu')).toBeHidden()
       await expect(page.locator('.rs__menu')).toHaveCount(1)
+    })
+  })
+
+  test.describe('Bulk Upload', () => {
+    test('should render the tenant field inline in the Edit all drawer for bulk uploads', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      await page.goto(mediaURL.list)
+      await clearTenantFilter({ page })
+
+      await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+
+      await page
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, '../uploads/image.png'),
+          path.resolve(dirname, '../uploads/test-image.png'),
+        ])
+
+      // The per-file form opens an AssignTenantFieldModal automatically; cancel it
+      // so we can drive the bulk-edit flow ourselves.
+      const perFileAssignModal = page
+        .locator('dialog#assign-tenant-field-modal')
+        .filter({ hasText: 'Assign' })
+      await expect(perFileAssignModal).toBeVisible()
+      await perFileAssignModal.locator('button', { hasText: 'Cancel' }).click()
+      await expect(perFileAssignModal).toBeHidden()
+
+      // Open the bulk-upload "Edit all" drawer and pick the Site (tenant) field.
+      await page.locator('.edit-many-bulk-uploads__toggle').click()
+      const editManyDrawer = page.locator('dialog#edit-media-bulk-uploads')
+      await expect(editManyDrawer).toBeVisible()
+
+      await selectInput({
+        multiSelect: true,
+        options: ['Site'],
+        selectLocator: editManyDrawer.locator('.edit-many-bulk-uploads__form .react-select'),
+      })
+
+      // The Site field should render inline inside the bulk-edit drawer (like Alt does).
+      // The bug: TenantField doesn't recognize 'edit-${slug}-bulk-uploads' as an
+      // edit-many context, so it wraps itself in a non-interactive AssignTenantFieldModal.
+      const inlineTenantField = editManyDrawer.locator('.tenantField .field-type.relationship')
+      await expect(inlineTenantField).toBeVisible()
+
+      await selectInput({
+        multiSelect: false,
+        option: 'Blue Dog',
+        selectLocator: inlineTenantField,
+        selectType: 'relationship',
+      })
+      await expect(
+        inlineTenantField.locator('.relationship--single-value__text', { hasText: 'Blue Dog' }),
+      ).toBeVisible()
     })
   })
 
@@ -605,6 +678,7 @@ test.describe('Multi Tenant', () => {
       await goToListDoc({
         cellClass: '.cell-name',
         page,
+        search: 'Spicy Mac',
         textToMatch: 'Spicy Mac',
         urlUtil: menuItemsURL,
       })
@@ -703,6 +777,24 @@ test.describe('Multi Tenant', () => {
         .toEqual(['Blue Dog', 'Anchor Bar'].sort())
     })
 
+    test('should not throw forbidden error when user has no tenants assigned', async () => {
+      await loginClientSide({
+        data: credentials.noTenant,
+        page,
+        serverURL,
+      })
+
+      // Navigate to a page that triggers getTenantOptions - previously caused a
+      // "Runtime Forbidden" error because payload.find() was called with an empty
+      // userTenantIds array and overrideAccess: false
+      await page.goto(menuItemsURL.list)
+
+      // Ensure the Next.js runtime error overlay is not shown
+      await expect(page.locator('body')).not.toContainText(
+        'You are not allowed to perform this action.',
+      )
+    })
+
     test('should not show public tenants to users with assigned tenants', async () => {
       await loginClientSide({
         data: credentials.owner,
@@ -726,7 +818,7 @@ test.describe('Multi Tenant', () => {
         page,
         serverURL,
       })
-      await wait(1000)
+      await wait(500)
 
       await goToListDoc({
         cellClass: '.cell-name',
@@ -734,18 +826,18 @@ test.describe('Multi Tenant', () => {
         textToMatch: 'Blue Dog',
         urlUtil: tenantsURL,
       })
-      await wait(1000)
+      await wait(500)
 
       await expect(page.locator('#field-name')).toBeVisible()
       await page.locator('#field-name').fill('Red Dog')
-      await wait(1000)
+      await wait(500)
 
       await saveDocAndAssert(page)
-      await wait(1000)
+      await wait(500)
 
       await page.goto(tenantsURL.list)
       // Wait for backend tenant cache to update after save operation
-      await wait(1000)
+      await wait(500)
 
       // Check the tenant selector
       await expect
@@ -753,7 +845,7 @@ test.describe('Multi Tenant', () => {
           return (await getTenantOptions({ page })).sort()
         })
         .toEqual(['Red Dog', 'Steel Cat', 'Public Tenant', 'Anchor Bar'].sort())
-      await wait(1000)
+      await wait(500)
 
       await goToListDoc({
         cellClass: '.cell-name',
@@ -761,19 +853,20 @@ test.describe('Multi Tenant', () => {
         textToMatch: 'Red Dog',
         urlUtil: tenantsURL,
       })
-      await wait(1000)
+      await wait(500)
 
       // Change the tenant back to the original name
       await page.locator('#field-name').fill('Blue Dog')
-      await wait(1000)
+      await wait(500)
 
       await saveDocAndAssert(page)
-      await wait(1000)
+      await wait(500)
 
       await page.goto(tenantsURL.list)
       // Wait for backend tenant cache to update after save operation
-      await wait(1000)
+      await wait(500)
 
+      await openNav(page)
       await expect
         .poll(async () => {
           return (await getTenantOptions({ page })).sort()
@@ -885,6 +978,25 @@ test.describe('Multi Tenant', () => {
         .toBeFalsy()
     })
 
+    test('should only show tenants that user has read access to whether they are assigned to tenant or not', async () => {
+      // Login as user with Steel Cat (admin), Anchor Bar (admin), and Blue Dog (member)
+      await loginClientSide({
+        data: credentials.memberUser,
+        page,
+        serverURL,
+      })
+
+      await page.goto(tenantsURL.list)
+
+      // Should see: Steel Cat (admin role), Anchor Bar (admin role)
+      // Should NOT see: Blue Dog (member role - no read access)
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Anchor Bar', 'Steel Cat'].sort())
+    })
+
     test('should populate tenant selector after standard form login with tree-restructuring provider', async () => {
       // This test verifies the fix for a bug where TenantSelectionProviderClient
       // loses state on remount. The ConditionalWrapperProvider (registered in the
@@ -908,6 +1020,291 @@ test.describe('Multi Tenant', () => {
           return (await getTenantOptions({ page })).sort()
         })
         .toEqual(['Anchor Bar', 'Blue Dog'].sort())
+    })
+  })
+
+  test.describe('Hierarchy Tenant Filtering', () => {
+    test('should filter hierarchy sidebar tree by selected tenant', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // Set tenant filter to Blue Dog
+      await setTenantFilter({
+        page,
+        tenant: 'Blue Dog',
+        urlUtil: foldersURL,
+      })
+
+      // Navigate to folders list to ensure sidebar is visible
+      await page.goto(foldersURL.list)
+
+      // Open the nav and click the Folders tab to show the hierarchy tree
+      await openNav(page)
+      await page.locator('.sidebar-tabs__tab', { hasText: 'Folders' }).click()
+
+      // The sidebar tree should only show Blue Dog folders
+      const sidebarTree = page.locator('.hierarchy-sidebar-tab')
+      await expect(sidebarTree.getByText('Blue Dog Documents')).toBeVisible()
+      await expect(sidebarTree.getByText('Steel Cat Documents')).toBeHidden()
+      await expect(sidebarTree.getByText('Anchor Bar Files')).toBeHidden()
+    })
+
+    test('should filter hierarchy list table by selected tenant', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // Set tenant filter to Steel Cat
+      await setTenantFilter({
+        page,
+        tenant: 'Steel Cat',
+        urlUtil: foldersURL,
+      })
+
+      // Switch to By Folder tab
+      await page.locator('#hierarchy-view-pill').click()
+
+      // The list table should only show Steel Cat folders
+      await expect(
+        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
+          hasText: 'Steel Cat Documents',
+        }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
+          hasText: 'Blue Dog Documents',
+        }),
+      ).toBeHidden()
+      await expect(
+        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
+          hasText: 'Anchor Bar Files',
+        }),
+      ).toBeHidden()
+    })
+
+    test('should filter move drawer miller columns by selected tenant', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // Set tenant filter to Blue Dog
+      await setTenantFilter({
+        page,
+        tenant: 'Blue Dog',
+        urlUtil: foldersURL,
+      })
+
+      // Switch to By Folder tab
+      await page.locator('#hierarchy-view-pill').click()
+
+      // Navigate into a Blue Dog folder by clicking the navigation link
+      await page
+        .locator('.hierarchy-list .slot-table .hierarchy-tables__col-name a', {
+          hasText: 'Blue Dog Documents',
+        })
+        .first()
+        .click()
+
+      // Wait for the child folder to appear
+      await expect(
+        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
+          hasText: 'Blue Dog Recipes',
+        }),
+      ).toBeVisible()
+
+      // Select the child folder for moving
+      const checkbox = page
+        .locator('.hierarchy-list .slot-table tr', {
+          hasText: 'Blue Dog Recipes',
+        })
+        .locator('input[type="checkbox"]')
+      await checkbox.click()
+
+      // Open the move drawer
+      const moveButton = page.locator('button', { hasText: 'Move' })
+      await expect(moveButton).toBeVisible()
+      await moveButton.click()
+
+      // The move drawer should be visible
+      const moveDrawer = page.locator('.drawer__content')
+      await expect(moveDrawer).toBeVisible()
+
+      // The miller columns should only show Blue Dog folders
+      await expect(moveDrawer.getByText('Blue Dog Documents')).toBeVisible()
+      await expect(moveDrawer.getByText('Steel Cat Documents')).toBeHidden()
+      await expect(moveDrawer.getByText('Anchor Bar Files')).toBeHidden()
+    })
+
+    test('should show all tenant folders when tenant selector is cleared', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      await page.goto(foldersURL.list)
+      await clearTenantFilter({ page })
+
+      // Switch to By Folder tab
+      await page.locator('#hierarchy-view-pill').click()
+
+      // The list table should show folders from all tenants
+      await expect(
+        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
+          hasText: 'Blue Dog Documents',
+        }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
+          hasText: 'Steel Cat Documents',
+        }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
+          hasText: 'Anchor Bar Files',
+        }),
+      ).toBeVisible()
+    })
+
+    test('should update hierarchy views after tenant selector change', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // Start with Blue Dog
+      await setTenantFilter({
+        page,
+        tenant: 'Blue Dog',
+        urlUtil: foldersURL,
+      })
+
+      // Switch to By Folder tab
+      await page.locator('#hierarchy-view-pill').click()
+
+      await expect(
+        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
+          hasText: 'Blue Dog Documents',
+        }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
+          hasText: 'Steel Cat Documents',
+        }),
+      ).toBeHidden()
+
+      // Switch to Steel Cat
+      // Note: We navigate after changing tenant because Next.js's router.refresh()
+      // may serve cached RSC payloads that don't reflect cookie changes.
+      await setTenantFilter({
+        page,
+        tenant: 'Steel Cat',
+        urlUtil: foldersURL,
+      })
+
+      // Should now show Steel Cat folders instead
+      await expect(
+        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
+          hasText: 'Steel Cat Documents',
+        }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.hierarchy-list .slot-table .hierarchy-tables__col-name', {
+          hasText: 'Blue Dog Documents',
+        }),
+      ).toBeHidden()
+    })
+
+    test('should filter sidebar tree when switching tenants without page navigation', async () => {
+      // This test reproduces the user flow:
+      // 1. Log in and go to folders
+      // 2. Select Folders tab in sidebar
+      // 3. Select Blue Dog tenant (without navigating)
+      // 4. Sidebar tree should show only Blue Dog folders
+      // 5. Refresh the page
+      // 6. Select Steel Cat tenant (without navigating)
+      // 7. Sidebar tree should show only Steel Cat folders (not both)
+
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // Navigate to folders page
+      await page.goto(foldersURL.list)
+      await page.waitForURL(foldersURL.list)
+
+      // Click on Folders tab in sidebar to see the tree
+      await openNav(page)
+      const foldersTab = page.locator('button[role="tab"]', { hasText: 'Folders' })
+      await foldersTab.click()
+
+      // Verify sidebar tree shows all folders initially
+      const sidebarTree = page.locator('.tree')
+      await expect(
+        sidebarTree.locator('[role="treeitem"]', { hasText: 'Blue Dog Documents' }),
+      ).toBeVisible()
+      await expect(
+        sidebarTree.locator('[role="treeitem"]', { hasText: 'Steel Cat Documents' }),
+      ).toBeVisible()
+
+      // Select Blue Dog tenant WITHOUT navigating (no urlUtil parameter)
+      await setTenantFilter({
+        page,
+        tenant: 'Blue Dog',
+        // Intentionally NOT passing urlUtil to avoid page navigation
+      })
+
+      // Wait for tree to update
+      await page.waitForTimeout(500)
+
+      // Sidebar tree should show only Blue Dog folders
+      await expect(
+        sidebarTree.locator('[role="treeitem"]', { hasText: 'Blue Dog Documents' }),
+      ).toBeVisible()
+      await expect(
+        sidebarTree.locator('[role="treeitem"]', { hasText: 'Steel Cat Documents' }),
+      ).toBeHidden()
+
+      // Refresh the page
+      await page.reload()
+      await openNav(page)
+      await foldersTab.click()
+
+      // After refresh, should still show only Blue Dog folders
+      await expect(
+        sidebarTree.locator('[role="treeitem"]', { hasText: 'Blue Dog Documents' }),
+      ).toBeVisible()
+      await expect(
+        sidebarTree.locator('[role="treeitem"]', { hasText: 'Steel Cat Documents' }),
+      ).toBeHidden()
+
+      // Now switch to Steel Cat WITHOUT navigating
+      await setTenantFilter({
+        page,
+        tenant: 'Steel Cat',
+        // Intentionally NOT passing urlUtil to avoid page navigation
+      })
+
+      // Wait for tree to update
+      await page.waitForTimeout(500)
+
+      // Sidebar tree should show ONLY Steel Cat folders (not both tenants)
+      await expect(
+        sidebarTree.locator('[role="treeitem"]', { hasText: 'Steel Cat Documents' }),
+      ).toBeVisible()
+      await expect(
+        sidebarTree.locator('[role="treeitem"]', { hasText: 'Blue Dog Documents' }),
+      ).toBeHidden()
     })
   })
 })

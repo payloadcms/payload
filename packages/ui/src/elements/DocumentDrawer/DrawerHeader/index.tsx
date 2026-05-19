@@ -2,18 +2,18 @@
 
 import { useCallback } from 'react'
 
-import { Gutter } from '../../../elements/Gutter/index.js'
 import { useModal } from '../../../elements/Modal/index.js'
 import { RenderTitle } from '../../../elements/RenderTitle/index.js'
 import { useFormModified } from '../../../forms/Form/index.js'
-import { XIcon } from '../../../icons/X/index.js'
+import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../../providers/DocumentTitle/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { Button } from '../../Button/index.js'
 import { IDLabel } from '../../IDLabel/index.js'
 import { LeaveWithoutSavingModal } from '../../LeaveWithoutSaving/index.js'
 import { documentDrawerBaseClass } from '../index.js'
-import './index.scss'
+import './index.css'
 
 const leaveWithoutSavingModalSlug = 'leave-without-saving-doc-drawer'
 
@@ -35,19 +35,18 @@ export const DocumentDrawerHeader: React.FC<{
   }, [isModified, openModal, closeModal, drawerSlug])
 
   return (
-    <Gutter className={`${documentDrawerBaseClass}__header`}>
+    <div className={`${documentDrawerBaseClass}__header`}>
       <div className={`${documentDrawerBaseClass}__header-content`}>
+        <Button
+          aria-label={t('general:close')}
+          buttonStyle="ghost"
+          className={`${documentDrawerBaseClass}__header-close`}
+          icon={<ChevronIcon direction="left" size={24} />}
+          onClick={handleOnClose}
+        />
         <h2 className={`${documentDrawerBaseClass}__header-text`}>
           {<RenderTitle element="span" />}
         </h2>
-        <button
-          aria-label={t('general:close')}
-          className={`${documentDrawerBaseClass}__header-close`}
-          onClick={handleOnClose}
-          type="button"
-        >
-          <XIcon />
-        </button>
       </div>
       {showDocumentID && <DocumentID />}
       {AfterHeader ? (
@@ -58,7 +57,7 @@ export const DocumentDrawerHeader: React.FC<{
         modalSlug={leaveWithoutSavingModalSlug}
         onConfirm={() => closeModal(drawerSlug)}
       />
-    </Gutter>
+    </div>
   )
 }
 

@@ -9,7 +9,7 @@ import React, { useState } from 'react'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
 import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'tabs-field__tab-button'
 

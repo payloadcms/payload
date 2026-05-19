@@ -182,4 +182,5 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
     ...(config.queryPresets?.labels || {}),
   },
   lockDocuments: false,
+  select: ({ select }) => (select ? { ...select, relatedCollection: true } : undefined),
 })

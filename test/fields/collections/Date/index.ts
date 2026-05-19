@@ -254,7 +254,7 @@ const DateFields: CollectionConfig = {
           ...baseField,
           admin: {
             ...baseField.admin,
-            disableListColumn: true,
+            disabled: { column: true },
             description: 'This timezone field was customized via override',
           },
         }),

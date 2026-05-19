@@ -6,6 +6,27 @@ import type { UploadConfig } from './types.js'
 import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
 
+const disabledFromImageSize = (
+  sizeAdmin:
+    | { disableGroupBy?: boolean; disableListColumn?: boolean; disableListFilter?: boolean }
+    | undefined,
+): { disabled?: { column?: boolean; filter?: boolean; groupBy?: boolean } } => {
+  if (!sizeAdmin) {
+    return {}
+  }
+  const disabled: { column?: boolean; filter?: boolean; groupBy?: boolean } = {}
+  if (sizeAdmin.disableGroupBy) {
+    disabled.groupBy = true
+  }
+  if (sizeAdmin.disableListColumn) {
+    disabled.column = true
+  }
+  if (sizeAdmin.disableListFilter) {
+    disabled.filter = true
+  }
+  return Object.keys(disabled).length ? { disabled } : {}
+}
+
 type Options = {
   collection: CollectionConfig
   config: Config
@@ -95,7 +116,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     name: 'filename',
     type: 'text',
     admin: {
-      disableBulkEdit: true,
+      disabled: { bulkEdit: true },
       hidden: true,
       readOnly: true,
     },
@@ -169,9 +190,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           name,
           type: 'number',
           admin: {
-            disableGroupBy: true,
-            disableListColumn: true,
-            disableListFilter: true,
+            disabled: { column: true, filter: true, groupBy: true },
             hidden: true,
           },
         }
@@ -184,8 +203,8 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
   }
 
   // In Payload v4, image size subfields (`url`, `width`, `height`, etc.) should
-  // default to `disableGroupBy: true`, `disableListColumn: true` and `disableListFilter: true`
-  // to avoid cluttering the collection list view and filters by default.
+  // default to `disabled: { groupBy, column, filter }` to avoid cluttering the
+  // collection list view and filters by default.
   if (uploadOptions.imageSizes) {
     uploadFields = uploadFields.concat([
       {
@@ -199,18 +218,14 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           type: 'group',
           admin: {
             hidden: true,
-            ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
-            ...(size.admin?.disableListColumn && { disableListColumn: true }),
-            ...(size.admin?.disableListFilter && { disableListFilter: true }),
+            ...disabledFromImageSize(size.admin),
           },
           fields: [
             {
               ...url,
               admin: {
                 ...url.admin,
-                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
-                ...(size.admin?.disableListColumn && { disableListColumn: true }),
-                ...(size.admin?.disableListFilter && { disableListFilter: true }),
+                ...disabledFromImageSize(size.admin),
               },
               hooks: {
                 afterRead: [
@@ -245,45 +260,35 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...width,
               admin: {
                 ...width.admin,
-                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
-                ...(size.admin?.disableListColumn && { disableListColumn: true }),
-                ...(size.admin?.disableListFilter && { disableListFilter: true }),
+                ...disabledFromImageSize(size.admin),
               },
             },
             {
               ...height,
               admin: {
                 ...height.admin,
-                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
-                ...(size.admin?.disableListColumn && { disableListColumn: true }),
-                ...(size.admin?.disableListFilter && { disableListFilter: true }),
+                ...disabledFromImageSize(size.admin),
               },
             },
             {
               ...mimeType,
               admin: {
                 ...mimeType.admin,
-                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
-                ...(size.admin?.disableListColumn && { disableListColumn: true }),
-                ...(size.admin?.disableListFilter && { disableListFilter: true }),
+                ...disabledFromImageSize(size.admin),
               },
             },
             {
               ...filesize,
               admin: {
                 ...filesize.admin,
-                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
-                ...(size.admin?.disableListColumn && { disableListColumn: true }),
-                ...(size.admin?.disableListFilter && { disableListFilter: true }),
+                ...disabledFromImageSize(size.admin),
               },
             },
             {
               ...filename,
               admin: {
                 ...filename.admin,
-                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
-                ...(size.admin?.disableListColumn && { disableListColumn: true }),
-                ...(size.admin?.disableListFilter && { disableListFilter: true }),
+                ...disabledFromImageSize(size.admin),
               },
               unique: false,
             },

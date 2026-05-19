@@ -29,7 +29,7 @@ type RawParams = {
   sort?: string | string[]
   trash?: string
   unpublishAllLocales?: string
-  where?: Where
+  where?: string | Where
 }
 
 type ParsedParams = {
@@ -109,6 +109,10 @@ export const parseParams = (params: RawParams): ParsedParams => {
 
   if ('data' in params && typeof params.data === 'string' && params.data.length > 0) {
     parsedParams.data = JSON.parse(params.data)
+  }
+
+  if ('where' in params && typeof params.where === 'string' && params.where.length > 0) {
+    parsedParams.where = JSON.parse(params.where) as Where
   }
 
   return parsedParams

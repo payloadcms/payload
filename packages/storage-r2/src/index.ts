@@ -1,9 +1,7 @@
 import type {
-  Adapter,
   ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
-  GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
@@ -12,10 +10,8 @@ import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import type { R2Bucket, R2StorageClientUploadHandlerParams } from './types.js'
 
-import { getHandleDelete } from './handleDelete.js'
+import { createR2Adapter } from './adapter.js'
 import { getHandleMultiPartUpload } from './handleMultiPartUpload.js'
-import { getHandleUpload } from './handleUpload.js'
-import { getHandler } from './staticHandler.js'
 
 export interface R2StorageOptions {
   /**
@@ -39,6 +35,20 @@ export interface R2StorageOptions {
    */
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
   enabled?: boolean
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely.
+   *
+   * Example:
+   * - collection prefix: `collection-prefix/`
+   * - document prefix: `document-prefix/`
+   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
+   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   *
+   * @default false
+   */
+  useCompositePrefixes?: boolean
 }
 
 type R2StoragePlugin = (r2StorageArgs: R2StorageOptions) => Plugin
@@ -46,7 +56,11 @@ type R2StoragePlugin = (r2StorageArgs: R2StorageOptions) => Plugin
 export const r2Storage: R2StoragePlugin =
   (r2StorageOptions) =>
   (incomingConfig: Config): Config => {
-    const adapter = r2StorageInternal(r2StorageOptions)
+    const adapter = createR2Adapter({
+      bucket: r2StorageOptions.bucket,
+      clientUploads: r2StorageOptions.clientUploads,
+      useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
+    })
 
     const isPluginDisabled = r2StorageOptions.enabled === false
 
@@ -58,10 +72,6 @@ export const r2Storage: R2StoragePlugin =
       collections: r2StorageOptions.collections,
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(r2StorageOptions.clientUploads),
-      extraClientHandlerProps: (collection) => ({
-        prefix:
-          (typeof collection === 'object' && collection.prefix && `${collection.prefix}/`) || '',
-      }),
       serverHandler: getHandleMultiPartUpload({
         access:
           typeof r2StorageOptions.clientUploads === 'object'
@@ -69,6 +79,7 @@ export const r2Storage: R2StoragePlugin =
             : undefined,
         bucket: r2StorageOptions.bucket,
         collections: r2StorageOptions.collections,
+        useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
       }),
       serverHandlerPath: '/storage-r2-multi-part-upload',
     })
@@ -112,21 +123,6 @@ export const r2Storage: R2StoragePlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: r2StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
     })(config)
   }
-
-function r2StorageInternal({ bucket, clientUploads }: R2StorageOptions): Adapter {
-  return ({ collection, prefix }): GeneratedAdapter => {
-    return {
-      name: 'r2',
-      clientUploads,
-      handleDelete: getHandleDelete({ bucket }),
-      handleUpload: getHandleUpload({
-        bucket,
-        collection,
-        prefix,
-      }),
-      staticHandler: getHandler({ bucket, collection, prefix }),
-    }
-  }
-}

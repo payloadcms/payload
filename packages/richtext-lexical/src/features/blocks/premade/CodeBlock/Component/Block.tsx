@@ -2,7 +2,7 @@
 import type { ComboboxEntry } from '@payloadcms/ui'
 import type {} from 'payload'
 
-import './index.scss'
+import './index.css'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
@@ -117,6 +117,8 @@ export const CodeBlockBlockComponent: React.FC<Pick<AdditionalCodeComponentProps
           <CodeBlockIcon />
         </div>
       }
+      showDragHandle={false}
+      showRowNumber={false}
     >
       <RenderFields
         fields={formSchema}

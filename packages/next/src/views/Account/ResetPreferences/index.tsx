@@ -35,10 +35,8 @@ export const ResetPreferences: React.FC<{
       {
         depth: 0,
         where: {
-          user: {
-            id: {
-              equals: user.id,
-            },
+          'user.value': {
+            equals: user.id,
           },
         },
       },

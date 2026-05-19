@@ -135,6 +135,9 @@ export const multiTenantPlugin =
       [string[], string[]]
     >(
       (acc, slug) => {
+        if (slug === adminUsersCollection.slug) {
+          return acc
+        }
         if (pluginConfig?.collections?.[slug]?.isGlobal) {
           acc[1].push(slug)
         } else {
@@ -151,96 +154,6 @@ export const multiTenantPlugin =
 
     // used to validate enabled collection slugs
     const multiTenantCollectionsFound: string[] = []
-
-    /**
-     * The folders collection is added AFTER the plugin is initialized
-     * so if they added the folder slug to the plugin collections,
-     * we can assume that they have folders enabled
-     */
-    const foldersSlug = incomingConfig.folders
-      ? incomingConfig.folders.slug || 'payload-folders'
-      : 'payload-folders'
-
-    if (collectionSlugs.includes(foldersSlug)) {
-      multiTenantCollectionsFound.push(foldersSlug)
-      incomingConfig.folders = incomingConfig.folders || {}
-      incomingConfig.folders.collectionOverrides = incomingConfig.folders.collectionOverrides || []
-      incomingConfig.folders.collectionOverrides.push(({ collection }) => {
-        /**
-         * Add filter options to all relationship fields
-         */
-        collection.fields = addFilterOptionsToFields({
-          blockReferencesWithFilters,
-          config: incomingConfig,
-          fields: collection.fields,
-          tenantEnabledCollectionSlugs: collectionSlugs,
-          tenantEnabledGlobalSlugs: globalCollectionSlugs,
-          tenantFieldName,
-          tenantsArrayFieldName,
-          tenantsArrayTenantFieldName,
-          tenantsCollectionSlug,
-          userHasAccessToAllTenants,
-        })
-
-        if (pluginConfig.collections[foldersSlug]?.customTenantField !== true) {
-          /**
-           * Add tenant field to enabled collections
-           */
-          collection.fields.unshift(
-            tenantField({
-              name: tenantFieldName,
-              debug: pluginConfig.debug,
-              isAutosaveEnabled: hasAutosaveEnabled(collection),
-              overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
-                ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
-                : pluginConfig.tenantField || {},
-              tenantsArrayFieldName,
-              tenantsArrayTenantFieldName,
-              tenantsCollectionSlug,
-              unique: false,
-            }),
-          )
-        }
-
-        const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
-        if (useBaseFilter ?? useBaseListFilter ?? true) {
-          /**
-           * Add list filter to enabled collections
-           * - filters results by selected tenant
-           */
-          collection.admin = collection.admin || {}
-          collection.admin.baseFilter = combineFilters({
-            baseFilter: collection.admin?.baseFilter ?? collection.admin?.baseListFilter,
-            customFilter: (args) =>
-              filterDocumentsByTenants<ConfigType>({
-                filterFieldName: tenantFieldName,
-                req: args.req,
-                tenantsArrayFieldName,
-                tenantsArrayTenantFieldName,
-                tenantsCollectionSlug,
-                userHasAccessToAllTenants,
-              }),
-          })
-        }
-
-        if (pluginConfig.collections[foldersSlug]?.useTenantAccess !== false) {
-          /**
-           * Add access control constraint to tenant enabled folders collection
-           */
-          addCollectionAccess({
-            accessResultCallback: pluginConfig.collections[foldersSlug]?.accessResultOverride,
-            adminUsersSlug: adminUsersCollection.slug,
-            collection,
-            fieldName: tenantFieldName,
-            tenantsArrayFieldName,
-            tenantsArrayTenantFieldName,
-            userHasAccessToAllTenants,
-          })
-        }
-
-        return collection
-      })
-    }
 
     /**
      * Modify collections
@@ -320,8 +233,7 @@ export const multiTenantPlugin =
                 path: '@payloadcms/plugin-multi-tenant/client#WatchTenantCollection',
               },
             },
-            disableBulkEdit: true,
-            disableListColumn: true,
+            disabled: { bulkEdit: true, column: true },
           },
         })
 
@@ -336,6 +248,13 @@ export const multiTenantPlugin =
           }),
         ]
       } else if (pluginConfig.collections?.[collection.slug]) {
+        if (collection.slug === adminUsersCollection.slug) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[plugin-multi-tenant] The admin users collection "${collection.slug}" should not be listed in pluginConfig.collections — it is already handled by the plugin. Skipping tenant-field processing for this collection to avoid double access control and validation errors.`,
+          )
+          return
+        }
         multiTenantCollectionsFound.push(collection.slug)
         const isGlobal = Boolean(pluginConfig.collections[collection.slug]?.isGlobal)
 

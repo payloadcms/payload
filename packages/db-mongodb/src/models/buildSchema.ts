@@ -268,6 +268,10 @@ const blocks: FieldSchemaGenerator<BlocksField> = (
     }
 
     block.fields.forEach((blockField) => {
+      if (fieldIsVirtual(blockField)) {
+        return
+      }
+
       const addFieldSchema = getSchemaGenerator(blockField.type)
 
       if (addFieldSchema) {

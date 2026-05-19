@@ -31,7 +31,7 @@ export default buildConfigWithDefaults({
       },
     },
   },
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
   globals: [MenuGlobal],
   routes: {
     admin: adminRoute,

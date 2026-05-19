@@ -1,0 +1,47 @@
+@layer payload-default {
+  .field-type.textarea {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    flex-grow: 1;
+
+    .field-type__wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
+    }
+
+    textarea {
+      overflow-y: auto;
+      resize: vertical;
+      min-height: calc(var(--spacer-5) * 2);
+      height: auto;
+      display: flex;
+      field-sizing: content;
+      padding: var(--spacer-2);
+
+      &:hover:not(:focus):not(:disabled) {
+        border-color: var(--color-border);
+      }
+    }
+
+    &.read-only {
+      textarea {
+        background: var(--color-bg);
+        border-color: var(--color-border);
+        color: var(--color-text);
+      }
+    }
+
+    &.error {
+      textarea {
+        border-color: var(--color-border-danger-strong);
+
+        &:hover:not(:focus):not(:disabled) {
+          border-color: var(--color-border-danger-strong);
+        }
+      }
+    }
+  }
+}

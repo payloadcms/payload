@@ -745,6 +745,102 @@ test.describe('Bulk Edit', () => {
       .toEqual('nestedText')
   })
 
+  test('should bulk edit a field inside a named tab', async () => {
+    const originalDoc = await payload.create({
+      collection: tabsSlug,
+      data: {
+        title: 'Tab Doc',
+        tabTab: {
+          tabText: 'original value',
+        },
+      },
+    })
+
+    await page.goto(tabsUrl.list)
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await addListFilter({
+      page,
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      value: originalDoc.id,
+    })
+
+    await page.locator('table tbody tr.row-1 input[type="checkbox"]').check()
+    await page
+      .locator('.list-selection__actions .btn', {
+        hasText: 'Edit',
+      })
+      .click()
+
+    const bulkEditForm = page.locator('form.edit-many__form')
+    await expect(bulkEditForm).toBeVisible()
+
+    await selectInput({
+      selectLocator: bulkEditForm.locator('.react-select'),
+      options: ['Tab Text'],
+      multiSelect: true,
+    })
+
+    await bulkEditForm.getByLabel('Tab Text').fill('updated value')
+    await bulkEditForm.locator('button[type="submit"]').click()
+
+    await expect(bulkEditForm).toBeHidden()
+
+    const updatedDocQuery = await payload.find({
+      collection: tabsSlug,
+      where: {
+        id: {
+          equals: originalDoc.id,
+        },
+      },
+    })
+    const updatedDoc = updatedDocQuery.docs[0]
+
+    await expect
+      .poll(() => updatedDoc?.tabTab?.tabText, { timeout: POLL_TOPASS_TIMEOUT })
+      .toEqual('updated value')
+
+    await payload.delete({ collection: tabsSlug, id: originalDoc.id })
+  })
+
+  test('should show clean labels for fields inside label-false groups and rows', async () => {
+    const doc = await payload.create({
+      collection: tabsSlug,
+      data: { title: 'Label Test Doc' },
+    })
+
+    await page.goto(tabsUrl.list)
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await addListFilter({
+      page,
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      value: doc.id,
+    })
+
+    await page.locator('table tbody tr.row-1 input[type="checkbox"]').check()
+    await page
+      .locator('.list-selection__actions .btn', {
+        hasText: 'Edit',
+      })
+      .click()
+
+    const bulkEditForm = page.locator('form.edit-many__form')
+    await expect(bulkEditForm).toBeVisible()
+
+    await bulkEditForm.locator('.field-select .rs__control').click()
+
+    // The option must match exactly — no spurious "> >" prefix
+    const option = bulkEditForm.locator('.field-select .rs__option', {
+      hasText: exactText('Row Text'),
+    })
+    await expect(option).toBeVisible()
+
+    await payload.delete({ collection: tabsSlug, id: doc.id })
+  })
+
   test('should preserve beforeInput components when selecting multiple fields', async () => {
     await deleteAllPosts()
     await createPost({ title: 'Post 1' })

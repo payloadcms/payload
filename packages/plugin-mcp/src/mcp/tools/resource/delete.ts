@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { PayloadRequest, TypedUser } from 'payload'
 
-import type { PluginMCPServerConfig } from '../../../types.js'
+import type { MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import { toolSchemas } from '../schemas.js'
@@ -12,7 +12,7 @@ export const deleteResourceTool = (
   user: TypedUser,
   verboseLogs: boolean,
   collectionSlug: string,
-  collections: PluginMCPServerConfig['collections'],
+  collections: MCPPluginConfig['collections'],
 ) => {
   const tool = async (
     id?: number | string,
@@ -115,7 +115,7 @@ export const deleteResourceTool = (
               text: `Document deleted successfully from collection "${collectionSlug}"!
 Deleted document:
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
             },
           ],
@@ -148,14 +148,14 @@ Errors: ${errors.length}
         if (docs.length > 0) {
           responseText += `\n\nDeleted documents:
 \`\`\`json
-${JSON.stringify(docs, null, 2)}
+${JSON.stringify(docs)}
 \`\`\``
         }
 
         if (errors.length > 0) {
           responseText += `\n\nErrors:
 \`\`\`json
-${JSON.stringify(errors, null, 2)}
+${JSON.stringify(errors)}
 \`\`\``
         }
 

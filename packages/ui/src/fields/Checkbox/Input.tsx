@@ -13,6 +13,7 @@ export type CheckboxInputProps = {
   readonly BeforeInput?: React.ReactNode
   readonly checked?: boolean
   readonly className?: string
+  readonly Error?: React.ReactNode
   readonly id?: string
   readonly inputRef?: React.RefObject<HTMLInputElement | null>
   readonly Label?: React.ReactNode
@@ -34,6 +35,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   BeforeInput,
   checked,
   className,
+  Error,
   inputRef,
   Label,
   label,
@@ -64,37 +66,40 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         .filter(Boolean)
         .join(' ')}
     >
-      <div className={`${inputBaseClass}__input`}>
-        {BeforeInput}
-        <input
-          aria-label=""
-          aria-labelledby={name}
-          checked={Boolean(checked)}
-          disabled={readOnly}
-          id={id}
-          name={name}
-          onChange={onToggle}
-          ref={inputRef}
-          required={required}
-          title={name}
-          type="checkbox"
+      {BeforeInput}
+      <div className={`${inputBaseClass}__wrap`}>
+        <div className={`${inputBaseClass}__input`}>
+          <input
+            aria-label=""
+            aria-labelledby={name}
+            checked={Boolean(checked)}
+            disabled={readOnly}
+            id={id}
+            name={name}
+            onChange={onToggle}
+            ref={inputRef}
+            required={required}
+            title={name}
+            type="checkbox"
+          />
+          <span
+            className={[`${inputBaseClass}__icon`, !checked && partialChecked ? 'partial' : 'check']
+              .filter(Boolean)
+              .join(' ')}
+          >
+            {checked && <CheckIcon />}
+            {!checked && partialChecked && <LineIcon />}
+          </span>
+        </div>
+        <RenderCustomComponent
+          CustomComponent={Label}
+          Fallback={
+            <FieldLabel htmlFor={id} label={label} localized={localized} required={required} />
+          }
         />
-        <span
-          className={[`${inputBaseClass}__icon`, !checked && partialChecked ? 'partial' : 'check']
-            .filter(Boolean)
-            .join(' ')}
-        >
-          {checked && <CheckIcon />}
-          {!checked && partialChecked && <LineIcon />}
-        </span>
-        {AfterInput}
+        {Error}
       </div>
-      <RenderCustomComponent
-        CustomComponent={Label}
-        Fallback={
-          <FieldLabel htmlFor={id} label={label} localized={localized} required={required} />
-        }
-      />
+      {AfterInput}
     </div>
   )
 }

@@ -1,11 +1,9 @@
 import type {
-  Adapter,
   ClientUploadsAccess,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
-  GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Field, Plugin, UploadCollectionSlug } from 'payload'
+import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 import type { createUploadthing } from 'uploadthing/server'
 import type { UTApiOptions } from 'uploadthing/types'
 
@@ -13,11 +11,8 @@ import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 import { UTApi } from 'uploadthing/server'
 
-import { generateURL } from './generateURL.js'
+import { createUploadthingAdapter } from './adapter.js'
 import { getClientUploadRoute } from './getClientUploadRoute.js'
-import { getHandleDelete } from './handleDelete.js'
-import { getHandleUpload } from './handleUpload.js'
-import { getHandler } from './staticHandler.js'
 
 export type FileRouterInputConfig = Parameters<ReturnType<typeof createUploadthing>>[0]
 
@@ -45,6 +40,8 @@ export type UploadthingStorageOptions = {
 
   /**
    * Collection options to apply the adapter to.
+   *
+   * TODO V4: OMIT 'prefix' from the collection options - uploadthing does not support prefixes
    */
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
 
@@ -100,34 +97,32 @@ export const uploadthingStorage: UploadthingPlugin =
       return incomingConfig
     }
 
-    // Default ACL to public-read
-    if (!uploadthingStorageOptions.options.acl) {
-      uploadthingStorageOptions.options.acl = 'public-read'
-    }
+    const { acl = 'public-read', ...utOptions } = uploadthingStorageOptions.options
+    const utApi = new UTApi(utOptions)
 
-    const adapter = uploadthingInternal(uploadthingStorageOptions)
+    const adapter = createUploadthingAdapter({
+      acl,
+      clientUploads: uploadthingStorageOptions.clientUploads,
+      utApi,
+    })
 
-    // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
       uploadthingStorageOptions.collections,
     ).reduce(
-      (acc, [slug, collOptions]) => ({
-        ...acc,
-        [slug]: {
+      (acc, [slug, collOptions]) => {
+        const mergedOptions = {
           ...(collOptions === true ? {} : collOptions),
-
-          // Disable payload access control if the ACL is public-read or not set
-          // ...(uploadthingStorageOptions.options.acl === 'public-read'
-          //   ? { disablePayloadAccessControl: true }
-          //   : {}),
-
           adapter,
-        },
-      }),
+          prefix: '', // upload thing does not support prefixes
+        }
+        return {
+          ...acc,
+          [slug]: mergedOptions,
+        }
+      },
       {} as Record<string, CollectionOptions>,
     )
 
-    // Set disableLocalStorage: true for collections specified in the plugin options
     const config = {
       ...incomingConfig,
       collections: (incomingConfig.collections || []).map((collection) => {
@@ -148,39 +143,6 @@ export const uploadthingStorage: UploadthingPlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: uploadthingStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: false, // uploadthing does not support prefixes
     })(config)
   }
-
-function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
-  const fields: Field[] = [
-    {
-      name: '_key',
-      type: 'text',
-      admin: {
-        disableBulkEdit: true,
-        disableListColumn: true,
-        disableListFilter: true,
-        hidden: true,
-      },
-    },
-  ]
-
-  return (): GeneratedAdapter => {
-    const {
-      clientUploads,
-      options: { acl = 'public-read', ...utOptions },
-    } = options
-
-    const utApi = new UTApi(utOptions)
-
-    return {
-      name: 'uploadthing',
-      clientUploads,
-      fields,
-      generateURL,
-      handleDelete: getHandleDelete({ utApi }),
-      handleUpload: getHandleUpload({ acl, utApi }),
-      staticHandler: getHandler({ utApi }),
-    }
-  }
-}

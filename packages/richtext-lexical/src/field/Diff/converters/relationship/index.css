@@ -1,0 +1,68 @@
+@layer payload-default {
+  .lexical-diff .lexical-relationship-diff {
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+    min-width: calc(var(--spacer-5) * 5);
+    max-width: fit-content;
+
+    display: flex;
+    align-items: center;
+    background-color: var(--color-bg);
+    border-radius: var(--radius-medium);
+    border: var(--stroke-width-small) solid var(--color-border);
+    position: relative;
+    font-family: var(--font-body);
+    margin-block: calc(var(--spacer-1) * 2.5);
+    max-height: calc(var(--spacer-5) * 2.5);
+    padding: var(--spacer-2-5);
+
+    &[data-match-type='create'] {
+      border-color: var(--diff-create-pill-border);
+      color: var(--diff-create-parent-color);
+
+      .lexical-relationship-diff__collectionLabel {
+        color: var(--diff-create-link-color);
+      }
+
+      .lexical-relationship-diff__title * {
+        color: var(--diff-create-parent-color);
+      }
+    }
+
+    &[data-match-type='delete'] {
+      border-color: var(--diff-delete-pill-border);
+      color: var(--diff-delete-parent-color);
+      text-decoration-line: none;
+      background-color: var(--diff-delete-pill-bg);
+
+      .lexical-relationship-diff__collectionLabel {
+        color: var(--diff-delete-link-color);
+      }
+
+      * {
+        text-decoration-line: none;
+        color: var(--diff-delete-parent-color);
+      }
+    }
+  }
+
+  .lexical-diff .lexical-relationship-diff__card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex-grow: 1;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .lexical-diff .lexical-relationship-diff__title {
+    display: flex;
+    flex-direction: row;
+    font-weight: 600;
+  }
+
+  .lexical-diff .lexical-relationship-diff__collectionLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

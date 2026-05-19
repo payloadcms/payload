@@ -31,7 +31,7 @@ jobs:
         run: sudo ethtool -K eth0 tx off rx off
 
       - uses: actions/checkout@v5
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: filter
         with:
           filters: |
@@ -55,6 +55,53 @@ jobs:
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
+
+  # Detects upstream Next.js canary publishes that are missing `@next/env` or
+  # `@next/eslint-plugin-next` for the same version (would break
+  # `pnpm create next-app@canary` with `ERR_PNPM_NO_MATCHING_VERSION`).
+  probe-next-canary:
+    name: probe-next-canary
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.needs_tests == 'true'
+    outputs:
+      healthy: ${{ steps.probe.outputs.healthy }}
+      next_version: ${{ steps.probe.outputs.next_version }}
+    steps:
+      - name: Probe registry for complete canary publish
+        id: probe
+        run: |
+          retry_npm_view() {
+            local spec="$1"
+            for attempt in 1 2 3; do
+              if npm view "$spec" version >/dev/null 2>&1; then
+                return 0
+              fi
+              sleep $((attempt * 2))
+            done
+            return 1
+          }
+
+          NEXT_VERSION=""
+          for attempt in 1 2 3; do
+            NEXT_VERSION="$(npm view next@canary version 2>/dev/null || true)"
+            if [ -n "$NEXT_VERSION" ]; then
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          echo "Resolved next@canary version: ${NEXT_VERSION:-<empty>}"
+          echo "next_version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
+          if [ -z "$NEXT_VERSION" ]; then
+            echo "healthy=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if retry_npm_view "@next/env@${NEXT_VERSION}" \
+            && retry_npm_view "@next/eslint-plugin-next@${NEXT_VERSION}"; then
+            echo "healthy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "healthy=false" >> "$GITHUB_OUTPUT"
+          fi
 
   lint:
     runs-on: ubuntu-24.04
@@ -88,7 +135,7 @@ jobs:
           DO_NOT_TRACK: 1 # Disable Turbopack telemetry
 
       - name: Cache build
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./*
           key: ${{ github.sha }}
@@ -103,16 +150,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - name: Unit Tests
         run: pnpm test:unit
@@ -129,16 +167,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
@@ -170,7 +199,7 @@ jobs:
 
   tests-int:
     runs-on: ubuntu-24.04
-    needs: [changes, build, int-matrix]
+    needs: [changes, build, int-matrix, probe-next-canary]
     if: needs.changes.outputs.needs_tests == 'true'
     name: int-${{ matrix.database }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
@@ -198,38 +227,32 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
-
-      - name: Start LocalStack
-        run: pnpm docker:start
+          restore-build: true
 
       - name: Configure Redis
         run: |
           echo "REDIS_URL=redis://127.0.0.1:6379" >> $GITHUB_ENV
 
-      - name: Start database
+      - name: Start services
         id: db
-        uses: ./.github/actions/start-database
+        uses: ./.github/actions/start-services
         with:
           database: ${{ matrix.database }}
 
       - name: Integration Tests
-        run: pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
           MONGODB_ATLAS_URL: ${{ steps.db.outputs.MONGODB_ATLAS_URL }}
+        run: |
+          if [ "${{ needs.probe-next-canary.outputs.healthy }}" = "false" ]; then
+            echo "::warning::Next.js canary publish is incomplete on npm (next@${{ needs.probe-next-canary.outputs.next_version }}); skipping Canary tests for this run."
+            pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }} -t '^(?!.*Canary).*$'
+          else
+            pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
+          fi
 
   # Generate the E2E test matrix from TypeScript config
   e2e-matrix:
@@ -266,75 +289,67 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - name: Prepare prod test environment
         run: pnpm prepare-run-test-against-prod:ci
 
-      - name: Cache prepared test environment
-        uses: actions/cache/save@v4
+      # Tar first: upload-artifact is extremely slow with pnpm node_modules (many small files + symlinks).
+      - name: Archive prepared test environment
+        run: tar --zstd -cf e2e-prep.tar.zst test/packed test/node_modules test/package.json test/pnpm-lock.yaml
+
+      # Artifact (not cache) so that re-runs of individual E2E shards survive the 10 GB cache LRU eviction.
+      - name: Upload prepared test environment
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          path: |
-            test/packed
-            test/node_modules
-            test/package.json
-            test/pnpm-lock.yaml
-          key: e2e-prep-${{ github.sha }}
+          name: e2e-prep-${{ github.sha }}
+          path: e2e-prep.tar.zst
+          if-no-files-found: error
 
   tests-e2e:
     runs-on: ubuntu-24.04
     needs: [e2e-matrix, e2e-prep]
-    name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
+    name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.e2e-matrix.outputs.matrix) }}
     env:
       SUITE_NAME: ${{ matrix.suite }}
+      PAYLOAD_CACHE_COMPONENTS: ${{ matrix.cacheComponents && 'true' || '' }}
     steps:
       - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
+          restore-build: true
 
-      - name: Restore build
-        uses: actions/cache@v4
+      - name: Download prepared test environment
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          name: e2e-prep-${{ github.sha }}
+          path: .
 
-      - name: Restore prepared test environment
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            test/packed
-            test/node_modules
-            test/package.json
-            test/pnpm-lock.yaml
-          key: e2e-prep-${{ github.sha }}
-          fail-on-cache-miss: true
+      - name: Extract prepared test environment
+        shell: bash
+        run: |
+          if [ ! -f e2e-prep.tar.zst ]; then
+            echo "::error::The 'e2e-prep-${{ github.sha }}' artifact did not contain e2e-prep.tar.zst."
+            echo "::error::This usually means the 'E2E Prep' job did not run or failed to upload."
+            echo "::error::Re-run the entire workflow so 'E2E Prep' regenerates the artifact."
+            exit 1
+          fi
+          tar --zstd -xf e2e-prep.tar.zst
+          rm e2e-prep.tar.zst
+          if [ ! -d test/packed ] || [ ! -d test/node_modules ]; then
+            echo "::error::Extracted artifact is missing expected directories (test/packed or test/node_modules)."
+            exit 1
+          fi
 
-      - name: Start LocalStack
-        run: pnpm docker:start
-        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite)
-
-      - name: Start database
+      - name: Start services
         id: db
-        uses: ./.github/actions/start-database
+        uses: ./.github/actions/start-services
         with:
           database: mongodb
 
@@ -347,7 +362,7 @@ jobs:
 
       - name: Cache Playwright Browsers for Playwright's Version
         id: cache-playwright-browsers
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
@@ -386,165 +401,18 @@ jobs:
         #   To maintain serial execution for most suites, we pass --workers=1 when parallel=false.
         #   Suites with parallel=true (e.g. LexicalFullyFeatured) use the default 16 workers.
         #
-        # Note: The e2e-prep job runs prepare-run-test-against-prod:ci once and caches the result.
-        # This job restores that cache, so we use test:e2e:prod:run which skips preparation.
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
+        # Note: The e2e-prep job runs prepare-run-test-against-prod:ci once and uploads the result
+        # as an artifact. This job downloads that artifact, so we use test:e2e:prod:run which skips preparation.
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:run ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
+          PAYLOAD_DATABASE: mongodb
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}_${{ matrix.shard }}
-          path: test/test-results/
-          if-no-files-found: ignore
-          retention-days: 1
-
-      # Disabled until this is fixed: https://github.com/daun/playwright-report-summary/issues/156
-      # - uses: daun/playwright-report-summary@v3
-      #   with:
-      #     report-file: results_${{ matrix.suite }}.json
-      #     report-tag: ${{ matrix.suite }}
-      #     job-summary: true
-
-  # This is unused, keeping it here for reference and possibly enabling in the future
-  tests-e2e-turbo:
-    runs-on: ubuntu-24.04
-    needs: [changes, build]
-    if: >-
-      needs.changes.outputs.needs_tests == 'true' &&
-      (
-        contains(github.event.pull_request.labels.*.name, 'run-e2e-turbo') ||
-        github.event.label.name == 'run-e2e-turbo'
-      )
-    name: e2e-turbo-${{ matrix.suite }}
-    strategy:
-      fail-fast: false
-      matrix:
-        # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
-        suite:
-          - _community
-          - access-control
-          - admin__e2e__general
-          - admin__e2e__list-view
-          - admin__e2e__document-view
-          - admin-bar
-          - admin-root
-          - auth
-          - auth-basic
-          - bulk-edit
-          - dashboard
-          - joins
-          - field-error-states
-          - fields-relationship
-          - fields__collections__Array
-          - fields__collections__Blocks
-          - fields__collections__Blocks#config.blockreferences.ts
-          - fields__collections__Checkbox
-          - fields__collections__Collapsible
-          - fields__collections__ConditionalLogic
-          - fields__collections__CustomID
-          - fields__collections__Date
-          - fields__collections__Email
-          - fields__collections__Indexed
-          - fields__collections__JSON
-          - fields__collections__Number
-          - fields__collections__Point
-          - fields__collections__Radio
-          - fields__collections__Relationship
-          - fields__collections__Row
-          - fields__collections__Select
-          - fields__collections__Tabs
-          - fields__collections__Tabs2
-          - fields__collections__Text
-          - fields__collections__UI
-          - fields__collections__Upload
-          - group-by
-          - folders
-          - hooks
-          - lexical__collections___LexicalFullyFeatured
-          - lexical__collections___LexicalFullyFeatured__db
-          - lexical__collections__LexicalHeadingFeature
-          - lexical__collections__LexicalJSXConverter
-          - lexical__collections__LexicalLinkFeature
-          - lexical__collections__OnDemandForm
-          - lexical__collections__Lexical__e2e__main
-          - lexical__collections__Lexical__e2e__blocks
-          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
-          - lexical__collections__RichText
-          - query-presets
-          - form-state
-          - live-preview
-          - localization
-          - locked-documents
-          - i18n
-          - plugin-cloud-storage
-          - plugin-form-builder
-          - plugin-import-export
-          - plugin-multi-tenant
-          - plugin-nested-docs
-          - plugin-seo
-          - queues
-          - sort
-          - trash
-          - versions
-          - uploads
-    env:
-      SUITE_NAME: ${{ matrix.suite }}
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Node setup
-        uses: ./.github/actions/setup
-        with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
-
-      - name: Start LocalStack
-        run: pnpm docker:start
-        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite)
-
-      - name: Store Playwright's Version
-        run: |
-          # Extract the version number using a more targeted regex pattern with awk
-          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
-          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
-
-      - name: Cache Playwright Browsers for Playwright's Version
-        id: cache-playwright-browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
-
-      - name: Setup Playwright - Browsers and Dependencies
-        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Setup Playwright - Dependencies-only
-        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps chromium
-
-      - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
-        env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
-          NEXT_TELEMETRY_DISABLED: 1
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results-turbo${{ matrix.suite }}
+          name: test-results-${{ matrix.suite }}_${{ matrix.shard }}${{ matrix.cacheComponents && '_cc' || '' }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
@@ -560,7 +428,9 @@ jobs:
   build-and-test-templates:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: needs.changes.outputs.needs_build == 'true'
+    # Temporarily disabled: template builds require a published beta of workspace packages.
+    # Re-enable once the next 4.x beta is published on npm.
+    if: false
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -594,21 +464,12 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
+          restore-build: true
 
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
-
-      - name: Start database
+      - name: Start services
         id: db
         if: matrix.database
-        uses: ./.github/actions/start-database
+        uses: ./.github/actions/start-services
         with:
           database: ${{ matrix.database }}
 
@@ -629,7 +490,7 @@ jobs:
 
       - name: Cache Playwright Browsers for Playwright's Version
         id: cache-playwright-browsers
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
@@ -669,22 +530,149 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
 
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
+
+  # Test content-api integration with packed packages. Each job runs its own
+  # ephemeral Content API instance pulled from Figma's ECR, backed by a Postgres
+  # service container and a LocalStack container for S3 storage tests. This
+  # gives each run an isolated sandbox, avoiding data collisions between
+  # concurrent CI runs and removing the need for shared credentials.
+  tests-content-api:
+    name: Content API Tests
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    # Skip fork PRs: this job uses credentials fork workflows must not reach.
+    if: needs.changes.outputs.needs_tests == 'true' && github.event.pull_request.head.repo.fork == false
+    # Non-blocking while adapter coverage is incomplete. Once the full suite
+    # passes, migrate to the `tests-int` matrix pattern (`pnpm test:int`
+    # with --shard); `test:int:summary` cannot shard.
+    continue-on-error: true
+    permissions:
+      id-token: write
+      contents: read
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: figma_content_api
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      localstack:
+        image: localstack/localstack:4.10.0
+        env:
+          SERVICES: s3
+        ports:
+          - 4566:4566
+        options: >-
+          --health-cmd "curl -f http://localhost:4566/_localstack/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          restore-build: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
+        with:
+          role-to-assume: arn:aws:iam::060562746757:role/content-api-external-ci-pull
+          aws-region: us-west-2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419 # v2.1.5
+
+      # Figma publishes ECR tags as the 40-char SHA of the figma/figma commit
+      # that built the image. There is no reliable floating alias, so pick the
+      # most recently pushed SHA tag (skipping cosign `.sig` signatures).
+      # `--max-results 100 --no-paginate` bounds the call to a single page;
+      # without it the CLI pages through the full history and takes ~50s.
+      - name: Resolve latest Content API image tag
+        id: resolve-image
+        run: |
+          TAG=$(aws ecr describe-images \
+            --repository-name payload/content-api \
+            --region us-west-2 \
+            --max-results 100 \
+            --no-paginate \
+            --query 'reverse(sort_by(imageDetails,& imagePushedAt))[].imageTags[]' \
+            --output text | tr '\t' '\n' | grep -E '^[a-f0-9]{40}$' | head -n1)
+          if [ -z "$TAG" ]; then
+            echo "::error::No git-SHA-like tag found in payload/content-api ECR"
+            exit 1
+          fi
+          echo "Using tag: $TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      # Cache the image tarball by resolved SHA so repeated runs on the same
+      # figma/figma image skip the ~55s ECR pull.
+      - name: Cache Content API image
+        id: cache-content-api-image
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: /tmp/content-api-image.tar
+          key: content-api-image-${{ steps.resolve-image.outputs.tag }}
+
+      - name: Start Content API
+        run: |
+          IMAGE=060562746757.dkr.ecr.us-west-2.amazonaws.com/payload/content-api:${{ steps.resolve-image.outputs.tag }}
+          if [ -f /tmp/content-api-image.tar ]; then
+            echo "Loading Content API image from cache"
+            docker load -i /tmp/content-api-image.tar
+          else
+            echo "Pulling Content API image from ECR"
+            docker pull "$IMAGE"
+            docker save -o /tmp/content-api-image.tar "$IMAGE"
+          fi
+          docker run -d \
+            --name content-api \
+            --network host \
+            -e DATABASE_URL="postgresql://postgres:postgres@localhost:5432/figma_content_api" \
+            -e NODE_ENV=development \
+            -e TARGET_ENV=development \
+            -e CONTENT_API_PORT=8080 \
+            -e S3_ENDPOINT=http://localhost:4566 \
+            "$IMAGE"
+
+      - name: Wait for Content API to be ready
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/health > /dev/null; then
+              echo "Content API is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Content API failed to start within timeout"
+          docker logs content-api || true
+          exit 1
+
+      - name: Run Content API Integration Tests
+        continue-on-error: true
+        run: pnpm test:int:summary
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: content-api
+
+      - name: Dump Content API logs on failure
+        if: failure()
+        run: docker logs content-api || true
 
   all-green:
     name: All Green
@@ -700,6 +688,7 @@ jobs:
         tests-e2e,
         tests-types,
         tests-type-generation,
+        tests-content-api,
       ]
 
     steps:
@@ -732,16 +721,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
         env:
@@ -750,6 +730,6 @@ jobs:
       - name: Analyze esbuild bundle size
         # Temporarily disable this for community PRs until this can be implemented in a separate workflow
         if: github.event.pull_request.head.repo.fork == false
-        uses: exoego/esbuild-bundle-analyzer@v1
+        uses: exoego/esbuild-bundle-analyzer@42795b5c2540f6c622dc3445103fabbb7776a6f9 # v1.5.5
         with:
           metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'

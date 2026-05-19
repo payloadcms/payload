@@ -4,7 +4,7 @@ import { type I18nClient } from '@payloadcms/translations'
 import { File } from '@payloadcms/ui/rsc'
 import { createHash } from 'crypto'
 
-import './index.scss'
+import './index.css'
 
 import { formatFilesize } from 'payload/shared'
 import React from 'react'

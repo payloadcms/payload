@@ -13,7 +13,6 @@ export const packagePublishList = [
   'live-preview',
   'live-preview-react',
   'live-preview-vue',
-  'richtext-slate',
   'richtext-lexical',
 
   'create-payload-app',

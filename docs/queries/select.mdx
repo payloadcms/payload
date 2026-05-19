@@ -75,9 +75,34 @@ console.log(post) // { id: '1' }
   implements your `select` query on the database level. Because of that, your
   `beforeRead` and `afterRead` hooks may not receive the full `doc`. To ensure
   that some fields are always selected for your hooks / access control,
-  regardless of the `select` query you can use `forceSelect` collection config
-  property.
+  regardless of the `select` query you can use the [entity-level
+  `select`](#entity-level-select-config) function on your Collection or Global
+  config.
 </Banner>
+
+## Entity-level select config
+
+Both Collections and Globals accept a top-level `select` function that runs before every read and lets you transform the caller's `select` based on request context. It receives `{ operation, req, select }` and returns the final `select` to apply, replacing the caller's. Return `undefined` to leave the caller's `select` untouched.
+
+Common uses:
+
+- Force a field to always be populated so it's available in hooks / access control.
+- Differentiate API requests from admin panel requests to optimize payload size.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  // Always include `title`, regardless of the caller's `select`.
+  select: ({ select }) => (select ? { ...select, title: true } : undefined),
+  fields: [
+    // ...
+  ],
+}
+```
+
+The function form **replaces** the caller's select rather than deep-merging, so spread the caller's `select` into your returned object when you want to add to it instead of replacing it. Per-document data is not available — this runs before the read.
 
 ## REST API
 

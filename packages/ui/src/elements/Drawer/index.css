@@ -1,0 +1,110 @@
+@layer payload-default {
+  .drawer {
+    display: flex;
+    justify-content: flex-end;
+    overflow: hidden;
+    position: fixed;
+    inset: 0;
+
+    --gutter-h: var(--spacer-2-5);
+    --gutter-v: var(--spacer-2-5);
+  }
+
+  .drawer__blur-bg {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 200ms linear;
+    background: var(--color-drawer-backdrop);
+  }
+
+  .drawer__content {
+    opacity: 0;
+    position: relative;
+    z-index: 2;
+    width: 600px;
+    overflow: hidden;
+    transition: all 200ms linear;
+    background-color: var(--color-bg);
+    box-shadow: var(--elevation-400-menu-panel);
+  }
+
+  .drawer__content-children {
+    position: relative;
+    z-index: 1;
+    overflow: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .drawer--is-open .drawer__content,
+  .drawer--is-open .drawer__blur-bg {
+    opacity: 1;
+  }
+
+  .drawer--is-open .drawer__close {
+    opacity: 0.1;
+    transition: opacity 200ms linear;
+    transition-delay: 100ms;
+  }
+
+  .drawer--is-open .drawer__content {
+    transform: translateX(0);
+  }
+
+  .drawer__close {
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+    cursor: pointer;
+    opacity: 0;
+    transition: none;
+    transition-delay: 0ms;
+    flex-grow: 1;
+    background: var(--color-drawer-backdrop);
+    border: 0;
+
+    &:active,
+    &:focus {
+      outline: 0;
+    }
+  }
+
+  .drawer__header {
+    display: flex;
+    align-items: center;
+    padding: var(--spacer-2-5);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    background: var(--color-bg);
+    gap: var(--spacer-2);
+  }
+
+  .drawer__header__title {
+    margin: 0;
+    flex: 1 0 0;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--color-text);
+    font-family: var(--text-body-large-strong-font-family);
+    font-size: var(--text-body-large-strong-font-size);
+    font-weight: var(--text-body-large-strong-font-weight);
+    line-height: var(--text-body-large-strong-line-height);
+    letter-spacing: var(--text-body-large-strong-letter-spacing);
+  }
+
+  .drawer__header__close {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .drawer__header__actions {
+    display: flex;
+    gap: var(--spacer-2);
+    align-items: center;
+  }
+}

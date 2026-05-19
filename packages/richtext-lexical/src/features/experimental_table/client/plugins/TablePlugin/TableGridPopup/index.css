@@ -1,0 +1,166 @@
+@layer payload-default {
+  .table-grid-popup {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 100;
+  }
+
+  .table-grid-popup__content {
+    width: 13rem;
+    background: var(--color-bg);
+    border-radius: var(--radius-large);
+    padding: var(--spacer-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    box-shadow:
+      0px 0px 0.5px 0px rgba(0, 0, 0, 0.15),
+      0px 5px 12px 0px rgba(0, 0, 0, 0.13),
+      0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+  }
+
+  .table-grid-popup__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    justify-content: center;
+  }
+
+  .table-grid-popup__input-group {
+    flex: 1 0 0;
+    display: flex;
+    align-items: center;
+    height: var(--spacer-4);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-medium);
+    overflow: clip;
+    min-width: 0;
+    border: var(--stroke-width-small) solid transparent;
+  }
+
+  .table-grid-popup__input-group:hover {
+    background: var(--color-bg-secondary-hover);
+  }
+
+  .table-grid-popup__input-group--focused {
+    border-color: var(--color-border-selected);
+  }
+
+  .table-grid-popup__input-icon {
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+  }
+
+  .table-grid-popup__input-icon svg {
+    width: var(--spacer-2-5);
+    height: var(--spacer-2-5);
+  }
+
+  .table-grid-popup__input {
+    flex: 1 0 0;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--color-text-secondary);
+    padding: 0;
+    padding-right: var(--spacer-2);
+    outline: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  .table-grid-popup__input::-webkit-inner-spin-button,
+  .table-grid-popup__input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .table-grid-popup__input[type='number'] {
+    -moz-appearance: textfield;
+  }
+
+  .table-grid-popup__separator {
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .table-grid-popup__grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    row-gap: calc(var(--spacer-1) / 2);
+    column-gap: calc(var(--spacer-1) / 2);
+    flex-shrink: 0;
+    align-self: stretch;
+    position: relative;
+  }
+
+  .table-grid-popup__cell {
+    aspect-ratio: 1;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    border: var(--stroke-width-small) solid transparent;
+  }
+
+  .table-grid-popup__cell--selected {
+    background: var(--color-bg-selected);
+    border-color: var(--color-blue-400);
+  }
+
+  .table-grid-popup__cell--hover {
+    background: var(--color-bg-selected-hover);
+    border-color: var(--color-blue-400);
+  }
+
+  .table-grid-popup__tooltip {
+    position: absolute;
+    background: var(--color-bg-menu);
+    color: var(--color-white-800);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    padding: var(--spacer-1) var(--spacer-2);
+    border-radius: var(--radius-medium);
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translate(-50%, calc(-100% - 6px));
+    z-index: 1;
+  }
+
+  /* .table-grid-popup__tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: calc(var(--spacer-1) * -1);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 4px solid var(--color-bg-menu);
+  } */
+
+  .table-grid-popup__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+  }
+}

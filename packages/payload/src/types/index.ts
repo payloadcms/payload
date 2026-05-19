@@ -22,7 +22,9 @@ import type {
   TypedLocale,
   TypedUser,
 } from '../index.js'
+import type { File } from '../uploads/types.js'
 import type { Operator } from './constants.js'
+export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
 
 export type CustomPayloadRequestProperties = {
@@ -111,12 +113,9 @@ type PayloadRequestData = {
      * Context of the file when it was uploaded via client side.
      */
     clientUploadContext?: unknown
-    data: Buffer
-    mimetype: string
-    name: string
-    size: number
-    tempFilePath?: string
-  }
+  } & File
+  /** All files from multipart form data, keyed by field name */
+  files?: Record<string, File | File[]>
 }
 export interface PayloadRequest
   extends CustomPayloadRequestProperties,
@@ -207,6 +206,55 @@ export type SelectExcludeType = {
 export type SelectMode = 'exclude' | 'include'
 
 export type SelectType = SelectExcludeType | SelectIncludeType
+
+/**
+ * Operations that invoke an entity-level `select` function.
+ *
+ * Narrower than `HookOperationType`: `select` runs only for read- and
+ * write-path operations that materialize a document (`create`, `delete`,
+ * `read`, `restoreVersion`, `update`). Operations like `autosave`, `count`,
+ * `countVersions`, `forgotPassword`, `login`, `readDistinct`, `refresh`, and
+ * `resetPassword` do not invoke `select` and are intentionally excluded.
+ */
+export type SelectFnOperation = 'create' | 'delete' | 'read' | 'restoreVersion' | 'update'
+
+export type SelectFnArgs = {
+  operation: SelectFnOperation
+  req: PayloadRequest
+  /** The caller's `select` arg, or `undefined` if not provided. */
+  select?: SelectType
+}
+
+export type SelectFn<TSelect extends SelectType = SelectType> = (
+  args: SelectFnArgs,
+) => TSelect | undefined
+
+/**
+ * Shared shape for the entity-level `select` config used by Collections and Globals.
+ * The JSDoc on the `select` property is the single source of truth — pick from this
+ * type when defining the config:
+ *
+ *   & Pick<WithSelectFn<...>, 'select'>
+ */
+export type WithSelectFn<TSelect extends SelectType = SelectType> = {
+  /**
+   * Entity-level Select API configuration.
+   *
+   * A function that receives the current request context (`operation`, `req`,
+   * the caller's `select`) and returns the final `select` to apply, replacing
+   * the caller's. Return `undefined` to leave the caller's `select` unchanged.
+   *
+   * Useful to dynamically modify the caller's selection based on the request context:
+   *  - Forcing a field to be populated for reference within hooks / access control.
+   *  - Differentiating between API requests and admin panel requests, to optimize
+   *    the amount of data being queried in each case.
+   *
+   * Note: per-document data is not available — this runs before the read.
+   *
+   * @see https://payloadcms.com/docs/queries/select
+   */
+  select?: SelectFn<TSelect>
+}
 
 export type ApplyDisableErrors<T, DisableErrors = false> = false extends DisableErrors
   ? T

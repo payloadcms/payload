@@ -20,6 +20,10 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  localization: {
+    locales: ['en', 'es'],
+    defaultLocale: 'en',
+  },
   editor: lexicalEditor({}),
 
   onInit: async (payload) => {

@@ -145,6 +145,9 @@ export interface Config {
     'global-drafts': GlobalDraftsSelect<false> | GlobalDraftsSelect<true>;
   };
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -175,11 +178,6 @@ export interface UserAuthOperations {
  */
 export interface RichText {
   id: string;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
   lexical?: {
     root: {
       type: string;
@@ -393,11 +391,6 @@ export interface AllFieldsLocalized {
   radio?: ('radio1' | 'radio2') | null;
   checkbox?: boolean | null;
   date?: string | null;
-  richTextSlate?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
   localizedGroup?: {
     title?: string | null;
     description?: string | null;
@@ -531,6 +524,7 @@ export interface ArrayField {
 export interface LocalizedRequired {
   id: string;
   title: string;
+  seoTitle?: string | null;
   nav: {
     layout: (
       | {
@@ -759,6 +753,9 @@ export interface Tab {
           id?: string | null;
         }[]
       | null;
+    group?: {
+      heading?: string | null;
+    };
   };
   tab?: {
     title?: string | null;
@@ -1029,7 +1026,6 @@ export interface PayloadMigration {
  * via the `definition` "richText_select".
  */
 export interface RichTextSelect<T extends boolean = true> {
-  richText?: T;
   lexical?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1205,7 +1201,6 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
   radio?: T;
   checkbox?: T;
   date?: T;
-  richTextSlate?: T;
   localizedGroup?:
     | T
     | {
@@ -1374,6 +1369,7 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
  */
 export interface LocalizedRequiredSelect<T extends boolean = true> {
   title?: T;
+  seoTitle?: T;
   nav?:
     | T
     | {
@@ -1582,6 +1578,11 @@ export interface TabsSelect<T extends boolean = true> {
           | {
               title?: T;
               id?: T;
+            };
+        group?:
+          | T
+          | {
+              heading?: T;
             };
       };
   tab?:
@@ -1815,6 +1816,16 @@ export interface GlobalDraftsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

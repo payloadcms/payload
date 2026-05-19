@@ -90,11 +90,13 @@ export const ClipboardAction: FC<Props> = ({
   return (
     <Popup
       button={<MoreIcon />}
+      buttonClassName={`${baseClass}__button`}
+      caret={false}
       className={classes}
       disabled={disabled}
-      horizontalAlign="center"
+      horizontalAlign="right"
       render={({ close }) => (
-        <PopupList.ButtonGroup>
+        <PopupList.ButtonGroup buttonSize="medium">
           <PopupList.Button
             className={copyClassName}
             disabled={!allowCopy}
@@ -117,7 +119,6 @@ export const ClipboardAction: FC<Props> = ({
           </PopupList.Button>
         </PopupList.ButtonGroup>
       )}
-      size="large"
       verticalAlign="bottom"
     />
   )

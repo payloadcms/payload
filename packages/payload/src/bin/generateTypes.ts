@@ -50,6 +50,12 @@ export async function generateTypes(
 
   compiled = addSelectGenericsToGeneratedTypes({ compiledGeneratedTypes: compiled })
 
+  if (config.typescript.postProcess?.length) {
+    for (const fn of config.typescript.postProcess) {
+      compiled = fn({ compiledTypes: compiled, config })
+    }
+  }
+
   if (config.typescript.declare !== false) {
     if (config.typescript.declare?.ignoreTSError) {
       compiled += `\n\n${declareWithTSIgnoreError}`

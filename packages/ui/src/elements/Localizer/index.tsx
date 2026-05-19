@@ -4,13 +4,15 @@ import { useRouter } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { Fragment } from 'react'
 
+import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { LanguageIcon } from '../../icons/Language/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale, useLocaleLoading } from '../../providers/Locale/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import './index.scss'
-import { LocalizerLabel } from './LocalizerLabel/index.js'
+import './index.css'
 
 const baseClass = 'localizer'
 
@@ -27,7 +29,7 @@ export const Localizer: React.FC<{
 
   const { setLocaleIsLoading } = useLocaleLoading()
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const locale = useLocale()
 
   if (localization) {
@@ -36,7 +38,6 @@ export const Localizer: React.FC<{
     return (
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
         <Popup
-          button={<LocalizerLabel />}
           horizontalAlign="right"
           render={({ close }) => (
             <PopupList.ButtonGroup>
@@ -91,6 +92,22 @@ export const Localizer: React.FC<{
                 )
               })}
             </PopupList.ButtonGroup>
+          )}
+          renderButton={({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
+            <Button
+              aria-label={t('general:locale')}
+              buttonStyle="secondary"
+              extraButtonProps={{ onKeyDown }}
+              icon={<LanguageIcon size={24} />}
+              iconPosition="left"
+              onClick={onClick}
+              {...ariaProps}
+            >
+              <div className={`${baseClass}__button-content`}>
+                {locale.code}
+                <ChevronIcon size={16} />
+              </div>
+            </Button>
           )}
           showScrollbar
           size="large"

@@ -8,8 +8,8 @@ import type { PayloadRequest } from '../types/index.js'
 
 import { APIError } from './APIError.js'
 
-// This gets dynamically reassigned during compilation
-export let ValidationErrorName = 'ValidationError'
+/** @deprecated Use `instanceof ValidationError` instead of name comparison. */
+export const ValidationErrorName = 'ValidationError'
 
 export type ValidationFieldError = {
   label?: LabelFunction | StaticLabel
@@ -75,7 +75,5 @@ export class ValidationError extends APIError<{
       httpStatus.BAD_REQUEST,
       results,
     )
-
-    ValidationErrorName = this.constructor.name
   }
 }

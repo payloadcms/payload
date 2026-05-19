@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/sdk",
-  "version": "3.79.0",
+  "version": "4.0.0-beta.0",
   "description": "The official Payload REST API SDK",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "payload": "workspace:*",
-    "qs-esm": "7.0.2",
+    "qs-esm": "8.0.1",
     "ts-essentials": "10.0.3"
   },
   "devDependencies": {

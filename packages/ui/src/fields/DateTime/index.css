@@ -1,0 +1,13 @@
+@layer payload-default {
+  .date-time-field--has-error .date-time-picker .react-datepicker__input-container input {
+    border-color: var(--color-border-danger-strong);
+
+    &:hover:not(:focus) {
+      border-color: var(--color-border-danger-strong);
+    }
+
+    &:focus {
+      border-color: var(--accessibility-focus-color);
+    }
+  }
+}

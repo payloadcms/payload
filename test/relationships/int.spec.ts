@@ -473,6 +473,37 @@ describe('Relationships', () => {
         expect(res.docs[0].id).toBe(director_2.id)
       })
 
+      // MongoDB dedupes $in at execution, so the bug is only visible in the
+      // filter Payload hands to Mongoose — not in the returned docs.
+      mongoIt('should not duplicate IDs in $in when querying through a relationship', async () => {
+        const movie = await payload.create({
+          collection: 'movies',
+          data: { name: 'dup_test_movie' },
+        })
+
+        const Model = (payload.db as any).collections.directors
+        const originalPaginate = Model.paginate.bind(Model)
+        let capturedQuery: any
+        Model.paginate = (query: any, ...rest: any[]) => {
+          capturedQuery = query
+          return originalPaginate(query, ...rest)
+        }
+
+        try {
+          await payload.find({
+            collection: 'directors',
+            where: { 'movie.name': { equals: 'dup_test_movie' } },
+          })
+        } finally {
+          Model.paginate = originalPaginate
+        }
+
+        // eslint-disable-next-line vitest/no-standalone-expect
+        expect(capturedQuery.$and[0].movie.$in).toHaveLength(1)
+
+        await payload.delete({ collection: 'movies', id: movie.id })
+      })
+
       describe('hasMany relationships', () => {
         it('should retrieve totalDocs correctly with hasMany,', async () => {
           const movie1 = await payload.create({
@@ -1812,7 +1843,8 @@ describe('Relationships', () => {
           polymorphic: {
             equals: {
               relationTo: 'movies',
-              value: payload.db.idType === 'uuid' ? randomUUID() : 99,
+              value:
+                payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7' ? randomUUID() : 99,
             },
           },
         },

@@ -32,6 +32,9 @@ export const getAfterReadHook =
           filename,
           prefix,
         })
+      } else if (url && prefix) {
+        const separator = url.includes('?') ? '&' : '?'
+        url = `${url}${separator}prefix=${encodeURIComponent(prefix)}`
       }
     }
 

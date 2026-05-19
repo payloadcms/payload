@@ -1,0 +1,251 @@
+---
+title: 3.0 to 4.0 Migration Guide
+label: 3.0 to 4.0
+order: 15
+desc: Upgrade guide for Payload 3.x projects migrating to 4.0.
+keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react
+---
+
+# Payload 3.0 to 4.0 Migration Guide
+
+All breaking changes are listed below. If you encounter changes that are not explicitly listed here, please consider contributing to this documentation by submitting a PR.
+
+## Codemod
+
+Most of the breaking changes below are auto-migratable using the [`@payloadcms/codemod`](https://github.com/payloadcms/payload/tree/main/packages/codemod) CLI:
+
+```bash
+npx @payloadcms/codemod
+```
+
+The codemod is idempotent and safe to run on a partially-migrated project.
+
+## Breaking Changes
+
+### List View Select API is now the default
+
+The `admin.enableListViewSelectAPI` Collection Config property has been removed. The List View now always uses the [Select API](../queries/select) to query only the active columns, which was previously opt-in.
+
+If you previously set `admin.enableListViewSelectAPI: true`, remove the property — the behavior is now default. The `migrate-list-view-select-api` transform in `@payloadcms/codemod` handles this automatically.
+
+### Globals: `admin.components.elements` renamed to `admin.components.edit`
+
+Global configs now use the same `admin.components` shape as Collections. The Edit View slot container is renamed from `elements` to `edit`, the `Description` slot is hoisted to top-level `admin.components.Description`, and `editMenuItems` is now supported.
+
+```diff
+export const Header: GlobalConfig = {
+  slug: 'header',
+  admin: {
+    components: {
+-     elements: {
+-       SaveButton: '/path/to/CustomSaveButton',
+-       Description: '/path/to/CustomDescription',
+-     },
++     Description: '/path/to/CustomDescription',
++     edit: {
++       SaveButton: '/path/to/CustomSaveButton',
++     },
+    },
+  },
+}
+```
+
+The available slots under `admin.components.edit` for Globals now match Collections (`beforeDocumentControls`, `editMenuItems`, `PreviewButton`, `PublishButton`, `SaveButton`, `SaveDraftButton`, `Status`, `UnpublishButton`). `Upload` remains Collection-only.
+
+Globals also now support custom views with arbitrary keys under `admin.components.views`, mirroring Collections.
+
+This change is auto-migrated by the `globals-components-edit` codemod.
+
+### `forceSelect` removed in favor of a `select` function on Collections and Globals
+
+The static `forceSelect` config has been removed. Each Collection and Global now accepts a top-level `select` function that receives the current `operation`, `req`, and the caller's `select`, and returns the final `select` to use. Returning `undefined` leaves the caller's `select` unchanged.
+
+The new function form **replaces** the caller's select rather than deep-merging into it. To preserve the previous behavior of always forcing certain fields, spread the caller's `select` into the returned object yourself.
+
+```diff
+// collections/Posts.ts
+import type { CollectionConfig } from 'payload'
+
+export const PostsCollection: CollectionConfig = {
+  slug: 'posts',
+- forceSelect: {
+-   title: true,
+-   slug: true,
+- },
++ select: ({ select }) => (select ? { ...select, title: true, slug: true } : undefined),
+  fields: [],
+}
+```
+
+The same change applies to Globals.
+
+Run `npx @payloadcms/codemod --transform migrate-force-select` to migrate automatically. The codemod handles object-literal `forceSelect` values, including nested ones (which previously deep-merged) — those are rewritten to call `deepMergeSimple` from `payload/shared`, with the import added automatically. Non-literal values, configs that already define a sibling `select`, and unsupported member kinds are surfaced as notes for manual review.
+
+#### The `admin.hideAPIURL` property on Collections and Globals has been removed
+
+Use the existing `admin.components.views.edit.api.tab.condition` to hide the API tab instead.
+
+```diff
+// collections/Posts.ts
+import type { CollectionConfig } from 'payload'
+
+export const PostsCollection: CollectionConfig = {
+  slug: 'posts',
+  admin: {
+-   hideAPIURL: true,
++   components: {
++     views: {
++       edit: {
++         api: {
++           tab: {
++             condition: () => false,
++           },
++         },
++       },
++     },
++   },
+  },
+  fields: [],
+}
+```
+
+Run `npx @payloadcms/codemod --transform remove-hide-api-url` to migrate automatically.
+
+### Aliased type and utility re-exports from `@payloadcms/ui` and `@payloadcms/next`
+
+Several types and utilities that were re-exported from `@payloadcms/ui` and `@payloadcms/next/utilities` for backwards compatibility have been removed. The canonical exports live in `payload` and `payload/shared`; import directly from there.
+
+**Pass-through re-exports** — same name, new source:
+
+| Symbol                        | Old source                   | New source       |
+| ----------------------------- | ---------------------------- | ---------------- |
+| `Column`                      | `@payloadcms/ui`             | `payload`        |
+| `ListViewSlots`               | `@payloadcms/ui`             | `payload`        |
+| `ListViewClientProps`         | `@payloadcms/ui`             | `payload`        |
+| `EntityType`                  | `@payloadcms/ui/shared`      | `payload/shared` |
+| `formatAdminURL`              | `@payloadcms/ui/shared`      | `payload/shared` |
+| `mergeListSearchAndWhere`     | `@payloadcms/ui/shared`      | `payload/shared` |
+| `mergeHeaders`                | `@payloadcms/next/utilities` | `payload`        |
+| `headersWithCors`             | `@payloadcms/next/utilities` | `payload`        |
+| `createPayloadRequest`        | `@payloadcms/next/utilities` | `payload`        |
+| `addDataAndFileToRequest`     | `@payloadcms/next/utilities` | `payload`        |
+| `sanitizeLocales`             | `@payloadcms/next/utilities` | `payload`        |
+| `addLocalesToRequestFromData` | `@payloadcms/next/utilities` | `payload`        |
+
+**Renamed types** — use the new canonical name from `payload`:
+
+| Old name                   | New name                | Source    |
+| -------------------------- | ----------------------- | --------- |
+| `ListPreferences`          | `CollectionPreferences` | `payload` |
+| `ListComponentClientProps` | `ListViewClientProps`   | `payload` |
+| `ListComponentServerProps` | `ListViewServerProps`   | `payload` |
+
+```diff
+- import type { Column, ListViewSlots, ListPreferences } from '@payloadcms/ui'
+- import { EntityType, formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
+- import { headersWithCors, mergeHeaders } from '@payloadcms/next/utilities'
++ import type { Column, ListViewSlots, CollectionPreferences } from 'payload'
++ import { EntityType, formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
++ import { headersWithCors, mergeHeaders } from 'payload'
+```
+
+Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
+
+### `title` and `setDocumentTitle` removed from `useDocumentInfo`
+
+For performance reasons, the document title state has been split out of `DocumentInfoContext` into its own `DocumentTitleContext`. Access it through the `useDocumentTitle` hook, which exposes the same `title` and `setDocumentTitle` API. Components that subscribed to `useDocumentInfo` solely for the title will no longer re-render when unrelated document state changes.
+
+```diff
+'use client'
+- import { useDocumentInfo } from '@payloadcms/ui'
++ import { useDocumentTitle } from '@payloadcms/ui'
+
+const Heading: React.FC = () => {
+-  const { title, setDocumentTitle } = useDocumentInfo()
++  const { title, setDocumentTitle } = useDocumentTitle()
+  return <h2>{title}</h2>
+}
+```
+
+If you only used `useDocumentInfo` for `title` / `setDocumentTitle`, drop the import entirely. If you used it for other properties as well, leave the original `useDocumentInfo()` call in place and add a separate `useDocumentTitle()` call alongside it.
+
+Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migrate automatically. The codemod splits mixed destructures, removes the `useDocumentInfo` import when no other properties are still used, and preserves any rename aliases (e.g. `{ title: docTitle }`).
+
+### Plugin Import/Export: `toCSV` and `fromCSV` removed
+
+The `toCSV` and `fromCSV` field options in `custom['plugin-import-export']` have been removed. Use `hooks.beforeExport` and `hooks.beforeImport` instead — they work for both CSV and JSON formats.
+
+The argument shapes differ slightly from the old API:
+
+| Old (`toCSV`) | New (`hooks.beforeExport`)          |
+| ------------- | ----------------------------------- |
+| `row`         | `siblingData`                       |
+| `doc`         | `data`                              |
+| `data`        | _(removed — was alias for `row`)_   |
+| —             | `format` (new: `'csv'` \| `'json'`) |
+
+The `fromCSV` → `hooks.beforeImport` change is non-breaking for the `data` parameter — both receive the full flat row.
+
+```diff
+{
+  name: 'author',
+  type: 'relationship',
+  relationTo: 'users',
+  custom: {
+    'plugin-import-export': {
+-     toCSV: ({ value, columnName, row, doc }) => {
+-       row[`${columnName}_id`] = (value as any).id
+-       return doc.title
+-     },
+-     fromCSV: ({ value, data }) => data[`${value}_key`],
++     hooks: {
++       beforeExport: ({ value, columnName, siblingData, data }) => {
++         siblingData[`${columnName}_id`] = (value as any).id
++         return data.title
++       },
++       beforeImport: ({ value, data }) => data[`${value}_key`],
++     },
+    },
+  },
+}
+```
+
+Run `npx @payloadcms/codemod --transform migrate-import-export-hooks` to migrate automatically. The codemod moves the function values into the correct hook positions and merges with any existing `hooks` object. Review argument names in the migrated functions — `row` references must be renamed to `siblingData` and `doc` references renamed to `data`.
+
+### DB Adapter `/types` Subpath Exports Removed
+
+The `/types` subpath export has been removed from all Drizzle-based database adapter packages. All types are available directly from the main package entry point.
+
+| Old import                             | New import                       |
+| -------------------------------------- | -------------------------------- |
+| `@payloadcms/drizzle/types`            | `@payloadcms/drizzle`            |
+| `@payloadcms/db-postgres/types`        | `@payloadcms/db-postgres`        |
+| `@payloadcms/db-sqlite/types`          | `@payloadcms/db-sqlite`          |
+| `@payloadcms/db-vercel-postgres/types` | `@payloadcms/db-vercel-postgres` |
+| `@payloadcms/db-d1-sqlite/types`       | `@payloadcms/db-d1-sqlite`       |
+
+```diff
+- import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+- import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+- import type { SQLiteAdapter } from '@payloadcms/db-sqlite/types'
+- import type { VercelPostgresAdapter } from '@payloadcms/db-vercel-postgres/types'
+- import type { SQLiteD1Adapter } from '@payloadcms/db-d1-sqlite/types'
++ import type { DrizzleAdapter } from '@payloadcms/drizzle'
++ import type { PostgresAdapter } from '@payloadcms/db-postgres'
++ import type { SQLiteAdapter } from '@payloadcms/db-sqlite'
++ import type { VercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
++ import type { SQLiteD1Adapter } from '@payloadcms/db-d1-sqlite'
+```
+
+If you use a `declare module` augmentation to extend `GeneratedDatabaseSchema` (typically found in generated schema files), update the module path as well:
+
+```diff
+- declare module '@payloadcms/db-postgres/types' {
++ declare module '@payloadcms/db-postgres' {
+    export interface GeneratedDatabaseSchema {
+      schema: DatabaseSchema
+    }
+  }
+```
+
+Run `npx @payloadcms/codemod --transform migrate-db-types-subpath` to migrate automatically. The codemod handles import declarations, re-export declarations, and `declare module` augmentations.

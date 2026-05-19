@@ -13,7 +13,6 @@
   }
 
   .upload-diff {
-    @extend %body;
     min-width: 100%;
     max-width: fit-content;
     display: flex;

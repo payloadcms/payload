@@ -50,7 +50,7 @@ describe('Join Field', () => {
   let categoriesVersionsURL: AdminUrlUtil
   let versionsURL: AdminUrlUtil
   let categoryID: number | string
-  let rootFolderID: number | string
+  let rootParentID: number | string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -103,7 +103,7 @@ describe('Join Field', () => {
     ;({ id: categoryID } = docs[0])
 
     const folder = await payload.find({ collection: 'folders', sort: 'createdAt', depth: 0 })
-    rootFolderID = folder.docs[0]!.id
+    rootParentID = folder.docs[0]!.id
   })
 
   test('should populate joined relationships in table cells of list view', async () => {
@@ -168,7 +168,7 @@ describe('Join Field', () => {
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField.locator('.row-1 > .cell-title')).toContainText('z')
-    await expect(joinField.locator('.paginator > .clickable-arrow--right')).toBeVisible()
+    await expect(joinField.locator('.relationship-table-pagination')).toBeVisible()
     const rows = joinField.locator('.relationship-table tbody tr')
     await expect(rows).toHaveCount(5)
   })
@@ -633,7 +633,7 @@ describe('Join Field', () => {
   })
 
   test('should render join field with array of collections', async () => {
-    await page.goto(foldersURL.edit(rootFolderID))
+    await page.goto(foldersURL.edit(rootParentID))
     const joinField = page.locator('#field-children.field-type.join')
     await expect(joinField).toBeVisible()
 
@@ -651,7 +651,7 @@ describe('Join Field', () => {
   })
 
   test('should create a new document from join field with array of collections', async () => {
-    await page.goto(foldersURL.edit(rootFolderID))
+    await page.goto(foldersURL.edit(rootParentID))
     const joinField = page.locator('#field-children.field-type.join')
     await expect(joinField).toBeVisible()
 
@@ -688,7 +688,7 @@ describe('Join Field', () => {
     await page.locator('#field-enableErrorOnJoin').click()
     await page.locator('#action-save').click()
 
-    await expect(page.locator('#field-joinWithError')).toContainText('enableErrorOnJoin is true')
+    await expect(page.locator('#field-joinWithError .error-pill')).toBeVisible()
   })
 
   test('should render localized data in table when locale changes', async () => {

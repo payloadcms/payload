@@ -132,7 +132,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
           />
           <div className={`${baseClass}__toggle-button-wrap`}>
             <Button
-              buttonStyle="none"
+              buttonStyle="ghost"
               className={`${baseClass}__toggle-button`}
               icon={<EyeIcon active={showKey} />}
               onClick={() => setShowKey((prev) => !prev)}

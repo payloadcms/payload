@@ -4,7 +4,6 @@ import type { Email, FormattedEmail, FormBuilderPluginConfig } from '../../../ty
 
 import { serializeLexical } from '../../../utilities/lexical/serializeLexical.js'
 import { replaceDoubleCurlys } from '../../../utilities/replaceDoubleCurlys.js'
-import { serializeSlate } from '../../../utilities/slate/serializeSlate.js'
 
 type AfterChangeParams = Parameters<CollectionAfterChangeHook>[0]
 
@@ -62,11 +61,7 @@ export const sendEmail = async (
             const from = replaceDoubleCurlys(emailFrom, submissionData)
             const replyTo = replaceDoubleCurlys(emailReplyTo || emailFrom, submissionData)
 
-            const isLexical = message && !Array.isArray(message) && 'root' in message
-
-            const serializedMessage = isLexical
-              ? await serializeLexical(message, submissionData)
-              : serializeSlate(message, submissionData)
+            const serializedMessage = await serializeLexical(message, submissionData)
 
             return {
               bcc,

@@ -45,7 +45,6 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
         name: 'publishedLocale',
         type: 'select',
         admin: {
-          disableBulkEdit: true,
           disabled: true,
         },
         index: true,

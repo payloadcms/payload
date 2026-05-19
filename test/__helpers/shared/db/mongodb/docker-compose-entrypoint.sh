@@ -17,9 +17,11 @@ KEYFILE="/data/db/keyfile"
 INIT_FLAG="$DATA_DIR/.initialized"
 
 # Copy keyfile to writable location and set correct permissions
-cp "$KEYFILE_SRC" "$KEYFILE"
-chmod 400 "$KEYFILE"
-chown mongodb:mongodb "$KEYFILE" 2>/dev/null || true
+if [ ! -f "$KEYFILE" ]; then
+    cp "$KEYFILE_SRC" "$KEYFILE"
+    chmod 400 "$KEYFILE"
+    chown mongod:mongod "$KEYFILE" 2>/dev/null || true
+fi
 
 # Check if already initialized
 if [ -f "$INIT_FLAG" ]; then
