@@ -97,7 +97,7 @@
     "file-type": "21.3.4",
     "http-status": "2.1.0",
     "jwt-decode": "4.0.0",
-    "mongoose": "8.15.1",
+    "mongoose": "8.22.1",
     "next": "16.2.6",
     "nodemailer": "^8.0.5",
     "object-to-formdata": "4.5.1",
