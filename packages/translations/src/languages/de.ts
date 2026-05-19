@@ -353,6 +353,7 @@ export const deTranslations: DefaultTranslationsObject = {
     locale: 'Sprache',
     locales: 'Sprachen',
     lock: 'Sperren',
+    manageLabel: 'Verwalten Sie {{label}}',
     menu: 'Menü',
     moreOptions: 'Mehr Optionen',
     move: 'Verschieben',

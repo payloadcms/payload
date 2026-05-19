@@ -348,6 +348,7 @@ export const myTranslations: DefaultTranslationsObject = {
     locale: 'ဒေသ',
     locales: 'Locales',
     lock: 'Kunci',
+    manageLabel: '{{label}} ကိုစီမံခန့်ခွဲပါ',
     menu: 'မီနူး',
     moreOptions: 'ပိုမိုများစွာရွေးချယ်ခွင့်',
     move: 'ရွှေ့ပြောင်းပါ',

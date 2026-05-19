@@ -348,6 +348,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     locale: 'Lokalė',
     locales: 'Lokalės',
     lock: 'Užraktas',
+    manageLabel: 'Tvarkyti {{label}}',
     menu: 'Meniu',
     moreOptions: 'Daugiau parinkčių',
     move: 'Judėti',

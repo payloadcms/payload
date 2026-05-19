@@ -13,6 +13,7 @@ import { CheckboxSection } from './sections/Checkbox.js'
 import { CopyToClipboardSection } from './sections/CopyToClipboard.js'
 import { DocumentAlertSection } from './sections/DocumentAlert.js'
 import { DrawerSection } from './sections/DrawerSection.js'
+import { DropzoneSection } from './sections/Dropzone.js'
 import { IconsSection } from './sections/Icons.js'
 import { IDLabelSection } from './sections/IDLabel.js'
 import { InputStepperSection } from './sections/InputStepper.js'
@@ -24,6 +25,7 @@ import { NoListResultsSection } from './sections/NoListResults.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
 import { RenderTitleSection } from './sections/RenderTitle.js'
+import { SearchBarSection } from './sections/SearchBar.js'
 import { SpinnerSection } from './sections/Spinner.js'
 import { StatusSection } from './sections/Status.js'
 import { StatusCellSection } from './sections/StatusCell.js'
@@ -58,6 +60,7 @@ type ComponentId =
   | 'date-field'
   | 'document-alert'
   | 'drawer'
+  | 'dropzone'
   | 'email-field'
   | 'email-username-field'
   | 'icons'
@@ -80,6 +83,7 @@ type ComponentId =
   | 'radio'
   | 'radiogroup-field'
   | 'render-title'
+  | 'search-bar'
   | 'select'
   | 'select-field'
   | 'shimmer'
@@ -106,6 +110,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Card', value: 'card' },
   { category: 'primitives', label: 'Checkbox', value: 'checkbox' },
   { category: 'primitives', label: 'Copy to Clipboard', value: 'copy-to-clipboard' },
+  { category: 'primitives', label: 'Dropzone', value: 'dropzone' },
   { category: 'primitives', label: 'Icons', value: 'icons' },
   { category: 'primitives', label: 'ID Label', value: 'id-label' },
   { category: 'primitives', label: 'Input', value: 'input' },
@@ -115,6 +120,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Pill', value: 'pill' },
   { category: 'primitives', label: 'Popup', value: 'popup' },
   { category: 'primitives', label: 'Radio', value: 'radio' },
+  { category: 'primitives', label: 'Search Bar', value: 'search-bar' },
   { category: 'primitives', label: 'Render Title', value: 'render-title' },
   { category: 'primitives', label: 'Select', value: 'select' },
   { category: 'primitives', label: 'Spinner', value: 'spinner' },
@@ -256,6 +262,7 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('tooltip', 'primitives') && <TooltipSection selectedComponent="tooltip" />}
         {shouldShow('popup', 'primitives') && <PopupSection selectedComponent="popup" />}
         {shouldShow('card', 'primitives') && <CardSection selectedComponent="card" />}
+        {shouldShow('dropzone', 'primitives') && <DropzoneSection selectedComponent="dropzone" />}
         {shouldShow('copy-to-clipboard', 'primitives') && (
           <CopyToClipboardSection selectedComponent="copy-to-clipboard" />
         )}
@@ -263,6 +270,9 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('locked', 'primitives') && <LockedSection selectedComponent="locked" />}
         {shouldShow('input-stepper', 'primitives') && (
           <InputStepperSection selectedComponent="input-stepper" />
+        )}
+        {shouldShow('search-bar', 'primitives') && (
+          <SearchBarSection selectedComponent="search-bar" />
         )}
         {shouldShow('spinner', 'primitives') && <SpinnerSection selectedComponent="spinner" />}
 

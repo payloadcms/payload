@@ -79,7 +79,9 @@
     border-radius: var(--radius-medium);
     cursor: pointer;
     color: var(--color-icon);
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease;
 
     &:hover {
       background-color: var(--color-bg-transparent-hover);

@@ -14,7 +14,7 @@ const DRAWER_SLUG_NESTED_3 = formatDrawerSlug({ slug: 'demo-drawer-nested-3', de
 const NestedDrawerContent: React.FC<{
   currentDepth: number
   maxDepth: number
-  slugs: (string | null)[]
+  slugs: (null | string)[]
 }> = ({ currentDepth, maxDepth, slugs }) => {
   const { openModal } = useModal()
   const nextSlug = slugs[currentDepth]

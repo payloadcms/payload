@@ -344,6 +344,7 @@ export const plTranslations: DefaultTranslationsObject = {
     locale: 'Ustawienia regionalne',
     locales: 'Ustawienia regionalne',
     lock: 'Zamek',
+    manageLabel: 'Manage {{label}}',
     menu: 'Menu',
     moreOptions: 'Więcej opcji',
     move: 'Przesuń',
