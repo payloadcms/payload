@@ -22,8 +22,8 @@ const Tags: CollectionConfig = {
       type: 'textarea',
     },
   ],
-  hierarchy: {
-    parentFieldName: 'parent',
+  tags: {
+    collectionSpecific: { fieldName: 'allowedCollections' },
   },
 }
 

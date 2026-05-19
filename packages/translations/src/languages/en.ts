@@ -346,6 +346,7 @@ export const enTranslations = {
     locale: 'Locale',
     locales: 'Locales',
     lock: 'Lock',
+    manageLabel: 'Manage {{label}}',
     menu: 'Menu',
     moreOptions: 'More options',
     move: 'Move',

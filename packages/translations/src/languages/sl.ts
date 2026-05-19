@@ -344,6 +344,7 @@ export const slTranslations: DefaultTranslationsObject = {
     locale: 'Jezik',
     locales: 'Jeziki',
     lock: 'Zakleni',
+    manageLabel: 'Upravljaj {{label}}',
     menu: 'Meni',
     moreOptions: 'Več možnosti',
     move: 'Premakni',

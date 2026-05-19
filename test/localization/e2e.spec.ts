@@ -378,7 +378,9 @@ describe('Localization', () => {
       await page.goto(url.list)
 
       // The localizer now shows just the locale code in .localizer__button-content
-      const localeLabel = page.locator('.localizer.app-header__localizer .localizer__button-content')
+      const localeLabel = page.locator(
+        '.localizer.app-header__localizer .localizer__button-content',
+      )
 
       await expect(localeLabel).not.toHaveText('en')
     })
@@ -786,7 +788,7 @@ describe('Localization', () => {
     await page.goto(url.list)
     const searchInput = page.locator('.search-filter__input')
     await expect(searchInput).toBeVisible()
-    await expect(searchInput).toHaveAttribute('placeholder', 'Search by Full title')
+    await expect(searchInput).toHaveAttribute('placeholder', 'Search')
   })
 
   describe('publish specific locale', () => {

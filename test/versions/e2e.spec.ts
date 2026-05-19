@@ -566,7 +566,7 @@ describe('Versions', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
 
       await page.goto(autosaveURL.list)
-      const createNewButton = page.locator('.list-header .btn:has-text("Create New")')
+      const createNewButton = page.locator('#create-new-doc')
       const href = await createNewButton.getAttribute('href')
       await page.goto(`${serverURL}${href}`)
 

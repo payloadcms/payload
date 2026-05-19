@@ -339,6 +339,7 @@ export const faTranslations: DefaultTranslationsObject = {
     locale: 'زبان',
     locales: 'زبان‌ها',
     lock: 'قفل',
+    manageLabel: 'مدیریت {{label}}',
     menu: 'منو',
     moreOptions: 'گزینه‌های بیشتر',
     move: 'انتقال',

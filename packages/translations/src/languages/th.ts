@@ -339,6 +339,7 @@ export const thTranslations: DefaultTranslationsObject = {
     locale: 'ตำแหน่งที่ตั้ง',
     locales: 'ภาษา',
     lock: 'ล็อค',
+    manageLabel: 'จัดการ {{label}}',
     menu: 'เมนู',
     moreOptions: 'ตัวเลือกเพิ่มเติม',
     move: 'ย้าย',
