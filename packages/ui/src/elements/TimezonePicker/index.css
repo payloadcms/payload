@@ -31,6 +31,7 @@
         background: var(--color-bg-menu);
         padding: var(--spacer-2);
         min-width: 280px;
+        max-height: 280px;
       }
 
       .rs__menu-list {
@@ -140,7 +141,7 @@
 
         &:focus-visible {
           outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-          outline-offset: -1px;
+          outline-offset: calc(-1 * var(--stroke-width-small));
         }
       }
 
@@ -148,7 +149,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding-inline: -1px;
+        padding-inline: calc(-1 * var(--stroke-width-small));
         cursor: pointer;
         margin-left: calc(var(--spacer-1) / 2);
         height: var(--spacer-3);
