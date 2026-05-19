@@ -12,7 +12,7 @@ declare module 'payload' {
   }
   interface RegisteredPlugins {
     /** After the plugin's `plugin` callback runs, `options` holds the sanitized config. */
-    '@payloadcms/plugin-mcp': SanitizedMCPPluginConfig
+    '@payloadcms/plugin-mcp': MCPPluginConfig
   }
 }
 
@@ -31,7 +31,8 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
     // read via `getPluginConfig()` (matches our type augmentation above).
     const registered = plugins['@payloadcms/plugin-mcp']
     if (registered) {
-      registered.options = pluginConfig as unknown as typeof registered.options
+      // @ts-expect-error
+      registered.sanitizedOptions = pluginConfig as unknown as typeof registered.options
     }
 
     /**

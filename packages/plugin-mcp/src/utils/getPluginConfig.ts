@@ -19,5 +19,6 @@ export const getPluginConfig: (args: { config: SanitizedConfig }) => SanitizedMC
     throw new Error('MCP Plugin not found in config.plugins.')
   }
 
-  return plugin.options
+  // @ts-expect-error
+  return plugin.sanitizedOptions
 }
