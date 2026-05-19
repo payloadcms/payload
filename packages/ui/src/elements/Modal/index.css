@@ -42,7 +42,12 @@
 
     .btn {
       padding: 0;
+      border: 0;
     }
+  }
+
+  .alert-modal__header--with-actions {
+    padding-right: var(--spacer-2);
   }
 
   .alert-modal__title {

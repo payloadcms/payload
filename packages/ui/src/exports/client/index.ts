@@ -46,6 +46,7 @@ export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
 export { Link } from '../../elements/Link/index.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
+export { DocumentStaleData } from '../../elements/DocumentStaleData/index.js'
 export { DocumentLocked } from '../../elements/DocumentLocked/index.js'
 export { TableColumnsProvider, useTableColumns } from '../../providers/TableColumns/index.js'
 export {

@@ -1,9 +1,15 @@
 'use client'
 
-import { Button, DocumentLocked, DocumentTakeOver } from '@payloadcms/ui'
+import {
+  Button,
+  ConfirmationModal,
+  DocumentLocked,
+  DocumentStaleData,
+  DocumentTakeOver,
+  useModal,
+} from '@payloadcms/ui'
 import React, { useState } from 'react'
 
-import { DocumentStaleData } from '../../../../../packages/ui/src/elements/DocumentStaleData/index.js'
 import { Section, Variant } from '../shared.js'
 
 export const DocumentAlertSection: React.FC<{ selectedComponent: string }> = ({
@@ -12,12 +18,18 @@ export const DocumentAlertSection: React.FC<{ selectedComponent: string }> = ({
   const [lockedActive, setLockedActive] = useState(false)
   const [takeOverActive, setTakeOverActive] = useState(false)
   const [staleActive, setStaleActive] = useState(false)
+  const { closeModal, toggleModal } = useModal()
 
   return (
-    <Section id="document-alert" selectedComponent={selectedComponent} title="Document Alerts">
-      <Variant label="Document Locked">
+    <Section
+      columns={5}
+      id="document-alert"
+      selectedComponent={selectedComponent}
+      title="Document Alerts"
+    >
+      <Variant>
         <Button buttonStyle="secondary" onClick={() => setLockedActive(true)}>
-          Open Modal
+          Document Locked
         </Button>
         <DocumentLocked
           handleGoBack={() => setLockedActive(false)}
@@ -34,9 +46,9 @@ export const DocumentAlertSection: React.FC<{ selectedComponent: string }> = ({
           }}
         />
       </Variant>
-      <Variant label="Document Take Over">
+      <Variant>
         <Button buttonStyle="secondary" onClick={() => setTakeOverActive(true)}>
-          Open Modal
+          Document Take Over
         </Button>
         <DocumentTakeOver
           handleBackToDashboard={() => setTakeOverActive(false)}
@@ -44,11 +56,41 @@ export const DocumentAlertSection: React.FC<{ selectedComponent: string }> = ({
           onReadOnly={() => setTakeOverActive(false)}
         />
       </Variant>
-      <Variant label="Stale Data">
+      <Variant>
         <Button buttonStyle="secondary" onClick={() => setStaleActive(true)}>
-          Open Modal
+          Stale Data
         </Button>
         <DocumentStaleData isActive={staleActive} onReload={() => setStaleActive(false)} />
+      </Variant>
+      <Variant>
+        <Button buttonStyle="secondary" onClick={() => toggleModal('leave-without-saving-demo')}>
+          Leave Without Saving
+        </Button>
+        <ConfirmationModal
+          body="Your changes have not been saved. Are you sure you want to leave?"
+          cancelLabel="Stay on this page"
+          confirmLabel="Leave anyway"
+          heading="Leave without saving"
+          modalSlug="leave-without-saving-demo"
+          onConfirm={() => closeModal('leave-without-saving-demo')}
+        />
+      </Variant>
+      <Variant>
+        <Button buttonStyle="secondary" onClick={() => toggleModal('generate-confirmation-demo')}>
+          Generate Confirmation
+        </Button>
+        <ConfirmationModal
+          body={
+            <p>
+              Generating a new API key will <strong>invalidate</strong> the previous key. Are you
+              sure you wish to continue?
+            </p>
+          }
+          confirmLabel="Generate"
+          heading="Confirm Generation"
+          modalSlug="generate-confirmation-demo"
+          onConfirm={() => closeModal('generate-confirmation-demo')}
+        />
       </Variant>
     </Section>
   )

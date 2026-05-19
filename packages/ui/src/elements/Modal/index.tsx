@@ -43,7 +43,9 @@ export const AlertModal: React.FC<AlertModalProps> = ({
     >
       <div className={`${baseClass}__wrapper`}>
         {title || headerActions ? (
-          <div className={`${baseClass}__header`}>
+          <div
+            className={`${baseClass}__header${headerActions ? ` ${baseClass}__header--with-actions` : ''}`}
+          >
             {title ? <h4 className={`${baseClass}__title`}>{title}</h4> : null}
             {headerActions}
           </div>
