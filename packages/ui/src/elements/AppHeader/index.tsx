@@ -65,16 +65,18 @@ export function AppHeader({ CustomAvatar }: Props) {
         <div className={`${baseClass}__wrapper`}>
           <NavToggler className={`${baseClass}__mobile-nav-toggler`} tabIndex={-1} />
           <div className={`${baseClass}__controls-wrapper`}>
-            <button
-              aria-label={`${navOpen ? t('general:close') : t('general:open')} ${t('general:menu')}`}
-              className={`${baseClass}__sidebar-toggle`}
-              onClick={() => setNavOpen(!navOpen)}
-              type="button"
-            >
-              <SidebarIcon />
-            </button>
             <div className={`${baseClass}__step-nav-wrapper`}>
-              <StepNav className={`${baseClass}__step-nav`} />
+              <button
+                aria-label={`${navOpen ? t('general:close') : t('general:open')} ${t('general:menu')}`}
+                className={`${baseClass}__sidebar-toggle`}
+                onClick={() => setNavOpen(!navOpen)}
+                type="button"
+              >
+                <SidebarIcon />
+              </button>
+              <div className={`${baseClass}__step-nav-wrapper`}>
+                <StepNav className={`${baseClass}__step-nav`} />
+              </div>
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>

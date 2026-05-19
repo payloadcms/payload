@@ -238,6 +238,10 @@
     padding-right: var(--spacer-1);
   }
 
+  /* .step-nav .dashboard-breadcrumb-dropdown {
+    margin-left: calc(var(--spacer-2) * -1);
+  } */
+
   .step-nav .dashboard-breadcrumb-dropdown__editing {
     align-items: center;
     display: flex !important;
@@ -261,7 +265,6 @@
 
   .step-nav .drawer-toggler--unstyled {
     background: transparent;
-    border: none;
     margin: 0;
     padding: 0;
     outline: none;
