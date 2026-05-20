@@ -100,6 +100,7 @@ export interface Config {
     'draft-versions': DraftVersion;
     autosave: Autosave;
     rubbish: Rubbish;
+    'unauthorized-test': UnauthorizedTest;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -153,6 +154,7 @@ export interface Config {
     'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
     rubbish: RubbishSelect<false> | RubbishSelect<true>;
+    'unauthorized-test': UnauthorizedTestSelect<false> | UnauthorizedTestSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -1256,6 +1258,16 @@ export interface Rubbish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unauthorized-test".
+ */
+export interface UnauthorizedTest {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1409,6 +1421,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'rubbish';
         value: string | Rubbish;
+      } | null)
+    | ({
+        relationTo: 'unauthorized-test';
+        value: string | UnauthorizedTest;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -2181,6 +2197,15 @@ export interface RubbishSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unauthorized-test_select".
+ */
+export interface UnauthorizedTestSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
