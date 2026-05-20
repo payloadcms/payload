@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import type { SanitizedMCPPluginConfig } from '../types.js'
 
-import { getAccessGroupField } from './getAccessFields.js'
+import { getAccessField } from './getAccessField.js'
 
 export const getAPIKeysCollection = ({
   pluginConfig,
@@ -49,7 +49,7 @@ export const getAPIKeysCollection = ({
         defaultValue: false,
         label: 'Override access control',
       },
-      getAccessGroupField({ pluginConfig }),
+      getAccessField({ pluginConfig }),
     ],
     labels: {
       plural: 'API Keys',

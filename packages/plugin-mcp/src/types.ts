@@ -26,6 +26,25 @@ export type { MCPCollectionAuthToolName, MCPCollectionBuiltinName, MCPGlobalBuil
 /** Re-exported from `@modelcontextprotocol/server` — the JSON Schema shape the MCP runtime validates against. */
 export type { JsonSchemaType }
 
+/**
+ * Serializable mirror of `SanitizedMCPPluginConfig` for client components —
+ * the full sanitized config carries functions (tool handlers, etc.) that can't
+ * cross the server→client boundary. Built by `sanitizeClientPluginConfig` and
+ * passed to the `AccessField` component via `clientProps`.
+ *
+ * @internal
+ */
+export type ClientMCPPluginConfig = {
+  items: Array<{
+    collectionSlug?: string
+    description: string
+    globalSlug?: string
+    key: string
+    label: string
+    type: 'collectionTool' | 'globalTool' | 'prompt' | 'resource' | 'tool'
+  }>
+}
+
 export type MCPToolResponse = {
   content: Array<{ text: string; type: 'text' }>
 }

@@ -21,13 +21,20 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     }
   },
   "main": "./src/index.ts",
@@ -53,10 +60,15 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "payload": "workspace:*"
+    "@payloadcms/ui": "workspace:*",
+    "@types/react": "19.2.14",
+    "payload": "workspace:*",
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*",
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "publishConfig": {
     "exports": {
@@ -64,6 +76,11 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
       }
     },
     "main": "./dist/index.js",
