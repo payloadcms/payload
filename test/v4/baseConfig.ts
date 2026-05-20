@@ -123,6 +123,11 @@ export const baseConfig: Partial<Config> = {
     locales: ['en', 'es', 'de'],
   },
   admin: {
+    autoLogin: {
+      email: devUser.email,
+      password: devUser.password,
+      prefillOnly: true,
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
