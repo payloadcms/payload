@@ -62,6 +62,6 @@
     --text-heading-large-font-size: 1.5rem; /* 24px */
     --text-heading-large-font-weight: 550;
     --text-heading-large-line-height: 2rem; /* 32px */
-    --text-heading-large-letter-spacing: -1.7px;
+    --text-heading-large-letter-spacing: -0.408px;
   }
 }
