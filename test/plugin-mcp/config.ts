@@ -3,7 +3,11 @@ import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import path from 'path'
 import { definePlugin } from 'payload'
 import { fileURLToPath } from 'url'
-import { z } from 'zod'
+import { z, type ZodType } from 'zod'
+
+/** Convert a zod schema to the JSON Schema shape the plugin's `input` field expects. */
+const zodInput = (schema: ZodType) =>
+  z.toJSONSchema(schema, { io: 'input' }) as Record<string, unknown>
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { FieldTypes } from './collections/FieldTypes.js'
@@ -20,6 +24,13 @@ import { seed } from './seed/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+/**
+ * Used by int.spec.ts to verify the MCP event callback was invoked. The runtime
+ * doesn't have an event hook yet — kept as a stable export so the spec imports
+ * don't break while that feature lands.
+ */
+export const capturedMcpEvents: unknown[] = []
 
 export default buildConfigWithDefaults({
   endpoints: [
@@ -49,18 +60,9 @@ export default buildConfigWithDefaults({
     defaultLocale: 'en',
     fallback: true,
     locales: [
-      {
-        code: 'en',
-        label: 'English',
-      },
-      {
-        code: 'es',
-        label: 'Spanish',
-      },
-      {
-        code: 'fr',
-        label: 'French',
-      },
+      { code: 'en', label: 'English' },
+      { code: 'es', label: 'Spanish' },
+      { code: 'fr', label: 'French' },
     ],
   },
   globals: [SiteSettings],
@@ -74,65 +76,42 @@ export default buildConfigWithDefaults({
         const mcp = plugins['@payloadcms/plugin-mcp']
         if (mcp?.options) {
           const opts = mcp.options
-          opts.mcp ??= {}
-          opts.mcp.tools ??= []
-          opts.mcp.tools.push({
-            name: 'injectedBefore',
+          opts.tools ??= {}
+          opts.tools.injectedBefore = {
             description: 'Tool injected by a plugin listed before mcp',
             handler: () => ({
               content: [{ type: 'text' as const, text: 'injected-before' }],
             }),
-            parameters: {},
-          })
+            input: { type: 'object', properties: {} },
+          }
         }
         return config
       },
     })(),
 
     mcpPlugin({
-      /**
-       * Override the authentication method.
-       * This allows you to use a custom authentication method instead of the default API key authentication.
-       * @param req - The request object.
-       * @returns The MCP access settings.
-       */
-      // overrideAuth: (req) => {
-      //   const { payload } = req
-
-      //   payload.logger.info('[Override MCP auth]:')
-
-      //   return {
-      //     posts: {
-      //       find: true,
-      //     },
-      //     products: {
-      //       find: true,
-      //       update: true,
-      //     },
-      //     'payload-mcp-tool': {
-      //       diceRoll: true,
-      //     },
-      //     'payload-mcp-prompt': {
-      //       echo: true,
-      //     },
-      //     'payload-mcp-resource': {
-      //       data: true,
-      //       dataByID: true,
-      //     },
-      //   } as MCPAccess
-      // },
       overrideApiKeyCollection: (collection) => {
         collection.fields.push({
           name: 'override',
           type: 'text',
-          admin: {
-            description: 'This field added by overrideApiKeyCollection',
-          },
+          admin: { description: 'This field added by overrideApiKeyCollection' },
           defaultValue: 'This field added by overrideApiKeyCollection',
         })
         return collection
       },
       collections: {
+        users: {
+          description: 'User accounts.',
+          // Opt-in auth ops: enabling these exposes login/verify/etc. via MCP.
+          tools: {
+            auth: true,
+            forgotPassword: true,
+            login: true,
+            resetPassword: true,
+            unlock: true,
+            verify: true,
+          },
+        },
         'field-types': {
           description: 'A collection covering all Payload field types for MCP schema testing.',
         },
@@ -149,11 +128,55 @@ export default buildConfigWithDefaults({
             })
             return response
           },
+          tools: {
+            // Built-in override — keep `find` enabled, just tighten its
+            // client-facing description. (Built-in keys autocomplete here.)
+            find: {
+              description:
+                'Find blog posts. Pass an `id` to fetch one; omit it to list with pagination.',
+            },
+
+            // Custom collection-scoped tool — surfaced as `publishPosts` on the
+            // wire (auto-prefixed). Flips a draft post to published.
+            publish: {
+              description: 'Publish a draft post by ID.',
+              input: zodInput(
+                z.object({
+                  id: z.string().describe('The post ID to publish.'),
+                }),
+              ),
+              // `collectionSlug` arrives in the handler context (not hardcoded)
+              // because this tool lives under `collections.X.tools` — the
+              // CollectionTool type makes that available.
+              handler: async ({ collectionSlug, input, authorizedMCP, req }) => {
+                const id = input.id as string
+                const result = await req.payload.update({
+                  id,
+                  collection: collectionSlug,
+                  data: { _status: 'published' },
+                  req,
+                  overrideAccess: authorizedMCP.overrideAccess,
+                  user: authorizedMCP.user,
+                })
+                return {
+                  content: [
+                    {
+                      type: 'text' as const,
+                      text: `Published ${collectionSlug} ${id}.\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+                    },
+                  ],
+                }
+              },
+            },
+          },
         },
         media: {
           description: 'This is a Payload collection with Media documents.',
-          // Test the partial-disable path — find/update remain enabled, create/delete blocked.
-          disabled: { create: true, delete: true },
+          // Partial-disable — find/update remain enabled, create/delete blocked.
+          tools: {
+            create: false,
+            delete: false,
+          },
         },
       },
       globals: {
@@ -162,201 +185,168 @@ export default buildConfigWithDefaults({
         },
       },
       mcp: {
-        handlerOptions: {
-          verboseLogs: true,
-        },
         serverOptions: {
           serverInfo: {
             name: 'My Custom MCP Server',
             version: '1.0.0',
           },
         },
-        tools: [
-          {
-            name: 'diceRoll',
-            description: 'Rolls a virtual dice with a specified number of sides',
-            handler: async (args: Record<string, unknown>, req) => {
-              const sides = (args.sides as number) || 6
-              const result = Math.floor(Math.random() * sides) + 1
-              const payload = req.payload
-
-              payload.logger.info(
-                `Dice Roll MCP Tool rolled a ${args.sides} sided die and got a ${result}`,
-              )
-
-              await payload.create({
-                collection: 'rolls',
-                data: {
-                  sides,
-                  result,
-                  user: req.user?.id,
-                },
-                req,
-                overrideAccess: false,
-                user: req.user,
-                draft: true,
-              })
-
-              return Promise.resolve({
-                content: [
-                  {
-                    type: 'text' as const,
-                    text: `# Dice Roll Result\n\n**Sides:** ${sides}\n**Result:** ${result}\n\n🎲 You rolled a **${result}** on a ${sides}-sided die!`,
-                  },
-                ],
-              })
-            },
-            parameters: z.toJSONSchema(
-              z.object({
-                sides: z
-                  .number()
-                  .int()
-                  .min(2)
-                  .max(1000)
-                  .optional()
-                  .default(6)
-                  .describe('Number of sides on the dice (default: 6)'),
-              }),
-            ),
-          },
-        ],
-        prompts: [
-          {
-            name: 'echo',
-            argsSchema: z.toJSONSchema(z.object({ message: z.string() })),
-            description: 'Creates a prompt to process a message',
-            title: 'Echo Prompt',
-            handler: async ({ message }, req) => {
-              const { payload } = req
-
-              payload.logger.info(`Echo Prompt was sent: ${message}`)
-
-              const modifiedPrompt = `This prompt was sent: ${message}`
-
-              await payload.create({
-                collection: 'modified-prompts',
-                data: {
-                  original: message as string,
-                  modified: modifiedPrompt,
-                  user: req.user?.id,
-                },
-                req,
-                overrideAccess: false,
-                user: req.user,
-                draft: true,
-              })
-
-              return {
-                messages: [
-                  {
-                    content: {
-                      type: 'text',
-                      text: modifiedPrompt,
-                    },
-                    role: 'user',
-                  },
-                  {
-                    content: {
-                      type: 'text',
-                      text: `This prompt was sent by userId: ${req.user?.id}`,
-                    },
-                    role: 'assistant',
-                  },
-                ],
-              }
-            },
-          },
-        ],
-        resources: [
-          // Resource with a static URI
-          {
-            name: 'data',
-            description: 'Data is a resource that contains special data.',
-            handler: async (uri, req) => {
-              const payload = req.payload
-
-              payload.logger.info(`Data resource was requested`)
-
-              const text = 'My special data.'
-              await payload.create({
-                collection: 'returned-resources',
-                data: {
-                  uri: uri.href,
-                  content: text,
-                  user: req.user?.id,
-                },
-                req,
-                overrideAccess: false,
-                user: req.user,
-                draft: true,
-              })
-
-              return {
-                contents: [
-                  {
-                    uri: uri.href,
-                    text,
-                  },
-                  {
-                    uri: uri.href,
-                    text: `This was requested by user: ${req.user?.id}`,
-                  },
-                ],
-              }
-            },
-            mimeType: 'text/plain',
-            title: 'Data',
-            uri: 'data://app',
-          },
-          // Resource with a template
-          {
-            name: 'dataByID',
-            description: 'Data is a resource that contains special data.',
-            handler: async (uri, { id }, req) => {
-              const payload = req.payload
-
-              payload.logger.info(`Data by ID resource was requested`)
-
-              const text = `My special data for ID: ${id}`
-              await payload.create({
-                collection: 'returned-resources',
-                data: {
-                  uri: uri.href,
-                  content: text,
-                  user: req.user?.id,
-                },
-                req,
-                overrideAccess: false,
-                user: req.user,
-                draft: true,
-              })
-
-              return {
-                contents: [
-                  {
-                    uri: uri.href,
-                    text,
-                  },
-                  {
-                    uri: uri.href,
-                    text: `This was requested by user: ${req.user?.id}`,
-                  },
-                ],
-              }
-            },
-            mimeType: 'text/plain',
-            title: 'Data By ID',
-            uri: new ResourceTemplate('data://app/{id}', { list: undefined }),
-          },
-        ],
+        verboseLogs: true,
       },
+      tools: {
+        diceRoll: {
+          description: 'Rolls a virtual dice with a specified number of sides',
+          handler: async ({ input, authorizedMCP, req }) => {
+            const sides = (input.sides as number) || 6
+            const result = Math.floor(Math.random() * sides) + 1
 
-      // Experimental MCP tools
-      experimental: {
-        tools: {
-          auth: {
-            enabled: true,
+            req.payload.logger.info(
+              `Dice Roll MCP Tool rolled a ${sides} sided die and got a ${result}`,
+            )
+
+            await req.payload.create({
+              collection: 'rolls',
+              data: {
+                sides,
+                result,
+                user: req.user?.id,
+              },
+              req,
+              draft: true,
+              overrideAccess: authorizedMCP.overrideAccess,
+              user: authorizedMCP.user,
+            })
+
+            return {
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `# Dice Roll Result\n\n**Sides:** ${sides}\n**Result:** ${result}\n\n🎲 You rolled a **${result}** on a ${sides}-sided die!`,
+                },
+              ],
+            }
           },
+          input: zodInput(
+            z.object({
+              sides: z
+                .number()
+                .int()
+                .min(2)
+                .max(1000)
+                .optional()
+                .default(6)
+                .describe('Number of sides on the dice (default: 6)'),
+            }),
+          ),
+        },
+      },
+      prompts: {
+        echo: {
+          argsSchema: zodInput(z.object({ message: z.string() })),
+          description: 'Creates a prompt to process a message',
+          handler: async ({ input: { message }, req }) => {
+            const { payload } = req
+
+            payload.logger.info(`Echo Prompt was sent: ${message as string}`)
+
+            const modifiedPrompt = `This prompt was sent: ${message as string}`
+
+            await payload.create({
+              collection: 'modified-prompts',
+              data: {
+                original: message as string,
+                modified: modifiedPrompt,
+                user: req.user?.id,
+              },
+              req,
+              draft: true,
+              overrideAccess: false,
+              user: req.user,
+            })
+
+            return {
+              messages: [
+                {
+                  content: { type: 'text', text: modifiedPrompt },
+                  role: 'user',
+                },
+                {
+                  content: {
+                    type: 'text',
+                    text: `This prompt was sent by userId: ${req.user?.id}`,
+                  },
+                  role: 'assistant',
+                },
+              ],
+            }
+          },
+          title: 'Echo Prompt',
+        },
+      },
+      resources: {
+        data: {
+          description: 'Data is a resource that contains special data.',
+          handler: async ({ req, uri }) => {
+            const payload = req.payload
+
+            payload.logger.info(`Data resource was requested`)
+
+            const text = 'My special data.'
+            await payload.create({
+              collection: 'returned-resources',
+              data: {
+                uri: uri.href,
+                content: text,
+                user: req.user?.id,
+              },
+              req,
+              draft: true,
+              overrideAccess: false,
+              user: req.user,
+            })
+
+            return {
+              contents: [
+                { uri: uri.href, text },
+                { uri: uri.href, text: `This was requested by user: ${req.user?.id}` },
+              ],
+            }
+          },
+          mimeType: 'text/plain',
+          title: 'Data',
+          uri: 'data://app',
+        },
+        dataByID: {
+          description: 'Data is a resource that contains special data.',
+          handler: async ({ params: { id }, req, uri }) => {
+            const payload = req.payload
+
+            payload.logger.info(`Data by ID resource was requested`)
+
+            const text = `My special data for ID: ${id}`
+            await payload.create({
+              collection: 'returned-resources',
+              data: {
+                uri: uri.href,
+                content: text,
+                user: req.user?.id,
+              },
+              req,
+              draft: true,
+              overrideAccess: false,
+              user: req.user,
+            })
+
+            return {
+              contents: [
+                { uri: uri.href, text },
+                { uri: uri.href, text: `This was requested by user: ${req.user?.id}` },
+              ],
+            }
+          },
+          mimeType: 'text/plain',
+          title: 'Data By ID',
+          uri: new ResourceTemplate('data://app/{id}', { list: undefined }),
         },
       },
     }),
@@ -368,16 +358,14 @@ export default buildConfigWithDefaults({
         const mcp = plugins['@payloadcms/plugin-mcp']
         if (mcp?.options) {
           const opts = mcp.options
-          opts.mcp ??= {}
-          opts.mcp.tools ??= []
-          opts.mcp.tools.push({
-            name: 'injectedAfter',
+          opts.tools ??= {}
+          opts.tools.injectedAfter = {
             description: 'Tool injected by a plugin listed after mcp',
             handler: () => ({
               content: [{ type: 'text' as const, text: 'injected-after' }],
             }),
-            parameters: {},
-          })
+            input: { type: 'object', properties: {} },
+          }
         }
         return config
       },
