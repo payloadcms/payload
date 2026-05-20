@@ -1,5 +1,5 @@
 import type { S3StorageOptions } from '@payloadcms/storage-s3'
-import type { Plugin } from 'payload'
+import type { StorageAdapter } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { azureStorage } from '@payloadcms/storage-azure'
@@ -43,7 +43,7 @@ export type BuildPluginCloudStorageIntConfigArgs = {
 export function buildPluginCloudStorageIntConfig({
   useCompositePrefixes,
 }: BuildPluginCloudStorageIntConfigArgs) {
-  let storagePlugin: Plugin = {} as Plugin
+  let storagePlugin: StorageAdapter | undefined
   let uploadOptions
 
   dotenv.config({
@@ -226,7 +226,8 @@ export function buildPluginCloudStorageIntConfig({
         `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
       )
     },
-    plugins: [storagePlugin, testMetadataPlugin],
+    plugins: [testMetadataPlugin],
+    storage: storagePlugin ? [storagePlugin] : [],
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
     },

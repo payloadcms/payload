@@ -167,7 +167,7 @@ export function detectPayloadConfigStructure(sourceFile: SourceFile): DetectionR
     },
     importSources: {
       dbAdapter: dbAdapterImportInfo,
-      storageAdapters: storageAdapterImports.length > 0 ? storageAdapterImports : undefined,
+      storage: storageAdapterImports.length > 0 ? storageAdapterImports : undefined,
     },
     sourceFile,
     structures: {
