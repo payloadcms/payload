@@ -15,7 +15,9 @@ import { Media } from './collections/Media.js'
 import { MediaWithCompositePrefixes } from './collections/MediaWithCompositePrefixes.js'
 import { MediaWithCustomURL } from './collections/MediaWithCustomURL.js'
 import { MediaWithGenerateFileURL } from './collections/MediaWithGenerateFileURL.js'
+import { MediaWithOverwrite } from './collections/MediaWithOverwrite.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
+import { MediaWithThrowingHook } from './collections/MediaWithThrowingHook.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
@@ -25,7 +27,9 @@ import {
   mediaWithCompositePrefixesSlug,
   mediaWithCustomURLSlug,
   mediaWithGenerateFileURLSlug,
+  mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
+  mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
@@ -113,9 +117,11 @@ export function buildPluginCloudStorageIntConfig({
               : null,
           prefix,
         } as S3StorageOptions['collections'][keyof S3StorageOptions['collections']],
+        [mediaWithOverwriteSlug]: true,
         [mediaWithPrefixSlug]: {
           prefix,
         },
+        [mediaWithThrowingHookSlug]: true,
         [restrictedMediaSlug]: true,
       },
       config: {
@@ -188,7 +194,9 @@ export function buildPluginCloudStorageIntConfig({
       MediaWithCompositePrefixes,
       MediaWithCustomURL,
       MediaWithGenerateFileURL,
+      MediaWithOverwrite,
       MediaWithPrefix,
+      MediaWithThrowingHook,
       RestrictedMedia,
       TestMetadata,
       Users,
