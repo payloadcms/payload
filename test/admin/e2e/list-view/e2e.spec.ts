@@ -1431,10 +1431,10 @@ describe('List View', () => {
       await wait(1000)
 
       await expect
-        .poll(async () => await page.locator('.per-page .popup-button').isVisible())
+        .poll(async () => await page.locator('.per-page .per-page__base-button').isVisible())
         .toBe(true)
 
-      await page.locator('.per-page .popup-button').click()
+      await page.locator('.per-page .per-page__base-button').click()
       await wait(500)
       const options = page.locator('.popup__content .popup-button-list__button')
       await expect.poll(async () => await options.count()).toBe(3)
@@ -1487,7 +1487,7 @@ describe('List View', () => {
 
       await wait(500)
 
-      await page.locator('.per-page .popup-button').click()
+      await page.locator('.per-page .per-page__base-button').click()
 
       await wait(500)
 
@@ -1517,7 +1517,7 @@ describe('List View', () => {
 
       await wait(1000)
 
-      await page.locator('.per-page .popup-button').click()
+      await page.locator('.per-page .per-page__base-button').click()
       await page.getByRole('button', { name: '5', exact: true }).click()
       await page.waitForURL(/limit=5/)
 
@@ -1570,7 +1570,7 @@ describe('List View', () => {
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
 
       // Change per-page to 5
-      await page.locator('.list-drawer .per-page .popup-button').click()
+      await page.locator('.list-drawer .per-page .per-page__base-button').click()
       await page.getByRole('button', { name: '5', exact: true }).click()
 
       await expect(page.locator('.list-drawer .per-page .per-page__base-button')).toContainText('5')
