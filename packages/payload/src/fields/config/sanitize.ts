@@ -295,18 +295,7 @@ export const sanitizeField = async ({
     }
 
     if (typeof field.localized !== 'undefined') {
-      let shouldDisableLocalized = !config.localization
-
-      if (
-        process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized !== 'true' &&
-        parentIsLocalized &&
-        // @todo PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY=true will be the default in 4.0
-        process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY !== 'true'
-      ) {
-        shouldDisableLocalized = true
-      }
-
-      if (shouldDisableLocalized) {
+      if (!config.localization) {
         delete field.localized
       }
     }
