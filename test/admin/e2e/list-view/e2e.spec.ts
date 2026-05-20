@@ -687,7 +687,7 @@ describe('List View', () => {
 
       await expect(tableItems).toHaveCount(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.per-page .per-page__base-button')).toContainText('5')
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
 
       await addListFilter({
@@ -1415,7 +1415,7 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await expect
         .poll(async () => await page.locator('.per-page .per-page__base-button').textContent())
-        .toContain('Per Page: 5')
+        .toContain('5')
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
 
@@ -1436,7 +1436,7 @@ describe('List View', () => {
 
       await page.locator('.per-page .popup-button').click()
       await wait(500)
-      const options = page.locator('.popup__content button.per-page__button')
+      const options = page.locator('.popup__content .popup-button-list__button')
       await expect.poll(async () => await options.count()).toBe(3)
       await expect(options.nth(0)).toContainText('5')
       await expect(options.nth(1)).toContainText('10')
@@ -1456,7 +1456,7 @@ describe('List View', () => {
 
       await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.per-page .per-page__base-button')).toContainText('5')
 
       await wait(500)
 
@@ -1483,7 +1483,7 @@ describe('List View', () => {
       const tableItems = page.locator(tableRowLocator)
       await expect.poll(async () => await tableItems.count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.per-page .per-page__base-button')).toContainText('5')
 
       await wait(500)
 
@@ -1492,19 +1492,19 @@ describe('List View', () => {
       await wait(500)
 
       await page
-        .locator('.popup__content button.per-page__button', {
+        .locator('.popup__content .popup-button-list__button', {
           hasText: '15',
         })
         .click()
       await wait(500)
 
       await expect(tableItems).toHaveCount(15)
-      await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 15')
+      await expect(page.locator('.per-page .per-page__base-button')).toContainText('15')
 
       await goToNextPage(page)
       await wait(500)
       await expect(tableItems).toHaveCount(1)
-      await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
+      await expect(page.locator('.per-page .per-page__base-button')).toContainText('15') // ensure this hasn't changed
       await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
     })
 
@@ -1564,14 +1564,16 @@ describe('List View', () => {
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
-      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 10')
+      await expect(page.locator('.list-drawer .per-page .per-page__base-button')).toContainText(
+        '10',
+      )
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
 
       // Change per-page to 5
       await page.locator('.list-drawer .per-page .popup-button').click()
       await page.getByRole('button', { name: '5', exact: true }).click()
 
-      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer .per-page .per-page__base-button')).toContainText('5')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
 
       await page.locator('.list-drawer .list-drawer__header .close-modal-button').click()
@@ -1583,7 +1585,7 @@ describe('List View', () => {
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
-      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer .per-page .per-page__base-button')).toContainText('5')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
     })
   })
