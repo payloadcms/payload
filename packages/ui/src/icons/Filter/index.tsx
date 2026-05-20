@@ -4,6 +4,11 @@ import './index.css'
 
 type Props = {
   readonly className?: string
+  /**
+   * When true, adds a circular cutout in the top-right corner and renders a red indicator badge.
+   * The cutout creates space for the badge to sit cleanly without overlapping the icon.
+   */
+  readonly hasBadgeCutout?: boolean
   readonly size?: 16 | 24
 }
 
@@ -12,15 +17,43 @@ const paths = {
   24: 'M8.5 18a.5.5 0 0 0 .5-.5v-1.55a2.5 2.5 0 0 0 0-4.9V6.5a.5.5 0 0 0-1 0v4.55a2.501 2.501 0 0 0 0 4.9v1.55a.5.5 0 0 0 .5.5m7 0a.5.5 0 0 0 .5-.5v-4.55a2.501 2.501 0 0 0 0-4.9V6.5a.5.5 0 0 0-1 0v1.55a2.5 2.5 0 0 0 0 4.9v4.55a.5.5 0 0 0 .5.5m0-6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m-7 3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3',
 }
 
-export const FilterIcon: React.FC<Props> = ({ className, size = 24 }) => (
-  <svg
-    className={['icon', 'icon--filter', className].filter(Boolean).join(' ')}
-    fill="none"
-    height={size}
-    viewBox={`0 0 ${size} ${size}`}
-    width={size}
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d={paths[size]} fill="currentColor" />
-  </svg>
-)
+// Badge positions and cutout dimensions
+// Indicator is 4px diameter, cutout is slightly larger for clean gap
+const badgeConfig = {
+  16: { badgeRadius: 2, cutoutRadius: 3, cx: 12.5, cy: 5 },
+  24: { badgeRadius: 2, cutoutRadius: 4, cx: 18, cy: 7 },
+}
+
+export const FilterIcon: React.FC<Props> = ({ className, hasBadgeCutout, size = 24 }) => {
+  const maskId = hasBadgeCutout ? `filter-badge-cutout-${size}` : undefined
+  const config = badgeConfig[size]
+
+  return (
+    <svg
+      className={['icon', 'icon--filter', className].filter(Boolean).join(' ')}
+      fill="none"
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      width={size}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {hasBadgeCutout && (
+        <defs>
+          <mask id={maskId}>
+            <rect fill="white" height={size} width={size} />
+            <circle cx={config.cx} cy={config.cy} fill="black" r={config.cutoutRadius} />
+          </mask>
+        </defs>
+      )}
+      <path d={paths[size]} fill="currentColor" mask={maskId ? `url(#${maskId})` : undefined} />
+      {hasBadgeCutout && (
+        <circle
+          className="icon--filter__badge"
+          cx={config.cx}
+          cy={config.cy}
+          r={config.badgeRadius}
+        />
+      )}
+    </svg>
+  )
+}

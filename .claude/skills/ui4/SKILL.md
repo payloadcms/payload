@@ -314,6 +314,7 @@ To find the correct icon:
    - `packages/ui/src/css/colors.css` — color tokens
    - `packages/ui/src/css/typography.css` — text tokens
    - `packages/ui/src/css/radius.css` — border-radius tokens
+   - `packages/ui/src/css/utilities.css` — accessibility tokens
 
 2. **Update styles** using tokens from files:
 
@@ -321,17 +322,25 @@ To find the correct icon:
    - Spacing: `--spacer-*` (ALWAYS check file for matching value)
    - Typography: `--text-body-*`, `--text-heading-*`
    - Radius: `--radius-none/small/medium/large/full`
+   - **Focus states: `--accessibility-focus-color`** (NEVER use `--color-border-selected` directly)
 
-3. **Use canonical shorthands** — see the shorthand table in `.claude/skills/ui4-review/SKILL.md`.
+3. **Focus state rules:**
 
-4. **Color rules — NEVER GUESS:**
+   - Always use `--accessibility-focus-color` for focus outlines/borders
+   - Use `:focus-visible` (not `:focus`) for keyboard-only focus
+   - Standard focus outline: `outline: 1px solid var(--accessibility-focus-color)`
+   - For parent containers: use `:has(:focus-visible)` to detect child focus
+
+4. **Use canonical shorthands** — see the shorthand table in `.claude/skills/ui4-review/SKILL.md`.
+
+5. **Color rules — NEVER GUESS:**
 
    - **Always extract exact token from Figma design context** — the `get_design_context` response includes CSS with token names
    - **Don't assume hierarchy** — e.g., don't assume "less prominent = tertiary". Check the design.
    - **When creating new elements** (icons, buttons, etc.), fetch the specific Figma node to get correct colors
    - If Figma shows a raw hex value, map it to the closest token and note this for user review
 
-5. **Spacing rules:**
+6. **Spacing rules:**
    - First choice: use `--spacer-*` token
    - If no match: use rem and tell user
    - NEVER use px (except 1px borders)

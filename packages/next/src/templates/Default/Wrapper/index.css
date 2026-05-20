@@ -1,5 +1,3 @@
-@import '~@payloadcms/ui/scss';
-
 @layer payload-default {
   .template-default {
     min-height: 100vh;
@@ -10,27 +8,23 @@
     @media (prefers-reduced-motion) {
       transition: none;
     }
+  }
 
-    &--nav-animate {
-      transition: grid-template-columns var(--nav-trans-time) linear;
-    }
+  .template-default--nav-animate {
+    transition: grid-template-columns var(--nav-trans-time) linear;
+  }
 
-    &--nav-open {
-      .template-default {
-        &__nav-overlay {
-          transition: opacity var(--nav-trans-time) linear;
-        }
-      }
-    }
+  .template-default--nav-open .template-default__nav-overlay {
+    transition: opacity var(--nav-trans-time) linear;
   }
 
   @media (min-width: 1441px) {
     .template-default {
       grid-template-columns: 0 auto;
+    }
 
-      &--nav-open {
-        grid-template-columns: var(--nav-width) auto;
-      }
+    .template-default--nav-open {
+      grid-template-columns: var(--nav-width) auto;
     }
   }
 
@@ -45,13 +39,13 @@
       .nav {
         display: none;
       }
+    }
 
-      &--nav-hydrated {
-        grid-template-columns: 0 auto;
+    .template-default--nav-hydrated {
+      grid-template-columns: 0 auto;
 
-        .nav {
-          display: unset;
-        }
+      .nav {
+        display: unset;
       }
     }
   }

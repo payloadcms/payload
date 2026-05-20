@@ -396,7 +396,7 @@ export const QueryPresetBar: React.FC<{
                 buttonStyle="secondary"
                 className={`${baseClass}__trigger`}
                 extraButtonProps={{ onKeyDown }}
-                icon={<FilterIcon size={24} />}
+                icon={<FilterIcon hasBadgeCutout={hasModifiedPreset} size={24} />}
                 iconPosition="left"
                 id="select-preset"
                 onClick={onClick}
@@ -404,7 +404,6 @@ export const QueryPresetBar: React.FC<{
               >
                 {buttonLabel}
               </Button>
-              {hasModifiedPreset && <span className={`${baseClass}__modified-indicator`} />}
               {activePreset && (
                 <button className={`${baseClass}__clear`} onClick={handleClearPreset} type="button">
                   <XIcon size={16} />
