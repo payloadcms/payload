@@ -34,7 +34,7 @@
     justify-content: center;
     height: 100%;
     width: 100%;
-    padding: 24px;
+    padding: var(--spacer-4);
   }
 
   body:has(.drag-overlay) * {
@@ -62,7 +62,7 @@
 
   .widget--highlight {
     animation: widget-highlight 1.5s ease-out forwards;
-    border-radius: 8px;
+    border-radius: var(--radius-medium);
   }
 
   .widget-wrapper {
@@ -81,31 +81,26 @@
 
   .widget-wrapper__controls {
     position: absolute;
-    top: 16px;
-    right: 16px;
+    top: var(--spacer-3);
+    right: var(--spacer-3);
     z-index: 10;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--spacer-2);
   }
 
   .widget-wrapper__delete-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
     background: var(--color-bg-danger);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-small);
     cursor: pointer;
     color: var(--color-text-ondanger);
     transition: all 0.2s ease;
-
-    & .icon {
-      width: 16px;
-      height: 16px;
-    }
 
     &:hover {
       background: var(--color-bg-danger-hover);
@@ -113,6 +108,11 @@
 
     &:active {
       background: var(--color-bg-danger-pressed);
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
     }
 
     & svg {
@@ -124,26 +124,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: var(--theme-text);
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    background: var(--color-bg-inverse);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-small);
     cursor: pointer;
-    color: var(--theme-elevation-0);
+    color: var(--color-text-oninverse);
     transition: all 0.2s ease;
 
-    & .icon {
-      width: 16px;
-      height: 16px;
-    }
-
     &:hover {
-      background: var(--theme-elevation-800);
+      background: var(--color-bg-inverse-hover);
     }
 
     &:active {
-      background: var(--theme-elevation-900);
+      background: var(--color-bg-inverse-pressed);
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
     }
 
     & svg {
@@ -154,37 +154,34 @@
   .widget-wrapper__size-btn {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
+    gap: var(--spacer-1);
+    padding: var(--spacer-1) var(--spacer-2);
     min-width: auto;
-    height: 28px;
-    background: var(--theme-text);
+    height: var(--spacer-4);
+    background: var(--color-bg-inverse);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-small);
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--theme-elevation-0);
+    font-family: var(--text-body-small-font-family);
+    font-size: var(--text-body-small-font-size);
+    font-weight: var(--text-body-small-font-weight);
+    line-height: var(--text-body-small-line-height);
+    letter-spacing: var(--text-body-small-letter-spacing);
+    color: var(--color-text-oninverse);
     white-space: nowrap;
 
-    & .icon {
-      width: 12px;
-      height: 12px;
-      flex-shrink: 0;
-    }
-
     & .icon .stroke {
-      stroke: var(--theme-elevation-0);
-      stroke-width: 2;
+      stroke: var(--color-icon-oninverse);
+      stroke-width: var(--stroke-width-medium);
     }
 
     &:hover {
-      background: var(--theme-elevation-800);
+      background: var(--color-bg-inverse-hover);
     }
 
     &:active {
-      background: var(--theme-elevation-900);
+      background: var(--color-bg-inverse-pressed);
     }
 
     &:disabled {
@@ -193,7 +190,12 @@
     }
 
     &:disabled:hover {
-      background: var(--theme-text);
+      background: var(--color-bg-inverse);
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
     }
 
     & svg {
@@ -202,9 +204,10 @@
   }
 
   .widget-wrapper__size-btn-percentage {
-    font-size: 12px;
+    font-family: var(--text-body-small-font-family);
+    font-size: var(--text-body-small-font-size);
     margin-left: auto;
-    color: var(--theme-elevation-500);
+    color: var(--color-text-tertiary);
   }
 
   .popup-button-list:has(.widget-wrapper__size-btn-label) .popup__scroll-container {
@@ -212,33 +215,46 @@
   }
 
   .popup__content:has(.widget-wrapper__size-btn-label) {
-    padding: 5px;
+    padding: var(--spacer-1);
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
   }
 
   .popup-button-list__button:has(.widget-wrapper__size-btn-label) {
     display: flex !important;
     align-items: center !important;
-    gap: 20px;
+    gap: var(--spacer-3);
   }
 
   .popup-button-list__button:has(.widget-wrapper__size-btn-label) .widget-wrapper__size-btn-label {
     flex: 0 0 auto;
   }
 
-  .popup-button-list__button:has(.widget-wrapper__size-btn-label) .widget-wrapper__size-btn-percentage {
+  .popup-button-list__button:has(.widget-wrapper__size-btn-label)
+    .widget-wrapper__size-btn-percentage {
     margin-left: auto !important;
   }
+
+  .step-nav .dashboard-breadcrumb-dropdown .btn {
+    padding-right: var(--spacer-1);
+  }
+
+  /* .step-nav .dashboard-breadcrumb-dropdown {
+    margin-left: calc(var(--spacer-2) * -1);
+  } */
 
   .step-nav .dashboard-breadcrumb-dropdown__editing {
     align-items: center;
     display: flex !important;
-    gap: 12px;
+    gap: var(--spacer-2-5);
+
+    > span:first-child {
+      padding-left: var(--spacer-1);
+    }
   }
 
   .step-nav .dashboard-breadcrumb-dropdown__actions {
     display: flex !important;
-    gap: 8px;
+    gap: var(--spacer-2-5);
   }
 
   .step-nav .dashboard-breadcrumb-dropdown__label {
@@ -249,7 +265,6 @@
 
   .step-nav .drawer-toggler--unstyled {
     background: transparent;
-    border: none;
     margin: 0;
     padding: 0;
     outline: none;
