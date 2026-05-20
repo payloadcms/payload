@@ -26,9 +26,9 @@ import type { BrowserContext, Dialog, Page } from '@playwright/test'
 import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
-import { postsCollectionSlug } from 'admin/slugs.js'
+import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { postsCollectionSlug } from '../admin/slugs.js'
 import mongoose from 'mongoose'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
@@ -566,7 +566,7 @@ describe('Versions', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
 
       await page.goto(autosaveURL.list)
-      const createNewButton = page.locator('.list-header .btn:has-text("Create New")')
+      const createNewButton = page.locator('#create-new-doc')
       const href = await createNewButton.getAttribute('href')
       await page.goto(`${serverURL}${href}`)
 

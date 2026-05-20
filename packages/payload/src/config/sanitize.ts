@@ -1,7 +1,6 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
-import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
 import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
 import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
@@ -460,6 +459,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config.csrf!.push(config.serverURL!)
   }
 
+  if (!config.storage) {
+    config.storage = []
+  }
+
   if (!config.upload) {
     config.upload = { adapters: [] }
   }
@@ -482,9 +485,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       isRoot: true,
       parentIsLocalized: false,
     })
-    if (config.editor.i18n && Object.keys(config.editor.i18n).length >= 0) {
-      config.i18n.translations = deepMergeSimple(config.i18n.translations, config.editor.i18n)
-    }
   }
 
   const promises: Promise<void>[] = []

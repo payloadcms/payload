@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { devUser } from 'credentials.js'
+import { devUser } from '../credentials.js'
 import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -31,6 +31,12 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import {
+  openCreatePreset,
+  openEditPreset,
+  openManagePresets,
+  selectPreset,
+} from '../query-presets/helpers/togglePreset.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { beforeEach } = test
@@ -967,7 +973,7 @@ test.describe('Group By', () => {
       await expect(page).toHaveURL(/&groupBy=page\.title/)
 
       // Create a new preset with this groupBy
-      await page.locator('#create-new-preset').click()
+      await openCreatePreset({ page })
       const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
       await expect(modal).toBeVisible()
 
@@ -1007,7 +1013,7 @@ test.describe('Group By', () => {
       })
 
       // Open the preset drawer
-      await page.click('#select-preset')
+      await openManagePresets({ page })
       const drawer = page.locator('dialog[id^="list-drawer_0_"]')
       await expect(drawer).toBeVisible()
 
@@ -1025,8 +1031,6 @@ test.describe('Group By', () => {
     })
 
     test('should display virtual field label when editing a preset', async () => {
-      await page.goto(url.list)
-
       const presetTitle = 'Virtual Field Edit Test'
       await payload.create({
         collection: 'payload-query-presets',
@@ -1045,22 +1049,14 @@ test.describe('Group By', () => {
         user,
       })
 
+      // Navigate after preset is created so it shows in the popup
+      await page.goto(url.list)
+
       // Select the preset to make it active
-      await page.locator('#select-preset').click()
-      const drawer = page.locator('[id^=list-drawer_0_]')
-      await expect(drawer).toBeVisible()
-
-      await drawer
-        .locator('tbody tr td button', {
-          hasText: exactText(presetTitle),
-        })
-        .first()
-        .click()
-
-      await expect(drawer).toBeHidden()
+      await selectPreset({ page, presetTitle })
 
       // Now open the edit preset drawer
-      await page.locator('#edit-preset').click()
+      await openEditPreset({ page })
       const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
       await expect(editModal).toBeVisible()
 

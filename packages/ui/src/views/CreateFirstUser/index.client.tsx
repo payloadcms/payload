@@ -24,6 +24,8 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 
+const baseClass = 'create-first-user__form'
+
 export const CreateFirstUserClient: React.FC<{
   docPermissions: SanitizedDocumentPermissions
   docPreferences: DocumentPreferences
@@ -89,6 +91,7 @@ export const CreateFirstUserClient: React.FC<{
         apiRoute,
         path: `/${userSlug}/first-register`,
       })}
+      className={baseClass}
       initialState={{
         ...initialState,
         'confirm-password': {
@@ -103,33 +106,36 @@ export const CreateFirstUserClient: React.FC<{
       redirect={admin}
       validationOperation="create"
     >
-      <EmailAndUsernameFields
-        className="emailAndUsername"
-        loginWithUsername={loginWithUsername}
-        operation="create"
-        readOnly={false}
-        t={t}
-      />
-      <PasswordField
-        autoComplete="off"
-        field={{
-          name: 'password',
-          label: t('authentication:newPassword'),
-          required: true,
-        }}
-        path="password"
-      />
-      <ConfirmPasswordField />
-      <RenderFields
-        fields={collectionConfig.fields}
-        forceRender
-        parentIndexPath=""
-        parentPath=""
-        parentSchemaPath={userSlug}
-        permissions={true}
-        readOnly={false}
-      />
-      <FormSubmit size="large">{t('general:create')}</FormSubmit>
+      <div className={`${baseClass}__inputWrap`}>
+        <EmailAndUsernameFields
+          loginWithUsername={loginWithUsername}
+          operation="create"
+          readOnly={false}
+          t={t}
+        />
+        <PasswordField
+          autoComplete="off"
+          field={{
+            name: 'password',
+            label: t('authentication:newPassword'),
+            required: true,
+          }}
+          path="password"
+        />
+        <ConfirmPasswordField />
+        <RenderFields
+          fields={collectionConfig.fields}
+          forceRender
+          parentIndexPath=""
+          parentPath=""
+          parentSchemaPath={userSlug}
+          permissions={true}
+          readOnly={false}
+        />
+      </div>
+      <div className={`${baseClass}__actions`}>
+        <FormSubmit size="large">{t('authentication:createUser')}</FormSubmit>
+      </div>
     </Form>
   )
 }

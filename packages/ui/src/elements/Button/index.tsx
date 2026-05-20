@@ -101,6 +101,7 @@ export const Button: React.FC<Props> = (props) => {
     !SubMenuPopupContent && `${baseClass}--withoutPopup`,
     !margin && `${baseClass}--no-margin`,
     loading && `${baseClass}--loading`,
+    icon && !children && `${baseClass}--icon-only`,
   ]
     .filter(Boolean)
     .join(' ')

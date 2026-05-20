@@ -246,14 +246,15 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
         return
       }
 
+      const queryParam = parentFieldName || 'parent'
       const url = formatAdminURL({
         adminRoute,
-        path: `/collections/${collectionSlug}${id !== null ? `?parent=${id}` : ''}`,
+        path: `/collections/${collectionSlug}${id !== null ? `?${queryParam}=${id}` : ''}`,
       })
       router.push(url)
       router.refresh()
     },
-    [adminRoute, collectionSlug, router],
+    [adminRoute, collectionSlug, parentFieldName, router],
   )
 
   const loadMoreChildren = useCallback(

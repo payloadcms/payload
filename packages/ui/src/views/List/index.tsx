@@ -144,6 +144,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
       // Add hierarchy breadcrumbs
       if (hierarchyData?.breadcrumbs) {
+        const queryParam = hierarchyData.parentFieldName || 'parent'
         const hierarchyBreadcrumbs = hierarchyData.breadcrumbs.map((crumb, index) => {
           const isLast = index === hierarchyData.breadcrumbs.length - 1
           return {
@@ -152,7 +153,7 @@ export function DefaultListView(props: ListViewClientProps) {
               ? undefined
               : formatAdminURL({
                   adminRoute,
-                  path: `/collections/${collectionSlug}?parent=${crumb.id}`,
+                  path: `/collections/${collectionSlug}?${queryParam}=${crumb.id}`,
                 }),
           }
         })
@@ -225,7 +226,9 @@ export function DefaultListView(props: ListViewClientProps) {
                 disableQueryPresets={
                   collectionConfig?.enableQueryPresets !== true || disableQueryPresets
                 }
+                hasCreatePermission={hasCreatePermission && viewType !== 'trash'}
                 listMenuItems={listMenuItems}
+                newDocumentURL={newDocumentURL}
                 queryPreset={queryPreset}
                 queryPresetPermissions={queryPresetPermissions}
                 renderedFilters={renderedFilters}

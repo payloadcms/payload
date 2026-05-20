@@ -36,9 +36,6 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
-import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
-import { noTimestampsSlug } from 'admin/collections/NoTimestamps.js'
-import { devUser } from 'credentials.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -62,6 +59,9 @@ import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { listViewSelectAPISlug } from '../../../admin/collections/ListViewSelectAPI/index.js'
+import { noTimestampsSlug } from '../../../admin/collections/NoTimestamps.js'
+import { devUser } from '../../../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)

@@ -7,7 +7,7 @@ import type { StepNavItem } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { Link } from '../Link/index.js'
+import { Button } from '../Button/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
 import './index.css'
 
@@ -39,62 +39,58 @@ const StepNav: React.FC<{
     typeof firstItem.label !== 'string' &&
     React.isValidElement(firstItem.label)
 
-  // Filter out any stepNav items that point to the dashboard (admin route)
-  // since Dashboard is shown as the home element (unless there's a dashboard dropdown)
-  const filteredStepNav = hasDashboardDropdown
+  const stepNavItems = hasDashboardDropdown
     ? stepNav
-    : stepNav.filter((item) => item.url !== admin)
+    : [
+        {
+          label: t('general:dashboard'),
+          url: admin,
+        },
+        ...stepNav,
+      ]
 
   return (
-    <Fragment>
-      {filteredStepNav.length > 0 ? (
-        <nav className={[baseClass, className].filter(Boolean).join(' ')}>
-          {!hasDashboardDropdown && (
-            <>
-              <Link className={`${baseClass}__home`} href={admin} prefetch={false} tabIndex={0}>
-                <span className={`${baseClass}__home-label`}>{t('general:dashboard')}</span>
-              </Link>
-              <span className={`${baseClass}__separator`}>/</span>
-            </>
-          )}
-          {filteredStepNav.map((item, i) => {
-            const StepLabel = getTranslation(item.label, i18n)
-            const isLast = filteredStepNav.length === i + 1
+    <nav className={[baseClass, className].filter(Boolean).join(' ')}>
+      {stepNavItems.map((item, i) => {
+        const StepLabel = getTranslation(item.label, i18n)
+        const isLast = stepNavItems.length === i + 1
+        const isFirst = i === 0
 
-            const Step = isLast ? (
-              item.url ? (
-                <Link forceReload={item.forceReload} href={item.url} key={i} prefetch={false}>
-                  <span className={`${baseClass}__last`}>{StepLabel}</span>
-                </Link>
-              ) : (
-                <span className={`${baseClass}__last`} key={i}>
-                  {StepLabel}
-                </span>
-              )
+        return (
+          <Fragment key={i}>
+            {item.url ? (
+              <Button
+                buttonStyle="ghost"
+                className={[
+                  `${baseClass}__item`,
+                  isLast ? `${baseClass}__last` : undefined,
+                  isFirst ? `${baseClass}__first` : undefined,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                el="link"
+                url={item.url}
+              >
+                {StepLabel}
+              </Button>
             ) : (
-              <Fragment key={i}>
-                {item.url ? (
-                  <Link forceReload={item.forceReload} href={item.url} prefetch={false}>
-                    <span key={i}>{StepLabel}</span>
-                  </Link>
-                ) : (
-                  <span key={i}>{StepLabel}</span>
-                )}
-                <span className={`${baseClass}__separator`}>/</span>
-              </Fragment>
-            )
-
-            return Step
-          })}
-        </nav>
-      ) : (
-        <div className={[baseClass, className].filter(Boolean).join(' ')}>
-          <div className={`${baseClass}__home`}>
-            <span className={`${baseClass}__home-label`}>{t('general:dashboard')}</span>
-          </div>
-        </div>
-      )}
-    </Fragment>
+              <span
+                className={[
+                  `${baseClass}__item`,
+                  isLast ? `${baseClass}__last` : undefined,
+                  isFirst ? `${baseClass}__first` : undefined,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {StepLabel}
+              </span>
+            )}
+            {!isLast && <span className={`${baseClass}__separator`}>/</span>}
+          </Fragment>
+        )
+      })}
+    </nav>
   )
 }
 

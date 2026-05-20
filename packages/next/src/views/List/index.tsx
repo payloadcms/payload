@@ -153,7 +153,8 @@ export const renderListView = async (
   })
 
   let queryPreset: QueryPreset | undefined
-  let queryPresetPermissions: SanitizedCollectionPermission | undefined
+  let queryPresetPermissions: SanitizedCollectionPermission | undefined =
+    permissions?.collections?.['payload-query-presets']
 
   if (collectionPreferences?.preset) {
     try {
@@ -281,16 +282,21 @@ export const renderListView = async (
 
   // Check for hierarchy parent param
   const isHierarchyCollection = Boolean(collectionConfig.hierarchy)
+  const hierarchyParentFieldName =
+    typeof collectionConfig.hierarchy === 'object'
+      ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
+      : 'parent'
   let hierarchyParentId: null | number | string = null
 
   if (isHierarchyCollection) {
-    if (searchParams?.parent === 'null' || searchParams?.parent === undefined) {
+    const parentParam = searchParams?.[hierarchyParentFieldName]
+    if (parentParam === 'null' || parentParam === undefined) {
       hierarchyParentId = null
-    } else if (typeof searchParams?.parent === 'string') {
+    } else if (typeof parentParam === 'string') {
       hierarchyParentId =
-        payload.db.defaultIDType === 'number' && isNumber(searchParams.parent)
-          ? Number(searchParams.parent)
-          : searchParams.parent
+        payload.db.defaultIDType === 'number' && isNumber(parentParam)
+          ? Number(parentParam)
+          : parentParam
     }
   }
 

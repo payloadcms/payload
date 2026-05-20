@@ -73,7 +73,7 @@ export const HierarchySidebarTab: React.FC<
   }, [treeRefreshKey, sidebarTabs, tabSlug])
 
   // Only highlight selected node when this tab is active
-  const parentParam = searchParams.get('parent')
+  const parentParam = searchParams.get(parentFieldName ?? 'parent')
   const isActiveTab = sidebarTabs?.activeTabSlug === tabSlug
   const selectedNodeId = isActiveTab
     ? (parentParam ?? selectedNodeIdFromServer ?? undefined)
@@ -91,16 +91,17 @@ export const HierarchySidebarTab: React.FC<
 
   const handleNavigateToParent = useCallback(
     ({ id }: { id: number | string }) => {
+      const queryParam = parentFieldName ?? 'parent'
       const url = formatAdminURL({
         adminRoute,
-        path: `/collections/${hierarchyCollectionSlug}/hierarchy?parent=${id}`,
+        path: `/collections/${hierarchyCollectionSlug}/hierarchy?${queryParam}=${id}`,
       })
       startRouteTransition(() => {
         router.push(url)
         router.refresh()
       })
     },
-    [adminRoute, hierarchyCollectionSlug, router, startRouteTransition],
+    [adminRoute, hierarchyCollectionSlug, parentFieldName, router, startRouteTransition],
   )
   return (
     <>

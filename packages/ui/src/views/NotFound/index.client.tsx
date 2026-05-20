@@ -2,19 +2,14 @@
 import React, { useEffect } from 'react'
 
 import { Button } from '../../elements/Button/index.js'
-import { Gutter } from '../../elements/Gutter/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'not-found'
 
-export const NotFoundClient: React.FC<{
-  marginTop?: 'large'
-}> = (props) => {
-  const { marginTop = 'large' } = props
-
+export const NotFoundClient: React.FC = () => {
   const { setStepNav } = useStepNav()
   const { t } = useTranslation()
 
@@ -33,20 +28,16 @@ export const NotFoundClient: React.FC<{
   }, [setStepNav, t])
 
   return (
-    <div
-      className={[baseClass, marginTop && `${baseClass}--margin-top-${marginTop}`]
-        .filter(Boolean)
-        .join(' ')}
-    >
-      <Gutter className={`${baseClass}__wrap`}>
+    <div className={baseClass}>
+      <div className={`${baseClass}__wrap`}>
         <div className={`${baseClass}__content`}>
           <h1>{t('general:nothingFound')}</h1>
           <p>{t('general:sorryNotFound')}</p>
         </div>
-        <Button className={`${baseClass}__button`} el="link" size="large" to={adminRoute}>
+        <Button el="link" to={adminRoute}>
           {t('general:backToDashboard')}
         </Button>
-      </Gutter>
+      </div>
     </div>
   )
 }

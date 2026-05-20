@@ -1,5 +1,5 @@
 import type {
-  DefaultTranslationKeys,
+  ClientTranslationKeys,
   DefaultTranslationsObject,
   I18n,
   I18nClient,
@@ -158,6 +158,41 @@ export type Plugin = ((config: Config) => Config | Promise<Config>) & {
   order?: number
   /** @experimental Unique identifier for cross-plugin discovery via `config.plugins`. */
   slug?: string
+}
+
+/**
+ * Configures where uploaded files are stored (S3, GCS, Azure, Vercel Blob, etc.).
+ *
+ * Storage adapters run **before plugins**, so upload hooks, static file handlers,
+ * and presigned-URL endpoints are guaranteed to be in place before any plugin
+ * modifies the config.
+ *
+ * Pass the return value of a storage adapter factory to `storage` in your
+ * Payload config:
+ *
+ * ```ts
+ * import { s3Storage } from '@payloadcms/storage-s3'
+ *
+ * export default buildConfig({
+ *   storage: [
+ *     s3Storage({
+ *       bucket: process.env.S3_BUCKET,
+ *       collections: { media: true },
+ *       config: { region: process.env.S3_REGION },
+ *     }),
+ *   ],
+ * })
+ * ```
+ *
+ * @see https://payloadcms.com/docs/uploads/storage-adapters
+ */
+export interface StorageAdapter {
+  /** Collection slugs this adapter is configured to handle. */
+  collections: string[]
+  /** Initializes the adapter and returns the modified config with upload hooks and handlers injected. */
+  init: (config: Config) => Config | Promise<Config>
+  /** Unique identifier for this adapter (e.g. `'s3'`, `'gcs'`, `'azure'`). Surfaced in telemetry and on `payload.config.upload.adapters`. */
+  name: string
 }
 
 /**
@@ -624,7 +659,7 @@ export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
 
-export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = (args: {
+export type LabelFunction<TTranslationKeys = ClientTranslationKeys> = (args: {
   i18n: I18nClient
   t: TFunction<TTranslationKeys>
 }) => string
@@ -1539,6 +1574,20 @@ export type Config = {
    *
    */
   sharp?: SharpDependency
+  /**
+   * Storage adapters that handle where uploaded files are stored (S3, GCS, Azure, Vercel Blob, etc.).
+   *
+   * Adapters are initialized **before** `plugins`, so file handling is fully wired before any plugin
+   * runs. Use this instead of placing storage adapter packages in `plugins`.
+   *
+   * Migrate existing `plugins` usage automatically with:
+   * ```sh
+   * npx @payloadcms/codemod --transform migrate-storage-adapters-to-config
+   * ```
+   *
+   * @see https://payloadcms.com/docs/uploads/storage-adapters
+   */
+  storage?: StorageAdapter[]
   /** Send anonymous telemetry data about general usage. */
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
@@ -1637,6 +1686,7 @@ export type SanitizedConfig = {
     configDir: string
     rawConfig: string
   }
+  storage: StorageAdapter[]
   upload: {
     /**
      * Deduped list of adapters used in the project
@@ -1657,6 +1707,7 @@ export type SanitizedConfig = {
   | 'i18n'
   | 'jobs'
   | 'localization'
+  | 'storage'
   | 'upload'
 >
 

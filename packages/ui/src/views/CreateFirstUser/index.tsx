@@ -8,7 +8,9 @@ import type {
 import React from 'react'
 
 import { CreateFirstUserClient } from './index.client.js'
-import './index.scss'
+import './index.css'
+
+const baseClass = 'create-first-user'
 
 export type CreateFirstUserViewProps = {
   beginMessage: string
@@ -30,9 +32,11 @@ export function CreateFirstUserView({
   welcomeMessage,
 }: CreateFirstUserViewProps) {
   return (
-    <div className="create-first-user">
-      <h1>{welcomeMessage}</h1>
-      <p>{beginMessage}</p>
+    <div className={baseClass}>
+      <div className={`${baseClass}__header`}>
+        <h1>{welcomeMessage}</h1>
+        <p>{beginMessage}</p>
+      </div>
       <CreateFirstUserClient
         docPermissions={docPermissions}
         docPreferences={docPreferences}

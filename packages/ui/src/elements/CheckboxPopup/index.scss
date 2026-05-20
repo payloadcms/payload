@@ -5,8 +5,8 @@
     &__options {
       display: flex;
       flex-direction: column;
-      gap: calc(var(--base) * 0.5);
-      padding: 0 3px;
+      gap: var(--spacer-2);
+      padding: 0 var(--spacer-2-5);
       margin: 3px 0;
     }
 

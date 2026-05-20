@@ -3,6 +3,7 @@ import type { LinkAdapterProps } from 'payload'
 
 import * as React from 'react'
 
+import { CheckIcon } from '../../../icons/Check/index.js'
 import { Link } from '../../Link/index.js'
 import './index.css'
 
@@ -28,12 +29,25 @@ export const ButtonGroup: React.FC<{
   return <div className={classes}>{children}</div>
 }
 
+/**
+ * A ButtonGroup variant that reserves space for icons on the left,
+ * ensuring text aligns consistently whether items have icons or not.
+ */
+export const IconButtonGroup: React.FC<{
+  children: React.ReactNode
+  className?: string
+}> = ({ children, className }) => {
+  const classes = [baseClass, className, `${baseClass}--with-icons`].filter(Boolean).join(' ')
+  return <div className={classes}>{children}</div>
+}
+
 type MenuButtonProps = {
   active?: boolean
   children: React.ReactNode
   className?: string
   disabled?: boolean
   href?: LinkAdapterProps['href']
+  icon?: React.ReactNode
   id?: string
   onClick?: (e?: React.MouseEvent) => void
 }
@@ -45,6 +59,7 @@ export const Button: React.FC<MenuButtonProps> = ({
   className,
   disabled,
   href,
+  icon,
   onClick,
 }) => {
   const classes = [
@@ -55,6 +70,17 @@ export const Button: React.FC<MenuButtonProps> = ({
   ]
     .filter(Boolean)
     .join(' ')
+
+  // Render icon column: checkmark if active, otherwise passed icon, otherwise empty placeholder
+  const iconElement = active ? (
+    <span className={`${baseClass}__icon`}>
+      <CheckIcon size={16} />
+    </span>
+  ) : icon ? (
+    <span className={`${baseClass}__icon`}>{icon}</span>
+  ) : (
+    <span className={`${baseClass}__icon`} />
+  )
 
   if (!disabled) {
     if (href) {
@@ -70,6 +96,7 @@ export const Button: React.FC<MenuButtonProps> = ({
           }}
           prefetch={false}
         >
+          {iconElement}
           {children}
         </Link>
       )
@@ -87,6 +114,7 @@ export const Button: React.FC<MenuButtonProps> = ({
           }}
           type="button"
         >
+          {iconElement}
           {children}
         </button>
       )
@@ -95,6 +123,7 @@ export const Button: React.FC<MenuButtonProps> = ({
 
   return (
     <div className={classes} id={id}>
+      {iconElement}
       {children}
     </div>
   )

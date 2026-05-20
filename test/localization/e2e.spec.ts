@@ -1,15 +1,15 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import type { GeneratedTypes } from '__helpers/shared/sdk/types.js'
+import type { GeneratedTypes } from '../__helpers/shared/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { addArrayRow } from '__helpers/e2e/fields/array/index.js'
-import { addBlock } from '__helpers/e2e/fields/blocks/addBlock.js'
-import { navigateToDoc } from '__helpers/e2e/navigateToDoc.js'
-import { openDocControls } from '__helpers/e2e/openDocControls.js'
-import { upsertPreferences } from '__helpers/e2e/preferences.js'
-import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
-import { openDocDrawer } from '__helpers/e2e/toggleDocDrawer.js'
-import { waitForAutoSaveToRunAndComplete } from '__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
+import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
+import { addBlock } from '../__helpers/e2e/fields/blocks/addBlock.js'
+import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { upsertPreferences } from '../__helpers/e2e/preferences.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -378,7 +378,9 @@ describe('Localization', () => {
       await page.goto(url.list)
 
       // The localizer now shows just the locale code in .localizer__button-content
-      const localeLabel = page.locator('.localizer.app-header__localizer .localizer__button-content')
+      const localeLabel = page.locator(
+        '.localizer.app-header__localizer .localizer__button-content',
+      )
 
       await expect(localeLabel).not.toHaveText('en')
     })
@@ -786,7 +788,7 @@ describe('Localization', () => {
     await page.goto(url.list)
     const searchInput = page.locator('.search-filter__input')
     await expect(searchInput).toBeVisible()
-    await expect(searchInput).toHaveAttribute('placeholder', 'Search by Full title')
+    await expect(searchInput).toHaveAttribute('placeholder', 'Search')
   })
 
   describe('publish specific locale', () => {

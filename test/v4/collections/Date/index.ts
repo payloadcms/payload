@@ -74,6 +74,30 @@ const DateFields: CollectionConfig = {
       type: 'date',
       timezone: true,
     },
+    {
+      name: 'withTimezoneRequired',
+      type: 'date',
+      timezone: true,
+      required: true,
+    },
+    {
+      name: 'withTimezoneDisabled',
+      type: 'date',
+      timezone: true,
+      admin: {
+        disabled: true,
+      },
+      defaultValue: '2026-01-15T12:00:00.000Z',
+    },
+    {
+      name: 'withTimezoneReadOnly',
+      type: 'date',
+      timezone: true,
+      admin: {
+        readOnly: true,
+      },
+      defaultValue: '2026-01-15T12:00:00.000Z',
+    },
   ],
 }
 

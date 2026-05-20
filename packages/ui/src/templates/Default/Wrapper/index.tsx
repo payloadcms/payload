@@ -2,7 +2,7 @@
 import React from 'react'
 
 import { useNav } from '../../../elements/Nav/context.js'
-import './index.scss'
+import './index.css'
 
 export const Wrapper: React.FC<{
   baseClass?: string

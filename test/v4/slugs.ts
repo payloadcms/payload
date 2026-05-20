@@ -30,6 +30,8 @@ export const hierarchySlug = 'hierarchy'
 export const joinFieldsSlug = 'join-fields'
 export const joinPostsSlug = 'join-posts'
 export const rubbishSlug = 'rubbish'
+export const searchBarTestSlug = 'search-bar-test'
+export const unauthorizedSlug = 'unauthorized-test'
 
 export const collectionSlugs = [
   'users',
@@ -64,4 +66,7 @@ export const collectionSlugs = [
   joinFieldsSlug,
   joinPostsSlug,
   rubbishSlug,
+  searchBarTestSlug,
+  unauthorizedSlug,
+  'payload-query-presets',
 ]

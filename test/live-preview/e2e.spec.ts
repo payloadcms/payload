@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { Config } from 'payload-types.js'
+import type { Config } from './payload-types.js'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'

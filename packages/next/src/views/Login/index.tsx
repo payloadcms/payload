@@ -8,7 +8,7 @@ import React, { Fragment } from 'react'
 import { Logo } from '../../elements/Logo/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
-import '@payloadcms/ui/views/Login/index.scss'
+import '@payloadcms/ui/views/Login/index.css'
 export const loginBaseClass = 'login'
 
 export function LoginView({ initPageResult, params, searchParams }: AdminViewServerProps) {

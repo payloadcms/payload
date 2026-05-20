@@ -212,7 +212,7 @@
     "husky": "9.0.11",
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
-    "mongoose": "8.15.1",
+    "mongoose": "8.22.1",
     "next": "16.2.6",
     "node-gyp": "12.3.0",
     "open": "^10.1.0",
@@ -234,7 +234,7 @@
     "tstyche": "3.5.0",
     "tsx": "4.21.0",
     "turbo": "^2.5.4",
-    "typescript": "5.7.3",
+    "typescript": "6.0.3",
     "vitest": "4.1.6",
     "wrangler": "~4.61.1",
     "zod": "4.3.6"

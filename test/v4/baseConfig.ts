@@ -54,6 +54,7 @@ import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
 import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
+import SearchBarTest from './collections/SearchBarTest/index.js'
 import SelectFields from './collections/Select/index.js'
 import SlugFields from './collections/Slug/index.js'
 import TabsFields from './collections/Tabs/index.js'
@@ -61,6 +62,7 @@ import Tags from './collections/Tags/index.js'
 import TextFields from './collections/Text/index.js'
 import TextareaFields from './collections/Textarea/index.js'
 import Rubbish from './collections/Trash/index.js'
+import Unauthorized from './collections/Unauthorized/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
 import {
@@ -78,7 +80,23 @@ export const collections: CollectionConfig[] = [
       useAsTitle: 'email',
     },
     auth: true,
-    fields: [],
+    access: {
+      admin: ({ req: { user } }) => {
+        return Boolean(user?.roles?.includes('admin'))
+      },
+    },
+    fields: [
+      {
+        name: 'roles',
+        type: 'select',
+        hasMany: true,
+        defaultValue: ['user'],
+        options: [
+          { label: 'Admin', value: 'admin' },
+          { label: 'User', value: 'user' },
+        ],
+      },
+    ],
   },
   ArrayFields,
   BlocksFields,
@@ -100,6 +118,7 @@ export const collections: CollectionConfig[] = [
   RelationshipFields,
   RichTextFields,
   RowFields,
+  SearchBarTest,
   SelectFields,
   SlugFields,
   TabsFields,
@@ -111,6 +130,7 @@ export const collections: CollectionConfig[] = [
   DraftVersions,
   Autosave,
   Rubbish,
+  Unauthorized,
 ]
 
 export const baseConfig: Partial<Config> = {
@@ -121,6 +141,11 @@ export const baseConfig: Partial<Config> = {
     locales: ['en', 'es', 'de'],
   },
   admin: {
+    autoLogin: {
+      email: devUser.email,
+      password: devUser.password,
+      prefillOnly: true,
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -148,6 +173,16 @@ export const baseConfig: Partial<Config> = {
       data: {
         email: devUser.email,
         password: devUser.password,
+        roles: ['admin'],
+      },
+    })
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: 'user@payloadcms.com',
+        password: 'test',
+        roles: ['user'],
       },
     })
 
@@ -311,6 +346,83 @@ export const baseConfig: Partial<Config> = {
     await payload.create({
       collection: tagsSlug,
       data: { name: 'Design' },
+    })
+
+    // Seed search-bar-test collection
+    const searchBarTestItems = [
+      { title: 'Welcome Post', description: 'First post', category: 'blog', status: 'published' },
+      {
+        title: 'API Documentation',
+        description: 'API docs',
+        category: 'docs',
+        status: 'published',
+      },
+      {
+        title: 'Tutorial Draft',
+        description: 'WIP tutorial',
+        category: 'tutorial',
+        status: 'draft',
+      },
+      {
+        title: 'Breaking News',
+        description: 'Important news',
+        category: 'news',
+        status: 'published',
+      },
+      { title: 'Old Announcement', description: 'Archived', category: 'news', status: 'archived' },
+    ]
+
+    for (const item of searchBarTestItems) {
+      await payload.create({
+        collection: 'search-bar-test',
+        data: item,
+      })
+    }
+
+    // Seed query presets for search-bar-test collection
+    const presetAccessEveryone = {
+      read: { constraint: 'everyone' },
+      update: { constraint: 'everyone' },
+      delete: { constraint: 'everyone' },
+    }
+
+    await payload.create({
+      collection: 'payload-query-presets',
+      data: {
+        title: 'Published Only',
+        relatedCollection: 'search-bar-test',
+        isShared: true,
+        access: presetAccessEveryone,
+        where: {
+          status: { equals: 'published' },
+        },
+      },
+    })
+
+    await payload.create({
+      collection: 'payload-query-presets',
+      data: {
+        title: 'News Articles',
+        relatedCollection: 'search-bar-test',
+        isShared: true,
+        access: presetAccessEveryone,
+        where: {
+          category: { equals: 'news' },
+        },
+      },
+    })
+
+    await payload.create({
+      collection: 'payload-query-presets',
+      data: {
+        title: 'Drafts',
+        relatedCollection: 'search-bar-test',
+        isShared: true,
+        access: presetAccessEveryone,
+        where: {
+          status: { equals: 'draft' },
+        },
+      },
     })
   },
   typescript: {
