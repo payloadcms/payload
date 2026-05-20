@@ -3,6 +3,7 @@ import type {
   McpServer,
   ResourceTemplate,
   ServerContext,
+  StandardSchemaWithJSON,
 } from '@modelcontextprotocol/server'
 import type {
   AuthCollectionSlug,
@@ -24,7 +25,13 @@ import type {
 export type { MCPCollectionAuthToolName, MCPCollectionBuiltinName, MCPGlobalBuiltinName }
 
 /** Re-exported from `@modelcontextprotocol/server` — the JSON Schema shape the MCP runtime validates against. */
-export type { JsonSchemaType }
+export type { JsonSchemaType, StandardSchemaWithJSON }
+
+/**
+ * What a tool's `input` (or a prompt's `argsSchema`) can be — either a raw
+ * JSON Schema literal, or a Standard Schema instance (Zod, Valibot, …).
+ */
+export type ToolInputSchema = JsonSchemaType | StandardSchemaWithJSON
 
 /**
  * Serializable mirror of `SanitizedMCPPluginConfig` for client components —
@@ -61,35 +68,63 @@ export type MCPResponseOverride = (
   req: PayloadRequest,
 ) => MCPToolResponse
 
-export type ToolHandlerArgs = {
+/**
+ * The handler's `input` type. A specific Standard Schema (Zod, Valibot, …) gets
+ * its inferred output; anything else falls back to `Record<string, unknown>`.
+ */
+export type TypedInput<TSchema> = TSchema extends StandardSchemaWithJSON
+  ? StandardSchemaWithJSON extends TSchema
+    ? Record<string, unknown>
+    : StandardSchemaWithJSON.InferOutput<TSchema>
+  : Record<string, unknown>
+
+export type ToolHandlerArgs<TSchema = undefined> = {
   authorizedMCP: AuthorizedMCP
-  input: Record<string, unknown>
+  input: TypedInput<TSchema>
   req: PayloadRequest
   serverContext: ServerContext
 }
 
-export type CollectionToolHandlerArgs = { collectionSlug: CollectionSlug } & ToolHandlerArgs
+export type CollectionToolHandlerArgs<TSchema = undefined> = {
+  collectionSlug: CollectionSlug
+} & ToolHandlerArgs<TSchema>
 
-export type GlobalToolHandlerArgs = { globalSlug: GlobalSlug } & ToolHandlerArgs
+export type GlobalToolHandlerArgs<TSchema = undefined> = {
+  globalSlug: GlobalSlug
+} & ToolHandlerArgs<TSchema>
 
-export type Tool = {
+export type Tool<
+  TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
+> = {
   description: string
-  handler: (args: ToolHandlerArgs) => MaybePromise<MCPToolResponse>
-  input?: JsonSchemaType
+  handler: (args: ToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
+  input?: TSchema
   /**
    * Override the return value of the tool handler
    */
   overrideResponse?: MCPResponseOverride
 }
 
-export type CollectionTool = {
-  handler: (args: CollectionToolHandlerArgs) => MaybePromise<MCPToolResponse>
-  input?: ((args: { collectionSchema: JsonSchemaType }) => JsonSchemaType) | JsonSchemaType
+export type CollectionToolInput =
+  | ((args: { collectionSchema: JsonSchemaType }) => ToolInputSchema)
+  | ToolInputSchema
+
+export type CollectionTool<
+  TSchema extends CollectionToolInput | undefined = CollectionToolInput | undefined,
+> = {
+  handler: (args: CollectionToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
+  input?: TSchema
 } & Pick<Tool, 'description' | 'overrideResponse'>
 
-export type GlobalTool = {
-  handler: (args: GlobalToolHandlerArgs) => MaybePromise<MCPToolResponse>
-  input?: ((args: { globalSchema: JsonSchemaType }) => JsonSchemaType) | JsonSchemaType
+export type GlobalToolInput =
+  | ((args: { globalSchema: JsonSchemaType }) => ToolInputSchema)
+  | ToolInputSchema
+
+export type GlobalTool<
+  TSchema extends GlobalToolInput | undefined = GlobalToolInput | undefined,
+> = {
+  handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
+  input?: TSchema
 } & Pick<Tool, 'description' | 'overrideResponse'>
 
 /**
@@ -133,16 +168,16 @@ export type MCPGlobalToolsMap = {
 
 export type MCPTopLevelToolsMap = Record<string, Tool>
 
-export type PromptHandlerArgs = {
-  input: Record<string, unknown>
+export type PromptHandlerArgs<TSchema = undefined> = {
+  input: TypedInput<TSchema>
   req: PayloadRequest
   serverContext: ServerContext
 }
 
-export type Prompt = {
-  argsSchema: JsonSchemaType
+export type Prompt<TSchema extends ToolInputSchema = ToolInputSchema> = {
+  argsSchema: TSchema
   description: string
-  handler: (args: PromptHandlerArgs) => MaybePromise<{
+  handler: (args: PromptHandlerArgs<TSchema>) => MaybePromise<{
     messages: Array<{ content: { text: string; type: 'text' }; role: 'assistant' | 'user' }>
   }>
   title: string

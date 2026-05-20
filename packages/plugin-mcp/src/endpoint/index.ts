@@ -1,5 +1,4 @@
 import {
-  fromJsonSchema,
   McpServer,
   type ServerContext,
   WebStandardStreamableHTTPServerTransport,
@@ -16,6 +15,7 @@ import {
   getGlobalVirtualFieldNames,
 } from '../utils/getVirtualFieldNames.js'
 import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
+import { toStandardSchema } from '../utils/toStandardSchema.js'
 import { getAuthorizedMCP } from './access.js'
 
 /** `findPosts`, `updateSiteSettings` — auto-prefixed wire name for collection/global tools. */
@@ -87,7 +87,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
             name,
             {
               description: tool.description,
-              inputSchema: inputSchema ? fromJsonSchema(inputSchema) : undefined,
+              inputSchema: inputSchema ? toStandardSchema(inputSchema) : undefined,
             },
             async (input: unknown, ctx: ServerContext) =>
               finalizeToolResponse(
@@ -124,7 +124,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
             name,
             {
               description: tool.description,
-              inputSchema: inputSchema ? fromJsonSchema(inputSchema) : undefined,
+              inputSchema: inputSchema ? toStandardSchema(inputSchema) : undefined,
             },
             async (input: unknown, ctx: ServerContext) =>
               finalizeToolResponse(
@@ -146,7 +146,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
           server.registerPrompt(
             item.key,
             {
-              argsSchema: prompt.argsSchema ? fromJsonSchema(prompt.argsSchema) : undefined,
+              argsSchema: prompt.argsSchema ? toStandardSchema(prompt.argsSchema) : undefined,
               description: prompt.description,
               title: prompt.title,
             },
@@ -189,7 +189,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
             item.key,
             {
               description: tool.description,
-              inputSchema: tool.input ? fromJsonSchema(tool.input) : undefined,
+              inputSchema: tool.input ? toStandardSchema(tool.input) : undefined,
             },
             async (input: unknown, ctx: ServerContext) =>
               finalizeToolResponse(

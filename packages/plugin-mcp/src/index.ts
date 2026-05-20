@@ -18,6 +18,13 @@ declare module 'payload' {
 
 export type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig }
 
+export {
+  defineCollectionTool,
+  defineGlobalTool,
+  definePrompt,
+  defineTool,
+} from './defineTool.js'
+
 /**
  * The MCP Plugin for Payload.
  */

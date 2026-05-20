@@ -1,13 +1,9 @@
 import { ResourceTemplate } from '@modelcontextprotocol/server'
-import { mcpPlugin } from '@payloadcms/plugin-mcp'
+import { defineCollectionTool, definePrompt, defineTool, mcpPlugin } from '@payloadcms/plugin-mcp'
 import path from 'path'
 import { definePlugin } from 'payload'
 import { fileURLToPath } from 'url'
-import { z, type ZodType } from 'zod'
-
-/** Convert a zod schema to the JSON Schema shape the plugin's `input` field expects. */
-const zodInput = (schema: ZodType) =>
-  z.toJSONSchema(schema, { io: 'input' }) as Record<string, unknown>
+import { z } from 'zod'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { FieldTypes } from './collections/FieldTypes.js'
@@ -138,20 +134,14 @@ export default buildConfigWithDefaults({
 
             // Custom collection-scoped tool — surfaced as `publishPosts` on the
             // wire (auto-prefixed). Flips a draft post to published.
-            publish: {
+            publish: defineCollectionTool({
               description: 'Publish a draft post by ID.',
-              input: zodInput(
-                z.object({
-                  id: z.string().describe('The post ID to publish.'),
-                }),
-              ),
-              // `collectionSlug` arrives in the handler context (not hardcoded)
-              // because this tool lives under `collections.X.tools` — the
-              // CollectionTool type makes that available.
+              input: z.object({
+                id: z.string().describe('The post ID to publish.'),
+              }),
               handler: async ({ collectionSlug, input, authorizedMCP, req }) => {
-                const id = input.id as string
                 const result = await req.payload.update({
-                  id,
+                  id: input.id,
                   collection: collectionSlug,
                   data: { _status: 'published' },
                   req,
@@ -162,12 +152,12 @@ export default buildConfigWithDefaults({
                   content: [
                     {
                       type: 'text' as const,
-                      text: `Published ${collectionSlug} ${id}.\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+                      text: `Published ${collectionSlug} ${input.id}.\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
                     },
                   ],
                 }
               },
-            },
+            }),
           },
         },
         media: {
@@ -194,10 +184,20 @@ export default buildConfigWithDefaults({
         verboseLogs: true,
       },
       tools: {
-        diceRoll: {
+        diceRoll: defineTool({
           description: 'Rolls a virtual dice with a specified number of sides',
+          input: z.object({
+            sides: z
+              .number()
+              .int()
+              .min(2)
+              .max(1000)
+              .optional()
+              .default(6)
+              .describe('Number of sides on the dice (default: 6)'),
+          }),
           handler: async ({ input, authorizedMCP, req }) => {
-            const sides = (input.sides as number) || 6
+            const sides = input.sides
             const result = Math.floor(Math.random() * sides) + 1
 
             req.payload.logger.info(
@@ -226,35 +226,23 @@ export default buildConfigWithDefaults({
               ],
             }
           },
-          input: zodInput(
-            z.object({
-              sides: z
-                .number()
-                .int()
-                .min(2)
-                .max(1000)
-                .optional()
-                .default(6)
-                .describe('Number of sides on the dice (default: 6)'),
-            }),
-          ),
-        },
+        }),
       },
       prompts: {
-        echo: {
-          argsSchema: zodInput(z.object({ message: z.string() })),
+        echo: definePrompt({
+          argsSchema: z.object({ message: z.string() }),
           description: 'Creates a prompt to process a message',
           handler: async ({ input: { message }, req }) => {
             const { payload } = req
 
-            payload.logger.info(`Echo Prompt was sent: ${message as string}`)
+            payload.logger.info(`Echo Prompt was sent: ${message}`)
 
-            const modifiedPrompt = `This prompt was sent: ${message as string}`
+            const modifiedPrompt = `This prompt was sent: ${message}`
 
             await payload.create({
               collection: 'modified-prompts',
               data: {
-                original: message as string,
+                original: message,
                 modified: modifiedPrompt,
                 user: req.user?.id,
               },
@@ -281,7 +269,7 @@ export default buildConfigWithDefaults({
             }
           },
           title: 'Echo Prompt',
-        },
+        }),
       },
       resources: {
         data: {
