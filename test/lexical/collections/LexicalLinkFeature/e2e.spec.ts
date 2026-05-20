@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { lexicalLinkFeatureSlug } from 'lexical/slugs.js'
+import { lexicalLinkFeatureSlug } from '../../slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
