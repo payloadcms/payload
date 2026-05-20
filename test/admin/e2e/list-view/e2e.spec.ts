@@ -56,6 +56,7 @@ import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellV
 import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
+import { setPerPageLimit } from '../../../__helpers/e2e/setPerPageLimit.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -1450,9 +1451,12 @@ describe('List View', () => {
         await createPost()
       })
 
-      await page.reload()
+      await page.goto(postsUrl.list)
 
       await wait(1000)
+
+      // Set per-page limit to 5
+      await setPerPageLimit(page, 5)
 
       await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
@@ -1476,9 +1480,12 @@ describe('List View', () => {
         await createPost()
       })
 
-      await page.reload()
+      await page.goto(postsUrl.list)
 
       await wait(1000)
+
+      // Set per-page limit to 5 first
+      await setPerPageLimit(page, 5)
 
       const tableItems = page.locator(tableRowLocator)
       await expect.poll(async () => await tableItems.count()).toBe(5)
@@ -1487,16 +1494,8 @@ describe('List View', () => {
 
       await wait(500)
 
-      await page.locator('.per-page .per-page__base-button').click()
-
-      await wait(500)
-
-      await page
-        .locator('.popup__content .popup-button-list__button', {
-          hasText: '15',
-        })
-        .click()
-      await wait(500)
+      // Now change to 15
+      await setPerPageLimit(page, 15)
 
       await expect(tableItems).toHaveCount(15)
       await expect(page.locator('.per-page .per-page__base-button')).toContainText('15')
@@ -1517,9 +1516,7 @@ describe('List View', () => {
 
       await wait(1000)
 
-      await page.locator('.per-page .per-page__base-button').click()
-      await page.getByRole('button', { name: '5', exact: true }).click()
-      await page.waitForURL(/limit=5/)
+      await setPerPageLimit(page, 5)
 
       const firstPageIds = await page.locator('.cell-id').allInnerTexts()
       await goToNextPage(page)
