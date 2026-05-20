@@ -1,6 +1,6 @@
 import type { SelectType } from 'payload'
 
-import type { CollectionTool, MCPToolResponse } from '../../../types.js'
+import type { CollectionTool } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import {
@@ -15,14 +15,11 @@ const DEFAULT_DESCRIPTION = 'Create a document in a collection.'
 
 export const createCollectionTool: CollectionTool = {
   description: DEFAULT_DESCRIPTION,
-  handler: async ({ authorizedMCP, collectionSlug, input, overrideResponse, req }) => {
+  handler: async ({ authorizedMCP, collectionSlug, input, req }) => {
     const payload = req.payload
     const logger = getLogger({ payload })
 
     const { depth, draft, fallbackLocale, locale, select, ...fieldData } = input
-
-    const applyOverride = (response: MCPToolResponse, doc: Record<string, unknown>) =>
-      overrideResponse?.(response, doc, req) || response
 
     logger.info(
       `Creating document in collection: ${collectionSlug}${locale ? ` with locale: ${locale}` : ''}`,
@@ -39,10 +36,7 @@ export const createCollectionTool: CollectionTool = {
           selectClause = JSON.parse(select as string) as SelectType
         } catch {
           logger.warn(`Invalid select clause JSON: ${String(select)}`)
-          return applyOverride(
-            { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] },
-            {},
-          )
+          return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
         }
       }
 
@@ -60,31 +54,26 @@ export const createCollectionTool: CollectionTool = {
 
       logger.info(`Successfully created document in ${collectionSlug} with ID: ${result.id}`)
 
-      return applyOverride(
-        {
-          content: [
-            {
-              type: 'text',
-              text: `Document created successfully in collection "${collectionSlug}"!\nCreated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-            },
-          ],
-        },
-        result as Record<string, unknown>,
-      )
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Document created successfully in collection "${collectionSlug}"!\nCreated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+          },
+        ],
+        doc: result as Record<string, unknown>,
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       logger.error(`Error creating document in ${collectionSlug}: ${errorMessage}`)
-      return applyOverride(
-        {
-          content: [
-            {
-              type: 'text',
-              text: `Error creating document in collection "${collectionSlug}": ${errorMessage}`,
-            },
-          ],
-        },
-        {},
-      )
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error creating document in collection "${collectionSlug}": ${errorMessage}`,
+          },
+        ],
+      }
     }
   },
   input: ({ collectionSchema }) => {

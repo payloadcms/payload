@@ -1,6 +1,6 @@
 import type { SelectType } from 'payload'
 
-import type { CollectionTool, JsonSchemaType, MCPToolResponse } from '../../../types.js'
+import type { CollectionTool, JsonSchemaType } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
@@ -69,7 +69,7 @@ const inputSchema: JsonSchemaType = {
 
 export const findCollectionTool: CollectionTool = {
   description: DEFAULT_DESCRIPTION,
-  handler: async ({ authorizedMCP, collectionSlug, input, overrideResponse, req }) => {
+  handler: async ({ authorizedMCP, collectionSlug, input, req }) => {
     const payload = req.payload
     const logger = getLogger({ payload })
 
@@ -84,9 +84,6 @@ export const findCollectionTool: CollectionTool = {
     const fallbackLocale = input.fallbackLocale as string | undefined
     const draft = input.draft as boolean | undefined
 
-    const applyOverride = (response: MCPToolResponse, doc: Record<string, unknown>) =>
-      overrideResponse?.(response, doc, req) || response
-
     logger.info(
       `Reading document from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}${locale ? `, locale: ${locale}` : ''}`,
     )
@@ -98,10 +95,7 @@ export const findCollectionTool: CollectionTool = {
           whereClause = JSON.parse(where) as Record<string, unknown>
         } catch {
           logger.warn(`Invalid where clause JSON: ${where}`)
-          return applyOverride(
-            { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] },
-            {},
-          )
+          return { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] }
         }
       }
 
@@ -111,10 +105,7 @@ export const findCollectionTool: CollectionTool = {
           selectClause = JSON.parse(select) as SelectType
         } catch {
           logger.warn(`Invalid select clause JSON: ${select}`)
-          return applyOverride(
-            { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] },
-            {},
-          )
+          return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
         }
       }
 
@@ -132,30 +123,25 @@ export const findCollectionTool: CollectionTool = {
             ...(draft !== undefined && { draft }),
           })
 
-          return applyOverride(
-            {
-              content: [
-                {
-                  type: 'text',
-                  text: `Document from collection "${collectionSlug}":\n${JSON.stringify(doc)}`,
-                },
-              ],
-            },
-            doc as Record<string, unknown>,
-          )
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Document from collection "${collectionSlug}":\n${JSON.stringify(doc)}`,
+              },
+            ],
+            doc: doc as Record<string, unknown>,
+          }
         } catch {
           logger.warn(`Document not found with ID: ${id} in collection: ${collectionSlug}`)
-          return applyOverride(
-            {
-              content: [
-                {
-                  type: 'text',
-                  text: `Error: Document with ID "${id}" not found in collection "${collectionSlug}"`,
-                },
-              ],
-            },
-            {},
-          )
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Error: Document with ID "${id}" not found in collection "${collectionSlug}"`,
+              },
+            ],
+          }
         }
       }
 
@@ -186,24 +172,21 @@ export const findCollectionTool: CollectionTool = {
         responseText += `\n\`\`\`json\n${JSON.stringify(doc)}\n\`\`\``
       }
 
-      return applyOverride(
-        { content: [{ type: 'text', text: responseText }] },
-        result as unknown as Record<string, unknown>,
-      )
+      return {
+        content: [{ type: 'text', text: responseText }],
+        doc: result as unknown as Record<string, unknown>,
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       logger.error(`Error reading documents from collection ${collectionSlug}: ${errorMessage}`)
-      return applyOverride(
-        {
-          content: [
-            {
-              type: 'text',
-              text: `❌ **Error reading documents from collection "${collectionSlug}":** ${errorMessage}`,
-            },
-          ],
-        },
-        {},
-      )
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `❌ **Error reading documents from collection "${collectionSlug}":** ${errorMessage}`,
+          },
+        ],
+      }
     }
   },
   input: inputSchema,

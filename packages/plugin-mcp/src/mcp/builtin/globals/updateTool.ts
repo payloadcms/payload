@@ -1,6 +1,6 @@
 import type { SelectType } from 'payload'
 
-import type { GlobalTool, MCPToolResponse } from '../../../types.js'
+import type { GlobalTool } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import {
@@ -14,14 +14,11 @@ const DEFAULT_DESCRIPTION = 'Update a Payload global singleton configuration.'
 
 export const updateGlobalTool: GlobalTool = {
   description: DEFAULT_DESCRIPTION,
-  handler: async ({ authorizedMCP, globalSlug, input, overrideResponse, req }) => {
+  handler: async ({ authorizedMCP, globalSlug, input, req }) => {
     const payload = req.payload
     const logger = getLogger({ payload })
 
     const { depth = 0, draft = false, fallbackLocale, locale, select, ...rest } = input
-
-    const applyOverride = (response: MCPToolResponse, doc: Record<string, unknown>) =>
-      overrideResponse?.(response, doc, req) || response
 
     logger.info(
       `Updating global: ${globalSlug}, draft: ${draft}${locale ? `, locale: ${locale as string}` : ''}`,
@@ -37,10 +34,7 @@ export const updateGlobalTool: GlobalTool = {
           selectClause = JSON.parse(select as string) as SelectType
         } catch {
           logger.warn(`Invalid select clause JSON for global: ${String(select)}`)
-          return applyOverride(
-            { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] },
-            {},
-          )
+          return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
         }
       }
 
@@ -64,28 +58,23 @@ export const updateGlobalTool: GlobalTool = {
 
       const result = await payload.updateGlobal(updateOptions)
 
-      return applyOverride(
-        {
-          content: [
-            {
-              type: 'text',
-              text: `Global "${globalSlug}" updated successfully!\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-            },
-          ],
-        },
-        result as Record<string, unknown>,
-      )
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Global "${globalSlug}" updated successfully!\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+          },
+        ],
+        doc: result as Record<string, unknown>,
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       logger.error(`Error updating global ${globalSlug}: ${errorMessage}`)
-      return applyOverride(
-        {
-          content: [
-            { type: 'text', text: `Error updating global "${globalSlug}": ${errorMessage}` },
-          ],
-        },
-        {},
-      )
+      return {
+        content: [
+          { type: 'text', text: `Error updating global "${globalSlug}": ${errorMessage}` },
+        ],
+      }
     }
   },
   input: ({ globalSchema }) => {

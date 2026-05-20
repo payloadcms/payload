@@ -130,6 +130,7 @@ export const authCollectionTool: CollectionTool = {
             text: `# Authentication Status\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
+        doc: result as unknown as Record<string, unknown>,
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -157,6 +158,7 @@ export const forgotPasswordCollectionTool: CollectionTool = {
             text: `# Forgot Password Email Sent\n\n**Collection:** ${collectionSlug}\n**Email:** ${String(input.email)}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
+        doc: { result } as Record<string, unknown>,
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -188,6 +190,7 @@ export const loginCollectionTool: CollectionTool = {
             text: `# Login Successful\n\n**User:** ${String(input.email)}\n**Collection:** ${collectionSlug}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
+        doc: result as unknown as Record<string, unknown>,
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -218,6 +221,7 @@ export const resetPasswordCollectionTool: CollectionTool = {
             text: `# Password Reset Successful\n\n**Collection:** ${collectionSlug}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
+        doc: result as unknown as Record<string, unknown>,
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -245,6 +249,7 @@ export const unlockCollectionTool: CollectionTool = {
             text: `# Account Unlocked\n\n**Collection:** ${collectionSlug}\n**Email:** ${String(input.email)}\n**Result:** ${result ? 'Success' : 'Failed'}`,
           },
         ],
+        doc: { result } as Record<string, unknown>,
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -271,6 +276,7 @@ export const verifyCollectionTool: CollectionTool = {
             text: `# Email Verification Successful\n\n**Collection:** ${collectionSlug}\n**Result:** ${result ? 'Success' : 'Failed'}`,
           },
         ],
+        doc: { result } as Record<string, unknown>,
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'

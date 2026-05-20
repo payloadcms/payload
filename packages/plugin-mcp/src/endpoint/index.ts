@@ -6,7 +6,7 @@ import {
 } from '@modelcontextprotocol/server'
 import { APIError, AuthenticationError, configToJSONSchema, type PayloadHandler } from 'payload'
 
-import type { JsonSchemaType } from '../types.js'
+import type { JsonSchemaType, MCPResponseOverride, MCPToolResponse } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
 import { getLogger } from '../utils/getLogger.js'
@@ -41,6 +41,19 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
   )
 
   const logger = getLogger({ payload: req.payload })
+
+  /**
+   * Wrap a tool handler's response with the tool's `overrideResponse`, then
+   * strip the internal `doc` field so it doesn't leak onto the wire.
+   */
+  const finalizeToolResponse = (
+    response: MCPToolResponse,
+    overrideResponse?: MCPResponseOverride,
+  ): MCPToolResponse => {
+    const overridden = overrideResponse?.(response, response.doc ?? {}, req) ?? response
+    const { doc: _doc, ...rest } = overridden
+    return rest
+  }
 
   const configSchema = configToJSONSchema(
     req.payload.config,
@@ -77,14 +90,16 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
               inputSchema: inputSchema ? fromJsonSchema(inputSchema) : undefined,
             },
             async (input: unknown, ctx: ServerContext) =>
-              tool.handler({
-                authorizedMCP,
-                collectionSlug: item.collectionSlug,
-                input: (input ?? {}) as Record<string, unknown>,
-                overrideResponse: tool.overrideResponse,
-                req,
-                serverContext: ctx,
-              }),
+              finalizeToolResponse(
+                await tool.handler({
+                  authorizedMCP,
+                  collectionSlug: item.collectionSlug,
+                  input: (input ?? {}) as Record<string, unknown>,
+                  req,
+                  serverContext: ctx,
+                }),
+                tool.overrideResponse,
+              ),
           )
           logger.info(`✅ Tool: ${name} Registered.`)
           break
@@ -112,14 +127,16 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
               inputSchema: inputSchema ? fromJsonSchema(inputSchema) : undefined,
             },
             async (input: unknown, ctx: ServerContext) =>
-              tool.handler({
-                authorizedMCP,
-                globalSlug: item.globalSlug,
-                input: (input ?? {}) as Record<string, unknown>,
-                overrideResponse: tool.overrideResponse,
-                req,
-                serverContext: ctx,
-              }),
+              finalizeToolResponse(
+                await tool.handler({
+                  authorizedMCP,
+                  globalSlug: item.globalSlug,
+                  input: (input ?? {}) as Record<string, unknown>,
+                  req,
+                  serverContext: ctx,
+                }),
+                tool.overrideResponse,
+              ),
           )
           logger.info(`✅ Tool: ${name} Registered.`)
           break
@@ -175,13 +192,15 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
               inputSchema: tool.input ? fromJsonSchema(tool.input) : undefined,
             },
             async (input: unknown, ctx: ServerContext) =>
-              tool.handler({
-                authorizedMCP,
-                input: (input ?? {}) as Record<string, unknown>,
-                overrideResponse: tool.overrideResponse,
-                req,
-                serverContext: ctx,
-              }),
+              finalizeToolResponse(
+                await tool.handler({
+                  authorizedMCP,
+                  input: (input ?? {}) as Record<string, unknown>,
+                  req,
+                  serverContext: ctx,
+                }),
+                tool.overrideResponse,
+              ),
           )
           logger.info(`✅ Tool: ${item.key} Registered.`)
           break

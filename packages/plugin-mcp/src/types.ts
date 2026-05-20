@@ -47,6 +47,12 @@ export type ClientMCPPluginConfig = {
 
 export type MCPToolResponse = {
   content: Array<{ text: string; type: 'text' }>
+  /**
+   * If available, return the document fetched within the
+   * mcp tool. This is threaded as an additional argument to
+   * overrideResponse functions
+   */
+  doc?: Record<string, unknown>
 }
 
 export type MCPResponseOverride = (
@@ -58,8 +64,6 @@ export type MCPResponseOverride = (
 export type ToolHandlerArgs = {
   authorizedMCP: AuthorizedMCP
   input: Record<string, unknown>
-  /** Set by the endpoint when registering a tool; the tool's handler can wrap its response. */
-  overrideResponse?: MCPResponseOverride
   req: PayloadRequest
   serverContext: ServerContext
 }
@@ -72,22 +76,21 @@ export type Tool = {
   description: string
   handler: (args: ToolHandlerArgs) => MaybePromise<MCPToolResponse>
   input?: JsonSchemaType
+  /**
+   * Override the return value of the tool handler
+   */
   overrideResponse?: MCPResponseOverride
 }
 
 export type CollectionTool = {
-  description: string
   handler: (args: CollectionToolHandlerArgs) => MaybePromise<MCPToolResponse>
   input?: ((args: { collectionSchema: JsonSchemaType }) => JsonSchemaType) | JsonSchemaType
-  overrideResponse?: MCPResponseOverride
-}
+} & Pick<Tool, 'description' | 'overrideResponse'>
 
 export type GlobalTool = {
-  description: string
   handler: (args: GlobalToolHandlerArgs) => MaybePromise<MCPToolResponse>
   input?: ((args: { globalSchema: JsonSchemaType }) => JsonSchemaType) | JsonSchemaType
-  overrideResponse?: MCPResponseOverride
-}
+} & Pick<Tool, 'description' | 'overrideResponse'>
 
 /**
  * Configures (or disables) a built-in tool without replacing it.

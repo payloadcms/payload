@@ -1,6 +1,6 @@
 import type { SelectType } from 'payload'
 
-import type { GlobalTool, JsonSchemaType, MCPToolResponse } from '../../../types.js'
+import type { GlobalTool, JsonSchemaType } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
@@ -36,7 +36,7 @@ const inputSchema: JsonSchemaType = {
 
 export const findGlobalTool: GlobalTool = {
   description: DEFAULT_DESCRIPTION,
-  handler: async ({ authorizedMCP, globalSlug, input, overrideResponse, req }) => {
+  handler: async ({ authorizedMCP, globalSlug, input, req }) => {
     const payload = req.payload
     const logger = getLogger({ payload })
 
@@ -44,9 +44,6 @@ export const findGlobalTool: GlobalTool = {
     const locale = input.locale as string | undefined
     const fallbackLocale = input.fallbackLocale as string | undefined
     const select = input.select as string | undefined
-
-    const applyOverride = (response: MCPToolResponse, doc: Record<string, unknown>) =>
-      overrideResponse?.(response, doc, req) || response
 
     logger.info(
       `Reading global: ${globalSlug}, depth: ${depth}${locale ? `, locale: ${locale}` : ''}`,
@@ -65,10 +62,7 @@ export const findGlobalTool: GlobalTool = {
           selectClause = JSON.parse(select) as SelectType
         } catch {
           logger.warn(`Invalid select clause JSON for global: ${select}`)
-          return applyOverride(
-            { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] },
-            {},
-          )
+          return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
         }
       }
 
@@ -84,28 +78,23 @@ export const findGlobalTool: GlobalTool = {
 
       const result = await payload.findGlobal(findOptions)
 
-      return applyOverride(
-        {
-          content: [
-            {
-              type: 'text',
-              text: `Global "${globalSlug}":\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-            },
-          ],
-        },
-        result as Record<string, unknown>,
-      )
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Global "${globalSlug}":\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+          },
+        ],
+        doc: result as Record<string, unknown>,
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       logger.error(`Error reading global ${globalSlug}: ${errorMessage}`)
-      return applyOverride(
-        {
-          content: [
-            { type: 'text', text: `❌ **Error reading global "${globalSlug}":** ${errorMessage}` },
-          ],
-        },
-        {},
-      )
+      return {
+        content: [
+          { type: 'text', text: `❌ **Error reading global "${globalSlug}":** ${errorMessage}` },
+        ],
+      }
     }
   },
   input: inputSchema,

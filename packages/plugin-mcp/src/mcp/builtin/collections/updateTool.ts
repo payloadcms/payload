@@ -1,6 +1,6 @@
 import type { SelectType } from 'payload'
 
-import type { CollectionTool, MCPToolResponse } from '../../../types.js'
+import type { CollectionTool } from '../../../types.js'
 
 import { getLogger } from '../../../utils/getLogger.js'
 import {
@@ -15,7 +15,7 @@ const DEFAULT_DESCRIPTION = 'Update documents in a collection by ID or where cla
 
 export const updateCollectionTool: CollectionTool = {
   description: DEFAULT_DESCRIPTION,
-  handler: async ({ authorizedMCP, collectionSlug, input, overrideResponse, req }) => {
+  handler: async ({ authorizedMCP, collectionSlug, input, req }) => {
     const payload = req.payload
     const logger = getLogger({ payload })
 
@@ -33,21 +33,15 @@ export const updateCollectionTool: CollectionTool = {
       ...fieldData
     } = input
 
-    const applyOverride = (response: MCPToolResponse, doc: Record<string, unknown>) =>
-      overrideResponse?.(response, doc, req) || response
-
     logger.info(
       `Updating document in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale as string}` : ''}`,
     )
 
     try {
       if (!id && !where) {
-        return applyOverride(
-          {
-            content: [{ type: 'text', text: 'Error: Either id or where clause must be provided' }],
-          },
-          {},
-        )
+        return {
+          content: [{ type: 'text', text: 'Error: Either id or where clause must be provided' }],
+        }
       }
 
       let parsedData = transformPointDataToPayload(fieldData)
@@ -60,10 +54,7 @@ export const updateCollectionTool: CollectionTool = {
           whereClause = JSON.parse(where as string) as Record<string, unknown>
         } catch {
           logger.error(`Invalid where clause JSON: ${String(where)}`)
-          return applyOverride(
-            { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] },
-            {},
-          )
+          return { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] }
         }
       }
 
@@ -73,10 +64,7 @@ export const updateCollectionTool: CollectionTool = {
           selectClause = JSON.parse(select as string) as SelectType
         } catch {
           logger.warn(`Invalid select clause JSON: ${String(select)}`)
-          return applyOverride(
-            { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] },
-            {},
-          )
+          return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
         }
       }
 
@@ -101,17 +89,15 @@ export const updateCollectionTool: CollectionTool = {
 
         const result = await payload.update(updateOptions as any)
 
-        return applyOverride(
-          {
-            content: [
-              {
-                type: 'text',
-                text: `Document updated successfully in collection "${collectionSlug}"!\nUpdated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-              },
-            ],
-          },
-          result as Record<string, unknown>,
-        )
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Document updated successfully in collection "${collectionSlug}"!\nUpdated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+            },
+          ],
+          doc: result as Record<string, unknown>,
+        }
       }
 
       const updateOptions = {
@@ -146,24 +132,21 @@ export const updateCollectionTool: CollectionTool = {
         responseText += `\n\nErrors:\n\`\`\`json\n${JSON.stringify(errors)}\n\`\`\``
       }
 
-      return applyOverride({ content: [{ type: 'text', text: responseText }] }, {
-        docs,
-        errors,
-      } as unknown as Record<string, unknown>)
+      return {
+        content: [{ type: 'text', text: responseText }],
+        doc: { docs, errors } as unknown as Record<string, unknown>,
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       logger.error(`Error updating document in ${collectionSlug}: ${errorMessage}`)
-      return applyOverride(
-        {
-          content: [
-            {
-              type: 'text',
-              text: `Error updating document in collection "${collectionSlug}": ${errorMessage}`,
-            },
-          ],
-        },
-        {},
-      )
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error updating document in collection "${collectionSlug}": ${errorMessage}`,
+          },
+        ],
+      }
     }
   },
   input: ({ collectionSchema }) => {
