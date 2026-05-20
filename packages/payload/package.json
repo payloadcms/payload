@@ -100,7 +100,6 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
-    "@next/env": "16.2.6",
     "@payloadcms/translations": "workspace:*",
     "@types/busboy": "1.5.4",
     "ajv": "8.20.0",
@@ -111,6 +110,8 @@
     "croner": "10.0.1",
     "dataloader": "2.2.3",
     "deepmerge": "4.3.1",
+    "dotenv": "16.4.7",
+    "dotenv-expand": "12.0.1",
     "file-type": "22.0.1",
     "get-tsconfig": "4.14.0",
     "http-status": "2.1.0",
