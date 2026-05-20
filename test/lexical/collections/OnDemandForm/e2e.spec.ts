@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
