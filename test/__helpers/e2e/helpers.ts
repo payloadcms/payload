@@ -14,6 +14,7 @@ import { formatAdminURL, wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
 import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
+import { hideNextDevTools } from './hideNextDevTools.js'
 
 export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
 
@@ -121,6 +122,10 @@ export async function ensureCompilationIsDone({
       }
 
       console.log('Successfully compiled')
+      // Hide Next.js dev tools to prevent pointer event interception in tests
+      if (pageFromArgs) {
+        await hideNextDevTools(page)
+      }
       if (browser) {
         await page.close()
       }

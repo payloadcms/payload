@@ -143,7 +143,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('body')).not.toContainText('Loading...')
 
       // Change per-page to 25
-      const perPageButton = page.locator('.per-page .popup-button')
+      const perPageButton = page.locator('.per-page .per-page__base-button')
       await expect(perPageButton).toBeVisible()
       await perPageButton.click()
 
