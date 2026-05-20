@@ -147,7 +147,9 @@ test.describe('Import Export Plugin', () => {
       await expect(perPageButton).toBeVisible()
       await perPageButton.click()
 
-      const perPage25 = page.locator('.popup__content button.per-page__button', { hasText: '25' })
+      const perPage25 = page.locator('.popup__content .popup-button-list__button', {
+        hasText: '25',
+      })
       await expect(perPage25).toBeVisible()
       await perPage25.click()
 
