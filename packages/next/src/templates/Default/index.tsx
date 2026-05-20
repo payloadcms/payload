@@ -7,22 +7,11 @@ import type {
   VisibleEntities,
 } from 'payload'
 
-import {
-  ActionsProvider,
-  AppHeader,
-  BulkUploadProvider,
-  EntityVisibilityProvider,
-} from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-
-import './index.css'
-
+import { DefaultTemplate as DefaultTemplateUI } from '@payloadcms/ui/templates/Default'
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
-import { Wrapper } from './Wrapper/index.js'
-
-const baseClass = 'template-default'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 export type DefaultTemplateProps = {
   children?: React.ReactNode
@@ -87,6 +76,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     params,
     payload,
     permissions,
+    renderComponent: RenderServerComponent,
     req,
     searchParams,
     user,
@@ -115,36 +105,38 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   })
 
   return (
-    <EntityVisibilityProvider visibleEntities={visibleEntities}>
-      <BulkUploadProvider drawerSlugPrefix={collectionSlug}>
-        <ActionsProvider Actions={Actions}>
-          {RenderServerComponent({
-            clientProps,
-            Component: CustomHeader,
-            importMap: payload.importMap,
-            serverProps,
-          })}
-          <div style={{ position: 'relative' }}>
-            <Wrapper baseClass={baseClass} className={className}>
-              {NavComponent}
-              <div className={`${baseClass}__wrap`}>
-                <AppHeader
-                  CustomAvatar={
-                    avatar !== 'gravatar' && avatar !== 'default'
-                      ? RenderServerComponent({
-                          Component: avatar.Component,
-                          importMap: payload.importMap,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                />
-                {children}
-              </div>
-            </Wrapper>
-          </div>
-        </ActionsProvider>
-      </BulkUploadProvider>
-    </EntityVisibilityProvider>
+    <DefaultTemplateUI
+      Actions={Actions}
+      className={className}
+      collectionSlug={collectionSlug}
+      CustomAvatar={
+        avatar !== 'gravatar' && avatar !== 'default'
+          ? RenderServerComponent({
+              Component: avatar.Component,
+              importMap: payload.importMap,
+              serverProps,
+            })
+          : undefined
+      }
+      CustomHeader={RenderServerComponent({
+        clientProps,
+        Component: CustomHeader,
+        importMap: payload.importMap,
+        serverProps,
+      })}
+      CustomIcon={
+        components?.graphics?.Icon
+          ? RenderServerComponent({
+              Component: components.graphics.Icon,
+              importMap: payload.importMap,
+              serverProps,
+            })
+          : undefined
+      }
+      NavComponent={NavComponent}
+      visibleEntities={visibleEntities}
+    >
+      {children}
+    </DefaultTemplateUI>
   )
 }

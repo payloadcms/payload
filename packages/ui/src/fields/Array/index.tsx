@@ -7,6 +7,7 @@ import type {
 
 import { verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
+import { getFromImportMap } from 'payload/shared'
 import React, { Fragment, useCallback, useId, useMemo } from 'react'
 import { toast } from 'sonner'
 
@@ -38,6 +39,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { CirclePlusIcon } from '../../icons/CirclePlus/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useImportMap } from '../../providers/ImportMap/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
@@ -148,6 +150,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
+
+  const importMap = useImportMap()
 
   const componentId = useId()
   const scrollIdPrefix = useMemo(() => `scroll-${componentId}`, [componentId])
@@ -430,6 +434,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                   <ArrayRow
                     {...draggableSortableItemProps}
                     addRow={addRow}
+                    clientRowLabelPath={
+                      !rows?.[i]?.customComponents?.RowLabel
+                        ? rows?.[i]?.clientComponentPaths?.RowLabel
+                        : undefined
+                    }
                     copyRow={copyRow}
                     CustomRowLabel={rows?.[i]?.customComponents?.RowLabel}
                     duplicateRow={duplicateRow}
@@ -437,6 +446,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     fields={fields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
+                    importMap={importMap}
                     isLoading={isLoading}
                     isSortable={isSortable}
                     labels={labels}

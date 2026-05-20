@@ -13,7 +13,7 @@ import { EmailAndUsernameFields } from '../../../elements/EmailAndUsername/index
 import { CheckboxField } from '../../../fields/Checkbox/index.js'
 import { ConfirmPasswordField } from '../../../fields/ConfirmPassword/index.js'
 import { PasswordField } from '../../../fields/Password/index.js'
-import { useFormFields, useFormModified } from '../../../forms/Form/context.js'
+import { useFormFields, useFormInitializing, useFormModified } from '../../../forms/Form/context.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -112,7 +112,8 @@ export const Auth: React.FC<Props> = (props) => {
       (typeof disableLocalStrategy === 'object' && disableLocalStrategy.enableFields === true)) &&
     (showUnlock || showPasswordFields)
 
-  const disabled = readOnly || isInitializing || isTrashed
+  const isFormInitializing = useFormInitializing()
+  const disabled = readOnly || isInitializing || isFormInitializing || isTrashed
 
   const apiKeyPermissions =
     docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey

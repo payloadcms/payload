@@ -1,7 +1,6 @@
 import type { DefaultDocumentIDType, Payload, PayloadRequest } from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { cache } from 'react'
 
 import { removeUndefined } from './removeUndefined.js'
 
@@ -18,44 +17,42 @@ const defaultMerge: DefaultMerge = <T>(existingValue: T, incomingValue: T | unde
     ...removeUndefined(incomingValue || {}),
   }) as T
 
-export const getPreferences = cache(
-  async <T>(
-    key: string,
-    payload: Payload,
-    userID: DefaultDocumentIDType,
-    userSlug: string,
-  ): Promise<PreferenceDoc<T>> => {
-    const result = (await payload
-      .find({
-        collection: 'payload-preferences',
-        depth: 0,
-        limit: 1,
-        pagination: false,
-        where: {
-          and: [
-            {
-              key: {
-                equals: key,
-              },
+export const getPreferences = async <T>(
+  key: string,
+  payload: Payload,
+  userID: DefaultDocumentIDType,
+  userSlug: string,
+): Promise<PreferenceDoc<T>> => {
+  const result = (await payload
+    .find({
+      collection: 'payload-preferences',
+      depth: 0,
+      limit: 1,
+      pagination: false,
+      where: {
+        and: [
+          {
+            key: {
+              equals: key,
             },
-            {
-              'user.relationTo': {
-                equals: userSlug,
-              },
+          },
+          {
+            'user.relationTo': {
+              equals: userSlug,
             },
-            {
-              'user.value': {
-                equals: userID,
-              },
+          },
+          {
+            'user.value': {
+              equals: userID,
             },
-          ],
-        },
-      })
-      .then((res) => res.docs?.[0])) as { id: DefaultDocumentIDType; value: T }
+          },
+        ],
+      },
+    })
+    .then((res) => res.docs?.[0])) as { id: DefaultDocumentIDType; value: T }
 
-    return result
-  },
-)
+  return result
+}
 
 /**
  * Will update the given preferences by key, creating a new record if it doesn't already exist, or merging existing preferences with the new value.

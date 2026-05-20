@@ -1,10 +1,10 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
-import { usePathname } from 'next/navigation.js'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useEffect, useRef } from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { usePathname } from '../../providers/RouterAdapter/index.js'
 
 type NavContextType = {
   hydrated: boolean
@@ -44,9 +44,10 @@ export const NavProvider: React.FC<{
   children: React.ReactNode
   initialIsOpen?: boolean
 }> = ({ children, initialIsOpen }) => {
-  const {
-    breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
-  } = useWindowInfo()
+  const windowInfo = useWindowInfo()
+  const largeBreak = windowInfo?.breakpoints?.l
+  const midBreak = windowInfo?.breakpoints?.m
+  const smallBreak = windowInfo?.breakpoints?.s
 
   const pathname = usePathname()
 

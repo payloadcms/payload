@@ -1,0 +1,27 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .nav {
+    position: sticky;
+    top: 0;
+    left: 0;
+    flex-shrink: 0;
+    height: 100vh;
+    width: var(--nav-width);
+    border-right: 1px solid var(--theme-elevation-100);
+    opacity: 0;
+
+    [dir='rtl'] & {
+      border-right: none;
+      border-left: 1px solid var(--theme-elevation-100);
+    }
+
+    &--nav-animate {
+      transition: opacity var(--nav-trans-time) ease-in-out;
+    }
+
+    &--nav-open {
+      opacity: 1;
+    }
+  }
+}

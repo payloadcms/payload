@@ -1,6 +1,5 @@
 'use client'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
 import { type FormState, type PayloadRequest } from 'payload'
 import {
@@ -11,7 +10,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -33,6 +32,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -169,6 +169,21 @@ export const Form: React.FC<FormProps> = (props) => {
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
   const [formState, dispatchFields] = fieldsReducer
+
+  // React's useReducer always returns a new [state, dispatch] tuple on every render,
+  // even when state hasn't changed.  FormFieldsContext.Provider uses use-context-selector
+  // which fires a layout effect on every value change, notifying ALL subscribers.
+  // If the Form re-renders for any reason (isMounted, modified, etc.), each subscriber's
+  // selector is called.  Selectors that return new object references (even inadvertently)
+  // will trigger dispatch() during render, causing infinite re-renders ("Maximum update
+  // depth exceeded").  Memoizing the tuple so it only changes when formState changes
+  // prevents spurious notifications on unrelated Form re-renders.
+  // dispatchFields is stable (React guarantees this for useReducer dispatch),
+  // so including it here satisfies the exhaustive-deps rule without extra re-renders.
+  const stableFieldsReducer = useMemo(
+    () => [formState, dispatchFields] as typeof fieldsReducer,
+    [formState, dispatchFields],
+  )
 
   contextRef.current.fields = formState
 
@@ -907,7 +922,7 @@ export const Form: React.FC<FormProps> = (props) => {
                   <BackgroundProcessingContext value={backgroundProcessing}>
                     <ModifiedContext value={modified}>
                       {/* eslint-disable-next-line @eslint-react/no-context-provider */}
-                      <FormFieldsContext.Provider value={fieldsReducer}>
+                      <FormFieldsContext.Provider value={stableFieldsReducer}>
                         {children}
                       </FormFieldsContext.Provider>
                     </ModifiedContext>

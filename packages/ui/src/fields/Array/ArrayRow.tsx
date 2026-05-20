@@ -3,11 +3,14 @@ import type {
   ArrayField,
   ClientComponentProps,
   ClientField,
+  ImportMap,
+  PayloadComponent,
   Row,
   SanitizedFieldPermissions,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { getFromImportMap } from 'payload/shared'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
@@ -27,12 +30,14 @@ const baseClass = 'array-field'
 
 type ArrayRowProps = {
   readonly addRow: (rowIndex: number) => Promise<void> | void
+  readonly clientRowLabelPath?: PayloadComponent
   readonly copyRow: (rowIndex: number) => void
   readonly CustomRowLabel?: React.ReactNode
   readonly duplicateRow: (rowIndex: number) => void
   readonly errorCount: number
   readonly fields: ClientField[]
   readonly hasMaxRows?: boolean
+  readonly importMap?: ImportMap | null
   readonly isLoading?: boolean
   readonly isSortable?: boolean
   readonly labels: Partial<ArrayField['labels']>
@@ -55,6 +60,7 @@ type ArrayRowProps = {
 export const ArrayRow: React.FC<ArrayRowProps> = ({
   addRow,
   attributes,
+  clientRowLabelPath,
   copyRow,
   CustomRowLabel,
   duplicateRow,
@@ -62,6 +68,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   fields,
   forceRender = false,
   hasMaxRows,
+  importMap,
   isDragging,
   isLoading: isLoadingFromProps,
   isSortable,
@@ -149,7 +156,29 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
               <ShimmerEffect height="1rem" width="8rem" />
             ) : (
               <RowLabel
-                CustomComponent={CustomRowLabel}
+                CustomComponent={
+                  CustomRowLabel ||
+                  (importMap && clientRowLabelPath
+                    ? (() => {
+                        const Comp = getFromImportMap<React.ComponentType<any>>({
+                          importMap,
+                          PayloadComponent: clientRowLabelPath,
+                          schemaPath: '',
+                          silent: true,
+                        })
+                        if (!Comp) {
+                          return undefined
+                        }
+                        const extraProps =
+                          typeof clientRowLabelPath === 'object' &&
+                          clientRowLabelPath &&
+                          'clientProps' in clientRowLabelPath
+                            ? clientRowLabelPath.clientProps
+                            : undefined
+                        return <Comp path={path} rowNumber={rowIndex} {...(extraProps as any)} />
+                      })()
+                    : undefined)
+                }
                 label={fallbackLabel}
                 path={path}
                 rowNumber={rowIndex}

@@ -1,15 +1,20 @@
+import type {
+  CollectionSlug,
+  Data,
+  Field,
+  FlattenedBlock,
+  PayloadRequest,
+  ServerFunction,
+} from 'payload'
+
 import ObjectIdImport from 'bson-objectid'
 import {
   canAccessAdmin,
-  type CollectionSlug,
-  type Data,
-  type Field,
-  type FlattenedBlock,
-  type PayloadRequest,
-  type ServerFunction,
+  fieldAffectsData,
+  fieldShouldBeLocalized,
+  tabHasName,
   traverseFields,
-} from 'payload'
-import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
+} from 'payload/shared'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 

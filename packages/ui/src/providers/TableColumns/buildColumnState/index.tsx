@@ -5,6 +5,7 @@ import type {
   CollectionPreferences,
   CollectionSlug,
   Column,
+  ComponentRenderer,
   DefaultCellComponentProps,
   Document,
   Field,
@@ -28,7 +29,6 @@ import React from 'react'
 
 import type { SortColumnProps } from '../../../elements/SortColumn/index.js'
 
-import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import {
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
@@ -49,6 +49,7 @@ export type BuildColumnStateArgs = {
   fieldPermissions?: SanitizedFieldsPermissions
   i18n: I18nClient
   payload: Payload
+  renderComponent: ComponentRenderer
   req?: PayloadRequest
   serverFields: Field[]
   sortColumnProps?: Partial<SortColumnProps>
@@ -84,6 +85,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     fieldPermissions,
     i18n,
     payload,
+    renderComponent,
     req,
     serverFields,
     sortColumnProps,
@@ -210,7 +212,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
       }
 
       CustomLabel = CustomLabelToRender
-        ? RenderServerComponent({
+        ? renderComponent({
             clientProps,
             Component: CustomLabelToRender,
             importMap: payload.importMap,
@@ -271,6 +273,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
               i18n,
               isLinkedColumn: enableLinkedCell && colIndex === activeColumnsIndices[0],
               payload,
+              renderComponent,
               req,
               rowIndex,
               serverField,

@@ -1,13 +1,14 @@
 import type { AdminViewServerProps, ServerProps } from 'payload'
 
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { getLoginViewData } from '@payloadcms/ui/views/Login/getLoginViewData'
+import { LoginForm } from '@payloadcms/ui/views/Login/LoginForm'
 import { redirect } from 'next/navigation.js'
-import { getSafeRedirect } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import { LoginForm } from './LoginForm/index.js'
-import './index.scss'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+
+import '@payloadcms/ui/views/Login/index.scss'
 export const loginBaseClass = 'login'
 
 export function LoginView({ initPageResult, params, searchParams }: AdminViewServerProps) {
@@ -20,36 +21,11 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
     user,
   } = req
 
-  const {
-    admin: { components: { afterLogin, beforeLogin } = {}, user: userSlug },
-    routes: { admin },
-  } = config
+  const loginData = getLoginViewData({ config, searchParams, user })
 
-  const redirectUrl = getSafeRedirect({ fallbackTo: admin, redirectTo: searchParams.redirect })
-
-  if (user) {
-    redirect(redirectUrl)
+  if (loginData.isLoggedIn) {
+    redirect(loginData.redirectUrl)
   }
-
-  const collectionConfig = payload?.collections?.[userSlug]?.config
-
-  const prefillAutoLogin =
-    typeof config.admin?.autoLogin === 'object' && config.admin?.autoLogin.prefillOnly
-
-  const prefillUsername =
-    prefillAutoLogin && typeof config.admin?.autoLogin === 'object'
-      ? config.admin?.autoLogin.username
-      : undefined
-
-  const prefillEmail =
-    prefillAutoLogin && typeof config.admin?.autoLogin === 'object'
-      ? config.admin?.autoLogin.email
-      : undefined
-
-  const prefillPassword =
-    prefillAutoLogin && typeof config.admin?.autoLogin === 'object'
-      ? config.admin?.autoLogin.password
-      : undefined
 
   return (
     <Fragment>
@@ -65,7 +41,7 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
         />
       </div>
       {RenderServerComponent({
-        Component: beforeLogin,
+        Component: loginData.beforeLogin,
         importMap: payload.importMap,
         serverProps: {
           i18n,
@@ -73,20 +49,21 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
           params,
           payload,
           permissions,
+          renderComponent: RenderServerComponent,
           searchParams,
           user,
         } satisfies ServerProps,
       })}
-      {!collectionConfig?.auth?.disableLocalStrategy && (
+      {!loginData.isLocalStrategyDisabled && (
         <LoginForm
-          prefillEmail={prefillEmail}
-          prefillPassword={prefillPassword}
-          prefillUsername={prefillUsername}
+          prefillEmail={loginData.prefillEmail}
+          prefillPassword={loginData.prefillPassword}
+          prefillUsername={loginData.prefillUsername}
           searchParams={searchParams}
         />
       )}
       {RenderServerComponent({
-        Component: afterLogin,
+        Component: loginData.afterLogin,
         importMap: payload.importMap,
         serverProps: {
           i18n,
@@ -94,6 +71,7 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
           params,
           payload,
           permissions,
+          renderComponent: RenderServerComponent,
           searchParams,
           user,
         } satisfies ServerProps,

@@ -1,18 +1,12 @@
 import type { AdminViewServerProps, DocumentViewServerPropsOnly } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { getAccountViewData } from '@payloadcms/ui/views/Account/getAccountViewData'
 import { notFound } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
-import { getDocPreferences } from '../Document/getDocPreferences.js'
-import { getDocumentData } from '../Document/getDocumentData.js'
-import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
-import { getIsLocked } from '../Document/getIsLocked.js'
-import { getVersions } from '../Document/getVersions.js'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { EditView } from '../Edit/index.js'
 import { AccountClient } from './index.client.js'
 import { Settings } from './Settings/index.js'
@@ -33,83 +27,14 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
 
   const {
     admin: { theme, user: userSlug },
-    routes: { api },
-    serverURL,
   } = config
 
-  const collectionConfig = payload?.collections?.[userSlug]?.config
-
-  if (collectionConfig && user?.id) {
-    // Fetch the data required for the view
-    const data = await getDocumentData({
-      id: user.id,
-      collectionSlug: collectionConfig.slug,
+  try {
+    const accountData = await getAccountViewData({
       locale,
-      payload,
-      req,
-      user,
-    })
-
-    if (!data) {
-      throw new Error('not-found')
-    }
-
-    // Get document preferences
-    const docPreferences = await getDocPreferences({
-      id: user.id,
-      collectionSlug: collectionConfig.slug,
-      payload,
-      user,
-    })
-
-    // Get permissions
-    const {
-      docPermissions,
-      hasDeletePermission,
-      hasPublishPermission,
-      hasSavePermission,
-      hasTrashPermission,
-    } = await getDocumentPermissions({
-      id: user.id,
-      collectionConfig,
-      data,
+      renderComponent: RenderServerComponent,
       req,
     })
-
-    // Build initial form state from data
-    const { state: formState } = await buildFormState({
-      id: user.id,
-      collectionSlug: collectionConfig.slug,
-      data,
-      docPermissions,
-      docPreferences,
-      locale: locale?.code,
-      operation: 'update',
-      renderAllFields: true,
-      req,
-      schemaPath: collectionConfig.slug,
-      skipValidation: true,
-    })
-
-    // Fetch document lock state
-    const { currentEditor, isLocked, lastUpdateTime } = await getIsLocked({
-      id: user.id,
-      collectionConfig,
-      isEditing: true,
-      req,
-    })
-
-    // Get all versions required for UI
-    const { hasPublishedDoc, mostRecentVersionIsAutosaved, unpublishedVersionCount, versionCount } =
-      await getVersions({
-        id: user.id,
-        collectionConfig,
-        doc: data,
-        docPermissions,
-        locale: locale?.code,
-        payload,
-        user,
-      })
 
     return (
       <DocumentInfoProvider
@@ -122,33 +47,31 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
             user={user}
           />
         }
-        apiURL={formatAdminURL({
-          apiRoute: api,
-          path: `/${userSlug}${user?.id ? `/${user.id}` : ''}`,
-        })}
+        apiURL={accountData.apiURL}
         collectionSlug={userSlug}
-        currentEditor={currentEditor}
-        docPermissions={docPermissions}
-        hasDeletePermission={hasDeletePermission}
-        hasPublishedDoc={hasPublishedDoc}
-        hasPublishPermission={hasPublishPermission}
-        hasSavePermission={hasSavePermission}
-        hasTrashPermission={hasTrashPermission}
+        currentEditor={accountData.currentEditor}
+        docPermissions={accountData.docPermissions}
+        hasDeletePermission={accountData.hasDeletePermission}
+        hasPublishedDoc={accountData.hasPublishedDoc}
+        hasPublishPermission={accountData.hasPublishPermission}
+        hasSavePermission={accountData.hasSavePermission}
+        hasTrashPermission={accountData.hasTrashPermission}
         id={user?.id}
-        initialData={data}
-        initialState={formState}
+        initialData={accountData.data}
+        initialState={accountData.formState}
         isEditing
-        isLocked={isLocked}
-        lastUpdateTime={lastUpdateTime}
-        mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
-        unpublishedVersionCount={unpublishedVersionCount}
-        versionCount={versionCount}
+        isLocked={accountData.isLocked}
+        lastUpdateTime={accountData.lastUpdateTime}
+        mostRecentVersionIsAutosaved={accountData.mostRecentVersionIsAutosaved}
+        unpublishedVersionCount={accountData.unpublishedVersionCount}
+        versionCount={accountData.versionCount}
       >
         <EditDepthProvider>
           <DocumentHeader
-            collectionConfig={collectionConfig}
+            collectionConfig={accountData.collectionConfig}
             hideTabs
             permissions={permissions}
+            renderComponent={RenderServerComponent}
             req={req}
           />
           <HydrateAuthProvider permissions={permissions} />
@@ -157,14 +80,15 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
             Fallback: EditView,
             importMap: payload.importMap,
             serverProps: {
-              doc: data,
-              hasPublishedDoc,
+              doc: accountData.data,
+              hasPublishedDoc: accountData.hasPublishedDoc,
               i18n,
               initPageResult,
               locale,
               params,
               payload,
               permissions,
+              renderComponent: RenderServerComponent,
               routeSegments: [],
               searchParams,
               user,
@@ -174,7 +98,10 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
         </EditDepthProvider>
       </DocumentInfoProvider>
     )
+  } catch (err) {
+    if (err instanceof Error && err.message === 'not-found') {
+      return notFound()
+    }
+    throw err
   }
-
-  return notFound()
 }

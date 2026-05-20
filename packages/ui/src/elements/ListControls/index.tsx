@@ -51,9 +51,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
 
-  const {
-    breakpoints: { s: smallBreak },
-  } = useWindowInfo()
+  const windowInfo = useWindowInfo()
+  const smallBreak = windowInfo?.breakpoints?.s
 
   const searchLabel =
     (titleField &&

@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { PlusIcon } from '../../../icons/Plus/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/context.js'
+import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
@@ -38,6 +39,7 @@ export const QueryPresetBar: React.FC<{
 
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
+  const router = useRouter()
 
   const {
     config: {
@@ -86,7 +88,10 @@ export const QueryPresetBar: React.FC<{
     async (preset: QueryPreset) => {
       await refineListData(
         {
-          columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : undefined,
+          // Materialize empty preset columns in the URL so subsequent edits
+          // (for example clearing groupBy on a preset that only stores groupBy)
+          // do not fall back to the preset's original server-side value.
+          columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : [],
           groupBy: preset.groupBy || '',
           preset: preset.id,
           where: preset.where,
@@ -323,11 +328,13 @@ export const QueryPresetBar: React.FC<{
         }}
         onSave={async ({ doc }) => {
           await handlePresetChange(doc as QueryPreset)
+          router.refresh()
         }}
       />
       <ListDrawer
         allowCreate={false}
         disableQueryPresets
+        enableRowSelections={false}
         onSelect={async ({ doc }) => {
           closeListDrawer()
           await handlePresetChange(doc as QueryPreset)

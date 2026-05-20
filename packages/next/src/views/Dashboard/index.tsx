@@ -1,12 +1,12 @@
 import type { AdminViewServerProps } from 'payload'
 
-import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { getGlobalData, getNavGroups } from '@payloadcms/ui/shared'
-import React, { Fragment } from 'react'
+import { DashboardView as DashboardViewUI } from '@payloadcms/ui/views/Dashboard'
+import { getDashboardData } from '@payloadcms/ui/views/Dashboard/getDashboardData'
+import React from 'react'
 
 import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'
 
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { DefaultDashboard } from './Default/index.js'
 
 export async function DashboardView(props: AdminViewServerProps) {
@@ -23,13 +23,10 @@ export async function DashboardView(props: AdminViewServerProps) {
     visibleEntities,
   } = props.initPageResult
 
-  const globalData = await getGlobalData(req)
-  const navGroups = getNavGroups(permissions, visibleEntities, config, i18n)
+  const { globalData, navGroups } = await getDashboardData(props)
 
   return (
-    <Fragment>
-      <HydrateAuthProvider permissions={permissions} />
-      <SetStepNav nav={[]} />
+    <DashboardViewUI permissions={permissions}>
       {RenderServerComponent({
         clientProps: {
           locale,
@@ -45,10 +42,11 @@ export async function DashboardView(props: AdminViewServerProps) {
           navGroups,
           payload,
           permissions,
+          renderComponent: RenderServerComponent,
           user,
           visibleEntities,
         } satisfies DashboardViewServerPropsOnly,
       })}
-    </Fragment>
+    </DashboardViewUI>
   )
 }

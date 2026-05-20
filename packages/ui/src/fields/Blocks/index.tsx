@@ -34,6 +34,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { CirclePlusIcon } from '../../icons/CirclePlus/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useImportMap } from '../../providers/ImportMap/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import './index.css'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -93,6 +94,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     config: { localization },
     config,
   } = useConfig()
+  const importMap = useImportMap()
   const drawerSlug = useDrawerSlug('blocks-drawer')
   const submitted = useFormSubmitted()
 
@@ -482,11 +484,17 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       block={blockConfig}
                       // Pass all blocks, not just clientBlocksAfterFilter, as existing blocks should still be displayed even if they don't match the new filter
                       blocks={clientBlocks}
+                      clientRowLabelPath={
+                        !rows?.[i]?.customComponents?.RowLabel
+                          ? rows?.[i]?.clientComponentPaths?.RowLabel
+                          : undefined
+                      }
                       copyRow={copyRow}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
                       hasMaxRows={hasMaxRows}
+                      importMap={importMap}
                       isLoading={isLoading}
                       isSortable={isSortable}
                       Label={rows?.[i]?.customComponents?.RowLabel}

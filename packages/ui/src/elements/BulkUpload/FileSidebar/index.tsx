@@ -41,7 +41,8 @@ export function FileSidebar() {
   const { i18n, t } = useTranslation()
   const { closeModal, openModal } = useModal()
   const [showFiles, setShowFiles] = React.useState(false)
-  const { breakpoints } = useWindowInfo()
+  const windowInfo = useWindowInfo()
+  const breakpoints = windowInfo?.breakpoints
 
   const handleRemoveFile = React.useCallback(
     (indexToRemove: number) => {
@@ -83,7 +84,7 @@ export function FileSidebar() {
     <div
       className={[baseClass, showFiles && `${baseClass}__showingFiles`].filter(Boolean).join(' ')}
     >
-      {breakpoints.m && showFiles ? <div className={`${baseClass}__mobileBlur`} /> : null}
+      {breakpoints?.m && showFiles ? <div className={`${baseClass}__mobileBlur`} /> : null}
       <div className={`${baseClass}__header`}>
         {selectableCollections?.length > 1 && (
           <SelectInput
@@ -163,7 +164,7 @@ export function FileSidebar() {
       </div>
 
       <div className={`${baseClass}__animateWrapper`}>
-        <AnimateHeight height={!breakpoints.m || showFiles ? 'auto' : 0}>
+        <AnimateHeight height={!breakpoints?.m || showFiles ? 'auto' : 0}>
           <div className={`${baseClass}__filesContainer`}>
             {isInitializing &&
             forms.length === 0 &&

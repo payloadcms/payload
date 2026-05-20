@@ -3,7 +3,6 @@
 import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
@@ -21,10 +20,10 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -65,8 +64,6 @@ export function DefaultListView(props: ListViewClientProps) {
     viewType,
   } = props
 
-  const [Table] = useControllableState(InitialTable)
-
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
 
   const hasCreatePermission =
@@ -104,9 +101,8 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const { setStepNav } = useStepNav()
 
-  const {
-    breakpoints: { s: smallBreak },
-  } = useWindowInfo()
+  const windowInfo = useWindowInfo()
+  const smallBreak = windowInfo?.breakpoints?.s
 
   const docs = React.useMemo(() => {
     if (isUploadCollection) {
@@ -270,7 +266,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 </DocumentSelectionProvider>
               ) : docs?.length > 0 ? (
                 <div className={`${baseClass}__tables`}>
-                  <RelationshipProvider>{Table}</RelationshipProvider>
+                  <RelationshipProvider>{InitialTable}</RelationshipProvider>
                 </div>
               ) : null}
               {/* HierarchyTable handles its own empty state, skip for hierarchy views */}

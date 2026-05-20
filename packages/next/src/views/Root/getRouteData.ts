@@ -1,3 +1,4 @@
+import type { ViewFromConfig } from '@payloadcms/ui/utilities/routeResolution'
 import type {
   AdminViewServerProps,
   CollectionPreferences,
@@ -12,6 +13,14 @@ import type {
 } from 'payload'
 import type React from 'react'
 
+import {
+  getCustomViewByKey,
+  getCustomViewByRoute,
+  getDocumentViewInfo,
+  getSubViewActions,
+  getViewActions,
+  isPathMatchingRoute,
+} from '@payloadcms/ui/utilities/routeResolution'
 import { parseDocumentID } from 'payload'
 import { formatAdminURL, isNumber } from 'payload/shared'
 
@@ -28,13 +37,8 @@ import { LogoutInactivity, LogoutView } from '../Logout/index.js'
 import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
-import { getSubViewActions, getViewActions } from './attachViewActions.js'
 import { getCustomCollectionViewByRoute } from './getCustomCollectionViewByRoute.js'
 import { getCustomGlobalViewByRoute } from './getCustomGlobalViewByRoute.js'
-import { getCustomViewByKey } from './getCustomViewByKey.js'
-import { getCustomViewByRoute } from './getCustomViewByRoute.js'
-import { getDocumentViewInfo } from './getDocumentViewInfo.js'
-import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 const baseClasses = {
   account: 'account',
@@ -48,10 +52,7 @@ type OneSegmentViews = {
   [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: React.FC<AdminViewServerProps>
 }
 
-export type ViewFromConfig = {
-  Component?: React.FC<AdminViewServerProps>
-  payloadComponent?: PayloadComponent<AdminViewServerProps>
-}
+export type { ViewFromConfig }
 
 const oneSegmentViews: OneSegmentViews = {
   account: AccountView,

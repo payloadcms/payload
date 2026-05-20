@@ -1,6 +1,7 @@
 import type {
   BuildFormStateArgs,
   ClientFieldSchemaMap,
+  ComponentRenderer,
   Data,
   DocumentPreferences,
   Field,
@@ -72,6 +73,7 @@ type Args = {
    * all custom fields will be re-rendered.
    */
   renderAllFields: boolean
+  renderComponent?: ComponentRenderer
   renderFieldFn?: RenderFieldMethod
   req: PayloadRequest
   schemaPath: string
@@ -96,6 +98,7 @@ export const fieldSchemasToFormState = async ({
   previousFormState,
   readOnly,
   renderAllFields,
+  renderComponent,
   renderFieldFn,
   req,
   schemaPath,
@@ -156,6 +159,7 @@ export const fieldSchemasToFormState = async ({
       previousFormState,
       readOnly,
       renderAllFields,
+      renderComponent,
       renderFieldFn,
       req,
       select,

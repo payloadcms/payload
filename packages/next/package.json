@@ -71,9 +71,15 @@
       "default": "./src/exports/client.ts"
     },
     "./rsc": {
-      "import": "./src/exports/rsc.ts",
       "types": "./src/exports/rsc.ts",
+      "browser": "./src/exports/rsc.browser.ts",
+      "import": "./src/exports/rsc.ts",
       "default": "./src/exports/rsc.ts"
+    },
+    "./elements/RenderServerComponent": {
+      "import": "./src/elements/RenderServerComponent/index.tsx",
+      "types": "./src/elements/RenderServerComponent/index.tsx",
+      "default": "./src/elements/RenderServerComponent/index.tsx"
     }
   },
   "main": "./src/index.js",
@@ -197,9 +203,15 @@
         "default": "./dist/exports/client.js"
       },
       "./rsc": {
-        "import": "./dist/exports/rsc.js",
         "types": "./dist/exports/rsc.d.ts",
+        "browser": "./dist/exports/rsc.browser.js",
+        "import": "./dist/exports/rsc.js",
         "default": "./dist/exports/rsc.js"
+      },
+      "./elements/RenderServerComponent": {
+        "import": "./dist/elements/RenderServerComponent/index.js",
+        "types": "./dist/elements/RenderServerComponent/index.d.ts",
+        "default": "./dist/elements/RenderServerComponent/index.js"
       }
     },
     "main": "./dist/index.js",
