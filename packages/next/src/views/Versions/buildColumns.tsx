@@ -65,18 +65,6 @@ export const buildVersionColumns = ({
         )
       }),
     },
-    {
-      accessor: 'id',
-      active: true,
-      field: {
-        name: '',
-        type: 'text',
-      },
-      Heading: <SortColumn disable Label={t('version:versionID')} name="id" />,
-      renderedCells: docs.map((doc, i) => {
-        return <IDCell id={doc.id} key={i} />
-      }),
-    },
   ]
 
   if (hasDraftsEnabled(entityConfig)) {
@@ -87,7 +75,7 @@ export const buildVersionColumns = ({
         name: '',
         type: 'checkbox',
       },
-      Heading: <SortColumn disable Label={t('version:status')} name="status" />,
+      Heading: <SortColumn Label={t('version:status')} name="status" />,
       renderedCells: docs.map((doc, i) => {
         return (
           <AutosaveCell
@@ -100,6 +88,19 @@ export const buildVersionColumns = ({
       }),
     })
   }
+
+  columns.push({
+    accessor: 'id',
+    active: true,
+    field: {
+      name: '',
+      type: 'text',
+    },
+    Heading: <SortColumn Label={t('version:versionID')} name="id" />,
+    renderedCells: docs.map((doc, i) => {
+      return <IDCell id={doc.id} key={i} />
+    }),
+  })
 
   return columns
 }

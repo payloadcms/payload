@@ -1,0 +1,116 @@
+@layer payload-default {
+  .versions {
+    width: 100%;
+    margin-bottom: var(--spacer-6);
+  }
+
+  .versions__wrap {
+    padding: 0 var(--spacer-3);
+  }
+
+  .versions__header {
+    margin-bottom: var(--spacer-3);
+  }
+
+  .versions__no-versions {
+    margin-top: var(--spacer-4);
+  }
+
+  .versions__parent-doc {
+    .banner__content {
+      display: flex;
+    }
+  }
+
+  .versions__parent-doc-pills {
+    [dir='ltr'] & {
+      margin-left: auto;
+    }
+
+    [dir='rtl'] & {
+      margin-right: auto;
+    }
+  }
+
+  .versions .table {
+    margin: 0;
+
+    table {
+      width: 100%;
+      overflow: auto;
+    }
+
+    th,
+    td {
+      padding: var(--spacer-3) var(--spacer-2-5);
+
+      &:first-child {
+        padding-inline-start: var(--spacer-2-5);
+      }
+    }
+
+    tbody tr {
+      border-top: var(--stroke-width-small) solid var(--color-border);
+
+      &:nth-child(odd) {
+        background: none;
+        border-radius: 0;
+      }
+    }
+  }
+
+  .versions__page-controls {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    border-top: var(--stroke-width-small) solid var(--color-border);
+    padding: var(--spacer-2-5);
+    gap: var(--spacer-3);
+  }
+
+  .versions .paginator {
+    margin-bottom: 0;
+  }
+
+  .versions__page-info {
+    flex: 1 0 0;
+    text-align: end;
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 1024px) {
+    .versions__wrap {
+      padding-top: 0;
+      margin-top: 0;
+    }
+
+    .versions .table {
+      display: flex;
+      width: calc(100% + calc(var(--gutter-h) * 2));
+      max-width: unset;
+      left: calc(var(--gutter-h) * -1);
+      position: relative;
+      padding-left: var(--gutter-h);
+
+      &::after {
+        content: '';
+        height: 1px;
+        padding-right: var(--gutter-h);
+      }
+    }
+
+    .versions__page-controls {
+      flex-wrap: wrap;
+    }
+
+    .versions .paginator {
+      width: 100%;
+      margin-bottom: var(--spacer-3);
+    }
+  }
+}
