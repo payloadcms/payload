@@ -62,6 +62,7 @@ import Tags from './collections/Tags/index.js'
 import TextFields from './collections/Text/index.js'
 import TextareaFields from './collections/Textarea/index.js'
 import Rubbish from './collections/Trash/index.js'
+import Unauthorized from './collections/Unauthorized/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
 import {
@@ -79,7 +80,23 @@ export const collections: CollectionConfig[] = [
       useAsTitle: 'email',
     },
     auth: true,
-    fields: [],
+    access: {
+      admin: ({ req: { user } }) => {
+        return Boolean(user?.roles?.includes('admin'))
+      },
+    },
+    fields: [
+      {
+        name: 'roles',
+        type: 'select',
+        hasMany: true,
+        defaultValue: ['user'],
+        options: [
+          { label: 'Admin', value: 'admin' },
+          { label: 'User', value: 'user' },
+        ],
+      },
+    ],
   },
   ArrayFields,
   BlocksFields,
@@ -113,6 +130,7 @@ export const collections: CollectionConfig[] = [
   DraftVersions,
   Autosave,
   Rubbish,
+  Unauthorized,
 ]
 
 export const baseConfig: Partial<Config> = {
@@ -123,6 +141,11 @@ export const baseConfig: Partial<Config> = {
     locales: ['en', 'es', 'de'],
   },
   admin: {
+    autoLogin: {
+      email: devUser.email,
+      password: devUser.password,
+      prefillOnly: true,
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -150,6 +173,16 @@ export const baseConfig: Partial<Config> = {
       data: {
         email: devUser.email,
         password: devUser.password,
+        roles: ['admin'],
+      },
+    })
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: 'user@payloadcms.com',
+        password: 'test',
+        roles: ['user'],
       },
     })
 

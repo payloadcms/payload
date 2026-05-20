@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { openNav } from '__helpers/e2e/toggleNav.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -464,13 +464,13 @@ test.describe('Hierarchy Sidebar', () => {
       // Wait for filter to apply - Products Only should be hidden
       await expect(tree.getByText('Products Only', { exact: true })).toBeHidden()
 
-      // Create a new folder via the Create New button in the list header
+      // Create a new folder via the Create New button in the list controls
       const uniqueSuffix = Date.now()
       const newFolderName = `Filter Test Folder ${uniqueSuffix}`
 
-      // Click Create New button in the list header
-      const listHeader = page.locator('.hierarchy-list-header')
-      await listHeader.getByRole('button', { name: 'Create New' }).first().click()
+      // Click Create New button in the list controls
+      const listControls = page.locator('.hierarchy-list__controls')
+      await listControls.getByRole('button', { name: 'Create New' }).first().click()
 
       // Select "Folder" from the popup menu
       await page.getByRole('button', { name: 'Folder', exact: true }).click()
@@ -532,8 +532,8 @@ test.describe('Hierarchy Sidebar', () => {
       const uniqueSuffix = Date.now()
       const newFolderName = `Products Only Folder ${uniqueSuffix}`
 
-      const listHeader = page.locator('.hierarchy-list-header')
-      await listHeader.getByRole('button', { name: 'Create New' }).first().click()
+      const listControls = page.locator('.hierarchy-list__controls')
+      await listControls.getByRole('button', { name: 'Create New' }).first().click()
       await page.getByRole('button', { name: 'Folder', exact: true }).click()
 
       const drawer = page.locator('.drawer__content')

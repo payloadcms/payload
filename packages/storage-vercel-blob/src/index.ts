@@ -3,7 +3,7 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -95,11 +95,14 @@ const defaultUploadOptions: Partial<VercelBlobStorageOptions> = {
   enabled: true,
 }
 
-type VercelBlobStoragePlugin = (vercelBlobStorageOpts: VercelBlobStorageOptions) => Plugin
+type VercelBlobStorageFactory = (vercelBlobStorageOpts: VercelBlobStorageOptions) => StorageAdapter
 
-export const vercelBlobStorage: VercelBlobStoragePlugin =
-  (options: VercelBlobStorageOptions) =>
-  (incomingConfig: Config): Config => {
+export const vercelBlobStorage: VercelBlobStorageFactory = (
+  options: VercelBlobStorageOptions,
+): StorageAdapter => ({
+  name: 'vercel-blob',
+  collections: Object.keys(options.collections),
+  init: (incomingConfig: Config): Config => {
     // Parse storeId from token
     const storeId = options.token
       ?.match(/^vercel_blob_rw_([a-z\d]+)_[a-z\d]+$/i)?.[1]
@@ -215,4 +218,5 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       collections: collectionsWithAdapter,
       useCompositePrefixes: options.useCompositePrefixes,
     })(config)
-  }
+  },
+})

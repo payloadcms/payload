@@ -95,5 +95,5 @@ export const NotFoundPage = async ({
 }
 
 export function NotFoundView(props: AdminViewServerProps) {
-  return <NotFoundClient marginTop="large" />
+  return <NotFoundClient />
 }

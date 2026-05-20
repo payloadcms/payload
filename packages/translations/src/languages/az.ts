@@ -17,6 +17,7 @@ export const azTranslations: DefaultTranslationsObject = {
     confirmGeneration: 'Generasiyani təsdiqlə',
     confirmPassword: 'Şifrəni təsdiq et',
     createFirstUser: 'İlk istifadəçini yaradın',
+    createUser: 'İstifadəçi yaradın',
     emailNotValid: 'Təqdim olunan e-poçt etibarlı deyil',
     emailOrUsername: 'E-poçt və ya İstifadəçi adı',
     emailSent: 'E-poçt göndərildi',

@@ -62,7 +62,7 @@ export type DetectionResult = {
       packageName: string
     }
     /** Current storage adapter import info */
-    storageAdapters?: Array<{
+    storage?: Array<{
       hasOtherImports: boolean
       importDeclaration: ImportDeclaration
       packageName: string

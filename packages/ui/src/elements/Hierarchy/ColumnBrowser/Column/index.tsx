@@ -60,7 +60,7 @@ export const Column: React.FC<ColumnProps> = ({
             buttonStyle="ghost"
             className={`${baseClass}__add-button`}
             disabled={disabled}
-            icon={<PlusIcon />}
+            icon={<PlusIcon size={16} />}
             iconPosition="left"
             margin={false}
             onClick={handleCreateNew}

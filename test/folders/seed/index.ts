@@ -1,6 +1,6 @@
 import type { Config, Payload } from 'payload'
 
-import { folderSlug } from 'folders/shared.js'
+import { folderSlug } from '../shared.js'
 
 import type { Post } from '../payload-types.js'
 
