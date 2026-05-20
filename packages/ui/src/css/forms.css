@@ -2,10 +2,10 @@
   .form-input {
     width: 100%;
     min-height: var(--spacer-5);
-    background: var(--bg-secondary);
+    background: var(--color-bg-secondary);
     border: 1px solid transparent;
     border-radius: var(--radius-medium);
-    color: var(--text-default);
+    color: var(--color-text);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
@@ -23,17 +23,17 @@
     }
 
     &::placeholder {
-      color: var(--text-tertiary);
+      color: var(--color-text-tertiary);
       font-weight: var(--text-body-medium-font-weight);
       font-size: var(--text-body-medium-font-size);
     }
 
     &:where(:hover:not(:focus):not(:disabled)) {
-      border-color: var(--border-default);
+      border-color: var(--color-border);
     }
 
     &:focus {
-      border-color: var(--border-selected-default);
+      border-color: var(--color-border-selected);
       border-radius: var(--radius-medium);
     }
 
@@ -42,17 +42,17 @@
     }
 
     &:disabled {
-      color: var(--text-disabled-default);
-      border-color: var(--border-default);
+      color: var(--color-text-disabled);
+      border-color: var(--color-border);
       background: none;
     }
   }
 
   .form-input-error {
-    border-color: var(--border-danger-strong);
+    border-color: var(--color-border-danger-strong);
 
     &:focus {
-      border-color: var(--border-selected-default);
+      border-color: var(--color-border-selected);
     }
   }
 
@@ -60,7 +60,7 @@
     display: flex;
     position: relative;
     align-items: stretch;
-    background: var(--bg-default-secondary);
+    background: var(--color-bg-secondary);
     border: 1px solid transparent;
     border-radius: var(--radius-medium);
     min-height: var(--spacer-5);
@@ -69,18 +69,18 @@
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
     &:where(:hover:not(:focus-within):not(:has(input:disabled))) {
-      border-color: var(--border-default);
+      border-color: var(--color-border);
     }
 
     &:focus-within {
       outline: none;
-      border-color: var(--border-selected-default);
+      border-color: var(--color-border-selected);
     }
 
     &:has(input:disabled) {
       background: transparent;
-      border-color: var(--border-disabled-default);
-      color: var(--text-disabled-default);
+      border-color: var(--color-border-disabled);
+      color: var(--color-text-disabled);
     }
 
     input.form-input {
@@ -99,10 +99,10 @@
   }
 
   .form-input-group-error {
-    border-color: var(--border-danger-strong);
+    border-color: var(--color-border-danger-strong);
 
     &:focus-within {
-      border-color: var(--border-selected-default);
+      border-color: var(--color-border-selected);
     }
   }
 }

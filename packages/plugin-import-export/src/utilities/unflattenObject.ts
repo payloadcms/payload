@@ -159,22 +159,14 @@ export const unflattenObject = ({
       importFieldHooks[flatKey] ?? importFieldHooks[toLogicalKey(flatKey, arrayLikeNames)]
     if (importHookEntry) {
       try {
-        if (importHookEntry.type === 'beforeImport') {
-          value = importHookEntry.fn({
-            columnName: flatKey,
-            data,
-            format,
-            siblingData: data,
-            siblingDoc: data,
-            value,
-          })
-        } else {
-          value = importHookEntry.fn({
-            columnName: flatKey,
-            data,
-            value,
-          })
-        }
+        value = importHookEntry.fn({
+          columnName: flatKey,
+          data,
+          format,
+          siblingData: data,
+          siblingDoc: data,
+          value,
+        })
       } catch (error) {
         req.payload.logger.error({
           err: error,

@@ -40,13 +40,13 @@
       &:focus-within,
       &:focus {
         .checkbox-input__input {
-          border-color: var(--border-selected-strong);
+          border-color: var(--accessibility-focus-color);
         }
       }
 
       &:hover {
         .checkbox-input__input {
-          border-color: var(--border-selected-strong);
+          border-color: var(--color-border-selected-strong);
         }
       }
     }
@@ -79,7 +79,7 @@
     position: relative;
     width: 1rem;
     height: 1rem;
-    border: 1px solid var(--border-default-strong);
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-medium);
     background: transparent;
 
@@ -116,7 +116,7 @@
     &.partial {
       svg {
         opacity: 1;
-        color: var(--icon-brand-onbrand);
+        color: var(--color-icon-onbrand);
       }
     }
   }
@@ -124,65 +124,65 @@
   /* Partial/indeterminate state - same blue background as checked */
   .checkbox-input:has(.checkbox-input__icon.partial) {
     .checkbox-input__input {
-      background-color: var(--bg-brand-default);
-      border-color: var(--border-selected);
+      background-color: var(--color-bg-brand);
+      border-color: var(--color-border-selected);
     }
 
     &:has(:focus-visible) .checkbox-input__input {
-      outline: 1px solid var(--bg-default);
+      outline: 1px solid var(--color-bg);
       outline-offset: -2px;
     }
   }
 
   .checkbox-input--checked {
     .checkbox-input__input {
-      background-color: var(--bg-brand-default);
-      border-color: var(--border-selected);
+      background-color: var(--color-bg-brand);
+      border-color: var(--color-border-selected);
     }
 
     &:has(:focus-visible) .checkbox-input__input {
-      outline: 1px solid var(--bg-default);
+      outline: 1px solid var(--color-bg);
       outline-offset: -2px; /* inset offset */
     }
 
     .checkbox-input__icon {
       svg {
         opacity: 1;
-        color: var(--icon-brand-onbrand);
+        color: var(--color-icon-onbrand);
       }
     }
   }
 
   .checkbox-input--read-only {
     .checkbox-input__input {
-      background: var(--bg-disabled-default);
-      border-color: var(--border-disabled-default);
+      background: var(--color-bg-disabled);
+      border-color: var(--color-border-disabled);
     }
 
     label {
-      color: var(--text-disabled-default);
+      color: var(--color-text-disabled);
     }
   }
 
   .checkbox.error {
     .checkbox-input--checked {
       .checkbox-input__input {
-        background-color: var(--bg-danger-default);
-        border-color: var(--border-danger-strong);
+        background-color: var(--color-bg-danger);
+        border-color: var(--color-border-danger-strong);
       }
 
       &:hover .checkbox-input__input {
-        border-color: var(--border-danger-strong);
+        border-color: var(--color-border-danger-strong);
       }
     }
 
     .checkbox-input:not(.checkbox-input--checked) {
       .checkbox-input__input {
-        border-color: var(--border-danger-strong);
+        border-color: var(--color-border-danger-strong);
       }
 
       &:hover .checkbox-input__input {
-        border-color: var(--border-danger-strong);
+        border-color: var(--color-border-danger-strong);
       }
     }
   }

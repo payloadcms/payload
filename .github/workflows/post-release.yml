@@ -44,7 +44,7 @@ jobs:
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - name: Dispatch release event to website
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
         with:
           token: ${{ secrets.PAYLOAD_REPOSITORY_DISPATCH }}
           repository: payloadcms/website
@@ -58,7 +58,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Announce Release - Releases Channel
-        uses: SethCohen/github-releases-to-discord@v1.19.0
+        uses: SethCohen/github-releases-to-discord@b96a33520f8ad5e6dcdecee6f1212bdf88b16550 # v1.19.0
         with:
           webhook_url: ${{ secrets.DISCORD_RELEASES_WEBHOOK_URL }}
           color: '16777215'
@@ -66,7 +66,7 @@ jobs:
           avatar_url: 'https://l4wlsi8vxy8hre4v.public.blob.vercel-storage.com/discord-bot-logo.png'
 
       - name: Announce Release - General Channel
-        uses: SethCohen/github-releases-to-discord@v1.19.0
+        uses: SethCohen/github-releases-to-discord@b96a33520f8ad5e6dcdecee6f1212bdf88b16550 # v1.19.0
         with:
           webhook_url: ${{ secrets.DISCORD_GENERAL_WEBHOOK_URL }}
           color: '16777215'

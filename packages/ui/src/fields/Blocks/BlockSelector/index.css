@@ -45,7 +45,7 @@
   .blocks-drawer__block-group-none {
     order: 1;
     padding-top: var(--spacer-2-5);
-    border-top: 1px solid var(--border-default-default);
+    border-top: 1px solid var(--color-border);
 
     &:only-child {
       padding-top: 0;

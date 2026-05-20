@@ -54,8 +54,8 @@
 
   .upload-relationship-details__meta {
     margin: 0;
-    color: var(--text-secondary);
-    white-space: nowrap;
+    color: var(--color-text-secondary);
+    text-wrap: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
   }

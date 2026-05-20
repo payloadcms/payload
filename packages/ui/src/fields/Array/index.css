@@ -32,7 +32,7 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    color: var(--text-default);
+    color: var(--color-text);
     gap: var(--spacer-1);
 
     & > li:last-child .array-field__header-action {
@@ -53,11 +53,11 @@
 
     &:hover,
     &:focus-visible {
-      background: var(--bg-transparent-hover);
+      background: var(--color-bg-transparent-hover);
     }
 
     &:active {
-      background: var(--bg-transparent-pressed);
+      background: var(--color-bg-transparent-pressed);
     }
   }
 

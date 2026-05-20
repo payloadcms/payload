@@ -8,7 +8,7 @@
 
   .table-grid-popup__content {
     width: 13rem;
-    background: var(--bg-default);
+    background: var(--color-bg);
     border-radius: var(--radius-large);
     padding: var(--spacer-2);
     display: flex;
@@ -32,7 +32,7 @@
     display: flex;
     align-items: center;
     height: var(--spacer-4);
-    background: var(--bg-secondary);
+    background: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
     overflow: clip;
     min-width: 0;
@@ -40,11 +40,11 @@
   }
 
   .table-grid-popup__input-group:hover {
-    background: var(--bg-default-secondary-hover);
+    background: var(--color-bg-secondary-hover);
   }
 
   .table-grid-popup__input-group--focused {
-    border-color: var(--border-selected);
+    border-color: var(--color-border-selected);
   }
 
   .table-grid-popup__input-icon {
@@ -54,7 +54,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
   }
 
   .table-grid-popup__input-icon svg {
@@ -71,7 +71,7 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     padding: 0;
     padding-right: var(--spacer-2);
     outline: none;
@@ -95,7 +95,7 @@
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     flex-shrink: 0;
     line-height: 1;
   }
@@ -113,25 +113,25 @@
 
   .table-grid-popup__cell {
     aspect-ratio: 1;
-    background: var(--bg-secondary);
+    background: var(--color-bg-secondary);
     border-radius: var(--radius-small);
     cursor: pointer;
     border: var(--stroke-width-small) solid transparent;
   }
 
   .table-grid-popup__cell--selected {
-    background: var(--bg-selected-default);
+    background: var(--color-bg-selected);
     border-color: var(--color-blue-400);
   }
 
   .table-grid-popup__cell--hover {
-    background: var(--bg-selected-hover);
+    background: var(--color-bg-selected-hover);
     border-color: var(--color-blue-400);
   }
 
   .table-grid-popup__tooltip {
     position: absolute;
-    background: var(--bg-menu);
+    background: var(--color-bg-menu);
     color: var(--color-white-800);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
@@ -155,7 +155,7 @@
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 4px solid var(--bg-menu);
+    border-top: 4px solid var(--color-bg-menu);
   } */
 
   .table-grid-popup__backdrop {

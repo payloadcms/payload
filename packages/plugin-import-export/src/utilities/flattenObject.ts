@@ -31,21 +31,11 @@ export const flattenObject = ({
     value: unknown,
     siblingSource: Record<string, unknown>,
   ): unknown => {
-    if (entry.type === 'beforeExport') {
-      return entry.fn({
-        columnName,
-        data,
-        format,
-        siblingData: row,
-        siblingDoc: siblingSource,
-        value,
-      })
-    }
     return entry.fn({
       columnName,
-      data: row,
-      doc: data,
-      row,
+      data,
+      format,
+      siblingData: row,
       siblingDoc: siblingSource,
       value,
     })

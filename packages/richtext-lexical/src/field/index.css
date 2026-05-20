@@ -1,5 +1,11 @@
 @layer payload-default {
   .rich-text-lexical {
+    --lexical-border-color: var(--color-border);
+
+    &.error {
+      --lexical-border-color: var(--color-border-danger-strong);
+    }
+
     & > .field-error.tooltip {
       right: auto;
       position: static;
@@ -39,15 +45,15 @@
             background-color: transparent;
           }
           to {
-            background-color: var(--bg-hover);
+            background-color: var(--color-bg-hover);
           }
           to {
-            background-color: var(--bg-hover);
+            background-color: var(--color-bg-hover);
           }
         }
 
         animation: fadeInBackground 0.5s ease forwards;
-        color: var(--text-tertiary);
+        color: var(--color-text-tertiary);
       }
     }
   }

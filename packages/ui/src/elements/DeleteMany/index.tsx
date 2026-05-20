@@ -22,7 +22,7 @@ import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 import { Translation } from '../Translation/index.js'
-import './index.scss'
+import './index.css'
 
 export type Props = {
   collection: ClientCollectionConfig

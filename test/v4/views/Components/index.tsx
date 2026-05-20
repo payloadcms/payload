@@ -10,18 +10,30 @@ import { BannerSection } from './sections/Banner.js'
 import { ButtonSection } from './sections/Button.js'
 import { CardSection } from './sections/Card.js'
 import { CheckboxSection } from './sections/Checkbox.js'
+import { CopyToClipboardSection } from './sections/CopyToClipboard.js'
 import { DrawerSection } from './sections/DrawerSection.js'
+import { DropzoneSection } from './sections/Dropzone.js'
 import { IconsSection } from './sections/Icons.js'
+import { IDLabelSection } from './sections/IDLabel.js'
+import { InputStepperSection } from './sections/InputStepper.js'
 import { LexicalIconsSection } from './sections/LexicalIcons.js'
 import { LoadingSection } from './sections/LoadingSection.js'
+import { LockedSection } from './sections/Locked.js'
 import { ModalSection } from './sections/ModalSection.js'
+import { NoListResultsSection } from './sections/NoListResults.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
+import { RenderTitleSection } from './sections/RenderTitle.js'
+import { SpinnerSection } from './sections/Spinner.js'
+import { StatusSection } from './sections/Status.js'
+import { StatusCellSection } from './sections/StatusCell.js'
+import { ThumbnailCardSection } from './sections/ThumbnailCard.js'
 import { ToastSection } from './sections/ToastSection.js'
 import { TooltipSection } from './sections/Tooltip.js'
 // Field sections
 import { CodeFieldSection } from './sections/fields/CodeField.js'
 import { DateFieldSection } from './sections/fields/DateField.js'
+import { EmailAndUsernameFieldSection } from './sections/fields/EmailAndUsernameField.js'
 import { EmailFieldSection } from './sections/fields/EmailField.js'
 import { JSONFieldSection } from './sections/fields/JSONField.js'
 import { NumberFieldSection } from './sections/fields/NumberField.js'
@@ -42,16 +54,23 @@ type ComponentId =
   | 'card'
   | 'checkbox'
   | 'code-field'
+  | 'copy-to-clipboard'
   | 'date-field'
   | 'drawer'
+  | 'dropzone'
   | 'email-field'
+  | 'email-username-field'
   | 'icons'
+  | 'id-label'
   | 'input'
+  | 'input-stepper'
   | 'json-field'
   | 'lexical-icons'
   | 'loading-overlay'
+  | 'locked'
   // Patterns
   | 'modal'
+  | 'no-list-results'
   | 'number-field'
   | 'password-field'
   | 'pill'
@@ -60,12 +79,17 @@ type ComponentId =
   | 'popup'
   | 'radio'
   | 'radiogroup-field'
+  | 'render-title'
   | 'select'
   | 'select-field'
   | 'shimmer'
+  | 'spinner'
+  | 'status'
+  | 'status-cell'
   | 'text-field'
   | 'textarea'
   | 'textarea-field'
+  | 'thumbnail-card'
   | 'toast'
   | 'tooltip'
 
@@ -81,25 +105,37 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Button', value: 'button' },
   { category: 'primitives', label: 'Card', value: 'card' },
   { category: 'primitives', label: 'Checkbox', value: 'checkbox' },
+  { category: 'primitives', label: 'Copy to Clipboard', value: 'copy-to-clipboard' },
+  { category: 'primitives', label: 'Dropzone', value: 'dropzone' },
   { category: 'primitives', label: 'Icons', value: 'icons' },
+  { category: 'primitives', label: 'ID Label', value: 'id-label' },
   { category: 'primitives', label: 'Input', value: 'input' },
+  { category: 'primitives', label: 'Input Stepper', value: 'input-stepper' },
   { category: 'primitives', label: 'Lexical Icons', value: 'lexical-icons' },
+  { category: 'primitives', label: 'Locked', value: 'locked' },
   { category: 'primitives', label: 'Pill', value: 'pill' },
   { category: 'primitives', label: 'Popup', value: 'popup' },
   { category: 'primitives', label: 'Radio', value: 'radio' },
+  { category: 'primitives', label: 'Render Title', value: 'render-title' },
   { category: 'primitives', label: 'Select', value: 'select' },
+  { category: 'primitives', label: 'Spinner', value: 'spinner' },
   { category: 'primitives', label: 'Textarea', value: 'textarea' },
   { category: 'primitives', label: 'Tooltip', value: 'tooltip' },
   // Patterns
   { category: 'patterns', label: 'Drawer', value: 'drawer' },
   { category: 'patterns', label: 'Loading Overlay', value: 'loading-overlay' },
   { category: 'patterns', label: 'Modal', value: 'modal' },
+  { category: 'patterns', label: 'No List Results', value: 'no-list-results' },
   { category: 'patterns', label: 'Shimmer / Loading', value: 'shimmer' },
+  { category: 'patterns', label: 'Status', value: 'status' },
+  { category: 'patterns', label: 'Status Cell', value: 'status-cell' },
+  { category: 'patterns', label: 'Thumbnail Card', value: 'thumbnail-card' },
   { category: 'patterns', label: 'Toast', value: 'toast' },
   // Fields
   { category: 'fields', label: 'Code Field', value: 'code-field' },
   { category: 'fields', label: 'Date Field', value: 'date-field' },
   { category: 'fields', label: 'Email Field', value: 'email-field' },
+  { category: 'fields', label: 'Email & Username', value: 'email-username-field' },
   { category: 'fields', label: 'JSON Field', value: 'json-field' },
   { category: 'fields', label: 'Number Field', value: 'number-field' },
   { category: 'fields', label: 'Password Field', value: 'password-field' },
@@ -210,13 +246,26 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('button', 'primitives') && <ButtonSection selectedComponent="button" />}
         {shouldShow('pill', 'primitives') && <PillSection selectedComponent="pill" />}
         {shouldShow('icons', 'primitives') && <IconsSection selectedComponent="icons" />}
+        {shouldShow('id-label', 'primitives') && <IDLabelSection selectedComponent="id-label" />}
+        {shouldShow('render-title', 'primitives') && (
+          <RenderTitleSection selectedComponent="render-title" />
+        )}
         {shouldShow('lexical-icons', 'primitives') && (
           <LexicalIconsSection selectedComponent="lexical-icons" />
         )}
         {shouldShow('tooltip', 'primitives') && <TooltipSection selectedComponent="tooltip" />}
         {shouldShow('popup', 'primitives') && <PopupSection selectedComponent="popup" />}
         {shouldShow('card', 'primitives') && <CardSection selectedComponent="card" />}
+        {shouldShow('dropzone', 'primitives') && <DropzoneSection selectedComponent="dropzone" />}
+        {shouldShow('copy-to-clipboard', 'primitives') && (
+          <CopyToClipboardSection selectedComponent="copy-to-clipboard" />
+        )}
         {shouldShow('banner', 'primitives') && <BannerSection selectedComponent="banner" />}
+        {shouldShow('locked', 'primitives') && <LockedSection selectedComponent="locked" />}
+        {shouldShow('input-stepper', 'primitives') && (
+          <InputStepperSection selectedComponent="input-stepper" />
+        )}
+        {shouldShow('spinner', 'primitives') && <SpinnerSection selectedComponent="spinner" />}
 
         {/* Patterns */}
         {(selectedCategory === 'all' || selectedCategory === 'patterns') &&
@@ -228,7 +277,17 @@ export const ComponentsView: React.FC = () => {
           <LoadingSection selectedComponent="loading-overlay" />
         )}
         {shouldShow('modal', 'patterns') && <ModalSection selectedComponent="modal" />}
+        {shouldShow('thumbnail-card', 'patterns') && (
+          <ThumbnailCardSection selectedComponent="thumbnail-card" />
+        )}
         {shouldShow('toast', 'patterns') && <ToastSection selectedComponent="toast" />}
+        {shouldShow('no-list-results', 'patterns') && (
+          <NoListResultsSection selectedComponent="no-list-results" />
+        )}
+        {shouldShow('status', 'patterns') && <StatusSection selectedComponent="status" />}
+        {shouldShow('status-cell', 'patterns') && (
+          <StatusCellSection selectedComponent="status-cell" />
+        )}
 
         {/* Fields */}
         {(selectedCategory === 'all' || selectedCategory === 'fields') &&
@@ -237,6 +296,7 @@ export const ComponentsView: React.FC = () => {
           )}
         {shouldShow('text-field', 'fields') && <TextFieldSection />}
         {shouldShow('email-field', 'fields') && <EmailFieldSection />}
+        {shouldShow('email-username-field', 'fields') && <EmailAndUsernameFieldSection />}
         {shouldShow('number-field', 'fields') && <NumberFieldSection />}
         {shouldShow('password-field', 'fields') && <PasswordFieldSection />}
         {shouldShow('point-field', 'fields') && <PointFieldSection />}

@@ -1,11 +1,11 @@
 @layer payload-default {
   @keyframes dropdown-press {
     0% {
-      background-color: var(--bg-transparent-pressed);
+      background-color: var(--color-bg-transparent-pressed);
     }
 
     100% {
-      background-color: var(--bg-selected);
+      background-color: var(--color-bg-selected);
     }
   }
 
@@ -28,20 +28,20 @@
     }
 
     &:hover:not([disabled]):not(.active) {
-      background-color: var(--bg-transparent-hover);
+      background-color: var(--color-bg-transparent-hover);
     }
 
     &:active:not(.active) {
-      background-color: var(--bg-transparent-pressed);
+      background-color: var(--color-bg-transparent-pressed);
     }
 
     &.active {
-      color: var(--icon-selected-default);
-      background-color: var(--bg-selected);
+      color: var(--color-icon-selected);
+      background-color: var(--color-bg-selected);
       animation: dropdown-press 0.15s cubic-bezier(0, 0.2, 0.2, 1);
 
       .toolbar-popup__dropdown-caret {
-        background-color: var(--icon-selected-default);
+        background-color: var(--color-icon-selected);
 
         &:after {
           transform: rotate(0deg);
@@ -62,7 +62,7 @@
     width: 6px;
     margin: 0 4px 0 2px;
     height: 4px;
-    background-color: var(--icon-default);
+    background-color: var(--color-icon);
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4' viewBox='0 0 6 4' fill='none'%3E%3Cpath d='M4.38921 0.146406C4.58445 -0.0488286 4.90098 -0.0487744 5.09624 0.146406C5.29151 0.341668 5.29151 0.658175 5.09624 0.853437L2.97515 2.97453C2.77987 3.16959 2.46332 3.16972 2.26812 2.97453L0.146049 0.853437C-0.0487219 0.6583 -0.0486443 0.341591 0.146049 0.146406C0.341285 -0.0488288 0.658788 -0.0487749 0.854057 0.146406L2.62164 1.91398L4.38921 0.146406Z' fill='black'/%3E%3C/svg%3E");
     mask-size: contain;
     mask-repeat: no-repeat;
@@ -71,8 +71,8 @@
   .toolbar-popup__dropdown-items {
     --dropdown-min-width: 5rem;
     position: absolute;
-    background: var(--bg-elevated-default);
-    color: var(--text-default-default);
+    background: var(--color-bg-elevated);
+    color: var(--color-text);
     border-radius: var(--radius-large);
     padding: var(--spacer-2);
     min-width: var(--dropdown-min-width);
@@ -86,7 +86,7 @@
     .toolbar-popup__dropdown-item {
       all: unset;
       cursor: pointer;
-      color: var(--text-default-default);
+      color: var(--color-text);
       transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
       position: relative;
       font-family: var(--text-body-medium-font-family);
@@ -110,27 +110,27 @@
       }
 
       &:hover:not([disabled]) {
-        background-color: var(--bg-transparent-pressed);
+        background-color: var(--color-bg-transparent-pressed);
       }
 
       &:active:not([disabled]) {
-        background-color: var(--bg-transparent-pressed);
+        background-color: var(--color-bg-transparent-pressed);
       }
 
       &.active {
-        background-color: var(--bg-selected-strong);
-        color: var(--text-selected-onselected-strong);
+        background-color: var(--color-bg-selected-strong);
+        color: var(--color-text-onselected-strong);
 
         .icon {
-          color: var(--text-selected-onselected-strong);
+          color: var(--color-text-onselected-strong);
         }
 
         &:hover:not([disabled]) {
-          background-color: var(--bg-selected-strong-hover);
+          background-color: var(--color-bg-selected-strong-hover);
         }
 
         &:active:not([disabled]) {
-          background-color: var(--bg-selected-strong-pressed);
+          background-color: var(--color-bg-selected-strong-pressed);
         }
       }
 
@@ -202,7 +202,7 @@
       top: 50%;
       width: var(--spacer-1);
       height: var(--spacer-2);
-      border: solid var(--text-selected-onselected-strong);
+      border: solid var(--color-text-onselected-strong);
       border-width: 0 1px 1px 0;
       transform: translateY(-60%) rotate(45deg);
     }

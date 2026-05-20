@@ -8,15 +8,15 @@
     -webkit-appearance: none;
 
     /* Theme */
-    background: var(--bg-default-secondary);
-    border: 1px solid var(--border-default-default);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-medium);
     box-shadow: none;
 
     /* Typography */
     font-family: var(--font-mono);
     font-size: var(--text-body);
-    color: var(--text-default-primary);
+    color: var(--color-text-default-primary);
 
     /* Transitions */
     transition-property: border, box-shadow, background-color;
@@ -24,12 +24,12 @@
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
     &:focus-within {
-      border-color: var(--border-selected-strong);
+      border-color: var(--accessibility-focus-color);
     }
 
     &.read-only {
-      background: var(--bg-default-default);
-      border-color: var(--border-default-default);
+      background: var(--color-bg);
+      border-color: var(--color-border);
     }
 
     /* Monaco editor resets */

@@ -18,7 +18,7 @@ import {
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/index.js'
 import { ListSelection } from '../ListSelection/index.js'
-import './index.scss'
+import './index.css'
 
 const drawerBaseClass = 'list-drawer'
 
@@ -77,18 +77,15 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   if (isInDrawer) {
     return (
       <ListHeader
-        Actions={[
-          <CloseModalButton
-            className={`${drawerBaseClass}__header-close`}
-            key="close-button"
-            slug={drawerSlug}
-          />,
-        ]}
+        Actions={[]}
         AfterListHeaderContent={
           <>
             {Description}
             {<DrawerRelationshipSelect />}
           </>
+        }
+        BeforeTitle={
+          <CloseModalButton className={`${drawerBaseClass}__header-close`} slug={drawerSlug} />
         }
         className={`${drawerBaseClass}__header`}
         title={getTranslation(

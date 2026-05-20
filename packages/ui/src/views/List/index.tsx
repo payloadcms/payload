@@ -33,7 +33,7 @@ import { ListSelection } from '../../views/List/ListSelection/index.js'
 import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/index.js'
 import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'collection-list'
 
@@ -299,20 +299,14 @@ export function DefaultListView(props: ListViewClientProps) {
                         ]
                       : []
                   }
-                  Message={
-                    viewType === 'trash' ? (
-                      <p>
-                        {i18n.t('general:noTrashResults', {
+                  description={
+                    viewType === 'trash'
+                      ? i18n.t('general:noTrashResults', {
                           label: getTranslation(labels?.plural, i18n),
-                        })}
-                      </p>
-                    ) : (
-                      <>
-                        <h3>{i18n.t('general:noResultsFound')}</h3>
-                        <p>{i18n.t('general:noResultsDescription')}</p>
-                      </>
-                    )
+                        })
+                      : i18n.t('general:noResultsDescription')
                   }
+                  title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
                 />
               )}
               {AfterListTable}

@@ -74,10 +74,9 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
         </div>
         {!hideRemoveFile && handleRemove && (
           <Button
-            buttonStyle="icon-label"
+            buttonStyle="ghost"
             className={`${baseClass}__remove`}
             icon="x"
-            iconStyle="with-border"
             onClick={handleRemove}
             round
           />

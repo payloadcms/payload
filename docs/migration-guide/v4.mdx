@@ -170,3 +170,82 @@ const Heading: React.FC = () => {
 If you only used `useDocumentInfo` for `title` / `setDocumentTitle`, drop the import entirely. If you used it for other properties as well, leave the original `useDocumentInfo()` call in place and add a separate `useDocumentTitle()` call alongside it.
 
 Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migrate automatically. The codemod splits mixed destructures, removes the `useDocumentInfo` import when no other properties are still used, and preserves any rename aliases (e.g. `{ title: docTitle }`).
+
+### Plugin Import/Export: `toCSV` and `fromCSV` removed
+
+The `toCSV` and `fromCSV` field options in `custom['plugin-import-export']` have been removed. Use `hooks.beforeExport` and `hooks.beforeImport` instead — they work for both CSV and JSON formats.
+
+The argument shapes differ slightly from the old API:
+
+| Old (`toCSV`) | New (`hooks.beforeExport`)          |
+| ------------- | ----------------------------------- |
+| `row`         | `siblingData`                       |
+| `doc`         | `data`                              |
+| `data`        | _(removed — was alias for `row`)_   |
+| —             | `format` (new: `'csv'` \| `'json'`) |
+
+The `fromCSV` → `hooks.beforeImport` change is non-breaking for the `data` parameter — both receive the full flat row.
+
+```diff
+{
+  name: 'author',
+  type: 'relationship',
+  relationTo: 'users',
+  custom: {
+    'plugin-import-export': {
+-     toCSV: ({ value, columnName, row, doc }) => {
+-       row[`${columnName}_id`] = (value as any).id
+-       return doc.title
+-     },
+-     fromCSV: ({ value, data }) => data[`${value}_key`],
++     hooks: {
++       beforeExport: ({ value, columnName, siblingData, data }) => {
++         siblingData[`${columnName}_id`] = (value as any).id
++         return data.title
++       },
++       beforeImport: ({ value, data }) => data[`${value}_key`],
++     },
+    },
+  },
+}
+```
+
+Run `npx @payloadcms/codemod --transform migrate-import-export-hooks` to migrate automatically. The codemod moves the function values into the correct hook positions and merges with any existing `hooks` object. Review argument names in the migrated functions — `row` references must be renamed to `siblingData` and `doc` references renamed to `data`.
+
+### DB Adapter `/types` Subpath Exports Removed
+
+The `/types` subpath export has been removed from all Drizzle-based database adapter packages. All types are available directly from the main package entry point.
+
+| Old import                             | New import                       |
+| -------------------------------------- | -------------------------------- |
+| `@payloadcms/drizzle/types`            | `@payloadcms/drizzle`            |
+| `@payloadcms/db-postgres/types`        | `@payloadcms/db-postgres`        |
+| `@payloadcms/db-sqlite/types`          | `@payloadcms/db-sqlite`          |
+| `@payloadcms/db-vercel-postgres/types` | `@payloadcms/db-vercel-postgres` |
+| `@payloadcms/db-d1-sqlite/types`       | `@payloadcms/db-d1-sqlite`       |
+
+```diff
+- import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+- import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+- import type { SQLiteAdapter } from '@payloadcms/db-sqlite/types'
+- import type { VercelPostgresAdapter } from '@payloadcms/db-vercel-postgres/types'
+- import type { SQLiteD1Adapter } from '@payloadcms/db-d1-sqlite/types'
++ import type { DrizzleAdapter } from '@payloadcms/drizzle'
++ import type { PostgresAdapter } from '@payloadcms/db-postgres'
++ import type { SQLiteAdapter } from '@payloadcms/db-sqlite'
++ import type { VercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
++ import type { SQLiteD1Adapter } from '@payloadcms/db-d1-sqlite'
+```
+
+If you use a `declare module` augmentation to extend `GeneratedDatabaseSchema` (typically found in generated schema files), update the module path as well:
+
+```diff
+- declare module '@payloadcms/db-postgres/types' {
++ declare module '@payloadcms/db-postgres' {
+    export interface GeneratedDatabaseSchema {
+      schema: DatabaseSchema
+    }
+  }
+```
+
+Run `npx @payloadcms/codemod --transform migrate-db-types-subpath` to migrate automatically. The codemod handles import declarations, re-export declarations, and `declare module` augmentations.

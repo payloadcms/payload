@@ -1,7 +1,7 @@
 @layer payload-default {
   .icon--document {
     &.icon--muted {
-      color: var(--icon-secondary);
+      color: var(--color-icon-secondary);
     }
   }
 }

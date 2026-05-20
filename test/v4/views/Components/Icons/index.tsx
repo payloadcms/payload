@@ -65,11 +65,6 @@ const icons: IconEntry[] = [
     sizes: [16, 24],
   },
   {
-    name: 'ChevronIcon (down, large)',
-    render: () => <ChevronIcon direction="down" large size={24} />,
-    sizes: [24],
-  },
-  {
     name: 'ChevronIcon (up)',
     render: (size) => <ChevronIcon direction="up" size={size} />,
     sizes: [16, 24],

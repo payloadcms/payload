@@ -16,11 +16,11 @@
   }
 
   .popup-button:hover:not(.popup-button--disabled) {
-    background: var(--bg-transparent-hover);
+    background: var(--color-bg-transparent-hover);
   }
 
   .popup-button:active:not(.popup-button--disabled) {
-    background: var(--bg-transparent-pressed);
+    background: var(--color-bg-transparent-pressed);
   }
 
   .popup-button--disabled {

@@ -47,7 +47,7 @@ export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
     path: `/collections/${row._collectionSlug}?parent=${row.id}`,
   })
 
-  const DefaultIcon = isFolder ? <FolderIcon color="muted" /> : <TagIcon color="muted" />
+  const DefaultIcon = isFolder ? <FolderIcon /> : <TagIcon />
 
   return (
     <div className={`${baseClass}__name-cell`}>

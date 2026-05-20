@@ -1,10 +1,12 @@
 @layer payload-default {
   .thumbnail-card {
+    --thumbnail-card-size: 106px;
+
     display: flex;
     flex-direction: column;
     gap: var(--spacer-2);
     align-items: flex-start;
-    width: 100%;
+    max-width: var(--thumbnail-card-size);
     background: transparent;
     border: 0;
     padding: 0;
@@ -13,6 +15,10 @@
 
   .thumbnail-card--has-on-click {
     cursor: pointer;
+
+    &:focus-visible {
+      outline: none;
+    }
   }
 
   .thumbnail-card--align-label-center {
@@ -23,26 +29,48 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    min-width: var(--thumbnail-card-size);
     width: 100%;
     aspect-ratio: 1 / 1;
-    background: var(--bg-default-secondary);
+    background: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
     overflow: hidden;
-    border: 2px solid transparent;
-    transition: border-color 100ms ease;
+    outline: var(--stroke-width-small) solid transparent;
+    outline-offset: calc(var(--stroke-width-small) * -1);
   }
 
-  .thumbnail-card--has-on-click:hover .thumbnail-card__thumbnail,
+  .thumbnail-card--has-on-click:hover .thumbnail-card__thumbnail {
+    outline-color: var(--color-border);
+  }
+
   .thumbnail-card--has-on-click:focus-visible .thumbnail-card__thumbnail {
-    border-color: var(--border-default);
+    outline-width: var(--stroke-width-medium);
+    outline-offset: calc(var(--stroke-width-medium) * -1);
+    outline-color: var(--color-border-selected);
+  }
+
+  .thumbnail-card--has-on-click:active .thumbnail-card__thumbnail {
+    outline-color: var(--color-bg-secondary-pressed);
   }
 
   .thumbnail-card--selected .thumbnail-card__thumbnail {
-    border-color: var(--border-selected);
+    outline-width: var(--stroke-width-medium);
+    outline-offset: calc(var(--stroke-width-medium) * -1);
+    outline-color: var(--color-border-selected);
+  }
+
+  .thumbnail-card--selected.thumbnail-card--has-on-click:hover .thumbnail-card__thumbnail,
+  .thumbnail-card--selected.thumbnail-card--has-on-click:focus-visible .thumbnail-card__thumbnail {
+    outline-color: var(--accessibility-focus-color);
+  }
+
+  .thumbnail-card--selected.thumbnail-card--has-on-click:active .thumbnail-card__thumbnail {
+    outline-color: var(--accessibility-focus-color);
   }
 
   .thumbnail-card__label {
     min-width: 100%;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -53,6 +81,5 @@
     font-style: normal;
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    letter-spacing: 0.055px;
   }
 }

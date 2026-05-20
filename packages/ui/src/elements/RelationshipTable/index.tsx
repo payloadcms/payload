@@ -13,7 +13,7 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
-import { Pill } from '../../elements/Pill/index.js'
+import { Button } from '../../elements/Button/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -30,7 +30,7 @@ import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { AddNewButton } from './AddNewButton.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'relationship-table'
 
@@ -302,29 +302,30 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           <AddNewButton
             allowCreate={allowCreate !== false}
             baseClass={baseClass}
-            buttonStyle="none"
-            className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ' doc-drawer__toggler'}`}
+            buttonStyle="ghost"
+            className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ''}`}
             collections={config.collections}
             i18n={i18n}
-            icon={isPolymorphic ? 'plus' : undefined}
             label={i18n.t('fields:addNew')}
             onClick={isPolymorphic ? setSelectedCollection : openDrawer}
             permissions={permissions}
             relationTo={relationTo}
           />
-          <Pill
-            aria-controls={`${baseClass}-columns`}
-            aria-expanded={openColumnSelector}
+          <Button
+            buttonStyle="secondary"
             className={`${baseClass}__toggle-columns ${
               openColumnSelector ? `${baseClass}__buttons-active` : ''
             }`}
-            icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} />}
+            extraButtonProps={{
+              'aria-controls': `${baseClass}-columns`,
+              'aria-expanded': openColumnSelector,
+            }}
+            icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} size={16} />}
             onClick={() => setOpenColumnSelector(!openColumnSelector)}
-            pillStyle="light"
-            size="small"
+            size="medium"
           >
             {t('general:columns')}
-          </Pill>
+          </Button>
         </div>
       </div>
       {BeforeInput}
@@ -355,18 +356,12 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     ]
                   : []
               }
-              Message={
-                <>
-                  <h3>{i18n.t('general:noResultsFound')}</h3>
-                  <p>
-                    {i18n.t('general:noResults', {
-                      label: isPolymorphic
-                        ? i18n.t('general:documents')
-                        : getTranslation(collectionConfig?.labels?.plural, i18n),
-                    })}
-                  </p>
-                </>
-              }
+              description={i18n.t('general:noResults', {
+                label: isPolymorphic
+                  ? i18n.t('general:documents')
+                  : getTranslation(collectionConfig?.labels?.plural, i18n),
+              })}
+              title={i18n.t('general:noResultsFound')}
             />
           )}
           {data?.docs && data.docs.length > 0 && (

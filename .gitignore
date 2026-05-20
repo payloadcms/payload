@@ -55,6 +55,7 @@ test/media
 *payloadtests.db-wal
 *payload.db
 /versions
+/uploads
 no-restrict-file-*
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode

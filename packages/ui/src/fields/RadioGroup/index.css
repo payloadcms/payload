@@ -19,10 +19,10 @@
 
     &.error {
       .radio-input__styled-radio {
-        border-color: var(--border-danger-strong);
+        border-color: var(--color-border-danger-strong);
 
         &:hover {
-          border-color: var(--border-danger-strong);
+          border-color: var(--color-border-danger-strong);
         }
       }
     }
@@ -51,14 +51,14 @@
     }
 
     .radio-input__label {
-      color: var(--text-default-default);
+      color: var(--color-text);
     }
 
     .radio-input__styled-radio {
-      border-color: var(--border-disabled-default);
+      border-color: var(--color-border-disabled);
 
       &::before {
-        background-color: var(--border-disabled-default);
+        background-color: var(--color-border-disabled);
       }
     }
 

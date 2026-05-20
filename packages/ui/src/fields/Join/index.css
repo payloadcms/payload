@@ -1,0 +1,25 @@
+@layer payload-default {
+  .field-type.join {
+    --join-header-letter-spacing: -0.032px;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .field-type.join .join__header-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .field-type.join .relationship-table__header h4 {
+    margin: 0;
+    font-family: var(--text-body-large-strong-font-family);
+    font-size: var(--text-body-large-strong-font-size);
+    font-weight: var(--text-body-large-strong-font-weight);
+    line-height: var(--text-body-large-strong-line-height);
+    letter-spacing: var(--join-header-letter-spacing);
+    color: var(--color-text);
+  }
+}

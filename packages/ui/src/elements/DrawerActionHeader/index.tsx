@@ -5,7 +5,7 @@ import React from 'react'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'drawer-action-header'
 

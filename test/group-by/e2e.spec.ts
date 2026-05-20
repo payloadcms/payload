@@ -1007,7 +1007,7 @@ test.describe('Group By', () => {
       })
 
       // Open the preset drawer
-      await page.click('button#select-preset')
+      await page.click('#select-preset')
       const drawer = page.locator('dialog[id^="list-drawer_0_"]')
       await expect(drawer).toBeVisible()
 
@@ -1046,7 +1046,7 @@ test.describe('Group By', () => {
       })
 
       // Select the preset to make it active
-      await page.locator('button#select-preset').click()
+      await page.locator('#select-preset').click()
       const drawer = page.locator('[id^=list-drawer_0_]')
       await expect(drawer).toBeVisible()
 

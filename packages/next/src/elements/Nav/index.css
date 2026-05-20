@@ -6,18 +6,18 @@
     flex-shrink: 0;
     height: 100vh;
     width: var(--nav-width);
-    border-right: 1px solid var(--border-default);
+    border-right: 1px solid var(--color-border);
     opacity: 0;
     overflow: hidden;
     --nav-padding-inline-start: var(--spacer-2-5);
     --nav-padding-inline-end: var(--spacer-2-5);
-    --nav-padding-block-start: var(--app-header-height);
+    --nav-padding-block-start: var(--spacer-2-5);
     --nav-padding-block-end: var(--spacer-5);
   }
 
   [dir='rtl'] .nav {
     border-right: none;
-    border-left: 1px solid var(--border-default);
+    border-left: 1px solid var(--color-border);
   }
 
   .nav--nav-animate {
@@ -26,20 +26,6 @@
 
   .nav--nav-open {
     opacity: 1;
-  }
-
-  .nav__header {
-    position: absolute;
-    top: 0;
-    width: 100vw;
-    height: var(--app-header-height);
-  }
-
-  .nav__header-content {
-    z-index: 1;
-    position: relative;
-    height: 100%;
-    width: 100%;
   }
 
   .nav__mobile-close {
@@ -72,7 +58,7 @@
   }
 
   .nav__label {
-    color: var(--text-tertiary);
+    color: var(--color-text-tertiary);
   }
 
   .nav__controls {
@@ -118,7 +104,7 @@
     border-radius: var(--radius-medium);
 
     &:hover {
-      background: var(--bg-secondary);
+      background: var(--color-bg-secondary);
       text-decoration: none;
     }
   }
@@ -126,7 +112,7 @@
   .nav__link--selected {
     font-weight: 600;
     border-radius: var(--radius-medium);
-    background: var(--bg-selected);
+    background: var(--color-bg-selected);
   }
 
   @media (max-width: 1024px) {

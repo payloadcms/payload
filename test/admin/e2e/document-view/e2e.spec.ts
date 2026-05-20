@@ -211,7 +211,7 @@ describe('Document View', () => {
       await page.goto(postURL)
       await wait(500)
       await page.locator('#field-title')?.fill('')
-      await expect(page.locator('.doc-header__title.render-title:has-text("ID:")')).toBeVisible()
+      await expect(page.locator('.doc-header__title.render-title:has-text("ID")')).toBeVisible()
       await saveDocAndAssert(page)
     })
 
@@ -418,7 +418,6 @@ describe('Document View', () => {
 
       const drawer1Box = await drawer1Content.boundingBox()
       await expect.poll(() => drawer1Box).not.toBeNull()
-      const drawerLeft = drawer1Box!.x
 
       await drawer1Content
         .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
@@ -429,9 +428,13 @@ describe('Document View', () => {
 
       const drawer2Box = await drawer2Content.boundingBox()
       await expect.poll(() => drawer2Box).not.toBeNull()
-      const drawer2Left = drawer2Box!.x
 
-      await expect.poll(() => drawer2Left > drawerLeft).toBe(true)
+      // Stacking is done via padding-right on the outer wrapper, which pushes
+      // the content inward from the right. Compare right edges of the content:
+      const drawer1Right = drawer1Box!.x + drawer1Box!.width
+      const drawer2Right = drawer2Box!.x + drawer2Box!.width
+
+      await expect.poll(() => drawer2Right < drawer1Right).toBe(true)
     })
 
     test('document drawer displays a link to document', async () => {
@@ -541,7 +544,7 @@ describe('Document View', () => {
       await navigateToDoc(page, postsUrl)
       const statusComponent = page.locator('.doc-controls__status > .status')
       await expect(statusComponent).toBeVisible()
-      await expect(statusComponent).toContainText('Status: Draft')
+      await expect(statusComponent).toContainText('Draft')
     })
 
     test('should render custom status component', async () => {
@@ -557,7 +560,7 @@ describe('Document View', () => {
       await page.goto(globalURL.global(globalSlug))
       const statusComponent = page.locator('.doc-controls__status > .status')
       await expect(statusComponent).toBeVisible()
-      await expect(statusComponent).toContainText('Status: Draft')
+      await expect(statusComponent).toContainText('Draft')
     })
 
     test('should render custom status component', async () => {

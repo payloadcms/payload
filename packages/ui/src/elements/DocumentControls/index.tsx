@@ -38,7 +38,7 @@ import { SaveButton } from '../SaveButton/index.js'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
 import { UnpublishButton } from '../UnpublishButton/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'doc-controls'
 

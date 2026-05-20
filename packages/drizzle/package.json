@@ -34,11 +34,6 @@
       "import": "./src/exports/sqlite.ts",
       "types": "./src/exports/sqlite.ts",
       "default": "./src/exports/sqlite.ts"
-    },
-    "./types": {
-      "import": "./src/exports/types-deprecated.ts",
-      "types": "./src/exports/types-deprecated.ts",
-      "default": "./src/exports/types-deprecated.ts"
     }
   },
   "main": "./src/index.ts",
@@ -57,7 +52,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "console-table-printer": "2.12.1",
+    "console-table-printer": "2.15.0",
     "dequal": "2.0.3",
     "drizzle-orm": "0.45.2",
     "prompts": "2.4.2",
@@ -90,11 +85,6 @@
         "import": "./dist/exports/sqlite.js",
         "types": "./dist/exports/sqlite.d.ts",
         "default": "./dist/exports/sqlite.js"
-      },
-      "./types": {
-        "import": "./dist/exports/types-deprecated.js",
-        "types": "./dist/exports/types-deprecated.d.ts",
-        "default": "./dist/exports/types-deprecated.js"
       }
     },
     "main": "./dist/index.js",

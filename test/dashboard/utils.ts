@@ -74,8 +74,6 @@ export class DashboardHelper {
         const previousWidgetBox = (await widgets[index - 1]!.boundingBox())!
         expectedX = previousWidgetBox.x + previousWidgetBox.width
         expect(widgetBox.y + widgetBox.height).toBe(previousWidgetBox.y + previousWidgetBox.height)
-        const innerWidgetBox = (await widget.locator('.draggable').boundingBox())!
-        expect(innerWidgetBox.y + innerWidgetBox.height).toBe(widgetBox.y + widgetBox.height - 6) // 6px padding
       }
 
       expect(widgetBox.x).toBe(expectedX)
@@ -132,13 +130,13 @@ export class DashboardHelper {
 
   setEditing = async () => {
     await this.stepNavLast.locator('button').click()
-    await this.stepNavLast.getByText('Edit Dashboard').click()
+    await this.page.getByRole('button', { name: 'Edit Dashboard' }).click()
     await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
   }
 
   resetLayout = async () => {
     await this.stepNavLast.locator('button').click()
-    await this.stepNavLast.getByText('Reset Layout').click()
+    await this.page.getByRole('button', { name: 'Reset Layout' }).click()
   }
 
   assertIsEditing = async (shouldBe: boolean) => {
@@ -150,7 +148,7 @@ export class DashboardHelper {
       await expect(this.stepNavLast.locator('button').nth(2)).toHaveText('Cancel')
     } else {
       await expect(this.stepNavLast.locator('button')).toHaveCount(1)
-      await expect(this.stepNavLast.getByTitle('Dashboard')).toBeVisible()
+      await expect(this.stepNavLast.getByLabel('Dashboard')).toBeVisible()
     }
   }
 

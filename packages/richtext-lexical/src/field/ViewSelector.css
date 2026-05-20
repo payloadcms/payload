@@ -13,12 +13,12 @@
   background: transparent;
   border-radius: var(--radius-small);
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   box-sizing: border-box;
 
   &:hover {
-    background: var(--bg-hover);
-    color: var(--text-default);
+    background: var(--color-bg-hover);
+    color: var(--color-text);
   }
 }
 

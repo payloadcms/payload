@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { Button } from '../Button/index.js'
-import './index.scss'
+import './index.css'
 
 export type Props = {
   actions?: React.ReactNode
@@ -35,17 +35,17 @@ export const Card: React.FC<Props> = (props) => {
   return (
     <div className={classes} id={id}>
       <Tag className={`${baseClass}__title`}>{title}</Tag>
-      {actions && <div className={`${baseClass}__actions`}>{actions}</div>}
       {(onClick || href) && (
         <Button
           aria-label={buttonAriaLabel}
-          buttonStyle="none"
+          buttonStyle="ghost"
           className={`${baseClass}__click`}
           el="link"
           onClick={onClick}
           to={href}
         />
       )}
+      {actions ? <div className={`${baseClass}__actions`}>{actions}</div> : null}
     </div>
   )
 }

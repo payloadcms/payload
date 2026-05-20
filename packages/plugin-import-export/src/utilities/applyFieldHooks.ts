@@ -145,8 +145,7 @@ const traverseFields = ({
 
 /**
  * Walks a nested document and applies each field's `beforeExport` or
- * `beforeImport` hook. Legacy `toCSV` / `fromCSV` hooks are handled by the
- * flat CSV pipelines and skipped here.
+ * `beforeImport` hook.
  *
  * Field-level hook errors are logged and the field falls back to its
  * original value so a single bad doc does not abort the batch.

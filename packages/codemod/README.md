@@ -32,6 +32,8 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 - `migrate-hide-api-url` — migrates `admin.hideAPIURL: true` to `admin.components.views.edit.api.tab.condition: () => false` on collection and global configs.
 - `migrate-aliased-exports` — rewrites imports of types and utilities that used to be re-exported from `@payloadcms/ui` and `@payloadcms/next/utilities` to their canonical sources in `payload` / `payload/shared`.
 - `migrate-document-title-context` — migrates `title` and `setDocumentTitle` destructured from `useDocumentInfo()` to `useDocumentTitle()`. They were removed from `DocumentInfoContext` in v4 and now live on `DocumentTitleContext`.
+- `migrate-import-export-hooks` — migrates the deprecated `toCSV` and `fromCSV` field options in `custom['plugin-import-export']` to `hooks.beforeExport` and `hooks.beforeImport`. If a `hooks` object already exists it is merged into; if `hooks.beforeExport`/`hooks.beforeImport` already exist the deprecated sibling is dropped without overwriting. Review argument shapes after migration: `beforeExport` uses `siblingData` (not `row`) and `data` is the top-level document (previously `doc`).
+- `migrate-db-types-subpath` — rewrites imports from the removed `/types` subpath exports of `@payloadcms/drizzle`, `@payloadcms/db-postgres`, `@payloadcms/db-sqlite`, `@payloadcms/db-vercel-postgres`, and `@payloadcms/db-d1-sqlite` to their main entry points. Also handles re-export declarations and `declare module` augmentations.
 
 ## Contributing
 

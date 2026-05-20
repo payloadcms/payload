@@ -10,7 +10,7 @@
     content: '';
     display: block;
     height: calc(var(--spacer-1) / 2);
-    background: var(--icon-tertiary);
+    background: var(--color-icon-tertiary);
     transform: translateY(-50%);
   }
 
@@ -19,7 +19,7 @@
     user-select: none;
     border-radius: var(--radius-small);
     box-shadow:
-      0px 0px 0px 1px var(--bg-default),
-      0px 0px 0px 2px var(--border-selected);
+      0px 0px 0px 1px var(--color-bg),
+      0px 0px 0px 2px var(--color-border-selected);
   }
 }

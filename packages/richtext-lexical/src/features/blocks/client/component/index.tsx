@@ -512,7 +512,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const EditButton = useMemo(
     () => () => (
       <Button
-        buttonStyle="icon-label"
+        buttonStyle="ghost"
         className={`${baseClass}__editButton`}
         disabled={!isEditable}
         el="button"
@@ -539,7 +539,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const RemoveButton = useMemo(
     () => () => (
       <Button
-        buttonStyle="icon-label"
+        buttonStyle="ghost"
         className={`${baseClass}__removeButton`}
         disabled={!isEditable}
         icon="x"

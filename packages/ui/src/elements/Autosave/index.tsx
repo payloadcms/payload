@@ -30,7 +30,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'autosave'
 // The minimum time the saving state should be shown
@@ -235,17 +235,23 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     setSaving(false)
   })
 
+  const hasVisibleContent = saving || Boolean(lastUpdateTime)
+
   return (
-    <div className={baseClass}>
+    <React.Fragment>
       {validateOnDraft && !isValid && <LeaveWithoutSaving />}
-      {saving && t('general:saving')}
-      {!saving && Boolean(lastUpdateTime) && (
-        <React.Fragment>
-          {t('version:lastSavedAgo', {
-            distance: formatTimeToNow({ date: lastUpdateTime, i18n }),
-          })}
-        </React.Fragment>
+      {hasVisibleContent && (
+        <div className={baseClass}>
+          {saving && t('general:saving')}
+          {!saving && Boolean(lastUpdateTime) && (
+            <React.Fragment>
+              {t('version:lastSavedAgo', {
+                distance: formatTimeToNow({ date: lastUpdateTime, i18n }),
+              })}
+            </React.Fragment>
+          )}
+        </div>
       )}
-    </div>
+    </React.Fragment>
   )
 }

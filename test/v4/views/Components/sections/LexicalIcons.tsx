@@ -77,7 +77,12 @@ const icons = [
 export const LexicalIconsSection: React.FC<{ selectedComponent: string }> = ({
   selectedComponent,
 }) => (
-  <Section id="lexical-icons" selectedComponent={selectedComponent} title="Lexical Icons">
+  <Section
+    columns={1}
+    id="lexical-icons"
+    selectedComponent={selectedComponent}
+    title="Lexical Icons"
+  >
     <div className="components-view__icon-grid">
       {/* Add - size */}
       <div className="components-view__icon-item components-view__icon-item--variants">

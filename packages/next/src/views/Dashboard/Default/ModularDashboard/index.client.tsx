@@ -153,7 +153,6 @@ export function ModularDashboardClient({
                 id={widget.item.id}
                 style={{
                   width: `${WIDTH_TO_PERCENTAGE[widget.item.width]}%`,
-                  padding: '6px',
                 }}
                 width={widget.item.width}
               >
@@ -369,7 +368,7 @@ function DroppableItem({ id, position }: { id: string; position: 'after' | 'befo
         bottom: 0,
         borderRadius: '1000px',
         width: '4px',
-        backgroundColor: isOver ? 'var(--bg-success-default)' : 'transparent',
+        backgroundColor: isOver ? 'var(--color-bg-success)' : 'transparent',
         marginBottom: '10px',
         marginTop: '10px',
         pointerEvents: 'none',

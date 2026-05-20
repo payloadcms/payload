@@ -4,10 +4,9 @@ import type { QueryPreset } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 
 import { PeopleIcon } from '../../../icons/People/index.js'
-import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { Pill } from '../../Pill/index.js'
+import { Chip } from '../../Chip/index.js'
 import './index.scss'
 
 const baseClass = 'active-query-preset'
@@ -29,46 +28,22 @@ export function QueryPresetToggler({
   })
 
   return (
-    <Pill
+    <Chip
       className={[baseClass, activePreset && `${baseClass}--active`].filter(Boolean).join(' ')}
+      icon={activePreset?.isShared ? <PeopleIcon className={`${baseClass}__shared`} /> : undefined}
       id="select-preset"
-      onClick={() => {
-        openPresetListDrawer()
-      }}
-      pillStyle="light"
-      size="small"
+      onClick={openPresetListDrawer}
+      onRemove={activePreset ? () => void resetPreset() : undefined}
+      size="medium"
     >
-      <div className={`${baseClass}__label`}>
-        {activePreset?.isShared && <PeopleIcon className={`${baseClass}__shared`} />}
-        <div className={`${baseClass}__label-text-max-width`}>
-          <div className={`${baseClass}__label-text`}>
-            {activePreset?.title ||
-              t('general:selectLabel', {
-                label: getTranslation(presetsConfig.labels.singular, i18n),
-              })}
-          </div>
+      <div className={`${baseClass}__label-text-max-width`}>
+        <div className={`${baseClass}__label-text`}>
+          {activePreset?.title ||
+            t('general:selectLabel', {
+              label: getTranslation(presetsConfig.labels.singular, i18n),
+            })}
         </div>
-        {activePreset ? (
-          <div
-            className={`${baseClass}__clear`}
-            id="clear-preset"
-            onClick={async (e) => {
-              e.stopPropagation()
-              await resetPreset()
-            }}
-            onKeyDown={async (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.stopPropagation()
-                await resetPreset()
-              }
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            <XIcon />
-          </div>
-        ) : null}
       </div>
-    </Pill>
+    </Chip>
   )
 }

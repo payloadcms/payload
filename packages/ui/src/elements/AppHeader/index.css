@@ -2,7 +2,7 @@
   .app-header {
     position: relative;
     width: 100%;
-    height: var(--app-header-height);
+    padding: var(--spacer-2-5) 0;
     z-index: var(--z-modal);
   }
 
@@ -11,39 +11,12 @@
   }
 
   .app-header__localizer.localizer {
-    position: absolute;
-    top: 50%;
-    right: calc(var(--base) * 4.5);
-    transform: translate3d(0, -50%, 0);
-  }
-
-  [dir='rtl'] .app-header__localizer {
-    right: unset;
-    left: calc(var(--base) * 4.5);
-  }
-
-  .app-header__localizer-spacing {
-    visibility: hidden;
-  }
-
-  .app-header__bg {
-    opacity: 0;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-
-  .app-header--show-bg {
-    opacity: 1;
+    flex-shrink: 0;
   }
 
   .app-header__content {
     display: flex;
     align-items: center;
-    height: 100%;
     padding: 0 var(--gutter-h);
     position: relative;
     flex-grow: 1;
@@ -53,7 +26,6 @@
     display: flex;
     gap: var(--spacer-2);
     align-items: center;
-    height: 100%;
     flex-grow: 1;
     justify-content: space-between;
     width: 100%;
@@ -88,8 +60,35 @@
   .app-header__controls-wrapper {
     display: flex;
     align-items: center;
+    gap: var(--spacer-2);
     flex: 1;
     min-width: 0;
+  }
+
+  .app-header__sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    padding: 0;
+    margin-left: calc((var(--spacer-1) + 1px) * -1);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-medium);
+    cursor: pointer;
+    color: var(--color-icon);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-bg-transparent-hover);
+    }
+
+    &:focus-visible {
+      outline: none;
+      border-color: var(--color-border-selected);
+    }
   }
 
   .app-header__step-nav-wrapper {
@@ -107,7 +106,6 @@
     display: flex;
     align-items: center;
     gap: var(--spacer-2);
-    margin-right: var(--base);
   }
 
   .app-header__gradient-placeholder {
@@ -116,7 +114,7 @@
     right: 0;
     width: var(--base);
     height: var(--base);
-    background: linear-gradient(to right, transparent, var(--bg-default));
+    background: linear-gradient(to right, transparent, var(--color-bg));
   }
 
   .app-header__actions {
@@ -169,10 +167,6 @@
 
     .app-header__mobile-nav-toggler.nav-toggler--is-open {
       opacity: 0.5;
-    }
-
-    .app-header__step-header {
-      display: none;
     }
 
     .app-header__gradient-placeholder {

@@ -1385,7 +1385,7 @@ describe('Versions', () => {
       await page.locator('#schedule-publish').click()
 
       // drawer should open
-      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      await expect(page.locator('.drawer__header')).toBeVisible()
       // nothing in scheduled
       await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
 
@@ -1420,7 +1420,7 @@ describe('Versions', () => {
       await page.locator('#schedule-publish').click()
 
       // drawer should open
-      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      await expect(page.locator('.drawer__header')).toBeVisible()
       // nothing in scheduled
       await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
 

@@ -30,7 +30,7 @@
       padding: 0;
 
       &:hover {
-        color: var(--icon-default);
+        color: var(--color-icon);
       }
     }
   }
@@ -54,7 +54,7 @@
 
   .tree__empty {
     padding: var(--spacer-2-5) var(--spacer-3);
-    color: var(--text-tertiary);
+    color: var(--color-text-tertiary);
     font-size: var(--tree-font-size);
   }
 }

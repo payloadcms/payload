@@ -8,7 +8,7 @@
       position: relative;
       letter-spacing: 0.02em;
       border-radius: var(--radius-medium);
-      border: var(--stroke-width-small) solid var(--border-default);
+      border: var(--stroke-width-small) solid var(--lexical-border-color);
 
       &[dir='rtl'] [dir='auto'] {
         direction: rtl;
@@ -17,13 +17,14 @@
 
     .LexicalEditorTheme__placeholder {
       position: absolute;
-      top: var(--spacer-2);
-      color: var(--text-secondary);
+      top: var(--spacer-4);
+      color: var(--color-text-secondary);
       user-select: none;
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
       pointer-events: none;
+      line-height: var(--text-body-large-line-height);
     }
   }
 
@@ -34,7 +35,7 @@
     > .editor
     > div
     > .LexicalEditorTheme__placeholder {
-    left: var(--spacer-6);
+    left: var(--spacer-5);
   }
 
   .rich-text-lexical:not(.rich-text-lexical--show-gutter)

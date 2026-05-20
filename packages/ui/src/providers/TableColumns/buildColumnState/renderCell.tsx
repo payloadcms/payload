@@ -153,12 +153,7 @@ export function renderCell({
           })
         } else {
           // Use default icon based on allowHasMany
-          hierarchyIcon =
-            hierarchyConfig.allowHasMany === false ? (
-              <FolderIcon color="muted" />
-            ) : (
-              <TagIcon color="muted" />
-            )
+          hierarchyIcon = hierarchyConfig.allowHasMany === false ? <FolderIcon /> : <TagIcon />
         }
       }
     }

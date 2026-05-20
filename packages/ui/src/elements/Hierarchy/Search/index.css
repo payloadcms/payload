@@ -9,7 +9,7 @@
     display: flex;
     align-items: center;
     height: var(--spacer-4);
-    background: var(--bg-secondary);
+    background: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
     border: 1px solid transparent;
     padding-inline-end: var(--spacer-2);
@@ -32,7 +32,7 @@
     flex-shrink: 0;
     width: var(--spacer-4);
     height: var(--spacer-4);
-    color: var(--icon-secondary);
+    color: var(--color-icon-secondary);
   }
 
   .hierarchy-search-input__input {
@@ -43,7 +43,7 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    color: var(--text-default);
+    color: var(--color-text);
     outline: none;
     border: none;
     padding: 0;
@@ -52,7 +52,7 @@
     }
 
     &::placeholder {
-      color: var(--text-tertiary);
+      color: var(--color-text-tertiary);
     }
   }
 
@@ -72,7 +72,7 @@
     border: none;
     background: transparent;
     cursor: pointer;
-    color: var(--icon-secondary);
+    color: var(--color-icon-secondary);
     padding: 0;
     width: var(--spacer-3);
     height: var(--spacer-3);
@@ -80,16 +80,16 @@
 
     &:hover,
     &:focus-visible {
-      color: var(--icon-default);
+      color: var(--color-icon);
     }
   }
 
   .hierarchy-search-input__filter--active {
-    color: var(--icon-success-default);
+    color: var(--color-icon-success);
 
     &:hover,
     &:focus-visible {
-      color: var(--icon-success-default);
+      color: var(--color-icon-success);
     }
   }
 
@@ -114,7 +114,7 @@
   }
 
   .hierarchy-search-results__empty {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     padding: var(--spacer-1) 0;
   }
 
@@ -124,12 +124,12 @@
     padding-right: var(--nav-padding-inline-end);
     border: none;
     background: transparent;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     cursor: pointer;
     font-size: var(--text-body-small-font-size);
 
     &:hover {
-      color: var(--text-default);
+      color: var(--color-text);
     }
 
     &:disabled {
@@ -153,17 +153,17 @@
     border: 1px solid transparent;
 
     &:hover .hierarchy-search-result-item__title {
-      color: var(--text-default);
+      color: var(--color-text);
       text-decoration: underline;
     }
 
     &:hover .hierarchy-search-result-item__path {
-      color: var(--text-secondary);
+      color: var(--color-text-secondary);
     }
 
     &:focus {
       outline: none;
-      border-color: var(--border-strong);
+      border-color: var(--color-border-strong);
     }
 
     &:focus .hierarchy-search-result-item__title {
@@ -172,12 +172,12 @@
   }
 
   .hierarchy-search-result-item__title {
-    color: var(--text-default);
+    color: var(--color-text);
     line-height: 1;
   }
 
   .hierarchy-search-result-item__path {
-    color: var(--text-tertiary);
+    color: var(--color-text-tertiary);
     line-height: 1;
   }
 }

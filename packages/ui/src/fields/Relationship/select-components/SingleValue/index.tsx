@@ -1,13 +1,12 @@
 'use client'
 import type { SingleValueProps } from 'react-select'
 
-import React, { Fragment, useState } from 'react'
+import React, { Fragment } from 'react'
 import { components as SelectComponents } from 'react-select'
 
 import type { ReactSelectAdapterProps } from '../../../../elements/ReactSelect/types.js'
 import type { Option } from '../../types.js'
 
-import { Tooltip } from '../../../../elements/Tooltip/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
@@ -29,7 +28,6 @@ export const SingleValue: React.FC<
     selectProps: { customProps: { onDocumentOpen } = {} } = {},
   } = props
 
-  const [showTooltip, setShowTooltip] = useState(false)
   const { t } = useTranslation()
   const { permissions } = useAuth()
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read)
@@ -45,7 +43,6 @@ export const SingleValue: React.FC<
                 aria-label={t('general:editLabel', { label })}
                 className={`${baseClass}__drawer-toggler`}
                 onClick={(event) => {
-                  setShowTooltip(false)
                   onDocumentOpen({
                     id: value,
                     collectionSlug: relationTo,
@@ -59,14 +56,9 @@ export const SingleValue: React.FC<
                   }
                 }}
                 onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
                 onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
                 type="button"
               >
-                <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
-                  {t('general:edit')}
-                </Tooltip>
                 <EditIcon />
               </button>
             </Fragment>

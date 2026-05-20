@@ -22,7 +22,7 @@
     "@payloadcms/next": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "cross-env": "^7.0.3",
+    "cross-env": "10.1.0",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
     "next": "16.2.6",
@@ -32,7 +32,7 @@
     "sharp": "0.34.2"
   },
   "devDependencies": {
-    "@playwright/test": "1.58.2",
+    "@playwright/test": "1.59.1",
     "@testing-library/react": "16.3.0",
     "@types/node": "24.12.3",
     "@types/react": "19.2.14",
@@ -45,7 +45,7 @@
     "tsx": "4.21.0",
     "typescript": "5.7.3",
     "vite-tsconfig-paths": "6.0.5",
-    "vitest": "4.0.18"
+    "vitest": "4.1.6"
   },
   "engines": {
     "node": ">=24.15.0",

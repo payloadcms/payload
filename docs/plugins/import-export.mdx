@@ -597,8 +597,6 @@ In addition to collection-level hooks, you can configure field-level export and 
 | `disabled`           | boolean  | When `true` the field is completely excluded from the import-export plugin. |
 | `hooks.beforeExport` | function | Runs before a field value is exported. Works for CSV and JSON.              |
 | `hooks.beforeImport` | function | Runs before a field value is imported. Works for CSV and JSON.              |
-| `toCSV`              | function | **Deprecated** — use `hooks.beforeExport` instead. Will be removed in v4.   |
-| `fromCSV`            | function | **Deprecated** — use `hooks.beforeImport` instead. Will be removed in v4.   |
 
 ### Disabling Fields
 
@@ -723,36 +721,6 @@ Field-level hooks run **before** collection-level hooks:
 
 1. **Field-level `hooks.beforeExport`/`hooks.beforeImport`**: run per-field, per-document, during transformation
 2. **Collection-level `export.hooks.before`/`import.hooks.before`**: run per-batch, on the already-field-transformed data
-
-### Migrating from toCSV / fromCSV
-
-`toCSV` and `fromCSV` are deprecated and will be removed in v4. Existing hooks continue to work unchanged. New code should use `hooks.beforeExport` / `hooks.beforeImport`, which also run for JSON exports and imports.
-
-```ts
-// Before
-custom: {
-  'plugin-import-export': {
-    toCSV: ({ value, columnName, row, doc }) => {
-      row[`${columnName}_id`] = (value as any).id
-      return doc.title
-    },
-    fromCSV: ({ value, data }) => data[`${value}_key`],
-  },
-},
-
-// After
-custom: {
-  'plugin-import-export': {
-    hooks: {
-      beforeExport: ({ value, columnName, siblingData, data, format }) => {
-        siblingData[`${columnName}_id`] = (value as any).id
-        return data.title
-      },
-      beforeImport: ({ value, data, format }) => data[`${value}_key`],
-    },
-  },
-},
-```
 
 ### Virtual Fields
 
@@ -895,15 +863,15 @@ For relationship fields, the column format varies based on the relationship type
 
 During CSV import, certain values are automatically converted:
 
-| CSV Value        | Converted To      | Notes                                    |
-| ---------------- | ----------------- | ---------------------------------------- |
-| `true`, `TRUE`   | `true` (boolean)  | Case-insensitive                         |
-| `false`, `FALSE` | `false` (boolean) | Case-insensitive                         |
-| `null`, `NULL`   | `null`            | Use `fromCSV` hook to preserve as string |
-| Empty string     | `''` or omitted   | Depends on field type                    |
-| Numeric strings  | `number`          | Auto-detected for integers and floats    |
+| CSV Value        | Converted To      | Notes                                          |
+| ---------------- | ----------------- | ---------------------------------------------- |
+| `true`, `TRUE`   | `true` (boolean)  | Case-insensitive                               |
+| `false`, `FALSE` | `false` (boolean) | Case-insensitive                               |
+| `null`, `NULL`   | `null`            | Use `hooks.beforeImport` to preserve as string |
+| Empty string     | `''` or omitted   | Depends on field type                          |
+| Numeric strings  | `number`          | Auto-detected for integers and floats          |
 
-To preserve literal strings like "null" or "true", use a `fromCSV` function:
+To preserve literal strings like "null" or "true", use `hooks.beforeImport`:
 
 ```ts
 {
@@ -911,9 +879,11 @@ To preserve literal strings like "null" or "true", use a `fromCSV` function:
   type: 'text',
   custom: {
     'plugin-import-export': {
-      fromCSV: ({ value }) => {
-        // Return raw value without automatic conversion
-        return value
+      hooks: {
+        beforeImport: ({ value }) => {
+          // Return raw value without automatic conversion
+          return value
+        },
       },
     },
   },

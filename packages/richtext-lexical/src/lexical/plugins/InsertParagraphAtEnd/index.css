@@ -16,7 +16,7 @@
       cursor: pointer;
 
       .insert-paragraph-at-end-inside {
-        background-color: var(--bg-hover);
+        background-color: var(--color-bg-hover);
 
         span {
           display: flex;
@@ -33,7 +33,7 @@
     display: flex;
     justify-content: center;
     border-radius: var(--radius-medium);
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 
     span {
       display: none;
@@ -45,7 +45,7 @@
   html[data-theme='dark'] {
     .insert-paragraph-at-end:hover {
       .insert-paragraph-at-end-inside {
-        background-color: var(--bg-secondary);
+        background-color: var(--color-bg-secondary);
       }
     }
   }

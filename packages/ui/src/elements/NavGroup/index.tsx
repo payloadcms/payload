@@ -61,7 +61,7 @@ export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, l
           type="button"
         >
           <div className={`${baseClass}__indicator`}>
-            <ChevronIcon bold={false} direction={collapsed ? 'right' : 'down'} size={16} />
+            <ChevronIcon direction={collapsed ? 'right' : 'down'} size={16} />
           </div>
           <div className={`${baseClass}__label`}>{label}</div>
         </button>

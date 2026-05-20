@@ -11,6 +11,7 @@ import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-ty
 
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { login } from '../__helpers/e2e/auth/login.js'
+import { getPillSelectorItem } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import {
@@ -931,16 +932,12 @@ describe('Access Control', () => {
 
         // Should hide restrictedTopLevel field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Restricted Top Level'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Restricted Top Level' }),
         ).toBeHidden()
 
         // Should show visibleTopLevel field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Visible Top Level'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Visible Top Level' }),
         ).toBeVisible()
       })
 
@@ -952,16 +949,12 @@ describe('Access Control', () => {
 
         // Should hide secretPhone field inside contactInfo group
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Contact Info > Secret Phone'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Contact Info > Secret Phone' }),
         ).toBeHidden()
 
         // Should show publicPhone field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Contact Info > Public Phone'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Contact Info > Public Phone' }),
         ).toBeVisible()
       })
 
@@ -973,16 +966,12 @@ describe('Access Control', () => {
 
         // Should hide restrictedInRow field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Restricted In Row'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Restricted In Row' }),
         ).toBeHidden()
 
         // Should show visibleInRow field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Visible In Row'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Visible In Row' }),
         ).toBeVisible()
       })
 
@@ -994,16 +983,12 @@ describe('Access Control', () => {
 
         // Should hide restrictedInCollapsible field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Restricted In Collapsible'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Restricted In Collapsible' }),
         ).toBeHidden()
 
         // Should show visibleInCollapsible field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Visible In Collapsible'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Visible In Collapsible' }),
         ).toBeVisible()
       })
 
@@ -1015,16 +1000,15 @@ describe('Access Control', () => {
 
         // Should hide metadata.analytics.restrictedMetric field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Metadata > Analytics > Restricted Metric'),
+          getPillSelectorItem({
+            container: page,
+            label: 'Metadata > Analytics > Restricted Metric',
           }),
         ).toBeHidden()
 
         // Should show metadata.analytics.visibleMetric field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Metadata > Analytics > Visible Metric'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Metadata > Analytics > Visible Metric' }),
         ).toBeVisible()
       })
 
@@ -1036,17 +1020,11 @@ describe('Access Control', () => {
 
         // Should hide secretInPublicTab field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Secret In Public Tab'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Secret In Public Tab' }),
         ).toBeHidden()
 
         // Should show publicData field
-        await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Public Data'),
-          }),
-        ).toBeVisible()
+        await expect(getPillSelectorItem({ container: page, label: 'Public Data' })).toBeVisible()
       })
 
       test('should hide field with read: false inside named tab in column selector', async () => {
@@ -1057,16 +1035,12 @@ describe('Access Control', () => {
 
         // Should hide restrictedSetting field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Settings > Restricted Setting'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Settings > Restricted Setting' }),
         ).toBeHidden()
 
         // Should show visibleSetting field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Settings > Visible Setting'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Settings > Visible Setting' }),
         ).toBeVisible()
       })
 
@@ -1078,16 +1052,12 @@ describe('Access Control', () => {
 
         // Should hide secretPostalCode field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Address > Secret Postal Code'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Address > Secret Postal Code' }),
         ).toBeHidden()
 
         // Should show city field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Address > City'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Address > City' }),
         ).toBeVisible()
       })
 
@@ -1099,16 +1069,12 @@ describe('Access Control', () => {
 
         // Should hide restrictedAdvanced field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Advanced > Restricted Advanced'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Advanced > Restricted Advanced' }),
         ).toBeHidden()
 
         // Should show visibleAdvanced field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Advanced > Visible Advanced'),
-          }),
+          getPillSelectorItem({ container: page, label: 'Advanced > Visible Advanced' }),
         ).toBeVisible()
       })
     })
@@ -1809,7 +1775,7 @@ describe('Access Control', () => {
       })
 
       await page.goto(blocksFieldAccessUrl.edit(doc.id))
-      await expect(page.locator('.doc-header__title')).toContainText('ID: ')
+      await expect(page.locator('.doc-header__title .id-label')).toBeVisible()
 
       // Editable blocks - fields should be editable
       await expect(page.locator('#field-editableBlocks__0__title')).toBeEnabled()

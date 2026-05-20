@@ -4,9 +4,9 @@
     max-width: fit-content;
     display: flex;
     align-items: center;
-    background: var(--bg-default);
+    background: var(--color-bg);
     border-radius: var(--radius-medium);
-    border: var(--stroke-width-small) solid var(--border-default);
+    border: var(--stroke-width-small) solid var(--color-border);
     position: relative;
     font-family: var(--font-body);
     margin-block: calc(var(--spacer-1) * 2.5);

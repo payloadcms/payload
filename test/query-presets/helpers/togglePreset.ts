@@ -23,15 +23,15 @@ export async function selectPreset({ page, presetTitle }: { page: Page; presetTi
   await page.waitForURL(() => page.url() !== currentURL)
 
   await expect(
-    page.locator('button#select-preset', {
+    page.locator('#select-preset', {
       hasText: exactText(presetTitle),
     }),
   ).toBeVisible()
 }
 
 export async function clearSelectedPreset({ page }: { page: Page }) {
-  const queryPresetsControl = page.locator('button#select-preset')
-  const clearButton = queryPresetsControl.locator('#clear-preset')
+  const queryPresetsControl = page.locator('#select-preset')
+  const clearButton = queryPresetsControl.locator('.chip__remove')
 
   // Wait for the clear button to be visible and click it
   await expect(clearButton).toBeVisible()
@@ -44,10 +44,10 @@ export async function clearSelectedPreset({ page }: { page: Page }) {
     timeout: TEST_TIMEOUT_LONG,
   })
 
-  await expect(queryPresetsControl.locator('#clear-preset')).toBeHidden()
+  await expect(queryPresetsControl.locator('.chip__remove')).toBeHidden()
 
   await expect(
-    page.locator('button#select-preset', {
+    page.locator('#select-preset', {
       hasText: exactText('Select Preset'),
     }),
   ).toBeVisible()

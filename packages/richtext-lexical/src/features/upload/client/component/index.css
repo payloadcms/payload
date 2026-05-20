@@ -30,7 +30,7 @@
     }
 
     &:hover {
-      border-color: var(--border-selected);
+      border-color: var(--color-border-selected);
       border-radius: 0;
       background: none;
     }
@@ -86,7 +86,7 @@
     gap: var(--spacer-2);
     height: var(--spacer-6);
     padding: 0 var(--spacer-2);
-    background: var(--bg-menu);
+    background: var(--color-bg-menu);
     border-radius: var(--radius-large);
     box-shadow:
       0 3px 8px 0 rgba(0, 0, 0, 0.35),
@@ -121,11 +121,11 @@
       cursor: pointer;
 
       &:hover:not(.btn--disabled) {
-        background: var(--bg-menu-hover);
+        background: var(--color-bg-menu);
       }
 
       &:active:not(.btn--disabled) {
-        background: var(--bg-menu-hover);
+        background: var(--color-bg-menu);
       }
     }
   }
@@ -206,7 +206,7 @@
 }
 
 .LexicalEditorTheme__upload--selected {
-  border-color: var(--border-selected);
+  border-color: var(--color-border-selected);
   background: transparent;
   border-radius: 0;
 }

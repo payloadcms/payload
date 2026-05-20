@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { CopyIcon } from '../../icons/Copy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Tooltip } from '../Tooltip/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'copy-to-clipboard'
 

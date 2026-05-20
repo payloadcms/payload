@@ -8,21 +8,21 @@
     padding: var(--spacer-2-5);
     align-items: center;
     gap: var(--spacer-2);
-    background: var(--bg-default);
-    border: 1px solid var(--border-default);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-medium);
     font-family: var(--font-body);
     margin-block: var(--spacer-2);
     color: var(--color-text);
 
     &:hover {
-      outline: var(--stroke-width-small) solid var(--border-selected);
+      outline: var(--stroke-width-small) solid var(--color-border-selected);
       outline-offset: calc(var(--stroke-width-small) * -1);
     }
   }
 
   .LexicalEditorTheme__relationship--selected {
-    outline: var(--stroke-width-small) solid var(--border-selected);
+    outline: var(--stroke-width-small) solid var(--color-border-selected);
     outline-offset: calc(var(--stroke-width-small) * -1);
   }
 
@@ -47,7 +47,7 @@
     font-weight: var(--text-body-small-font-weight);
     line-height: var(--text-body-small-line-height);
     letter-spacing: var(--text-body-small-letter-spacing);
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     margin: 0;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -57,7 +57,7 @@
   .LexicalEditorTheme__relationship__title {
     font-family: var(--text-body-medium-strong-font-family);
     font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--font-weight-strong);
+    font-weight: var(--text-body-medium-strong-font-weight);
     line-height: var(--text-body-medium-strong-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
     color: var(--color-text);
@@ -91,7 +91,7 @@
   .LexicalEditorTheme__relationship__doc-drawer-toggler,
   .LexicalEditorTheme__relationship__swapButton {
     &:disabled {
-      color: var(--text-disabled);
+      color: var(--color-text-disabled);
       pointer-events: none;
     }
   }
@@ -105,7 +105,7 @@
 
   .LexicalEditorTheme__relationship__removeButton.btn {
     &:disabled {
-      color: var(--text-disabled);
+      color: var(--color-text-disabled);
       pointer-events: none;
     }
   }

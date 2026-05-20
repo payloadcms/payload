@@ -10,7 +10,7 @@
   .sidebar-tabs__tabs {
     display: flex;
     gap: 0;
-    background-color: var(--bg-secondary);
+    background-color: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
     width: 100%;
   }
@@ -28,7 +28,7 @@
     border-radius: var(--radius-medium);
     border: 1px solid transparent;
     background-color: transparent;
-    color: var(--icon-secondary);
+    color: var(--color-icon-secondary);
     transition:
       background-color 0.15s ease,
       border-color 0.15s ease,
@@ -36,14 +36,14 @@
     position: relative;
 
     &:hover {
-      color: var(--icon-default);
+      color: var(--color-icon);
     }
   }
 
   .sidebar-tabs__tab--active {
-    background-color: var(--bg-default);
-    border-color: var(--border-default);
-    color: var(--icon-default);
+    background-color: var(--color-bg);
+    border-color: var(--color-border);
+    color: var(--color-icon);
   }
 
   .sidebar-tabs__tab-icon {

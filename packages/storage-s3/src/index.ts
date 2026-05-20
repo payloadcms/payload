@@ -1,3 +1,4 @@
+import type { S3ClientConfig } from '@aws-sdk/client-s3'
 import type {
   ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
@@ -6,7 +7,7 @@ import type {
 import type { NodeHttpHandlerOptions } from '@smithy/node-http-handler'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
-import * as AWS from '@aws-sdk/client-s3'
+import { S3 } from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
@@ -69,7 +70,7 @@ export type S3StorageOptions = {
    *
    * [AWS.S3ClientConfig Docs](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html)
    */
-  config: AWS.S3ClientConfig
+  config: S3ClientConfig
 
   /**
    * Whether or not to disable local storage
@@ -106,7 +107,7 @@ export type S3StorageOptions = {
 
 type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
 
-const s3Clients = new Map<string, AWS.S3>()
+const s3Clients = new Map<string, S3>()
 
 const defaultRequestHandlerOpts: NodeHttpHandlerOptions = {
   httpAgent: {
@@ -124,14 +125,16 @@ export const s3Storage: S3StoragePlugin =
   (incomingConfig: Config): Config => {
     const cacheKey = s3StorageOptions.clientCacheKey || `s3:${s3StorageOptions.bucket}`
 
-    const getStorageClient: () => AWS.S3 = () => {
+    const isPluginDisabled = s3StorageOptions.enabled === false
+
+    const getStorageClient: () => S3 = () => {
       if (s3Clients.has(cacheKey)) {
         return s3Clients.get(cacheKey)!
       }
 
       s3Clients.set(
         cacheKey,
-        new AWS.S3({
+        new S3({
           requestHandler: defaultRequestHandlerOpts,
           ...(s3StorageOptions.config ?? {}),
         }),
@@ -139,8 +142,6 @@ export const s3Storage: S3StoragePlugin =
 
       return s3Clients.get(cacheKey)!
     }
-
-    const isPluginDisabled = s3StorageOptions.enabled === false
 
     initClientUploads({
       clientHandler: '@payloadcms/storage-s3/client#S3ClientUploadHandler',

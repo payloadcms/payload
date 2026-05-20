@@ -14,9 +14,9 @@ import { Dots } from '../../icons/Dots/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
+import { Button } from '../Button/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { GroupByBuilder } from '../GroupByBuilder/index.js'
-import { Pill } from '../Pill/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
 import { SearchBar } from '../SearchBar/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
@@ -128,68 +128,76 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             <React.Fragment key="before-actions">{beforeActions && beforeActions}</React.Fragment>
           ),
           enableColumns && (
-            <Pill
-              aria-controls={`${baseClass}-columns`}
-              aria-expanded={visibleDrawer === 'columns'}
+            <Button
+              buttonStyle="pill"
               className={`${baseClass}__toggle-columns`}
+              extraButtonProps={{
+                'aria-controls': `${baseClass}-columns`,
+                'aria-expanded': visibleDrawer === 'columns',
+              }}
               icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
               id="toggle-list-columns"
               key="toggle-list-columns"
               onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
-              pillStyle="light"
-              size="small"
+              size="medium"
             >
               {t('general:columns')}
-            </Pill>
+            </Button>
           ),
           enableFilters && (
-            <Pill
-              aria-controls={`${baseClass}-where`}
-              aria-expanded={visibleDrawer === 'where'}
+            <Button
+              buttonStyle="pill"
               className={`${baseClass}__toggle-where`}
+              extraButtonProps={{
+                'aria-controls': `${baseClass}-where`,
+                'aria-expanded': visibleDrawer === 'where',
+              }}
               icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
               id="toggle-list-filters"
               key="toggle-list-filters"
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-              pillStyle="light"
-              size="small"
+              size="medium"
             >
               {t('general:filters')}
-            </Pill>
+            </Button>
           ),
           enableSort && (
-            <Pill
-              aria-controls={`${baseClass}-sort`}
-              aria-expanded={visibleDrawer === 'sort'}
+            <Button
+              buttonStyle="pill"
               className={`${baseClass}__toggle-sort`}
+              extraButtonProps={{
+                'aria-controls': `${baseClass}-sort`,
+                'aria-expanded': visibleDrawer === 'sort',
+              }}
               icon={<ChevronIcon />}
               id="toggle-list-sort"
               key="toggle-list-sort"
               onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
-              pillStyle="light"
-              size="small"
+              size="medium"
             >
               {t('general:sort')}
-            </Pill>
+            </Button>
           ),
           collectionConfig.admin.groupBy && (
-            <Pill
-              aria-controls={`${baseClass}-group-by`}
-              aria-expanded={visibleDrawer === 'group-by'}
+            <Button
+              buttonStyle="pill"
               className={`${baseClass}__toggle-group-by`}
+              extraButtonProps={{
+                'aria-controls': `${baseClass}-group-by`,
+                'aria-expanded': visibleDrawer === 'group-by',
+              }}
               icon={<ChevronIcon direction={visibleDrawer === 'group-by' ? 'up' : 'down'} />}
               id="toggle-group-by"
               key="toggle-group-by"
               onClick={() =>
                 setVisibleDrawer(visibleDrawer !== 'group-by' ? 'group-by' : undefined)
               }
-              pillStyle="light"
-              size="small"
+              size="medium"
             >
               {t('general:groupByLabel', {
                 label: '',
               })}
-            </Pill>
+            </Button>
           ),
           listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
             <Popup
@@ -198,7 +206,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               horizontalAlign="right"
               id="list-menu"
               key="list-menu"
-              size="small"
+              size="medium"
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>

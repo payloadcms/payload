@@ -5,34 +5,34 @@
     flex-direction: column;
     gap: var(--spacer-2);
 
-    & .code-editor {
-      background: var(--bg-default-secondary);
-      border: 1px solid var(--border-default-default);
+    .code-editor {
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
       border-radius: var(--radius-medium);
       padding: var(--spacer-2) 0;
       overflow: clip;
       box-shadow: none;
 
       &:hover {
-        border-color: var(--border-default-default);
+        border-color: var(--color-border);
       }
 
       &:focus-within {
-        border-color: var(--border-selected-strong);
+        border-color: var(--accessibility-focus-color);
       }
     }
 
-    &.error .code-editor {
-      border-color: var(--border-danger-strong);
+    &.error .code-editor:not(:focus-within) {
+      border-color: var(--color-border-danger-strong);
 
       &:hover {
-        border-color: var(--border-danger-strong);
+        border-color: var(--color-border-danger-strong);
       }
     }
 
     &.read-only .code-editor {
-      background: var(--bg-default-default);
-      border-color: var(--border-default-default);
+      background: var(--color-bg);
+      border-color: var(--color-border);
     }
   }
 }

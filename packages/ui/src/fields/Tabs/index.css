@@ -46,7 +46,7 @@
     vertical-align: bottom;
     position: relative;
     z-index: 1;
-    box-shadow: inset 0px -1px var(--border-default-default);
+    box-shadow: inset 0px -1px var(--color-border);
 
     &:before,
     &:after {

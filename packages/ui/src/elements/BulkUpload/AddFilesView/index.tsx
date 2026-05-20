@@ -6,7 +6,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { Dropzone } from '../../Dropzone/index.js'
 import { DrawerHeader } from '../Header/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'bulk-upload--add-files'
 
@@ -26,7 +26,7 @@ export function AddFilesView({ acceptMimeTypes, onCancel, onDrop }: Props) {
       <div className={`${baseClass}__dropArea`}>
         <Dropzone multipleFiles onChange={onDrop}>
           <Button
-            buttonStyle="subtle"
+            buttonStyle="pill"
             iconPosition="left"
             onClick={() => {
               if (inputRef.current) {

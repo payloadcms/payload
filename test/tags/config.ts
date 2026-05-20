@@ -6,8 +6,6 @@ const dirname = path.dirname(filename)
 
 import type { CollectionConfig } from 'payload'
 
-import type { CollectionConfig } from 'payload'
-
 import { createTagField } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'

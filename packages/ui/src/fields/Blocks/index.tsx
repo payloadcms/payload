@@ -514,7 +514,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           {!valid && (
             <React.Fragment>
               {showMinRows && (
-                <Banner type="error">
+                <Banner type="danger">
                   {t('validation:requiresAtLeast', {
                     count: minRows,
                     label:
@@ -540,7 +540,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             slug={drawerSlug}
           >
             <Button
-              buttonStyle="icon-label"
+              buttonStyle="ghost"
               disabled={readOnly || disabled}
               el="span"
               icon={<CirclePlusIcon />}

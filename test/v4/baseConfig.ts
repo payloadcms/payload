@@ -1,23 +1,19 @@
-import type { CollectionConfig, Config } from 'payload'
-
+import fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { getFileByPath } from 'payload'
+import { type CollectionConfig, type Config } from 'payload'
 
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
 import { blocksSeedData } from './seed/blocksSeedData.js'
 import {
-  codeContent,
-  getRichTextContent,
-  getTypographyContent,
-  listsContent,
-  tableContent,
-} from './seed/richTextData.js'
-import {
   blocksFieldsSlug,
   collectionSlugs,
+  joinFieldsSlug,
+  joinPostsSlug,
+  relationshipFieldsSlug,
   richTextFieldsSlug,
+  tagsSlug,
   textFieldsSlug,
   uploadsSlug,
 } from './slugs.js'
@@ -25,7 +21,19 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// Load file at module level, manually construct to avoid file-type dynamic import issue
+const imagePath = path.resolve(dirname, '../lexical/collections/Upload/payload.jpg')
+const imageData = await fs.readFile(imagePath)
+const imageStat = await fs.stat(imagePath)
+const imageFile = {
+  name: path.basename(imagePath),
+  data: imageData,
+  mimetype: 'image/jpeg',
+  size: imageStat.size,
+}
+
 import ArrayFields from './collections/Array/index.js'
+import Autosave from './collections/Autosave/index.js'
 import BlocksFields from './collections/Blocks/index.js'
 import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
@@ -36,6 +44,8 @@ import EmailFields from './collections/Email/index.js'
 import FolderItems from './collections/FolderItems/index.js'
 import { Folders } from './collections/Folders/index.js'
 import GroupFields from './collections/Group/index.js'
+import JoinFields from './collections/Join/index.js'
+import JoinPosts from './collections/JoinPosts/index.js'
 import JSONFields from './collections/JSON/index.js'
 import NumberFields from './collections/Number/index.js'
 import PasswordFields from './collections/Password/index.js'
@@ -47,10 +57,19 @@ import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
 import SlugFields from './collections/Slug/index.js'
 import TabsFields from './collections/Tabs/index.js'
+import Tags from './collections/Tags/index.js'
 import TextFields from './collections/Text/index.js'
 import TextareaFields from './collections/Textarea/index.js'
+import Rubbish from './collections/Trash/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
+import {
+  codeContent,
+  getRichTextContent,
+  getTypographyContent,
+  listsContent,
+  tableContent,
+} from './seed/richTextData.js'
 
 export const collections: CollectionConfig[] = [
   {
@@ -71,6 +90,8 @@ export const collections: CollectionConfig[] = [
   FolderItems,
   Folders,
   GroupFields,
+  JoinFields,
+  JoinPosts,
   JSONFields,
   NumberFields,
   PasswordFields,
@@ -82,20 +103,32 @@ export const collections: CollectionConfig[] = [
   SelectFields,
   SlugFields,
   TabsFields,
+  Tags,
   TextFields,
   TextareaFields,
   Uploads,
   UploadFields,
   DraftVersions,
+  Autosave,
+  Rubbish,
 ]
 
 export const baseConfig: Partial<Config> = {
   collections,
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: ['en', 'es', 'de'],
+  },
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
     components: {
+      actions: [
+        './components/HeaderAction.tsx#HeaderAction',
+        './components/HeaderAction.tsx#HeaderAction2',
+      ],
       afterNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
       views: {
         components: {
@@ -110,7 +143,7 @@ export const baseConfig: Partial<Config> = {
     await resetDB(payload, collectionSlugs)
 
     // Seed users
-    await payload.create({
+    const devUserDoc = await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
@@ -143,18 +176,17 @@ export const baseConfig: Partial<Config> = {
       { title: 'GraphQL vs REST API' },
     ]
 
+    const createdPosts: { id: number | string }[] = []
     for (const post of posts) {
-      await payload.create({
+      const created = await payload.create({
         collection: textFieldsSlug,
         data: post,
       })
+      createdPosts.push(created)
     }
 
     const richTextCount = await payload.count({ collection: richTextFieldsSlug })
     if (richTextCount.totalDocs === 0) {
-      const imagePath = path.resolve(dirname, '../lexical/collections/Upload/payload.jpg')
-      const imageFile = await getFileByPath(imagePath)
-
       const uploadDoc = await payload.create({
         collection: uploadsSlug,
         data: { alt: 'Farming image' },
@@ -191,10 +223,94 @@ export const baseConfig: Partial<Config> = {
         },
       })
     }
+
+    // Seed relationship-fields to test join field
+    await payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        authorRequired: devUserDoc.id,
+        relatedPosts: createdPosts.slice(0, 3).map((p) => p.id) as string[],
+      },
+    })
+    await payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        authorRequired: devUserDoc.id,
+        relatedPosts: createdPosts.slice(3, 6).map((p) => p.id) as string[],
+      },
+    })
+
     // Seed blocks collection
     await payload.create({
       collection: blocksFieldsSlug,
       data: blocksSeedData,
+    })
+
+    // Seed join fields collection
+    const joinCategory = await payload.create({
+      collection: joinFieldsSlug,
+      data: {
+        name: 'Example Category',
+      },
+    })
+
+    const joinPosts = [
+      { title: 'First Post', _status: 'published' },
+      { title: 'Second Post test', _status: 'published' },
+      { title: 'Third Post', _status: 'draft' },
+      { title: 'Fourth Post', _status: 'published' },
+      { title: 'Fifth Post', _status: 'draft' },
+    ]
+
+    for (const post of joinPosts) {
+      await payload.create({
+        collection: joinPostsSlug,
+        data: {
+          ...post,
+          category: joinCategory.id,
+        },
+      })
+    }
+
+    // Seed tags hierarchy for testing hierarchy field
+    const techTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Technology' },
+    })
+
+    const frontendTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Frontend', parent: techTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'React', parent: frontendTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Vue', parent: frontendTag.id },
+    })
+
+    const backendTag = await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Backend', parent: techTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Node.js', parent: backendTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Python', parent: backendTag.id },
+    })
+
+    await payload.create({
+      collection: tagsSlug,
+      data: { name: 'Design' },
     })
   },
   typescript: {

@@ -21,17 +21,26 @@ export function registerCodegenCases(
   options: RegisterCodegenOptions = {},
 ) {
   const {
+    agentModel,
     expectPass = true,
     groupName = 'Codegen',
+    kind,
     labelSuffix = '',
     runnerModel,
+    skillInstall,
     systemPromptKey,
     testNamePrefix = '',
   } = options
   describe.concurrent(`${groupName}${labelSuffix}`, () => {
     for (const testCase of dataset) {
       it(`${testNamePrefix}${testCase.fixturePath}`, async () => {
-        const result = await runCodegenCase(testCase, label, { runnerModel, systemPromptKey })
+        const result = await runCodegenCase(testCase, label, {
+          agentModel,
+          kind,
+          runnerModel,
+          skillInstall,
+          systemPromptKey,
+        })
         if (expectPass) {
           expect(result.pass, caseFailureMessage(result)).toBe(true)
         } else {

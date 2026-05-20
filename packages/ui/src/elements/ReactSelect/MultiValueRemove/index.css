@@ -12,11 +12,11 @@
     border: 1px solid transparent;
     border-radius: var(--radius-small);
     padding: 0;
-    color: var(--icon-secondary);
+    color: var(--color-icon-secondary);
 
     &:hover {
-      color: var(--text-default);
-      background: var(--bg-hover);
+      color: var(--color-text);
+      background: var(--color-bg-hover);
     }
 
     &:focus-visible {

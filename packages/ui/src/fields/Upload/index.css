@@ -9,6 +9,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: var(--spacer-2-5);
     gap: var(--spacer-2);
     width: 100%;
   }
@@ -20,7 +21,7 @@
   }
 
   .upload__dropzoneContent__orText {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     text-transform: lowercase;
   }
 
@@ -28,7 +29,7 @@
     flex-shrink: 0;
     margin: 0;
     text-transform: lowercase;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
   }
 
   .upload__loadingRows {
@@ -39,10 +40,7 @@
 
   .upload .shimmer-effect {
     border-radius: var(--radius-medium);
-  }
-
-  .upload.error .dropzone {
-    border-color: var(--border-danger-strong);
+    border: var(--stroke-width-small) solid var(--color-border);
   }
 
   @media (max-width: 768px) {

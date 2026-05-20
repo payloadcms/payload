@@ -8,10 +8,10 @@
       position: relative;
       width: 100%;
       min-height: var(--spacer-5);
-      background: var(--bg-default-secondary);
+      background: var(--color-bg-secondary);
       border: 1px solid transparent;
       border-radius: var(--radius-medium);
-      color: var(--text-default);
+      color: var(--color-text);
       font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
@@ -28,7 +28,7 @@
       gap: var(--spacer-1);
 
       &.rs__control--is-focused {
-        border-color: var(--border-selected-default);
+        border-color: var(--accessibility-focus-color);
       }
 
       &:has(.clear-indicator) {
@@ -36,12 +36,12 @@
       }
 
       &:hover:not(:focus-within) {
-        border-color: var(--border-default);
+        border-color: var(--color-border);
       }
     }
 
     .rs__placeholder {
-      color: var(--text-default-tertiary);
+      color: var(--color-text-tertiary);
     }
 
     .rs__menu-notice {
@@ -66,7 +66,7 @@
     }
 
     .rs__input-container {
-      color: var(--text-default);
+      color: var(--color-text);
       height: var(--text-body-medium-line-height);
       margin: 0;
       padding: 0;
@@ -76,7 +76,7 @@
       z-index: 4;
       border-radius: var(--radius-medium);
       box-shadow: var(--elevation-400-menu-panel);
-      background: var(--bg-default);
+      background: var(--color-bg);
       overflow: hidden;
     }
 
@@ -94,7 +94,7 @@
     }
 
     .rs__group-heading {
-      color: var(--text-tertiary);
+      color: var(--color-text-tertiary);
       padding: var(--spacer-2-5) var(--spacer-3) var(--spacer-1);
       font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
@@ -109,28 +109,33 @@
       line-height: var(--text-body-medium-line-height);
       padding-inline: var(--spacer-3) var(--spacer-1);
       padding-block: var(--spacer-2);
-      color: var(--text-default);
+      color: var(--color-text);
     }
 
     .rs__option--is-focused {
-      background-color: var(--bg-default-secondary);
+      background-color: var(--color-bg-secondary);
     }
 
     .rs__option--is-selected {
-      background-color: var(--bg-selected);
+      background-color: var(--color-bg-selected);
     }
 
     &.rs--is-disabled .rs__control {
-      background: var(--bg-default);
-      border-color: var(--border-default);
-      color: var(--text-disabled-default);
+      background: var(--color-bg);
+      border-color: var(--color-border);
+      color: var(--color-text-disabled);
+    }
+
+    &.react-select--error .rs__control:not(.rs__control--is-focused) {
+      &:hover {
+        border-color: var(--color-border-danger-strong);
+      }
     }
   }
 
-  .react-select--error,
-  .react-select--error:hover {
+  .react-select--error {
     div.rs__control {
-      border: 1px solid var(--border-danger-strong);
+      border: 1px solid var(--color-border-danger-strong);
 
       & > div.rs__indicator > button.dropdown-indicator[type='button'] {
         border: none;
@@ -138,9 +143,13 @@
     }
   }
 
+  .react-select--error .rs__control:hover {
+    border-color: var(--color-border-danger-strong);
+  }
+
   .react-select--error:focus-within {
     div.rs__control {
-      border-color: var(--border-selected-default);
+      border-color: var(--accessibility-focus-color);
     }
   }
 }
