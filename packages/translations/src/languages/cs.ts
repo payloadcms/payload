@@ -388,6 +388,7 @@ export const csTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Trvale smazat',
     permanentlyDeletedCountSuccessfully: 'Trvale odstraněno {{count}} {{label}} úspěšně.',
     perPage: 'Na stránku: {{limit}}',
+    perPageLabel: 'Na stránku:',
     previous: 'Předchozí',
     reindex: 'Přeindexovat',
     reindexingAll: 'Přeindexování všech {{collections}}.',

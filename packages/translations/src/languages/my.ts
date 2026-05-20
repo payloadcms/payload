@@ -394,6 +394,7 @@ export const myTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       '{{count}} {{label}} telah berjaya dipadamkan secara kekal.',
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
+    perPageLabel: 'တစ်အုပ်စာမျက်နှာ။',
     previous: 'ယခင်',
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',

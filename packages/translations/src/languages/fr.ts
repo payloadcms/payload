@@ -400,6 +400,7 @@ export const frTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Supprimer définitivement',
     permanentlyDeletedCountSuccessfully: 'Supprimé définitivement {{count}} {{label}} avec succès.',
     perPage: 'Par Page: {{limit}}',
+    perPageLabel: 'Par page :',
     previous: 'Précédent',
     reindex: 'Réindexer',
     reindexingAll: 'Réindexation de toutes les {{collections}}.',

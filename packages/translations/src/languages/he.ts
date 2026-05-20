@@ -377,6 +377,7 @@ export const heTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'מחק לצמיתות',
     permanentlyDeletedCountSuccessfully: 'נמחקו לצמיתות {{count}} {{label}} בהצלחה.',
     perPage: '{{limit}} בכל עמוד',
+    perPageLabel: 'לכל עמוד:',
     previous: 'קודם',
     reindex: 'החזרת אינדקס',
     reindexingAll: 'החזרת אינדקס לכל {{collections}}.',

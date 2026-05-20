@@ -395,6 +395,7 @@ export const roTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Șterge definitiv',
     permanentlyDeletedCountSuccessfully: 'Șters permanent cu succes {{count}} {{label}}.',
     perPage: 'Pe pagină: {{limit}}',
+    perPageLabel: 'Pe pagină:',
     previous: 'Anterior',
     reindex: 'Reindexare',
     reindexingAll: 'Reindexarea tuturor {{collections}}.',

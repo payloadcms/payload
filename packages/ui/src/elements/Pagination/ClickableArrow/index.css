@@ -1,0 +1,40 @@
+@layer payload-default {
+  .clickable-arrow {
+    cursor: pointer;
+    min-width: 24px;
+    min-height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    outline: 0;
+    color: var(--color-icon);
+    border-radius: var(--radius-medium);
+
+    &:not(.clickable-arrow--is-disabled) {
+      &:hover,
+      &:focus-visible {
+        background: var(--color-bg-elevated);
+      }
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+    }
+  }
+
+  .clickable-arrow--right .icon {
+    transform: rotate(-90deg);
+  }
+
+  .clickable-arrow--left .icon {
+    transform: rotate(90deg);
+  }
+
+  .clickable-arrow--is-disabled {
+    cursor: default;
+
+    .icon .fill {
+      fill: var(--color-icon-disabled);
+    }
+  }
+}

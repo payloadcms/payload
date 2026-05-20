@@ -392,6 +392,7 @@ export const idTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Hapus Secara Permanen',
     permanentlyDeletedCountSuccessfully: 'Berhasil menghapus secara permanen {{count}} {{label}}.',
     perPage: 'Per Halaman: {{limit}}',
+    perPageLabel: 'Per halaman:',
     previous: 'Sebelumnya',
     reindex: 'Indeks Ulang',
     reindexingAll: 'Mengindeks ulang semua {{collections}}.',

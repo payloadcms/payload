@@ -2,7 +2,7 @@
 import React from 'react'
 
 import { ClickableArrow } from './ClickableArrow/index.js'
-import './index.scss'
+import './index.css'
 import { Page } from './Page/index.js'
 import { Separator } from './Separator/index.js'
 

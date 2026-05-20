@@ -6,7 +6,7 @@ import React from 'react'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'per-page'
 
@@ -32,25 +32,20 @@ export const PerPage: React.FC<PerPageProps> = ({
 
   return (
     <div className={baseClass}>
+      <span className={`${baseClass}__label`}>{t('general:perPageLabel')}</span>
       <Popup
         button={
           <div className={`${baseClass}__base-button`}>
-            <span>{t('general:perPage', { limit: limitToUse })}</span>
-            &nbsp;
-            <ChevronIcon className={`${baseClass}__icon`} />
+            <span>{limitToUse}</span>
+            <ChevronIcon className={`${baseClass}__icon`} size={16} />
           </div>
         }
         horizontalAlign="right"
         render={({ close }) => (
-          <PopupList.ButtonGroup>
+          <PopupList.IconButtonGroup>
             {limits.map((limitNumber, i) => (
               <PopupList.Button
-                className={[
-                  `${baseClass}__button`,
-                  limitNumber === limitToUse && `${baseClass}__button-active`,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
+                active={limitNumber === limitToUse}
                 key={i}
                 onClick={() => {
                   close()
@@ -59,16 +54,10 @@ export const PerPage: React.FC<PerPageProps> = ({
                   }
                 }}
               >
-                {limitNumber === limitToUse && (
-                  <div className={`${baseClass}__chevron`}>
-                    <ChevronIcon direction="right" size={16} />
-                  </div>
-                )}
-                &nbsp;
-                <span>{limitNumber}</span>
+                {limitNumber}
               </PopupList.Button>
             ))}
-          </PopupList.ButtonGroup>
+          </PopupList.IconButtonGroup>
         )}
         size="small"
       />

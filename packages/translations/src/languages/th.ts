@@ -382,6 +382,7 @@ export const thTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'ลบถาวร',
     permanentlyDeletedCountSuccessfully: 'ลบ {{label}} {{count}} รายการอย่างถาวรสำเร็จแล้ว',
     perPage: 'จำนวนต่อหน้า: {{limit}}',
+    perPageLabel: 'ต่อหน้า:',
     previous: 'ก่อนหน้านี้',
     reindex: 'จัดทำดัชนีใหม่',
     reindexingAll: 'กำลังทำการจัดทำดัชนีใหม่ทั้งหมดใน {{collections}}.',

@@ -10,6 +10,8 @@
     flex-grow: 1;
     position: relative;
     background-color: var(--theme-bg);
+    display: flex;
+    flex-direction: column;
 
     &:before {
       content: '';

@@ -387,6 +387,7 @@ export const etTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Püsivalt Kustuta',
     permanentlyDeletedCountSuccessfully: '{{count}} {{label}} edukalt ja lõplikult kustutatud.',
     perPage: 'Lehel: {{limit}}',
+    perPageLabel: 'Lehekülje kohta:',
     previous: 'Eelmine',
     reindex: 'Indekseeri uuesti',
     reindexingAll: 'Indekseerin uuesti kõik {{collections}}.',

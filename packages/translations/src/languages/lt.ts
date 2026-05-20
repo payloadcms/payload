@@ -392,6 +392,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Visam laikui pašalinti',
     permanentlyDeletedCountSuccessfully: 'Sėkmingai visam laikui ištrinta {{count}} {{label}}.',
     perPage: 'Puslapyje: {{limit}}',
+    perPageLabel: 'Puslapyje:',
     previous: 'Ankstesnis',
     reindex: 'Perindeksuoti',
     reindexingAll: 'Perindeksuojamos visos {{collections}}.',

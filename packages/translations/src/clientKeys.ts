@@ -325,6 +325,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:permanentlyDelete',
   'general:permanentlyDeletedCountSuccessfully',
   'general:perPage',
+  'general:perPageLabel',
   'general:previous',
   'general:reindex',
   'general:reindexingAll',

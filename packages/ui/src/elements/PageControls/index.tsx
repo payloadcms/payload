@@ -10,7 +10,7 @@ import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
 import { useListQuery } from '../../providers/ListQuery/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'page-controls'
 
@@ -48,7 +48,7 @@ export const PageControlsComponent: React.FC<{
         totalPages={data.totalPages}
       />
       {data.totalDocs > 0 && (
-        <Fragment>
+        <div className={`${baseClass}__per-page-container`}>
           <div className={`${baseClass}__page-info`}>
             {data.page * data.limit - (data.limit - 1)}-
             {data.totalPages > 1 && data.totalPages !== data.page
@@ -63,7 +63,7 @@ export const PageControlsComponent: React.FC<{
             resetPage={data.totalDocs <= data.pagingCounter}
           />
           {AfterPageControls}
-        </Fragment>
+        </div>
       )}
     </div>
   )
