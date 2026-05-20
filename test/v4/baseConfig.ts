@@ -80,7 +80,23 @@ export const collections: CollectionConfig[] = [
       useAsTitle: 'email',
     },
     auth: true,
-    fields: [],
+    access: {
+      admin: ({ req: { user } }) => {
+        return Boolean(user?.roles?.includes('admin'))
+      },
+    },
+    fields: [
+      {
+        name: 'roles',
+        type: 'select',
+        hasMany: true,
+        defaultValue: ['user'],
+        options: [
+          { label: 'Admin', value: 'admin' },
+          { label: 'User', value: 'user' },
+        ],
+      },
+    ],
   },
   ArrayFields,
   BlocksFields,
@@ -157,6 +173,16 @@ export const baseConfig: Partial<Config> = {
       data: {
         email: devUser.email,
         password: devUser.password,
+        roles: ['admin'],
+      },
+    })
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: 'user@payloadcms.com',
+        password: 'test',
+        roles: ['user'],
       },
     })
 
