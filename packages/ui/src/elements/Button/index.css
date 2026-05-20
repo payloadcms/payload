@@ -208,6 +208,10 @@
     }
   }
 
+  .btn--icon-only {
+    padding-inline: var(--spacer-1);
+  }
+
   /* Round (square icon button) */
 
   .btn--round {

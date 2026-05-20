@@ -19,6 +19,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:confirmGeneration',
   'authentication:confirmPassword',
   'authentication:createFirstUser',
+  'authentication:createUser',
   'authentication:emailNotValid',
   'authentication:usernameNotValid',
   'authentication:emailOrUsername',

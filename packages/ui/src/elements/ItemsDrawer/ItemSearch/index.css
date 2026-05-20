@@ -8,6 +8,7 @@
     z-index: 1;
     padding: var(--spacer-2-5);
     gap: var(--spacer-2);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
 
     .icon--search {
       flex-shrink: 0;
@@ -42,7 +43,7 @@
 
     &:focus,
     &:focus-within {
-      border-color: var(--color-border-selected);
+      border-color: var(--accessibility-focus-color);
       outline: 0;
     }
 
