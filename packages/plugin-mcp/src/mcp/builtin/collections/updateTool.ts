@@ -1,3 +1,4 @@
+import { fromJsonSchema } from '@modelcontextprotocol/server'
 import type { SelectType } from 'payload'
 import { z } from 'zod'
 
@@ -17,11 +18,10 @@ export const updateCollectionTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
   input: ({ collectionSchema }) =>
     z.object({
-      data: z
-        .fromJSONSchema(
-          prepareCollectionSchema(collectionSchema) as unknown as z.core.JSONSchema.JSONSchema,
-        )
-        .describe('The fields to update'),
+      data: fromJsonSchema({
+        ...prepareCollectionSchema(collectionSchema),
+        description: 'The fields to update',
+      }),
       depth: z
         .number()
         .describe('How many levels deep to populate relationships')

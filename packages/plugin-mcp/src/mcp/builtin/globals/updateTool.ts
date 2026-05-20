@@ -1,3 +1,4 @@
+import { fromJsonSchema } from '@modelcontextprotocol/server'
 import type { SelectType } from 'payload'
 import { z } from 'zod'
 
@@ -16,11 +17,10 @@ export const updateGlobalTool = defineGlobalTool({
   description: DEFAULT_DESCRIPTION,
   input: ({ globalSchema }) =>
     z.object({
-      data: z
-        .fromJSONSchema(
-          prepareCollectionSchema(globalSchema) as unknown as z.core.JSONSchema.JSONSchema,
-        )
-        .describe('The fields to update'),
+      data: fromJsonSchema({
+        ...prepareCollectionSchema(globalSchema),
+        description: 'The fields to update',
+      }),
       depth: z
         .number()
         .describe('Optional: Depth of relationships to populate')
