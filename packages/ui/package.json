@@ -226,9 +226,9 @@
       "types": "./src/views/Dashboard/Default/ModularDashboard/utils/collisionDetection.ts",
       "default": "./src/views/Dashboard/Default/ModularDashboard/utils/collisionDetection.ts"
     },
-    "./views/Login/index.scss": {
-      "import": "./src/views/Login/index.scss",
-      "default": "./src/views/Login/index.scss"
+    "./views/Login/index.css": {
+      "import": "./src/views/Login/index.css",
+      "default": "./src/views/Login/index.css"
     },
     "./views/Login/getLoginViewData": {
       "import": "./src/views/Login/getLoginViewData.ts",
@@ -240,9 +240,9 @@
       "types": "./src/views/Login/LoginForm/index.tsx",
       "default": "./src/views/Login/LoginForm/index.tsx"
     },
-    "./views/Login/LoginForm/index.scss": {
-      "import": "./src/views/Login/LoginForm/index.scss",
-      "default": "./src/views/Login/LoginForm/index.scss"
+    "./views/Login/LoginForm/index.css": {
+      "import": "./src/views/Login/LoginForm/index.css",
+      "default": "./src/views/Login/LoginForm/index.css"
     },
     "./views/Login/LoginField": {
       "import": "./src/views/Login/LoginField/index.tsx",
@@ -288,9 +288,9 @@
       "types": "./src/views/CreateFirstUser/index.client.tsx",
       "default": "./src/views/CreateFirstUser/index.client.tsx"
     },
-    "./views/CreateFirstUser/index.scss": {
-      "import": "./src/views/CreateFirstUser/index.scss",
-      "default": "./src/views/CreateFirstUser/index.scss"
+    "./views/CreateFirstUser/index.css": {
+      "import": "./src/views/CreateFirstUser/index.css",
+      "default": "./src/views/CreateFirstUser/index.css"
     },
     "./views/Verify": {
       "import": "./src/views/Verify/index.tsx",
@@ -330,9 +330,9 @@
       "types": "./src/views/Unauthorized/index.tsx",
       "default": "./src/views/Unauthorized/index.tsx"
     },
-    "./views/Unauthorized/index.scss": {
-      "import": "./src/views/Unauthorized/index.scss",
-      "default": "./src/views/Unauthorized/index.scss"
+    "./views/Unauthorized/index.css": {
+      "import": "./src/views/Unauthorized/index.css",
+      "default": "./src/views/Unauthorized/index.css"
     },
     "./views/API": {
       "import": "./src/views/API/index.tsx",
@@ -1182,9 +1182,9 @@
         "types": "./dist/views/Dashboard/Default/ModularDashboard/utils/collisionDetection.d.ts",
         "default": "./dist/views/Dashboard/Default/ModularDashboard/utils/collisionDetection.js"
       },
-      "./views/Login/index.scss": {
-        "import": "./dist/views/Login/index.scss",
-        "default": "./dist/views/Login/index.scss"
+      "./views/Login/index.css": {
+        "import": "./dist/views/Login/index.css",
+        "default": "./dist/views/Login/index.css"
       },
       "./views/Login/getLoginViewData": {
         "import": "./dist/views/Login/getLoginViewData.js",
@@ -1196,9 +1196,9 @@
         "types": "./dist/views/Login/LoginForm/index.d.ts",
         "default": "./dist/views/Login/LoginForm/index.js"
       },
-      "./views/Login/LoginForm/index.scss": {
-        "import": "./dist/views/Login/LoginForm/index.scss",
-        "default": "./dist/views/Login/LoginForm/index.scss"
+      "./views/Login/LoginForm/index.css": {
+        "import": "./dist/views/Login/LoginForm/index.css",
+        "default": "./dist/views/Login/LoginForm/index.css"
       },
       "./views/Login/LoginField": {
         "import": "./dist/views/Login/LoginField/index.js",
@@ -1244,9 +1244,9 @@
         "types": "./dist/views/CreateFirstUser/index.client.d.ts",
         "default": "./dist/views/CreateFirstUser/index.client.js"
       },
-      "./views/CreateFirstUser/index.scss": {
-        "import": "./dist/views/CreateFirstUser/index.scss",
-        "default": "./dist/views/CreateFirstUser/index.scss"
+      "./views/CreateFirstUser/index.css": {
+        "import": "./dist/views/CreateFirstUser/index.css",
+        "default": "./dist/views/CreateFirstUser/index.css"
       },
       "./views/Verify": {
         "import": "./dist/views/Verify/index.js",
@@ -1286,9 +1286,9 @@
         "types": "./dist/views/Unauthorized/index.d.ts",
         "default": "./dist/views/Unauthorized/index.js"
       },
-      "./views/Unauthorized/index.scss": {
-        "import": "./dist/views/Unauthorized/index.scss",
-        "default": "./dist/views/Unauthorized/index.scss"
+      "./views/Unauthorized/index.css": {
+        "import": "./dist/views/Unauthorized/index.css",
+        "default": "./dist/views/Unauthorized/index.css"
       },
       "./views/API": {
         "import": "./dist/views/API/index.js",
