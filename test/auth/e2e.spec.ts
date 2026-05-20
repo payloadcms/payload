@@ -1,7 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { devUser } from 'credentials.js'
+import { devUser } from '../credentials.js'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'

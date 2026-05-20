@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
-import { exactText } from '__helpers/e2e/helpers.js'
-import { TEST_TIMEOUT_LONG } from 'playwright.config.js'
+import { exactText } from '../../__helpers/e2e/helpers.js'
+import { TEST_TIMEOUT_LONG } from '../../playwright.config.js'
 
 export async function selectPreset({ page, presetTitle }: { page: Page; presetTitle: string }) {
   // Click the preset dropdown to open the popup

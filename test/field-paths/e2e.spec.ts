@@ -1,11 +1,10 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import type { PayloadTestSDK } from '__helpers/shared/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
-import { navigateToDiffVersionView } from '__helpers/e2e/navigateToDiffVersionView.js'
+import { navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
 import * as path from 'path'
-import { wait } from 'payload/shared'
-import { fileURLToPath } from 'url'
++import { fileURLToPath } from 'url'
 
 import type { Config } from './payload-types.js'
 

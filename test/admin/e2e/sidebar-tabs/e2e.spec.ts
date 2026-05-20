@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { TEST_TIMEOUT_LONG } from 'playwright.config.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { fileURLToPath } from 'url'
 
 import type { Config } from '../../payload-types.js'
