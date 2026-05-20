@@ -1213,6 +1213,9 @@ importers:
       '@modelcontextprotocol/server':
         specifier: 2.0.0-alpha.2
         version: 2.0.0-alpha.2(@cfworker/json-schema@4.1.1)
+      zod:
+        specifier: ^4.0.0
+        version: 4.3.6
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*

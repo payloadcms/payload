@@ -1,101 +1,95 @@
 import type { SelectType } from 'payload'
+import { z } from 'zod'
 
-import type { GlobalTool, JsonSchemaType } from '../../../types.js'
-
+import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
 const DEFAULT_DESCRIPTION = 'Find a Payload global singleton configuration.'
 
-const inputSchema: JsonSchemaType = {
-  type: 'object',
-  properties: {
-    depth: {
-      type: 'integer',
-      default: 0,
-      description: 'Depth of population for relationships',
-      maximum: 10,
-      minimum: 0,
-    },
-    fallbackLocale: {
-      type: 'string',
-      description: 'Optional: fallback locale code to use when requested locale is not available',
-    },
-    locale: {
-      type: 'string',
-      description:
-        'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
-    },
-    select: {
-      type: 'string',
-      description:
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
-    },
-  },
-}
-
-export const findGlobalTool: GlobalTool = {
+export const findGlobalTool = defineGlobalTool({
   description: DEFAULT_DESCRIPTION,
-  handler: async ({ authorizedMCP, globalSlug, input, req }) => {
-    const payload = req.payload
-    const logger = getLogger({ payload })
+  input: z.object({
+    depth: z
+      .number()
+      .int()
+      .min(0)
+      .max(10)
+      .describe('Depth of population for relationships')
+      .optional()
+      .default(0),
+    fallbackLocale: z
+      .string()
+      .describe('Optional: fallback locale code to use when requested locale is not available')
+      .optional(),
+    locale: z
+      .string()
+      .describe(
+        'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
+      )
+      .optional(),
+    select: z
+      .string()
+      .describe(
+        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+      )
+      .optional(),
+  }),
+}).handler(async ({ authorizedMCP, globalSlug, input, req }) => {
+  const payload = req.payload
+  const logger = getLogger({ payload })
 
-    const depth = (input.depth as number | undefined) ?? 0
-    const locale = input.locale as string | undefined
-    const fallbackLocale = input.fallbackLocale as string | undefined
-    const select = input.select as string | undefined
+  const { depth, locale, fallbackLocale, select } = input
 
-    logger.info(
-      `Reading global: ${globalSlug}, depth: ${depth}${locale ? `, locale: ${locale}` : ''}`,
-    )
+  logger.info(
+    `Reading global: ${globalSlug}, depth: ${depth}${locale ? `, locale: ${locale}` : ''}`,
+  )
 
-    try {
-      const findOptions: Parameters<typeof payload.findGlobal>[0] = {
-        slug: globalSlug,
-        depth,
-        ...localAPIDefaults(authorizedMCP),
-      }
+  try {
+    const findOptions: Parameters<typeof payload.findGlobal>[0] = {
+      slug: globalSlug,
+      depth,
+      ...localAPIDefaults(authorizedMCP),
+    }
 
-      let selectClause: SelectType | undefined
-      if (select) {
-        try {
-          selectClause = JSON.parse(select) as SelectType
-        } catch {
-          logger.warn(`Invalid select clause JSON for global: ${select}`)
-          return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
-        }
-      }
-
-      if (locale) {
-        findOptions.locale = locale
-      }
-      if (fallbackLocale) {
-        findOptions.fallbackLocale = fallbackLocale
-      }
-      if (selectClause) {
-        findOptions.select = selectClause
-      }
-
-      const result = await payload.findGlobal(findOptions)
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Global "${globalSlug}":\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-          },
-        ],
-        doc: result as Record<string, unknown>,
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Error reading global ${globalSlug}: ${errorMessage}`)
-      return {
-        content: [
-          { type: 'text', text: `❌ **Error reading global "${globalSlug}":** ${errorMessage}` },
-        ],
+    let selectClause: SelectType | undefined
+    if (select) {
+      try {
+        selectClause = JSON.parse(select) as SelectType
+      } catch {
+        logger.warn(`Invalid select clause JSON for global: ${select}`)
+        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
       }
     }
-  },
-  input: inputSchema,
-}
+
+    if (locale) {
+      findOptions.locale = locale
+    }
+    if (fallbackLocale) {
+      findOptions.fallbackLocale = fallbackLocale
+    }
+    if (selectClause) {
+      findOptions.select = selectClause
+    }
+
+    const result = await payload.findGlobal(findOptions)
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Global "${globalSlug}":\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+        },
+      ],
+      doc: result as Record<string, unknown>,
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    logger.error(`Error reading global ${globalSlug}: ${errorMessage}`)
+    return {
+      content: [
+        { type: 'text', text: `❌ **Error reading global "${globalSlug}":** ${errorMessage}` },
+      ],
+    }
+  }
+})

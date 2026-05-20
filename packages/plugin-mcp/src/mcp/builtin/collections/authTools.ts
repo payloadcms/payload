@@ -1,5 +1,8 @@
-import type { CollectionTool, JsonSchemaType, MCPToolResponse } from '../../../types.js'
+import { z } from 'zod'
 
+import type { MCPToolResponse } from '../../../types.js'
+
+import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 
 /**
@@ -13,87 +16,7 @@ import { getLogger } from '../../../utils/getLogger.js'
  * users collection so all auth-shaped tools live in one place.
  */
 
-const authInput: JsonSchemaType = {
-  type: 'object',
-  properties: {
-    headers: {
-      type: 'string',
-      description:
-        'Optional JSON string containing custom headers to send with the authentication request',
-    },
-  },
-}
-
-const forgotPasswordInput: JsonSchemaType = {
-  type: 'object',
-  properties: {
-    disableEmail: {
-      type: 'boolean',
-      default: false,
-      description: 'Whether to disable sending the email (for testing)',
-    },
-    email: {
-      type: 'string',
-      description: 'The user email address',
-      format: 'email',
-    },
-  },
-  required: ['email'],
-}
-
-const loginInput: JsonSchemaType = {
-  type: 'object',
-  properties: {
-    depth: {
-      type: 'integer',
-      default: 0,
-      description: 'Depth of population for relationships',
-      maximum: 10,
-      minimum: 0,
-    },
-    email: {
-      type: 'string',
-      description: 'The user email address',
-      format: 'email',
-    },
-    password: { type: 'string', description: 'The user password' },
-    showHiddenFields: {
-      type: 'boolean',
-      default: false,
-      description: 'Whether to show hidden fields in the response',
-    },
-  },
-  required: ['email', 'password'],
-}
-
-const resetPasswordInput: JsonSchemaType = {
-  type: 'object',
-  properties: {
-    password: { type: 'string', description: 'The new password for the user' },
-    token: { type: 'string', description: 'The password reset token sent to the user email' },
-  },
-  required: ['password', 'token'],
-}
-
-const unlockInput: JsonSchemaType = {
-  type: 'object',
-  properties: {
-    email: {
-      type: 'string',
-      description: 'The user email address',
-      format: 'email',
-    },
-  },
-  required: ['email'],
-}
-
-const verifyInput: JsonSchemaType = {
-  type: 'object',
-  properties: {
-    token: { type: 'string', description: 'The verification token sent to the user email' },
-  },
-  required: ['token'],
-}
+const emailSchema = z.string().email().describe('The user email address')
 
 const wrapError =
   (name: string) =>
@@ -108,181 +31,203 @@ const wrapError =
     }
   }
 
-export const authCollectionTool: CollectionTool = {
+export const authCollectionTool = defineCollectionTool({
   description: 'Checks authentication status for the current user.',
-  handler: async ({ collectionSlug, input, req }) => {
-    const logger = getLogger({ payload: req.payload })
-    try {
-      const headersInput = input.headers as string | undefined
-      let authHeaders = new Headers()
-      if (headersInput) {
-        try {
-          authHeaders = new Headers(JSON.parse(headersInput) as Record<string, string>)
-        } catch {
-          logger.warn(`Invalid headers JSON for auth: ${headersInput}, using empty headers`)
-        }
+  input: z.object({
+    headers: z
+      .string()
+      .describe(
+        'Optional JSON string containing custom headers to send with the authentication request',
+      )
+      .optional(),
+  }),
+}).handler(async ({ collectionSlug, input, req }) => {
+  const logger = getLogger({ payload: req.payload })
+  try {
+    let authHeaders = new Headers()
+    if (input.headers) {
+      try {
+        authHeaders = new Headers(JSON.parse(input.headers) as Record<string, string>)
+      } catch {
+        logger.warn(`Invalid headers JSON for auth: ${input.headers}, using empty headers`)
       }
-      const result = await req.payload.auth({ headers: authHeaders })
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `# Authentication Status\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-          },
-        ],
-        doc: result as unknown as Record<string, unknown>,
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Error in auth tool on ${collectionSlug}: ${errorMessage}`)
-      return wrapError('auth')({ collectionSlug, message: errorMessage })
     }
-  },
-  input: authInput,
-}
+    const result = await req.payload.auth({ headers: authHeaders })
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `# Authentication Status\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+        },
+      ],
+      doc: result as unknown as Record<string, unknown>,
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    logger.error(`Error in auth tool on ${collectionSlug}: ${errorMessage}`)
+    return wrapError('auth')({ collectionSlug, message: errorMessage })
+  }
+})
 
-export const forgotPasswordCollectionTool: CollectionTool = {
+export const forgotPasswordCollectionTool = defineCollectionTool({
   description: 'Sends a password reset email to a user.',
-  handler: async ({ collectionSlug, input, req }) => {
-    const logger = getLogger({ payload: req.payload })
-    try {
-      const result = await req.payload.forgotPassword({
-        collection: collectionSlug,
-        data: { email: input.email as string },
-        disableEmail: (input.disableEmail as boolean | undefined) ?? false,
-      })
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `# Forgot Password Email Sent\n\n**Collection:** ${collectionSlug}\n**Email:** ${String(input.email)}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-          },
-        ],
-        doc: { result } as Record<string, unknown>,
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Error in forgotPassword tool on ${collectionSlug}: ${errorMessage}`)
-      return wrapError('forgotPassword')({ collectionSlug, message: errorMessage })
+  input: z.object({
+    disableEmail: z
+      .boolean()
+      .describe('Whether to disable sending the email (for testing)')
+      .optional()
+      .default(false),
+    email: emailSchema,
+  }),
+}).handler(async ({ collectionSlug, input, req }) => {
+  const logger = getLogger({ payload: req.payload })
+  try {
+    const result = await req.payload.forgotPassword({
+      collection: collectionSlug,
+      data: { email: input.email },
+      disableEmail: input.disableEmail,
+    })
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `# Forgot Password Email Sent\n\n**Collection:** ${collectionSlug}\n**Email:** ${input.email}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+        },
+      ],
+      doc: { result } as Record<string, unknown>,
     }
-  },
-  input: forgotPasswordInput,
-}
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    logger.error(`Error in forgotPassword tool on ${collectionSlug}: ${errorMessage}`)
+    return wrapError('forgotPassword')({ collectionSlug, message: errorMessage })
+  }
+})
 
-export const loginCollectionTool: CollectionTool = {
+export const loginCollectionTool = defineCollectionTool({
   description: 'Authenticates a user with email and password.',
-  handler: async ({ collectionSlug, input, req }) => {
-    const logger = getLogger({ payload: req.payload })
-    try {
-      const result = await req.payload.login({
-        collection: collectionSlug,
-        data: {
-          email: input.email as string,
-          password: input.password as string,
+  input: z.object({
+    depth: z
+      .number()
+      .int()
+      .min(0)
+      .max(10)
+      .describe('Depth of population for relationships')
+      .optional()
+      .default(0),
+    email: emailSchema,
+    password: z.string().describe('The user password'),
+    showHiddenFields: z
+      .boolean()
+      .describe('Whether to show hidden fields in the response')
+      .optional()
+      .default(false),
+  }),
+}).handler(async ({ collectionSlug, input, req }) => {
+  const logger = getLogger({ payload: req.payload })
+  try {
+    const result = await req.payload.login({
+      collection: collectionSlug,
+      data: { email: input.email, password: input.password },
+      depth: input.depth,
+      showHiddenFields: input.showHiddenFields,
+    })
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `# Login Successful\n\n**User:** ${input.email}\n**Collection:** ${collectionSlug}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
         },
-        depth: (input.depth as number | undefined) ?? 0,
-        showHiddenFields: (input.showHiddenFields as boolean | undefined) ?? false,
-      })
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `# Login Successful\n\n**User:** ${String(input.email)}\n**Collection:** ${collectionSlug}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-          },
-        ],
-        doc: result as unknown as Record<string, unknown>,
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Error in login tool on ${collectionSlug}: ${errorMessage}`)
-      return wrapError('login')({ collectionSlug, message: errorMessage })
+      ],
+      doc: result as unknown as Record<string, unknown>,
     }
-  },
-  input: loginInput,
-}
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    logger.error(`Error in login tool on ${collectionSlug}: ${errorMessage}`)
+    return wrapError('login')({ collectionSlug, message: errorMessage })
+  }
+})
 
-export const resetPasswordCollectionTool: CollectionTool = {
+export const resetPasswordCollectionTool = defineCollectionTool({
   description: 'Resets a user password with a reset token.',
-  handler: async ({ collectionSlug, input, req }) => {
-    const logger = getLogger({ payload: req.payload })
-    try {
-      const result = await req.payload.resetPassword({
-        collection: collectionSlug,
-        data: {
-          password: input.password as string,
-          token: input.token as string,
+  input: z.object({
+    password: z.string().describe('The new password for the user'),
+    token: z.string().describe('The password reset token sent to the user email'),
+  }),
+}).handler(async ({ collectionSlug, input, req }) => {
+  const logger = getLogger({ payload: req.payload })
+  try {
+    const result = await req.payload.resetPassword({
+      collection: collectionSlug,
+      data: { password: input.password, token: input.token },
+      overrideAccess: true,
+    })
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `# Password Reset Successful\n\n**Collection:** ${collectionSlug}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
         },
-        overrideAccess: true,
-      })
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `# Password Reset Successful\n\n**Collection:** ${collectionSlug}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-          },
-        ],
-        doc: result as unknown as Record<string, unknown>,
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Error in resetPassword tool on ${collectionSlug}: ${errorMessage}`)
-      return wrapError('resetPassword')({ collectionSlug, message: errorMessage })
+      ],
+      doc: result as unknown as Record<string, unknown>,
     }
-  },
-  input: resetPasswordInput,
-}
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    logger.error(`Error in resetPassword tool on ${collectionSlug}: ${errorMessage}`)
+    return wrapError('resetPassword')({ collectionSlug, message: errorMessage })
+  }
+})
 
-export const unlockCollectionTool: CollectionTool = {
+export const unlockCollectionTool = defineCollectionTool({
   description: 'Unlocks a user account that has been locked due to failed login attempts.',
-  handler: async ({ collectionSlug, input, req }) => {
-    const logger = getLogger({ payload: req.payload })
-    try {
-      const result = await req.payload.unlock({
-        collection: collectionSlug,
-        data: { email: input.email as string },
-        overrideAccess: true,
-      })
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `# Account Unlocked\n\n**Collection:** ${collectionSlug}\n**Email:** ${String(input.email)}\n**Result:** ${result ? 'Success' : 'Failed'}`,
-          },
-        ],
-        doc: { result } as Record<string, unknown>,
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Error in unlock tool on ${collectionSlug}: ${errorMessage}`)
-      return wrapError('unlock')({ collectionSlug, message: errorMessage })
+  input: z.object({ email: emailSchema }),
+}).handler(async ({ collectionSlug, input, req }) => {
+  const logger = getLogger({ payload: req.payload })
+  try {
+    const result = await req.payload.unlock({
+      collection: collectionSlug,
+      data: { email: input.email },
+      overrideAccess: true,
+    })
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `# Account Unlocked\n\n**Collection:** ${collectionSlug}\n**Email:** ${input.email}\n**Result:** ${result ? 'Success' : 'Failed'}`,
+        },
+      ],
+      doc: { result } as Record<string, unknown>,
     }
-  },
-  input: unlockInput,
-}
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    logger.error(`Error in unlock tool on ${collectionSlug}: ${errorMessage}`)
+    return wrapError('unlock')({ collectionSlug, message: errorMessage })
+  }
+})
 
-export const verifyCollectionTool: CollectionTool = {
+export const verifyCollectionTool = defineCollectionTool({
   description: 'Verifies a user email with a verification token.',
-  handler: async ({ collectionSlug, input, req }) => {
-    const logger = getLogger({ payload: req.payload })
-    try {
-      const result = await req.payload.verifyEmail({
-        collection: collectionSlug,
-        token: input.token as string,
-      })
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `# Email Verification Successful\n\n**Collection:** ${collectionSlug}\n**Result:** ${result ? 'Success' : 'Failed'}`,
-          },
-        ],
-        doc: { result } as Record<string, unknown>,
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`Error in verify tool on ${collectionSlug}: ${errorMessage}`)
-      return wrapError('verify')({ collectionSlug, message: errorMessage })
+  input: z.object({
+    token: z.string().describe('The verification token sent to the user email'),
+  }),
+}).handler(async ({ collectionSlug, input, req }) => {
+  const logger = getLogger({ payload: req.payload })
+  try {
+    const result = await req.payload.verifyEmail({
+      collection: collectionSlug,
+      token: input.token,
+    })
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `# Email Verification Successful\n\n**Collection:** ${collectionSlug}\n**Result:** ${result ? 'Success' : 'Failed'}`,
+        },
+      ],
+      doc: { result } as Record<string, unknown>,
     }
-  },
-  input: verifyInput,
-}
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    logger.error(`Error in verify tool on ${collectionSlug}: ${errorMessage}`)
+    return wrapError('verify')({ collectionSlug, message: errorMessage })
+  }
+})

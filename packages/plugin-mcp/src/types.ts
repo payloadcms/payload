@@ -105,26 +105,23 @@ export type Tool<
   overrideResponse?: MCPResponseOverride
 }
 
-export type CollectionToolInput =
-  | ((args: { collectionSchema: JsonSchemaType }) => ToolInputSchema)
-  | ToolInputSchema
-
+/**
+ * `TSchema` is the schema itself (Standard Schema, raw JSON Schema, or undefined).
+ * The function-form variant of `input` carries a concrete `{ collectionSchema: JsonSchemaType }`
+ * parameter type so callers can write `({ collectionSchema }) => …` without annotating it.
+ */
 export type CollectionTool<
-  TSchema extends CollectionToolInput | undefined = CollectionToolInput | undefined,
+  TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
 > = {
   handler: (args: CollectionToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
-  input?: TSchema
+  input?: ((args: { collectionSchema: JsonSchemaType }) => TSchema) | TSchema
 } & Pick<Tool, 'description' | 'overrideResponse'>
 
-export type GlobalToolInput =
-  | ((args: { globalSchema: JsonSchemaType }) => ToolInputSchema)
-  | ToolInputSchema
-
 export type GlobalTool<
-  TSchema extends GlobalToolInput | undefined = GlobalToolInput | undefined,
+  TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
 > = {
   handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
-  input?: TSchema
+  input?: ((args: { globalSchema: JsonSchemaType }) => TSchema) | TSchema
 } & Pick<Tool, 'description' | 'overrideResponse'>
 
 /**
