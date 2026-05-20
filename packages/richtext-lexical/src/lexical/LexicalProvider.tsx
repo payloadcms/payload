@@ -71,7 +71,8 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
 
   const editorContainerRef = React.useRef<HTMLDivElement>(null)
 
-  // useMemo for the initialConfig that depends on readOnly and value
+  // useMemo for the initialConfig. `readOnly` and `value` are intentionally excluded from deps
+  // to avoid full remounts on every save (which would destroy cursor position and undo history).
   const initialConfig = useMemo<InitialConfigType>(() => {
     if (value && typeof value !== 'object') {
       throw new Error(
@@ -112,18 +113,35 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     // cause the editor to lose focus.
   }, [editorConfig, views, currentView])
 
-  if (!initialConfig) {
+  // Track whether the editor has ever been editable. Once it transitions to editable,
+  // we never remount due to transient readOnly changes (e.g. during form save processing).
+  const hasBeenEditable = React.useRef(readOnly !== true)
+  if (readOnly !== true) {
+    hasBeenEditable.current = true
+  }
+
+  // Compute the effective editable state for the config.
+  // Override the memoized config's editable value to reflect the current readOnly prop.
+  const effectiveConfig = useMemo<InitialConfigType>(
+    () => ({
+      ...initialConfig,
+      editable: readOnly !== true,
+    }),
+
+    [initialConfig, readOnly],
+  )
+
+  if (!effectiveConfig) {
     return <p>Loading...</p>
   }
 
-  // We need to add initialConfig.editable to the key to force a re-render when the readOnly prop changes.
-  // Without it, there were cases where lexical editors inside drawers turn readOnly initially - a few miliseconds later they turn editable, but the editor does not re-render and stays readOnly.
-  // We also add currentView to force re-render when the view changes.
+  // Use `hasBeenEditable` to build the key: only force a remount when the editor has NEVER
+  // been editable and transitions to editable for the first time. After that, LexicalComposer
+  // stays mounted (preserving cursor/focus/undo) and we rely on Lexical's internal
+  // `editor.setEditable()` for transient readOnly changes during saves.
+  const editableKey = hasBeenEditable.current ? 'editable' : 'readonly'
   return (
-    <LexicalComposer
-      initialConfig={initialConfig}
-      key={composerKey + initialConfig.editable + currentView}
-    >
+    <LexicalComposer initialConfig={effectiveConfig} key={composerKey + editableKey + currentView}>
       <EditorConfigProvider
         editorConfig={editorConfig}
         editorContainerRef={editorContainerRef}

@@ -1,0 +1,128 @@
+'use client'
+import type { ClientWidget } from 'payload'
+
+import { useEffect, useId } from 'react'
+
+import { Button } from '../../../../elements/Button/index.js'
+import { DrawerToggler } from '../../../../elements/Drawer/index.js'
+import { ItemsDrawer } from '../../../../elements/ItemsDrawer/index.js'
+import { type Option, ReactSelect } from '../../../../elements/ReactSelect/index.js'
+import { useStepNav } from '../../../../elements/StepNav/index.js'
+import { useTranslation } from '../../../../providers/Translation/index.js'
+
+export function DashboardStepNav({
+  addWidget,
+  cancel,
+  isEditing,
+  resetLayout,
+  saveLayout,
+  setIsEditing,
+  widgets,
+}: {
+  addWidget: (slug: string) => void
+  cancel: () => void
+  isEditing: boolean
+  resetLayout: () => Promise<void>
+  saveLayout: () => Promise<void>
+  setIsEditing: (isEditing: boolean) => void
+  widgets: ClientWidget[]
+}) {
+  const { t } = useTranslation()
+  const { setStepNav } = useStepNav()
+  const uuid = useId()
+  const drawerSlug = `widgets-drawer-${uuid}`
+
+  useEffect(() => {
+    setStepNav([
+      {
+        label: (
+          <DashboardBreadcrumbDropdown
+            isEditing={isEditing}
+            onCancel={cancel}
+            onEditClick={() => setIsEditing(true)}
+            onResetLayout={resetLayout}
+            onSaveChanges={saveLayout}
+            widgetsDrawerSlug={drawerSlug}
+          />
+        ),
+      },
+    ])
+  }, [isEditing, drawerSlug, cancel, resetLayout, saveLayout, setIsEditing, setStepNav])
+
+  return (
+    <>
+      {isEditing && (
+        <ItemsDrawer
+          drawerSlug={drawerSlug}
+          items={widgets}
+          onItemClick={(widget) => addWidget(widget.slug)}
+          searchPlaceholder={t('dashboard:searchWidgets')}
+          title={t('dashboard:addWidget')}
+        />
+      )}
+    </>
+  )
+}
+
+export function DashboardBreadcrumbDropdown(props: {
+  isEditing: boolean
+  onCancel: () => void
+  onEditClick: () => void
+  onResetLayout: () => void
+  onSaveChanges: () => void
+  widgetsDrawerSlug: string
+}) {
+  const { isEditing, onCancel, onEditClick, onResetLayout, onSaveChanges, widgetsDrawerSlug } =
+    props
+  const { t } = useTranslation()
+
+  if (isEditing) {
+    return (
+      <div className="dashboard-breadcrumb-dropdown__editing">
+        <span>{t('dashboard:editingDashboard')}</span>
+        <div className="dashboard-breadcrumb-dropdown__actions">
+          <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
+            <Button buttonStyle="pill" el="span" size="medium">
+              {t('dashboard:addButton')}
+            </Button>
+          </DrawerToggler>
+          <Button buttonStyle="pill" onClick={onSaveChanges} size="medium">
+            {t('fields:saveChanges')}
+          </Button>
+          <Button buttonStyle="pill" onClick={onCancel} size="medium">
+            {t('general:cancel')}
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  const options = [
+    { label: t('dashboard:editDashboard'), value: 'edit' },
+    { label: t('dashboard:resetLayout'), value: 'reset' },
+  ]
+
+  const handleChange = (selectedOption: Option | Option[]) => {
+    // Since isMulti is false, we expect a single Option
+    const option = Array.isArray(selectedOption) ? selectedOption[0] : selectedOption
+
+    if (option?.value === 'edit') {
+      onEditClick()
+    } else if (option?.value === 'reset') {
+      onResetLayout()
+    }
+  }
+
+  return (
+    <ReactSelect
+      className="dashboard-breadcrumb-select"
+      isClearable={false}
+      isSearchable={false}
+      menuIsOpen={undefined} // Let ReactSelect handle open/close
+      onChange={handleChange}
+      options={options}
+      placeholder={t('general:dashboard')}
+      value={{ label: t('general:dashboard'), value: 'dashboard' }}
+    />
+  )
+}

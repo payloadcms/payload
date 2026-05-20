@@ -191,11 +191,11 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient = clientSchemaMap?.[
+  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
     componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient
+  ]?.[0] as BlocksFieldClient | undefined
 
-  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
+  const clientBlock: ClientBlock | undefined = blocksField?.blockReferences
     ? typeof blocksField?.blockReferences?.[0] === 'string'
       ? config.blocksMap[blocksField?.blockReferences?.[0]]
       : blocksField?.blockReferences?.[0]
