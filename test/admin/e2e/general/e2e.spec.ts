@@ -949,7 +949,7 @@ describe('General', () => {
       const options = page.locator('.rs__option')
       await options.locator('text=Español').click()
 
-      await expect(page.locator('.step-nav__home-label')).toHaveText('Panel de Control')
+      await expect(page.locator('.step-nav__first')).toHaveText('Panel de Control')
 
       await field.click()
       await options.locator('text=English').click()
@@ -959,7 +959,7 @@ describe('General', () => {
 
     test('should allow custom translation', async () => {
       await page.goto(postsUrl.account)
-      await expect(page.locator('.step-nav__home-label')).toHaveText('Home')
+      await expect(page.locator('.step-nav__first')).toHaveText('Home')
     })
 
     test('should allow custom translation of locale labels', async () => {
@@ -1085,9 +1085,7 @@ describe('General', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page
-        .locator('#leave-without-saving .alert-modal__controls .btn--style-primary')
-        .click()
+      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
 
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)

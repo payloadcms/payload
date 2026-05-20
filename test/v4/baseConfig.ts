@@ -315,34 +315,21 @@ export const baseConfig: Partial<Config> = {
       data: { name: 'Design' },
     })
 
-    // Seed search-bar-test collection
-    const searchBarTestItems = [
-      { title: 'Welcome Post', description: 'First post', category: 'blog', status: 'published' },
-      {
-        title: 'API Documentation',
-        description: 'API docs',
-        category: 'docs',
-        status: 'published',
-      },
-      {
-        title: 'Tutorial Draft',
-        description: 'WIP tutorial',
-        category: 'tutorial',
-        status: 'draft',
-      },
-      {
-        title: 'Breaking News',
-        description: 'Important news',
-        category: 'news',
-        status: 'published',
-      },
-      { title: 'Old Announcement', description: 'Archived', category: 'news', status: 'archived' },
-    ]
+    // Seed search-bar-test collection with 300 items for pagination testing
+    const categories = ['news', 'blog', 'tutorial', 'docs']
+    const statuses = ['draft', 'published', 'archived']
 
-    for (const item of searchBarTestItems) {
+    for (let i = 1; i <= 300; i++) {
+      const index = i.toString().padStart(3, '0')
       await payload.create({
         collection: 'search-bar-test',
-        data: item,
+        data: {
+          title: `Document ${index}`,
+          description: `Description for document ${index}`,
+          category: categories[i % categories.length],
+          status: statuses[i % statuses.length],
+          priority: i,
+        },
       })
     }
 
