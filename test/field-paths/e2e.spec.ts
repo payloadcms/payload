@@ -1,11 +1,10 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
-import { navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
 import * as path from 'path'
-+import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
@@ -13,6 +12,7 @@ import {
   initPageConsoleErrorCatch,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
+import { navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
