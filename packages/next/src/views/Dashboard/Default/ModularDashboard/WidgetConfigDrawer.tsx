@@ -6,7 +6,6 @@ import {
   Drawer,
   DrawerContentContainer,
   Form,
-  FormSubmit,
   OperationProvider,
   RenderFields,
   ShimmerEffect,
@@ -54,6 +53,17 @@ export function WidgetConfigDrawer({
     [widget.label, widget.slug],
   )
   const fields = useMemo(() => widget.fields ?? [], [widget.fields])
+
+  const headerActions = useMemo(
+    () => [
+      {
+        label: t('general:save'),
+        onClick: () => document.getElementById(drawerSlug)?.querySelector('form')?.requestSubmit(),
+        style: 'primary' as const,
+      },
+    ],
+    [drawerSlug, t],
+  )
 
   useEffect(() => {
     if (!isOpen || fields.length === 0) {
@@ -127,7 +137,11 @@ export function WidgetConfigDrawer({
   }, [])
 
   return (
-    <Drawer slug={drawerSlug} title={`${t('general:edit')} ${widgetLabel}`}>
+    <Drawer
+      headerActions={headerActions}
+      slug={drawerSlug}
+      title={`${t('general:edit')} ${widgetLabel}`}
+    >
       {initialState === false ? (
         <ShimmerEffect height="250px" />
       ) : (
@@ -152,7 +166,6 @@ export function WidgetConfigDrawer({
                 permissions={true}
                 readOnly={false}
               />
-              <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
             </Form>
           </OperationProvider>
         </DrawerContentContainer>
