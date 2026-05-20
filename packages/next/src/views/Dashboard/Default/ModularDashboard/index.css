@@ -1,4 +1,9 @@
 @layer payload-default {
+  .modular-dashboard {
+    margin: calc(var(--spacer-2-5) / -2);
+    width: calc(100% + var(--spacer-2-5));
+  }
+
   .modular-dashboard .widget {
     padding: calc(var(--spacer-2-5) / 2);
   }
