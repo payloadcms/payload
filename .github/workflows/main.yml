@@ -502,7 +502,6 @@ jobs:
       contents: read
     services:
       postgres:
-        # This backs only the ephemeral Content API service, which is Figma-hosted and uses PG15+ features.
         image: postgres:15
         env:
           POSTGRES_DB: figma_content_api
