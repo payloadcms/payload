@@ -1,31 +1,40 @@
 import type { Page } from '@playwright/test'
 
+const HIDE_DEV_TOOLS_SCRIPT = `
+  // Inject CSS to hide Next.js dev tools indicator
+  function injectHideStyles() {
+    const style = document.createElement('style');
+    style.id = 'hide-nextjs-devtools';
+    style.textContent = \`
+      [data-nextjs-dialog-overlay],
+      [data-nextjs-toast],
+      #__next-build-indicator,
+      #nextjs-dev-tools-menu,
+      .dev-tools-indicator,
+      [class*="dev-tools-indicator"],
+      button#next-logo,
+      nextjs-portal {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+    \`;
+    (document.head || document.documentElement).appendChild(style);
+  }
+  
+  // Run when DOM is ready
+  if (document.head || document.documentElement) {
+    injectHideStyles();
+  } else {
+    document.addEventListener('DOMContentLoaded', injectHideStyles);
+  }
+`
+
 /**
- * Hides the Next.js dev tools indicator by clicking Hide in preferences.
- * Use this in test suites where the indicator interferes with clicks.
+ * Sets up automatic hiding of Next.js dev tools for all navigations.
+ * Call this once per page/test context (e.g., in beforeEach or test setup).
+ * Uses addInitScript so the CSS is injected before any page scripts run.
  */
 export const hideNextDevTools = async (page: Page): Promise<void> => {
-  const devToolsButton = page.locator('#next-logo')
-
-  // Only proceed if the dev tools button exists and is visible
-  if ((await devToolsButton.count()) === 0 || !(await devToolsButton.isVisible())) {
-    return
-  }
-
-  // Click the Next.js logo button to open the menu
-  await devToolsButton.click({ force: true })
-
-  // Click Preferences menu item
-  const preferencesItem = page.locator('.dev-tools-indicator-item[data-preferences="true"]')
-  await preferencesItem.waitFor({ state: 'visible', timeout: 2000 }).catch(() => {})
-  if ((await preferencesItem.count()) > 0 && (await preferencesItem.isVisible())) {
-    await preferencesItem.click({ force: true })
-  }
-
-  // Click Hide button
-  const hideButton = page.locator('button[data-hide-dev-tools="true"]')
-  await hideButton.waitFor({ state: 'visible', timeout: 2000 }).catch(() => {})
-  if ((await hideButton.count()) > 0 && (await hideButton.isVisible())) {
-    await hideButton.click({ force: true })
-  }
+  await page.addInitScript(HIDE_DEV_TOOLS_SCRIPT)
 }

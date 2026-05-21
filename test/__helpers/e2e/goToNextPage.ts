@@ -1,7 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
-import { hideNextDevTools } from './hideNextDevTools.js'
 
 export const goToNextPage = async (
   page: Page,
@@ -15,9 +14,6 @@ export const goToNextPage = async (
     targetPage?: number
   } = { targetPage: 2, affectsURL: true },
 ) => {
-  // Hide Next.js dev tools to prevent pointer event interception
-  await hideNextDevTools(page)
-
   const pageControls = (options.scope || page).locator('.paginator')
   const nextButton = pageControls.locator('button').nth(1)
   await nextButton.waitFor({ state: 'visible' })
@@ -45,9 +41,6 @@ export const goToPreviousPage = async (
     affectsURL: true,
   },
 ) => {
-  // Hide Next.js dev tools to prevent pointer event interception
-  await hideNextDevTools(page)
-
   const pageControls = (options.scope || page).locator('.paginator')
   const prevButton = pageControls.locator('button').nth(0)
   await prevButton.waitFor({ state: 'visible' })

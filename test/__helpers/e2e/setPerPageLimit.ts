@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
-import { hideNextDevTools } from './hideNextDevTools.js'
 
 /**
  * Sets the per-page limit in the list view.
@@ -12,9 +11,6 @@ export const setPerPageLimit = async (
   limit: number,
   options?: { scope?: Page },
 ): Promise<void> => {
-  // Hide Next.js dev tools to prevent pointer event interception
-  await hideNextDevTools(page)
-
   const scope = options?.scope || page
   const perPageButton = scope.locator('.per-page .per-page__base-button')
 
