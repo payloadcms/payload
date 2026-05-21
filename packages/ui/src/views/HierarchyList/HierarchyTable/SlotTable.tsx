@@ -155,11 +155,6 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
         {enableHeader && (
           <thead>
             <tr>
-              {enableDragHandle && (
-                <th className={`${baseClass}__th ${baseClass}__th--drag`}>
-                  <span className={`${baseClass}__drag-header`} />
-                </th>
-              )}
               {enableCheckbox && !mergeCheckboxHeader && (
                 <th className={`${baseClass}__th ${baseClass}__th--checkbox`}>
                   {enableSelectAll && (
@@ -171,6 +166,11 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                       variant="muted"
                     />
                   )}
+                </th>
+              )}
+              {enableDragHandle && (
+                <th className={`${baseClass}__th ${baseClass}__th--drag`}>
+                  <span className={`${baseClass}__drag-header`} />
                 </th>
               )}
               {columns.map((col, colIndex) => (
@@ -206,13 +206,6 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                 onKeyDown={isClickable ? (e) => handleRowKeyDown(row, rowIndex, e) : undefined}
                 tabIndex={isClickable ? 0 : undefined}
               >
-                {enableDragHandle && (
-                  <td className={`${baseClass}__td ${baseClass}__td--drag`}>
-                    <span className={`${baseClass}__drag-handle`}>
-                      <AlignJustifiedIcon />
-                    </span>
-                  </td>
-                )}
                 {enableCheckbox && (
                   <td className={`${baseClass}__td ${baseClass}__td--checkbox`}>
                     {(() => {
@@ -231,6 +224,13 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                         />
                       )
                     })()}
+                  </td>
+                )}
+                {enableDragHandle && (
+                  <td className={`${baseClass}__td ${baseClass}__td--drag`}>
+                    <span className={`${baseClass}__drag-handle`}>
+                      <AlignJustifiedIcon />
+                    </span>
                   </td>
                 )}
                 {columns.map((col) => (
