@@ -28,7 +28,7 @@ import { DateCell } from './DateCell.js'
 import { RelatedNameCell } from './RelatedNameCell.js'
 import { SlotTable } from './SlotTable.js'
 import { baseClass } from './types.js'
-import './index.scss'
+import './index.css'
 
 // Top-level cell components to avoid nested component eslint errors
 const NameCell: SlotColumn<TableRow>['Cell'] = (props) =>

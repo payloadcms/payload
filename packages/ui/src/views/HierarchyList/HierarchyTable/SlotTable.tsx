@@ -7,7 +7,7 @@ import React from 'react'
 import { Locked } from '../../../elements/Locked/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
 import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
-import './SlotTable.scss'
+import './SlotTable.css'
 
 const baseClass = 'slot-table'
 

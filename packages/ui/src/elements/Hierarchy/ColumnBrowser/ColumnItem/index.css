@@ -79,8 +79,8 @@
   }
 
   .hierarchy-column-item__descendant-indicator {
-    width: 6px;
-    height: 6px;
+    width: var(--spacer-1);
+    height: var(--spacer-1);
     border-radius: 50%;
     background-color: var(--color-bg-success);
     flex-shrink: 0;
@@ -92,12 +92,12 @@
     align-items: center;
     justify-content: center;
     color: var(--color-icon-tertiary);
-    width: 16px;
-    height: 16px;
+    width: var(--spacer-3);
+    height: var(--spacer-3);
 
     svg {
-      width: 12px;
-      height: 12px;
+      width: var(--spacer-2-5);
+      height: var(--spacer-2-5);
     }
   }
 }
