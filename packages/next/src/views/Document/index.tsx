@@ -17,7 +17,6 @@ import {
   LivePreviewProvider,
 } from '@payloadcms/ui'
 import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
 import { getDocumentPermissions } from '@payloadcms/ui/server'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
@@ -35,6 +34,7 @@ import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { EditView } from '../Edit/index.js'
 import { NotFoundView } from '../NotFound/index.js'
@@ -377,6 +377,7 @@ export const renderDocument = async ({
     hasSavePermission,
     locale,
     permissions,
+    renderComponent: RenderServerComponent,
     req,
   })
 
