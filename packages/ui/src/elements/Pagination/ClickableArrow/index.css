@@ -1,8 +1,6 @@
 @layer payload-default {
   .clickable-arrow {
     cursor: pointer;
-    min-width: 24px;
-    min-height: 24px;
     display: flex;
     justify-content: center;
     align-items: center;

@@ -1881,17 +1881,19 @@ describe('List View', () => {
     await Promise.all(Array.from({ length: 12 }, (_, i) => createPost({ title: `post${i + 1}` })))
     await page.goto(postsUrl.list)
 
-    const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
-    await expect(pageOneButton).toBeVisible()
-    await pageOneButton.click()
+    // Ensure we're on page 1
+    const paginatorInput = page.locator('.paginator__page-input')
+    await expect(paginatorInput).toBeVisible()
+    await expect(paginatorInput).toHaveValue('1')
 
     await page.locator('.checkbox-input:has(#select-all)').locator('input').click()
     await expect(page.locator('.checkbox-input:has(#select-all)').locator('input')).toBeChecked()
     await expect(page.locator('.list-selection')).toContainText('5 selected')
 
-    const pageTwoButton = page.locator('.paginator__page', { hasText: '2' })
-    await expect(pageTwoButton).toBeVisible()
-    await pageTwoButton.click()
+    // Navigate to page 2 using the right arrow
+    const nextPageButton = page.locator('.clickable-arrow--right')
+    await expect(nextPageButton).toBeVisible()
+    await nextPageButton.click()
 
     await expect(
       page.locator('.checkbox-input:has(#select-all) input:not([checked])'),

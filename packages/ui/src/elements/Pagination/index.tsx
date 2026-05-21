@@ -1,16 +1,8 @@
 'use client'
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 
 import { ClickableArrow } from './ClickableArrow/index.js'
 import './index.css'
-import { Page } from './Page/index.js'
-import { Separator } from './Separator/index.js'
-
-const nodeTypes = {
-  ClickableArrow,
-  Page,
-  Separator,
-}
 
 const baseClass = 'paginator'
 
@@ -26,124 +18,106 @@ export type PaginationProps = {
   totalPages?: number
 }
 
-export type Node =
-  | {
-      props?: {
-        direction?: 'left' | 'right'
-        isDisabled?: boolean
-        isFirstPage?: boolean
-        isLastPage?: boolean
-        page?: number
-        updatePage: (page?: number) => void
-      }
-      type: 'ClickableArrow' | 'Page' | 'Separator'
-    }
-  | number
-
 export const Pagination: React.FC<PaginationProps> = (props) => {
   const {
     hasNextPage = false,
     hasPrevPage = false,
     nextPage = null,
-    numberOfNeighbors = 1,
     onChange,
-    page: currentPage,
+    page: currentPage = 1,
     prevPage = null,
-    totalPages = null,
+    totalPages = 1,
   } = props
 
-  if (!hasPrevPage && !hasNextPage) {
-    return null
+  const [inputValue, setInputValue] = useState(String(currentPage))
+
+  // Sync input value when currentPage changes externally
+  React.useEffect(() => {
+    setInputValue(String(currentPage))
+  }, [currentPage])
+
+  const updatePage = useCallback(
+    (page: number) => {
+      if (typeof onChange === 'function') {
+        onChange(page)
+      }
+    },
+    [onChange],
+  )
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value)
   }
 
-  const updatePage = (page) => {
-    if (typeof onChange === 'function') {
-      onChange(page)
+  const handleInputBlur = () => {
+    const parsed = parseInt(inputValue, 10)
+    if (!isNaN(parsed)) {
+      // Clamp to valid range
+      const clamped = Math.max(1, Math.min(parsed, totalPages))
+      if (clamped !== currentPage) {
+        updatePage(clamped)
+      } else {
+        setInputValue(String(currentPage))
+      }
+    } else {
+      // Reset to current page if not a number
+      setInputValue(String(currentPage))
     }
   }
 
-  // Create array of integers for each page
-  const pages = Array.from({ length: totalPages }, (_, index) => index + 1)
-
-  // Assign indices for start and end of the range of pages that should be shown in paginator
-  let rangeStartIndex = currentPage - 1 - numberOfNeighbors
-
-  // Sanitize rangeStartIndex in case it is less than zero for safe split
-  if (rangeStartIndex <= 0) {
-    rangeStartIndex = 0
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur()
+    } else if (e.key === 'Escape') {
+      setInputValue(String(currentPage))
+      e.currentTarget.blur()
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      const parsed = parseInt(inputValue, 10)
+      if (!isNaN(parsed) && parsed < totalPages) {
+        setInputValue(String(parsed + 1))
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      const parsed = parseInt(inputValue, 10)
+      if (!isNaN(parsed) && parsed > 1) {
+        setInputValue(String(parsed - 1))
+      }
+    }
   }
 
-  const rangeEndIndex = currentPage - 1 + numberOfNeighbors + 1
-
-  // Slice out the range of pages that we want to render
-  const nodes: Node[] = pages.slice(rangeStartIndex, rangeEndIndex)
-
-  // Add prev separator if necessary
-  if (currentPage - numberOfNeighbors - 1 >= 2) {
-    nodes.unshift({ type: 'Separator' })
+  if (!totalPages || totalPages <= 1) {
+    return null
   }
-
-  // Add first page if necessary
-  if (currentPage > numberOfNeighbors + 1) {
-    nodes.unshift({
-      type: 'Page',
-      props: {
-        isFirstPage: true,
-        page: 1,
-        updatePage,
-      },
-    })
-  }
-
-  // Add next separator if necessary
-  if (currentPage + numberOfNeighbors + 1 < totalPages) {
-    nodes.push({ type: 'Separator' })
-  }
-
-  // Add last page if necessary
-  if (rangeEndIndex < totalPages) {
-    nodes.push({
-      type: 'Page',
-      props: {
-        isLastPage: true,
-        page: totalPages,
-        updatePage,
-      },
-    })
-  }
-
-  // Add prev and next arrows based on necessity
-  nodes.unshift({
-    type: 'ClickableArrow',
-    props: {
-      direction: 'right',
-      isDisabled: !hasNextPage,
-      updatePage: () => updatePage(nextPage ?? currentPage + 1),
-    },
-  })
-
-  nodes.unshift({
-    type: 'ClickableArrow',
-    props: {
-      direction: 'left',
-      isDisabled: !hasPrevPage,
-      updatePage: () => updatePage(prevPage ?? Math.max(1, currentPage - 1)),
-    },
-  })
 
   return (
     <div className={baseClass}>
-      {nodes.map((node, i) => {
-        if (typeof node === 'number') {
-          return (
-            <Page isCurrent={currentPage === node} key={i} page={node} updatePage={updatePage} />
-          )
-        }
-
-        const NodeType = nodeTypes[node.type]
-
-        return <NodeType key={i} {...node.props} />
-      })}
+      <ClickableArrow
+        direction="left"
+        isDisabled={!hasPrevPage}
+        updatePage={() => updatePage(prevPage ?? Math.max(1, currentPage - 1))}
+      />
+      <ClickableArrow
+        direction="right"
+        isDisabled={!hasNextPage}
+        updatePage={() => updatePage(nextPage ?? currentPage + 1)}
+      />
+      <div className={`${baseClass}__page-input-wrapper`}>
+        <input
+          aria-label="Go to page"
+          className={`${baseClass}__page-input`}
+          inputMode="numeric"
+          max={totalPages}
+          min={1}
+          onBlur={handleInputBlur}
+          onChange={handleInputChange}
+          onKeyDown={handleInputKeyDown}
+          style={{ width: `${Math.max(inputValue.length, 1)}ch` }}
+          type="text"
+          value={inputValue}
+        />
+        <span className={`${baseClass}__page-total`}>of {totalPages}</span>
+      </div>
     </div>
   )
 }

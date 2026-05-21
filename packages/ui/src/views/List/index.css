@@ -132,5 +132,14 @@
     .collection-list {
       margin-bottom: var(--spacing-view-bottom);
     }
+
+    .collection-list__list-selection {
+      position: static;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      box-shadow: none;
+      border-radius: 0;
+    }
   }
 }

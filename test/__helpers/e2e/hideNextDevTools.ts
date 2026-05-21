@@ -21,7 +21,7 @@ const HIDE_DEV_TOOLS_SCRIPT = `
     \`;
     (document.head || document.documentElement).appendChild(style);
   }
-  
+
   // Run when DOM is ready
   if (document.head || document.documentElement) {
     injectHideStyles();
