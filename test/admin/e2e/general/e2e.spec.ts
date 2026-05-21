@@ -698,7 +698,7 @@ describe('General', () => {
       await page.goto(disableCopyToLocale.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await expect(page.locator('#copy-locale-data__button')).toBeHidden()
     })
   })
@@ -1063,7 +1063,7 @@ describe('General', () => {
       await page.goto(disableDuplicateURL.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await expect(page.locator('#action-duplicate')).toBeHidden()
     })
 
