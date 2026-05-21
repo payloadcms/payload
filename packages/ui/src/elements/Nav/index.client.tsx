@@ -56,6 +56,8 @@ export const DefaultNavClient: React.FC<{
               const isActive =
                 pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
 
+              const linkClass = `${baseClass}__link${isActive ? ` ${baseClass}__link--selected` : ''}`
+
               const Label = (
                 <>
                   {isActive && <div className={`${baseClass}__link-indicator`} />}
@@ -66,14 +68,14 @@ export const DefaultNavClient: React.FC<{
               // If the URL matches the link exactly
               if (pathname === href) {
                 return (
-                  <div className={`${baseClass}__link`} id={id} key={i}>
+                  <div className={linkClass} id={id} key={i}>
                     {Label}
                   </div>
                 )
               }
 
               return (
-                <Link className={`${baseClass}__link`} href={href} id={id} key={i} prefetch={false}>
+                <Link className={linkClass} href={href} id={id} key={i} prefetch={false}>
                   {Label}
                 </Link>
               )
