@@ -5,7 +5,7 @@ import React from 'react'
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'select-all'
 
