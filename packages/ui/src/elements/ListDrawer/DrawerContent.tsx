@@ -3,7 +3,7 @@ import type { CollectionSlug, ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { hoistQueryParamsToAnd } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { RenderListDataOnlyResult } from '../../utilities/dataOnlyHandlers/renderList.js'
 import type { ListDrawerContextProps, ListDrawerContextType } from '../ListDrawer/Provider.js'
@@ -98,8 +98,12 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     updateSelectedOption(collectionSlugFromProps)
   }, [collectionSlugFromProps])
 
+  const hasLoadedRef = useRef(false)
+
   const refresh = useCallback(
     async ({ slug, query }: { query?: ListQuery; slug: string }) => {
+      const isInitialLoad = !hasLoadedRef.current
+
       try {
         const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
 
@@ -126,6 +130,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
           if ('List' in result && result?.List) {
             setListView(result.List)
+            hasLoadedRef.current = true
           } else if ('listViewData' in result && result?.listViewData && importMap) {
             const listData = result.listViewData
 
@@ -150,17 +155,22 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                 <DefaultListView {...listViewClientProps} />
               </ListQueryProvider>,
             )
-          } else {
+            hasLoadedRef.current = true
+          } else if (isInitialLoad) {
             setListView(null)
           }
-        } else {
+        } else if (isInitialLoad) {
           setListView(null)
         }
         setIsLoading(false)
       } catch (_err) {
         console.error('Error rendering List View: ', _err) // eslint-disable-line no-console
 
-        if (isOpen) {
+        // Closing the drawer on a refresh error nukes the user's open list
+        // view (and any nested document drawers) and is too destructive past
+        // the initial load. Only force-close when the drawer has never
+        // successfully rendered a list view.
+        if (isOpen && isInitialLoad) {
           closeModal(drawerSlug)
         }
       }
