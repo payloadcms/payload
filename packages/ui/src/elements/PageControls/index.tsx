@@ -2,7 +2,7 @@
 import type { ClientCollectionConfig, PaginatedDocs } from 'payload'
 
 import { isNumber } from 'payload/shared'
-import React, { Fragment } from 'react'
+import React from 'react'
 
 import type { IListQueryContext } from '../../providers/ListQuery/types.js'
 
