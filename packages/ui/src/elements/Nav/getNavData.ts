@@ -1,5 +1,11 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { NavPreferences, PayloadRequest, SanitizedPermissions, VisibleEntities } from 'payload'
+import type {
+  NavPreferences,
+  Payload,
+  PayloadRequest,
+  SanitizedPermissions,
+  VisibleEntities,
+} from 'payload'
 
 import type { EntityToGroup, NavGroupType } from '../../utilities/groupNavItems.js'
 
@@ -13,16 +19,18 @@ export type NavData = {
 
 export async function getNavData({
   i18n,
+  payload,
   permissions,
   req,
   visibleEntities,
 }: {
   i18n: I18nClient
+  payload: Payload
   permissions: SanitizedPermissions
-  req: PayloadRequest
+  req?: PayloadRequest
   visibleEntities: VisibleEntities
 }): Promise<NavData> {
-  const { collections, globals } = req.payload.config
+  const { collections, globals } = payload.config
 
   const groups = groupNavItems(
     [
@@ -49,7 +57,7 @@ export async function getNavData({
     i18n,
   )
 
-  const navPreferences = await getNavPrefs(req)
+  const navPreferences: NavPreferences = req ? await getNavPrefs(req) : { groups: {}, open: false }
 
   return {
     groups,

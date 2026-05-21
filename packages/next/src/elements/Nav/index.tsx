@@ -38,6 +38,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
 
   const { groups, navPreferences } = await getNavData({
     i18n,
+    payload,
     permissions,
     req,
     visibleEntities,
