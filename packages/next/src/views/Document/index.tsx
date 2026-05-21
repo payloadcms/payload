@@ -36,7 +36,10 @@ import React from 'react'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { getPreferences } from '../../utilities/getPreferences.js'
+import { EditView } from '../Edit/index.js'
 import { NotFoundView } from '../NotFound/index.js'
+import { VersionView } from '../Version/index.js'
+import { VersionsView } from '../Versions/index.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
@@ -308,6 +311,11 @@ export const renderDocument = async ({
     ;({ View } = getDocumentView({
       collectionConfig,
       config,
+      defaultViews: {
+        edit: EditView,
+        version: VersionView,
+        versions: VersionsView,
+      },
       docPermissions,
       globalConfig,
       routeSegments: segments,
