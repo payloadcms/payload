@@ -1,7 +1,10 @@
 'use client'
 
-import { CheckboxInput, useTheme, useTranslation } from '@payloadcms/ui'
 import React, { useCallback } from 'react'
+
+import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
+import { useTheme } from '../../../providers/Theme/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 
 export const ToggleHighContrast: React.FC = () => {
   const { highContrastMode, setHighContrastMode } = useTheme()
