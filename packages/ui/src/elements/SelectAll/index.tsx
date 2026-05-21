@@ -28,6 +28,7 @@ export const SelectAll: React.FC = () => {
       name="select-all"
       onToggle={() => toggleAll()}
       partialChecked={selectAll === SelectAllStatus.Some}
+      variant="muted"
     />
   )
 }

@@ -87,7 +87,12 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
       tabIndex={isDisabled ? -1 : 0}
     >
       <div className={`${baseClass}__checkbox`}>
-        <CheckboxInput checked={isSelected} onToggle={handleCheckboxToggle} readOnly={isDisabled} />
+        <CheckboxInput
+          checked={isSelected}
+          onToggle={handleCheckboxToggle}
+          readOnly={isDisabled}
+          variant="muted"
+        />
       </div>
 
       <span className={`${baseClass}__title`} title={title}>

@@ -168,6 +168,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                       className={`${baseClass}__checkbox`}
                       onToggle={handleSelectAll}
                       partialChecked={someSelected && !allSelected}
+                      variant="muted"
                     />
                   )}
                 </th>
@@ -226,6 +227,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                           checked={isSelected}
                           className={`${baseClass}__checkbox`}
                           onToggle={() => handleRowCheckbox(row, rowIndex, isSelected)}
+                          variant="muted"
                         />
                       )
                     })()}

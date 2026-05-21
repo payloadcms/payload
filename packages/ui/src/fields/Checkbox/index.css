@@ -164,6 +164,38 @@
     }
   }
 
+  /* Muted variant - used in tables with lighter appearance */
+  .checkbox-input--muted {
+    .checkbox-input__input {
+      background: var(--color-bg-secondary);
+      border-color: var(--color-border);
+    }
+
+    &:not(.checkbox-input--read-only):not(.checkbox-input--checked) {
+      &:hover {
+        .checkbox-input__input {
+          border-color: var(--color-border-selected-strong);
+        }
+      }
+    }
+
+    /* Ensure checked state overrides muted base styles */
+    &.checkbox-input--checked {
+      .checkbox-input__input {
+        background-color: var(--color-bg-brand);
+        border-color: var(--color-border-selected);
+      }
+    }
+
+    /* Ensure partial state overrides muted base styles */
+    &:has(.checkbox-input__icon.partial) {
+      .checkbox-input__input {
+        background-color: var(--color-bg-brand);
+        border-color: var(--color-border-selected);
+      }
+    }
+  }
+
   .checkbox.error {
     .checkbox-input--checked {
       .checkbox-input__input {
