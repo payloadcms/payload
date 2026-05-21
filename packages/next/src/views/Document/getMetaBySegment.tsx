@@ -9,7 +9,7 @@ import { generateEditViewMetadata } from '../Edit/metadata.js'
 import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
 import { generateVersionViewMetadata } from '../Version/metadata.js'
 import { generateVersionsViewMetadata } from '../Versions/metadata.js'
-import { getDocumentView } from './getDocumentView.js'
+import { getDocumentView } from '@payloadcms/ui/views/Document/getDocumentView'
 
 export type GenerateEditViewMetadata = (
   args: {

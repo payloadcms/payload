@@ -81,6 +81,46 @@
       "types": "./src/views/Document/renderDocumentSlots.tsx",
       "default": "./src/views/Document/renderDocumentSlots.tsx"
     },
+    "./views/Document/getDocPreferences": {
+      "import": "./src/views/Document/getDocPreferences.ts",
+      "types": "./src/views/Document/getDocPreferences.ts",
+      "default": "./src/views/Document/getDocPreferences.ts"
+    },
+    "./views/Document/getDocumentData": {
+      "import": "./src/views/Document/getDocumentData.ts",
+      "types": "./src/views/Document/getDocumentData.ts",
+      "default": "./src/views/Document/getDocumentData.ts"
+    },
+    "./views/Document/getIsLocked": {
+      "import": "./src/views/Document/getIsLocked.ts",
+      "types": "./src/views/Document/getIsLocked.ts",
+      "default": "./src/views/Document/getIsLocked.ts"
+    },
+    "./views/Document/getVersions": {
+      "import": "./src/views/Document/getVersions.ts",
+      "types": "./src/views/Document/getVersions.ts",
+      "default": "./src/views/Document/getVersions.ts"
+    },
+    "./elements/DocumentHeader": {
+      "import": "./src/elements/DocumentHeader/index.tsx",
+      "types": "./src/elements/DocumentHeader/index.tsx",
+      "default": "./src/elements/DocumentHeader/index.tsx"
+    },
+    "./views/List/enrichDocsWithVersionStatus": {
+      "import": "./src/views/List/enrichDocsWithVersionStatus.ts",
+      "types": "./src/views/List/enrichDocsWithVersionStatus.ts",
+      "default": "./src/views/List/enrichDocsWithVersionStatus.ts"
+    },
+    "./views/List/resolveAllFilterOptions": {
+      "import": "./src/views/List/resolveAllFilterOptions.ts",
+      "types": "./src/views/List/resolveAllFilterOptions.ts",
+      "default": "./src/views/List/resolveAllFilterOptions.ts"
+    },
+    "./views/List/transformColumnsToSelect": {
+      "import": "./src/views/List/transformColumnsToSelect.ts",
+      "types": "./src/views/List/transformColumnsToSelect.ts",
+      "default": "./src/views/List/transformColumnsToSelect.ts"
+    },
     "./views/Root/getRootViewData": {
       "import": "./src/views/Root/getRootViewData.ts",
       "types": "./src/views/Root/getRootViewData.ts",
@@ -1036,6 +1076,46 @@
         "import": "./dist/views/Document/renderDocumentSlots.js",
         "types": "./dist/views/Document/renderDocumentSlots.d.ts",
         "default": "./dist/views/Document/renderDocumentSlots.js"
+      },
+      "./views/Document/getDocPreferences": {
+        "import": "./dist/views/Document/getDocPreferences.js",
+        "types": "./dist/views/Document/getDocPreferences.d.ts",
+        "default": "./dist/views/Document/getDocPreferences.js"
+      },
+      "./views/Document/getDocumentData": {
+        "import": "./dist/views/Document/getDocumentData.js",
+        "types": "./dist/views/Document/getDocumentData.d.ts",
+        "default": "./dist/views/Document/getDocumentData.js"
+      },
+      "./views/Document/getIsLocked": {
+        "import": "./dist/views/Document/getIsLocked.js",
+        "types": "./dist/views/Document/getIsLocked.d.ts",
+        "default": "./dist/views/Document/getIsLocked.js"
+      },
+      "./views/Document/getVersions": {
+        "import": "./dist/views/Document/getVersions.js",
+        "types": "./dist/views/Document/getVersions.d.ts",
+        "default": "./dist/views/Document/getVersions.js"
+      },
+      "./elements/DocumentHeader": {
+        "import": "./dist/elements/DocumentHeader/index.js",
+        "types": "./dist/elements/DocumentHeader/index.d.ts",
+        "default": "./dist/elements/DocumentHeader/index.js"
+      },
+      "./views/List/enrichDocsWithVersionStatus": {
+        "import": "./dist/views/List/enrichDocsWithVersionStatus.js",
+        "types": "./dist/views/List/enrichDocsWithVersionStatus.d.ts",
+        "default": "./dist/views/List/enrichDocsWithVersionStatus.js"
+      },
+      "./views/List/resolveAllFilterOptions": {
+        "import": "./dist/views/List/resolveAllFilterOptions.js",
+        "types": "./dist/views/List/resolveAllFilterOptions.d.ts",
+        "default": "./dist/views/List/resolveAllFilterOptions.js"
+      },
+      "./views/List/transformColumnsToSelect": {
+        "import": "./dist/views/List/transformColumnsToSelect.js",
+        "types": "./dist/views/List/transformColumnsToSelect.d.ts",
+        "default": "./dist/views/List/transformColumnsToSelect.js"
       },
       "./views/Root/getRootViewData": {
         "import": "./dist/views/Root/getRootViewData.js",

@@ -5,11 +5,11 @@ import { getAccountViewData } from '@payloadcms/ui/views/Account/getAccountViewD
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
-import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
+import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { EditView } from '../Edit/index.js'
-import { AccountClient } from './index.client.js'
-import { Settings } from './Settings/index.js'
+import { AccountClient } from '@payloadcms/ui/views/Account/index.client'
+import { Settings } from '@payloadcms/ui/views/Account/Settings'
 
 export async function AccountView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {

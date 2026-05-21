@@ -18,7 +18,7 @@ import React from 'react'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
-import { MinimalTemplate } from '../../templates/Minimal/index.js'
+import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { initReq } from '../../utilities/initReq.js'
 import { getRouteData } from './getRouteData.js'

@@ -5,9 +5,9 @@ import { type DocumentViewServerProps } from 'payload'
 import { isNumber } from 'payload/shared'
 import React from 'react'
 
-import { VersionDrawerCreatedAtCell } from '../Version/SelectComparison/VersionDrawer/CreatedAtCell.js'
-import { buildVersionColumns } from './buildColumns.js'
-import { VersionsViewClient } from './index.client.js'
+import { VersionDrawerCreatedAtCell } from '@payloadcms/ui/views/Version/SelectComparison/VersionDrawer/CreatedAtCell'
+import { buildVersionColumns } from '@payloadcms/ui/views/Versions/buildColumns'
+import { VersionsViewClient } from '@payloadcms/ui/views/Versions/index.client'
 import './index.scss'
 
 const baseClass = 'versions'

@@ -1,4 +1,4 @@
-export { DocumentHeader } from '../elements/DocumentHeader/index.js'
+export { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
 export { HierarchyTypeFieldServer } from '../elements/HierarchyTypeField/index.server.js'
 export { Logo } from '../elements/Logo/index.js'
 export { DefaultNav } from '../elements/Nav/index.js'

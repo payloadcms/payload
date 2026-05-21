@@ -9,7 +9,7 @@ import { cookies as nextCookies } from 'next/headers.js'
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
-import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
+import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { NextRouterAdapter } from '../../elements/RouterAdapter/index.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'

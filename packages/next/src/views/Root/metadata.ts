@@ -15,7 +15,7 @@ import { generateResetPasswordViewMetadata } from '../ResetPassword/metadata.js'
 import { generateUnauthorizedViewMetadata } from '../Unauthorized/metadata.js'
 import { generateVerifyViewMetadata } from '../Verify/metadata.js'
 import { generateCustomViewMetadata } from './generateCustomViewMetadata.js'
-import { getCustomViewByRoute } from './getCustomViewByRoute.js'
+import { getCustomViewByRoute } from '@payloadcms/ui/utilities/routeResolution/getCustomViewByRoute'
 
 const oneSegmentMeta = {
   'create-first-user': generateCreateFirstUserViewMetadata,

@@ -11,10 +11,10 @@ import React from 'react'
 import type { CompareOption } from './Default/types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { DefaultVersionView } from './Default/index.js'
-import { RenderDiff } from './RenderFieldsToDiff/index.js'
-import { getVersionLabel } from './VersionPillLabel/getVersionLabel.js'
-import { VersionPillLabel } from './VersionPillLabel/VersionPillLabel.js'
+import { DefaultVersionView } from '@payloadcms/ui/views/Version/Default'
+import { RenderDiff } from '@payloadcms/ui/views/Version/RenderFieldsToDiff'
+import { getVersionLabel } from '@payloadcms/ui/views/Version/VersionPillLabel/getVersionLabel'
+import { VersionPillLabel } from '@payloadcms/ui/views/Version/VersionPillLabel/VersionPillLabel'
 
 export async function VersionView(props: DocumentViewServerProps) {
   const { hasPublishedDoc, i18n, initPageResult, routeSegments, searchParams } = props

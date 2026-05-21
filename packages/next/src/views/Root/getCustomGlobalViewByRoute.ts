@@ -7,7 +7,7 @@ import type {
 
 import type { ViewFromConfig } from './getRouteData.js'
 
-import { isPathMatchingRoute } from './isPathMatchingRoute.js'
+import { isPathMatchingRoute } from '@payloadcms/ui/utilities/routeResolution/isPathMatchingRoute'
 
 export const getCustomGlobalViewByRoute = ({
   adminRoute,

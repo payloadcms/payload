@@ -35,13 +35,13 @@ import {
 } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
-import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
-import { handleGroupBy } from './handleGroupBy.js'
+import { getDocumentPermissions } from '@payloadcms/ui/server'
+import { enrichDocsWithVersionStatus } from '@payloadcms/ui/views/List/enrichDocsWithVersionStatus'
+import { handleGroupBy } from '@payloadcms/ui/views/List/handleGroupBy'
 import { handleHierarchy } from './handleHierarchy.js'
-import { renderListViewSlots } from './renderListViewSlots.js'
-import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
-import { transformColumnsToSelect } from './transformColumnsToSelect.js'
+import { renderListViewSlots } from '@payloadcms/ui/views/List/renderListViewSlots'
+import { resolveAllFilterOptions } from '@payloadcms/ui/views/List/resolveAllFilterOptions'
+import { transformColumnsToSelect } from '@payloadcms/ui/views/List/transformColumnsToSelect'
 
 /**
  * @internal
