@@ -1,10 +1,4 @@
 import { expect, test } from '@playwright/test'
-import { clickPillSelectorItem, toggleColumn } from '../__helpers/e2e/columns/index.js'
-import { addListFilter, openListFilters } from '../__helpers/e2e/filters/index.js'
-import { addGroupBy, clearGroupBy } from '../__helpers/e2e/groupBy/index.js'
-import { navigateToListView } from '../__helpers/e2e/navigateToListView.js'
-import { openNav } from '../__helpers/e2e/toggleNav.js'
-import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -12,13 +6,19 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, PayloadQueryPreset } from './payload-types.js'
 
+import { clickPillSelectorItem, toggleColumn } from '../__helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from '../__helpers/e2e/filters/index.js'
+import { addGroupBy, clearGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
+import { navigateToListView } from '../__helpers/e2e/navigateToListView.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
@@ -773,7 +773,10 @@ describe('Query Presets', () => {
 
     // Clear the groupBy (modify the preset)
     await clearGroupBy(page)
-    await expect(page).not.toHaveURL(/groupBy=/)
+    // With an active preset, an empty `groupBy=` is intentionally preserved
+    // to mark the user's clear-override; only the previous non-empty value
+    // (e.g. `groupBy=text`) must be gone.
+    await expect(page).not.toHaveURL(/[?&]groupBy=[^&]+/)
     await expect(page.locator('.group-by-header')).toHaveCount(0)
 
     // Verify reset button becomes visible after modification
