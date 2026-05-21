@@ -769,7 +769,7 @@ describe('Locked Documents', () => {
       // save buttons should be readOnly / disabled
       await expect(page.locator('#action-save-draft')).toBeDisabled()
       await expect(page.locator('#action-save')).toBeDisabled()
-      await expect(page.locator('.doc-controls__dots')).toBeHidden()
+      await expect(page.locator('.doc-controls__popup')).toBeHidden()
 
       // fields should be readOnly / disabled
       await expect(page.locator('#field-text')).toBeDisabled()
