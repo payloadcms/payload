@@ -5,9 +5,9 @@ import type {
   SanitizedCollectionConfig,
 } from 'payload'
 
-import type { ViewFromConfig } from './getRouteData.js'
-
 import { isPathMatchingRoute } from '@payloadcms/ui/utilities/routeResolution/isPathMatchingRoute'
+
+import type { ViewFromConfig } from './getRouteData.js'
 
 export const getCustomCollectionViewByRoute = ({
   adminRoute,

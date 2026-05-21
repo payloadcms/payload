@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
+import { getDocumentView } from '@payloadcms/ui/views/Document/getDocumentView'
+
 import type { GenerateViewMetadata } from '../Root/index.js'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
@@ -9,7 +11,6 @@ import { generateEditViewMetadata } from '../Edit/metadata.js'
 import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
 import { generateVersionViewMetadata } from '../Version/metadata.js'
 import { generateVersionsViewMetadata } from '../Versions/metadata.js'
-import { getDocumentView } from '@payloadcms/ui/views/Document/getDocumentView'
 
 export type GenerateEditViewMetadata = (
   args: {

@@ -16,10 +16,18 @@ import {
   HydrateAuthProvider,
   LivePreviewProvider,
 } from '@payloadcms/ui'
+import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
+import { getDocumentPermissions } from '@payloadcms/ui/server'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { getDocPreferences } from '@payloadcms/ui/views/Document/getDocPreferences'
+import { getDocumentData } from '@payloadcms/ui/views/Document/getDocumentData'
+import { getDocumentView } from '@payloadcms/ui/views/Document/getDocumentView'
+import { getIsLocked } from '@payloadcms/ui/views/Document/getIsLocked'
+import { getVersions } from '@payloadcms/ui/views/Document/getVersions'
+import { UnauthorizedViewWithGutter } from '@payloadcms/ui/views/Unauthorized'
 import { notFound, redirect } from 'next/navigation.js'
 import { isolateObjectProperty, logError } from 'payload'
 import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
@@ -27,17 +35,9 @@ import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
-import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { NotFoundView } from '../NotFound/index.js'
-import { UnauthorizedViewWithGutter } from '@payloadcms/ui/views/Unauthorized'
-import { getDocPreferences } from '@payloadcms/ui/views/Document/getDocPreferences'
-import { getDocumentData } from '@payloadcms/ui/views/Document/getDocumentData'
-import { getDocumentPermissions } from '@payloadcms/ui/server'
-import { getDocumentView } from '@payloadcms/ui/views/Document/getDocumentView'
-import { getIsLocked } from '@payloadcms/ui/views/Document/getIsLocked'
 import { getMetaBySegment } from './getMetaBySegment.js'
-import { getVersions } from '@payloadcms/ui/views/Document/getVersions'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)

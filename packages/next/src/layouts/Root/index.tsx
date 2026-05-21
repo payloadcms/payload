@@ -3,13 +3,13 @@ import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient 
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
+import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { Inter, Roboto_Mono } from 'next/font/google'
 import { cookies as nextCookies } from 'next/headers.js'
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
-import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { NextRouterAdapter } from '../../elements/RouterAdapter/index.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'

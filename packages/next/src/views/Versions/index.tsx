@@ -1,13 +1,13 @@
 import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@payloadcms/ui'
+import { VersionDrawerCreatedAtCell } from '@payloadcms/ui/views/Version/SelectComparison/VersionDrawer/CreatedAtCell'
+import { buildVersionColumns } from '@payloadcms/ui/views/Versions/buildColumns'
 import { getVersionsViewData } from '@payloadcms/ui/views/Versions/getVersionsViewData'
+import { VersionsViewClient } from '@payloadcms/ui/views/Versions/index.client'
 import { notFound } from 'next/navigation.js'
 import { type DocumentViewServerProps } from 'payload'
 import { isNumber } from 'payload/shared'
 import React from 'react'
 
-import { VersionDrawerCreatedAtCell } from '@payloadcms/ui/views/Version/SelectComparison/VersionDrawer/CreatedAtCell'
-import { buildVersionColumns } from '@payloadcms/ui/views/Versions/buildColumns'
-import { VersionsViewClient } from '@payloadcms/ui/views/Versions/index.client'
 import './index.scss'
 
 const baseClass = 'versions'

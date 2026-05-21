@@ -1,15 +1,15 @@
 import type { AdminViewServerProps, DocumentViewServerPropsOnly } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
 import { getAccountViewData } from '@payloadcms/ui/views/Account/getAccountViewData'
+import { AccountClient } from '@payloadcms/ui/views/Account/index.client'
+import { Settings } from '@payloadcms/ui/views/Account/Settings'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
-import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { EditView } from '../Edit/index.js'
-import { AccountClient } from '@payloadcms/ui/views/Account/index.client'
-import { Settings } from '@payloadcms/ui/views/Account/Settings'
 
 export async function AccountView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {

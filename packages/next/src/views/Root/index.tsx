@@ -10,6 +10,7 @@ import type {
 } from 'payload'
 
 import { PageConfigProvider } from '@payloadcms/ui'
+import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { getRootViewData } from '@payloadcms/ui/views/Root/getRootViewData'
 import { notFound, redirect } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
@@ -18,7 +19,6 @@ import React from 'react'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
-import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { initReq } from '../../utilities/initReq.js'
 import { getRouteData } from './getRouteData.js'

@@ -4,17 +4,17 @@ import { formatDate } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { getClientSchemaMap } from '@payloadcms/ui/utilities/getClientSchemaMap'
 import { getSchemaMap } from '@payloadcms/ui/utilities/getSchemaMap'
+import { DefaultVersionView } from '@payloadcms/ui/views/Version/Default'
 import { getVersionViewData } from '@payloadcms/ui/views/Version/getVersionViewData'
+import { RenderDiff } from '@payloadcms/ui/views/Version/RenderFieldsToDiff'
+import { getVersionLabel } from '@payloadcms/ui/views/Version/VersionPillLabel/getVersionLabel'
+import { VersionPillLabel } from '@payloadcms/ui/views/Version/VersionPillLabel/VersionPillLabel'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
 import type { CompareOption } from './Default/types.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { DefaultVersionView } from '@payloadcms/ui/views/Version/Default'
-import { RenderDiff } from '@payloadcms/ui/views/Version/RenderFieldsToDiff'
-import { getVersionLabel } from '@payloadcms/ui/views/Version/VersionPillLabel/getVersionLabel'
-import { VersionPillLabel } from '@payloadcms/ui/views/Version/VersionPillLabel/VersionPillLabel'
 
 export async function VersionView(props: DocumentViewServerProps) {
   const { hasPublishedDoc, i18n, initPageResult, routeSegments, searchParams } = props

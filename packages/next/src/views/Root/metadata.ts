@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload'
 
+import { getCustomViewByRoute } from '@payloadcms/ui/utilities/routeResolution/getCustomViewByRoute'
+
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAccountViewMetadata } from '../Account/metadata.js'
 import { generateCollectionTrashMetadata } from '../CollectionTrash/metadata.js'
@@ -15,7 +17,6 @@ import { generateResetPasswordViewMetadata } from '../ResetPassword/metadata.js'
 import { generateUnauthorizedViewMetadata } from '../Unauthorized/metadata.js'
 import { generateVerifyViewMetadata } from '../Verify/metadata.js'
 import { generateCustomViewMetadata } from './generateCustomViewMetadata.js'
-import { getCustomViewByRoute } from '@payloadcms/ui/utilities/routeResolution/getCustomViewByRoute'
 
 const oneSegmentMeta = {
   'create-first-user': generateCreateFirstUserViewMetadata,
