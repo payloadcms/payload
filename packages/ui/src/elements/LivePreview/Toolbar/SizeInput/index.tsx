@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect } from 'react'
 
 import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'toolbar-input'
 

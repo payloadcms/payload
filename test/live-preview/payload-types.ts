@@ -118,6 +118,9 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
   };
   locale: 'en' | 'es';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -211,22 +214,42 @@ export interface Page {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?:
-      | {
+    richText?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
           [k: string]: unknown;
-        }[]
-      | null;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     media?: (string | null) | Media;
   };
   layout?:
     | (
         | {
             invertBackground?: boolean | null;
-            richText?:
-              | {
+            richText?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
                   [k: string]: unknown;
-                }[]
-              | null;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             links?:
               | {
                   link: {
@@ -260,11 +283,21 @@ export interface Page {
             columns?:
               | {
                   size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?:
-                    | {
+                  richText?: {
+                    root: {
+                      type: string;
+                      children: {
+                        type: any;
+                        version: number;
                         [k: string]: unknown;
-                      }[]
-                    | null;
+                      }[];
+                      direction: ('ltr' | 'rtl') | null;
+                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                      indent: number;
+                      version: number;
+                    };
+                    [k: string]: unknown;
+                  } | null;
                   enableLink?: boolean | null;
                   link?: {
                     type?: ('reference' | 'custom') | null;
@@ -301,11 +334,21 @@ export interface Page {
             blockType: 'mediaBlock';
           }
         | {
-            introContent?:
-              | {
+            introContent?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
                   [k: string]: unknown;
-                }[]
-              | null;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             populateBy?: ('collection' | 'selection') | null;
             relationTo?: 'posts' | null;
             categories?: (string | Category)[] | null;
@@ -337,11 +380,6 @@ export interface Page {
     | null;
   localizedTitle?: string | null;
   relationToLocalized?: (string | null) | Post;
-  richTextSlate?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
   richTextLexical?: {
     root: {
       type: string;
@@ -451,22 +489,42 @@ export interface Post {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?:
-      | {
+    richText?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
           [k: string]: unknown;
-        }[]
-      | null;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     media?: (string | null) | Media;
   };
   layout?:
     | (
         | {
             invertBackground?: boolean | null;
-            richText?:
-              | {
+            richText?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
                   [k: string]: unknown;
-                }[]
-              | null;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             links?:
               | {
                   link: {
@@ -500,11 +558,21 @@ export interface Post {
             columns?:
               | {
                   size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?:
-                    | {
+                  richText?: {
+                    root: {
+                      type: string;
+                      children: {
+                        type: any;
+                        version: number;
                         [k: string]: unknown;
-                      }[]
-                    | null;
+                      }[];
+                      direction: ('ltr' | 'rtl') | null;
+                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                      indent: number;
+                      version: number;
+                    };
+                    [k: string]: unknown;
+                  } | null;
                   enableLink?: boolean | null;
                   link?: {
                     type?: ('reference' | 'custom') | null;
@@ -541,11 +609,21 @@ export interface Post {
             blockType: 'mediaBlock';
           }
         | {
-            introContent?:
-              | {
+            introContent?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
                   [k: string]: unknown;
-                }[]
-              | null;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             populateBy?: ('collection' | 'selection') | null;
             relationTo?: 'posts' | null;
             categories?: (string | Category)[] | null;
@@ -609,22 +687,42 @@ export interface Ssr {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?:
-      | {
+    richText?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
           [k: string]: unknown;
-        }[]
-      | null;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     media?: (string | null) | Media;
   };
   layout?:
     | (
         | {
             invertBackground?: boolean | null;
-            richText?:
-              | {
+            richText?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
                   [k: string]: unknown;
-                }[]
-              | null;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             links?:
               | {
                   link: {
@@ -658,11 +756,21 @@ export interface Ssr {
             columns?:
               | {
                   size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?:
-                    | {
+                  richText?: {
+                    root: {
+                      type: string;
+                      children: {
+                        type: any;
+                        version: number;
                         [k: string]: unknown;
-                      }[]
-                    | null;
+                      }[];
+                      direction: ('ltr' | 'rtl') | null;
+                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                      indent: number;
+                      version: number;
+                    };
+                    [k: string]: unknown;
+                  } | null;
                   enableLink?: boolean | null;
                   link?: {
                     type?: ('reference' | 'custom') | null;
@@ -699,11 +807,21 @@ export interface Ssr {
             blockType: 'mediaBlock';
           }
         | {
-            introContent?:
-              | {
+            introContent?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
                   [k: string]: unknown;
-                }[]
-              | null;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             populateBy?: ('collection' | 'selection') | null;
             relationTo?: 'posts' | null;
             categories?: (string | Category)[] | null;
@@ -754,22 +872,42 @@ export interface SsrAutosave {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?:
-      | {
+    richText?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
           [k: string]: unknown;
-        }[]
-      | null;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     media?: (string | null) | Media;
   };
   layout?:
     | (
         | {
             invertBackground?: boolean | null;
-            richText?:
-              | {
+            richText?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
                   [k: string]: unknown;
-                }[]
-              | null;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             links?:
               | {
                   link: {
@@ -803,11 +941,21 @@ export interface SsrAutosave {
             columns?:
               | {
                   size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?:
-                    | {
+                  richText?: {
+                    root: {
+                      type: string;
+                      children: {
+                        type: any;
+                        version: number;
                         [k: string]: unknown;
-                      }[]
-                    | null;
+                      }[];
+                      direction: ('ltr' | 'rtl') | null;
+                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                      indent: number;
+                      version: number;
+                    };
+                    [k: string]: unknown;
+                  } | null;
                   enableLink?: boolean | null;
                   link?: {
                     type?: ('reference' | 'custom') | null;
@@ -844,11 +992,21 @@ export interface SsrAutosave {
             blockType: 'mediaBlock';
           }
         | {
-            introContent?:
-              | {
+            introContent?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
                   [k: string]: unknown;
-                }[]
-              | null;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             populateBy?: ('collection' | 'selection') | null;
             relationTo?: 'posts' | null;
             categories?: (string | Category)[] | null;
@@ -920,22 +1078,42 @@ export interface CustomLivePreview {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?:
-      | {
+    richText?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
           [k: string]: unknown;
-        }[]
-      | null;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     media?: (string | null) | Media;
   };
   layout?:
     | (
         | {
             invertBackground?: boolean | null;
-            richText?:
-              | {
+            richText?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
                   [k: string]: unknown;
-                }[]
-              | null;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             links?:
               | {
                   link: {
@@ -969,11 +1147,21 @@ export interface CustomLivePreview {
             columns?:
               | {
                   size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?:
-                    | {
+                  richText?: {
+                    root: {
+                      type: string;
+                      children: {
+                        type: any;
+                        version: number;
                         [k: string]: unknown;
-                      }[]
-                    | null;
+                      }[];
+                      direction: ('ltr' | 'rtl') | null;
+                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                      indent: number;
+                      version: number;
+                    };
+                    [k: string]: unknown;
+                  } | null;
                   enableLink?: boolean | null;
                   link?: {
                     type?: ('reference' | 'custom') | null;
@@ -1010,11 +1198,21 @@ export interface CustomLivePreview {
             blockType: 'mediaBlock';
           }
         | {
-            introContent?:
-              | {
+            introContent?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
                   [k: string]: unknown;
-                }[]
-              | null;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             populateBy?: ('collection' | 'selection') | null;
             relationTo?: 'posts' | null;
             categories?: (string | Category)[] | null;
@@ -1291,7 +1489,6 @@ export interface PagesSelect<T extends boolean = true> {
       };
   localizedTitle?: T;
   relationToLocalized?: T;
-  richTextSlate?: T;
   richTextLexical?: T;
   richTextLexicalLocalized?: T;
   relationshipAsUpload?: T;
@@ -1947,6 +2144,16 @@ export interface FooterSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

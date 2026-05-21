@@ -9,9 +9,10 @@ import { ExternalLinkIcon } from '../../../../icons/ExternalLink/index.js'
 import { XIcon } from '../../../../icons/X/index.js'
 import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
+import { Button } from '../../../Button/index.js'
 import { Popup, PopupList } from '../../../Popup/index.js'
 import { PreviewFrameSizeInput } from '../SizeInput/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'live-preview-toolbar-controls'
 const zoomOptions = [50, 75, 100, 125, 150, 200]
@@ -31,14 +32,6 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
     <div className={baseClass}>
       {breakpoints?.length > 0 && (
         <Popup
-          button={
-            <React.Fragment>
-              <span>
-                {breakpoints.find((bp) => bp.name == breakpoint)?.label ?? customOption.label}
-              </span>
-              <ChevronIcon className={`${baseClass}__chevron`} />
-            </React.Fragment>
-          }
           className={`${baseClass}__breakpoint`}
           horizontalAlign="right"
           render={({ close }) => (
@@ -71,60 +64,64 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
               </React.Fragment>
             </PopupList.ButtonGroup>
           )}
+          renderButton={(buttonProps) => (
+            <Button {...buttonProps} buttonStyle="secondary" icon={<ChevronIcon size={16} />}>
+              {breakpoints.find((bp) => bp.name == breakpoint)?.label ?? customOption.label}
+            </Button>
+          )}
           showScrollbar
           verticalAlign="bottom"
         />
       )}
-      <div className={`${baseClass}__device-size`}>
-        <PreviewFrameSizeInput axis="x" />
-        <span className={`${baseClass}__size-divider`}>
-          <XIcon />
-        </span>
-        <PreviewFrameSizeInput axis="y" />
+      <div className={`${baseClass}__center`}>
+        <div className={`${baseClass}__device-size`}>
+          <PreviewFrameSizeInput axis="x" />
+          <span className={`${baseClass}__size-divider`}>
+            <XIcon />
+          </span>
+          <PreviewFrameSizeInput axis="y" />
+        </div>
+        <Popup
+          className={`${baseClass}__zoom`}
+          horizontalAlign="right"
+          render={({ close }) => (
+            <PopupList.ButtonGroup>
+              <React.Fragment>
+                {zoomOptions.map((zoomValue) => (
+                  <PopupList.Button
+                    active={zoom * 100 == zoomValue}
+                    key={zoomValue}
+                    onClick={() => {
+                      setZoom(zoomValue / 100)
+                      close()
+                    }}
+                  >
+                    {zoomValue}%
+                  </PopupList.Button>
+                ))}
+              </React.Fragment>
+            </PopupList.ButtonGroup>
+          )}
+          renderButton={(buttonProps) => (
+            <Button {...buttonProps} buttonStyle="pill" icon={<ChevronIcon size={16} />}>
+              {zoom * 100}%
+            </Button>
+          )}
+          showScrollbar
+          verticalAlign="bottom"
+        />
       </div>
-      <Popup
-        button={
-          <React.Fragment>
-            <span>{zoom * 100}%</span>
-            <ChevronIcon className={`${baseClass}__chevron`} />
-          </React.Fragment>
-        }
-        className={`${baseClass}__zoom`}
-        horizontalAlign="right"
-        render={({ close }) => (
-          <PopupList.ButtonGroup>
-            <React.Fragment>
-              {zoomOptions.map((zoomValue) => (
-                <PopupList.Button
-                  active={zoom * 100 == zoomValue}
-                  key={zoomValue}
-                  onClick={() => {
-                    setZoom(zoomValue / 100)
-                    close()
-                  }}
-                >
-                  {zoomValue}%
-                </PopupList.Button>
-              ))}
-            </React.Fragment>
-          </PopupList.ButtonGroup>
-        )}
-        showScrollbar
-        verticalAlign="bottom"
-      />
-      <a
+      <Button
+        aria-label={t('general:openInNewWindow')}
+        buttonStyle="ghost"
         className={`${baseClass}__external`}
-        href={url}
+        icon={<ExternalLinkIcon size={16} />}
         onClick={(e) => {
           e.preventDefault()
           setPreviewWindowType('popup')
         }}
-        target="_blank"
-        title={t('general:openInNewWindow')}
-        type="button"
-      >
-        <ExternalLinkIcon />
-      </a>
+        tooltip={t('general:openInNewWindow')}
+      />
     </div>
   )
 }

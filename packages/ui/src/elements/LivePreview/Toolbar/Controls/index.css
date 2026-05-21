@@ -1,0 +1,32 @@
+@layer payload-default {
+  .live-preview-toolbar-controls {
+    display: contents;
+  }
+
+  .live-preview-toolbar-controls__breakpoint {
+    justify-self: start;
+  }
+
+  .live-preview-toolbar-controls__center {
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    gap: var(--spacer-2);
+  }
+
+  .live-preview-toolbar-controls__device-size {
+    display: flex;
+    align-items: center;
+  }
+
+  .live-preview-toolbar-controls__size-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-icon-secondary);
+  }
+
+  .live-preview-toolbar-controls__external {
+    justify-self: end;
+  }
+}

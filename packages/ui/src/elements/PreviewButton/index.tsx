@@ -4,11 +4,9 @@ import type { PreviewButtonClientProps } from 'payload'
 import React from 'react'
 
 import { ExternalLinkIcon } from '../../icons/ExternalLink/index.js'
-import './index.scss'
 import { usePreviewURL } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-
-const baseClass = 'preview-btn'
+import { Button } from '../Button/index.js'
 
 export function PreviewButton(props: PreviewButtonClientProps) {
   const { previewURL } = usePreviewURL()
@@ -18,16 +16,17 @@ export function PreviewButton(props: PreviewButtonClientProps) {
     return null
   }
 
+  const label = t('version:preview')
+
   return (
-    <a
-      aria-label={t('version:preview')}
-      className={baseClass}
-      href={previewURL}
+    <Button
+      aria-label={label}
+      buttonStyle="ghost"
+      icon={<ExternalLinkIcon size={16} />}
       id="preview-button"
-      target="_blank"
-      title={t('version:preview')}
-    >
-      <ExternalLinkIcon />
-    </a>
+      newTab
+      tooltip={label}
+      url={previewURL}
+    />
   )
 }

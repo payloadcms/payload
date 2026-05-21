@@ -1,0 +1,42 @@
+@layer payload-default {
+  .live-preview-toolbar {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    max-height: var(--spacer-6);
+    padding: var(--spacer-2);
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .live-preview-toolbar--static {
+    position: relative;
+    width: 100%;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .live-preview-toolbar--draggable {
+    box-shadow: 0 -2px 16px -2px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    border-radius: var(--radius-medium);
+  }
+
+  .live-preview-toolbar__drag-handle {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: grab;
+
+    .icon--drag-handle .fill {
+      fill: var(--color-icon-tertiary);
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+}
