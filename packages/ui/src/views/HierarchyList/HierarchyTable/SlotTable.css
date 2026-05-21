@@ -41,52 +41,39 @@
   }
 
   .slot-table__th--drag {
-    width: var(--spacer-6);
-    min-width: var(--spacer-6);
+    width: var(--spacer-4);
+    min-width: var(--spacer-4);
     padding: 0;
   }
 
   .slot-table__th--checkbox {
-    width: var(--spacer-6);
-    min-width: var(--spacer-6);
-    padding: var(--spacer-2-5);
+    width: var(--spacer-5);
+    min-width: var(--spacer-5);
+    padding: var(--spacer-2);
     text-align: center;
   }
 
   .slot-table__tr {
     position: relative;
     line-height: 1;
-
-    &:nth-child(odd) {
-      background: var(--color-bg-secondary);
-
-      td:first-child {
-        border-top-left-radius: var(--radius-small);
-        border-bottom-left-radius: var(--radius-small);
-      }
-
-      td:last-child {
-        border-top-right-radius: var(--radius-small);
-        border-bottom-right-radius: var(--radius-small);
-      }
-    }
+    border-top: 1px solid var(--color-border);
   }
 
   .slot-table__tr--clickable {
     cursor: pointer;
 
     &:hover {
-      background: var(--color-bg-tertiary);
+      background: var(--color-bg-secondary);
     }
 
     &:focus {
       outline: none;
-      background: var(--color-bg-tertiary);
+      background: var(--color-bg-secondary);
     }
   }
 
   .slot-table__tr--selected {
-    background: var(--color-bg-tertiary) !important;
+    background: var(--color-bg-selected) !important;
   }
 
   .slot-table__td {
@@ -105,16 +92,16 @@
   }
 
   .slot-table__td--drag {
-    width: var(--spacer-6);
-    min-width: var(--spacer-6);
+    width: var(--spacer-4);
+    min-width: var(--spacer-4);
     padding: 0;
     text-align: center;
   }
 
   .slot-table__td--checkbox {
-    width: var(--spacer-6);
-    min-width: var(--spacer-6);
-    padding: var(--spacer-2-5);
+    width: var(--spacer-5);
+    min-width: var(--spacer-5);
+    padding: var(--spacer-2);
     text-align: center;
   }
 
