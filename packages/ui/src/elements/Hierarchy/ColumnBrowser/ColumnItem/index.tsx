@@ -6,7 +6,7 @@ import type { ColumnItemProps } from '../types.js'
 import { CheckboxInput } from '../../../../fields/Checkbox/Input.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { isSuperset } from '../../../../utilities/isSuperset.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-column-item'
 
