@@ -3,33 +3,12 @@
     width: 100%;
     display: flex;
     --doc-sidebar-width: 325px;
-    --sidebar-gutter-h-right: var(--gutter-h);
-    --sidebar-gutter-h-left: var(--spacer-6);
-    --main-gutter-h-left: var(--gutter-h);
-    --main-gutter-h-right: var(--spacer-6);
-  }
-
-  [dir='rtl'] .document-fields:not(.document-fields--force-sidebar-wrap) {
-    --sidebar-gutter-h-left: var(--gutter-h);
-    --sidebar-gutter-h-right: var(--spacer-6);
-    --main-gutter-h-left: var(--spacer-6);
-    --main-gutter-h-right: var(--gutter-h);
-  }
-
-  .document-fields--force-sidebar-wrap,
-  .document-fields:has(
-      .document-fields__sidebar-wrap .document-fields__sidebar-fields > .render-fields:empty
-    ) {
-    --sidebar-gutter-h-left: var(--gutter-h);
-    --sidebar-gutter-h-right: var(--gutter-h);
-    --main-gutter-h-left: var(--gutter-h);
-    --main-gutter-h-right: var(--gutter-h);
   }
 
   .document-fields--has-sidebar {
     --main-width: 66.66%;
     --main-border: 1px solid var(--color-border);
-    --main-field-margin: calc(var(--spacer-6) * -1);
+    --main-field-margin: calc(var(--gutter-h) * -1);
   }
 
   .document-fields--has-sidebar:has(
@@ -45,8 +24,8 @@
   }
 
   .document-fields--has-sidebar .document-fields__edit {
-    padding-left: var(--main-gutter-h-left);
-    padding-right: var(--main-gutter-h-right);
+    padding-left: var(--gutter-h);
+    padding-right: var(--gutter-h);
   }
 
   [dir='ltr'] .document-fields--has-sidebar .document-fields__edit {
@@ -61,9 +40,13 @@
     border-left: var(--main-border);
   }
 
-  .document-fields--has-sidebar .document-fields__fields > .tabs-field,
-  .document-fields--has-sidebar .document-fields__fields > .group-field {
+  .document-fields--has-sidebar .document-fields__fields > .tabs-field {
     margin-right: var(--main-field-margin);
+  }
+
+  /* Extend group border to the main/sidebar divider */
+  .document-fields--has-sidebar .document-fields__fields > .group-field::before {
+    right: calc(var(--gutter-h) * -1);
   }
 
   .document-fields__main {
@@ -112,8 +95,8 @@
     flex-direction: column;
     gap: var(--spacer-3);
     padding-top: var(--spacer-5);
-    padding-left: var(--sidebar-gutter-h-left);
-    padding-right: var(--sidebar-gutter-h-right);
+    padding-left: var(--gutter-h);
+    padding-right: var(--gutter-h);
     padding-bottom: var(--spacing-view-bottom);
   }
 
@@ -151,17 +134,6 @@
   @media (max-width: 1024px) {
     .document-fields {
       display: block;
-      --main-gutter-h-left: var(--gutter-h);
-      --main-gutter-h-right: var(--gutter-h);
-      --sidebar-gutter-h-left: var(--gutter-h);
-      --sidebar-gutter-h-right: var(--gutter-h);
-    }
-
-    [dir='rtl'] .document-fields:not(.document-fields--force-sidebar-wrap) {
-      --sidebar-gutter-h-left: var(--gutter-h);
-      --sidebar-gutter-h-right: var(--gutter-h);
-      --main-gutter-h-left: var(--gutter-h);
-      --main-gutter-h-right: var(--gutter-h);
     }
 
     .document-fields--has-sidebar .document-fields__main {
@@ -176,8 +148,7 @@
       border-left: 0;
     }
 
-    .document-fields--has-sidebar .document-fields__fields > .tabs-field,
-    .document-fields--has-sidebar .document-fields__fields > .group-field {
+    .document-fields--has-sidebar .document-fields__fields > .tabs-field {
       margin-right: calc(var(--gutter-h) * -1);
     }
 
