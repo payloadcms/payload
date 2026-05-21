@@ -1,11 +1,14 @@
 import type { PayloadRequest, ServerProps } from 'payload'
 
-import { Logout } from '@payloadcms/ui'
-import { DefaultNav as DefaultNavUI } from '@payloadcms/ui/elements/Nav'
+import { AlignJustifiedIcon, Logout } from '@payloadcms/ui'
 import { getNavData } from '@payloadcms/ui/elements/Nav/getNavData'
+import { DefaultNavClient } from '@payloadcms/ui/elements/Nav/index.client'
+import { NavWrapper } from '@payloadcms/ui/elements/Nav/NavWrapper'
+import { SettingsMenuButton } from '@payloadcms/ui/elements/Nav/SettingsMenuButton'
 import React from 'react'
 
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
+import { SidebarTabs } from './SidebarTabs/index.js'
 
 export type NavProps = {
   req?: PayloadRequest
@@ -77,36 +80,79 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
         )
       : []
 
+  const RenderedBeforeNav = RenderServerComponent({
+    clientProps,
+    Component: beforeNav,
+    importMap: payload.importMap,
+    serverProps,
+  })
+
+  const RenderedBeforeNavLinks = RenderServerComponent({
+    clientProps,
+    Component: beforeNavLinks,
+    importMap: payload.importMap,
+    serverProps,
+  })
+
+  const RenderedAfterNavLinks = RenderServerComponent({
+    clientProps,
+    Component: afterNavLinks,
+    importMap: payload.importMap,
+    serverProps,
+  })
+
+  const RenderedAfterNav = RenderServerComponent({
+    clientProps,
+    Component: afterNav,
+    importMap: payload.importMap,
+    serverProps,
+  })
+
+  const allTabs = [
+    {
+      slug: 'nav',
+      components: {
+        Content: (
+          <>
+            {RenderedBeforeNavLinks}
+            <DefaultNavClient groups={groups} navPreferences={navPreferences} />
+            {RenderedAfterNavLinks}
+          </>
+        ),
+        Icon: <AlignJustifiedIcon size={24} />,
+      },
+      isDefaultActive: true,
+      label: i18n.t('general:collections'),
+    },
+    ...(payload.config.admin?.components?.sidebar?.tabs?.filter((tab) => !tab.disabled) || []),
+  ]
+
+  const baseClass = 'nav'
+
   return (
-    <DefaultNavUI
-      afterNav={RenderServerComponent({
-        clientProps,
-        Component: afterNav,
-        importMap: payload.importMap,
-        serverProps,
-      })}
-      afterNavLinks={RenderServerComponent({
-        clientProps,
-        Component: afterNavLinks,
-        importMap: payload.importMap,
-        serverProps,
-      })}
-      beforeNav={RenderServerComponent({
-        clientProps,
-        Component: beforeNav,
-        importMap: payload.importMap,
-        serverProps,
-      })}
-      beforeNavLinks={RenderServerComponent({
-        clientProps,
-        Component: beforeNavLinks,
-        importMap: payload.importMap,
-        serverProps,
-      })}
-      groups={groups}
-      logoutComponent={LogoutComponent}
-      navPreferences={navPreferences}
-      settingsMenu={RenderedSettingsMenu}
-    />
+    <NavWrapper baseClass={baseClass}>
+      {RenderedBeforeNav}
+      <nav className={`${baseClass}__wrap`}>
+        <SidebarTabs
+          documentSubViewType={documentSubViewType}
+          i18n={i18n}
+          locale={locale}
+          navPreferences={navPreferences}
+          params={params}
+          payload={payload}
+          permissions={permissions}
+          req={req}
+          searchParams={searchParams}
+          tabs={allTabs}
+          user={user}
+          viewType={viewType}
+        />
+        <div className={`${baseClass}__controls`}>
+          <SettingsMenuButton settingsMenu={RenderedSettingsMenu} />
+          {LogoutComponent}
+        </div>
+      </nav>
+      {RenderedAfterNav}
+    </NavWrapper>
   )
 }
