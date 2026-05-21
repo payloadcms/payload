@@ -9,6 +9,7 @@ import { blocksSeedData } from './seed/blocksSeedData.js'
 import {
   blocksFieldsSlug,
   collectionSlugs,
+  draftVersionsSlug,
   joinFieldsSlug,
   joinPostsSlug,
   relationshipFieldsSlug,
@@ -261,19 +262,13 @@ export const baseConfig: Partial<Config> = {
       },
     })
 
-    const joinPosts = [
-      { title: 'First Post', _status: 'published' },
-      { title: 'Second Post test', _status: 'published' },
-      { title: 'Third Post', _status: 'draft' },
-      { title: 'Fourth Post', _status: 'published' },
-      { title: 'Fifth Post', _status: 'draft' },
-    ]
-
-    for (const post of joinPosts) {
+    // Create 15 posts to test join field pagination (defaultLimit: 3)
+    for (let i = 1; i <= 15; i++) {
       await payload.create({
         collection: joinPostsSlug,
         data: {
-          ...post,
+          title: `Post ${i}`,
+          _status: i % 2 === 0 ? 'published' : 'draft',
           category: joinCategory.id,
         },
       })
@@ -383,6 +378,27 @@ export const baseConfig: Partial<Config> = {
         },
       },
     })
+
+    // Seed draft-versions collection with many versions for pagination testing
+    const { id: draftVersionsDocID } = await payload.create({
+      collection: draftVersionsSlug,
+      data: {
+        title: 'Document With Many Versions',
+        content: 'Initial content',
+      },
+      draft: true,
+    })
+
+    for (let i = 0; i < 20; i++) {
+      await payload.update({
+        id: draftVersionsDocID,
+        collection: draftVersionsSlug,
+        data: {
+          title: `Document With Many Versions - v${i + 2}`,
+          content: `Updated content version ${i + 2}`,
+        },
+      })
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

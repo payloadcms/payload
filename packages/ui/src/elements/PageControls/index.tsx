@@ -19,19 +19,12 @@ const baseClass = 'page-controls'
  */
 export const PageControlsComponent: React.FC<{
   AfterPageControls?: React.ReactNode
-  collectionConfig: ClientCollectionConfig
   data: PaginatedDocs
   handlePageChange?: IListQueryContext['handlePageChange']
   handlePerPageChange?: IListQueryContext['handlePerPageChange']
   limit?: number
-}> = ({
-  AfterPageControls,
-  collectionConfig,
-  data,
-  handlePageChange,
-  handlePerPageChange,
-  limit,
-}) => {
+  limits?: number[]
+}> = ({ AfterPageControls, data, handlePageChange, handlePerPageChange, limit, limits }) => {
   const { i18n } = useTranslation()
 
   return (
@@ -61,7 +54,7 @@ export const PageControlsComponent: React.FC<{
             <PerPage
               handleChange={handlePerPageChange}
               limit={limit}
-              limits={collectionConfig?.admin?.pagination?.limits}
+              limits={limits}
               resetPage={data.totalDocs <= data.pagingCounter}
             />
           </div>
@@ -92,11 +85,11 @@ export const PageControls: React.FC<{
   return (
     <PageControlsComponent
       AfterPageControls={AfterPageControls}
-      collectionConfig={collectionConfig}
       data={data}
       handlePageChange={handlePageChange}
       handlePerPageChange={handlePerPageChange}
       limit={isNumber(query.limit) ? query.limit : initialLimit}
+      limits={collectionConfig?.admin?.pagination?.limits}
     />
   )
 }
