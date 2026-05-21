@@ -75,7 +75,7 @@
   .versions__page-info {
     flex: 1 0 0;
     text-align: end;
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
