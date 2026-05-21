@@ -32,7 +32,6 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
           className={`${baseClass}__fields`}
           fields={fields}
           forceRender={forceRender}
-          margins={false}
           parentIndexPath={indexPath}
           parentPath={parentPath}
           parentSchemaPath={parentSchemaPath}

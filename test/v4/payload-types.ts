@@ -88,6 +88,7 @@ export interface Config {
     'relationship-fields': RelationshipField;
     'rich-text-fields': RichTextField;
     'row-fields': RowField;
+    'search-bar-test': SearchBarTest;
     'select-fields': SelectField;
     'slug-fields': SlugField;
     'tabs-fields': TabsField;
@@ -99,6 +100,7 @@ export interface Config {
     'draft-versions': DraftVersion;
     autosave: Autosave;
     rubbish: Rubbish;
+    'unauthorized-test': UnauthorizedTest;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -140,6 +142,7 @@ export interface Config {
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'row-fields': RowFieldsSelect<false> | RowFieldsSelect<true>;
+    'search-bar-test': SearchBarTestSelect<false> | SearchBarTestSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
@@ -151,6 +154,7 @@ export interface Config {
     'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
     rubbish: RubbishSelect<false> | RubbishSelect<true>;
+    'unauthorized-test': UnauthorizedTestSelect<false> | UnauthorizedTestSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -160,10 +164,10 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -466,6 +470,12 @@ export interface DateField {
   monthOnly?: string | null;
   withTimezone?: string | null;
   withTimezone_tz?: SupportedTimezones;
+  withTimezoneRequired: string;
+  withTimezoneRequired_tz: SupportedTimezones;
+  withTimezoneDisabled?: string | null;
+  withTimezoneDisabled_tz?: SupportedTimezones;
+  withTimezoneReadOnly?: string | null;
+  withTimezoneReadOnly_tz?: SupportedTimezones;
   updatedAt: string;
   createdAt: string;
 }
@@ -851,6 +861,10 @@ export interface TextField {
    */
   textReadOnly?: string | null;
   /**
+   * Tags for this post (hierarchy field)
+   */
+  _h_tags?: (string | Tag)[] | null;
+  /**
    * Documents that reference this post
    */
   relatedFrom?: {
@@ -858,10 +872,6 @@ export interface TextField {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  /**
-   * Tags for this post (hierarchy field)
-   */
-  _h_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -871,13 +881,14 @@ export interface TextField {
  */
 export interface Tag {
   id: string;
-  parent?: (string | null) | Tag;
+  _h_tags?: (string | null) | Tag;
   name: string;
   description?: string | null;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
+  allowedCollections?: 'text-fields'[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -991,6 +1002,20 @@ export interface RowField {
   billingCity?: string | null;
   shippingStreet?: string | null;
   shippingCity?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-bar-test".
+ */
+export interface SearchBarTest {
+  id: string;
+  title: string;
+  description?: string | null;
+  category?: ('news' | 'blog' | 'tutorial' | 'docs') | null;
+  status?: ('draft' | 'published' | 'archived') | null;
+  priority?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1233,6 +1258,16 @@ export interface Rubbish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unauthorized-test".
+ */
+export interface UnauthorizedTest {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1340,6 +1375,10 @@ export interface PayloadLockedDocument {
         value: string | RowField;
       } | null)
     | ({
+        relationTo: 'search-bar-test';
+        value: string | SearchBarTest;
+      } | null)
+    | ({
         relationTo: 'select-fields';
         value: string | SelectField;
       } | null)
@@ -1382,6 +1421,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'rubbish';
         value: string | Rubbish;
+      } | null)
+    | ({
+        relationTo: 'unauthorized-test';
+        value: string | UnauthorizedTest;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1466,7 +1509,7 @@ export interface PayloadQueryPreset {
     | boolean
     | null;
   groupBy?: string | null;
-  relatedCollection: 'select-fields';
+  relatedCollection: 'search-bar-test' | 'select-fields';
   /**
    * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
    */
@@ -1734,6 +1777,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
   monthOnly?: T;
   withTimezone?: T;
   withTimezone_tz?: T;
+  withTimezoneRequired?: T;
+  withTimezoneRequired_tz?: T;
+  withTimezoneDisabled?: T;
+  withTimezoneDisabled_tz?: T;
+  withTimezoneReadOnly?: T;
+  withTimezoneReadOnly_tz?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1957,6 +2006,19 @@ export interface RowFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-bar-test_select".
+ */
+export interface SearchBarTestSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  category?: T;
+  status?: T;
+  priority?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "select-fields_select".
  */
 export interface SelectFieldsSelect<T extends boolean = true> {
@@ -2038,13 +2100,14 @@ export interface TabsFieldsSelect<T extends boolean = true> {
  * via the `definition` "tags_select".
  */
 export interface TagsSelect<T extends boolean = true> {
-  parent?: T;
+  _h_tags?: T;
   name?: T;
   description?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
   _h_titlePath?: T;
+  allowedCollections?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2055,8 +2118,8 @@ export interface TextFieldsSelect<T extends boolean = true> {
   favoriteFruit?: T;
   textDisabled?: T;
   textReadOnly?: T;
-  relatedFrom?: T;
   _h_tags?: T;
+  relatedFrom?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2134,6 +2197,15 @@ export interface RubbishSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unauthorized-test_select".
+ */
+export interface UnauthorizedTestSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

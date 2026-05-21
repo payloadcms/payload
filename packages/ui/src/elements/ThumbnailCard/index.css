@@ -61,11 +61,11 @@
 
   .thumbnail-card--selected.thumbnail-card--has-on-click:hover .thumbnail-card__thumbnail,
   .thumbnail-card--selected.thumbnail-card--has-on-click:focus-visible .thumbnail-card__thumbnail {
-    outline-color: var(--color-border-selected-strong);
+    outline-color: var(--accessibility-focus-color);
   }
 
   .thumbnail-card--selected.thumbnail-card--has-on-click:active .thumbnail-card__thumbnail {
-    outline-color: var(--color-border-selected-strong);
+    outline-color: var(--accessibility-focus-color);
   }
 
   .thumbnail-card__label {

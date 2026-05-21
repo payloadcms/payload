@@ -1,0 +1,28 @@
+{
+  "name": "ai-reviewer",
+  "version": "0.0.0",
+  "private": true,
+  "description": "GitHub Action for AI-powered PR code review",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "pnpm build:typecheck && pnpm build:ncc",
+    "build:ncc": "ncc build src/index.ts -t -o dist",
+    "build:typecheck": "tsc",
+    "clean": "rimraf dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@actions/core": "^1.3.0",
+    "@actions/github": "^5.0.0",
+    "@anthropic-ai/sdk": "^0.39.0"
+  },
+  "devDependencies": {
+    "@octokit/webhooks-types": "^7.5.1",
+    "@types/node": "^20.16.5",
+    "@vercel/ncc": "0.38.1",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  }
+}

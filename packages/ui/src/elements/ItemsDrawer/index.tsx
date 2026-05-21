@@ -12,7 +12,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { ThumbnailCard } from '../ThumbnailCard/index.js'
-import './index.scss'
+import './index.css'
 import { ItemSearch } from './ItemSearch/index.js'
 
 export type DrawerItem = ClientBlock | ClientWidget

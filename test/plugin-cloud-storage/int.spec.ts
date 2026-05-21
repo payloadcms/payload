@@ -3,6 +3,7 @@ import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import fs from 'fs'
 import path from 'path'
 import { APIError } from 'payload'
 import { sanitizeFilename } from 'payload/shared'
@@ -17,7 +18,9 @@ import {
   mediaSlug,
   mediaWithCustomURLSlug,
   mediaWithGenerateFileURLSlug,
+  mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
+  mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
@@ -641,6 +644,148 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           storageIdChanged: storageIdsAreDifferent,
           timestampChanged: timestampsAreDifferent,
         })
+      })
+    })
+
+    describe('User afterChange hook propagation', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          try {
+            await payload.delete({ id, collection: mediaWithThrowingHookSlug })
+          } catch (_) {
+            // Ignore
+          }
+        }
+        createdIDs.length = 0
+      })
+
+      it('should surface user afterChange errors that throw during the plugin internal update on create', async () => {
+        await expect(
+          payload.create({
+            collection: mediaWithThrowingHookSlug,
+            data: { shouldThrow: true },
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          }),
+        ).rejects.toThrow('User afterChange hook throws error')
+      })
+
+      it('should surface user afterChange errors during reupload and preserve the previous file in S3', async () => {
+        const imagePath = path.resolve(dirname, '../uploads/image.png')
+        const buildFile = (name: string) => ({
+          data: fs.readFileSync(imagePath),
+          mimetype: 'image/png',
+          name,
+          size: fs.statSync(imagePath).size,
+        })
+
+        const initial = await payload.create({
+          collection: mediaWithThrowingHookSlug,
+          data: { shouldThrow: false },
+          file: buildFile('initial.png'),
+        })
+
+        createdIDs.push(initial.id)
+
+        const initialKey = `${initial.filename}`
+        const before = await client.send(
+          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
+        )
+        expect(before.$metadata.httpStatusCode).toBe(200)
+
+        await expect(
+          payload.update({
+            id: initial.id,
+            collection: mediaWithThrowingHookSlug,
+            data: { shouldThrow: true },
+            file: buildFile('replacement.png'),
+          }),
+        ).rejects.toThrow('User afterChange hook throws error')
+
+        const after = await client.send(
+          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
+        )
+        expect(after.$metadata.httpStatusCode).toBe(200)
+      })
+    })
+
+    describe('Reupload with overwriteExistingFiles', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          try {
+            await payload.delete({ id, collection: mediaWithOverwriteSlug })
+          } catch (_) {
+            // Ignore
+          }
+        }
+        createdIDs.length = 0
+      })
+
+      it('should preserve size variants in S3 when reupload reuses the same filename', async () => {
+        const imagePath = path.resolve(dirname, '../uploads/image.png')
+        const buildFile = (name: string) => ({
+          data: fs.readFileSync(imagePath),
+          mimetype: 'image/png',
+          name,
+          size: fs.statSync(imagePath).size,
+        })
+
+        const initial = (await payload.create({
+          collection: mediaWithOverwriteSlug,
+          data: {},
+          file: buildFile('overwrite.png'),
+          overwriteExistingFiles: true,
+        })) as unknown as {
+          filename: string
+          id: number | string
+          sizes: Record<string, { filename: string }>
+        }
+
+        createdIDs.push(initial.id)
+
+        const initialSizeKeys = Object.values(initial.sizes ?? {})
+          .map((s) => s?.filename)
+          .filter((f): f is string => typeof f === 'string')
+
+        expect(initialSizeKeys.length).toBeGreaterThan(0)
+
+        for (const key of [initial.filename, ...initialSizeKeys]) {
+          const head = await client.send(
+            new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
+          )
+          expect(head.$metadata.httpStatusCode).toBe(200)
+        }
+
+        const updated = (await payload.update({
+          id: initial.id,
+          collection: mediaWithOverwriteSlug,
+          data: {},
+          file: buildFile('overwrite.png'),
+          overwriteExistingFiles: true,
+        })) as unknown as {
+          filename: string
+          sizes: Record<string, { filename: string }>
+        }
+
+        // Filenames should match because overwriteExistingFiles is enabled.
+        expect(updated.filename).toBe(initial.filename)
+
+        const updatedSizeKeys = Object.values(updated.sizes ?? {})
+          .map((s) => s?.filename)
+          .filter((f): f is string => typeof f === 'string')
+
+        expect(updatedSizeKeys.sort()).toEqual(initialSizeKeys.sort())
+
+        // All keys (main + every size variant) should still exist in S3.
+        for (const key of [updated.filename, ...updatedSizeKeys]) {
+          const head = await client.send(
+            new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
+          )
+          expect(head.$metadata.httpStatusCode).toBe(200)
+        }
       })
     })
 

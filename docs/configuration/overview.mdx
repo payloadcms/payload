@@ -267,16 +267,6 @@ The Payload Config only lives on the server and is not allowed to contain any cl
 
 Behind the curtains, the Next.js-based Admin Panel generates a ClientConfig, which strips away any server-only code and enriches the config with React Components.
 
-## Compatibility flags
-
-The Payload Config can accept compatibility flags for running the newest versions but with older databases. You should only use these flags if you need to, and should confirm that you need to prior to enabling these flags.
-
-`allowLocalizedWithinLocalized`
-
-Payload localization works on a field-by-field basis. As you can nest fields within other fields, you could potentially nest a localized field within a localized field—but this would be redundant and unnecessary. There would be no reason to define a localized field within a localized parent field, given that the entire data structure from the parent field onward would be localized.
-
-By default, Payload will remove the `localized: true` property from sub-fields if a parent field is localized. Set this compatibility flag to `true` only if you have an existing Payload MongoDB database from pre-3.0, and you have nested localized fields that you would like to maintain without migrating.
-
 ## Logger
 
 Payload uses [Pino](https://getpino.io) as its logger. By default, Payload logs pretty-printed output to stdout. You can customise this through the `logger` option in your config.

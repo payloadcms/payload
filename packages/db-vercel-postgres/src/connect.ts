@@ -1,4 +1,4 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { Connect, Migration } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'

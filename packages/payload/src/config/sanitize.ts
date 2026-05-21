@@ -1,7 +1,6 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
-import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
 import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
 import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
@@ -42,10 +41,6 @@ import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/ind
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
-
-  if (configToSanitize?.compatibility?.allowLocalizedWithinLocalized) {
-    process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized = 'true'
-  }
 
   // default logging level will be 'error' if not provided
   sanitizedConfig.loggingLevels = {
@@ -460,13 +455,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config.csrf!.push(config.serverURL!)
   }
 
-  const uploadAdapters = new Set<string>()
-  // interact with all collections
-  for (const collection of config.collections!) {
-    // deduped upload adapters
-    if (collection.upload?.adapter) {
-      uploadAdapters.add(collection.upload.adapter)
-    }
+  if (!config.storage) {
+    config.storage = []
   }
 
   if (!config.upload) {
@@ -491,9 +481,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       isRoot: true,
       parentIsLocalized: false,
     })
-    if (config.editor.i18n && Object.keys(config.editor.i18n).length >= 0) {
-      config.i18n.translations = deepMergeSimple(config.i18n.translations, config.editor.i18n)
-    }
   }
 
   const promises: Promise<void>[] = []

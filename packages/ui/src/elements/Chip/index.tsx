@@ -75,7 +75,7 @@ export const Chip: React.FC<ChipProps> = ({
           onClick={onRemove}
           type="button"
         >
-          <XIcon />
+          <XIcon size={24} />
         </button>
       ) : null}
     </div>

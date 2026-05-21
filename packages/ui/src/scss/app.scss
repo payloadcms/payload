@@ -37,21 +37,22 @@
     --z-modal: 30;
     --z-status: 40;
 
-    --gutter-h: #{base(3)};
+    --gutter-h: var(--spacer-5);
     --spacing-view-bottom: var(--gutter-h);
     --doc-controls-height: calc(var(--text-body-large-line-height) + var(--spacer-4));
-    --app-header-height: calc(var(--base) * 2.8);
     --nav-width: 275px;
     --nav-trans-time: 150ms;
 
+    @include large-break {
+      --gutter-h: var(--spacer-4);
+    }
+
     @include mid-break {
-      --gutter-h: #{base(2)};
-      --app-header-height: calc(var(--base) * 2.4);
+      --gutter-h: var(--spacer-3);
       --doc-controls-height: calc(var(--base) * 2.4);
     }
 
     @include small-break {
-      --gutter-h: #{base(0.8)};
       --spacing-view-bottom: calc(var(--base) * 2);
       --nav-width: 100vw;
     }

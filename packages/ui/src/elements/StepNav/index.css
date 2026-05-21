@@ -2,45 +2,39 @@
   .step-nav {
     display: flex;
     align-items: center;
-    gap: var(--spacer-2);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    color: var(--color-text);
 
     &::after {
       content: ' ';
       position: sticky;
       top: 0;
       right: 0;
-      width: var(--base);
+      width: var(--spacer-3);
       background: linear-gradient(to right, transparent, var(--color-bg));
     }
 
-    * {
-      display: block;
-    }
-
     a {
-      border: 0;
       display: flex;
       align-items: center;
-      font-weight: 600;
       text-decoration: none;
 
       label {
         cursor: pointer;
       }
-
-      &:hover,
-      &:focus-visible {
-        text-decoration: underline;
-      }
     }
 
     span {
-      max-width: calc(var(--base) * 8);
+      max-width: calc(var(--spacer-6) * 4);
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
 
-      &:has(.dashboard-breadcrumb-select, .dashboard-breadcrumb-dropdown__editing) {
+      &:has(.dashboard-breadcrumb-dropdown, .dashboard-breadcrumb-dropdown__editing) {
         max-width: none;
         overflow: visible;
         white-space: normal;
@@ -48,22 +42,23 @@
     }
   }
 
-  .step-nav__home {
-    width: var(--spacer-4);
-    height: var(--spacer-4);
-    position: relative;
+  .step-nav__separator {
+    color: var(--color-text-tertiary);
+    width: var(--spacer-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  @media (max-width: 1024px) {
-    .step-nav__home {
-      width: var(--spacer-3);
-      height: var(--spacer-3);
-    }
+  .step-nav__last {
+    color: var(--color-text-secondary);
   }
 
-  @media (max-width: 768px) {
-    .step-nav {
-      gap: var(--spacer-1);
-    }
+  .step-nav__item:not(.btn),
+  .step-nav__item:has(.btn) {
+    margin-left: var(--spacer-2);
+  }
+  .step-nav__item:has(.btn) {
+    margin-left: 0;
   }
 }

@@ -15,18 +15,23 @@
   }
 
   .popup__hidden-content {
-    display: none;
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .popup__content {
     --popup-caret-size: 8px;
 
     position: absolute;
+    top: -9999px;
+    left: -9999px;
     z-index: var(--z-popup);
     background: var(--color-bg-elevated);
     color: var(--color-text);
     border-radius: var(--radius-large);
-    padding: var(--spacer-2);
     min-width: 80px;
     max-width: 400px;
     box-shadow:
@@ -49,8 +54,10 @@
   }
 
   .popup__scroll-container {
+    overflow-x: hidden;
     overflow-y: auto;
-    max-height: calc(var(--base) * 10);
+    max-height: calc(var(--spacer-5) * 10);
+    padding: var(--spacer-2) 0;
   }
 
   .popup__scroll-container:not(.popup__scroll-container--show-scrollbar) {

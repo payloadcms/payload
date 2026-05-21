@@ -34,7 +34,7 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
   // For default FolderIcon path, render directly to avoid import map requirement
   const isDefaultFolderIcon = !IconComponent || IconComponent === '@payloadcms/ui#FolderIcon'
   const renderedIcon = isDefaultFolderIcon ? (
-    <FolderIcon color="muted" />
+    <FolderIcon />
   ) : (
     RenderServerComponent({
       Component: IconComponent,

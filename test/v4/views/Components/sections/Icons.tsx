@@ -66,10 +66,22 @@ const icons = [
 export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selectedComponent }) => (
   <Section columns={1} id="icons" selectedComponent={selectedComponent} title="Icons">
     <div className="components-view__icon-grid">
-      {/* Chevron - direction + large */}
+      {/* Chevron - direction + size */}
       <div className="components-view__icon-item components-view__icon-item--variants">
         <span>Chevron</span>
         <div className="components-view__icon-content">
+          <div className="components-view__icon-size-row">
+            <span>size: 24 (default)</span>
+            <div className="components-view__icon-variants">
+              <ChevronIcon size={24} />
+            </div>
+          </div>
+          <div className="components-view__icon-size-row">
+            <span>size: 16</span>
+            <div className="components-view__icon-variants">
+              <ChevronIcon size={16} />
+            </div>
+          </div>
           <div className="components-view__icon-size-row">
             <span>direction: down (default)</span>
             <div className="components-view__icon-variants">
@@ -77,17 +89,12 @@ export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selected
             </div>
           </div>
           <div className="components-view__icon-size-row">
-            <span>direction: up | left | right</span>
+            <span>direction: down (default) | up | left | right</span>
             <div className="components-view__icon-variants">
+              <ChevronIcon />
               <ChevronIcon direction="up" />
               <ChevronIcon direction="left" />
               <ChevronIcon direction="right" />
-            </div>
-          </div>
-          <div className="components-view__icon-size-row">
-            <span>large: true</span>
-            <div className="components-view__icon-variants">
-              <ChevronIcon direction="down" large />
             </div>
           </div>
         </div>
@@ -377,7 +384,7 @@ export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selected
         </div>
       </div>
 
-      {/* Folder - size + color */}
+      {/* Folder - size */}
       <div className="components-view__icon-item components-view__icon-item--variants">
         <span>Folder</span>
         <div className="components-view__icon-content">
@@ -391,14 +398,6 @@ export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selected
             <span>size: 16</span>
             <div className="components-view__icon-variants">
               <FolderIcon size={16} />
-            </div>
-          </div>
-          <div className="components-view__icon-size-row">
-            <span>color: default | dark | muted</span>
-            <div className="components-view__icon-variants">
-              <FolderIcon color="default" />
-              <FolderIcon color="dark" />
-              <FolderIcon color="muted" />
             </div>
           </div>
         </div>
@@ -499,7 +498,7 @@ export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selected
         </div>
       </div>
 
-      {/* Tag - size + color */}
+      {/* Tag - size */}
       <div className="components-view__icon-item components-view__icon-item--variants">
         <span>Tag</span>
         <div className="components-view__icon-content">
@@ -513,14 +512,6 @@ export const IconsSection: React.FC<{ selectedComponent: string }> = ({ selected
             <span>size: 16</span>
             <div className="components-view__icon-variants">
               <TagIcon size={16} />
-            </div>
-          </div>
-          <div className="components-view__icon-size-row">
-            <span>color: default | dark | muted</span>
-            <div className="components-view__icon-variants">
-              <TagIcon color="default" />
-              <TagIcon color="dark" />
-              <TagIcon color="muted" />
             </div>
           </div>
         </div>

@@ -108,7 +108,7 @@ export const DiffCollapser: React.FC<Props> = ({
         >
           <div className={`${baseClass}__label`}>{Label}</div>
 
-          <ChevronIcon direction={isCollapsed ? 'right' : 'down'} size={'small'} />
+          <ChevronIcon direction={isCollapsed ? 'right' : 'down'} size={16} />
         </button>
         {changeCount > 0 && isCollapsed && (
           <span className={`${baseClass}__field-change-count`}>

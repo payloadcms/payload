@@ -11,6 +11,7 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
 
+import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -21,6 +22,7 @@ import { TagIcon } from '../../icons/Tag/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
@@ -64,11 +66,24 @@ export function HierarchyListView(props: ListViewClientProps) {
   const collectionConfig = getEntityConfig({ collectionSlug })
   const { labels } = collectionConfig
 
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : undefined
+  const parentFieldName = hierarchyConfig?.parentFieldName
+
   const { i18n, t } = useTranslation()
   const collectionLabel = getTranslation(labels?.plural, i18n)
 
   const { setStepNav } = useStepNav()
-  const { parent } = useHierarchy()
+  const { parent, refreshTree } = useHierarchy()
+  const { clearRouteCache } = useRouteCache()
+
+  // Callback for when a new document is created
+  const handleSave = useCallback(() => {
+    clearRouteCache()
+    refreshTree(collectionSlug)
+  }, [clearRouteCache, collectionSlug, refreshTree])
 
   // Get search from URL params
   const searchFromURL = searchParams.get('search') || ''
@@ -113,7 +128,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       const baseLabel: StepNavItem = {
         label: (
           <div className={`${baseClass}__step-nav-icon-label`}>
-            {HierarchyIcon || <TagIcon color="muted" />}
+            {HierarchyIcon || <TagIcon />}
             {collectionLabel}
           </div>
         ),
@@ -128,11 +143,12 @@ export function HierarchyListView(props: ListViewClientProps) {
       let navItems = [baseLabel]
 
       if (ancestorBreadcrumbs.length > 0) {
+        const queryParam = parentFieldName || 'parent'
         const hierarchyBreadcrumbs: StepNavItem[] = ancestorBreadcrumbs.map((crumb) => ({
           label: crumb.title,
           url: formatAdminURL({
             adminRoute,
-            path: `/collections/${collectionSlug}?parent=${crumb.id}`,
+            path: `/collections/${collectionSlug}?${queryParam}=${crumb.id}`,
           }),
         }))
         navItems = [...navItems, ...hierarchyBreadcrumbs]
@@ -150,13 +166,9 @@ export function HierarchyListView(props: ListViewClientProps) {
     currentItemTitle,
     parent,
     HierarchyIcon,
+    parentFieldName,
   ])
 
-  const hierarchyConfig =
-    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
-      ? collectionConfig.hierarchy
-      : undefined
-  const parentFieldName = hierarchyConfig?.parentFieldName
   const parentId = hierarchyData?.parentId ?? null
 
   // Build collections array for create button
@@ -319,7 +331,6 @@ export function HierarchyListView(props: ListViewClientProps) {
           <Gutter className={`${baseClass}__wrap`}>
             <HierarchyListHeader
               collectionConfig={collectionConfig}
-              collections={collections}
               currentItemTitle={currentItemTitle}
               Description={
                 <React.Fragment>
@@ -345,29 +356,36 @@ export function HierarchyListView(props: ListViewClientProps) {
                   ) : null}
                 </React.Fragment>
               }
-              hasCreatePermission={hasCreatePermission}
               HierarchyIcon={HierarchyIcon}
               i18n={i18n}
               viewType={viewType}
             />
 
             <div className={`${baseClass}__controls`}>
-              <SearchBar
-                Actions={[
-                  <TypeFilter
-                    i18n={i18n}
-                    key={`type-filter-${hierarchyData.parent ? hierarchyData.parent.id : 'root'}`}
-                    onChange={handleTypeFilterChange}
-                    options={typeOptions}
-                    selectedValues={selectedTypes}
-                  />,
-                ]}
-                label={t('general:searchBy', {
-                  label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
-                })}
-                onSearchChange={handleSearchChange}
-                searchQueryParam={searchFromURL}
-              />
+              <div className={`${baseClass}__controls-left`}>
+                <SearchBar
+                  label={t('general:searchBy', {
+                    label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
+                  })}
+                  onSearchChange={handleSearchChange}
+                  searchQueryParam={searchFromURL}
+                />
+                <TypeFilter
+                  i18n={i18n}
+                  key={`type-filter-${hierarchyData.parent ? hierarchyData.parent.id : 'root'}`}
+                  onChange={handleTypeFilterChange}
+                  options={typeOptions}
+                  selectedValues={selectedTypes}
+                />
+              </div>
+              {hasCreatePermission && collections.length > 0 && (
+                <CreateDocumentButton
+                  buttonStyle="primary"
+                  collections={collections}
+                  drawerSlug={`hierarchy-create-${collectionSlug}`}
+                  onSave={handleSave}
+                />
+              )}
             </div>
 
             <HierarchyTable

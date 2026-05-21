@@ -150,14 +150,15 @@ export function renderCell({
           hierarchyIcon = RenderServerComponent({
             Component: iconComponent,
             importMap: payload.importMap,
+            key: `hierarchy-icon-${relationTo}`,
           })
         } else {
           // Use default icon based on allowHasMany
           hierarchyIcon =
             hierarchyConfig.allowHasMany === false ? (
-              <FolderIcon color="muted" />
+              <FolderIcon key={`hierarchy-icon-${relationTo}`} />
             ) : (
-              <TagIcon color="muted" />
+              <TagIcon key={`hierarchy-icon-${relationTo}`} />
             )
         }
       }

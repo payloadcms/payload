@@ -1,4 +1,4 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { Payload } from 'payload'
 
 import { isMongoose } from '../isMongoose.js'

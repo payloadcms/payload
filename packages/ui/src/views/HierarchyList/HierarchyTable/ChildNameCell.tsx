@@ -31,11 +31,12 @@ export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
       ? row[titleField]
       : row.id
   const title = typeof rawTitle === 'object' ? JSON.stringify(rawTitle) : String(rawTitle)
-  const isFolder = Boolean(
-    collectionConfig?.hierarchy &&
-      typeof collectionConfig.hierarchy === 'object' &&
-      collectionConfig.hierarchy.allowHasMany === false,
-  )
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : undefined
+  const isFolder = Boolean(hierarchyConfig && hierarchyConfig.allowHasMany === false)
+  const parentFieldName = hierarchyConfig?.parentFieldName || 'parent'
 
   const documentURL = formatAdminURL({
     adminRoute,
@@ -44,10 +45,10 @@ export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
 
   const hierarchyURL = formatAdminURL({
     adminRoute,
-    path: `/collections/${row._collectionSlug}?parent=${row.id}`,
+    path: `/collections/${row._collectionSlug}?${parentFieldName}=${row.id}`,
   })
 
-  const DefaultIcon = isFolder ? <FolderIcon color="muted" /> : <TagIcon color="muted" />
+  const DefaultIcon = isFolder ? <FolderIcon /> : <TagIcon />
 
   return (
     <div className={`${baseClass}__name-cell`}>

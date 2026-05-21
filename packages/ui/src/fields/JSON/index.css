@@ -14,7 +14,7 @@
         }
 
         &:focus-within {
-          border-color: var(--color-border-selected-strong);
+          border-color: var(--accessibility-focus-color);
         }
       }
 

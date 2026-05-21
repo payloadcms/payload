@@ -11,7 +11,9 @@ import { ButtonSection } from './sections/Button.js'
 import { CardSection } from './sections/Card.js'
 import { CheckboxSection } from './sections/Checkbox.js'
 import { CopyToClipboardSection } from './sections/CopyToClipboard.js'
+import { DocumentAlertSection } from './sections/DocumentAlert.js'
 import { DrawerSection } from './sections/DrawerSection.js'
+import { DropzoneSection } from './sections/Dropzone.js'
 import { IconsSection } from './sections/Icons.js'
 import { IDLabelSection } from './sections/IDLabel.js'
 import { InputStepperSection } from './sections/InputStepper.js'
@@ -22,11 +24,15 @@ import { ModalSection } from './sections/ModalSection.js'
 import { NoListResultsSection } from './sections/NoListResults.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
+import { RenderTitleSection } from './sections/RenderTitle.js'
+import { SearchBarSection } from './sections/SearchBar.js'
 import { SpinnerSection } from './sections/Spinner.js'
+import { StatusSection } from './sections/Status.js'
 import { StatusCellSection } from './sections/StatusCell.js'
 import { ThumbnailCardSection } from './sections/ThumbnailCard.js'
 import { ToastSection } from './sections/ToastSection.js'
 import { TooltipSection } from './sections/Tooltip.js'
+import { UnauthorizedSection } from './sections/Unauthorized.js'
 // Field sections
 import { CodeFieldSection } from './sections/fields/CodeField.js'
 import { DateFieldSection } from './sections/fields/DateField.js'
@@ -40,8 +46,9 @@ import { RadioGroupFieldSection } from './sections/fields/RadioGroupField.js'
 import { SelectFieldSection } from './sections/fields/SelectField.js'
 import { TextareaFieldSection } from './sections/fields/TextareaField.js'
 import { TextFieldSection } from './sections/fields/TextField.js'
+import { TimezonePickerFieldSection } from './sections/fields/TimezonePickerField.js'
 
-type CategoryId = 'all' | 'fields' | 'patterns' | 'primitives'
+type CategoryId = 'all' | 'fields' | 'patterns' | 'primitives' | 'views'
 
 type ComponentId =
   | 'all'
@@ -53,7 +60,9 @@ type ComponentId =
   | 'code-field'
   | 'copy-to-clipboard'
   | 'date-field'
+  | 'document-alert'
   | 'drawer'
+  | 'dropzone'
   | 'email-field'
   | 'email-username-field'
   | 'icons'
@@ -75,17 +84,23 @@ type ComponentId =
   | 'popup'
   | 'radio'
   | 'radiogroup-field'
+  | 'render-title'
+  | 'search-bar'
   | 'select'
   | 'select-field'
   | 'shimmer'
   | 'spinner'
+  | 'status'
   | 'status-cell'
   | 'text-field'
   | 'textarea'
   | 'textarea-field'
   | 'thumbnail-card'
+  | 'timezone-picker'
   | 'toast'
   | 'tooltip'
+  // Views
+  | 'unauthorized'
 
 type ComponentOption = {
   category: CategoryId
@@ -100,6 +115,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Card', value: 'card' },
   { category: 'primitives', label: 'Checkbox', value: 'checkbox' },
   { category: 'primitives', label: 'Copy to Clipboard', value: 'copy-to-clipboard' },
+  { category: 'primitives', label: 'Dropzone', value: 'dropzone' },
   { category: 'primitives', label: 'Icons', value: 'icons' },
   { category: 'primitives', label: 'ID Label', value: 'id-label' },
   { category: 'primitives', label: 'Input', value: 'input' },
@@ -109,16 +125,20 @@ const componentOptions: ComponentOption[] = [
   { category: 'primitives', label: 'Pill', value: 'pill' },
   { category: 'primitives', label: 'Popup', value: 'popup' },
   { category: 'primitives', label: 'Radio', value: 'radio' },
+  { category: 'primitives', label: 'Search Bar', value: 'search-bar' },
+  { category: 'primitives', label: 'Render Title', value: 'render-title' },
   { category: 'primitives', label: 'Select', value: 'select' },
   { category: 'primitives', label: 'Spinner', value: 'spinner' },
   { category: 'primitives', label: 'Textarea', value: 'textarea' },
   { category: 'primitives', label: 'Tooltip', value: 'tooltip' },
   // Patterns
+  { category: 'patterns', label: 'Document Alert', value: 'document-alert' },
   { category: 'patterns', label: 'Drawer', value: 'drawer' },
   { category: 'patterns', label: 'Loading Overlay', value: 'loading-overlay' },
   { category: 'patterns', label: 'Modal', value: 'modal' },
   { category: 'patterns', label: 'No List Results', value: 'no-list-results' },
   { category: 'patterns', label: 'Shimmer / Loading', value: 'shimmer' },
+  { category: 'patterns', label: 'Status', value: 'status' },
   { category: 'patterns', label: 'Status Cell', value: 'status-cell' },
   { category: 'patterns', label: 'Thumbnail Card', value: 'thumbnail-card' },
   { category: 'patterns', label: 'Toast', value: 'toast' },
@@ -135,6 +155,9 @@ const componentOptions: ComponentOption[] = [
   { category: 'fields', label: 'Select Field', value: 'select-field' },
   { category: 'fields', label: 'Text Field', value: 'text-field' },
   { category: 'fields', label: 'Textarea Field', value: 'textarea-field' },
+  { category: 'fields', label: 'Timezone Picker', value: 'timezone-picker' },
+  // Views
+  { category: 'views', label: 'Unauthorized', value: 'unauthorized' },
 ]
 
 const categories: { label: string; value: CategoryId }[] = [
@@ -142,6 +165,7 @@ const categories: { label: string; value: CategoryId }[] = [
   { label: 'Primitives', value: 'primitives' },
   { label: 'Patterns', value: 'patterns' },
   { label: 'Fields', value: 'fields' },
+  { label: 'Views', value: 'views' },
 ]
 
 export const ComponentsView: React.FC = () => {
@@ -238,12 +262,16 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('pill', 'primitives') && <PillSection selectedComponent="pill" />}
         {shouldShow('icons', 'primitives') && <IconsSection selectedComponent="icons" />}
         {shouldShow('id-label', 'primitives') && <IDLabelSection selectedComponent="id-label" />}
+        {shouldShow('render-title', 'primitives') && (
+          <RenderTitleSection selectedComponent="render-title" />
+        )}
         {shouldShow('lexical-icons', 'primitives') && (
           <LexicalIconsSection selectedComponent="lexical-icons" />
         )}
         {shouldShow('tooltip', 'primitives') && <TooltipSection selectedComponent="tooltip" />}
         {shouldShow('popup', 'primitives') && <PopupSection selectedComponent="popup" />}
         {shouldShow('card', 'primitives') && <CardSection selectedComponent="card" />}
+        {shouldShow('dropzone', 'primitives') && <DropzoneSection selectedComponent="dropzone" />}
         {shouldShow('copy-to-clipboard', 'primitives') && (
           <CopyToClipboardSection selectedComponent="copy-to-clipboard" />
         )}
@@ -252,6 +280,9 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('input-stepper', 'primitives') && (
           <InputStepperSection selectedComponent="input-stepper" />
         )}
+        {shouldShow('search-bar', 'primitives') && (
+          <SearchBarSection selectedComponent="search-bar" />
+        )}
         {shouldShow('spinner', 'primitives') && <SpinnerSection selectedComponent="spinner" />}
 
         {/* Patterns */}
@@ -259,6 +290,9 @@ export const ComponentsView: React.FC = () => {
           selectedComponent === 'all' && (
             <h2 className="components-view__category-title">Patterns</h2>
           )}
+        {shouldShow('document-alert', 'patterns') && (
+          <DocumentAlertSection selectedComponent="document-alert" />
+        )}
         {shouldShow('drawer', 'patterns') && <DrawerSection selectedComponent="drawer" />}
         {shouldShow('loading-overlay', 'patterns') && (
           <LoadingSection selectedComponent="loading-overlay" />
@@ -271,6 +305,7 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('no-list-results', 'patterns') && (
           <NoListResultsSection selectedComponent="no-list-results" />
         )}
+        {shouldShow('status', 'patterns') && <StatusSection selectedComponent="status" />}
         {shouldShow('status-cell', 'patterns') && (
           <StatusCellSection selectedComponent="status-cell" />
         )}
@@ -293,6 +328,14 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('radiogroup-field', 'fields') && <RadioGroupFieldSection />}
         {shouldShow('json-field', 'fields') && <JSONFieldSection />}
         {shouldShow('code-field', 'fields') && <CodeFieldSection />}
+        {shouldShow('timezone-picker', 'fields') && <TimezonePickerFieldSection />}
+
+        {/* Views */}
+        {(selectedCategory === 'all' || selectedCategory === 'views') &&
+          selectedComponent === 'all' && <h2 className="components-view__category-title">Views</h2>}
+        {shouldShow('unauthorized', 'views') && (
+          <UnauthorizedSection selectedComponent="unauthorized" />
+        )}
       </div>
     </div>
   )

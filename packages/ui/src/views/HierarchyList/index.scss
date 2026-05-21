@@ -20,7 +20,7 @@
 
     &__allowed-types {
       color: var(--theme-elevation-500);
-      padding-top: calc(var(--base) * 0.2);
+      padding-top: var(--spacer-1);
     }
 
     &__sub-header {
@@ -37,8 +37,15 @@
 
     &__controls {
       display: flex;
-      gap: var(--spacing-sm);
       align-items: center;
+      gap: var(--spacer-2);
+    }
+
+    &__controls-left {
+      display: flex;
+      align-items: center;
+      gap: var(--spacer-2);
+      flex: 1;
     }
 
     &__no-results {

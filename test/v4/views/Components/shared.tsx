@@ -40,7 +40,7 @@ export const Variant: React.FC<{
   label?: string
 }> = ({ children, label }) => (
   <div className="components-view__variant">
-    {label && <span className="components-view__variant-label">{label}</span>}
+    {label && <div className="components-view__variant-label">{label}</div>}
     <div className="components-view__variant-content">{children}</div>
   </div>
 )
