@@ -1,4 +1,6 @@
 import type {
+  CallToolResult,
+  ContentBlock,
   JsonSchemaType,
   McpServer,
   ResourceTemplate,
@@ -53,14 +55,14 @@ export type ClientMCPPluginConfig = {
 }
 
 export type MCPToolResponse = {
-  content: Array<{ text: string; type: 'text' }>
+  content: ContentBlock[]
   /**
    * If available, return the document fetched within the
    * mcp tool. This is threaded as an additional argument to
-   * overrideResponse functions
+   * overrideResponse functions and stripped before going on the wire.
    */
   doc?: Record<string, unknown>
-}
+} & Pick<CallToolResult, '_meta' | 'isError' | 'structuredContent'>
 
 export type MCPResponseOverride = (
   response: MCPToolResponse,
@@ -93,9 +95,7 @@ export type GlobalToolHandlerArgs<TSchema = undefined> = {
   globalSlug: GlobalSlug
 } & ToolHandlerArgs<TSchema>
 
-export type Tool<
-  TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
-> = {
+export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> = {
   description: string
   handler: (args: ToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
   input?: TSchema
@@ -117,12 +117,11 @@ export type CollectionTool<
   input?: ((args: { collectionSchema: JsonSchemaType }) => TSchema) | TSchema
 } & Pick<Tool, 'description' | 'overrideResponse'>
 
-export type GlobalTool<
-  TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
-> = {
-  handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
-  input?: ((args: { globalSchema: JsonSchemaType }) => TSchema) | TSchema
-} & Pick<Tool, 'description' | 'overrideResponse'>
+export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> =
+  {
+    handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
+    input?: ((args: { globalSchema: JsonSchemaType }) => TSchema) | TSchema
+  } & Pick<Tool, 'description' | 'overrideResponse'>
 
 /**
  * Configures (or disables) a built-in tool without replacing it.
