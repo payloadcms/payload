@@ -32,7 +32,7 @@ export const tenantField = ({
   tenantsCollectionSlug = defaults.tenantCollectionSlug,
   unique,
 }: Args): SingleRelationshipField => {
-  const { hasMany = false, ...overrides } = _overrides || {}
+  const { hasMany = false, validate: validateOverride, ...overrides } = _overrides || {}
   return {
     ...(overrides || {}),
     name,
@@ -114,7 +114,7 @@ export const tenantField = ({
     index: true,
     relationTo: tenantsCollectionSlug,
     unique,
-    validate: tenantFieldValidate,
+    validate: validateOverride || tenantFieldValidate,
     ...(hasMany
       ? {
           hasMany: true,

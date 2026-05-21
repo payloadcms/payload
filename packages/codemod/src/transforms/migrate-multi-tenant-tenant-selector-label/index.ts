@@ -14,10 +14,6 @@ export const migrateMultiTenantTenantSelectorLabel: Transform = {
         .filter((prop) => !prop.wasForgotten() && prop.getName() === 'tenantSelectorLabel')
 
       for (const prop of targets) {
-        if (prop.wasForgotten()) {
-          continue
-        }
-
         const filePath = sourceFile.getFilePath()
         const parentObject = prop.getParentIfKind(SyntaxKind.ObjectLiteralExpression)
         if (!parentObject) {
