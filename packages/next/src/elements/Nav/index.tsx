@@ -9,6 +9,7 @@ import React from 'react'
 
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { SidebarTabs } from './SidebarTabs/index.js'
+import './index.css'
 
 export type NavProps = {
   req?: PayloadRequest
