@@ -64,7 +64,7 @@
 
     tbody tr {
       position: relative;
-      border-top: 1px solid var(--color-border);
+      border-top: var(--stroke-width-small) solid var(--color-border);
       cursor: pointer;
 
       &:hover {
