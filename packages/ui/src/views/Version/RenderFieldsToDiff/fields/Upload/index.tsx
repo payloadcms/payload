@@ -114,13 +114,17 @@ export const HasManyUploadDiff: React.FC<{
     : null
 
   const From = (
-    <div className={`${baseClass}-hasMany`}>
-      {FromComponents?.map((component, index) => <div key={index}>{component}</div>)}
+    <div className="html-diff__diff-old">
+      <div className={`${baseClass}-hasMany`}>
+        {FromComponents?.map((component, index) => <div key={index}>{component}</div>)}
+      </div>
     </div>
   )
   const To = (
-    <div className={`${baseClass}-hasMany`}>
-      {ToComponents?.map((component, index) => <div key={index}>{component}</div>)}
+    <div className="html-diff__diff-new">
+      <div className={`${baseClass}-hasMany`}>
+        {ToComponents?.map((component, index) => <div key={index}>{component}</div>)}
+      </div>
     </div>
   )
 
@@ -174,8 +178,8 @@ export const SingleUploadDiff: React.FC<{
     />
   ) : null
 
-  const From = FromComponent ?? <p></p>
-  const To = ToComponent ?? <p></p>
+  const From = <div className="html-diff__diff-old">{FromComponent ?? <p></p>}</div>
+  const To = <div className="html-diff__diff-new">{ToComponent ?? <p></p>}</div>
 
   return (
     <FieldDiffContainer
