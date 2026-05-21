@@ -30,6 +30,12 @@ export const CustomListDrawer = () => {
         method: 'POST',
       })
 
+      // In the root document view, there is no outer drawer context, so this will be `undefined`.
+      // Refresh first so the e2e test sees the new rows by the time the toast fires.
+      if (typeof refresh === 'function') {
+        await refresh()
+      }
+
       setIsCreating(false)
 
       toast.success(
@@ -37,11 +43,6 @@ export const CustomListDrawer = () => {
           label: 'Custom List Drawer',
         }),
       )
-
-      // In the root document view, there is no outer drawer context, so this will be `undefined`
-      if (typeof refresh === 'function') {
-        await refresh()
-      }
     } catch (_err) {
       console.error('Error creating document:', _err) // eslint-disable-line no-console
       setIsCreating(false)
