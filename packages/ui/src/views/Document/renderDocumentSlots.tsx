@@ -68,6 +68,18 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  const BeforeDocumentMeta =
+    collectionConfig?.admin?.components?.edit?.BeforeDocumentMeta ||
+    globalConfig?.admin?.components?.edit?.BeforeDocumentMeta
+
+  if (BeforeDocumentMeta) {
+    components.BeforeDocumentMeta = render({
+      Component: BeforeDocumentMeta,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
   const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
 
   if (EditMenuItems) {

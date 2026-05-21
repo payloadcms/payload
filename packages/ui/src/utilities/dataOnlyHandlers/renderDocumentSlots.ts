@@ -17,6 +17,7 @@ import { getDocumentPermissions } from '../../views/Document/getDocumentPermissi
  */
 export type DocumentSlotConfigs = {
   BeforeDocumentControls?: CustomComponent[]
+  BeforeDocumentMeta?: CustomComponent[]
   Description?: {
     Component?: PayloadComponent
     staticDescription?: StaticDescription
@@ -78,6 +79,14 @@ export const renderDocumentSlotsDataOnlyHandler: ServerFunction<
 
   if (BeforeDocumentControls) {
     slotConfigs.BeforeDocumentControls = BeforeDocumentControls
+  }
+
+  const BeforeDocumentMeta =
+    collectionConfig?.admin?.components?.edit?.BeforeDocumentMeta ||
+    globalConfig?.admin?.components?.edit?.BeforeDocumentMeta
+
+  if (BeforeDocumentMeta) {
+    slotConfigs.BeforeDocumentMeta = BeforeDocumentMeta
   }
 
   const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
