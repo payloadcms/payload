@@ -6,6 +6,24 @@ import type { MCPAccessSettings, MCPPluginConfig } from '../types.js'
 import { createRequestFromPayloadRequest } from '../mcp/createRequest.js'
 import { getMCPHandler } from '../mcp/getMcpHandler.js'
 
+const parseMCPApiKey = (authorization: null | string): null | string => {
+  if (!authorization) {
+    return null
+  }
+
+  const bearerPrefix = 'Bearer '
+  if (authorization.startsWith(bearerPrefix)) {
+    return authorization.slice(bearerPrefix.length).trim()
+  }
+
+  const payloadAPIKeyPrefix = 'payload-mcp-api-keys API-Key '
+  if (authorization.startsWith(payloadAPIKeyPrefix)) {
+    return authorization.slice(payloadAPIKeyPrefix.length).trim()
+  }
+
+  return null
+}
+
 export const initializeMCPHandler = (pluginOptions: MCPPluginConfig) => {
   const mcpHandler: PayloadHandler = async (req) => {
     const { payload } = req
@@ -16,12 +34,9 @@ export const initializeMCPHandler = (pluginOptions: MCPPluginConfig) => {
     req.payloadAPI = 'MCP' as const
 
     const getDefaultMcpAccessSettings = async (overrideApiKey?: null | string) => {
-      const apiKey =
-        (overrideApiKey ?? req.headers.get('Authorization')?.startsWith('Bearer '))
-          ? req.headers.get('Authorization')?.replace('Bearer ', '').trim()
-          : null
+      const apiKey = overrideApiKey ?? parseMCPApiKey(req.headers.get('Authorization'))
 
-      if (apiKey === null) {
+      if (!apiKey) {
         throw new UnauthorizedError()
       }
 
