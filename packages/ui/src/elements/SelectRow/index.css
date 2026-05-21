@@ -1,0 +1,6 @@
+@layer payload-default {
+  .select-row__checkbox {
+    display: block;
+    width: min-content;
+  }
+}

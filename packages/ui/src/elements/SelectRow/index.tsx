@@ -7,7 +7,7 @@ import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useSelection } from '../../providers/Selection/index.js'
 import { Locked } from '../Locked/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'select-row'
 
