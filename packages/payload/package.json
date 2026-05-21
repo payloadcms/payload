@@ -41,8 +41,9 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
       "types": "./src/index.ts",
+      "browser": "./src/exports/shared.ts",
+      "import": "./src/index.ts",
       "default": "./src/index.ts"
     },
     "./internal": {
@@ -161,8 +162,9 @@
   "publishConfig": {
     "exports": {
       ".": {
-        "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
+        "browser": "./dist/exports/shared.js",
+        "import": "./dist/index.js",
         "default": "./dist/index.js"
       },
       "./internal": {

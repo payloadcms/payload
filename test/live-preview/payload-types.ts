@@ -118,6 +118,7 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
   };
   locale: 'en' | 'es';
+  widgets: {};
   user: User;
   jobs: {
     tasks: unknown;

@@ -51,6 +51,8 @@ export const rootEslintConfig = [
       'packages/drizzle/src/postgres/predefinedMigrations/v2-v3/**',
       'packages/codemod/src/transforms/**/*.input.ts',
       'packages/codemod/src/transforms/**/*.output.ts',
+      'packages/tanstack-start/scripts/**',
+      'packages/tanstack-start/test/**',
     ],
   },
   {

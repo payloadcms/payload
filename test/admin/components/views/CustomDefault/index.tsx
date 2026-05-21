@@ -1,24 +1,17 @@
-import { DefaultTemplate } from '@payloadcms/next/templates'
-import LinkImport from 'next/link.js'
-import { redirect } from 'next/navigation.js'
-import React from 'react'
-
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
-
 import type { AdminViewServerProps } from 'payload'
 
 import { Button, SetStepNav } from '@payloadcms/ui'
+import React from 'react'
 
 import { customViewPath } from '../../../shared.js'
 import './index.scss'
 
 const baseClass = 'custom-default-view'
 
-export function CustomDefaultView({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export function CustomDefaultView({ initPageResult }: AdminViewServerProps) {
   const {
     permissions,
     req: {
-      payload,
       payload: {
         config: {
           routes: { admin: adminRoute },
@@ -26,26 +19,14 @@ export function CustomDefaultView({ initPageResult, params, searchParams }: Admi
       },
       user,
     },
-    visibleEntities,
   } = initPageResult
 
-  // If an unauthorized user tries to navigate straight to this page,
-  // Boot 'em out
   if (!user || (user && !permissions?.canAccessAdmin)) {
-    return redirect(`${adminRoute}/unauthorized`)
+    return null
   }
 
   return (
-    <DefaultTemplate
-      i18n={initPageResult.req.i18n}
-      locale={initPageResult.locale}
-      params={params}
-      payload={payload}
-      permissions={permissions}
-      searchParams={searchParams}
-      user={user}
-      visibleEntities={visibleEntities}
-    >
+    <React.Fragment>
       <SetStepNav
         nav={[
           {
@@ -66,20 +47,15 @@ export function CustomDefaultView({ initPageResult, params, searchParams }: Admi
           Template, so the sidebar is rendered.
         </p>
         <div className="custom-view__controls">
-          <Button buttonStyle="secondary" el="link" Link={Link} to={`${adminRoute}`}>
+          <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
             Go to Dashboard
           </Button>
           &nbsp; &nbsp; &nbsp;
-          <Button
-            buttonStyle="secondary"
-            el="link"
-            Link={Link}
-            to={`${adminRoute}/${customViewPath}`}
-          >
+          <Button buttonStyle="secondary" el="link" to={`${adminRoute}/${customViewPath}`}>
             Go to Custom View
           </Button>
         </div>
       </div>
-    </DefaultTemplate>
+    </React.Fragment>
   )
 }

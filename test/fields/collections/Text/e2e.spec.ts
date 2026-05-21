@@ -1,11 +1,12 @@
 import type { Page } from '@playwright/test'
-import type { GeneratedTypes } from '../../../__helpers/shared/sdk/types.js'
+import type { GeneratedTypes } from '__helpers/shared/sdk/types.js'
 
-import { expect, test } from '@playwright/test'
-import { getPillSelectorItem, openListColumns, toggleColumn } from '../../../__helpers/e2e/columns/index.js'
-import { addListFilter } from '../../../__helpers/e2e/filters/index.js'
-import { upsertPreferences } from '../../../__helpers/e2e/preferences.js'
-import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { expect } from '@playwright/test'
+import { openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
+import { addListFilter } from '__helpers/e2e/filters/index.js'
+import { test } from '__helpers/e2e/playwright.js'
+import { upsertPreferences } from '__helpers/e2e/preferences.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -84,7 +85,9 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Hidden Text Field' }),
+        columnContainer.locator('.pill-selector__pill', {
+          hasText: exactText('Hidden Text Field'),
+        }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -108,7 +111,9 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Disabled Text Field' }),
+        columnContainer.locator('.pill-selector__pill', {
+          hasText: exactText('Disabled Text Field'),
+        }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -134,7 +139,9 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Admin Hidden Text Field' }),
+        columnContainer.locator('.pill-selector__pill', {
+          hasText: exactText('Admin Hidden Text Field'),
+        }),
       ).toBeVisible()
 
       await selectTableRow(page, 'Seeded text document')
@@ -148,10 +155,14 @@ describe('Text', () => {
       await expect(adminHiddenFieldOption).toBeVisible()
     })
 
-    test('hidden and disabled fields should not break subsequent field paths', async () => {
-      await page.goto(url.create)
-      await expect(page.locator('#custom-field-schema-path')).toHaveText('text-fields._index-4')
-    })
+    test(
+      'hidden and disabled fields should not break subsequent field paths',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(url.create)
+        await expect(page.locator('#custom-field-schema-path')).toHaveText('text-fields._index-4')
+      },
+    )
   })
 
   test('should display field in list view', async () => {
@@ -178,7 +189,9 @@ describe('Text', () => {
     await page.goto(url.list)
     await openListColumns(page, {})
     await expect(
-      getPillSelectorItem({ container: page, label: 'Disable List Column Text' }),
+      page.locator(`.pill-selector .pill-selector__pill`, {
+        hasText: exactText('Disable List Column Text'),
+      }),
     ).toBeHidden()
 
     await expect(page.locator('#heading-disableListColumnText')).toBeHidden()

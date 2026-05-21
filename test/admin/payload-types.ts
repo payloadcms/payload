@@ -101,6 +101,7 @@ export interface Config {
     virtuals: Virtual;
     'no-timestamps': NoTimestamp;
     localized: Localized;
+    'fully-featured': FullyFeatured;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -142,6 +143,7 @@ export interface Config {
     virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
     'no-timestamps': NoTimestampsSelect<false> | NoTimestampsSelect<true>;
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
+    'fully-featured': FullyFeaturedSelect<false> | FullyFeaturedSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -695,6 +697,124 @@ export interface Localized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fully-featured".
+ */
+export interface FullyFeatured {
+  id: string;
+  title: string;
+  slug?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Short summary for list views and SEO
+   */
+  excerpt?: string | null;
+  heroImage?: (string | null) | Upload;
+  layout?:
+    | (
+        | {
+            richText?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'richTextBlock';
+          }
+        | {
+            image: string | Upload;
+            caption?: string | null;
+            size?: ('small' | 'medium' | 'fullWidth') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'imageBlock';
+          }
+        | {
+            heading: string;
+            description?: string | null;
+            links?:
+              | {
+                  label: string;
+                  url: string;
+                  style?: ('primary' | 'secondary' | 'outline') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'ctaBlock';
+          }
+        | {
+            cards?:
+              | {
+                  title: string;
+                  description?: string | null;
+                  image?: (string | null) | Upload;
+                  link?: {
+                    label?: string | null;
+                    url?: string | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cardGridBlock';
+          }
+      )[]
+    | null;
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  relatedPosts?: (string | Post)[] | null;
+  category?: ('news' | 'blog' | 'tutorial' | 'case-study') | null;
+  /**
+   * Priority from 1 (lowest) to 10 (highest)
+   */
+  priority?: number | null;
+  seo?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    ogImage?: (string | null) | Upload;
+    noIndex?: boolean | null;
+  };
+  status?: ('draft' | 'published' | 'archived') | null;
+  isFeatured?: boolean | null;
+  publishedDate?: string | null;
+  authors?: (string | User)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -852,6 +972,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'localized';
         value: string | Localized;
+      } | null)
+    | ({
+        relationTo: 'fully-featured';
+        value: string | FullyFeatured;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1338,6 +1462,97 @@ export interface NoTimestampsSelect<T extends boolean = true> {
  */
 export interface LocalizedSelect<T extends boolean = true> {
   title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fully-featured_select".
+ */
+export interface FullyFeaturedSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  excerpt?: T;
+  heroImage?: T;
+  layout?:
+    | T
+    | {
+        richTextBlock?:
+          | T
+          | {
+              richText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        imageBlock?:
+          | T
+          | {
+              image?: T;
+              caption?: T;
+              size?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ctaBlock?:
+          | T
+          | {
+              heading?: T;
+              description?: T;
+              links?:
+                | T
+                | {
+                    label?: T;
+                    url?: T;
+                    style?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        cardGridBlock?:
+          | T
+          | {
+              cards?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    image?: T;
+                    link?:
+                      | T
+                      | {
+                          label?: T;
+                          url?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  relatedPosts?: T;
+  category?: T;
+  priority?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        noIndex?: T;
+      };
+  status?: T;
+  isFeatured?: T;
+  publishedDate?: T;
+  authors?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

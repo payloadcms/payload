@@ -1,8 +1,9 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { expect } from '@playwright/test'
+import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
+import { test } from '__helpers/e2e/playwright.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -14,8 +15,8 @@ import {
   initPageConsoleErrorCatch,
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { radioFieldsSlug } from '../../slugs.js'
@@ -81,12 +82,12 @@ describe('Radio', () => {
     )
   })
 
-  test('should show custom JSX label in list', async () => {
+  test('should show custom JSX label in list', { framework: 'next' }, async () => {
     await page.goto(url.list)
     await expect(page.locator('.cell-radioWithJsxLabelOption svg#payload-logo')).toBeVisible()
   })
 
-  test('should show custom JSX label while editing', async () => {
+  test('should show custom JSX label while editing', { framework: 'next' }, async () => {
     await page.goto(url.create)
     await expect(
       page.locator('label[for="field-radioWithJsxLabelOption-three"] svg#payload-logo'),
@@ -104,7 +105,7 @@ describe('Radio', () => {
         testInfo,
       })
 
-      // On this page there's a known custom label without a clear name, expect 1 violation
+      // The custom JSX label option causes 1 a11y violation
       expect(scanResults.violations.length).toBe(1)
     })
 

@@ -1,8 +1,9 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { expect } from '@playwright/test'
+import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
+import { test } from '__helpers/e2e/playwright.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -15,11 +16,12 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   switchTab,
+  waitForFormReady,
 } from '../../../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { tabsFieldsSlug } from '../../slugs.js'
@@ -75,6 +77,7 @@ describe('Tabs', () => {
     const jsonValue = '{ "foo": "bar"}'
 
     await page.goto(url.create)
+    await waitForFormReady(page)
 
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
     await page.locator('#field-textInRow').fill(textInRowValue)

@@ -34,6 +34,7 @@ import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/c
 import { getJobStatsGlobal } from '../queues/config/global.js'
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
+import { isRSCEnabled } from '../utilities/isRSCEnabled.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
@@ -55,11 +56,19 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
-  ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
-    slug: 'collections',
-    Component: '@payloadcms/next/rsc#CollectionCards',
-    minWidth: 'full',
-  })
+  sanitizedConfig.admin!.dashboard ??= { widgets: [] }
+  if (isRSCEnabled()) {
+    const collectionCardsComponent =
+      process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
+        ? '@payloadcms/tanstack-start/rsc#CollectionCards'
+        : '@payloadcms/next/rsc#CollectionCards'
+
+    sanitizedConfig.admin!.dashboard.widgets.push({
+      slug: 'collections',
+      Component: collectionCardsComponent,
+      minWidth: 'full',
+    })
+  }
   sanitizedConfig.admin!.dashboard.defaultLayout ??= [
     {
       widgetSlug: 'collections',

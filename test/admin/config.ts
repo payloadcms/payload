@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { isRSCEnabled } from 'payload/shared'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
@@ -15,6 +16,7 @@ import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { EditMenuItems } from './collections/editMenuItems.js'
 import { FormatDocURL } from './collections/FormatDocURL/index.js'
+import { FullyFeatured } from './collections/FullyFeatured.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
@@ -84,7 +86,9 @@ export default buildConfigWithDefaults({
         Button: '/components/Logout/index.js#Logout',
       },
       providers: [
-        '/components/CustomProviderServer/index.js#CustomProviderServer',
+        ...(isRSCEnabled()
+          ? ['/components/CustomProviderServer/index.js#CustomProviderServer']
+          : []),
         '/components/CustomProvider/index.js#CustomProvider',
       ],
       settingsMenu: [
@@ -94,47 +98,51 @@ export default buildConfigWithDefaults({
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
-        collections: {
-          Component: '/components/views/CustomView/index.js#CustomView',
-          path: '/collections',
-        },
-        CustomDefaultView: {
-          Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
-          path: '/custom-default-view',
-        },
-        CustomMinimalView: {
-          Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
-          meta: {
-            title: customRootViewMetaTitle,
-          },
-          path: '/custom-minimal-view',
-        },
-        CustomNestedView: {
-          Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
-          exact: true,
-          path: customNestedViewPath,
-        },
-        CustomView: {
-          Component: '/components/views/CustomView/index.js#CustomView',
-          exact: true,
-          path: customViewPath,
-          strict: true,
-        },
-        CustomViewWithParam: {
-          Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
-          path: customParamViewPath,
-        },
-        ProtectedCustomNestedView: {
-          Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
-          exact: true,
-          path: protectedCustomNestedViewPath,
-        },
-        PublicCustomView: {
-          Component: '/components/views/CustomView/index.js#CustomView',
-          exact: true,
-          path: publicCustomViewPath,
-          strict: true,
-        },
+        ...(isRSCEnabled()
+          ? {
+              collections: {
+                Component: '/components/views/CustomView/index.js#CustomView',
+                path: '/collections',
+              },
+              CustomDefaultView: {
+                Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
+                path: '/custom-default-view',
+              },
+              CustomMinimalView: {
+                Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
+                meta: {
+                  title: customRootViewMetaTitle,
+                },
+                path: '/custom-minimal-view',
+              },
+              CustomNestedView: {
+                Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
+                exact: true,
+                path: customNestedViewPath,
+              },
+              CustomView: {
+                Component: '/components/views/CustomView/index.js#CustomView',
+                exact: true,
+                path: customViewPath,
+                strict: true,
+              },
+              CustomViewWithParam: {
+                Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
+                path: customParamViewPath,
+              },
+              ProtectedCustomNestedView: {
+                Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
+                exact: true,
+                path: protectedCustomNestedViewPath,
+              },
+              PublicCustomView: {
+                Component: '/components/views/CustomView/index.js#CustomView',
+                exact: true,
+                path: publicCustomViewPath,
+                strict: true,
+              },
+            }
+          : {}),
         ButtonShowcase: {
           Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
           path: '/button-styles',
@@ -252,6 +260,7 @@ export default buildConfigWithDefaults({
     Virtuals,
     NoTimestampsCollection,
     Localized,
+    FullyFeatured,
   ],
   globals: [
     GlobalHidden,

@@ -44,6 +44,8 @@
       "@payloadcms/ui/scss": ["./packages/ui/src/scss.scss"],
       "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
       "@payloadcms/next/*": ["./packages/next/src/exports/*.ts"],
+      "@payloadcms/tanstack-start": ["./packages/tanstack-start/src/index.ts"],
+      "@payloadcms/tanstack-start/*": ["./packages/tanstack-start/src/exports/*.ts"],
       "@payloadcms/richtext-lexical/client": [
         "./packages/richtext-lexical/src/exports/client/index.ts"
       ],

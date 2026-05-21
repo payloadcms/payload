@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from '__helpers/e2e/playwright.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -80,7 +81,7 @@ describe('Select', () => {
     await expect(field.locator('.rs__value-container')).toContainText('One')
   })
 
-  test('should show custom JSX option label in edit', async () => {
+  test('should show custom JSX option label in edit', { framework: 'next' }, async () => {
     await page.goto(url.create)
 
     const svgLocator = page.locator('#field-selectWithJsxLabelOption svg#payload-logo')
@@ -88,7 +89,7 @@ describe('Select', () => {
     await expect(svgLocator).toBeVisible()
   })
 
-  test('should show custom JSX option label in list', async () => {
+  test('should show custom JSX option label in list', { framework: 'next' }, async () => {
     await page.goto(url.list)
 
     const columnsButton = page.locator('button:has-text("Columns")')

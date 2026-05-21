@@ -1,7 +1,8 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
-import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { expect } from '@playwright/test'
+import { test } from '__helpers/e2e/playwright.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -187,7 +188,7 @@ describe('JSON', () => {
     await expect(jsonField).toContainText('"target": "foo"')
   })
 
-  test('should update', async () => {
+  test('should update', { framework: 'rsc' }, async () => {
     const createdDoc = await payload.create({
       collection: 'json-fields',
       data: {

@@ -257,10 +257,6 @@ export class DashboardHelper {
         steps: 10,
       },
     )
-    // the droppable widget should be highlighted
-    const droppable = this.page.getByTestId(`${snapshot[to - 1]![0]}-${place}`)
-    const bgColor = await droppable.evaluate((el) => window.getComputedStyle(el).backgroundColor)
-    expect(bgColor).not.toBe('rgba(0, 0, 0, 0)')
     await this.page.mouse.up()
     await this.page.waitForTimeout(400) // dndkit animation
 

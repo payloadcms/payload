@@ -80,6 +80,7 @@
     "dev:generate-types": "pnpm runts ./test/generateTypes.ts",
     "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres pnpm runts ./test/dev.ts",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/dev.ts --prod",
+    "dev:tanstack": "cross-env PAYLOAD_FRAMEWORK=tanstack-start NODE_OPTIONS=\"--no-deprecation --max-old-space-size=16384\" tsx ./test/dev.ts",
     "dev:vercel-postgres": "cross-env PAYLOAD_DATABASE=vercel-postgres pnpm runts ./test/dev.ts",
     "devsafe": "node ./scripts/delete-recursively.js '**/.next' && pnpm dev",
     "docker:clean": "node ./scripts/docker-clean.ts",
@@ -235,6 +236,7 @@
     "tsx": "4.21.0",
     "turbo": "^2.5.4",
     "typescript": "6.0.3",
+    "vite": "~7.3.2",
     "vitest": "4.1.6",
     "wrangler": "~4.61.1",
     "zod": "4.3.6"

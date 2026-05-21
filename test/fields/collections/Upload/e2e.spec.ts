@@ -1,9 +1,10 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
-import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
+import { expect } from '@playwright/test'
+import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
+import { test } from '__helpers/e2e/playwright.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
+import { openDocDrawer } from '__helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -13,6 +14,7 @@ import type { Config } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
+  gotoAndWaitForForm,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
@@ -61,7 +63,7 @@ describe('Upload', () => {
   })
 
   async function uploadImage() {
-    await page.goto(url.create)
+    await gotoAndWaitForForm(page, url.create)
 
     // create a jpg upload
     await page
@@ -76,7 +78,7 @@ describe('Upload', () => {
   })
 
   test('should upload files from remote URL', async () => {
-    await page.goto(url.create)
+    await gotoAndWaitForForm(page, url.create)
 
     const pasteURLButton = page.locator('.file-field__upload button', {
       hasText: 'Paste URL',
@@ -103,7 +105,7 @@ describe('Upload', () => {
   })
 
   test('should disable save button during upload progress from remote URL', async () => {
-    await page.goto(url.create)
+    await gotoAndWaitForForm(page, url.create)
 
     const pasteURLButton = page.locator('.file-field__upload button', {
       hasText: 'Paste URL',
@@ -250,7 +252,7 @@ describe('Upload', () => {
 
   test.skip('should show drawer for input field when enableRichText is false', async () => {
     const uploads3URL = new AdminUrlUtil(serverURL, 'uploads3')
-    await page.goto(uploads3URL.create)
+    await gotoAndWaitForForm(page, uploads3URL.create)
 
     // create file in uploads 3 collection
     await page
