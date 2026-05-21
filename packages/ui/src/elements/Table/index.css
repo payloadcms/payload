@@ -103,6 +103,10 @@
     thead {
       background: var(--color-bg-secondary);
 
+      th {
+        height: var(--spacer-5);
+      }
+
       th:first-child {
         border-top-left-radius: var(--radius-medium);
       }
