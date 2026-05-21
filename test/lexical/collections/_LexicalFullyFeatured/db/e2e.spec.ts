@@ -4,7 +4,7 @@ import {
   type SerializedInlineBlockNode,
 } from '@payloadcms/richtext-lexical'
 import { expect, type Page, test } from '@playwright/test'
-import { lexicalFullyFeaturedSlug } from 'lexical/slugs.js'
+import { lexicalFullyFeaturedSlug } from '../../../slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 

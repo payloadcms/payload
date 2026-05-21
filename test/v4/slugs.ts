@@ -24,8 +24,14 @@ export const richTextFieldsSlug = 'rich-text-fields'
 export const foldersSlug = 'folders'
 export const folderItemsSlug = 'folder-items'
 export const draftVersionsSlug = 'draft-versions'
+export const tagsSlug = 'tags'
 export const autosaveSlug = 'autosave'
 export const hierarchySlug = 'hierarchy'
+export const joinFieldsSlug = 'join-fields'
+export const joinPostsSlug = 'join-posts'
+export const rubbishSlug = 'rubbish'
+export const searchBarTestSlug = 'search-bar-test'
+export const unauthorizedSlug = 'unauthorized-test'
 
 export const collectionSlugs = [
   'users',
@@ -54,6 +60,13 @@ export const collectionSlugs = [
   foldersSlug,
   folderItemsSlug,
   draftVersionsSlug,
+  tagsSlug,
   autosaveSlug,
   hierarchySlug,
+  joinFieldsSlug,
+  joinPostsSlug,
+  rubbishSlug,
+  searchBarTestSlug,
+  unauthorizedSlug,
+  'payload-query-presets',
 ]

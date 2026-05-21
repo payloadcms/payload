@@ -1,14 +1,14 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
-import { openCreateDocDrawer } from '__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
-import { addListFilter, openListFilters } from '__helpers/e2e/filters/index.js'
-import { navigateToDoc } from '__helpers/e2e/navigateToDoc.js'
-import { openDocControls } from '__helpers/e2e/openDocControls.js'
-import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
-import { getSelectInputOptions, selectInput } from '__helpers/e2e/selectInput.js'
-import { openDocDrawer } from '__helpers/e2e/toggleDocDrawer.js'
+import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
+import { openCreateDocDrawer } from '../../../__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
+import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
+import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
+import { openDocControls } from '../../../__helpers/e2e/openDocControls.js'
+import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { getSelectInputOptions, selectInput } from '../../../__helpers/e2e/selectInput.js'
+import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -614,7 +614,7 @@ describe('relationship', () => {
       await page.locator('.popup__content #action-delete').click()
 
       await page
-        .locator('[id^=delete-].payload__modal-item.confirmation-modal[open] button#confirm-action')
+        .locator('[id^=delete-].payload__modal-item.alert-modal[open] button#confirm-action')
         .click()
 
       await expect(drawer1Content).toBeHidden()

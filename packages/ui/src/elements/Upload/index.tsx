@@ -20,7 +20,7 @@ import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
-import './index.scss'
+import './index.css'
 import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
@@ -477,10 +477,9 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 </div>
               </div>
               <Button
-                buttonStyle="icon-label"
+                buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"
-                iconStyle="with-border"
                 onClick={() => {
                   setShowUrlInput(false)
                   setUploadControlFileUrl('')
@@ -517,10 +516,9 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 />
               </div>
               <Button
-                buttonStyle="icon-label"
+                buttonStyle="ghost"
                 className={`${baseClass}__remove`}
                 icon="x"
-                iconStyle="with-border"
                 onClick={handleFileRemoval}
                 round
                 tooltip={t('general:cancel')}

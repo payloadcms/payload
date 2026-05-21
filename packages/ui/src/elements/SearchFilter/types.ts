@@ -1,6 +1,7 @@
 import type { ParsedQs } from 'qs-esm'
 
 export type SearchFilterProps = {
+  disabled?: boolean
   /**
    * This prop is deprecated and will be removed in the next major version.
    *

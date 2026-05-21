@@ -34,7 +34,7 @@ export const LoadMoreRow: React.FC<LoadMoreRowProps> = ({
   const { t } = useTranslation()
   const defaultButton = onLoadMore && (
     <Button
-      buttonStyle="none"
+      buttonStyle="ghost"
       className={`${baseClass}__button`}
       disabled={isLoading}
       margin={false}

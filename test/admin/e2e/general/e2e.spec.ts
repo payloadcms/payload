@@ -9,6 +9,7 @@ import {
   ensureCompilationIsDone,
   getRoutes,
   initPageConsoleErrorCatch,
+  openLocaleSelector,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
   // throttleTest,
@@ -871,7 +872,7 @@ describe('General', () => {
     test('should reset actions array when navigating from view with actions to view without actions', async () => {
       await page.goto(geoUrl.list)
       await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
-      await page.locator('button.nav-toggler[aria-label="Open Menu"][tabindex="0"]').click()
+      await openNav(page)
       await page.locator(`#nav-posts`).click()
       await expect(page.locator('.app-header .collection-list-button')).toHaveCount(0)
     })
@@ -948,10 +949,7 @@ describe('General', () => {
       const options = page.locator('.rs__option')
       await options.locator('text=Español').click()
 
-      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
-        'title',
-        'Panel de Control',
-      )
+      await expect(page.locator('.step-nav__first')).toHaveText('Panel de Control')
 
       await field.click()
       await options.locator('text=English').click()
@@ -961,10 +959,7 @@ describe('General', () => {
 
     test('should allow custom translation', async () => {
       await page.goto(postsUrl.account)
-      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
-        'title',
-        'Home',
-      )
+      await expect(page.locator('.step-nav__first')).toHaveText('Home')
     })
 
     test('should allow custom translation of locale labels', async () => {
@@ -973,11 +968,10 @@ describe('General', () => {
       await wait(1000)
 
       const selectOptionClass = '.popup__content .popup-button-list__button'
-      const localizerButton = page.locator('.localizer .popup-button')
       const localeListItem1 = page.locator(selectOptionClass).nth(0)
 
       async function checkLocaleLabels(firstLabel: string, secondLabel: string) {
-        await localizerButton.click()
+        await openLocaleSelector(page)
         await expect(page.locator(selectOptionClass).first()).toContainText(firstLabel)
         await expect(page.locator(selectOptionClass).nth(1)).toContainText(secondLabel)
       }
@@ -1003,7 +997,7 @@ describe('General', () => {
       // Change locale and language back to English
       await languageField.click()
       await options.locator('text=English').click()
-      await localizerButton.click()
+      await openLocaleSelector(page)
       await expect(localeListItem1).toContainText('Spanish (es)')
     })
   })
@@ -1092,7 +1086,7 @@ describe('General', () => {
 
       // Click the "Leave anyway" button
       await page
-        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+        .locator('#leave-without-saving .alert-modal__controls .btn--style-primary')
         .click()
 
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'

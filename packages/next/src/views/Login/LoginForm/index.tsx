@@ -21,7 +21,7 @@ import { formatAdminURL, getLoginOptions, getSafeRedirect } from 'payload/shared
 import type { LoginFieldProps } from '../LoginField/index.js'
 
 import { LoginField } from '../LoginField/index.js'
-import './index.scss'
+import './index.css'
 
 export const LoginForm: React.FC<{
   prefillEmail?: string
@@ -109,16 +109,20 @@ export const LoginForm: React.FC<{
           path="password"
         />
       </div>
-      <Link
-        href={formatAdminURL({
-          adminRoute,
-          path: forgotRoute,
-        })}
-        prefetch={false}
-      >
-        {t('authentication:forgotPasswordQuestion')}
-      </Link>
-      <FormSubmit size="large">{t('authentication:login')}</FormSubmit>
+      <div className={`${baseClass}__actions`}>
+        <FormSubmit size="large">{t('authentication:login')}</FormSubmit>
+        <div className={`${baseClass}__forgotPassword`}>
+          <Link
+            href={formatAdminURL({
+              adminRoute,
+              path: forgotRoute,
+            })}
+            prefetch={false}
+          >
+            {t('authentication:forgotPasswordQuestion')}
+          </Link>
+        </div>
+      </div>
     </Form>
   )
 }

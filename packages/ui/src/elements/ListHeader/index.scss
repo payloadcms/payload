@@ -20,17 +20,18 @@
     }
 
     &__title {
-      margin: 0;
+      font-size: var(--text-heading-medium-font-size);
+      line-height: var(--text-heading-medium-line-height);
+      font-weight: var(--text-heading-medium-font-weight);
+      font-family: var(--text-heading-medium-font-family);
     }
 
     &__title-actions {
-      margin-bottom: 4px;
       display: flex;
       gap: calc(var(--base) * 0.5);
     }
 
     &__actions {
-      margin-bottom: 4px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -39,10 +40,6 @@
 
     &__after-header-content {
       width: 100%;
-    }
-
-    .btn {
-      margin: 0;
     }
   }
 }

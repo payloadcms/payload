@@ -12,16 +12,14 @@ import {
   AppHeader,
   BulkUploadProvider,
   EntityVisibilityProvider,
-  NavToggler,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 
-import './index.scss'
+import './index.css'
 
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
-import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
 
 const baseClass = 'template-default'
@@ -127,13 +125,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
             serverProps,
           })}
           <div style={{ position: 'relative' }}>
-            <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
-              <div className={`${baseClass}__nav-toggler-container`} id="nav-toggler">
-                <NavToggler className={`${baseClass}__nav-toggler`}>
-                  <NavHamburger />
-                </NavToggler>
-              </div>
-            </div>
             <Wrapper baseClass={baseClass} className={className}>
               {NavComponent}
               <div className={`${baseClass}__wrap`}>
@@ -142,15 +133,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                     avatar !== 'gravatar' && avatar !== 'default'
                       ? RenderServerComponent({
                           Component: avatar.Component,
-                          importMap: payload.importMap,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                  CustomIcon={
-                    components?.graphics?.Icon
-                      ? RenderServerComponent({
-                          Component: components.graphics.Icon,
                           importMap: payload.importMap,
                           serverProps,
                         })

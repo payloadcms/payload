@@ -1,13 +1,11 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback } from 'react'
 
+import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { drawerZBase, useDrawerDepth } from '../Drawer/index.js'
-import './index.scss'
-
-const baseClass = 'confirmation-modal'
+import { AlertModal, useModal } from '../Modal/index.js'
 
 export type OnCancel = () => void
 
@@ -71,38 +69,42 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
   }
 
   return (
-    <Modal
-      className={[baseClass, className].filter(Boolean).join(' ')}
-      // Fixes https://github.com/payloadcms/payload/issues/13778
-      closeOnBlur={false}
-      slug={modalSlug}
-      style={{
-        zIndex: drawerZBase + editDepth,
-      }}
-    >
-      <div className={`${baseClass}__wrapper`}>
-        <div className={`${baseClass}__content`}>
-          {typeof heading === 'string' ? <h1>{heading}</h1> : heading}
-          {typeof body === 'string' ? <p>{body}</p> : body}
-        </div>
-        <div className={`${baseClass}__controls`}>
+    <AlertModal
+      actions={
+        <>
           <Button
             buttonStyle="secondary"
             disabled={confirming}
             id="confirm-cancel"
             onClick={onCancel}
-            size="large"
+            size="medium"
             type="button"
           >
             {cancelLabel || t('general:cancel')}
           </Button>
-          <Button id="confirm-action" onClick={onConfirm} size="large">
+          <Button id="confirm-action" onClick={onConfirm} size="medium">
             {confirming
               ? confirmingLabel || `${t('general:loading')}...`
               : confirmLabel || t('general:confirm')}
           </Button>
-        </div>
-      </div>
-    </Modal>
+        </>
+      }
+      className={className}
+      compact
+      headerActions={
+        <Button
+          aria-label={t('general:close')}
+          buttonStyle="ghost"
+          disabled={confirming}
+          icon={<XIcon size={24} />}
+          onClick={onCancel}
+        />
+      }
+      slug={modalSlug}
+      title={heading}
+      zIndex={drawerZBase + editDepth}
+    >
+      {typeof body === 'string' ? <p>{body}</p> : body}
+    </AlertModal>
   )
 }

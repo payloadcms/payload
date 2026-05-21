@@ -14,18 +14,21 @@ export type SpinnerProps = {
    */
   loadingText?: null | string
   /**
-   * Size of the spinner
-   * @default 'default'
+   * Size of the spinner:
+   * - sm: 16px icon
+   * - md: 24px icon with smaller arc
+   * - lg: 24px icon with larger arc
+   * @default 'md'
    */
-  size?: 'default' | 'small'
+  size?: 'lg' | 'md' | 'sm'
 }
 
-export const Spinner: React.FC<SpinnerProps> = ({ loadingText, size = 'default' }) => {
+export const Spinner: React.FC<SpinnerProps> = ({ loadingText, size = 'md' }) => {
   const { t } = useTranslation()
 
   return (
     <div className={[baseClass, `${baseClass}--${size}`].filter(Boolean).join(' ')}>
-      <SpinnerIcon size={size === 'small' ? 16 : 24} />
+      <SpinnerIcon size={size} />
 
       {loadingText !== null && (
         <span className={`${baseClass}__text`}>{loadingText || `${t('general:loading')}...`}</span>

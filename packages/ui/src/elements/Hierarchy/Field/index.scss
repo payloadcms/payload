@@ -2,6 +2,12 @@
 
 @layer payload-default {
   .hierarchy-field {
+    .field-type__wrap {
+      gap: var(--spacer-2);
+      flex-direction: column;
+      display: flex;
+    }
+
     .field-label {
       display: flex;
       font-size: 18px;

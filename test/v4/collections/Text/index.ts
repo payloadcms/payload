@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-import { textFieldsSlug } from '../../slugs.js'
+import { createTagField } from 'payload'
+
+import { relationshipFieldsSlug, tagsSlug, textFieldsSlug } from '../../slugs.js'
 
 const TextFields: CollectionConfig = {
   slug: textFieldsSlug,
@@ -55,6 +57,32 @@ const TextFields: CollectionConfig = {
         readOnly: true,
         description: 'This field is read-only',
       },
+    },
+    createTagField({
+      relationTo: tagsSlug,
+      admin: {
+        position: 'sidebar',
+        description: 'Tags for this post (hierarchy field)',
+      },
+    }),
+    {
+      type: 'group',
+      label: 'Relationship/Tags Group',
+      admin: {
+        description:
+          'Helper fields for testing relationship-type field visuals (join, hierarchy/tags)',
+      },
+      fields: [
+        {
+          name: 'relatedFrom',
+          type: 'join',
+          collection: relationshipFieldsSlug,
+          on: 'relatedPosts',
+          admin: {
+            description: 'Documents that reference this post',
+          },
+        },
+      ],
     },
   ],
 }

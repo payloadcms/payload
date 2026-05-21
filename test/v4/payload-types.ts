@@ -70,7 +70,6 @@ export interface Config {
     users: User;
     'array-fields': ArrayField;
     'blocks-fields': BlocksField;
-    hierarchy: Hierarchy;
     'checkbox-fields': CheckboxField;
     'code-fields': CodeField;
     'collapsible-fields': CollapsibleField;
@@ -79,6 +78,8 @@ export interface Config {
     'folder-items': FolderItem;
     folders: Folder;
     'group-fields': GroupField;
+    'join-fields': JoinField;
+    'join-posts': JoinPost;
     'json-fields': JsonField;
     'number-fields': NumberField;
     'password-fields': PasswordField;
@@ -87,26 +88,42 @@ export interface Config {
     'relationship-fields': RelationshipField;
     'rich-text-fields': RichTextField;
     'row-fields': RowField;
+    'search-bar-test': SearchBarTest;
     'select-fields': SelectField;
     'slug-fields': SlugField;
     'tabs-fields': TabsField;
+    tags: Tag;
     'text-fields': TextField;
     'textarea-fields': TextareaField;
     uploads: Upload;
     'upload-fields': UploadField;
     'draft-versions': DraftVersion;
     autosave: Autosave;
+    rubbish: Rubbish;
+    'unauthorized-test': UnauthorizedTest;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+    'payload-query-presets': PayloadQueryPreset;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'join-fields': {
+      relatedPosts: 'join-posts';
+      postsWithColumns: 'join-posts';
+      postsLimited: 'join-posts';
+      postsSorted: 'join-posts';
+      postsNoRowTypes: 'join-posts';
+      'group.groupedPosts': 'join-posts';
+    };
+    'text-fields': {
+      relatedFrom: 'relationship-fields';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
-    hierarchy: HierarchySelect<false> | HierarchySelect<true>;
     'checkbox-fields': CheckboxFieldsSelect<false> | CheckboxFieldsSelect<true>;
     'code-fields': CodeFieldsSelect<false> | CodeFieldsSelect<true>;
     'collapsible-fields': CollapsibleFieldsSelect<false> | CollapsibleFieldsSelect<true>;
@@ -115,6 +132,8 @@ export interface Config {
     'folder-items': FolderItemsSelect<false> | FolderItemsSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
     'group-fields': GroupFieldsSelect<false> | GroupFieldsSelect<true>;
+    'join-fields': JoinFieldsSelect<false> | JoinFieldsSelect<true>;
+    'join-posts': JoinPostsSelect<false> | JoinPostsSelect<true>;
     'json-fields': JsonFieldsSelect<false> | JsonFieldsSelect<true>;
     'number-fields': NumberFieldsSelect<false> | NumberFieldsSelect<true>;
     'password-fields': PasswordFieldsSelect<false> | PasswordFieldsSelect<true>;
@@ -123,27 +142,32 @@ export interface Config {
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'row-fields': RowFieldsSelect<false> | RowFieldsSelect<true>;
+    'search-bar-test': SearchBarTestSelect<false> | SearchBarTestSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'upload-fields': UploadFieldsSelect<false> | UploadFieldsSelect<true>;
     'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
+    rubbish: RubbishSelect<false> | RubbishSelect<true>;
+    'unauthorized-test': UnauthorizedTestSelect<false> | UnauthorizedTestSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-query-presets': PayloadQueryPresetsSelect<false> | PayloadQueryPresetsSelect<true>;
   };
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -369,19 +393,6 @@ export interface BlocksField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy".
- */
-export interface Hierarchy {
-  id: string;
-  parent?: (string | null) | Hierarchy;
-  name: string;
-  updatedAt: string;
-  createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "checkbox-fields".
  */
 export interface CheckboxField {
@@ -459,6 +470,12 @@ export interface DateField {
   monthOnly?: string | null;
   withTimezone?: string | null;
   withTimezone_tz?: SupportedTimezones;
+  withTimezoneRequired: string;
+  withTimezoneRequired_tz: SupportedTimezones;
+  withTimezoneDisabled?: string | null;
+  withTimezoneDisabled_tz?: SupportedTimezones;
+  withTimezoneReadOnly?: string | null;
+  withTimezoneReadOnly_tz?: SupportedTimezones;
   updatedAt: string;
   createdAt: string;
 }
@@ -538,6 +555,81 @@ export interface GroupField {
   };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "join-fields".
+ */
+export interface JoinField {
+  id: string;
+  name: string;
+  /**
+   * Posts related to this category
+   */
+  relatedPosts?: {
+    docs?: (string | JoinPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Join field with custom default columns
+   */
+  postsWithColumns?: {
+    docs?: (string | JoinPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Join field with default limit of 3
+   */
+  postsLimited?: {
+    docs?: (string | JoinPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Join field sorted by title descending
+   */
+  postsSorted?: {
+    docs?: (string | JoinPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Join field with row types disabled
+   */
+  postsNoRowTypes?: {
+    docs?: (string | JoinPost)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  group?: {
+    /**
+     * Join field inside a group
+     */
+    groupedPosts?: {
+      docs?: (string | JoinPost)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "join-posts".
+ */
+export interface JoinPost {
+  id: string;
+  title: string;
+  /**
+   * The parent category (used by join fields)
+   */
+  category?: (string | null) | JoinField;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -712,6 +804,10 @@ export interface RelationshipField {
    */
   author?: (string | null) | User;
   /**
+   * Relationship with drawer appearance
+   */
+  authorWithDrawer?: (string | null) | User;
+  /**
    * The author of this post
    */
   authorRequired: string | User;
@@ -764,8 +860,35 @@ export interface TextField {
    * This field is read-only
    */
   textReadOnly?: string | null;
+  /**
+   * Tags for this post (hierarchy field)
+   */
+  _h_tags?: (string | Tag)[] | null;
+  /**
+   * Documents that reference this post
+   */
+  relatedFrom?: {
+    docs?: (string | RelationshipField)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: string;
+  _h_tags?: (string | null) | Tag;
+  name: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+  allowedCollections?: 'text-fields'[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -879,6 +1002,20 @@ export interface RowField {
   billingCity?: string | null;
   shippingStreet?: string | null;
   shippingCity?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-bar-test".
+ */
+export interface SearchBarTest {
+  id: string;
+  title: string;
+  description?: string | null;
+  category?: ('news' | 'blog' | 'tutorial' | 'docs') | null;
+  status?: ('draft' | 'published' | 'archived') | null;
+  priority?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1110,6 +1247,27 @@ export interface Autosave {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish".
+ */
+export interface Rubbish {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unauthorized-test".
+ */
+export interface UnauthorizedTest {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1145,10 +1303,6 @@ export interface PayloadLockedDocument {
         value: string | BlocksField;
       } | null)
     | ({
-        relationTo: 'hierarchy';
-        value: string | Hierarchy;
-      } | null)
-    | ({
         relationTo: 'checkbox-fields';
         value: string | CheckboxField;
       } | null)
@@ -1179,6 +1333,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'group-fields';
         value: string | GroupField;
+      } | null)
+    | ({
+        relationTo: 'join-fields';
+        value: string | JoinField;
+      } | null)
+    | ({
+        relationTo: 'join-posts';
+        value: string | JoinPost;
       } | null)
     | ({
         relationTo: 'json-fields';
@@ -1213,6 +1375,10 @@ export interface PayloadLockedDocument {
         value: string | RowField;
       } | null)
     | ({
+        relationTo: 'search-bar-test';
+        value: string | SearchBarTest;
+      } | null)
+    | ({
         relationTo: 'select-fields';
         value: string | SelectField;
       } | null)
@@ -1223,6 +1389,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tabs-fields';
         value: string | TabsField;
+      } | null)
+    | ({
+        relationTo: 'tags';
+        value: string | Tag;
       } | null)
     | ({
         relationTo: 'text-fields';
@@ -1247,6 +1417,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave';
         value: string | Autosave;
+      } | null)
+    | ({
+        relationTo: 'rubbish';
+        value: string | Rubbish;
+      } | null)
+    | ({
+        relationTo: 'unauthorized-test';
+        value: string | UnauthorizedTest;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1287,6 +1465,55 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-query-presets".
+ */
+export interface PayloadQueryPreset {
+  id: string;
+  title: string;
+  isShared?: boolean | null;
+  access?: {
+    read?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (string | User)[] | null;
+    };
+    update?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (string | User)[] | null;
+    };
+    delete?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (string | User)[] | null;
+    };
+  };
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  columns?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  groupBy?: string | null;
+  relatedCollection: 'search-bar-test' | 'select-fields';
+  /**
+   * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
+   */
+  isTemp?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1498,18 +1725,6 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy_select".
- */
-export interface HierarchySelect<T extends boolean = true> {
-  parent?: T;
-  name?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "checkbox-fields_select".
  */
 export interface CheckboxFieldsSelect<T extends boolean = true> {
@@ -1562,6 +1777,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
   monthOnly?: T;
   withTimezone?: T;
   withTimezone_tz?: T;
+  withTimezoneRequired?: T;
+  withTimezoneRequired_tz?: T;
+  withTimezoneDisabled?: T;
+  withTimezoneDisabled_tz?: T;
+  withTimezoneReadOnly?: T;
+  withTimezoneReadOnly_tz?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1627,6 +1848,36 @@ export interface GroupFieldsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "join-fields_select".
+ */
+export interface JoinFieldsSelect<T extends boolean = true> {
+  name?: T;
+  relatedPosts?: T;
+  postsWithColumns?: T;
+  postsLimited?: T;
+  postsSorted?: T;
+  postsNoRowTypes?: T;
+  group?:
+    | T
+    | {
+        groupedPosts?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "join-posts_select".
+ */
+export interface JoinPostsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1701,6 +1952,7 @@ export interface RadioFieldsSelect<T extends boolean = true> {
  */
 export interface RelationshipFieldsSelect<T extends boolean = true> {
   author?: T;
+  authorWithDrawer?: T;
   authorRequired?: T;
   relatedPosts?: T;
   authorDisabled?: T;
@@ -1749,6 +2001,19 @@ export interface RowFieldsSelect<T extends boolean = true> {
   billingCity?: T;
   shippingStreet?: T;
   shippingCity?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-bar-test_select".
+ */
+export interface SearchBarTestSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  category?: T;
+  status?: T;
+  priority?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1832,6 +2097,20 @@ export interface TabsFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_select".
+ */
+export interface TagsSelect<T extends boolean = true> {
+  _h_tags?: T;
+  name?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+  allowedCollections?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "text-fields_select".
  */
 export interface TextFieldsSelect<T extends boolean = true> {
@@ -1839,6 +2118,8 @@ export interface TextFieldsSelect<T extends boolean = true> {
   favoriteFruit?: T;
   textDisabled?: T;
   textReadOnly?: T;
+  _h_tags?: T;
+  relatedFrom?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1909,6 +2190,25 @@ export interface AutosaveSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish_select".
+ */
+export interface RubbishSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unauthorized-test_select".
+ */
+export interface UnauthorizedTestSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1944,6 +2244,43 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
 export interface PayloadMigrationsSelect<T extends boolean = true> {
   name?: T;
   batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-query-presets_select".
+ */
+export interface PayloadQueryPresetsSelect<T extends boolean = true> {
+  title?: T;
+  isShared?: T;
+  access?:
+    | T
+    | {
+        read?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+        update?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+        delete?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+      };
+  where?: T;
+  columns?: T;
+  groupBy?: T;
+  relatedCollection?: T;
+  isTemp?: T;
   updatedAt?: T;
   createdAt?: T;
 }

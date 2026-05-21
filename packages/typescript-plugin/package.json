@@ -40,7 +40,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "devDependencies": {
-    "typescript": "5.7.3"
+    "typescript": "6.0.3"
   },
   "engines": {
     "node": ">=24.15.0"

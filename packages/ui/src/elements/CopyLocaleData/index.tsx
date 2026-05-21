@@ -20,7 +20,7 @@ import { DrawerHeader } from '../BulkUpload/Header/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { PopupList } from '../Popup/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'copy-locale-data'
 
@@ -133,7 +133,6 @@ export const CopyLocaleData: React.FC = () => {
       </PopupList.Button>
       <Drawer
         className={baseClass}
-        gutter={false}
         Header={
           <DrawerHeader
             onClose={() => {

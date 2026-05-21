@@ -1,0 +1,68 @@
+@layer payload-default {
+  .card {
+    background: var(--color-bg-secondary);
+    padding: var(--spacer-2-5) var(--spacer-3);
+    width: 100%;
+    min-height: 4rem;
+    position: relative;
+    border-radius: var(--radius-medium);
+    border: var(--stroke-width-small) solid var(--color-border);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacer-2);
+  }
+
+  .card__title {
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .card__actions {
+    position: absolute;
+    top: var(--spacer-2);
+    right: var(--spacer-2);
+    z-index: 2;
+    display: inline-flex;
+  }
+
+  .card--has-onclick {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-bg-secondary-hover);
+    }
+
+    &:has(.card__click:active) {
+      background: var(--color-bg-secondary-pressed);
+    }
+  }
+
+  .card__click {
+    z-index: 1;
+    inset: 0;
+    position: absolute;
+    margin: 0;
+    height: auto;
+    width: auto;
+    border-radius: inherit;
+
+    &:hover,
+    &:active,
+    &:hover:not(.btn--disabled),
+    &:active:not(.btn--disabled) {
+      background-color: transparent;
+    }
+
+    &:focus-visible {
+      outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
+      outline-offset: 0;
+    }
+  }
+}

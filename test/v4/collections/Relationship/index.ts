@@ -15,6 +15,16 @@ const RelationshipFields: CollectionConfig = {
       },
     },
     {
+      name: 'authorWithDrawer',
+      type: 'relationship',
+      relationTo: 'users',
+      label: 'Author (Drawer)',
+      admin: {
+        appearance: 'drawer',
+        description: 'Relationship with drawer appearance',
+      },
+    },
+    {
       name: 'authorRequired',
       type: 'relationship',
       relationTo: 'users',

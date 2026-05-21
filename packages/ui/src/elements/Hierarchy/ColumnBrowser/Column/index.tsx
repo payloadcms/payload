@@ -57,10 +57,10 @@ export const Column: React.FC<ColumnProps> = ({
         <span className={`${baseClass}__header-title`}>{headerTitle}</span>
         {canCreate && (
           <Button
-            buttonStyle="muted-text"
+            buttonStyle="ghost"
             className={`${baseClass}__add-button`}
             disabled={disabled}
-            icon={<PlusIcon />}
+            icon={<PlusIcon size={16} />}
             iconPosition="left"
             margin={false}
             onClick={handleCreateNew}
@@ -88,7 +88,7 @@ export const Column: React.FC<ColumnProps> = ({
 
         {isLoading && (
           <div className={`${baseClass}__loading`}>
-            <Spinner loadingText={null} size="small" />
+            <Spinner loadingText={null} size="sm" />
           </div>
         )}
 

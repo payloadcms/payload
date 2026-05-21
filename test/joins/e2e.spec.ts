@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { waitForAutoSaveToRunAndComplete } from '__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -168,7 +168,7 @@ describe('Join Field', () => {
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField.locator('.row-1 > .cell-title')).toContainText('z')
-    await expect(joinField.locator('.paginator > .clickable-arrow--right')).toBeVisible()
+    await expect(joinField.locator('.relationship-table-pagination')).toBeVisible()
     const rows = joinField.locator('.relationship-table tbody tr')
     await expect(rows).toHaveCount(5)
   })
@@ -688,7 +688,7 @@ describe('Join Field', () => {
     await page.locator('#field-enableErrorOnJoin').click()
     await page.locator('#action-save').click()
 
-    await expect(page.locator('#field-joinWithError')).toContainText('enableErrorOnJoin is true')
+    await expect(page.locator('#field-joinWithError .error-pill')).toBeVisible()
   })
 
   test('should render localized data in table when locale changes', async () => {

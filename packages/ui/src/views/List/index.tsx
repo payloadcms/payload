@@ -33,7 +33,7 @@ import { ListSelection } from '../../views/List/ListSelection/index.js'
 import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/index.js'
 import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'collection-list'
 
@@ -148,6 +148,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
       // Add hierarchy breadcrumbs
       if (hierarchyData?.breadcrumbs) {
+        const queryParam = hierarchyData.parentFieldName || 'parent'
         const hierarchyBreadcrumbs = hierarchyData.breadcrumbs.map((crumb, index) => {
           const isLast = index === hierarchyData.breadcrumbs.length - 1
           return {
@@ -156,7 +157,7 @@ export function DefaultListView(props: ListViewClientProps) {
               ? undefined
               : formatAdminURL({
                   adminRoute,
-                  path: `/collections/${collectionSlug}?parent=${crumb.id}`,
+                  path: `/collections/${collectionSlug}?${queryParam}=${crumb.id}`,
                 }),
           }
         })
@@ -229,7 +230,9 @@ export function DefaultListView(props: ListViewClientProps) {
                 disableQueryPresets={
                   collectionConfig?.enableQueryPresets !== true || disableQueryPresets
                 }
+                hasCreatePermission={hasCreatePermission && viewType !== 'trash'}
                 listMenuItems={listMenuItems}
+                newDocumentURL={newDocumentURL}
                 queryPreset={queryPreset}
                 queryPresetPermissions={queryPresetPermissions}
                 renderedFilters={renderedFilters}
@@ -299,20 +302,14 @@ export function DefaultListView(props: ListViewClientProps) {
                         ]
                       : []
                   }
-                  Message={
-                    viewType === 'trash' ? (
-                      <p>
-                        {i18n.t('general:noTrashResults', {
+                  description={
+                    viewType === 'trash'
+                      ? i18n.t('general:noTrashResults', {
                           label: getTranslation(labels?.plural, i18n),
-                        })}
-                      </p>
-                    ) : (
-                      <>
-                        <h3>{i18n.t('general:noResultsFound')}</h3>
-                        <p>{i18n.t('general:noResultsDescription')}</p>
-                      </>
-                    )
+                        })
+                      : i18n.t('general:noResultsDescription')
                   }
+                  title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
                 />
               )}
               {AfterListTable}

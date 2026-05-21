@@ -55,13 +55,13 @@
     --text-heading-medium-font-size: 0.9375rem; /* 15px */
     --text-heading-medium-font-weight: 550;
     --text-heading-medium-line-height: 1.5625rem;
-    --text-heading-medium-letter-spacing: -0.5px;
+    --text-heading-medium-letter-spacing: -0.075px;
 
     /* Heading — Large */
     --text-heading-large-font-family: var(--font-family-sans);
     --text-heading-large-font-size: 1.5rem; /* 24px */
     --text-heading-large-font-weight: 550;
     --text-heading-large-line-height: 2rem; /* 32px */
-    --text-heading-large-letter-spacing: -1.7px;
+    --text-heading-large-letter-spacing: -0.408px;
   }
 }

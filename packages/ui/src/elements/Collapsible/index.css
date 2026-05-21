@@ -180,7 +180,7 @@
   }
 
   .collapsible__indicator:focus-visible {
-    border: 1px solid var(--color-border-selected-strong);
+    border: 1px solid var(--accessibility-focus-color);
     border-radius: var(--radius-medium, 0.3125rem);
     background: var(--color-bg-secondary);
   }

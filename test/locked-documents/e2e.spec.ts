@@ -169,7 +169,7 @@ describe('Locked Documents', () => {
     test('should show lock icon on document row if locked', async () => {
       await page.goto(postsUrl.list)
 
-      await expect(page.locator('.table .row-2 .locked svg')).toBeVisible()
+      await expect(page.locator('.table .row-2 .locked svg.icon--lock')).toBeVisible()
     })
 
     test('should not show lock icon on document row if unlocked', async () => {
@@ -209,9 +209,9 @@ describe('Locked Documents', () => {
       // Should be partial since one doc is locked and cannot be selected
       await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
       await page.locator('.delete-documents__toggle').click()
-      await expect(
-        page.locator('#confirm-delete-many-docs .confirmation-modal__content p'),
-      ).toHaveText('You are about to delete 2 Posts')
+      await expect(page.locator('#confirm-delete-many-docs .alert-modal__content p')).toHaveText(
+        'You are about to delete 2 Posts',
+      )
     })
 
     test('should only allow bulk delete on unlocked documents on all pages', async () => {
@@ -390,8 +390,8 @@ describe('Locked Documents', () => {
     test('should delete all expired locked documents upon initial editing of unlocked document', async () => {
       await page.goto(testsUrl.list)
 
-      await expect(page.locator('.table .row-2 .locked svg')).toBeVisible()
-      await expect(page.locator('.table .row-3 .locked svg')).toBeVisible()
+      await expect(page.locator('.table .row-2 .locked svg.icon--lock')).toBeVisible()
+      await expect(page.locator('.table .row-3 .locked svg.icon--lock')).toBeVisible()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(5000)
@@ -509,9 +509,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page
-        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
-        .click()
+      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
@@ -562,9 +560,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page
-        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
-        .click()
+      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
@@ -1320,7 +1316,9 @@ describe('Locked Documents', () => {
     test('should show lock on document card in dashboard view if locked', async () => {
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.collections__card-list #card-menu .locked svg')).toBeVisible()
+      await expect(
+        page.locator('.collections__card-list #card-menu .locked svg.icon--lock'),
+      ).toBeVisible()
     })
 
     test('should not show lock on document card in dashboard view if unlocked', async () => {
@@ -1358,7 +1356,9 @@ describe('Locked Documents', () => {
     test('should not show lock on document card in dashboard view if lock expired', async () => {
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.collections__card-list #card-admin .locked svg')).toBeVisible()
+      await expect(
+        page.locator('.collections__card-list #card-admin .locked svg.icon--lock'),
+      ).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
       // eslint-disable-next-line payload/no-wait-function
@@ -1389,7 +1389,9 @@ describe('Locked Documents', () => {
 
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.collections__card-list #card-admin .locked svg')).toBeVisible()
+      await expect(
+        page.locator('.collections__card-list #card-admin .locked svg.icon--lock'),
+      ).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
       // eslint-disable-next-line payload/no-wait-function
@@ -1472,7 +1474,9 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+        await expect(user2Page.locator('#document-stale-data .alert-modal__title')).toHaveText(
+          'Document modified',
+        )
       })
 
       test('should reload document and show latest data when clicking reload button', async () => {
@@ -1870,7 +1874,9 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+        await expect(user2Page.locator('#document-stale-data .alert-modal__title')).toHaveText(
+          'Document modified',
+        )
       })
 
       test('should reload global and show latest data when clicking reload button', async () => {
@@ -2059,7 +2065,9 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+        await expect(user2Page.locator('#document-stale-data .alert-modal__title')).toHaveText(
+          'Document modified',
+        )
       })
 
       test('should detect stale data across multiple save cycles for global with drafts', async () => {

@@ -6,11 +6,12 @@ import { Collapsible } from '@payloadcms/ui'
 
 export const Section: React.FC<{
   children: React.ReactNode
+  columns?: number
   fullWidth?: boolean
   id: string
   selectedComponent: string
   title: string
-}> = ({ id, children, fullWidth, selectedComponent, title }) => {
+}> = ({ id, children, columns, fullWidth, selectedComponent, title }) => {
   if (selectedComponent !== 'all' && selectedComponent !== id) {
     return null
   }
@@ -25,6 +26,7 @@ export const Section: React.FC<{
           ]
             .filter(Boolean)
             .join(' ')}
+          style={columns ? ({ '--columns': columns } as React.CSSProperties) : undefined}
         >
           {children}
         </div>
@@ -38,7 +40,7 @@ export const Variant: React.FC<{
   label?: string
 }> = ({ children, label }) => (
   <div className="components-view__variant">
-    {label && <span className="components-view__variant-label">{label}</span>}
+    {label && <div className="components-view__variant-label">{label}</div>}
     <div className="components-view__variant-content">{children}</div>
   </div>
 )

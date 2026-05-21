@@ -74,7 +74,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   return (
     <div className={baseClass}>
       <Button
-        buttonStyle="tab"
+        buttonStyle="pill"
         className={[`${baseClass}__button`, viewType === 'list' && `${baseClass}__button--active`]
           .filter(Boolean)
           .join(' ')}
@@ -88,7 +88,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
 
       {isHierarchyEnabled && (
         <Button
-          buttonStyle="tab"
+          buttonStyle="pill"
           className={[
             `${baseClass}__button`,
             viewType === 'hierarchy' && `${baseClass}__button--active`,
@@ -106,7 +106,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
 
       {isTrashEnabled && (
         <Button
-          buttonStyle="tab"
+          buttonStyle="pill"
           className={[
             `${baseClass}__button`,
             viewType === 'trash' && `${baseClass}__button--active`,

@@ -218,3 +218,110 @@ Run `npx @payloadcms/codemod --transform migrate-multi-tenant-tenant-selector-la
 #### `getGlobalViewRedirect`: `basePath` argument removed
 
 The `basePath` parameter on `getGlobalViewRedirect` was deprecated and is now removed. The redirect path is now derived internally from the Payload config. Remove any `basePath` argument from direct calls to this utility.
+
+### RichText adapter `i18n` property removed
+
+The `i18n` property on `RichTextAdapter` (and its return type from adapter provider functions) has been removed. It was deprecated in v3 in favour of merging translations directly into `config.i18n.translations` inside the adapter provider.
+
+If you authored a custom rich-text adapter that returned an `i18n` object, move that logic into the adapter provider function and merge the translations into the config yourself:
+
+```diff
+// my-richtext-adapter/index.ts
+export const myRichTextAdapter = (): RichTextAdapterProvider => {
+  return async ({ config }) => {
+    const myTranslations = { en: { myKey: 'My translation' } }
+
+-   return {
+-     // ... other adapter properties
+-     i18n: myTranslations,
+-   }
++   config.i18n.translations = deepMergeSimple(config.i18n.translations, myTranslations)
++   return {
++     // ... other adapter properties
++   }
+  }
+}
+```
+
+### `transactionIDPromise` removed from `PayloadRequest`
+
+The `transactionIDPromise` property on `PayloadRequest` has been removed. It was deprecated and unused — `transactionID` (which already supports `Promise<number | string>`) is the correct property to use for both resolved values and pending transactions.
+
+### Plugin Import/Export: `toCSV` and `fromCSV` removed
+
+The `toCSV` and `fromCSV` field options in `custom['plugin-import-export']` have been removed. Use `hooks.beforeExport` and `hooks.beforeImport` instead — they work for both CSV and JSON formats.
+
+The argument shapes differ slightly from the old API:
+
+| Old (`toCSV`) | New (`hooks.beforeExport`)          |
+| ------------- | ----------------------------------- |
+| `row`         | `siblingData`                       |
+| `doc`         | `data`                              |
+| `data`        | _(removed — was alias for `row`)_   |
+| —             | `format` (new: `'csv'` \| `'json'`) |
+
+The `fromCSV` → `hooks.beforeImport` change is non-breaking for the `data` parameter — both receive the full flat row.
+
+```diff
+{
+  name: 'author',
+  type: 'relationship',
+  relationTo: 'users',
+  custom: {
+    'plugin-import-export': {
+-     toCSV: ({ value, columnName, row, doc }) => {
+-       row[`${columnName}_id`] = (value as any).id
+-       return doc.title
+-     },
+-     fromCSV: ({ value, data }) => data[`${value}_key`],
++     hooks: {
++       beforeExport: ({ value, columnName, siblingData, data }) => {
++         siblingData[`${columnName}_id`] = (value as any).id
++         return data.title
++       },
++       beforeImport: ({ value, data }) => data[`${value}_key`],
++     },
+    },
+  },
+}
+```
+
+Run `npx @payloadcms/codemod --transform migrate-import-export-hooks` to migrate automatically. The codemod moves the function values into the correct hook positions and merges with any existing `hooks` object. Review argument names in the migrated functions — `row` references must be renamed to `siblingData` and `doc` references renamed to `data`.
+
+### DB Adapter `/types` Subpath Exports Removed
+
+The `/types` subpath export has been removed from all Drizzle-based database adapter packages. All types are available directly from the main package entry point.
+
+| Old import                             | New import                       |
+| -------------------------------------- | -------------------------------- |
+| `@payloadcms/drizzle/types`            | `@payloadcms/drizzle`            |
+| `@payloadcms/db-postgres/types`        | `@payloadcms/db-postgres`        |
+| `@payloadcms/db-sqlite/types`          | `@payloadcms/db-sqlite`          |
+| `@payloadcms/db-vercel-postgres/types` | `@payloadcms/db-vercel-postgres` |
+| `@payloadcms/db-d1-sqlite/types`       | `@payloadcms/db-d1-sqlite`       |
+
+```diff
+- import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+- import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
+- import type { SQLiteAdapter } from '@payloadcms/db-sqlite/types'
+- import type { VercelPostgresAdapter } from '@payloadcms/db-vercel-postgres/types'
+- import type { SQLiteD1Adapter } from '@payloadcms/db-d1-sqlite/types'
++ import type { DrizzleAdapter } from '@payloadcms/drizzle'
++ import type { PostgresAdapter } from '@payloadcms/db-postgres'
++ import type { SQLiteAdapter } from '@payloadcms/db-sqlite'
++ import type { VercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
++ import type { SQLiteD1Adapter } from '@payloadcms/db-d1-sqlite'
+```
+
+If you use a `declare module` augmentation to extend `GeneratedDatabaseSchema` (typically found in generated schema files), update the module path as well:
+
+```diff
+- declare module '@payloadcms/db-postgres/types' {
++ declare module '@payloadcms/db-postgres' {
+    export interface GeneratedDatabaseSchema {
+      schema: DatabaseSchema
+    }
+  }
+```
+
+Run `npx @payloadcms/codemod --transform migrate-db-types-subpath` to migrate automatically. The codemod handles import declarations, re-export declarations, and `declare module` augmentations.

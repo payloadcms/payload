@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Button,
   CheckboxInput,
   ChevronIcon,
   formatTimeToNow,
@@ -194,14 +195,14 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
               />
             </span>
             {localization && (
-              <Pill
+              <Button
                 aria-controls={`${baseClass}-locales`}
                 aria-expanded={localeSelectorOpen}
+                buttonStyle="pill"
                 className={`${baseClass}__toggle-locales`}
                 icon={<ChevronIcon direction={localeSelectorOpen ? 'up' : 'down'} />}
                 onClick={() => setLocaleSelectorOpen((localeSelectorOpen) => !localeSelectorOpen)}
-                pillStyle="light"
-                size="small"
+                size="medium"
               >
                 <span className={`${baseClass}__toggle-locales-label`}>
                   {t('general:locales')}:{' '}
@@ -212,7 +213,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                     .map((locale) => locale.name)
                     .join(', ')}
                 </span>
-              </Pill>
+              </Button>
             )}
           </div>
         </div>

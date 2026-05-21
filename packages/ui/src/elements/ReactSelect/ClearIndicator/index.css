@@ -12,9 +12,4 @@
       color: var(--color-icon);
     }
   }
-
-  .clear-indicator__icon {
-    width: var(--spacer-3);
-    height: var(--spacer-3);
-  }
 }

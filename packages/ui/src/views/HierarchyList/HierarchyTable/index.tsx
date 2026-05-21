@@ -221,11 +221,8 @@ export function HierarchyTable({
       }))
 
       try {
-        // Field name is always _t_{hierarchySlug} by convention
-        const fieldName = `_t_${collectionSlug}`
-
         // "in" operator works for both hasMany and single relationship fields
-        const relationshipCondition = { [fieldName]: { in: [parentId] } }
+        const relationshipCondition = { [parentFieldName]: { in: [parentId] } }
 
         const relatedConfig = getEntityConfig({ collectionSlug: relatedSlug })
         const relatedUseAsTitle = relatedConfig?.admin?.useAsTitle || 'id'
@@ -277,6 +274,7 @@ export function HierarchyTable({
       apiRoute,
       collectionSlug,
       getEntityConfig,
+      parentFieldName,
       parentId,
       relatedBaseFilters,
       relatedGroups,
@@ -448,12 +446,8 @@ export function HierarchyTable({
               ]
             : undefined
         }
-        Message={
-          <>
-            <h3>{t('general:noResultsFound')}</h3>
-            <p>{t('general:noResultsDescription')}</p>
-          </>
-        }
+        description={t('general:noResultsDescription')}
+        title={t('general:noResultsFound')}
       />
     )
   }

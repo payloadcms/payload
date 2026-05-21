@@ -33,8 +33,10 @@ export const Pages: CollectionConfig = {
       defaultValue: 'my custom csv transformer',
       custom: {
         'plugin-import-export': {
-          toCSV: ({ value }) => {
-            return String(value) + ' toCSV'
+          hooks: {
+            beforeExport: ({ value }) => {
+              return String(value) + ' toCSV'
+            },
           },
         },
       },
@@ -45,20 +47,20 @@ export const Pages: CollectionConfig = {
       relationTo: 'users',
       custom: {
         'plugin-import-export': {
-          toCSV: ({ value, columnName, row }) => {
-            if (value && typeof value === 'object' && 'id' in value && 'email' in value) {
-              row[`${columnName}_id`] = (value as { id: number | string }).id
-              row[`${columnName}_email`] = (value as { email: string }).email
-            }
-          },
-          fromCSV: ({ data, columnName }) => {
-            // When importing, reconstruct the relationship from the split columns
-            const id = data[`${columnName}_id`]
-            const email = data[`${columnName}_email`]
-            if (id) {
-              return id // Return just the ID for the relationship
-            }
-            return undefined
+          hooks: {
+            beforeExport: ({ value, columnName, siblingData }) => {
+              if (value && typeof value === 'object' && 'id' in value && 'email' in value) {
+                siblingData[`${columnName}_id`] = (value as { id: number | string }).id
+                siblingData[`${columnName}_email`] = (value as { email: string }).email
+              }
+            },
+            beforeImport: ({ data, columnName }) => {
+              const id = data[`${columnName}_id`]
+              if (id) {
+                return id
+              }
+              return undefined
+            },
           },
         },
       },
@@ -69,19 +71,13 @@ export const Pages: CollectionConfig = {
       relationTo: 'users',
       custom: {
         'plugin-import-export': {
-          toCSV: ({
-            value,
-            columnName,
-            row,
-          }: {
-            columnName: string
-            row: Record<string, unknown>
-            value: unknown
-          }) => {
-            if (value && typeof value === 'object' && 'name' in value && 'email' in value) {
-              row[`${columnName}_name`] = (value as { name: string }).name
-              row[`${columnName}_email`] = (value as { email: string }).email
-            }
+          hooks: {
+            beforeExport: ({ value, columnName, siblingData }) => {
+              if (value && typeof value === 'object' && 'name' in value && 'email' in value) {
+                siblingData[`${columnName}_name`] = (value as { name: string }).name
+                siblingData[`${columnName}_email`] = (value as { email: string }).email
+              }
+            },
           },
         },
       },
@@ -92,19 +88,13 @@ export const Pages: CollectionConfig = {
       relationTo: 'users',
       custom: {
         'plugin-import-export': {
-          toCSV: ({
-            value,
-            columnName,
-            row,
-          }: {
-            columnName: string
-            row: Record<string, unknown>
-            value: unknown
-          }) => {
-            if (value && typeof value === 'object' && 'id' in value && 'name' in value) {
-              row[`${columnName}_id`] = (value as { id: number | string }).id
-              row[`${columnName}_locationName`] = (value as { name: string }).name
-            }
+          hooks: {
+            beforeExport: ({ value, columnName, siblingData }) => {
+              if (value && typeof value === 'object' && 'id' in value && 'name' in value) {
+                siblingData[`${columnName}_id`] = (value as { id: number | string }).id
+                siblingData[`${columnName}_locationName`] = (value as { name: string }).name
+              }
+            },
           },
         },
       },
@@ -147,8 +137,10 @@ export const Pages: CollectionConfig = {
           defaultValue: 'my custom csv transformer',
           custom: {
             'plugin-import-export': {
-              toCSV: ({ value }) => {
-                return String(value) + ' toCSV'
+              hooks: {
+                beforeExport: ({ value }) => {
+                  return String(value) + ' toCSV'
+                },
               },
             },
           },
@@ -167,8 +159,10 @@ export const Pages: CollectionConfig = {
               defaultValue: 'my custom csv transformer',
               custom: {
                 'plugin-import-export': {
-                  toCSV: ({ value }) => {
-                    return String(value) + ' toCSV'
+                  hooks: {
+                    beforeExport: ({ value }) => {
+                      return String(value) + ' toCSV'
+                    },
                   },
                 },
               },
@@ -187,8 +181,10 @@ export const Pages: CollectionConfig = {
               defaultValue: 'my custom csv transformer',
               custom: {
                 'plugin-import-export': {
-                  toCSV: ({ value }) => {
-                    return String(value) + ' toCSV'
+                  hooks: {
+                    beforeExport: ({ value }) => {
+                      return String(value) + ' toCSV'
+                    },
                   },
                 },
               },

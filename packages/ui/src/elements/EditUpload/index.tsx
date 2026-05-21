@@ -11,7 +11,7 @@ import { PlusIcon } from '../../icons/Plus/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { Button } from '../Button/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'edit-upload'
 
@@ -256,7 +256,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                   <div className={`${baseClass}__titleWrap`}>
                     <h3>{t('upload:crop')}</h3>
                     <Button
-                      buttonStyle="none"
+                      buttonStyle="ghost"
                       className={`${baseClass}__reset`}
                       onClick={() =>
                         setCrop({
@@ -300,7 +300,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                   <div className={`${baseClass}__titleWrap`}>
                     <h3>{t('upload:focalPoint')}</h3>
                     <Button
-                      buttonStyle="none"
+                      buttonStyle="ghost"
                       className={`${baseClass}__reset`}
                       onClick={centerFocalPoint}
                     >
