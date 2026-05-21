@@ -1,6 +1,5 @@
 import type { SelectType } from 'payload'
 
-import { fromJsonSchema } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 
 import { defineCollectionTool } from '../../../defineTool.js'
@@ -19,10 +18,11 @@ export const createCollectionTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
   input: ({ collectionSchema }) =>
     z.object({
-      data: fromJsonSchema({
-        ...prepareCollectionSchema(collectionSchema),
-        description: 'The document fields to create',
-      }),
+      data: z
+        .fromJSONSchema(
+          prepareCollectionSchema(collectionSchema) as unknown as z.core.JSONSchema.JSONSchema,
+        )
+        .describe('The document fields to create'),
       depth: z
         .number()
         .int()

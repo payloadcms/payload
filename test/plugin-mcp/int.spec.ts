@@ -848,6 +848,43 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('Collections', () => {
+    it('createPosts data validation: ensure invalid data is rejected', async () => {
+      const apiKey = await getApiKey()
+
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'createPosts',
+            arguments: {
+              data: {
+                content: 'test content',
+                title: 'test title',
+                badProperty: 'not in schema',
+              },
+            },
+          },
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+      const validationRejected =
+        json.error !== undefined ||
+        json.result?.isError === true ||
+        (typeof json.result?.content?.[0]?.text === 'string' &&
+          json.result.content[0].text
+            .toLowerCase()
+            .includes('input validation error: invalid arguments for tool createposts'))
+      expect(validationRejected).toBe(true)
+    })
+
     it('should call createPosts', async () => {
       const apiKey = await getApiKey()
       const response = await restClient.POST('/mcp', {
