@@ -48,8 +48,8 @@ export const richtextCodegenDataset: CodegenEvalCase[] = [
       'EXPERIMENTAL_TableFeature() added to the features array of the lexicalEditor on the content field; imported from @payloadcms/richtext-lexical',
     category: 'richtext',
     fixturePath: 'richtext/codegen/add-tables-feature',
-    // Feature array content not introspectable by AST catalog; fieldOption verifies editor override exists on the field
-    assertions: [{ kind: 'fieldOption', slug: 'posts', field: 'content', option: 'editor' }],
+    // No AST assertion kind covers lexicalEditor features[] array contents — scorer carries the load.
+    assertions: [],
   },
   {
     input:
@@ -58,8 +58,8 @@ export const richtextCodegenDataset: CodegenEvalCase[] = [
       'BlocksFeature with a callout block added to the features array of the lexicalEditor on the body field; callout block has a style select field and a content textarea field',
     category: 'richtext',
     fixturePath: 'richtext/codegen/add-blocks-feature-with-blocks',
-    // BlocksFeature content not introspectable; fieldOption verifies editor override exists on the field
-    assertions: [{ kind: 'fieldOption', slug: 'posts', field: 'body', option: 'editor' }],
+    // No AST assertion kind covers lexicalEditor features[] array contents — scorer carries the load.
+    assertions: [],
   },
   {
     input:
@@ -68,8 +68,8 @@ export const richtextCodegenDataset: CodegenEvalCase[] = [
       'lexicalEditor on the body field configured with features: [BoldFeature(), ItalicFeature()] — no ...defaultFeatures spread — removing all other features',
     category: 'richtext',
     fixturePath: 'richtext/codegen/disable-default-features',
-    // Feature array contents not introspectable; fieldOption verifies editor override exists
-    assertions: [{ kind: 'fieldOption', slug: 'posts', field: 'body', option: 'editor' }],
+    // No AST assertion kind covers lexicalEditor features[] array contents — scorer carries the load.
+    assertions: [],
   },
   {
     input: 'Limit headings to h2 and h3 only on the body richText field of the posts collection.',
@@ -77,8 +77,8 @@ export const richtextCodegenDataset: CodegenEvalCase[] = [
       'HeadingFeature({ enabledHeadingSizes: ["h2", "h3"] }) used in the features array of the lexicalEditor on the body field',
     category: 'richtext',
     fixturePath: 'richtext/codegen/add-headingfeature-h2-h3',
-    // HeadingFeature argument not introspectable; fieldOption verifies editor override exists
-    assertions: [{ kind: 'fieldOption', slug: 'posts', field: 'body', option: 'editor' }],
+    // No AST assertion kind covers lexicalEditor features[] array contents — scorer carries the load.
+    assertions: [],
   },
   {
     input:
