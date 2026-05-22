@@ -7,7 +7,8 @@ import { TrashIcon } from '../../icons/Trash/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import { Banner } from '../Banner/index.js'
+import './index.css'
 
 const baseClass = 'trash-banner'
 
@@ -18,14 +19,12 @@ export const TrashBanner: React.FC = () => {
 
   const { labels } = collectionConfig
   const { i18n } = useTranslation()
+
   return (
-    <div className={baseClass}>
-      <TrashIcon />
-      <p>
-        {i18n.t('general:documentIsTrashed', {
-          label: `${getTranslation(labels?.singular, i18n)}`,
-        })}
-      </p>
-    </div>
+    <Banner className={baseClass} icon={<TrashIcon />} type="warning">
+      {i18n.t('general:documentIsTrashed', {
+        label: `${getTranslation(labels?.singular, i18n)}`,
+      })}
+    </Banner>
   )
 }

@@ -3,7 +3,7 @@
 import type { EditViewProps } from 'payload'
 
 import { reduceFieldsToValues } from 'payload/shared'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 
 import { useAllFormFields } from '../../../forms/Form/context.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
@@ -13,7 +13,7 @@ import { useLocale } from '../../../providers/Locale/index.js'
 import { IframeLoader } from '../../IframeLoader/index.js'
 import { DeviceContainer } from '../Device/index.js'
 import { LivePreviewToolbar } from '../Toolbar/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'live-preview-window'
 
@@ -22,10 +22,11 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     appIsReady,
     breakpoint,
     iframeRef,
+    isExpanded,
     isLivePreviewing,
+    lastReadyAt,
     loadedURL,
     popupRef,
-    previewWindowType,
     setLoadedURL,
     shouldRenderIframe,
     url,
@@ -39,58 +40,58 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const [formState] = useAllFormFields()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
+  const postMessageToTargets = useCallback(
+    (message: object) => {
+      if (popupRef.current && !popupRef.current.closed) {
+        popupRef.current.postMessage(message, url)
+      }
+
+      if (iframeRef.current) {
+        iframeRef.current.contentWindow?.postMessage(message, url)
+      }
+    },
+    [iframeRef, popupRef, url],
+  )
+
+  const hasActiveTarget = isLivePreviewing || (popupRef.current && !popupRef.current.closed)
+
   /**
    * For client-side apps, send data through `window.postMessage`
    * The preview could either be an iframe embedded on the page
    * Or it could be a separate popup window
-   * We need to transmit data to both accordingly
+   * Also fires when a preview signals ready (lastReadyAt) to sync initial state
    */
   useEffect(() => {
-    if (!isLivePreviewing || !appIsReady) {
+    if (!hasActiveTarget || !appIsReady || !formState) {
       return
     }
 
-    // For performance, do not reduce fields to values until after the iframe or popup has loaded
-    if (formState) {
-      const values = reduceFieldsToValues(formState, true)
+    const values = reduceFieldsToValues(formState, true)
 
-      if (!values.id) {
-        values.id = id
-      }
-
-      const message = {
-        type: 'payload-live-preview',
-        collectionSlug,
-        data: values,
-        externallyUpdatedRelationship: mostRecentUpdate,
-        globalSlug,
-        locale: locale.code,
-      }
-
-      // Post message to external popup window
-      if (previewWindowType === 'popup' && popupRef.current) {
-        popupRef.current.postMessage(message, url)
-      }
-
-      // Post message to embedded iframe
-      if (previewWindowType === 'iframe' && iframeRef.current) {
-        iframeRef.current.contentWindow?.postMessage(message, url)
-      }
+    if (!values.id) {
+      values.id = id
     }
+
+    postMessageToTargets({
+      type: 'payload-live-preview',
+      collectionSlug,
+      data: values,
+      externallyUpdatedRelationship: mostRecentUpdate,
+      globalSlug,
+      locale: locale.code,
+    })
   }, [
     formState,
-    url,
     collectionSlug,
     globalSlug,
     id,
-    previewWindowType,
-    popupRef,
     appIsReady,
-    iframeRef,
     mostRecentUpdate,
     locale,
-    isLivePreviewing,
+    hasActiveTarget,
     loadedURL,
+    lastReadyAt,
+    postMessageToTargets,
   ])
 
   /**
@@ -99,35 +100,23 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
    * i.e., save, save draft, autosave, etc. will fire `router.refresh()`
    */
   useEffect(() => {
-    if (!isLivePreviewing || !appIsReady) {
+    if (!hasActiveTarget || !appIsReady) {
       return
     }
 
-    const message = {
-      type: 'payload-document-event',
-    }
-
-    // Post message to external popup window
-    if (previewWindowType === 'popup' && popupRef.current) {
-      popupRef.current.postMessage(message, url)
-    }
-
-    // Post message to embedded iframe
-    if (previewWindowType === 'iframe' && iframeRef.current) {
-      iframeRef.current.contentWindow?.postMessage(message, url)
-    }
-  }, [mostRecentUpdate, iframeRef, popupRef, previewWindowType, url, isLivePreviewing, appIsReady])
-
-  if (previewWindowType !== 'iframe') {
-    return null
-  }
+    postMessageToTargets({ type: 'payload-document-event' })
+  }, [mostRecentUpdate, hasActiveTarget, appIsReady, postMessageToTargets])
 
   return (
     <div
       className={[
         baseClass,
         isLivePreviewing && `${baseClass}--is-live-previewing`,
-        breakpoint && breakpoint !== 'responsive' && `${baseClass}--has-breakpoint`,
+        isExpanded && `${baseClass}--is-expanded`,
+        breakpoint &&
+          breakpoint !== 'responsive' &&
+          breakpoint !== 'custom' &&
+          `${baseClass}--has-breakpoint`,
       ]
         .filter(Boolean)
         .join(' ')}

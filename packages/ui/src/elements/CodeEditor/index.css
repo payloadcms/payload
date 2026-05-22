@@ -3,6 +3,7 @@
     /* Base styles */
     direction: ltr;
     width: 100%;
+    contain: inline-size; /* Width doesn't depend on children - helps Monaco calculate correctly */
     height: auto;
     padding: var(--spacer-2) 0;
     -webkit-appearance: none;

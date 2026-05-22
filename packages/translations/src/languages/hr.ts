@@ -390,6 +390,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Trajno izbriši',
     permanentlyDeletedCountSuccessfully: 'Trajno izbrisano {{count}} {{label}} uspješno.',
     perPage: 'Po stranici: {{limit}}',
+    perPageLabel: 'Po stranici:',
     previous: 'Prethodni',
     reindex: 'Ponovno indeksiraj',
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',

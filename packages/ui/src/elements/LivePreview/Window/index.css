@@ -1,0 +1,48 @@
+@layer payload-default {
+  .live-preview-window {
+    background-color: var(--color-bg);
+    display: none;
+    width: 60%;
+    flex-shrink: 0;
+    flex-grow: 0;
+    position: sticky;
+    top: var(--doc-controls-height);
+    height: calc(100vh - var(--doc-controls-height));
+    overflow: hidden;
+  }
+
+  .live-preview-window--is-live-previewing {
+    display: block;
+  }
+
+  .live-preview-window--is-expanded {
+    width: 100%;
+  }
+
+  .live-preview-window__wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: flex-start;
+  }
+
+  .live-preview-window__main {
+    flex-grow: 1;
+    height: 100%;
+    width: 100%;
+  }
+
+  .live-preview-window--has-breakpoint .live-preview-iframe {
+    border: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .live-preview-window--has-breakpoint .live-preview-window__main {
+    padding: var(--spacer-3);
+  }
+
+  @media (max-width: 1024px) {
+    .live-preview-window {
+      width: 100%;
+    }
+  }
+}

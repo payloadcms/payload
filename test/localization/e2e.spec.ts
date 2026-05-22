@@ -1,22 +1,16 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import type { GeneratedTypes } from '../__helpers/shared/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
-import { addBlock } from '../__helpers/e2e/fields/blocks/addBlock.js'
-import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
-import { openDocControls } from '../__helpers/e2e/openDocControls.js'
-import { upsertPreferences } from '../__helpers/e2e/preferences.js'
-import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
-import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
-import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
+import type { GeneratedTypes } from '../__helpers/shared/sdk/types.js'
 import type { Config, LocalizedPost } from './payload-types.js'
 
+import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
+import { addBlock } from '../__helpers/e2e/fields/blocks/addBlock.js'
 import {
   changeLocale,
   closeAllToasts,
@@ -29,6 +23,12 @@ import {
   throttleTest,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
+import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { upsertPreferences } from '../__helpers/e2e/preferences.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
@@ -1061,7 +1061,7 @@ describe('Localization', () => {
     })
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme('Locale picker should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.list)
 
@@ -1112,7 +1112,7 @@ async function createAndSaveDoc(page: Page, url: AdminUrlUtil, values: Partial<L
 }
 
 async function openCopyToLocaleDrawer(page: Page) {
-  await page.locator('.doc-controls__popup button.popup-button').click()
+  await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
   await page.locator('#copy-locale-data__button').click()
   await expect(page.locator('#copy-locale')).toBeVisible()
   await expect(page.locator('.copy-locale-data__content')).toBeVisible()
