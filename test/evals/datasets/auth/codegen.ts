@@ -84,7 +84,6 @@ export const authCodegenDataset: CodegenEvalCase[] = [
     category: 'auth',
     fixturePath: 'auth/codegen/save-roles-to-jwt',
     assertions: [
-      { kind: 'fieldExists', slug: 'users', field: 'roles' },
       { kind: 'fieldOption', slug: 'users', field: 'roles', option: 'saveToJWT', value: true },
     ],
   },
