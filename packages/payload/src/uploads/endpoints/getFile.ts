@@ -70,7 +70,10 @@ export const getFileHandler: PayloadHandler = async (req) => {
   const filePath = path.resolve(resolvedDir, filename)
 
   if (!filePath.startsWith(resolvedDir + path.sep)) {
-    throw new APIError('Invalid filename.', httpStatus.BAD_REQUEST)
+    throw new APIError(
+      req.t ? req.t('error:invalidFilename') : 'Invalid filename.',
+      httpStatus.BAD_REQUEST,
+    )
   }
 
   let stats: Stats

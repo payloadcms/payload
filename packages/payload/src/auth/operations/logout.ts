@@ -25,10 +25,13 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
   } = incomingArgs
 
   if (!user) {
-    throw new APIError('No User', httpStatus.BAD_REQUEST)
+    throw new APIError(req.t ? req.t('error:noUser') : 'No User', httpStatus.BAD_REQUEST)
   }
   if (user.collection !== collectionConfig.slug) {
-    throw new APIError('Incorrect collection', httpStatus.FORBIDDEN)
+    throw new APIError(
+      req.t ? req.t('error:incorrectCollection') : 'Incorrect collection',
+      httpStatus.FORBIDDEN,
+    )
   }
 
   const shouldCommit = await initTransaction(req)
@@ -66,7 +69,7 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
       })
 
       if (!userWithSessions) {
-        throw new APIError('No User', httpStatus.BAD_REQUEST)
+        throw new APIError(req.t ? req.t('error:noUser') : 'No User', httpStatus.BAD_REQUEST)
       }
 
       if (allSessions) {

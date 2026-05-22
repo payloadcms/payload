@@ -29,7 +29,11 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
     )
     fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
   } else {
-    throw new APIError('Either collection or globalSlug must be passed.')
+    throw new APIError(
+      req.t
+        ? req.t('error:eitherCollectionOrGlobalRequired')
+        : 'Either collection or globalSlug must be passed.',
+    )
   }
 
   const { docs } = await findMany({

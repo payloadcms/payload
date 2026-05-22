@@ -108,7 +108,10 @@ export const updateByIDOperation = async <
     } = args
 
     if (!id) {
-      throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
+      throw new APIError(
+        req.t ? req.t('error:missingIDOfDocument') : 'Missing ID of document to update.',
+        httpStatus.BAD_REQUEST,
+      )
     }
 
     const { data } = args
