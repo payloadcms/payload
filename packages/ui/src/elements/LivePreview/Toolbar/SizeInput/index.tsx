@@ -3,6 +3,7 @@ import React, { useCallback, useEffect } from 'react'
 
 import { InputStepper } from '../../../../elements/InputStepper/index.js'
 import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
+import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.css'
 
 const baseClass = 'toolbar-input'
@@ -14,6 +15,8 @@ export const PreviewFrameSizeInput: React.FC<{
 
   const { breakpoint, measuredDeviceSize, setBreakpoint, setSize, size, zoom } =
     useLivePreviewContext()
+
+  const { t } = useTranslation()
 
   const [internalState, setInternalState] = React.useState<number>(
     (axis === 'x' ? measuredDeviceSize?.width : measuredDeviceSize?.height) || 0,
@@ -86,7 +89,9 @@ export const PreviewFrameSizeInput: React.FC<{
 
   return (
     <div className={`${baseClass}__group`}>
+      <span className={`${baseClass}__prefix`}>{axis === 'x' ? 'W' : 'H'}</span>
       <input
+        aria-label={axis === 'x' ? t('upload:width') : t('upload:height')}
         className={baseClass}
         min={0}
         name={axis === 'x' ? 'live-preview-width' : 'live-preview-height'}

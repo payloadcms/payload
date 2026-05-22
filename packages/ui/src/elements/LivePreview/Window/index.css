@@ -33,7 +33,7 @@
   }
 
   .live-preview-window--has-breakpoint .live-preview-iframe {
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
   }
 
   .live-preview-window--has-breakpoint .live-preview-window__main {

@@ -17,6 +17,16 @@
     }
   }
 
+  .toolbar-input__prefix {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-4);
+    font-size: var(--text-body-medium-font-size, 0.6875rem);
+    color: var(--color-text-secondary);
+    user-select: none;
+  }
+
   .toolbar-input {
     width: calc(var(--spacer-4) * 2);
     display: flex;
@@ -24,7 +34,7 @@
     border: none;
     background: transparent;
     font-size: var(--text-body-medium-font-size, 0.6875rem);
-    padding: 0 var(--spacer-2);
+    padding: 0 var(--spacer-1) 0 var(--spacer-half);
     color: var(--color-text);
     appearance: textfield;
 
