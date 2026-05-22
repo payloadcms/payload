@@ -11,12 +11,21 @@
 export type CollectionHookName =
   | 'afterChange'
   | 'afterDelete'
+  | 'afterForgotPassword' // auth-enabled collections
+  | 'afterLogin' // auth-enabled collections
+  | 'afterLogout' // auth-enabled collections
+  | 'afterMe' // auth-enabled collections
+  | 'afterOperation'
   | 'afterRead'
+  | 'afterRefresh' // auth-enabled collections
   | 'beforeChange'
   | 'beforeDelete'
+  | 'beforeLogin' // auth-enabled collections
   | 'beforeOperation'
   | 'beforeRead'
   | 'beforeValidate'
+  | 'me' // auth-enabled collections
+  | 'refresh' // auth-enabled collections
 
 export type FieldHookName = 'afterChange' | 'afterRead' | 'beforeChange' | 'beforeValidate'
 

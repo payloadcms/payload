@@ -492,6 +492,34 @@ describe('existing kinds still work', () => {
     ).toEqual([])
   })
 
+  it('collectionHook supports beforeLogin (auth hook)', () => {
+    const src = raw(`
+      import { buildConfig } from 'payload'
+      export default buildConfig({
+        collections: [
+          { slug: 'users', auth: true, fields: [], hooks: { beforeLogin: [async () => {}] } },
+        ],
+      })
+    `)
+    expect(
+      evaluateAssertions(src, [{ kind: 'collectionHook', slug: 'users', hook: 'beforeLogin' }]),
+    ).toEqual([])
+  })
+
+  it('collectionHook supports afterLogin (auth hook)', () => {
+    const src = raw(`
+      import { buildConfig } from 'payload'
+      export default buildConfig({
+        collections: [
+          { slug: 'users', auth: true, fields: [], hooks: { afterLogin: [async () => {}] } },
+        ],
+      })
+    `)
+    expect(
+      evaluateAssertions(src, [{ kind: 'collectionHook', slug: 'users', hook: 'afterLogin' }]),
+    ).toEqual([])
+  })
+
   it('collectionAccess', () => {
     const src = wrap(`
       collections: [{
