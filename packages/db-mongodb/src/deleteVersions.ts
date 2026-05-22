@@ -34,8 +34,8 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
     VersionsModel = Model
   } else {
     throw new APIError(
-      req.t
-        ? req.t('error:eitherCollectionOrGlobalRequired')
+      req?.t
+        ? req?.t('error:eitherCollectionOrGlobalRequired')
         : 'Either collection or globalSlug must be passed.',
     )
   }
