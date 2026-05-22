@@ -12,7 +12,7 @@ import {
 import { formatDate } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'date-diff'
 
@@ -46,33 +46,38 @@ export const DateDiffComponent: DateFieldDiffClientComponent = ({
       })
     : ''
 
+  // TODO: translate 'No value'
+  const NoValue = <div className="diff-no-value">No value</div>
+
   const escapedFromDate = escapeDiffHTML(formattedFromDate)
   const escapedToDate = escapeDiffHTML(formattedToDate)
 
   const { From, To } = getHTMLDiffComponents({
-    fromHTML:
-      `<div class="${baseClass}" data-enable-match="true" data-date="${escapedFromDate}"><p>` +
-      escapedFromDate +
-      '</p></div>',
+    fromHTML: formattedFromDate
+      ? `<div class="${baseClass}" data-enable-match="true" data-date="${escapedFromDate}"><p>` +
+        escapedFromDate +
+        '</p></div>'
+      : '<p></p>',
     postProcess: unescapeDiffHTML,
-    toHTML:
-      `<div class="${baseClass}" data-enable-match="true" data-date="${escapedToDate}"><p>` +
-      escapedToDate +
-      '</p></div>',
+    toHTML: formattedToDate
+      ? `<div class="${baseClass}" data-enable-match="true" data-date="${escapedToDate}"><p>` +
+        escapedToDate +
+        '</p></div>'
+      : '<p></p>',
     tokenizeByCharacter: false,
   })
 
   return (
     <FieldDiffContainer
       className={baseClass}
-      From={From}
+      From={formattedFromDate ? From : NoValue}
       i18n={i18n}
       label={{
         label: field.label,
         locale,
       }}
       nestingLevel={nestingLevel}
-      To={To}
+      To={formattedToDate ? To : NoValue}
     />
   )
 }

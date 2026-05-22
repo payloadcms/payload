@@ -1,12 +1,15 @@
 import type { LabelFunction, StaticLabel } from 'payload'
 
-import './index.scss'
+import './index.css'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
+import React from 'react'
 
 import { FieldDiffLabel } from '../FieldDiffLabel/index.js'
 
 const baseClass = 'field-diff'
+
+const gutterOffset = 6.5
 
 export const FieldDiffContainer: React.FC<{
   className?: string
@@ -31,27 +34,17 @@ export const FieldDiffContainer: React.FC<{
   return (
     <div
       className={`${baseClass}-container${className ? ` ${className}` : ''} nested-level-${nestingLevel}`}
-      style={
-        nestingLevel
-          ? ({
-              // Need to use % instead of fr, as calc() doesn't work with fr when this is used in gridTemplateColumns
-              '--left-offset': `calc(50%  - (${nestingLevel} * calc( calc(var(--base)* 0.5) - 2.5px  )))`,
-            } as React.CSSProperties)
-          : ({
-              '--left-offset': '50%',
-            } as React.CSSProperties)
-      }
     >
       <FieldDiffLabel>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {typeof label !== 'function' && getTranslation(label || '', i18n)}
+        {label !== false && typeof label !== 'function' && getTranslation(label || '', i18n)}
       </FieldDiffLabel>
       <div
         className={`${baseClass}-content`}
         style={
           nestingLevel
             ? {
-                gridTemplateColumns: `calc(var(--left-offset) - calc(var(--base)*0.5) )     calc(50% - calc(var(--base)*0.5) + calc(50% - var(--left-offset)))`,
+                gridTemplateColumns: `calc(50% - ${nestingLevel * gutterOffset}px - var(--spacer-2-5)) calc(50% + ${nestingLevel * gutterOffset}px - var(--spacer-2-5))`,
               }
             : undefined
         }

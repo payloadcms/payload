@@ -1,0 +1,181 @@
+@layer payload-default {
+  .html-diff {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+  }
+
+  .html-diff-no-value {
+    color: var(--color-text-tertiary);
+  }
+
+  .html-diff pre {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  /* Apply background color to parents that have children with diffs */
+  .html-diff p:not([data-enable-match='false']):has([data-match-type='create']),
+  .html-diff h1:not([data-enable-match='false']):has([data-match-type='create']),
+  .html-diff h2:not([data-enable-match='false']):has([data-match-type='create']),
+  .html-diff h3:not([data-enable-match='false']):has([data-match-type='create']),
+  .html-diff h4:not([data-enable-match='false']):has([data-match-type='create']),
+  .html-diff h5:not([data-enable-match='false']):has([data-match-type='create']),
+  .html-diff h6:not([data-enable-match='false']):has([data-match-type='create']),
+  .html-diff blockquote:not([data-enable-match='false']):has([data-match-type='create']),
+  .html-diff pre:not([data-enable-match='false']):has([data-match-type='create']) {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: calc(var(--spacer-2) * -1);
+      bottom: calc(var(--spacer-2) * -1);
+      left: calc(var(--spacer-2-5) * -1);
+      right: calc(var(--spacer-2-5) * -1);
+      display: block;
+      background-color: var(--diff-create-parent-bg);
+      color: var(--diff-create-parent-color);
+      z-index: -1;
+    }
+  }
+
+  .html-diff p:not([data-enable-match='false']):has([data-match-type='delete']),
+  .html-diff h1:not([data-enable-match='false']):has([data-match-type='delete']),
+  .html-diff h2:not([data-enable-match='false']):has([data-match-type='delete']),
+  .html-diff h3:not([data-enable-match='false']):has([data-match-type='delete']),
+  .html-diff h4:not([data-enable-match='false']):has([data-match-type='delete']),
+  .html-diff h5:not([data-enable-match='false']):has([data-match-type='delete']),
+  .html-diff h6:not([data-enable-match='false']):has([data-match-type='delete']),
+  .html-diff blockquote:not([data-enable-match='false']):has([data-match-type='delete']),
+  .html-diff pre:not([data-enable-match='false']):has([data-match-type='delete']) {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: calc(var(--spacer-2) * -1);
+      bottom: calc(var(--spacer-2) * -1);
+      left: calc(var(--spacer-2-5) * -1);
+      right: calc(var(--spacer-2-5) * -1);
+      display: block;
+      background-color: var(--diff-delete-parent-bg);
+      color: var(--diff-delete-parent-color);
+      z-index: -1;
+    }
+  }
+
+  .html-diff li:not([data-enable-match='false']):has([data-match-type='create']) {
+    position: relative;
+    z-index: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: calc(var(--spacer-2-5) * -1);
+      right: calc(var(--spacer-2-5) * -1);
+      display: block;
+      background-color: var(--diff-create-parent-bg);
+      color: var(--diff-create-parent-color);
+      z-index: -1;
+    }
+  }
+
+  .html-diff li:not([data-enable-match='false']):has([data-match-type='delete']) {
+    position: relative;
+    z-index: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: calc(var(--spacer-2-5) * -1);
+      right: calc(var(--spacer-2-5) * -1);
+      display: block;
+      background-color: var(--diff-delete-parent-bg);
+      color: var(--diff-delete-parent-color);
+      z-index: -1;
+    }
+  }
+
+  .html-diff li::marker {
+    color: var(--color-text);
+  }
+
+  .html-diff
+    [data-match-type='delete']:not([data-enable-match='false']):not(
+      :is([data-enable-match='false'] *)
+    ) {
+    color: var(--diff-delete-pill-color);
+    text-decoration-color: var(--diff-delete-pill-color);
+    text-decoration-line: line-through;
+    background-color: var(--diff-delete-pill-bg);
+    border-radius: var(--radius-medium);
+    padding: 1.5px 2px;
+    text-decoration-thickness: var(--stroke-width-small);
+  }
+
+  .html-diff
+    a[data-match-type='delete']:not([data-enable-match='false']):not(
+      :is([data-enable-match='false'] *)
+    ) {
+    color: var(--diff-delete-link-color);
+  }
+
+  .html-diff
+    a[data-match-type='create']:not([data-enable-match='false']):not(
+      :is([data-enable-match='false'] *)
+    ) {
+    color: var(--diff-create-link-color);
+  }
+
+  .html-diff
+    [data-match-type='create']:not(img):not([data-enable-match='false']):not(
+      :is([data-enable-match='false'] *)
+    ) {
+    background-color: var(--diff-create-pill-bg);
+    color: var(--diff-create-pill-color);
+    border-radius: var(--radius-medium);
+    padding: 1.5px 2px;
+  }
+
+  .html-diff-create-inline-wrapper,
+  .html-diff-delete-inline-wrapper {
+    display: inline-flex;
+  }
+
+  .html-diff-create-block-wrapper,
+  .html-diff-delete-block-wrapper {
+    display: flex;
+  }
+
+  .html-diff-create-inline-wrapper,
+  .html-diff-delete-inline-wrapper,
+  .html-diff-create-block-wrapper,
+  .html-diff-delete-block-wrapper {
+    position: relative;
+    align-items: center;
+    flex-direction: row;
+
+    &::after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      content: '';
+    }
+  }
+}

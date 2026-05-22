@@ -10,13 +10,13 @@ import {
 } from '@payloadcms/ui'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'text-diff'
 
 function formatValue(value: unknown): {
   tokenizeByCharacter: boolean
-  value: string
+  value: string | undefined
 } {
   if (typeof value === 'string') {
     return { tokenizeByCharacter: true, value: escapeDiffHTML(value) }
@@ -58,9 +58,12 @@ export const Text: TextFieldDiffClientComponent = ({
 
   let placeholder = ''
 
-  if (valueTo == valueFrom) {
-    placeholder = `<span class="html-diff-no-value"><span>`
+  if (valueTo === valueFrom) {
+    placeholder = `<span class="html-diff-no-value"></span>`
   }
+
+  // TODO: translate 'No value'
+  const NoValue = <div className="diff-no-value">No value</div>
 
   const formattedValueFrom = formatValue(valueFrom)
   const formattedValueTo = formatValue(valueTo)
@@ -72,15 +75,18 @@ export const Text: TextFieldDiffClientComponent = ({
     tokenizeByCharacter = formattedValueTo.tokenizeByCharacter
   }
 
-  const renderedValueFrom = formattedValueFrom.value ?? placeholder
-  const renderedValueTo: string = formattedValueTo.value ?? placeholder
+  const fromHTML = formattedValueFrom.value ?? placeholder
+  const toHTML = formattedValueTo.value ?? placeholder
 
-  const { From, To } = getHTMLDiffComponents({
-    fromHTML: '<p>' + renderedValueFrom + '</p>',
+  const { From: DiffFrom, To: DiffTo } = getHTMLDiffComponents({
+    fromHTML: `<p>${fromHTML}</p>`,
     postProcess: unescapeDiffHTML,
-    toHTML: '<p>' + renderedValueTo + '</p>',
+    toHTML: `<p>${toHTML}</p>`,
     tokenizeByCharacter,
   })
+
+  const From = fromHTML ? DiffFrom : NoValue
+  const To = toHTML ? DiffTo : NoValue
 
   return (
     <FieldDiffContainer

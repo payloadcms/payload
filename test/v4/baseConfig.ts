@@ -6,6 +6,7 @@ import { type CollectionConfig, type Config } from 'payload'
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
 import { blocksSeedData } from './seed/blocksSeedData.js'
+import { seedVersionsDiff } from './seed/versionsDiffData.js'
 import {
   blocksFieldsSlug,
   collectionSlugs,
@@ -65,6 +66,7 @@ import Rubbish from './collections/Trash/index.js'
 import Unauthorized from './collections/Unauthorized/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
+import { VersionsDiff } from './collections/VersionsDiff/index.js'
 import {
   codeContent,
   getRichTextContent,
@@ -131,6 +133,7 @@ export const collections: CollectionConfig[] = [
   Autosave,
   Rubbish,
   Unauthorized,
+  VersionsDiff,
 ]
 
 export const baseConfig: Partial<Config> = {
@@ -424,6 +427,9 @@ export const baseConfig: Partial<Config> = {
         },
       },
     })
+
+    // Seed versions-diff collection with two versions for diff testing
+    await seedVersionsDiff(payload)
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

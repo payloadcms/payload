@@ -37,6 +37,11 @@ export type Props = {
   onClick?: (event: MouseEvent) => void
   onMouseDown?: (event: MouseEvent) => void
   /**
+   * Size of the chevron icon in the split-button popup trigger.
+   * @default 24
+   */
+  popupIconSize?: 16 | 24
+  /**
    * Enables form submission via an onClick handler. This is only needed if
    * type="submit" does not trigger form submission, e.g. if the button DOM
    * element is not a direct child of the form element.

@@ -8,7 +8,7 @@ import type {
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { FieldDiffContainer, getHTMLDiffComponents } from '@payloadcms/ui/rsc'
 
-import './index.scss'
+import './index.css'
 
 import React from 'react'
 
@@ -157,23 +157,34 @@ export const SingleRelationshipDiff: React.FC<{
     />
   ) : null
 
-  const fromHTML = FromComponent ? ReactDOMServer.renderToStaticMarkup(FromComponent) : `<p></p>`
-  const toHTML = ToComponent ? ReactDOMServer.renderToStaticMarkup(ToComponent) : `<p></p>`
+  // TODO: translate 'No value'
+  const NoValue = <div className="diff-no-value">No value</div>
 
-  const diff = getHTMLDiffComponents({
-    fromHTML,
-    toHTML,
-    tokenizeByCharacter: false,
-  })
+  let From: React.ReactNode = NoValue
+  let To: React.ReactNode = NoValue
+
+  if (FromComponent || ToComponent) {
+    const fromHTML = FromComponent ? ReactDOMServer.renderToStaticMarkup(FromComponent) : '<p></p>'
+    const toHTML = ToComponent ? ReactDOMServer.renderToStaticMarkup(ToComponent) : '<p></p>'
+
+    const diff = getHTMLDiffComponents({
+      fromHTML,
+      toHTML,
+      tokenizeByCharacter: false,
+    })
+
+    From = FromComponent ? diff.From : NoValue
+    To = ToComponent ? diff.To : NoValue
+  }
 
   return (
     <FieldDiffContainer
       className={`${baseClass}-container ${baseClass}-container--hasOne`}
-      From={diff.From}
+      From={From}
       i18n={i18n}
       label={{ label: field.label, locale }}
       nestingLevel={nestingLevel}
-      To={diff.To}
+      To={To}
     />
   )
 }
@@ -250,35 +261,46 @@ const ManyRelationshipDiff: React.FC<{
             : (field.relationTo as string)
         }
         req={req}
-        showPill={polymorphic}
+        showPill={true}
         title={titles[idx]}
         value={val}
       />
     ))
 
-  const fromNodes =
-    fromArr.length > 0 ? makeNodes(fromArr, titlesFrom) : <p className={`${baseClass}__empty`}></p>
+  // TODO: translate 'No value'
+  const NoValue = <div className="diff-no-value">No value</div>
 
-  const toNodes =
-    toArr.length > 0 ? makeNodes(toArr, titlesTo) : <p className={`${baseClass}__empty`}></p>
+  const hasFrom = fromArr.length > 0
+  const hasTo = toArr.length > 0
 
-  const fromHTML = ReactDOMServer.renderToStaticMarkup(fromNodes)
-  const toHTML = ReactDOMServer.renderToStaticMarkup(toNodes)
+  let From: React.ReactNode = NoValue
+  let To: React.ReactNode = NoValue
 
-  const diff = getHTMLDiffComponents({
-    fromHTML,
-    toHTML,
-    tokenizeByCharacter: false,
-  })
+  if (hasFrom || hasTo) {
+    const fromNodes = hasFrom ? makeNodes(fromArr, titlesFrom) : []
+    const toNodes = hasTo ? makeNodes(toArr, titlesTo) : []
+
+    const fromHTML = hasFrom ? ReactDOMServer.renderToStaticMarkup(<>{fromNodes}</>) : ''
+    const toHTML = hasTo ? ReactDOMServer.renderToStaticMarkup(<>{toNodes}</>) : ''
+
+    const diff = getHTMLDiffComponents({
+      fromHTML,
+      toHTML,
+      tokenizeByCharacter: false,
+    })
+
+    From = hasFrom ? diff.From : NoValue
+    To = hasTo ? diff.To : NoValue
+  }
 
   return (
     <FieldDiffContainer
       className={`${baseClass}-container ${baseClass}-container--hasMany`}
-      From={diff.From}
+      From={From}
       i18n={i18n}
       label={{ label: field.label, locale }}
       nestingLevel={nestingLevel}
-      To={diff.To}
+      To={To}
     />
   )
 }
@@ -320,8 +342,12 @@ const RelationshipDocumentDiff = ({
       data-enable-match="true"
       data-id={
         polymorphic
-          ? (value as { relationTo: string; value: TypeWithID }).value.id
-          : (value as TypeWithID).id
+          ? typeof (value as { relationTo: string; value: unknown }).value === 'object'
+            ? ((value as { relationTo: string; value: TypeWithID }).value?.id ?? '')
+            : (value as { relationTo: string; value: unknown }).value
+          : typeof value === 'object' && value !== null
+            ? (value as TypeWithID).id
+            : value
       }
       data-relation-to={relationTo}
     >

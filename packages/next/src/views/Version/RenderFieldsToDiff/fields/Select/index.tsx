@@ -12,12 +12,12 @@ import {
 } from '@payloadcms/ui'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'select-diff'
 
 const getOptionsToRender = (
-  value: string,
+  value: string | string[],
   options: SelectField['options'],
   hasMany: boolean,
 ): Option | Option[] => {
@@ -78,11 +78,7 @@ export const Select: SelectFieldDiffClientComponent = ({
   const renderedValueFrom =
     typeof valueFrom !== 'undefined'
       ? getTranslatedOptions(
-          getOptionsToRender(
-            typeof valueFrom === 'string' ? valueFrom : JSON.stringify(valueFrom),
-            options,
-            field.hasMany,
-          ),
+          getOptionsToRender(valueFrom as string | string[], options, field.hasMany),
           i18n,
         )
       : ''
@@ -90,33 +86,32 @@ export const Select: SelectFieldDiffClientComponent = ({
   const renderedValueTo =
     typeof valueTo !== 'undefined'
       ? getTranslatedOptions(
-          getOptionsToRender(
-            typeof valueTo === 'string' ? valueTo : JSON.stringify(valueTo),
-            options,
-            field.hasMany,
-          ),
+          getOptionsToRender(valueTo as string | string[], options, field.hasMany),
           i18n,
         )
       : ''
 
+  // TODO: translate 'No value'
+  const NoValue = <div className="diff-no-value">No value</div>
+
   const { From, To } = getHTMLDiffComponents({
-    fromHTML: '<p>' + escapeDiffHTML(renderedValueFrom) + '</p>',
+    fromHTML: renderedValueFrom ? '<p>' + escapeDiffHTML(renderedValueFrom) + '</p>' : '<p></p>',
     postProcess: unescapeDiffHTML,
-    toHTML: '<p>' + escapeDiffHTML(renderedValueTo) + '</p>',
+    toHTML: renderedValueTo ? '<p>' + escapeDiffHTML(renderedValueTo) + '</p>' : '<p></p>',
     tokenizeByCharacter: true,
   })
 
   return (
     <FieldDiffContainer
       className={baseClass}
-      From={From}
+      From={renderedValueFrom ? From : NoValue}
       i18n={i18n}
       label={{
         label: field.label,
         locale,
       }}
       nestingLevel={nestingLevel}
-      To={To}
+      To={renderedValueTo ? To : NoValue}
     />
   )
 }
