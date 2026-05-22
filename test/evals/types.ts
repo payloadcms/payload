@@ -13,6 +13,7 @@ export type EvalCategory =
   | 'fields'
   | 'graphql'
   | 'local-api'
+  | 'migrations'
   | 'negative'
   | 'plugins'
   | 'rest-api'
