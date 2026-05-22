@@ -13,6 +13,7 @@ export type EvalCategory =
   | 'development'
   | 'fields'
   | 'graphql'
+  | 'jobs'
   | 'local-api'
   | 'migrations'
   | 'negative'
