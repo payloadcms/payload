@@ -262,7 +262,6 @@ export const koTranslations: DefaultTranslationsObject = {
     copy: '복사',
     copyField: '필드 복사',
     copying: '복사하기',
-    copyLink: '링크 복사',
     copyRow: '행 복사',
     copyWarning: '{{label}} {{title}}에 대해 {{from}}으로 {{to}}를 덮어쓰려고 합니다. 확실합니까?',
     create: '생성',

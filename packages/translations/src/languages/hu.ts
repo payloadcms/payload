@@ -267,7 +267,6 @@ export const huTranslations: DefaultTranslationsObject = {
     copy: 'Másolás',
     copyField: 'Mező másolása',
     copying: 'Másolás',
-    copyLink: 'Hivatkozás másolása',
     copyRow: 'Sor másolása',
     copyWarning:
       'Ön azzal készül felülírni {{to}} -t {{from}} -mal a {{label}} {{title}} számára. Biztos benne?',

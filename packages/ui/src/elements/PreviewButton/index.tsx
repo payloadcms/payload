@@ -26,7 +26,7 @@ export function PreviewButton(props: PreviewButtonClientProps) {
     return null
   }
 
-  const label = copied ? t('general:copied') : t('general:copyLink')
+  const label = copied ? t('general:copied') : t('general:copy')
 
   return (
     <span

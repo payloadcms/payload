@@ -266,7 +266,6 @@ export const azTranslations: DefaultTranslationsObject = {
     copy: 'Kopyala',
     copyField: 'Sahəni kopyala',
     copying: 'Kopyalama',
-    copyLink: 'Linki kopyala',
     copyRow: 'Sətiri kopyala',
     copyWarning:
       'Siz {{label}} {{title}} üçün {{from}} ilə {{to}} -nu üzərindən yazmaq ətrafındasınız. Eminsiniz?',

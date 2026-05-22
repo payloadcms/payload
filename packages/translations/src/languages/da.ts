@@ -263,7 +263,6 @@ export const daTranslations: DefaultTranslationsObject = {
     copy: 'Kopier',
     copyField: 'Kopiér felt',
     copying: 'Kopiering',
-    copyLink: 'Kopier link',
     copyRow: 'Kopiér række',
     copyWarning:
       'Du er lige ved at overskrive {{to}} med {{from}} for {{label}} {{title}}. Er du sikker?',

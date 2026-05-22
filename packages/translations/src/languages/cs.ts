@@ -262,7 +262,6 @@ export const csTranslations: DefaultTranslationsObject = {
     copy: 'Kopírovat',
     copyField: 'Kopírovat pole',
     copying: 'Kopírování',
-    copyLink: 'Kopírovat odkaz',
     copyRow: 'Kopírovat řádek',
     copyWarning: 'Chystáte se přepsat {{to}} s {{from}} pro {{label}} {{title}}. Jste si jistý?',
     create: 'Vytvořit',

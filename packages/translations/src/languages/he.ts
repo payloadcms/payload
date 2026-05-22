@@ -254,7 +254,6 @@ export const heTranslations: DefaultTranslationsObject = {
     copy: 'העתק',
     copyField: 'העתק שדה',
     copying: 'העתקה',
-    copyLink: 'העתקת קישור',
     copyRow: 'העתק שורה',
     copyWarning:
       'אתה עומד לדרוס את {{to}} באמצעות {{from}} עבור {{label}} {{title}}. האם אתה בטוח?',

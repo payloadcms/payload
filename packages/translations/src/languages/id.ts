@@ -265,7 +265,6 @@ export const idTranslations: DefaultTranslationsObject = {
     copy: 'Salin',
     copyField: 'Salin Isian',
     copying: 'Menyalin',
-    copyLink: 'Salin Tautan',
     copyRow: 'Salin Baris',
     copyWarning:
       'Anda akan menimpa {{to}} dengan {{from}} untuk {{label}} {{title}}. Apakah Anda yakin?',

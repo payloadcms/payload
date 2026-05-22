@@ -271,7 +271,6 @@ export const deTranslations: DefaultTranslationsObject = {
     copy: 'Kopieren',
     copyField: 'Feld kopieren',
     copying: 'Kopieren',
-    copyLink: 'Link kopieren',
     copyRow: 'Zeile kopieren',
     copyWarning:
       'Du bist dabei, {{to}} mit {{from}} für {{label}} {{title}} zu überschreiben. Bist du dir sicher?',

@@ -264,7 +264,6 @@ export const caTranslations: DefaultTranslationsObject = {
     copy: 'Copiar',
     copyField: 'Copiar camp',
     copying: 'Copiant',
-    copyLink: 'Copia l’enllaç',
     copyRow: 'Copiar fila',
     copyWarning:
       'Estas a punt de sobreescriure {{to}} amb {{from}} per {{label}} {{title}}. Estas segur?',

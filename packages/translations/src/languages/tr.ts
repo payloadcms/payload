@@ -266,7 +266,6 @@ export const trTranslations: DefaultTranslationsObject = {
     copy: 'Kopyala',
     copyField: 'Alanı kopyala',
     copying: 'Kopyalama',
-    copyLink: 'Bağlantıyı Kopyala',
     copyRow: 'Satırı kopyala',
     copyWarning:
       "{{to}}'yu {{from}} ile {{label}} {{title}} için üstüne yazmak üzeresiniz. Emin misiniz?",

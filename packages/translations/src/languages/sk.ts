@@ -265,7 +265,6 @@ export const skTranslations: DefaultTranslationsObject = {
     copy: 'Kopírovať',
     copyField: 'Kopírovať pole',
     copying: 'Kopírovanie',
-    copyLink: 'Kopírovať odkaz',
     copyRow: 'Kopírovať riadok',
     copyWarning: 'Chystáte sa prepísať {{to}} na {{from}} pre {{label}} {{title}}. Ste si istý?',
     create: 'Vytvoriť',

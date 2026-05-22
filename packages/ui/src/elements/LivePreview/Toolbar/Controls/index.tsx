@@ -74,13 +74,8 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
         />
       )}
       <div className={`${baseClass}__center`}>
-        <div className={`${baseClass}__device-size`}>
-          <PreviewFrameSizeInput axis="x" />
-          <span className={`${baseClass}__size-divider`}>
-            <XIcon />
-          </span>
-          <PreviewFrameSizeInput axis="y" />
-        </div>
+        <PreviewFrameSizeInput axis="x" />
+        <PreviewFrameSizeInput axis="y" />
         <Popup
           className={`${baseClass}__zoom`}
           horizontalAlign="right"

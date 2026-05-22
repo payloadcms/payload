@@ -262,7 +262,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     copy: 'Копирай',
     copyField: 'Копирай поле',
     copying: 'Копиране',
-    copyLink: 'Копиране на връзка',
     copyRow: 'Копирай ред',
     copyWarning:
       'Предстои да презапишете {{to}} с {{from}} за {{label}} {{title}}. Сигурни ли сте?',

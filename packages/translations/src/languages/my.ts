@@ -266,7 +266,6 @@ export const myTranslations: DefaultTranslationsObject = {
     copy: 'ကူးယူမည်။',
     copyField: 'ကွက်လပ်ကိုကူးပါ',
     copying: 'ကူးယူခြင်း',
-    copyLink: 'လင့်ခ်ကိုကူးယူပါ',
     copyRow: 'တန်းကိုကူးပါ',
     copyWarning:
       'Anda akan menulis ganti {{to}} dengan {{from}} untuk {{label}} {{title}}. Adakah anda pasti?',

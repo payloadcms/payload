@@ -264,7 +264,6 @@ export const enTranslations = {
     copy: 'Copy',
     copyField: 'Copy Field',
     copying: 'Copying',
-    copyLink: 'Copy Link',
     copyRow: 'Copy Row',
     copyWarning:
       'You are about to overwrite {{to}} with {{from}} for {{label}} {{title}}. Are you sure?',

@@ -263,7 +263,6 @@ export const viTranslations: DefaultTranslationsObject = {
     copy: 'Sao chép',
     copyField: 'Sao chép trường',
     copying: 'Sao chép',
-    copyLink: 'Sao chép liên kết',
     copyRow: 'Sao chép dòng',
     copyWarning:
       'Bạn đang chuẩn bị ghi đè {{to}} bằng {{from}} cho {{label}} {{title}}. Bạn có chắc chắn không?',

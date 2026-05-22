@@ -264,7 +264,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     copy: 'Kopiraj',
     copyField: 'Kopiraj polje',
     copying: 'Kopiranje',
-    copyLink: 'Kopiraj link',
     copyRow: 'Kopiraj red',
     copyWarning:
       'Na korak ste da prepišete {{to}} sa {{from}} za {{label}} {{title}}. Da li ste sigurni?',

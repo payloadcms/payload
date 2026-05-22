@@ -263,7 +263,6 @@ export const isTranslations: DefaultTranslationsObject = {
     copy: 'Afrita',
     copyField: 'Afrita svæði',
     copying: 'Afrita',
-    copyLink: 'Afrita tengil',
     copyRow: 'Afrita röð',
     copyWarning: 'Þú munt yfirskrifa {{to}} með {{from}} fyrir {{label}} {{title}}. Ertu viss?',
     create: 'Nýskrá',

@@ -256,7 +256,6 @@ export const arTranslations: DefaultTranslationsObject = {
     copy: 'نسخ',
     copyField: 'نسخ الحقل',
     copying: 'نسخ',
-    copyLink: 'نسخ الرابط',
     copyRow: 'نسخ الصف',
     copyWarning: 'أنت على وشك الكتابة فوق {{to}} بـ {{from}} لـ {{label}} {{title}}. هل أنت متأكد؟',
     create: 'إنشاء',

@@ -249,7 +249,6 @@ export const zhTranslations: DefaultTranslationsObject = {
     copy: '复制',
     copyField: '复制字段',
     copying: '复制中',
-    copyLink: '复制链接',
     copyRow: '复制行',
     copyWarning: '您即将用 {{from}} 覆盖 {{label}} {{title}} 中的 {{to}}。您确定吗？',
     create: '创建',

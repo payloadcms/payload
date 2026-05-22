@@ -273,7 +273,6 @@ export const frTranslations: DefaultTranslationsObject = {
     copy: 'Copie',
     copyField: 'Copier le champ',
     copying: 'Copie',
-    copyLink: 'Copier le lien',
     copyRow: 'Copier la ligne',
     copyWarning:
       "Vous êtes sur le point d'écraser {{to}} avec {{from}} pour {{label}} {{title}}. Êtes-vous sûr ?",

@@ -265,7 +265,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     copy: 'コピー',
     copyField: 'フィールドをコピー',
     copying: 'コピーする',
-    copyLink: 'リンクをコピー',
     copyRow: '行をコピー',
     copyWarning:
       'あなたは{{label}} {{title}}の{{to}}を{{from}}で上書きしようとしています。よろしいですか？',
