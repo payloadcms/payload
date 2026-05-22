@@ -1,0 +1,22 @@
+import { stubAdapter } from '@/db-stub.js'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  db: stubAdapter,
+  secret: 'eval-fixture',
+  collections: [
+    {
+      slug: 'users',
+      auth: true,
+      fields: [
+        {
+          name: 'roles',
+          type: 'select',
+          hasMany: true,
+          options: ['admin', 'editor', 'user'],
+          defaultValue: ['user'],
+        },
+      ],
+    },
+  ],
+})

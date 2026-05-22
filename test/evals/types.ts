@@ -5,6 +5,7 @@ import type { RunnerKind, SkillInstallMode } from './runner/types.js'
 
 // Dataset
 export type EvalCategory =
+  | 'auth'
   | 'coding'
   | 'collections'
   | 'commits'
