@@ -21,6 +21,7 @@ export type EvalCategory =
   | 'negative'
   | 'plugins'
   | 'production'
+  | 'queries'
   | 'rest-api'
   | 'richtext'
   | 'structure'
