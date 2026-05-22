@@ -13,9 +13,9 @@ export interface LivePreviewContextType {
   breakpoint: LivePreviewConfig['breakpoints'][number]['name']
   breakpoints: LivePreviewConfig['breakpoints']
   iframeRef: React.RefObject<HTMLIFrameElement | null>
+  isExpanded: boolean
   isLivePreviewEnabled: boolean
   isLivePreviewing: boolean
-  isMaximized: boolean
   isPopupOpen: boolean
   isPreviewEnabled: boolean
   listeningForMessages?: boolean
@@ -36,8 +36,8 @@ export interface LivePreviewContextType {
   setAppIsReady: (appIsReady: boolean) => void
   setBreakpoint: (breakpoint: LivePreviewConfig['breakpoints'][number]['name']) => void
   setHeight: (height: number) => void
+  setIsExpanded: (isExpanded: boolean) => void
   setIsLivePreviewing: (isLivePreviewing: boolean) => void
-  setIsMaximized: (isMaximized: boolean) => void
   setLoadedURL: (loadedURL: string) => void
   setMeasuredDeviceSize: (size: { height: number; width: number }) => void
   setPreviewURL: (url: string) => void
@@ -79,9 +79,9 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   breakpoint: undefined,
   breakpoints: undefined,
   iframeRef: undefined,
+  isExpanded: false,
   isLivePreviewEnabled: undefined,
   isLivePreviewing: false,
-  isMaximized: false,
   isPopupOpen: false,
   isPreviewEnabled: undefined,
   measuredDeviceSize: {
@@ -95,8 +95,8 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   setAppIsReady: () => {},
   setBreakpoint: () => {},
   setHeight: () => {},
+  setIsExpanded: () => {},
   setIsLivePreviewing: () => {},
-  setIsMaximized: () => {},
   setLoadedURL: () => {},
   setMeasuredDeviceSize: () => {},
   setPreviewURL: () => {},

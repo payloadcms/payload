@@ -10,7 +10,7 @@
     flex-shrink: 0;
   }
 
-  .live-preview-window--is-maximized .live-preview-toolbar--static {
+  .live-preview-window--is-expanded .live-preview-toolbar--static {
     padding-inline-start: var(--gutter-h);
   }
 

@@ -22,8 +22,8 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     appIsReady,
     breakpoint,
     iframeRef,
+    isExpanded,
     isLivePreviewing,
-    isMaximized,
     loadedURL,
     popupRef,
     previewWindowType,
@@ -128,7 +128,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
       className={[
         baseClass,
         isLivePreviewing && `${baseClass}--is-live-previewing`,
-        isMaximized && `${baseClass}--is-maximized`,
+        isExpanded && `${baseClass}--is-expanded`,
         breakpoint &&
           breakpoint !== 'responsive' &&
           breakpoint !== 'custom' &&

@@ -22,9 +22,9 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
   const {
     breakpoint,
     breakpoints,
-    isMaximized,
+    isExpanded,
     setBreakpoint,
-    setIsMaximized,
+    setIsExpanded,
     setPreviewWindowType,
     setZoom,
     zoom,
@@ -117,11 +117,11 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
       </div>
       <div className={`${baseClass}__end`}>
         <Button
-          aria-label={isMaximized ? 'Minimize' : 'Maximize'}
+          aria-label={isExpanded ? t('general:collapse') : t('general:expand')}
           buttonStyle="ghost"
-          icon={isMaximized ? <CollapseIcon size={16} /> : <ExpandIcon size={16} />}
-          onClick={() => setIsMaximized(!isMaximized)}
-          tooltip={isMaximized ? 'Minimize' : 'Maximize'}
+          icon={isExpanded ? <CollapseIcon size={16} /> : <ExpandIcon size={16} />}
+          onClick={() => setIsExpanded(!isExpanded)}
+          tooltip={isExpanded ? t('general:collapse') : t('general:expand')}
         />
         <Button
           aria-label={t('general:openInNewWindow')}
