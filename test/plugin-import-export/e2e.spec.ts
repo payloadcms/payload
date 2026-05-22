@@ -18,6 +18,7 @@ import {
   runJobsQueue,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
+import { setPerPageLimit } from '../__helpers/e2e/setPerPageLimit.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -143,20 +144,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('body')).not.toContainText('Loading...')
 
       // Change per-page to 25
-      const perPageButton = page.locator('.per-page .per-page__base-button')
-      await expect(perPageButton).toBeVisible()
-      await perPageButton.click()
-
-      const perPage25 = page.locator('.popup__content .popup-button-list__button', {
-        hasText: '25',
-      })
-      await expect(perPage25).toBeVisible()
-      await perPage25.click()
-
-      // Wait for URL to contain limit=25
-      await expect(() => {
-        expect(page.url()).toContain('limit=25')
-      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+      await setPerPageLimit({ page, limit: 25 })
 
       // Open export from list menu
       const listMenuButton = page.locator('#list-menu')
