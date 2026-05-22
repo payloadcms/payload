@@ -1,3 +1,5 @@
+import ts from 'typescript'
+
 import type { Assertion } from './types.js'
 
 import {
@@ -5,6 +7,7 @@ import {
   parseConfig,
   type ParsedCollection,
   type ParsedField,
+  walkPath,
 } from './parseConfig.js'
 
 /**
@@ -26,7 +29,7 @@ export function evaluateAssertions(source: string, assertions: Assertion[]): str
 
   const errors: string[] = []
   for (const assertion of assertions) {
-    const error = evaluateOne(assertion, parsed.collections)
+    const error = evaluateOne(assertion, parsed)
     if (error) {
       errors.push(error)
     }
@@ -34,7 +37,8 @@ export function evaluateAssertions(source: string, assertions: Assertion[]): str
   return errors
 }
 
-function evaluateOne(assertion: Assertion, collections: ParsedCollection[]): null | string {
+function evaluateOne(assertion: Assertion, parsed: ReturnType<typeof parseConfig>): null | string {
+  const { collections } = parsed
   switch (assertion.kind) {
     case 'blockField': {
       const collection = findCollection(collections, assertion.slug)
@@ -83,6 +87,91 @@ function evaluateOne(assertion: Assertion, collections: ParsedCollection[]): nul
       }
       if (!collection.hooks[assertion.hook]) {
         return `expected collection-level hooks.${assertion.hook} on collection "${assertion.slug}"`
+      }
+      return null
+    }
+
+    case 'collectionOption': {
+      const collection = findCollection(collections, assertion.slug)
+      if (!collection) {
+        return `expected collection "${assertion.slug}" (for option "${assertion.path}")`
+      }
+      const segments = assertion.path.split('.')
+      const [root, ...rest] = segments as [string, ...string[]]
+      const rootExpr = collection.options[root]
+      if (!rootExpr) {
+        return `expected collection "${assertion.slug}" to have option "${assertion.path}"`
+      }
+      const expr = rest.length > 0 ? walkPath(rootExpr, rest, parsed.symbols) : rootExpr
+      if (!expr) {
+        return `expected collection "${assertion.slug}" option "${assertion.path}" to exist`
+      }
+      if (assertion.value !== undefined) {
+        const error = checkValueWithBooleanShorthand(
+          expr,
+          assertion.value,
+          `collection "${assertion.slug}" option "${assertion.path}"`,
+          parsed.symbols,
+        )
+        if (error) {
+          return error
+        }
+      }
+      return null
+    }
+
+    case 'configOption': {
+      const segments = assertion.path.split('.')
+      const [root, ...rest] = segments as [string, ...string[]]
+      const rootExpr = parsed.configOptions[root]
+      if (!rootExpr) {
+        return `expected buildConfig to have option "${assertion.path}"`
+      }
+      const expr = rest.length > 0 ? walkPath(rootExpr, rest, parsed.symbols) : rootExpr
+      if (!expr) {
+        return `expected buildConfig option "${assertion.path}" to exist`
+      }
+      if (assertion.value !== undefined) {
+        const error = checkValueWithBooleanShorthand(
+          expr,
+          assertion.value,
+          `buildConfig option "${assertion.path}"`,
+          parsed.symbols,
+        )
+        if (error) {
+          return error
+        }
+      }
+      return null
+    }
+
+    case 'dbAdapterOption': {
+      if (!parsed.db) {
+        return `expected db adapter to be configured (for option "${assertion.path}")`
+      }
+      if (assertion.adapter && parsed.db.adapter !== assertion.adapter) {
+        return `expected db adapter "${assertion.adapter}", got "${parsed.db.adapter}"`
+      }
+      const segments = assertion.path.split('.')
+      const [root, ...rest] = segments as [string, ...string[]]
+      const rootExpr = parsed.db.options[root]
+      if (!rootExpr) {
+        return `expected db adapter to have option "${assertion.path}"`
+      }
+      const expr = rest.length > 0 ? walkPath(rootExpr, rest, parsed.symbols) : rootExpr
+      if (!expr) {
+        return `expected db adapter option "${assertion.path}" to exist`
+      }
+      if (assertion.value !== undefined) {
+        const error = checkValueWithBooleanShorthand(
+          expr,
+          assertion.value,
+          `db adapter option "${assertion.path}"`,
+          parsed.symbols,
+        )
+        if (error) {
+          return error
+        }
       }
       return null
     }
@@ -147,7 +236,87 @@ function evaluateOne(assertion: Assertion, collections: ParsedCollection[]): nul
       }
       return null
     }
+
+    case 'jobsTask': {
+      if (!parsed.jobs) {
+        return `expected jobs config to be present (for task "${assertion.slug}")`
+      }
+      return parsed.jobs.tasks.some((t) => t.slug === assertion.slug)
+        ? null
+        : `expected jobs.tasks to contain a task with slug "${assertion.slug}"`
+    }
+
+    case 'jobsWorkflow': {
+      if (!parsed.jobs) {
+        return `expected jobs config to be present (for workflow "${assertion.slug}")`
+      }
+      return parsed.jobs.workflows.some((w) => w.slug === assertion.slug)
+        ? null
+        : `expected jobs.workflows to contain a workflow with slug "${assertion.slug}"`
+    }
   }
+}
+
+/**
+ * Checks a walked expression against an expected value, implementing the
+ * boolean shorthand rule:
+ *
+ * When `expected` is `true` AND the expression resolves to an ObjectLiteral,
+ * the check passes — an object value implies the feature is enabled (e.g.
+ * `auth.loginWithUsername: { allowEmailLogin: true }` satisfies `value: true`).
+ *
+ * For `expected: false` or any primitive, strict literal equality is required.
+ *
+ * Returns an error string on mismatch, or `null` on success.
+ */
+function checkValueWithBooleanShorthand(
+  expr: ts.Expression,
+  expected: boolean | number | string,
+  label: string,
+  symbols: Map<string, ts.Expression>,
+): null | string {
+  // Boolean shorthand: object presence satisfies value: true
+  if (expected === true) {
+    const asObj = resolveToObjectLiteralLocal(expr, symbols)
+    if (asObj) {
+      return null
+    }
+  }
+  const actual = literalValue(expr)
+  if (actual !== expected) {
+    return `expected ${label} to equal ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`
+  }
+  return null
+}
+
+/**
+ * Local re-export of resolveToObjectLiteral logic for use inside evaluate.ts.
+ * We inline a simple version here to avoid exporting a private helper from
+ * parseConfig.ts.
+ */
+function resolveToObjectLiteralLocal(
+  expr: ts.Expression,
+  symbols: Map<string, ts.Expression>,
+): ts.ObjectLiteralExpression | undefined {
+  let current: ts.Expression = expr
+  while (
+    ts.isAsExpression(current) ||
+    ts.isSatisfiesExpression(current) ||
+    ts.isParenthesizedExpression(current) ||
+    ts.isTypeAssertionExpression(current)
+  ) {
+    current = current.expression
+  }
+  if (ts.isObjectLiteralExpression(current)) {
+    return current
+  }
+  if (ts.isIdentifier(current) && symbols.has(current.text)) {
+    const target = symbols.get(current.text)!
+    if (ts.isObjectLiteralExpression(target)) {
+      return target
+    }
+  }
+  return undefined
 }
 
 type FieldLookup = {

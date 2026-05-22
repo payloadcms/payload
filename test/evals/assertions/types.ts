@@ -38,6 +38,36 @@ export type Assertion =
       slug: string
     }
   | {
+      /** Asserts a property on a collection beyond `fields[]`/`hooks`/`access` — versions, auth, admin, timestamps, upload, etc. */
+      kind: 'collectionOption'
+      /** Dotted path on the collection, e.g. 'versions.drafts', 'auth.loginWithUsername', 'admin.useAsTitle'. */
+      path: string
+      /** Slug of the collection. */
+      slug: string
+      /** Optional expected literal value. Omit to check existence only. */
+      value?: boolean | number | string
+    }
+  | {
+      /** Asserts a property on the top-level `buildConfig({ ... })` object, addressed by a dotted path. Used for root-level options that don't fit collections.fields/hooks/access (csrf, cookiePrefix, serverURL, routes, admin.importMap.baseDir, admin.components.*, jobs.autoRun, etc.). */
+      kind: 'configOption'
+      /** Dotted path under buildConfig, e.g. 'csrf', 'admin.importMap.baseDir', 'jobs.autoRun'. */
+      path: string
+      /** Optional expected literal value (boolean/number/string). Omit to check existence only. */
+      value?: boolean | number | string
+    }
+  | {
+      /** Asserts a task with the given slug exists in `buildConfig.jobs.tasks[]`. */
+      kind: 'jobsTask'
+      /** Slug of the task. */
+      slug: string
+    }
+  | {
+      /** Asserts a workflow with the given slug exists in `buildConfig.jobs.workflows[]`. */
+      kind: 'jobsWorkflow'
+      /** Slug of the workflow. */
+      slug: string
+    }
+  | {
       /** Lifecycle name of the collection hook (e.g. "beforeChange"). */
       hook: CollectionHookName
       /** Asserts a collection-level hook (`collection.hooks.<hook>`) is defined and non-empty. */
@@ -81,6 +111,16 @@ export type Assertion =
       /** Slug of the collection containing the field. */
       slug: string
       /** Optional expected literal value. When omitted, only existence of the option is checked. */
+      value?: boolean | number | string
+    }
+  | {
+      /** Optional adapter discriminator. Values: 'mongoose' | 'postgres' | 'sqlite' | 'vercel-postgres' | 'd1-sqlite'. Omit to accept any. */
+      adapter?: string
+      /** Asserts a property passed to the db adapter call (mongooseAdapter, postgresAdapter, sqliteAdapter, vercelPostgresAdapter, d1SqliteAdapter). */
+      kind: 'dbAdapterOption'
+      /** Dotted path on the adapter args, e.g. 'migrationDir', 'prodMigrations', 'transactionOptions'. */
+      path: string
+      /** Optional expected literal value. */
       value?: boolean | number | string
     }
   | {
