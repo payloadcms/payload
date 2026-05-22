@@ -1931,7 +1931,17 @@ describe('List View', () => {
 
     await drawer.locator('.list-header__create-new-button.doc-drawer__toggler').click()
     const createNewDrawer = page.locator('[id^=doc-drawer_custom-list-drawer_1_]')
+
+    // The custom create button POSTs to /api/custom-list-drawer and then
+    // calls the outer list drawer's refresh(). Wait for both the POST and
+    // the toast so the row-count assertion below isn't racing the refresh.
+    const createResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().endsWith('/api/custom-list-drawer') &&
+        response.request().method() === 'POST',
+    )
     await createNewDrawer.locator('#create-custom-list-drawer-doc').click()
+    await createResponsePromise
 
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
