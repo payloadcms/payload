@@ -58,8 +58,7 @@ export default buildConfig({
   "mcpServers": {
     "Payload": {
       "command": "npx",
-      "args": ["payload-mcp"],
-      "cwd": "/absolute/path/to/your/payload/project"
+      "args": ["payload-mcp"]
     }
   }
 }
@@ -67,6 +66,10 @@ export default buildConfig({
 
 That's it - every collection and global is now available as MCP tools (`findPosts`,
 `createPosts`, `updatePosts`, …).
+
+The `payload-mcp` bin finds your `payload.config.ts` automatically, since it's installed
+inside your project. If your project has an unusual layout (e.g. a monorepo), see
+[locating the config](#locating-the-config).
 
 ### Production setup (HTTP)
 
@@ -191,7 +194,6 @@ curl -i 'http://localhost:3000/api/mcp' \
 The plugin ships a `payload-mcp` bin that serves the MCP protocol over stdin/stdout. It loads your `payload.config.ts`, boots Payload, and serves MCP requests until the parent process closes the stream.
 
 ```bash
-# from the project root
 npx payload-mcp
 ```
 
@@ -280,14 +282,37 @@ For clients that spawn local processes (Claude Desktop, Cursor stdio servers, et
   "mcpServers": {
     "Payload": {
       "command": "npx",
-      "args": ["payload-mcp"],
-      "cwd": "/absolute/path/to/your/payload/project"
+      "args": ["payload-mcp"]
     }
   }
 }
 ```
 
-`cwd` must point at the directory containing your `payload.config.ts`. stdio runs with full local access - no API key is required.
+stdio runs with full local access - no API key is required.
+
+#### Locating the config
+
+The `payload-mcp` bin is installed inside your project's `node_modules`, so it derives
+your project root from its own location and resolves `payload.config.ts` from there - no
+matter which working directory the MCP client spawns it from.
+
+For layouts where that derived root is wrong (most commonly a monorepo where the package
+is hoisted above the app that actually contains the config), point the bin at the config
+explicitly with the `PAYLOAD_CONFIG_PATH` environment variable:
+
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": ["payload-mcp"],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "/absolute/path/to/your/payload.config.ts"
+      }
+    }
+  }
+}
+```
 
 ## Testing your MCP endpoint
 
@@ -298,7 +323,9 @@ npx @modelcontextprotocol/inspector
 ```
 
 - For HTTP: set the URL to `http://127.0.0.1:3000/api/mcp` and add `Authorization: Bearer MCP-USER-API-KEY` as a header.
-- For stdio: choose the stdio transport, set the command to `npx payload-mcp`, and the working directory to your project root.
+- For stdio: choose the stdio transport and set the command to `npx payload-mcp`. Run the
+  Inspector from your project directory, or set `PAYLOAD_CONFIG_PATH` (see
+  [locating the config](#locating-the-config)).
 
 ## API key authentication
 

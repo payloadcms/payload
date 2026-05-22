@@ -2,7 +2,7 @@ import type { MaybePromise, Plugin, SanitizedConfig } from 'payload'
 
 /* eslint-disable no-console */
 import { StdioServerTransport } from '@modelcontextprotocol/server'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createLocalReq, getPayload } from 'payload'
 import { findConfig } from 'payload/node'
 
@@ -11,6 +11,7 @@ import type { AuthorizedMCP, SanitizedMCPPluginConfig } from './types.js'
 import { buildMcpServer } from './mcp/buildMcpServer.js'
 import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
 import { getPluginConfig } from './utils/getPluginConfig.js'
+import { resolveProjectRoot } from './utils/resolveProjectRoot.js'
 
 /**
  * Stdio adapter for the Payload MCP server.
@@ -19,6 +20,21 @@ import { getPluginConfig } from './utils/getPluginConfig.js'
  * full access to your local data.
  */
 export const runMcpStdio = async (): Promise<void> => {
+  /**
+   * If MCP clients spawn stdio servers from an arbitrary working directory,
+   * Payload's cwd-anchored `findConfig()` can't locate the project on
+   * its own. This module always lives inside the project's `node_modules`, so
+   * we derive the project root from its own path and `chdir` into it.
+   *
+   * An absolute `PAYLOAD_CONFIG_PATH` still overrides everything; unusual
+   * layouts (e.g. a monorepo where the package is hoisted above the app) can
+   * fall back to it. See the implementation of findConfig for details.
+   */
+  const projectRoot = resolveProjectRoot(fileURLToPath(import.meta.url))
+  if (projectRoot) {
+    process.chdir(projectRoot)
+  }
+
   const configPath = findConfig()
   const configModule = await import(pathToFileURL(configPath).toString())
   const config = (await (configModule.default ?? configModule)) as MaybePromise<SanitizedConfig>
