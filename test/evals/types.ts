@@ -19,6 +19,7 @@ export type EvalCategory =
   | 'migrations'
   | 'negative'
   | 'plugins'
+  | 'production'
   | 'rest-api'
   | 'richtext'
   | 'structure'
