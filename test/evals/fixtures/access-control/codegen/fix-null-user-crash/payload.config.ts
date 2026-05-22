@@ -9,7 +9,7 @@ export default buildConfig({
       slug: 'posts',
       access: {
         // BUG: crashes when no user is logged in — req.user is null for public requests
-        read: ({ req }) => req.user.role === 'admin',
+        read: ({ req }) => (req.user as unknown as { role: string }).role === 'admin',
       },
       fields: [
         { name: 'title', type: 'text', required: true },
