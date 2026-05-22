@@ -35,35 +35,25 @@ const existsQuery: Where = { image: { exists: true } }
 // Near (point fields) — order: longitude, latitude, maxDistance (m), minDistance (m)
 const nearQuery: Where = { location: { near: '-122.4194,37.7749,10000,0' } }
 
-// Within (GeoJSON polygon — point fields only)
+// Within — GeoJSON polygon (point fields only)
 const withinQuery: Where = {
   location: {
     within: {
       type: 'Polygon',
       coordinates: [
-        [
-          [-73.99, 40.73],
-          [-73.98, 40.73],
-          [-73.98, 40.74],
-          [-73.99, 40.73],
-        ],
+        /* GeoJSON ring */
       ],
     },
   },
 }
 
-// Intersects (GeoJSON geometry — point fields only)
+// Intersects — GeoJSON geometry (point fields only)
 const intersectsQuery: Where = {
   location: {
     intersects: {
       type: 'Polygon',
       coordinates: [
-        [
-          [-74.0, 40.7],
-          [-73.9, 40.7],
-          [-73.9, 40.8],
-          [-74.0, 40.7],
-        ],
+        /* GeoJSON ring */
       ],
     },
   },
@@ -788,18 +778,15 @@ const Posts: CollectionConfig = {
 
 ## Sort
 
+Prefix field name with `-` for descending order. Multi-field: array in Local API, comma-separated in REST.
+
 ```ts
-// Single field — descending
 await payload.find({ collection: 'posts', sort: '-createdAt' })
-
-// Multi-field — Local API uses an array
 await payload.find({ collection: 'posts', sort: ['priority', '-createdAt'] })
-
-// REST: comma-separated
-// GET /api/posts?sort=priority,-createdAt
+// REST: GET /api/posts?sort=priority,-createdAt
 ```
 
-> **Virtual fields cannot be sorted** unless they are linked with a relationship field. Sorting is handled by the database and requires the field to be stored there.
+> **Virtual fields cannot be sorted** unless linked with a relationship field. Sorting runs at the database level and requires the field to be stored.
 
 ## Performance Best Practices
 
