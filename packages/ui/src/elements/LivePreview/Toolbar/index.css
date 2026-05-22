@@ -17,7 +17,7 @@
   }
 
   .live-preview-toolbar--draggable {
-    box-shadow: 0 -2px 16px -2px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--elevation-400-menu-panel);
     position: absolute;
     top: 0;
     left: 0;

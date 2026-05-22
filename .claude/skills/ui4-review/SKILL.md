@@ -48,7 +48,7 @@ grep -n '&__\|&--' "$FILE"
 # 2. Hardcoded Spacing (px/rem values that should be tokens)
 grep -nE ':\s*[0-9]+px|:\s*[0-9.]+rem' "$FILE"
 
-# 3. Hardcoded Colors (hex, rgb, rgba)
+# 3. Hardcoded Colors (hex, rgb, rgba - includes box-shadow)
 grep -nE '#[0-9a-fA-F]{3,8}|rgba?\(' "$FILE"
 
 # 4. Legacy Theme Variables
@@ -137,6 +137,28 @@ After fixing, report:
 | 5px / 0.3125rem  | `--radius-medium` |
 | 13px / 0.8125rem | `--radius-large`  |
 | 9999px           | `--radius-full`   |
+
+---
+
+### Elevation Tokens (Box Shadows)
+
+**Never use hardcoded `rgba()` for box-shadows.** Use elevation tokens instead:
+
+| Token                          | Use Case                          |
+| ------------------------------ | --------------------------------- |
+| `--elevation-300-tooltip`      | Tooltips, small floating elements |
+| `--elevation-400-menu-panel`   | Menus, dropdowns, floating panels |
+| `--elevation-500-modal-window` | Modals, dialogs, full overlays    |
+
+```css
+/* ❌ BAD - hardcoded shadow */
+box-shadow: 0 -2px 16px -2px rgba(0, 0, 0, 0.2);
+
+/* ✅ GOOD - elevation token */
+box-shadow: var(--elevation-400-menu-panel);
+```
+
+Elevations automatically adjust for light/dark themes.
 
 ---
 
