@@ -65,7 +65,6 @@
     tbody tr {
       position: relative;
       border-top: var(--stroke-width-small) solid var(--color-border);
-      cursor: pointer;
 
       &:hover {
         background: var(--color-bg-secondary);
