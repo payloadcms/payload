@@ -263,6 +263,7 @@ export const slTranslations: DefaultTranslationsObject = {
     copy: 'Kopiraj',
     copyField: 'Kopiraj polje',
     copying: 'Kopiranje',
+    copyLink: 'Kopiraj povezavo',
     copyRow: 'Kopiraj vrstico',
     copyWarning: 'Prepisali boste {{to}} z {{from}} za {{label}} {{title}}. Ste prepričani?',
     create: 'Ustvari',

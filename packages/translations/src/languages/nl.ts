@@ -270,6 +270,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     copy: 'Kopiëren',
     copyField: 'Veld kopiëren',
     copying: 'Kopiëren',
+    copyLink: 'Kopieer link',
     copyRow: 'Rij kopiëren',
     copyWarning:
       'U staat op het punt om {{to}} te overschrijven met {{from}} voor {{label}} {{title}}. Bent u zeker?',

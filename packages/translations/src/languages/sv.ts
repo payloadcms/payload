@@ -264,6 +264,7 @@ export const svTranslations: DefaultTranslationsObject = {
     copy: 'Kopiera',
     copyField: 'Kopiera fält',
     copying: 'Kopierar...',
+    copyLink: 'Kopiera länk',
     copyRow: 'Kopiera rad',
     copyWarning:
       'Du håller på att skriva över {{to}} med {{from}} för {{label}} {{title}}. Är du säker?',

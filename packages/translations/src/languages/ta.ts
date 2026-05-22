@@ -261,6 +261,7 @@ export const taTranslations: DefaultTranslationsObject = {
     copy: 'நகலெடுக்கவும்',
     copyField: 'புலத்தை நகலெடுக்கவும்',
     copying: 'நகலெடுக்கிறது...',
+    copyLink: 'இணைப்பை நகலெடு',
     copyRow: 'வரிசையை நகலெடுக்கவும்',
     copyWarning:
       '{{label}} {{title}}-க்கு {{to}}-ஐ {{from}}-ஆல் மீளெழுதவிருக்கிறீர்கள். உறுதியாகவா?',

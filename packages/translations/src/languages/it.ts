@@ -267,6 +267,7 @@ export const itTranslations: DefaultTranslationsObject = {
     copy: 'Copia',
     copyField: 'Copia campo',
     copying: 'Copia',
+    copyLink: 'Copia link',
     copyRow: 'Copia riga',
     copyWarning: 'Stai per sovrascrivere {{to}} con {{from}} per {{label}} {{title}}. Sei sicuro?',
     create: 'Crea',

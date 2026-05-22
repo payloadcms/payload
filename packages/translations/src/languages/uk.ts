@@ -263,6 +263,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     copy: 'Скопіювати',
     copyField: 'Копіювати поле',
     copying: 'Копіювання',
+    copyLink: 'Скопіювати посилання',
     copyRow: 'Копіювати рядок',
     copyWarning: 'Ви збираєтесь замінити {{to}} на {{from}} для {{label}} {{title}}. Ви впевнені?',
     create: 'Створити',

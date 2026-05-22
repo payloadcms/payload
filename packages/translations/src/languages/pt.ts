@@ -264,6 +264,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     copy: 'Copiar',
     copyField: 'Copiar campo',
     copying: 'Copiando',
+    copyLink: 'Copiar link',
     copyRow: 'Copiar linha',
     copyWarning:
       'Você está prestes a sobrescrever {{to}} com {{from}} para {{label}} {{title}}. Tem certeza?',

@@ -264,6 +264,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     copy: 'Kopier',
     copyField: 'Kopier felt',
     copying: 'Kopierer',
+    copyLink: 'Kopier lenke',
     copyRow: 'Kopier rad',
     copyWarning:
       'Du er i ferd med å overskrive {{to}} med {{from}} for {{label}} {{title}}. Er du sikker?',

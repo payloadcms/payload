@@ -247,6 +247,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     copy: '複製',
     copyField: '複製欄位',
     copying: '複製中',
+    copyLink: '複製連結',
     copyRow: '複製列',
     copyWarning: '您即將使用 {{from}} 覆寫 {{label}} {{title}} 中的 {{to}}。確定要繼續？',
     create: '建立',

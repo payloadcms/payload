@@ -264,6 +264,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     copy: 'Kopēt',
     copyField: 'Kopēt lauku',
     copying: 'Kopē...',
+    copyLink: 'Kopēt saiti',
     copyRow: 'Kopēt rindu',
     copyWarning:
       'Jūs grasāties pārrakstīt {{to}} ar {{from}} priekš {{label}} {{title}}. Vai esat pārliecināts?',

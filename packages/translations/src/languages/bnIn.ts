@@ -266,6 +266,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     copy: 'কপি করুন',
     copyField: 'ফিল্ড কপি করুন',
     copying: 'কপি করা হচ্ছে',
+    copyLink: 'লিঙ্ক অনুলিপি করুন',
     copyRow: 'সারি কপি করুন',
     copyWarning:
       'আপনি {{label}} {{title}} এর জন্য {{to}} কে {{from}} দ্বারা ওভাররাইট করতে চলেছেন। আপনি কি নিশ্চিত?',

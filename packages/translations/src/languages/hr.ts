@@ -263,6 +263,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     copy: 'Kopiraj',
     copyField: 'Kopiraj polje',
     copying: 'Kopiranje',
+    copyLink: 'Kopiraj poveznicu',
     copyRow: 'Kopiraj redak',
     copyWarning:
       'Na rubu ste prepisivanja {{to}} s {{from}} za {{label}} {{title}}. Jeste li sigurni?',

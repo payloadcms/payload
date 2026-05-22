@@ -265,6 +265,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     copy: 'Скопировать',
     copyField: 'Копировать поле',
     copying: 'Копирование',
+    copyLink: 'Скопировать ссылку',
     copyRow: 'Копировать строку',
     copyWarning:
       'Вы собираетесь перезаписать {{to}} на {{from}} для {{label}} {{title}}. Вы уверены?',

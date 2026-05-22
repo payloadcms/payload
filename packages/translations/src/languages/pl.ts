@@ -262,6 +262,7 @@ export const plTranslations: DefaultTranslationsObject = {
     copy: 'Skopiuj',
     copyField: 'Kopiuj pole',
     copying: 'Kopiowanie',
+    copyLink: 'Kopiuj link',
     copyRow: 'Kopiuj wiersz',
     copyWarning:
       'Zamierzasz nadpisać {{to}} na {{from}} dla {{label}} {{title}}. Czy jesteś pewny?',

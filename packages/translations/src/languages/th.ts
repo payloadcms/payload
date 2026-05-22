@@ -257,6 +257,7 @@ export const thTranslations: DefaultTranslationsObject = {
     copy: 'คัดลอก',
     copyField: 'คัดลอกฟิลด์',
     copying: 'การคัดลอก',
+    copyLink: 'คัดลอกลิงก์',
     copyRow: 'คัดลอกแถว',
     copyWarning:
       'คุณกำลังจะเขียนทับ {{to}} ด้วย {{from}} สำหรับ {{label}} {{title}}. คุณแน่ใจหรือไม่?',

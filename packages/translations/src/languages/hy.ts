@@ -262,6 +262,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     copy: 'Պատճենել',
     copyField: 'Պատճենել դաշտը',
     copying: 'Պատճենվում է',
+    copyLink: 'Պատճենել հղումը',
     copyRow: 'Պատճենել տողը',
     copyWarning:
       'Դուք պատրաստվում եք վերագրել {{to}}-ը {{from}}-ով {{label}} {{title}}-ի համար։ Համոզվա՞ծ եք։',

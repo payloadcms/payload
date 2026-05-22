@@ -267,6 +267,7 @@ export const esTranslations: DefaultTranslationsObject = {
     copy: 'Copiar',
     copyField: 'Copiar campo',
     copying: 'Copiando',
+    copyLink: 'Copiar enlace',
     copyRow: 'Copiar fila',
     copyWarning:
       'Está a punto de sobrescribir {{to}} con {{from}} para {{label}} {{title}}. ¿Desea continuar?',

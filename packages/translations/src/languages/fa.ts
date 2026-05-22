@@ -258,6 +258,7 @@ export const faTranslations: DefaultTranslationsObject = {
     copy: 'کپی',
     copyField: 'کپی کردن فیلد',
     copying: 'در حال کپی...',
+    copyLink: 'کپی لینک',
     copyRow: 'کپی کردن ردیف',
     copyWarning:
       'شما در حال کپی کردن مقادیر از {{from}} به {{to}} برای {{label}} "{{title}}" هستید. آیا مطمئن هستید؟',

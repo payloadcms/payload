@@ -262,6 +262,7 @@ export const etTranslations: DefaultTranslationsObject = {
     copy: 'Kopeeri',
     copyField: 'Kopeeri väli',
     copying: 'Kopeerimine',
+    copyLink: 'Kopeeri link',
     copyRow: 'Kopeeri rida',
     copyWarning: 'Olete üle kirjutamas {{to}} {{from}}-ga {{label}} {{title}} jaoks. Olete kindel?',
     create: 'Loo',

@@ -268,6 +268,7 @@ export const roTranslations: DefaultTranslationsObject = {
     copy: 'Copiați',
     copyField: 'Copiază câmpul',
     copying: 'Copiere',
+    copyLink: 'Copiați linkul',
     copyRow: 'Copiază rândul',
     copyWarning:
       'Sunteți pe cale să suprascrieți {{to}} cu {{from}} pentru {{label}} {{title}}. Sunteți sigur?',

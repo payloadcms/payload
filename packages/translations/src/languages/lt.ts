@@ -266,6 +266,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     copy: 'Kopijuoti',
     copyField: 'Kopijuoti lauką',
     copying: 'Kopijavimas',
+    copyLink: 'Kopijuoti nuorodą',
     copyRow: 'Kopijuoti eilutę',
     copyWarning:
       'Jūs ketinate perrašyti {{to}} į {{from}} šildymui {{label}} {{title}}. Ar esate tikri?',
