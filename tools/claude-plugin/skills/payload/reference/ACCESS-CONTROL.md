@@ -534,7 +534,17 @@ export const Users: CollectionConfig = {
 ```ts
 import type { Access } from 'payload'
 
-// Prevent deletion if document has dependencies
+// Ownership check — query another collection to verify membership
+export const projectMemberAccess: Access = async ({ req, id }) => {
+  const { user, payload } = req
+  if (!user) return false
+  if (user.roles?.includes('admin')) return true
+  if (!id) return false // Access Operation guard
+  const project = await payload.findByID({ collection: 'projects', id: id as string, depth: 0 })
+  return Boolean(project.members?.includes(user.id))
+}
+
+// Dependency guard — block delete when related documents exist
 export const preventDeleteWithDependencies: Access = async ({ req, id }) => {
   if (!id) return true // Access Operation guard
   const count = await req.payload.count({
@@ -547,87 +557,17 @@ export const preventDeleteWithDependencies: Access = async ({ req, id }) => {
 
 ## Access Control Function Arguments
 
-### Collection Create
+`req` is always `PayloadRequest` (has `req.user`, `req.payload`, `req.headers`, `req.locale`). `id` is `undefined` during Access Operations (login checks).
 
-```ts
-create: ({ req, data }) => boolean | Where
-
-// req: PayloadRequest
-//   - req.user: Authenticated user (if any)
-//   - req.payload: Payload instance for queries
-//   - req.headers: Request headers
-//   - req.locale: Current locale
-// data: The data being created
-```
-
-### Collection Read
-
-```ts
-read: ({ req, id }) => boolean | Where
-
-// req: PayloadRequest
-// id: Document ID being read
-//   - undefined during Access Operation (login check)
-//   - string when reading specific document
-```
-
-### Collection Update
-
-```ts
-update: ({ req, id, data }) => boolean | Where
-
-// req: PayloadRequest
-// id: Document ID being updated
-// data: New values being applied
-```
-
-### Collection Delete
-
-```ts
-delete: ({ req, id }) => boolean | Where
-
-// req: PayloadRequest
-// id: Document ID being deleted
-```
-
-### Field Create
-
-```ts
-access: {
-  create: ({ req, data, siblingData }) => boolean
-}
-
-// req: PayloadRequest
-// data: Full document data
-// siblingData: Adjacent field values at same level
-```
-
-### Field Read
-
-```ts
-access: {
-  read: ({ req, id, doc, siblingData }) => boolean
-}
-
-// req: PayloadRequest
-// id: Document ID
-// doc: Full document
-// siblingData: Adjacent field values
-```
-
-### Field Update
-
-```ts
-access: {
-  update: ({ req, id, data, doc, siblingData }) => boolean
-}
-
-// req: PayloadRequest
-// id: Document ID
-// data: New values
-// doc: Current document
-// siblingData: Adjacent field values
-```
+| Operation         | Signature                                          |
+| ----------------- | -------------------------------------------------- |
+| Collection create | `({ req, data }) => boolean \| Where`              |
+| Collection read   | `({ req, id }) => boolean \| Where`                |
+| Collection update | `({ req, id, data }) => boolean \| Where`          |
+| Collection delete | `({ req, id }) => boolean \| Where`                |
+| Field create      | `({ req, data, siblingData }) => boolean`          |
+| Field read        | `({ req, id, doc, siblingData }) => boolean`       |
+| Field update      | `({ req, id, data, doc, siblingData }) => boolean` |
 
 ## Access Operation Context
 

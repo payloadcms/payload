@@ -70,25 +70,9 @@ Payload sets an HTTP-only cookie on login. See [AUTHENTICATION.md#cookies--csrf]
 
 ### CSRF Allow-list
 
-Add trusted frontend origins to the root `csrf` array. Without this, cross-origin cookie-authenticated requests return 403:
+Add trusted frontend origins to the root `csrf` array. See [AUTHENTICATION.md#csrf-allow-list](AUTHENTICATION.md#csrf-allow-list) for the full example and gotchas.
 
-```ts
-// see docs/authentication/cookies.mdx
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  serverURL: 'https://api.myapp.com',
-  csrf: [
-    'https://app.myapp.com',
-    'https://staging.myapp.com',
-    // serverURL is included automatically — no need to repeat it
-  ],
-})
-```
-
-**Gotcha:** Using `csrf: ['*']` disables CSRF protection entirely — any origin can send cookie-authenticated requests. Always use an explicit allowlist in production.
-
-**Gotcha:** Omitting `csrf` when the frontend is on a different origin than `serverURL` causes login to appear to succeed (cookie is set) but all subsequent authenticated requests fail with 403. The symptom looks like an auth bug but is actually a CSRF misconfiguration.
+**Gotcha:** `csrf: ['*']` disables CSRF protection — use an explicit allowlist in production. Omitting `csrf` when the frontend is on a different origin causes cookie-authenticated requests to fail with 403.
 
 ## CORS
 
