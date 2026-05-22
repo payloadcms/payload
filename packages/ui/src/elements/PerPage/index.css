@@ -5,15 +5,6 @@
     gap: var(--spacer-2);
   }
 
-  .per-page ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacer-half);
-  }
-
   .per-page__label {
     color: var(--color-text-secondary);
     font-family: var(--text-body-medium-font-family);
@@ -23,16 +14,8 @@
     white-space: nowrap;
   }
 
-  .per-page__base-button {
-    gap: var(--spacer-half);
-    padding: var(--spacer-1);
-    background: var(--color-bg);
-    border: var(--stroke-width-small) solid var(--color-border);
-  }
-
-  .per-page__base-button:hover,
-  .per-page__base-button:focus-visible {
-    background: var(--color-bg-selected);
+  .btn.btn--style-secondary.per-page--active {
+    background-color: var(--color-bg-transparent-pressed);
   }
 
   .per-page__icon {

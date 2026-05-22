@@ -54,11 +54,11 @@ export const PerPage: React.FC<PerPageProps> = ({
             ))}
           </PopupList.IconButtonGroup>
         )}
-        renderButton={({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
+        renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
           <Button
             {...ariaProps}
             buttonStyle="secondary"
-            className={`${baseClass}__base-button`}
+            className={[active && `${baseClass}--active`].filter(Boolean).join(' ')}
             extraButtonProps={{ onKeyDown }}
             icon={<ChevronIcon className={`${baseClass}__icon`} size={16} />}
             iconPosition="right"

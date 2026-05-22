@@ -46,6 +46,5 @@
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     white-space: nowrap;
-    padding: 0 var(--spacer-1);
   }
 }
