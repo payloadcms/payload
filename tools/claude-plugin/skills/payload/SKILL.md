@@ -9,35 +9,47 @@ Payload is a Next.js native CMS with TypeScript-first architecture, providing ad
 
 ## Quick Reference
 
-| Task                     | Solution                                                                   | Details                                                                                                                          |
-| ------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Auto-generate slugs      | `slugField()`                                                              | [FIELDS.md#slug-field-helper](reference/FIELDS.md#slug-field-helper)                                                             |
-| Restrict content by user | Access control with query                                                  | [ACCESS-CONTROL.md#row-level-security-with-complex-queries](reference/ACCESS-CONTROL.md#row-level-security-with-complex-queries) |
-| Local API user ops       | `user` + `overrideAccess: false`                                           | [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api)                                       |
-| Draft/publish workflow   | `versions: { drafts: true }`                                               | [COLLECTIONS.md#versioning--drafts](reference/COLLECTIONS.md#versioning--drafts)                                                 |
-| Computed fields          | `virtual: true` with **field-level** `hooks.afterRead` returning the value | [FIELDS.md#virtual-fields](reference/FIELDS.md#virtual-fields)                                                                   |
-| Conditional fields       | `admin.condition`                                                          | [FIELDS.md#conditional-fields](reference/FIELDS.md#conditional-fields)                                                           |
-| Custom field validation  | `validate` function                                                        | [FIELDS.md#validation](reference/FIELDS.md#validation)                                                                           |
-| Filter relationship list | `filterOptions` on field                                                   | [FIELDS.md#relationship](reference/FIELDS.md#relationship)                                                                       |
-| Select specific fields   | `select` parameter                                                         | [QUERIES.md#field-selection](reference/QUERIES.md#field-selection)                                                               |
-| Auto-set author/dates    | beforeChange hook                                                          | [HOOKS.md#collection-hooks](reference/HOOKS.md#collection-hooks)                                                                 |
-| Prevent hook loops       | `req.context` check                                                        | [HOOKS.md#context](reference/HOOKS.md#context)                                                                                   |
-| Cascading deletes        | beforeDelete hook                                                          | [HOOKS.md#collection-hooks](reference/HOOKS.md#collection-hooks)                                                                 |
-| Geospatial queries       | `point` field with `near`/`within`                                         | [FIELDS.md#point-geolocation](reference/FIELDS.md#point-geolocation)                                                             |
-| Reverse relationships    | `join` field type                                                          | [FIELDS.md#join-fields](reference/FIELDS.md#join-fields)                                                                         |
-| Next.js revalidation     | Context control in afterChange                                             | [HOOKS.md#nextjs-revalidation-with-context-control](reference/HOOKS.md#nextjs-revalidation-with-context-control)                 |
-| Query by relationship    | Nested property syntax                                                     | [QUERIES.md#nested-properties](reference/QUERIES.md#nested-properties)                                                           |
-| Complex queries          | AND/OR logic                                                               | [QUERIES.md#andor-logic](reference/QUERIES.md#andor-logic)                                                                       |
-| Transactions             | Pass `req` to operations                                                   | [ADAPTERS.md#threading-req-through-operations](reference/ADAPTERS.md#threading-req-through-operations)                           |
-| Background jobs          | Jobs queue with tasks                                                      | [ADVANCED.md#jobs-queue](reference/ADVANCED.md#jobs-queue)                                                                       |
-| Custom API routes        | Collection custom endpoints                                                | [ADVANCED.md#custom-endpoints](reference/ADVANCED.md#custom-endpoints)                                                           |
-| Cloud storage            | Storage adapter plugins                                                    | [ADAPTERS.md#storage-adapters](reference/ADAPTERS.md#storage-adapters)                                                           |
-| Multi-language           | `localization` config + `localized: true`                                  | [ADVANCED.md#localization](reference/ADVANCED.md#localization)                                                                   |
-| Create plugin            | `(options) => (config) => Config`                                          | [PLUGIN-DEVELOPMENT.md#plugin-architecture](reference/PLUGIN-DEVELOPMENT.md#plugin-architecture)                                 |
-| Plugin package setup     | Package structure with SWC                                                 | [PLUGIN-DEVELOPMENT.md#plugin-package-structure](reference/PLUGIN-DEVELOPMENT.md#plugin-package-structure)                       |
-| Add fields to collection | Map collections, spread fields                                             | [PLUGIN-DEVELOPMENT.md#adding-fields-to-collections](reference/PLUGIN-DEVELOPMENT.md#adding-fields-to-collections)               |
-| Plugin hooks             | Preserve existing hooks in array                                           | [PLUGIN-DEVELOPMENT.md#adding-hooks](reference/PLUGIN-DEVELOPMENT.md#adding-hooks)                                               |
-| Check field type         | Type guard functions                                                       | [FIELD-TYPE-GUARDS.md](reference/FIELD-TYPE-GUARDS.md)                                                                           |
+| Task                                 | Solution                                                                   | Details                                                                                                                          |
+| ------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Auto-generate slugs                  | `slugField()`                                                              | [FIELDS.md#slug-field-helper](reference/FIELDS.md#slug-field-helper)                                                             |
+| Restrict content by user             | Access control with query                                                  | [ACCESS-CONTROL.md#row-level-security-with-complex-queries](reference/ACCESS-CONTROL.md#row-level-security-with-complex-queries) |
+| Local API user ops                   | `user` + `overrideAccess: false`                                           | [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api)                                       |
+| Draft/publish workflow               | `versions: { drafts: true }`                                               | [COLLECTIONS.md#versioning--drafts](reference/COLLECTIONS.md#versioning--drafts)                                                 |
+| Computed fields                      | `virtual: true` with **field-level** `hooks.afterRead` returning the value | [FIELDS.md#virtual-fields](reference/FIELDS.md#virtual-fields)                                                                   |
+| Conditional fields                   | `admin.condition`                                                          | [FIELDS.md#conditional-fields](reference/FIELDS.md#conditional-fields)                                                           |
+| Custom field validation              | `validate` function                                                        | [FIELDS.md#validation](reference/FIELDS.md#validation)                                                                           |
+| Filter relationship list             | `filterOptions` on field                                                   | [FIELDS.md#relationship](reference/FIELDS.md#relationship)                                                                       |
+| Select specific fields               | `select` parameter                                                         | [QUERIES.md#field-selection](reference/QUERIES.md#field-selection)                                                               |
+| Auto-set author/dates                | beforeChange hook                                                          | [HOOKS.md#collection-hooks](reference/HOOKS.md#collection-hooks)                                                                 |
+| Prevent hook loops                   | `req.context` check                                                        | [HOOKS.md#context](reference/HOOKS.md#context)                                                                                   |
+| Cascading deletes                    | beforeDelete hook                                                          | [HOOKS.md#collection-hooks](reference/HOOKS.md#collection-hooks)                                                                 |
+| Geospatial queries                   | `point` field with `near`/`within`                                         | [FIELDS.md#point-geolocation](reference/FIELDS.md#point-geolocation)                                                             |
+| Reverse relationships                | `join` field type                                                          | [FIELDS.md#join-fields](reference/FIELDS.md#join-fields)                                                                         |
+| Next.js revalidation                 | Context control in afterChange                                             | [HOOKS.md#nextjs-revalidation-with-context-control](reference/HOOKS.md#nextjs-revalidation-with-context-control)                 |
+| Query by relationship                | Nested property syntax                                                     | [QUERIES.md#nested-properties](reference/QUERIES.md#nested-properties)                                                           |
+| Complex queries                      | AND/OR logic                                                               | [QUERIES.md#andor-logic](reference/QUERIES.md#andor-logic)                                                                       |
+| Transactions                         | Pass `req` to operations                                                   | [ADAPTERS.md#threading-req-through-operations](reference/ADAPTERS.md#threading-req-through-operations)                           |
+| Background jobs                      | Jobs queue with tasks                                                      | [ADVANCED.md#jobs-queue](reference/ADVANCED.md#jobs-queue)                                                                       |
+| Custom API routes                    | Collection custom endpoints                                                | [ADVANCED.md#custom-endpoints](reference/ADVANCED.md#custom-endpoints)                                                           |
+| Cloud storage                        | Storage adapter plugins                                                    | [ADAPTERS.md#storage-adapters](reference/ADAPTERS.md#storage-adapters)                                                           |
+| Multi-language                       | `localization` config + `localized: true`                                  | [ADVANCED.md#localization](reference/ADVANCED.md#localization)                                                                   |
+| Create plugin                        | `(options) => (config) => Config`                                          | [PLUGIN-DEVELOPMENT.md#plugin-architecture](reference/PLUGIN-DEVELOPMENT.md#plugin-architecture)                                 |
+| Plugin package setup                 | Package structure with SWC                                                 | [PLUGIN-DEVELOPMENT.md#plugin-package-structure](reference/PLUGIN-DEVELOPMENT.md#plugin-package-structure)                       |
+| Add fields to collection             | Map collections, spread fields                                             | [PLUGIN-DEVELOPMENT.md#adding-fields-to-collections](reference/PLUGIN-DEVELOPMENT.md#adding-fields-to-collections)               |
+| Plugin hooks                         | Preserve existing hooks in array                                           | [PLUGIN-DEVELOPMENT.md#adding-hooks](reference/PLUGIN-DEVELOPMENT.md#adding-hooks)                                               |
+| Check field type                     | Type guard functions                                                       | [FIELD-TYPE-GUARDS.md](reference/FIELD-TYPE-GUARDS.md)                                                                           |
+| Run/create migration                 | `payload migrate` CLI                                                      | [MIGRATIONS.md](reference/MIGRATIONS.md)                                                                                         |
+| Add login with username              | `loginWithUsername` config                                                 | [AUTHENTICATION.md](reference/AUTHENTICATION.md)                                                                                 |
+| Configure JWT/cookies/CSRF           | `auth.cookies` + root `csrf`                                               | [AUTHENTICATION.md](reference/AUTHENTICATION.md)                                                                                 |
+| Validate API key externally          | SHA-256 + slice(0,32) of `PAYLOAD_SECRET`                                  | [AUTHENTICATION.md](reference/AUTHENTICATION.md)                                                                                 |
+| Define a background task             | `tasks: [...]` in jobs config                                              | [JOBS-QUEUE.md](reference/JOBS-QUEUE.md)                                                                                         |
+| Schedule recurring job               | `schedule` on task                                                         | [JOBS-QUEUE.md](reference/JOBS-QUEUE.md)                                                                                         |
+| Execute jobs in production           | `payload jobs:run` / `autoRun` / endpoint                                  | [JOBS-QUEUE.md](reference/JOBS-QUEUE.md)                                                                                         |
+| Build a custom field component       | Path syntax + import map                                                   | [CUSTOM-COMPONENTS.md](reference/CUSTOM-COMPONENTS.md)                                                                           |
+| Use admin React hooks                | `useField`, `useDocumentInfo`, etc.                                        | [CUSTOM-COMPONENTS.md](reference/CUSTOM-COMPONENTS.md)                                                                           |
+| Convert Lexical to HTML/JSX/Markdown | Converter fns + editor config                                              | [RICHTEXT.md](reference/RICHTEXT.md)                                                                                             |
+| Build custom Lexical feature         | Server + client feature pair                                               | [RICHTEXT.md](reference/RICHTEXT.md)                                                                                             |
+| Build without DB connection          | `experimental-build-mode`                                                  | [PRODUCTION.md](reference/PRODUCTION.md)                                                                                         |
 
 ## Quick Start
 
@@ -449,17 +461,23 @@ import type { Post, User } from '@/payload-types'
 
 ## Reference Documentation
 
-- **[FIELDS.md](reference/FIELDS.md)** - All field types, validation, admin options
-- **[FIELD-TYPE-GUARDS.md](reference/FIELD-TYPE-GUARDS.md)** - Type guards for runtime field type checking and narrowing
-- **[COLLECTIONS.md](reference/COLLECTIONS.md)** - Collection configs, auth, upload, drafts, live preview
-- **[HOOKS.md](reference/HOOKS.md)** - Collection hooks, field hooks, context patterns
 - **[ACCESS-CONTROL.md](reference/ACCESS-CONTROL.md)** - Collection, field, global access control, RBAC, multi-tenant
 - **[ACCESS-CONTROL-ADVANCED.md](reference/ACCESS-CONTROL-ADVANCED.md)** - Context-aware, time-based, subscription-based access, factory functions, templates
-- **[QUERIES.md](reference/QUERIES.md)** - Query operators, Local/REST/GraphQL APIs
-- **[ENDPOINTS.md](reference/ENDPOINTS.md)** - Custom API endpoints: authentication, helpers, request/response patterns
 - **[ADAPTERS.md](reference/ADAPTERS.md)** - Database, storage, email adapters, transactions
 - **[ADVANCED.md](reference/ADVANCED.md)** - Authentication, jobs, endpoints, components, plugins, localization
+- **[AUTHENTICATION.md](reference/AUTHENTICATION.md)** - Auth config, JWT, cookies, CSRF, API keys, custom strategies, operations
+- **[COLLECTIONS.md](reference/COLLECTIONS.md)** - Collection configs, auth, upload, drafts, live preview
+- **[CUSTOM-COMPONENTS.md](reference/CUSTOM-COMPONENTS.md)** - Admin React hooks, custom views, edit/list-view slots, root slots
+- **[ENDPOINTS.md](reference/ENDPOINTS.md)** - Custom API endpoints: authentication, helpers, request/response patterns
+- **[FIELD-TYPE-GUARDS.md](reference/FIELD-TYPE-GUARDS.md)** - Type guards for runtime field type checking and narrowing
+- **[FIELDS.md](reference/FIELDS.md)** - All field types, validation, admin options
+- **[HOOKS.md](reference/HOOKS.md)** - Collection hooks, field hooks, context patterns
+- **[JOBS-QUEUE.md](reference/JOBS-QUEUE.md)** - Tasks, workflows, schedules, execution methods, queue strategy
+- **[MIGRATIONS.md](reference/MIGRATIONS.md)** - `payload migrate` CLI, transactions per adapter, prod workflow
 - **[PLUGIN-DEVELOPMENT.md](reference/PLUGIN-DEVELOPMENT.md)** - Plugin architecture, monorepo structure, patterns, best practices
+- **[PRODUCTION.md](reference/PRODUCTION.md)** - Build-without-DB, deployment, security headers, Docker, FS warnings
+- **[QUERIES.md](reference/QUERIES.md)** - Query operators, Local/REST/GraphQL APIs
+- **[RICHTEXT.md](reference/RICHTEXT.md)** - Lexical blocks, converters, custom features, views, official features
 
 ## Resources
 
