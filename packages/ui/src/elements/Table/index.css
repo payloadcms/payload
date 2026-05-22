@@ -37,6 +37,23 @@
       &:last-child {
         padding-inline-end: var(--spacer-2);
       }
+
+      /* Linked cells: move padding to the anchor for full-cell clickability */
+      &:has(> a) {
+        padding: 0;
+
+        > a {
+          display: flex;
+          align-items: center;
+          padding: var(--spacer-2) var(--spacer-2-5);
+          min-height: calc(var(--spacer-4) * 2);
+        }
+      }
+
+      &:first-child:has(> a) > a {
+        padding-inline-start: var(--spacer-2);
+        padding-inline-end: var(--spacer-2);
+      }
     }
 
     #heading-_select,
@@ -151,6 +168,20 @@
         display: flex;
         align-items: center;
         height: 100%;
+      }
+
+      /* Linked cells: move padding to the anchor for full-cell clickability */
+      &:has(> a) {
+        padding: 0;
+
+        > a {
+          padding: 0 var(--spacer-2-5);
+          min-height: var(--spacer-5);
+        }
+      }
+
+      &:first-child:has(> a) > a {
+        padding-inline-start: var(--spacer-2-5);
       }
     }
 

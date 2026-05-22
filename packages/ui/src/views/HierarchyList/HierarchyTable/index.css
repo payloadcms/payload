@@ -34,17 +34,19 @@
   }
 
   .hierarchy-tables__name-link {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: var(--spacer-2);
     color: var(--color-text);
     text-decoration: none;
     background: none;
     border: none;
-    padding: 0;
+    padding: var(--spacer-2) var(--spacer-2-5);
+    padding-inline-start: var(--spacer-2);
     font: inherit;
     cursor: pointer;
     text-align: left;
+    min-height: calc(var(--spacer-4) * 2);
 
     &:hover {
       color: var(--color-text);
@@ -87,8 +89,9 @@
     width: auto;
     min-width: 200px;
 
-    &:has(.icon) {
-      padding-inline-start: var(--spacer-2);
+    /* Move padding to link for full-cell clickability */
+    &:has(.hierarchy-tables__name-link) {
+      padding: 0;
     }
   }
 
