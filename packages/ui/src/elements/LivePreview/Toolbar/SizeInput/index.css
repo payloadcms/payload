@@ -1,19 +1,41 @@
 @layer payload-default {
-  .toolbar-input {
-    width: calc(var(--spacer-4) * 3);
+  .toolbar-input__group {
+    display: flex;
+    align-items: stretch;
     height: var(--spacer-4);
+    border: var(--stroke-width-small) solid transparent;
+    border-radius: var(--radius-medium);
+    background: var(--color-bg-secondary);
+    overflow: hidden;
+
+    &:hover:not(:focus-within) {
+      border-color: var(--color-border);
+    }
+
+    &:focus-within {
+      border-color: var(--color-border-selected);
+    }
+  }
+
+  .toolbar-input {
+    width: calc(var(--spacer-4) * 2);
     display: flex;
     align-items: center;
-    border: var(--stroke-width-small) solid var(--color-border);
-    background: var(--color-bg-secondary);
-    border-radius: var(--radius-medium);
+    border: none;
+    background: transparent;
     font-size: var(--text-body-medium-font-size, 0.6875rem);
     padding: 0 var(--spacer-2);
     color: var(--color-text);
+    appearance: textfield;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      appearance: none;
+      margin: 0;
+    }
 
     &:focus {
-      outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-      outline-offset: calc(var(--stroke-width-small) * -1);
+      outline: none;
     }
   }
 }

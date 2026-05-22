@@ -5,8 +5,9 @@ import type { EditViewProps } from 'payload'
 import React from 'react'
 
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
+import { CollapseIcon } from '../../../../icons/Collapse/index.js'
+import { ExpandIcon } from '../../../../icons/Expand/index.js'
 import { ExternalLinkIcon } from '../../../../icons/ExternalLink/index.js'
-import { XIcon } from '../../../../icons/X/index.js'
 import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { Button } from '../../../Button/index.js'
@@ -18,8 +19,16 @@ const baseClass = 'live-preview-toolbar-controls'
 const zoomOptions = [50, 75, 100, 125, 150, 200]
 
 export const ToolbarControls: React.FC<EditViewProps> = () => {
-  const { breakpoint, breakpoints, setBreakpoint, setPreviewWindowType, setZoom, url, zoom } =
-    useLivePreviewContext()
+  const {
+    breakpoint,
+    breakpoints,
+    isMaximized,
+    setBreakpoint,
+    setIsMaximized,
+    setPreviewWindowType,
+    setZoom,
+    zoom,
+  } = useLivePreviewContext()
 
   const { t } = useTranslation()
 
@@ -106,17 +115,26 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           verticalAlign="bottom"
         />
       </div>
-      <Button
-        aria-label={t('general:openInNewWindow')}
-        buttonStyle="ghost"
-        className={`${baseClass}__external`}
-        icon={<ExternalLinkIcon size={16} />}
-        onClick={(e) => {
-          e.preventDefault()
-          setPreviewWindowType('popup')
-        }}
-        tooltip={t('general:openInNewWindow')}
-      />
+      <div className={`${baseClass}__end`}>
+        <Button
+          aria-label={isMaximized ? 'Minimize' : 'Maximize'}
+          buttonStyle="ghost"
+          icon={isMaximized ? <CollapseIcon size={16} /> : <ExpandIcon size={16} />}
+          onClick={() => setIsMaximized(!isMaximized)}
+          tooltip={isMaximized ? 'Minimize' : 'Maximize'}
+        />
+        <Button
+          aria-label={t('general:openInNewWindow')}
+          buttonStyle="ghost"
+          className={`${baseClass}__external`}
+          icon={<ExternalLinkIcon size={16} />}
+          onClick={(e) => {
+            e.preventDefault()
+            setPreviewWindowType('popup')
+          }}
+          tooltip={t('general:openInNewWindow')}
+        />
+      </div>
     </div>
   )
 }

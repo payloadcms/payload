@@ -1,6 +1,7 @@
 'use client'
 import React, { useCallback, useEffect } from 'react'
 
+import { InputStepper } from '../../../../elements/InputStepper/index.js'
 import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
 import './index.css'
 
@@ -44,6 +45,29 @@ export const PreviewFrameSizeInput: React.FC<{
     [axis, setBreakpoint, measuredDeviceSize, setSize, zoom],
   )
 
+  const handleStep = useCallback(
+    (direction: 'down' | 'up') => {
+      const currentValue = internalState || 0
+      let newValue = direction === 'up' ? currentValue + 1 : currentValue - 1
+
+      if (newValue < 0) {
+        newValue = 0
+      }
+
+      setInternalState(newValue)
+      setBreakpoint('custom')
+
+      setSize({
+        type: 'reset',
+        value: {
+          height: axis === 'y' ? newValue : Number(measuredDeviceSize?.height.toFixed(0)) * zoom,
+          width: axis === 'x' ? newValue : Number(measuredDeviceSize?.width.toFixed(0)) * zoom,
+        },
+      })
+    },
+    [axis, internalState, measuredDeviceSize, setBreakpoint, setSize, zoom],
+  )
+
   // if the breakpoint is `responsive` then the device's div will have `100%` width and height
   // so we need to take the measurements provided by `actualDeviceSize` and sync internal state
   useEffect(() => {
@@ -61,14 +85,21 @@ export const PreviewFrameSizeInput: React.FC<{
   }, [breakpoint, axis, measuredDeviceSize, size, zoom])
 
   return (
-    <input
-      className={baseClass}
-      min={0}
-      name={axis === 'x' ? 'live-preview-width' : 'live-preview-height'}
-      onChange={handleChange}
-      step={1}
-      type="number"
-      value={internalState || 0}
-    />
+    <div className={`${baseClass}__group`}>
+      <input
+        className={baseClass}
+        min={0}
+        name={axis === 'x' ? 'live-preview-width' : 'live-preview-height'}
+        onChange={handleChange}
+        onWheel={(e) => {
+          // @ts-expect-error - blur() exists on input elements but not typed on EventTarget
+          e.target.blur()
+        }}
+        step={1}
+        type="number"
+        value={internalState || 0}
+      />
+      <InputStepper onDecrement={() => handleStep('down')} onIncrement={() => handleStep('up')} />
+    </div>
   )
 }

@@ -14,7 +14,10 @@
     gap: var(--spacer-2);
   }
 
-  .live-preview-toolbar-controls__external {
+  .live-preview-toolbar-controls__end {
+    display: flex;
+    align-items: center;
     justify-self: end;
+    gap: var(--spacer-1);
   }
 }

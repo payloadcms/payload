@@ -13,7 +13,7 @@ import { useLocale } from '../../../providers/Locale/index.js'
 import { IframeLoader } from '../../IframeLoader/index.js'
 import { DeviceContainer } from '../Device/index.js'
 import { LivePreviewToolbar } from '../Toolbar/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'live-preview-window'
 
@@ -23,6 +23,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     breakpoint,
     iframeRef,
     isLivePreviewing,
+    isMaximized,
     loadedURL,
     popupRef,
     previewWindowType,
@@ -127,7 +128,11 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
       className={[
         baseClass,
         isLivePreviewing && `${baseClass}--is-live-previewing`,
-        breakpoint && breakpoint !== 'responsive' && `${baseClass}--has-breakpoint`,
+        isMaximized && `${baseClass}--is-maximized`,
+        breakpoint &&
+          breakpoint !== 'responsive' &&
+          breakpoint !== 'custom' &&
+          `${baseClass}--has-breakpoint`,
       ]
         .filter(Boolean)
         .join(' ')}

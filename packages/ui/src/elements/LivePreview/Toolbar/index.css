@@ -10,10 +10,15 @@
     flex-shrink: 0;
   }
 
+  .live-preview-window--is-maximized .live-preview-toolbar--static {
+    padding-inline-start: var(--gutter-h);
+  }
+
   .live-preview-toolbar--static {
     position: relative;
     width: 100%;
     border-bottom: var(--stroke-width-small) solid var(--color-border);
+    padding-inline-end: var(--gutter-h);
   }
 
   .live-preview-toolbar--draggable {

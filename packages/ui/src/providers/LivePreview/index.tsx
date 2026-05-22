@@ -99,6 +99,8 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
 
+  const [isMaximized, setIsMaximized] = useState(false)
+
   const [loadedURL, setLoadedURL] = useState<string>()
 
   const [zoom, setZoom] = useState(1)
@@ -279,6 +281,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         iframeRef,
         isLivePreviewEnabled,
         isLivePreviewing,
+        isMaximized,
         isPopupOpen,
         isPreviewEnabled,
         listeningForMessages,
@@ -292,6 +295,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         setBreakpoint,
         setHeight,
         setIsLivePreviewing,
+        setIsMaximized,
         setLoadedURL,
         setMeasuredDeviceSize,
         setPreviewURL,

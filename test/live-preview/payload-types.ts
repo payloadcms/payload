@@ -378,6 +378,10 @@ export interface Page {
           }
       )[]
     | null;
+  /**
+   * A number field for visual comparison with toolbar size inputs
+   */
+  testNumber?: number | null;
   localizedTitle?: string | null;
   relationToLocalized?: (string | null) | Post;
   richTextLexical?: {
@@ -1487,6 +1491,7 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  testNumber?: T;
   localizedTitle?: T;
   relationToLocalized?: T;
   richTextLexical?: T;
