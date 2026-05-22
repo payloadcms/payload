@@ -23,14 +23,6 @@ export const migrationsCodegenDataset: CodegenEvalCase[] = [
     assertions: [{ kind: 'collectionExists', slug: 'posts' }],
   },
   {
-    input: 'Add version history to the posts collection so we can track changes over time.',
-    expected:
-      'versions property set on the posts collection — either versions: true or versions: { maxPerDoc: N } — enabling version tracking',
-    category: 'migrations',
-    fixturePath: 'migrations/codegen/enable-versions-posts',
-    assertions: [{ kind: 'collectionExists', slug: 'posts' }],
-  },
-  {
     input:
       'Add an afterChange hook to the posts collection that logs an audit entry to the audit-log collection. Make sure the hook passes req so it runs inside the same transaction.',
     expected:

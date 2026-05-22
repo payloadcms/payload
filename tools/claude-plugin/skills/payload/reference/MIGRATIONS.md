@@ -46,11 +46,12 @@ All commands: `pnpm payload migrate[:<sub-command>]`
 - `--skip-empty` — skip the "no schema changes detected" prompt (useful in CI with Postgres).
 - `--force-accept-warning` / `--forceAcceptWarning` — accept any prompts automatically; creates a blank migration even when no schema changes are detected.
 
-## Migration File Structure
+## Writing Migrations
 
 Each migration lives in a TypeScript file with two named exports:
 
 ```ts
+// see test/database/up-down-migration/int.spec.ts
 import type { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres'
 
 export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
@@ -74,6 +75,7 @@ Each migration runs inside a transaction automatically. If `up()` throws, the tr
 ### MongoDB
 
 ```ts
+// see test/database/migrations-cli.int.spec.ts
 import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
 
 export async function up({ session, payload, req }: MigrateUpArgs): Promise<void> {
@@ -95,6 +97,7 @@ MongoDB requires a replica set for transactions. Without one, each operation run
 ### Postgres / SQLite
 
 ```ts
+// see test/database/up-down-migration/migrations/20260328_094148.ts
 import { sql } from '@payloadcms/db-postgres'
 import type { MigrateUpArgs } from '@payloadcms/db-postgres'
 
