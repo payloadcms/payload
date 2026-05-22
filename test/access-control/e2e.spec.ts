@@ -769,9 +769,7 @@ describe('Access Control', () => {
         serverURL,
       })
 
-      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
-        'Unauthorized, this user does not have access to the admin panel.',
-      )
+      await expect(page.locator('.unauthorized__content h1')).toHaveText('Unauthorized')
 
       await page.goto(url.logout)
 
@@ -799,9 +797,7 @@ describe('Access Control', () => {
 
       // Should be redirected to unauthorized, not the collection list
       await page.waitForURL(/\/unauthorized/)
-      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
-        'Unauthorized, this user does not have access to the admin panel.',
-      )
+      await expect(page.locator('.unauthorized__content h1')).toHaveText('Unauthorized')
 
       await page.goto(url.logout)
     })
@@ -836,9 +832,7 @@ describe('Access Control', () => {
       // await for redirect to unauthorized
       await page.waitForURL(/unauthorized$/)
 
-      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
-        'Unauthorized, this user does not have access to the admin panel.',
-      )
+      await expect(page.locator('.unauthorized__content h1')).toHaveText('Unauthorized')
 
       await page.goto(url.logout)
 

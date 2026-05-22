@@ -32,6 +32,8 @@ import { StatusCellSection } from './sections/StatusCell.js'
 import { ThumbnailCardSection } from './sections/ThumbnailCard.js'
 import { ToastSection } from './sections/ToastSection.js'
 import { TooltipSection } from './sections/Tooltip.js'
+import { TrashBannerSection } from './sections/TrashBanner.js'
+import { UnauthorizedSection } from './sections/Unauthorized.js'
 // Field sections
 import { CodeFieldSection } from './sections/fields/CodeField.js'
 import { DateFieldSection } from './sections/fields/DateField.js'
@@ -47,7 +49,7 @@ import { TextareaFieldSection } from './sections/fields/TextareaField.js'
 import { TextFieldSection } from './sections/fields/TextField.js'
 import { TimezonePickerFieldSection } from './sections/fields/TimezonePickerField.js'
 
-type CategoryId = 'all' | 'fields' | 'patterns' | 'primitives'
+type CategoryId = 'all' | 'fields' | 'patterns' | 'primitives' | 'views'
 
 type ComponentId =
   | 'all'
@@ -98,6 +100,9 @@ type ComponentId =
   | 'timezone-picker'
   | 'toast'
   | 'tooltip'
+  | 'trash-banner'
+  // Views
+  | 'unauthorized'
 
 type ComponentOption = {
   category: CategoryId
@@ -139,6 +144,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'patterns', label: 'Status Cell', value: 'status-cell' },
   { category: 'patterns', label: 'Thumbnail Card', value: 'thumbnail-card' },
   { category: 'patterns', label: 'Toast', value: 'toast' },
+  { category: 'patterns', label: 'Trash Banner', value: 'trash-banner' },
   // Fields
   { category: 'fields', label: 'Code Field', value: 'code-field' },
   { category: 'fields', label: 'Date Field', value: 'date-field' },
@@ -153,6 +159,8 @@ const componentOptions: ComponentOption[] = [
   { category: 'fields', label: 'Text Field', value: 'text-field' },
   { category: 'fields', label: 'Textarea Field', value: 'textarea-field' },
   { category: 'fields', label: 'Timezone Picker', value: 'timezone-picker' },
+  // Views
+  { category: 'views', label: 'Unauthorized', value: 'unauthorized' },
 ]
 
 const categories: { label: string; value: CategoryId }[] = [
@@ -160,6 +168,7 @@ const categories: { label: string; value: CategoryId }[] = [
   { label: 'Primitives', value: 'primitives' },
   { label: 'Patterns', value: 'patterns' },
   { label: 'Fields', value: 'fields' },
+  { label: 'Views', value: 'views' },
 ]
 
 export const ComponentsView: React.FC = () => {
@@ -303,6 +312,9 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('status-cell', 'patterns') && (
           <StatusCellSection selectedComponent="status-cell" />
         )}
+        {shouldShow('trash-banner', 'patterns') && (
+          <TrashBannerSection selectedComponent="trash-banner" />
+        )}
 
         {/* Fields */}
         {(selectedCategory === 'all' || selectedCategory === 'fields') &&
@@ -323,6 +335,13 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('json-field', 'fields') && <JSONFieldSection />}
         {shouldShow('code-field', 'fields') && <CodeFieldSection />}
         {shouldShow('timezone-picker', 'fields') && <TimezonePickerFieldSection />}
+
+        {/* Views */}
+        {(selectedCategory === 'all' || selectedCategory === 'views') &&
+          selectedComponent === 'all' && <h2 className="components-view__category-title">Views</h2>}
+        {shouldShow('unauthorized', 'views') && (
+          <UnauthorizedSection selectedComponent="unauthorized" />
+        )}
       </div>
     </div>
   )
