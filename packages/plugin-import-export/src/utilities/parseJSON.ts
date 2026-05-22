@@ -17,11 +17,7 @@ export const parseJSON = ({ data, req }: ParseJSONArgs): Record<string, unknown>
     const parsed = JSON.parse(content)
 
     if (!Array.isArray(parsed)) {
-      throw new APIError(
-        req.t
-          ? req.t('error:jsonImportMustBeArray')
-          : 'JSON import data must be an array of documents',
-      )
+      throw new APIError('JSON import data must be an array of documents')
     }
 
     return parsed
