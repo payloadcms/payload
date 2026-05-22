@@ -20,6 +20,7 @@ export type EvalCategory =
   | 'negative'
   | 'plugins'
   | 'rest-api'
+  | 'richtext'
   | 'structure'
   | 'testing'
 
