@@ -5,6 +5,7 @@ import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import './index.css'
 
@@ -34,12 +35,6 @@ export const PerPage: React.FC<PerPageProps> = ({
     <div className={baseClass}>
       <span className={`${baseClass}__label`}>{t('general:perPageLabel')}</span>
       <Popup
-        button={
-          <div className={`${baseClass}__base-button`}>
-            <span>{limitToUse}</span>
-            <ChevronIcon className={`${baseClass}__icon`} size={16} />
-          </div>
-        }
         horizontalAlign="right"
         render={({ close }) => (
           <PopupList.IconButtonGroup>
@@ -58,6 +53,19 @@ export const PerPage: React.FC<PerPageProps> = ({
               </PopupList.Button>
             ))}
           </PopupList.IconButtonGroup>
+        )}
+        renderButton={({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
+          <Button
+            {...ariaProps}
+            buttonStyle="secondary"
+            className={`${baseClass}__base-button`}
+            extraButtonProps={{ onKeyDown }}
+            icon={<ChevronIcon className={`${baseClass}__icon`} size={16} />}
+            iconPosition="right"
+            onClick={onClick}
+          >
+            {limitToUse}
+          </Button>
         )}
         size="small"
       />

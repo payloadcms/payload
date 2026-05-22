@@ -9,18 +9,18 @@
   .versions__wrap {
     padding-top: 0;
     padding-bottom: var(--spacing-view-bottom);
-    margin-top: calc(var(--base) * 0.75);
+    margin-top: var(--spacer-3);
     display: flex;
     flex-direction: column;
     flex: 1;
   }
 
   .versions__header {
-    margin-bottom: var(--base);
+    margin-bottom: var(--spacer-3);
   }
 
   .versions__no-versions {
-    margin-top: calc(var(--base) * 1.5);
+    margin-top: var(--spacer-5);
   }
 
   .versions__parent-doc .banner__content {
@@ -63,7 +63,7 @@
 
     .versions .table::after {
       content: '';
-      height: 1px;
+      height: var(--stroke-width-small);
       padding-right: var(--gutter-h);
     }
   }

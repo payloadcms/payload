@@ -7,7 +7,7 @@
     display: flex;
     flex-direction: column;
     background: var(--color-bg);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--stroke-width-small) solid var(--color-border);
     margin-top: auto;
     position: sticky;
     bottom: 0;
@@ -55,7 +55,7 @@
 
     .page-controls > .collection-list__list-selection {
       padding: var(--spacer-2) var(--gutter-h);
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: var(--stroke-width-small) solid var(--color-border);
 
       &:not(:has(.list-selection)) {
         display: none;

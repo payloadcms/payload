@@ -24,19 +24,10 @@
   }
 
   .per-page__base-button {
-    display: flex;
-    align-items: center;
     gap: var(--spacer-half);
-    color: var(--color-text);
-    font-family: var(--text-body-medium-font-family);
-    font-size: var(--text-body-medium-font-size);
-    font-weight: var(--text-body-medium-font-weight);
-    line-height: var(--text-body-medium-line-height);
-    cursor: pointer;
     padding: var(--spacer-1);
-    border-radius: var(--radius-medium);
     background: var(--color-bg);
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
   }
 
   .per-page__base-button:hover,

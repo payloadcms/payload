@@ -2,6 +2,6 @@
   .autosave-cell__items {
     display: flex;
     align-items: center;
-    gap: calc(var(--base) * 0.5);
+    gap: var(--spacer-2);
   }
 }

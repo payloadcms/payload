@@ -1,9 +1,7 @@
-@import '../../../scss/styles.scss';
-
 @layer payload-default {
   .group-by-header {
     display: flex;
-    gap: var(--base);
+    gap: var(--spacer-3);
 
     .list-selection__actions button {
       margin: 0;

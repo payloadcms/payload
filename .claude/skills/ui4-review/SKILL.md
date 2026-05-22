@@ -125,7 +125,15 @@ After fixing, report:
 
 **Rule:** For values ≤ 40px, ALWAYS use a single token (no `calc()`). For values > 40px, use `calc()` with a spacer token.
 
-**Exceptions:** `1px` borders, `0`, percentages, `auto`, `inherit`, `-1px` (for clip offsets)
+**Exceptions:** `0`, percentages, `auto`, `inherit`, `-1px` (for clip offsets)
+
+---
+
+### Stroke Width Tokens
+
+| Value | Token                  |
+| ----- | ---------------------- |
+| 1px   | `--stroke-width-small` |
 
 ---
 
