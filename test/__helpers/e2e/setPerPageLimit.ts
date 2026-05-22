@@ -21,7 +21,7 @@ export const setPerPageLimit = async ({
   /** The Playwright page object */
   page: Page
   /** Scope the selector to a specific element (e.g., a drawer locator) */
-  scope?: Page | Locator
+  scope?: Locator | Page
   /** Whether to wait for URL to update. Set to false for drawers. Default: true */
   waitForURL?: boolean
 }): Promise<void> => {
@@ -29,13 +29,13 @@ export const setPerPageLimit = async ({
   const perPageButton = scopeToUse.locator('.per-page button')
 
   await perPageButton.waitFor({ state: 'visible' })
-  await perPageButton.click({ force: true })
+  await perPageButton.click()
 
-  // Target the option within the popup with exact text match
-  const popupOption = scopeToUse.locator('.popup__content .popup-button-list__button', {
+  // Target the option within the popup - use page since popup is portaled to body
+  const popupOption = page.locator('.popup__content .popup-button-list__button', {
     hasText: new RegExp(`^${limit}$`),
   })
-  await popupOption.click({ force: true })
+  await popupOption.click()
 
   if (waitForURL) {
     await page.waitForURL(new RegExp(`limit=${limit}`), { timeout: POLL_TOPASS_TIMEOUT })
@@ -59,7 +59,7 @@ export const expectPerPageLimits = async ({
   /** The Playwright page object */
   page: Page
   /** Scope the selector to a specific element (e.g., a drawer locator) */
-  scope?: Page | Locator
+  scope?: Locator | Page
 }): Promise<void> => {
   const scopeToUse = scope ?? page
   const perPageButton = scopeToUse.locator('.per-page button')
@@ -67,7 +67,8 @@ export const expectPerPageLimits = async ({
   await perPageButton.waitFor({ state: 'visible' })
   await perPageButton.click({ force: true })
 
-  const popupOptions = scopeToUse.locator('.popup__content .popup-button-list__button')
+  // Use page since popup is portaled to body
+  const popupOptions = page.locator('.popup__content .popup-button-list__button')
 
   await expect
     .poll(async () => await popupOptions.count(), { timeout: POLL_TOPASS_TIMEOUT })
