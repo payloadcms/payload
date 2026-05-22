@@ -3,7 +3,7 @@ import type { ClientCollectionConfig } from 'payload'
 import React from 'react'
 
 import { ListSelection } from '../ListSelection/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'group-by-header'
 

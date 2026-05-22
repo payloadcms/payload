@@ -1,0 +1,20 @@
+@layer payload-default {
+  .group-by-header {
+    display: flex;
+    gap: var(--spacer-3);
+
+    .list-selection__actions button {
+      margin: 0;
+    }
+  }
+
+  .group-by-header__heading {
+    margin: 0;
+    flex-grow: 1;
+    font-family: var(--text-heading-large-font-family);
+    font-size: var(--text-heading-large-font-size);
+    font-weight: var(--text-heading-large-font-weight);
+    line-height: var(--text-heading-large-line-height);
+    letter-spacing: var(--text-heading-large-letter-spacing);
+  }
+}

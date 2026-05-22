@@ -394,6 +394,7 @@ export const itTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       'Eliminato definitivamente {{count}} {{label}} con successo.',
     perPage: 'Per Pagina: {{limit}}',
+    perPageLabel: 'Per pagina:',
     previous: 'Precedente',
     reindex: 'Reindicizza',
     reindexingAll: "Rifacendo l'indice di tutte le {{collections}}.",

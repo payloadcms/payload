@@ -388,6 +388,7 @@ export const isTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Eyða varanlega',
     permanentlyDeletedCountSuccessfully: 'Eyddi {{count}} {{label}} varanlega.',
     perPage: 'Á síðu: {{limit}}',
+    perPageLabel: 'Á síðunni:',
     previous: 'Fyrri',
     reindex: 'Endursetja leitargrunn',
     reindexingAll: 'Endursetja leitargrunn fyrir allar {{collections}}.',

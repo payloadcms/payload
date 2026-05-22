@@ -8,7 +8,7 @@ import { fetchLatestVersion, fetchVersions } from '../Version/fetchVersions.js'
 import { VersionDrawerCreatedAtCell } from '../Version/SelectComparison/VersionDrawer/CreatedAtCell.js'
 import { buildVersionColumns } from './buildColumns.js'
 import { VersionsViewClient } from './index.client.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'versions'
 

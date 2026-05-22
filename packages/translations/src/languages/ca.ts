@@ -393,6 +393,7 @@ export const caTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       "S'ha eliminat permanentment {{count}} {{label}} amb èxit.",
     perPage: 'Per pagian: {{limit}}',
+    perPageLabel: 'Per pàgina:',
     previous: 'Previ',
     reindex: 'Reindexa',
     reindexingAll: 'Reindexa tots el {{collections}}.',

@@ -389,6 +389,7 @@ export const koTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       '영구적으로 {{count}} {{label}}가 성공적으로 삭제되었습니다.',
     perPage: '페이지당 개수: {{limit}}',
+    perPageLabel: '페이지당:',
     previous: '이전',
     reindex: '재인덱싱',
     reindexingAll: '모든 {{collections}}를 다시 인덱싱하는 중입니다.',

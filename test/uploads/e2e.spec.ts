@@ -2068,17 +2068,19 @@ describe('Uploads', () => {
     const imageRelationshipCell = firstRow.locator('.cell-imageRelationship .relationship-cell')
     await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
 
-    const pageTwoButton = page.locator('.paginator__page', { hasText: '2' })
-    await expect(pageTwoButton).toBeVisible()
-    await pageTwoButton.click()
+    // Navigate to page 2 using the right arrow
+    const nextPageButton = page.locator('.clickable-arrow--right')
+    await expect(nextPageButton).toBeVisible()
+    await nextPageButton.click()
 
     const imageUploadImg = imageUploadCell.locator('.thumbnail')
     await expect(imageUploadImg).toBeVisible()
     await expect(imageRelationshipCell).toHaveText('image.png')
 
-    const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
-    await expect(pageOneButton).toBeVisible()
-    await pageOneButton.click()
+    // Navigate back to page 1 using the left arrow
+    const prevPageButton = page.locator('.clickable-arrow--left')
+    await expect(prevPageButton).toBeVisible()
+    await prevPageButton.click()
 
     await expect(imageUploadCell).toHaveText('<No Image Upload>')
     await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')

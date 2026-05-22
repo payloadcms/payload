@@ -380,6 +380,7 @@ export const arTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'حذف بشكل دائم',
     permanentlyDeletedCountSuccessfully: 'تم حذف {{count}} {{label}} بشكل دائم بنجاح.',
     perPage: 'لكلّ صفحة: {{limit}}',
+    perPageLabel: 'لكل صفحة:',
     previous: 'سابق',
     reindex: 'إعادة الفهرسة',
     reindexingAll: 'جاري إعادة فهرسة جميع {{collections}}.',

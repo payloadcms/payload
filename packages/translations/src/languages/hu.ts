@@ -394,6 +394,7 @@ export const huTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Végleges Törlés',
     permanentlyDeletedCountSuccessfully: 'Véglegesen törölt {{count}} {{label}} sikeresen.',
     perPage: 'Oldalanként: {{limit}}',
+    perPageLabel: 'Oldalanként:',
     previous: 'Előző',
     reindex: 'Újraindexelés',
     reindexingAll: 'Az összes {{collections}} újraindexálása folyamatban.',

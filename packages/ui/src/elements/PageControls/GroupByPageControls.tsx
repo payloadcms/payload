@@ -53,10 +53,10 @@ export const GroupByPageControls: React.FC<{
   return (
     <PageControlsComponent
       AfterPageControls={AfterPageControls}
-      collectionConfig={collectionConfig}
       data={data}
       handlePageChange={handlePageChange}
       handlePerPageChange={handlePerPageChange}
+      limits={collectionConfig?.admin?.pagination?.limits}
     />
   )
 }
