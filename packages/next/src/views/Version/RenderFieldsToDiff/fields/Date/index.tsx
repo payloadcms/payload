@@ -23,7 +23,7 @@ export const DateDiffComponent: DateFieldDiffClientComponent = ({
   nestingLevel,
   versionValue: valueTo,
 }) => {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const {
     config: {
       admin: { dateFormat },
@@ -46,8 +46,7 @@ export const DateDiffComponent: DateFieldDiffClientComponent = ({
       })
     : ''
 
-  // TODO: translate 'No value'
-  const NoValue = <div className="diff-no-value">No value</div>
+  const NoValue = <div className="diff-no-value">{t('general:noValue')}</div>
 
   const escapedFromDate = escapeDiffHTML(formattedFromDate)
   const escapedToDate = escapeDiffHTML(formattedToDate)

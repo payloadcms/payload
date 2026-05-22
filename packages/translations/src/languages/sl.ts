@@ -239,6 +239,7 @@ export const slTranslations: DefaultTranslationsObject = {
     cancel: 'Prekliči',
     changesNotSaved:
       'Vaše spremembe niso shranjene. Če zapustite zdaj, boste izgubili svoje spremembe.',
+    checked: 'Preverjeno',
     clear: 'Čisto',
     clearAll: 'Počisti vse',
     close: 'Zapri',
@@ -444,6 +445,7 @@ export const slTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} premaknjeno v smeti.',
     true: 'Da',
     unauthorized: 'Nepooblaščeno',
+    unchecked: 'Nepotrjeno',
     unlock: 'Odkleni',
     unsavedChanges: 'Neshranjene spremembe',
     unsavedChangesDuplicate: 'Imate neshranjene spremembe. Želite nadaljevati s podvajanjem?',

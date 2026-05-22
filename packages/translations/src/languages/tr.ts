@@ -242,6 +242,7 @@ export const trTranslations: DefaultTranslationsObject = {
     cancel: 'İptal',
     changesNotSaved:
       'Değişiklikleriniz henüz kaydedilmedi. Eğer bu sayfayı terk ederseniz değişiklikleri kaybedeceksiniz.',
+    checked: 'Kontrol edildi',
     clear: 'Temiz',
     clearAll: 'Hepsini Temizle',
     close: 'Kapat',
@@ -449,6 +450,7 @@ export const trTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} çöp kutusuna taşındı.',
     true: 'Doğru',
     unauthorized: 'Yetkisiz',
+    unchecked: 'Seçilmemiş',
     unlock: 'Kilidi Aç',
     unsavedChanges: 'Kaydedilmemiş değişiklikleriniz var. Devam etmeden önce kaydedin veya atın.',
     unsavedChangesDuplicate:

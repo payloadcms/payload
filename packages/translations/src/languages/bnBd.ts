@@ -242,6 +242,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     cancel: 'বাতিল করুন',
     changesNotSaved:
       'আপনার পরিবর্তনগুলি সংরক্ষণ করা হয়নি। আপনি যদি এখন চলে যান, তাহলে আপনার পরিবর্তনগুলি হারিয়ে যাবে।',
+    checked: 'পরীক্ষিত',
     clear:
       'মূল পাঠের অর্থ সম্মান করুন পেলোড প্রসঙ্গে। এখানে পেলোড নির্দিষ্ট বিশেষ অর্থ বহন করে এরকম একটি সাধারণ টার্মের তালিকা:\n    - সংগ্রহ',
     clearAll: 'সমস্ত সাফ করুন',
@@ -450,6 +451,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} ট্র্যাশে মুভ করা হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
+    unchecked: 'অচিহ্নিত',
     unlock: 'আনলক করুন',
     unsavedChanges:
       'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। চালিয়ে যাওয়ার আগে সংরক্ষণ করুন বা বাতিল করুন।',

@@ -54,7 +54,7 @@ export const Text: TextFieldDiffClientComponent = ({
   nestingLevel,
   versionValue: valueTo,
 }) => {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   let placeholder = ''
 
@@ -62,8 +62,7 @@ export const Text: TextFieldDiffClientComponent = ({
     placeholder = `<span class="html-diff-no-value"></span>`
   }
 
-  // TODO: translate 'No value'
-  const NoValue = <div className="diff-no-value">No value</div>
+  const NoValue = <div className="diff-no-value">{t('general:noValue')}</div>
 
   const formattedValueFrom = formatValue(valueFrom)
   const formattedValueTo = formatValue(valueTo)

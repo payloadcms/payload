@@ -81,8 +81,7 @@ export const HasManyUploadDiff: React.FC<{
   let From: React.ReactNode = ''
   let To: React.ReactNode = ''
 
-  // TODO: translate 'No value'
-  const NoValue = <div className="diff-no-value">No value</div>
+  const NoValue = <div className="diff-no-value">{i18n.t('general:noValue')}</div>
 
   const hasFrom = valueFrom && valueFrom.length > 0
   const hasTo = valueTo && valueTo.length > 0
@@ -215,8 +214,7 @@ export const SingleUploadDiff: React.FC<{
   let From: React.ReactNode = ''
   let To: React.ReactNode = ''
 
-  // TODO: translate 'No value'
-  const NoValue = <div className="diff-no-value">No value</div>
+  const NoValue = <div className="diff-no-value">{i18n.t('general:noValue')}</div>
 
   const FromComponent = valueFrom ? (
     <UploadDocumentDiff

@@ -157,8 +157,7 @@ export const SingleRelationshipDiff: React.FC<{
     />
   ) : null
 
-  // TODO: translate 'No value'
-  const NoValue = <div className="diff-no-value">No value</div>
+  const NoValue = <div className="diff-no-value">{i18n.t('general:noValue')}</div>
 
   let From: React.ReactNode = NoValue
   let To: React.ReactNode = NoValue
@@ -267,8 +266,7 @@ const ManyRelationshipDiff: React.FC<{
       />
     ))
 
-  // TODO: translate 'No value'
-  const NoValue = <div className="diff-no-value">No value</div>
+  const NoValue = <div className="diff-no-value">{i18n.t('general:noValue')}</div>
 
   const hasFrom = fromArr.length > 0
   const hasTo = toArr.length > 0

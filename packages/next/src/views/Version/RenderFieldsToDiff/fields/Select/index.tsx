@@ -65,13 +65,12 @@ const getTranslatedOptions = (options: Option | Option[], i18n: I18nClient): str
 
 export const Select: SelectFieldDiffClientComponent = ({
   comparisonValue: valueFrom,
-  diffMethod,
   field,
   locale,
   nestingLevel,
   versionValue: valueTo,
 }) => {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const options = 'options' in field && field.options
 
@@ -91,8 +90,7 @@ export const Select: SelectFieldDiffClientComponent = ({
         )
       : ''
 
-  // TODO: translate 'No value'
-  const NoValue = <div className="diff-no-value">No value</div>
+  const NoValue = <div className="diff-no-value">{t('general:noValue')}</div>
 
   const { From, To } = getHTMLDiffComponents({
     fromHTML: renderedValueFrom ? '<p>' + escapeDiffHTML(renderedValueFrom) + '</p>' : '<p></p>',

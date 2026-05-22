@@ -242,6 +242,7 @@ export const myTranslations: DefaultTranslationsObject = {
     cancel: 'မလုပ်တော့ပါ။',
     changesNotSaved:
       'သင်၏ပြောင်းလဲမှုများကို မသိမ်းဆည်းရသေးပါ။ ယခု စာမျက်နှာက ထွက်လိုက်ပါက သင်၏ပြောင်းလဲမှုများ အကုန် ဆုံးရှုံးသွားပါမည်။ အကုန်နော်။',
+    checked: 'စစ်ဆေးပြီး',
     clear: 'Jelas',
     clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
     close: 'ပိတ်',
@@ -450,6 +451,7 @@ export const myTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} သို့ ဖယ်ရှားလိုက်သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
+    unchecked: 'မစစ်ဆေးရသေးပါ',
     unlock: 'ဖွင့်',
     unsavedChanges:
       'Anda mempunyai perubahan yang belum disimpan. Simpan atau buang sebelum meneruskan.',

@@ -241,6 +241,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     cancel: 'Отмена',
     changesNotSaved:
       'Ваши изменения не были сохранены. Если вы сейчас уйдете, то потеряете свои изменения.',
+    checked: 'Проверено',
     clear: 'Четкий',
     clearAll: 'Очистить все',
     close: 'Закрыть',
@@ -446,6 +447,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} перемещено в корзину.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
+    unchecked: 'Не отмечено',
     unlock: 'Разблокировать',
     unsavedChanges:
       'У вас есть несохраненные изменения. Сохраните или отмените их перед продолжением.',

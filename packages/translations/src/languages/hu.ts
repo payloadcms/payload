@@ -243,6 +243,7 @@ export const huTranslations: DefaultTranslationsObject = {
     cancel: 'Mégsem',
     changesNotSaved:
       'A módosítások nem lettek mentve. Ha most távozik, elveszíti a változtatásokat.',
+    checked: 'Ellenőrizve',
     clear: 'Tiszta',
     clearAll: 'Törölj mindent',
     close: 'Bezárás',
@@ -449,6 +450,7 @@ export const huTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} átkerült a szemeteskukába.',
     true: 'Igaz',
     unauthorized: 'Jogosulatlan',
+    unchecked: 'Nincs bejelölve',
     unlock: 'Feloldás',
     unsavedChanges: 'Vannak mentetlen változtatásai. Mentsen vagy dobja el mielőtt folytatja.',
     unsavedChangesDuplicate: 'Nem mentett módosításai vannak. Szeretné folytatni a duplikációt?',

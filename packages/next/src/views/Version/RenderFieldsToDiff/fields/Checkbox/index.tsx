@@ -36,7 +36,7 @@ export const Checkbox: CheckboxFieldDiffClientComponent = ({
   nestingLevel,
   versionValue: valueTo,
 }) => {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const checkedFrom = Boolean(valueFrom)
   const checkedTo = Boolean(valueTo)
@@ -49,7 +49,7 @@ export const Checkbox: CheckboxFieldDiffClientComponent = ({
     <div className={`${baseClass}__value ${baseClass}__value--${fromVariant}`}>
       <CheckboxIndicator checked={checkedFrom} variant={fromVariant} />
       <span className={`${baseClass}__label ${baseClass}__label--${fromVariant}`}>
-        {checkedFrom ? 'Checked' : 'Unchecked'}
+        {checkedFrom ? t('general:checked') : t('general:unchecked')}
       </span>
     </div>
   )
@@ -58,7 +58,7 @@ export const Checkbox: CheckboxFieldDiffClientComponent = ({
     <div className={`${baseClass}__value ${baseClass}__value--${toVariant}`}>
       <CheckboxIndicator checked={checkedTo} variant={toVariant} />
       <span className={`${baseClass}__label ${baseClass}__label--${toVariant}`}>
-        {checkedTo ? 'Checked' : 'Unchecked'}
+        {checkedTo ? t('general:checked') : t('general:unchecked')}
       </span>
     </div>
   )
