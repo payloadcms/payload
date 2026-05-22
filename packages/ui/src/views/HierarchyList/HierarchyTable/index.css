@@ -41,7 +41,7 @@
     text-decoration: none;
     background: none;
     border: none;
-    padding: var(--spacer-2) var(--spacer-2-5);
+    padding: var(--spacer-2) 0;
     padding-inline-start: var(--spacer-2);
     font: inherit;
     cursor: pointer;

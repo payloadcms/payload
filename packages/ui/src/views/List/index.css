@@ -39,9 +39,9 @@
     overflow: auto;
   }
 
-  .collection-list .table table [class^='cell']:not(.cell-title):not(.cell-name) > p,
-  .collection-list .table table [class^='cell']:not(.cell-title):not(.cell-name) > span,
-  .collection-list .table table [class^='cell']:not(.cell-title):not(.cell-name) > a {
+  .collection-list .table table [class^='cell']:not(.cell--linked) > p,
+  .collection-list .table table [class^='cell']:not(.cell--linked) > span,
+  .collection-list .table table [class^='cell']:not(.cell--linked) > a {
     line-clamp: 4;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
