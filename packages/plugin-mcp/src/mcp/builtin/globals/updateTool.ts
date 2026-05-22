@@ -1,4 +1,5 @@
 import type { SelectType } from 'payload'
+
 import { z } from 'zod'
 
 import { defineGlobalTool } from '../../../defineTool.js'
@@ -14,12 +15,17 @@ const DEFAULT_DESCRIPTION = 'Update a Payload global singleton configuration.'
 
 export const updateGlobalTool = defineGlobalTool({
   description: DEFAULT_DESCRIPTION,
-  input: ({ globalSchema }) =>
-    z.object({
+  input: ({ globalSchema }) => {
+    const partialSchema = prepareCollectionSchema(globalSchema)
+    // Global updates do not require all required fields to be passed => delete .required.
+    //
+    // Local API equivalent: packages/payload/src/global/operations/local/update.ts#BaseOptions#data:
+    // data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
+    delete partialSchema.required
+
+    return z.object({
       data: z
-        .fromJSONSchema(
-          prepareCollectionSchema(globalSchema) as unknown as z.core.JSONSchema.JSONSchema,
-        )
+        .fromJSONSchema(partialSchema as unknown as z.core.JSONSchema.JSONSchema)
         .describe('The fields to update'),
       depth: z
         .number()
@@ -47,7 +53,8 @@ export const updateGlobalTool = defineGlobalTool({
           'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"siteName": "My Site"}\'',
         )
         .optional(),
-    }),
+    })
+  },
 }).handler(async ({ authorizedMCP, globalSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
