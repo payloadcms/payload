@@ -16,6 +16,8 @@ export const draftWithMaxCollectionSlug = 'draft-with-max-posts'
 
 export const draftWithChangeHookCollectionSlug = 'draft-posts-with-change-hook'
 
+export const draftWithImmutableFieldCollectionSlug = 'draft-with-immutable-field'
+
 export const postCollectionSlug = 'posts'
 
 export const diffCollectionSlug = 'diff'

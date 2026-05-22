@@ -14,6 +14,7 @@ import DraftPosts from './collections/Drafts.js'
 import DraftsNoReadVersions from './collections/DraftsNoReadVersions.js'
 import DraftWithChangeHook from './collections/DraftsWithChangeHook.js'
 import DraftsWithCustomUnpublish from './collections/DraftsWithCustomUnpublish.js'
+import DraftsWithImmutableField from './collections/DraftsWithImmutableField.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
 import DraftsWithValidate from './collections/DraftsWithValidate.js'
 import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
@@ -54,6 +55,7 @@ export default buildConfigWithDefaults({
     DraftsNoReadVersions,
     DraftWithMax,
     DraftWithChangeHook,
+    DraftsWithImmutableField,
     DraftsWithCustomUnpublish,
     DraftsWithValidate,
     ErrorOnUnpublish,

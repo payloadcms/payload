@@ -316,11 +316,19 @@ export const promise = async <T>({
       }
     }
 
-    // Execute access control
-    if (field.access && field.access[operation]) {
+    // Execute access control.
+    //
+    // During `restoreVersion`, look up `field.access.restoreVersion` rather than
+    // `field.access.update`. By default that key is undefined → no per-field enforcement,
+    // which is correct for snapshot replay (already gated by collection-level access).
+    // Authors can opt back in to per-field gating on restore by defining the key.
+    const accessKey = req.context?.isRestoringVersion ? 'restoreVersion' : operation
+    const accessFn = field.access?.[accessKey]
+
+    if (accessFn) {
       const result = overrideAccess
         ? true
-        : await field.access[operation]({
+        : await accessFn({
             id,
             blockData,
             data: data as Partial<T>,

@@ -26,6 +26,7 @@ import {
   draftCollectionSlug,
   draftGlobalSlug,
   draftUnlimitedGlobalSlug,
+  draftWithImmutableFieldCollectionSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   versionCollectionSlug,
@@ -949,6 +950,85 @@ describe('Versions', () => {
         // Block sub-fields should NOT have leaked either
         expect(restored.blocksField?.[0]!.localized).toBeFalsy()
         expect(restored.blocksField?.[0]!.text).toBe('original-text')
+      })
+
+      it('should restore a version when a required field has field-level update access denying writes', async () => {
+        const doc = await payload.create({
+          collection: draftWithImmutableFieldCollectionSlug,
+          data: {
+            immutable: 'set-on-create',
+            title: 'v1',
+          },
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          collection: draftWithImmutableFieldCollectionSlug,
+          id: doc.id,
+          data: { title: 'v2' },
+          overrideAccess: true,
+        })
+
+        const { docs: versions } = await payload.findVersions({
+          collection: draftWithImmutableFieldCollectionSlug,
+          sort: '-createdAt',
+          where: { parent: { equals: doc.id } },
+          overrideAccess: true,
+        })
+
+        const originalVersion = versions[versions.length - 1]
+
+        const restored = await payload.restoreVersion({
+          collection: draftWithImmutableFieldCollectionSlug,
+          id: originalVersion!.id,
+          overrideAccess: false,
+          user,
+        })
+
+        expect(restored.title).toBe('v1')
+        expect(restored.immutable).toBe('set-on-create')
+      })
+
+      it('should honor field.access.restoreVersion when authors opt in to per-field gating on restore', async () => {
+        const doc = await payload.create({
+          collection: draftWithImmutableFieldCollectionSlug,
+          data: {
+            immutable: 'set-on-create',
+            restoreGated: 'v1-gated',
+            title: 'v1',
+          },
+          overrideAccess: true,
+        })
+
+        await payload.update({
+          collection: draftWithImmutableFieldCollectionSlug,
+          id: doc.id,
+          data: { restoreGated: 'v2-gated', title: 'v2' },
+          overrideAccess: true,
+        })
+
+        const { docs: versions } = await payload.findVersions({
+          collection: draftWithImmutableFieldCollectionSlug,
+          sort: '-createdAt',
+          where: { parent: { equals: doc.id } },
+          overrideAccess: true,
+        })
+
+        const originalVersion = versions[versions.length - 1]
+
+        const restored = await payload.restoreVersion({
+          collection: draftWithImmutableFieldCollectionSlug,
+          id: originalVersion!.id,
+          overrideAccess: false,
+          user,
+        })
+
+        // Title rolls back normally. `restoreGated` was stripped from the snapshot
+        // by its `restoreVersion: () => false` access fn before persisting, so the
+        // db update doesn't touch that column and the current value ('v2-gated')
+        // remains — mirroring how `update: () => false` skips writes on normal updates.
+        expect(restored.title).toBe('v1')
+        expect(restored.restoreGated).toBe('v2-gated')
       })
     })
 

@@ -486,6 +486,7 @@ export interface FieldBase {
   access?: {
     create?: FieldAccess
     read?: FieldAccess
+    restoreVersion?: FieldAccess
     update?: FieldAccess
   }
   admin?: FieldAdmin
