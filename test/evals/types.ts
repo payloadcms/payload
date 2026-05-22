@@ -14,6 +14,7 @@ export type EvalCategory =
   | 'development'
   | 'fields'
   | 'graphql'
+  | 'hooks'
   | 'jobs'
   | 'local-api'
   | 'migrations'
