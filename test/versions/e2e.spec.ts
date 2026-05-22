@@ -26,9 +26,6 @@ import type { BrowserContext, Dialog, Page } from '@playwright/test'
 import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
-import { postsCollectionSlug } from '../admin/slugs.js'
 import mongoose from 'mongoose'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
@@ -38,6 +35,7 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Diff } from './payload-types.js'
 
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
@@ -51,10 +49,12 @@ import {
 } from '../__helpers/e2e/helpers.js'
 import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { postsCollectionSlug } from '../admin/slugs.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { draftWithCustomUnpublishSlug } from './collections/DraftsWithCustomUnpublish.js'
 import { BASE_PATH } from './shared.js'
@@ -2304,8 +2304,8 @@ describe('Versions', () => {
 
       const checkbox = page.locator('[data-field-path="checkbox"]')
 
-      await expect(checkbox.locator('.html-diff__diff-old')).toHaveText('true')
-      await expect(checkbox.locator('.html-diff__diff-new')).toHaveText('false')
+      await expect(checkbox.locator('.checkbox-diff__label--delete')).toHaveText('Checked')
+      await expect(checkbox.locator('.checkbox-diff__label--create')).toHaveText('Unchecked')
     })
 
     test('correctly renders diff for code fields', async () => {
@@ -2437,7 +2437,7 @@ describe('Versions', () => {
 
       const zeroDepthRelationship = page.locator('[data-field-path="zeroDepthRelationship"]')
 
-      await expect(zeroDepthRelationship.locator('.html-diff__diff-old')).toBeEmpty()
+      await expect(zeroDepthRelationship.locator('.diff-no-value')).toHaveText('No value')
       await expect(
         zeroDepthRelationship.locator('.html-diff__diff-new .relationship-diff__info'),
       ).toHaveText('dev@payloadcms.com')

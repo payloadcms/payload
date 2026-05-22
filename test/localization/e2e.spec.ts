@@ -1,22 +1,16 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import type { GeneratedTypes } from '../__helpers/shared/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
-import { addBlock } from '../__helpers/e2e/fields/blocks/addBlock.js'
-import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
-import { openDocControls } from '../__helpers/e2e/openDocControls.js'
-import { upsertPreferences } from '../__helpers/e2e/preferences.js'
-import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
-import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
-import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
+import type { GeneratedTypes } from '../__helpers/shared/sdk/types.js'
 import type { Config, LocalizedPost } from './payload-types.js'
 
+import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
+import { addBlock } from '../__helpers/e2e/fields/blocks/addBlock.js'
 import {
   changeLocale,
   closeAllToasts,
@@ -29,6 +23,12 @@ import {
   throttleTest,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
+import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { upsertPreferences } from '../__helpers/e2e/preferences.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
@@ -934,7 +934,7 @@ describe('Localization', () => {
         await page.goto(urlAllFieldsLocalized.versions(docID))
 
         const firstRow = page.locator('tbody tr').first()
-        await expect(firstRow.locator('.pill__label span')).toHaveText('Currently Published')
+        await expect(firstRow.locator('.status-cell span')).toHaveText('Currently Published')
       })
 
       test('should only show published status when viewing the published locale', async () => {
@@ -961,7 +961,7 @@ describe('Localization', () => {
         await changeLocale(page, defaultLocale)
 
         const firstRow = page.locator('tbody tr').first()
-        await expect(firstRow.locator('.pill__label span')).toHaveText('Current Draft')
+        await expect(firstRow.locator('.status-cell span')).toHaveText('Current Draft')
       })
     })
   })
