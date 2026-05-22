@@ -142,6 +142,8 @@ After fixing, report:
 
 ### Elevation Tokens (Box Shadows)
 
+Defined in `packages/ui/src/css/elevations.css`.
+
 **Never use hardcoded `rgba()` for box-shadows.** Use elevation tokens instead:
 
 | Token                          | Use Case                          |
