@@ -21,13 +21,6 @@ import { seed } from './seed/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-/**
- * Used by int.spec.ts to verify the MCP event callback was invoked. The runtime
- * doesn't have an event hook yet — kept as a stable export so the spec imports
- * don't break while that feature lands.
- */
-export const capturedMcpEvents: unknown[] = []
-
 export default buildConfigWithDefaults({
   endpoints: [
     {
