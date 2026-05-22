@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { EyeIcon } from '../../../icons/Eye/index.js'
+import { PreviewIcon } from '../../../icons/Preview/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
@@ -23,7 +23,7 @@ export const LivePreviewToggler: React.FC = () => {
       aria-label={label}
       buttonStyle="ghost"
       className={[baseClass, isLivePreviewing && `${baseClass}--active`].filter(Boolean).join(' ')}
-      icon={<EyeIcon active={isLivePreviewing} />}
+      icon={<PreviewIcon active={isLivePreviewing} />}
       id="live-preview-toggler"
       onClick={() => {
         setIsLivePreviewing(!isLivePreviewing)
