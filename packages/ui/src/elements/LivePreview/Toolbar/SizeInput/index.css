@@ -1,10 +1,10 @@
 @layer payload-default {
   .toolbar-input {
-    width: 4.5rem;
+    width: calc(var(--spacer-4) * 3);
     height: var(--spacer-4);
     display: flex;
     align-items: center;
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
     background: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
     font-size: var(--text-body-medium-font-size, 0.6875rem);
@@ -12,8 +12,8 @@
     color: var(--color-text);
 
     &:focus {
-      outline: 1px solid var(--accessibility-focus-color);
-      outline-offset: -1px;
+      outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
+      outline-offset: calc(var(--stroke-width-small) * -1);
     }
   }
 }

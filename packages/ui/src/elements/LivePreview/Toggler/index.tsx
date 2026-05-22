@@ -4,7 +4,7 @@ import { EyeIcon } from '../../../icons/Eye/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'live-preview-toggler'
 
