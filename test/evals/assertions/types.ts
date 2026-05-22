@@ -11,6 +11,7 @@
 export type CollectionHookName =
   | 'afterChange'
   | 'afterDelete'
+  | 'afterError'
   | 'afterForgotPassword' // auth-enabled collections
   | 'afterLogin' // auth-enabled collections
   | 'afterLogout' // auth-enabled collections

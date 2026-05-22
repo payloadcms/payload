@@ -35,7 +35,7 @@ Full hook family — all available on `CollectionConfig.hooks`:
 
 | Hook              | Operation(s)   | Runs                                                 |
 | ----------------- | -------------- | ---------------------------------------------------- |
-| `beforeOperation` | all            | Before operation args are processed                  |
+| `beforeOperation` | all            | Wraps the operation; return modified args            |
 | `beforeValidate`  | create, update | Before server-side validation; after client validate |
 | `beforeChange`    | create, update | After validation; before write                       |
 | `afterChange`     | create, update | After write                                          |
@@ -43,7 +43,6 @@ Full hook family — all available on `CollectionConfig.hooks`:
 | `afterRead`       | find, findByID | Last step before return                              |
 | `beforeDelete`    | delete         | Before delete; return discarded                      |
 | `afterDelete`     | delete         | After delete; return discarded                       |
-| `beforeOperation` | all            | Wraps the operation; return modified args            |
 | `afterOperation`  | all            | After operation completes; return modified result    |
 | `afterError`      | all            | After any error on this collection                   |
 
@@ -61,6 +60,62 @@ export const Posts: CollectionConfig = {
     afterDelete: [async ({ req, id, doc }) => {}],
     afterOperation: [async ({ result, operation }) => result],
     afterError: [async ({ error, req, result }) => result],
+  },
+}
+```
+
+### Common patterns
+
+Real-world hook bodies demonstrating the most frequent use cases:
+
+```ts
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  hooks: {
+    // Normalise slug from title on create
+    beforeValidate: [
+      async ({ data, operation }) => {
+        if (operation === 'create') {
+          data.slug = slugify(data.title)
+        }
+        return data
+      },
+    ],
+
+    // Stamp publishedAt when status flips to published
+    beforeChange: [
+      async ({ data, req, operation, originalDoc }) => {
+        if (operation === 'update' && data.status === 'published') {
+          data.publishedAt = new Date()
+        }
+        return data
+      },
+    ],
+
+    // Send notification on first publish
+    afterChange: [
+      async ({ doc, req, operation, previousDoc }) => {
+        if (operation === 'create') {
+          await sendNotification(doc)
+        }
+        return doc
+      },
+    ],
+
+    // Attach real-time view count (virtual field)
+    afterRead: [
+      async ({ doc, req }) => {
+        doc.viewCount = await getViewCount(doc.id)
+        return doc
+      },
+    ],
+
+    // Clean up related data before deletion
+    beforeDelete: [
+      async ({ req, id }) => {
+        await cleanupRelatedData(id)
+      },
+    ],
   },
 }
 ```

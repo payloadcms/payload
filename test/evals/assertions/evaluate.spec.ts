@@ -520,6 +520,20 @@ describe('existing kinds still work', () => {
     ).toEqual([])
   })
 
+  it('collectionHook supports afterError (collection-level)', () => {
+    const source = `
+      import { buildConfig } from 'payload'
+      export default buildConfig({
+        collections: [
+          { slug: 'posts', fields: [], hooks: { afterError: [async () => {}] } },
+        ],
+      })
+    `
+    expect(
+      evaluateAssertions(source, [{ kind: 'collectionHook', slug: 'posts', hook: 'afterError' }]),
+    ).toEqual([])
+  })
+
   it('collectionAccess', () => {
     const src = wrap(`
       collections: [{
