@@ -25,7 +25,7 @@ export const getClientUploadRoute =
         body,
         onBeforeGenerateToken: async (_pathname: string, collectionSlug: null | string) => {
           if (!collectionSlug) {
-            throw new APIError('No payload was provided')
+            throw new APIError(req.t ? req.t('error:noPayloadProvided') : 'No payload was provided')
           }
 
           if (!(await access({ collectionSlug, req }))) {
@@ -45,6 +45,10 @@ export const getClientUploadRoute =
       return Response.json(jsonResponse)
     } catch (error) {
       req.payload.logger.error(error)
-      throw new APIError('storage-vercel-blob client upload route error')
+      throw new APIError(
+        req.t
+          ? req.t('error:vercelBlobUploadError')
+          : 'storage-vercel-blob client upload route error',
+      )
     }
   }

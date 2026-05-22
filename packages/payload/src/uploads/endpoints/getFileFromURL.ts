@@ -24,7 +24,12 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
   const config = collection?.config
 
   if (!config.upload?.pasteURL) {
-    throw new APIError('Pasting from URL is not enabled for this collection.', 400)
+    throw new APIError(
+      req.t
+        ? req.t('error:pastingFromURLNotEnabled')
+        : 'Pasting from URL is not enabled for this collection.',
+      400,
+    )
   }
 
   if (id) {
@@ -42,14 +47,17 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
   }
 
   if (!req.url) {
-    throw new APIError('Request URL is missing.', 400)
+    throw new APIError(req.t ? req.t('error:requestURLMissing') : 'Request URL is missing.', 400)
   }
 
   const { searchParams } = new URL(req.url)
   const src = searchParams.get('src')
 
   if (!src || typeof src !== 'string') {
-    throw new APIError('A valid URL string is required.', 400)
+    throw new APIError(
+      req.t ? req.t('error:validURLRequired') : 'A valid URL string is required.',
+      400,
+    )
   }
 
   const hasAllowList =
@@ -59,11 +67,17 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
   try {
     fileURL = new URL(src).href
   } catch {
-    throw new APIError('A valid URL string is required.', 400)
+    throw new APIError(
+      req.t ? req.t('error:validURLRequired') : 'A valid URL string is required.',
+      400,
+    )
   }
 
   if (hasAllowList && !isURLAllowed(fileURL, config.upload.pasteURL.allowList)) {
-    throw new APIError('The provided URL is not allowed.', 400)
+    throw new APIError(
+      req.t ? req.t('error:urlNotAllowed') : 'The provided URL is not allowed.',
+      400,
+    )
   }
 
   let redirectCount = 0
@@ -90,13 +104,16 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
     if (response.status >= 300 && response.status < 400) {
       redirectCount++
       if (redirectCount > maxRedirects) {
-        throw new APIError('Too many redirects.', 403)
+        throw new APIError(req.t ? req.t('error:tooManyRedirects') : 'Too many redirects.', 403)
       }
       const location = response.headers.get('location')
       if (location) {
         fileURL = new URL(location, fileURL).href
         if (hasAllowList && !isURLAllowed(fileURL, config.upload.pasteURL.allowList)) {
-          throw new APIError('The provided URL is not allowed.', 400)
+          throw new APIError(
+            req.t ? req.t('error:urlNotAllowed') : 'The provided URL is not allowed.',
+            400,
+          )
         }
         continue
       }
@@ -106,7 +123,12 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
   }
 
   if (!response.ok) {
-    throw new APIError('Failed to fetch the file from the provided URL.', response.status)
+    throw new APIError(
+      req.t
+        ? req.t('error:failedToFetchFromURL')
+        : 'Failed to fetch the file from the provided URL.',
+      response.status,
+    )
   }
 
   const rawFileName = decodeURIComponent(new URL(fileURL).pathname.split('/').pop() || '')

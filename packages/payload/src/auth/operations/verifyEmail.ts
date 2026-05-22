@@ -22,7 +22,10 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
     throw new Forbidden(req.t)
   }
   if (!Object.prototype.hasOwnProperty.call(args, 'token')) {
-    throw new APIError('Missing required data.', httpStatus.BAD_REQUEST)
+    throw new APIError(
+      req.t ? req.t('error:missingRequiredData') : 'Missing required data.',
+      httpStatus.BAD_REQUEST,
+    )
   }
 
   try {
@@ -43,7 +46,10 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
     })
 
     if (!user) {
-      throw new APIError('Verification token is invalid.', httpStatus.FORBIDDEN)
+      throw new APIError(
+        req.t ? req.t('error:verificationTokenInvalid') : 'Verification token is invalid.',
+        httpStatus.FORBIDDEN,
+      )
     }
 
     // Ensure updatedAt date is always updated

@@ -25,7 +25,7 @@ export const getTenantOptionsEndpoint = <ConfigType>({
     const { payload, user } = req
 
     if (!user) {
-      throw new APIError('Unauthorized', 401)
+      throw new APIError(req.t ? req.t('error:unauthorized') : 'Unauthorized', 401)
     }
 
     const tenantOptions = await getTenantOptions({

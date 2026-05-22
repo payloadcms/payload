@@ -49,7 +49,7 @@ export const getClientUploadRoute = ({
         const collectionSlug = req.searchParams.get('collectionSlug')
 
         if (!collectionSlug) {
-          throw new APIError('No payload was provided')
+          throw new APIError(req.t ? req.t('error:noPayloadProvided') : 'No payload was provided')
         }
 
         if (!(await access({ collectionSlug, req }))) {
