@@ -35,29 +35,9 @@ const existsQuery: Where = { image: { exists: true } }
 // Near (point fields) — order: longitude, latitude, maxDistance (m), minDistance (m)
 const nearQuery: Where = { location: { near: '-122.4194,37.7749,10000,0' } }
 
-// Within — GeoJSON polygon (point fields only)
-const withinQuery: Where = {
-  location: {
-    within: {
-      type: 'Polygon',
-      coordinates: [
-        /* GeoJSON ring */
-      ],
-    },
-  },
-}
-
-// Intersects — GeoJSON geometry (point fields only)
-const intersectsQuery: Where = {
-  location: {
-    intersects: {
-      type: 'Polygon',
-      coordinates: [
-        /* GeoJSON ring */
-      ],
-    },
-  },
-}
+// Within / Intersects — GeoJSON polygon (point fields only)
+// within: { type: 'Polygon', coordinates: [[...]] }
+// intersects: { type: 'Polygon', coordinates: [[...]] }
 ```
 
 > `all` is MongoDB-only. `within` / `intersects` require a Point field and a GeoJSON geometry object.
@@ -290,6 +270,26 @@ export const logoutAction = () => logout({ allSessions: true, config })
 export const refreshAction = () => refresh({ config })
 ```
 
+### Standalone Scripts (`payload run`)
+
+Run TypeScript files with the Local API outside Next.js — seeders, one-off transforms, manual migrations.
+
+```ts
+// scripts/seed.ts — see docs/local-api/outside-nextjs.mdx
+import { getPayload } from 'payload'
+import config from '@payload-config'
+const payload = await getPayload({ config })
+await payload.create({ collection: 'posts', data: { title: 'Hello' } })
+```
+
+```sh
+pnpm payload run scripts/seed.ts
+# --use-swc       use SWC instead of tsx (requires @swc-node/register)
+# --disable-transpile  skip transpilation (pre-compiled JS or bun runtime)
+```
+
+Loads `.env` the same way Next.js does — no `dotenv` needed.
+
 ### Threading req Parameter
 
 When performing operations in hooks or nested operations, pass the `req` parameter to maintain transaction context:
@@ -460,7 +460,7 @@ const res = await fetch(`/api/posts`, {
 
 ### Payload REST SDK
 
-Type-safe REST client (`@payloadcms/sdk`) — mirrors the Local API interface but over HTTP. Usage is identical to the Local API (`sdk.find`, `sdk.findByID`, `sdk.create`, `sdk.update`, `sdk.delete`, `sdk.findVersions`, etc.). Pass the generated `Config` type as a generic for full type safety. **Currently in beta.**
+Type-safe REST client (`@payloadcms/sdk`, **beta**) — mirrors the Local API interface over HTTP. Pass the generated `Config` type for full type safety.
 
 ```ts
 import { PayloadSDK } from '@payloadcms/sdk'
