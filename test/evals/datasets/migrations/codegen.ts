@@ -3,10 +3,14 @@ import type { CodegenEvalCase } from '../../types.js'
 /**
  * Migrations eval cases.
  *
- * Note on AST assertions: the assertion catalog covers collections, fields,
- * hooks, and access — not collection-level config properties like `versions`.
- * Cases involving `versions` rely on the OpenAI scorer rather than AST checks.
- * See MIGRATIONS.md for the deferred-cases rationale.
+ * NOTE for downstream task implementers:
+ * Only include assertions that the LLM must actively produce — never assertions
+ * already satisfied by the starter fixture (those are false signal). When no
+ * AST assertion kind applies, leave `assertions: []` and rely on the scorer.
+ *
+ * The assertion catalog covers collections, fields, hooks, and access — not
+ * collection-level config properties like `versions`. Cases involving `versions`
+ * rely on the OpenAI scorer rather than AST checks.
  */
 export const migrationsCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
@@ -19,8 +23,8 @@ export const migrationsCodegenDataset: CodegenEvalCase[] = [
       'versions property on the posts collection set to { drafts: true } — enabling draft support and the _status field',
     category: 'migrations',
     fixturePath: 'migrations/codegen/enable-drafts-posts',
-    // versions is a collection-level property, not a field — only collectionExists is assertable
-    assertions: [{ kind: 'collectionExists', slug: 'posts' }],
+    // No AST assertion kind covers collection-level `versions` config — scorer carries the load.
+    assertions: [],
   },
   {
     input:
@@ -41,6 +45,7 @@ export const migrationsCodegenDataset: CodegenEvalCase[] = [
       'versions property on posts changed from `versions: true` to `versions: { drafts: true }` to correctly enable draft support and the _status field',
     category: 'migrations',
     fixturePath: 'migrations/codegen/fix-missing-versions-config',
-    assertions: [{ kind: 'collectionExists', slug: 'posts' }],
+    // No AST assertion kind covers collection-level `versions` config — scorer carries the load.
+    assertions: [],
   },
 ]

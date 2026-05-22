@@ -13,12 +13,6 @@ export default buildConfig({
           type: 'text',
           required: true,
         },
-        {
-          name: 'status',
-          type: 'select',
-          options: ['draft', 'published'],
-          defaultValue: 'draft',
-        },
       ],
     },
     {
