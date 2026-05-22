@@ -239,6 +239,8 @@ For each violation:
 - Value is intentional (e.g., `1px` border, `0`)
 - Ambiguous replacement
 
+**Empty CSS files:** If a component's CSS file becomes empty after migration (all styles now handled by shared components like `Button`), delete the CSS file and remove its import from the component.
+
 ---
 
 ## Output Format
