@@ -399,6 +399,7 @@ export const deTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Dauerhaft löschen',
     permanentlyDeletedCountSuccessfully: '{{count}} {{label}} erfolgreich dauerhaft gelöscht.',
     perPage: 'Pro Seite: {{limit}}',
+    perPageLabel: 'Pro Seite:',
     previous: 'Vorherige',
     reindex: 'Neuindizieren',
     reindexingAll: 'Alle {{collections}} werden neu indiziert.',

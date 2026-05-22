@@ -313,6 +313,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               )}
               {AfterListTable}
+              {AfterList}
               {docs?.length > 0 && !isGroupingBy && (
                 <PageControls
                   AfterPageControls={
@@ -342,7 +343,6 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               )}
             </Gutter>
-            {AfterList}
           </SelectionProvider>
         </div>
       </TableColumnsProvider>

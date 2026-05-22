@@ -153,10 +153,6 @@
   }
 
   @media (max-width: 768px) {
-    .app-header__localizer.localizer {
-      right: var(--spacer-6);
-    }
-
     .app-header--nav-open .app-header__localizer {
       display: none;
     }

@@ -392,6 +392,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Permanent slett',
     permanentlyDeletedCountSuccessfully: 'Permanent slettet {{count}} {{label}} med suksess.',
     perPage: 'Per side: {{limit}}',
+    perPageLabel: 'Per side:',
     previous: 'Forrige',
     reindex: 'Reindekser',
     reindexingAll: 'Reindekserer alle {{collections}}.',

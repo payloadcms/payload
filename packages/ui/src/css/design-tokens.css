@@ -2,20 +2,20 @@
   :root {
     /* Black (opacity-based) */
     --ramp-black-100: rgba(0, 0, 0, 0.05);
-    --ramp-black-200: rgba(0, 0, 0, 0.10);
-    --ramp-black-300: rgba(0, 0, 0, 0.20);
-    --ramp-black-400: rgba(0, 0, 0, 0.30);
-    --ramp-black-500: rgba(0, 0, 0, 0.50);
-    --ramp-black-600: rgba(0, 0, 0, 0.80);
-    --ramp-black-800: rgba(0, 0, 0, 0.90);
+    --ramp-black-200: rgba(0, 0, 0, 0.1);
+    --ramp-black-300: rgba(0, 0, 0, 0.2);
+    --ramp-black-400: rgba(0, 0, 0, 0.3);
+    --ramp-black-500: rgba(0, 0, 0, 0.5);
+    --ramp-black-600: rgba(0, 0, 0, 0.8);
+    --ramp-black-800: rgba(0, 0, 0, 0.9);
 
     /* White (opacity-based) */
     --ramp-white-100: rgba(255, 255, 255, 0.05);
-    --ramp-white-200: rgba(255, 255, 255, 0.10);
-    --ramp-white-400: rgba(255, 255, 255, 0.40);
-    --ramp-white-500: rgba(255, 255, 255, 0.70);
-    --ramp-white-600: rgba(255, 255, 255, 0.80);
-    --ramp-white-800: rgba(255, 255, 255, 0.90);
+    --ramp-white-200: rgba(255, 255, 255, 0.1);
+    --ramp-white-400: rgba(255, 255, 255, 0.4);
+    --ramp-white-500: rgba(255, 255, 255, 0.7);
+    --ramp-white-600: rgba(255, 255, 255, 0.8);
+    --ramp-white-800: rgba(255, 255, 255, 0.9);
     --ramp-white-1000: #ffffff;
 
     /* Blue */
