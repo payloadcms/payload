@@ -30,7 +30,13 @@ export type CollectionHookName =
 
 export type FieldHookName = 'afterChange' | 'afterRead' | 'beforeChange' | 'beforeValidate'
 
-export type AccessOperation = 'create' | 'delete' | 'read' | 'update'
+export type AccessOperation =
+  | 'create'
+  | 'delete'
+  | 'read'
+  | 'readVersions' // version-enabled collections
+  | 'unlock' // auth-enabled collections
+  | 'update'
 
 export type Assertion =
   | {

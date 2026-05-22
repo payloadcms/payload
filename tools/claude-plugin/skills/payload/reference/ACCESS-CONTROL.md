@@ -534,35 +534,14 @@ export const Users: CollectionConfig = {
 ```ts
 import type { Access } from 'payload'
 
-// Check if user is a project member before allowing access
-export const projectMemberAccess: Access = async ({ req, id }) => {
-  const { user, payload } = req
-
-  if (!user) return false
-  if (user.roles?.includes('admin')) return true
-
-  // Check if document exists and user is member
-  const project = await payload.findByID({
-    collection: 'projects',
-    id: id as string,
-    depth: 0,
-  })
-
-  return project.members?.includes(user.id)
-}
-
 // Prevent deletion if document has dependencies
 export const preventDeleteWithDependencies: Access = async ({ req, id }) => {
-  const { payload } = req
-
-  const dependencyCount = await payload.count({
+  if (!id) return true // Access Operation guard
+  const count = await req.payload.count({
     collection: 'related-items',
-    where: {
-      parent: { equals: id },
-    },
+    where: { parent: { equals: id } },
   })
-
-  return dependencyCount === 0
+  return count === 0
 }
 ```
 
@@ -649,6 +628,131 @@ access: {
 // doc: Current document
 // siblingData: Adjacent field values
 ```
+
+## Access Operation Context
+
+On login, Payload executes all access functions without a document reference — this is the **Access Operation**. During it, `id`, `data`, `siblingData`, `blockData`, and `doc` are all `undefined`. `Where` queries are also **not evaluated** (treated as denial). Guard before using any of these:
+
+```ts
+import type { Access } from 'payload'
+
+// ❌ crashes during Access Operation (id is undefined)
+export const byOwner: Access = ({ req: { user }, id }) => user?.id === id
+
+// ✅ guard first
+export const byOwner: Access = ({ req: { user }, id }) => {
+  if (!id) return Boolean(user) // Access Operation: allow if authenticated
+  return user?.id === id
+}
+```
+
+## Default Access Behavior
+
+When no access function is specified, Payload uses:
+
+```ts
+const defaultPayloadAccess = ({ req: { user } }) => Boolean(user)
+```
+
+`Boolean(undefined) === false`, `Boolean({...}) === true` — authenticated = allowed, unauthenticated = denied. This is also the canonical pattern for "must be logged in" checks.
+
+## `unlock` Access
+
+Auth-enabled collections only. Controls who can unlock accounts locked after too many failed login attempts:
+
+```ts
+export const Users: CollectionConfig = {
+  slug: 'users',
+  auth: true,
+  access: {
+    unlock: ({ req: { user } }) => user?.roles?.includes('admin'),
+  },
+  fields: [
+    { name: 'name', type: 'text' },
+    { name: 'roles', type: 'select', hasMany: true, options: ['admin', 'user'], saveToJWT: true },
+  ],
+}
+```
+
+## `readVersions` Access
+
+Version-enabled collections/globals only. Controls who can browse version history:
+
+```ts
+const adminOnly = ({ req: { user } }) => user?.roles?.includes('admin')
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  versions: { drafts: true },
+  access: {
+    read: () => true, // public reads current version
+    readVersions: adminOnly, // only admins see version history
+  },
+  fields: [{ name: 'title', type: 'text' }],
+}
+```
+
+> **Note:** A `Where` query from `readVersions` applies to the internal versions collection (`_posts_v`), not the originals.
+
+## Drafts Update Access — Controlling Who Can Publish
+
+Inspect `data._status` to restrict who can publish drafts:
+
+```ts
+export const updatePostAccess: Access = ({ req: { user }, data }) => {
+  if (!user) return false
+  // data may be undefined during Access Operation — always use ?.
+  if (data?._status === 'published' && !user.roles?.includes('admin')) return false
+  return true
+}
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  versions: { drafts: true },
+  access: { update: updatePostAccess },
+  fields: [{ name: 'title', type: 'text' }],
+}
+```
+
+## Trash Discrimination — Soft Delete vs Permanent Delete
+
+For Trash-enabled collections, `delete` access receives a `data` argument. Check `data.deletedAt` to tell trash from permanent deletion:
+
+```ts
+// Anyone can trash (soft-delete); only admins can permanently delete
+export const deletePostAccess: Access = ({ req: { user }, data }) => {
+  if (!user) return false
+  // data?.deletedAt is set when trashing; absent/null for permanent delete
+  if (data?.deletedAt) return true // soft delete — allow
+  return user.roles?.includes('admin') ?? false // permanent — admin only
+}
+```
+
+> **Note:** `data` is `undefined` during the Access Operation — use `data?.deletedAt`.
+
+## Field Access Side Effects
+
+- **`read: false`** — the property is **completely omitted** from API responses (not `null`, not present at all).
+- **`update: false`** — submitted values are **silently discarded**; no error thrown, stored value unchanged.
+
+```ts
+export const Customers: CollectionConfig = {
+  slug: 'customers',
+  fields: [
+    { name: 'name', type: 'text' },
+    {
+      name: 'ssn',
+      type: 'text',
+      access: {
+        read: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+        update: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+      },
+    },
+  ],
+}
+```
+
+> **Tip:** `read: false` omits the key entirely — use `doc?.ssn` in client code, never assume the key exists.
 
 ## Important Notes
 

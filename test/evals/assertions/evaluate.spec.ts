@@ -547,6 +547,52 @@ describe('existing kinds still work', () => {
     ).toEqual([])
   })
 
+  it('collectionAccess: readVersions (version-enabled collection)', () => {
+    const src = wrap(`
+      collections: [{
+        slug: 'posts',
+        versions: { drafts: true },
+        access: { readVersions: ({ req: { user } }) => Boolean(user?.roles?.includes('admin')) },
+        fields: [],
+      }],
+    `)
+    expect(
+      evaluateAssertions(src, [
+        { kind: 'collectionAccess', slug: 'posts', operation: 'readVersions' },
+      ]),
+    ).toEqual([])
+  })
+
+  it('collectionAccess: unlock (auth-enabled collection)', () => {
+    const src = wrap(`
+      collections: [{
+        slug: 'users',
+        auth: true,
+        access: { unlock: ({ req: { user } }) => Boolean(user?.roles?.includes('admin')) },
+        fields: [],
+      }],
+    `)
+    expect(
+      evaluateAssertions(src, [{ kind: 'collectionAccess', slug: 'users', operation: 'unlock' }]),
+    ).toEqual([])
+  })
+
+  it('collectionAccess fails when readVersions is missing', () => {
+    const src = wrap(`
+      collections: [{
+        slug: 'posts',
+        versions: { drafts: true },
+        access: { read: () => true },
+        fields: [],
+      }],
+    `)
+    const errors = evaluateAssertions(src, [
+      { kind: 'collectionAccess', slug: 'posts', operation: 'readVersions' },
+    ])
+    expect(errors).toHaveLength(1)
+    expect(errors[0]).toMatch(/readVersions/)
+  })
+
   it('blockField', () => {
     const src = wrap(`
       collections: [{
