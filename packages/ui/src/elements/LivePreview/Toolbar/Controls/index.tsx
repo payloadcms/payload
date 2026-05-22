@@ -44,7 +44,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           className={`${baseClass}__breakpoint`}
           horizontalAlign="right"
           render={({ close }) => (
-            <PopupList.ButtonGroup>
+            <PopupList.IconButtonGroup>
               <React.Fragment>
                 {breakpoints.map((bp) => (
                   <PopupList.Button
@@ -71,7 +71,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
                   </PopupList.Button>
                 )}
               </React.Fragment>
-            </PopupList.ButtonGroup>
+            </PopupList.IconButtonGroup>
           )}
           renderButton={(buttonProps) => (
             <Button {...buttonProps} buttonStyle="secondary" icon={<ChevronIcon size={16} />}>
@@ -89,7 +89,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           className={`${baseClass}__zoom`}
           horizontalAlign="right"
           render={({ close }) => (
-            <PopupList.ButtonGroup>
+            <PopupList.IconButtonGroup>
               <React.Fragment>
                 {zoomOptions.map((zoomValue) => (
                   <PopupList.Button
@@ -104,11 +104,12 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
                   </PopupList.Button>
                 ))}
               </React.Fragment>
-            </PopupList.ButtonGroup>
+            </PopupList.IconButtonGroup>
           )}
           renderButton={(buttonProps) => (
             <Button {...buttonProps} buttonStyle="pill" icon={<ChevronIcon size={16} />}>
-              {zoom * 100}%
+              <span className={`${baseClass}__zoom-percentage`}>%</span>
+              {zoom * 100}
             </Button>
           )}
           showScrollbar

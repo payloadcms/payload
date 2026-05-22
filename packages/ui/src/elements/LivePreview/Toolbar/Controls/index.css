@@ -14,6 +14,11 @@
     gap: var(--spacer-2);
   }
 
+  .live-preview-toolbar-controls__zoom-percentage {
+    margin-right: var(--spacer-2);
+    color: var(--color-text-secondary);
+  }
+
   .live-preview-toolbar-controls__end {
     display: flex;
     align-items: center;
