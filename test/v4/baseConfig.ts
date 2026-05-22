@@ -12,6 +12,7 @@ import {
   draftVersionsSlug,
   joinFieldsSlug,
   joinPostsSlug,
+  orderableSlug,
   relationshipFieldsSlug,
   richTextFieldsSlug,
   tagsSlug,
@@ -49,6 +50,7 @@ import JoinFields from './collections/Join/index.js'
 import JoinPosts from './collections/JoinPosts/index.js'
 import JSONFields from './collections/JSON/index.js'
 import NumberFields from './collections/Number/index.js'
+import Orderable from './collections/Orderable/index.js'
 import PasswordFields from './collections/Password/index.js'
 import PointFields from './collections/Point/index.js'
 import RadioFields from './collections/Radio/index.js'
@@ -113,6 +115,7 @@ export const collections: CollectionConfig[] = [
   JoinPosts,
   JSONFields,
   NumberFields,
+  Orderable,
   PasswordFields,
   PointFields,
   RadioFields,
@@ -358,6 +361,22 @@ export const baseConfig: Partial<Config> = {
           status: statuses[i % statuses.length],
           priority: i,
         },
+      })
+    }
+
+    // Seed orderable collection for testing drag-and-drop ordering
+    const orderableItems = [
+      { title: 'First Task', priority: 'high' },
+      { title: 'Second Task', priority: 'medium' },
+      { title: 'Third Task', priority: 'low' },
+      { title: 'Fourth Task', priority: 'high' },
+      { title: 'Fifth Task', priority: 'medium' },
+    ]
+
+    for (const item of orderableItems) {
+      await payload.create({
+        collection: orderableSlug,
+        data: item,
       })
     }
 

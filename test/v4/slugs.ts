@@ -29,6 +29,7 @@ export const autosaveSlug = 'autosave'
 export const hierarchySlug = 'hierarchy'
 export const joinFieldsSlug = 'join-fields'
 export const joinPostsSlug = 'join-posts'
+export const orderableSlug = 'orderable'
 export const rubbishSlug = 'rubbish'
 export const searchBarTestSlug = 'search-bar-test'
 export const unauthorizedSlug = 'unauthorized-test'
@@ -65,6 +66,7 @@ export const collectionSlugs = [
   hierarchySlug,
   joinFieldsSlug,
   joinPostsSlug,
+  orderableSlug,
   rubbishSlug,
   searchBarTestSlug,
   unauthorizedSlug,

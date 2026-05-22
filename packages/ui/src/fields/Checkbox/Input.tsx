@@ -26,6 +26,12 @@ export type CheckboxInputProps = {
   readonly readOnly?: boolean
   readonly required?: boolean
   readonly tooltip?: string
+  /**
+   * Visual variant for the checkbox
+   * - 'default': Dark border, transparent background (for form fields)
+   * - 'muted': Light gray background and border (for tables)
+   */
+  readonly variant?: 'default' | 'muted'
 }
 
 export const inputBaseClass = 'checkbox-input'
@@ -47,6 +53,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   readOnly: readOnlyFromProps,
   required,
   tooltip,
+  variant = 'default',
 }) => {
   const [isHydrated, setIsHydrated] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
@@ -67,6 +74,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         checked && `${inputBaseClass}--checked`,
         readOnly && `${inputBaseClass}--read-only`,
         tooltip && `${inputBaseClass}--has-tooltip`,
+        variant !== 'default' && `${inputBaseClass}--${variant}`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -107,11 +115,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         {Error}
       </div>
       {tooltip && (
-        <Tooltip
-          alignCaret="left"
-          className={`${inputBaseClass}__tooltip`}
-          show={showTooltip}
-        >
+        <Tooltip alignCaret="left" className={`${inputBaseClass}__tooltip`} show={showTooltip}>
           {tooltip}
         </Tooltip>
       )}

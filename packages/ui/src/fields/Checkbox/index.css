@@ -68,20 +68,16 @@
     padding: 0;
     line-height: 0;
     position: relative;
-    width: 1rem;
-    height: 1rem;
+    width: var(--spacer-3);
+    height: var(--spacer-3);
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-medium);
     background: transparent;
 
     & input[type='checkbox'] {
       position: absolute;
-      width: calc(100% + 0.25rem);
-      height: calc(100% + 0.25rem);
       padding: 0;
       margin: 0;
-      margin-left: -0.125rem;
-      margin-top: -0.125rem;
       opacity: 0;
       border-radius: 0;
       z-index: 1;
@@ -155,6 +151,33 @@
     }
   }
 
+   .checkbox-input--has-tooltip {
+    position: relative;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  /* Allow Wrap */
+  .checkbox-input__tooltip {
+    --tooltip-x: 0;
+    left: 0;
+    width: max-content;
+    max-width: 280px;
+    white-space: normal;
+    text-align: start;
+  }
+
+  /* Center the caret on the checkbox box itself (0.5rem from the row's
+     left edge = center of the 1rem-wide checkbox input). */
+  .checkbox-input__tooltip.tooltip--caret-left .tooltip__caret {
+    left: 0.5rem;
+    transform: translateX(-50%);
+  }
+
+  .checkbox-input__tooltip.tooltip--caret-left.tooltip--position-bottom .tooltip__caret {
+    transform: translateX(-50%) rotate(180deg);
+  }
+
   .checkbox-input--has-tooltip {
     position: relative;
     width: max-content;
@@ -180,6 +203,36 @@
 
   .checkbox-input__tooltip.tooltip--caret-left.tooltip--position-bottom .tooltip__caret {
     transform: translateX(-50%) rotate(180deg);
+  /* Muted variant - used in tables with lighter appearance */
+  .checkbox-input--muted {
+    .checkbox-input__input {
+      background: var(--color-bg-secondary);
+      border-color: var(--color-border);
+    }
+
+    &:not(.checkbox-input--read-only):not(.checkbox-input--checked) {
+      &:hover {
+        .checkbox-input__input {
+          border-color: var(--color-border-selected-strong);
+        }
+      }
+    }
+
+    /* Ensure checked state overrides muted base styles */
+    &.checkbox-input--checked {
+      .checkbox-input__input {
+        background-color: var(--color-bg-brand);
+        border-color: var(--color-border-selected);
+      }
+    }
+
+    /* Ensure partial state overrides muted base styles */
+    &:has(.checkbox-input__icon.partial) {
+      .checkbox-input__input {
+        background-color: var(--color-bg-brand);
+        border-color: var(--color-border-selected);
+      }
+    }
   }
 
   .checkbox.error {
