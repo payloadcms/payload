@@ -18,7 +18,11 @@ export interface LivePreviewContextType {
   isLivePreviewing: boolean
   isPopupOpen: boolean
   isPreviewEnabled: boolean
-  listeningForMessages?: boolean
+  /**
+   * Timestamp of the last "ready" message received from any preview (iframe or popup).
+   * Used to trigger initial syncs to newly opened previews.
+   */
+  lastReadyAt: number
   /**
    * The URL that has finished loading in the iframe or popup.
    * For example, if you set the `url`, it will begin to load into the iframe,
@@ -32,8 +36,6 @@ export interface LivePreviewContextType {
   openPopupWindow: ReturnType<typeof usePopupWindow>['openPopupWindow']
   popupRef?: React.RefObject<null | Window>
   previewURL?: string
-  previewWindowType: 'iframe' | 'popup'
-  setAppIsReady: (appIsReady: boolean) => void
   setBreakpoint: (breakpoint: LivePreviewConfig['breakpoints'][number]['name']) => void
   setHeight: (height: number) => void
   setIsExpanded: (isExpanded: boolean) => void
@@ -41,7 +43,6 @@ export interface LivePreviewContextType {
   setLoadedURL: (loadedURL: string) => void
   setMeasuredDeviceSize: (size: { height: number; width: number }) => void
   setPreviewURL: (url: string) => void
-  setPreviewWindowType: (previewWindowType: 'iframe' | 'popup') => void
   setSize: Dispatch<SizeReducerAction>
   setToolbarPosition: (position: { x: number; y: number }) => void
   /**
@@ -84,6 +85,7 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   isLivePreviewing: false,
   isPopupOpen: false,
   isPreviewEnabled: undefined,
+  lastReadyAt: 0,
   measuredDeviceSize: {
     height: 0,
     width: 0,
@@ -91,8 +93,6 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   openPopupWindow: () => {},
   popupRef: undefined,
   previewURL: undefined,
-  previewWindowType: 'iframe',
-  setAppIsReady: () => {},
   setBreakpoint: () => {},
   setHeight: () => {},
   setIsExpanded: () => {},
@@ -100,7 +100,6 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   setLoadedURL: () => {},
   setMeasuredDeviceSize: () => {},
   setPreviewURL: () => {},
-  setPreviewWindowType: () => {},
   setSize: () => {},
   setToolbarPosition: () => {},
   setURL: () => {},

@@ -23,9 +23,10 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
     breakpoint,
     breakpoints,
     isExpanded,
+    openPopupWindow,
     setBreakpoint,
     setIsExpanded,
-    setPreviewWindowType,
+    setIsLivePreviewing,
     setZoom,
     zoom,
   } = useLivePreviewContext()
@@ -131,7 +132,8 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           icon={<ExternalLinkIcon size={16} />}
           onClick={(e) => {
             e.preventDefault()
-            setPreviewWindowType('popup')
+            openPopupWindow()
+            setIsLivePreviewing(false)
           }}
           tooltip={t('general:openInNewWindow')}
         />
