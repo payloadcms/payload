@@ -10,6 +10,7 @@ export type EvalCategory =
   | 'collections'
   | 'commits'
   | 'config'
+  | 'custom-components'
   | 'development'
   | 'fields'
   | 'graphql'
