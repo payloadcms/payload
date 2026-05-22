@@ -7,11 +7,6 @@ import type { CodegenEvalCase } from '../../types.js'
  * Only include assertions that the LLM must actively produce — never assertions
  * already satisfied by the starter fixture (those are false signal). When no
  * AST assertion kind applies, leave `assertions: []` and rely on the scorer.
- *
- * The assertion catalog covers collections, fields, hooks, and access — not
- * admin-level config properties like `admin.components.*` or field-level
- * `admin.components.*`. All custom-components config cases rely on the OpenAI
- * scorer rather than AST checks.
  */
 export const customComponentsCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
@@ -24,8 +19,7 @@ export const customComponentsCodegenDataset: CodegenEvalCase[] = [
       'admin.components.beforeDashboard set to an array containing the path string "/src/components/AnnouncementBanner" (or equivalent path) in the buildConfig admin config',
     category: 'custom-components',
     fixturePath: 'custom-components/codegen/register-beforeDashboard',
-    // No AST assertion kind covers admin.components.* config — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'configOption', path: 'admin.components.beforeDashboard' }],
   },
   {
     input:
@@ -34,8 +28,9 @@ export const customComponentsCodegenDataset: CodegenEvalCase[] = [
       'admin.components.edit.SaveButton set to "/src/components/MySaveButton" (or equivalent path string) on the posts collection config',
     category: 'custom-components',
     fixturePath: 'custom-components/codegen/register-custom-saveButton',
-    // No AST assertion kind covers collection admin.components.edit.* — scorer carries the load.
-    assertions: [],
+    assertions: [
+      { kind: 'collectionOption', slug: 'posts', path: 'admin.components.edit.SaveButton' },
+    ],
   },
   {
     input:
@@ -44,8 +39,7 @@ export const customComponentsCodegenDataset: CodegenEvalCase[] = [
       'admin.components.views.list.Component set to "/src/views/PostsListView" (or equivalent path string) on the posts collection config',
     category: 'custom-components',
     fixturePath: 'custom-components/codegen/register-custom-list-view',
-    // No AST assertion kind covers collection admin.components.views.* — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'collectionOption', slug: 'posts', path: 'admin.components.views.list' }],
   },
   {
     input:
@@ -54,8 +48,7 @@ export const customComponentsCodegenDataset: CodegenEvalCase[] = [
       'admin.components.graphics.Logo set to "/src/components/BrandLogo" (or equivalent path string) in the buildConfig admin config',
     category: 'custom-components',
     fixturePath: 'custom-components/codegen/register-graphics-logo',
-    // No AST assertion kind covers admin.components.graphics.* config — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'configOption', path: 'admin.components.graphics.Logo' }],
   },
   // ──────────────────────────────────────────────────────────
   // Correction case — broken fixture that the LLM must fix
@@ -67,7 +60,6 @@ export const customComponentsCodegenDataset: CodegenEvalCase[] = [
       'admin.importMap.baseDir added and set to path.resolve(dirname, "src") (or equivalent using fileURLToPath + path.dirname) so that component path strings resolve correctly relative to the src directory',
     category: 'custom-components',
     fixturePath: 'custom-components/codegen/fix-missing-importmap-base',
-    // No AST assertion kind covers admin.importMap.baseDir — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'configOption', path: 'admin.importMap.baseDir' }],
   },
 ]

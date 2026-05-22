@@ -7,10 +7,6 @@ import type { CodegenEvalCase } from '../../types.js'
  * Only include assertions that the LLM must actively produce — never assertions
  * already satisfied by the starter fixture (those are false signal). When no
  * AST assertion kind applies, leave `assertions: []` and rely on the scorer.
- *
- * The assertion catalog covers collections, fields, hooks, and access — not
- * collection-level config properties like `versions`. Cases involving `versions`
- * rely on the OpenAI scorer rather than AST checks.
  */
 export const migrationsCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
@@ -23,8 +19,7 @@ export const migrationsCodegenDataset: CodegenEvalCase[] = [
       'versions property on the posts collection set to { drafts: true } — enabling draft support and the _status field',
     category: 'migrations',
     fixturePath: 'migrations/codegen/enable-drafts-posts',
-    // No AST assertion kind covers collection-level `versions` config — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'collectionOption', slug: 'posts', path: 'versions.drafts', value: true }],
   },
   {
     input:
@@ -45,7 +40,6 @@ export const migrationsCodegenDataset: CodegenEvalCase[] = [
       'versions property on posts changed from `versions: true` to `versions: { drafts: true }` to correctly enable draft support and the _status field',
     category: 'migrations',
     fixturePath: 'migrations/codegen/fix-missing-versions-config',
-    // No AST assertion kind covers collection-level `versions` config — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'collectionOption', slug: 'posts', path: 'versions.drafts', value: true }],
   },
 ]

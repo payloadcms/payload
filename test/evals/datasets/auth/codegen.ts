@@ -7,11 +7,6 @@ import type { CodegenEvalCase } from '../../types.js'
  * Only include assertions that the LLM must actively produce — never assertions
  * already satisfied by the starter fixture (those are false signal). When no
  * AST assertion kind applies, leave `assertions: []` and rely on the scorer.
- *
- * The assertion catalog covers collections, fields, hooks, and access — not
- * collection-level config properties like `auth.tokenExpiration`. Cases
- * involving only auth config options rely on the OpenAI scorer rather than
- * AST checks.
  */
 export const authCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
@@ -24,8 +19,9 @@ export const authCodegenDataset: CodegenEvalCase[] = [
       'auth.loginWithUsername on the customers collection set to an object with allowEmailLogin: true so both username and email are accepted at login',
     category: 'auth',
     fixturePath: 'auth/codegen/login-with-username',
-    // No AST assertion kind covers collection-level auth config properties — scorer carries the load.
-    assertions: [],
+    assertions: [
+      { kind: 'collectionOption', slug: 'customers', path: 'auth.loginWithUsername', value: true },
+    ],
   },
   {
     input:
@@ -34,8 +30,9 @@ export const authCodegenDataset: CodegenEvalCase[] = [
       'auth.tokenExpiration on the users collection changed from 86400 to 3600 (seconds in one hour)',
     category: 'auth',
     fixturePath: 'auth/codegen/token-expiration-1h',
-    // No AST assertion kind covers collection-level auth config properties — scorer carries the load.
-    assertions: [],
+    assertions: [
+      { kind: 'collectionOption', slug: 'users', path: 'auth.tokenExpiration', value: 3600 },
+    ],
   },
   {
     input:
@@ -44,7 +41,16 @@ export const authCodegenDataset: CodegenEvalCase[] = [
       'A new services collection with auth.useAPIKey: true and auth.disableLocalStrategy: true so only API key auth is allowed',
     category: 'auth',
     fixturePath: 'auth/codegen/api-key-only-collection',
-    assertions: [{ kind: 'collectionExists', slug: 'services' }],
+    assertions: [
+      { kind: 'collectionExists', slug: 'services' },
+      { kind: 'collectionOption', slug: 'services', path: 'auth.useAPIKey', value: true },
+      {
+        kind: 'collectionOption',
+        slug: 'services',
+        path: 'auth.disableLocalStrategy',
+        value: true,
+      },
+    ],
   },
   {
     input:
@@ -53,8 +59,7 @@ export const authCodegenDataset: CodegenEvalCase[] = [
       'Root-level csrf array added (or appended to) in buildConfig with https://app.mysite.com included',
     category: 'auth',
     fixturePath: 'auth/codegen/add-csrf-allowlist',
-    // No AST assertion kind covers root-level buildConfig options like csrf[] — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'configOption', path: 'csrf' }],
   },
   {
     input:
@@ -63,8 +68,10 @@ export const authCodegenDataset: CodegenEvalCase[] = [
       'auth.cookies.sameSite set to "None" and auth.cookies.secure set to true on the users collection to enable cross-domain cookie auth',
     category: 'auth',
     fixturePath: 'auth/codegen/crossdomain-cookies',
-    // No AST assertion kind covers collection-level auth.cookies properties — scorer carries the load.
-    assertions: [],
+    assertions: [
+      { kind: 'collectionOption', slug: 'users', path: 'auth.cookies.sameSite', value: 'None' },
+      { kind: 'collectionOption', slug: 'users', path: 'auth.cookies.secure', value: true },
+    ],
   },
   {
     input:
@@ -73,8 +80,7 @@ export const authCodegenDataset: CodegenEvalCase[] = [
       'auth.verify set to true (or an object with verify options) on the customers collection',
     category: 'auth',
     fixturePath: 'auth/codegen/enable-email-verification',
-    // No AST assertion kind covers collection-level auth config — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'collectionOption', slug: 'customers', path: 'auth.verify', value: true }],
   },
   {
     input:
@@ -109,7 +115,13 @@ export const authCodegenDataset: CodegenEvalCase[] = [
       'auth.loginWithUsername changed from true to { allowEmailLogin: true } (or { allowEmailLogin: true, requireUsername: false }) on the customers collection so both username and email are accepted at login',
     category: 'auth',
     fixturePath: 'auth/codegen/fix-login-with-username',
-    // No AST assertion kind covers collection-level auth config — scorer carries the load.
-    assertions: [],
+    assertions: [
+      {
+        kind: 'collectionOption',
+        slug: 'customers',
+        path: 'auth.loginWithUsername.allowEmailLogin',
+        value: true,
+      },
+    ],
   },
 ]

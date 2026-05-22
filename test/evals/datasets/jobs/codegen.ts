@@ -7,11 +7,6 @@ import type { CodegenEvalCase } from '../../types.js'
  * Only include assertions that the LLM must actively produce — never assertions
  * already satisfied by the starter fixture (those are false signal). When no
  * AST assertion kind applies, leave `assertions: []` and rely on the scorer.
- *
- * The assertion catalog covers collections, fields, hooks, and access — not
- * top-level config properties like `jobs.tasks`, `jobs.workflows`, or
- * `jobs.autoRun`. All jobs-config cases rely on the OpenAI scorer rather than
- * AST checks, with the exception of cases that also add a collection hook.
  */
 export const jobsCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
@@ -24,8 +19,7 @@ export const jobsCodegenDataset: CodegenEvalCase[] = [
       'A task with slug "send-email" (or "sendEmail") added to jobs.tasks, with inputSchema containing a field named "to" of type "email" and a field named "subject" of type "text", and a handler function',
     category: 'jobs',
     fixturePath: 'jobs/codegen/add-simple-task',
-    // No AST assertion kind covers jobs.tasks[] config — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'jobsTask', slug: 'send-email' }],
   },
   {
     input:
@@ -34,8 +28,7 @@ export const jobsCodegenDataset: CodegenEvalCase[] = [
       'A task with slug "process-upload" (or similar) added to jobs.tasks with retries: 3 and inputSchema containing a required "fileId" text field, plus a handler function',
     category: 'jobs',
     fixturePath: 'jobs/codegen/add-task-with-retries',
-    // No AST assertion kind covers jobs.tasks[] config — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'jobsTask', slug: 'process-upload' }],
   },
   {
     input:
@@ -44,7 +37,8 @@ export const jobsCodegenDataset: CodegenEvalCase[] = [
       'A task added to jobs.tasks with a schedule property containing a cron expression for 2 AM daily (e.g. "0 2 * * *") and a queue name, plus a handler that queries and deletes old temp-files; an autoRun entry (or note about needing a runner) using the same queue name',
     category: 'jobs',
     fixturePath: 'jobs/codegen/add-scheduled-task',
-    // No AST assertion kind covers jobs.tasks[].schedule or jobs.autoRun — scorer carries the load.
+    // Prompt does not specify an exact task slug so a jobsTask assertion would be unreliable —
+    // scorer carries the load for the task and schedule content.
     assertions: [],
   },
   {
@@ -54,8 +48,7 @@ export const jobsCodegenDataset: CodegenEvalCase[] = [
       'A workflow added to jobs.workflows with slug "publish-post", inputSchema containing a postId field, and a handler that calls tasks.validatePost (or the equivalent task slug) followed by tasks.notifySubscribers using stable task ID strings',
     category: 'jobs',
     fixturePath: 'jobs/codegen/add-workflow',
-    // No AST assertion kind covers jobs.workflows[] config — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'jobsWorkflow', slug: 'publish-post' }],
   },
   {
     input:
@@ -64,8 +57,7 @@ export const jobsCodegenDataset: CodegenEvalCase[] = [
       'An autoRun array added to the jobs config with at least one entry containing a cron expression for every minute ("* * * * *" or similar) and queue: "default" (or no queue specified, defaulting to default)',
     category: 'jobs',
     fixturePath: 'jobs/codegen/enable-autorun',
-    // No AST assertion kind covers jobs.autoRun config — scorer carries the load.
-    assertions: [],
+    assertions: [{ kind: 'configOption', path: 'jobs.autoRun' }],
   },
   {
     input:
@@ -86,7 +78,9 @@ export const jobsCodegenDataset: CodegenEvalCase[] = [
       'The handler string changed from a relative path to an absolute path computed via path.resolve(dirname, ...) where dirname is derived from fileURLToPath(import.meta.url), and the path includes a named export reference (e.g. "#handlerName")',
     category: 'jobs',
     fixturePath: 'jobs/codegen/fix-relative-handler-path',
-    // No AST assertion kind covers jobs.tasks[].handler string values — scorer carries the load.
+    // The task slug "generate-pdf" already exists in the starter fixture, so a jobsTask
+    // assertion would be trivially satisfied. The fix is to the handler path string —
+    // scorer carries the load.
     assertions: [],
   },
 ]
