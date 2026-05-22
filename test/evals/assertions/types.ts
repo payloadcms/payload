@@ -48,7 +48,7 @@ export type Assertion =
       value?: boolean | number | string
     }
   | {
-      /** Asserts a property on the top-level `buildConfig({ ... })` object, addressed by a dotted path. Used for root-level options that don't fit collections.fields/hooks/access (csrf, cookiePrefix, serverURL, routes, admin.importMap.baseDir, admin.components.*, jobs.autoRun, etc.). */
+      /** Asserts a property on the top-level `buildConfig({ ... })` object, addressed by a dotted path. Used for root-level options that don't fit collections.fields/hooks/access (csrf, cookiePrefix, serverURL, routes, admin.importMap.baseDir, admin.components.*, jobs.autoRun, etc.). When the value at a path is not an object literal (e.g. `db` is a call to `postgresAdapter(...)`), descent stops there — use `dbAdapterOption` for adapter args. */
       kind: 'configOption'
       /** Dotted path under buildConfig, e.g. 'csrf', 'admin.importMap.baseDir', 'jobs.autoRun'. */
       path: string

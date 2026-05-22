@@ -90,6 +90,30 @@ describe('configOption', () => {
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/admin\.importMap\.baseDir/)
   })
+
+  it('walks into jobs.* paths', () => {
+    const source = `
+      import { buildConfig } from 'payload'
+      export default buildConfig({
+        collections: [],
+        jobs: { tasks: [], autoRun: [{ cron: '* * * * *', queue: 'default' }] },
+      })
+    `
+    expect(evaluateAssertions(source, [{ kind: 'configOption', path: 'jobs.autoRun' }])).toEqual([])
+  })
+
+  it('walks into db.* paths', () => {
+    const source = `
+      import { buildConfig } from 'payload'
+      import { postgresAdapter } from '@payloadcms/db-postgres'
+      export default buildConfig({
+        collections: [],
+        db: postgresAdapter({ pool: { connectionString: '' }, migrationDir: './migrations' }),
+      })
+    `
+    // configOption can address db as a top-level key; the value is a CallExpression, so existence check should pass
+    expect(evaluateAssertions(source, [{ kind: 'configOption', path: 'db' }])).toEqual([])
+  })
 })
 
 // ─── collectionOption ────────────────────────────────────────────────────────

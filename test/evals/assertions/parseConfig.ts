@@ -384,25 +384,17 @@ function collectCollections(
   return collections
 }
 
-/** The set of buildConfig keys handled by dedicated parsers (not captured in `configOptions`). */
-const CONFIG_RESERVED_KEYS = new Set(['collections', 'db', 'jobs'])
-
 function collectConfigOptions(
   configArg: ts.ObjectLiteralExpression,
 ): Record<string, ts.Expression> {
   const out: Record<string, ts.Expression> = {}
   for (const prop of configArg.properties) {
     if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
-      if (!CONFIG_RESERVED_KEYS.has(prop.name.text)) {
-        out[prop.name.text] = prop.initializer
-      }
+      out[prop.name.text] = prop.initializer
     } else if (ts.isShorthandPropertyAssignment(prop)) {
       // e.g. buildConfig({ csrf }) where csrf is a top-level const
-      const name = prop.name.text
-      if (!CONFIG_RESERVED_KEYS.has(name)) {
-        // Use the name identifier as the expression so the symbols map can resolve it
-        out[name] = prop.name
-      }
+      // Use the name identifier as the expression so the symbols map can resolve it
+      out[prop.name.text] = prop.name
     }
   }
   return out
