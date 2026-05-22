@@ -173,15 +173,33 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                   <span className={`${baseClass}__drag-header`} />
                 </th>
               )}
-              {columns.map((col, colIndex) => (
-                <th
-                  className={[`${baseClass}__th`, col.className].filter(Boolean).join(' ')}
-                  colSpan={colIndex === 0 && enableCheckbox && mergeCheckboxHeader ? 2 : undefined}
-                  key={col.accessor}
-                >
-                  {col.heading}
-                </th>
-              ))}
+              {columns.map((col, colIndex) => {
+                const isMergedCheckboxColumn =
+                  colIndex === 0 && enableCheckbox && mergeCheckboxHeader
+
+                return (
+                  <th
+                    className={[`${baseClass}__th`, col.className].filter(Boolean).join(' ')}
+                    colSpan={isMergedCheckboxColumn ? 2 : undefined}
+                    key={col.accessor}
+                  >
+                    {isMergedCheckboxColumn && enableSelectAll ? (
+                      <span className={`${baseClass}__th-merged`}>
+                        <CheckboxInput
+                          checked={allSelected}
+                          className={`${baseClass}__checkbox`}
+                          onToggle={handleSelectAll}
+                          partialChecked={someSelected && !allSelected}
+                          variant="muted"
+                        />
+                        {col.heading}
+                      </span>
+                    ) : (
+                      col.heading
+                    )}
+                  </th>
+                )
+              })}
             </tr>
           </thead>
         )}

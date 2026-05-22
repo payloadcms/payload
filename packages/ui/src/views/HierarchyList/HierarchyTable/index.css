@@ -86,6 +86,10 @@
   .hierarchy-tables__col-name {
     width: auto;
     min-width: 200px;
+
+    &:has(.icon) {
+      padding-inline-start: var(--spacer-2);
+    }
   }
 
   .hierarchy-tables__col-collection {

@@ -31,14 +31,14 @@
   }
 
   .hierarchy-column-item--selected {
-    background-color: var(--color-bg-success-tertiary);
+    background-color: var(--color-bg-selected);
 
     &:hover {
-      background-color: var(--color-bg-success-tertiary-hover);
+      background-color: var(--color-bg-selected);
     }
 
     &.hierarchy-column-item--expanded {
-      background-color: var(--color-bg-success-tertiary-hover);
+      background-color: var(--color-bg-selected);
     }
   }
 
