@@ -115,12 +115,17 @@
 
   .hierarchy-tables__load-more-wrap {
     padding: var(--spacer-2);
-    padding-left: var(--spacer-3);
+    padding-left: var(--spacer-2-5);
     padding-top: var(--spacer-1);
   }
 
   .hierarchy-tables__group-label {
     padding-bottom: var(--spacer-3);
     color: var(--color-text);
+    letter-spacing: var(--text-body-large-letter-spacing);
+    font-family: var(--text-body-large-strong-font-family);
+    font-size: var(--text-body-large-strong-font-size);
+    font-weight: var(--text-body-large-strong-font-weight);
+    line-height: var(--text-body-large-strong-line-height);
   }
 }

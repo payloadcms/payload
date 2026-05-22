@@ -32,11 +32,11 @@
     }
 
     &:first-child {
-      padding-inline-start: var(--spacer-3);
+      padding-inline-start: var(--spacer-2);
     }
 
     &:last-child {
-      padding-inline-end: var(--spacer-3);
+      padding-inline-end: var(--spacer-2);
     }
   }
 
@@ -78,16 +78,16 @@
 
   .slot-table__td {
     vertical-align: middle;
-    padding: var(--spacer-2-5);
+    padding: var(--spacer-2) var(--spacer-2-5);
     min-width: 150px;
     position: relative;
 
     &:first-child {
-      padding-inline-start: var(--spacer-3);
+      padding-inline-start: var(--spacer-2);
     }
 
     &:last-child {
-      padding-inline-end: var(--spacer-3);
+      padding-inline-end: var(--spacer-2);
     }
   }
 
