@@ -42,30 +42,44 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
 pnpm add @payloadcms/plugin-mcp
 ```
 
-## Basic Usage
+## Quick Start
 
-Add `mcpPlugin` to your Payload config. With no options every collection and global in your config is automatically exposed via MCP with their default tools:
+**1.** Add `mcpPlugin` to your Payload config:
 
 ```ts
 import { buildConfig } from 'payload'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 
 export default buildConfig({
-  collections: [
-    {
-      slug: 'posts',
-      fields: [{ name: 'title', type: 'text' }],
-    },
-  ],
+  // your collections, globals, etc.
   plugins: [mcpPlugin({})],
 })
 ```
 
-This adds:
+**2.** Point your MCP client (Claude Desktop, your IDE, …) at the stdio server:
 
-- An HTTP MCP endpoint at `POST /api/mcp`
-- A `payload-mcp-api-keys` collection in the admin UI for managing client keys
-- Tools `findPosts`, `createPosts`, `updatePosts`, `deletePosts` (and similar for every other collection / global in your config)
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": ["payload-mcp"],
+      "cwd": "/absolute/path/to/your/payload/project"
+    }
+  }
+}
+```
+
+That's it - every collection and global is now available as MCP tools (`findPosts`,
+`createPosts`, `updatePosts`, …).
+
+### Production setup (HTTP)
+
+The stdio server above is for local development, and works even when the dev server is not running.
+
+For deployed apps and remote clients, use the HTTP transport - `mcpPlugin` already exposes `POST /api/mcp` and a
+`payload-mcp-api-keys` collection in the admin UI. [Create an API key](#creating-an-api-key),
+then point your client at the endpoint - see [Connecting MCP clients](#http).
 
 ### Configuring per-collection tools
 
