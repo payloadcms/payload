@@ -16,15 +16,15 @@ The labels you provide for your Collections and Globals are used to name the Gra
 
 At the top of your Payload Config you can define all the options to manage GraphQL.
 
-| Option                             | Description                                                                                                                                                |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mutations`                        | Any custom Mutations to be added in addition to what Payload provides. [More](/docs/graphql/extending)                                                     |
-| `queries`                          | Any custom Queries to be added in addition to what Payload provides. [More](/docs/graphql/extending)                                                       |
-| `maxComplexity`                    | A number used to set the maximum allowed complexity allowed by requests [More](/docs/graphql/overview#query-complexity-limits)                             |
-| `disablePlaygroundInProduction`    | A boolean that if false will enable the GraphQL playground in production environments, defaults to true. [More](/docs/graphql/overview#graphql-playground) |
-| `disableIntrospectionInProduction` | A boolean that if false will enable the GraphQL introspection in production environments, defaults to true.                                                |
-| `disable`                          | A boolean that if true will disable the GraphQL entirely, defaults to false.                                                                               |
-| `validationRules`                  | A function that takes the ExecutionArgs and returns an array of ValidationRules.                                                                           |
+| Option                             | Description                                                                                                                        |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `mutations`                        | Any custom Mutations to be added in addition to what Payload provides. [More](/docs/graphql/extending)                             |
+| `queries`                          | Any custom Queries to be added in addition to what Payload provides. [More](/docs/graphql/extending)                               |
+| `maxComplexity`                    | A number used to set the maximum allowed complexity allowed by requests [More](/docs/graphql/overview#query-complexity-limits)     |
+| `disablePlaygroundInProduction`    | A boolean that if false will enable GraphiQL in production environments, defaults to true. [More](/docs/graphql/overview#graphiql) |
+| `disableIntrospectionInProduction` | A boolean that if false will enable the GraphQL introspection in production environments, defaults to true.                        |
+| `disable`                          | A boolean that if true will disable GraphQL entirely, defaults to false.                                                           |
+| `validationRules`                  | A function that takes the ExecutionArgs and returns an array of ValidationRules.                                                   |
 
 ## Collections
 
@@ -110,16 +110,16 @@ User [preferences](../admin/preferences) for the [Admin Panel](../admin/overview
 | `updatePreference` | `update`  |
 | `deletePreference` | `delete`  |
 
-## GraphQL Playground
+## GraphiQL
 
-GraphQL Playground is enabled by default for development purposes, but disabled in production. You can enable it in production by passing `graphQL.disablePlaygroundInProduction` a `false` setting in the main Payload Config.
+GraphiQL is enabled by default for development purposes, but disabled in production. You can enable it in production by passing `graphQL.disablePlaygroundInProduction` a `false` setting in the main Payload Config.
 
-You can even log in using the `login[collection-singular-label-here]` mutation to use the Playground as an authenticated user.
+You can even log in using the `login[collection-singular-label-here]` mutation to use GraphiQL as an authenticated user.
 
 <Banner type="success">
   **Tip:**
 
-To see more regarding how the above queries and mutations are used, visit your GraphQL playground
+To see more regarding how the above queries and mutations are used, visit GraphiQL
 (by default at
 [`${SERVER_URL}/api/graphql-playground`](http://localhost:3000/api/graphql-playground))
 while your server is running. There, you can use the "Schema" and "Docs" buttons on the right to

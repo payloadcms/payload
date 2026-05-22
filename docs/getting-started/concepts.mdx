@@ -50,7 +50,7 @@ Everything Payload does (create, read, update, delete, login, logout, etc.) is e
 
 - [Local API](#local-api) - Extremely fast, direct-to-database access
 - [REST API](#rest-api) - Standard HTTP endpoints for querying and mutating data
-- [GraphQL](#graphql-api) - A full GraphQL API with a GraphQL Playground
+- [GraphQL](#graphql-api) - A full GraphQL API with GraphiQL
 
 <Banner type="success">
   **Note:** All of these APIs share the exact same query language. [More
@@ -111,7 +111,7 @@ fetch('https://localhost:3000/api/pages') // highlight-line
 
 ### GraphQL API
 
-Payload automatically exposes GraphQL queries and mutations through a dedicated [GraphQL API](../graphql/overview). By default, the GraphQL route handler is mounted at the `/api/graphql` path of your app. You'll also find a full GraphQL Playground which can be accessible at the `/api/graphql-playground` path of your app.
+Payload automatically exposes GraphQL queries and mutations through a dedicated [GraphQL API](../graphql/overview). By default, the GraphQL route handler is mounted at the `/api/graphql` path of your app. You'll also find GraphiQL at the `/api/graphql-playground` path of your app.
 
 You can use any GraphQL client with Payload's GraphQL endpoint. Here are a few packages:
 

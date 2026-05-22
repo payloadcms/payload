@@ -1278,7 +1278,7 @@ export type Config = {
      */
     disableIntrospectionInProduction?: boolean
     /**
-     * Disable the GraphQL Playground in production.
+     * Disable GraphiQL in production.
      *
      * @default true
      */
@@ -1500,7 +1500,7 @@ export type Config = {
      */
     graphQL?: string
     /**
-     * The route for the GraphQL Playground.
+     * The route for GraphiQL.
      * @default "/graphql-playground"
      * @link https://payloadcms.com/docs/admin/overview#root-level-routes
      */
