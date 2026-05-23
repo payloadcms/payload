@@ -414,7 +414,7 @@ function collectConfigOptions(
 }
 
 /** Maps adapter function names to their short discriminator strings. */
-const ADAPTER_NAME_MAP: Record<string, string> = {
+const ADAPTER_NAME_MAP: Record<string, AdapterName> = {
   d1SqliteAdapter: 'd1-sqlite',
   mongooseAdapter: 'mongoose',
   postgresAdapter: 'postgres',
