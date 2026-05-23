@@ -32,6 +32,7 @@ export const customComponentsCodegenDataset: CodegenEvalCase[] = [
     input:
       'Replace the SaveButton in the posts collection edit view with a custom component at "/src/components/MySaveButton".',
   },
+  // docs-grounded: no test/ config assigns admin.components.views.list.Component; pattern documented at docs/custom-components/list-view.mdx.
   {
     assertions: [{ slug: 'posts', kind: 'collectionOption', path: 'admin.components.views.list' }],
     category: 'custom-components',

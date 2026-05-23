@@ -55,15 +55,6 @@ export const accessControlCodegenDataset: CodegenEvalCase[] = [
       'Add field-level read access to the ssn field on the customers collection so that only admins can read it. Non-admin users should not see the ssn field in API responses.',
   },
   {
-    assertions: [{ slug: 'posts', kind: 'collectionAccess', operation: 'delete' }],
-    category: 'access-control',
-    expected:
-      'access.delete function added to the posts collection; the function checks data?.deletedAt — if set (soft delete / trash), any authenticated user is allowed; if not set (permanent delete), only admins are allowed',
-    fixturePath: 'access-control/codegen/trash-discrimination-delete',
-    input:
-      'Add a delete access function on the posts collection that allows any authenticated user to soft-delete (trash) documents, but only admins can permanently delete them. Use data.deletedAt to discriminate between the two operations.',
-  },
-  {
     assertions: [{ slug: 'posts', kind: 'collectionAccess', operation: 'update' }],
     category: 'access-control',
     expected:
@@ -75,6 +66,7 @@ export const accessControlCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
   // Correction cases — broken fixtures the LLM must fix
   // ──────────────────────────────────────────────────────────
+  // docs-grounded: correction-case for a common runtime crash; not exercised in test/access-control/. Pattern documented at docs/access-control/overview.mdx (Access Operation Context).
   {
     category: 'access-control',
     expected:

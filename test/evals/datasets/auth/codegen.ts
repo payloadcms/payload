@@ -61,6 +61,7 @@ export const authCodegenDataset: CodegenEvalCase[] = [
     input:
       'Add a CSRF allow-list to the config so that my frontend at https://app.mysite.com can send authenticated requests using the HTTP-only cookie.',
   },
+  // docs-grounded: no test/ config sets auth.cookies.sameSite: 'None' + secure: true; pattern is documented at docs/authentication/cookies.mdx.
   {
     assertions: [
       { slug: 'users', kind: 'collectionOption', path: 'auth.cookies.sameSite', value: 'None' },

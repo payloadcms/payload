@@ -67,6 +67,7 @@ export const productionCodegenDataset: CodegenEvalCase[] = [
     input:
       'Lock the users collection after 5 failed login attempts and require them to wait 10 minutes before trying again.',
   },
+  // docs-grounded: prodMigrations is a deployment-time adapter option not exercised in test/; documented at docs/database/migrations.mdx.
   {
     assertions: [{ adapter: 'postgres', kind: 'dbAdapterOption', path: 'prodMigrations' }],
     category: 'production',

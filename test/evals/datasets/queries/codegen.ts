@@ -17,6 +17,7 @@ export const queriesCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
   // Positive cases — valid config modifications
   // ──────────────────────────────────────────────────────────
+  // docs-grounded: root-level defaultDepth not configured in any test/ config; documented at docs/queries/depth.mdx.
   {
     assertions: [{ kind: 'configOption', path: 'defaultDepth', value: 1 }],
     category: 'queries',
@@ -55,6 +56,7 @@ export const queriesCodegenDataset: CodegenEvalCase[] = [
     input:
       'The audit-log collection is internal — disable its GraphQL exposure so it does not appear in the GraphQL schema at all.',
   },
+  // docs-grounded: graphQL.singularName/pluralName not configured in any test/ config; documented at docs/graphql/overview.mdx.
   {
     assertions: [
       { slug: 'news', kind: 'collectionOption', path: 'graphQL.singularName', value: 'NewsItem' },
