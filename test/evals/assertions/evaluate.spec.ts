@@ -151,7 +151,7 @@ describe('collectionOption', () => {
       collections: [{ slug: 'posts', versions: { drafts: true }, fields: [] }],
     `)
     expect(
-      evaluateAssertions(src, [{ kind: 'collectionOption', slug: 'posts', path: 'versions' }]),
+      evaluateAssertions(src, [{ slug: 'posts', kind: 'collectionOption', path: 'versions' }]),
     ).toEqual([])
   })
 
@@ -161,7 +161,7 @@ describe('collectionOption', () => {
     `)
     expect(
       evaluateAssertions(src, [
-        { kind: 'collectionOption', slug: 'posts', path: 'versions.drafts', value: true },
+        { slug: 'posts', kind: 'collectionOption', path: 'versions.drafts', value: true },
       ]),
     ).toEqual([])
   })
@@ -169,7 +169,7 @@ describe('collectionOption', () => {
   it('fails when collection is missing', () => {
     const src = wrap(`collections: [],`)
     const errors = evaluateAssertions(src, [
-      { kind: 'collectionOption', slug: 'posts', path: 'versions' },
+      { slug: 'posts', kind: 'collectionOption', path: 'versions' },
     ])
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/posts/)
@@ -180,7 +180,7 @@ describe('collectionOption', () => {
       collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
     `)
     const errors = evaluateAssertions(src, [
-      { kind: 'collectionOption', slug: 'posts', path: 'versions' },
+      { slug: 'posts', kind: 'collectionOption', path: 'versions' },
     ])
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/versions/)
@@ -191,7 +191,7 @@ describe('collectionOption', () => {
       collections: [{ slug: 'users', auth: { tokenExpiration: 86400 }, fields: [] }],
     `)
     const errors = evaluateAssertions(src, [
-      { kind: 'collectionOption', slug: 'users', path: 'auth.tokenExpiration', value: 3600 },
+      { slug: 'users', kind: 'collectionOption', path: 'auth.tokenExpiration', value: 3600 },
     ])
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/3600/)
@@ -212,7 +212,7 @@ describe('collectionOption', () => {
     `)
     expect(
       evaluateAssertions(src, [
-        { kind: 'collectionOption', slug: 'posts', path: 'versions.drafts', value: true },
+        { slug: 'posts', kind: 'collectionOption', path: 'versions.drafts', value: true },
       ]),
     ).toEqual([])
   })
@@ -227,8 +227,8 @@ describe('collectionOption', () => {
     `)
     expect(
       evaluateAssertions(src, [
-        { kind: 'collectionOption', slug: 'users', path: 'auth.cookies.sameSite', value: 'None' },
-        { kind: 'collectionOption', slug: 'users', path: 'auth.cookies.secure', value: true },
+        { slug: 'users', kind: 'collectionOption', path: 'auth.cookies.sameSite', value: 'None' },
+        { slug: 'users', kind: 'collectionOption', path: 'auth.cookies.secure', value: true },
       ]),
     ).toEqual([])
   })
@@ -262,7 +262,7 @@ describe('dbAdapterOption', () => {
     `)
     expect(
       evaluateAssertions(src, [
-        { kind: 'dbAdapterOption', adapter: 'postgres', path: 'migrationDir' },
+        { adapter: 'postgres', kind: 'dbAdapterOption', path: 'migrationDir' },
       ]),
     ).toEqual([])
   })
@@ -278,7 +278,7 @@ describe('dbAdapterOption', () => {
       })
     `)
     const errors = evaluateAssertions(src, [
-      { kind: 'dbAdapterOption', adapter: 'sqlite', path: 'migrationDir' },
+      { adapter: 'sqlite', kind: 'dbAdapterOption', path: 'migrationDir' },
     ])
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/sqlite/)
@@ -325,7 +325,7 @@ describe('jobsTask', () => {
         ],
       },
     `)
-    expect(evaluateAssertions(src, [{ kind: 'jobsTask', slug: 'send-email' }])).toEqual([])
+    expect(evaluateAssertions(src, [{ slug: 'send-email', kind: 'jobsTask' }])).toEqual([])
   })
 
   it('fails when task slug is missing', () => {
@@ -336,14 +336,14 @@ describe('jobsTask', () => {
         ],
       },
     `)
-    const errors = evaluateAssertions(src, [{ kind: 'jobsTask', slug: 'send-email' }])
+    const errors = evaluateAssertions(src, [{ slug: 'send-email', kind: 'jobsTask' }])
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/send-email/)
   })
 
   it('fails when jobs config is entirely absent', () => {
     const src = wrap(`collections: [],`)
-    const errors = evaluateAssertions(src, [{ kind: 'jobsTask', slug: 'send-email' }])
+    const errors = evaluateAssertions(src, [{ slug: 'send-email', kind: 'jobsTask' }])
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/jobs config/)
   })
@@ -361,7 +361,7 @@ describe('jobsWorkflow', () => {
         ],
       },
     `)
-    expect(evaluateAssertions(src, [{ kind: 'jobsWorkflow', slug: 'publish-post' }])).toEqual([])
+    expect(evaluateAssertions(src, [{ slug: 'publish-post', kind: 'jobsWorkflow' }])).toEqual([])
   })
 
   it('fails when workflow slug is missing', () => {
@@ -371,14 +371,14 @@ describe('jobsWorkflow', () => {
         workflows: [],
       },
     `)
-    const errors = evaluateAssertions(src, [{ kind: 'jobsWorkflow', slug: 'publish-post' }])
+    const errors = evaluateAssertions(src, [{ slug: 'publish-post', kind: 'jobsWorkflow' }])
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/publish-post/)
   })
 
   it('fails when jobs config is entirely absent', () => {
     const src = wrap(`collections: [],`)
-    const errors = evaluateAssertions(src, [{ kind: 'jobsWorkflow', slug: 'publish-post' }])
+    const errors = evaluateAssertions(src, [{ slug: 'publish-post', kind: 'jobsWorkflow' }])
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/jobs config/)
   })
@@ -398,7 +398,7 @@ describe('boolean shorthand', () => {
     `)
     expect(
       evaluateAssertions(src, [
-        { kind: 'collectionOption', slug: 'users', path: 'auth.loginWithUsername', value: true },
+        { slug: 'users', kind: 'collectionOption', path: 'auth.loginWithUsername', value: true },
       ]),
     ).toEqual([])
   })
@@ -413,7 +413,7 @@ describe('boolean shorthand', () => {
     `)
     expect(
       evaluateAssertions(src, [
-        { kind: 'collectionOption', slug: 'users', path: 'auth.loginWithUsername', value: true },
+        { slug: 'users', kind: 'collectionOption', path: 'auth.loginWithUsername', value: true },
       ]),
     ).toEqual([])
   })
@@ -428,7 +428,7 @@ describe('boolean shorthand', () => {
     `)
     expect(
       evaluateAssertions(src, [
-        { kind: 'collectionOption', slug: 'users', path: 'auth.cookies.secure', value: false },
+        { slug: 'users', kind: 'collectionOption', path: 'auth.cookies.secure', value: false },
       ]),
     ).toEqual([])
   })
@@ -443,7 +443,7 @@ describe('boolean shorthand', () => {
     `)
     // An object does not equal false
     const errors = evaluateAssertions(src, [
-      { kind: 'collectionOption', slug: 'users', path: 'auth.loginWithUsername', value: false },
+      { slug: 'users', kind: 'collectionOption', path: 'auth.loginWithUsername', value: false },
     ])
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/false/)
@@ -457,8 +457,8 @@ describe('existing kinds still work', () => {
     const src = wrap(`
       collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
     `)
-    expect(evaluateAssertions(src, [{ kind: 'collectionExists', slug: 'posts' }])).toEqual([])
-    const errors = evaluateAssertions(src, [{ kind: 'collectionExists', slug: 'missing' }])
+    expect(evaluateAssertions(src, [{ slug: 'posts', kind: 'collectionExists' }])).toEqual([])
+    const errors = evaluateAssertions(src, [{ slug: 'missing', kind: 'collectionExists' }])
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/missing/)
   })
@@ -468,9 +468,9 @@ describe('existing kinds still work', () => {
       collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
     `)
     expect(
-      evaluateAssertions(src, [{ kind: 'fieldExists', slug: 'posts', field: 'title' }]),
+      evaluateAssertions(src, [{ slug: 'posts', field: 'title', kind: 'fieldExists' }]),
     ).toEqual([])
-    const errors = evaluateAssertions(src, [{ kind: 'fieldExists', slug: 'posts', field: 'nope' }])
+    const errors = evaluateAssertions(src, [{ slug: 'posts', field: 'nope', kind: 'fieldExists' }])
     expect(errors).toHaveLength(1)
   })
 
@@ -483,7 +483,7 @@ describe('existing kinds still work', () => {
     `)
     expect(
       evaluateAssertions(src, [
-        { kind: 'fieldOption', slug: 'posts', field: 'status', option: 'required', value: true },
+        { slug: 'posts', field: 'status', kind: 'fieldOption', option: 'required', value: true },
       ]),
     ).toEqual([])
   })
@@ -501,7 +501,7 @@ describe('existing kinds still work', () => {
     `)
     expect(
       evaluateAssertions(src, [
-        { kind: 'fieldHook', slug: 'posts', field: 'slug', hook: 'beforeChange' },
+        { slug: 'posts', field: 'slug', hook: 'beforeChange', kind: 'fieldHook' },
       ]),
     ).toEqual([])
   })
@@ -515,7 +515,7 @@ describe('existing kinds still work', () => {
       }],
     `)
     expect(
-      evaluateAssertions(src, [{ kind: 'collectionHook', slug: 'posts', hook: 'afterChange' }]),
+      evaluateAssertions(src, [{ slug: 'posts', hook: 'afterChange', kind: 'collectionHook' }]),
     ).toEqual([])
   })
 
@@ -529,7 +529,7 @@ describe('existing kinds still work', () => {
       })
     `)
     expect(
-      evaluateAssertions(src, [{ kind: 'collectionHook', slug: 'users', hook: 'beforeLogin' }]),
+      evaluateAssertions(src, [{ slug: 'users', hook: 'beforeLogin', kind: 'collectionHook' }]),
     ).toEqual([])
   })
 
@@ -543,7 +543,7 @@ describe('existing kinds still work', () => {
       })
     `)
     expect(
-      evaluateAssertions(src, [{ kind: 'collectionHook', slug: 'users', hook: 'afterLogin' }]),
+      evaluateAssertions(src, [{ slug: 'users', hook: 'afterLogin', kind: 'collectionHook' }]),
     ).toEqual([])
   })
 
@@ -557,7 +557,7 @@ describe('existing kinds still work', () => {
       })
     `
     expect(
-      evaluateAssertions(source, [{ kind: 'collectionHook', slug: 'posts', hook: 'afterError' }]),
+      evaluateAssertions(source, [{ slug: 'posts', hook: 'afterError', kind: 'collectionHook' }]),
     ).toEqual([])
   })
 
@@ -570,7 +570,7 @@ describe('existing kinds still work', () => {
       }],
     `)
     expect(
-      evaluateAssertions(src, [{ kind: 'collectionAccess', slug: 'posts', operation: 'read' }]),
+      evaluateAssertions(src, [{ slug: 'posts', kind: 'collectionAccess', operation: 'read' }]),
     ).toEqual([])
   })
 
@@ -585,7 +585,7 @@ describe('existing kinds still work', () => {
     `)
     expect(
       evaluateAssertions(src, [
-        { kind: 'collectionAccess', slug: 'posts', operation: 'readVersions' },
+        { slug: 'posts', kind: 'collectionAccess', operation: 'readVersions' },
       ]),
     ).toEqual([])
   })
@@ -600,7 +600,7 @@ describe('existing kinds still work', () => {
       }],
     `)
     expect(
-      evaluateAssertions(src, [{ kind: 'collectionAccess', slug: 'users', operation: 'unlock' }]),
+      evaluateAssertions(src, [{ slug: 'users', kind: 'collectionAccess', operation: 'unlock' }]),
     ).toEqual([])
   })
 
@@ -614,7 +614,7 @@ describe('existing kinds still work', () => {
       }],
     `)
     const errors = evaluateAssertions(src, [
-      { kind: 'collectionAccess', slug: 'posts', operation: 'readVersions' },
+      { slug: 'posts', kind: 'collectionAccess', operation: 'readVersions' },
     ])
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/readVersions/)
@@ -636,10 +636,10 @@ describe('existing kinds still work', () => {
     expect(
       evaluateAssertions(src, [
         {
-          kind: 'blockField',
           slug: 'pages',
-          field: 'layout',
           blockSlug: 'hero',
+          field: 'layout',
+          kind: 'blockField',
           subfield: 'heading',
         },
       ]),

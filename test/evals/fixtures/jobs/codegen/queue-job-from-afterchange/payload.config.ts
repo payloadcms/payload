@@ -2,8 +2,6 @@ import { stubAdapter } from '@/db-stub.js'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  db: stubAdapter,
-  secret: 'eval-fixture',
   collections: [
     {
       slug: 'users',
@@ -16,16 +14,18 @@ export default buildConfig({
       ],
     },
   ],
+  db: stubAdapter,
   jobs: {
     tasks: [
       {
         slug: 'send-welcome-email',
-        inputSchema: [{ name: 'userId', type: 'text', required: true }],
         handler: async ({ input, req }) => {
-          await req.payload.findByID({ collection: 'users', id: input.userId })
+          await req.payload.findByID({ id: input.userId, collection: 'users' })
           return { output: {} }
         },
+        inputSchema: [{ name: 'userId', type: 'text', required: true }],
       },
     ],
   },
+  secret: 'eval-fixture',
 })

@@ -3,9 +3,6 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  db: stubAdapter,
-  secret: 'eval-fixture',
-  editor: lexicalEditor({}),
   collections: [
     {
       slug: 'posts',
@@ -23,4 +20,7 @@ export default buildConfig({
       ],
     },
   ],
+  db: stubAdapter,
+  editor: lexicalEditor({}),
+  secret: 'eval-fixture',
 })

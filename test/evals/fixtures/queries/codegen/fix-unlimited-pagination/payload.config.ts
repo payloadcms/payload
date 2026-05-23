@@ -5,8 +5,6 @@ import { buildConfig } from 'payload'
 // view, but `pagination: false` combined with no explicit limit means every
 // request will load ALL documents from the collection — potentially thousands.
 export default buildConfig({
-  db: stubAdapter,
-  secret: 'eval-fixture',
   collections: [
     {
       slug: 'posts',
@@ -30,4 +28,6 @@ export default buildConfig({
       ],
     },
   ],
+  db: stubAdapter,
+  secret: 'eval-fixture',
 })

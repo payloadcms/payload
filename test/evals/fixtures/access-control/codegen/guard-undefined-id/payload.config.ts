@@ -2,14 +2,12 @@ import { stubAdapter } from '@/db-stub.js'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  db: stubAdapter,
-  secret: 'eval-fixture',
   collections: [
     {
       slug: 'posts',
       access: {
         // BUG: crashes during Access Operation — id is undefined when admin panel loads
-        read: ({ req: { user }, id }) => {
+        read: ({ id, req: { user } }) => {
           if (user?.roles?.includes('admin')) {
             return true
           }
@@ -30,12 +28,14 @@ export default buildConfig({
         {
           name: 'roles',
           type: 'select',
+          defaultValue: ['user'],
           hasMany: true,
           options: ['admin', 'user'],
-          defaultValue: ['user'],
           saveToJWT: true,
         },
       ],
     },
   ],
+  db: stubAdapter,
+  secret: 'eval-fixture',
 })

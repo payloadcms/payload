@@ -111,19 +111,19 @@ export function walkPath(
   symbols: Map<string, ts.Expression>,
 ): WalkPathResult {
   if (path.length === 0) {
-    return { ok: true, expr }
+    return { expr, ok: true }
   }
   const obj = resolveToObjectLiteral(expr, symbols)
   const [head, ...rest] = path as [string, ...string[]]
   if (!obj) {
-    return { ok: false, failedAt: head, reason: 'not-object' }
+    return { failedAt: head, ok: false, reason: 'not-object' }
   }
   const next = getProp(obj, head)
   if (!next) {
-    return { ok: false, failedAt: head, reason: 'missing' }
+    return { failedAt: head, ok: false, reason: 'missing' }
   }
   if (rest.length === 0) {
-    return { ok: true, expr: next }
+    return { expr: next, ok: true }
   }
   return walkPath(next, rest, symbols)
 }
@@ -305,8 +305,8 @@ function collectBlocks(
       continue
     }
     blocks.push({
-      fields: collectFieldsFrom(blockObj, symbols),
       slug: getString(getProp(blockObj, 'slug')),
+      fields: collectFieldsFrom(blockObj, symbols),
     })
   }
   return blocks
@@ -318,10 +318,10 @@ function parseField(
 ): ParsedField {
   const type = getString(getProp(fieldObj, 'type'))
   const field: ParsedField = {
-    hooks: collectHooks(fieldObj, symbols),
     name: getString(getProp(fieldObj, 'name')),
-    options: collectFieldOptions(fieldObj),
     type,
+    hooks: collectHooks(fieldObj, symbols),
+    options: collectFieldOptions(fieldObj),
   }
   if (type === 'array' || type === 'group') {
     field.fields = collectFieldsFrom(fieldObj, symbols)
@@ -388,11 +388,11 @@ function collectCollections(
       }
     }
     collections.push({
+      slug: getString(getProp(collObj, 'slug')),
       access: collectAccess(collObj, symbols),
       fields: collectFieldsFrom(collObj, symbols),
       hooks: collectHooks(collObj, symbols),
       options,
-      slug: getString(getProp(collObj, 'slug')),
     })
   }
   return collections

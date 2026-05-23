@@ -2,8 +2,6 @@ import { stubAdapter } from '@/db-stub.js'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  db: stubAdapter,
-  secret: 'eval-fixture',
   collections: [
     {
       slug: 'users',
@@ -12,10 +10,12 @@ export default buildConfig({
         {
           name: 'role',
           type: 'select',
-          options: ['admin', 'user'],
           defaultValue: 'user',
+          options: ['admin', 'user'],
         },
       ],
     },
   ],
+  db: stubAdapter,
+  secret: 'eval-fixture',
 })

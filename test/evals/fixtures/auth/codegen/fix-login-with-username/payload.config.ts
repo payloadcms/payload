@@ -5,8 +5,6 @@ import { buildConfig } from 'payload'
 // configured. Users can only log in with username — email fallback is disabled.
 // Fix this so users can log in with either username OR email.
 export default buildConfig({
-  db: stubAdapter,
-  secret: 'eval-fixture',
   collections: [
     {
       slug: 'customers',
@@ -21,4 +19,6 @@ export default buildConfig({
       ],
     },
   ],
+  db: stubAdapter,
+  secret: 'eval-fixture',
 })

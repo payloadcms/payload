@@ -2,9 +2,6 @@ import { stubAdapter } from '@/db-stub.js'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  db: stubAdapter,
-  secret: 'eval-fixture',
-  serverURL: 'https://api.myapp.com',
   collections: [
     {
       slug: 'posts',
@@ -17,4 +14,7 @@ export default buildConfig({
       ],
     },
   ],
+  db: stubAdapter,
+  secret: 'eval-fixture',
+  serverURL: 'https://api.myapp.com',
 })

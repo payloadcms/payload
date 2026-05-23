@@ -2,8 +2,6 @@ import { stubAdapter } from '@/db-stub.js'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  db: stubAdapter,
-  secret: 'eval-fixture',
   collections: [
     {
       slug: 'media',
@@ -16,7 +14,9 @@ export default buildConfig({
       ],
     },
   ],
+  db: stubAdapter,
   jobs: {
     tasks: [],
   },
+  secret: 'eval-fixture',
 })

@@ -2,8 +2,6 @@ import { stubAdapter } from '@/db-stub.js'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  db: stubAdapter,
-  secret: 'eval-fixture',
   collections: [
     {
       slug: 'posts',
@@ -25,8 +23,8 @@ export default buildConfig({
         afterChange: [
           async ({ doc, req }) => {
             await req.payload.update({
-              collection: 'posts',
               id: doc.id,
+              collection: 'posts',
               data: { viewCount: (doc.viewCount ?? 0) + 1 },
             })
             return doc
@@ -35,4 +33,6 @@ export default buildConfig({
       },
     },
   ],
+  db: stubAdapter,
+  secret: 'eval-fixture',
 })

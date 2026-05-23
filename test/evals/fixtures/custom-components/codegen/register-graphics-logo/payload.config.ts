@@ -2,8 +2,11 @@ import { stubAdapter } from '@/db-stub.js'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  db: stubAdapter,
-  secret: 'eval-fixture',
+  admin: {
+    components: {
+      graphics: {},
+    },
+  },
   collections: [
     {
       slug: 'posts',
@@ -16,9 +19,6 @@ export default buildConfig({
       ],
     },
   ],
-  admin: {
-    components: {
-      graphics: {},
-    },
-  },
+  db: stubAdapter,
+  secret: 'eval-fixture',
 })
