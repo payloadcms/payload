@@ -281,17 +281,18 @@ import type { MigrateUpArgs } from '@payloadcms/db-postgres'
 
 export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
   // Mark all existing posts as published so they appear in public queries.
-  // Paginate to avoid loading the entire collection into memory.
+  // Always re-query page 1: each iteration's updates remove docs from the
+  // `_status exists: false` filter, so the unprocessed set shifts up.
+  // Incrementing `page` would skip the next batch instead.
   const limit = 500
-  let page = 1
 
   while (true) {
-    const { docs, hasNextPage } = await payload.find({
+    const { docs } = await payload.find({
       collection: 'posts',
       where: { _status: { exists: false } },
       depth: 0,
       limit,
-      page,
+      page: 1,
       req,
     })
 
@@ -305,9 +306,6 @@ export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
         req,
       })
     }
-
-    if (!hasNextPage) break
-    page += 1
   }
 }
 ```

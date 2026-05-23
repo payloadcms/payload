@@ -9,7 +9,6 @@ import {
   type ParsedField,
   resolveToObjectLiteral,
   walkPath,
-  type WalkPathResult,
 } from './parseConfig.js'
 
 /**

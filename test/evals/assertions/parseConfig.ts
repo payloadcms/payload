@@ -1,5 +1,9 @@
 import ts from 'typescript'
 
+import type { AdapterName } from './types.js'
+
+export type { AdapterName } from './types.js'
+
 export type ParsedField = {
   /** For `blocks` fields: the parsed block configs in `blocks: [...]`. */
   blocks?: ParsedBlock[]
@@ -25,9 +29,6 @@ export type ParsedCollection = {
   options: Record<string, ts.Expression>
   slug?: string
 }
-
-/** Discriminator values for the db adapter in use. '<unknown>' means the parser did not recognize the adapter call expression. */
-export type AdapterName = 'd1-sqlite' | 'mongoose' | 'postgres' | 'sqlite' | 'vercel-postgres'
 
 export type ParsedConfig = {
   collections: ParsedCollection[]
