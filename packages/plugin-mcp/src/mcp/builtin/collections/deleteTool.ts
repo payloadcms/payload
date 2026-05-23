@@ -9,6 +9,10 @@ const DEFAULT_DESCRIPTION = 'Delete documents in a collection by ID or where cla
 export const deleteCollectionTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
   input: z.object({
+    id: z
+      .union([z.string(), z.number()])
+      .describe('Optional: specific document ID to delete')
+      .optional(),
     depth: z
       .number()
       .int()
@@ -20,10 +24,6 @@ export const deleteCollectionTool = defineCollectionTool({
     fallbackLocale: z
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    id: z
-      .union([z.string(), z.number()])
-      .describe('Optional: specific document ID to delete')
       .optional(),
     locale: z
       .string()
@@ -40,7 +40,7 @@ export const deleteCollectionTool = defineCollectionTool({
   const payload = req.payload
   const logger = getLogger({ payload })
 
-  const { id, where, depth, locale, fallbackLocale } = input
+  const { id, depth, fallbackLocale, locale, where } = input
 
   logger.info(
     `Deleting document from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}${locale ? `, locale: ${locale}` : ''}`,

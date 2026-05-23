@@ -56,28 +56,28 @@ export const sanitizeMCPConfig = ({
 
   for (const [key, tool] of Object.entries(pluginConfig.tools ?? {})) {
     items.push({
+      type: 'tool',
       key,
       label: key,
       tool,
-      type: 'tool',
     })
   }
 
   for (const [key, prompt] of Object.entries(pluginConfig.prompts ?? {})) {
     items.push({
+      type: 'prompt',
       key,
       label: prompt.title ?? key,
       prompt,
-      type: 'prompt',
     })
   }
 
   for (const [key, resource] of Object.entries(pluginConfig.resources ?? {})) {
     items.push({
+      type: 'resource',
       key,
       label: resource.title ?? key,
       resource,
-      type: 'resource',
     })
   }
 
@@ -115,11 +115,11 @@ const sanitizeCollectionConfig = ({
       continue
     }
     items.push({
+      type: 'collectionTool',
       collectionSlug: slug,
       key: toolKey,
       label: capitalize(toolKey),
       tool: overrideBuiltinTool(tool, matchedConfigEntry, collectionPluginConfig),
-      type: 'collectionTool',
     })
   }
 
@@ -132,11 +132,11 @@ const sanitizeCollectionConfig = ({
       // `true` means "enable, no override"; only the object form carries fields.
       const override = typeof matchedConfigEntry === 'object' ? matchedConfigEntry : undefined
       items.push({
+        type: 'collectionTool',
         collectionSlug: slug,
         key: authToolKey,
         label,
         tool: overrideBuiltinTool(tool, override, collectionPluginConfig),
-        type: 'collectionTool',
       })
     }
   }
@@ -154,11 +154,11 @@ const sanitizeCollectionConfig = ({
       continue
     }
     items.push({
+      type: 'collectionTool',
       collectionSlug: slug,
       key,
       label: key,
       tool: customTool,
-      type: 'collectionTool',
     })
   }
 
@@ -182,11 +182,11 @@ const sanitizeGlobalConfig = ({
       continue
     }
     items.push({
+      type: 'globalTool',
       globalSlug: slug,
       key: toolKey,
       label: capitalize(toolKey),
       tool: overrideBuiltinTool(baseTool, matchedConfigEntry, globalPluginConfig),
-      type: 'globalTool',
     })
   }
 
@@ -201,11 +201,11 @@ const sanitizeGlobalConfig = ({
       continue
     }
     items.push({
+      type: 'globalTool',
       globalSlug: slug,
       key,
       label: key,
       tool: customTool,
-      type: 'globalTool',
     })
   }
 

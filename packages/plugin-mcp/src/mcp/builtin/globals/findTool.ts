@@ -1,4 +1,5 @@
 import type { SelectType } from 'payload'
+
 import { z } from 'zod'
 
 import { defineGlobalTool } from '../../../defineTool.js'
@@ -39,7 +40,7 @@ export const findGlobalTool = defineGlobalTool({
   const payload = req.payload
   const logger = getLogger({ payload })
 
-  const { depth, locale, fallbackLocale, select } = input
+  const { depth, fallbackLocale, locale, select } = input
 
   logger.info(
     `Reading global: ${globalSlug}, depth: ${depth}${locale ? `, locale: ${locale}` : ''}`,

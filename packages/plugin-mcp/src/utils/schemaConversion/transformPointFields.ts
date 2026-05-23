@@ -20,9 +20,7 @@ export function transformPointFieldsForMCP(schema: JsonSchemaType): JsonSchemaTy
           isArrayType &&
           Array.isArray(value.items) &&
           value.items.length === 2 &&
-          value.items.every(
-            (item) => item && typeof item === 'object' && item.type === 'number',
-          )
+          value.items.every((item) => item && typeof item === 'object' && item.type === 'number')
         ) {
           // Transform to object format
           const isNullable = Array.isArray(value.type) && value.type.includes('null')

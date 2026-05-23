@@ -29,7 +29,7 @@ export function simplifyRelationshipFields(schema: JsonSchemaType): JsonSchemaTy
       (option) => option && typeof option === 'object' && '$ref' in option,
     )
 
-    const recurse = (option: JsonSchemaType | boolean): JsonSchemaType | boolean =>
+    const recurse = (option: boolean | JsonSchemaType): boolean | JsonSchemaType =>
       typeof option === 'object' ? simplifyRelationshipFields(option) : option
 
     if (hasRef) {
