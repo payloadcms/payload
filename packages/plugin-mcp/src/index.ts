@@ -18,12 +18,7 @@ declare module 'payload' {
 
 export type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig }
 
-export {
-  defineCollectionTool,
-  defineGlobalTool,
-  definePrompt,
-  defineTool,
-} from './defineTool.js'
+export { defineCollectionTool, defineGlobalTool, definePrompt, defineTool } from './defineTool.js'
 
 export const mcpPlugin = definePlugin<MCPPluginConfig>({
   slug: '@payloadcms/plugin-mcp',
