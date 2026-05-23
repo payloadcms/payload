@@ -7,7 +7,7 @@ import React from 'react'
 import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { ToolbarControls } from './Controls/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'live-preview-toolbar'
 

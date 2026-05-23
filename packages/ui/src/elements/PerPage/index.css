@@ -1,0 +1,24 @@
+@layer payload-default {
+  .per-page {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .per-page__label {
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    white-space: nowrap;
+  }
+
+  .btn.btn--style-secondary.per-page--active {
+    background-color: var(--color-bg-transparent-pressed);
+  }
+
+  .per-page__icon {
+    color: var(--color-icon-secondary);
+  }
+}

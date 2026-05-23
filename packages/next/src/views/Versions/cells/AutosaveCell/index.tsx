@@ -5,7 +5,7 @@ import { Pill, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import { VersionPillLabel } from '../../../Version/VersionPillLabel/VersionPillLabel.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'autosave-cell'
 

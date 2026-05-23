@@ -390,6 +390,7 @@ export const daTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Permanent Sletning',
     permanentlyDeletedCountSuccessfully: 'Permanent slettet {{count}} {{label}} succesfuldt.',
     perPage: 'Per side: {{limit}}',
+    perPageLabel: 'Pr. side:',
     previous: 'Tidligere',
     reindex: 'Genindekser',
     reindexingAll: 'Genindekserer alle {{collections}}.',

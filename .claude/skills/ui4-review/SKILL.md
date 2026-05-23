@@ -48,7 +48,7 @@ grep -n '&__\|&--' "$FILE"
 # 2. Hardcoded Spacing (px/rem values that should be tokens)
 grep -nE ':\s*[0-9]+px|:\s*[0-9.]+rem' "$FILE"
 
-# 3. Hardcoded Colors (hex, rgb, rgba)
+# 3. Hardcoded Colors (hex, rgb, rgba - includes box-shadow)
 grep -nE '#[0-9a-fA-F]{3,8}|rgba?\(' "$FILE"
 
 # 4. Legacy Theme Variables
@@ -125,7 +125,15 @@ After fixing, report:
 
 **Rule:** For values ≤ 40px, ALWAYS use a single token (no `calc()`). For values > 40px, use `calc()` with a spacer token.
 
-**Exceptions:** `1px` borders, `0`, percentages, `auto`, `inherit`, `-1px` (for clip offsets)
+**Exceptions:** `0`, percentages, `auto`, `inherit`, `-1px` (for clip offsets)
+
+---
+
+### Stroke Width Tokens
+
+| Value | Token                  |
+| ----- | ---------------------- |
+| 1px   | `--stroke-width-small` |
 
 ---
 
@@ -137,6 +145,30 @@ After fixing, report:
 | 5px / 0.3125rem  | `--radius-medium` |
 | 13px / 0.8125rem | `--radius-large`  |
 | 9999px           | `--radius-full`   |
+
+---
+
+### Elevation Tokens (Box Shadows)
+
+Defined in `packages/ui/src/css/elevations.css`.
+
+**Never use hardcoded `rgba()` for box-shadows.** Use elevation tokens instead:
+
+| Token                          | Use Case                          |
+| ------------------------------ | --------------------------------- |
+| `--elevation-300-tooltip`      | Tooltips, small floating elements |
+| `--elevation-400-menu-panel`   | Menus, dropdowns, floating panels |
+| `--elevation-500-modal-window` | Modals, dialogs, full overlays    |
+
+```css
+/* ❌ BAD - hardcoded shadow */
+box-shadow: 0 -2px 16px -2px rgba(0, 0, 0, 0.2);
+
+/* ✅ GOOD - elevation token */
+box-shadow: var(--elevation-400-menu-panel);
+```
+
+Elevations automatically adjust for light/dark themes.
 
 ---
 
@@ -214,6 +246,8 @@ For each violation:
 - No matching token exists (e.g., 18px badge size)
 - Value is intentional (e.g., `1px` border, `0`)
 - Ambiguous replacement
+
+**Empty CSS files:** If a component's CSS file becomes empty after migration (all styles now handled by shared components like `Button`), delete the CSS file and remove its import from the component.
 
 ---
 
