@@ -1,23 +1,5 @@
 import type { CodegenEvalCase } from '../../types.js'
 
-/**
- * Rich text (Lexical) eval cases.
- *
- * NOTE for downstream task implementers:
- * Only include assertions that the LLM must actively produce — never assertions
- * already satisfied by the starter fixture (those are false signal). When no
- * AST assertion kind applies, leave `assertions: []` and rely on the scorer.
- *
- * AST hygiene for rich text:
- * - Feature configuration lives inside `lexicalEditor({ features: [...] })` which
- *   is a function argument, not a static object path. No assertion kind can verify
- *   array element contents. Those cases use `assertions: []` + scorer only.
- * - `configOption { path: 'editor' }` verifies that the root editor is set in
- *   buildConfig — confirms the LLM placed it at the right level.
- * - `fieldOption { option: 'editor' }` verifies a field-level editor override exists.
- * - `fieldExists` + `fieldOption { option: 'type', value: 'richText' }` verifies a
- *   missing richText field was added with the correct type.
- */
 export const richtextCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
   // Positive cases — valid config modifications

@@ -1,13 +1,5 @@
 import type { CodegenEvalCase } from '../../types.js'
 
-/**
- * Custom Components eval cases.
- *
- * NOTE for downstream task implementers:
- * Only include assertions that the LLM must actively produce — never assertions
- * already satisfied by the starter fixture (those are false signal). When no
- * AST assertion kind applies, leave `assertions: []` and rely on the scorer.
- */
 export const customComponentsCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
   // Positive cases — valid config modifications

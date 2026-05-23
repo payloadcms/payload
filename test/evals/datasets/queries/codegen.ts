@@ -1,18 +1,5 @@
 import type { CodegenEvalCase } from '../../types.js'
 
-/**
- * Queries eval cases.
- *
- * NOTE for downstream task implementers:
- * Only include assertions that the LLM must actively produce — never assertions
- * already satisfied by the starter fixture (those are false signal). When no
- * AST assertion kind applies, leave `assertions: []` and rely on the scorer.
- *
- * Runtime call patterns (payload.find, REST fetch, etc.) are NOT config
- * modifications and are deferred — see 4-DEFERRED-EVAL-CASES.md ## QUERIES.
- * Only config-modifying cases (defaultDepth, defaultPopulate, graphQL options,
- * maxDepth, pagination limits) belong here.
- */
 export const queriesCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
   // Positive cases — valid config modifications

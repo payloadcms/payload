@@ -1,19 +1,5 @@
 import type { CodegenEvalCase } from '../../types.js'
 
-/**
- * Access control eval cases.
- *
- * NOTE for downstream task implementers:
- * Only include assertions that the LLM must actively produce — never assertions
- * already satisfied by the starter fixture (those are false signal). When no
- * AST assertion kind applies, leave `assertions: []` and rely on the scorer.
- *
- * AST catalog gaps as of Task 9:
- * - Global access functions are not parsed by parseConfig.ts (only collections
- *   are scanned) → scorer-only for global-level access cases
- * - `fieldOption { option: 'access' }` checks that the field has an access
- *   object but cannot inspect individual operation bodies → scorer supplements
- */
 export const accessControlCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
   // Positive cases — valid config modifications

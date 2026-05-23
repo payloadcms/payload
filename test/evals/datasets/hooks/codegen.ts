@@ -1,18 +1,5 @@
 import type { CodegenEvalCase } from '../../types.js'
 
-/**
- * Hooks eval cases.
- *
- * NOTE for downstream task implementers:
- * Only include assertions that the LLM must actively produce — never assertions
- * already satisfied by the starter fixture (those are false signal). When no
- * AST assertion kind applies, leave `assertions: []` and rely on the scorer.
- *
- * AST catalog gaps as of Task 7:
- * - `beforeDuplicate` is NOT in FieldHookName → deferred (see 4-DEFERRED-EVAL-CASES.md)
- * - Global hooks are not parsed by parseConfig.ts (only collections are scanned) → scorer-only
- * - Root-level `hooks.afterError` is addressable via `configOption { path: 'hooks.afterError' }`
- */
 export const hooksCodegenDataset: CodegenEvalCase[] = [
   // ──────────────────────────────────────────────────────────
   // Positive cases — valid config modifications
