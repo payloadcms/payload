@@ -2,8 +2,6 @@ import ts from 'typescript'
 
 import type { AdapterName } from './types.js'
 
-export type { AdapterName } from './types.js'
-
 export type ParsedField = {
   /** For `blocks` fields: the parsed block configs in `blocks: [...]`. */
   blocks?: ParsedBlock[]
