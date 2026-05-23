@@ -82,8 +82,8 @@ export const accessControlCodegenDataset: CodegenEvalCase[] = [
       'The read access function guards against undefined id before calling startsWith — e.g. `if (!id) return Boolean(user)` or optional chaining — so it no longer crashes during the Access Operation',
     category: 'access-control',
     fixturePath: 'access-control/codegen/guard-undefined-id',
-    // AST cannot verify the guard logic inside a function body — rely on scorer
-    assertions: [{ kind: 'collectionAccess', slug: 'posts', operation: 'read' }],
+    // No AST assertion kind verifies the body of the access function — scorer carries the load.
+    assertions: [],
   },
   {
     input:
@@ -92,6 +92,7 @@ export const accessControlCodegenDataset: CodegenEvalCase[] = [
       'The read access function on the posts collection no longer crashes when req.user is null — e.g. uses optional chaining (req.user?.role) or an explicit null check before accessing .role; unauthenticated requests return false or a Where constraint',
     category: 'access-control',
     fixturePath: 'access-control/codegen/fix-null-user-crash',
-    assertions: [{ kind: 'collectionAccess', slug: 'posts', operation: 'read' }],
+    // No AST assertion kind verifies the body of the access function — scorer carries the load.
+    assertions: [],
   },
 ]

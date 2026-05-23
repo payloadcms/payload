@@ -71,11 +71,11 @@ export const Posts: CollectionConfig = {
 
     // Async: Check related data
     delete: async ({ req, id }) => {
-      const hasComments = await req.payload.count({
+      const commentCount = await req.payload.count({
         collection: 'comments',
         where: { post: { equals: id } },
       })
-      return hasComments === 0
+      return commentCount.totalDocs === 0
     },
 
     // Admin panel visibility
@@ -547,11 +547,11 @@ export const projectMemberAccess: Access = async ({ req, id }) => {
 // Dependency guard — block delete when related documents exist
 export const preventDeleteWithDependencies: Access = async ({ req, id }) => {
   if (!id) return true // Access Operation guard
-  const count = await req.payload.count({
+  const { totalDocs } = await req.payload.count({
     collection: 'related-items',
     where: { parent: { equals: id } },
   })
-  return count === 0
+  return totalDocs === 0
 }
 ```
 

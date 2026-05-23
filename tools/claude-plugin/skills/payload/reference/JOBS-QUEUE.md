@@ -41,7 +41,7 @@ export default buildConfig({
         // Handler return value must include an `output` key
         outputSchema: [{ name: 'messageId', type: 'text', required: true }],
 
-        // Retry this task up to 3 times on failure
+        // Retry up to 2 times on failure (3 attempts total)
         retries: 2,
 
         handler: async ({ input, job, req }) => {
