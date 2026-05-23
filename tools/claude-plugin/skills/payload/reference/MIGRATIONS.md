@@ -281,20 +281,33 @@ import type { MigrateUpArgs } from '@payloadcms/db-postgres'
 
 export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
   // Mark all existing posts as published so they appear in public queries.
-  const { docs } = await payload.find({
-    collection: 'posts',
-    where: { _status: { exists: false } },
-    limit: 0,
-    req,
-  })
+  // Paginate to avoid loading the entire collection into memory.
+  const limit = 500
+  let page = 1
 
-  for (const doc of docs) {
-    await payload.update({
+  while (true) {
+    const { docs, hasNextPage } = await payload.find({
       collection: 'posts',
-      id: doc.id,
-      data: { _status: 'published' },
+      where: { _status: { exists: false } },
+      depth: 0,
+      limit,
+      page,
       req,
     })
+
+    if (docs.length === 0) break
+
+    for (const doc of docs) {
+      await payload.update({
+        collection: 'posts',
+        id: doc.id,
+        data: { _status: 'published' },
+        req,
+      })
+    }
+
+    if (!hasNextPage) break
+    page += 1
   }
 }
 ```

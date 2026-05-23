@@ -280,8 +280,12 @@ Field access does NOT support query constraints - only boolean returns.
 ```ts
 import type { NumberField, FieldAccess } from 'payload'
 
+// Assumes the salary field lives on the Users collection — doc.id is the
+// user's own ID, so comparing user?.id === doc?.id correctly identifies
+// the record owner. On any other collection, use a `user` relationship
+// field and compare `doc.user === user?.id` instead.
 const salaryReadAccess: FieldAccess = ({ req: { user }, doc }) => {
-  // Self can read own salary
+  // Self can read own salary (Users collection only — doc.id is the user's ID)
   if (user?.id === doc?.id) return true
   // Admin can read all salaries
   return user?.roles?.includes('admin')

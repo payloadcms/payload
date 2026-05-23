@@ -319,7 +319,7 @@ schedule: [
 
 ## Execution Methods
 
-Scheduling (step 2) and execution (step 4) are independent. You must configure a runner that processes the same `queue` name used when jobs are queued.
+Scheduling and execution are independent. You must configure a runner that processes the same `queue` name used when jobs are queued.
 
 ### 1. Bin script (recommended for dedicated servers)
 

@@ -26,7 +26,7 @@ Install the package and register the editor at root level or per-field:
 ```ts
 // see test/lexical/config.ts
 import { buildConfig } from 'payload'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export default buildConfig({
   // Root-level editor — applied to every richText field that doesn't override it
@@ -40,7 +40,7 @@ export default buildConfig({
           type: 'richText',
           // Field-level override — only this field gets FixedToolbarFeature
           editor: lexicalEditor({
-            features: ({ defaultFeatures }) => [...defaultFeatures],
+            features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
           }),
         },
       ],
