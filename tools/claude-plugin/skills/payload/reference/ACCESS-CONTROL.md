@@ -561,7 +561,7 @@ export const preventDeleteWithDependencies: Access = async ({ req, id }) => {
 
 ## Access Control Function Arguments
 
-`req` is always `PayloadRequest` (has `req.user`, `req.payload`, `req.headers`, `req.locale`). `id` is `undefined` during Access Operations (login checks).
+Quick signature reference:
 
 | Operation         | Signature                                          |
 | ----------------- | -------------------------------------------------- |
@@ -572,6 +572,21 @@ export const preventDeleteWithDependencies: Access = async ({ req, id }) => {
 | Field create      | `({ req, data, siblingData }) => boolean`          |
 | Field read        | `({ req, id, doc, siblingData }) => boolean`       |
 | Field update      | `({ req, id, data, doc, siblingData }) => boolean` |
+
+### Argument reference
+
+- `req: PayloadRequest`
+  - `req.user`: authenticated user (or `null` for public requests)
+  - `req.payload`: Payload instance for queries inside the access fn
+  - `req.headers`: request headers
+  - `req.locale`: current locale string
+- `id: string | number | undefined`: document ID being read/updated/deleted. **`undefined` during Access Operation** (login check) — guard before using.
+- `data`: incoming write payload on create/update; `undefined` during Access Operation.
+- `doc`: full existing document on field-level read/update; `undefined` during Access Operation and on collection create.
+- `siblingData`: adjacent field values at the same level (field access only).
+- `blockData`: containing block's data (inside `blocks` field access only); `undefined` outside a block.
+
+Access fns may return `boolean` or a `Where` query for row-level filtering — field-level fns return `boolean` only.
 
 ## Access Operation Context
 
