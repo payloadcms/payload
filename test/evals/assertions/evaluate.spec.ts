@@ -91,6 +91,33 @@ describe('configOption', () => {
     expect(errors[0]).toMatch(/admin\.importMap\.baseDir/)
   })
 
+  it('reports the failing segment name when a path segment is missing', () => {
+    const src = wrap(`admin: { components: {} },`)
+    const errors = evaluateAssertions(src, [
+      { kind: 'configOption', path: 'admin.importMap.baseDir' },
+    ])
+    expect(errors).toHaveLength(1)
+    // Should name the segment that couldn't be found
+    expect(errors[0]).toMatch(/importMap/)
+  })
+
+  it('reports not-object when an intermediate segment is a non-object expression', () => {
+    // db is a call expression (postgresAdapter(...)) so descent into db.connectionString fails
+    const src = raw(`
+      import { buildConfig } from 'payload'
+      import { postgresAdapter } from '@payloadcms/db-postgres'
+      export default buildConfig({
+        db: postgresAdapter({ url: 'postgres://localhost/test' }),
+        secret: 'test',
+        collections: [],
+      })
+    `)
+    const errors = evaluateAssertions(src, [{ kind: 'configOption', path: 'db.connectionString' }])
+    expect(errors).toHaveLength(1)
+    // configOption stops at db (a CallExpression, not an object) — should explain the segment
+    expect(errors[0]).toMatch(/db/)
+  })
+
   it('walks into jobs.* paths', () => {
     const source = `
       import { buildConfig } from 'payload'

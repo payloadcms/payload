@@ -26,12 +26,15 @@ export type ParsedCollection = {
   slug?: string
 }
 
+/** Discriminator values for the db adapter in use. '<unknown>' means the parser did not recognize the adapter call expression. */
+export type AdapterName = 'd1-sqlite' | 'mongoose' | 'postgres' | 'sqlite' | 'vercel-postgres'
+
 export type ParsedConfig = {
   collections: ParsedCollection[]
   /** Top-level buildConfig keys excluding `collections`, `db`, and `jobs`. Captured as raw AST expressions so dotted paths can be walked. */
   configOptions: Record<string, ts.Expression>
   /** Parsed db adapter call: which adapter is in use and the object literal passed to it. */
-  db?: { adapter: string; options: Record<string, ts.Expression> }
+  db?: { adapter: '<unknown>' | AdapterName; options: Record<string, ts.Expression> }
   /** Parsed jobs config. */
   jobs?: {
     options: Record<string, ts.Expression>
@@ -77,14 +80,24 @@ export function parseConfig(source: string): ParsedConfig {
 }
 
 /**
+ * Structured result from `walkPath`. On success, `expr` holds the resolved
+ * expression. On failure, `failedAt` names the segment that couldn't be
+ * resolved and `reason` distinguishes "the key was absent" from "the
+ * intermediate node was not an object literal".
+ */
+export type WalkPathResult =
+  | { expr: ts.Expression; ok: true }
+  | { failedAt: string; ok: false; reason: 'missing' | 'not-object' }
+
+/**
  * Walks a dotted path through nested object literals, resolving identifier
  * references at each step via the symbols map.
  *
  * For example, given the expression for `admin: { importMap: { baseDir: './src' } }`
  * and path `['admin', 'importMap', 'baseDir']`, returns the expression for `'./src'`.
  *
- * Returns `undefined` if any segment is missing or if an intermediate node is
- * not an object literal (and cannot be resolved to one via the symbols map).
+ * Returns a structured result indicating success or the specific failure reason
+ * (missing key or non-object intermediate node).
  *
  * Boolean shorthand: when the final path segment resolves to an
  * `ObjectLiteralExpression`, the evaluator may treat that as satisfying
@@ -95,21 +108,21 @@ export function walkPath(
   expr: ts.Expression,
   path: string[],
   symbols: Map<string, ts.Expression>,
-): ts.Expression | undefined {
+): WalkPathResult {
   if (path.length === 0) {
-    return expr
+    return { ok: true, expr }
   }
   const obj = resolveToObjectLiteral(expr, symbols)
-  if (!obj) {
-    return undefined
-  }
   const [head, ...rest] = path as [string, ...string[]]
+  if (!obj) {
+    return { ok: false, failedAt: head, reason: 'not-object' }
+  }
   const next = getProp(obj, head)
   if (!next) {
-    return undefined
+    return { ok: false, failedAt: head, reason: 'missing' }
   }
   if (rest.length === 0) {
-    return next
+    return { ok: true, expr: next }
   }
   return walkPath(next, rest, symbols)
 }
@@ -162,7 +175,7 @@ function unwrap(node: ts.Expression): ts.Expression {
   return current
 }
 
-function resolveToObjectLiteral(
+export function resolveToObjectLiteral(
   node: ts.Expression,
   symbols: Map<string, ts.Expression>,
   seen: Set<string> = new Set(),

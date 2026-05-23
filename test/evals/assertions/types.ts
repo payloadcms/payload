@@ -8,6 +8,9 @@
  * as "minor" (e.g. collection-level vs. field-level hooks).
  */
 
+/** String-literal union of recognized Payload db adapter discriminators. Catches typos like `adapter: 'mongo'` at compile time. */
+export type AdapterName = 'd1-sqlite' | 'mongoose' | 'postgres' | 'sqlite' | 'vercel-postgres'
+
 export type CollectionHookName =
   | 'afterChange'
   | 'afterDelete'
@@ -130,8 +133,8 @@ export type Assertion =
       value?: boolean | number | string
     }
   | {
-      /** Optional adapter discriminator. Values: 'mongoose' | 'postgres' | 'sqlite' | 'vercel-postgres' | 'd1-sqlite'. Omit to accept any. */
-      adapter?: string
+      /** Optional adapter discriminator. Omit to accept any adapter. */
+      adapter?: AdapterName
       /** Asserts a property passed to the db adapter call (mongooseAdapter, postgresAdapter, sqliteAdapter, vercelPostgresAdapter, d1SqliteAdapter). */
       kind: 'dbAdapterOption'
       /** Dotted path on the adapter args, e.g. 'migrationDir', 'prodMigrations', 'transactionOptions'. */
