@@ -81,13 +81,17 @@ export const sanitizeMCPConfig = ({
     })
   }
 
+  // Mirror Payload's own admin.user detection (sanitize.ts) since plugins run first.
+  const firstCollectionWithAuth = config.collections!.find(({ auth }) => Boolean(auth))
+
   return {
     disabled: pluginConfig.disabled,
     items,
     mcp: pluginConfig.mcp,
     overrideApiKeyCollection: pluginConfig.overrideApiKeyCollection,
     overrideAuth: pluginConfig.overrideAuth,
-    userCollection: pluginConfig.userCollection ?? config.admin?.user ?? 'users',
+    userCollection:
+      pluginConfig.userCollection ?? config.admin?.user ?? firstCollectionWithAuth?.slug ?? 'users',
   }
 }
 

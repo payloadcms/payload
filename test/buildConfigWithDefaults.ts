@@ -174,29 +174,12 @@ export async function buildConfigWithDefaults(
     config.admin.disable = true
   }
 
+  // Auto-add the MCP plugin so every test suite exercises it. Suites that need
+  // to configure it explicitly add their own `mcpPlugin({...})` call. The
+  // plugin itself adds a default `users` collection when needed so its own
+  // auth-enabled `payload-mcp-api-keys` doesn't end up as `admin.user`.
   const hasMcpPlugin = (config.plugins ?? []).some((p) => p.slug === '@payloadcms/plugin-mcp')
-
   if (!hasMcpPlugin) {
-    // Payload's sanitize step picks the first auth-enabled collection as admin.user when
-    // it's unset, so adding the MCP plugin's API keys collection (auth.useAPIKey) would
-    // otherwise hijack admin.user. Pre-populate a default users collection to keep that
-    // detection stable across suites that don't define one.
-    if (!config.admin.user && !(config.collections ?? []).some(({ auth }) => Boolean(auth))) {
-      config.collections = [
-        ...(config.collections ?? []),
-        {
-          slug: 'users',
-          auth: { tokenExpiration: 7200 },
-          fields: [],
-        },
-      ]
-      config.admin.user = 'users'
-    }
-
-    // Opt-out model — every collection / global is exposed by default; suites can pass
-    // their own `mcpPlugin({ collections: { foo: { disabled: true } } })` if they want
-    // finer-grained control, in which case we'll see the plugin in `config.plugins`
-    // and skip this block.
     config.plugins = [...(config.plugins ?? []), mcpPlugin({})]
   }
 
