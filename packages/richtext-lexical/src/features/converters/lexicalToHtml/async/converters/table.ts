@@ -2,7 +2,7 @@ import type {
   SerializedTableCellNode,
   SerializedTableNode,
   SerializedTableRowNode,
-} from '../../../../../nodeTypes.js'
+} from '../../../../../types/nodeTypes.js'
 import type { HTMLConvertersAsync } from '../types.js'
 
 import { isSafeCssColor } from '../../shared/cssColors.js'

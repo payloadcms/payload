@@ -14,7 +14,7 @@ export const sanitizeServerFeatures = (
   const sanitized: SanitizedServerFeatures = {
     enabledFeatures: [],
     generatedTypes: {
-      modifyOutputSchemas: [],
+      modifyJSONSchemas: [],
     },
     getSubFields: new Map(),
     getSubFieldsData: new Map(),
@@ -43,8 +43,8 @@ export const sanitizeServerFeatures = (
   }
 
   features.forEach((feature) => {
-    if (feature?.generatedTypes?.modifyOutputSchema) {
-      sanitized.generatedTypes.modifyOutputSchemas.push(feature.generatedTypes.modifyOutputSchema)
+    if (feature?.generatedTypes?.modifyJSONSchema) {
+      sanitized.generatedTypes.modifyJSONSchemas.push(feature.generatedTypes.modifyJSONSchema)
     }
 
     if (feature?.hooks?.beforeValidate?.length) {

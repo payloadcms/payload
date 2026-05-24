@@ -8,7 +8,7 @@ import type { SerializedLexicalNode } from 'lexical'
 import { ListPlugin } from '@lexical/react/LexicalListPlugin.js'
 import React from 'react'
 
-import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
+import type { StronglyTypedElementNode } from '../../../types/nodeTypes.js'
 import type { PluginComponent } from '../../typesClient.js'
 
 export type SerializedListItemNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
