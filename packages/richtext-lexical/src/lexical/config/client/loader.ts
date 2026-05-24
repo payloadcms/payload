@@ -7,7 +7,7 @@ import type {
   ResolvedClientFeature,
   ResolvedClientFeatureMap,
 } from '../../../features/typesClient.js'
-import type { FeatureClientSchemaMap } from '../../../types.js'
+import type { FeatureClientSchemaMap } from '../../../types/index.js'
 import type { ClientEditorConfig } from '../types.js'
 
 /**

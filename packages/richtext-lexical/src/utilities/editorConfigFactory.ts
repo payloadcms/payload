@@ -7,7 +7,7 @@ import type {
   FeaturesInput,
   LexicalRichTextAdapter,
   LexicalRichTextAdapterProvider,
-} from '../types.js'
+} from '../types/index.js'
 
 import { defaultEditorConfig, defaultEditorFeatures } from '../lexical/config/server/default.js'
 import { loadFeatures } from '../lexical/config/server/loader.js'

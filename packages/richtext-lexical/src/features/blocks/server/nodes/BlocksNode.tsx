@@ -16,7 +16,7 @@ import {
   type NodeKey,
 } from 'lexical'
 
-import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
+import type { StronglyTypedLeafNode } from '../../../../types/nodeTypes.js'
 
 type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = {
   /** Block form data */

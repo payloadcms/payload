@@ -9,7 +9,7 @@ import type { Config, Field, FieldSchemaMap } from 'payload'
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { sanitizeFields } from 'payload'
 
-import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
+import type { StronglyTypedElementNode } from '../../../types/nodeTypes.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'

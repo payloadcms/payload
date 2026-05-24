@@ -39,7 +39,7 @@ import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
-import type { ViewMapBlockComponentProps } from '../../../../types.js'
+import type { ViewMapBlockComponentProps } from '../../../../types/index.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
 import './index.css'
