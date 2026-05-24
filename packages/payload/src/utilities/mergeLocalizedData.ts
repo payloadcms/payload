@@ -236,7 +236,9 @@ export function mergeLocalizedData({
                   }
                 }
 
-                result[field.name] = merged
+                if (Object.keys(merged).length > 0) {
+                  result[field.name] = merged
+                }
               } else if (parentIsLocalized) {
                 // Child of localized parent - replace with new value
                 result[field.name] = newValue
