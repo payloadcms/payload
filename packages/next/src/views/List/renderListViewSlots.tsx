@@ -6,6 +6,8 @@ import type {
   BeforeListServerPropsOnly,
   BeforeListTableClientProps,
   BeforeListTableServerPropsOnly,
+  ListHeaderActionsClientProps,
+  ListHeaderActionsServerPropsOnly,
   ListViewServerPropsOnly,
   ListViewSlots,
   ListViewSlotSharedClientProps,
@@ -67,6 +69,15 @@ export const renderListViewSlots = ({
       Component: collectionConfig.admin.components.afterListTable,
       importMap: payload.importMap,
       serverProps: serverProps satisfies AfterListTableServerPropsOnly,
+    })
+  }
+
+  if (collectionConfig.admin.components?.listHeaderActions) {
+    result.ListHeaderActions = RenderServerComponent({
+      clientProps: clientProps satisfies ListHeaderActionsClientProps,
+      Component: collectionConfig.admin.components.listHeaderActions,
+      importMap: payload.importMap,
+      serverProps: serverProps satisfies ListHeaderActionsServerPropsOnly,
     })
   }
 

@@ -52,8 +52,12 @@ export type {
   CustomComponent as CustomSaveDraftButton,
 } from '../config/types.js'
 export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
-export type { ConditionalDateProps } from './elements/DatePicker.js'
-export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
+export type {
+  ConditionalDateProps,
+  DayPickerProps,
+  SharedProps,
+  TimePickerProps,
+} from './elements/DatePicker.js'
 export type {
   EditMenuItemsClientProps,
   EditMenuItemsServerProps,
@@ -636,13 +640,13 @@ export type {
    */
   DocumentViewClientProps as ClientSideEditViewProps,
   DocumentViewClientProps,
+  DocumentViewServerProps,
   /**
    * @deprecated
    * The `ServerSideEditViewProps` is deprecated and will be removed in the next major version.
    * Use `DocumentViewServerProps` instead.
    */
   DocumentViewServerProps as ServerSideEditViewProps,
-  DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewProps,
   RenderDocumentVersionsProperties,
@@ -690,6 +694,9 @@ export type {
   BeforeListTableServerProps,
   BeforeListTableServerPropsOnly,
   HierarchyViewData,
+  ListHeaderActionsClientProps,
+  ListHeaderActionsServerProps,
+  ListHeaderActionsServerPropsOnly,
   ListViewClientProps,
   ListViewServerProps,
   ListViewServerPropsOnly,
