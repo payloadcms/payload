@@ -1,0 +1,48 @@
+{
+  "name": "payload-example-vinext",
+  "version": "1.0.0",
+  "description": "Minimal Payload example running through vinext.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "vinext build",
+    "dev": "vinext dev",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "vinext start"
+  },
+  "dependencies": {
+    "@payloadcms/db-sqlite": "3.84.1",
+    "@payloadcms/next": "3.84.1",
+    "@payloadcms/richtext-lexical": "3.84.1",
+    "@payloadcms/ui": "3.84.1",
+    "cross-env": "^7.0.3",
+    "graphql": "^16.8.1",
+    "next": "^16.2.6",
+    "payload": "3.84.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "vinext": "0.0.52"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.25",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "@vitejs/plugin-rsc": "^0.5.26",
+    "typescript": "5.5.2",
+    "vite": "^8.0.0",
+    "vite-tsconfig-paths": "^5.0.4"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0",
+    "pnpm": "^9 || ^10 || ^11"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "unrs-resolver"
+    ]
+  }
+}
