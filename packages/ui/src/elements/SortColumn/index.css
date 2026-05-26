@@ -38,7 +38,7 @@
   .sort-column__buttons {
     display: flex;
     align-items: center;
-    gap: 0;
+    gap: var(--spacer-1);
   }
 
   .sort-column__button {
