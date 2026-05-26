@@ -429,10 +429,9 @@ export const baseConfig: Partial<Config> = {
       },
     })
 
-<<<<<<< HEAD
     // Seed versions-diff collection with two versions for diff testing
     await seedVersionsDiff(payload)
-=======
+
     // Seed draft-versions collection with many versions for pagination testing
     const { id: draftVersionsDocID } = await payload.create({
       collection: draftVersionsSlug,
@@ -453,7 +452,6 @@ export const baseConfig: Partial<Config> = {
         },
       })
     }
->>>>>>> main
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
