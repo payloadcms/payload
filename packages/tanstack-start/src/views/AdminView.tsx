@@ -47,6 +47,7 @@ import { buildDocumentViewClientProps } from '@payloadcms/ui/views/Document/buil
 import { buildListViewClientProps } from '@payloadcms/ui/views/List/buildListViewClientProps'
 import { LoginForm } from '@payloadcms/ui/views/Login/LoginForm'
 import { LogoutClient } from '@payloadcms/ui/views/Logout/LogoutClient'
+import { UnauthorizedView } from '@payloadcms/ui/views/Unauthorized/UnauthorizedClient'
 import { DefaultVersionView } from '@payloadcms/ui/views/Version/Default'
 import { buildVersionFields } from '@payloadcms/ui/views/Version/RenderFieldsToDiff/buildVersionFields'
 import { RenderVersionFieldsToDiff } from '@payloadcms/ui/views/Version/RenderFieldsToDiff/RenderVersionFieldsToDiff'
@@ -515,6 +516,20 @@ function DocumentViewContent({
   const livePreviewSlot = CustomLivePreviewComponent ? <CustomLivePreviewComponent /> : undefined
 
   const renderSubView = () => {
+    // The Next.js adapter selects the document view via `getDocumentView`,
+    // which can return `UnauthorizedViewWithGutter` when the user lacks
+    // permissions for the current segment (e.g. `create` on a locale where
+    // the create access function denies). The server has already evaluated
+    // this and sent `viewKind: 'unauthorized'`; mirror it here so locale /
+    // permission changes flip the view, not just the form data.
+    if (documentData.viewKind === 'unauthorized') {
+      return (
+        <Gutter className="unauthorized--with-gutter">
+          <UnauthorizedView />
+        </Gutter>
+      )
+    }
+
     switch (routeData.documentSubViewType) {
       case 'api':
         return <APIViewClient />

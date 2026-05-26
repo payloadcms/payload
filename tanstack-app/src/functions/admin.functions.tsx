@@ -5,32 +5,34 @@ import React from 'react'
 
 import { getToSerializable } from './getToSerializable.js'
 
-export const loadDashboard = createServerFn({ method: 'GET' }).handler(async () => {
-  const { getAdminPageData } = await import('@payloadcms/tanstack-start/views/server')
-  const config = (await import('@payload-config')).default
-  const { importMap } = await import('../importMap.js')
-  const toSerializable = await getToSerializable()
+export const loadDashboard = createServerFn({ method: 'GET' })
+  .inputValidator((data: { search?: Record<string, string | string[]> } | undefined) => data ?? {})
+  .handler(async ({ data }) => {
+    const { getAdminPageData } = await import('@payloadcms/tanstack-start/views/server')
+    const config = (await import('@payload-config')).default
+    const { importMap } = await import('../importMap.js')
+    const toSerializable = await getToSerializable()
 
-  let result: Awaited<ReturnType<typeof getAdminPageData>>
-  try {
-    result = await getAdminPageData({
-      configPromise: config,
-      importMap,
-      params: { segments: [] },
-      searchParams: {},
-    })
-  } catch (err) {
-    if (err instanceof Error && err.message === 'not-found') {
-      return { _notFound: true } as any
+    let result: Awaited<ReturnType<typeof getAdminPageData>>
+    try {
+      result = await getAdminPageData({
+        configPromise: config,
+        importMap,
+        params: { segments: [] },
+        searchParams: data?.search ?? {},
+      })
+    } catch (err) {
+      if (err instanceof Error && err.message === 'not-found') {
+        return { _notFound: true } as any
+      }
+      throw err
     }
-    throw err
-  }
 
-  if ('redirect' in result) {
-    return { _redirect: result.redirect } as any
-  }
-  return toSerializable(result.data) as any
-})
+    if ('redirect' in result) {
+      return { _redirect: result.redirect } as any
+    }
+    return toSerializable(result.data) as any
+  })
 
 export const loadAdminPage = createServerFn({ method: 'GET' })
   .inputValidator((data: { _splat: string; search: Record<string, string | string[]> }) => data)

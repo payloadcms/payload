@@ -11,6 +11,7 @@ import {
   getRequestLanguage,
   parseCookies,
 } from 'payload'
+import * as qs from 'qs-esm'
 
 import { getRequestLocale } from './getRequestLocale.js'
 
@@ -53,13 +54,33 @@ export async function initReq({
 
   const { req: reqOverrides, ...optionsOverrides } = overrides || {}
 
+  // Parse the active URL's query string so that `req.query` (and thus
+  // `getRequestLocale`, access checks, etc.) reflect things like `?locale=es`
+  // even when the caller (e.g. the root layout loader) hasn't explicitly
+  // forwarded `searchParams` via overrides. `createLocalReq` only defaults
+  // `req.query` to `{}` and never reads the request URL itself.
+  let queryFromUrl: Record<string, unknown> | undefined
+  try {
+    const urlObject = new URL(webRequest.url)
+    if (urlObject.search) {
+      queryFromUrl = qs.parse(urlObject.search, {
+        depth: 10,
+        ignoreQueryPrefix: true,
+      }) as Record<string, unknown>
+    }
+  } catch {
+    queryFromUrl = undefined
+  }
+
   const req = await createLocalReq(
     {
       req: {
         headers,
         host: headers.get('host') ?? undefined,
         i18n: i18n as I18n,
+        query: queryFromUrl,
         responseHeaders,
+        url: webRequest.url,
         user,
         ...(reqOverrides || {}),
       },

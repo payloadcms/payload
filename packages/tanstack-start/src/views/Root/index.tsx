@@ -35,6 +35,7 @@ import { getListViewData } from '@payloadcms/ui/views/List/getListViewData'
 import { toSerializableListViewData } from '@payloadcms/ui/views/List/toSerializableListViewData'
 import { getLoginViewData } from '@payloadcms/ui/views/Login/getLoginViewData'
 import { getRootViewData } from '@payloadcms/ui/views/Root/getRootViewData'
+import { UnauthorizedViewWithGutter } from '@payloadcms/ui/views/Unauthorized'
 import { getVersionViewData } from '@payloadcms/ui/views/Version/getVersionViewData'
 import { getVersionsViewData } from '@payloadcms/ui/views/Versions/getVersionsViewData'
 import { formatAdminURL, isNumber } from 'payload/shared'
@@ -424,6 +425,11 @@ export async function getAdminPageData({
         typeofLivePreviewURL: docViewResult.typeofLivePreviewURL,
         unpublishedVersionCount: docViewResult.unpublishedVersionCount,
         versionCount: docViewResult.versionCount,
+        // The Next.js adapter renders the React `View` returned by
+        // `getDocumentView` directly. Because we serialize documentData to JSON
+        // for the client, we ship a coarse string identifier instead so the
+        // client can mount the matching fallback (Unauthorized vs default).
+        viewKind: docViewResult.View === UnauthorizedViewWithGutter ? 'unauthorized' : 'default',
         viewType: viewType as ViewTypes,
       }
     } catch (err) {

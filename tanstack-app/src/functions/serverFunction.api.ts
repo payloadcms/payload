@@ -1,9 +1,9 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
 import type { DefaultServerFunctionArgs, ServerFunctionClientArgs } from 'payload'
 
+import { getRequestLocale } from '@payloadcms/tanstack-start/server'
 import { initI18n } from '@payloadcms/translations'
 import { RenderClientComponent } from '@payloadcms/ui/elements/RenderServerComponent/clientOnly'
-import { findLocaleFromCode } from '@payloadcms/ui/shared'
 import { dataOnlyServerFunctions } from '@payloadcms/ui/utilities/dataOnlyServerFunctions'
 import { sharedServerFunctions } from '@payloadcms/ui/utilities/serverFunctionRegistry'
 import {
@@ -58,14 +58,8 @@ export async function handleServerFunctionRequest(
     payload,
   )
 
-  if (config.localization) {
-    const localeFromQuery = (req.query?.locale as string) || undefined
-    const locale =
-      findLocaleFromCode(config.localization, localeFromQuery) ??
-      findLocaleFromCode(config.localization, config.localization.defaultLocale || 'en')
-
-    req.locale = locale?.code
-  }
+  const locale = await getRequestLocale({ req })
+  req.locale = locale?.code
 
   const permissions = await getAccessResults({ req })
 
@@ -75,9 +69,7 @@ export async function handleServerFunctionRequest(
     ...fnArgs,
     cookies,
     importMap,
-    locale: config.localization
-      ? (findLocaleFromCode(config.localization, req.locale) ?? undefined)
-      : undefined,
+    locale,
     mode: 'data-only',
     permissions,
     renderComponent: RenderClientComponent,

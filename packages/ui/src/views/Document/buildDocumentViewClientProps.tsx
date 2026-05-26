@@ -12,6 +12,15 @@ import type {
 } from 'payload'
 
 /**
+ * Coarse identifier for which `View` component `getDocumentView` resolved to.
+ * Used by non-RSC adapters (e.g. TanStack Start) to render the matching
+ * fallback view on the client, since the resolved React component itself
+ * cannot cross a JSON boundary. `default` covers the standard edit/version
+ * surfaces handled by `DefaultEditView` / `VersionView`.
+ */
+export type DocumentViewKind = 'default' | 'unauthorized'
+
+/**
  * Serializable subset of document view data that can cross a JSON boundary
  * (e.g. TanStack Start server function → client component).
  */
@@ -54,6 +63,7 @@ export type SerializableDocumentViewData = {
   typeofLivePreviewURL?: 'function' | 'string' | undefined
   unpublishedVersionCount: number
   versionCount: number
+  viewKind?: DocumentViewKind
   viewType: ViewTypes
 }
 

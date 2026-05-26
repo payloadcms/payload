@@ -483,17 +483,37 @@ export function installTanStackHydrationGotoWait(page: Page) {
     }
   }
 
+  // Non-admin URLs (e.g. `/api/<collection>` JSON endpoints used by tests that
+  // assert on the raw REST response) never mount the TanStack admin app, so
+  // `__TANSTACK_HYDRATED__` will never be set. Skip the hydration wait for
+  // those, otherwise each such navigation pays the full 15s timeout.
+  const requiresHydrationWait = (url: string | undefined): boolean => {
+    if (!url) {
+      return true
+    }
+    try {
+      const path = new URL(url, 'http://localhost').pathname
+      return !path.startsWith('/api/') && path !== '/api'
+    } catch {
+      return true
+    }
+  }
+
   const originalGoto = page.goto.bind(page)
   page.goto = (async (...args: Parameters<Page['goto']>) => {
     const response = await originalGoto(...args)
-    await waitForHydration()
+    if (requiresHydrationWait(args[0])) {
+      await waitForHydration()
+    }
     return response
   }) as Page['goto']
 
   const originalReload = page.reload.bind(page)
   page.reload = (async (...args: Parameters<Page['reload']>) => {
     const response = await originalReload(...args)
-    await waitForHydration()
+    if (requiresHydrationWait(page.url())) {
+      await waitForHydration()
+    }
     return response
   }) as Page['reload']
 }

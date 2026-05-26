@@ -370,6 +370,11 @@
       "types": "./src/views/Unauthorized/index.tsx",
       "default": "./src/views/Unauthorized/index.tsx"
     },
+    "./views/Unauthorized/UnauthorizedClient": {
+      "import": "./src/views/Unauthorized/UnauthorizedClient.tsx",
+      "types": "./src/views/Unauthorized/UnauthorizedClient.tsx",
+      "default": "./src/views/Unauthorized/UnauthorizedClient.tsx"
+    },
     "./views/Unauthorized/index.css": {
       "import": "./src/views/Unauthorized/index.css",
       "default": "./src/views/Unauthorized/index.css"
@@ -1365,6 +1370,11 @@
         "import": "./dist/views/Unauthorized/index.js",
         "types": "./dist/views/Unauthorized/index.d.ts",
         "default": "./dist/views/Unauthorized/index.js"
+      },
+      "./views/Unauthorized/UnauthorizedClient": {
+        "import": "./dist/views/Unauthorized/UnauthorizedClient.js",
+        "types": "./dist/views/Unauthorized/UnauthorizedClient.d.ts",
+        "default": "./dist/views/Unauthorized/UnauthorizedClient.js"
       },
       "./views/Unauthorized/index.css": {
         "import": "./dist/views/Unauthorized/index.css",

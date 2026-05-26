@@ -4,6 +4,11 @@ import { AdminPageView } from '../../components/AdminPageView/index.js'
 import { loadAdminPage } from '../../functions/admin.functions.js'
 
 export const Route = createFileRoute('/_payload/admin/$')({
+  // Pass URL search params straight through so they appear in `loaderDeps`.
+  // Without this, TanStack Router treats `search` as `{}` and the loader is
+  // never re-run when query params like `?locale=es` change, which breaks
+  // locale-driven access control, form refetches, etc.
+  validateSearch: (search: Record<string, unknown>) => search,
   loaderDeps: ({ search }) => ({
     searchKey: JSON.stringify(search),
   }),
