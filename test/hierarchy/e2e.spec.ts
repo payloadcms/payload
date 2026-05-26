@@ -17,7 +17,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 /**
- * Safely set a hierarchy filter checkbox to checked or unchecked state.
+ * Safely set a hierarchy filter option to checked or unchecked state.
  * Opens the filter dropdown, checks current state, only toggles if needed, then closes.
  */
 async function setHierarchyFilter({
@@ -32,12 +32,16 @@ async function setHierarchyFilter({
   sidebar: ReturnType<Page['locator']>
 }): Promise<void> {
   await sidebar.locator('.hierarchy-search__filter').click()
-  const checkbox = page.getByRole('checkbox', { name: filterName })
-  await expect(checkbox).toBeVisible()
+  const filterButton = page.locator('.popup__content .popup-button-list__button', {
+    hasText: filterName,
+  })
+  await expect(filterButton).toBeVisible()
 
-  const isCurrentlyChecked = await checkbox.isChecked()
+  const isCurrentlyChecked = await filterButton.evaluate((el) =>
+    el.classList.contains('popup-button-list__button--selected'),
+  )
   if (isCurrentlyChecked !== checked) {
-    await checkbox.click()
+    await filterButton.click()
   }
 
   await page.keyboard.press('Escape')
@@ -390,9 +394,13 @@ test.describe('Hierarchy Sidebar', () => {
       await sidebar.locator('.hierarchy-search__filter').click()
 
       // Should show collection options (based on what collections reference folders)
-      // Popup content is rendered in a portal, use role-based selectors
-      await expect(page.getByRole('checkbox', { name: 'Organizations' })).toBeVisible()
-      await expect(page.getByRole('checkbox', { name: 'Products' })).toBeVisible()
+      // Popup content is rendered in a portal, use class-based selectors for PopupList.Button
+      await expect(
+        page.locator('.popup__content .popup-button-list__button', { hasText: 'Organizations' }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.popup__content .popup-button-list__button', { hasText: 'Products' }),
+      ).toBeVisible()
     })
 
     test('should filter tree by selected collection type', async () => {

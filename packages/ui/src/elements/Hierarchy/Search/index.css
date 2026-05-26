@@ -18,7 +18,7 @@
     background: var(--color-bg-secondary);
   }
 
-  .hierarchy-search__filter:hover:not(.popup-trigger-button--active) {
+  .hierarchy-search__filter:hover:not(.btn--selected) {
     background: var(--color-bg-tertiary);
   }
 
