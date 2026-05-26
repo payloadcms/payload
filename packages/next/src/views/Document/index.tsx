@@ -37,7 +37,7 @@ import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
-import { VersionsView } from '../adapter.js'
+import { adminViews } from '../adapter.js'
 import { NotFoundView } from '../NotFound.js'
 import { VersionView } from '../Version/index.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
@@ -314,7 +314,7 @@ export const renderDocument = async ({
       defaultViews: {
         edit: DefaultEditView,
         version: VersionView,
-        versions: VersionsView,
+        versions: adminViews.versions,
       },
       docPermissions,
       globalConfig,

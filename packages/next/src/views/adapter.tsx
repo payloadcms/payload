@@ -15,53 +15,6 @@ import { renderListView } from './List/index.js'
 
 export { verifyBaseClass } from '@payloadcms/ui/views/Verify'
 
-export function AccountView(props: AdminViewServerProps) {
-  return (
-    <AccountViewBase {...props} onNotFound={notFound} renderComponent={RenderServerComponent} />
-  )
-}
-
-export function CreateFirstUserView(props: AdminViewServerProps) {
-  return <CreateFirstUserViewBase {...props} renderComponent={RenderServerComponent} />
-}
-
-export function DashboardView(props: AdminViewServerProps) {
-  return (
-    <DashboardViewBase
-      {...props}
-      DefaultDashboard={DefaultDashboard}
-      renderComponent={RenderServerComponent}
-    />
-  )
-}
-
-export function Verify(props: AdminViewServerProps) {
-  const { initPageResult, params, searchParams } = props
-  const { locale, permissions, req } = initPageResult
-  const { i18n, payload, user } = req
-
-  return (
-    <VerifyViewBase
-      {...props}
-      logo={
-        <Logo
-          i18n={i18n}
-          locale={locale}
-          params={params}
-          payload={payload}
-          permissions={permissions}
-          searchParams={searchParams}
-          user={user}
-        />
-      }
-    />
-  )
-}
-
-export function VersionsView(props: DocumentViewServerProps) {
-  return <VersionsViewBase {...props} onNotFound={notFound} />
-}
-
 type RenderListWrapperArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
@@ -76,39 +29,81 @@ type RenderListWrapperArgs = {
   redirectAfterRestore?: boolean
 } & AdminViewServerProps
 
-export const HierarchyView: React.FC<Omit<RenderListWrapperArgs, 'enableRowSelections'>> = async (
-  args,
-) => {
-  try {
-    const { List } = await renderListView({
-      ...args,
-      enableRowSelections: true,
-      viewType: 'hierarchy',
-    })
-    return List
-  } catch (error) {
-    if (error.message === 'not-found') {
-      notFound()
+/**
+ * Keyed map of admin views adapted for Next.js.
+ * Each entry wraps a framework-agnostic ui view with Next-specific bits
+ * (RenderServerComponent, notFound, Logo, DefaultDashboard).
+ * Other framework adapters (e.g. Tanstack) export the same shape with
+ * their own framework wiring.
+ */
+export const adminViews = {
+  account: (props: AdminViewServerProps) => (
+    <AccountViewBase {...props} onNotFound={notFound} renderComponent={RenderServerComponent} />
+  ),
+  createFirstUser: (props: AdminViewServerProps) => (
+    <CreateFirstUserViewBase {...props} renderComponent={RenderServerComponent} />
+  ),
+  dashboard: (props: AdminViewServerProps) => (
+    <DashboardViewBase
+      {...props}
+      DefaultDashboard={DefaultDashboard}
+      renderComponent={RenderServerComponent}
+    />
+  ),
+  hierarchy: (async (args) => {
+    try {
+      const { List } = await renderListView({
+        ...args,
+        enableRowSelections: true,
+        viewType: 'hierarchy',
+      })
+      return List
+    } catch (error) {
+      if (error.message === 'not-found') {
+        notFound()
+      }
+      console.error(error) // eslint-disable-line no-console
     }
-    console.error(error) // eslint-disable-line no-console
-  }
-}
+  }) satisfies React.FC<Omit<RenderListWrapperArgs, 'enableRowSelections'>>,
+  trash: (async (args) => {
+    try {
+      const { List } = await renderListView({
+        ...args,
+        enableRowSelections: true,
+        trash: true,
+        viewType: 'trash',
+      })
+      return List
+    } catch (error) {
+      if (error.message === 'not-found') {
+        notFound()
+      }
+      console.error(error) // eslint-disable-line no-console
+    }
+  }) satisfies React.FC<Omit<RenderListWrapperArgs, 'enableRowSelections'>>,
+  verify: (props: AdminViewServerProps) => {
+    const { initPageResult, params, searchParams } = props
+    const { locale, permissions, req } = initPageResult
+    const { i18n, payload, user } = req
 
-export const TrashView: React.FC<Omit<RenderListWrapperArgs, 'enableRowSelections'>> = async (
-  args,
-) => {
-  try {
-    const { List } = await renderListView({
-      ...args,
-      enableRowSelections: true,
-      trash: true,
-      viewType: 'trash',
-    })
-    return List
-  } catch (error) {
-    if (error.message === 'not-found') {
-      notFound()
-    }
-    console.error(error) // eslint-disable-line no-console
-  }
-}
+    return (
+      <VerifyViewBase
+        {...props}
+        logo={
+          <Logo
+            i18n={i18n}
+            locale={locale}
+            params={params}
+            payload={payload}
+            permissions={permissions}
+            searchParams={searchParams}
+            user={user}
+          />
+        }
+      />
+    )
+  },
+  versions: (props: DocumentViewServerProps) => (
+    <VersionsViewBase {...props} onNotFound={notFound} />
+  ),
+} as const

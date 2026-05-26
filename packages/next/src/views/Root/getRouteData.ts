@@ -28,15 +28,7 @@ import { UnauthorizedView } from '@payloadcms/ui/views/Unauthorized'
 import { parseDocumentID } from 'payload'
 import { formatAdminURL, isNumber } from 'payload/shared'
 
-import {
-  AccountView,
-  CreateFirstUserView,
-  DashboardView,
-  HierarchyView,
-  TrashView,
-  Verify,
-  verifyBaseClass,
-} from '../adapter.js'
+import { adminViews, verifyBaseClass } from '../adapter.js'
 import { DocumentView } from '../Document/index.js'
 import { ListView } from '../List/index.js'
 import { loginBaseClass, LoginView } from '../Login/index.js'
@@ -58,8 +50,8 @@ type OneSegmentViews = {
 export type { ViewFromConfig }
 
 const oneSegmentViews: OneSegmentViews = {
-  account: AccountView,
-  createFirstUser: CreateFirstUserView,
+  account: adminViews.account,
+  createFirstUser: adminViews.createFirstUser,
   forgot: ForgotPasswordView,
   inactivity: LogoutInactivity,
   login: LoginView,
@@ -130,7 +122,7 @@ export const getRouteData = ({
     case 0: {
       if (currentRoute === adminRoute) {
         ViewToRender = {
-          Component: DashboardView,
+          Component: adminViews.dashboard,
         }
         templateClassName = 'dashboard'
         templateType = 'default'
@@ -221,7 +213,7 @@ export const getRouteData = ({
         if (collectionPreferences?.listViewType === 'hierarchy' && collectionConfig.hierarchy) {
           // Render hierarchy view by default if set in preferences
           ViewToRender = {
-            Component: HierarchyView,
+            Component: adminViews.hierarchy,
           }
 
           templateClassName = `${segmentTwo}-hierarchy`
@@ -268,7 +260,7 @@ export const getRouteData = ({
         routeParams.token = segmentThree
 
         ViewToRender = {
-          Component: Verify,
+          Component: adminViews.verify,
         }
 
         templateClassName = 'verify'
@@ -306,7 +298,7 @@ export const getRouteData = ({
         } else if (segmentThree === 'trash') {
           // --> /collections/:collectionSlug/trash
           ViewToRender = {
-            Component: TrashView,
+            Component: adminViews.trash,
           }
 
           templateClassName = `${segmentTwo}-trash`
@@ -317,7 +309,7 @@ export const getRouteData = ({
         } else if (segmentThree === 'hierarchy' && collectionConfig.hierarchy) {
           // --> /collections/:collectionSlug/hierarchy
           ViewToRender = {
-            Component: HierarchyView,
+            Component: adminViews.hierarchy,
           }
 
           templateClassName = `${segmentTwo}-hierarchy`

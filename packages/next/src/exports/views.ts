@@ -1,4 +1,10 @@
-export { AccountView, CreateFirstUserView, DashboardView } from '../views/adapter.js'
+import { adminViews } from '../views/adapter.js'
+
+export { adminViews }
+export const AccountView = adminViews.account
+export const CreateFirstUserView = adminViews.createFirstUser
+export const DashboardView = adminViews.dashboard
+
 export {
   type DashboardViewClientProps,
   type DashboardViewServerProps,
