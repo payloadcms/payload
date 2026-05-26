@@ -25,9 +25,9 @@
       pointer-events: none;
 
       &[data-match-type='create'] {
-        background-color: var(--ramp-blue-200);
-        border-color: var(--ramp-blue-600);
-        color: var(--ramp-blue-600);
+        background-color: var(--color-bg-brand-tertiary);
+        border-color: var(--color-border-brand-strong);
+        color: var(--color-text-brand);
       }
 
       &[data-match-type='delete'] {
@@ -43,8 +43,8 @@
     }
 
     .checkboxItem__icon.checkboxItem__icon[data-enable-match='true'][data-match-type='create'] {
-      background-color: var(--ramp-blue-200);
-      color: var(--ramp-blue-600);
+      background-color: var(--color-bg-brand-tertiary);
+      color: var(--color-text-brand);
     }
 
     .checkboxItem__icon.checkboxItem__icon[data-enable-match='true'][data-match-type='delete'] {

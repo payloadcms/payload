@@ -30,7 +30,7 @@
   @media (max-width: 768px) {
     .field-diff-content {
       grid-template-columns: 1fr !important;
-      gap: 2px;
+      gap: calc(var(--stroke-width-small) * 2);
       padding: 0;
       background: transparent;
       isolation: isolate;

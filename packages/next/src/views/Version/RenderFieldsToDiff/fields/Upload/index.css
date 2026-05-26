@@ -108,7 +108,7 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    min-width: 1px;
+    min-width: var(--stroke-width-small);
   }
 
   .upload-diff__pill {

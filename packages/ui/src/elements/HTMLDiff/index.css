@@ -122,7 +122,7 @@
     text-decoration-line: line-through;
     background-color: var(--diff-delete-pill-bg);
     border-radius: var(--radius-medium);
-    padding: 1.5px 2px;
+    padding: calc(var(--stroke-width-small) * 1.5) calc(var(--stroke-width-small) * 2);
     text-decoration-thickness: var(--stroke-width-small);
   }
 
@@ -147,7 +147,7 @@
     background-color: var(--diff-create-pill-bg);
     color: var(--diff-create-pill-color);
     border-radius: var(--radius-medium);
-    padding: 1.5px 2px;
+    padding: calc(var(--stroke-width-small) * 1.5) calc(var(--stroke-width-small) * 2);
   }
 
   .html-diff-create-inline-wrapper,

@@ -109,7 +109,7 @@
       font-size: var(--text-body-medium-font-size);
       line-height: var(--text-body-medium-line-height);
       overflow: hidden;
-      min-width: 1px;
+      min-width: var(--stroke-width-small);
 
       strong {
         font-weight: 600;
