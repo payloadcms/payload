@@ -36,5 +36,20 @@ export const CheckboxSection: React.FC<{ selectedComponent: string }> = ({ selec
         onToggle={() => {}}
       />
     </Variant>
+    <Variant label="Muted Unchecked">
+      <CheckboxInput checked={false} label="Unchecked" onToggle={() => {}} variant="muted" />
+    </Variant>
+    <Variant label="Muted Checked">
+      <CheckboxInput checked={true} label="Checked" onToggle={() => {}} variant="muted" />
+    </Variant>
+    <Variant label="Muted Indeterminate">
+      <CheckboxInput
+        checked={false}
+        label="Indeterminate"
+        onToggle={() => {}}
+        partialChecked={true}
+        variant="muted"
+      />
+    </Variant>
   </Section>
 )

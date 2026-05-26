@@ -147,7 +147,7 @@ export function DefaultEditView({
   const {
     isLivePreviewEnabled,
     isLivePreviewing,
-    previewWindowType,
+    isPopupOpen,
     setURL: setLivePreviewURL,
     typeofLivePreviewURL,
     url: livePreviewURL,
@@ -619,7 +619,7 @@ export function DefaultEditView({
         (id || globalSlug) && `${baseClass}--is-editing`,
         globalSlug && `global-edit--${globalSlug}`,
         collectionSlug && `collection-edit--${collectionSlug}`,
-        isLivePreviewing && previewWindowType === 'iframe' && `${baseClass}--is-live-previewing`,
+        isLivePreviewing && `${baseClass}--is-live-previewing`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -759,18 +759,12 @@ export function DefaultEditView({
             user={currentEditor}
           />
           <div
-            className={[
-              `${baseClass}__main-wrapper`,
-              previewWindowType === 'popup' && `${baseClass}--detached`,
-            ]
+            className={[`${baseClass}__main-wrapper`, isPopupOpen && `${baseClass}--detached`]
               .filter(Boolean)
               .join(' ')}
           >
             <div
-              className={[
-                `${baseClass}__main`,
-                previewWindowType === 'popup' && `${baseClass}__main--popup-open`,
-              ]
+              className={[`${baseClass}__main`, isPopupOpen && `${baseClass}__main--popup-open`]
                 .filter(Boolean)
                 .join(' ')}
             >

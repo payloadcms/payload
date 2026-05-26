@@ -56,8 +56,8 @@
   .LexicalEditorTheme__upload__contents--landscape {
     img,
     svg {
-      max-width: var(--upload-media-size);
-      min-width: var(--upload-media-size);
+      max-width: min(100%, var(--upload-media-size));
+      min-width: min(100%, var(--upload-media-size));
     }
   }
 
@@ -209,6 +209,8 @@
   border-color: var(--color-border-selected);
   background: transparent;
   border-radius: 0;
+  max-width: min(100%, var(--upload-media-size));
+  min-width: min(100%, var(--upload-media-size));
 }
 
 .LexicalEditorTheme__upload--selected img,

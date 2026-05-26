@@ -17,7 +17,7 @@ export const goToNextPage = async (
   const pageControls = (options.scope || page).locator('.paginator')
   const nextButton = pageControls.locator('button').nth(1)
   await nextButton.waitFor({ state: 'visible' })
-  await nextButton.click()
+  await nextButton.click({ force: true })
 
   if (options.affectsURL) {
     const regex = new RegExp(`page=${options.targetPage}(?:&|$)`)
@@ -44,10 +44,22 @@ export const goToPreviousPage = async (
   const pageControls = (options.scope || page).locator('.paginator')
   const prevButton = pageControls.locator('button').nth(0)
   await prevButton.waitFor({ state: 'visible' })
-  await prevButton.click()
+  await prevButton.click({ force: true })
 
   if (options.affectsURL) {
-    const regex = new RegExp(`page=${options.targetPage}(?:&|$)`)
-    await page.waitForURL(regex, { timeout: POLL_TOPASS_TIMEOUT })
+    // For page 1, the URL might not have a page param at all (default page)
+    if (options.targetPage === 1) {
+      // Wait for URL that either has no page param or has page=1
+      await page.waitForURL(
+        (url) => {
+          const pageParam = new URL(url).searchParams.get('page')
+          return pageParam === null || pageParam === '1'
+        },
+        { timeout: POLL_TOPASS_TIMEOUT },
+      )
+    } else {
+      const regex = new RegExp(`page=${options.targetPage}(?:&|$)`)
+      await page.waitForURL(regex, { timeout: POLL_TOPASS_TIMEOUT })
+    }
   }
 }

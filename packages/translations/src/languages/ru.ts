@@ -393,6 +393,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Удалить Навсегда',
     permanentlyDeletedCountSuccessfully: 'Успешно удалено {{count}} {{label}} навсегда.',
     perPage: 'На странице: {{limit}}',
+    perPageLabel: 'На страницу:',
     previous: 'Предыдущий',
     reindex: 'Переиндексировать',
     reindexingAll: 'Переиндексирование всех {{collections}}.',

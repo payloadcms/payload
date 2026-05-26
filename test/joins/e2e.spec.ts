@@ -497,7 +497,7 @@ describe('Join Field', () => {
     await editButton.click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const popupButton = drawer.locator('.doc-controls__popup button.popup-button')
+    const popupButton = drawer.locator('.doc-controls__popup .popup__trigger-wrap button')
     await expect(popupButton).toBeVisible()
     await popupButton.click()
     const deleteButton = page.locator('.popup__content #action-delete')

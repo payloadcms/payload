@@ -389,6 +389,7 @@ export const taTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'நிரந்தரமாக நீக்கு',
     permanentlyDeletedCountSuccessfully: '{{count}} {{label}} நிரந்தரமாக நீக்கப்பட்டது.',
     perPage: 'ஒரு பக்கத்தில்: {{limit}}',
+    perPageLabel: 'ஒரு பக்கம்:',
     previous: 'முந்தையது',
     reindex: 'மறுஅட்டவணை',
     reindexingAll: 'அனைத்து {{collections}} மறுஅட்டவணை செய்யப்படுகிறது.',

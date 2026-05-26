@@ -137,38 +137,8 @@
     }
   }
 
-  .doc-controls__dots {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 2px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-medium);
-    height: var(--spacer-5);
-    width: var(--spacer-5);
-
-    &:hover {
-      border: 1px solid var(--color-border-strong);
-      background-color: var(--color-bg-hover);
-    }
-
-    > div {
-      width: 3px;
-      height: 3px;
-      border-radius: 100%;
-      background-color: currentColor;
-    }
-  }
-
   .doc-controls__popup {
     position: relative;
-  }
-
-  .doc-controls .popup--active .doc-controls__dots {
-    border: 1px solid var(--color-border-strong);
-    background-color: var(--color-bg-hover);
   }
 
   .doc-controls .popup__trigger-wrap {

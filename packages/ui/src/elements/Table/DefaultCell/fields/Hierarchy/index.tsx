@@ -67,9 +67,12 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     return <IconComponent />
   }, [hierarchyConfig, preRenderedIcon])
 
+  const drawerIcon = preRenderedIcon || fallbackIcon
+
   // Set up the hierarchy drawer
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
     hierarchyCollectionSlug: hierarchyCollectionSlug || '',
+    Icon: drawerIcon,
   })
 
   // Fetch relationship data when visible
@@ -200,7 +203,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
       <Button
         buttonStyle="pill"
         className={`${baseClass}__pill`}
-        icon={preRenderedIcon || fallbackIcon}
+        icon={drawerIcon}
         iconPosition="left"
         margin={false}
         onClick={openDrawer}

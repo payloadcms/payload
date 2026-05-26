@@ -28,7 +28,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
 import { TypeFilter } from './TypeFilter/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-list'
 

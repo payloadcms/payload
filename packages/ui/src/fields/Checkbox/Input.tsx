@@ -24,6 +24,12 @@ export type CheckboxInputProps = {
   readonly partialChecked?: boolean
   readonly readOnly?: boolean
   readonly required?: boolean
+  /**
+   * Visual variant for the checkbox
+   * - 'default': Dark border, transparent background (for form fields)
+   * - 'muted': Light gray background and border (for tables)
+   */
+  readonly variant?: 'default' | 'muted'
 }
 
 export const inputBaseClass = 'checkbox-input'
@@ -44,6 +50,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   partialChecked,
   readOnly: readOnlyFromProps,
   required,
+  variant = 'default',
 }) => {
   const [isHydrated, setIsHydrated] = useState(false)
   const fallbackID = useId()
@@ -62,6 +69,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         inputBaseClass,
         checked && `${inputBaseClass}--checked`,
         readOnly && `${inputBaseClass}--read-only`,
+        variant !== 'default' && `${inputBaseClass}--${variant}`,
       ]
         .filter(Boolean)
         .join(' ')}

@@ -8,6 +8,9 @@ const SearchBarTest: CollectionConfig = {
       fields: ['category', 'status'],
     },
     listSearchableFields: ['title', 'description'],
+    components: {
+      afterList: ['./collections/SearchBarTest/AfterList.js#AfterList'],
+    },
   },
   enableQueryPresets: true,
   fields: [
