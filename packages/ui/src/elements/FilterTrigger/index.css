@@ -1,0 +1,46 @@
+@layer payload-default {
+  .filter-trigger__wrap {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .filter-trigger__wrap:has(.filter-trigger__clear) .filter-trigger {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+    padding-right: var(--spacer-1);
+  }
+
+  .filter-trigger__wrap:has(.filter-trigger__clear) .filter-trigger:focus-visible {
+    z-index: 1;
+  }
+
+  .filter-trigger {
+    gap: var(--spacer-1);
+  }
+
+  .filter-trigger__clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacer-1);
+    border: 1px solid var(--special-border-translucent);
+    border-left: none;
+    border-radius: 0 var(--radius-medium) var(--radius-medium) 0;
+    background: var(--color-bg);
+    cursor: pointer;
+  }
+
+  .filter-trigger__clear:focus-visible {
+    border-radius: 0 var(--radius-medium) var(--radius-medium) 0;
+  }
+
+  .filter-trigger__clear:hover {
+    background: var(--color-bg-transparent-hover);
+  }
+
+  .filter-trigger__clear:active {
+    background: var(--color-bg-transparent-pressed);
+  }
+}

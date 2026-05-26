@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { openNav } from '../__helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -9,6 +8,7 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Organization } from './payload-types.js'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -31,7 +31,7 @@ async function setHierarchyFilter({
   page: Page
   sidebar: ReturnType<Page['locator']>
 }): Promise<void> {
-  await sidebar.locator('.hierarchy-search-input__filter').click()
+  await sidebar.locator('.hierarchy-search__filter').click()
   const checkbox = page.getByRole('checkbox', { name: filterName })
   await expect(checkbox).toBeVisible()
 
@@ -375,7 +375,7 @@ test.describe('Hierarchy Sidebar', () => {
       await page.getByRole('tab', { name: 'Folders' }).click()
 
       // Filter button should be visible (it's a div with aria-label="Filter")
-      const filterButton = page.locator('.hierarchy-search-input__filter')
+      const filterButton = page.locator('.hierarchy-search__filter')
       await expect(filterButton).toBeVisible()
     })
 
@@ -387,7 +387,7 @@ test.describe('Hierarchy Sidebar', () => {
 
       // Click filter button in sidebar
       const sidebar = page.getByRole('tabpanel')
-      await sidebar.locator('.hierarchy-search-input__filter').click()
+      await sidebar.locator('.hierarchy-search__filter').click()
 
       // Should show collection options (based on what collections reference folders)
       // Popup content is rendered in a portal, use role-based selectors

@@ -12,6 +12,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { ClipboardActionLabel } from './ClipboardActionLabel.js'
 import { clipboardCopy, clipboardPaste } from './clipboardUtilities.js'
+import './index.css'
 
 const baseClass = 'clipboard-action'
 

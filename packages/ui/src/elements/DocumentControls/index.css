@@ -141,6 +141,13 @@
     position: relative;
   }
 
+  .doc-controls__popup-button.popup-button--active,
+  .doc-controls__popup-button.popup-button--active:hover,
+  .doc-controls__popup-button.popup-button--active:active {
+    background: var(--color-bg-selected);
+    color: var(--color-icon-selected);
+  }
+
   .doc-controls .popup__trigger-wrap {
     display: flex;
   }

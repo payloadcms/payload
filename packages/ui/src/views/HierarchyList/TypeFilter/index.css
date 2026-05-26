@@ -1,0 +1,17 @@
+@layer payload-default {
+  .type-filter__options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    padding: 0 var(--spacer-2-5);
+    margin: 3px 0;
+  }
+
+  .type-filter__options .checkbox-input {
+    align-items: center;
+  }
+
+  .type-filter__options .checkbox-input label {
+    padding-bottom: 0;
+  }
+}

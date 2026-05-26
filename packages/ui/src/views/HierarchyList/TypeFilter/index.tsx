@@ -2,11 +2,12 @@
 
 import type { I18nClient } from '@payloadcms/translations'
 
-import React from 'react'
+import React, { useCallback } from 'react'
 
-import { Button } from '../../../elements/Button/index.js'
-import { CheckboxPopup } from '../../../elements/CheckboxPopup/index.js'
-import './index.scss'
+import { FilterTrigger } from '../../../elements/FilterTrigger/index.js'
+import { Popup } from '../../../elements/Popup/index.js'
+import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
+import './index.css'
 
 const baseClass = 'type-filter'
 
@@ -18,27 +19,49 @@ type TypeFilterProps = {
 }
 
 export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilterProps) {
-  const isRefined = selectedValues.length !== options.length ? true : false
+  const isRefined = selectedValues.length !== options.length
+
+  const handleClear = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      onChange(options.map((o) => o.value))
+    },
+    [onChange, options],
+  )
 
   return (
-    <CheckboxPopup
-      Button={
-        <Button
-          buttonStyle="pill"
-          className={`${baseClass}__button`}
-          el="div"
-          icon="chevron"
-          margin={false}
-          size="medium"
+    <Popup
+      className={baseClass}
+      horizontalAlign="right"
+      render={() => (
+        <div className={`${baseClass}__options`}>
+          {options.map(({ label, value }) => (
+            <CheckboxInput
+              checked={selectedValues?.includes(value)}
+              key={value}
+              label={label}
+              onToggle={() => {
+                const newSelectedValues = selectedValues?.includes(value)
+                  ? selectedValues.filter((v) => v !== value)
+                  : [...selectedValues, value]
+                onChange(newSelectedValues)
+              }}
+            />
+          ))}
+        </div>
+      )}
+      renderButton={({ onClick, onKeyDown, ...ariaProps }) => (
+        <FilterTrigger
+          ariaProps={ariaProps}
+          isActive={isRefined}
+          onClear={handleClear}
+          onClick={onClick}
+          onKeyDown={onKeyDown}
         >
-          {isRefined && <span className={`${baseClass}__count`}>{selectedValues.length}</span>}
           {i18n.t('version:type')}
-        </Button>
-      }
-      className={[baseClass, isRefined ? `${baseClass}--active` : ''].filter(Boolean).join(' ')}
-      onChange={({ selectedValues: newValues }) => onChange(newValues)}
-      options={options}
-      selectedValues={selectedValues}
+        </FilterTrigger>
+      )}
+      verticalAlign="bottom"
     />
   )
 }

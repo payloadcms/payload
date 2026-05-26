@@ -5,9 +5,37 @@
     width: 100%;
   }
 
+  .hierarchy-search__controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .hierarchy-search__filter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    padding: 0;
+    border: none;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-medium);
+    cursor: pointer;
+    color: var(--color-icon-secondary);
+
+    &:hover,
+    &:focus-visible {
+      color: var(--color-icon);
+      background: var(--color-bg-tertiary);
+    }
+  }
+
   .hierarchy-search-input {
     display: flex;
     align-items: center;
+    flex: 1;
     height: var(--spacer-4);
     background: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
@@ -56,15 +84,6 @@
     }
   }
 
-  .hierarchy-search-input__actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacer-1);
-    margin-inline-start: var(--spacer-1);
-  }
-
-  .hierarchy-search-input__filter,
   .hierarchy-search-input__clear {
     display: flex;
     align-items: center;
@@ -77,6 +96,7 @@
     width: var(--spacer-3);
     height: var(--spacer-3);
     border-radius: var(--radius-small);
+    margin-inline-start: var(--spacer-1);
 
     &:hover,
     &:focus-visible {
@@ -84,19 +104,25 @@
     }
   }
 
-  .hierarchy-search-input__filter--active {
-    color: var(--color-icon-success);
-
-    &:hover,
-    &:focus-visible {
-      color: var(--color-icon-success);
-    }
-  }
-
-  .hierarchy-search-input__filter .icon--filter,
   .hierarchy-search-input__clear .icon--x {
     width: var(--spacer-3);
     height: var(--spacer-3);
+  }
+
+  .hierarchy-search__filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    padding: 0 var(--spacer-2-5);
+    margin: 3px 0;
+  }
+
+  .hierarchy-search__filter-options .checkbox-input {
+    align-items: center;
+  }
+
+  .hierarchy-search__filter-options .checkbox-input label {
+    padding-bottom: 0;
   }
 
   .hierarchy-search-results {
