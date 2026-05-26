@@ -50,13 +50,13 @@ export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilt
           ))}
         </div>
       )}
-      renderButton={({ onClick, onKeyDown, ...ariaProps }) => (
+      renderButton={({ active, onClick, onKeyDown }) => (
         <FilterTrigger
-          ariaProps={ariaProps}
           isActive={isRefined}
           onClear={handleClear}
           onClick={onClick}
           onKeyDown={onKeyDown}
+          popupActive={active}
         >
           {i18n.t('version:type')}
         </FilterTrigger>

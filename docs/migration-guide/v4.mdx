@@ -277,3 +277,152 @@ If you use a `declare module` augmentation to extend `GeneratedDatabaseSchema` (
 ```
 
 Run `npx @payloadcms/codemod --transform migrate-db-types-subpath` to migrate automatically. The codemod handles import declarations, re-export declarations, and `declare module` augmentations.
+
+### Minimum supported Node.js version is now 24.15.0 ([#16540](https://github.com/payloadcms/payload/pull/16540))
+
+The minimum supported Node.js version is now **24.15.0** (previously 18.20.2). Upgrade your runtime — along with any CI, Docker images, and deployment targets — to the latest node LTS version or newer before upgrading to 4.0.
+
+### Minimum supported Next.js version is now 16.2.6 ([#16537](https://github.com/payloadcms/payload/pull/16537))
+
+Older versions of Next.js are no longer supported. Update Next.js to **16.2.6** or newer.
+
+### Minimum supported TypeScript version is now 6.0.3 ([#16692](https://github.com/payloadcms/payload/pull/16692))
+
+Payload's generated types are no longer guaranteed to work on TypeScript versions below **6.0.3** (previously 5.7.3). Upgrade the `typescript` dependency in your project to 6.0.3 or newer.
+
+### `@payloadcms/richtext-slate` has been removed ([#16359](https://github.com/payloadcms/payload/pull/16359))
+
+Starting in Payload 4.0, `@payloadcms/richtext-lexical` is the only supported rich text editor. The `@payloadcms/richtext-slate` package has been deleted and will no longer be published.
+
+The following are removed:
+
+- The `@payloadcms/richtext-slate` package
+- The Slate → Lexical migration utilities in `@payloadcms/richtext-lexical/migrate`
+- The `payload-plugin-lexical` migration utilities
+- All Slate references in the documentation
+
+The rich text adapter pattern itself is unchanged — `editor: lexicalEditor({})` continues to work exactly as before, and third-party adapters following the same interface remain supported.
+
+If you are still using Slate, **do not upgrade to 4.0 yet.** Stay on the latest 3.x release and complete the [Slate → Lexical migration](https://payloadcms.com/docs/rich-text/migration) first.
+
+### `HTMLConverterFeature` and `lexicalHTML` have been removed ([#16548](https://github.com/payloadcms/payload/pull/16548))
+
+The deprecated `HTMLConverterFeature`, `lexicalHTML`, and the per-node `converters.html` API have been removed from `@payloadcms/richtext-lexical`. Use `convertLexicalToHTML` and `lexicalHTMLField` from the non-deprecated converter instead.
+
+```diff
+- import { HTMLConverterFeature, lexicalHTML, convertLexicalToHTML } from '@payloadcms/richtext-lexical'
++ import { lexicalHTMLField, convertLexicalToHTML } from '@payloadcms/richtext-lexical'
+
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+-     HTMLConverterFeature({}),
+    ],
+  }),
+
+  fields: [
+    { name: 'content', type: 'richText' },
+-   lexicalHTML('content', { name: 'content_html' }),
++   lexicalHTMLField({ htmlFieldName: 'content_html', lexicalFieldName: 'content' }),
+  ]
+```
+
+Custom nodes that define `converters.html` should export their converters instead.
+
+### Jobs: `jobs.depth` and `jobs.runHooks` have been removed ([#16414](https://github.com/payloadcms/payload/pull/16414))
+
+The deprecated `jobs.depth` and `jobs.runHooks` config options have been removed. Job operations now always use direct database calls with depth `0`.
+
+If you relied on either option, remove it from your `jobs` config. If you depended on collection hooks running for jobs, migrate that logic out of those hooks.
+
+The `jobsCollectionOverrides` warning that detected extra hooks and prompted users to set `runHooks` has also been removed.
+
+### Jobs: the `state` field on task return values has been removed ([#16416](https://github.com/payloadcms/payload/pull/16416))
+
+Job task handlers and `inlineTask` callbacks can no longer use the `state` field to signal success or failure. Both shapes were deprecated in v3 and are now removed from tasks and inline tasks.
+
+- `return { state: 'failed', errorMessage }` — throw an error instead.
+- `return { state: 'succeeded', output }` — return `{ output }` directly.
+
+```ts
+// Before
+const myTask: TaskHandler<'MyTask'> = async ({ input }) => {
+  if (!input.id) {
+    return { state: 'failed', errorMessage: 'Missing id' }
+  }
+  return { state: 'succeeded', output: { ok: true } }
+}
+
+// After
+const myTask: TaskHandler<'MyTask'> = async ({ input }) => {
+  if (!input.id) {
+    throw new Error('Missing id')
+  }
+  return { output: { ok: true } }
+}
+```
+
+### Croner `sloppyRanges` compatibility setting removed ([#16546](https://github.com/payloadcms/payload/pull/16546))
+
+The `sloppyRanges: true` setting that kept Croner v9 stepping syntax working after the v10 upgrade has been removed. Croner now enforces stricter cron parsing rules, so stepping expressions must use either `*` or an explicit range before the `/`.
+
+This affects job autorun crons (`jobs.autoRun[].cron`), scheduled task and workflow runs (`schedule.cron`), and the `payload` bin script `--cron` flag.
+
+In strict mode (now the default), only these stepping forms are valid:
+
+- `*/N` — wildcard with step
+- `start-end/N` — explicit range with step
+
+The following forms now throw a `TypeError` at registration:
+
+- `/N` — missing prefix
+- `M/N` — numeric prefix (single number before `/`)
+
+Migrate any affected cron expressions:
+
+```diff
+# Missing prefix — the leading `*` is now required (both fire every 10 minutes)
+- cron: '/10 * * * *'
++ cron: '*/10 * * * *'
+
+# Numeric prefix "every N starting from M" — make the range explicit (fires at 5, 20, 35, 50)
+- cron: '5/15 * * * *'
++ cron: '5-59/15 * * * *'
+
+# Numeric prefix that produces a single value — drop the redundant step (only fires at minute 30)
+- cron: '30/30 * * * *'
++ cron: '30 * * * *'
+```
+
+### `min` and `max` removed from `relationship` and `upload` fields ([#16547](https://github.com/payloadcms/payload/pull/16547))
+
+The deprecated `min` and `max` properties have been removed from `relationship` and `upload` fields with `hasMany: true`. Use `minRows` and `maxRows` instead.
+
+```diff
+  {
+    name: 'tags',
+    type: 'relationship',
+    relationTo: 'tags',
+    hasMany: true,
+-   min: 1,
+-   max: 5,
++   minRows: 1,
++   maxRows: 5,
+  }
+```
+
+The same change applies to `upload` fields with `hasMany: true`.
+
+### `allowLocalizedWithinLocalized` compatibility flag removed ([#16693](https://github.com/payloadcms/payload/pull/16693))
+
+`config.compatibility.allowLocalizedWithinLocalized` and the `PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY` environment variable have been removed. Sanitize no longer strips `localized: true` from fields nested under a localized parent — `fieldShouldBeLocalized` decides this at runtime instead.
+
+**Who is affected:**
+
+- Users of `compatibility: { allowLocalizedWithinLocalized: true }`.
+- Anyone with `localized: true` nested under a localized parent. The end behavior is unchanged (Payload's own code already uses `fieldShouldBeLocalized`), but `field.localized` is no longer deleted. Custom plugin or hook code that reads `field.localized` directly will now see `true` where it previously saw `undefined`.
+
+**How to migrate:**
+
+- Remove the `compatibility` block from your config. If your MongoDB data still has the redundant nested-localized shape, flatten the config and run a data migration.
+- Replace any direct `field.localized` reads in custom code with `fieldShouldBeLocalized({ field, parentIsLocalized })` from `payload/shared`.
