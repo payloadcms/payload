@@ -1,8 +1,7 @@
 @layer payload-default {
   .doc-header {
     width: 100%;
-    margin-top: var(--spacer-2);
-    padding-bottom: var(--spacer-4);
+    padding-block: var(--spacer-2-5);
     position: relative;
 
     &::after {
