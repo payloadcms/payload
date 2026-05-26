@@ -1,5 +1,5 @@
 @layer payload-default {
-  .doc-controls__wrapper {
+  .doc-controls {
     position: sticky;
     width: 100%;
     top: 0;
@@ -122,7 +122,7 @@
       padding-left: 0;
     }
 
-    .doc-controls__wrapper {
+    .doc-controls {
       flex-direction: column;
       gap: 0;
       height: unset;

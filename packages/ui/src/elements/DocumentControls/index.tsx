@@ -188,7 +188,7 @@ export const DocumentControls: React.FC<{
   const showLockedMetaIcon = user && readOnlyForIncomingUser
 
   return (
-    <div className={`${baseClass}__wrapper`}>
+    <div className={baseClass}>
       <div className={`${baseClass}__content`}>
         {Boolean(showLockedMetaIcon || BeforeDocumentMeta) && (
           <div className={`${baseClass}__before-meta`}>
