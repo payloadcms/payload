@@ -1,4 +1,6 @@
 import type {
+  AdminViewServerProps,
+  ComponentRenderer,
   DocumentPreferences,
   FormState,
   LoginWithUsernameOptions,
@@ -7,12 +9,13 @@ import type {
 
 import React from 'react'
 
+import { getCreateFirstUserData } from './getCreateFirstUserData.js'
 import { CreateFirstUserClient } from './index.client.js'
 import './index.css'
 
 const baseClass = 'create-first-user'
 
-export type CreateFirstUserViewProps = {
+export type DefaultCreateFirstUserViewProps = {
   beginMessage: string
   docPermissions: SanitizedDocumentPermissions
   docPreferences: DocumentPreferences
@@ -22,7 +25,7 @@ export type CreateFirstUserViewProps = {
   welcomeMessage: string
 }
 
-export function CreateFirstUserView({
+export function DefaultCreateFirstUserView({
   beginMessage,
   docPermissions,
   docPreferences,
@@ -30,7 +33,7 @@ export function CreateFirstUserView({
   loginWithUsername,
   userSlug,
   welcomeMessage,
-}: CreateFirstUserViewProps) {
+}: DefaultCreateFirstUserViewProps) {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
@@ -46,4 +49,14 @@ export function CreateFirstUserView({
       />
     </div>
   )
+}
+
+export async function CreateFirstUserView({
+  initPageResult,
+  renderComponent,
+}: { renderComponent: ComponentRenderer } & AdminViewServerProps) {
+  const { locale, req } = initPageResult
+  const data = await getCreateFirstUserData({ locale, renderComponent, req })
+
+  return <DefaultCreateFirstUserView {...data} />
 }

@@ -151,6 +151,11 @@
       "types": "./src/views/List/toSerializableListViewData.ts",
       "default": "./src/views/List/toSerializableListViewData.ts"
     },
+    "./views/Account": {
+      "import": "./src/views/Account/index.tsx",
+      "types": "./src/views/Account/index.tsx",
+      "default": "./src/views/Account/index.tsx"
+    },
     "./views/Account/getAccountViewData": {
       "import": "./src/views/Account/getAccountViewData.ts",
       "types": "./src/views/Account/getAccountViewData.ts",
@@ -160,6 +165,11 @@
       "import": "./src/views/Version/getVersionViewData.ts",
       "types": "./src/views/Version/getVersionViewData.ts",
       "default": "./src/views/Version/getVersionViewData.ts"
+    },
+    "./views/Versions": {
+      "import": "./src/views/Versions/index.tsx",
+      "types": "./src/views/Versions/index.tsx",
+      "default": "./src/views/Versions/index.tsx"
     },
     "./views/Versions/getVersionsViewData": {
       "import": "./src/views/Versions/getVersionsViewData.ts",
@@ -1147,6 +1157,11 @@
         "types": "./dist/views/List/toSerializableListViewData.d.ts",
         "default": "./dist/views/List/toSerializableListViewData.js"
       },
+      "./views/Account": {
+        "import": "./dist/views/Account/index.js",
+        "types": "./dist/views/Account/index.d.ts",
+        "default": "./dist/views/Account/index.js"
+      },
       "./views/Account/getAccountViewData": {
         "import": "./dist/views/Account/getAccountViewData.js",
         "types": "./dist/views/Account/getAccountViewData.d.ts",
@@ -1156,6 +1171,11 @@
         "import": "./dist/views/Version/getVersionViewData.js",
         "types": "./dist/views/Version/getVersionViewData.d.ts",
         "default": "./dist/views/Version/getVersionViewData.js"
+      },
+      "./views/Versions": {
+        "import": "./dist/views/Versions/index.js",
+        "types": "./dist/views/Versions/index.d.ts",
+        "default": "./dist/views/Versions/index.js"
       },
       "./views/Versions/getVersionsViewData": {
         "import": "./dist/views/Versions/getVersionsViewData.js",

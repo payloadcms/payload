@@ -11,6 +11,7 @@ import type {
 } from 'payload'
 
 import {
+  DefaultEditView,
   DocumentInfoProvider,
   EditDepthProvider,
   HydrateAuthProvider,
@@ -36,7 +37,6 @@ import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
-import { EditView } from '../Edit/index.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { VersionView } from '../Version/index.js'
 import { VersionsView } from '../Versions/index.js'
@@ -312,7 +312,7 @@ export const renderDocument = async ({
       collectionConfig,
       config,
       defaultViews: {
-        edit: EditView,
+        edit: DefaultEditView,
         version: VersionView,
         versions: VersionsView,
       },

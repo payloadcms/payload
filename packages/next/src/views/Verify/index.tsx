@@ -1,39 +1,20 @@
 import type { AdminViewServerProps } from 'payload'
 
-import { Verify as VerifyUI } from '@payloadcms/ui/views/Verify'
-import { getVerifyData } from '@payloadcms/ui/views/Verify/getVerifyData'
-import { formatAdminURL } from 'payload/shared'
+import { VerifyView as VerifyViewBase } from '@payloadcms/ui/views/Verify'
 import React from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
 
 export { verifyBaseClass } from '@payloadcms/ui/views/Verify'
 
-export async function Verify({ initPageResult, params, searchParams }: AdminViewServerProps) {
-  const [collectionSlug, , token] = params.segments
+export function Verify(props: AdminViewServerProps) {
+  const { initPageResult, params, searchParams } = props
   const { locale, permissions, req } = initPageResult
-
-  const {
-    i18n,
-    payload: { config },
-    payload,
-    user,
-  } = req
-
-  const {
-    routes: { admin: adminRoute },
-  } = config
-
-  const { isVerified, textToRender } = await getVerifyData({
-    collectionSlug,
-    req,
-    token,
-  })
+  const { i18n, payload, user } = req
 
   return (
-    <VerifyUI
-      adminRoute={formatAdminURL({ adminRoute, path: '' })}
-      isVerified={isVerified}
+    <VerifyViewBase
+      {...props}
       logo={
         <Logo
           i18n={i18n}
@@ -45,8 +26,6 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
           user={user}
         />
       }
-      textToRender={textToRender}
-      verifiedMessage={req.t('authentication:emailVerified')}
     />
   )
 }
