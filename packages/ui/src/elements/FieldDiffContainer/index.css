@@ -27,6 +27,23 @@
     overflow: clip;
   }
 
+  @media (max-width: 768px) {
+    .field-diff-content {
+      grid-template-columns: 1fr !important;
+      gap: 2px;
+      padding: 0;
+      background: transparent;
+      isolation: isolate;
+    }
+
+    .field-diff-content > * {
+      background: var(--color-bg-secondary);
+      padding: var(--spacer-1) var(--spacer-2);
+      min-height: var(--spacer-5);
+      overflow: hidden;
+    }
+  }
+
   .diff-no-value {
     display: flex;
     align-items: center;

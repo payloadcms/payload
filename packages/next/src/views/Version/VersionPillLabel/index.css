@@ -23,9 +23,9 @@
 
   @media (max-width: 768px) {
     .version-pill-label {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0;
+      flex-direction: row;
+      align-items: center;
+      gap: var(--spacer-2);
     }
   }
 }

@@ -178,4 +178,40 @@
       content: '';
     }
   }
+
+  @media (max-width: 768px) {
+    .html-diff p:not([data-enable-match='false']):has([data-match-type='create']),
+    .html-diff h1:not([data-enable-match='false']):has([data-match-type='create']),
+    .html-diff h2:not([data-enable-match='false']):has([data-match-type='create']),
+    .html-diff h3:not([data-enable-match='false']):has([data-match-type='create']),
+    .html-diff h4:not([data-enable-match='false']):has([data-match-type='create']),
+    .html-diff h5:not([data-enable-match='false']):has([data-match-type='create']),
+    .html-diff h6:not([data-enable-match='false']):has([data-match-type='create']),
+    .html-diff blockquote:not([data-enable-match='false']):has([data-match-type='create']),
+    .html-diff pre:not([data-enable-match='false']):has([data-match-type='create']),
+    .html-diff p:not([data-enable-match='false']):has([data-match-type='delete']),
+    .html-diff h1:not([data-enable-match='false']):has([data-match-type='delete']),
+    .html-diff h2:not([data-enable-match='false']):has([data-match-type='delete']),
+    .html-diff h3:not([data-enable-match='false']):has([data-match-type='delete']),
+    .html-diff h4:not([data-enable-match='false']):has([data-match-type='delete']),
+    .html-diff h5:not([data-enable-match='false']):has([data-match-type='delete']),
+    .html-diff h6:not([data-enable-match='false']):has([data-match-type='delete']),
+    .html-diff blockquote:not([data-enable-match='false']):has([data-match-type='delete']),
+    .html-diff pre:not([data-enable-match='false']):has([data-match-type='delete']) {
+      &::before {
+        top: calc(var(--spacer-1) * -1);
+        bottom: calc(var(--spacer-1) * -1);
+        left: calc(var(--spacer-2) * -1);
+        right: calc(var(--spacer-2) * -1);
+      }
+    }
+
+    .html-diff li:not([data-enable-match='false']):has([data-match-type='create']),
+    .html-diff li:not([data-enable-match='false']):has([data-match-type='delete']) {
+      &::before {
+        left: calc(var(--spacer-2) * -1);
+        right: calc(var(--spacer-2) * -1);
+      }
+    }
+  }
 }
