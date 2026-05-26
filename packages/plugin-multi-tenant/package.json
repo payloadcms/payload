@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-multi-tenant",
-  "version": "3.84.1",
+  "version": "3.85.0",
   "description": "Multi Tenant plugin for Payload",
   "keywords": [
     "payload",
