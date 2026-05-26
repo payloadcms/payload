@@ -1,8 +1,8 @@
 @layer payload-default {
   .pill {
-    --pill-padding-block: 0px;
-    --pill-padding-inline-start: 0px;
-    --pill-padding-inline-end: 0px;
+    --pill-padding-block: 0;
+    --pill-padding-inline-start: 0;
+    --pill-padding-inline-end: 0;
     --pill-icon-size: var(--spacer-4);
     padding: var(--pill-padding-block) var(--pill-padding-inline-end) var(--pill-padding-block)
       var(--pill-padding-inline-start);
@@ -14,7 +14,7 @@
     letter-spacing: var(--text-body-medium-letter-spacing);
     display: inline-flex;
     background: var(--color-black-200);
-    color: var(--text-default);
+    color: var(--color-text);
     border-radius: var(--radius-medium);
     cursor: inherit;
     border: 0;
@@ -56,7 +56,7 @@
   .pill--has-icon {
     gap: 0;
     --pill-padding-inline-start: var(--spacer-2);
-    --pill-padding-inline-end: calc(var(--base) * 0.1);
+    --pill-padding-inline-end: var(--spacer-1);
   }
 
   .pill--has-icon svg {
@@ -65,33 +65,38 @@
 
   .pill--align-icon-left {
     flex-direction: row-reverse;
-    --pill-padding-inline-start: calc(var(--base) * 0.1);
+    --pill-padding-inline-start: var(--spacer-1);
     --pill-padding-inline-end: var(--spacer-2);
   }
 
   .pill--style-always-white {
-    background: var(--bg-inverse-default);
-    color: var(--text-inverse-oninverse);
+    background: var(--color-bg-inverse);
+    color: var(--color-text-oninverse);
   }
 
   .pill--style-light-gray {
-    background: var(--bg-default-secondary);
-    color: var(--text-default);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+  }
+
+  .pill--style-light {
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
   }
 
   .pill--style-warning {
-    background: var(--bg-warning-tertiary);
-    color: var(--text-warning-default);
+    background: var(--color-bg-warning-tertiary);
+    color: var(--color-text-warning);
   }
 
   .pill--style-success {
-    background: var(--bg-success-tertiary);
-    color: var(--text-success-default);
+    background: var(--color-bg-selected);
+    color: var(--color-text-brand);
   }
 
   .pill--style-error {
-    background: var(--bg-danger-tertiary);
-    color: var(--text-danger-default);
+    background: var(--color-bg-danger-tertiary);
+    color: var(--color-text-danger);
   }
 
   .pill--style-dark {
@@ -115,15 +120,15 @@
   }
 
   .pill--size-small {
-    --pill-icon-size: calc(var(--base) * 0.9);
+    --pill-icon-size: var(--spacer-3);
     --pill-padding-block: 0;
     --pill-padding-inline-start: var(--spacer-1);
     --pill-padding-inline-end: var(--spacer-1);
   }
 
   html[data-theme='light'] .pill--style-always-white {
-    background: var(--bg-default);
-    color: var(--text-default);
-    border: var(--stroke-width-small) solid var(--border-default);
+    background: var(--color-bg);
+    color: var(--color-text);
+    border: var(--stroke-width-small) solid var(--color-border);
   }
 }
