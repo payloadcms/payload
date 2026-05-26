@@ -124,6 +124,6 @@
   html[data-theme='light'] .pill--style-always-white {
     background: var(--bg-default);
     color: var(--text-default);
-    border: 1px solid var(--border-default);
+    border: var(--stroke-width-small) solid var(--border-default);
   }
 }

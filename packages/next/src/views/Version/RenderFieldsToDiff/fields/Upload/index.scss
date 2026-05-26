@@ -19,7 +19,7 @@
     align-items: center;
     background-color: var(--theme-elevation-50);
     border-radius: $style-radius-s;
-    border: 1px solid var(--theme-elevation-150);
+    border: var(--stroke-width-small) solid var(--theme-elevation-150);
     position: relative;
     font-family: var(--font-body);
     max-height: calc(var(--base) * 3);
@@ -72,7 +72,7 @@
       overflow: hidden;
       flex-shrink: 0;
       border-radius: 0px;
-      border: 1px solid var(--theme-elevation-100);
+      border: var(--stroke-width-small) solid var(--theme-elevation-100);
 
       img,
       svg {

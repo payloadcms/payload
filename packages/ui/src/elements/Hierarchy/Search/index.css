@@ -39,7 +39,7 @@
     height: var(--spacer-4);
     background: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
     padding-inline-end: var(--spacer-2);
 
     &:has(input:focus-visible) {
@@ -177,7 +177,7 @@
     margin-inline-start: calc(0.5 * var(--nav-padding-inline-start));
     margin-inline-end: calc(0.5 * var(--nav-padding-inline-end));
     gap: var(--spacer-1);
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
 
     &:hover .hierarchy-search-result-item__title {
       color: var(--color-text);

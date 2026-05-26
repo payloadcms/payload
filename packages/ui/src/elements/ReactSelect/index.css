@@ -9,7 +9,7 @@
       width: 100%;
       min-height: var(--spacer-5);
       background: var(--color-bg-secondary);
-      border: 1px solid transparent;
+      border: var(--stroke-width-small) solid transparent;
       border-radius: var(--radius-medium);
       color: var(--color-text);
       font-family: var(--text-body-medium-font-family);
@@ -135,7 +135,7 @@
 
   .react-select--error {
     div.rs__control {
-      border: 1px solid var(--color-border-danger-strong);
+      border: var(--stroke-width-small) solid var(--color-border-danger-strong);
 
       & > div.rs__indicator > button.dropdown-indicator[type='button'] {
         border: none;

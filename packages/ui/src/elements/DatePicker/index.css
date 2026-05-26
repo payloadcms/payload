@@ -127,7 +127,7 @@
     width: 100%;
     margin: 0;
     height: var(--spacer-4);
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
     background: var(--color-bg);
     border-radius: var(--radius-medium);
     outline: none;
@@ -258,7 +258,7 @@
   .react-datepicker__year-read-view,
   .react-datepicker__month-read-view,
   .react-datepicker__month-year-read-view {
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
     border-radius: var(--radius-medium);
     position: relative;
 
@@ -294,7 +294,7 @@
     z-index: 1;
     text-align: center;
     border-radius: var(--radius-medium);
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
     box-shadow:
       0 2px 5px rgba(0, 0, 0, 0.15),
       0 10px 24px rgba(0, 0, 0, 0.18);
@@ -823,7 +823,7 @@
     line-height: var(--text-body-medium-line-height);
     width: 100%;
     min-height: var(--spacer-5);
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
     border-radius: var(--radius-medium);
     background: var(--color-bg-secondary);
     color: var(--color-text);

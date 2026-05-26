@@ -34,7 +34,7 @@
     display: flex;
     align-items: center;
     border-radius: $style-radius-s;
-    border: 1px solid var(--theme-elevation-150);
+    border: var(--stroke-width-small) solid var(--theme-elevation-150);
     position: relative;
     font-family: var(--font-body);
     max-height: calc(var(--base) * 3);

@@ -3,7 +3,7 @@
     width: 100%;
     min-height: var(--spacer-5);
     background: var(--color-bg-secondary);
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
     border-radius: var(--radius-medium);
     color: var(--color-text);
     font-family: var(--text-body-medium-font-family);
@@ -61,7 +61,7 @@
     position: relative;
     align-items: stretch;
     background: var(--color-bg-secondary);
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
     border-radius: var(--radius-medium);
     min-height: var(--spacer-5);
     transition-property: box-shadow, background-color;

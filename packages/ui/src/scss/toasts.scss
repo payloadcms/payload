@@ -49,7 +49,7 @@
       align-items: center;
       width: 100%;
       border-radius: 4px;
-      border: 1px solid var(--theme-border-color);
+      border: var(--stroke-width-small) solid var(--theme-border-color);
       background: var(--theme-input-bg);
       box-shadow:
         0px 10px 4px -8px rgba(0, 2, 4, 0.02),

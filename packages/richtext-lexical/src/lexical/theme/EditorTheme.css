@@ -331,7 +331,7 @@
   }
 
   .LexicalEditorTheme__listItemUnchecked:before {
-    border: 1px solid var(--color-text);
+    border: var(--stroke-width-small) solid var(--color-text);
     background-color: var(--color-bg);
   }
 

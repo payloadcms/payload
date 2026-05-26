@@ -25,7 +25,7 @@
       border: none;
       cursor: pointer;
       border-radius: var(--style-radius-s);
-      border: 1px solid transparent;
+      border: var(--stroke-width-small) solid transparent;
 
       &:hover,
       &:focus-visible {

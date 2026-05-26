@@ -14,7 +14,7 @@
       gap: calc(var(--base) * 0.25);
       align-items: center;
       background-color: var(--theme-elevation-50);
-      border: 1px solid var(--theme-elevation-150);
+      border: var(--stroke-width-small) solid var(--theme-elevation-150);
       padding-inline-end: calc(var(--base) * 0.2);
 
       .pill__label {
