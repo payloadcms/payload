@@ -1,6 +1,6 @@
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 export const listHeaderClass = 'list-header'
 

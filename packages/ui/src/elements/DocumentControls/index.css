@@ -1,51 +1,15 @@
 @layer payload-default {
-  .doc-controls {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    z-index: 5;
-    display: flex;
-    align-items: center;
-
-    &::before,
-    &::after {
-      content: ' ';
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-    }
-
-    &::before {
-      background: var(--color-bg);
-      opacity: 0.3;
-    }
-
-    &::after {
-      backdrop-filter: blur(8px);
-    }
-  }
-
-  .doc-controls__divider {
-    content: '';
-    display: block;
-    position: absolute;
-    height: var(--stroke-width-small);
-    background: var(--color-border);
-    width: 100%;
-    left: 0;
-    top: 100%;
-  }
-
   .doc-controls__wrapper {
-    position: relative;
+    position: sticky;
     width: 100%;
+    top: 0;
     display: flex;
     justify-content: space-between;
+    z-index: 1;
     gap: var(--spacer-3);
-    z-index: 4;
-    height: var(--doc-controls-height);
+    padding: var(--spacer-2-5) var(--gutter-h);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    background-color: var(--color-bg);
   }
 
   .doc-controls__content {
@@ -53,7 +17,6 @@
     align-items: center;
     flex-grow: 1;
     overflow: hidden;
-    padding: var(--spacer-3) 0;
     gap: var(--spacer-2);
   }
 
@@ -163,12 +126,12 @@
       flex-direction: column;
       gap: 0;
       height: unset;
+      padding-inline: 0;
     }
 
     .doc-controls__content {
       width: 100%;
       overflow: auto;
-      padding-inline: var(--spacer-6);
 
       &::-webkit-scrollbar {
         display: none;
@@ -182,6 +145,7 @@
     .doc-controls__meta {
       width: auto;
       gap: var(--spacer-2);
+      padding: 0 var(--gutter-h) var(--spacer-2-5) var(--gutter-h);
 
       &::after {
         content: '';
@@ -201,9 +165,8 @@
       background-color: var(--color-bg);
       width: 100%;
       transform: translate3d(0, 0, 0);
-      padding-right: var(--gutter-h);
+      padding: var(--spacer-2-5) var(--gutter-h) 0 var(--gutter-h);
       justify-content: space-between;
-      height: var(--doc-controls-height);
       border-top: var(--stroke-width-small) solid var(--color-border);
     }
 
@@ -229,12 +192,16 @@
     }
 
     [dir='ltr'] .doc-controls__controls {
-      padding-left: var(--gutter-h);
+      padding-left: 0;
     }
   }
 
   @media (max-width: 768px) {
-    .doc-controls__content {
+    .doc-controls__meta {
+      padding-inline: var(--spacer-3);
+    }
+
+    .doc-controls__controls-wrapper {
       padding-inline: var(--spacer-3);
     }
   }

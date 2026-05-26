@@ -13,10 +13,6 @@
     flex-direction: column;
   }
 
-  .collection-list__wrap > *:not(:last-child) {
-    margin-bottom: var(--spacer-4);
-  }
-
   .collection-list .list-header a {
     text-decoration: none;
   }
