@@ -5,6 +5,7 @@ import React, { useCallback, useState } from 'react'
 
 import type { HierarchySearchProps } from './types.js'
 
+import { CheckIcon } from '../../../icons/Check/index.js'
 import { FilterIcon } from '../../../icons/Filter/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -106,20 +107,24 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
             horizontalAlign="right"
             render={() => (
               <PopupList.IconButtonGroup>
-                {collectionSpecificOptions.map(({ label, value }) => (
-                  <PopupList.Button
-                    active={selectedFilters?.includes(value)}
-                    key={value}
-                    onClick={() => {
-                      const newSelectedValues = selectedFilters?.includes(value)
-                        ? selectedFilters.filter((v) => v !== value)
-                        : [...selectedFilters, value]
-                      handleFilterChange({ selectedValues: newSelectedValues })
-                    }}
-                  >
-                    {label}
-                  </PopupList.Button>
-                ))}
+                {collectionSpecificOptions.map(({ label, value }) => {
+                  const isActive = selectedFilters?.includes(value)
+                  return (
+                    <PopupList.Button
+                      active={isActive}
+                      icon={isActive ? <CheckIcon size={16} /> : undefined}
+                      key={value}
+                      onClick={() => {
+                        const newSelectedValues = isActive
+                          ? selectedFilters.filter((v) => v !== value)
+                          : [...selectedFilters, value]
+                        handleFilterChange({ selectedValues: newSelectedValues })
+                      }}
+                    >
+                      {label}
+                    </PopupList.Button>
+                  )
+                })}
               </PopupList.IconButtonGroup>
             )}
             renderButton={({ active, onClick, onKeyDown }) => (

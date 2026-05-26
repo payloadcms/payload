@@ -6,6 +6,7 @@ import React, { useCallback } from 'react'
 
 import { FilterTrigger } from '../../../elements/FilterTrigger/index.js'
 import { Popup, PopupList } from '../../../elements/Popup/index.js'
+import { CheckIcon } from '../../../icons/Check/index.js'
 
 const baseClass = 'type-filter'
 
@@ -33,20 +34,24 @@ export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilt
       horizontalAlign="left"
       render={() => (
         <PopupList.IconButtonGroup>
-          {options.map(({ label, value }) => (
-            <PopupList.Button
-              active={selectedValues?.includes(value)}
-              key={value}
-              onClick={() => {
-                const newSelectedValues = selectedValues?.includes(value)
-                  ? selectedValues.filter((v) => v !== value)
-                  : [...selectedValues, value]
-                onChange(newSelectedValues)
-              }}
-            >
-              {label}
-            </PopupList.Button>
-          ))}
+          {options.map(({ label, value }) => {
+            const isActive = selectedValues?.includes(value)
+            return (
+              <PopupList.Button
+                active={isActive}
+                icon={isActive ? <CheckIcon size={16} /> : undefined}
+                key={value}
+                onClick={() => {
+                  const newSelectedValues = isActive
+                    ? selectedValues.filter((v) => v !== value)
+                    : [...selectedValues, value]
+                  onChange(newSelectedValues)
+                }}
+              >
+                {label}
+              </PopupList.Button>
+            )
+          })}
         </PopupList.IconButtonGroup>
       )}
       renderButton={({ active, onClick, onKeyDown }) => (

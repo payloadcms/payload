@@ -4,6 +4,7 @@ import type { EditViewProps } from 'payload'
 
 import React from 'react'
 
+import { CheckIcon } from '../../../../icons/Check/index.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { CollapseIcon } from '../../../../icons/Collapse/index.js'
 import { ExpandIcon } from '../../../../icons/Expand/index.js'
@@ -47,22 +48,27 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           render={({ close }) => (
             <PopupList.IconButtonGroup>
               <React.Fragment>
-                {breakpoints.map((bp) => (
-                  <PopupList.Button
-                    active={bp.name == breakpoint}
-                    key={bp.name}
-                    onClick={() => {
-                      setBreakpoint(bp.name)
-                      close()
-                    }}
-                  >
-                    {bp.label}
-                  </PopupList.Button>
-                ))}
+                {breakpoints.map((bp) => {
+                  const isActive = bp.name == breakpoint
+                  return (
+                    <PopupList.Button
+                      active={isActive}
+                      icon={isActive ? <CheckIcon size={16} /> : undefined}
+                      key={bp.name}
+                      onClick={() => {
+                        setBreakpoint(bp.name)
+                        close()
+                      }}
+                    >
+                      {bp.label}
+                    </PopupList.Button>
+                  )
+                })}
                 {/* Dynamically add this option so that it only appears when the width and height inputs are explicitly changed */}
                 {breakpoint === 'custom' && (
                   <PopupList.Button
                     active={breakpoint == customOption.value}
+                    icon={breakpoint == customOption.value ? <CheckIcon size={16} /> : undefined}
                     onClick={() => {
                       setBreakpoint(customOption.value)
                       close()
@@ -92,18 +98,22 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           render={({ close }) => (
             <PopupList.IconButtonGroup>
               <React.Fragment>
-                {zoomOptions.map((zoomValue) => (
-                  <PopupList.Button
-                    active={zoom * 100 == zoomValue}
-                    key={zoomValue}
-                    onClick={() => {
-                      setZoom(zoomValue / 100)
-                      close()
-                    }}
-                  >
-                    {zoomValue}%
-                  </PopupList.Button>
-                ))}
+                {zoomOptions.map((zoomValue) => {
+                  const isActive = zoom * 100 == zoomValue
+                  return (
+                    <PopupList.Button
+                      active={isActive}
+                      icon={isActive ? <CheckIcon size={16} /> : undefined}
+                      key={zoomValue}
+                      onClick={() => {
+                        setZoom(zoomValue / 100)
+                        close()
+                      }}
+                    >
+                      {zoomValue}%
+                    </PopupList.Button>
+                  )
+                })}
               </React.Fragment>
             </PopupList.IconButtonGroup>
           )}

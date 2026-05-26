@@ -286,18 +286,22 @@ export const QueryPresetBar: React.FC<{
           portalClassName={`${baseClass}__popup-content`}
           render={({ close }) => (
             <PopupList.IconButtonGroup>
-              {presets.map((preset) => (
-                <PopupList.Button
-                  active={activePreset?.id === preset.id}
-                  key={preset.id}
-                  onClick={async () => {
-                    close()
-                    await handlePresetChange(preset)
-                  }}
-                >
-                  {preset.title}
-                </PopupList.Button>
-              ))}
+              {presets.map((preset) => {
+                const isActive = activePreset?.id === preset.id
+                return (
+                  <PopupList.Button
+                    active={isActive}
+                    icon={isActive ? <CheckIcon size={16} /> : undefined}
+                    key={preset.id}
+                    onClick={async () => {
+                      close()
+                      await handlePresetChange(preset)
+                    }}
+                  >
+                    {preset.title}
+                  </PopupList.Button>
+                )
+              })}
               {activePreset && (
                 <Fragment>
                   <PopupList.Divider />
