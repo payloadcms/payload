@@ -393,7 +393,12 @@ export { OperationProvider, useOperation } from '../../providers/Operation/index
 export { ParamsProvider, useParams } from '../../providers/Params/index.js'
 export { PreferencesProvider, usePreferences } from '../../providers/Preferences/index.js'
 export { RootProvider } from '../../providers/Root/index.js'
-export { RouterAdapterContext } from '../../providers/RouterAdapter/index.js'
+export {
+  PayloadLink,
+  RouterAdapterContext,
+  usePathname,
+  useRouter,
+} from '../../providers/RouterAdapter/index.js'
 export type { RouterAdapterContextValue } from '../../providers/RouterAdapter/index.js'
 export {
   RouteCache as RouteCacheProvider,
