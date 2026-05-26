@@ -425,4 +425,29 @@ The same change applies to `upload` fields with `hasMany: true`.
 **How to migrate:**
 
 - Remove the `compatibility` block from your config. If your MongoDB data still has the redundant nested-localized shape, flatten the config and run a data migration.
+
+### Storage adapters must be declared under `storage`, not `plugins` ([#16596](https://github.com/payloadcms/payload/pull/16596))
+
+Storage adapter packages (`@payloadcms/storage-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`, `-uploadthing`) must now be placed under the top-level `storage` key in your Payload config instead of inside `plugins`.
+
+Declaring adapters inside `plugins` no longer works. The `storage` key ensures upload hooks, static file handlers, and presigned-URL endpoints are wired up before any plugin runs.
+
+```diff
+import { s3Storage } from '@payloadcms/storage-s3'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+- plugins: [
+-   s3Storage({ bucket: process.env.S3_BUCKET, collections: { media: true }, config: { region: process.env.S3_REGION } }),
+-   otherPlugin(),
+- ],
++ plugins: [otherPlugin()],
++ storage: [
++   s3Storage({ bucket: process.env.S3_BUCKET, collections: { media: true }, config: { region: process.env.S3_REGION } }),
++ ],
+})
+```
+
+Run `npx @payloadcms/codemod --transform migrate-storage-adapters-to-config` to migrate automatically.
+
 - Replace any direct `field.localized` reads in custom code with `fieldShouldBeLocalized({ field, parentIsLocalized })` from `payload/shared`.
