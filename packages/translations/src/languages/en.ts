@@ -392,6 +392,7 @@ export const enTranslations = {
     permanentlyDelete: 'Permanently Delete',
     permanentlyDeletedCountSuccessfully: 'Permanently deleted {{count}} {{label}} successfully.',
     perPage: 'Per Page: {{limit}}',
+    perPageLabel: 'Per page:',
     previous: 'Previous',
     reindex: 'Reindex',
     reindexingAll: 'Reindexing all {{collections}}.',

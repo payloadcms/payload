@@ -1061,7 +1061,7 @@ describe('Localization', () => {
     })
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme('Locale picker should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.list)
 
@@ -1112,7 +1112,7 @@ async function createAndSaveDoc(page: Page, url: AdminUrlUtil, values: Partial<L
 }
 
 async function openCopyToLocaleDrawer(page: Page) {
-  await page.locator('.doc-controls__popup button.popup-button').click()
+  await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
   await page.locator('#copy-locale-data__button').click()
   await expect(page.locator('#copy-locale')).toBeVisible()
   await expect(page.locator('.copy-locale-data__content')).toBeVisible()

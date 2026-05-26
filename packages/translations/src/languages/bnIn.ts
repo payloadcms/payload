@@ -396,6 +396,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       'স্থায়ীভাবে {{count}} টি {{label}} সফলভাবে মুছে ফেলা হয়েছে।',
     perPage: 'প্রতি পৃষ্ঠায়: {{limit}}',
+    perPageLabel: 'প্রতি পৃষ্ঠা:',
     previous: 'পূর্ববর্তী',
     reindex: 'পুনরায় সূচিবদ্ধ করুন',
     reindexingAll: 'সমস্ত {{collections}} পুনরায় সূচিবদ্ধ করা হচ্ছে।',

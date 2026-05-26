@@ -393,6 +393,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Pastāvīgi Dzēst',
     permanentlyDeletedCountSuccessfully: 'Veiksmīgi neatgriezeniski izdzēsts {{count}} {{label}}.',
     perPage: 'Lapas ieraksti: {{limit}}',
+    perPageLabel: 'Vienā lapā:',
     previous: 'Iepriekšējais',
     reindex: 'Pārindeksēt',
     reindexingAll: 'Pārindeksē visus {{collections}}.',

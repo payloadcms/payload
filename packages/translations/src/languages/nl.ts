@@ -399,6 +399,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Permanent Verwijderen',
     permanentlyDeletedCountSuccessfully: 'Permanent {{count}} {{label}} succesvol verwijderd.',
     perPage: 'Per pagina: {{limit}}',
+    perPageLabel: 'Per pagina:',
     previous: 'Vorige',
     reindex: 'Herindexeren',
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',

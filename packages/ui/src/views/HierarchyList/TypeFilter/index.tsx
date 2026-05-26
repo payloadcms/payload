@@ -6,7 +6,7 @@ import React from 'react'
 
 import { Button } from '../../../elements/Button/index.js'
 import { CheckboxPopup } from '../../../elements/CheckboxPopup/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'type-filter'
 

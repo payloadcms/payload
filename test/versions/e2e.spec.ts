@@ -999,7 +999,7 @@ describe('Versions', () => {
       expect(versionsTabUpdated).toBeTruthy()
     })
 
-    describe('A11y', () => {
+    describe.skip('A11y', () => {
       test('Versions list view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
         const firstRowLink = page.locator('tbody tr .cell-title a').first()

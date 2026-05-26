@@ -391,6 +391,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Трайно изтриване',
     permanentlyDeletedCountSuccessfully: 'Успешно изтрити завинаги {{count}} {{label}}.',
     perPage: 'На страница: {{limit}}',
+    perPageLabel: 'На страница:',
     previous: 'Предишен',
     reindex: 'Преиндексиране',
     reindexingAll: 'Преиндексиране на всички {{collections}}.',

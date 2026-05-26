@@ -395,6 +395,7 @@ export const azTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Daimi Olaraq Sil',
     permanentlyDeletedCountSuccessfully: '{{count}} {{label}} uğurla daimi olaraq silindi.',
     perPage: 'Hər səhifədə: {{limit}}',
+    perPageLabel: 'Səhifə başına:',
     previous: 'Əvvəlki',
     reindex: 'Yenidən indekslə',
     reindexingAll: 'Bütün {{collections}} yenidən indekslənir.',

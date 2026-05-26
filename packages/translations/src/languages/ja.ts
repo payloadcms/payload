@@ -393,6 +393,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     permanentlyDelete: '永久に削除する',
     permanentlyDeletedCountSuccessfully: '{{count}} {{label}}を正常に完全に削除しました。',
     perPage: '表示件数: {{limit}}',
+    perPageLabel: '1ページあたり：',
     previous: '前の',
     reindex: '再インデックス',
     reindexingAll: 'すべての{{collections}}を再インデックスしています。',

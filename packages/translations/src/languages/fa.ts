@@ -385,6 +385,7 @@ export const faTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'حذف دائمی',
     permanentlyDeletedCountSuccessfully: '{{count}} {{label}} با موفقیت برای همیشه حذف شد.',
     perPage: 'تعداد در هر صفحه: {{limit}}',
+    perPageLabel: 'در هر صفحه:',
     previous: 'قبلی',
     reindex: 'ایندکس مجدد',
     reindexingAll: 'در حال ایندکس مجدد همه {{collections}}...',

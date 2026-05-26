@@ -391,6 +391,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Մշտականությամբ Ջնջել',
     permanentlyDeletedCountSuccessfully: '{{count}} {{label}}-ը հաստատապես ջնջվել է հաջողակ:',
     perPage: 'Էջում՝ {{limit}}',
+    perPageLabel: 'Մեկ էջի համար:',
     previous: 'Նախորդ',
     reindex: 'Վերաինդեքսավորել',
     reindexingAll: 'Վերաինդեքսավորվում են բոլոր {{collections}}-ները։',

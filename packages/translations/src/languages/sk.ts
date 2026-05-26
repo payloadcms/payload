@@ -391,6 +391,7 @@ export const skTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Trvalo odstrániť',
     permanentlyDeletedCountSuccessfully: 'Úspešne ste natrvalo odstránili {{count}} {{label}}.',
     perPage: 'Na stránku: {{limit}}',
+    perPageLabel: 'Na stránku:',
     previous: 'Predchádzajúci',
     reindex: 'Reindexovať',
     reindexingAll: 'Znova sa indexujú všetky {{collections}}.',

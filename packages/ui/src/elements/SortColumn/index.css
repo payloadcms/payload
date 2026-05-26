@@ -43,11 +43,12 @@
 
     &.sort-column--active {
       color: var(--color-icon);
-      visibility: visible;
+      background: var(--color-bg-secondary);
     }
 
     &:hover {
       color: var(--color-icon);
+      background: var(--color-bg-secondary);
     }
 
     &:focus-visible {

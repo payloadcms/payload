@@ -1,9 +1,6 @@
 import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { scrollEntirePage } from '../__helpers/e2e/scrollEntirePage.js'
-import { moveRow } from '../__helpers/e2e/sort/moveRow.js'
-import { RESTClient } from '../__helpers/shared/rest.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -15,8 +12,11 @@ import {
   initPageConsoleErrorCatch,
   // throttleTest
 } from '../__helpers/e2e/helpers.js'
+import { scrollEntirePage } from '../__helpers/e2e/scrollEntirePage.js'
+import { moveRow } from '../__helpers/e2e/sort/moveRow.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
@@ -75,7 +75,7 @@ describe('Sort functionality', () => {
     await joinFieldResolvePromise
     await page.goto(`${url.list}?sort=-_order`)
 
-    await page.locator('.sort-header button').nth(0).click()
+    await page.locator('button.sort-header').nth(0).click()
 
     await assertRows(['A', 'B', 'C', 'D'])
 
@@ -104,7 +104,7 @@ describe('Sort functionality', () => {
 
     // Note: Clicking the sort button again should not change the order
     // In previous versions we allowed ascending and descending order.
-    await page.locator('.sort-header button').nth(0).click()
+    await page.locator('button.sort-header').nth(0).click()
     await page.waitForURL(/sort=_order/, { timeout: 2000 })
     await assertRows(['A', 'C', 'D', 'B'])
 
@@ -128,7 +128,7 @@ describe('Sort functionality', () => {
     await page.waitForURL(new RegExp(`${orderableJoinSlug}/`))
     await scrollEntirePage(page)
 
-    await expect(page.locator('.sort-header button')).toHaveCount(3)
+    await expect(page.locator('button.sort-header')).toHaveCount(3)
 
     await assertRows(['A', 'B', 'C', 'D'], {
       scope: page.locator('#field-orderableJoinField1'),

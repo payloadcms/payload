@@ -393,6 +393,7 @@ export const svTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Radera permanent',
     permanentlyDeletedCountSuccessfully: '{{count}} {{label}} har raderats permanent.',
     perPage: 'Per Sida: {{limit}}',
+    perPageLabel: 'Per sida:',
     previous: 'Föregående',
     reindex: 'Omindexera',
     reindexingAll: 'Omindexerar alla {{collections}}...',

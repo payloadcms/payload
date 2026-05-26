@@ -82,6 +82,7 @@ export interface Config {
     'join-posts': JoinPost;
     'json-fields': JsonField;
     'number-fields': NumberField;
+    orderable: Orderable;
     'password-fields': PasswordField;
     'point-fields': PointField;
     'radio-fields': RadioField;
@@ -137,6 +138,7 @@ export interface Config {
     'join-posts': JoinPostsSelect<false> | JoinPostsSelect<true>;
     'json-fields': JsonFieldsSelect<false> | JsonFieldsSelect<true>;
     'number-fields': NumberFieldsSelect<false> | NumberFieldsSelect<true>;
+    orderable: OrderableSelect<false> | OrderableSelect<true>;
     'password-fields': PasswordFieldsSelect<false> | PasswordFieldsSelect<true>;
     'point-fields': PointFieldsSelect<false> | PointFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
@@ -721,6 +723,18 @@ export interface NumberField {
    * Listed prices in USD, excluding tax
    */
   pricesReadOnly?: number[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable".
+ */
+export interface Orderable {
+  id: string;
+  _order?: string | null;
+  title: string;
+  priority?: ('high' | 'medium' | 'low') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1428,6 +1442,10 @@ export interface PayloadLockedDocument {
         value: string | NumberField;
       } | null)
     | ({
+        relationTo: 'orderable';
+        value: string | Orderable;
+      } | null)
+    | ({
         relationTo: 'password-fields';
         value: string | PasswordField;
       } | null)
@@ -1984,6 +2002,17 @@ export interface NumberFieldsSelect<T extends boolean = true> {
   priceReadOnly?: T;
   prices?: T;
   pricesReadOnly?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable_select".
+ */
+export interface OrderableSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  priority?: T;
   updatedAt?: T;
   createdAt?: T;
 }

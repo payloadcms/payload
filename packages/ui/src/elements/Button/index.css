@@ -180,6 +180,10 @@
     }
   }
 
+  .btn__label {
+    white-space: nowrap;
+  }
+
   /* Sizes */
 
   .btn--size-medium {

@@ -14,6 +14,7 @@ import React, { Fragment, useEffect } from 'react'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
+import { MoreIcon } from '../../icons/More/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
@@ -333,16 +334,16 @@ export const DocumentControls: React.FC<{
           </div>
           {showDotMenu && !readOnlyForIncomingUser && (
             <Popup
-              button={
-                <div className={`${baseClass}__dots`}>
-                  <div />
-                  <div />
-                  <div />
-                </div>
-              }
               className={`${baseClass}__popup`}
               disabled={initializing || processing}
               horizontalAlign="right"
+              renderButton={({ active, ...buttonProps }) => (
+                <Button
+                  {...buttonProps}
+                  buttonStyle="ghost"
+                  icon={<MoreIcon size={16} />}
+                />
+              )}
               size="large"
               verticalAlign="bottom"
             >

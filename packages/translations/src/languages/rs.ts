@@ -392,6 +392,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Trajno Izbriši',
     permanentlyDeletedCountSuccessfully: 'Trajno obrisano {{count}} {{label}} uspešno.',
     perPage: 'По страници: {{limit}}',
+    perPageLabel: 'Po stranici:',
     previous: 'Prethodni',
     reindex: 'Реиндексирај',
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',

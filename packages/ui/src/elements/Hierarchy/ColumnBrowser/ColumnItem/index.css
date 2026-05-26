@@ -1,0 +1,103 @@
+@layer payload-default {
+  .hierarchy-column-item {
+    display: flex;
+    align-items: center;
+    padding: var(--spacer-2);
+    cursor: pointer;
+    transition: background-color 80ms ease;
+    user-select: none;
+    gap: var(--spacer-2-5);
+    border-radius: var(--radius-medium);
+
+    &:first-child {
+      margin-top: var(--spacer-1);
+    }
+
+    &:last-child {
+      margin-bottom: var(--spacer-1);
+    }
+
+    &:hover {
+      background-color: var(--color-bg-hover);
+    }
+  }
+
+  .hierarchy-column-item--expanded {
+    background-color: var(--color-bg-tertiary);
+
+    &:hover {
+      background-color: var(--color-bg-tertiary);
+    }
+  }
+
+  .hierarchy-column-item--selected {
+    background-color: var(--color-bg-selected);
+
+    &:hover {
+      background-color: var(--color-bg-selected);
+    }
+
+    &.hierarchy-column-item--expanded {
+      background-color: var(--color-bg-selected);
+    }
+  }
+
+  .hierarchy-column-item--disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+
+    &:hover {
+      background-color: transparent;
+    }
+
+    .hierarchy-column-item__title {
+      color: var(--color-text-tertiary);
+    }
+  }
+
+  .hierarchy-column-item__checkbox {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    input[type='checkbox'] {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+  }
+
+  .hierarchy-column-item__title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--color-text);
+    font-weight: 500;
+  }
+
+  .hierarchy-column-item__descendant-indicator {
+    width: var(--spacer-1);
+    height: var(--spacer-1);
+    border-radius: 50%;
+    background-color: var(--color-bg-success);
+    flex-shrink: 0;
+  }
+
+  .hierarchy-column-item__chevron {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-icon-tertiary);
+    width: var(--spacer-3);
+    height: var(--spacer-3);
+
+    svg {
+      width: var(--spacer-2-5);
+      height: var(--spacer-2-5);
+    }
+  }
+}

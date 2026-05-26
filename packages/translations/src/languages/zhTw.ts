@@ -371,6 +371,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     permanentlyDelete: '永久刪除',
     permanentlyDeletedCountSuccessfully: '已成功永久刪除 {{count}} 個 {{label}}。',
     perPage: '每頁顯示：{{limit}}',
+    perPageLabel: '每頁顯示：',
     previous: '上一頁',
     reindex: '重新索引',
     reindexingAll: '正在重新索引 {{collections}}。',
