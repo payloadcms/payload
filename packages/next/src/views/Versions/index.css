@@ -38,7 +38,20 @@
     overflow: auto;
   }
 
-  .versions .table .cell--linked > a {
+  .versions .table th:first-child {
+    padding-inline-start: var(--spacer-2-5);
+  }
+
+  .versions .table td:first-child:not(.cell--linked) {
+    padding-inline-start: var(--spacer-2-5);
+  }
+
+  .versions .table td.cell--linked {
+    padding: 0 var(--spacer-2-5);
+  }
+
+  .versions .table td.cell--linked > a {
+    padding: 0;
     width: 100%;
   }
 
