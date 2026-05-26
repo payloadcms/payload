@@ -195,7 +195,7 @@
 
     .view-version__diff-wrap {
       order: 3;
-      padding: var(--spacer-2) var(--spacer-3);
+      padding: var(--spacer-3);
 
       /* Hide vertical separator on mobile */
       &::after {

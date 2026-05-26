@@ -95,4 +95,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  @media (max-width: 768px) {
+    .lexical-diff .html-diff .lexical-relationship-diff {
+      max-width: unset;
+      display: flex;
+      border-radius: 0;
+      outline: none;
+      margin: 0;
+    }
+  }
 }

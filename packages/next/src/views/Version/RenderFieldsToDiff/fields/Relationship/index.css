@@ -186,4 +186,34 @@
     color: var(--color-text-danger);
     text-decoration-line: line-through;
   }
+
+  @media (max-width: 768px) {
+    .relationship-diff-container--hasOne .field-diff-content {
+      padding: 0;
+      background: transparent;
+    }
+
+    .relationship-diff-container--hasOne .field-diff-content > .html-diff {
+      justify-content: center;
+    }
+
+    .relationship-diff-container--hasOne
+      .field-diff-content
+      > .html-diff:has(.relationship-diff[data-match-type='create'])::before,
+    .relationship-diff-container--hasOne
+      .field-diff-content
+      > .html-diff:has(.relationship-diff[data-match-type='delete'])::before {
+      top: calc(var(--spacer-1) * -1);
+      bottom: calc(var(--spacer-1) * -1);
+      left: calc(var(--spacer-2) * -1);
+      right: calc(var(--spacer-2) * -1);
+    }
+
+    .relationship-diff-container--hasMany .field-diff-content {
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
+      gap: calc(var(--stroke-width-small) * 2);
+    }
+  }
 }

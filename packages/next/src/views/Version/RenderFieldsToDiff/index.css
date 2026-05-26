@@ -18,7 +18,7 @@
 
   @media (max-width: 768px) {
     .render-field-diffs {
-      gap: var(--spacer-2);
+      gap: calc(var(--spacer-4) - var(--spacer-1));
     }
   }
 }

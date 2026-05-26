@@ -12,4 +12,10 @@
     align-items: center;
     color: var(--color-text);
   }
+
+  @media (max-width: 768px) {
+    .field-diff-label {
+      height: min-content;
+    }
+  }
 }

@@ -180,6 +180,10 @@
   }
 
   @media (max-width: 768px) {
+    .html-diff p {
+      align-content: center;
+    }
+
     .html-diff p:not([data-enable-match='false']):has([data-match-type='create']),
     .html-diff h1:not([data-enable-match='false']):has([data-match-type='create']),
     .html-diff h2:not([data-enable-match='false']):has([data-match-type='create']),
