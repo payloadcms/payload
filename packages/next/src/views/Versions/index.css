@@ -47,11 +47,11 @@
   }
 
   .versions .table td.cell--linked {
-    padding: 0 var(--spacer-2-5);
+    padding: 0;
   }
 
   .versions .table td.cell--linked > a {
-    padding: 0;
+    padding: 0 var(--spacer-2-5);
     width: 100%;
   }
 
