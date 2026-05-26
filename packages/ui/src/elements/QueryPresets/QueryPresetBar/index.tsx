@@ -387,15 +387,15 @@ export const QueryPresetBar: React.FC<{
               </PopupList.Button>
             </PopupList.IconButtonGroup>
           )}
-          renderButton={({ onClick, onKeyDown, ...ariaProps }) => (
+          renderButton={({ active, onClick, onKeyDown }) => (
             <FilterTrigger
-              ariaProps={ariaProps}
               className={`${baseClass}__trigger`}
               id="select-preset"
               isActive={Boolean(activePreset)}
               onClear={handleClearPreset}
               onClick={onClick}
               onKeyDown={onKeyDown}
+              popupActive={active}
               showBadge={hasModifiedPreset}
             >
               {buttonLabel}

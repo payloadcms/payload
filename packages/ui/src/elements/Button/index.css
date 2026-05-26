@@ -139,6 +139,23 @@
     }
   }
 
+  /* Selected state - overrides hover/active for supported button styles */
+  .btn.btn--style-secondary.btn--selected,
+  .btn.btn--style-secondary.btn--selected:hover,
+  .btn.btn--style-secondary.btn--selected:active,
+  .btn.btn--style-ghost.btn--selected,
+  .btn.btn--style-ghost.btn--selected:hover,
+  .btn.btn--style-ghost.btn--selected:active {
+    background-color: var(--color-bg-selected);
+    color: var(--color-text-selected);
+  }
+
+  .btn.btn--style-secondary.btn--selected,
+  .btn.btn--style-secondary.btn--selected:hover,
+  .btn.btn--style-secondary.btn--selected:active {
+    border-color: transparent;
+  }
+
   /* Icon */
 
   .btn__icon {

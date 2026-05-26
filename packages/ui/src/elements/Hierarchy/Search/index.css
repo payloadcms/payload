@@ -12,24 +12,14 @@
   }
 
   .hierarchy-search__filter {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     flex-shrink: 0;
     width: var(--spacer-4);
     height: var(--spacer-4);
-    padding: 0;
-    border: none;
     background: var(--color-bg-secondary);
-    border-radius: var(--radius-medium);
-    cursor: pointer;
-    color: var(--color-icon-secondary);
+  }
 
-    &:hover,
-    &:focus-visible {
-      color: var(--color-icon);
-      background: var(--color-bg-tertiary);
-    }
+  .hierarchy-search__filter:hover:not(.popup-trigger-button--active) {
+    background: var(--color-bg-tertiary);
   }
 
   .hierarchy-search-input {

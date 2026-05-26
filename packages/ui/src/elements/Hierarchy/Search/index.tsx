@@ -9,6 +9,7 @@ import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
 import { FilterIcon } from '../../../icons/Filter/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { Button } from '../../Button/index.js'
 import { Popup } from '../../Popup/index.js'
 import { HierarchySearchInput } from './HierarchySearchInput.js'
 import { HierarchySearchResults } from './HierarchySearchResults.js'
@@ -121,17 +122,17 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
                 ))}
               </div>
             )}
-            renderButton={({ onClick, onKeyDown, ...ariaProps }) => (
-              <button
+            renderButton={({ active, onClick, onKeyDown }) => (
+              <Button
                 aria-label={t('general:filter')}
+                buttonStyle="ghost"
                 className={`${baseClass}__filter`}
+                extraButtonProps={{ onKeyDown }}
+                icon={<FilterIcon hasBadgeCutout={hasActiveFilters} size={16} />}
                 onClick={onClick}
-                onKeyDown={onKeyDown}
-                type="button"
-                {...ariaProps}
-              >
-                <FilterIcon hasBadgeCutout={hasActiveFilters} size={16} />
-              </button>
+                round
+                selected={active}
+              />
             )}
             verticalAlign="bottom"
           />

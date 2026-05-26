@@ -10,7 +10,6 @@ import './index.css'
 const baseClass = 'filter-trigger'
 
 type FilterTriggerProps = {
-  ariaProps?: React.AriaAttributes
   children: React.ReactNode
   className?: string
   id?: string
@@ -18,25 +17,26 @@ type FilterTriggerProps = {
   onClear?: (e: React.MouseEvent) => void
   onClick: (e: React.MouseEvent) => void
   onKeyDown?: (e: React.KeyboardEvent) => void
+  /** Whether the popup is currently open */
+  popupActive?: boolean
   /** Whether to show the badge cutout on the filter icon. Defaults to `isActive`. */
   showBadge?: boolean
 }
 
 export function FilterTrigger({
   id,
-  ariaProps,
   children,
   className,
   isActive,
   onClear,
   onClick,
   onKeyDown,
+  popupActive,
   showBadge,
 }: FilterTriggerProps) {
   return (
     <div className={`${baseClass}__wrap`}>
       <Button
-        {...ariaProps}
         buttonStyle="secondary"
         className={[baseClass, className].filter(Boolean).join(' ')}
         extraButtonProps={{ onKeyDown }}
@@ -44,6 +44,7 @@ export function FilterTrigger({
         iconPosition="left"
         id={id}
         onClick={onClick}
+        selected={popupActive}
         size="medium"
       >
         {children}
