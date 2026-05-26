@@ -64,12 +64,19 @@
 
   .ReactCrop__crop-selection:not(.ReactCrop--no-animate .ReactCrop__crop-selection) {
     animation: marching-ants 1s;
-    background-image: linear-gradient(to right, #fff 50%, #444 50%),
-      linear-gradient(to right, #fff 50%, #444 50%),
-      linear-gradient(to bottom, #fff 50%, #444 50%),
-      linear-gradient(to bottom, #fff 50%, #444 50%);
-    background-size: 10px 1px, 10px 1px, 1px 10px, 1px 10px;
-    background-position: 0 0, 0 100%, 0 0, 100% 0;
+    background-image:
+      linear-gradient(to right, #fff 50%, #444 50%), linear-gradient(to right, #fff 50%, #444 50%),
+      linear-gradient(to bottom, #fff 50%, #444 50%), linear-gradient(to bottom, #fff 50%, #444 50%);
+    background-size:
+      10px 1px,
+      10px 1px,
+      1px 10px,
+      1px 10px;
+    background-position:
+      0 0,
+      0 100%,
+      0 0,
+      100% 0;
     background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
     color: #fff;
     animation-play-state: running;
@@ -79,10 +86,18 @@
 
   @keyframes marching-ants {
     0% {
-      background-position: 0 0, 0 100%, 0 0, 100% 0;
+      background-position:
+        0 0,
+        0 100%,
+        0 0,
+        100% 0;
     }
     to {
-      background-position: 20px 0, -20px 100%, 0 -20px, 100% 20px;
+      background-position:
+        20px 0,
+        -20px 100%,
+        0 -20px,
+        100% 20px;
     }
   }
 
@@ -145,7 +160,7 @@
     width: 10px;
     height: 10px;
     background-color: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.7);
+    border: var(--stroke-width-small) solid rgba(255, 255, 255, 0.7);
     outline: 1px solid transparent;
   }
 

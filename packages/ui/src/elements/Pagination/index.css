@@ -16,7 +16,7 @@
     min-width: calc(24px - var(--spacer-2) - 2px);
     min-height: var(--spacer-4);
     padding: 0 var(--spacer-1);
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
     border-radius: var(--radius-medium);
     background: var(--color-bg-secondary);
     color: var(--color-text);

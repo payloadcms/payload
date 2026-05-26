@@ -12,7 +12,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { Fragment } from 'react'
 
 import { DocumentTabLink } from './TabLink.js'
-import './index.scss'
+import './index.css'
 
 export const baseClass = 'doc-tab'
 

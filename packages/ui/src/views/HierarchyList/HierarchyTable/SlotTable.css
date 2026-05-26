@@ -220,7 +220,7 @@
     }
   }
 
-  @media (max-width: var(--breakpoint-m-width)) {
+  @media (max-width: 1024px) {
     .slot-table__th,
     .slot-table__td {
       max-width: 70vw;

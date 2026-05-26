@@ -47,7 +47,7 @@
   .relationship-table .table {
     margin-bottom: 0;
     background: var(--color-bg);
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
     overflow: hidden;
 

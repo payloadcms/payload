@@ -2,7 +2,7 @@
   .hierarchy-column-item {
     display: flex;
     align-items: center;
-    padding: var(--spacer-2);
+    padding: var(--spacer-1) var(--spacer-2);
     cursor: pointer;
     transition: background-color 80ms ease;
     user-select: none;
@@ -92,12 +92,5 @@
     align-items: center;
     justify-content: center;
     color: var(--color-icon-tertiary);
-    width: var(--spacer-3);
-    height: var(--spacer-3);
-
-    svg {
-      width: var(--spacer-2-5);
-      height: var(--spacer-2-5);
-    }
   }
 }

@@ -9,7 +9,7 @@
     flex-shrink: 0;
     position: relative;
     background-color: transparent;
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
     border-radius: var(--radius-small);
     padding: 0;
     color: var(--color-icon-secondary);
