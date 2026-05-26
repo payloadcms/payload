@@ -51,7 +51,6 @@
     cursor: pointer;
     border-radius: var(--radius-medium);
     color: var(--color-icon-tertiary);
-    padding: var(--spacer-1);
 
     &.sort-column--active {
       color: var(--color-icon);

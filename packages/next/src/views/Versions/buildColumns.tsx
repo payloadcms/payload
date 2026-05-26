@@ -49,6 +49,7 @@ export const buildVersionColumns = ({
         type: 'date',
       },
       Heading: <SortColumn Label={t('general:updatedAt')} name="updatedAt" />,
+      isLinkedColumn: true,
       renderedCells: docs.map((doc, i) => {
         return (
           <CreatedAtCellComponent

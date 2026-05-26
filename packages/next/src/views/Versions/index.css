@@ -38,6 +38,10 @@
     overflow: auto;
   }
 
+  .versions .table .cell--linked > a {
+    width: 100%;
+  }
+
   .versions .paginator {
     margin-bottom: 0;
   }
