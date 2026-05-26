@@ -28,15 +28,18 @@ import { UnauthorizedView } from '@payloadcms/ui/views/Unauthorized'
 import { parseDocumentID } from 'payload'
 import { formatAdminURL, isNumber } from 'payload/shared'
 
-import { AccountView } from '../Account/index.js'
+import {
+  AccountView,
+  CreateFirstUserView,
+  DashboardView,
+  Verify,
+  verifyBaseClass,
+} from '../adapter.js'
 import { TrashView } from '../CollectionTrash/index.js'
-import { CreateFirstUserView } from '../CreateFirstUser/index.js'
-import { DashboardView } from '../Dashboard/index.js'
 import { DocumentView } from '../Document/index.js'
 import { HierarchyView } from '../Hierarchy/index.js'
 import { ListView } from '../List/index.js'
 import { loginBaseClass, LoginView } from '../Login/index.js'
-import { Verify, verifyBaseClass } from '../Verify/index.js'
 import { getCustomCollectionViewByRoute } from './getCustomCollectionViewByRoute.js'
 import { getCustomGlobalViewByRoute } from './getCustomGlobalViewByRoute.js'
 

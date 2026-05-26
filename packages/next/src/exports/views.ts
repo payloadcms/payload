@@ -1,12 +1,10 @@
-export { AccountView } from '../views/Account/index.js'
-export { CreateFirstUserView } from '../views/CreateFirstUser/index.js'
+export { AccountView, CreateFirstUserView, DashboardView } from '../views/adapter.js'
 export {
   type DashboardViewClientProps,
   type DashboardViewServerProps,
   type DashboardViewServerPropsOnly,
   DefaultDashboard,
 } from '../views/Dashboard/Default/index.js'
-export { DashboardView } from '../views/Dashboard/index.js'
 
 export { ListView, renderListView, type RenderListViewArgs } from '../views/List/index.js'
 export { LoginView } from '../views/Login/index.js'

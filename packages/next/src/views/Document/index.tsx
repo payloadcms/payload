@@ -37,9 +37,9 @@ import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
+import { VersionsView } from '../adapter.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { VersionView } from '../Version/index.js'
-import { VersionsView } from '../Versions/index.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
