@@ -12,6 +12,7 @@ import type {
   Where,
 } from 'payload'
 
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderTable } from '@payloadcms/ui/rsc'
 import { formatDate } from '@payloadcms/ui/shared'
 import { flattenAllFields } from 'payload'
@@ -195,6 +196,7 @@ export const handleGroupBy = async ({
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
+          renderComponent: RenderServerComponent,
           useAsTitle: collectionConfig.admin.useAsTitle,
           viewType,
         })

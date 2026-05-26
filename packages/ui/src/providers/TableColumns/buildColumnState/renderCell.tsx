@@ -1,6 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientField,
+  ComponentRenderer,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Document,
@@ -15,7 +16,6 @@ import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
-import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import {
   DefaultCell,
   FolderIcon,
@@ -36,6 +36,7 @@ type RenderCellArgs = {
   readonly i18n: I18nClient
   readonly isLinkedColumn: boolean
   readonly payload: Payload
+  readonly renderComponent: ComponentRenderer
   readonly req?: PayloadRequest
   readonly rowIndex: number
   readonly serverField: Field
@@ -51,6 +52,7 @@ export function renderCell({
   i18n,
   isLinkedColumn,
   payload,
+  renderComponent,
   req,
   rowIndex,
   serverField,
@@ -147,7 +149,7 @@ export function renderCell({
         const iconComponent = hierarchyConfig.admin?.components?.Icon
         if (iconComponent) {
           // Pre-render the custom icon
-          hierarchyIcon = RenderServerComponent({
+          hierarchyIcon = renderComponent({
             Component: iconComponent,
             importMap: payload.importMap,
             key: `hierarchy-icon-${relationTo}`,
@@ -215,7 +217,7 @@ export function renderCell({
 
     const CustomCellComponent = serverField.admin.components.Cell
 
-    CustomCell = RenderServerComponent({
+    CustomCell = renderComponent({
       clientProps: cellClientProps,
       Component: CustomCellComponent ?? serverField.editor.CellComponent,
       importMap: payload.importMap,
@@ -225,7 +227,7 @@ export function renderCell({
     const CustomCellComponent = serverField?.admin?.components?.Cell
 
     if (CustomCellComponent) {
-      CustomCell = RenderServerComponent({
+      CustomCell = renderComponent({
         clientProps: cellClientProps,
         Component: CustomCellComponent,
         importMap: payload.importMap,
@@ -236,7 +238,7 @@ export function renderCell({
       cellClientProps.field &&
       hasOptionLabelJSXElement(cellClientProps)
     ) {
-      CustomCell = RenderServerComponent({
+      CustomCell = renderComponent({
         clientProps: cellClientProps,
         Component: DefaultCell,
         importMap: payload.importMap,
@@ -245,7 +247,7 @@ export function renderCell({
       const CustomCellComponent = serverField?.admin?.components?.Cell
 
       if (CustomCellComponent) {
-        CustomCell = RenderServerComponent({
+        CustomCell = renderComponent({
           clientProps: cellClientProps,
           Component: CustomCellComponent,
           importMap: payload.importMap,

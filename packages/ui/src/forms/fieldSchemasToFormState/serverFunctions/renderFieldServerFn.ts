@@ -6,6 +6,7 @@ import {
   UnauthorizedError,
 } from 'payload'
 
+import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import { getClientConfig } from '../../../utilities/getClientConfig.js'
 import { getClientSchemaMap } from '../../../utilities/getClientSchemaMap.js'
 import { getSchemaMap } from '../../../utilities/getSchemaMap.js'
@@ -118,6 +119,7 @@ export const _internal_renderFieldHandler: ServerFunction<
     forceCreateClientField: fieldArg ? true : false,
     previousFieldState: undefined,
     renderAllFields: true,
+    renderComponent: RenderServerComponent,
     req,
     schemaPath: `${entitySlug}.${fieldPath.join('.')}`,
     siblingData: data,
