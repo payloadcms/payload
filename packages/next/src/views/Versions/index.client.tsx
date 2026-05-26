@@ -3,8 +3,7 @@ import type { Column, SanitizedCollectionConfig } from 'payload'
 
 import {
   LoadingOverlayToggle,
-  Pagination,
-  PerPage,
+  PageControlsComponent,
   Table,
   useListQuery,
   useTranslation,
@@ -40,35 +39,13 @@ export const VersionsViewClient: React.FC<{
       {versionCount > 0 && (
         <React.Fragment>
           <Table columns={columns} data={data?.docs} />
-          <div className={`${baseClass}__page-controls`}>
-            <Pagination
-              hasNextPage={data.hasNextPage}
-              hasPrevPage={data.hasPrevPage}
-              limit={data.limit}
-              nextPage={data.nextPage}
-              numberOfNeighbors={1}
-              onChange={handlePageChange}
-              page={data.page}
-              prevPage={data.prevPage}
-              totalPages={data.totalPages}
-            />
-            {data?.totalDocs > 0 && (
-              <React.Fragment>
-                <div className={`${baseClass}__page-info`}>
-                  {data.page * data.limit - (data.limit - 1)}-
-                  {data.totalPages > 1 && data.totalPages !== data.page
-                    ? data.limit * data.page
-                    : data.totalDocs}{' '}
-                  {i18n.t('general:of')} {data.totalDocs}
-                </div>
-                <PerPage
-                  handleChange={handlePerPageChange}
-                  limit={limit ? Number(limit) : 10}
-                  limits={paginationLimits}
-                />
-              </React.Fragment>
-            )}
-          </div>
+          <PageControlsComponent
+            data={data}
+            handlePageChange={handlePageChange}
+            handlePerPageChange={handlePerPageChange}
+            limit={limit ? Number(limit) : 10}
+            limits={paginationLimits}
+          />
         </React.Fragment>
       )}
     </React.Fragment>

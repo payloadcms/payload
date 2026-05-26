@@ -394,6 +394,7 @@ export const trTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Kalıcı Olarak Sil',
     permanentlyDeletedCountSuccessfully: 'Kalıcı olarak {{count}} {{label}} başarıyla silindi.',
     perPage: 'Sayfa başına: {{limit}}',
+    perPageLabel: 'Sayfa başına:',
     previous: 'Önceki',
     reindex: 'Yeniden İndeksle',
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',

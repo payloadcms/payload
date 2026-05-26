@@ -389,6 +389,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Назавжди видалити',
     permanentlyDeletedCountSuccessfully: 'Успішно видалено назавжди {{count}} {{label}}.',
     perPage: 'На сторінці: {{limit}}',
+    perPageLabel: 'На сторінку:',
     previous: 'Попередній',
     reindex: 'Повторне індексування',
     reindexingAll: 'Перебудова індексів для всіх {{collections}}.',

@@ -74,6 +74,12 @@ export const usePopupWindow = (props: {
         e.preventDefault()
       }
 
+      // If a popup is already open, focus it instead of opening a new one
+      if (popupRef.current && !popupRef.current.closed) {
+        popupRef.current.focus()
+        return
+      }
+
       const features = {
         height: 700,
         left: 'auto',

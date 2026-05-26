@@ -58,17 +58,6 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
         <div className={`${baseClass}__buttons`}>
           <button
             aria-label={t('general:sortByLabelDirection', {
-              direction: t('general:ascending'),
-              label,
-            })}
-            className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => void handleSortChange(asc)}
-            type="button"
-          >
-            <ChevronIcon direction="up" size={16} />
-          </button>
-          <button
-            aria-label={t('general:sortByLabelDirection', {
               direction: t('general:descending'),
               label,
             })}
@@ -77,6 +66,17 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
             type="button"
           >
             <ChevronIcon size={16} />
+          </button>
+          <button
+            aria-label={t('general:sortByLabelDirection', {
+              direction: t('general:ascending'),
+              label,
+            })}
+            className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
+            onClick={() => void handleSortChange(asc)}
+            type="button"
+          >
+            <ChevronIcon direction="up" size={16} />
           </button>
         </div>
       )}

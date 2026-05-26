@@ -390,6 +390,7 @@ export const plTranslations: DefaultTranslationsObject = {
     permanentlyDelete: 'Trwale Usuń',
     permanentlyDeletedCountSuccessfully: 'Trwale usunięto {{count}} {{label}} pomyślnie.',
     perPage: 'Na stronę: {{limit}}',
+    perPageLabel: 'Na stronę:',
     previous: 'Poprzedni',
     reindex: 'Ponowne indeksowanie',
     reindexingAll: 'Ponowne indeksowanie wszystkich {{collections}}.',

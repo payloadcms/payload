@@ -1,10 +1,16 @@
 @layer payload-default {
   .collection-list {
     width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .collection-list__wrap {
     padding-bottom: var(--spacing-view-bottom);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .collection-list__wrap > *:not(:last-child) {
@@ -20,12 +26,12 @@
     padding-top: var(--spacer-3);
   }
 
-  .collection-list__tables .table-wrap:not(:last-child) {
+  .collection-list__tables .table-wrap {
     margin-bottom: var(--spacer-6);
   }
 
   .collection-list__tables .table-wrap--group-by:first-child {
-    margin-top: var(--spacer-6);
+    margin-top: var(--spacer-2);
   }
 
   .collection-list .table table {
@@ -33,9 +39,9 @@
     overflow: auto;
   }
 
-  .collection-list .table table [class^='cell'] > p,
-  .collection-list .table table [class^='cell'] > span,
-  .collection-list .table table [class^='cell'] > a {
+  .collection-list .table table [class^='cell']:not(.cell--linked) > p,
+  .collection-list .table table [class^='cell']:not(.cell--linked) > span,
+  .collection-list .table table [class^='cell']:not(.cell--linked) > a {
     line-clamp: 4;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
@@ -125,6 +131,15 @@
   @media (max-width: 768px) {
     .collection-list {
       margin-bottom: var(--spacing-view-bottom);
+    }
+
+    .collection-list__list-selection {
+      position: static;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      box-shadow: none;
+      border-radius: 0;
     }
   }
 }
