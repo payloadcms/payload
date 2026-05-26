@@ -1,4 +1,4 @@
-import type { AdminViewServerProps, DocumentViewServerProps } from 'payload'
+import type { AdminViewServerProps, DocumentViewServerProps, ListQuery } from 'payload'
 
 import { AccountView as AccountViewBase } from '@payloadcms/ui/views/Account'
 import { CreateFirstUserView as CreateFirstUserViewBase } from '@payloadcms/ui/views/CreateFirstUser'
@@ -11,6 +11,7 @@ import React from 'react'
 import { Logo } from '../elements/Logo/index.js'
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { DefaultDashboard } from './Dashboard/Default/index.js'
+import { renderListView } from './List/index.js'
 
 export { verifyBaseClass } from '@payloadcms/ui/views/Verify'
 
@@ -59,4 +60,55 @@ export function Verify(props: AdminViewServerProps) {
 
 export function VersionsView(props: DocumentViewServerProps) {
   return <VersionsViewBase {...props} onNotFound={notFound} />
+}
+
+type RenderListWrapperArgs = {
+  customCellProps?: Record<string, any>
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
+  disableQueryPresets?: boolean
+  drawerSlug?: string
+  enableRowSelections: boolean
+  overrideEntityVisibility?: boolean
+  query: ListQuery
+  redirectAfterDelete?: boolean
+  redirectAfterDuplicate?: boolean
+  redirectAfterRestore?: boolean
+} & AdminViewServerProps
+
+export const HierarchyView: React.FC<Omit<RenderListWrapperArgs, 'enableRowSelections'>> = async (
+  args,
+) => {
+  try {
+    const { List } = await renderListView({
+      ...args,
+      enableRowSelections: true,
+      viewType: 'hierarchy',
+    })
+    return List
+  } catch (error) {
+    if (error.message === 'not-found') {
+      notFound()
+    }
+    console.error(error) // eslint-disable-line no-console
+  }
+}
+
+export const TrashView: React.FC<Omit<RenderListWrapperArgs, 'enableRowSelections'>> = async (
+  args,
+) => {
+  try {
+    const { List } = await renderListView({
+      ...args,
+      enableRowSelections: true,
+      trash: true,
+      viewType: 'trash',
+    })
+    return List
+  } catch (error) {
+    if (error.message === 'not-found') {
+      notFound()
+    }
+    console.error(error) // eslint-disable-line no-console
+  }
 }

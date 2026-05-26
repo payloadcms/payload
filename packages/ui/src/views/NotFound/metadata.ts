@@ -1,6 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload'
+
+import type { ViewMetadata } from '../../utilities/meta.js'
 
 import { generateMetadata } from '../../utilities/meta.js'
 
@@ -10,7 +11,7 @@ export const generateNotFoundViewMetadata = async ({
 }: {
   config: SanitizedConfig
   i18n: I18nClient
-}): Promise<Metadata> =>
+}): Promise<ViewMetadata> =>
   generateMetadata({
     description: i18n.t('general:pageNotFound'),
     keywords: `404 ${i18n.t('general:notFound')}`,

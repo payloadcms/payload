@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 import type { AdminViewServerProps, ImportMap, SanitizedConfig } from 'payload'
 
 import { getVisibleEntities } from '@payloadcms/ui/shared'
@@ -7,26 +6,8 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { DefaultTemplate } from '../../templates/Default/index.js'
-import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { initReq } from '../../utilities/initReq.js'
-
-export const generateNotFoundViewMetadata = async ({
-  config: configPromise,
-}: {
-  config: Promise<SanitizedConfig> | SanitizedConfig
-  params?: { [key: string]: string | string[] }
-}): Promise<Metadata> => {
-  const config = await configPromise
-
-  const i18n = await getNextRequestI18n({
-    config,
-  })
-
-  return {
-    title: i18n.t('general:notFound'),
-  }
-}
+import { DefaultTemplate } from '../templates/Default/index.js'
+import { initReq } from '../utilities/initReq.js'
 
 export const NotFoundPage = async ({
   config: configPromise,
@@ -95,6 +76,6 @@ export const NotFoundPage = async ({
   )
 }
 
-export function NotFoundView(props: AdminViewServerProps) {
+export function NotFoundView(_props: AdminViewServerProps) {
   return <NotFoundClient />
 }

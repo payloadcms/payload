@@ -1,5 +1,4 @@
-import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
-import type { Metadata } from 'next'
+import type { AcceptedLanguages } from '@payloadcms/translations'
 import type {
   AdminViewClientProps,
   AdminViewServerPropsOnly,
@@ -23,12 +22,7 @@ import { getPreferences } from '../../utilities/getPreferences.js'
 import { initReq } from '../../utilities/initReq.js'
 import { getRouteData } from './getRouteData.js'
 
-export type GenerateViewMetadata = (args: {
-  config: SanitizedConfig
-  i18n: I18nClient
-  isEditing?: boolean
-  params?: { [key: string]: string | string[] }
-}) => Promise<Metadata>
+export type { GenerateViewMetadata } from '@payloadcms/ui/views/types'
 
 export const RootPage = async ({
   config: configPromise,

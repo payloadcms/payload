@@ -8,7 +8,7 @@ export {
 
 export { ListView, renderListView, type RenderListViewArgs } from '../views/List/index.js'
 export { LoginView } from '../views/Login/index.js'
-export { NotFoundPage } from '../views/NotFound/index.js'
+export { NotFoundPage } from '../views/NotFound.js'
 
 export { type GenerateViewMetadata, RootPage } from '../views/Root/index.js'
 export { generatePageMetadata } from '../views/Root/metadata.js'

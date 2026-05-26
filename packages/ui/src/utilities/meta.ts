@@ -1,14 +1,16 @@
-import type { Metadata } from 'next'
-import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
 import type { MetaConfig } from 'payload'
 
-import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
 import * as qs from 'qs-esm'
 
-const appendTitleSuffix = (
-  title: Metadata['title'],
-  suffix: string | undefined,
-): Metadata['title'] => {
+import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '../assets/index.js'
+
+/**
+ * Framework-agnostic admin page metadata.
+ * Adapters (e.g. @payloadcms/next) cast this to their framework's metadata type.
+ */
+export type ViewMetadata = Record<string, any>
+
+const appendTitleSuffix = (title: any, suffix: string | undefined): any => {
   if (!suffix || !title) {
     return title ?? undefined
   }
@@ -30,7 +32,7 @@ const appendTitleSuffix = (
   return { absolute: `${title.absolute} ${suffix}` }
 }
 
-const getTitleString = (title: Metadata['title']): string | undefined => {
+const getTitleString = (title: any): string | undefined => {
   if (!title) {
     return undefined
   }
@@ -43,7 +45,7 @@ const getTitleString = (title: Metadata['title']): string | undefined => {
   return title.default
 }
 
-const defaultOpenGraph: Metadata['openGraph'] = {
+const defaultOpenGraph = {
   description:
     'Payload is a headless CMS and application framework built with TypeScript, Node.js, and React.',
   siteName: 'Payload App',
@@ -52,7 +54,7 @@ const defaultOpenGraph: Metadata['openGraph'] = {
 
 export const generateMetadata = async (
   args: { serverURL: string } & MetaConfig,
-): Promise<Metadata> => {
+): Promise<ViewMetadata> => {
   const { defaultOGImageType, serverURL, titleSuffix, ...rest } = args
 
   /**
@@ -60,28 +62,29 @@ export const generateMetadata = async (
    * It is a result of needing to `DeepCopy` the `MetaConfig` type from Payload.
    * This is required for the `DeepRequired` from `Config` to `SanitizedConfig`.
    */
-  const incomingMetadata = rest as Metadata
+  const incomingMetadata = rest as any
 
-  const icons: Metadata['icons'] =
-    incomingMetadata.icons ||
-    ([
-      {
-        type: 'image/png',
-        rel: 'icon',
-        sizes: '32x32',
-        url: typeof payloadFaviconDark === 'object' ? payloadFaviconDark?.src : payloadFaviconDark,
-      },
-      {
-        type: 'image/png',
-        media: '(prefers-color-scheme: dark)',
-        rel: 'icon',
-        sizes: '32x32',
-        url:
-          typeof payloadFaviconLight === 'object' ? payloadFaviconLight?.src : payloadFaviconLight,
-      },
-    ] satisfies Array<Icon>)
+  const icons = incomingMetadata.icons || [
+    {
+      type: 'image/png',
+      rel: 'icon',
+      sizes: '32x32',
+      url: (typeof payloadFaviconDark === 'object'
+        ? (payloadFaviconDark as any)?.src
+        : payloadFaviconDark) as string,
+    },
+    {
+      type: 'image/png',
+      media: '(prefers-color-scheme: dark)',
+      rel: 'icon',
+      sizes: '32x32',
+      url: (typeof payloadFaviconLight === 'object'
+        ? (payloadFaviconLight as any)?.src
+        : payloadFaviconLight) as string,
+    },
+  ]
 
-  const metaTitle: Metadata['title'] = appendTitleSuffix(incomingMetadata.title, titleSuffix)
+  const metaTitle = appendTitleSuffix(incomingMetadata.title, titleSuffix)
 
   const titleStringForOg: string | undefined =
     typeof incomingMetadata.openGraph?.title === 'string'
@@ -90,7 +93,7 @@ export const generateMetadata = async (
 
   const ogTitle = [titleStringForOg, titleSuffix].filter(Boolean).join(' ')
 
-  const mergedOpenGraph: Metadata['openGraph'] = {
+  const mergedOpenGraph = {
     ...(defaultOpenGraph || {}),
     ...(defaultOGImageType === 'dynamic'
       ? {
@@ -119,7 +122,9 @@ export const generateMetadata = async (
             {
               alt: ogTitle,
               height: 480,
-              url: typeof staticOGImage === 'object' ? staticOGImage?.src : staticOGImage,
+              url: (typeof staticOGImage === 'object'
+                ? (staticOGImage as any)?.src
+                : staticOGImage) as string,
               width: 640,
             },
           ],

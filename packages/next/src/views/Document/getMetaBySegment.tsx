@@ -1,25 +1,16 @@
-import type { Metadata } from 'next'
-import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { GenerateEditViewMetadata } from '@payloadcms/ui/views/types'
+import type { EditConfig } from 'payload'
 
+import { generateAPIViewMetadata } from '@payloadcms/ui/views/API/metadata'
 import { getDocumentView } from '@payloadcms/ui/views/Document/getDocumentView'
-
-import type { GenerateViewMetadata } from '../Root/index.js'
+import { generateEditViewMetadata } from '@payloadcms/ui/views/Edit/metadata'
+import { generateNotFoundViewMetadata } from '@payloadcms/ui/views/NotFound/metadata'
+import { generateVersionViewMetadata } from '@payloadcms/ui/views/Version/metadata'
+import { generateVersionsViewMetadata } from '@payloadcms/ui/views/Versions/metadata'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { generateAPIViewMetadata } from '../API/metadata.js'
-import { generateEditViewMetadata } from '../Edit/metadata.js'
-import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
-import { generateVersionViewMetadata } from '../Version/metadata.js'
-import { generateVersionsViewMetadata } from '../Versions/metadata.js'
 
-export type GenerateEditViewMetadata = (
-  args: {
-    collectionConfig?: null | SanitizedCollectionConfig
-    globalConfig?: null | SanitizedGlobalConfig
-    isReadOnly?: boolean
-    view?: keyof EditConfig
-  } & Parameters<GenerateViewMetadata>[0],
-) => Promise<Metadata>
+export type { GenerateEditViewMetadata }
 
 export const getMetaBySegment: GenerateEditViewMetadata = async ({
   collectionConfig,

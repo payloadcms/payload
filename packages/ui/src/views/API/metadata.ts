@@ -2,7 +2,7 @@ import type { MetaConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
-import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
+import type { GenerateEditViewMetadata } from '../types.js'
 
 import { generateMetadata } from '../../utilities/meta.js'
 

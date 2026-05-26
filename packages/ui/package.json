@@ -46,6 +46,16 @@
       "types": "./src/views/*.ts",
       "default": "./src/views/*.ts"
     },
+    "./views/*/metadata": {
+      "import": "./src/views/*/metadata.ts",
+      "types": "./src/views/*/metadata.ts",
+      "default": "./src/views/*/metadata.ts"
+    },
+    "./utilities/meta": {
+      "import": "./src/utilities/meta.ts",
+      "types": "./src/utilities/meta.ts",
+      "default": "./src/utilities/meta.ts"
+    },
     "./views/Document/getCustomViewByRoute": {
       "import": "./src/views/Document/getCustomViewByRoute.tsx",
       "types": "./src/views/Document/getCustomViewByRoute.tsx",
@@ -1051,6 +1061,16 @@
         "import": "./dist/views/*.js",
         "types": "./dist/views/*.d.ts",
         "default": "./dist/views/*.js"
+      },
+      "./views/*/metadata": {
+        "import": "./dist/views/*/metadata.js",
+        "types": "./dist/views/*/metadata.d.ts",
+        "default": "./dist/views/*/metadata.js"
+      },
+      "./utilities/meta": {
+        "import": "./dist/utilities/meta.js",
+        "types": "./dist/utilities/meta.d.ts",
+        "default": "./dist/utilities/meta.js"
       },
       "./views/Document/getCustomViewByRoute": {
         "import": "./dist/views/Document/getCustomViewByRoute.js",

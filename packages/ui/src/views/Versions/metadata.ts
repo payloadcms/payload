@@ -1,9 +1,9 @@
-import type { Metadata } from 'next'
 import type { MetaConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
-import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
+import type { ViewMetadata } from '../../utilities/meta.js'
+import type { GenerateEditViewMetadata } from '../types.js'
 
 import { generateMetadata } from '../../utilities/meta.js'
 
@@ -15,7 +15,7 @@ export const generateVersionsViewMetadata: GenerateEditViewMetadata = async ({
   config,
   globalConfig,
   i18n,
-}): Promise<Metadata> => {
+}): Promise<ViewMetadata> => {
   const { t } = i18n
 
   const entityLabel = collectionConfig

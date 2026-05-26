@@ -1,11 +1,11 @@
-import type { Metadata } from 'next'
 import type { MetaConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatDate } from '@payloadcms/ui/shared'
 
-import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
+import type { ViewMetadata } from '../../utilities/meta.js'
+import type { GenerateEditViewMetadata } from '../types.js'
 
+import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { generateMetadata } from '../../utilities/meta.js'
 
 /**
@@ -16,7 +16,7 @@ export const generateVersionViewMetadata: GenerateEditViewMetadata = async ({
   config,
   globalConfig,
   i18n,
-}): Promise<Metadata> => {
+}): Promise<ViewMetadata> => {
   const { t } = i18n
 
   let metaToUse: MetaConfig = {
