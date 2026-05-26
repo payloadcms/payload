@@ -1,7 +1,6 @@
 import type {
   BuildFormStateArgs,
   ClientFieldSchemaMap,
-  ComponentRenderer,
   Data,
   DocumentPreferences,
   Field,
@@ -67,7 +66,6 @@ type Args = {
   previousFormState: FormState
   readOnly?: boolean
   renderAllFields: boolean
-  renderComponent: ComponentRenderer
   renderFieldFn: RenderFieldMethod
   req: PayloadRequest
   select?: SelectType
@@ -112,7 +110,6 @@ export const iterateFields = async ({
   previousFormState,
   readOnly,
   renderAllFields,
-  renderComponent,
   renderFieldFn: renderFieldFn,
   req,
   select,
@@ -203,7 +200,6 @@ export const iterateFields = async ({
         previousFormState,
         readOnly,
         renderAllFields,
-        renderComponent,
         renderFieldFn,
         req,
         schemaPath,

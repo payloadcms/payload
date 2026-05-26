@@ -12,6 +12,8 @@ import { fieldIsHiddenOrDisabled } from 'payload/shared'
 
 import type { RenderFieldMethod } from './types.js'
 
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 import { FieldDescription, WatchCondition } from '../../exports/client/index.js'
 
@@ -43,7 +45,6 @@ export const renderField: RenderFieldMethod = ({
   preferences,
   readOnly: readOnlyFromProps,
   renderAllFields,
-  renderComponent,
   req,
   schemaPath,
   siblingData,
@@ -138,7 +139,7 @@ export const renderField: RenderFieldMethod = ({
           }
 
           row.customComponents.RowLabel = !mockRSCs
-            ? renderComponent({
+            ? RenderServerComponent({
                 clientProps,
                 Component: fieldConfig.admin.components.RowLabel,
                 importMap: req.payload.importMap,
@@ -187,7 +188,7 @@ export const renderField: RenderFieldMethod = ({
           }
 
           fieldState.rows[rowIndex].customComponents.RowLabel = !mockRSCs
-            ? renderComponent({
+            ? RenderServerComponent({
                 clientProps,
                 Component: blockConfig.admin.components.Label,
                 importMap: req.payload.importMap,
@@ -258,7 +259,7 @@ export const renderField: RenderFieldMethod = ({
 
       fieldState.customComponents.Field = !mockRSCs ? (
         <WatchCondition path={path}>
-          {renderComponent({
+          {RenderServerComponent({
             clientProps,
             Component: fieldConfig.editor.FieldComponent,
             importMap: req.payload.importMap,
@@ -289,7 +290,7 @@ export const renderField: RenderFieldMethod = ({
           const Component = fieldConfig.admin.components[key]
 
           fieldState.customComponents[key] = !mockRSCs
-            ? renderComponent({
+            ? RenderServerComponent({
                 clientProps,
                 Component,
                 importMap: req.payload.importMap,
@@ -328,7 +329,7 @@ export const renderField: RenderFieldMethod = ({
     if (fieldConfig.admin?.components) {
       if ('afterInput' in fieldConfig.admin.components) {
         fieldState.customComponents.AfterInput = !mockRSCs
-          ? renderComponent({
+          ? RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.afterInput,
               importMap: req.payload.importMap,
@@ -340,7 +341,7 @@ export const renderField: RenderFieldMethod = ({
 
       if ('beforeInput' in fieldConfig.admin.components) {
         fieldState.customComponents.BeforeInput = !mockRSCs
-          ? renderComponent({
+          ? RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.beforeInput,
               importMap: req.payload.importMap,
@@ -352,7 +353,7 @@ export const renderField: RenderFieldMethod = ({
 
       if ('Description' in fieldConfig.admin.components) {
         fieldState.customComponents.Description = !mockRSCs
-          ? renderComponent({
+          ? RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.Description,
               importMap: req.payload.importMap,
@@ -364,7 +365,7 @@ export const renderField: RenderFieldMethod = ({
 
       if ('Error' in fieldConfig.admin.components) {
         fieldState.customComponents.Error = !mockRSCs
-          ? renderComponent({
+          ? RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.Error,
               importMap: req.payload.importMap,
@@ -376,7 +377,7 @@ export const renderField: RenderFieldMethod = ({
 
       if ('Label' in fieldConfig.admin.components) {
         fieldState.customComponents.Label = !mockRSCs
-          ? renderComponent({
+          ? RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.Label,
               importMap: req.payload.importMap,
@@ -389,7 +390,7 @@ export const renderField: RenderFieldMethod = ({
       if ('Field' in fieldConfig.admin.components) {
         fieldState.customComponents.Field = !mockRSCs ? (
           <WatchCondition path={path}>
-            {renderComponent({
+            {RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.Field,
               importMap: req.payload.importMap,

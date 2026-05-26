@@ -368,7 +368,6 @@ export const renderListView = async (
         orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
         payload: req.payload,
         query,
-        renderComponent: RenderServerComponent,
         req,
         useAsTitle: collectionConfig.admin.useAsTitle,
         viewType,
@@ -422,11 +421,7 @@ export const renderListView = async (
     })
   }
 
-  const renderedFilters = renderFilters(
-    collectionConfig.fields,
-    req.payload.importMap,
-    RenderServerComponent,
-  )
+  const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
   const resolvedFilterOptions = await resolveAllFilterOptions({
     fields: collectionConfig.fields,
