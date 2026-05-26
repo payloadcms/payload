@@ -32,7 +32,7 @@ export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilt
   return (
     <Popup
       className={baseClass}
-      horizontalAlign="right"
+      horizontalAlign="left"
       render={() => (
         <div className={`${baseClass}__options`}>
           {options.map(({ label, value }) => (

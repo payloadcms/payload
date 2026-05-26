@@ -43,4 +43,15 @@
   .filter-trigger__clear:active {
     background: var(--color-bg-transparent-pressed);
   }
+
+  /* Selected state for clear button when popup is open */
+  .filter-trigger__wrap:has(.btn--selected) .filter-trigger__clear {
+    background: var(--color-bg-selected);
+    color: var(--color-text-selected);
+    border-color: transparent;
+  }
+
+  .filter-trigger__wrap:has(.btn--selected) .filter-trigger__clear:hover {
+    background: var(--color-bg-selected-hover);
+  }
 }
