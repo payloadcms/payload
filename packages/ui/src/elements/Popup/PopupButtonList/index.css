@@ -117,6 +117,17 @@
     width: 20px;
     height: 20px;
     flex-shrink: 0;
+    opacity: 0;
+  }
+
+  /* Show checkmark with low opacity on hover (preview state) */
+  .popup-button-list--with-icons .popup-button-list__button:hover .popup-button-list__icon {
+    opacity: 1;
+  }
+
+  /* Show checkmark with full opacity when selected */
+  .popup-button-list--with-icons .popup-button-list__button--selected .popup-button-list__icon {
+    opacity: 1;
   }
 
   .popup-button-list--with-icons .popup-button-list__icon svg {

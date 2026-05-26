@@ -5,9 +5,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
 import { FilterTrigger } from '../../../elements/FilterTrigger/index.js'
-import { Popup } from '../../../elements/Popup/index.js'
-import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
-import './index.css'
+import { Popup, PopupList } from '../../../elements/Popup/index.js'
 
 const baseClass = 'type-filter'
 
@@ -34,21 +32,22 @@ export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilt
       className={baseClass}
       horizontalAlign="left"
       render={() => (
-        <div className={`${baseClass}__options`}>
+        <PopupList.IconButtonGroup>
           {options.map(({ label, value }) => (
-            <CheckboxInput
-              checked={selectedValues?.includes(value)}
+            <PopupList.Button
+              active={selectedValues?.includes(value)}
               key={value}
-              label={label}
-              onToggle={() => {
+              onClick={() => {
                 const newSelectedValues = selectedValues?.includes(value)
                   ? selectedValues.filter((v) => v !== value)
                   : [...selectedValues, value]
                 onChange(newSelectedValues)
               }}
-            />
+            >
+              {label}
+            </PopupList.Button>
           ))}
-        </div>
+        </PopupList.IconButtonGroup>
       )}
       renderButton={({ active, onClick, onKeyDown }) => (
         <FilterTrigger

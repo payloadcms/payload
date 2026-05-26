@@ -99,35 +99,18 @@
     height: var(--spacer-3);
   }
 
-  .hierarchy-search__filter-options {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacer-2);
-    padding: 0 var(--spacer-2-5);
-    margin: 3px 0;
-  }
-
-  .hierarchy-search__filter-options .checkbox-input {
-    align-items: center;
-  }
-
-  .hierarchy-search__filter-options .checkbox-input label {
-    padding-bottom: 0;
-  }
-
   .hierarchy-search-results {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
     max-height: calc(100vh - 200px);
-    width: calc(100% + var(--nav-padding-inline-start) + var(--nav-padding-inline-end));
-    margin-left: calc(-1 * var(--nav-padding-inline-start));
     margin-top: var(--spacer-2);
   }
 
   .hierarchy-search-results__list {
     display: flex;
     flex-direction: column;
+    gap: var(--spacer-1);
   }
 
   .hierarchy-search-results__empty {
@@ -137,13 +120,12 @@
 
   .hierarchy-search-results__load-more {
     margin-top: var(--spacer-1);
-    padding-left: calc(var(--nav-padding-inline-start) - 2px);
+    padding-left: calc(var(--spacer-1) + 1px); /* Align with text, accounting for 1px border */
     padding-right: var(--nav-padding-inline-end);
     border: none;
     background: transparent;
     color: var(--color-text-secondary);
     cursor: pointer;
-    font-size: var(--text-body-small-font-size);
 
     &:hover {
       color: var(--color-text);
@@ -159,32 +141,33 @@
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    transition: background-color 150ms ease;
     padding-block: var(--spacer-1);
     padding-inline-start: calc(var(--nav-padding-inline-start) * 0.5);
     padding-inline-end: calc(var(--nav-padding-inline-end) * 0.5);
-    border-radius: var(--radius-small);
-    margin-inline-start: calc(0.5 * var(--nav-padding-inline-start));
-    margin-inline-end: calc(0.5 * var(--nav-padding-inline-end));
+    border-radius: var(--radius-medium);
     gap: var(--spacer-1);
+    background: transparent;
     border: var(--stroke-width-small) solid transparent;
+
+    &:hover {
+      background-color: var(--color-bg-transparent-hover);
+    }
+
+    &:active {
+      background-color: var(--color-bg-transparent-pressed);
+    }
 
     &:hover .hierarchy-search-result-item__title {
       color: var(--color-text);
-      text-decoration: underline;
     }
 
     &:hover .hierarchy-search-result-item__path {
       color: var(--color-text-secondary);
     }
 
-    &:focus {
+    &:focus-visible {
       outline: none;
-      border-color: var(--color-border-strong);
-    }
-
-    &:focus .hierarchy-search-result-item__title {
-      text-decoration: underline;
+      border-color: var(--accessibility-focus-color);
     }
   }
 

@@ -5,12 +5,11 @@ import React, { useCallback, useState } from 'react'
 
 import type { HierarchySearchProps } from './types.js'
 
-import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
 import { FilterIcon } from '../../../icons/Filter/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
-import { Popup } from '../../Popup/index.js'
+import { Popup, PopupList } from '../../Popup/index.js'
 import { HierarchySearchInput } from './HierarchySearchInput.js'
 import { HierarchySearchResults } from './HierarchySearchResults.js'
 import { useHierarchySearch } from './useHierarchySearch.js'
@@ -106,21 +105,22 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
             caret={false}
             horizontalAlign="right"
             render={() => (
-              <div className={`${baseClass}__filter-options`}>
+              <PopupList.IconButtonGroup>
                 {collectionSpecificOptions.map(({ label, value }) => (
-                  <CheckboxInput
-                    checked={selectedFilters?.includes(value)}
+                  <PopupList.Button
+                    active={selectedFilters?.includes(value)}
                     key={value}
-                    label={label}
-                    onToggle={() => {
+                    onClick={() => {
                       const newSelectedValues = selectedFilters?.includes(value)
                         ? selectedFilters.filter((v) => v !== value)
                         : [...selectedFilters, value]
                       handleFilterChange({ selectedValues: newSelectedValues })
                     }}
-                  />
+                  >
+                    {label}
+                  </PopupList.Button>
                 ))}
-              </div>
+              </PopupList.IconButtonGroup>
             )}
             renderButton={({ active, onClick, onKeyDown }) => (
               <Button

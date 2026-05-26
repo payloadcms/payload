@@ -59,7 +59,7 @@ export const Button: React.FC<MenuButtonProps> = ({
   className,
   disabled,
   href,
-  icon,
+  icon: _icon, // Reserved for future use, currently checkmark is always shown
   onClick,
 }) => {
   const classes = [
@@ -71,15 +71,11 @@ export const Button: React.FC<MenuButtonProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  // Render icon column: checkmark if active, otherwise passed icon, otherwise empty placeholder
-  const iconElement = active ? (
+  // Always render checkmark icon - CSS controls visibility based on selected/hover state
+  const iconElement = (
     <span className={`${baseClass}__icon`}>
       <CheckIcon size={16} />
     </span>
-  ) : icon ? (
-    <span className={`${baseClass}__icon`}>{icon}</span>
-  ) : (
-    <span className={`${baseClass}__icon`} />
   )
 
   if (!disabled) {
