@@ -3,14 +3,13 @@ import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient 
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
-import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { Inter, Roboto_Mono } from 'next/font/google'
 import { cookies as nextCookies } from 'next/headers.js'
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { NextRouterAdapter } from '../../elements/RouterAdapter/index.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
@@ -179,7 +178,6 @@ const RootLayoutContent = async ({
         <RootProvider
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
-          enableRouterCacheRefresh={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
           fallbackLang={config.i18n.fallbackLanguage}
           highContrastMode={highContrastMode}
           isNavOpen={navPrefs?.open ?? true}
@@ -204,7 +202,6 @@ const RootLayoutContent = async ({
                 i18n: req.i18n,
                 payload: req.payload,
                 permissions,
-                renderComponent: RenderServerComponent,
                 user: req.user,
               }}
             >

@@ -46,7 +46,6 @@ export { TableFeatureClient } from '../../features/experimental_table/client/ind
 export { ToolbarDropdown } from '../../features/toolbars/shared/ToolbarDropdown/index.js'
 export { UploadFeatureClient } from '../../features/upload/client/index.js'
 
-export { ClientEntryLexicalField } from '../../field/clientEntry.js'
 export { RichTextField } from '../../field/index.js'
 export {
   EditorConfigProvider,

@@ -19,11 +19,7 @@ type RenderServerComponentFn = (args: {
 }) => React.ReactNode
 
 /**
- * @deprecated Import from `@payloadcms/next/elements/RenderServerComponent` instead.
- * This export will be removed in a future major version.
- * For framework-agnostic rendering, use `RenderClientComponent` from
- * `@payloadcms/ui/elements/RenderServerComponent/clientOnly` or accept
- * a `ComponentRenderer` parameter.
+ * Can be used to render both MappedComponents and React Components.
  */
 export const RenderServerComponent: RenderServerComponentFn = ({
   clientProps = {},

@@ -773,10 +773,7 @@ describe('Query Presets', () => {
 
     // Clear the groupBy (modify the preset)
     await clearGroupBy(page)
-    // With an active preset, an empty `groupBy=` is intentionally preserved
-    // to mark the user's clear-override; only the previous non-empty value
-    // (e.g. `groupBy=text`) must be gone.
-    await expect(page).not.toHaveURL(/[?&]groupBy=[^&]+/)
+    await expect(page).not.toHaveURL(/groupBy=/)
     await expect(page.locator('.group-by-header')).toHaveCount(0)
 
     // Verify reset button becomes visible after modification

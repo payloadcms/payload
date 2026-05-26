@@ -7,7 +7,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { generateMetadata } from '@payloadcms/ui/utilities/meta'
+import { generateMetadata } from '../../utilities/meta.js'
 
 export const generateCustomViewMetadata = async (args: {
   collectionConfig?: SanitizedCollectionConfig

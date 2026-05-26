@@ -1,7 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientField,
-  ComponentRenderer,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Document,
@@ -11,7 +10,8 @@ import type {
   ViewTypes,
 } from 'payload'
 
-import { formatAdminURL, MissingEditorProp } from 'payload/shared'
+import { MissingEditorProp } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
@@ -36,7 +36,6 @@ type RenderCellArgs = {
   readonly i18n: I18nClient
   readonly isLinkedColumn: boolean
   readonly payload: Payload
-  readonly renderComponent: ComponentRenderer
   readonly req?: PayloadRequest
   readonly rowIndex: number
   readonly serverField: Field
@@ -52,7 +51,6 @@ export function renderCell({
   i18n,
   isLinkedColumn,
   payload,
-  renderComponent,
   req,
   rowIndex,
   serverField,
@@ -217,7 +215,7 @@ export function renderCell({
 
     const CustomCellComponent = serverField.admin.components.Cell
 
-    CustomCell = renderComponent({
+    CustomCell = RenderServerComponent({
       clientProps: cellClientProps,
       Component: CustomCellComponent ?? serverField.editor.CellComponent,
       importMap: payload.importMap,
@@ -227,7 +225,7 @@ export function renderCell({
     const CustomCellComponent = serverField?.admin?.components?.Cell
 
     if (CustomCellComponent) {
-      CustomCell = renderComponent({
+      CustomCell = RenderServerComponent({
         clientProps: cellClientProps,
         Component: CustomCellComponent,
         importMap: payload.importMap,
@@ -238,7 +236,7 @@ export function renderCell({
       cellClientProps.field &&
       hasOptionLabelJSXElement(cellClientProps)
     ) {
-      CustomCell = renderComponent({
+      CustomCell = RenderServerComponent({
         clientProps: cellClientProps,
         Component: DefaultCell,
         importMap: payload.importMap,
@@ -247,7 +245,7 @@ export function renderCell({
       const CustomCellComponent = serverField?.admin?.components?.Cell
 
       if (CustomCellComponent) {
-        CustomCell = renderComponent({
+        CustomCell = RenderServerComponent({
           clientProps: cellClientProps,
           Component: CustomCellComponent,
           importMap: payload.importMap,

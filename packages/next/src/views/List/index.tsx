@@ -22,12 +22,6 @@ import {
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
-import { getDocumentPermissions } from '@payloadcms/ui/server'
-import { enrichDocsWithVersionStatus } from '@payloadcms/ui/views/List/enrichDocsWithVersionStatus'
-import { handleGroupBy } from '@payloadcms/ui/views/List/handleGroupBy'
-import { renderListViewSlots } from '@payloadcms/ui/views/List/renderListViewSlots'
-import { resolveAllFilterOptions } from '@payloadcms/ui/views/List/resolveAllFilterOptions'
-import { transformColumnsToSelect } from '@payloadcms/ui/views/List/transformColumnsToSelect'
 import { notFound } from 'next/navigation.js'
 import {
   appendDateTimezoneSelectFields,
@@ -41,7 +35,13 @@ import {
 } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
+import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
+import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'
+import { renderListViewSlots } from './renderListViewSlots.js'
+import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
+import { transformColumnsToSelect } from './transformColumnsToSelect.js'
 
 /**
  * @internal
@@ -316,7 +316,6 @@ export const renderListView = async (
         enableRowSelections,
         fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
         query,
-        renderComponent: RenderServerComponent,
         req,
         select,
         trash,
@@ -369,7 +368,6 @@ export const renderListView = async (
         orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
         payload: req.payload,
         query,
-        renderComponent: RenderServerComponent,
         req,
         useAsTitle: collectionConfig.admin.useAsTitle,
         viewType,
@@ -423,11 +421,7 @@ export const renderListView = async (
     })
   }
 
-  const renderedFilters = renderFilters(
-    collectionConfig.fields,
-    req.payload.importMap,
-    RenderServerComponent,
-  )
+  const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
   const resolvedFilterOptions = await resolveAllFilterOptions({
     fields: collectionConfig.fields,

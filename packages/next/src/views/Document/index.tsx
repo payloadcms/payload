@@ -11,23 +11,15 @@ import type {
 } from 'payload'
 
 import {
-  DefaultEditView,
   DocumentInfoProvider,
   EditDepthProvider,
   HydrateAuthProvider,
   LivePreviewProvider,
 } from '@payloadcms/ui'
-import { DocumentHeader } from '@payloadcms/ui/elements/DocumentHeader'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
-import { getDocumentPermissions } from '@payloadcms/ui/server'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import { getDocPreferences } from '@payloadcms/ui/views/Document/getDocPreferences'
-import { getDocumentData } from '@payloadcms/ui/views/Document/getDocumentData'
-import { getDocumentView } from '@payloadcms/ui/views/Document/getDocumentView'
-import { getIsLocked } from '@payloadcms/ui/views/Document/getIsLocked'
-import { getVersions } from '@payloadcms/ui/views/Document/getVersions'
-import { UnauthorizedViewWithGutter } from '@payloadcms/ui/views/Unauthorized'
 import { notFound, redirect } from 'next/navigation.js'
 import { isolateObjectProperty, logError } from 'payload'
 import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
@@ -35,12 +27,17 @@ import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
-import { adminViews } from '../adapter.js'
-import { NotFoundView } from '../NotFound.js'
-import { VersionView } from '../Version/index.js'
+import { NotFoundView } from '../NotFound/index.js'
+import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
+import { getDocPreferences } from './getDocPreferences.js'
+import { getDocumentData } from './getDocumentData.js'
+import { getDocumentPermissions } from './getDocumentPermissions.js'
+import { getDocumentView } from './getDocumentView.js'
+import { getIsLocked } from './getIsLocked.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
+import { getVersions } from './getVersions.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
@@ -311,15 +308,10 @@ export const renderDocument = async ({
     ;({ View } = getDocumentView({
       collectionConfig,
       config,
-      defaultViews: {
-        edit: DefaultEditView,
-        version: VersionView,
-        versions: adminViews.versions,
-      },
       docPermissions,
       globalConfig,
       routeSegments: segments,
-    }) as { View: ViewToRender })
+    }))
 
     if (View === UnauthorizedViewWithGutter) {
       showHeader = false
@@ -377,7 +369,6 @@ export const renderDocument = async ({
     hasSavePermission,
     locale,
     permissions,
-    renderComponent: RenderServerComponent,
     req,
   })
 

@@ -5,7 +5,6 @@ import type {
   CollectionConfig,
   Column,
   ColumnPreference,
-  ComponentRenderer,
   Field,
   ImportMap,
   ListQuery,
@@ -23,6 +22,7 @@ import React from 'react'
 
 import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
 
+import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import {
   GroupByHeader,
   GroupByPageControls,
@@ -42,7 +42,6 @@ import { buildColumnState } from '../providers/TableColumns/buildColumnState/ind
 export const renderFilters = (
   fields: Field[],
   importMap: ImportMap,
-  renderComponent: ComponentRenderer,
 ): Map<string, React.ReactNode> =>
   fields.reduce(
     (acc, field) => {
@@ -53,7 +52,7 @@ export const renderFilters = (
       if ('name' in field && field.admin?.components?.Filter) {
         acc.set(
           field.name,
-          renderComponent({
+          RenderServerComponent({
             Component: field.admin.components?.Filter,
             importMap,
           }),
@@ -83,7 +82,6 @@ export const renderTable = ({
   orderableFieldName,
   payload,
   query,
-  renderComponent,
   renderRowTypes,
   req,
   showHeading,
@@ -109,7 +107,6 @@ export const renderTable = ({
   orderableFieldName: string
   payload: Payload
   query?: ListQuery
-  renderComponent: ComponentRenderer
   renderRowTypes?: boolean
   req?: PayloadRequest
   /** Show heading without requiring full groupBy context */
@@ -178,7 +175,6 @@ export const renderTable = ({
     | 'fieldPermissions'
     | 'i18n'
     | 'payload'
-    | 'renderComponent'
     | 'req'
     | 'serverFields'
     | 'useAsTitle'
@@ -192,7 +188,6 @@ export const renderTable = ({
     // sortColumnProps,
     customCellProps,
     payload,
-    renderComponent,
     req,
     serverFields,
     useAsTitle,

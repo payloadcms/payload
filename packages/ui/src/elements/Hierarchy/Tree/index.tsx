@@ -2,6 +2,7 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { useRouter } from 'next/navigation.js'
 import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload/shared'
 import React, { useCallback, useId, useMemo, useRef, useState } from 'react'
 
@@ -11,7 +12,6 @@ import { PlusIcon } from '../../../icons/Plus/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
-import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { CreateDocumentButton } from '../../CreateDocumentButton/index.js'

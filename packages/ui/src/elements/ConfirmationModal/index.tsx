@@ -102,7 +102,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
       }
       slug={modalSlug}
       title={heading}
-      zIndex={drawerZBase + editDepth}
+      zIndex={drawerZBase + editDepth + 1}
     >
       {typeof body === 'string' ? <p>{body}</p> : body}
     </AlertModal>

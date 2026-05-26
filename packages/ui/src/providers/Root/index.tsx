@@ -23,6 +23,7 @@ import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
+import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
@@ -39,13 +40,11 @@ import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
 import { UploadHandlersProvider } from '../UploadHandlers/index.js'
-import { WindowInfoProvider } from '../WindowInfo/index.js'
 
 type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
-  readonly enableRouterCacheRefresh?: boolean
   readonly fallbackLang: I18nOptions['fallbackLanguage']
   readonly highContrastMode: boolean
   readonly isNavOpen?: boolean
@@ -65,7 +64,6 @@ export const RootProvider: React.FC<Props> = ({
   children,
   config,
   dateFNSKey,
-  enableRouterCacheRefresh = false,
   fallbackLang,
   highContrastMode,
   isNavOpen,
@@ -87,7 +85,9 @@ export const RootProvider: React.FC<Props> = ({
       <RouterAdapter>
         <ServerFunctionsProvider serverFunction={serverFunction}>
           <RouteTransitionProvider>
-            <RouteCache cachingEnabled={enableRouterCacheRefresh}>
+            <RouteCache
+              cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
+            >
               <ConfigProvider config={config}>
                 <ClientFunctionProvider>
                   <TranslationProvider

@@ -59,9 +59,8 @@
       "default": "./src/exports/plaintext/index.ts"
     },
     "./rsc": {
-      "types": "./src/exports/server/rsc.ts",
-      "browser": "./src/exports/server/rsc.browser.ts",
       "import": "./src/exports/server/rsc.ts",
+      "types": "./src/exports/server/rsc.ts",
       "default": "./src/exports/server/rsc.ts"
     },
     "./lexical": {
@@ -465,9 +464,8 @@
         "default": "./dist/exports/plaintext/index.js"
       },
       "./rsc": {
-        "types": "./dist/exports/server/rsc.d.ts",
-        "browser": "./dist/exports/server/rsc.browser.js",
         "import": "./dist/exports/server/rsc.js",
+        "types": "./dist/exports/server/rsc.d.ts",
         "default": "./dist/exports/server/rsc.js"
       },
       "./lexical": {

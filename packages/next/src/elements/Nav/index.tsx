@@ -1,15 +1,21 @@
+import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { PayloadRequest, ServerProps } from 'payload'
 
 import { AlignJustifiedIcon, Logout } from '@payloadcms/ui'
-import { getNavData } from '@payloadcms/ui/elements/Nav/getNavData'
-import { DefaultNavClient } from '@payloadcms/ui/elements/Nav/index.client'
-import { NavWrapper } from '@payloadcms/ui/elements/Nav/NavWrapper'
-import { SettingsMenuButton } from '@payloadcms/ui/elements/Nav/SettingsMenuButton'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { groupNavItems } from '@payloadcms/ui/shared'
+import { EntityType } from 'payload'
 import React from 'react'
 
-import { RenderServerComponent } from '../RenderServerComponent/index.js'
+import { DefaultNavClient } from './index.client.js'
+import { NavWrapper } from './NavWrapper/index.js'
+import { SettingsMenuButton } from './SettingsMenuButton/index.js'
 import { SidebarTabs } from './SidebarTabs/index.js'
 import './index.css'
+
+const baseClass = 'nav'
+
+import { getNavPrefs } from './getNavPrefs.js'
 
 export type NavProps = {
   req?: PayloadRequest
@@ -38,77 +44,155 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     admin: {
       components: { afterNav, afterNavLinks, beforeNav, beforeNavLinks, logout, settingsMenu },
     },
+    collections,
+    globals,
   } = payload.config
 
-  const { groups, navPreferences } = await getNavData({
-    i18n,
-    payload,
+  // Group collections and globals for nav display
+  // These groups are passed to SidebarTabs -> CollectionsTab to avoid recomputing
+  const groups = groupNavItems(
+    [
+      ...collections
+        .filter(({ slug }) => visibleEntities.collections.includes(slug))
+        .map(
+          (collection) =>
+            ({
+              type: EntityType.collection,
+              entity: collection,
+            }) satisfies EntityToGroup,
+        ),
+      ...globals
+        .filter(({ slug }) => visibleEntities.globals.includes(slug))
+        .map(
+          (global) =>
+            ({
+              type: EntityType.global,
+              entity: global,
+            }) satisfies EntityToGroup,
+        ),
+    ],
     permissions,
-    req,
-    visibleEntities,
-  })
+    i18n,
+  )
 
-  const clientProps = { documentSubViewType, viewType }
-  const serverProps = {
-    i18n,
-    locale,
-    params,
-    payload,
-    permissions,
-    renderComponent: RenderServerComponent,
-    searchParams,
-    user,
-  }
+  const navPreferences = await getNavPrefs(req)
 
   const LogoutComponent = RenderServerComponent({
-    clientProps,
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
     Component: logout?.Button,
     Fallback: Logout,
     importMap: payload.importMap,
-    serverProps,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
   })
 
   const RenderedSettingsMenu =
     settingsMenu && Array.isArray(settingsMenu)
       ? settingsMenu.map((item, index) =>
           RenderServerComponent({
-            clientProps,
+            clientProps: {
+              documentSubViewType,
+              viewType,
+            },
             Component: item,
             importMap: payload.importMap,
             key: `settings-menu-item-${index}`,
-            serverProps,
+            serverProps: {
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+            },
           }),
         )
       : []
 
   const RenderedBeforeNav = RenderServerComponent({
-    clientProps,
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
     Component: beforeNav,
     importMap: payload.importMap,
-    serverProps,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
   })
 
   const RenderedBeforeNavLinks = RenderServerComponent({
-    clientProps,
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
     Component: beforeNavLinks,
     importMap: payload.importMap,
-    serverProps,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
   })
 
   const RenderedAfterNavLinks = RenderServerComponent({
-    clientProps,
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
     Component: afterNavLinks,
     importMap: payload.importMap,
-    serverProps,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
   })
 
   const RenderedAfterNav = RenderServerComponent({
-    clientProps,
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
     Component: afterNav,
     importMap: payload.importMap,
-    serverProps,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
   })
 
+  // Build the full tabs array, starting with the default nav tab
   const allTabs = [
     {
       slug: 'nav',
@@ -127,8 +211,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     },
     ...(payload.config.admin?.components?.sidebar?.tabs?.filter((tab) => !tab.disabled) || []),
   ]
-
-  const baseClass = 'nav'
 
   return (
     <NavWrapper baseClass={baseClass}>

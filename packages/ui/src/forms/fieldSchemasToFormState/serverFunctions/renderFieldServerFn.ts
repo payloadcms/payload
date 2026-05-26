@@ -1,8 +1,11 @@
-import type { ComponentRenderer, Field, FieldState, ServerFunction } from 'payload'
+import {
+  deepMerge,
+  type Field,
+  type FieldState,
+  type ServerFunction,
+  UnauthorizedError,
+} from 'payload'
 
-import { deepMerge, UnauthorizedError } from 'payload/shared'
-
-import { RenderClientComponent } from '../../../elements/RenderServerComponent/clientOnly.js'
 import { getClientConfig } from '../../../utilities/getClientConfig.js'
 import { getClientSchemaMap } from '../../../utilities/getClientSchemaMap.js'
 import { getSchemaMap } from '../../../utilities/getSchemaMap.js'
@@ -45,7 +48,7 @@ export const _internal_renderFieldHandler: ServerFunction<
   RenderFieldServerFnArgs,
   Promise<RenderFieldServerFnReturnType>
   // eslint-disable-next-line @typescript-eslint/require-await
-> = async ({ field: fieldArg, initialValue, path, renderComponent, req, schemaPath }) => {
+> = async ({ field: fieldArg, initialValue, path, req, schemaPath }) => {
   if (!req.user) {
     throw new UnauthorizedError()
   }
@@ -115,7 +118,6 @@ export const _internal_renderFieldHandler: ServerFunction<
     forceCreateClientField: fieldArg ? true : false,
     previousFieldState: undefined,
     renderAllFields: true,
-    renderComponent: renderComponent || RenderClientComponent,
     req,
     schemaPath: `${entitySlug}.${fieldPath.join('.')}`,
     siblingData: data,

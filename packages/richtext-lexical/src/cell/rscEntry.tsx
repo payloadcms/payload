@@ -48,8 +48,8 @@ export const RscEntryLexicalCell: React.FC<LexicalRichTextCellProps> = (props) =
     classNameFromProps ||
     (field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
-  const adminRoute = payload?.config?.routes?.admin
-  const serverURL = payload?.config?.serverURL
+  const adminRoute = payload.config.routes.admin
+  const serverURL = payload.config.serverURL
 
   const onClick = onClickFromProps
 
@@ -65,7 +65,7 @@ export const RscEntryLexicalCell: React.FC<LexicalRichTextCellProps> = (props) =
     className,
   }
 
-  if (link && adminRoute) {
+  if (link) {
     wrapElementProps.prefetch = false
     WrapElement = Link
     wrapElementProps.href = collectionConfig?.slug
@@ -96,13 +96,11 @@ export const RscEntryLexicalCell: React.FC<LexicalRichTextCellProps> = (props) =
   }
 
   if (!textContent?.length) {
-    textContent = i18n
-      ? [
-          i18n.t('general:noLabel', {
-            label: getTranslation(('label' in field ? field.label : null) || 'data', i18n),
-          }),
-        ]
-      : ['\u00A0']
+    textContent = [
+      i18n.t('general:noLabel', {
+        label: getTranslation(('label' in field ? field.label : null) || 'data', i18n),
+      }),
+    ]
   }
 
   return <WrapElement {...wrapElementProps}>{textContent}</WrapElement>

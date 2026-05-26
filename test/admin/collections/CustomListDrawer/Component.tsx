@@ -32,13 +32,10 @@ export const CustomListDrawer = () => {
 
       setIsCreating(false)
 
-      // Use a long duration so the e2e assertion does not race the
-      // default 4s sonner auto-dismiss when CI is slow.
       toast.success(
         t('general:successfullyCreated', {
           label: 'Custom List Drawer',
         }),
-        { duration: 30_000 },
       )
 
       // In the root document view, there is no outer drawer context, so this will be `undefined`

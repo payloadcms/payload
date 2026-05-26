@@ -1,16 +1,24 @@
-import type { GenerateEditViewMetadata } from '@payloadcms/ui/views/types'
-import type { EditConfig } from 'payload'
+import type { Metadata } from 'next'
+import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
-import { generateAPIViewMetadata } from '@payloadcms/ui/views/API/metadata'
-import { getDocumentView } from '@payloadcms/ui/views/Document/getDocumentView'
-import { generateEditViewMetadata } from '@payloadcms/ui/views/Edit/metadata'
-import { generateNotFoundViewMetadata } from '@payloadcms/ui/views/NotFound/metadata'
-import { generateVersionViewMetadata } from '@payloadcms/ui/views/Version/metadata'
-import { generateVersionsViewMetadata } from '@payloadcms/ui/views/Versions/metadata'
+import type { GenerateViewMetadata } from '../Root/index.js'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
+import { generateAPIViewMetadata } from '../API/metadata.js'
+import { generateEditViewMetadata } from '../Edit/metadata.js'
+import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
+import { generateVersionViewMetadata } from '../Version/metadata.js'
+import { generateVersionsViewMetadata } from '../Versions/metadata.js'
+import { getDocumentView } from './getDocumentView.js'
 
-export type { GenerateEditViewMetadata }
+export type GenerateEditViewMetadata = (
+  args: {
+    collectionConfig?: null | SanitizedCollectionConfig
+    globalConfig?: null | SanitizedGlobalConfig
+    isReadOnly?: boolean
+    view?: keyof EditConfig
+  } & Parameters<GenerateViewMetadata>[0],
+) => Promise<Metadata>
 
 export const getMetaBySegment: GenerateEditViewMetadata = async ({
   collectionConfig,
@@ -142,7 +150,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       },
       globalConfig,
       routeSegments: typeof segments === 'string' ? [segments] : segments,
-    }) || { viewKey: undefined }
+    })
 
     if (viewKey) {
       const customViewConfig =

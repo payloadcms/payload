@@ -13,7 +13,6 @@ import type {
 } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
-import type { ComponentRenderer } from '../adapters.js'
 
 export type InitReqResult = {
   cookies: Map<string, string>
@@ -26,17 +25,8 @@ export type InitReqResult = {
   req: PayloadRequest
 }
 
-/**
- * Determines how server function handlers serialize their return values.
- * - `'rsc'`: Return React nodes (JSX) — requires RSC flight serialization (Next.js)
- * - `'data-only'`: Return JSON-serializable data — for non-RSC adapters (TanStack Start)
- */
-export type ServerFunctionMode = 'data-only' | 'rsc'
-
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
-  mode?: ServerFunctionMode
-  renderComponent?: ComponentRenderer
 } & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
 
 export type ServerFunctionArgs = {

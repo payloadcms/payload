@@ -31,24 +31,18 @@ export function loadClientFeatures({
 }): ResolvedClientFeatureMap {
   const featureProviderMap: ClientFeatureProviderMap = new Map()
 
-  const validFeatures: typeof unSanitizedEditorConfig.features = []
-
   for (const featureProvider of unSanitizedEditorConfig.features) {
     if (
       !featureProvider?.clientFeatureProps?.featureKey ||
       featureProvider?.clientFeatureProps?.order === undefined ||
       featureProvider?.clientFeatureProps?.order === null
     ) {
-      console.warn(
-        'A Feature you have installed does not return the client props as clientFeatureProps. Please make sure to always return those props, even if they are null, as other important props like order and featureKey are later on injected. Skipping feature.',
+      throw new Error(
+        'A Feature you have installed does not return the client props as clientFeatureProps. Please make sure to always return those props, even if they are null, as other important props like order and featureKey are later on injected.',
       )
-      continue
     }
     featureProviderMap.set(featureProvider.clientFeatureProps.featureKey, featureProvider)
-    validFeatures.push(featureProvider)
   }
-
-  unSanitizedEditorConfig.features = validFeatures
 
   // sort unSanitizedEditorConfig.features by order
   unSanitizedEditorConfig.features = unSanitizedEditorConfig.features.sort(

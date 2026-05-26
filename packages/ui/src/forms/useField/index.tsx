@@ -1,7 +1,6 @@
 'use client'
 import type { PayloadRequest } from 'payload'
 
-import { getFromImportMap } from 'payload/shared'
 import React, { useCallback, useMemo, useRef } from 'react'
 
 import type { UPDATE } from '../Form/types.js'
@@ -13,7 +12,6 @@ import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
-import { useImportMap } from '../../providers/ImportMap/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import {
@@ -57,8 +55,6 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()
   const documentForm = useDocumentForm()
 
-  const importMap = useImportMap()
-
   const filterOptions = field?.filterOptions
   const value = field?.value as TValue
   const initialValue = field?.initialValue as TValue
@@ -99,74 +95,12 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
     [setModified, path, dispatchField, disableFormData, hasRows],
   )
 
-  // For non-RSC adapters (e.g. TanStack Start): resolve custom component slots from the
-  // import map using the serializable paths stored in `clientComponentPaths`.
-  const resolvedCustomComponents = useMemo(() => {
-    const existing = field?.customComponents
-    const hasExistingComponents =
-      existing && Object.values(existing).some((v) => v !== undefined && v !== null)
-    if (hasExistingComponents || !importMap || !field?.clientComponentPaths) {
-      return existing
-    }
-
-    const paths = field.clientComponentPaths
-    const resolved: Record<string, React.ReactNode> = {}
-    let hasResolved = false
-
-    for (const [slotKey, componentPath] of Object.entries(paths)) {
-      if (!componentPath) {
-        continue
-      }
-
-      if (Array.isArray(componentPath)) {
-        const elements = componentPath
-          .map((cp, i) => {
-            const Comp = getFromImportMap<React.ComponentType<any>>({
-              importMap,
-              PayloadComponent: cp,
-              schemaPath: '',
-              silent: true,
-            })
-            if (!Comp) {
-              return null
-            }
-            const extraProps =
-              typeof cp === 'object' && cp && 'clientProps' in cp ? cp.clientProps : undefined
-            return <Comp key={i} path={path} {...(extraProps as any)} />
-          })
-          .filter(Boolean)
-
-        if (elements.length > 0) {
-          resolved[slotKey] = <>{elements}</>
-          hasResolved = true
-        }
-      } else {
-        const Comp = getFromImportMap<React.ComponentType<any>>({
-          importMap,
-          PayloadComponent: componentPath,
-          schemaPath: '',
-          silent: true,
-        })
-        if (Comp) {
-          const extraProps =
-            typeof componentPath === 'object' && componentPath && 'clientProps' in componentPath
-              ? componentPath.clientProps
-              : undefined
-          resolved[slotKey] = <Comp path={path} {...(extraProps as any)} />
-          hasResolved = true
-        }
-      }
-    }
-
-    return hasResolved ? resolved : undefined
-  }, [field?.customComponents, field?.clientComponentPaths, importMap, path])
-
   // Store result from hook as ref
   // to prevent unnecessary rerenders
   const result: FieldType<TValue> = useMemo(
     () => ({
       blocksFilterOptions: field?.blocksFilterOptions,
-      customComponents: resolvedCustomComponents,
+      customComponents: field?.customComponents,
       disabled: processing || initializing,
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
@@ -194,7 +128,6 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
       path,
       filterOptions,
       initializing,
-      resolvedCustomComponents,
     ],
   )
 

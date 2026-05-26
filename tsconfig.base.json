@@ -32,7 +32,7 @@
     ],
     "paths": {
       "@payloadcms/figma": ["../enterprise-plugins/packages/figma/src/index.ts"],
-      "@payload-config": ["./test/live-preview/config.ts"],
+      "@payload-config": ["./test/_community/config.ts"],
       "@payloadcms/admin-bar": ["./packages/admin-bar/src"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
@@ -40,7 +40,6 @@
       "@payloadcms/ui": ["./packages/ui/src/exports/client/index.ts"],
       "@payloadcms/ui/shared": ["./packages/ui/src/exports/shared/index.ts"],
       "@payloadcms/ui/rsc": ["./packages/ui/src/exports/rsc/index.ts"],
-      "@payloadcms/ui/server": ["./packages/ui/src/exports/server.ts"],
       "@payloadcms/ui/scss": ["./packages/ui/src/scss.scss"],
       "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
       "@payloadcms/next/*": ["./packages/next/src/exports/*.ts"],

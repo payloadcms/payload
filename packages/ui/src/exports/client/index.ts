@@ -130,7 +130,6 @@ export { HierarchyButtonClient } from '../../elements/Hierarchy/DocHeaderButton/
 export type { HierarchyButtonClientProps } from '../../elements/Hierarchy/DocHeaderButton/index.js'
 export { HierarchyFieldClient } from '../../elements/Hierarchy/Field/index.client.js'
 export type { HierarchyFieldClientProps } from '../../elements/Hierarchy/Field/index.client.js'
-export { HierarchyTypeField } from '../../elements/Hierarchy/TypeField/index.js'
 export {
   formatHierarchyDrawerSlug,
   HierarchyDrawerToggler,
@@ -379,7 +378,6 @@ export type { DocumentTitleContext } from '../../providers/DocumentTitle/index.j
 export type { DocumentInfoContext, DocumentInfoProps } from '../../providers/DocumentInfo/index.js'
 export { useUploadControls } from '../../providers/UploadControls/index.js'
 export { EditDepthProvider, useEditDepth } from '../../providers/EditDepth/index.js'
-export { ImportMapProvider, useImportMap } from '../../providers/ImportMap/index.js'
 export {
   EntityVisibilityProvider,
   useEntityVisibility,
@@ -395,12 +393,7 @@ export { OperationProvider, useOperation } from '../../providers/Operation/index
 export { ParamsProvider, useParams } from '../../providers/Params/index.js'
 export { PreferencesProvider, usePreferences } from '../../providers/Preferences/index.js'
 export { RootProvider } from '../../providers/Root/index.js'
-export {
-  PayloadLink,
-  RouterAdapterContext,
-  usePathname,
-  useRouter,
-} from '../../providers/RouterAdapter/index.js'
+export { RouterAdapterContext } from '../../providers/RouterAdapter/index.js'
 export type { RouterAdapterContextValue } from '../../providers/RouterAdapter/index.js'
 export {
   RouteCache as RouteCacheProvider,

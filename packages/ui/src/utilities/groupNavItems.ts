@@ -1,5 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
+  EntityType,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
@@ -7,9 +8,6 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { EntityType } from 'payload'
-
-export { EntityType }
 
 export type EntityToGroup =
   | {

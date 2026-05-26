@@ -4,7 +4,6 @@ import type {
   ClientConfig,
   CollectionPreferences,
   Column,
-  ComponentRenderer,
   ErrorResult,
   PaginatedDocs,
   SanitizedCollectionConfig,
@@ -15,7 +14,6 @@ import type {
 import { APIError, canAccessAdmin, formatErrors } from 'payload'
 import { applyLocaleFiltering, isNumber } from 'payload/shared'
 
-import { RenderClientComponent } from '../elements/RenderServerComponent/clientOnly.js'
 import { getClientConfig } from './getClientConfig.js'
 import { getColumns } from './getColumns.js'
 import { renderFilters, renderTable } from './renderTable.js'
@@ -49,10 +47,10 @@ export const buildTableStateHandler: ServerFunction<
   BuildTableStateArgs,
   Promise<BuildTableStateResult>
 > = async (args) => {
-  const { renderComponent, req } = args
+  const { req } = args
 
   try {
-    const res = await buildTableState(args, renderComponent || RenderClientComponent)
+    const res = await buildTableState(args)
     return res
   } catch (err) {
     req.payload.logger.error({ err, msg: `There was an error building form state` })
@@ -71,10 +69,10 @@ export const buildTableStateHandler: ServerFunction<
   }
 }
 
-const buildTableState = async (
-  args: Parameters<ServerFunction<BuildTableStateArgs>>[0],
-  renderComponent: ComponentRenderer,
-): Promise<BuildTableStateSuccessResult> => {
+const buildTableState: ServerFunction<
+  BuildTableStateArgs,
+  Promise<BuildTableStateSuccessResult>
+> = async (args) => {
   const {
     collectionSlug,
     columns: columnsFromArgs,
@@ -224,7 +222,6 @@ const buildTableState = async (
     orderableFieldName,
     payload,
     query,
-    renderComponent,
     renderRowTypes,
     req,
     tableAppearance,
@@ -236,7 +233,7 @@ const buildTableState = async (
   let renderedFilters
 
   if (collectionConfig) {
-    renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap, renderComponent)
+    renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
   }
 
   return {

@@ -1,0 +1,11 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .settings-menu-button {
+    &.popup--h-align-left {
+      .popup__content {
+        left: calc(var(--nav-padding-inline-start) * -0.5);
+      }
+    }
+  }
+}

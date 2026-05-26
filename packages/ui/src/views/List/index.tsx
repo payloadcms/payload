@@ -20,6 +20,7 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
@@ -64,6 +65,8 @@ export function DefaultListView(props: ListViewClientProps) {
     viewType,
   } = props
 
+  const [Table] = useControllableState(InitialTable)
+
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
 
   const hasCreatePermission =
@@ -101,8 +104,9 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const { setStepNav } = useStepNav()
 
-  const windowInfo = useWindowInfo()
-  const smallBreak = windowInfo?.breakpoints?.s
+  const {
+    breakpoints: { s: smallBreak },
+  } = useWindowInfo()
 
   const docs = React.useMemo(() => {
     if (isUploadCollection) {
@@ -269,7 +273,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 </DocumentSelectionProvider>
               ) : docs?.length > 0 ? (
                 <div className={`${baseClass}__tables`}>
-                  <RelationshipProvider>{InitialTable}</RelationshipProvider>
+                  <RelationshipProvider>{Table}</RelationshipProvider>
                 </div>
               ) : null}
               {/* HierarchyTable handles its own empty state, skip for hierarchy views */}

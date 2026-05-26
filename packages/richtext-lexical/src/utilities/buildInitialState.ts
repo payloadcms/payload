@@ -1,7 +1,6 @@
 import type { SerializedLexicalNode } from 'lexical'
 import type {
   ClientFieldSchemaMap,
-  ComponentRenderer,
   DocumentPreferences,
   FieldSchemaMap,
   FormState,
@@ -35,7 +34,6 @@ type Props = {
     operation: Operation
     permissions?: SanitizedFieldPermissions
     preferences: DocumentPreferences
-    renderComponent: ComponentRenderer
     renderFieldFn: any
     req: PayloadRequest
   }
@@ -86,7 +84,6 @@ export async function buildInitialState({
         preferences: context.preferences,
         readOnly: context.disabled,
         renderAllFields: true, // If this function runs, the parent lexical field is being re-rendered => thus we can assume all its sub-fields need to be re-rendered
-        renderComponent: context.renderComponent,
         renderFieldFn: context.renderFieldFn,
         req: context.req,
         schemaPath: schemaFieldsPath,

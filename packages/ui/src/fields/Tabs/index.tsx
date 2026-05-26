@@ -10,7 +10,7 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 import { getFieldPaths, toKebabCase } from 'payload/shared'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -64,7 +64,6 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const [activeTabIndex, setActiveTabIndex] = useState<number>(
     () => tabStates.filter(({ passesCondition }) => passesCondition)?.[0]?.index ?? 0,
   )
-  const userHasInteractedRef = useRef(false)
 
   const tabsPrefKey = `tabs-${indexPath}`
 
@@ -81,7 +80,6 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 
   const handleTabChange = useCallback(
     async (incomingTabIndex: number): Promise<void> => {
-      userHasInteractedRef.current = true
       setActiveTabIndex(incomingTabIndex)
 
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
@@ -118,11 +116,6 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
     if (preferencesKey) {
       const getInitialPref = async () => {
         const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
-
-        if (userHasInteractedRef.current) {
-          return
-        }
-
         const initialIndex = path
           ? existingPreferences?.fields?.[path]?.tabIndex
           : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex

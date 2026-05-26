@@ -10,7 +10,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -169,21 +169,6 @@ export const Form: React.FC<FormProps> = (props) => {
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
   const [formState, dispatchFields] = fieldsReducer
-
-  // React's useReducer always returns a new [state, dispatch] tuple on every render,
-  // even when state hasn't changed.  FormFieldsContext.Provider uses use-context-selector
-  // which fires a layout effect on every value change, notifying ALL subscribers.
-  // If the Form re-renders for any reason (isMounted, modified, etc.), each subscriber's
-  // selector is called.  Selectors that return new object references (even inadvertently)
-  // will trigger dispatch() during render, causing infinite re-renders ("Maximum update
-  // depth exceeded").  Memoizing the tuple so it only changes when formState changes
-  // prevents spurious notifications on unrelated Form re-renders.
-  // dispatchFields is stable (React guarantees this for useReducer dispatch),
-  // so including it here satisfies the exhaustive-deps rule without extra re-renders.
-  const stableFieldsReducer = useMemo(
-    () => [formState, dispatchFields] as typeof fieldsReducer,
-    [formState, dispatchFields],
-  )
 
   contextRef.current.fields = formState
 
@@ -922,7 +907,7 @@ export const Form: React.FC<FormProps> = (props) => {
                   <BackgroundProcessingContext value={backgroundProcessing}>
                     <ModifiedContext value={modified}>
                       {/* eslint-disable-next-line @eslint-react/no-context-provider */}
-                      <FormFieldsContext.Provider value={stableFieldsReducer}>
+                      <FormFieldsContext.Provider value={fieldsReducer}>
                         {children}
                       </FormFieldsContext.Provider>
                     </ModifiedContext>

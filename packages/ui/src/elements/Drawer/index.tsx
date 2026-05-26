@@ -60,7 +60,13 @@ export const DrawerToggler: React.FC<TogglerProps> = ({
   )
 }
 
-export const Drawer: React.FC<Props> = ({
+export const Drawer: React.FC<Props> = (props) => (
+  <DrawerDepthProvider>
+    <DrawerInner {...props} />
+  </DrawerDepthProvider>
+)
+
+const DrawerInner: React.FC<Props> = ({
   slug,
   children,
   className,
@@ -84,82 +90,79 @@ export const Drawer: React.FC<Props> = ({
   if (isOpen) {
     // IMPORTANT: do not render the drawer until it is explicitly open, this is to avoid large html trees especially when nesting drawers
     return (
-      <DrawerDepthProvider>
-        <Modal
-          className={[
-            className,
-            baseClass,
-            animateIn && `${baseClass}--is-open`,
-            drawerDepth > 1 && `${baseClass}--nested`,
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          // Fixes https://github.com/payloadcms/payload/issues/13778
-          closeOnBlur={false}
-          slug={slug}
-          style={{
-            paddingRight:
-              drawerDepth > 1 ? `calc(${drawerDepth - 1} * var(--spacer-3))` : undefined,
-            zIndex: drawerZBase + drawerDepth,
-          }}
-        >
-          {(!drawerDepth || drawerDepth === 1) && <div className={`${baseClass}__blur-bg`} />}
-          <button
-            aria-label={t('general:close')}
-            className={`${baseClass}__close`}
-            id={`close-drawer__${slug}`}
-            onClick={() => closeModal(slug)}
-            type="button"
-          />
-          <div className={`${baseClass}__content`}>
-            <div className={`${baseClass}__blur-bg-content`} />
-            <div className={`${baseClass}__content-children`}>
-              {Header}
-              {Header === undefined && (
-                <div className={`${baseClass}__header`}>
-                  {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
-                    i.e. changing to a `div` element will fix the animation issue but will break accessibility
-                  */}
-                  <Button
-                    aria-label={t('general:close')}
-                    buttonStyle="ghost"
-                    className={`${baseClass}__header__close`}
-                    icon={<ChevronIcon direction="left" size={24} />}
-                    onClick={() => closeModal(slug)}
-                  />
-                  <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
-                    {title}
-                  </h2>
-                  {headerActions && headerActions.length > 0 && (
-                    <div className={`${baseClass}__header__actions`}>
-                      {headerActions.map((action, i) => (
-                        <Button
-                          buttonStyle={action.style || 'secondary'}
-                          disabled={action.disabled}
-                          key={i}
-                          margin={false}
-                          onClick={action.onClick}
-                          size="medium"
-                        >
-                          {action.label}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-              {children}
-            </div>
+      <Modal
+        className={[
+          className,
+          baseClass,
+          animateIn && `${baseClass}--is-open`,
+          drawerDepth > 1 && `${baseClass}--nested`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        // Fixes https://github.com/payloadcms/payload/issues/13778
+        closeOnBlur={false}
+        slug={slug}
+        style={{
+          paddingRight: drawerDepth > 1 ? `calc(${drawerDepth - 1} * var(--spacer-3))` : undefined,
+          zIndex: drawerZBase + drawerDepth,
+        }}
+      >
+        {drawerDepth === 1 && <div className={`${baseClass}__blur-bg`} />}
+        <button
+          aria-label={t('general:close')}
+          className={`${baseClass}__close`}
+          id={`close-drawer__${slug}`}
+          onClick={() => closeModal(slug)}
+          type="button"
+        />
+        <div className={`${baseClass}__content`}>
+          <div className={`${baseClass}__blur-bg-content`} />
+          <div className={`${baseClass}__content-children`}>
+            {Header}
+            {Header === undefined && (
+              <div className={`${baseClass}__header`}>
+                {/* TODO: the `button` HTML element breaks CSS transitions on the drawer for some reason...
+                  i.e. changing to a `div` element will fix the animation issue but will break accessibility
+                */}
+                <Button
+                  aria-label={t('general:close')}
+                  buttonStyle="ghost"
+                  className={`${baseClass}__header__close`}
+                  icon={<ChevronIcon direction="left" size={24} />}
+                  onClick={() => closeModal(slug)}
+                />
+                <h2 className={`${baseClass}__header__title`} title={hoverTitle ? title : null}>
+                  {title}
+                </h2>
+                {headerActions && headerActions.length > 0 && (
+                  <div className={`${baseClass}__header__actions`}>
+                    {headerActions.map((action, i) => (
+                      <Button
+                        buttonStyle={action.style || 'secondary'}
+                        disabled={action.disabled}
+                        key={i}
+                        margin={false}
+                        onClick={action.onClick}
+                        size="medium"
+                      >
+                        {action.label}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {children}
           </div>
-        </Modal>
-      </DrawerDepthProvider>
+        </div>
+      </Modal>
     )
   }
 
   return null
 }
 
-export const DrawerDepthContext = createContext(1)
+export const DrawerDepthContext = createContext(0)
 
 export const DrawerDepthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const parentDepth = useDrawerDepth()

@@ -2,6 +2,7 @@
 
 import type { TypeWithID, Where } from 'payload'
 
+import { useRouter } from 'next/navigation.js'
 import { DEFAULT_HIERARCHY_TREE_LIMIT, formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useState } from 'react'
@@ -18,7 +19,6 @@ import type {
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
 import { useConfig } from '../Config/index.js'
 import { usePreferences } from '../Preferences/index.js'
-import { useRouter } from '../RouterAdapter/index.js'
 
 const HierarchyContext = createContext<HierarchyContextValue | undefined>(undefined)
 

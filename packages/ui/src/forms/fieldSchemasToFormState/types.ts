@@ -1,6 +1,5 @@
 import type {
   ClientFieldSchemaMap,
-  ComponentRenderer,
   Data,
   DocumentPreferences,
   Field,
@@ -39,7 +38,6 @@ export type RenderFieldArgs = {
   previousFieldState: FieldState
   readOnly?: boolean
   renderAllFields: boolean
-  renderComponent: ComponentRenderer
   req: PayloadRequest
   schemaPath: string
   siblingData: Data

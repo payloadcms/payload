@@ -1,0 +1,9 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .compare-version {
+    &-moreVersions {
+      color: var(--theme-elevation-500);
+    }
+  }
+}

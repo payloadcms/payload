@@ -283,13 +283,6 @@ export type RichTextAdapter<
    */
   CellComponent: PayloadComponent<never>
   /**
-   * Client-only field component for non-RSC adapters (e.g. TanStack Start).
-   * When provided, this component is used as a fallback when the RSC `FieldComponent`
-   * cannot be rendered (e.g. because customComponents are stripped during serialization).
-   * The component path is stored in field state and resolved from the import map on the client.
-   */
-  ClientFieldComponent?: PayloadComponent<RichTextFieldClientProps>
-  /**
    * Component that will be displayed in the version diff view.
    * If not provided, richtext content will be diffed as JSON.
    */
@@ -301,17 +294,6 @@ export type RichTextAdapter<
    * Component that will be displayed in the edit view.
    */
   FieldComponent: PayloadComponent<RichTextFieldServerProps, RichTextFieldClientProps>
-  /**
-   * Builds serializable props for the `ClientFieldComponent`.
-   * Called during `renderField` on the server; the returned object is stored
-   * in `fieldState.clientFieldComponentProps` and passed to the client component.
-   */
-  getClientFieldProps?: (args: {
-    clientFieldSchemaMap: Map<string, any>
-    path: string
-    payload: { importMap: Record<string, any> }
-    schemaPath: string
-  }) => Record<string, any>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<

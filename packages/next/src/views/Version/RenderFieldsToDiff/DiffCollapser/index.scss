@@ -1,0 +1,81 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .diff-collapser {
+    &__toggle-button {
+      all: unset;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+
+      .icon {
+        color: var(--theme-elevation-500);
+      }
+
+      &:hover {
+        // Apply background color but with padding, thus we use after
+        &::before {
+          content: '';
+          position: absolute;
+          top: -(base(0.15));
+          left: -(base(0.15));
+          right: -(base(0.15));
+          bottom: -(base(0.15));
+          background-color: var(--theme-elevation-50);
+          border-radius: var(--style-radius-s);
+          z-index: -1;
+        }
+
+        .iterable-diff__label {
+          background-color: var(--theme-elevation-50);
+          z-index: 1;
+        }
+      }
+    }
+
+    &__label {
+      // Add space between label, chevron, and change count
+      margin: 0 calc(var(--base) * 0.3) 0 0;
+      display: inline-flex;
+      height: 100%;
+    }
+
+    &__field-change-count {
+      // Reset the font weight of the change count to normal
+      font-weight: normal;
+      margin-left: calc(var(--base) * 0.3);
+      padding: calc(var(--base) * 0.1) calc(var(--base) * 0.2);
+      background: var(--theme-elevation-100);
+      border-radius: var(--style-radius-s);
+      font-size: 0.8rem;
+    }
+
+    &__content:not(.diff-collapser__content--hide-gutter) {
+      [dir='ltr'] & {
+        // Vertical gutter
+        border-left: 2px solid var(--theme-elevation-100);
+        // Center-align the gutter with the chevron
+        margin-left: 3px;
+        // Content indentation
+        padding-left: calc(var(--base) * 0.5);
+      }
+      [dir='rtl'] & {
+        // Vertical gutter
+        border-right: 2px solid var(--theme-elevation-100);
+        // Center-align the gutter with the chevron
+        margin-right: 3px;
+        // Content indentation
+        padding-right: calc(var(--base) * 0.5);
+      }
+    }
+
+    &__content--is-collapsed {
+      // Hide the content when collapsed. We use display: none instead of
+      // conditional rendering to avoid loosing children's collapsed state when
+      // remounting.
+      display: none;
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isPathMatchingRoute } from '@payloadcms/ui/utilities/routeResolution/isPathMatchingRoute'
+import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 describe('isPathMatchingRoute', () => {
   describe('no path defined', () => {

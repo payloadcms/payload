@@ -1,12 +1,13 @@
 import type { DefaultServerFunctionArgs, ServerFunction, ServerFunctionHandler } from 'payload'
 
-import { _internal_renderFieldHandler } from '@payloadcms/ui/rsc'
-import { sharedServerFunctions } from '@payloadcms/ui/utilities/serverFunctionRegistry'
-import { getDefaultLayoutHandler } from '@payloadcms/ui/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn'
-import { renderWidgetHandler } from '@payloadcms/ui/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn'
+import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
+import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
+import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
+import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 
 import { renderTabHandler } from '../elements/Nav/SidebarTabs/renderTabServerFn.js'
-import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
+import { getDefaultLayoutHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
+import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
@@ -14,7 +15,8 @@ import { initReq } from './initReq.js'
 import { slugifyHandler } from './slugify.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
-  ...sharedServerFunctions,
+  'copy-data-from-locale': copyDataFromLocaleHandler,
+  'form-state': buildFormStateHandler,
   'get-default-layout': getDefaultLayoutHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
@@ -22,7 +24,9 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'render-list': renderListHandler,
   'render-tab': renderTabHandler,
   'render-widget': renderWidgetHandler,
+  'schedule-publish': schedulePublishHandler,
   slugify: slugifyHandler,
+  'table-state': buildTableStateHandler,
 }
 
 export const handleServerFunctions: ServerFunctionHandler = async (args) => {
@@ -45,9 +49,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     cookies,
     importMap,
     locale,
-    mode: 'rsc',
     permissions,
-    renderComponent: RenderServerComponent,
     req,
   }
 

@@ -1,4 +1,3 @@
-import type { ViewFromConfig } from '@payloadcms/ui/utilities/routeResolution'
 import type {
   AdminViewServerProps,
   CollectionPreferences,
@@ -13,27 +12,29 @@ import type {
 } from 'payload'
 import type React from 'react'
 
-import {
-  getCustomViewByKey,
-  getCustomViewByRoute,
-  getDocumentViewInfo,
-  getSubViewActions,
-  getViewActions,
-  isPathMatchingRoute,
-} from '@payloadcms/ui/utilities/routeResolution'
-import { forgotPasswordBaseClass, ForgotPasswordView } from '@payloadcms/ui/views/ForgotPassword'
-import { LogoutInactivity, LogoutView } from '@payloadcms/ui/views/Logout'
-import { ResetPassword, resetPasswordBaseClass } from '@payloadcms/ui/views/ResetPassword'
-import { UnauthorizedView } from '@payloadcms/ui/views/Unauthorized'
 import { parseDocumentID } from 'payload'
 import { formatAdminURL, isNumber } from 'payload/shared'
 
-import { adminViews, verifyBaseClass } from '../adapter.js'
+import { AccountView } from '../Account/index.js'
+import { TrashView } from '../CollectionTrash/index.js'
+import { CreateFirstUserView } from '../CreateFirstUser/index.js'
+import { DashboardView } from '../Dashboard/index.js'
 import { DocumentView } from '../Document/index.js'
+import { forgotPasswordBaseClass, ForgotPasswordView } from '../ForgotPassword/index.js'
+import { HierarchyView } from '../Hierarchy/index.js'
 import { ListView } from '../List/index.js'
 import { loginBaseClass, LoginView } from '../Login/index.js'
+import { LogoutInactivity, LogoutView } from '../Logout/index.js'
+import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
+import { UnauthorizedView } from '../Unauthorized/index.js'
+import { Verify, verifyBaseClass } from '../Verify/index.js'
+import { getSubViewActions, getViewActions } from './attachViewActions.js'
 import { getCustomCollectionViewByRoute } from './getCustomCollectionViewByRoute.js'
 import { getCustomGlobalViewByRoute } from './getCustomGlobalViewByRoute.js'
+import { getCustomViewByKey } from './getCustomViewByKey.js'
+import { getCustomViewByRoute } from './getCustomViewByRoute.js'
+import { getDocumentViewInfo } from './getDocumentViewInfo.js'
+import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 const baseClasses = {
   account: 'account',
@@ -47,11 +48,14 @@ type OneSegmentViews = {
   [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: React.FC<AdminViewServerProps>
 }
 
-export type { ViewFromConfig }
+export type ViewFromConfig = {
+  Component?: React.FC<AdminViewServerProps>
+  payloadComponent?: PayloadComponent<AdminViewServerProps>
+}
 
 const oneSegmentViews: OneSegmentViews = {
-  account: adminViews.account,
-  createFirstUser: adminViews.createFirstUser,
+  account: AccountView,
+  createFirstUser: CreateFirstUserView,
   forgot: ForgotPasswordView,
   inactivity: LogoutInactivity,
   login: LoginView,
@@ -122,7 +126,7 @@ export const getRouteData = ({
     case 0: {
       if (currentRoute === adminRoute) {
         ViewToRender = {
-          Component: adminViews.dashboard,
+          Component: DashboardView,
         }
         templateClassName = 'dashboard'
         templateType = 'default'
@@ -213,7 +217,7 @@ export const getRouteData = ({
         if (collectionPreferences?.listViewType === 'hierarchy' && collectionConfig.hierarchy) {
           // Render hierarchy view by default if set in preferences
           ViewToRender = {
-            Component: adminViews.hierarchy,
+            Component: HierarchyView,
           }
 
           templateClassName = `${segmentTwo}-hierarchy`
@@ -260,7 +264,7 @@ export const getRouteData = ({
         routeParams.token = segmentThree
 
         ViewToRender = {
-          Component: adminViews.verify,
+          Component: Verify,
         }
 
         templateClassName = 'verify'
@@ -298,7 +302,7 @@ export const getRouteData = ({
         } else if (segmentThree === 'trash') {
           // --> /collections/:collectionSlug/trash
           ViewToRender = {
-            Component: adminViews.trash,
+            Component: TrashView,
           }
 
           templateClassName = `${segmentTwo}-trash`
@@ -309,7 +313,7 @@ export const getRouteData = ({
         } else if (segmentThree === 'hierarchy' && collectionConfig.hierarchy) {
           // --> /collections/:collectionSlug/hierarchy
           ViewToRender = {
-            Component: adminViews.hierarchy,
+            Component: HierarchyView,
           }
 
           templateClassName = `${segmentTwo}-hierarchy`
