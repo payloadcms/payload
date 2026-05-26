@@ -426,3 +426,79 @@ The same change applies to `upload` fields with `hasMany: true`.
 
 - Remove the `compatibility` block from your config. If your MongoDB data still has the redundant nested-localized shape, flatten the config and run a data migration.
 - Replace any direct `field.localized` reads in custom code with `fieldShouldBeLocalized({ field, parentIsLocalized })` from `payload/shared`.
+
+### Storage adapters must be declared under `storage`, not `plugins` ([#16596](https://github.com/payloadcms/payload/pull/16596))
+
+Storage adapter packages (`@payloadcms/storage-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`, `-uploadthing`) must now be placed under the top-level `storage` key in your Payload config instead of inside `plugins`.
+
+Declaring adapters inside `plugins` no longer works. The `storage` key ensures upload hooks, static file handlers, and presigned-URL endpoints are wired up before any plugin runs.
+
+```diff
+import { s3Storage } from '@payloadcms/storage-s3'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+- plugins: [
+-   s3Storage({ bucket: process.env.S3_BUCKET, collections: { media: true }, config: { region: process.env.S3_REGION } }),
+-   otherPlugin(),
+- ],
++ plugins: [otherPlugin()],
++ storage: [
++   s3Storage({ bucket: process.env.S3_BUCKET, collections: { media: true }, config: { region: process.env.S3_REGION } }),
++ ],
+})
+```
+
+Run `npx @payloadcms/codemod --transform migrate-storage-adapters-to-config` to migrate automatically.
+
+### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
+
+`FileSizeImproved` has been merged into `FileSize`. The `url`, `width`, `height`, `filesize`, `mimeType`, and `filename` properties now accept `null` directly on `FileSize`, matching what the database stores for sizes that were not generated.
+
+```diff
+- import type { FileSizeImproved } from 'payload'
++ import type { FileSize } from 'payload'
+```
+
+### `ImageSize.admin` — `disableListColumn`, `disableListFilter`, and `disableGroupBy` removed ([#16593](https://github.com/payloadcms/payload/pull/16593))
+
+The three individual boolean props have been replaced with a single `disabled` object, consistent with the shape used by all other fields.
+
+```diff
+  {
+    name: 'thumbnail',
+    width: 400,
+    height: 300,
+    admin: {
+-     disableListColumn: true,
+-     disableGroupBy: true,
++     disabled: { column: true, groupBy: true },
+    },
+  }
+```
+
+Run `npx @payloadcms/codemod --transform migrate-disabled-fields` to migrate automatically.
+
+### `db-mongodb`: `connectOptions.useFacet` removed ([#16612](https://github.com/payloadcms/payload/pull/16612))
+
+The `useFacet` option in `mongooseAdapter` config has been removed. Payload no longer uses `$facet` aggregation, so the option has no effect.
+
+```diff
+  mongooseAdapter({
+    connectOptions: {
+-     useFacet: false,
+    },
+  })
+```
+
+### `plugin-search`: `apiBasePath` config option removed ([#16597](https://github.com/payloadcms/payload/pull/16597))
+
+The deprecated `apiBasePath` option on the search plugin has been removed. The plugin now derives the correct path from the root config automatically.
+
+Remove any `apiBasePath` key from your search plugin config.
+
+### API keys created before v3.46.0 must be regenerated ([#16628](https://github.com/payloadcms/payload/pull/16628))
+
+The sha1 HMAC fallback for API key authentication has been removed. API keys are now matched exclusively against the sha256 index. Any API key that was created before v3.46.0 and never re-saved will no longer authenticate.
+
+**How to migrate:** Open the user document for each affected API key holder and save it — this regenerates the key under sha256. Alternatively, generate a new API key from the admin panel.
