@@ -171,6 +171,54 @@ If you only used `useDocumentInfo` for `title` / `setDocumentTitle`, drop the im
 
 Run `npx @payloadcms/codemod --transform migrate-document-title-context` to migrate automatically. The codemod splits mixed destructures, removes the `useDocumentInfo` import when no other properties are still used, and preserves any rename aliases (e.g. `{ title: docTitle }`).
 
+### `@payloadcms/plugin-multi-tenant`
+
+#### `useBaseListFilter` renamed to `useBaseFilter`
+
+The `useBaseListFilter` property on per-collection config inside `multiTenantPlugin` has been removed. Use `useBaseFilter` instead.
+
+```diff
+ multiTenantPlugin({
+   collections: {
+     posts: {
+-      useBaseListFilter: false,
++      useBaseFilter: false,
+     },
+   },
+ })
+```
+
+Run `npx @payloadcms/codemod --transform migrate-multi-tenant-use-base-list-filter` to migrate automatically.
+
+#### `tenantSelectorLabel` removed — use `i18n.translations` instead
+
+The `tenantSelectorLabel` shorthand has been removed. Customise the tenant selector label through `i18n.translations` using the `nav-tenantSelector-label` key.
+
+If you previously passed a locale-keyed object:
+
+```diff
+ multiTenantPlugin({
+-  tenantSelectorLabel: {
+-    en: 'Filter by Site',
+-    fr: 'Filtrer par site',
+-  },
++  i18n: {
++    translations: {
++      en: { 'nav-tenantSelector-label': 'Filter by Site' },
++      fr: { 'nav-tenantSelector-label': 'Filtrer par site' },
++    },
++  },
+ })
+```
+
+If you previously passed a plain string, you need to decide which locale it applies to and add it under the corresponding locale key in `i18n.translations`.
+
+Run `npx @payloadcms/codemod --transform migrate-multi-tenant-tenant-selector-label` to migrate locale-keyed objects automatically. String values and configs that already have an `i18n` property require manual migration — the codemod removes the property and emits a note with the file path.
+
+#### `getGlobalViewRedirect`: `basePath` argument removed
+
+The `basePath` parameter on `getGlobalViewRedirect` was deprecated and is now removed. The redirect path is now derived internally from the Payload config. Remove any `basePath` argument from direct calls to this utility.
+
 ### RichText adapter `i18n` property removed
 
 The `i18n` property on `RichTextAdapter` (and its return type from adapter provider functions) has been removed. It was deprecated in v3 in favour of merging translations directly into `config.i18n.translations` inside the adapter provider.
