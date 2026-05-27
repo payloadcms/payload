@@ -12,7 +12,7 @@ import type { CollectionOption } from '../../elements/CreateDocumentButton/index
 import type { StepNavItem } from '../../elements/StepNav/index.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
-import { Gutter } from '../../elements/Gutter/index.js'
+import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
@@ -317,7 +317,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         {BeforeList}
         <DocumentSelectionProvider collectionData={collectionData}>
-          <Gutter className={`${baseClass}__wrap`}>
+          <div className={`${baseClass}__wrap`}>
             <HierarchyListHeader
               collectionConfig={collectionConfig}
               currentItemTitle={currentItemTitle}
@@ -350,7 +350,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               viewType={viewType}
             />
 
-            <div className={`${baseClass}__controls`}>
+            <ListControlsBar className={`${baseClass}__controls`}>
               <div className={`${baseClass}__controls-left`}>
                 <SearchBar
                   label={t('general:searchBy', {
@@ -375,7 +375,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                   onSave={handleSave}
                 />
               )}
-            </div>
+            </ListControlsBar>
 
             <HierarchyTable
               baseFilter={baseFilter}
@@ -396,7 +396,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               search={searchFromURL}
               useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
             />
-          </Gutter>
+          </div>
         </DocumentSelectionProvider>
         {AfterList}
       </div>

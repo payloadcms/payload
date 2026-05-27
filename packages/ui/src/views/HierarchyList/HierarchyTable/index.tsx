@@ -19,6 +19,7 @@ import type { RelatedGroup, TableRow } from './types.js'
 import { CreateDocumentButton } from '../../../elements/CreateDocumentButton/index.js'
 import { LoadMoreRow } from '../../../elements/LoadMoreRow/index.js'
 import { NoListResults } from '../../../elements/NoListResults/index.js'
+import { TableSection } from '../../../elements/TableSection/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
@@ -459,33 +460,32 @@ export function HierarchyTable({
   return (
     <div className={baseClass}>
       {allGroups.map((group) => (
-        <div key={group.slug}>
-          <div className={`${baseClass}__group-label`}>
-            <span>{group.label}</span>
-          </div>
-          <SlotTable
-            collectionSlug={group.slug}
-            columns={columns}
-            data={group.docs}
-            enableCheckbox={true}
-            enableDragHandle={false}
-            enableHeader={true}
-            enableSelectAll={true}
-            getRowLockedUser={getRowLockedUser}
-            mergeCheckboxHeader={false}
-            onCheckboxChange={group.onCheckboxChange}
-            onSelectAllChange={group.onSelectAllChange}
-            parentId={parentId}
-            selectedIds={
-              new Set(
-                group.docs
-                  .filter((row) => isSelected({ id: row.id, collectionSlug: group.slug }))
-                  .map((row) => row.id),
-              )
-            }
-          />
-
-          <div className={`${baseClass}__load-more-wrap`}>
+        <TableSection key={group.slug}>
+          <TableSection.Header heading={group.label} />
+          <TableSection.Content>
+            <SlotTable
+              collectionSlug={group.slug}
+              columns={columns}
+              data={group.docs}
+              enableCheckbox={true}
+              enableDragHandle={false}
+              enableHeader={true}
+              enableSelectAll={true}
+              getRowLockedUser={getRowLockedUser}
+              mergeCheckboxHeader={false}
+              onCheckboxChange={group.onCheckboxChange}
+              onSelectAllChange={group.onSelectAllChange}
+              parentId={parentId}
+              selectedIds={
+                new Set(
+                  group.docs
+                    .filter((row) => isSelected({ id: row.id, collectionSlug: group.slug }))
+                    .map((row) => row.id),
+                )
+              }
+            />
+          </TableSection.Content>
+          <TableSection.Footer>
             <LoadMoreRow
               currentCount={group.docs.length}
               hasMore={group.hasNextPage}
@@ -493,8 +493,8 @@ export function HierarchyTable({
               onLoadMore={group.onLoadMore}
               totalDocs={group.totalDocs}
             />
-          </div>
-        </div>
+          </TableSection.Footer>
+        </TableSection>
       ))}
     </div>
   )
