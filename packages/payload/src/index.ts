@@ -1840,6 +1840,7 @@ export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
   entityToJSONSchema,
+  type FieldsToJSONSchemaArgs,
   fieldsToJSONSchema,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
