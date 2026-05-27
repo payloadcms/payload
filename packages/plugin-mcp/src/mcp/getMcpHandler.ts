@@ -49,9 +49,14 @@ export const getMCPHandler = (
   req: PayloadRequest,
 ) => {
   const { payload } = req
-  const configSchema = configToJSONSchema(payload.config, payload.db.defaultIDType, req.i18n, {
-    forceInlineBlocks: true,
-  })
+  const { jsonSchema: configSchema } = configToJSONSchema(
+    payload.config,
+    payload.db.defaultIDType,
+    req.i18n,
+    {
+      forceInlineBlocks: true,
+    },
+  )
 
   // Handler wrapper that injects req before the _extra argument
   const wrapHandler = (handler: (...args: any[]) => any) => {
