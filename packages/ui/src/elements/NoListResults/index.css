@@ -4,12 +4,15 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin: var(--spacer-4) var(--gutter-h);
     padding: var(--spacer-3) var(--spacer-2-5);
     border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
     text-align: center;
     gap: var(--spacer-2);
+  }
+
+  .no-results--with-margin {
+    margin: var(--spacer-4) var(--gutter-h);
   }
 
   .no-results__title {

@@ -306,6 +306,7 @@ export function DefaultListView(props: ListViewClientProps) {
                     : i18n.t('general:noResultsDescription')
                 }
                 title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
+                withMargin
               />
             )}
             {AfterListTable}

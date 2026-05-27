@@ -511,6 +511,7 @@ export function HierarchyTable({
         }
         description={t('general:noResultsDescription')}
         title={t('general:noResultsFound')}
+        withMargin
       />
     )
   }
