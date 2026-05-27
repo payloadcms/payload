@@ -148,6 +148,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
       // Add hierarchy breadcrumbs
       if (hierarchyData?.breadcrumbs) {
+        const queryParam = hierarchyData.parentFieldName || 'parent'
         const hierarchyBreadcrumbs = hierarchyData.breadcrumbs.map((crumb, index) => {
           const isLast = index === hierarchyData.breadcrumbs.length - 1
           return {
@@ -156,7 +157,7 @@ export function DefaultListView(props: ListViewClientProps) {
               ? undefined
               : formatAdminURL({
                   adminRoute,
-                  path: `/collections/${collectionSlug}?parent=${crumb.id}`,
+                  path: `/collections/${collectionSlug}?${queryParam}=${crumb.id}`,
                 }),
           }
         })
@@ -185,58 +186,58 @@ export function DefaultListView(props: ListViewClientProps) {
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
           <SelectionProvider docs={docs} totalDocs={data?.totalDocs}>
             {BeforeList}
+            <CollectionListHeader
+              collectionConfig={collectionConfig}
+              Description={
+                Description || collectionConfig?.admin?.description ? (
+                  <div className={`${baseClass}__sub-header`}>
+                    <RenderCustomComponent
+                      CustomComponent={Description}
+                      Fallback={
+                        <ViewDescription
+                          collectionSlug={collectionSlug}
+                          description={collectionConfig?.admin?.description}
+                        />
+                      }
+                    />
+                  </div>
+                ) : undefined
+              }
+              disableBulkDelete={disableBulkDelete}
+              disableBulkEdit={disableBulkEdit}
+              hasCreatePermission={hasCreatePermission}
+              hasDeletePermission={hasDeletePermission}
+              hasTrashPermission={hasTrashPermission}
+              i18n={i18n}
+              isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
+              isTrashEnabled={isTrashEnabled}
+              newDocumentURL={newDocumentURL}
+              openBulkUpload={openBulkUpload}
+              smallBreak={smallBreak}
+              viewType={viewType}
+            />
+            <ListControls
+              beforeActions={
+                enableRowSelections && typeof onBulkSelect === 'function'
+                  ? beforeActions
+                    ? [...beforeActions, <SelectMany key="select-many" onClick={onBulkSelect} />]
+                    : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                  : beforeActions
+              }
+              collectionConfig={collectionConfig}
+              collectionSlug={collectionSlug}
+              disableQueryPresets={
+                collectionConfig?.enableQueryPresets !== true || disableQueryPresets
+              }
+              hasCreatePermission={hasCreatePermission && viewType !== 'trash'}
+              listMenuItems={listMenuItems}
+              newDocumentURL={newDocumentURL}
+              queryPreset={queryPreset}
+              queryPresetPermissions={queryPresetPermissions}
+              renderedFilters={renderedFilters}
+              resolvedFilterOptions={resolvedFilterOptions}
+            />
             <Gutter className={`${baseClass}__wrap`}>
-              <CollectionListHeader
-                collectionConfig={collectionConfig}
-                Description={
-                  Description || collectionConfig?.admin?.description ? (
-                    <div className={`${baseClass}__sub-header`}>
-                      <RenderCustomComponent
-                        CustomComponent={Description}
-                        Fallback={
-                          <ViewDescription
-                            collectionSlug={collectionSlug}
-                            description={collectionConfig?.admin?.description}
-                          />
-                        }
-                      />
-                    </div>
-                  ) : undefined
-                }
-                disableBulkDelete={disableBulkDelete}
-                disableBulkEdit={disableBulkEdit}
-                hasCreatePermission={hasCreatePermission}
-                hasDeletePermission={hasDeletePermission}
-                hasTrashPermission={hasTrashPermission}
-                i18n={i18n}
-                isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
-                isTrashEnabled={isTrashEnabled}
-                newDocumentURL={newDocumentURL}
-                openBulkUpload={openBulkUpload}
-                smallBreak={smallBreak}
-                viewType={viewType}
-              />
-              <ListControls
-                beforeActions={
-                  enableRowSelections && typeof onBulkSelect === 'function'
-                    ? beforeActions
-                      ? [...beforeActions, <SelectMany key="select-many" onClick={onBulkSelect} />]
-                      : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                    : beforeActions
-                }
-                collectionConfig={collectionConfig}
-                collectionSlug={collectionSlug}
-                disableQueryPresets={
-                  collectionConfig?.enableQueryPresets !== true || disableQueryPresets
-                }
-                hasCreatePermission={hasCreatePermission && viewType !== 'trash'}
-                listMenuItems={listMenuItems}
-                newDocumentURL={newDocumentURL}
-                queryPreset={queryPreset}
-                queryPresetPermissions={queryPresetPermissions}
-                renderedFilters={renderedFilters}
-                resolvedFilterOptions={resolvedFilterOptions}
-              />
               {BeforeListTable}
               {hierarchyData ? (
                 <DocumentSelectionProvider
@@ -312,6 +313,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               )}
               {AfterListTable}
+              {AfterList}
               {docs?.length > 0 && !isGroupingBy && (
                 <PageControls
                   AfterPageControls={
@@ -341,7 +343,6 @@ export function DefaultListView(props: ListViewClientProps) {
                 />
               )}
             </Gutter>
-            {AfterList}
           </SelectionProvider>
         </div>
       </TableColumnsProvider>

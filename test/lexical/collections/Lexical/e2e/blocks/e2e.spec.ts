@@ -1526,14 +1526,12 @@ describe('lexicalBlocks', () => {
       await expect(inlineBlocks).toHaveCount(inlineBlockCount - 1)
 
       const contentEditable = secondRow.locator('[contenteditable="true"]').first()
-      await contentEditable.click()
+      // Use focus() instead of click() to avoid creating an extra selection undo entry
+      await contentEditable.focus()
 
       // Undo the removal using keyboard shortcut
       await page.keyboard.press('ControlOrMeta+Z')
       await wait(500)
-
-      const countAfterUndo = await inlineBlocks.count()
-      console.log(`After undo: ${countAfterUndo}, Expected: ${inlineBlockCount}`)
 
       // Wait for the block to be restored
       await expect(inlineBlocks).toHaveCount(inlineBlockCount)

@@ -2,7 +2,6 @@
   .search-bar {
     display: flex;
     align-items: center;
-    width: 100%;
     background-color: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
     outline: var(--stroke-width-small) solid transparent;

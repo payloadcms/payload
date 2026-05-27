@@ -42,6 +42,7 @@ import { handleHierarchy } from './handleHierarchy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
+import './index.css'
 
 /**
  * @internal
@@ -282,16 +283,21 @@ export const renderListView = async (
 
   // Check for hierarchy parent param
   const isHierarchyCollection = Boolean(collectionConfig.hierarchy)
+  const hierarchyParentFieldName =
+    typeof collectionConfig.hierarchy === 'object'
+      ? (collectionConfig.hierarchy.parentFieldName ?? 'parent')
+      : 'parent'
   let hierarchyParentId: null | number | string = null
 
   if (isHierarchyCollection) {
-    if (searchParams?.parent === 'null' || searchParams?.parent === undefined) {
+    const parentParam = searchParams?.[hierarchyParentFieldName]
+    if (parentParam === 'null' || parentParam === undefined) {
       hierarchyParentId = null
-    } else if (typeof searchParams?.parent === 'string') {
+    } else if (typeof parentParam === 'string') {
       hierarchyParentId =
-        payload.db.defaultIDType === 'number' && isNumber(searchParams.parent)
-          ? Number(searchParams.parent)
-          : searchParams.parent
+        payload.db.defaultIDType === 'number' && isNumber(parentParam)
+          ? Number(parentParam)
+          : parentParam
     }
   }
 

@@ -12,18 +12,16 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 
 import { CheckIcon } from '../../../icons/Check/index.js'
 import { EditIcon } from '../../../icons/Edit/index.js'
-import { FilterIcon } from '../../../icons/Filter/index.js'
 import { GearIcon } from '../../../icons/Gear/index.js'
 import { PlusIcon } from '../../../icons/Plus/index.js'
 import { RefreshIcon } from '../../../icons/Refresh/index.js'
 import { TrashIcon } from '../../../icons/Trash/index.js'
-import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/context.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { Button } from '../../Button/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
+import { FilterTrigger } from '../../FilterTrigger/index.js'
 import { useListDrawer } from '../../ListDrawer/index.js'
 import { useModal } from '../../Modal/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
@@ -288,18 +286,22 @@ export const QueryPresetBar: React.FC<{
           portalClassName={`${baseClass}__popup-content`}
           render={({ close }) => (
             <PopupList.IconButtonGroup>
-              {presets.map((preset) => (
-                <PopupList.Button
-                  active={activePreset?.id === preset.id}
-                  key={preset.id}
-                  onClick={async () => {
-                    close()
-                    await handlePresetChange(preset)
-                  }}
-                >
-                  {preset.title}
-                </PopupList.Button>
-              ))}
+              {presets.map((preset) => {
+                const isActive = activePreset?.id === preset.id
+                return (
+                  <PopupList.Button
+                    active={isActive}
+                    icon={isActive ? <CheckIcon size={16} /> : undefined}
+                    key={preset.id}
+                    onClick={async () => {
+                      close()
+                      await handlePresetChange(preset)
+                    }}
+                  >
+                    {preset.title}
+                  </PopupList.Button>
+                )
+              })}
               {activePreset && (
                 <Fragment>
                   <PopupList.Divider />
@@ -389,28 +391,19 @@ export const QueryPresetBar: React.FC<{
               </PopupList.Button>
             </PopupList.IconButtonGroup>
           )}
-          renderButton={({ onClick, onKeyDown, ...ariaProps }) => (
-            <div className={`${baseClass}__trigger-wrap`}>
-              <Button
-                {...ariaProps}
-                buttonStyle="secondary"
-                className={`${baseClass}__trigger`}
-                extraButtonProps={{ onKeyDown }}
-                icon={<FilterIcon size={24} />}
-                iconPosition="left"
-                id="select-preset"
-                onClick={onClick}
-                size="medium"
-              >
-                {buttonLabel}
-              </Button>
-              {hasModifiedPreset && <span className={`${baseClass}__modified-indicator`} />}
-              {activePreset && (
-                <button className={`${baseClass}__clear`} onClick={handleClearPreset} type="button">
-                  <XIcon size={16} />
-                </button>
-              )}
-            </div>
+          renderButton={({ active, onClick, onKeyDown }) => (
+            <FilterTrigger
+              className={`${baseClass}__trigger`}
+              id="select-preset"
+              isActive={Boolean(activePreset)}
+              onClear={handleClearPreset}
+              onClick={onClick}
+              onKeyDown={onKeyDown}
+              popupActive={active}
+              showBadge={hasModifiedPreset}
+            >
+              {buttonLabel}
+            </FilterTrigger>
           )}
           size="large"
           verticalAlign="bottom"

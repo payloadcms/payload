@@ -106,6 +106,41 @@ To find the correct icon:
 4. Delete `index.scss`
 5. Wrap in `@layer payload-default {}`
 6. **Convert legacy `var(--base)` to `--spacer` tokens** (see below)
+7. **Check for SCSS-only variables** (see below)
+
+---
+
+#### SCSS Variable Dependencies
+
+**CRITICAL:** The `packages/ui/src/scss/` folder is being deprecated. Any CSS variables defined there must be migrated to `packages/ui/src/css/` before use.
+
+**Before using a variable, verify it exists in the CSS folder:**
+
+```bash
+grep -r "variable-name" packages/ui/src/css/
+```
+
+**If a variable is only in SCSS:**
+
+1. Check if there's an equivalent in the CSS folder
+2. If not, add it to the appropriate CSS file:
+   - `spacing.css` — spacers, gutters, layout spacing, breakpoints
+   - `colors.css` — color tokens
+   - `typography.css` — font tokens
+   - `radius.css` — border-radius tokens
+   - `utilities.css` — accessibility, misc utilities
+
+**Common SCSS-only variables to watch for:**
+
+| SCSS Variable           | CSS Equivalent / Action                          |
+| ----------------------- | ------------------------------------------------ |
+| `--spacing-view-bottom` | Defined in `spacing.css`                         |
+| `--breakpoint-m-width`  | Defined in `spacing.css` (1024px)                |
+| `--breakpoint-s-width`  | Defined in `spacing.css` (768px)                 |
+| `--gutter-h`            | Defined in `spacing.css`                         |
+| `$breakpoint-m-width`   | Use `var(--breakpoint-m-width)` in media queries |
+| `@include mid-break`    | Use `@media (max-width: 1024px)`                 |
+| `@include small-break`  | Use `@media (max-width: 768px)`                  |
 
 ---
 
@@ -314,6 +349,7 @@ To find the correct icon:
    - `packages/ui/src/css/colors.css` — color tokens
    - `packages/ui/src/css/typography.css` — text tokens
    - `packages/ui/src/css/radius.css` — border-radius tokens
+   - `packages/ui/src/css/utilities.css` — accessibility tokens
 
 2. **Update styles** using tokens from files:
 
@@ -321,17 +357,25 @@ To find the correct icon:
    - Spacing: `--spacer-*` (ALWAYS check file for matching value)
    - Typography: `--text-body-*`, `--text-heading-*`
    - Radius: `--radius-none/small/medium/large/full`
+   - **Focus states: `--accessibility-focus-color`** (NEVER use `--color-border-selected` directly)
 
-3. **Use canonical shorthands** — see the shorthand table in `.claude/skills/ui4-review/SKILL.md`.
+3. **Focus state rules:**
 
-4. **Color rules — NEVER GUESS:**
+   - Always use `--accessibility-focus-color` for focus outlines/borders
+   - Use `:focus-visible` (not `:focus`) for keyboard-only focus
+   - Standard focus outline: `outline: 1px solid var(--accessibility-focus-color)`
+   - For parent containers: use `:has(:focus-visible)` to detect child focus
+
+4. **Use canonical shorthands** — see the shorthand table in `.claude/skills/ui4-review/SKILL.md`.
+
+5. **Color rules — NEVER GUESS:**
 
    - **Always extract exact token from Figma design context** — the `get_design_context` response includes CSS with token names
    - **Don't assume hierarchy** — e.g., don't assume "less prominent = tertiary". Check the design.
    - **When creating new elements** (icons, buttons, etc.), fetch the specific Figma node to get correct colors
    - If Figma shows a raw hex value, map it to the closest token and note this for user review
 
-5. **Spacing rules:**
+6. **Spacing rules:**
    - First choice: use `--spacer-*` token
    - If no match: use rem and tell user
    - NEVER use px (except 1px borders)

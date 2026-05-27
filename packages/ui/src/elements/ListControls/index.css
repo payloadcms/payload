@@ -2,6 +2,8 @@
   .list-controls {
     display: flex;
     flex-direction: column;
+    padding: var(--spacer-2-5) var(--gutter-h);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
 
     .pill-selector,
     .where-builder,
@@ -36,7 +38,7 @@
   .list-controls__actions {
     display: flex;
     align-items: center;
-    gap: var(--spacer-1);
+    gap: var(--spacer-2);
     flex-shrink: 0;
   }
 

@@ -11,7 +11,11 @@
     align-items: center;
   }
 
-  .localizer__locale-code {
-    color: var(--text-default-tertiary);
+  .localizer .btn__content {
+    gap: 0;
+  }
+
+  .localizer .btn__icon {
+    color: var(--color-icon-secondary);
   }
 }

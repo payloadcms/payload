@@ -27,6 +27,10 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
       },
     })
 
+    // TS 6 always prepends "use strict"; to transpileModule output. Strip it so
+    // the remaining expression can be returned directly.
+    const expression = transpileResult.outputText.replace(/^"use strict";\s*/, '')
+
     /**
      * This Function evaluation is safe because:
      * 1. The input schema comes from Payload's collection configuration, which is controlled by the application developer
@@ -36,7 +40,7 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
      * 5. No user input or external data is involved in the schema generation process
      */
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
-    return new Function('z', `return ${transpileResult.outputText}`)(z)
+    return new Function('z', `return ${expression}`)(z)
   } catch (error) {
     // If schema conversion fails (e.g., due to Zod v4 toJSONSchema null-check bug
     // with record schemas that have undefined valueType, or bundler transforms

@@ -136,7 +136,7 @@ describe('Hooks', () => {
 
       await page.goto(beforeDeleteURL.edit(doc.id))
 
-      await page.locator('.doc-controls__popup .popup-button').click()
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await page.locator('#action-delete').click()
 
       await page.locator('#confirm-action').click()
@@ -207,7 +207,7 @@ describe('Hooks', () => {
 
       await page.goto(beforeDelete2URL.edit(doc.id))
 
-      await page.locator('.doc-controls__popup .popup-button').click()
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await page.locator('#action-delete').click()
 
       await page.locator('#confirm-action').click()

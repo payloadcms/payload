@@ -1,8 +1,8 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addArrayRow } from '__helpers/e2e/fields/array/index.js'
-import { addBlock } from '__helpers/e2e/fields/blocks/index.js'
+import { addArrayRow } from '../../../__helpers/e2e/fields/array/index.js'
+import { addBlock } from '../../../__helpers/e2e/fields/blocks/index.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 

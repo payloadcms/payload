@@ -27,19 +27,17 @@ export const DocumentHeader: React.FC<{
   const { AfterHeader, collectionConfig, globalConfig, hideTabs, permissions, req } = props
 
   return (
-    <Gutter className={baseClass}>
-      <div className={`${baseClass}__header`}>
-        <RenderTitle className={`${baseClass}__title`} />
-        {!hideTabs && (
-          <DocumentTabs
-            collectionConfig={collectionConfig}
-            globalConfig={globalConfig}
-            permissions={permissions}
-            req={req}
-          />
-        )}
-      </div>
+    <div className={baseClass}>
+      <RenderTitle className={`${baseClass}__title`} />
+      {!hideTabs && (
+        <DocumentTabs
+          collectionConfig={collectionConfig}
+          globalConfig={globalConfig}
+          permissions={permissions}
+          req={req}
+        />
+      )}
       {AfterHeader ? <div className={`${baseClass}__after-header`}>{AfterHeader}</div> : null}
-    </Gutter>
+    </div>
   )
 }

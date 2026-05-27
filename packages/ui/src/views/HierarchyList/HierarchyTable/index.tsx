@@ -28,7 +28,7 @@ import { DateCell } from './DateCell.js'
 import { RelatedNameCell } from './RelatedNameCell.js'
 import { SlotTable } from './SlotTable.js'
 import { baseClass } from './types.js'
-import './index.scss'
+import './index.css'
 
 // Top-level cell components to avoid nested component eslint errors
 const NameCell: SlotColumn<TableRow>['Cell'] = (props) =>
@@ -71,6 +71,7 @@ type GroupState = {
   label: string
   onCheckboxChange: (row: TableRow) => void
   onLoadMore: () => void
+  onSelectAllChange: () => void
   slug: string
   totalDocs: number
 }
@@ -135,7 +136,7 @@ export function HierarchyTable({
   })
 
   // Get selection functions from context
-  const { isLocked, isSelected, toggleSelection } = useDocumentSelection()
+  const { isLocked, isSelected, toggleAllInCollection, toggleSelection } = useDocumentSelection()
 
   // Get the user who is locking a row (for SlotTable to show lock icon instead of checkbox)
   const getRowLockedUser = useCallback(
@@ -221,11 +222,8 @@ export function HierarchyTable({
       }))
 
       try {
-        // Field name is always _h_{hierarchySlug} by convention (created by createTagField)
-        const fieldName = `_h_${collectionSlug}`
-
         // "in" operator works for both hasMany and single relationship fields
-        const relationshipCondition = { [fieldName]: { in: [parentId] } }
+        const relationshipCondition = { [parentFieldName]: { in: [parentId] } }
 
         const relatedConfig = getEntityConfig({ collectionSlug: relatedSlug })
         const relatedUseAsTitle = relatedConfig?.admin?.useAsTitle || 'id'
@@ -277,6 +275,7 @@ export function HierarchyTable({
       apiRoute,
       collectionSlug,
       getEntityConfig,
+      parentFieldName,
       parentId,
       relatedBaseFilters,
       relatedGroups,
@@ -348,6 +347,7 @@ export function HierarchyTable({
             },
           }),
         onLoadMore: () => void handleLoadMoreChildren(),
+        onSelectAllChange: () => toggleAllInCollection({ collectionSlug }),
         totalDocs: childTotal,
       })
     }
@@ -384,6 +384,7 @@ export function HierarchyTable({
             metadata: {}, // Related items don't have allowedCollections - their collection slug is the constraint
           }),
         onLoadMore: () => void handleLoadMoreRelated(group.collectionSlug),
+        onSelectAllChange: () => toggleAllInCollection({ collectionSlug: group.collectionSlug }),
         totalDocs: state.totalDocs,
       })
     }
@@ -403,6 +404,7 @@ export function HierarchyTable({
     i18n,
     relatedGroups,
     relatedState,
+    toggleAllInCollection,
     toggleSelection,
   ])
 
@@ -468,10 +470,11 @@ export function HierarchyTable({
             enableCheckbox={true}
             enableDragHandle={false}
             enableHeader={true}
-            enableSelectAll={false}
+            enableSelectAll={true}
             getRowLockedUser={getRowLockedUser}
-            mergeCheckboxHeader={true}
+            mergeCheckboxHeader={false}
             onCheckboxChange={group.onCheckboxChange}
+            onSelectAllChange={group.onSelectAllChange}
             parentId={parentId}
             selectedIds={
               new Set(

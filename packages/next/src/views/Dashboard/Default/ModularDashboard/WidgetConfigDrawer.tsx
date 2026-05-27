@@ -131,7 +131,6 @@ export function WidgetConfigDrawer({
       {initialState === false ? (
         <ShimmerEffect height="250px" />
       ) : (
-        // PR #16687 follow-up: keep this drawer migration separate and unstaged.
         <DrawerContentContainer className="widget-config-drawer__content">
           <OperationProvider operation="update">
             <Form

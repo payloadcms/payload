@@ -300,7 +300,8 @@ export const renderTable = ({
     }
   }
 
-  columnsToUse.unshift({
+  // Insert after _select column (index 1) so order is: _select, _dragHandle, ...rest
+  columnsToUse.splice(enableRowSelections ? 1 : 0, 0, {
     accessor: '_dragHandle',
     active: true,
     field: {
