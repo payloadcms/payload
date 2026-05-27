@@ -391,7 +391,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                   >
                     <div className={`${baseClass}__columns-inner`}>
                       {collectionConfig && (
-                        <ColumnSelector collectionSlug={collectionConfig.slug} />
+                        <ColumnSelector
+                          collectionSlug={collectionConfig.slug}
+                          onClose={() => setOpenColumnSelector(false)}
+                        />
                       )}
                     </div>
                   </AnimateHeight>

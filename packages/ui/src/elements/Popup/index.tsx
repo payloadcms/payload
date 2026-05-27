@@ -89,6 +89,13 @@ export type PopupProps = {
   showScrollbar?: boolean
   size?: 'fit-content' | 'large' | 'medium' | 'small'
   /**
+   * Theme for the popup content. Use 'light' for light backgrounds, 'dark' for dark backgrounds,
+   * or 'auto' to inherit from the page theme.
+   *
+   * @default 'auto'
+   */
+  theme?: 'auto' | 'dark' | 'light'
+  /**
    * Preferred vertical alignment of the popup (position below or above the trigger),
    * if there is enough space available.
    *
@@ -129,6 +136,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     showOnHover = false,
     showScrollbar = false,
     size = 'medium',
+    theme = 'auto',
     verticalAlign = 'bottom',
   } = props
 
@@ -462,7 +470,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
                     `${baseClass}__hidden-content`
               }
               data-popup-id={id || undefined}
-              data-theme="dark"
+              data-theme={theme === 'auto' ? undefined : theme}
               ref={popupRef}
             >
               <div

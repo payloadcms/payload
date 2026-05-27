@@ -132,22 +132,27 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             </Button>
           )}
           {enableColumns && (
-            <Button
-              buttonStyle="secondary"
-              className={`${baseClass}__toggle-columns`}
-              extraButtonProps={{
-                'aria-controls': `${baseClass}-columns`,
-                'aria-expanded': visibleDrawer === 'columns',
-              }}
-              icon={
-                <ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} size={16} />
+            <Popup
+              button={
+                <Button
+                  buttonStyle="secondary"
+                  className={`${baseClass}__toggle-columns`}
+                  icon={<ChevronIcon direction="down" size={16} />}
+                  id="toggle-list-columns"
+                  size="medium"
+                >
+                  {t('general:columns')}
+                </Button>
               }
-              id="toggle-list-columns"
-              onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
-              size="medium"
-            >
-              {t('general:columns')}
-            </Button>
+              buttonType="custom"
+              className={`${baseClass}__columns-popup`}
+              horizontalAlign="right"
+              id="list-columns"
+              render={({ close }) => (
+                <ColumnSelector collectionSlug={collectionConfig.slug} onClose={close} />
+              )}
+              verticalAlign="bottom"
+            />
           )}
           {enableSort && (
             <Button
@@ -195,15 +200,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           )}
         </div>
       </div>
-      {enableColumns && (
-        <AnimateHeight
-          className={`${baseClass}__columns`}
-          height={visibleDrawer === 'columns' ? 'auto' : 0}
-          id={`${baseClass}-columns`}
-        >
-          <ColumnSelector collectionSlug={collectionConfig.slug} />
-        </AnimateHeight>
-      )}
       <AnimateHeight
         className={`${baseClass}__where`}
         height={visibleDrawer === 'where' ? 'auto' : 0}
