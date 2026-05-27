@@ -367,6 +367,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Nenhuma data selecionada',
     noFiltersSet: 'Nenhum filtro definido',
     noLabel: '<Nenhum(a) {{label}}>',
+    noMatchesFound: 'Nenhum resultado encontrado para esta pesquisa',
     none: 'Nenhum',
     noOptions: 'Sem opções',
     noResults:

@@ -6,7 +6,6 @@ import { getTranslation } from '@payloadcms/translations'
 import { fieldIsHiddenOrDisabled, fieldIsID, isFieldDisabled } from 'payload/shared'
 import React, { useCallback, useId, useMemo, useState } from 'react'
 
-import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { XIcon } from '../../icons/X/index.js'
@@ -21,6 +20,48 @@ import './index.css'
 
 const baseClass = 'column-selector'
 
+/**
+ * Parses a nested field label and returns segments for rendering.
+ * - For deeply nested paths (more than 3 segments), truncates to [First, "...", Last]
+ */
+function parseNestedLabel(label: string): string[] {
+  if (!label.includes(' > ')) {
+    return [label]
+  }
+
+  const segments = label.split(' > ')
+
+  if (segments.length <= 3) {
+    return segments
+  }
+
+  // For deep nesting, show: First / ... / Last
+  return [segments[0], '...', segments[segments.length - 1]]
+}
+
+type NestedLabelProps = {
+  readonly label: string
+}
+
+const NestedLabel: React.FC<NestedLabelProps> = ({ label }) => {
+  const segments = parseNestedLabel(label)
+
+  if (segments.length === 1) {
+    return <>{segments[0]}</>
+  }
+
+  return (
+    <>
+      {segments.map((segment, index) => (
+        <React.Fragment key={index}>
+          {index > 0 && <span className={`${baseClass}__separator`}>/</span>}
+          {segment}
+        </React.Fragment>
+      ))}
+    </>
+  )
+}
+
 export type Props = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly onClose?: () => void
@@ -29,12 +70,11 @@ export type Props = {
 type ColumnItemProps = {
   readonly active: boolean
   readonly id: string
-  readonly label: StaticLabel | string
   readonly labelText: string
   readonly onToggle: () => void
 }
 
-const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, label, labelText, onToggle }) => {
+const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle }) => {
   const { t } = useTranslation()
   const { attributes, isDragging, isOver, isSorting, listeners, setNodeRef, transform } =
     useDraggableSortable({
@@ -68,7 +108,7 @@ const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, label, labelText, o
         <AlignJustifiedIcon size={16} />
       </span>
       <span className={`${baseClass}__item-label`}>
-        <FieldLabel label={label} unstyled />
+        <NestedLabel label={labelText} />
       </span>
       <Switch checked={active} onChange={onToggle} />
     </div>
@@ -207,6 +247,9 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug, onClose }) => 
       </div>
       <div className={`${baseClass}__content`}>
         <DraggableSortable ids={allIds} onDragEnd={handleDragEnd}>
+          {columnItems.shown.length === 0 && columnItems.hidden.length === 0 && searchQuery && (
+            <div className={`${baseClass}__no-results`}>{t('general:noMatchesFound')}</div>
+          )}
           {columnItems.shown.length > 0 && (
             <div className={`${baseClass}__section`}>
               <div className={`${baseClass}__section-header`}>{t('general:shownInTable')}</div>
@@ -215,7 +258,6 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug, onClose }) => 
                   active={item.active}
                   id={item.id}
                   key={item.id}
-                  label={item.label as StaticLabel}
                   labelText={item.labelText}
                   onToggle={() => {
                     void toggleColumn(item.accessor)
@@ -232,7 +274,6 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug, onClose }) => 
                   active={item.active}
                   id={item.id}
                   key={item.id}
-                  label={item.label as StaticLabel}
                   labelText={item.labelText}
                   onToggle={() => {
                     void toggleColumn(item.accessor)

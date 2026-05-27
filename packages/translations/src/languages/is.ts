@@ -363,6 +363,7 @@ export const isTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Engin dagsetning valin',
     noFiltersSet: 'Engar síur virkar',
     noLabel: '<Ekkert {{label}}>',
+    noMatchesFound: 'Engin samsvörun fannst fyrir þessu leitarorði',
     none: 'Ekkert',
     noOptions: 'Engir valkostir',
     noResults:

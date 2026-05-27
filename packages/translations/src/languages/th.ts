@@ -359,6 +359,7 @@ export const thTranslations: DefaultTranslationsObject = {
     noDateSelected: 'ไม่ได้เลือกวันที่',
     noFiltersSet: 'ไม่มีการกรอง',
     noLabel: '<ไม่มี {{label}}>',
+    noMatchesFound: 'ไม่พบผลลัพธ์สำหรับการค้นหานี้',
     none: 'ไม่มี',
     noOptions: 'ไม่มีตัวเลือก',
     noResults:

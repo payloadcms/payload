@@ -359,6 +359,7 @@ export const faTranslations: DefaultTranslationsObject = {
     noDateSelected: 'تاریخی انتخاب نشده است',
     noFiltersSet: 'هیچ فیلتری اعمال نشده است.',
     noLabel: 'بدون {{label}}',
+    noMatchesFound: 'موردی مطابق با این جستجو یافت نشد',
     none: 'هیچکدام',
     noOptions: 'گزینه‌ای وجود ندارد',
     noResults:

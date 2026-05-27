@@ -366,6 +366,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Nije odabran datum',
     noFiltersSet: 'Нема постављених филтера',
     noLabel: '<Нема {{label}}>',
+    noMatchesFound: 'Nema pronađenih rezultata za ovu pretragu',
     none: 'Ниједан',
     noOptions: 'Нема опција',
     noResults:

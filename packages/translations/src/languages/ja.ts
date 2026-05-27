@@ -368,6 +368,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     noDateSelected: '日付が選択されていません',
     noFiltersSet: '絞り込みが未設定です。',
     noLabel: '<No {{label}}>',
+    noMatchesFound: 'この検索に一致するものは見つかりませんでした。',
     none: 'なし',
     noOptions: '選択肢なし',
     noResults:

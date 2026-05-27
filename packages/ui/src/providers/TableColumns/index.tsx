@@ -45,12 +45,33 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
 
   const toggleColumn = useCallback(
     async (column: string) => {
-      const newColumnState = (columnState || []).map((col) => {
-        if (col.accessor === column) {
-          return { ...col, active: !col.active }
-        }
-        return col
-      })
+      const currentColumns = columnState || []
+      const columnIndex = currentColumns.findIndex((col) => col.accessor === column)
+
+      if (columnIndex === -1) {
+        return
+      }
+
+      const targetColumn = currentColumns[columnIndex]
+      const isBeingShown = !targetColumn.active
+
+      let newColumnState: typeof currentColumns
+
+      if (isBeingShown) {
+        // When showing a column, move it to the end of shown columns
+        const otherColumns = currentColumns.filter((col) => col.accessor !== column)
+        const shownColumns = otherColumns.filter((col) => col.active)
+        const hiddenColumns = otherColumns.filter((col) => !col.active)
+        newColumnState = [...shownColumns, { ...targetColumn, active: true }, ...hiddenColumns]
+      } else {
+        // When hiding a column, just toggle it in place
+        newColumnState = currentColumns.map((col) => {
+          if (col.accessor === column) {
+            return { ...col, active: false }
+          }
+          return col
+        })
+      }
 
       startTransition(() => {
         setOptimisticColumnState(newColumnState)

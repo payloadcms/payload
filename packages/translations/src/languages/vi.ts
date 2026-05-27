@@ -366,6 +366,7 @@ export const viTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Không có ngày nào được chọn',
     noFiltersSet: 'Không có bộ lọc nào được áp dụng',
     noLabel: '<Không có {{label}}>',
+    noMatchesFound: 'Không tìm thấy kết quả phù hợp cho tìm kiếm này',
     none: 'Không có',
     noOptions: 'Không có lựa chọn',
     noResults:

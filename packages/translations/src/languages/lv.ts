@@ -367,6 +367,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Datums nav izvēlēts',
     noFiltersSet: 'Nav uzstādīti filtri',
     noLabel: '<Nav {{label}}>',
+    noMatchesFound: 'Šai meklēšanai netika atrasti rezultāti',
     none: 'Nav',
     noOptions: 'Nav opciju',
     noResults:

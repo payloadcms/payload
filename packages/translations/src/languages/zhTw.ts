@@ -347,6 +347,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     noDateSelected: '尚未選取日期',
     noFiltersSet: '尚未設定篩選條件',
     noLabel: '<無 {{label}}>',
+    noMatchesFound: '此搜尋未找到符合的結果',
     none: '無',
     noOptions: '無選項',
     noResults: '找不到符合條件的 {{label}}。可能尚未建立或篩選條件不符。',

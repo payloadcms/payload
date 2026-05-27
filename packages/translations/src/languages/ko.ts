@@ -364,6 +364,7 @@ export const koTranslations: DefaultTranslationsObject = {
     noDateSelected: '선택된 날짜가 없습니다.',
     noFiltersSet: '설정된 필터 없음',
     noLabel: '<{{label}} 없음>',
+    noMatchesFound: '이 검색에 대한 일치 항목이 없습니다.',
     none: '없음',
     noOptions: '옵션 없음',
     noResults:

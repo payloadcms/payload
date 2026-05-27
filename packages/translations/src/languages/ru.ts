@@ -368,6 +368,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Дата не выбрана',
     noFiltersSet: 'Фильтры не установлены',
     noLabel: 'Без метки',
+    noMatchesFound: 'Совпадений по вашему запросу не найдено',
     none: 'Никто',
     noOptions: 'Нет вариантов',
     noResults:

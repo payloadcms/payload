@@ -367,6 +367,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Ingen dato valgt',
     noFiltersSet: 'Ingen filtre satt',
     noLabel: '<Ingen {{label}}>',
+    noMatchesFound: 'Ingen treff funnet for dette søket',
     none: 'Ingen',
     noOptions: 'Ingen alternativer',
     noResults:

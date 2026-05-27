@@ -364,6 +364,7 @@ export const csTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Nebylo vybráno žádné datum',
     noFiltersSet: 'Nenastaveny žádné filtry',
     noLabel: '<Žádný {{label}}>',
+    noMatchesFound: 'Nebyly nalezeny žádné výsledky pro toto vyhledávání',
     none: 'Žádné',
     noOptions: 'Žádné možnosti',
     noResults:

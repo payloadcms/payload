@@ -355,6 +355,7 @@ export const heTranslations: DefaultTranslationsObject = {
     noDateSelected: 'לא נבחר תאריך',
     noFiltersSet: 'לא הוגדרו מסננים',
     noLabel: '<ללא {{label}}>',
+    noMatchesFound: 'לא נמצאו תוצאות עבור חיפוש זה',
     none: 'ללא',
     noOptions: 'אין אפשרויות',
     noResults: 'לא נמצאו {{label}}. אין עדיין {{label}}, או שאינם תואמים למסננים שנבחרו.',

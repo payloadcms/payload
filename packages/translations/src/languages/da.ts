@@ -365,6 +365,7 @@ export const daTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Ingen dato valgt',
     noFiltersSet: 'Ingen filtre angivet',
     noLabel: '<Ingen {{label}}>',
+    noMatchesFound: 'Ingen resultater fundet for denne søgning',
     none: 'Ingen',
     noOptions: 'Ingen muligheder',
     noResults:

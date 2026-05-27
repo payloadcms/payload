@@ -363,6 +363,7 @@ export const etTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Kuupäeva ei ole valitud',
     noFiltersSet: 'Filtreid pole määratud',
     noLabel: '<{{label}} puudub>',
+    noMatchesFound: 'Selle otsingu kohta tulemusi ei leitud',
     none: 'Puudub',
     noOptions: 'Valikud puuduvad',
     noResults:

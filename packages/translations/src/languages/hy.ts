@@ -365,6 +365,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Չկա ընտրված ամսաթիվ',
     noFiltersSet: 'Ֆիլտրեր սահմանված չեն',
     noLabel: '<Չկա {{label}}>',
+    noMatchesFound: 'Այս որոնման համար համապատասխանություններ չեն գտնվել',
     none: 'Ոչ մեկը',
     noOptions: 'Ընտրանքներ չկան',
     noResults:

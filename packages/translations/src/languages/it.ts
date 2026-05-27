@@ -368,6 +368,7 @@ export const itTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Nessuna data selezionata',
     noFiltersSet: 'Nessun filtro impostato',
     noLabel: '<No {{label}}>',
+    noMatchesFound: 'Nessuna corrispondenza trovata per questa ricerca',
     none: 'Nessuno',
     noOptions: 'Nessuna opzione',
     noResults:

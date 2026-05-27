@@ -13,34 +13,27 @@
 
   .switch__input {
     position: absolute;
-    width: 1px;
-    height: 1px;
     padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+    margin: 0;
+    opacity: 0;
+    z-index: 1;
   }
 
   .switch__track {
     position: relative;
     display: flex;
     align-items: center;
-    width: 32px;
-    height: 16px;
+    width: var(--spacer-5);
+    height: var(--spacer-3);
     background: var(--color-bg-secondary);
-    border: var(--stroke-width-small) solid var(--color-border-translucent);
+    border: var(--stroke-width-small) solid var(--special-border-translucent);
     border-radius: var(--radius-full);
-    transition:
-      background 0.15s ease,
-      border-color 0.15s ease;
     pointer-events: none;
   }
 
   .switch__track--checked {
     background: var(--color-bg-brand);
-    border-color: var(--color-bg-brand);
+    border-color: var(--color-border-brand-strong);
   }
 
   .switch__knob {
@@ -49,19 +42,18 @@
     width: 12px;
     height: 8px;
     background: var(--color-icon-onbrand);
-    border: var(--stroke-width-small) solid var(--color-border-translucent);
+    outline: var(--stroke-width-small) solid var(--special-border-translucent);
     border-radius: var(--radius-full);
-    transition: left 0.15s ease;
   }
 
   .switch__track--checked .switch__knob {
     left: calc(100% - 15px);
-    border-color: transparent;
+    outline-color: var(--color-border-brand-strong);
   }
 
   .switch__input:focus-visible + .switch__track {
     outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-    outline-offset: 2px;
+    outline-offset: var(--stroke-width-medium);
   }
 
   .switch__label {

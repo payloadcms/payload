@@ -368,6 +368,7 @@ export const idTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Tidak ada tanggal yang dipilih',
     noFiltersSet: 'Tidak ada filter yang diatur',
     noLabel: '<Tidak ada {{label}}>',
+    noMatchesFound: 'Tidak ada hasil yang ditemukan untuk pencarian ini',
     none: 'Tidak ada',
     noOptions: 'Tidak ada opsi',
     noResults:

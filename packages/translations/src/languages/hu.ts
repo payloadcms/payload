@@ -369,6 +369,7 @@ export const huTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Nincs kiválasztott dátum',
     noFiltersSet: 'Nincs beállítva szűrő',
     noLabel: '<No {{label}}>',
+    noMatchesFound: 'Nem található egyezés erre a keresésre',
     none: 'Semmi',
     noOptions: 'Nincs lehetőség',
     noResults:

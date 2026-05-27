@@ -366,6 +366,7 @@ export const skTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Nie je vybraný dátum',
     noFiltersSet: 'Nie sú nastavené žiadne filtre',
     noLabel: '<Žiadny {{label}}>',
+    noMatchesFound: 'Nenašli sa žiadne zhodné výsledky pre toto vyhľadávanie',
     none: 'Žiadny',
     noOptions: 'Žiadne možnosti',
     noResults:

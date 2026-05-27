@@ -369,6 +369,7 @@ export const azTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Heç bir tarix seçilməyib',
     noFiltersSet: 'Filter təyin edilməyib',
     noLabel: '<Heç bir {{label}}>',
+    noMatchesFound: 'Bu axtarış üçün heç bir uyğunluq tapılmadı',
     none: 'Heç bir',
     noOptions: 'Heç bir seçim yoxdur',
     noResults:

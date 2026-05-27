@@ -365,6 +365,7 @@ export const plTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Nie wybrano daty',
     noFiltersSet: 'Brak ustawionych filtrów',
     noLabel: '<Bez {{label}}>',
+    noMatchesFound: 'Brak wyników dla tego wyszukiwania',
     none: 'Nic',
     noOptions: 'Brak opcji',
     noResults:

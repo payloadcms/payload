@@ -349,6 +349,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     noDateSelected: '未选择日期',
     noFiltersSet: '没有设置过滤条件',
     noLabel: '<没有 {{label}}>',
+    noMatchesFound: '未找到与此搜索匹配的结果',
     none: '无',
     noOptions: '没有选项',
     noResults: '没有找到 {{label}}。{{label}} 并不存在或没有符合您上面所指定的过滤条件。',

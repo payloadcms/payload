@@ -369,6 +369,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Pasirinktos datos nėra',
     noFiltersSet: 'Nenustatyti jokie filtrai',
     noLabel: '<Ne {{label}}>',
+    noMatchesFound: 'Šiai paieškai rezultatų nerasta',
     none: 'Jokios',
     noOptions: 'Jokių variantų',
     noResults:

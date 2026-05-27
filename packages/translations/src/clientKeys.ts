@@ -303,6 +303,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:noDateSelected',
   'general:noFiltersSet',
   'general:noLabel',
+  'general:noMatchesFound',
   'general:none',
   'general:noOptions',
   'general:noResults',

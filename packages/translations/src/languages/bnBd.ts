@@ -370,6 +370,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     noDateSelected: 'কোনো তারিখ নির্বাচন করা হয়নি',
     noFiltersSet: 'কোনো ফিল্টার সেট করা হয়নি',
     noLabel: '<কোনো {{label}} নেই>',
+    noMatchesFound: 'এই অনুসন্ধানের জন্য কোনো ফলাফল পাওয়া যায়নি',
     none: 'কোনোটিই নয়',
     noOptions: 'কোনো বিকল্প নেই',
     noResults:

@@ -374,6 +374,7 @@ export const deTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Kein Datum ausgewählt',
     noFiltersSet: 'Keine Filter gesetzt',
     noLabel: '<Kein {{label}}>',
+    noMatchesFound: 'Für diese Suche wurden keine Übereinstimmungen gefunden.',
     none: 'Kein',
     noOptions: 'Keine Optionen',
     noResults:

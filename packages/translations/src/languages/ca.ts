@@ -367,6 +367,7 @@ export const caTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Data not seleccionada',
     noFiltersSet: 'Sense filtres',
     noLabel: '<No {{label}}>',
+    noMatchesFound: 'No s’han trobat coincidències per a aquesta cerca',
     none: 'Cap',
     noOptions: 'Sense opcions',
     noResults:

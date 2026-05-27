@@ -371,6 +371,7 @@ export const roTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Nu a fost selectată nicio dată',
     noFiltersSet: 'Nici un filtru setat',
     noLabel: '<Nici un {{label}}>',
+    noMatchesFound: 'Nu s-au găsit rezultate pentru această căutare',
     none: 'Nici unul',
     noOptions: 'Fără opțiuni',
     noResults:

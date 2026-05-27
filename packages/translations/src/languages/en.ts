@@ -367,6 +367,7 @@ export const enTranslations = {
     noDateSelected: 'No date selected',
     noFiltersSet: 'No filters set',
     noLabel: '<No {{label}}>',
+    noMatchesFound: 'No matches found for this search',
     none: 'None',
     noOptions: 'No options',
     noResults:

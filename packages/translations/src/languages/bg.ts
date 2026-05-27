@@ -365,6 +365,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Не е избрана дата',
     noFiltersSet: 'Няма зададени филтри',
     noLabel: '<Няма {{label}}>',
+    noMatchesFound: 'Няма намерени съвпадения за това търсене.',
     none: 'Никакъв',
     noOptions: 'Няма опции',
     noResults:

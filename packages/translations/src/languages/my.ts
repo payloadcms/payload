@@ -369,6 +369,7 @@ export const myTranslations: DefaultTranslationsObject = {
     noDateSelected: 'ရက်စွဲမရွေးချယ်ထားပါ',
     noFiltersSet: 'စစ်ထုတ်မှုများ မသတ်မှတ်ထားပါ။',
     noLabel: '<မရှိ {{label}}>',
+    noMatchesFound: 'ရှာဖွေမှုအတွက် သင့်တော်သောစာရင်းမှမတွေ့ရှိပါ။',
     none: 'တစ်ခုမှ',
     noOptions: 'ရွေးချယ်မှုမရှိပါ',
     noResults:

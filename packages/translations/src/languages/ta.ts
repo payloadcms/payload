@@ -364,6 +364,7 @@ export const taTranslations: DefaultTranslationsObject = {
     noDateSelected: 'தேதி எதுவும் தேர்ந்தெடுக்கப்படவில்லை',
     noFiltersSet: 'வடிகட்டிகள் எதுவும் அமைக்கப்படவில்லை',
     noLabel: '<{{label}} இல்லை>',
+    noMatchesFound: 'இந்த தேடலில் எந்தப் பொருத்தங்களும் காணப்படவில்லை',
     none: 'ஒன்றுமில்லை',
     noOptions: 'விருப்பங்கள் எதுவும் இல்லை',
     noResults:

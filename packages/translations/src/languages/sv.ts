@@ -367,6 +367,7 @@ export const svTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Inget datum valt',
     noFiltersSet: 'Inga filter inställda',
     noLabel: '<Ingen {{label}}>',
+    noMatchesFound: 'Inga träffar hittades för denna sökning',
     none: 'Ingen',
     noOptions: 'Inga alternativ',
     noResults:

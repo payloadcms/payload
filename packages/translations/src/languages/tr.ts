@@ -369,6 +369,7 @@ export const trTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Tarih seçilmedi',
     noFiltersSet: 'Tanımlı filtre yok',
     noLabel: '<{{label}} yok>',
+    noMatchesFound: 'Bu arama için eşleşme bulunamadı.',
     none: 'Hiç',
     noOptions: 'Seçenek yok',
     noResults:

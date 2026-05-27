@@ -356,6 +356,7 @@ export const arTranslations: DefaultTranslationsObject = {
     noDateSelected: 'لم يتم اختيار تاريخ',
     noFiltersSet: 'لم يتم تعيين أي عوامل تصفية',
     noLabel: '<لا {{label}}>',
+    noMatchesFound: 'لم يتم العثور على نتائج لهذا البحث',
     none: 'لا شيء',
     noOptions: 'لا خيارات',
     noResults:

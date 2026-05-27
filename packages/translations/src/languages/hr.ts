@@ -365,6 +365,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Nije odabran datum',
     noFiltersSet: 'Nema postavljenih filtera',
     noLabel: '<Nema {{label}}>',
+    noMatchesFound: 'Nema pronađenih rezultata za ovaj upit',
     none: 'Nijedan',
     noOptions: 'Nema opcija',
     noResults:

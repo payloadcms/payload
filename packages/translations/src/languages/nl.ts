@@ -373,6 +373,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Geen datum geselecteerd',
     noFiltersSet: 'Geen filters ingesteld',
     noLabel: 'Geen "{{label}}"',
+    noMatchesFound: 'Geen overeenkomsten gevonden voor deze zoekopdracht',
     none: 'Niets',
     noOptions: 'Geen opties',
     noResults:

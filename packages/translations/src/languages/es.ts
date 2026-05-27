@@ -370,6 +370,7 @@ export const esTranslations: DefaultTranslationsObject = {
     noDateSelected: 'No se seleccionó ninguna fecha',
     noFiltersSet: 'No hay filtros establecidos',
     noLabel: '<Sin {{label}}>',
+    noMatchesFound: 'No se encontraron resultados para esta búsqueda.',
     none: 'Ninguna',
     noOptions: 'Sin opciones',
     noResults:

@@ -1,18 +1,23 @@
 @layer payload-default {
-  /* Remove default popup padding when column selector is inside */
+  /* Override default popup padding/max-height when column selector is inside */
   .popup__scroll-container:has(.column-selector) {
     padding: 0;
+    max-height: fit-content;
   }
 
   .column-selector {
+    --column-selector-min-width: 240px;
+    --column-selector-max-height: 430px;
+
     display: flex;
     flex-direction: column;
-    width: 240px;
-    overflow: hidden;
+    min-width: var(--column-selector-min-width);
+    max-height: var(--column-selector-max-height);
   }
 
   .column-selector__header {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: space-between;
     height: 40px;
@@ -37,8 +42,10 @@
 
   .column-selector__search {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
-    height: 40px;
+    /* +1px accounts for border-bottom so content area remains 40px (8px + 24px search bar + 8px) */
+    height: calc(var(--spacer-5) + var(--spacer-2) + 1px);
     padding-inline: var(--spacer-2-5);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
   }
@@ -54,6 +61,7 @@
   }
 
   .column-selector__search-bar svg {
+    display: block;
     flex-shrink: 0;
     color: var(--color-icon-secondary);
   }
@@ -82,8 +90,22 @@
   .column-selector__content {
     display: flex;
     flex-direction: column;
-    max-height: 400px;
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
+  }
+
+  .column-selector__no-results {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(var(--spacer-6) + var(--spacer-2)); /* 48px total: 32px content + 8px top/bottom padding */
+    padding-block: var(--spacer-2);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--color-text);
   }
 
   .column-selector__section {
@@ -113,7 +135,7 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: var(--spacer-0);
+    gap: var(--spacer-1);
     padding-inline: var(--spacer-3);
     padding-block: var(--spacer-1);
     cursor: pointer;
@@ -136,6 +158,12 @@
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     color: var(--color-text);
+    white-space: nowrap;
+  }
+
+  .column-selector__separator {
+    margin-inline: var(--spacer-1);
+    color: var(--color-text-secondary);
   }
 
   .column-selector__item--inactive .column-selector__item-label {

@@ -364,6 +364,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Не вибрано жодної дати',
     noFiltersSet: 'Відсусті фільтри',
     noLabel: '<без {{label}}>',
+    noMatchesFound: 'Збігів за цим пошуком не знайдено',
     none: 'Ніхто',
     noOptions: 'Немає варіантів',
     noResults:

@@ -365,6 +365,7 @@ export const slTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Izbran ni noben datum',
     noFiltersSet: 'Ni nastavljenih filtrov',
     noLabel: '<Brez {{label}}>',
+    noMatchesFound: 'Za to iskanje ni bilo najdenih zadetkov.',
     none: 'Brez',
     noOptions: 'Ni možnosti',
     noResults:
