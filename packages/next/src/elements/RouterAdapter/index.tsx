@@ -49,18 +49,26 @@ export const NextRouterAdapter: React.FC<{ children: React.ReactNode }> = ({ chi
   const searchParams = useNextSearchParams()
   const params = useNextParams()
 
-  const value: RouterAdapterContextValue = {
-    Link: NextLinkAdapter,
-    params: params as Record<string, string | string[]>,
-    pathname,
-    router: {
+  const router = React.useMemo<RouterAdapterContextValue['router']>(
+    () => ({
       back: nextRouter.back,
       push: nextRouter.push,
       refresh: nextRouter.refresh,
       replace: nextRouter.replace,
-    },
-    searchParams,
-  }
+    }),
+    [nextRouter],
+  )
+
+  const value = React.useMemo<RouterAdapterContextValue>(
+    () => ({
+      Link: NextLinkAdapter,
+      params: params as Record<string, string | string[]>,
+      pathname,
+      router,
+      searchParams,
+    }),
+    [params, pathname, router, searchParams],
+  )
 
   return <RouterAdapterContext value={value}>{children}</RouterAdapterContext>
 }
