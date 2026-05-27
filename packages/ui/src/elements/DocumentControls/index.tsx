@@ -188,233 +188,226 @@ export const DocumentControls: React.FC<{
   const showLockedMetaIcon = user && readOnlyForIncomingUser
 
   return (
-    <Gutter className={baseClass}>
-      <div className={`${baseClass}__wrapper`}>
-        <div className={`${baseClass}__content`}>
-          {Boolean(showLockedMetaIcon || BeforeDocumentMeta) && (
-            <div className={`${baseClass}__before-meta`}>
-              {showLockedMetaIcon && (
-                <Locked className={`${baseClass}__locked-controls`} user={user} />
-              )}
-              {BeforeDocumentMeta}
-            </div>
-          )}
-          <ul className={`${baseClass}__meta`}>
-            {collectionConfig && !isEditing && !isAccountView && (
-              <li className={`${baseClass}__list-item`}>
-                <p className={`${baseClass}__value`}>
-                  {i18n.t('general:creatingNewLabel', {
-                    label: getTranslation(
-                      collectionConfig?.labels?.singular ?? i18n.t('general:document'),
-                      i18n,
-                    ),
-                  })}
-                </p>
-              </li>
+    <div className={baseClass}>
+      <div className={`${baseClass}__content`}>
+        {Boolean(showLockedMetaIcon || BeforeDocumentMeta) && (
+          <div className={`${baseClass}__before-meta`}>
+            {showLockedMetaIcon && (
+              <Locked className={`${baseClass}__locked-controls`} user={user} />
             )}
-            {(collectionHasDraftsEnabled || globalHasDraftsEnabled) && (
-              <Fragment>
-                {(globalConfig || (collectionConfig && isEditing)) && (
-                  <li
-                    className={[`${baseClass}__status`, `${baseClass}__list-item`]
-                      .filter(Boolean)
-                      .join(' ')}
-                  >
-                    <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
+            {BeforeDocumentMeta}
+          </div>
+        )}
+        <ul className={`${baseClass}__meta`}>
+          {collectionConfig && !isEditing && !isAccountView && (
+            <li className={`${baseClass}__list-item`}>
+              <p className={`${baseClass}__value`}>
+                {i18n.t('general:creatingNewLabel', {
+                  label: getTranslation(
+                    collectionConfig?.labels?.singular ?? i18n.t('general:document'),
+                    i18n,
+                  ),
+                })}
+              </p>
+            </li>
+          )}
+          {(collectionHasDraftsEnabled || globalHasDraftsEnabled) && (
+            <Fragment>
+              {(globalConfig || (collectionConfig && isEditing)) && (
+                <li
+                  className={[`${baseClass}__status`, `${baseClass}__list-item`]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
+                </li>
+              )}
+              {hasSavePermission &&
+                autosaveEnabled &&
+                !unsavedDraftWithValidations &&
+                !isTrashed && (
+                  <li className={`${baseClass}__list-item`}>
+                    <Autosave
+                      collection={collectionConfig}
+                      global={globalConfig}
+                      id={id}
+                      publishedDocUpdatedAt={data?.createdAt}
+                    />
                   </li>
                 )}
-                {hasSavePermission &&
-                  autosaveEnabled &&
-                  !unsavedDraftWithValidations &&
-                  !isTrashed && (
-                    <li className={`${baseClass}__list-item`}>
-                      <Autosave
-                        collection={collectionConfig}
-                        global={globalConfig}
-                        id={id}
-                        publishedDocUpdatedAt={data?.createdAt}
-                      />
-                    </li>
-                  )}
-              </Fragment>
-            )}
-            {collectionConfig?.timestamps && (isEditing || isAccountView) && (
-              <Fragment>
-                <li
-                  className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
-                    .filter(Boolean)
-                    .join(' ')}
-                  title={data?.updatedAt ? updatedAt : ''}
-                >
-                  <p className={`${baseClass}__label`}>
-                    {i18n.t(isTrashed ? 'general:deleted' : 'general:lastModified')}:&nbsp;
-                  </p>
-
-                  {data?.updatedAt && <p className={`${baseClass}__value`}>{updatedAt}</p>}
-                </li>
-                <li
-                  className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
-                    .filter(Boolean)
-                    .join(' ')}
-                  title={data?.createdAt ? createdAt : ''}
-                >
-                  <p className={`${baseClass}__label`}>{i18n.t('general:created')}:&nbsp;</p>
-                  {data?.createdAt && <p className={`${baseClass}__value`}>{createdAt}</p>}
-                </li>
-              </Fragment>
-            )}
-          </ul>
-        </div>
-        <div className={`${baseClass}__controls-wrapper`}>
-          <div className={`${baseClass}__controls`}>
-            {BeforeDocumentControls}
-            {isLivePreviewEnabled && !isInDrawer && <LivePreviewToggler />}
-            {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
-              <RenderCustomComponent
-                CustomComponent={CustomPreviewButton}
-                Fallback={<PreviewButton />}
-              />
-            )}
-            {hasSavePermission && !isTrashed && (
-              <Fragment>
-                {collectionHasDraftsEnabled || globalHasDraftsEnabled ? (
-                  <Fragment>
-                    {(unsavedDraftWithValidations ||
-                      !autosaveEnabled ||
-                      (autosaveEnabled && showSaveDraftButton)) && (
-                      <RenderCustomComponent
-                        CustomComponent={CustomSaveDraftButton}
-                        Fallback={<SaveDraftButton />}
-                      />
-                    )}
-                    <RenderCustomComponent
-                      CustomComponent={CustomPublishButton}
-                      Fallback={<PublishButton />}
-                    />
-                  </Fragment>
-                ) : (
-                  <RenderCustomComponent
-                    CustomComponent={CustomSaveButton}
-                    Fallback={<SaveButton />}
-                  />
-                )}
-              </Fragment>
-            )}
-            {docHasDeletePermission && isTrashed && (
-              <PermanentlyDeleteButton
-                buttonId="action-permanently-delete"
-                collectionSlug={collectionConfig?.slug}
-                id={id.toString()}
-                onDelete={onDelete}
-                redirectAfterDelete={redirectAfterDelete}
-                singularLabel={collectionConfig?.labels?.singular}
-              />
-            )}
-            {hasSavePermission && isTrashed && (
-              <RestoreButton
-                buttonId="action-restore"
-                collectionSlug={collectionConfig?.slug}
-                id={id.toString()}
-                onRestore={onRestore}
-                redirectAfterRestore={redirectAfterRestore}
-                singularLabel={collectionConfig?.labels?.singular}
-              />
-            )}
-            {user && readOnlyForIncomingUser && (
-              <Button
-                buttonStyle="secondary"
-                id="take-over"
-                onClick={onTakeOver}
-                size="medium"
-                type="button"
+            </Fragment>
+          )}
+          {collectionConfig?.timestamps && (isEditing || isAccountView) && (
+            <Fragment>
+              <li
+                className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
+                  .filter(Boolean)
+                  .join(' ')}
+                title={data?.updatedAt ? updatedAt : ''}
               >
-                {t('general:takeOver')}
-              </Button>
-            )}
-          </div>
-          {showDotMenu && !readOnlyForIncomingUser && (
-            <Popup
-              className={`${baseClass}__popup`}
-              disabled={initializing || processing}
-              horizontalAlign="right"
-              renderButton={({ active, ...buttonProps }) => (
-                <Button
-                  {...buttonProps}
-                  buttonStyle="ghost"
-                  icon={<MoreIcon size={16} />}
+                <p className={`${baseClass}__label`}>
+                  {i18n.t(isTrashed ? 'general:deleted' : 'general:lastModified')}:&nbsp;
+                </p>
+
+                {data?.updatedAt && <p className={`${baseClass}__value`}>{updatedAt}</p>}
+              </li>
+              <li
+                className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
+                  .filter(Boolean)
+                  .join(' ')}
+                title={data?.createdAt ? createdAt : ''}
+              >
+                <p className={`${baseClass}__label`}>{i18n.t('general:created')}:&nbsp;</p>
+                {data?.createdAt && <p className={`${baseClass}__value`}>{createdAt}</p>}
+              </li>
+            </Fragment>
+          )}
+        </ul>
+      </div>
+      <div className={`${baseClass}__controls-wrapper`}>
+        <div className={`${baseClass}__controls`}>
+          {BeforeDocumentControls}
+          {isLivePreviewEnabled && !isInDrawer && <LivePreviewToggler />}
+          {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
+            <RenderCustomComponent
+              CustomComponent={CustomPreviewButton}
+              Fallback={<PreviewButton />}
+            />
+          )}
+          {hasSavePermission && !isTrashed && (
+            <Fragment>
+              {collectionHasDraftsEnabled || globalHasDraftsEnabled ? (
+                <Fragment>
+                  {(unsavedDraftWithValidations ||
+                    !autosaveEnabled ||
+                    (autosaveEnabled && showSaveDraftButton)) && (
+                    <RenderCustomComponent
+                      CustomComponent={CustomSaveDraftButton}
+                      Fallback={<SaveDraftButton />}
+                    />
+                  )}
+                  <RenderCustomComponent
+                    CustomComponent={CustomPublishButton}
+                    Fallback={<PublishButton />}
+                  />
+                </Fragment>
+              ) : (
+                <RenderCustomComponent
+                  CustomComponent={CustomSaveButton}
+                  Fallback={<SaveButton />}
                 />
               )}
-              size="large"
-              verticalAlign="bottom"
+            </Fragment>
+          )}
+          {docHasDeletePermission && isTrashed && (
+            <PermanentlyDeleteButton
+              buttonId="action-permanently-delete"
+              collectionSlug={collectionConfig?.slug}
+              id={id.toString()}
+              onDelete={onDelete}
+              redirectAfterDelete={redirectAfterDelete}
+              singularLabel={collectionConfig?.labels?.singular}
+            />
+          )}
+          {hasSavePermission && isTrashed && (
+            <RestoreButton
+              buttonId="action-restore"
+              collectionSlug={collectionConfig?.slug}
+              id={id.toString()}
+              onRestore={onRestore}
+              redirectAfterRestore={redirectAfterRestore}
+              singularLabel={collectionConfig?.labels?.singular}
+            />
+          )}
+          {user && readOnlyForIncomingUser && (
+            <Button
+              buttonStyle="secondary"
+              id="take-over"
+              onClick={onTakeOver}
+              size="medium"
+              type="button"
             >
-              <PopupList.ButtonGroup>
-                {showCopyToLocale && <CopyLocaleData />}
-                {hasCreatePermission && (
-                  <React.Fragment>
-                    {!disableCreate && (
-                      <Fragment>
-                        {editDepth > 1 ? (
-                          <PopupList.Button id="action-create" onClick={onDrawerCreateNew}>
-                            {i18n.t('general:createNew')}
-                          </PopupList.Button>
-                        ) : (
-                          <PopupList.Button
-                            href={formatAdminURL({
-                              adminRoute,
-                              path: `/collections/${collectionConfig?.slug}/create`,
-                            })}
-                            id="action-create"
-                          >
-                            {i18n.t('general:createNew')}
-                          </PopupList.Button>
-                        )}
-                      </Fragment>
-                    )}
-                    {collectionConfig.disableDuplicate !== true && isEditing && (
-                      <>
+              {t('general:takeOver')}
+            </Button>
+          )}
+        </div>
+        {showDotMenu && !readOnlyForIncomingUser && (
+          <Popup
+            button={<MoreIcon />}
+            buttonClassName={`${baseClass}__popup-button`}
+            caret={false}
+            className={`${baseClass}__popup`}
+            disabled={initializing || processing}
+            horizontalAlign="right"
+            size="large"
+            verticalAlign="bottom"
+          >
+            <PopupList.ButtonGroup>
+              {showCopyToLocale && <CopyLocaleData />}
+              {hasCreatePermission && (
+                <React.Fragment>
+                  {!disableCreate && (
+                    <Fragment>
+                      {editDepth > 1 ? (
+                        <PopupList.Button id="action-create" onClick={onDrawerCreateNew}>
+                          {i18n.t('general:createNew')}
+                        </PopupList.Button>
+                      ) : (
+                        <PopupList.Button
+                          href={formatAdminURL({
+                            adminRoute,
+                            path: `/collections/${collectionConfig?.slug}/create`,
+                          })}
+                          id="action-create"
+                        >
+                          {i18n.t('general:createNew')}
+                        </PopupList.Button>
+                      )}
+                    </Fragment>
+                  )}
+                  {collectionConfig.disableDuplicate !== true && isEditing && (
+                    <>
+                      <DuplicateDocument
+                        id={id}
+                        onDuplicate={onDuplicate}
+                        redirectAfterDuplicate={redirectAfterDuplicate}
+                        singularLabel={collectionConfig?.labels?.singular}
+                        slug={collectionConfig?.slug}
+                      />
+                      {localization && (
                         <DuplicateDocument
                           id={id}
                           onDuplicate={onDuplicate}
                           redirectAfterDuplicate={redirectAfterDuplicate}
+                          selectLocales={true}
                           singularLabel={collectionConfig?.labels?.singular}
                           slug={collectionConfig?.slug}
                         />
-                        {localization && (
-                          <DuplicateDocument
-                            id={id}
-                            onDuplicate={onDuplicate}
-                            redirectAfterDuplicate={redirectAfterDuplicate}
-                            selectLocales={true}
-                            singularLabel={collectionConfig?.labels?.singular}
-                            slug={collectionConfig?.slug}
-                          />
-                        )}
-                      </>
-                    )}
-                  </React.Fragment>
-                )}
-                {hasDeletePermission && (
-                  <DeleteDocument
-                    buttonId="action-delete"
-                    collectionSlug={collectionConfig?.slug}
-                    id={id.toString()}
-                    onDelete={onDelete}
-                    redirectAfterDelete={redirectAfterDelete}
-                    singularLabel={collectionConfig?.labels?.singular}
-                    useAsTitle={collectionConfig?.admin?.useAsTitle}
-                  />
-                )}
-                <RenderCustomComponent
-                  CustomComponent={CustomUnpublishButton}
-                  Fallback={<UnpublishButton />}
+                      )}
+                    </>
+                  )}
+                </React.Fragment>
+              )}
+              {hasDeletePermission && (
+                <DeleteDocument
+                  buttonId="action-delete"
+                  collectionSlug={collectionConfig?.slug}
+                  id={id.toString()}
+                  onDelete={onDelete}
+                  redirectAfterDelete={redirectAfterDelete}
+                  singularLabel={collectionConfig?.labels?.singular}
+                  useAsTitle={collectionConfig?.admin?.useAsTitle}
                 />
-                {EditMenuItems}
-              </PopupList.ButtonGroup>
-            </Popup>
-          )}
-        </div>
+              )}
+              <RenderCustomComponent
+                CustomComponent={CustomUnpublishButton}
+                Fallback={<UnpublishButton />}
+              />
+              {EditMenuItems}
+            </PopupList.ButtonGroup>
+          </Popup>
+        )}
       </div>
-      <div className={`${baseClass}__divider`} />
-    </Gutter>
+    </div>
   )
 }

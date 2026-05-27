@@ -10,7 +10,7 @@
 
     /* Theme */
     background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
     box-shadow: none;
 

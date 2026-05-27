@@ -78,6 +78,7 @@ export const Button: React.FC<Props> = (props) => {
     popupIconSize,
     ref,
     round,
+    selected,
     size = 'medium',
     SubMenuPopupContent,
     to,
@@ -121,6 +122,7 @@ export const Button: React.FC<Props> = (props) => {
     buttonStyle && `${baseClass}--style-${buttonStyle}`,
     isDisabled && `${baseClass}--disabled`,
     round && `${baseClass}--round`,
+    selected && `${baseClass}--selected`,
     SubMenuPopupContent ? `${baseClass}--withPopup` : `${baseClass}--withoutPopup`,
   ]
     .filter(Boolean)

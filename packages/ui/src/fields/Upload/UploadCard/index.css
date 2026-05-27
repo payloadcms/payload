@@ -1,7 +1,7 @@
 @layer payload-default {
   .upload-field-card {
     background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
     display: flex;
     align-items: center;
@@ -11,7 +11,7 @@
 
   .upload-field-card--readOnly {
     background: var(--bg-default);
-    border: 1px solid var(--border-default);
+    border: var(--stroke-width-small) solid var(--border-default);
   }
 
   .upload-field-card--size-medium {

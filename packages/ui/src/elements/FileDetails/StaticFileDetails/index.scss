@@ -3,7 +3,7 @@
 @layer payload-default {
   .file-details {
     background: var(--theme-elevation-50);
-    border: 1px solid var(--theme-border-color);
+    border: var(--stroke-width-small) solid var(--theme-border-color);
     border-radius: var(--style-radius-m);
     @include inputShadow;
 
@@ -21,13 +21,13 @@
       right: $baseline;
 
       & .btn__icon {
-        border: 1px solid var(--theme-border-color);
+        border: var(--stroke-width-small) solid var(--theme-border-color);
         background: var(--theme-input-bg);
         @include inputShadow;
         transition: border 100ms cubic-bezier(0, 0.2, 0.2, 1);
 
         &:hover {
-          border: 1px solid var(--theme-elevation-400);
+          border: var(--stroke-width-small) solid var(--theme-elevation-400);
         }
       }
     }

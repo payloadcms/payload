@@ -45,6 +45,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
     !noBackground && `${baseClass}--background`,
     size && `${baseClass}--size-${size}`,
     disabled && `${baseClass}--disabled`,
+    active && `${baseClass}--active`,
   ]
     .filter(Boolean)
     .join(' ')

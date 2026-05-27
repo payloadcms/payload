@@ -6,7 +6,7 @@
     position: sticky;
     bottom: var(--base);
     background-color: var(--theme-bg);
-    border: 1px solid var(--theme-elevation-100);
+    border: var(--stroke-width-small) solid var(--theme-elevation-100);
     max-width: 500px;
     z-index: 1;
     margin-left: 50%;

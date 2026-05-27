@@ -3,7 +3,6 @@ import type { LinkProps } from 'next/link.js'
 
 import * as React from 'react'
 
-import { CheckIcon } from '../../../icons/Check/index.js'
 import { Link } from '../../Link/index.js'
 import './index.css'
 
@@ -71,16 +70,8 @@ export const Button: React.FC<MenuButtonProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  // Render icon column: checkmark if active, otherwise passed icon, otherwise empty placeholder
-  const iconElement = active ? (
-    <span className={`${baseClass}__icon`}>
-      <CheckIcon size={16} />
-    </span>
-  ) : icon ? (
-    <span className={`${baseClass}__icon`}>{icon}</span>
-  ) : (
-    <span className={`${baseClass}__icon`} />
-  )
+  // Always render icon element - CSS hides it outside IconButtonGroup
+  const iconElement = <span className={`${baseClass}__icon`}>{icon}</span>
 
   if (!disabled) {
     if (href) {
