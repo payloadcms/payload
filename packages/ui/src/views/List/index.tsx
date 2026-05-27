@@ -17,7 +17,6 @@ import { PageControls } from '../../elements/PageControls/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
-import { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
@@ -343,9 +342,7 @@ export function DefaultListView(props: ListViewClientProps) {
         </div>
       </TableColumnsProvider>
       {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
-        <StickyToolbar>
-          <PageControls collectionConfig={collectionConfig} />
-        </StickyToolbar>
+        <PageControls collectionConfig={collectionConfig} />
       )}
     </Fragment>
   )

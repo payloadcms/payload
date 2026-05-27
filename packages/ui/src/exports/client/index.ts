@@ -154,7 +154,6 @@ export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { GroupByHeader } from '../../views/List/GroupByHeader/index.js'
 export { PageControls, PageControlsComponent } from '../../elements/PageControls/index.js'
-export { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 
 export { GroupByPageControls } from '../../elements/PageControls/GroupByPageControls.js'
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
