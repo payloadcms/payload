@@ -54,6 +54,13 @@ export {
   useCellProps,
 } from '../../providers/TableColumns/RenderDefaultCell/index.js'
 export { DateCell } from '../../elements/Table/DefaultCell/fields/Date/index.js'
+export { TableSection } from '../../elements/TableSection/index.js'
+export type {
+  TableSectionContentProps,
+  TableSectionFooterProps,
+  TableSectionHeaderProps,
+  TableSectionProps,
+} from '../../elements/TableSection/index.js'
 
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
@@ -118,6 +125,8 @@ export type { InputStepperProps } from '../../elements/InputStepper/index.js'
 
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
+export { ListControlsBar } from '../../elements/ListControlsBar/index.js'
+export type { ListControlsBarProps } from '../../elements/ListControlsBar/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
 export type {
   ListDrawerProps,
