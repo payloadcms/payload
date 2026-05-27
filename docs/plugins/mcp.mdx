@@ -149,9 +149,11 @@ In your Payload admin panel, navigate to **MCP → API Keys**, create a new key,
 toggle the individual capabilities on for each collection, global, tool, prompt, and
 resource you want that key to be able to use.
 
-All MCP requests must include a valid API key as a Bearer token — requests without
-one are rejected immediately. Here is a complete example of an MCP `tools/list` request
-showing the correct headers:
+All MCP requests must include a valid API key. Bearer tokens are supported, and
+the Payload API key scheme for the MCP API key collection is also accepted:
+`Authorization: payload-mcp-api-keys API-Key MCP-USER-API-KEY`. Requests without
+a valid API key are rejected immediately. Here is a complete example of an MCP
+`tools/list` request showing the correct headers:
 
 ```bash
 curl -i 'http://localhost:3000/api/mcp' \
@@ -266,7 +268,8 @@ npx @modelcontextprotocol/inspector
 ```
 
 Open the inspector, set the URL to `http://127.0.0.1:3000/api/mcp`, and add an
-`Authorization: Bearer MCP-USER-API-KEY` header.
+`Authorization: Bearer MCP-USER-API-KEY` header. You can also use Payload's API
+key convention: `Authorization: payload-mcp-api-keys API-Key MCP-USER-API-KEY`.
 
 You can also test directly with `curl`:
 

@@ -273,6 +273,29 @@ describe('@payloadcms/plugin-mcp', () => {
         'Unauthorized, you must be logged in to make this request.',
       )
     })
+
+    it('should allow the Payload API-Key Authorization scheme', async () => {
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `payload-mcp-api-keys API-Key ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(response.status).toBe(200)
+      expect(json).toBeDefined()
+      expect(json.result?.tools).toBeDefined()
+    })
   })
 
   describe('List', () => {
