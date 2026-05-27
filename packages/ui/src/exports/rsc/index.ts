@@ -8,6 +8,7 @@ export {
   getHTMLDiffComponents,
   unescapeDiffHTML,
 } from '../../elements/HTMLDiff/index.js'
+export { PayloadVersionMenuItem } from '../../elements/PayloadVersionMenuItem/index.js'
 export { _internal_renderFieldHandler } from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
 export { File } from '../../graphics/File/index.js'
 export { CheckIcon } from '../../icons/Check/index.js'

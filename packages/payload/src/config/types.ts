@@ -1172,6 +1172,13 @@ export type Config = {
     }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
+    /**
+     * When false, the built-in Payload version item is not auto-injected into
+     * `admin.components.settingsMenu`. Users can still add `@payloadcms/ui/rsc#PayloadVersionMenuItem`
+     * manually to control placement.
+     * @default true
+     */
+    versionInSettingsMenu?: boolean
   }
 
   /**
@@ -1616,6 +1623,12 @@ export type Config = {
  */
 export type SanitizedConfig = {
   admin: {
+    /**
+     * Map of resolved Payload-related package versions (name → semver), computed
+     * at config sanitization. Always contains a `payload` entry. Missing packages
+     * are omitted. Used by the built-in version menu item.
+     */
+    packageVersions: Record<string, string>
     timezones: SanitizedTimezoneConfig
   } & DeepRequired<Config['admin']>
   blocks?: FlattenedBlock[]

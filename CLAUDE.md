@@ -233,6 +233,7 @@ Generate types for a test directory: `pnpm run dev:generate-types <directory_nam
 - Add new strings to English locale first, then translate to other languages
 - Run `pnpm run translateNewKeys` to auto-translate new keys (requires `OPENAI_KEY` in `.env`)
 - Lexical translations: `cd packages/richtext-lexical && pnpm run translateNewKeys`
+- **Adding a key to `en.ts` makes it required in every other language file.** The build fails (TS2741) for each unpopulated locale until either `translateNewKeys` runs or English fallbacks are stubbed across all ~44 files. If `OPENAI_KEY` isn't available and the work is small, prefer hardcoding the user-facing string and deferring the translation key to a follow-up.
 
 ## Commit & PR Guidelines
 
@@ -356,4 +357,39 @@ import { MyClientComponent } from './MyComponent.js'
 import { MyClientComponent } from '../../exports/client/index.js'
 ```
 
+**3. Server-only components in built-in path strings must use the `/rsc` subpath:**
+
+When auto-injecting a built-in server component into a config slot via path-string syntax (e.g. inside `sanitizeConfig`, `inject*` helpers), use the `/rsc` subpath. The bare `@payloadcms/ui` resolves to the client bundle, which doesn't export server-only components — the runtime warns `getFromImportMap: PayloadComponent not found in importMap`.
+
+```typescript
+// BAD - resolves to the client bundle, server-only export is missing
+config.admin.components.settingsMenu.push('@payloadcms/ui#PayloadVersionMenuItem')
+
+// GOOD - resolves through the RSC export map
+config.admin.components.settingsMenu.push('@payloadcms/ui/rsc#PayloadVersionMenuItem')
+```
+
+See `packages/payload/src/hierarchy/injectHierarchyButton.ts` for the established pattern.
+
 **Testing bundling changes:** Always test with `pnpm prepare-run-test-against-prod` followed by `pnpm dev:prod <suite>`. Dev mode (`pnpm dev`) doesn't catch these issues.
+
+### Styling
+
+New components prefer vanilla CSS (`index.css`) over SCSS, using v4 design tokens. Existing SCSS files are migrated as touched.
+
+- Wrap rules in `@layer payload-default { ... }` (matches Tooltip, PopupButtonList, and other v4 components).
+- Use v4 tokens: `--bg-default-default`, `--text-default-secondary`, `--spacer-N`, `--radius-medium`, `--font-family-mono`, etc. Do not hardcode colors or pixels.
+- **Native CSS nesting does not support BEM concatenation.** `&__wrapper` only works in SCSS. In vanilla CSS, write each BEM child as a top-level rule within the layer:
+
+```css
+/* BAD - native CSS nesting cannot concat suffixes */
+.thing {
+  &__row { ... }
+}
+
+/* GOOD - separate top-level rules */
+.thing { ... }
+.thing__row { ... }
+```
+
+- `&` is still valid for pseudo-classes/states (`&:hover`, `&.is-open`) and descendants (`& .child`).

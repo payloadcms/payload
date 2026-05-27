@@ -454,4 +454,5 @@ export type {
 } from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
 
 export { useLivePreviewContext } from '../../providers/LivePreview/context.js'
+export { PayloadVersionModalTrigger } from '../../elements/PayloadVersionMenuItem/PayloadVersionModalTrigger.js'
 export { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'

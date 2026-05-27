@@ -1168,6 +1168,37 @@ describe('General', () => {
       })
     })
   })
+
+  describe('Payload version menu item', () => {
+    test('should show Payload version button, open drawer, and copy version to clipboard', async ({}, testInfo) => {
+      testInfo.setTimeout(TEST_TIMEOUT_LONG)
+      await page.goto(postsUrl.admin)
+      await openNav(page)
+
+      const gearButton = page.locator('.nav__controls .popup#settings-menu .popup-button')
+      await gearButton.click()
+
+      const versionButton = page.locator(
+        '[data-popup-id="settings-menu"] .popup-button-list__button',
+        {
+          hasText: /^Payload v\d+\.\d+/,
+        },
+      )
+      await expect(versionButton).toBeVisible()
+      await versionButton.click()
+
+      const drawer = page.locator('#payload-version-info')
+      await expect(drawer).toBeVisible()
+
+      await expect(drawer.locator('dt', { hasText: 'payload' }).first()).toBeVisible()
+
+      await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+      await drawer.getByRole('button', { name: /^Copy/ }).click()
+
+      const clipboardText = await page.evaluate(() => navigator.clipboard.readText())
+      expect(clipboardText).toMatch(/^payload: \d+\.\d+\.\d+/)
+    })
+  })
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
