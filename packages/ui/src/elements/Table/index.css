@@ -1,6 +1,5 @@
 @layer payload-default {
   .table {
-    margin-bottom: var(--spacer-3);
     overflow: auto;
     max-width: 100%;
     isolation: isolate;
