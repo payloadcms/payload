@@ -93,6 +93,12 @@ export default buildConfigWithDefaults({
           hasMany: true,
         },
         {
+          name: 'polymorphicUploads',
+          type: 'upload',
+          relationTo: ['uploads-1', 'uploads-2'],
+          hasMany: true,
+        },
+        {
           type: 'tabs',
           tabs: [
             {

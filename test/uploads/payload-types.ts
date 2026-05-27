@@ -210,9 +210,6 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'fr';
-  widgets: {
-    collections: CollectionsWidget;
-  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -247,6 +244,18 @@ export interface Relation {
   versionedImage?: (string | null) | Version;
   hideFileInputOnCreate?: (string | null) | HideFileInputOnCreate;
   hasManyImage?: (string | Media)[] | null;
+  polymorphicUploads?:
+    | (
+        | {
+            relationTo: 'uploads-1';
+            value: string | Uploads1;
+          }
+        | {
+            relationTo: 'uploads-2';
+            value: string | Uploads2;
+          }
+      )[]
+    | null;
   blocks?:
     | {
         media: string | Media;
@@ -448,6 +457,99 @@ export interface HideFileInputOnCreate {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-1".
+ */
+export interface Uploads1 {
+  id: string;
+  hasManyUpload?: (string | Uploads2)[] | null;
+  singleUpload?: (string | null) | Uploads2;
+  hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
+  singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-2".
+ */
+export interface Uploads2 {
+  id: string;
+  prefix: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-thumbnail-size".
+ */
+export interface AdminThumbnailSize {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1293,99 +1395,6 @@ export interface ExternallyServedMedia {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads-1".
- */
-export interface Uploads1 {
-  id: string;
-  hasManyUpload?: (string | Uploads2)[] | null;
-  singleUpload?: (string | null) | Uploads2;
-  hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
-  singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads-2".
- */
-export interface Uploads2 {
-  id: string;
-  prefix: string;
-  title?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "admin-thumbnail-size".
- */
-export interface AdminThumbnailSize {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    small?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    medium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "any-images".
  */
 export interface AnyImage {
@@ -2199,6 +2208,7 @@ export interface RelationSelect<T extends boolean = true> {
   versionedImage?: T;
   hideFileInputOnCreate?: T;
   hasManyImage?: T;
+  polymorphicUploads?: T;
   blocks?:
     | T
     | {
@@ -3939,16 +3949,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections_widget".
- */
-export interface CollectionsWidget {
-  data?: {
-    [k: string]: unknown;
-  };
-  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
