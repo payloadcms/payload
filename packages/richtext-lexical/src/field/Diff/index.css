@@ -1,6 +1,7 @@
 @layer payload-default {
   .lexical-diff .field-diff-content {
     .html-diff {
+      overflow: clip;
       font-family: var(--text-body-large-font-family);
       font-size: var(--text-body-large-font-size);
       font-weight: var(--text-body-large-font-weight);
