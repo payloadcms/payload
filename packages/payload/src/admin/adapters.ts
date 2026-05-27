@@ -1,7 +1,5 @@
 import type React from 'react'
 
-import type { ImportMap, PayloadComponent } from '../index.js'
-
 /**
  * Client-side router adapter, provided as a React component.
  * The adapter component wraps children and populates the RouterAdapterContext
@@ -55,31 +53,3 @@ export type CookieOptions = {
   sameSite?: 'lax' | 'none' | 'strict'
   secure?: boolean
 }
-
-/**
- * Pluggable component renderer.
- * RSC-capable frameworks use the current RenderServerComponent logic.
- * Non-RSC frameworks treat all components as client components.
- */
-export type ComponentRenderer = (args: {
-  readonly clientProps?: object
-  readonly Component?:
-    | PayloadComponent
-    | PayloadComponent[]
-    | React.ComponentType
-    | React.ComponentType[]
-  readonly Fallback?: React.ComponentType
-  readonly importMap: ImportMap
-  readonly key?: string
-  readonly serverProps?: object
-}) => React.ReactNode
-
-/**
- * Strategy for dev-mode HMR/reload detection.
- * Each framework adapter provides its own implementation.
- */
-export type DevReloadStrategy = {
-  connect: (onReload: () => void) => DevReloadCleanup
-}
-
-export type DevReloadCleanup = () => void
