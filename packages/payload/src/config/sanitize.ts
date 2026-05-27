@@ -56,16 +56,97 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
+  const dashboardDefaultCollection = sanitizedConfig.collections?.[0]?.slug
+
   ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
     slug: 'collections',
     Component: '@payloadcms/next/rsc#CollectionCards',
     minWidth: 'full',
   })
+  sanitizedConfig.admin!.dashboard.widgets.push({
+    slug: 'collection-query',
+    Component: '@payloadcms/next/rsc#CollectionQueryWidget',
+    fields: [
+      {
+        name: 'title',
+        type: 'text',
+        defaultValue: 'Recent documents',
+        label: 'Title',
+      },
+      {
+        name: 'relatedCollection',
+        type: 'select',
+        label: 'Collection',
+        options: (sanitizedConfig.collections ?? []).map((collection) => ({
+          label: collection.labels?.plural || collection.slug,
+          value: collection.slug,
+        })),
+        required: true,
+      },
+      {
+        name: 'where',
+        type: 'json',
+        admin: {
+          components: {
+            Field: '@payloadcms/next/client#QueryPresetsWhereField',
+          },
+        },
+        label: 'Filters',
+      },
+      {
+        name: 'sortField',
+        type: 'text',
+        admin: {
+          components: {
+            Field: '@payloadcms/next/client#CollectionQuerySortField',
+          },
+        },
+        label: 'Sort Field',
+      },
+      {
+        name: 'sortDirection',
+        type: 'select',
+        defaultValue: 'desc',
+        label: 'Sort Direction',
+        options: [
+          {
+            label: 'Ascending',
+            value: 'asc',
+          },
+          {
+            label: 'Descending',
+            value: 'desc',
+          },
+        ],
+      },
+      {
+        name: 'limit',
+        type: 'number',
+        defaultValue: 5,
+        label: 'Limit',
+        max: 25,
+        min: 1,
+      },
+    ],
+    minWidth: 'medium',
+  })
   sanitizedConfig.admin!.dashboard.defaultLayout ??= [
-    {
-      widgetSlug: 'collections',
-      width: 'full',
-    } satisfies WidgetInstance,
+    dashboardDefaultCollection
+      ? ({
+          data: {
+            limit: 5,
+            relatedCollection: dashboardDefaultCollection,
+            sortDirection: 'desc',
+            sortField: 'updatedAt',
+            title: 'Recent documents',
+          },
+          widgetSlug: 'collection-query',
+          width: 'medium',
+        } satisfies WidgetInstance)
+      : ({
+          widgetSlug: 'collections',
+          width: 'full',
+        } satisfies WidgetInstance),
   ]
 
   // add default user collection if none provided

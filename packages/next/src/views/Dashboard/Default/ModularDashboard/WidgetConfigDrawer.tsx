@@ -4,6 +4,7 @@ import type { ClientWidget, FormState } from 'payload'
 
 import {
   Drawer,
+  DrawerContentContainer,
   Form,
   FormSubmit,
   OperationProvider,
@@ -130,29 +131,32 @@ export function WidgetConfigDrawer({
       {initialState === false ? (
         <ShimmerEffect height="250px" />
       ) : (
-        <OperationProvider operation="update">
-          <Form
-            fields={fields}
-            initialState={initialState}
-            onChange={[onChange]}
-            onSubmit={(_, data) => {
-              onSave(mergeLocaleData(widgetData ?? {}, data, localeCode, fields))
-              closeModal(drawerSlug)
-            }}
-            uuid={formUUID}
-          >
-            <RenderFields
+        // PR #16687 follow-up: keep this drawer migration separate and unstaged.
+        <DrawerContentContainer className="widget-config-drawer__content">
+          <OperationProvider operation="update">
+            <Form
               fields={fields}
-              forceRender
-              parentIndexPath=""
-              parentPath=""
-              parentSchemaPath={widget.slug}
-              permissions={true}
-              readOnly={false}
-            />
-            <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
-          </Form>
-        </OperationProvider>
+              initialState={initialState}
+              onChange={[onChange]}
+              onSubmit={(_, data) => {
+                onSave(mergeLocaleData(widgetData ?? {}, data, localeCode, fields))
+                closeModal(drawerSlug)
+              }}
+              uuid={formUUID}
+            >
+              <RenderFields
+                fields={fields}
+                forceRender
+                parentIndexPath=""
+                parentPath=""
+                parentSchemaPath={widget.slug}
+                permissions={true}
+                readOnly={false}
+              />
+              <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+            </Form>
+          </OperationProvider>
+        </DrawerContentContainer>
       )}
     </Drawer>
   )

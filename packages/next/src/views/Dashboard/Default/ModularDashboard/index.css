@@ -12,6 +12,17 @@
     height: 100%;
   }
 
+  /* PR #16687 follow-up: keep this drawer migration separate and unstaged. */
+  .widget-config-drawer__content {
+    .form-submit {
+      margin-top: var(--spacer-2-5);
+
+      .btn {
+        width: auto;
+      }
+    }
+  }
+
   @media (max-width: 768px) {
     .modular-dashboard .widget {
       width: 100% !important;
