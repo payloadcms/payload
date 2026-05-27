@@ -14,6 +14,14 @@
 
   .widget-config-drawer__content {
     height: 100%;
+
+    .form-submit {
+      margin-top: var(--spacer-2-5);
+
+      .btn {
+        width: auto;
+      }
+    }
   }
 
   @media (max-width: 768px) {
