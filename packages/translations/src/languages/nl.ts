@@ -329,6 +329,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     export: 'Exporteren',
     fallbackToDefaultLocale: 'Terugval naar standaardtaal',
     false: 'Onwaar',
+    field: 'Veld',
     filter: 'Filter',
     filters: 'Filters',
     filterWhere: 'Filter {{label}} waar',

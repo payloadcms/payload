@@ -323,6 +323,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     export: 'Eksports',
     fallbackToDefaultLocale: 'Izmantot noklusēto lokalizāciju',
     false: 'Nepatiesi',
+    field: 'Lauks',
     filter: 'Filtrs',
     filters: 'Filtri',
     filterWhere: 'Filtrēt {{label}} kur',
