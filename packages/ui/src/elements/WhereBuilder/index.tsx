@@ -101,7 +101,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
       if (relation === 'and') {
         newConditions[orIndex].and.splice(andIndex, 0, {
-          [String(field.value)]: {
+          [String(field.fieldPath)]: {
             [defaultOperator]: undefined,
           },
         })
@@ -109,7 +109,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         newConditions.push({
           and: [
             {
-              [String(field.value)]: {
+              [String(field.fieldPath)]: {
                 [defaultOperator]: undefined,
               },
             },
@@ -126,20 +126,20 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     async ({ andIndex, field, operator: incomingOperator, orIndex, value }) => {
       const existingCondition = conditions[orIndex].and[andIndex]
 
-      if (typeof existingCondition === 'object' && field?.value) {
+      if (typeof existingCondition === 'object' && field?.fieldPath) {
         const { validOperator } = getValidFieldOperators({
           field: field.field,
           operator: incomingOperator,
         })
 
         // Skip if nothing changed
-        const existingValue = existingCondition[String(field.value)]?.[validOperator]
+        const existingValue = existingCondition[String(field.fieldPath)]?.[validOperator]
         if (typeof existingValue !== 'undefined' && existingValue === value) {
           return
         }
 
         const newRowCondition = {
-          [String(field.value)]: { [validOperator]: value },
+          [String(field.fieldPath)]: { [validOperator]: value },
         }
 
         if (dequal(existingCondition, newRowCondition)) {

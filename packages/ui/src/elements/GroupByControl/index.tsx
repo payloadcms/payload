@@ -65,13 +65,13 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({ collectionSlug, 
       reducedFields.filter(
         (field) =>
           !isFieldDisabled(field.field, 'groupBy') &&
-          field.value !== 'id' &&
+          field.fieldPath !== 'id' &&
           supportedFieldTypes.includes(field.field.type),
       ),
     [reducedFields],
   )
 
-  const groupByField = reducedFields.find((field) => field.value === groupByFieldName)
+  const groupByField = reducedFields.find((field) => field.fieldPath === groupByFieldName)
   const isActive = Boolean(groupByFieldName && groupByField)
 
   const handleFieldSelect = useCallback(
@@ -170,13 +170,15 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({ collectionSlug, 
                       <PopupList.ButtonGroup>
                         {filteredFields.map((field, i) => (
                           <PopupList.Button
-                            active={field.value === groupByFieldName}
+                            active={field.fieldPath === groupByFieldName}
                             icon={
-                              field.value === groupByFieldName ? <CheckIcon size={16} /> : undefined
+                              field.fieldPath === groupByFieldName ? (
+                                <CheckIcon size={16} />
+                              ) : undefined
                             }
                             key={i}
                             onClick={() => {
-                              handleFieldSelect(field.value)
+                              handleFieldSelect(field.fieldPath)
                               closeFieldPopup()
                             }}
                           >
