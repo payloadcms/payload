@@ -33,7 +33,7 @@ export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilt
       className={baseClass}
       horizontalAlign="left"
       render={() => (
-        <PopupList.IconButtonGroup>
+        <PopupList.RadioGroup>
           {options.map(({ label, value }) => {
             const isActive = selectedValues?.includes(value)
             return (
@@ -52,7 +52,7 @@ export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilt
               </PopupList.Button>
             )
           })}
-        </PopupList.IconButtonGroup>
+        </PopupList.RadioGroup>
       )}
       renderButton={({ active, onClick, onKeyDown }) => (
         <FilterTrigger
