@@ -1,7 +1,7 @@
 @layer payload-default {
   .lexical-diff {
     ul.list-check {
-      padding-left: 0;
+      padding-inline-start: 0;
     }
 
     .checkboxItem {
@@ -16,7 +16,7 @@
     .checkboxItem__icon {
       width: var(--spacer-3);
       height: var(--spacer-3);
-      margin-right: var(--spacer-2);
+      margin-inline-end: var(--spacer-2);
       border: var(--stroke-width-small) solid var(--color-text);
       border-radius: var(--radius-medium);
       display: flex;
@@ -53,7 +53,7 @@
     }
 
     .checkboxItem--nested {
-      margin-left: var(--spacer-4);
+      margin-inline-start: var(--spacer-4);
     }
   }
 }

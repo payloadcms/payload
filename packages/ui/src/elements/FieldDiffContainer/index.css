@@ -2,15 +2,8 @@
   .field-diff__locale-label {
     background: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
-    padding: 0 var(--spacer-1);
-
-    [dir='ltr'] & {
-      margin-right: var(--spacer-1);
-    }
-
-    [dir='rtl'] & {
-      margin-left: var(--spacer-1);
-    }
+    padding-inline: var(--spacer-1);
+    margin-inline-end: var(--spacer-1);
   }
 
   .field-diff-container {
@@ -23,6 +16,7 @@
     background: var(--color-bg-secondary);
     padding-block: var(--spacer-2);
     border-radius: var(--radius-medium);
+    overflow: clip;
   }
 
   .field-diff-content > * {

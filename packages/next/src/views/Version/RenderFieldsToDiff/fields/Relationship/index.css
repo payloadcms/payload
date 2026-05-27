@@ -19,7 +19,7 @@
   }
 
   .relationship-diff-container--hasOne .field-diff-content {
-    padding: var(--spacer-2) var(--spacer-2-5);
+    padding-block: var(--spacer-2);
     background: var(--color-bg-secondary);
   }
 
@@ -37,10 +37,7 @@
     )::before {
     content: '';
     position: absolute;
-    top: calc(var(--spacer-2) * -1);
-    bottom: calc(var(--spacer-2) * -1);
-    left: calc(var(--spacer-2-5) * -1);
-    right: calc(var(--spacer-2-5) * -1);
+    inset: calc(var(--spacer-2) * -1) 0;
     display: block;
     z-index: -1;
   }
@@ -59,7 +56,7 @@
 
   .relationship-diff-container--hasMany .field-diff-content {
     background: var(--color-bg-secondary);
-    padding: var(--spacer-1) var(--spacer-2);
+    padding-block: var(--spacer-1);
 
     .html-diff {
       display: flex;
@@ -109,6 +106,7 @@
     border-radius: var(--radius-medium);
     padding: var(--spacer-2) var(--spacer-1);
     text-decoration-line: none;
+    color: inherit;
   }
 
   /* hasMany pills stay compact at 24px */
@@ -134,13 +132,11 @@
   .html-diff .relationship-diff.relationship-diff.relationship-diff[data-match-type='create'] {
     background-color: var(--diff-create-parent-bg);
     outline-color: var(--diff-create-pill-border);
-    color: inherit;
   }
 
   .html-diff .relationship-diff.relationship-diff.relationship-diff[data-match-type='delete'] {
     background-color: var(--diff-delete-parent-bg);
     outline-color: var(--diff-delete-pill-border);
-    color: inherit;
   }
 
   .relationship-diff__pill {
@@ -148,7 +144,7 @@
     align-items: center;
     height: var(--spacer-3);
     border-radius: var(--radius-medium);
-    padding: 0 var(--spacer-1);
+    padding-inline: var(--spacer-1);
     background-color: var(--color-bg-tertiary);
     color: var(--color-text);
     white-space: nowrap;
@@ -203,10 +199,7 @@
     .relationship-diff-container--hasOne
       .field-diff-content
       > .html-diff:has(.relationship-diff[data-match-type='delete'])::before {
-      top: calc(var(--spacer-1) * -1);
-      bottom: calc(var(--spacer-1) * -1);
-      left: calc(var(--spacer-2) * -1);
-      right: calc(var(--spacer-2) * -1);
+      inset: calc(var(--spacer-1) * -1) calc(var(--spacer-2) * -1);
     }
 
     .relationship-diff-container--hasMany .field-diff-content {

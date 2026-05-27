@@ -11,32 +11,20 @@
       color: var(--color-icon-tertiary);
     }
 
-    &:hover {
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: calc(var(--spacer-1) * -1);
-        right: 0;
-        bottom: 0;
-        background-color: var(--color-bg-hover);
-        border-radius: var(--radius-medium);
-        z-index: -1;
-      }
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 0 calc(var(--spacer-1) * -1);
+      border-radius: var(--radius-medium);
+      z-index: -1;
     }
 
-    &:active {
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: calc(var(--spacer-1) * -1);
-        right: 0;
-        bottom: 0;
-        background-color: var(--color-bg-pressed);
-        border-radius: var(--radius-medium);
-        z-index: -1;
-      }
+    &:hover::before {
+      background-color: var(--color-bg-hover);
+    }
+
+    &:active::before {
+      background-color: var(--color-bg-pressed);
     }
   }
 
@@ -47,8 +35,8 @@
   }
 
   .diff-collapser__field-change-count {
-    margin-left: var(--spacer-2);
-    padding: 0 var(--spacer-1);
+    margin-inline-start: var(--spacer-2);
+    padding-inline: var(--spacer-1);
     background: var(--color-bg-tertiary);
     border-radius: var(--radius-medium);
     font-family: var(--text-body-medium-font-family);

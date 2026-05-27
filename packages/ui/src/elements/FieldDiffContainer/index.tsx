@@ -44,7 +44,7 @@ export const FieldDiffContainer: React.FC<{
         style={
           nestingLevel
             ? ({
-                '--field-diff-columns': `calc(50% - ${nestingLevel * gutterOffset}px - var(--spacer-2-5)) calc(50% + ${nestingLevel * gutterOffset}px - var(--spacer-2-5))`,
+                '--field-diff-columns': `calc(50% - ${nestingLevel * gutterOffset}px) calc(50% + ${nestingLevel * gutterOffset}px)`,
               } as React.CSSProperties)
             : undefined
         }

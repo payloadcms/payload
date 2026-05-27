@@ -13,7 +13,7 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    margin: var(--spacer-2) 0;
+    margin-block: var(--spacer-2);
     padding: var(--spacer-1);
 
     &[data-match-type='create'] {
@@ -80,7 +80,7 @@
     display: inline-flex;
     align-items: center;
     border-radius: var(--radius-medium);
-    padding: 0 var(--spacer-1);
+    padding-inline: var(--spacer-1);
     background-color: var(--color-bg-brand);
     color: var(--color-text-onbrand);
     white-space: nowrap;

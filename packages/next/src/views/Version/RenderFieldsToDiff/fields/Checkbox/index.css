@@ -11,10 +11,7 @@
   .checkbox-diff__value--delete::before {
     content: '';
     position: absolute;
-    top: calc(var(--spacer-2) * -1);
-    bottom: calc(var(--spacer-2) * -1);
-    left: calc(var(--spacer-2-5) * -1);
-    right: calc(var(--spacer-2-5) * -1);
+    inset: calc(var(--spacer-2) * -1) 0;
     display: block;
     z-index: -1;
   }

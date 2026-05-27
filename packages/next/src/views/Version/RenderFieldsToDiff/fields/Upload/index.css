@@ -143,7 +143,7 @@
 
   .upload-diff__pill {
     border-radius: var(--radius-medium);
-    padding: 0 var(--spacer-1);
+    padding-inline: var(--spacer-1);
     background-color: var(--color-bg-brand);
     color: var(--color-text-onbrand);
     font-size: var(--text-body-medium-font-size);
