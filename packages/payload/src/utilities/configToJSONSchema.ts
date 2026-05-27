@@ -155,15 +155,17 @@ function getAllowedWidgetWidths({
 function generateWidgetSchemas({
   collectionIDFieldTypes,
   config,
+  forceInlineBlocks,
   i18n,
   interfaceNameDefinitions,
-  opts = {},
+  typeStringDefinitions,
 }: {
   collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
   config: SanitizedConfig
+  forceInlineBlocks?: boolean
   i18n?: I18n
   interfaceNameDefinitions: Map<string, JSONSchema4>
-  opts?: ConfigToJSONSchemaOptions
+  typeStringDefinitions: Map<string, string>
 }): {
   definitions: Record<string, JSONSchema4>
   schema: JSONSchema4
@@ -181,14 +183,15 @@ function generateWidgetSchemas({
     let dataSchema: JSONSchema4
 
     if (widget.fields?.length) {
-      const widgetFieldSchemas = fieldsToJSONSchema(
+      const widgetFieldSchemas = fieldsToJSONSchema({
         collectionIDFieldTypes,
-        flattenAllFields({ fields: widget.fields }),
-        interfaceNameDefinitions,
         config,
+        fields: flattenAllFields({ fields: widget.fields }),
+        forceInlineBlocks,
         i18n,
-        opts,
-      )
+        interfaceNameDefinitions,
+        typeStringDefinitions,
+      })
 
       dataSchema = {
         type: 'object',
@@ -350,22 +353,41 @@ type ConfigToJSONSchemaOptions = {
   forceInlineBlocks?: boolean
 }
 
-export function fieldsToJSONSchema(
+export type FieldsToJSONSchemaArgs = {
   /**
-   * Used for relationship fields, to determine whether to use a string or number type for the ID.
-   * While there is a default ID field type set by the db adapter, they can differ on a collection-level
-   * if they have custom ID fields.
+   * Used for relationship fields, to determine whether to use a string or
+   * number type for the ID. While there is a default ID field type set by
+   * the db adapter, they can differ on a collection-level if they have
+   * custom ID fields.
    */
-  collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
-  fields: FlattenedField[],
+  collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
+  config?: SanitizedConfig
+  fields: FlattenedField[]
   /**
-   * Allows you to define new top-level interfaces that can be re-used in the output schema.
+   * If true, blocks are inlined into each `block` field instead of being
+   * lifted to a top-level definition. Used by the MCP plugin.
    */
-  interfaceNameDefinitions: Map<string, JSONSchema4>,
-  config?: SanitizedConfig,
-  i18n?: I18n,
-  opts: ConfigToJSONSchemaOptions = {},
-): {
+  forceInlineBlocks?: boolean
+  i18n?: I18n
+  /** Allows you to define new top-level interfaces that can be re-used in the output schema. */
+  interfaceNameDefinitions: Map<string, JSONSchema4>
+  /**
+   * Allows you to append raw TS source to `payload-types.ts`. Keys are used
+   * for de-duplication - identical keys overwrite, so the same string written
+   * from many fields ends up emitted once.
+   */
+  typeStringDefinitions: Map<string, string>
+}
+
+export function fieldsToJSONSchema({
+  collectionIDFieldTypes,
+  config,
+  fields,
+  forceInlineBlocks,
+  i18n,
+  interfaceNameDefinitions,
+  typeStringDefinitions,
+}: FieldsToJSONSchemaArgs): {
   properties: {
     [k: string]: JSONSchema4
   }
@@ -394,14 +416,15 @@ export function fieldsToJSONSchema(
               items: {
                 type: 'object',
                 additionalProperties: false,
-                ...fieldsToJSONSchema(
+                ...fieldsToJSONSchema({
                   collectionIDFieldTypes,
-                  field.flattenedFields,
-                  interfaceNameDefinitions,
                   config,
+                  fields: field.flattenedFields,
+                  forceInlineBlocks,
                   i18n,
-                  opts,
-                ),
+                  interfaceNameDefinitions,
+                  typeStringDefinitions,
+                }),
               },
             }
 
@@ -435,7 +458,7 @@ export function fieldsToJSONSchema(
                           return {}
                         }
 
-                        if (!opts.forceInlineBlocks) {
+                        if (!forceInlineBlocks) {
                           return {
                             $ref: `#/definitions/${resolvedBlock.interfaceName ?? resolvedBlock.slug}`,
                           }
@@ -443,14 +466,15 @@ export function fieldsToJSONSchema(
 
                         block = resolvedBlock
                       }
-                      const blockFieldSchemas = fieldsToJSONSchema(
+                      const blockFieldSchemas = fieldsToJSONSchema({
                         collectionIDFieldTypes,
-                        block.flattenedFields,
-                        interfaceNameDefinitions,
                         config,
+                        fields: block.flattenedFields,
+                        forceInlineBlocks,
                         i18n,
-                        opts,
-                      )
+                        interfaceNameDefinitions,
+                        typeStringDefinitions,
+                      })
 
                       const blockSchema: JSONSchema4 = {
                         type: 'object',
@@ -464,7 +488,7 @@ export function fieldsToJSONSchema(
                         required: ['blockType', ...blockFieldSchemas.required],
                       }
 
-                      if (!opts.forceInlineBlocks && block.interfaceName) {
+                      if (!forceInlineBlocks && block.interfaceName) {
                         interfaceNameDefinitions.set(block.interfaceName, blockSchema)
 
                         return {
@@ -503,14 +527,15 @@ export function fieldsToJSONSchema(
                 ...baseFieldSchema,
                 type: 'object',
                 additionalProperties: false,
-                ...fieldsToJSONSchema(
+                ...fieldsToJSONSchema({
                   collectionIDFieldTypes,
-                  field.flattenedFields,
-                  interfaceNameDefinitions,
                   config,
+                  fields: field.flattenedFields,
+                  forceInlineBlocks,
                   i18n,
-                  opts,
-                ),
+                  interfaceNameDefinitions,
+                  typeStringDefinitions,
+                }),
               }
 
               if (field.interfaceName) {
@@ -744,6 +769,7 @@ export function fieldsToJSONSchema(
                   i18n,
                   interfaceNameDefinitions,
                   isRequired,
+                  typeStringDefinitions,
                 }),
               }
             } else {
@@ -819,14 +845,15 @@ export function fieldsToJSONSchema(
               ...baseFieldSchema,
               type: 'object',
               additionalProperties: false,
-              ...fieldsToJSONSchema(
+              ...fieldsToJSONSchema({
                 collectionIDFieldTypes,
-                field.flattenedFields,
-                interfaceNameDefinitions,
                 config,
+                fields: field.flattenedFields,
+                forceInlineBlocks,
                 i18n,
-                opts,
-              ),
+                interfaceNameDefinitions,
+                typeStringDefinitions,
+              }),
             }
 
             if (field.interfaceName) {
@@ -883,9 +910,10 @@ export function entityToJSONSchema(
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig,
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   defaultIDType: 'number' | 'text',
+  typeStringDefinitions: Map<string, string>,
   collectionIDFieldTypes?: { [key: string]: 'number' | 'string' },
   i18n?: I18n,
-  opts: ConfigToJSONSchemaOptions = {},
+  forceInlineBlocks?: boolean,
 ): JSONSchema4 {
   if (!collectionIDFieldTypes) {
     collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
@@ -940,14 +968,15 @@ export function entityToJSONSchema(
 
   const isAuthCollection = 'auth' in entity && entity.auth
 
-  const fieldsSchema = fieldsToJSONSchema(
+  const fieldsSchema = fieldsToJSONSchema({
     collectionIDFieldTypes,
-    mutableFields,
-    interfaceNameDefinitions,
     config,
+    fields: mutableFields,
+    forceInlineBlocks,
     i18n,
-    opts,
-  )
+    interfaceNameDefinitions,
+    typeStringDefinitions,
+  })
 
   // Add collection property to auth collections
   if (isAuthCollection) {
@@ -1260,10 +1289,12 @@ export function configToJSONSchema(
   config: SanitizedConfig,
   defaultIDType?: 'number' | 'text',
   i18n?: I18n,
-  opts: ConfigToJSONSchemaOptions = {},
-): JSONSchema4 {
+  { forceInlineBlocks }: ConfigToJSONSchemaOptions = {},
+): { jsonSchema: JSONSchema4; typeStringDefinitions: Map<string, string> } {
   // a mutable Map to store custom top-level `interfaceName` types. Fields with an `interfaceName` property will be moved to the top-level definitions here
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
+  // a mutable Map for raw TS source to be appended to `payload-types.ts`.
+  const typeStringDefinitions: Map<string, string> = new Map()
 
   //  Used for relationship fields, to determine whether to use a string or number type for the ID.
   const collectionIDFieldTypes = getCollectionIDFieldTypes({
@@ -1292,9 +1323,10 @@ export function configToJSONSchema(
         entity,
         interfaceNameDefinitions,
         defaultIDType!,
+        typeStringDefinitions,
         collectionIDFieldTypes,
         i18n,
-        opts,
+        forceInlineBlocks,
       )
       const select = fieldsToSelectJSONSchema({
         config,
@@ -1323,9 +1355,10 @@ export function configToJSONSchema(
   const widgetSchemas = generateWidgetSchemas({
     collectionIDFieldTypes,
     config,
+    forceInlineBlocks,
     i18n,
     interfaceNameDefinitions,
-    opts,
+    typeStringDefinitions,
   })
 
   const authOperationDefinitions = [...config.collections]
@@ -1344,6 +1377,7 @@ export function configToJSONSchema(
         config.jobs,
         interfaceNameDefinitions,
         collectionIDFieldTypes,
+        typeStringDefinitions,
         i18n,
       )
     : {}
@@ -1356,14 +1390,15 @@ export function configToJSONSchema(
   }
   if (config?.blocks?.length) {
     for (const block of config.blocks) {
-      const blockFieldSchemas = fieldsToJSONSchema(
+      const blockFieldSchemas = fieldsToJSONSchema({
         collectionIDFieldTypes,
-        block.flattenedFields,
-        interfaceNameDefinitions,
         config,
+        fields: block.flattenedFields,
+        forceInlineBlocks,
         i18n,
-        opts,
-      )
+        interfaceNameDefinitions,
+        typeStringDefinitions,
+      })
 
       const blockSchema: JSONSchema4 = {
         type: 'object',
@@ -1459,5 +1494,5 @@ export function configToJSONSchema(
     }
   }
 
-  return jsonSchema
+  return { jsonSchema, typeStringDefinitions }
 }

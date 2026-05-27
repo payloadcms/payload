@@ -14,6 +14,7 @@ import type {
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { RequestContext, TypedFallbackLocale } from '../index.js'
 import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
+import type { FieldsToJSONSchemaArgs } from '../utilities/configToJSONSchema.js'
 import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
 
@@ -249,17 +250,15 @@ type RichTextAdapterBase<
    * `json-schema-to-typescript` which is used to generate types for this richtext field
    * payload-types.ts)
    */
-  jsonSchema?: (args: {
-    collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
-    config?: SanitizedConfig
-    field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
-    i18n?: I18n
-    /**
-     * Allows you to define new top-level interfaces that can be re-used in the output schema.
-     */
-    interfaceNameDefinitions: Map<string, JSONSchema4>
-    isRequired: boolean
-  }) => JSONSchema4
+  jsonSchema?: (
+    args: Pick<
+      FieldsToJSONSchemaArgs,
+      'collectionIDFieldTypes' | 'config' | 'i18n' | 'interfaceNameDefinitions' | 'typeStringDefinitions'
+    > & {
+      field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+      isRequired: boolean
+    },
+  ) => JSONSchema4
   /**
    * Provide validation function for the richText field. This function is run the same way
    * as other field validation functions.
