@@ -57,7 +57,6 @@ export { DateCell } from '../../elements/Table/DefaultCell/fields/Date/index.js'
 export { TableSection } from '../../elements/TableSection/index.js'
 export type {
   TableSectionContentProps,
-  TableSectionFooterProps,
   TableSectionHeaderProps,
   TableSectionProps,
 } from '../../elements/TableSection/index.js'
@@ -173,6 +172,8 @@ export { NoListResults } from '../../elements/NoListResults/index.js'
 export { NavContext, NavProvider, useNav } from '../../elements/Nav/context.js'
 export { NavGroup } from '../../elements/NavGroup/index.js'
 export { Pagination } from '../../elements/Pagination/index.js'
+export { SimplePagination } from '../../elements/Pagination/SimplePagination/index.js'
+export type { SimplePaginationProps } from '../../elements/Pagination/SimplePagination/index.js'
 export { PerPage } from '../../elements/PerPage/index.js'
 export { Pill } from '../../elements/Pill/index.js'
 import * as PopupList from '../../elements/Popup/PopupButtonList/index.js'

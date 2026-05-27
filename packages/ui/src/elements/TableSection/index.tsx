@@ -21,11 +21,6 @@ export type TableSectionContentProps = {
   className?: string
 }
 
-export type TableSectionFooterProps = {
-  children: React.ReactNode
-  className?: string
-}
-
 export function TableSectionRoot({
   children,
   className,
@@ -56,15 +51,8 @@ export function TableSectionContent({ children, className }: TableSectionContent
   )
 }
 
-export function TableSectionFooter({ children, className }: TableSectionFooterProps) {
-  return (
-    <div className={[`${baseClass}__footer`, className].filter(Boolean).join(' ')}>{children}</div>
-  )
-}
-
 // Compound component for client usage
 export const TableSection = Object.assign(TableSectionRoot, {
   Content: TableSectionContent,
-  Footer: TableSectionFooter,
   Header: TableSectionHeader,
 })

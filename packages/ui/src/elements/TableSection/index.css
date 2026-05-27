@@ -35,10 +35,6 @@
     padding-bottom: var(--spacer-2);
   }
 
-  .table-section__footer {
-    padding: var(--spacer-2) var(--gutter-h);
-  }
-
   .table-section__divider {
     display: none;
     height: var(--spacer-2);
