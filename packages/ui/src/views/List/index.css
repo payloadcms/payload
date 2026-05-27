@@ -97,7 +97,7 @@
 
     .collection-list .table::after {
       content: '';
-      height: 1px;
+      height: var(--stroke-width-small);
       padding-right: var(--gutter-h);
     }
   }

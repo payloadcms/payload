@@ -152,7 +152,7 @@
       height: var(--spacer-5);
       line-height: var(--text-body-medium-line-height);
       vertical-align: middle;
-      border-right: 1px solid var(--color-border);
+      border-right: var(--stroke-width-small) solid var(--color-border);
 
       &:last-child {
         border-right: none;
@@ -185,11 +185,11 @@
     }
 
     tbody td {
-      border-top: 1px solid var(--color-border);
+      border-top: var(--stroke-width-small) solid var(--color-border);
     }
 
     th {
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: var(--stroke-width-small) solid var(--color-border);
     }
   }
 

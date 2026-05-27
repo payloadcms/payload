@@ -16,7 +16,7 @@
     border: none;
     cursor: pointer;
     border-radius: var(--radius-small);
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
 
     &:hover,
     &:focus-visible {
@@ -109,7 +109,7 @@
 
   .hierarchy-tables__section-title {
     margin: 0;
-    font-weight: 500;
+    font-weight: var(--text-body-medium-strong-font-weight);
     color: var(--color-text);
   }
 
