@@ -15,6 +15,12 @@
       margin-block: var(--spacer-1);
       padding: var(--spacer-2);
 
+      &[data-match-type] {
+        .lexical-upload-diff__thumbnail {
+          background-color: transparent;
+        }
+      }
+
       &[data-match-type='create'] {
         background-color: var(--diff-create-parent-bg);
         outline-color: var(--diff-create-pill-border);
@@ -26,10 +32,6 @@
 
         .lexical-upload-diff__meta {
           color: var(--diff-create-parent-color);
-        }
-
-        .lexical-upload-diff__thumbnail {
-          background-color: transparent;
         }
       }
 
@@ -48,10 +50,6 @@
         .lexical-upload-diff__meta {
           text-decoration-line: line-through;
           color: var(--diff-delete-parent-color);
-        }
-
-        .lexical-upload-diff__thumbnail {
-          background-color: transparent;
         }
       }
     }

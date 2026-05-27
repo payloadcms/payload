@@ -2,6 +2,7 @@
   .html-diff {
     display: flex;
     flex-direction: column;
+    overflow: clip;
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
@@ -82,8 +83,8 @@
       position: absolute;
       top: 0;
       bottom: 0;
-      left: calc(var(--spacer-2-5) * -1);
-      right: calc(var(--spacer-2-5) * -1);
+      left: -9999px;
+      right: -9999px;
       display: block;
       background-color: var(--diff-create-parent-bg);
       color: var(--diff-create-parent-color);
@@ -100,8 +101,8 @@
       position: absolute;
       top: 0;
       bottom: 0;
-      left: calc(var(--spacer-2-5) * -1);
-      right: calc(var(--spacer-2-5) * -1);
+      left: -9999px;
+      right: -9999px;
       display: block;
       background-color: var(--diff-delete-parent-bg);
       color: var(--diff-delete-parent-color);

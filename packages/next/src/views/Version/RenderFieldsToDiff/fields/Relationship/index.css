@@ -31,7 +31,10 @@
 
   .relationship-diff-container--hasOne
     .field-diff-content
-    > .html-diff:has(.relationship-diff[data-match-type='create'])::before {
+    > .html-diff:is(
+      :has(.relationship-diff[data-match-type='create']),
+      :has(.relationship-diff[data-match-type='delete'])
+    )::before {
     content: '';
     position: absolute;
     top: calc(var(--spacer-2) * -1);
@@ -39,22 +42,19 @@
     left: calc(var(--spacer-2-5) * -1);
     right: calc(var(--spacer-2-5) * -1);
     display: block;
-    background-color: var(--diff-create-parent-bg);
     z-index: -1;
   }
 
   .relationship-diff-container--hasOne
     .field-diff-content
+    > .html-diff:has(.relationship-diff[data-match-type='create'])::before {
+    background-color: var(--diff-create-parent-bg);
+  }
+
+  .relationship-diff-container--hasOne
+    .field-diff-content
     > .html-diff:has(.relationship-diff[data-match-type='delete'])::before {
-    content: '';
-    position: absolute;
-    top: calc(var(--spacer-2) * -1);
-    bottom: calc(var(--spacer-2) * -1);
-    left: calc(var(--spacer-2-5) * -1);
-    right: calc(var(--spacer-2-5) * -1);
-    display: block;
     background-color: var(--diff-delete-parent-bg);
-    z-index: -1;
   }
 
   .relationship-diff-container--hasMany .field-diff-content {

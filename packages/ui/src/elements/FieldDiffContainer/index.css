@@ -19,17 +19,19 @@
 
   .field-diff-content {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: calc(var(--spacer-2-5) * 2);
+    grid-template-columns: var(--field-diff-columns, minmax(0, 1fr) minmax(0, 1fr));
     background: var(--color-bg-secondary);
-    padding: var(--spacer-2) var(--spacer-2-5);
+    padding-block: var(--spacer-2);
     border-radius: var(--radius-medium);
-    overflow: clip;
+  }
+
+  .field-diff-content > * {
+    padding-inline: var(--spacer-2-5);
   }
 
   @media (max-width: 768px) {
-    .field-diff-content {
-      grid-template-columns: 1fr !important;
+    .field-diff-container .field-diff-content {
+      grid-template-columns: 1fr;
       gap: calc(var(--stroke-width-small) * 2);
       padding: 0;
       background: transparent;

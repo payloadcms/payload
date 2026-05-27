@@ -185,9 +185,11 @@ export const HasManyUploadDiff: React.FC<{
       >
         <div
           className="field-diff-content"
-          style={{
-            gridTemplateColumns: `calc(50% - ${uploadGutterOffset}px - var(--spacer-2-5)) calc(50% + ${uploadGutterOffset}px - var(--spacer-2-5))`,
-          }}
+          style={
+            {
+              '--field-diff-columns': `calc(50% - ${uploadGutterOffset}px - var(--spacer-2-5)) calc(50% + ${uploadGutterOffset}px - var(--spacer-2-5))`,
+            } as React.CSSProperties
+          }
         >
           {From}
           {To}

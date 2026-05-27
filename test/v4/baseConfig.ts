@@ -74,8 +74,12 @@ import {
   codeContent,
   getRichTextContent,
   getTypographyContent,
+  getUpdatedRichTextContent,
+  getUpdatedTypographyContent,
   listsContent,
   tableContent,
+  updatedCodeContent,
+  updatedListsContent,
 } from './seed/richTextData.js'
 
 export const collections: CollectionConfig[] = [
@@ -253,7 +257,7 @@ export const baseConfig: Partial<Config> = {
 
       const richTextContent = getRichTextContent(formattedUploadID, formattedUserID)
 
-      await payload.create({
+      const richTextDoc = await payload.create({
         collection: richTextFieldsSlug,
         data: {
           title: 'Data harvest \u2013 how AI and sensors are revolutionizing farming',
@@ -262,6 +266,18 @@ export const baseConfig: Partial<Config> = {
           typography: getTypographyContent(formattedUserID),
           table: tableContent,
           code: codeContent,
+        },
+      })
+
+      // Create a second version with updated content for diff testing
+      await payload.update({
+        id: richTextDoc.id,
+        collection: richTextFieldsSlug,
+        data: {
+          content: getUpdatedRichTextContent(formattedUploadID, formattedUserID),
+          lists: updatedListsContent,
+          typography: getUpdatedTypographyContent(formattedUserID),
+          code: updatedCodeContent,
         },
       })
     }
