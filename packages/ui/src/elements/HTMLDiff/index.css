@@ -19,7 +19,8 @@
     margin-bottom: 0;
   }
 
-  /* Apply background color to parents that have children with diffs */
+  /* Apply background color to parents that have children with diffs.
+     ::before extends full-width via -100vw, clipped by overflow:clip on .html-diff */
   .html-diff p:not([data-enable-match='false']):has([data-match-type='create']),
   .html-diff h1:not([data-enable-match='false']):has([data-match-type='create']),
   .html-diff h2:not([data-enable-match='false']):has([data-match-type='create']),
@@ -28,21 +29,20 @@
   .html-diff h5:not([data-enable-match='false']):has([data-match-type='create']),
   .html-diff h6:not([data-enable-match='false']):has([data-match-type='create']),
   .html-diff blockquote:not([data-enable-match='false']):has([data-match-type='create']),
-  .html-diff pre:not([data-enable-match='false']):has([data-match-type='create']) {
+  .html-diff pre:not([data-enable-match='false']):has([data-match-type='create']),
+  .html-diff li:not([data-enable-match='false']):has([data-match-type='create']) {
     position: relative;
     z-index: 1;
-    flex: 1;
 
     &::before {
       content: '';
       position: absolute;
-      top: calc(var(--spacer-2) * -1);
-      bottom: calc(var(--spacer-2) * -1);
-      left: calc(var(--spacer-2-5) * -1);
-      right: calc(var(--spacer-2-5) * -1);
-      display: block;
+      top: 50%;
+      left: -100vw;
+      right: -100vw;
+      min-height: max(100%, var(--spacer-5));
+      transform: translateY(-50%);
       background-color: var(--diff-create-parent-bg);
-      color: var(--diff-create-parent-color);
       z-index: -1;
     }
   }
@@ -55,43 +55,7 @@
   .html-diff h5:not([data-enable-match='false']):has([data-match-type='delete']),
   .html-diff h6:not([data-enable-match='false']):has([data-match-type='delete']),
   .html-diff blockquote:not([data-enable-match='false']):has([data-match-type='delete']),
-  .html-diff pre:not([data-enable-match='false']):has([data-match-type='delete']) {
-    position: relative;
-    z-index: 1;
-    flex: 1;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: calc(var(--spacer-2) * -1);
-      bottom: calc(var(--spacer-2) * -1);
-      left: calc(var(--spacer-2-5) * -1);
-      right: calc(var(--spacer-2-5) * -1);
-      display: block;
-      background-color: var(--diff-delete-parent-bg);
-      color: var(--diff-delete-parent-color);
-      z-index: -1;
-    }
-  }
-
-  .html-diff li:not([data-enable-match='false']):has([data-match-type='create']) {
-    position: relative;
-    z-index: 1;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: -9999px;
-      right: -9999px;
-      display: block;
-      background-color: var(--diff-create-parent-bg);
-      color: var(--diff-create-parent-color);
-      z-index: -1;
-    }
-  }
-
+  .html-diff pre:not([data-enable-match='false']):has([data-match-type='delete']),
   .html-diff li:not([data-enable-match='false']):has([data-match-type='delete']) {
     position: relative;
     z-index: 1;
@@ -99,13 +63,12 @@
     &::before {
       content: '';
       position: absolute;
-      top: 0;
-      bottom: 0;
-      left: -9999px;
-      right: -9999px;
-      display: block;
+      top: 50%;
+      left: -100vw;
+      right: -100vw;
+      min-height: max(100%, var(--spacer-5));
+      transform: translateY(-50%);
       background-color: var(--diff-delete-parent-bg);
-      color: var(--diff-delete-parent-color);
       z-index: -1;
     }
   }

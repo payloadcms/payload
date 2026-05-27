@@ -95,21 +95,24 @@
     }
 
     hr {
-      margin: var(--spacer-3) 0;
+      margin: var(--spacer-2-5) 0;
       border: none;
       border-top: var(--stroke-width-small) solid var(--color-border);
     }
 
-    ul,
     ol {
       padding: 0;
-      margin-block: var(--spacer-3);
+      margin-block: var(--spacer-2);
+    }
+
+    ul {
+      padding-left: 0;
     }
 
     li {
       font-family: var(--text-body-large-font-family);
       font-size: var(--text-body-large-font-size);
-      margin: 0 0 var(--spacer-3) var(--spacer-6);
+      margin: 0 0 var(--spacer-1) var(--spacer-4);
     }
   }
 }
