@@ -12,8 +12,8 @@ import {
   parseCookies,
 } from 'payload'
 
+import { nextServerAdapter } from '../adapters/server.js'
 import { getRequestLocale } from './getRequestLocale.js'
-import { nextServerAdapter } from './nextServerAdapter.js'
 import { selectiveCache } from './selectiveCache.js'
 
 type PartialResult = {
