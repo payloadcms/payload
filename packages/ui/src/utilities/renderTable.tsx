@@ -25,7 +25,6 @@ import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumn
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import {
   TableSectionContent,
-  TableSectionFooter,
   TableSectionHeader,
   TableSectionRoot,
 } from '../elements/TableSection/index.js'
@@ -279,17 +278,11 @@ export const renderTable = ({
                 groupByValue={groupByValue}
                 heading={heading}
               />
+              <GroupByPageControls data={data} groupByValue={groupByValue} />
             </TableSectionHeader>
             <TableSectionContent>
               <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
             </TableSectionContent>
-            <TableSectionFooter>
-              <GroupByPageControls
-                collectionConfig={clientCollectionConfig}
-                data={data}
-                groupByValue={groupByValue}
-              />
-            </TableSectionFooter>
           </SelectionProvider>
         </TableSectionRoot>
       ),
