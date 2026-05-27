@@ -42,10 +42,6 @@ import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/ind
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
 
-  if (configToSanitize?.compatibility?.allowLocalizedWithinLocalized) {
-    process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized = 'true'
-  }
-
   // default logging level will be 'error' if not provided
   sanitizedConfig.loggingLevels = {
     Forbidden: 'info',
@@ -457,6 +453,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   if (config.serverURL !== '') {
     config.csrf!.push(config.serverURL!)
+  }
+
+  if (!config.storage) {
+    config.storage = []
   }
 
   if (!config.upload) {

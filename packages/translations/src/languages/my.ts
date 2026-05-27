@@ -10,13 +10,14 @@ export const myTranslations: DefaultTranslationsObject = {
     apiKey: 'API Key',
     authenticated: 'အတည်ပြုပြီး',
     backToLogin: 'အကောင့်ထဲ ပြန်ဝင်မည်။',
-    beginCreateFirstUser: 'စတင်နိုင်ရန် ပထမဦးစွာ အသုံးပြုသူအား ဖန်တီးပါ။',
+    beginCreateFirstUser: 'အသုံးပြုသူတစ်ဦးကို တည်ဆောက်၍ စတင်ပါ။',
     changePassword: 'စကားဝှက် ပြောင်းလဲမည်။',
     checkYourEmailForPasswordReset:
       'Jika alamat e-mel dikaitkan dengan akaun, anda akan menerima arahan untuk menetapkan semula kata laluan anda sebentar lagi. Sila semak folder spam atau junk mail anda jika anda tidak melihat e-mel di kotak masuk anda.',
     confirmGeneration: 'Generation အတည်ပြု',
     confirmPassword: 'စကားဝှက်အား ထပ်မံ ရိုက်ထည့်ပါ။',
     createFirstUser: 'ပထမဆုံး အသုံးပြုသူကို ဖန်တီးပါ။',
+    createUser: 'အသုံးပြုသူဖန်တီးပါ',
     emailNotValid: 'ထည့်သွင်းထားသော အီးမေလ်မှာ မှားယွင်းနေပါသည်။',
     emailOrUsername: 'E-mel atau Nama Pengguna',
     emailSent: 'မေးလ် ပို့ထားပါသည်။',
@@ -394,6 +395,7 @@ export const myTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       '{{count}} {{label}} telah berjaya dipadamkan secara kekal.',
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
+    perPageLabel: 'တစ်အုပ်စာမျက်နှာ။',
     previous: 'ယခင်',
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',

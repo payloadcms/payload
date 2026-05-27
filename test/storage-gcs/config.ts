@@ -35,7 +35,7 @@ export default buildConfigWithDefaults({
       },
     })
   },
-  plugins: [
+  storage: [
     gcsStorage({
       collections: {
         [mediaSlug]: true,

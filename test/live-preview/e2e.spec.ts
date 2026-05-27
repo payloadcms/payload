@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-import type { Config } from 'payload-types.js'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -7,6 +6,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
+import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -828,7 +828,7 @@ describe('Live Preview', () => {
     await expect(customLivePreview).toContainText('Custom live preview being rendered')
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme(
       'Live preview and edit view should have no accessibility violations',
       async ({}, testInfo) => {

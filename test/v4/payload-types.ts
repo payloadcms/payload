@@ -82,6 +82,7 @@ export interface Config {
     'join-posts': JoinPost;
     'json-fields': JsonField;
     'number-fields': NumberField;
+    orderable: Orderable;
     'password-fields': PasswordField;
     'point-fields': PointField;
     'radio-fields': RadioField;
@@ -100,6 +101,7 @@ export interface Config {
     'draft-versions': DraftVersion;
     autosave: Autosave;
     rubbish: Rubbish;
+    'unauthorized-test': UnauthorizedTest;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -135,6 +137,7 @@ export interface Config {
     'join-posts': JoinPostsSelect<false> | JoinPostsSelect<true>;
     'json-fields': JsonFieldsSelect<false> | JsonFieldsSelect<true>;
     'number-fields': NumberFieldsSelect<false> | NumberFieldsSelect<true>;
+    orderable: OrderableSelect<false> | OrderableSelect<true>;
     'password-fields': PasswordFieldsSelect<false> | PasswordFieldsSelect<true>;
     'point-fields': PointFieldsSelect<false> | PointFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
@@ -153,6 +156,7 @@ export interface Config {
     'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
     rubbish: RubbishSelect<false> | RubbishSelect<true>;
+    'unauthorized-test': UnauthorizedTestSelect<false> | UnauthorizedTestSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -199,6 +203,7 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  roles?: ('admin' | 'user')[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -716,6 +721,18 @@ export interface NumberField {
    * Listed prices in USD, excluding tax
    */
   pricesReadOnly?: number[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable".
+ */
+export interface Orderable {
+  id: string;
+  _order?: string | null;
+  title: string;
+  priority?: ('high' | 'medium' | 'low') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1256,6 +1273,16 @@ export interface Rubbish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unauthorized-test".
+ */
+export interface UnauthorizedTest {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1339,6 +1366,10 @@ export interface PayloadLockedDocument {
         value: string | NumberField;
       } | null)
     | ({
+        relationTo: 'orderable';
+        value: string | Orderable;
+      } | null)
+    | ({
         relationTo: 'password-fields';
         value: string | PasswordField;
       } | null)
@@ -1409,6 +1440,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'rubbish';
         value: string | Rubbish;
+      } | null)
+    | ({
+        relationTo: 'unauthorized-test';
+        value: string | UnauthorizedTest;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1506,6 +1541,7 @@ export interface PayloadQueryPreset {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  roles?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1891,6 +1927,17 @@ export interface NumberFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable_select".
+ */
+export interface OrderableSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  priority?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "password-fields_select".
  */
 export interface PasswordFieldsSelect<T extends boolean = true> {
@@ -2181,6 +2228,15 @@ export interface RubbishSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unauthorized-test_select".
+ */
+export interface UnauthorizedTestSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

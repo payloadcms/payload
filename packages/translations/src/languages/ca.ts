@@ -10,13 +10,14 @@ export const caTranslations: DefaultTranslationsObject = {
     apiKey: 'Clau API',
     authenticated: 'Autenticat',
     backToLogin: "Tornar a l'inici de sessió",
-    beginCreateFirstUser: 'Comença a crear el primer usuari',
+    beginCreateFirstUser: 'Creeu el vostre primer usuari per començar.',
     changePassword: 'Canviar contrasenya',
     checkYourEmailForPasswordReset:
       "Si l'adreça de correu electrònic està associada amb un compte, rebràs instruccions per restablir la teva contrasenya aviat. Si no trobes el correu electrònic a la safata d'entrada, revisa la carpeta de correu brossa o no desitjat.",
     confirmGeneration: 'Confirmar generació',
     confirmPassword: 'Confirma la contrasenya',
     createFirstUser: 'Crea el primer usuari',
+    createUser: 'Crear usuari',
     emailNotValid: 'El correu electrònic proporcionat no és vàlid',
     emailOrUsername: "Correu electrònic o nom d'usuari",
     emailSent: 'Correu electrònic enviat',
@@ -392,6 +393,7 @@ export const caTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       "S'ha eliminat permanentment {{count}} {{label}} amb èxit.",
     perPage: 'Per pagian: {{limit}}',
+    perPageLabel: 'Per pàgina:',
     previous: 'Previ',
     reindex: 'Reindexa',
     reindexingAll: 'Reindexa tots el {{collections}}.',

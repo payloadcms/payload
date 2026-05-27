@@ -17,6 +17,36 @@ Payload offers additional storage adapters to handle file uploads. These adapter
 | Uploadthing          | [`@payloadcms/storage-uploadthing`](https://github.com/payloadcms/payload/tree/main/packages/storage-uploadthing) |
 | R2                   | [`@payloadcms/storage-r2`](https://github.com/payloadcms/payload/tree/main/packages/storage-r2)                   |
 
+## Configuration
+
+Storage adapters are registered under the top-level `storage` key in your Payload config. This placement ensures that upload hooks, static file handlers, and presigned-URL endpoints are wired up before any plugin modifies the config.
+
+```ts
+import { s3Storage } from '@payloadcms/storage-s3'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  storage: [
+    s3Storage({
+      bucket: process.env.S3_BUCKET,
+      collections: { media: true },
+      config: { region: process.env.S3_REGION },
+    }),
+  ],
+  // ... rest of config
+})
+```
+
+<Banner type="info">
+  **Migrating from an older version?** If you previously placed storage adapter packages inside
+  `plugins`, run the codemod to migrate automatically:
+
+```sh
+npx @payloadcms/codemod --transform migrate-storage-adapters-to-config
+```
+
+</Banner>
+
 ## Vercel Blob Storage
 
 [`@payloadcms/storage-vercel-blob`](https://www.npmjs.com/package/@payloadcms/storage-vercel-blob)
@@ -41,7 +71,7 @@ import { MediaWithPrefix } from './collections/MediaWithPrefix'
 
 export default buildConfig({
   collections: [Media, MediaWithPrefix],
-  plugins: [
+  storage: [
     vercelBlobStorage({
       enabled: true, // Optional, defaults to true
       // Specify which collections should use Vercel Blob
@@ -96,7 +126,7 @@ import { MediaWithPrefix } from './collections/MediaWithPrefix'
 
 export default buildConfig({
   collections: [Media, MediaWithPrefix],
-  plugins: [
+  storage: [
     s3Storage({
       collections: {
         media: true,
@@ -158,7 +188,7 @@ import { s3Storage } from '@payloadcms/storage-s3'
 
 export default buildConfig({
   collections: [Media],
-  plugins: [
+  storage: [
     s3Storage({
       enabled: Boolean(process.env.R2_BUCKET),
       collections: {
@@ -225,7 +255,7 @@ import { MediaWithPrefix } from './collections/MediaWithPrefix'
 
 export default buildConfig({
   collections: [Media, MediaWithPrefix],
-  plugins: [
+  storage: [
     azureStorage({
       collections: {
         media: true,
@@ -279,7 +309,7 @@ import { MediaWithPrefix } from './collections/MediaWithPrefix'
 
 export default buildConfig({
   collections: [Media, MediaWithPrefix],
-  plugins: [
+  storage: [
     gcsStorage({
       collections: {
         media: true,
@@ -329,7 +359,7 @@ pnpm add @payloadcms/storage-uploadthing
 ```ts
 export default buildConfig({
   collections: [Media],
-  plugins: [
+  storage: [
     uploadthingStorage({
       collections: {
         media: true,
@@ -380,7 +410,7 @@ pnpm add @payloadcms/storage-r2
 ```ts
 export default buildConfig({
   collections: [Media],
-  plugins: [
+  storage: [
     r2Storage({
       collections: {
         media: true,
@@ -428,6 +458,9 @@ import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 export default buildConfig({
   plugins: [
+    // cloudStoragePlugin is a low-level building block — place it in plugins, not storage.
+    // The built-in adapter packages (s3Storage, gcsStorage, etc.) wrap this internally
+    // and are used via storage instead.
     cloudStoragePlugin({
       collections: {
         'my-collection-slug': {
@@ -486,16 +519,18 @@ Result: media-folder/user-123/image.jpg
 This is useful when you want a base folder structure (collection prefix) while still allowing per-document organization (document prefix).
 
 ```ts
-s3Storage({
-  collections: {
-    media: {
-      prefix: 'uploads', // All files go under uploads/
+storage: [
+  s3Storage({
+    collections: {
+      media: {
+        prefix: 'uploads', // All files go under uploads/
+      },
     },
-  },
-  useCompositePrefixes: true, // Document prefixes append to collection prefix
-  bucket: process.env.S3_BUCKET,
-  // ...
-})
+    useCompositePrefixes: true, // Document prefixes append to collection prefix
+    bucket: process.env.S3_BUCKET,
+    // ...
+  }),
+],
 ```
 
 ## Payload Access Control

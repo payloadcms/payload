@@ -27,7 +27,7 @@
   }
 
   .relationship__error-loading {
-    border: 1px solid var(--color-border-danger-strong);
+    border: var(--stroke-width-small) solid var(--color-border-danger-strong);
     min-height: var(--spacer-6);
     padding: var(--spacer-2) var(--spacer-3);
     background-color: var(--color-bg-danger);

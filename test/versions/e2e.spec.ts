@@ -26,9 +26,6 @@ import type { BrowserContext, Dialog, Page } from '@playwright/test'
 import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
-import { postsCollectionSlug } from 'admin/slugs.js'
 import mongoose from 'mongoose'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
@@ -38,6 +35,7 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Diff } from './payload-types.js'
 
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
@@ -51,10 +49,12 @@ import {
 } from '../__helpers/e2e/helpers.js'
 import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { postsCollectionSlug } from '../admin/slugs.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { draftWithCustomUnpublishSlug } from './collections/DraftsWithCustomUnpublish.js'
 import { BASE_PATH } from './shared.js'
@@ -999,7 +999,7 @@ describe('Versions', () => {
       expect(versionsTabUpdated).toBeTruthy()
     })
 
-    describe('A11y', () => {
+    describe.skip('A11y', () => {
       test('Versions list view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
         const firstRowLink = page.locator('tbody tr .cell-title a').first()

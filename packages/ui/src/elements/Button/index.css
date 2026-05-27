@@ -14,7 +14,7 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
     cursor: pointer;
     text-decoration: none;
     color: inherit;
@@ -53,7 +53,7 @@
   .btn.btn--style-secondary {
     color: var(--color-text);
     background-color: var(--color-bg);
-    border: 1px solid var(--special-border-translucent);
+    border: var(--stroke-width-small) solid var(--special-border-translucent);
 
     &:hover:not(.btn--disabled) {
       background-color: var(--color-bg-transparent-hover);
@@ -139,6 +139,23 @@
     }
   }
 
+  /* Selected state - overrides hover/active for supported button styles */
+  .btn.btn--style-secondary.btn--selected,
+  .btn.btn--style-secondary.btn--selected:hover,
+  .btn.btn--style-secondary.btn--selected:active,
+  .btn.btn--style-ghost.btn--selected,
+  .btn.btn--style-ghost.btn--selected:hover,
+  .btn.btn--style-ghost.btn--selected:active {
+    background-color: var(--color-bg-selected);
+    color: var(--color-text-selected);
+  }
+
+  .btn.btn--style-secondary.btn--selected,
+  .btn.btn--style-secondary.btn--selected:hover,
+  .btn.btn--style-secondary.btn--selected:active {
+    border-color: transparent;
+  }
+
   /* Icon */
 
   .btn__icon {
@@ -178,6 +195,10 @@
     .btn__content {
       flex-direction: row-reverse;
     }
+  }
+
+  .btn__label {
+    white-space: nowrap;
   }
 
   /* Sizes */
@@ -335,7 +356,7 @@
     .popup-button {
       color: var(--color-text);
       background-color: var(--color-bg);
-      border: 1px solid var(--special-border-translucent);
+      border: var(--stroke-width-small) solid var(--special-border-translucent);
 
       &:hover,
       &:active {

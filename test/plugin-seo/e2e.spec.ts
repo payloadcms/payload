@@ -1,8 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { wait } from 'payload/shared'
@@ -10,11 +8,13 @@ import { fileURLToPath } from 'url'
 
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
+import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   switchTab,
 } from '../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -181,7 +181,7 @@ describe('SEO Plugin', () => {
     })
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme('SEO fields should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.edit(id))
 

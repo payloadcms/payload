@@ -8,7 +8,7 @@ import { fetchLatestVersion, fetchVersions } from '../Version/fetchVersions.js'
 import { VersionDrawerCreatedAtCell } from '../Version/SelectComparison/VersionDrawer/CreatedAtCell.js'
 import { buildVersionColumns } from './buildColumns.js'
 import { VersionsViewClient } from './index.client.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'versions'
 
@@ -176,7 +176,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
         view={i18n.t('version:versions')}
       />
       <main className={baseClass}>
-        <GutterComponent className={`${baseClass}__wrap`}>
+        <div className={`${baseClass}__wrap`}>
           <ListQueryProvider
             data={versionsData}
             modifySearchParams
@@ -193,7 +193,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
               paginationLimits={collectionConfig?.admin?.pagination?.limits}
             />
           </ListQueryProvider>
-        </GutterComponent>
+        </div>
       </main>
     </React.Fragment>
   )

@@ -1,6 +1,6 @@
 @layer payload-default {
   .render-title {
-    --render-title-letter-spacing: -0.408px;
+    --render-title-letter-spacing: var(--text-heading-large-letter-spacing);
 
     display: inline-flex;
     align-items: center;

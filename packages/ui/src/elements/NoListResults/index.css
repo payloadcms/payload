@@ -5,7 +5,7 @@
     align-items: center;
     justify-content: center;
     padding: var(--spacer-3) var(--spacer-2-5);
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
     text-align: center;
     gap: var(--spacer-2);

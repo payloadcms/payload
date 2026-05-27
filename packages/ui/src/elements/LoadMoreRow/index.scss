@@ -25,6 +25,10 @@
       margin: 0;
       color: var(--theme-elevation-400);
       white-space: nowrap;
+
+      display: flex;
+      align-items: center;
+      gap: var(--spacer-1);
     }
 
     &__button {

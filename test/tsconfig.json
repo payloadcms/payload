@@ -5,7 +5,6 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noEmit": true,
-    "rootDir": ".",
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -28,7 +27,6 @@
         "name": "@payloadcms/typescript-plugin"
       }
     ],
-    "baseUrl": ".",
     "paths": {
       "@payload-config": ["./tags/config.ts"]
     }

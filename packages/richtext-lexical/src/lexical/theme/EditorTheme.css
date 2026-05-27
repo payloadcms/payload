@@ -6,7 +6,7 @@
     --lexical-h1-font-size: 2rem; /* 32px */
     --lexical-h1-letter-spacing: -0.544px;
     --lexical-h2-font-size: 1.5rem; /* 24px */
-    --lexical-h2-letter-spacing: -0.408px;
+    --lexical-h2-letter-spacing: var(--text-heading-large-letter-spacing);
     --lexical-h2-line-height: 2rem; /* 32px */
     --lexical-h3-font-size: 1.25rem; /* 20px */
     --lexical-h3-letter-spacing: -0.34px;
@@ -331,7 +331,7 @@
   }
 
   .LexicalEditorTheme__listItemUnchecked:before {
-    border: 1px solid var(--color-text);
+    border: var(--stroke-width-small) solid var(--color-text);
     background-color: var(--color-bg);
   }
 

@@ -2,7 +2,6 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
-import { adminRoute } from 'shared.js'
 import { fileURLToPath } from 'url'
 
 import { login } from '../__helpers/e2e/auth/login.js'
@@ -15,6 +14,7 @@ import {
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { adminRoute } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -102,7 +102,7 @@ test.describe('Admin Panel (Root)', () => {
     const textField = page.locator('#field-text')
     await textField.fill('test')
     await saveDocAndAssert(page)
-    await page.locator('.doc-controls__popup >> .popup-button').click()
+    await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
     await expect(page.locator('#copy-locale-data__button')).toBeHidden()
   })
 

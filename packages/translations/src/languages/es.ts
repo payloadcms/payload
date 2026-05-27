@@ -10,13 +10,14 @@ export const esTranslations: DefaultTranslationsObject = {
     apiKey: 'Clave API',
     authenticated: 'Autenticado',
     backToLogin: 'Regresar al inicio de sesión',
-    beginCreateFirstUser: 'Para empezar, crea tu primer usuario.',
+    beginCreateFirstUser: 'Cree su primer usuario para comenzar.',
     changePassword: 'Cambiar contraseña',
     checkYourEmailForPasswordReset:
       'Si la dirección de correo electrónico está asociada a una cuenta, recibirás instrucciones para restablecer tu contraseña en breve. Por favor, revisa tu carpeta de spam o correo no deseado si no ves el correo en tu bandeja de entrada.',
     confirmGeneration: 'Confirmar Generación',
     confirmPassword: 'Confirmar Contraseña',
     createFirstUser: 'Crear el primer usuario',
+    createUser: 'Crear usuario',
     emailNotValid: 'El correo proporcionado es inválido',
     emailOrUsername: 'Correo electrónico o nombre de usuario',
     emailSent: 'Correo Enviado',
@@ -395,6 +396,7 @@ export const esTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       'Se ha eliminado permanentemente {{count}} {{label}} con éxito.',
     perPage: 'Por página: {{limit}}',
+    perPageLabel: 'Por página:',
     previous: 'Anterior',
     reindex: 'Reindexar',
     reindexingAll: 'Reindexando todas las {{collections}}.',

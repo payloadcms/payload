@@ -1336,7 +1336,7 @@ async function openAssignTenantModal({
 
   // Open the assign tenant modal
   const docControlsPopup = page.locator('.popup__content')
-  const docControlsButton = page.locator('.doc-controls__popup .popup-button')
+  const docControlsButton = page.locator('.doc-controls__popup .popup__trigger-wrap button')
   await expect(docControlsButton).toBeVisible()
   await docControlsButton.click()
 

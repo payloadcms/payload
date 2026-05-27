@@ -4,38 +4,25 @@ import type { ChangeEvent, KeyboardEvent } from 'react'
 
 import React, { useCallback } from 'react'
 
-import { FilterIcon } from '../../../icons/Filter/index.js'
 import { SearchIcon } from '../../../icons/Search/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { CheckboxPopup } from '../../CheckboxPopup/index.js'
 
 const baseClass = 'hierarchy-search-input'
 
-type FilterOption = {
-  label: string
-  value: string
-}
-
 type HierarchySearchInputProps = {
-  collectionSpecificOptions?: FilterOption[]
   onChange: (value: string) => void
   onClear: () => void
-  onFilterChange?: (values: string[]) => void
   onSearch: (value: string) => void
   placeholder?: string
-  selectedFilters?: string[]
   value: string
 }
 
 export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
-  collectionSpecificOptions,
   onChange,
   onClear,
-  onFilterChange,
   onSearch,
   placeholder,
-  selectedFilters = [],
   value,
 }) => {
   const { t } = useTranslation()
@@ -59,15 +46,6 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
     onClear()
   }, [onClear])
 
-  const handleFilterChange = useCallback(
-    ({ selectedValues }: { selectedValues: string[] }) => {
-      onFilterChange?.(selectedValues)
-    },
-    [onFilterChange],
-  )
-
-  const hasFilters = collectionSpecificOptions && collectionSpecificOptions.length > 0
-  const hasActiveFilters = selectedFilters.length > 0
   const hasValue = value.length > 0
 
   return (
@@ -84,38 +62,16 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
         type="text"
         value={value}
       />
-      <div className={`${baseClass}__actions`}>
-        {hasValue && (
-          <button
-            aria-label={t('general:clear')}
-            className={`${baseClass}__clear`}
-            onClick={handleClear}
-            type="button"
-          >
-            <XIcon />
-          </button>
-        )}
-        {hasFilters && (
-          <CheckboxPopup
-            Button={
-              <div
-                aria-label={t('general:filter')}
-                className={[
-                  `${baseClass}__filter`,
-                  hasActiveFilters && `${baseClass}__filter--active`,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                <FilterIcon />
-              </div>
-            }
-            onChange={handleFilterChange}
-            options={collectionSpecificOptions}
-            selectedValues={selectedFilters}
-          />
-        )}
-      </div>
+      {hasValue && (
+        <button
+          aria-label={t('general:clear')}
+          className={`${baseClass}__clear`}
+          onClick={handleClear}
+          type="button"
+        >
+          <XIcon />
+        </button>
+      )}
     </div>
   )
 }
