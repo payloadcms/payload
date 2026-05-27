@@ -203,6 +203,7 @@ const RootLayoutContent = async ({
                 i18n: req.i18n,
                 payload: req.payload,
                 permissions,
+                server: req.server,
                 user: req.user,
               }}
             >

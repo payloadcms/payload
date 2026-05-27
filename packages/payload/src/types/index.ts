@@ -3,6 +3,7 @@ import type DataLoader from 'dataloader'
 import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
 
+import type { ServerAdapter } from '../admin/adapters.js'
 import type {
   DataFromCollectionSlug,
   QueryDraftDataFromCollectionSlug,
@@ -74,6 +75,15 @@ export type CustomPayloadRequestProperties = {
    * { collection: 'posts', id: '123' }
    */
   routeParams?: Record<string, unknown>
+  /**
+   * Framework abstraction for server-only navigation, cookies, and headers APIs.
+   * Populated by the framework adapter (e.g. `@payloadcms/next`). Plugins that
+   * have access to `req` should call methods here (`req.server.unauthorized()`,
+   * `req.server.redirect(...)`) instead of importing from `next/navigation` or
+   * `next/headers` directly. Optional because non-framework contexts (jobs,
+   * scripts, tests) construct requests without a server adapter.
+   */
+  server?: ServerAdapter
   /** Translate function - duplicate of i18n.t */
   t: TFunction
   /**
