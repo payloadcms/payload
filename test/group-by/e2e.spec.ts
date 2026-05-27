@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { devUser } from '../credentials.js'
 import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -30,6 +29,7 @@ import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { devUser } from '../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   openCreatePreset,
@@ -141,10 +141,10 @@ test.describe('Group By', () => {
 
     await expect(page.locator('.table-wrap')).toHaveCount(2)
 
-    await expect(page.locator('.group-by-header')).toHaveCount(2)
+    await expect(page.locator('.table-section__header')).toHaveCount(2)
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
 
     await expect(page.locator('.table-wrap').first().locator('tbody tr')).toHaveCount(10)
@@ -158,7 +158,7 @@ test.describe('Group By', () => {
     await expect(table1CategoryCells.first()).toHaveText(/Category 1/)
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 2') }),
     ).toBeVisible()
 
     const table2 = page.locator('.table-wrap').nth(1)
@@ -209,7 +209,7 @@ test.describe('Group By', () => {
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
     await expect(page.locator('.table-wrap')).toHaveCount(2)
-    await expect(page.locator('.group-by-header')).toHaveCount(2)
+    await expect(page.locator('.table-section__header')).toHaveCount(2)
 
     await clearGroupBy(page)
   })
@@ -223,7 +223,7 @@ test.describe('Group By', () => {
     })
 
     await expect(page.locator('.table-wrap')).toHaveCount(2)
-    await expect(page.locator('.group-by-header')).toHaveCount(2)
+    await expect(page.locator('.table-section__header')).toHaveCount(2)
 
     // click the "x" button on the select field itself
     await field.locator('.clear-indicator').click()
@@ -233,7 +233,7 @@ test.describe('Group By', () => {
     await expect(page).not.toHaveURL(/&groupBy=/)
     await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
     await expect(page.locator('.table-wrap')).toHaveCount(1)
-    await expect(page.locator('.group-by-header')).toHaveCount(0)
+    await expect(page.locator('.table-section__header')).toHaveCount(0)
   })
 
   test('should group by relationships even when their values are null', async () => {
@@ -252,7 +252,7 @@ test.describe('Group By', () => {
     await expect(page.locator('.table-wrap')).toHaveCount(3)
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
@@ -272,7 +272,7 @@ test.describe('Group By', () => {
     await expect(page.locator('.table-wrap')).toHaveCount(1)
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
@@ -310,18 +310,18 @@ test.describe('Group By', () => {
 
     await expect(page.locator('.table-wrap')).toHaveCount(3)
 
-    await expect(page.locator('.group-by-header')).toHaveCount(3)
+    await expect(page.locator('.table-section__header')).toHaveCount(3)
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('True') }),
+      page.locator('.table-section__heading', { hasText: exactText('True') }),
     ).toBeVisible()
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('False') }),
+      page.locator('.table-section__heading', { hasText: exactText('False') }),
     ).toBeVisible()
   })
 
@@ -333,16 +333,16 @@ test.describe('Group By', () => {
       fieldPath: 'category',
     })
 
-    const firstHeading = page.locator('.group-by-header__heading').first()
+    const firstHeading = page.locator('.table-section__heading').first()
     await expect(firstHeading).toHaveText(/Category 1/)
-    const secondHeading = page.locator('.group-by-header__heading').nth(1)
+    const secondHeading = page.locator('.table-section__heading').nth(1)
     await expect(secondHeading).toHaveText(/Category 2/)
 
     await groupByContainer.locator('#group-by--sort').click()
     await groupByContainer.locator('.rs__option', { hasText: exactText('Descending') })?.click()
 
-    await expect(page.locator('.group-by-header__heading').first()).toHaveText(/Category 2/)
-    await expect(page.locator('.group-by-header__heading').nth(1)).toHaveText(/Category 1/)
+    await expect(page.locator('.table-section__heading').first()).toHaveText(/Category 2/)
+    await expect(page.locator('.table-section__heading').nth(1)).toHaveText(/Category 1/)
   })
 
   test('should sort by columns within each table (will affect all tables)', async () => {
@@ -578,7 +578,7 @@ test.describe('Group By', () => {
 
     // the value of the updated at column in the table should match exactly the value in the table cell
     const table1 = page.locator('.table-wrap').first()
-    const firstTableHeading = table1.locator('.group-by-header__heading')
+    const firstTableHeading = table1.locator('.table-section__heading')
     const firstRowUpdatedAtCell = table1.locator('tbody tr td.cell-updatedAt').first()
 
     const headingText = (await firstTableHeading.textContent())?.trim()
@@ -762,16 +762,16 @@ test.describe('Group By', () => {
 
     // Should show populated values first, then "No value"
     await expect(page.locator('.table-wrap')).toHaveCount(2)
-    await expect(page.locator('.group-by-header')).toHaveCount(2)
+    await expect(page.locator('.table-section__header')).toHaveCount(2)
 
     // Check that Category 1 appears as a group
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
 
     // Check that "No value" appears last
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
@@ -786,20 +786,20 @@ test.describe('Group By', () => {
 
     // Should flatten hasMany arrays - each category gets its own group
     await expect(page.locator('.table-wrap')).toHaveCount(3)
-    await expect(page.locator('.group-by-header')).toHaveCount(3)
+    await expect(page.locator('.table-section__header')).toHaveCount(3)
 
     // Both categories should appear as separate groups
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 2') }),
     ).toBeVisible()
 
     // "No value" should appear last
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
@@ -814,19 +814,19 @@ test.describe('Group By', () => {
 
     // Should show groups for both collection types plus "No value"
     await expect(page.locator('.table-wrap')).toHaveCount(3)
-    await expect(page.locator('.group-by-header')).toHaveCount(3)
+    await expect(page.locator('.table-section__header')).toHaveCount(3)
 
     // Check for Category 1 group
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
 
     // Check for Post group (should display the post's title as useAsTitle)
-    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+    await expect(page.locator('.table-section__heading', { hasText: 'Find me' })).toBeVisible()
 
     // "No value" should appear last
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
@@ -842,23 +842,23 @@ test.describe('Group By', () => {
     // Should flatten polymorphic hasMany arrays - each relationship gets its own group
     // Expecting: Category 1, Category 2, Post, and "No value" = 4 groups
     await expect(page.locator('.table-wrap')).toHaveCount(4)
-    await expect(page.locator('.group-by-header')).toHaveCount(4)
+    await expect(page.locator('.table-section__header')).toHaveCount(4)
 
     // Check for both category groups
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 2') }),
     ).toBeVisible()
 
     // Check for post group
-    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+    await expect(page.locator('.table-section__heading', { hasText: 'Find me' })).toBeVisible()
 
     // "No value" should appear last (documents without any relationships)
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
@@ -889,9 +889,7 @@ test.describe('Group By', () => {
       await firstTable.locator('.row-1 .cell-_select input').check()
       await firstTable.locator('.list-selection__button[aria-label="Delete"]').click()
 
-      const firstGroupID = await firstTable
-        .locator('.group-by-header__heading')
-        .getAttribute('data-group-id')
+      const firstGroupID = await firstTable.getAttribute('data-group-id')
 
       const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
       await expect(page.locator(modalId)).toBeVisible()
@@ -923,10 +921,10 @@ test.describe('Group By', () => {
       // Enable group-by on Title
       await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
       await expect(page.locator('.table-wrap')).toHaveCount(1)
-      await expect(page.locator('.group-by-header')).toHaveText('Trashed Post 1')
+      await expect(page.locator('.table-section__header')).toHaveText('Trashed Post 1')
 
       await page.locator('#group-by--reset').click()
-      await expect(page.locator('.group-by-header')).toBeHidden()
+      await expect(page.locator('.table-section__header')).toBeHidden()
     })
 
     test('should properly navigate to trashed doc edit view from group-by in trash view', async () => {
@@ -936,7 +934,7 @@ test.describe('Group By', () => {
       // Enable group-by on Title
       await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
       await expect(page.locator('.table-wrap')).toHaveCount(1)
-      await expect(page.locator('.group-by-header')).toHaveText('Trashed Post 1')
+      await expect(page.locator('.table-section__header')).toHaveText('Trashed Post 1')
 
       await page.locator('.table-wrap tbody tr td.cell-title a').click()
       await expect(page).toHaveURL(/\/posts\/trash\/\d+/)
