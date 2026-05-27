@@ -65,6 +65,7 @@
       max-width: unset;
       flex-wrap: wrap;
       gap: var(--spacer-1);
+      justify-content: flex-start;
     }
 
     .relationship-diff {

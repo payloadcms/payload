@@ -12,19 +12,16 @@
       position: relative;
       z-index: 2;
       font-family: var(--text-body-medium-font-family);
-      margin-block: var(--spacer-1);
       padding: var(--spacer-2);
-
-      &[data-match-type] {
-        .lexical-upload-diff__thumbnail {
-          background-color: transparent;
-        }
-      }
 
       &[data-match-type='create'] {
         background-color: var(--diff-create-parent-bg);
         outline-color: var(--diff-create-pill-border);
         color: var(--diff-create-parent-color);
+
+        .lexical-upload-diff__thumbnail {
+          background-color: var(--diff-create-pill-bg);
+        }
 
         .lexical-upload-diff__info {
           color: var(--diff-create-parent-color);
@@ -41,14 +38,22 @@
         outline-color: var(--diff-delete-pill-border);
         color: var(--diff-delete-parent-color);
 
+        .lexical-upload-diff__thumbnail {
+          background-color: var(--diff-delete-pill-bg);
+        }
+
         .lexical-upload-diff__info {
-          text-decoration-line: line-through;
-          text-decoration-color: var(--diff-delete-parent-color);
           color: var(--diff-delete-parent-color);
+
+          strong {
+            text-decoration-line: line-through;
+            text-decoration-color: var(--diff-delete-parent-color);
+          }
         }
 
         .lexical-upload-diff__meta {
           text-decoration-line: line-through;
+          text-decoration-color: var(--diff-delete-parent-color);
           color: var(--diff-delete-parent-color);
         }
       }
@@ -123,6 +128,48 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    /* Style uploads based on ancestor data-match-type (e.g. from diff wrappers) */
+    [data-match-type='create'] .lexical-upload-diff__info {
+      color: var(--diff-create-parent-color);
+    }
+
+    [data-match-type='create'] .lexical-upload-diff__meta.lexical-upload-diff__meta {
+      color: var(--diff-create-parent-color);
+    }
+
+    [data-match-type='create'] .lexical-upload-diff__thumbnail {
+      background-color: var(--diff-create-pill-bg);
+    }
+
+    [data-match-type='create'] .lexical-upload-diff {
+      background-color: var(--diff-create-parent-bg);
+      outline-color: var(--diff-create-pill-border);
+    }
+
+    [data-match-type='delete'] .lexical-upload-diff__info {
+      color: var(--diff-delete-parent-color);
+
+      strong {
+        text-decoration-line: line-through;
+        text-decoration-color: var(--diff-delete-parent-color);
+      }
+    }
+
+    [data-match-type='delete'] .lexical-upload-diff__meta.lexical-upload-diff__meta {
+      text-decoration-line: line-through;
+      text-decoration-color: var(--diff-delete-parent-color);
+      color: var(--diff-delete-parent-color);
+    }
+
+    [data-match-type='delete'] .lexical-upload-diff__thumbnail {
+      background-color: var(--diff-delete-pill-bg);
+    }
+
+    [data-match-type='delete'] .lexical-upload-diff {
+      background-color: var(--diff-delete-parent-bg);
+      outline-color: var(--diff-delete-pill-border);
     }
   }
 }

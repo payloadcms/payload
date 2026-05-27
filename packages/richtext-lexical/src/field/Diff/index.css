@@ -1,7 +1,6 @@
 @layer payload-default {
   .lexical-diff .field-diff-content {
     .html-diff {
-      overflow: clip;
       font-family: var(--text-body-large-font-family);
       font-size: var(--text-body-large-font-size);
       font-weight: var(--text-body-large-font-weight);
@@ -13,20 +12,19 @@
       font-size: var(--text-body-large-font-size);
       line-height: 1.5;
       letter-spacing: normal;
-      margin-block: var(--spacer-3);
       margin-inline: var(--spacer-1);
       padding-inline-start: var(--spacer-2-5);
       padding-block: var(--spacer-1);
       position: relative;
-      border-inline-start: var(--spacer-1) solid var(--color-border);
+      border-inline-start: var(--stroke-width-medium) solid currentColor;
+    }
 
-      &:has([data-match-type='create']) {
-        border-inline-start-color: var(--color-bg-success-tertiary);
-      }
+    .html-diff:has([data-match-type='create']) blockquote {
+      color: var(--diff-create-pill-color);
+    }
 
-      &:has([data-match-type='delete']) {
-        border-inline-start-color: var(--color-bg-danger-tertiary);
-      }
+    .html-diff:has([data-match-type='delete']) blockquote {
+      color: var(--diff-delete-pill-color);
     }
 
     a {
@@ -42,7 +40,6 @@
     h6 {
       font-weight: 550;
       line-height: 1.2;
-      margin-block: var(--spacer-3);
     }
 
     h1 {
@@ -80,7 +77,7 @@
     }
 
     p {
-      margin-block: var(--spacer-3);
+      margin: 0;
     }
 
     code {
@@ -96,15 +93,29 @@
     }
 
     hr {
-      margin-block: var(--spacer-2-5);
+      margin: 0;
       border: none;
-      border-top: var(--stroke-width-small) solid var(--color-border);
+      border-top: var(--stroke-width-small) solid currentColor;
     }
 
-    ul,
-    ol {
+    .html-diff:has([data-match-type='create']) hr {
+      color: var(--diff-create-pill-color);
+    }
+
+    .html-diff:has([data-match-type='delete']) hr {
+      color: var(--diff-delete-pill-color);
+    }
+
+    ul {
+      list-style: disc;
       padding: 0;
-      margin-block: var(--spacer-2);
+      margin: 0;
+    }
+
+    ol {
+      list-style: decimal;
+      padding: 0;
+      margin: 0;
     }
 
     li {
@@ -112,6 +123,34 @@
       font-size: var(--text-body-large-font-size);
       margin-block: 0 var(--spacer-1);
       margin-inline-start: var(--spacer-4);
+      position: relative;
+      z-index: 0;
+
+      &:has(> [data-match-type='create'])::before,
+      &:has(> [data-match-type='delete'])::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        inset-inline-start: calc(var(--spacer-4) * -1);
+        border-radius: var(--radius-medium);
+        z-index: -1;
+      }
+
+      &:has(> [data-match-type='create'])::before {
+        background-color: var(--diff-create-pill-bg);
+      }
+
+      &:has(> [data-match-type='delete'])::before {
+        background-color: var(--diff-delete-pill-bg);
+      }
+
+      &.nestedListItem:last-child {
+        margin-block-end: 0;
+      }
+
+      &:last-child {
+        margin-block-end: 0;
+      }
     }
   }
 }

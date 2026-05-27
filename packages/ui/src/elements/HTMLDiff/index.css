@@ -2,6 +2,7 @@
   .html-diff {
     display: flex;
     flex-direction: column;
+    gap: var(--spacer-3);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
@@ -23,99 +24,29 @@
     margin-bottom: 0;
   }
 
-  /* Apply background color to parents that have children with diffs */
-  .html-diff p:not([data-enable-match='false']):has([data-match-type='create']),
-  .html-diff h1:not([data-enable-match='false']):has([data-match-type='create']),
-  .html-diff h2:not([data-enable-match='false']):has([data-match-type='create']),
-  .html-diff h3:not([data-enable-match='false']):has([data-match-type='create']),
-  .html-diff h4:not([data-enable-match='false']):has([data-match-type='create']),
-  .html-diff h5:not([data-enable-match='false']):has([data-match-type='create']),
-  .html-diff h6:not([data-enable-match='false']):has([data-match-type='create']),
-  .html-diff blockquote:not([data-enable-match='false']):has([data-match-type='create']),
-  .html-diff pre:not([data-enable-match='false']):has([data-match-type='create']) {
-    position: relative;
-    z-index: 1;
-    flex: 1;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: calc(var(--spacer-2) * -1);
-      bottom: calc(var(--spacer-2) * -1);
-      left: calc(var(--spacer-2-5) * -1);
-      right: calc(var(--spacer-2-5) * -1);
-      display: block;
-      background-color: var(--diff-create-parent-bg);
-      color: var(--diff-create-parent-color);
-      z-index: -1;
-    }
+  /* Apply background color to the whole field when it has diffs */
+  .html-diff:has([data-match-type='create']) {
+    background-color: var(--diff-create-parent-bg);
+    margin-block: calc(var(--spacer-2) * -1);
+    padding-block: var(--spacer-2);
   }
 
-  .html-diff p:not([data-enable-match='false']):has([data-match-type='delete']),
-  .html-diff h1:not([data-enable-match='false']):has([data-match-type='delete']),
-  .html-diff h2:not([data-enable-match='false']):has([data-match-type='delete']),
-  .html-diff h3:not([data-enable-match='false']):has([data-match-type='delete']),
-  .html-diff h4:not([data-enable-match='false']):has([data-match-type='delete']),
-  .html-diff h5:not([data-enable-match='false']):has([data-match-type='delete']),
-  .html-diff h6:not([data-enable-match='false']):has([data-match-type='delete']),
-  .html-diff blockquote:not([data-enable-match='false']):has([data-match-type='delete']),
-  .html-diff pre:not([data-enable-match='false']):has([data-match-type='delete']) {
-    position: relative;
-    z-index: 1;
-    flex: 1;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: calc(var(--spacer-2) * -1);
-      bottom: calc(var(--spacer-2) * -1);
-      left: calc(var(--spacer-2-5) * -1);
-      right: calc(var(--spacer-2-5) * -1);
-      display: block;
-      background-color: var(--diff-delete-parent-bg);
-      color: var(--diff-delete-parent-color);
-      z-index: -1;
-    }
-  }
-
-  .html-diff li:not([data-enable-match='false']):has([data-match-type='create']) {
-    position: relative;
-    z-index: 1;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: -9999px;
-      right: -9999px;
-      display: block;
-      background-color: var(--diff-create-parent-bg);
-      color: var(--diff-create-parent-color);
-      z-index: -1;
-    }
-  }
-
-  .html-diff li:not([data-enable-match='false']):has([data-match-type='delete']) {
-    position: relative;
-    z-index: 1;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: -9999px;
-      right: -9999px;
-      display: block;
-      background-color: var(--diff-delete-parent-bg);
-      color: var(--diff-delete-parent-color);
-      z-index: -1;
-    }
+  .html-diff:has([data-match-type='delete']) {
+    background-color: var(--diff-delete-parent-bg);
+    margin-block: calc(var(--spacer-2) * -1);
+    padding-block: var(--spacer-2);
   }
 
   .html-diff li::marker {
     color: var(--color-text);
+  }
+
+  .html-diff li:has(> [data-match-type='create'])::marker {
+    color: var(--diff-create-pill-color);
+  }
+
+  .html-diff li:has(> [data-match-type='delete'])::marker {
+    color: var(--diff-delete-pill-color);
   }
 
   .html-diff
@@ -129,6 +60,7 @@
     border-radius: var(--radius-medium);
     padding: calc(var(--stroke-width-small) * 1.5) calc(var(--stroke-width-small) * 2);
     text-decoration-thickness: var(--stroke-width-small);
+    vertical-align: baseline;
   }
 
   .html-diff
@@ -153,6 +85,7 @@
     color: var(--diff-create-pill-color);
     border-radius: var(--radius-medium);
     padding: calc(var(--stroke-width-small) * 1.5) calc(var(--stroke-width-small) * 2);
+    vertical-align: baseline;
   }
 
   .html-diff-create-inline-wrapper,
@@ -185,6 +118,17 @@
   }
 
   @media (max-width: 768px) {
+    .html-diff:has([data-match-type='create']),
+    .html-diff:has([data-match-type='delete']) {
+      margin-block: 0;
+      padding-block: 0;
+      background-color: transparent;
+    }
+
+    .html-diff {
+      justify-content: center;
+    }
+
     .html-diff p {
       align-content: center;
     }
