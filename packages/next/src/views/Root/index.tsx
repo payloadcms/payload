@@ -12,6 +12,7 @@ import type {
 
 import { PageConfigProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui/rsc'
 import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
@@ -19,8 +20,6 @@ import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { DefaultTemplate } from '../../templates/Default/index.js'
-import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { handleAuthRedirect } from '../../utilities/handleAuthRedirect.js'
 import { initReq } from '../../utilities/initReq.js'

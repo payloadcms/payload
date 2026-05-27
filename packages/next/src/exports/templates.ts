@@ -1,2 +1,6 @@
-export { DefaultTemplate, type DefaultTemplateProps } from '../templates/Default/index.js'
-export { MinimalTemplate, type MinimalTemplateProps } from '../templates/Minimal/index.js'
+export {
+  DefaultTemplate,
+  type DefaultTemplateProps,
+  MinimalTemplate,
+  type MinimalTemplateProps,
+} from '@payloadcms/ui/rsc'
