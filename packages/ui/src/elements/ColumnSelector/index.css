@@ -20,7 +20,7 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: space-between;
-    height: 40px;
+    height: var(--spacer-6);
     padding-inline-start: var(--spacer-2);
     padding-inline-end: var(--spacer-2);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
@@ -45,7 +45,7 @@
     flex-shrink: 0;
     align-items: center;
     /* +1px accounts for border-bottom so content area remains 40px (8px + 24px search bar + 8px) */
-    height: calc(var(--spacer-5) + var(--spacer-2) + 1px);
+    height: calc(var(--spacer-5) + var(--spacer-2) + var(--stroke-width-small));
     padding-inline: var(--spacer-2-5);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
   }
@@ -54,7 +54,7 @@
     display: flex;
     align-items: center;
     flex: 1;
-    height: 24px;
+    height: var(--spacer-4);
     padding-inline-end: var(--spacer-2);
     background: var(--color-bg-secondary);
     border-radius: var(--radius-medium);
@@ -99,7 +99,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: calc(var(--spacer-6) + var(--spacer-2)); /* 48px total: 32px content + 8px top/bottom padding */
+    min-height: calc(
+      var(--spacer-6) + var(--spacer-2)
+    ); /* 48px total: 32px content + 8px top/bottom padding */
     padding-block: var(--spacer-2);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
@@ -122,7 +124,7 @@
   .column-selector__section-header {
     display: flex;
     align-items: center;
-    height: 32px;
+    height: var(--spacer-5);
     padding-inline: var(--spacer-3);
     font-family: var(--text-body-medium-strong-font-family);
     font-size: var(--text-body-medium-strong-font-size);
@@ -146,7 +148,7 @@
 
     &:focus-visible {
       outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
-      outline-offset: -1px;
+      outline-offset: calc(-1 * var(--accessibility-outline-offset));
     }
   }
 
@@ -207,15 +209,15 @@
       content: '';
       position: absolute;
       inset-inline: 0;
-      top: -1px;
-      height: 2px;
+      top: calc(-1 * var(--stroke-width-small));
+      height: var(--stroke-width-medium);
       background: var(--color-icon);
-      border-radius: 1px;
+      border-radius: var(--stroke-width-small);
     }
   }
 
   .column-selector__drop-indicator {
-    height: 2px;
+    height: var(--stroke-width-medium);
     background: var(--color-icon);
     margin-inline: var(--spacer-3);
   }

@@ -38,16 +38,17 @@
 
   .switch__knob {
     position: absolute;
-    left: 3px;
-    width: 12px;
-    height: 8px;
+    left: calc(var(--stroke-width-small) + var(--stroke-width-medium));
+    width: var(--spacer-2-5);
+    height: var(--spacer-2);
     background: var(--color-icon-onbrand);
     outline: var(--stroke-width-small) solid var(--special-border-translucent);
     border-radius: var(--radius-full);
   }
 
   .switch__track--checked .switch__knob {
-    left: calc(100% - 15px);
+    left: auto;
+    right: calc(var(--stroke-width-small) + var(--stroke-width-medium));
     outline-color: var(--color-border-brand-strong);
   }
 
