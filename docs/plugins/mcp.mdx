@@ -150,7 +150,17 @@ toggle the individual capabilities on for each collection, global, tool, prompt,
 resource you want that key to be able to use.
 
 All MCP requests must include a valid API key as a Bearer token — requests without
-one are rejected immediately. Here is a complete example of an MCP `tools/list` request
+one are rejected immediately.
+
+<Banner type="info">
+  Unlike other Payload API-key-based endpoints that accept the
+  `<collection-slug> API-Key <key>` convention, the MCP endpoint
+  **only** supports `Authorization: Bearer <key>`. Using
+  `payload-mcp-api-keys API-Key <key>` or any other auth scheme will
+  be rejected.
+</Banner>
+
+Here is a complete example of an MCP `tools/list` request
 showing the correct headers:
 
 ```bash
