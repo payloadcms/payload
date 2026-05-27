@@ -40,18 +40,6 @@ export type LinkAdapterProps = {
   scroll?: boolean
 } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
 
-/**
- * Server-side adapter passed into server functions (not React context).
- * Abstracts framework-specific server APIs like cookies, headers, redirect.
- */
-export type ServerAdapter = {
-  getCookies: () => CookieStore | Promise<CookieStore>
-  getHeaders: () => Headers | Promise<Headers>
-  notFound: () => never
-  redirect: (path: string) => never
-  setCookie: (name: string, value: string, options?: CookieOptions) => Promise<void> | void
-}
-
 export type CookieStore = {
   get: (name: string) => { name: string; value: string } | null | undefined
   getAll?: () => Array<{ name: string; value: string }>
