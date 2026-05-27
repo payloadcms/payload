@@ -169,6 +169,20 @@ export type JobsConfig = {
       }
     | Sort
   /**
+   * The queue used when Payload's built-in `schedulePublish` task is enqueued
+   * by the admin UI (i.e. when an editor schedules a publish or unpublish
+   * event on a versioned collection or global).
+   *
+   * If not set, scheduled-publish jobs are queued onto the `'default'` queue.
+   * Set this to route scheduled-publish jobs to a dedicated queue (e.g.
+   * `'schedule-publish'`) with its own runner, which keeps them isolated
+   * from other default-queue work and makes them filterable by queue name
+   * in the queue dashboard.
+   *
+   * @default 'default'
+   */
+  scheduledPublishQueue?: string
+  /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
    * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.
    * @default undefined - if this function is not defined, jobs will be run - as if () => true was passed.
