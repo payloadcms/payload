@@ -2,8 +2,7 @@
 
 import type { OptionObject } from 'payload'
 
-import { toast, useAuth, useConfig } from '@payloadcms/ui'
-import { useRouter } from 'next/navigation.js'
+import { toast, useAuth, useConfig, useRouter } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React, { createContext } from 'react'
 
