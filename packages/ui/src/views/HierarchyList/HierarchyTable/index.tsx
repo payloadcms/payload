@@ -17,8 +17,8 @@ import type { SlotColumn } from './SlotTable.js'
 import type { RelatedGroup, TableRow } from './types.js'
 
 import { CreateDocumentButton } from '../../../elements/CreateDocumentButton/index.js'
-import { LoadMoreRow } from '../../../elements/LoadMoreRow/index.js'
 import { NoListResults } from '../../../elements/NoListResults/index.js'
+import { SimplePagination } from '../../../elements/Pagination/SimplePagination/index.js'
 import { TableSection } from '../../../elements/TableSection/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
@@ -63,20 +63,6 @@ export type HierarchyTableProps = {
   useAsTitle: string
 }
 
-type GroupState = {
-  docs: TableRow[]
-  hasNextPage: boolean
-  isChildren: boolean
-  isHierarchyEnabled: boolean
-  isLoading: boolean
-  label: string
-  onCheckboxChange: (row: TableRow) => void
-  onLoadMore: () => void
-  onSelectAllChange: () => void
-  slug: string
-  totalDocs: number
-}
-
 export function HierarchyTable({
   baseFilter,
   childrenData,
@@ -104,9 +90,15 @@ export function HierarchyTable({
 
   // Children pagination state
   const [childDocs, setChildDocs] = useState(childrenData?.docs || [])
-  const [childHasNext, setChildHasNext] = useState(childrenData?.hasNextPage || false)
-  const [childPage, setChildPage] = useState(childrenData?.page || 1)
-  const [childTotal, setChildTotal] = useState(childrenData?.totalDocs || 0)
+  const [childPaginationData, setChildPaginationData] = useState<Partial<PaginatedDocs>>({
+    hasNextPage: childrenData?.hasNextPage || false,
+    hasPrevPage: childrenData?.hasPrevPage || false,
+    limit: childrenData?.limit || DEFAULT_HIERARCHY_LIST_LIMIT,
+    page: childrenData?.page || 1,
+    pagingCounter: childrenData?.pagingCounter || 1,
+    totalDocs: childrenData?.totalDocs || 0,
+    totalPages: childrenData?.totalPages || 1,
+  })
   const [childLoading, setChildLoading] = useState(false)
 
   // Related groups pagination state (per collection)
@@ -128,9 +120,13 @@ export function HierarchyTable({
       initial[group.collectionSlug] = {
         docs: group.data.docs,
         hasNextPage: group.data.hasNextPage,
+        hasPrevPage: group.data.hasPrevPage || false,
         isLoading: false,
+        limit: group.data.limit || DEFAULT_HIERARCHY_LIST_LIMIT,
         page: group.data.page || 1,
+        pagingCounter: group.data.pagingCounter || 1,
         totalDocs: group.data.totalDocs,
+        totalPages: group.data.totalPages || 1,
       }
     }
     return initial
@@ -148,66 +144,80 @@ export function HierarchyTable({
     [isLocked],
   )
 
-  // Load more children
-  const handleLoadMoreChildren = useCallback(async () => {
-    if (childLoading || !childHasNext) {
-      return
-    }
-
-    setChildLoading(true)
-
-    try {
-      const parentCondition = parentId
-        ? { [parentFieldName]: { equals: parentId } }
-        : {
-            or: [{ [parentFieldName]: { exists: false } }, { [parentFieldName]: { equals: null } }],
-          }
-
-      const searchCondition = search ? { [useAsTitle]: { like: search } } : undefined
-      const where = combineWhereConstraints([parentCondition, searchCondition, baseFilter])
-
-      const queryString = qs.stringify(
-        { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page: childPage + 1, where },
-        { addQueryPrefix: true },
-      )
-      const url = formatAdminURL({ apiRoute, path: `/${collectionSlug}${queryString}`, serverURL })
-
-      const response = await fetch(url, { credentials: 'include' })
-
-      if (!response.ok) {
-        throw new Error('Failed to load more')
+  // Page change for children
+  const handlePageChangeChildren = useCallback(
+    async (page: number) => {
+      if (childLoading) {
+        return
       }
 
-      const result: PaginatedDocs = await response.json()
+      setChildLoading(true)
 
-      setChildDocs((prev) => [...prev, ...result.docs])
-      setChildHasNext(result.hasNextPage)
-      setChildPage(result.page || childPage + 1)
-      setChildTotal(result.totalDocs)
-    } catch (_error) {
-      // Silently fail
-    } finally {
-      setChildLoading(false)
-    }
-  }, [
-    apiRoute,
-    baseFilter,
-    childHasNext,
-    childLoading,
-    childPage,
-    collectionSlug,
-    parentFieldName,
-    parentId,
-    search,
-    serverURL,
-    useAsTitle,
-  ])
+      try {
+        const parentCondition = parentId
+          ? { [parentFieldName]: { equals: parentId } }
+          : {
+              or: [
+                { [parentFieldName]: { exists: false } },
+                { [parentFieldName]: { equals: null } },
+              ],
+            }
 
-  // Load more for a related collection
-  const handleLoadMoreRelated = useCallback(
-    async (relatedSlug: string) => {
+        const searchCondition = search ? { [useAsTitle]: { like: search } } : undefined
+        const where = combineWhereConstraints([parentCondition, searchCondition, baseFilter])
+
+        const queryString = qs.stringify(
+          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
+          { addQueryPrefix: true },
+        )
+        const url = formatAdminURL({
+          apiRoute,
+          path: `/${collectionSlug}${queryString}`,
+          serverURL,
+        })
+
+        const response = await fetch(url, { credentials: 'include' })
+
+        if (!response.ok) {
+          throw new Error('Failed to load page')
+        }
+
+        const result: PaginatedDocs = await response.json()
+
+        setChildDocs(result.docs)
+        setChildPaginationData({
+          hasNextPage: result.hasNextPage,
+          hasPrevPage: result.hasPrevPage,
+          limit: result.limit,
+          page: result.page,
+          pagingCounter: result.pagingCounter,
+          totalDocs: result.totalDocs,
+          totalPages: result.totalPages,
+        })
+      } catch (_error) {
+        // Silently fail
+      } finally {
+        setChildLoading(false)
+      }
+    },
+    [
+      apiRoute,
+      baseFilter,
+      childLoading,
+      collectionSlug,
+      parentFieldName,
+      parentId,
+      search,
+      serverURL,
+      useAsTitle,
+    ],
+  )
+
+  // Page change for a related collection
+  const handlePageChangeRelated = useCallback(
+    async (relatedSlug: string, page: number) => {
       const state = relatedState[relatedSlug]
-      if (!state || state.isLoading || !state.hasNextPage) {
+      if (!state || state.isLoading) {
         return
       }
 
@@ -223,8 +233,24 @@ export function HierarchyTable({
       }))
 
       try {
-        // "in" operator works for both hasMany and single relationship fields
-        const relationshipCondition = { [parentFieldName]: { in: [parentId] } }
+        // Build relationship condition based on whether we're at root or in a parent
+        let relationshipCondition: Record<string, unknown>
+        if (parentId) {
+          // Nested level: find documents assigned to this hierarchy item
+          // "in" operator works for both hasMany and single relationship fields
+          relationshipCondition = { [group.fieldName]: { in: [parentId] } }
+        } else {
+          // Root level: find documents where hierarchy field doesn't exist, is null, or is empty array
+          const conditions: Record<string, unknown>[] = [
+            { [group.fieldName]: { exists: false } },
+            { [group.fieldName]: { equals: null } },
+          ]
+          if (group.hasMany) {
+            // hasMany fields store cleared values as empty arrays
+            conditions.push({ [group.fieldName]: { equals: [] } })
+          }
+          relationshipCondition = { or: conditions }
+        }
 
         const relatedConfig = getEntityConfig({ collectionSlug: relatedSlug })
         const relatedUseAsTitle = relatedConfig?.admin?.useAsTitle || 'id'
@@ -238,7 +264,7 @@ export function HierarchyTable({
         ])
 
         const queryString = qs.stringify(
-          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page: state.page + 1, where },
+          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page, where },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
@@ -250,7 +276,7 @@ export function HierarchyTable({
         const response = await fetch(url, { credentials: 'include' })
 
         if (!response.ok) {
-          throw new Error('Failed to load more')
+          throw new Error('Failed to load page')
         }
 
         const result: PaginatedDocs = await response.json()
@@ -258,11 +284,15 @@ export function HierarchyTable({
         setRelatedState((prev) => ({
           ...prev,
           [relatedSlug]: {
-            docs: [...prev[relatedSlug].docs, ...result.docs],
+            docs: result.docs,
             hasNextPage: result.hasNextPage,
+            hasPrevPage: result.hasPrevPage,
             isLoading: false,
-            page: result.page || prev[relatedSlug].page + 1,
+            limit: result.limit,
+            page: result.page,
+            pagingCounter: result.pagingCounter,
             totalDocs: result.totalDocs,
+            totalPages: result.totalPages,
           },
         }))
       } catch (_error) {
@@ -274,7 +304,6 @@ export function HierarchyTable({
     },
     [
       apiRoute,
-      collectionSlug,
       getEntityConfig,
       parentFieldName,
       parentId,
@@ -322,10 +351,23 @@ export function HierarchyTable({
     [HierarchyIcon, allowedCollectionsFieldName, childDocs, childrenLabel, collectionSlug],
   )
 
-  const hasChildren = childTotal > 0
+  const hasChildren = (childPaginationData.totalDocs || 0) > 0
   const hasRelated = relatedGroups.some((g) => relatedState[g.collectionSlug]?.totalDocs > 0)
 
   // Unified groups array
+  type GroupState = {
+    docs: TableRow[]
+    isChildren: boolean
+    isHierarchyEnabled: boolean
+    isLoading: boolean
+    label: string
+    onCheckboxChange: (row: TableRow) => void
+    onPageChange: (page: number) => void
+    onSelectAllChange: () => void
+    paginationData: PaginatedDocs
+    slug: string
+  }
+
   const allGroups: GroupState[] = useMemo(() => {
     const groups: GroupState[] = []
 
@@ -334,7 +376,6 @@ export function HierarchyTable({
       groups.push({
         slug: collectionSlug,
         docs: childTableData,
-        hasNextPage: childHasNext,
         isChildren: true,
         isHierarchyEnabled: true,
         isLoading: childLoading,
@@ -347,9 +388,18 @@ export function HierarchyTable({
               allowedCollections: row._allowedCollections as string[] | undefined,
             },
           }),
-        onLoadMore: () => void handleLoadMoreChildren(),
+        onPageChange: (page: number) => void handlePageChangeChildren(page),
         onSelectAllChange: () => toggleAllInCollection({ collectionSlug }),
-        totalDocs: childTotal,
+        paginationData: {
+          docs: childDocs,
+          hasNextPage: childPaginationData.hasNextPage || false,
+          hasPrevPage: childPaginationData.hasPrevPage || false,
+          limit: childPaginationData.limit || DEFAULT_HIERARCHY_LIST_LIMIT,
+          page: childPaginationData.page || 1,
+          pagingCounter: childPaginationData.pagingCounter || 1,
+          totalDocs: childPaginationData.totalDocs || 0,
+          totalPages: childPaginationData.totalPages || 1,
+        },
       })
     }
 
@@ -373,7 +423,6 @@ export function HierarchyTable({
       groups.push({
         slug: group.collectionSlug,
         docs: relatedTableData,
-        hasNextPage: state.hasNextPage,
         isChildren: false,
         isHierarchyEnabled: false,
         isLoading: state.isLoading,
@@ -384,23 +433,32 @@ export function HierarchyTable({
             collectionSlug: group.collectionSlug,
             metadata: {}, // Related items don't have allowedCollections - their collection slug is the constraint
           }),
-        onLoadMore: () => void handleLoadMoreRelated(group.collectionSlug),
+        onPageChange: (page: number) => void handlePageChangeRelated(group.collectionSlug, page),
         onSelectAllChange: () => toggleAllInCollection({ collectionSlug: group.collectionSlug }),
-        totalDocs: state.totalDocs,
+        paginationData: {
+          docs: state.docs || [],
+          hasNextPage: state.hasNextPage || false,
+          hasPrevPage: state.hasPrevPage || false,
+          limit: state.limit || DEFAULT_HIERARCHY_LIST_LIMIT,
+          page: state.page || 1,
+          pagingCounter: state.pagingCounter || 1,
+          totalDocs: state.totalDocs || 0,
+          totalPages: state.totalPages || 1,
+        },
       })
     }
 
     return groups
   }, [
-    childHasNext,
+    childDocs,
     childLoading,
+    childPaginationData,
     childrenLabel,
     childTableData,
-    childTotal,
     collectionSlug,
     getEntityConfig,
-    handleLoadMoreChildren,
-    handleLoadMoreRelated,
+    handlePageChangeChildren,
+    handlePageChangeRelated,
     hasChildren,
     i18n,
     relatedGroups,
@@ -461,7 +519,9 @@ export function HierarchyTable({
     <div className={baseClass}>
       {allGroups.map((group) => (
         <TableSection key={group.slug}>
-          <TableSection.Header heading={group.label} />
+          <TableSection.Header heading={group.label}>
+            <SimplePagination data={group.paginationData} onChange={group.onPageChange} />
+          </TableSection.Header>
           <TableSection.Content>
             <SlotTable
               collectionSlug={group.slug}
@@ -485,15 +545,6 @@ export function HierarchyTable({
               }
             />
           </TableSection.Content>
-          <TableSection.Footer>
-            <LoadMoreRow
-              currentCount={group.docs.length}
-              hasMore={group.hasNextPage}
-              isLoading={group.isLoading}
-              onLoadMore={group.onLoadMore}
-              totalDocs={group.totalDocs}
-            />
-          </TableSection.Footer>
         </TableSection>
       ))}
     </div>

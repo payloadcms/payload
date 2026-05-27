@@ -296,6 +296,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       .map(([slug, related]) => ({
         collectionSlug: slug,
         data: related.result,
+        fieldName: related.fieldName,
         hasMany: related.hasMany,
         label: related.label,
       }))
