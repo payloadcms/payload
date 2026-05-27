@@ -89,6 +89,13 @@ export type PopupProps = {
   showScrollbar?: boolean
   size?: 'fit-content' | 'large' | 'medium' | 'small'
   /**
+   * Theme for the popup content. Defaults to 'dark'.
+   * Set to 'auto' to inherit the current theme.
+   *
+   * @default 'dark'
+   */
+  theme?: 'auto' | 'dark' | 'light'
+  /**
    * Preferred vertical alignment of the popup (position below or above the trigger),
    * if there is enough space available.
    *
@@ -129,6 +136,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     showOnHover = false,
     showScrollbar = false,
     size = 'medium',
+    theme = 'dark',
     verticalAlign = 'bottom',
   } = props
 
@@ -267,13 +275,26 @@ export const Popup: React.FC<PopupProps> = (props) => {
   // /////////////////////////////////////
   // Click Outside Handler
   // Closes popup when clicking outside both the popup and trigger.
+  // Distinguishes between parent and child popups:
+  // - Click in child popup: parent stays open
+  // - Click in parent popup: child closes
   // /////////////////////////////////////
 
   const handleClickOutside = useEffectEvent((e: MouseEvent) => {
-    const isOutsidePopup = !popupRef.current?.contains(e.target as Node)
-    const isOutsideTrigger = !triggerRef.current?.contains(e.target as Node)
+    const target = e.target as Node
+    const isOutsidePopup = !popupRef.current?.contains(target)
+    const isOutsideTrigger = !triggerRef.current?.contains(target)
 
-    if (isOutsidePopup && isOutsideTrigger) {
+    // Check if click is inside a popup portal
+    const clickedPopupContent = (target as Element).closest?.('.popup__content')
+
+    // If the clicked popup contains this popup's trigger, it's a parent popup
+    // and we should close. If it doesn't contain our trigger, it's a child popup
+    // and we should stay open to avoid closing parent when interacting with child.
+    const isInsideChildPopup =
+      clickedPopupContent && !clickedPopupContent.contains(triggerRef.current)
+
+    if (isOutsidePopup && isOutsideTrigger && !isInsideChildPopup) {
       setActive(false)
     }
   })
@@ -462,7 +483,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
                     `${baseClass}__hidden-content`
               }
               data-popup-id={id || undefined}
-              data-theme="dark"
+              data-theme={theme === 'auto' ? undefined : theme}
               ref={popupRef}
             >
               <div
