@@ -3,7 +3,7 @@ import type DataLoader from 'dataloader'
 import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
 
-import type { ServerAdapter } from '../admin/adapters.js'
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type {
   DataFromCollectionSlug,
   QueryDraftDataFromCollectionSlug,
