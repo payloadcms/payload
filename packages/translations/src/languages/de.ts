@@ -332,6 +332,7 @@ export const deTranslations: DefaultTranslationsObject = {
     export: 'Export',
     fallbackToDefaultLocale: 'Auf die Standardsprache zurückfallen',
     false: 'Falsch',
+    field: 'Feld',
     filter: 'Filter',
     filters: 'Filter',
     filterWhere: 'Filter {{label}}, wo',

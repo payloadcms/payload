@@ -328,6 +328,7 @@ export const esTranslations: DefaultTranslationsObject = {
     export: 'Exportar',
     fallbackToDefaultLocale: 'Volver al idioma predeterminado',
     false: 'Falso',
+    field: 'Campo',
     filter: 'Filtro',
     filters: 'Filtros',
     filterWhere: 'Filtrar {{label}} donde',

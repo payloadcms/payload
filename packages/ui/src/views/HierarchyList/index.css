@@ -1,14 +1,16 @@
 @layer payload-default {
   .hierarchy-list {
     width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .hierarchy-list__wrap {
     padding-bottom: var(--spacing-view-bottom);
-  }
-
-  .hierarchy-list__wrap > *:not(:last-child) {
-    margin-bottom: var(--spacer-3);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .hierarchy-list .list-header a {
@@ -30,12 +32,6 @@
     display: flex;
     align-items: center;
     gap: var(--spacer-1);
-  }
-
-  .hierarchy-list__controls {
-    display: flex;
-    align-items: center;
-    gap: var(--spacer-2);
   }
 
   .hierarchy-list__controls-left {
@@ -62,7 +58,6 @@
     }
 
     .hierarchy-list__wrap {
-      padding-top: 0;
       padding-bottom: 0;
     }
 

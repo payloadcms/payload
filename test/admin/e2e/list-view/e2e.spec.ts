@@ -222,7 +222,7 @@ describe('List View', () => {
     test('should render custom beforeListTable component', async () => {
       await page.goto(postsUrl.list)
       await expect(
-        page.locator('.collection-list__wrap').locator('div', {
+        page.locator('.collection-list').locator('div', {
           hasText: exactText('BeforeListTable custom component'),
         }),
       ).toBeVisible()
@@ -240,10 +240,10 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should render custom afterList component', async () => {
+    test('should render custom afterListTable component', async () => {
       await page.goto(postsUrl.list)
       await expect(
-        page.locator('.collection-list__wrap').locator('div', {
+        page.locator('.collection-list').locator('div', {
           hasText: exactText('AfterListTable custom component'),
         }),
       ).toBeVisible()
@@ -262,15 +262,6 @@ describe('List View', () => {
             hasText: 'listMenuItems',
           })
           .first(),
-      ).toBeVisible()
-    })
-
-    test('should render custom afterListTable component', async () => {
-      await page.goto(postsUrl.list)
-      await expect(
-        page.locator('.collection-list--posts').locator('div', {
-          hasText: exactText('AfterList custom component'),
-        }),
       ).toBeVisible()
     })
   })

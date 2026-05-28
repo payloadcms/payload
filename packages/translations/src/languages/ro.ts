@@ -329,6 +329,7 @@ export const roTranslations: DefaultTranslationsObject = {
     export: 'Export',
     fallbackToDefaultLocale: 'Revenire la locația implicită',
     false: 'Fals',
+    field: 'Field',
     filter: 'Filtru',
     filters: 'Filtre',
     filterWhere: 'Filtrează {{label}} unde',

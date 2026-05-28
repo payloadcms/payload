@@ -116,6 +116,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams,
+    server: req.server,
     versions,
     viewType: 'document',
   })

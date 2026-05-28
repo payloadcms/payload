@@ -325,6 +325,7 @@ export const caTranslations: DefaultTranslationsObject = {
     export: 'Exportació',
     fallbackToDefaultLocale: 'Torna al idioma per defecte',
     false: 'Fals',
+    field: 'Camp',
     filter: 'Filtra',
     filters: 'Filtres',
     filterWhere: 'Filtra {{label}} on',
