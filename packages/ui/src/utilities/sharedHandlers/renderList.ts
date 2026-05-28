@@ -3,37 +3,27 @@ import type { CollectionPreferences, ServerFunction, VisibleEntities } from 'pay
 import { canAccessAdmin, isEntityHidden, UnauthorizedError } from 'payload'
 import { applyLocaleFiltering } from 'payload/shared'
 
-import type { SerializableListViewData } from '../../views/List/buildListViewClientProps.js'
+import type {
+  RenderListServerFnArgs,
+  RenderListServerFnReturnType,
+} from '../../elements/ListDrawer/types.js'
 
-import { RenderClientComponent } from '../../elements/RenderServerComponent/clientOnly.js'
-import { getListViewData } from '../../views/List/getListViewData.js'
-import { toSerializableListViewData } from '../../views/List/toSerializableListViewData.js'
+import { ListViewRSC } from '../../views/List/ListViewRSC.js'
 import { getClientConfig } from '../getClientConfig.js'
 
-export type RenderListDataOnlyResult = {
-  listViewData: SerializableListViewData
-  preferences?: CollectionPreferences
-}
-
 /**
- * Data-only alternative to `renderListHandler` (packages/next).
- * Returns `SerializableListViewData` instead of `{ List: ReactNode }`.
+ * Framework-agnostic `'render-list'` server function. Used by drawers and
+ * other on-demand list-render flows in both the Next.js and TanStack Start
+ * adapters. Returns a React node (`List`) that adapters ship to the client
+ * either via Next's RSC payload or, for TanStack Start, via
+ * `serializeForRsc` + `createServerFn`.
+ *
+ * Throws `Error('not-found')` when the user lacks access; adapters translate
+ * that into their framework-specific 404 response.
  */
-export const renderListDataOnlyHandler: ServerFunction<
-  {
-    collectionSlug: string
-    disableActions?: boolean
-    disableBulkDelete?: boolean
-    disableBulkEdit?: boolean
-    disableQueryPresets?: boolean
-    drawerSlug?: string
-    enableRowSelections?: boolean
-    overrideEntityVisibility?: boolean
-    query?: Record<string, unknown>
-    redirectAfterDelete?: boolean
-    redirectAfterDuplicate?: boolean
-  },
-  Promise<RenderListDataOnlyResult>
+export const renderListHandler: ServerFunction<
+  RenderListServerFnArgs,
+  Promise<RenderListServerFnReturnType>
 > = async (args) => {
   const {
     collectionSlug,
@@ -46,9 +36,11 @@ export const renderListDataOnlyHandler: ServerFunction<
     overrideEntityVisibility,
     permissions,
     query,
-    renderComponent,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
     req,
     req: {
+      i18n,
       payload,
       payload: { config },
       user,
@@ -63,12 +55,28 @@ export const renderListDataOnlyHandler: ServerFunction<
 
   const clientConfig = getClientConfig({
     config,
-    i18n: req.i18n,
+    i18n,
     importMap: payload.importMap,
     user,
   })
-
   await applyLocaleFiltering({ clientConfig, config, req })
+
+  const preferencesKey = `collection-${collectionSlug}`
+
+  const preferences = await payload
+    .find({
+      collection: 'payload-preferences',
+      depth: 0,
+      limit: 1,
+      where: {
+        and: [
+          { key: { equals: preferencesKey } },
+          { 'user.relationTo': { equals: user.collection } },
+          { 'user.value': { equals: user.id } },
+        ],
+      },
+    })
+    .then((res) => res.docs[0]?.value as CollectionPreferences)
 
   const visibleEntities: VisibleEntities = {
     collections: payload.config.collections
@@ -81,7 +89,7 @@ export const renderListDataOnlyHandler: ServerFunction<
 
   const collectionConfig = payload?.collections?.[collectionSlug]?.config
 
-  const listViewData = await getListViewData({
+  const List = await ListViewRSC({
     clientConfig,
     collectionConfig,
     disableBulkDelete,
@@ -91,24 +99,19 @@ export const renderListDataOnlyHandler: ServerFunction<
     enableRowSelections: enableRowSelections ?? true,
     locale,
     overrideEntityVisibility,
+    params: { segments: ['collections', collectionSlug] },
     permissions,
-    query: query as any,
-    renderComponent: renderComponent || RenderClientComponent,
+    query,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
     req,
+    searchParams: {},
     viewType: 'list',
     visibleEntities,
   })
 
-  const isHidden = collectionConfig?.admin?.hidden === true
-
-  const serializable = toSerializableListViewData({
-    collectionConfig,
-    fieldPermissions: isHidden ? true : permissions?.collections?.[collectionSlug]?.fields,
-    listViewData,
-  })
-
   return {
-    listViewData: serializable,
-    preferences: listViewData.collectionPreferences,
+    List,
+    preferences,
   }
 }

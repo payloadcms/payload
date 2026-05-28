@@ -4,13 +4,10 @@ import type {
   ClientConfig,
   CollectionPreferences,
   Column,
-  ColumnPreference,
   ComponentRenderer,
   ErrorResult,
-  ListQuery,
   PaginatedDocs,
   SanitizedCollectionConfig,
-  SanitizedFieldsPermissions,
   ServerFunction,
   Where,
 } from 'payload'
@@ -32,39 +29,6 @@ type BuildTableStateSuccessResult = {
   renderedFilters: Map<string, React.ReactNode>
   state: Column[]
   Table: React.ReactNode
-  tableStateData?: never
-}
-
-/**
- * Serializable subset of `renderTable` props used by the data-only branch.
- *
- * Non-RSC adapters (e.g. TanStack Start) serialize server function results to
- * JSON, which drops React elements (e.g. the rendered `Table`) and the rich
- * `Column[]` state (rendered cells / Heading nodes). Callers that receive this
- * payload reconstruct the table on the client via `buildTableStateClientProps`.
- */
-export type SerializableTableStateData = {
-  collectionSlug: string | string[]
-  columns: ColumnPreference[]
-  customCellProps?: Record<string, unknown>
-  data: PaginatedDocs
-  enableRowSelections: boolean
-  fieldPermissions?: SanitizedFieldsPermissions | true
-  orderableFieldName?: string
-  query?: ListQuery
-  renderRowTypes?: boolean
-  tableAppearance?: 'condensed' | 'default'
-  useAsTitle?: string
-}
-
-type BuildTableStateDataOnlyResult = {
-  data: PaginatedDocs
-  errors?: never
-  preferences: CollectionPreferences
-  renderedFilters?: never
-  state?: never
-  Table?: never
-  tableStateData: SerializableTableStateData
 }
 
 type BuildTableStateErrorResult = {
@@ -72,7 +36,6 @@ type BuildTableStateErrorResult = {
   renderedFilters?: never
   state?: never
   Table?: never
-  tableStateData?: never
 } & (
   | {
       message: string
@@ -80,10 +43,7 @@ type BuildTableStateErrorResult = {
   | ErrorResult
 )
 
-export type BuildTableStateResult =
-  | BuildTableStateDataOnlyResult
-  | BuildTableStateErrorResult
-  | BuildTableStateSuccessResult
+export type BuildTableStateResult = BuildTableStateErrorResult | BuildTableStateSuccessResult
 
 export const buildTableStateHandler: ServerFunction<
   BuildTableStateArgs,
@@ -114,7 +74,7 @@ export const buildTableStateHandler: ServerFunction<
 const buildTableState = async (
   args: Parameters<ServerFunction<BuildTableStateArgs>>[0],
   renderComponent: ComponentRenderer,
-): Promise<BuildTableStateDataOnlyResult | BuildTableStateSuccessResult> => {
+): Promise<BuildTableStateSuccessResult> => {
   const {
     collectionSlug,
     columns: columnsFromArgs,
@@ -258,28 +218,6 @@ const buildTableState = async (
   const resolvedUseAsTitle = Array.isArray(collectionSlug)
     ? payload.collections[collectionSlug[0]]?.config?.admin?.useAsTitle
     : collectionConfig?.admin?.useAsTitle
-
-  // Data-only mode (non-RSC adapters): skip React rendering. The caller
-  // serializes the result and the client reconstructs `{state, Table}` via
-  // `buildTableStateClientProps` once the result lands in the browser.
-  if (args.mode === 'data-only') {
-    return {
-      data,
-      preferences: collectionPreferences,
-      tableStateData: {
-        collectionSlug,
-        columns: resolvedColumns,
-        data,
-        enableRowSelections,
-        fieldPermissions: resolvedFieldPermissions,
-        orderableFieldName,
-        query,
-        renderRowTypes,
-        tableAppearance,
-        useAsTitle: resolvedUseAsTitle,
-      },
-    }
-  }
 
   const { columnState, Table } = renderTable({
     clientCollectionConfig,

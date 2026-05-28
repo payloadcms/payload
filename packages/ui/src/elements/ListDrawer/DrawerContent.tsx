@@ -5,7 +5,6 @@ import { useModal } from '@faceless-ui/modal'
 import { hoistQueryParamsToAnd } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { RenderListDataOnlyResult } from '../../utilities/dataOnlyHandlers/renderList.js'
 import type { ListDrawerContextProps, ListDrawerContextType } from '../ListDrawer/Provider.js'
 import type {
   ListDrawerProps,
@@ -15,15 +14,8 @@ import type {
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useImportMap } from '../../providers/ImportMap/index.js'
-import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
-import { renderFilters, renderTable } from '../../utilities/renderTable.js'
-import { buildListViewClientProps } from '../../views/List/buildListViewClientProps.js'
-import { DefaultListView } from '../../views/List/index.js'
 import { ListDrawerContextProvider } from '../ListDrawer/Provider.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { type Option } from '../ReactSelect/index.js'
@@ -47,13 +39,9 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [isLoading, setIsLoading] = useState(true)
 
   const {
-    config,
     config: { collections },
     getEntityConfig,
   } = useConfig()
-  const importMap = useImportMap()
-  const { permissions } = useAuth()
-  const { i18n } = useTranslation()
 
   const isOpen = isModalOpen(drawerSlug)
 
@@ -126,35 +114,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
               overrideEntityVisibility,
               query: newQuery,
             } satisfies RenderListServerFnArgs,
-          })) as RenderListDataOnlyResult | RenderListServerFnReturnType
+          })) as RenderListServerFnReturnType
 
-          if ('List' in result && result?.List) {
+          if (result?.List) {
             setListView(result.List)
-            hasLoadedRef.current = true
-          } else if ('listViewData' in result && result?.listViewData && importMap) {
-            const listData = result.listViewData
-
-            const listViewClientProps = buildListViewClientProps({
-              clientConfig: config,
-              data: listData,
-              i18n,
-              importMap,
-              permissions,
-              renderFilters,
-              renderTable,
-            })
-
-            setListView(
-              <ListQueryProvider
-                collectionSlug={listData.collectionSlug}
-                data={listData.data}
-                modifySearchParams={!listData.isInDrawer}
-                orderableFieldName={listData.orderableFieldName}
-                query={listData.query}
-              >
-                <DefaultListView {...listViewClientProps} />
-              </ListQueryProvider>,
-            )
             hasLoadedRef.current = true
           } else if (isInitialLoad) {
             setListView(null)
@@ -178,16 +141,12 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     [
       serverFunction,
       closeModal,
-      config,
       drawerSlug,
       isOpen,
       enableRowSelections,
       filterOptions,
-      i18n,
-      importMap,
       overrideEntityVisibility,
       disableQueryPresets,
-      permissions,
     ],
   )
 

@@ -39,16 +39,6 @@
       "types": "./src/exports/layouts.ts",
       "default": "./src/exports/layouts.ts"
     },
-    "./views": {
-      "import": "./src/exports/views.ts",
-      "types": "./src/exports/views.ts",
-      "default": "./src/exports/views.ts"
-    },
-    "./views/server": {
-      "import": "./src/exports/views-server.ts",
-      "types": "./src/exports/views-server.ts",
-      "default": "./src/exports/views-server.ts"
-    },
     "./rsc": {
       "types": "./src/exports/rsc.ts",
       "browser": "./src/exports/rsc.browser.ts",
@@ -134,16 +124,6 @@
         "import": "./dist/exports/layouts.js",
         "types": "./dist/exports/layouts.d.ts",
         "default": "./dist/exports/layouts.js"
-      },
-      "./views": {
-        "import": "./dist/exports/views.js",
-        "types": "./dist/exports/views.d.ts",
-        "default": "./dist/exports/views.js"
-      },
-      "./views/server": {
-        "import": "./dist/exports/views-server.js",
-        "types": "./dist/exports/views-server.d.ts",
-        "default": "./dist/exports/views-server.js"
       },
       "./rsc": {
         "types": "./dist/exports/rsc.d.ts",

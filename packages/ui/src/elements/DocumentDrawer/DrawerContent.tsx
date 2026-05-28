@@ -1,7 +1,5 @@
 'use client'
 
-import type { FormState } from 'payload'
-
 import { useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -9,18 +7,10 @@ import { toast } from 'sonner'
 import type { DocumentDrawerProps } from './types.js'
 
 import { LoadingOverlay } from '../../elements/Loading/index.js'
-import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
-import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
-import {
-  buildDocumentViewClientProps,
-  type SerializableDocumentViewData,
-} from '../../views/Document/buildDocumentViewClientProps.js'
-import { DefaultEditView } from '../../views/Edit/index.js'
 import { DocumentDrawerContextProvider } from './Provider.js'
 
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
@@ -51,7 +41,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const { t } = useTranslation()
 
   const { renderDocument } = useServerFunctions()
-  const { permissions } = useAuth()
 
   const [DocumentView, setDocumentView] = useState<React.ReactNode>(undefined)
   const [isLoading, setIsLoading] = useState(true)
@@ -85,45 +74,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
           if (result?.Document) {
             setDocumentView(result.Document)
             setIsLoading(false)
-          } else if ((result as any)?.documentViewData) {
-            const documentData = (result as any).documentViewData as SerializableDocumentViewData
-            const clientProps = buildDocumentViewClientProps(documentData)
-
-            setDocumentView(
-              <DocumentInfoProvider
-                apiURL={documentData.apiURL}
-                collectionSlug={documentData.collectionSlug}
-                currentEditor={documentData.currentEditor}
-                disableActions={documentData.disableActions}
-                docPermissions={documentData.docPermissions}
-                globalSlug={documentData.globalSlug}
-                hasDeletePermission={documentData.hasDeletePermission}
-                hasPublishedDoc={documentData.hasPublishedDoc}
-                hasPublishPermission={documentData.hasPublishPermission}
-                hasSavePermission={documentData.hasSavePermission}
-                hasTrashPermission={documentData.hasTrashPermission}
-                id={documentData.id}
-                initialData={documentData.doc}
-                initialState={documentData.formState as FormState}
-                isEditing={documentData.isEditing}
-                isLocked={documentData.isLocked}
-                isTrashed={documentData.isTrashedDoc}
-                key={`${documentData.id ?? 'create'}-${documentData.locale?.code}`}
-                lastUpdateTime={documentData.lastUpdateTime ?? 0}
-                mostRecentVersionIsAutosaved={documentData.mostRecentVersionIsAutosaved}
-                redirectAfterCreate={redirectAfterCreate}
-                redirectAfterDelete={redirectAfterDelete}
-                redirectAfterDuplicate={redirectAfterDuplicate}
-                redirectAfterRestore={redirectAfterRestore}
-                unpublishedVersionCount={documentData.unpublishedVersionCount}
-                versionCount={documentData.versionCount ?? 0}
-              >
-                <EditDepthProvider>
-                  <DefaultEditView {...clientProps} />
-                </EditDepthProvider>
-              </DocumentInfoProvider>,
-            )
-            setIsLoading(false)
           }
         } catch (error) {
           toast.error(error?.message || t('error:unspecific'))
@@ -147,7 +97,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       redirectAfterCreate,
       closeModal,
       overrideEntityVisibility,
-      permissions,
       t,
     ],
   )

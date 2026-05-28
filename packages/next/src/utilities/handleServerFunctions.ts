@@ -7,8 +7,6 @@ import { getDefaultLayoutHandler } from '@payloadcms/ui/views/Dashboard/Default/
 import { renderWidgetHandler } from '@payloadcms/ui/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn'
 import { renderDocumentSlotsHandler } from '@payloadcms/ui/views/Document/renderDocumentSlots'
 
-import { renderDocumentHandler } from '../admin/serverFunctions/renderDocument.js'
-import { renderListHandler } from '../admin/serverFunctions/renderList.js'
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { initReq } from './initReq.js'
 import { slugifyHandler } from './slugify.js'
@@ -16,10 +14,8 @@ import { slugifyHandler } from './slugify.js'
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   ...sharedServerFunctions,
   'get-default-layout': getDefaultLayoutHandler,
-  'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,
-  'render-list': renderListHandler,
   'render-tab': renderTabHandler,
   'render-widget': renderWidgetHandler,
   slugify: slugifyHandler,

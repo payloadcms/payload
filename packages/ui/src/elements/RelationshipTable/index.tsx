@@ -18,12 +18,10 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useImportMap } from '../../providers/ImportMap/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { buildTableStateClientProps } from '../../utilities/buildTableStateClient.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
@@ -75,7 +73,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const [Table, setTable] = useState<React.ReactNode>(null)
   const { config, getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
-  const importMap = useImportMap()
 
   const [query, setQuery] = useState<ListQuery>()
   const [openColumnSelector, setOpenColumnSelector] = useState(false)
@@ -173,30 +170,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         return
       }
 
-      // Non-RSC adapters (e.g. TanStack Start) return a serializable
-      // `tableStateData` blob instead of a pre-rendered `Table` node. Rebuild
-      // the column state / Table here from the data so the same client tree
-      // works across adapters. The RSC adapter (Next.js) ships `Table`
-      // directly and we use it as-is.
-      let newData = result.data
-      let newColumnState = result.state
-      let NewTable = result.Table
-
-      if (!NewTable && 'tableStateData' in result && result.tableStateData) {
-        const reconstructed = buildTableStateClientProps({
-          clientConfig: config,
-          i18n,
-          importMap,
-          tableStateData: result.tableStateData,
-        })
-        newColumnState = reconstructed.state
-        NewTable = reconstructed.Table
-        newData = result.data
-      }
-
-      setData(newData)
-      setTable(NewTable)
-      setColumnState(newColumnState)
+      setData(result.data)
+      setTable(result.Table)
+      setColumnState(result.state)
       setIsLoadingTable(false)
     },
     [
@@ -214,9 +190,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       getTableState,
       relationTo,
       parent,
-      config,
-      i18n,
-      importMap,
     ],
   )
 

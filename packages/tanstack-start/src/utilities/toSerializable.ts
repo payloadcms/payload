@@ -3,10 +3,15 @@
  * functions, Symbols) while preserving Maps, Sets, Dates, typed arrays, etc.
  *
  * TanStack Start uses seroval to transfer server function return values to
- * the client.  Payload's `getClientConfig` / `getAdminPageData` may include
- * React elements (with `$$typeof: Symbol(...)`) or callback functions that
- * seroval chokes on.  Running the data through this function before returning
- * from a `createServerFn` handler keeps the transfer safe.
+ * the client.  Payload's `getClientConfig` / `getLayoutData` may include
+ * callback functions or RegExp instances that seroval chokes on.  Running
+ * the data through this function before returning from a `createServerFn`
+ * handler keeps the transfer safe.
+ *
+ * For server functions whose payloads contain React elements (e.g. the
+ * shared `form-state` / `render-list` / `render-document` handlers), use
+ * `serializeForRsc` instead — it converts elements into RSC handles rather
+ * than stripping them.
  *
  * Uses a WeakMap cache so that shared object references (e.g. the same array
  * referenced by both `doc.hasMany` and `formState.hasMany.value`) are

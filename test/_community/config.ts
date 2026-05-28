@@ -48,18 +48,13 @@ export default buildConfigWithDefaults({
     const existingExamplePosts = await payload.find({
       collection: postsSlug,
       limit: 1,
-      where: {
-        title: {
-          equals: 'example post',
-        },
-      },
     })
 
     if (existingExamplePosts.docs.length === 0) {
       await payload.create({
         collection: postsSlug,
         data: {
-          title: 'example post',
+          array: [{ title: 'example post' }],
         },
       })
     }

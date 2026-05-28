@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build --configLoader runner",
-    "dev": "vite dev",
+    "dev": "vite dev --configLoader runner",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "start": "vite start"

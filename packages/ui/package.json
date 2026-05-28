@@ -66,11 +66,6 @@
       "types": "./src/views/Document/getDocumentPermissions.tsx",
       "default": "./src/views/Document/getDocumentPermissions.tsx"
     },
-    "./views/Document/buildDocumentViewClientProps": {
-      "import": "./src/views/Document/buildDocumentViewClientProps.tsx",
-      "types": "./src/views/Document/buildDocumentViewClientProps.tsx",
-      "default": "./src/views/Document/buildDocumentViewClientProps.tsx"
-    },
     "./views/Document/getDocumentViewData": {
       "import": "./src/views/Document/getDocumentViewData.ts",
       "types": "./src/views/Document/getDocumentViewData.ts",
@@ -125,11 +120,6 @@
       "import": "./src/views/Root/getRootViewData.ts",
       "types": "./src/views/Root/getRootViewData.ts",
       "default": "./src/views/Root/getRootViewData.ts"
-    },
-    "./views/List/buildListViewClientProps": {
-      "import": "./src/views/List/buildListViewClientProps.tsx",
-      "types": "./src/views/List/buildListViewClientProps.tsx",
-      "default": "./src/views/List/buildListViewClientProps.tsx"
     },
     "./views/List/getListViewData": {
       "import": "./src/views/List/getListViewData.ts",
@@ -215,11 +205,6 @@
       "import": "./src/views/List/handleGroupBy.ts",
       "types": "./src/views/List/handleGroupBy.ts",
       "default": "./src/views/List/handleGroupBy.ts"
-    },
-    "./views/List/toSerializableListViewData": {
-      "import": "./src/views/List/toSerializableListViewData.ts",
-      "types": "./src/views/List/toSerializableListViewData.ts",
-      "default": "./src/views/List/toSerializableListViewData.ts"
     },
     "./views/Account/getAccountViewData": {
       "import": "./src/views/Account/getAccountViewData.ts",
@@ -920,11 +905,6 @@
       "types": "./src/utilities/serverFunctionRegistry.ts",
       "default": "./src/utilities/serverFunctionRegistry.ts"
     },
-    "./utilities/dataOnlyServerFunctions": {
-      "import": "./src/utilities/dataOnlyServerFunctions.ts",
-      "types": "./src/utilities/dataOnlyServerFunctions.ts",
-      "default": "./src/utilities/dataOnlyServerFunctions.ts"
-    },
     "./forms/fieldSchemasToFormState": {
       "import": "./src/forms/fieldSchemasToFormState/index.tsx",
       "types": "./src/forms/fieldSchemasToFormState/index.tsx",
@@ -1157,11 +1137,6 @@
         "types": "./dist/views/Document/getDocumentPermissions.d.ts",
         "default": "./dist/views/Document/getDocumentPermissions.js"
       },
-      "./views/Document/buildDocumentViewClientProps": {
-        "import": "./dist/views/Document/buildDocumentViewClientProps.js",
-        "types": "./dist/views/Document/buildDocumentViewClientProps.d.ts",
-        "default": "./dist/views/Document/buildDocumentViewClientProps.js"
-      },
       "./views/Document/getDocumentViewData": {
         "import": "./dist/views/Document/getDocumentViewData.js",
         "types": "./dist/views/Document/getDocumentViewData.d.ts",
@@ -1216,11 +1191,6 @@
         "import": "./dist/views/Root/getRootViewData.js",
         "types": "./dist/views/Root/getRootViewData.d.ts",
         "default": "./dist/views/Root/getRootViewData.js"
-      },
-      "./views/List/buildListViewClientProps": {
-        "import": "./dist/views/List/buildListViewClientProps.js",
-        "types": "./dist/views/List/buildListViewClientProps.d.ts",
-        "default": "./dist/views/List/buildListViewClientProps.js"
       },
       "./views/List/getListViewData": {
         "import": "./dist/views/List/getListViewData.js",
@@ -1306,11 +1276,6 @@
         "import": "./dist/views/List/handleGroupBy.js",
         "types": "./dist/views/List/handleGroupBy.d.ts",
         "default": "./dist/views/List/handleGroupBy.js"
-      },
-      "./views/List/toSerializableListViewData": {
-        "import": "./dist/views/List/toSerializableListViewData.js",
-        "types": "./dist/views/List/toSerializableListViewData.d.ts",
-        "default": "./dist/views/List/toSerializableListViewData.js"
       },
       "./views/Account/getAccountViewData": {
         "import": "./dist/views/Account/getAccountViewData.js",
@@ -1965,11 +1930,6 @@
         "import": "./dist/utilities/serverFunctionRegistry.js",
         "types": "./dist/utilities/serverFunctionRegistry.d.ts",
         "default": "./dist/utilities/serverFunctionRegistry.js"
-      },
-      "./utilities/dataOnlyServerFunctions": {
-        "import": "./dist/utilities/dataOnlyServerFunctions.js",
-        "types": "./dist/utilities/dataOnlyServerFunctions.d.ts",
-        "default": "./dist/utilities/dataOnlyServerFunctions.js"
       }
     },
     "main": "./dist/exports/client/index.js",

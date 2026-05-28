@@ -1,18 +1,23 @@
-import type { RenderDocumentServerFunction } from '@payloadcms/ui'
 import type { DocumentPreferences, VisibleEntities } from 'payload'
 
-import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { canAccessAdmin, isEntityHidden } from 'payload'
 import { applyLocaleFiltering } from 'payload/shared'
 
-import { renderDocument } from '../views.js'
+import type { RenderDocumentServerFunction } from '../../providers/ServerFunctions/index.js'
+
+import { renderDocument } from '../../views/Document/DocumentViewRSC.js'
+import { getClientConfig } from '../getClientConfig.js'
 
 /**
- * Server-function wrapper that prepares the document-render arguments
- * (client config, locale filtering, preferences, visible entities) and
- * delegates to the shared `renderDocument` helper.
+ * Framework-agnostic `'render-document'` server function. Used by document
+ * drawers and other on-demand document-render flows in both adapters.
+ * Returns `{ data, Document, preferences }` where `Document` is a React node;
+ * adapters ship it to the client either via Next's RSC payload or, for
+ * TanStack Start, via `serializeForRsc` + `createServerFn`.
  *
- * Wired into the next `handleServerFunctions` registry under `'render-document'`.
+ * Throws `Error('not-found')` and `Error('redirect:<url>')` per the contract
+ * documented on `renderDocument`. Adapters translate those into framework-
+ * specific responses.
  */
 export const renderDocumentHandler: RenderDocumentServerFunction = async (args) => {
   const {

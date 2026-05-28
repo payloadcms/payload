@@ -17,22 +17,20 @@ type LoadResult =
     }
 
 /**
- * Server function that:
+ * Admin-page server function for TanStack Start.
+ *
  *   1. Initializes the Payload request (TanStack-side `initReq`).
  *   2. Calls the shared `renderAdminPage` helper from `@payloadcms/ui`
  *      to produce a React server tree (template chrome + view RSC).
  *   3. Pipes that tree through TanStack's `renderServerComponent` to
  *      produce a Flight payload that the client can consume directly.
  *
- * Replaces the legacy `loadAdminPage` data-only pipeline that returned a
- * giant serialized blob the client had to rebuild into a React tree.
- *
  * Returns a sidecar `metadata` object the route loader uses to build
  * `head()` / `<meta>` entries.
  */
 export const loadAdminPageRSC = createServerFn({ method: 'GET' })
   .inputValidator((data: LoadInput): LoadInput => data ?? {})
-  .handler(async ({ data }): Promise<LoadResult> => {
+  .handler(async ({ data }) => {
     const { renderAdminPage } = await import('@payloadcms/ui/views/Root/renderAdminPage')
     const { initReq } = await import('@payloadcms/tanstack-start/server')
     const config = await (await import('@payload-config')).default
@@ -64,14 +62,19 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
 
       const rscPayload = await renderServerComponent(node as React.ReactElement)
 
-      return { metadata, rscPayload }
+      // Cast through `unknown` because TanStack's `createServerFn` strictly
+      // checks that the return type is seroval-serializable. `clientConfig`
+      // contains function references (`typescriptSchema`, etc.) that seroval
+      // strips at runtime via `toSerializable` / RSC rules, but the type
+      // system doesn't know that.
+      return { metadata, rscPayload } as unknown as LoadResult
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       if (message === 'not-found') {
-        return { _notFound: true }
+        return { _notFound: true } as LoadResult
       }
       if (message.startsWith('redirect:')) {
-        return { _redirect: message.slice('redirect:'.length) }
+        return { _redirect: message.slice('redirect:'.length) } as LoadResult
       }
       throw err
     }

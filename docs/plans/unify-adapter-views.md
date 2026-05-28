@@ -1,5 +1,33 @@
 # Unify Adapter Views Into `@payloadcms/ui` (Single-File Adapters via TanStack RSCs)
 
+## Progress (2026-05-28)
+
+**Stage 4.5.1 (wire format) landed. Stages 4 + 4.5.2–4.5.5 + 4.6 remaining.**
+
+### Done since 2026-05-27
+
+| Step                | Result                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 4.5.1 (wire format) | TanStack Start's shared server-function dispatcher (`form-state`, `table-state`, `copy-data-from-locale`, `schedule-publish`) now ships React elements as RSC Flight payloads end-to-end. The hand-rolled `/api/server-function` JSON route + `serverFunction.api.ts` have been deleted in favour of `runPayloadServerFn`, a `createServerFn({ method: 'POST' })` that calls the package's `handleServerFunctions`. The result is run through a new `serializeForRsc` helper that converts every React element into an RSC "renderable handle" via `renderServerComponent` from `@tanstack/react-start/rsc`. |
+
+### Implementation note: how 4.5.1 actually landed
+
+The plan called for a custom Flight stream over `/_payload/api/server-function/...` with `Content-Type: text/x-component` decoded by `createFromFetch`. We achieved the same outcome via TanStack Start's higher-level `createServerFn` + `$RSC` serialization adapter:
+
+- The server function returns a JS structure that may contain RSC handles produced by `renderServerComponent`. `serializeForRsc` walks the result tree (Maps, Sets, Dates, typed arrays, circular refs preserved) and converts every React element into such a handle. Functions / Symbols / RegExps are stripped, mirroring the prior `toSerializable` walk.
+- TanStack Start's `$RSC` serialization adapter (registered globally via `globalThis.__RSC_SSR__`) recognises tagged handles and streams their underlying Flight bytes inline within the createServerFn payload. The client adapter calls `createRenderableFromStream` to decode each handle back into a renderable React proxy.
+- Plain JSON-ish data still rides seroval as before. Args travelling client → server are stripped of functions / Symbols / RegExps / React elements before dispatch to preserve the relaxed `JSON.stringify` behaviour callers depended on (seroval errors on functions; `JSON.stringify` silently dropped them).
+- Network requests that previously hit `/api/server-function` now hit `/_serverFn/<base64-fn-id>`. `test/__helpers/e2e/assertNetworkRequests.ts`, `test/auth/e2e.spec.ts`, and `test/lexical/.../e2e.spec.ts` accept both URL patterns for backward compatibility.
+
+Verified end-to-end: the original repro — a `TitleField` server component nested inside an `array` field in `_community` — now renders immediately on Add Row (`array.0.title`, `array.1.title`, ...) instead of requiring save+reload, and updates correctly after save (`Character count: 14` for "first row text"). Behaviour matches the Next.js adapter.
+
+### Remaining for full completion
+
+- **Stage 4** — switch `tanstack-app/src/app/_payload/admin.{$,index}.tsx` and `tanstack-app/src/functions/admin.functions.tsx` to use `loadAdminPageRSC` exclusively; delete `packages/tanstack-start/src/views/AdminView.tsx`, `AccountSettings/`, and `Root/index.tsx` (the data-only `getAdminPageData`); collapse `tanstack-app` glue.
+- **Stage 4.5.2 / 4.5.3 / 4.5.4** — delete `packages/ui/src/utilities/dataOnlyHandlers/` (6 files), `dataOnlyServerFunctions.ts` registry, `buildListViewClientProps.tsx`, `buildDocumentViewClientProps.tsx`, `toSerializableListViewData.ts`, `createSerializableValue.ts`. Drop the registry merge in `packages/tanstack-start/src/utilities/handleServerFunctions.ts`.
+- **Stage 4.6** — re-run TanStack e2e acceptance suites; expect the previously documented "data-only-pipeline rendering gaps" buckets (`hierarchy` 19/19, `admin/document-view` 23/62, `versions` 9/122) to flip green.
+- **Stage 5 / 6** — composite slots + docs (optional follow-ups).
+
 ## Progress (2026-05-27)
 
 **Completed Stages 0–3.** All view RSCs live in `@payloadcms/ui` and the Next.js
@@ -789,15 +817,20 @@ No `views/` folder in either adapter. Both adapters import everything view-relat
 
 ## Concrete Deliverables Checklist
 
-- [ ] **Stage 0:** shared `RenderServerComponent` in `packages/ui`; both adapters re-export.
-- [ ] **Stage 0:** `getRouteData` promoted to `packages/ui`; `DefaultView` field dropped.
-- [ ] **Stage 0:** `NavigationAdapter` contract + adapter impls.
-- [ ] **Stage 0:** templates consolidated; `packages/next/src/templates/` deleted.
-- [ ] **Stage 1:** `ListViewRSC` + `ListViewShell` in `packages/ui/src/views/List/`; next + tanstack wired; old tanstack `ListViewContent` deleted.
-- [ ] **Stage 2:** same for `Dashboard`, `Verify`, `Account`, `Login`, `CreateFirstUser`, `Document` (incl. `Versions` / `Version` / `API`), `NotFound`, `Hierarchy`, `CollectionTrash`, `Logout`, `ResetPassword`, `ForgotPassword`, `Unauthorized`, `Custom`.
-- [ ] **Stage 3:** `RootPageRSC` + `renderAdminView`; `packages/next/src/RootPage.tsx` (~40 lines); `packages/next/src/views/` deleted entirely.
-- [ ] **Stage 4:** `packages/tanstack-start/src/AdminPage.tsx` (~50 lines); `packages/tanstack-start/src/views/` deleted entirely; `tanstack-app` glue reduced.
-- [ ] **Stage 4.5:** on-demand server functions Flight-wrapped; `dataOnlyHandlers/` deleted; `buildListViewClientProps` / `buildDocumentViewClientProps` / `toSerializable*` shims deleted.
+- [x] **Stage 0:** shared `RenderServerComponent` in `packages/ui`; both adapters re-export.
+- [x] **Stage 0:** `getRouteData` promoted to `packages/ui`; `DefaultView` field dropped.
+- [x] **Stage 0:** `NavigationAdapter` contract + adapter impls.
+- [x] **Stage 0:** templates consolidated; `packages/next/src/templates/` deleted.
+- [x] **Stage 1:** `ListViewRSC` in `packages/ui/src/views/List/`; next wired; old tanstack `ListViewContent` deleted (note: `ListViewShell` not extracted as a separate file — providers wrap inside `ListViewRSC` directly).
+- [x] **Stage 2:** same for `Dashboard`, `Verify`, `Account`, `Login`, `CreateFirstUser`, `Document` (incl. `Versions` / `Version`), `Hierarchy`, `CollectionTrash`, `Logout`, `ResetPassword`, `ForgotPassword`, `Unauthorized`, `Custom`. (`NotFound` lives at `packages/next/src/admin/NotFoundPage.tsx` since 404s are framework-routed; `API` view collapsed into Document RSC.)
+- [x] **Stage 3:** `renderAdminView` + `renderAdminPage` dispatcher; `packages/next/src/admin/RootPage.tsx` (~225 lines, was 238 in `views/Root/`); `packages/next/src/views/` deleted entirely.
+- [x] **Stage 4:** `tanstack-app/src/functions/adminPageRSC.functions.tsx` (~80 lines) is the new `createServerFn` calling `renderAdminPage` and shipping it as a single Flight payload — wired into `tanstack-app/src/app/_payload/admin.{$,index}.tsx`. Deleted: `packages/tanstack-start/src/views/AdminView.tsx`, `AccountSettings/`, `Root/index.tsx` (incl. legacy `getAdminPageData`), `Root/getRouteData.ts`, the package-level `views/` exports, the legacy `loadAdminPage` / `loadDashboard` in `tanstack-app/src/functions/admin.functions.tsx`, the `getToSerializable` shim, and the unused `tanstack-app/src/components/AdminPageView`.
+- [x] **Stage 4.5.1 (wire format):** shared on-demand server functions ship React elements as RSC Flight payloads via `serializeForRsc` + `createServerFn` + the `$RSC` serialization adapter. `runPayloadServerFn` in `tanstack-app/src/functions/serverFunction.functions.ts` replaces the `/api/server-function` JSON route. Verified with `TitleField` server component nested in array.
+- [x] **Stage 4.5.2:** deleted `packages/ui/src/utilities/dataOnlyHandlers/` (all 6 files) and the `dataOnlyServerFunctions` registry. `render-list` / `render-document` handlers now live in `packages/ui/src/utilities/sharedHandlers/` and are registered through `sharedServerFunctions` in `packages/ui/src/utilities/serverFunctionRegistry.ts`. Both `packages/next` and `packages/tanstack-start` `handleServerFunctions.ts` consume the shared registry; the TanStack-side merge is gone.
+- [x] **Stage 4.5.3:** deleted `buildListViewClientProps.tsx`, `buildDocumentViewClientProps.tsx`, `toSerializableListViewData.ts`, `buildTableStateClient.tsx`, the `BuildTableStateDataOnlyResult` / `SerializableTableStateData` types, plus the corresponding `data-only` branches in `buildTableState.ts`, `RelationshipTable`, `ListDrawer/DrawerContent.tsx`, and `DocumentDrawer/DrawerContent.tsx`. `createSerializableValue` is kept — it's still used outside the data-only pipeline. `SerializableListViewData` / `SerializableDocumentViewData` / `DocumentViewKind` are gone with the deletions above. `FormStateWithoutComponents` deprecation is deferred until a separate pass — it's still referenced internally in `fieldSchemasToFormState` and `ClipboardAction`.
+- [x] **Stage 4.5.4:** N/A — `getAdminPageData` itself was deleted in Stage 4 along with `packages/tanstack-start/src/views/Root/index.tsx`. The TanStack admin route now goes through the shared `renderAdminPage` helper from `@payloadcms/ui`, so all of the `toSerializable*` / `viewKind: 'unauthorized'` / `livePreviewComponent`-as-string / `clientSchemaMap` round-trips that lived in `getAdminPageData` are gone by construction.
+- [ ] **Stage 4.5.5:** validate form interactions (field re-renders mid-form, blocks/array `customComponents` after refetch, copy-from-locale, drawers, plugin-seo).
+- [ ] **Stage 4.6:** re-run TanStack e2e acceptance suites against the RSC-Flight pipeline; expect the documented "data-only-pipeline rendering gaps" buckets to flip green.
 - [ ] **Stage 5:** custom-view composite slot; optional Logo/AfterFields composites.
 - [ ] **Stage 6:** docs + `CLAUDE.md` update; framework-adapter guide.
 - [ ] **Per stage:** `pnpm prepare-run-test-against-prod && pnpm dev:prod <suite>`, integration tests, tanstack-app e2e.
