@@ -34,6 +34,11 @@
 
     /* Modal */
     --color-modalbackdrop: rgba(0, 0, 0, 0.5);
+
+    /* Field */
+    --color-bg-field: var(--color-bg);
+    --color-border-field: var(--special-border-translucent);
+    --color-border-field-hover: var(--special-border-translucent-strong);
   }
 
   /* ——————————————————————————————————————————————
@@ -236,6 +241,7 @@
     --special-bg-transparent: rgba(255, 255, 255, 0.6);
     --special-bg-transparent-secondary-hover: var(--ramp-black-200);
     --special-border-translucent: var(--ramp-black-200);
+    --special-border-translucent-strong: var(--ramp-black-300);
 
     /* Multiplayer */
     --multiplayer-blue: var(--special-multiplayer-blue);
@@ -382,5 +388,6 @@
     --special-bg-transparent: rgba(0, 0, 0, 0.6);
     --special-bg-transparent-secondary-hover: var(--ramp-white-200);
     --special-border-translucent: var(--ramp-white-200);
+    --special-border-translucent-strong: var(--ramp-white-300);
   }
 }

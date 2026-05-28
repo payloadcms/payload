@@ -2,8 +2,8 @@
   .form-input {
     width: 100%;
     min-height: var(--spacer-5);
-    background: var(--color-bg-secondary);
-    border: var(--stroke-width-small) solid transparent;
+    background: var(--color-bg-field);
+    border: var(--stroke-width-small) solid var(--color-border-field);
     border-radius: var(--radius-medium);
     color: var(--color-text);
     font-family: var(--text-body-medium-font-family);
@@ -28,13 +28,17 @@
       font-size: var(--text-body-medium-font-size);
     }
 
-    &:where(:hover:not(:focus):not(:disabled)) {
-      border-color: var(--color-border);
+    &:where(:hover:not(:focus):not(:disabled):not(:read-only)) {
+      border-color: var(--color-border-field-hover);
     }
 
     &:focus {
       border-color: var(--color-border-selected);
       border-radius: var(--radius-medium);
+    }
+
+    &:read-only:focus {
+      border-color: var(--color-border-field-hover);
     }
 
     &:focus-visible {
@@ -60,16 +64,16 @@
     display: flex;
     position: relative;
     align-items: stretch;
-    background: var(--color-bg-secondary);
-    border: var(--stroke-width-small) solid transparent;
+    background: var(--color-bg-field);
+    border: var(--stroke-width-small) solid var(--color-border-field);
     border-radius: var(--radius-medium);
     min-height: var(--spacer-5);
     transition-property: box-shadow, background-color;
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
-    &:where(:hover:not(:focus-within):not(:has(input:disabled))) {
-      border-color: var(--color-border);
+    &:where(:hover:not(:focus-within):not(:has(input:disabled)):not(:has(input:read-only))) {
+      border-color: var(--color-border-field-hover);
     }
 
     &:focus-within {

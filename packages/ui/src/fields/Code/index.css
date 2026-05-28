@@ -6,15 +6,15 @@
     gap: var(--spacer-2);
 
     .code-editor {
-      background: var(--color-bg-secondary);
-      border: var(--stroke-width-small) solid var(--color-border);
+      background: var(--color-bg-field);
+      border: var(--stroke-width-small) solid var(--color-border-field);
       border-radius: var(--radius-medium);
       padding: var(--spacer-2) 0;
       overflow: clip;
       box-shadow: none;
 
       &:hover {
-        border-color: var(--color-border);
+        border-color: var(--color-border-field-hover);
       }
 
       &:focus-within {

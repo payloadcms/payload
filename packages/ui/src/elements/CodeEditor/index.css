@@ -9,8 +9,8 @@
     -webkit-appearance: none;
 
     /* Theme */
-    background: var(--color-bg-secondary);
-    border: var(--stroke-width-small) solid var(--color-border);
+    background: var(--color-bg-field);
+    border: var(--stroke-width-small) solid var(--color-border-field);
     border-radius: var(--radius-medium);
     box-shadow: none;
 

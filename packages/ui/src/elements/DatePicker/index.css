@@ -823,9 +823,9 @@
     line-height: var(--text-body-medium-line-height);
     width: 100%;
     min-height: var(--spacer-5);
-    border: var(--stroke-width-small) solid transparent;
+    border: var(--stroke-width-small) solid var(--color-border-field);
     border-radius: var(--radius-medium);
-    background: var(--color-bg-secondary);
+    background: var(--color-bg-field);
     color: var(--color-text);
     padding-block: calc(var(--spacer-1));
     padding-inline: var(--spacer-2) var(--spacer-5); /* space for calendar icon */
@@ -835,13 +835,17 @@
       font-weight: var(--text-body-medium-font-weight);
     }
 
-    &:hover:not(:focus) {
-      border-color: var(--color-border);
+    &:hover:not(:focus):not(:read-only) {
+      border-color: var(--color-border-field-hover);
     }
 
     &:focus {
       border-color: var(--color-border-selected);
       outline: none;
+    }
+
+    &:read-only:focus {
+      border-color: var(--color-border-field-hover);
     }
 
     &:disabled {

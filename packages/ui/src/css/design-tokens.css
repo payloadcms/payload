@@ -12,6 +12,7 @@
     /* White (opacity-based) */
     --ramp-white-100: rgba(255, 255, 255, 0.05);
     --ramp-white-200: rgba(255, 255, 255, 0.1);
+    --ramp-white-300: rgba(255, 255, 255, 0.2);
     --ramp-white-400: rgba(255, 255, 255, 0.4);
     --ramp-white-500: rgba(255, 255, 255, 0.7);
     --ramp-white-600: rgba(255, 255, 255, 0.8);

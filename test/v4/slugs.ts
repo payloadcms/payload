@@ -33,6 +33,7 @@ export const joinPostsSlug = 'join-posts'
 export const orderableSlug = 'orderable'
 export const rubbishSlug = 'rubbish'
 export const searchBarTestSlug = 'search-bar-test'
+export const talksSlug = 'talks'
 export const unauthorizedSlug = 'unauthorized-test'
 
 export const collectionSlugs = [
@@ -71,6 +72,7 @@ export const collectionSlugs = [
   orderableSlug,
   rubbishSlug,
   searchBarTestSlug,
+  talksSlug,
   unauthorizedSlug,
   'payload-query-presets',
 ]

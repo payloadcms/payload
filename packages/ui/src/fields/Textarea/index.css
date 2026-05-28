@@ -21,16 +21,8 @@
       field-sizing: content;
       padding: var(--spacer-2);
 
-      &:hover:not(:focus):not(:disabled) {
-        border-color: var(--color-border);
-      }
-    }
-
-    &.read-only {
-      textarea {
-        background: var(--color-bg);
-        border-color: var(--color-border);
-        color: var(--color-text);
+      &:hover:not(:focus):not(:disabled):not(:read-only) {
+        border-color: var(--color-border-field-hover);
       }
     }
 

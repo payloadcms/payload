@@ -95,6 +95,7 @@ export interface Config {
     'tabs-fields': TabsField;
     'tag-items': TagItem;
     tags: Tag;
+    talks: Talk;
     'text-fields': TextField;
     'textarea-fields': TextareaField;
     uploads: Upload;
@@ -117,6 +118,9 @@ export interface Config {
       postsSorted: 'join-posts';
       postsNoRowTypes: 'join-posts';
       'group.groupedPosts': 'join-posts';
+    };
+    talks: {
+      referencedBy: 'talks';
     };
     'text-fields': {
       relatedFrom: 'relationship-fields';
@@ -151,6 +155,7 @@ export interface Config {
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
     'tag-items': TagItemsSelect<false> | TagItemsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    talks: TalksSelect<false> | TalksSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
@@ -905,7 +910,7 @@ export interface Tag {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  allowedCollections?: ('tag-items' | 'text-fields')[] | null;
+  allowedCollections?: ('tag-items' | 'talks' | 'text-fields')[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1194,6 +1199,227 @@ export interface TagItem {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "talks".
+ */
+export interface Talk {
+  id: string;
+  /**
+   * Public-facing title of the talk.
+   */
+  title: string;
+  /**
+   * URL slug — leave blank to auto-generate.
+   */
+  slug?: string | null;
+  /**
+   * One-paragraph teaser shown in listings.
+   */
+  shortDescription?: string | null;
+  abstract?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  track?: ('frontend' | 'backend' | 'devops' | 'design' | 'ai-ml' | 'workshop') | null;
+  /**
+   * Total runtime in minutes.
+   */
+  durationMinutes?: number | null;
+  difficultyLevel?: ('beginner' | 'intermediate' | 'advanced') | null;
+  languages?: ('en' | 'es' | 'de' | 'fr' | 'ja' | 'pt')[] | null;
+  /**
+   * Keywords for search and discoverability.
+   */
+  keywords?: string[] | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  /**
+   * Room or stage name.
+   */
+  room?: string | null;
+  /**
+   * Maximum seats.
+   */
+  capacity?: number | null;
+  /**
+   * Geographic coordinates of the venue.
+   *
+   * @minItems 2
+   * @maxItems 2
+   */
+  venueLocation?: [number, number] | null;
+  registrationDeadline?: string | null;
+  registrationUrl?: string | null;
+  contactEmail?: string | null;
+  /**
+   * Wide image used on the talk landing page.
+   */
+  heroImage?: (string | null) | Upload;
+  slidesUrl?: string | null;
+  recordingUrl?: string | null;
+  /**
+   * Photos and graphics for the talk.
+   */
+  gallery?:
+    | {
+        image: string | Upload;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  sections?:
+    | (
+        | {
+            eyebrow?: string | null;
+            heading: string;
+            subheading?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-hero';
+          }
+        | {
+            quote: string;
+            attribution?: string | null;
+            role?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-quote';
+          }
+        | {
+            label: string;
+            url: string;
+            style?: ('primary' | 'secondary' | 'ghost') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-cta';
+          }
+        | {
+            image: string | Upload;
+            caption?: string | null;
+            align?: ('left' | 'center' | 'right') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-image';
+          }
+        | {
+            heading?: string | null;
+            items?:
+              | {
+                  question: string;
+                  answer: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-qa';
+          }
+      )[]
+    | null;
+  /**
+   * Links to slides, recording, docs, code.
+   */
+  resources?:
+    | {
+        label: string;
+        url: string;
+        type?: ('slides' | 'recording' | 'docs' | 'code' | 'other') | null;
+        id?: string | null;
+      }[]
+    | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: (string | null) | Upload;
+  customCss?: string | null;
+  /**
+   * JSON-LD schema injected into the page head.
+   */
+  customSchema?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Notes visible only to organizers.
+   */
+  internalNotes?: {
+    reviewerNotes?: string | null;
+    flagged?: boolean | null;
+  };
+  /**
+   * Other talks attendees might enjoy.
+   */
+  relatedTalks?: (string | Talk)[] | null;
+  /**
+   * Talks that list this one as related.
+   */
+  referencedBy?: {
+    docs?: (string | Talk)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Workflow status (separate from publish state).
+   */
+  status?: ('proposed' | 'accepted' | 'confirmed' | 'cancelled') | null;
+  /**
+   * Primary owner of this talk.
+   */
+  organizer?: (string | null) | User;
+  coOrganizers?: (string | User)[] | null;
+  /**
+   * Hierarchical tags.
+   */
+  _h_tags?: (string | Tag)[] | null;
+  isFeatured?: boolean | null;
+  isVirtual?: boolean | null;
+  /**
+   * Current registered attendees.
+   */
+  attendeeCount?: number | null;
+  /**
+   * Sort priority (1–10).
+   */
+  priority?: number | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads".
+ */
+export interface Upload {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "textarea-fields".
  */
 export interface TextareaField {
@@ -1216,25 +1442,6 @@ export interface TextareaField {
   contentDisabled?: string | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads".
- */
-export interface Upload {
-  id: string;
-  alt?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1430,6 +1637,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tags';
         value: string | Tag;
+      } | null)
+    | ({
+        relationTo: 'talks';
+        value: string | Talk;
       } | null)
     | ({
         relationTo: 'text-fields';
@@ -2168,6 +2379,125 @@ export interface TagsSelect<T extends boolean = true> {
   _h_slugPath?: T;
   _h_titlePath?: T;
   allowedCollections?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "talks_select".
+ */
+export interface TalksSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  shortDescription?: T;
+  abstract?: T;
+  track?: T;
+  durationMinutes?: T;
+  difficultyLevel?: T;
+  languages?: T;
+  keywords?: T;
+  startTime?: T;
+  endTime?: T;
+  room?: T;
+  capacity?: T;
+  venueLocation?: T;
+  registrationDeadline?: T;
+  registrationUrl?: T;
+  contactEmail?: T;
+  heroImage?: T;
+  slidesUrl?: T;
+  recordingUrl?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  sections?:
+    | T
+    | {
+        'talk-hero'?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              subheading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'talk-quote'?:
+          | T
+          | {
+              quote?: T;
+              attribution?: T;
+              role?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'talk-cta'?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              style?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'talk-image'?:
+          | T
+          | {
+              image?: T;
+              caption?: T;
+              align?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'talk-qa'?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  resources?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        type?: T;
+        id?: T;
+      };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  customCss?: T;
+  customSchema?: T;
+  internalNotes?:
+    | T
+    | {
+        reviewerNotes?: T;
+        flagged?: T;
+      };
+  relatedTalks?: T;
+  referencedBy?: T;
+  status?: T;
+  organizer?: T;
+  coOrganizers?: T;
+  _h_tags?: T;
+  isFeatured?: T;
+  isVirtual?: T;
+  attendeeCount?: T;
+  priority?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
