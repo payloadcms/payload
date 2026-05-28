@@ -832,7 +832,7 @@ No `views/` folder in either adapter. Both adapters import everything view-relat
 - [ ] **Stage 4.5.5:** validate form interactions (field re-renders mid-form, blocks/array `customComponents` after refetch, copy-from-locale, drawers, plugin-seo).
 - [ ] **Stage 4.6:** re-run TanStack e2e acceptance suites against the RSC-Flight pipeline; expect the documented "data-only-pipeline rendering gaps" buckets to flip green.
 - [ ] **Stage 5:** custom-view composite slot; optional Logo/AfterFields composites.
-- [ ] **Stage 6:** docs + `CLAUDE.md` update; framework-adapter guide.
+- [x] **Stage 6:** `CLAUDE.md` updated with the "shared views, thin adapters" architecture section; one-page framework-adapter guide added at `docs/framework-adapter-guide.md` (covers `initReq`, `renderAdminPage`, server-function dispatch, layout/providers, navigation adapter, and the explicit "what not to do" list).
 - [ ] **Per stage:** `pnpm prepare-run-test-against-prod && pnpm dev:prod <suite>`, integration tests, tanstack-app e2e.
 
 ## Bottom line
