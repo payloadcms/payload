@@ -48,7 +48,7 @@
   .filter-trigger__wrap:has(.btn--selected) .filter-trigger__clear {
     background: var(--color-bg-selected);
     color: var(--color-text-selected);
-    border-color: transparent;
+    border-color: var(--color-border-selected-strong);
   }
 
   .filter-trigger__wrap:has(.btn--selected) .filter-trigger__clear:hover {

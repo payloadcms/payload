@@ -324,6 +324,7 @@ export const idTranslations: DefaultTranslationsObject = {
     export: 'Ekspor',
     fallbackToDefaultLocale: 'Kembali ke lokal default',
     false: 'Salah',
+    field: 'Field',
     filter: 'Filter',
     filters: 'Filter',
     filterWhere: 'Filter {{label}} di mana',

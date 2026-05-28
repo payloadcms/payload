@@ -325,6 +325,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     export: 'এক্সপোর্ট করুন',
     fallbackToDefaultLocale: 'ডিফল্ট লোকেলে ফিরে যান',
     false: 'মিথ্যা',
+    field: 'Field',
     filter: 'ফিল্টার করুন',
     filters: 'ফিল্টারগুলি',
     filterWhere: '{{label}} যেখানে ফিল্টার করুন',

@@ -321,6 +321,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     export: 'Износ',
     fallbackToDefaultLocale: 'Използвай локализацията, която е по подразбиране',
     false: 'Невярно',
+    field: 'Field',
     filter: 'Филтрирай',
     filters: 'Филтри',
     filterWhere: 'Филтрирай {{label}} където',

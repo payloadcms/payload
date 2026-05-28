@@ -10,11 +10,14 @@ import {
   blocksFieldsSlug,
   collectionSlugs,
   draftVersionsSlug,
+  folderItemsSlug,
+  foldersSlug,
   joinFieldsSlug,
   joinPostsSlug,
   orderableSlug,
   relationshipFieldsSlug,
   richTextFieldsSlug,
+  tagItemsSlug,
   tagsSlug,
   textFieldsSlug,
   uploadsSlug,
@@ -61,6 +64,7 @@ import SearchBarTest from './collections/SearchBarTest/index.js'
 import SelectFields from './collections/Select/index.js'
 import SlugFields from './collections/Slug/index.js'
 import TabsFields from './collections/Tabs/index.js'
+import TagItems from './collections/TagItems/index.js'
 import Tags from './collections/Tags/index.js'
 import TextFields from './collections/Text/index.js'
 import TextareaFields from './collections/Textarea/index.js'
@@ -126,6 +130,7 @@ export const collections: CollectionConfig[] = [
   SelectFields,
   SlugFields,
   TabsFields,
+  TagItems,
   Tags,
   TextFields,
   TextareaFields,
@@ -345,6 +350,72 @@ export const baseConfig: Partial<Config> = {
       collection: tagsSlug,
       data: { name: 'Design' },
     })
+
+    // Add more root-level tags to test pagination (20+ total root tags)
+    const additionalTags = [
+      'Marketing',
+      'Sales',
+      'Finance',
+      'HR',
+      'Operations',
+      'Legal',
+      'Engineering',
+      'Product',
+      'Research',
+      'Analytics',
+      'Support',
+      'Quality',
+      'Security',
+      'Infrastructure',
+      'Data Science',
+      'DevOps',
+      'Mobile',
+      'Cloud',
+    ]
+
+    for (const tagName of additionalTags) {
+      await payload.create({
+        collection: tagsSlug,
+        data: { name: tagName },
+      })
+    }
+
+    // Seed tag-items collection with 30 untagged items for hierarchy pagination testing
+    for (let i = 1; i <= 30; i++) {
+      await payload.create({
+        collection: tagItemsSlug,
+        data: {
+          title: `Tag Item ${i}`,
+          description: `Description for tag item ${i}`,
+        },
+      })
+    }
+
+    // Seed folders for hierarchy testing
+    const rootFolder = await payload.create({
+      collection: foldersSlug,
+      data: { name: 'Root Folder' },
+    })
+
+    await payload.create({
+      collection: foldersSlug,
+      data: { name: 'Subfolder A', parent: rootFolder.id },
+    })
+
+    await payload.create({
+      collection: foldersSlug,
+      data: { name: 'Subfolder B', parent: rootFolder.id },
+    })
+
+    // Seed folder-items collection with 30 items (no folder assigned) for hierarchy pagination testing
+    for (let i = 1; i <= 30; i++) {
+      await payload.create({
+        collection: folderItemsSlug,
+        data: {
+          title: `Folder Item ${i}`,
+        },
+      })
+    }
 
     // Seed search-bar-test collection with 300 items for pagination testing
     const categories = ['news', 'blog', 'tutorial', 'docs']

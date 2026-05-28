@@ -13,17 +13,6 @@
     flex-direction: column;
     background-color: var(--color-bg);
 
-    &:before {
-      content: '';
-      display: block;
-      position: absolute;
-      inset: 0;
-      background-color: inherit;
-      opacity: 0;
-      z-index: var(--z-status);
-      visibility: hidden;
-      transition: all var(--nav-trans-time) linear;
-    }
   }
 
   @media (max-width: 768px) {
