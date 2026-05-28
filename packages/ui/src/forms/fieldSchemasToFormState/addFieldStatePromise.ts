@@ -986,7 +986,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   }
 
-  if (renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
+  if (renderFieldFn && !fieldIsHiddenOrDisabled(field) && passesCondition !== false) {
     const fieldConfig = fieldSchemaMap.get(schemaPath)
 
     if (!fieldConfig && !mockRSCs) {
