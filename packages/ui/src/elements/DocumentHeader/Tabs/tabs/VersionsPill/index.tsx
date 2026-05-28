@@ -2,7 +2,6 @@
 import React from 'react'
 
 import { useDocumentInfo } from '../../../../../providers/DocumentInfo/index.js'
-
 import './index.css'
 
 const baseClass = 'pill-version-count'
