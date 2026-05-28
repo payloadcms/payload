@@ -10,6 +10,7 @@ import { cookies as nextCookies } from 'next/headers.js'
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
+import { NextRouterAdapter } from '../../adapters/router.js'
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
@@ -185,6 +186,7 @@ const RootLayoutContent = async ({
           languageOptions={languageOptions}
           locale={req.locale}
           permissions={req.user ? permissions : null}
+          RouterAdapter={NextRouterAdapter}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
