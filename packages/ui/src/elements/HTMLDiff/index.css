@@ -58,7 +58,7 @@
     text-decoration-line: line-through;
     background-color: var(--diff-delete-pill-bg);
     border-radius: var(--radius-medium);
-    padding: calc(var(--stroke-width-small) * 1.5) calc(var(--stroke-width-small) * 2);
+    padding: calc(var(--stroke-width-small) * 1) calc(var(--stroke-width-small) * 2);
     text-decoration-thickness: var(--stroke-width-small);
     vertical-align: baseline;
   }
@@ -84,7 +84,7 @@
     background-color: var(--diff-create-pill-bg);
     color: var(--diff-create-pill-color);
     border-radius: var(--radius-medium);
-    padding: calc(var(--stroke-width-small) * 1.5) calc(var(--stroke-width-small) * 2);
+    padding: calc(var(--stroke-width-small) * 1) calc(var(--stroke-width-small) * 2);
     vertical-align: baseline;
   }
 
