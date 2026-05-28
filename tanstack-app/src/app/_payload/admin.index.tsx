@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 
-import { AdminPageView } from '../../components/AdminPageView/index.js'
-import { loadDashboard } from '../../functions/admin.functions.js'
+import { getAdminMeta } from '@payloadcms/tanstack-start/server'
+import { loadAdminPageRSC } from '../../functions/adminPageRSC.functions.js'
 
 export const Route = createFileRoute('/_payload/admin/')({
   // Mirror admin.$.tsx: surface query params in `loaderDeps` so changes like
@@ -12,14 +12,15 @@ export const Route = createFileRoute('/_payload/admin/')({
     searchKey: JSON.stringify(search),
   }),
   loader: async ({ location }) => {
-    const data = await loadDashboard({
+    const data = (await loadAdminPageRSC({
       data: {
+        _splat: '',
         search: Object.fromEntries(new URLSearchParams(location.searchStr)) as Record<
           string,
           string | string[]
         >,
       },
-    })
+    })) as any
     if (data?._redirect) {
       // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing redirect objects
       throw redirect({ to: data._redirect })
@@ -30,5 +31,19 @@ export const Route = createFileRoute('/_payload/admin/')({
     }
     return data
   },
-  component: () => <AdminPageView {...Route.useLoaderData()} />,
+  head: ({ loaderData }) => ({
+    meta: getAdminMeta({
+      clientConfig: (loaderData as any)?.metadata?.clientConfig,
+      collectionLabel: (loaderData as any)?.metadata?.collectionLabel,
+      globalLabel: (loaderData as any)?.metadata?.globalLabel,
+      viewType: (loaderData as any)?.metadata?.viewType,
+    }),
+  }),
+  component: AdminPage,
 })
+
+function AdminPage() {
+  const data = Route.useLoaderData() as any
+
+  return <>{data?.rscPayload}</>
+}

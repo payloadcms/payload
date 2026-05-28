@@ -22,6 +22,7 @@ import type {
 import type React from 'react'
 
 import {
+  appendDateTimezoneSelectFields,
   appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
@@ -292,6 +293,12 @@ export async function getListViewData(args: GetListViewDataArgs): Promise<ListVi
 
   appendUploadSelectFields({
     collectionConfig,
+    select,
+  })
+
+  /** Force select `_tz` siblings for any timezone-enabled date fields in select */
+  appendDateTimezoneSelectFields({
+    fields: collectionConfig.flattenedFields,
     select,
   })
 

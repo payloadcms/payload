@@ -129,7 +129,13 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  title?: string | null;
+  array?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  check?: boolean | null;
   content?: {
     root: {
       type: string;
@@ -300,7 +306,13 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  title?: T;
+  array?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
+  check?: T;
   content?: T;
   updatedAt?: T;
   createdAt?: T;

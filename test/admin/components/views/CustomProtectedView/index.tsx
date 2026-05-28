@@ -1,6 +1,7 @@
 import type { AdminViewServerProps } from 'payload'
 
 import { Button } from '@payloadcms/ui'
+import { notFound, redirect } from 'next/navigation.js'
 import React from 'react'
 
 import { customNestedViewTitle, customViewPath } from '../../../shared.js'
@@ -25,9 +26,9 @@ export async function CustomProtectedView({ initPageResult }: AdminViewServerPro
 
   if (!settings?.canAccessProtected) {
     if (user) {
-      return null
+      redirect(`${adminRoute}/unauthorized`)
     } else {
-      return null
+      notFound()
     }
   }
 

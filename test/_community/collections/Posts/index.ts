@@ -6,13 +6,27 @@ export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
-  admin: {
-    useAsTitle: 'title',
-  },
+  admin: {},
   fields: [
     {
-      name: 'title',
-      type: 'text',
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          admin: {
+            components: {
+              Field: '/TitleField.js#TitleField',
+            },
+          },
+        },
+      ],
+    },
+
+    {
+      name: 'check',
+      type: 'checkbox',
     },
     {
       name: 'content',

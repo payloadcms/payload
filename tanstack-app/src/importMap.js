@@ -1,3 +1,4 @@
+import { TitleField as TitleField_ba0a29d70eebd4c15a905cf1169f279e } from '../../test/_community/TitleField.js'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -26,6 +27,7 @@ import { CollectionCards as CollectionCards_1c475a2e69b97294aaf64deb8d2cf29b } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  '/TitleField.js#TitleField': TitleField_ba0a29d70eebd4c15a905cf1169f279e,
   '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell':
     RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField':

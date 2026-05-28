@@ -136,6 +136,76 @@
       "types": "./src/views/List/getListViewData.ts",
       "default": "./src/views/List/getListViewData.ts"
     },
+    "./views/List/ListViewRSC": {
+      "import": "./src/views/List/ListViewRSC.tsx",
+      "types": "./src/views/List/ListViewRSC.tsx",
+      "default": "./src/views/List/ListViewRSC.tsx"
+    },
+    "./views/List/handleHierarchy": {
+      "import": "./src/views/List/handleHierarchy.ts",
+      "types": "./src/views/List/handleHierarchy.ts",
+      "default": "./src/views/List/handleHierarchy.ts"
+    },
+    "./views/Account/AccountViewRSC": {
+      "import": "./src/views/Account/AccountViewRSC.tsx",
+      "types": "./src/views/Account/AccountViewRSC.tsx",
+      "default": "./src/views/Account/AccountViewRSC.tsx"
+    },
+    "./views/CreateFirstUser/CreateFirstUserViewRSC": {
+      "import": "./src/views/CreateFirstUser/CreateFirstUserViewRSC.tsx",
+      "types": "./src/views/CreateFirstUser/CreateFirstUserViewRSC.tsx",
+      "default": "./src/views/CreateFirstUser/CreateFirstUserViewRSC.tsx"
+    },
+    "./views/Dashboard/DashboardViewRSC": {
+      "import": "./src/views/Dashboard/DashboardViewRSC.tsx",
+      "types": "./src/views/Dashboard/DashboardViewRSC.tsx",
+      "default": "./src/views/Dashboard/DashboardViewRSC.tsx"
+    },
+    "./views/Login/LoginViewRSC": {
+      "import": "./src/views/Login/LoginViewRSC.tsx",
+      "types": "./src/views/Login/LoginViewRSC.tsx",
+      "default": "./src/views/Login/LoginViewRSC.tsx"
+    },
+    "./views/Verify/VerifyViewRSC": {
+      "import": "./src/views/Verify/VerifyViewRSC.tsx",
+      "types": "./src/views/Verify/VerifyViewRSC.tsx",
+      "default": "./src/views/Verify/VerifyViewRSC.tsx"
+    },
+    "./views/Versions/VersionsViewRSC": {
+      "import": "./src/views/Versions/VersionsViewRSC.tsx",
+      "types": "./src/views/Versions/VersionsViewRSC.tsx",
+      "default": "./src/views/Versions/VersionsViewRSC.tsx"
+    },
+    "./views/Version/VersionViewRSC": {
+      "import": "./src/views/Version/VersionViewRSC.tsx",
+      "types": "./src/views/Version/VersionViewRSC.tsx",
+      "default": "./src/views/Version/VersionViewRSC.tsx"
+    },
+    "./views/Document/DocumentViewRSC": {
+      "import": "./src/views/Document/DocumentViewRSC.tsx",
+      "types": "./src/views/Document/DocumentViewRSC.tsx",
+      "default": "./src/views/Document/DocumentViewRSC.tsx"
+    },
+    "./views/Root/renderAdminView": {
+      "import": "./src/views/Root/renderAdminView.tsx",
+      "types": "./src/views/Root/renderAdminView.tsx",
+      "default": "./src/views/Root/renderAdminView.tsx"
+    },
+    "./views/Root/renderAdminPage": {
+      "import": "./src/views/Root/renderAdminPage.tsx",
+      "types": "./src/views/Root/renderAdminPage.tsx",
+      "default": "./src/views/Root/renderAdminPage.tsx"
+    },
+    "./utilities/getPreferences": {
+      "import": "./src/utilities/getPreferences.ts",
+      "types": "./src/utilities/getPreferences.ts",
+      "default": "./src/utilities/getPreferences.ts"
+    },
+    "./elements/LogoServer": {
+      "import": "./src/elements/LogoServer/index.tsx",
+      "types": "./src/elements/LogoServer/index.tsx",
+      "default": "./src/elements/LogoServer/index.tsx"
+    },
     "./views/List/renderListViewSlots": {
       "import": "./src/views/List/renderListViewSlots.tsx",
       "types": "./src/views/List/renderListViewSlots.tsx",
@@ -623,6 +693,11 @@
       "types": "./src/templates/Default/index.tsx",
       "default": "./src/templates/Default/index.tsx"
     },
+    "./templates/Default/Server": {
+      "import": "./src/templates/Default/Server.tsx",
+      "types": "./src/templates/Default/Server.tsx",
+      "default": "./src/templates/Default/Server.tsx"
+    },
     "./templates/Default/Wrapper": {
       "import": "./src/templates/Default/Wrapper/index.tsx",
       "types": "./src/templates/Default/Wrapper/index.tsx",
@@ -647,6 +722,21 @@
       "import": "./src/elements/Nav/getNavData.ts",
       "types": "./src/elements/Nav/getNavData.ts",
       "default": "./src/elements/Nav/getNavData.ts"
+    },
+    "./elements/Nav/Server": {
+      "import": "./src/elements/Nav/Server.tsx",
+      "types": "./src/elements/Nav/Server.tsx",
+      "default": "./src/elements/Nav/Server.tsx"
+    },
+    "./elements/Nav/SidebarTabs": {
+      "import": "./src/elements/Nav/SidebarTabs/index.tsx",
+      "types": "./src/elements/Nav/SidebarTabs/index.tsx",
+      "default": "./src/elements/Nav/SidebarTabs/index.tsx"
+    },
+    "./elements/Nav/SidebarTabs/renderTabServerFn": {
+      "import": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts",
+      "types": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts",
+      "default": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts"
     },
     "./elements/RenderServerComponent": {
       "import": "./src/elements/RenderServerComponent/index.tsx",
@@ -1137,6 +1227,76 @@
         "types": "./dist/views/List/getListViewData.d.ts",
         "default": "./dist/views/List/getListViewData.js"
       },
+      "./views/List/ListViewRSC": {
+        "import": "./dist/views/List/ListViewRSC.js",
+        "types": "./dist/views/List/ListViewRSC.d.ts",
+        "default": "./dist/views/List/ListViewRSC.js"
+      },
+      "./views/List/handleHierarchy": {
+        "import": "./dist/views/List/handleHierarchy.js",
+        "types": "./dist/views/List/handleHierarchy.d.ts",
+        "default": "./dist/views/List/handleHierarchy.js"
+      },
+      "./views/Account/AccountViewRSC": {
+        "import": "./dist/views/Account/AccountViewRSC.js",
+        "types": "./dist/views/Account/AccountViewRSC.d.ts",
+        "default": "./dist/views/Account/AccountViewRSC.js"
+      },
+      "./views/CreateFirstUser/CreateFirstUserViewRSC": {
+        "import": "./dist/views/CreateFirstUser/CreateFirstUserViewRSC.js",
+        "types": "./dist/views/CreateFirstUser/CreateFirstUserViewRSC.d.ts",
+        "default": "./dist/views/CreateFirstUser/CreateFirstUserViewRSC.js"
+      },
+      "./views/Dashboard/DashboardViewRSC": {
+        "import": "./dist/views/Dashboard/DashboardViewRSC.js",
+        "types": "./dist/views/Dashboard/DashboardViewRSC.d.ts",
+        "default": "./dist/views/Dashboard/DashboardViewRSC.js"
+      },
+      "./views/Login/LoginViewRSC": {
+        "import": "./dist/views/Login/LoginViewRSC.js",
+        "types": "./dist/views/Login/LoginViewRSC.d.ts",
+        "default": "./dist/views/Login/LoginViewRSC.js"
+      },
+      "./views/Verify/VerifyViewRSC": {
+        "import": "./dist/views/Verify/VerifyViewRSC.js",
+        "types": "./dist/views/Verify/VerifyViewRSC.d.ts",
+        "default": "./dist/views/Verify/VerifyViewRSC.js"
+      },
+      "./views/Versions/VersionsViewRSC": {
+        "import": "./dist/views/Versions/VersionsViewRSC.js",
+        "types": "./dist/views/Versions/VersionsViewRSC.d.ts",
+        "default": "./dist/views/Versions/VersionsViewRSC.js"
+      },
+      "./views/Version/VersionViewRSC": {
+        "import": "./dist/views/Version/VersionViewRSC.js",
+        "types": "./dist/views/Version/VersionViewRSC.d.ts",
+        "default": "./dist/views/Version/VersionViewRSC.js"
+      },
+      "./views/Document/DocumentViewRSC": {
+        "import": "./dist/views/Document/DocumentViewRSC.js",
+        "types": "./dist/views/Document/DocumentViewRSC.d.ts",
+        "default": "./dist/views/Document/DocumentViewRSC.js"
+      },
+      "./views/Root/renderAdminView": {
+        "import": "./dist/views/Root/renderAdminView.js",
+        "types": "./dist/views/Root/renderAdminView.d.ts",
+        "default": "./dist/views/Root/renderAdminView.js"
+      },
+      "./views/Root/renderAdminPage": {
+        "import": "./dist/views/Root/renderAdminPage.js",
+        "types": "./dist/views/Root/renderAdminPage.d.ts",
+        "default": "./dist/views/Root/renderAdminPage.js"
+      },
+      "./utilities/getPreferences": {
+        "import": "./dist/utilities/getPreferences.js",
+        "types": "./dist/utilities/getPreferences.d.ts",
+        "default": "./dist/utilities/getPreferences.js"
+      },
+      "./elements/LogoServer": {
+        "import": "./dist/elements/LogoServer/index.js",
+        "types": "./dist/elements/LogoServer/index.d.ts",
+        "default": "./dist/elements/LogoServer/index.js"
+      },
       "./views/List/renderListViewSlots": {
         "import": "./dist/views/List/renderListViewSlots.js",
         "types": "./dist/views/List/renderListViewSlots.d.ts",
@@ -1619,6 +1779,11 @@
         "types": "./dist/templates/Default/index.d.ts",
         "default": "./dist/templates/Default/index.js"
       },
+      "./templates/Default/Server": {
+        "import": "./dist/templates/Default/Server.js",
+        "types": "./dist/templates/Default/Server.d.ts",
+        "default": "./dist/templates/Default/Server.js"
+      },
       "./templates/Default/Wrapper": {
         "import": "./dist/templates/Default/Wrapper/index.js",
         "types": "./dist/templates/Default/Wrapper/index.d.ts",
@@ -1633,6 +1798,21 @@
         "import": "./dist/elements/Nav/getNavData.js",
         "types": "./dist/elements/Nav/getNavData.d.ts",
         "default": "./dist/elements/Nav/getNavData.js"
+      },
+      "./elements/Nav/Server": {
+        "import": "./dist/elements/Nav/Server.js",
+        "types": "./dist/elements/Nav/Server.d.ts",
+        "default": "./dist/elements/Nav/Server.js"
+      },
+      "./elements/Nav/SidebarTabs": {
+        "import": "./dist/elements/Nav/SidebarTabs/index.js",
+        "types": "./dist/elements/Nav/SidebarTabs/index.d.ts",
+        "default": "./dist/elements/Nav/SidebarTabs/index.js"
+      },
+      "./elements/Nav/SidebarTabs/renderTabServerFn": {
+        "import": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.js",
+        "types": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.d.ts",
+        "default": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.js"
       },
       "./elements/ListDrawer/types": {
         "import": "./dist/elements/ListDrawer/types.js",

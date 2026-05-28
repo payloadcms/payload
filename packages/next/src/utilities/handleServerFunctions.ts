@@ -1,15 +1,15 @@
 import type { DefaultServerFunctionArgs, ServerFunction, ServerFunctionHandler } from 'payload'
 
+import { renderTabHandler } from '@payloadcms/ui/elements/Nav/SidebarTabs/renderTabServerFn'
 import { _internal_renderFieldHandler } from '@payloadcms/ui/rsc'
 import { sharedServerFunctions } from '@payloadcms/ui/utilities/serverFunctionRegistry'
 import { getDefaultLayoutHandler } from '@payloadcms/ui/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn'
 import { renderWidgetHandler } from '@payloadcms/ui/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn'
+import { renderDocumentSlotsHandler } from '@payloadcms/ui/views/Document/renderDocumentSlots'
 
-import { renderTabHandler } from '../elements/Nav/SidebarTabs/renderTabServerFn.js'
+import { renderDocumentHandler } from '../admin/serverFunctions/renderDocument.js'
+import { renderListHandler } from '../admin/serverFunctions/renderList.js'
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
-import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
-import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
-import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { initReq } from './initReq.js'
 import { slugifyHandler } from './slugify.js'
 
