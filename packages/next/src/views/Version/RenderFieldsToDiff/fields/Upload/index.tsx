@@ -187,7 +187,7 @@ export const HasManyUploadDiff: React.FC<{
           className="field-diff-content"
           style={
             {
-              '--field-diff-columns': `calc(50% - ${uploadGutterOffset}px - var(--spacer-2-5)) calc(50% + ${uploadGutterOffset}px - var(--spacer-2-5))`,
+              '--field-diff-columns': `calc(50% - ${uploadGutterOffset}px) calc(50% + ${uploadGutterOffset}px)`,
             } as React.CSSProperties
           }
         >

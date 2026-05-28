@@ -4,6 +4,12 @@
     background: unset;
   }
 
+  .upload-diff-container .html-diff {
+    background-color: transparent;
+    margin-block: 0;
+    padding-block: 0;
+  }
+
   .upload-diff-container .diff-no-value {
     padding: var(--spacer-2) var(--spacer-2-5);
   }

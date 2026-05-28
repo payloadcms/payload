@@ -55,5 +55,26 @@
     .checkboxItem--nested {
       margin-inline-start: var(--spacer-4);
     }
+
+    /* Match editor's hierarchical ordered list numbering (1, A, a, I, i) */
+    ol.list-number {
+      list-style-type: decimal;
+    }
+
+    ol.list-number ol.list-number {
+      list-style-type: upper-alpha;
+    }
+
+    ol.list-number ol.list-number ol.list-number {
+      list-style-type: lower-alpha;
+    }
+
+    ol.list-number ol.list-number ol.list-number ol.list-number {
+      list-style-type: upper-roman;
+    }
+
+    ol.list-number ol.list-number ol.list-number ol.list-number ol.list-number {
+      list-style-type: lower-roman;
+    }
   }
 }
