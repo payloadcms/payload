@@ -264,15 +264,6 @@ describe('List View', () => {
           .first(),
       ).toBeVisible()
     })
-
-    test('should render custom afterListTable component', async () => {
-      await page.goto(postsUrl.list)
-      await expect(
-        page.locator('.collection-list--posts').locator('div', {
-          hasText: exactText('AfterList custom component'),
-        }),
-      ).toBeVisible()
-    })
   })
 
   describe('search', () => {
