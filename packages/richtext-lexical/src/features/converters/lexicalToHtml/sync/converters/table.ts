@@ -30,7 +30,7 @@ export const TableHTMLConverter: HTMLConverters<
     const TagName = node.headerState > 0 ? 'th' : 'td'
     const headerStateClass = `lexical-table-cell-header-${node.headerState}`
 
-    let style = 'border: 1px solid #ccc; padding: 8px;' + providedCSSString
+    let style = 'border: var(--stroke-width-small) solid #ccc; padding: 8px;' + providedCSSString
     if (node.backgroundColor && isSafeCssColor(node.backgroundColor)) {
       style += ` background-color: ${node.backgroundColor};`
     }

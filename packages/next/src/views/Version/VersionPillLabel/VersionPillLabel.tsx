@@ -6,7 +6,7 @@ import { Pill, useConfig, useLocale, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 import { getVersionLabel } from './getVersionLabel.js'
 
 const baseClass = 'version-pill-label'
