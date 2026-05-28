@@ -230,6 +230,123 @@ describe('Form State', () => {
     expect(stateWithTitle?.['array.1.customTextField']?.customComponents?.Field).toBeDefined()
   })
 
+  it('should not render custom Field components for fields hidden by admin.condition', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const hiddenPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'hide-conditional',
+      },
+    })
+
+    const { state: stateHidden } = await buildFormState({
+      mockRSCs: true,
+      id: hiddenPost.id,
+      collectionSlug: postsSlug,
+      data: hiddenPost,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    expect(stateHidden?.conditionalCustomField).toBeDefined()
+    expect(stateHidden?.conditionalCustomField?.passesCondition).toBe(false)
+    expect(stateHidden?.conditionalCustomField).not.toHaveProperty('customComponents')
+    expect(stateHidden?.conditionalCustomField?.lastRenderedPath).toBeUndefined()
+
+    const visiblePost = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'show-conditional',
+      },
+    })
+
+    const { state: stateVisible } = await buildFormState({
+      mockRSCs: true,
+      id: visiblePost.id,
+      collectionSlug: postsSlug,
+      data: visiblePost,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    expect(stateVisible?.conditionalCustomField?.passesCondition).not.toBe(false)
+    expect(stateVisible?.conditionalCustomField).toHaveProperty('customComponents')
+    expect(stateVisible?.conditionalCustomField?.customComponents?.Field).toBeDefined()
+
+    await payload.delete({ collection: postsSlug, id: hiddenPost.id })
+    await payload.delete({ collection: postsSlug, id: visiblePost.id })
+  })
+
+  it('should render custom Field component when admin.condition flips from false to true via onChange', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const post = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'hide-conditional',
+      },
+    })
+
+    const { state: initialState } = await buildFormState({
+      mockRSCs: true,
+      id: post.id,
+      collectionSlug: postsSlug,
+      data: post,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    expect(initialState?.conditionalCustomField).not.toHaveProperty('customComponents')
+
+    // Simulate condition flipping true (user changes title) by re-requesting form
+    // state with `renderAllFields: false` and updated value — same flow as onChange.
+    initialState.title!.value = 'show-conditional'
+
+    const { state: flippedState } = await buildFormState({
+      mockRSCs: true,
+      id: post.id,
+      collectionSlug: postsSlug,
+      formState: initialState,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    expect(flippedState?.conditionalCustomField?.passesCondition).not.toBe(false)
+    expect(flippedState?.conditionalCustomField).toHaveProperty('customComponents')
+    expect(flippedState?.conditionalCustomField?.customComponents?.Field).toBeDefined()
+
+    await payload.delete({ collection: postsSlug, id: post.id })
+  })
+
   it('should add `addedByServer` flag to fields that originate on the server', async () => {
     const req = await createLocalReq({ user }, payload)
 
