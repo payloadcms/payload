@@ -51,8 +51,6 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
-  const dashboardDefaultCollection = sanitizedConfig.collections?.[0]?.slug
-
   ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
     slug: 'collections',
     Component: '@payloadcms/next/rsc#CollectionCards',
@@ -123,6 +121,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
         min: 1,
       },
     ],
+    minWidth: 'x-small',
   })
   sanitizedConfig.admin!.dashboard.defaultLayout ??= [
     {

@@ -68,11 +68,11 @@ export default buildConfigWithDefaults({
               limit: 3,
               relatedCollection: 'tickets',
               sortDirection: 'desc',
-              sortField: 'updatedAt',
-              title: 'Critical tickets',
+              sortField: 'priority',
+              title: 'Open tickets by priority',
               where: {
-                priority: {
-                  equals: 'critical',
+                status: {
+                  equals: 'open',
                 },
               },
             },
@@ -89,6 +89,60 @@ export default buildConfigWithDefaults({
             },
             widgetSlug: 'collection-query',
             width: 'medium',
+          },
+          {
+            data: {
+              limit: 3,
+              relatedCollection: 'archived-posts',
+              sortDirection: 'desc',
+              sortField: 'updatedAt',
+              title: 'Missing collection',
+            },
+            widgetSlug: 'collection-query',
+            width: 'x-small',
+          },
+          {
+            data: {
+              limit: 3,
+              relatedCollection: 'tickets',
+              sortDirection: 'desc',
+              sortField: 'severity',
+              title: 'Missing sort field',
+            },
+            widgetSlug: 'collection-query',
+            width: 'x-small',
+          },
+          {
+            data: {
+              limit: 3,
+              relatedCollection: 'events',
+              sortDirection: 'asc',
+              sortField: 'startDate',
+              title: 'Missing filter field',
+              where: {
+                visibility: {
+                  equals: 'public',
+                },
+              },
+            },
+            widgetSlug: 'collection-query',
+            width: 'x-small',
+          },
+          {
+            data: {
+              limit: 3,
+              relatedCollection: 'revenue',
+              sortDirection: 'desc',
+              sortField: 'total',
+              title: 'Multiple stale fields',
+              where: {
+                channel: {
+                  equals: 'enterprise',
+                },
+              },
+            },
+            widgetSlug: 'collection-query',
+            width: 'x-small',
           },
         ] as unknown as WidgetInstance[]
 
@@ -151,8 +205,8 @@ export default buildConfigWithDefaults({
             {
               name: 'title',
               type: 'text',
-              required: true,
               localized: true,
+              required: true,
             },
             {
               name: 'description',
@@ -189,10 +243,6 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  localization: {
-    defaultLocale: 'en',
-    locales: ['en', 'es'],
-  },
   collections: [
     Tickets,
     Revenue,
@@ -202,6 +252,10 @@ export default buildConfigWithDefaults({
     //   fields: [],
     // })),
   ],
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+  },
   onInit: async (payload) => {
     await seed(payload)
   },
