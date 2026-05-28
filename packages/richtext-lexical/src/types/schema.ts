@@ -37,7 +37,6 @@ export const getFieldToJSONSchema: (args: {
     field,
     i18n,
     interfaceNameDefinitions,
-    isRequired,
     typeStringDefinitions,
   }) => {
     // Step 1: build the schema for every node type allowed in this field.
@@ -89,21 +88,6 @@ export const getFieldToJSONSchema: (args: {
 
     interfaceNameDefinitions.set(nodeUnionName, replacePlaceholder(nodeUnionJson))
 
-    let jsonSchema = replacePlaceholder(JSON.stringify(rootSchemaWithPlaceholder))
-
-    for (const modifyJSONSchema of editorConfig.features.generatedTypes.modifyJSONSchemas) {
-      jsonSchema = modifyJSONSchema({
-        collectionIDFieldTypes,
-        config,
-        currentSchema: jsonSchema,
-        field,
-        i18n,
-        interfaceNameDefinitions,
-        isRequired,
-        typeStringDefinitions,
-      })
-    }
-
-    return jsonSchema
+    return replacePlaceholder(JSON.stringify(rootSchemaWithPlaceholder))
   }
 }

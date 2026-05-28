@@ -1,4 +1,4 @@
-import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
+import type { GenericLanguages, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type {
   Klass,
@@ -309,24 +309,6 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       }
     | ImportMapGenerators[0]
     | PayloadComponent[]
-  generatedTypes?: {
-    modifyJSONSchema: (args: {
-      collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
-      config?: SanitizedConfig
-      /**
-       * Current schema which will be modified by this function.
-       */
-      currentSchema: JSONSchema4
-      field: LexicalRichTextField
-      i18n?: I18n
-      /**
-       * Allows you to define new top-level interfaces that can be re-used in the output schema.
-       */
-      interfaceNameDefinitions: Map<string, JSONSchema4>
-      isRequired: boolean
-      typeStringDefinitions: Set<string>
-    }) => JSONSchema4
-  }
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     field: RichTextField
@@ -382,26 +364,6 @@ export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<any, an
 export type SanitizedServerFeatures = {
   /** The keys of all enabled features */
   enabledFeatures: string[]
-  generatedTypes: {
-    modifyJSONSchemas: Array<
-      (args: {
-        collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
-        config?: SanitizedConfig
-        /**
-         * Current schema which will be modified by this function.
-         */
-        currentSchema: JSONSchema4
-        field: LexicalRichTextField
-        i18n?: I18n
-        /**
-         * Allows you to define new top-level interfaces that can be re-used in the output schema.
-         */
-        interfaceNameDefinitions: Map<string, JSONSchema4>
-        isRequired: boolean
-        typeStringDefinitions: Set<string>
-      }) => JSONSchema4
-    >
-  }
   /**  The node types mapped to their hooks */
 
   getSubFields?: Map<

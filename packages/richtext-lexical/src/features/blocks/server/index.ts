@@ -4,14 +4,11 @@ import type {
   BlockSlug,
   Config,
   FieldSchemaMap,
-  FlattenedBlocksField,
   UIFieldClientProps,
   UIFieldServerProps,
 } from 'payload'
 
-import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
-
-import type { NodeWithHooks } from '../../typesServer.js'
+import { sanitizeFields } from 'payload'
 
 import { applyBaseFilterToFields } from '../../../utilities/applyBaseFilterToFields.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
@@ -98,63 +95,6 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
-      generatedTypes: {
-        modifyJSONSchema: ({
-          collectionIDFieldTypes,
-          config,
-          currentSchema,
-          field,
-          i18n,
-          interfaceNameDefinitions,
-          typeStringDefinitions,
-        }) => {
-          if (!blockConfigs?.length && !inlineBlockConfigs?.length) {
-            return currentSchema
-          }
-
-          const fields: FlattenedBlocksField[] = []
-
-          if (blockConfigs?.length) {
-            fields.push({
-              name: field?.name + '_lexical_blocks',
-              type: 'blocks',
-              blocks: blockConfigs.map((block) => {
-                return {
-                  ...block,
-                  flattenedFields: flattenAllFields({ fields: block.fields }),
-                }
-              }),
-            })
-          }
-          if (inlineBlockConfigs?.length) {
-            fields.push({
-              name: field?.name + '_lexical_inline_blocks',
-              type: 'blocks',
-              blocks: inlineBlockConfigs.map((block) => {
-                return {
-                  ...block,
-                  flattenedFields: flattenAllFields({ fields: block.fields }),
-                }
-              }),
-            })
-          }
-
-          if (fields.length) {
-            // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
-            // we don't actually use the JSON Schema itself in the generated types yet.
-            fieldsToJSONSchema({
-              collectionIDFieldTypes,
-              config,
-              fields,
-              i18n,
-              interfaceNameDefinitions,
-              typeStringDefinitions,
-            })
-          }
-
-          return currentSchema
-        },
-      },
       generateSchemaMap: ({ config }) => {
         /**
          * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block, and it runs addRow, it will request these
