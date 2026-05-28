@@ -15,6 +15,11 @@
     max-height: var(--column-selector-max-height);
   }
 
+  /* Lock width during search to prevent layout shift when results change */
+  .column-selector[data-width-locked] {
+    min-width: var(--column-selector-locked-width);
+  }
+
   .column-selector__header {
     display: flex;
     flex-shrink: 0;

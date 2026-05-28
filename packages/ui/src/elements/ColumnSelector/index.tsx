@@ -4,7 +4,7 @@ import type { SanitizedCollectionConfig, StaticLabel } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { fieldIsHiddenOrDisabled, fieldIsID, isFieldDisabled } from 'payload/shared'
-import React, { useCallback, useId, useMemo, useState } from 'react'
+import React, { useCallback, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
@@ -122,6 +122,23 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug, onClose }) => 
   const uuid = useId()
   const editDepth = useEditDepth()
   const [searchQuery, setSearchQuery] = useState('')
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [lockedWidth, setLockedWidth] = useState<null | number>(null)
+
+  // Lock the width when search starts to prevent layout shift
+  useLayoutEffect(() => {
+    if (!containerRef.current) {
+      return
+    }
+
+    if (searchQuery && lockedWidth === null) {
+      // Capture width when search starts
+      setLockedWidth(containerRef.current.offsetWidth)
+    } else if (!searchQuery && lockedWidth !== null) {
+      // Release width lock when search is cleared
+      setLockedWidth(null)
+    }
+  }, [searchQuery, lockedWidth])
 
   const filteredColumns = useMemo(
     () =>
@@ -218,8 +235,18 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug, onClose }) => 
   // Combined IDs: shown items first, then hidden items
   const allIds = [...columnItems.shown, ...columnItems.hidden].map((item) => item.id)
 
+  const containerStyle = lockedWidth
+    ? ({ '--column-selector-locked-width': `${lockedWidth}px` } as React.CSSProperties)
+    : undefined
+
   return (
-    <div className={baseClass} data-popup-prevent-close>
+    <div
+      className={baseClass}
+      data-popup-prevent-close
+      data-width-locked={lockedWidth ? 'true' : undefined}
+      ref={containerRef}
+      style={containerStyle}
+    >
       <div className={`${baseClass}__header`}>
         <span className={`${baseClass}__title`}>{t('general:editColumns')}</span>
         {onClose && (

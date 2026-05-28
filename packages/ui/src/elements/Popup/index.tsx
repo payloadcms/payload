@@ -391,13 +391,9 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // /////////////////////////////////////
     // Event Listeners
     // - resize/scroll: recalculate position (only applies styles if changed)
-    // - ResizeObserver: recalculate when popup content size changes
     // - mousedown: detect clicks outside to close
     // - keydown: handle keyboard navigation
     // /////////////////////////////////////
-
-    const resizeObserver = new ResizeObserver(updatePosition)
-    resizeObserver.observe(popup)
 
     window.addEventListener('resize', updatePosition)
     window.addEventListener('scroll', updatePosition, { capture: true, passive: true })
@@ -406,7 +402,6 @@ export const Popup: React.FC<PopupProps> = (props) => {
     popup.addEventListener('click', handleActionableClick)
 
     return () => {
-      resizeObserver.disconnect()
       window.removeEventListener('resize', updatePosition)
       window.removeEventListener('scroll', updatePosition, { capture: true })
       document.removeEventListener('mousedown', handleClickOutside)
