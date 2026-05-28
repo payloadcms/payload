@@ -329,6 +329,14 @@ The deprecated `HTMLConverterFeature`, `lexicalHTML`, and the per-node `converte
 
 Custom nodes that define `converters.html` should export their converters instead.
 
+### Every block now auto-generates a top-level TypeScript interface
+
+Before, a block's fields only became a top-level interface in `payload-types.ts` if you set `interfaceName` on the block. Without it, the fields were inlined wherever the block appeared in your types.
+
+Now **every block always emits a top-level interface**. The name comes from the slug, converted to PascalCase (`'content-block'` → `ContentBlock`, `'richTextBlock'` → `RichTextBlock`). `interfaceName` still works, but it's now an *override* for that default name rather than the switch that enables generation.
+
+If a block's auto-derived name collides with another type in your generated file (a collection, an array's `interfaceName`, etc.), set `interfaceName` on the block to disambiguate.
+
 ### Jobs: `jobs.depth` and `jobs.runHooks` have been removed ([#16414](https://github.com/payloadcms/payload/pull/16414))
 
 The deprecated `jobs.depth` and `jobs.runHooks` config options have been removed. Job operations now always use direct database calls with depth `0`.

@@ -11,7 +11,7 @@ import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
 import { flattenAllFields } from './flattenAllFields.js'
-import { formatNames } from './formatLabels.js'
+import { formatNames, toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 import { optionsAreEqual } from './optionsAreEqual.js'
 
@@ -437,7 +437,7 @@ export function fieldsToJSONSchema(
 
                         if (!opts.forceInlineBlocks) {
                           return {
-                            $ref: `#/definitions/${resolvedBlock.interfaceName ?? resolvedBlock.slug}`,
+                            $ref: `#/definitions/${resolvedBlock.interfaceName ?? toWords(resolvedBlock.slug, true)}`,
                           }
                         }
 
@@ -464,11 +464,15 @@ export function fieldsToJSONSchema(
                         required: ['blockType', ...blockFieldSchemas.required],
                       }
 
-                      if (!opts.forceInlineBlocks && block.interfaceName) {
-                        interfaceNameDefinitions.set(block.interfaceName, blockSchema)
+                      if (!opts.forceInlineBlocks) {
+                        // Always register the block as a top-level definition,
+                        // using the user's `interfaceName` override if set or a
+                        // PascalCase fallback derived from the slug.
+                        const interfaceName = block.interfaceName ?? toWords(block.slug, true)
+                        interfaceNameDefinitions.set(interfaceName, blockSchema)
 
                         return {
-                          $ref: `#/definitions/${block.interfaceName}`,
+                          $ref: `#/definitions/${interfaceName}`,
                         }
                       }
 
@@ -1262,7 +1266,11 @@ export function configToJSONSchema(
   i18n?: I18n,
   opts: ConfigToJSONSchemaOptions = {},
 ): JSONSchema4 {
-  // a mutable Map to store custom top-level `interfaceName` types. Fields with an `interfaceName` property will be moved to the top-level definitions here
+  // a mutable Map of top-level definitions in the generated JSON Schema.
+  // - `array`/`group`/named-`tab` fields are registered here when they set
+  //   `interfaceName` (otherwise they stay inline).
+  // - `block` configs always register here, keyed by `block.interfaceName`
+  //   if set, otherwise a PascalCase form of the slug via `toWords`.
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
 
   //  Used for relationship fields, to determine whether to use a string or number type for the ID.
@@ -1377,7 +1385,9 @@ export function configToJSONSchema(
         required: ['blockType', ...blockFieldSchemas.required],
       }
 
-      const interfaceName = block.interfaceName ?? block.slug
+      // `block.interfaceName` is treated as an override of the auto-derived
+      // PascalCase name. Without it, blocks still get a top-level interface.
+      const interfaceName = block.interfaceName ?? toWords(block.slug, true)
       interfaceNameDefinitions.set(interfaceName, blockSchema)
 
       blocksDefinition.properties![block.slug] = {

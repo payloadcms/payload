@@ -1522,11 +1522,17 @@ export type Block = {
    * @deprecated Use `admin.images` instead. Preferred aspect ratio of the image is 3:2.
    */
   imageURL?: string
-  /** Customize generated GraphQL and Typescript schema names.
-   * The slug is used by default.
+  /**
+   * Override the name of the top-level TypeScript interface and GraphQL
+   * type generated for this block. Blocks **always** generate a top-level
+   * interface — by default it's a PascalCase form of the slug
+   * (`'content-block'` → `ContentBlock`). Set this to take control of the
+   * generated name (useful for disambiguating slug-PascalCase collisions
+   * or referencing the type elsewhere under a name of your choosing).
    *
-   * This is useful if you would like to generate a top level type to share amongst collections/fields.
-   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
+   * **Note**: Top-level types share a namespace with collections, arrays,
+   * groups, tabs, and other blocks — set an explicit `interfaceName` to
+   * resolve any collisions.
    */
   interfaceName?: string
   jsx?: BlockJSX
