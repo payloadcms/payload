@@ -19,7 +19,8 @@
     background: var(--color-bg-transparent-hover);
   }
 
-  .popup-button:active:not(.popup-button--disabled) {
+  .popup-button:active:not(.popup-button--disabled),
+  .popup-button--active:not(.popup-button--disabled) {
     background: var(--color-bg-transparent-pressed);
   }
 

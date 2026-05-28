@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
+
 import { exactText } from '../../__helpers/e2e/helpers.js'
 import { TEST_TIMEOUT_LONG } from '../../playwright.config.js'
 
@@ -32,7 +33,7 @@ export async function selectPreset({ page, presetTitle }: { page: Page; presetTi
 }
 
 export async function clearSelectedPreset({ page }: { page: Page }) {
-  const clearButton = page.locator('.query-preset-bar__clear')
+  const clearButton = page.locator('.query-preset-bar .filter-trigger__clear')
 
   // Wait for the clear button to be visible and click it
   await expect(clearButton).toBeVisible()
@@ -45,7 +46,7 @@ export async function clearSelectedPreset({ page }: { page: Page }) {
     timeout: TEST_TIMEOUT_LONG,
   })
 
-  await expect(page.locator('.query-preset-bar__clear')).toBeHidden()
+  await expect(page.locator('.query-preset-bar .filter-trigger__clear')).toBeHidden()
 
   await expect(
     page.locator('#select-preset', {

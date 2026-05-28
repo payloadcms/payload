@@ -14,7 +14,7 @@ import { ShouldRenderTabs } from '../../../exports/client/index.js'
 import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 import { DefaultDocumentTab } from './Tab/index.js'
 import { getTabs } from './tabs/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'doc-tabs'
 

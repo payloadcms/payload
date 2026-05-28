@@ -63,7 +63,7 @@ export const DocumentTabLink: React.FC<{
   return (
     <Button
       aria-label={ariaLabel}
-      buttonStyle="pill"
+      buttonStyle={isActive ? 'pill' : 'ghost'}
       className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}
       disabled={isActive}
       el={!isActive || href !== pathname ? 'link' : 'div'}
