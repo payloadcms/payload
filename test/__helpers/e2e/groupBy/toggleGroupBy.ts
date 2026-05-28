@@ -22,7 +22,9 @@ export const toggleGroupBy = async (page: Page, { targetState = 'open' }: Toggle
 
   if (isAlreadyOpen && targetState === 'closed') {
     // Click the close button inside the popup
-    await groupByContent.locator('.group-by-control__header-actions button').last().click()
+    await groupByContent
+      .locator('.group-by-control__header-actions button[aria-label="Close"]')
+      .click()
     await expect(groupByContent).toBeHidden()
   }
 

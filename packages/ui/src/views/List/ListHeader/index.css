@@ -27,8 +27,4 @@
     padding: var(--spacer-2-5);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
   }
-
-  .drawer .list-controls {
-    padding: 0 var(--spacer-2-5);
-  }
 }

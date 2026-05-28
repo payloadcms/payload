@@ -29,7 +29,7 @@
       height: calc(var(--spacer-4) * 2);
 
       &:first-child {
-        padding-inline-start: var(--spacer-2);
+        padding-inline-start: var(--gutter-h);
         padding-inline-end: var(--spacer-2);
       }
 
@@ -59,7 +59,8 @@
     .cell-_select {
       width: var(--spacer-5);
       min-width: var(--spacer-5);
-      padding: var(--spacer-2);
+      padding-inline-end: var(--spacer-2);
+      padding-block: var(--spacer-2);
       text-align: center;
     }
 

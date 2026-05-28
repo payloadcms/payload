@@ -4,15 +4,11 @@
     flex-direction: column;
   }
 
-  .table-section__header {
-    padding: 0 calc(var(--gutter-h) - var(--spacer-2));
-  }
-
   .table-section__header-inner {
     display: flex;
     align-items: center;
     min-height: calc(var(--spacer-6) + var(--spacer-2));
-    padding: 0 var(--spacer-2);
+    padding: 0 var(--gutter-h);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
   }
 
@@ -31,7 +27,6 @@
   }
 
   .table-section__content {
-    padding: 0 calc(var(--gutter-h) - var(--spacer-2));
     padding-bottom: var(--spacer-2);
   }
 

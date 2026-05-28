@@ -8,7 +8,9 @@ export const clearGroupBy = async (page: Page): Promise<{ groupByContent: Locato
   const { groupByContent } = await openGroupBy(page)
 
   // Click the trash/clear button in the header
-  const clearButton = groupByContent.locator('.group-by-control__header-actions button').first()
+  const clearButton = groupByContent.locator(
+    '.group-by-control__header-actions button[aria-label="Clear"]',
+  )
   await clearButton.click()
 
   // Verify no groupBy in URL
