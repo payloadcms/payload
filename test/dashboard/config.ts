@@ -59,6 +59,41 @@ export default buildConfigWithDefaults({
             width: 'full',
           })
         }
+
+        // `collection-query` is injected while sanitizing the config, so this test config's widget
+        // slug union does not know about it yet.
+        const collectionQueryWidgets = [
+          {
+            data: {
+              limit: 3,
+              relatedCollection: 'tickets',
+              sortDirection: 'desc',
+              sortField: 'updatedAt',
+              title: 'Critical tickets',
+              where: {
+                priority: {
+                  equals: 'critical',
+                },
+              },
+            },
+            widgetSlug: 'collection-query',
+            width: 'medium',
+          },
+          {
+            data: {
+              limit: 15,
+              relatedCollection: 'events',
+              sortDirection: 'asc',
+              sortField: 'startDate',
+              title: 'Upcoming events',
+            },
+            widgetSlug: 'collection-query',
+            width: 'medium',
+          },
+        ] as unknown as WidgetInstance[]
+
+        baseWidgets.push(...collectionQueryWidgets)
+
         return baseWidgets
       },
       widgets: [
