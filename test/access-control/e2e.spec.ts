@@ -1258,165 +1258,175 @@ describe('Access Control', () => {
     describe('groupBy dropdown', () => {
       test('should hide top-level field with read: false in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedTopLevel field
-        await expect(field.locator('.rs__option', { hasText: 'Restricted Top Level' })).toBeHidden()
+        await expect(
+          page.locator('.popup-button-list__button', { hasText: 'Restricted Top Level' }),
+        ).toHaveCount(0)
       })
 
       test('should hide nested field with read: false inside group in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Public Phone',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretPhone field
-        await expect(field.locator('.rs__option', { hasText: 'Secret Phone' })).toBeHidden()
+        await expect(
+          page.locator('.popup-button-list__button', { hasText: 'Secret Phone' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside row in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible In Row',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedInRow field
-        await expect(field.locator('.rs__option', { hasText: 'Restricted In Row' })).toBeHidden()
+        await expect(
+          page.locator('.popup-button-list__button', { hasText: 'Restricted In Row' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside collapsible in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible In Collapsible',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedInCollapsible field
         await expect(
-          field.locator('.rs__option', { hasText: 'Restricted In Collapsible' }),
-        ).toBeHidden()
+          page.locator('.popup-button-list__button', { hasText: 'Restricted In Collapsible' }),
+        ).toHaveCount(0)
       })
 
       test('should hide deeply nested field with read: false in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Metric',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide metadata.analytics.restrictedMetric field
-        await expect(field.locator('.rs__option', { hasText: 'Restricted Metric' })).toBeHidden()
+        await expect(
+          page.locator('.popup-button-list__button', { hasText: 'Restricted Metric' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside unnamed tab in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Public Data',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretInPublicTab field
-        await expect(field.locator('.rs__option', { hasText: 'Secret In Public Tab' })).toBeHidden()
+        await expect(
+          page.locator('.popup-button-list__button', { hasText: 'Secret In Public Tab' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside named tab in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Settings > Visible Setting',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedSetting field
         await expect(
-          field.locator('.rs__option', { hasText: 'Settings > Restricted Setting' }),
-        ).toBeHidden()
+          page.locator('.popup-button-list__button', { hasText: 'Settings > Restricted Setting' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside row within group in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Address > City',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretPostalCode field
         await expect(
-          field.locator('.rs__option', { hasText: 'Address > Secret Postal Code' }),
-        ).toBeHidden()
+          page.locator('.popup-button-list__button', { hasText: 'Address > Secret Postal Code' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside group within collapsible in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Advanced Settings > Advanced > Visible Advanced',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedAdvanced field
         await expect(
-          field.locator('.rs__option', {
+          page.locator('.popup-button-list__button', {
             hasText: 'Advanced Settings > Advanced > Restricted Advanced',
           }),
-        ).toBeHidden()
+        ).toHaveCount(0)
       })
     })
 
@@ -1444,19 +1454,19 @@ describe('Access Control', () => {
 
       test('should show virtual field in groupBy dropdown when collection has field with access control', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Virtual field should be visible in the groupBy dropdown
-        const virtualFieldOption = field.locator('.rs__option', {
+        const virtualFieldOption = page.locator('.popup-button-list__button', {
           hasText: 'Unrestricted Virtual Field Name',
         })
         await expect(virtualFieldOption).toBeVisible()
@@ -1490,24 +1500,24 @@ describe('Access Control', () => {
 
       test('should show nested fields within virtual group field in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Nested fields within the virtual group should be visible
-        const virtualGroupTitleOption = field.locator('.rs__option', {
+        const virtualGroupTitleOption = page.locator('.popup-button-list__button', {
           hasText: 'Unrestricted Virtual Group Info > Title',
         })
         await expect(virtualGroupTitleOption).toBeVisible()
 
-        const virtualGroupDescriptionOption = field.locator('.rs__option', {
+        const virtualGroupDescriptionOption = page.locator('.popup-button-list__button', {
           hasText: 'Unrestricted Virtual Group Info > Description',
         })
         await expect(virtualGroupDescriptionOption).toBeVisible()
@@ -1536,19 +1546,19 @@ describe('Access Control', () => {
 
       test('should show virtual field nested inside group in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Virtual field nested inside contactInfo group should be visible
-        const nestedVirtualFieldOption = field.locator('.rs__option', {
+        const nestedVirtualFieldOption = page.locator('.popup-button-list__button', {
           hasText: 'Contact Info > Virtual Contact Name',
         })
         await expect(nestedVirtualFieldOption).toBeVisible()
@@ -1576,21 +1586,23 @@ describe('Access Control', () => {
 
       test('should hide top-level virtual field with read: false in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Restricted virtual field should be hidden (use exactText to avoid matching "Unrestricted...")
         await expect(
-          field.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
-        ).toBeHidden()
+          page.locator('.popup-button-list__button', {
+            hasText: exactText('Restricted Virtual Field'),
+          }),
+        ).toHaveCount(0)
       })
 
       test('should hide nested virtual field with read: false in filter dropdown', async () => {
@@ -1617,23 +1629,23 @@ describe('Access Control', () => {
 
       test('should hide nested virtual field with read: false in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Restricted virtual field nested in contactInfo should be hidden
         await expect(
-          field.locator('.rs__option', {
+          page.locator('.popup-button-list__button', {
             hasText: 'Contact Info > Restricted Virtual Contact Info',
           }),
-        ).toBeHidden()
+        ).toHaveCount(0)
       })
     })
 
