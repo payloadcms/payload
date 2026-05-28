@@ -10,7 +10,7 @@ export const Wrapper: React.FC<{
   className?: string
 }> = (props) => {
   const { baseClass, children, className } = props
-  const { hydrated, navOpen, shouldAnimate } = useNav()
+  const { hydrated, navOpen } = useNav()
 
   return (
     <div
@@ -18,7 +18,6 @@ export const Wrapper: React.FC<{
         baseClass,
         className,
         navOpen && `${baseClass}--nav-open`,
-        shouldAnimate && `${baseClass}--nav-animate`,
         hydrated && `${baseClass}--nav-hydrated`,
       ]
         .filter(Boolean)
