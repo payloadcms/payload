@@ -123,25 +123,12 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
         min: 1,
       },
     ],
-    minWidth: 'medium',
   })
   sanitizedConfig.admin!.dashboard.defaultLayout ??= [
-    dashboardDefaultCollection
-      ? ({
-          data: {
-            limit: 5,
-            relatedCollection: dashboardDefaultCollection,
-            sortDirection: 'desc',
-            sortField: 'updatedAt',
-            title: 'Recent documents',
-          },
-          widgetSlug: 'collection-query',
-          width: 'medium',
-        } satisfies WidgetInstance)
-      : ({
-          widgetSlug: 'collections',
-          width: 'full',
-        } satisfies WidgetInstance),
+    {
+      widgetSlug: 'collections',
+      width: 'full',
+    } satisfies WidgetInstance,
   ]
 
   // add default user collection if none provided
