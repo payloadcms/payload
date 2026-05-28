@@ -116,13 +116,6 @@
     white-space: nowrap;
   }
 
-  .collection-query-widget__open-icon {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-    color: var(--color-text-secondary);
-  }
-
   .collection-query-widget__empty {
     margin: 0;
     color: var(--color-text-secondary);

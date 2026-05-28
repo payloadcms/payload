@@ -86,7 +86,6 @@ export async function CollectionQueryWidget({
                   </span>
                   <span className="collection-query-widget__row-meta">
                     {docDate ? <time dateTime={docDate}>{formatDate(docDate)}</time> : null}
-                    <OpenIcon />
                   </span>
                 </a>
               </li>
@@ -97,28 +96,6 @@ export async function CollectionQueryWidget({
         <p className="collection-query-widget__empty">No documents found.</p>
       )}
     </div>
-  )
-}
-
-function OpenIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="collection-query-widget__open-icon"
-      fill="none"
-      height="16"
-      viewBox="0 0 16 16"
-      width="16"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M6 4H4.5C3.67 4 3 4.67 3 5.5V11.5C3 12.33 3.67 13 4.5 13H10.5C11.33 13 12 12.33 12 11.5V10"
-        stroke="currentColor"
-        strokeLinecap="round"
-      />
-      <path d="M9 3H13V7" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M8 8L13 3" stroke="currentColor" strokeLinecap="round" />
-    </svg>
   )
 }
 
