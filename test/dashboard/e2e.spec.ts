@@ -453,3 +453,16 @@ describe('Dashboard', () => {
     await expect(pageQueryWidget.getByText(/Current page from query: 2/)).toBeVisible()
   })
 })
+
+// TODO: Add e2e coverage for the collection-query widget shrinking to content when the limit is low.
+// It should not leave dead vertical space between the last list item and the card edge.
+// TODO: Add e2e coverage for the collection-query widget max height when the limit is high.
+// The list area should scroll while the widget header remains visible.
+// TODO: Add e2e coverage that the row metadata displays the configured sort field value.
+// Include one date sort field and one non-date sort field.
+// Date sort fields should render as compact relative time, for example "5m" or "3d".
+// TODO: Add e2e coverage for stale collection-query config errors.
+// Cover missing collection, missing sort field, missing filter field, and multiple stale fields.
+// TODO: Add e2e coverage that collection labels and external-link icons are not rendered in rows.
+// TODO: Add e2e coverage that the default dashboard test layout keeps the valid query widgets half-width
+// and the stale config examples extra-small.

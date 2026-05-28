@@ -1,6 +1,7 @@
 import type { CollectionSlug, Where, WidgetServerProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { formatDistanceToNow } from 'date-fns'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
@@ -158,7 +159,7 @@ function getDocSortMeta({ doc, sortField }: { doc: QueryDoc; sortField?: string 
 
     return {
       dateTime,
-      label: formatDate(dateTime),
+      label: formatRelativeDate(dateTime),
     }
   }
 
@@ -166,7 +167,7 @@ function getDocSortMeta({ doc, sortField }: { doc: QueryDoc; sortField?: string 
     if (isDateString(value)) {
       return {
         dateTime: value,
-        label: formatDate(value),
+        label: formatRelativeDate(value),
       }
     }
 
@@ -336,18 +337,55 @@ function getValueByPath({ object, path }: { object: Record<string, unknown>; pat
   }, object)
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('en', {
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(value))
+function formatRelativeDate(value: string) {
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return formatCompactDistance(formatDistanceToNow(date))
+}
+
+function formatCompactDistance(distance: string) {
+  if (distance.startsWith('less than') || distance.startsWith('half')) {
+    return '<1m'
+  }
+
+  const normalizedDistance = distance.replace(/^(?:about|almost|over)\s/, '')
+  const match = normalizedDistance.match(/^(a|an|\d+)\s+([a-z]+)/)
+
+  if (!match) {
+    return distance
+  }
+
+  const amount = match[1] === 'a' || match[1] === 'an' ? 1 : Number(match[1])
+  const unit = relativeDateUnitLabels[match[2]]
+
+  if (!unit) {
+    return distance
+  }
+
+  return `${amount}${unit}`
 }
 
 function isDateString(value: string) {
   return /^\d{4}-\d{2}-\d{2}/.test(value) && !Number.isNaN(new Date(value).getTime())
+}
+
+const relativeDateUnitLabels: Record<string, string> = {
+  day: 'd',
+  days: 'd',
+  hour: 'h',
+  hours: 'h',
+  minute: 'm',
+  minutes: 'm',
+  month: 'mo',
+  months: 'mo',
+  second: 's',
+  seconds: 's',
+  year: 'y',
+  years: 'y',
 }
 
 const whereOperatorKeys = new Set([
