@@ -71,7 +71,7 @@
   .btn--style-dashed {
     color: var(--color-text);
     background-color: transparent;
-    border: 1px dashed var(--special-border-translucent);
+    border: var(--stroke-width-small) dashed var(--special-border-translucent);
 
     &:hover:not(.btn--disabled) {
       background-color: var(--color-bg-transparent-hover);
@@ -187,7 +187,7 @@
 
   .btn--icon {
     .btn__content {
-      gap: 2px;
+      gap: var(--stroke-width-medium);
     }
   }
 
@@ -230,7 +230,10 @@
   }
 
   .btn--icon-only {
-    padding-inline: var(--spacer-1);
+    aspect-ratio: 1;
+    padding: 0;
+    border-width: 0;
+    justify-content: center;
   }
 
   /* Round (square icon button) */
@@ -312,13 +315,13 @@
       align-items: center;
 
       html:not([dir='RTL']) & {
-        border-left: 1px solid var(--separator-color);
+        border-left: var(--stroke-width-small) solid var(--separator-color);
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
       }
 
       html[dir='RTL'] & {
-        border-right: 1px solid var(--separator-color);
+        border-right: var(--stroke-width-small) solid var(--separator-color);
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
       }

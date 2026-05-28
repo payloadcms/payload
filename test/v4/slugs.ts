@@ -33,6 +33,7 @@ export const orderableSlug = 'orderable'
 export const rubbishSlug = 'rubbish'
 export const searchBarTestSlug = 'search-bar-test'
 export const unauthorizedSlug = 'unauthorized-test'
+export const docControlsSlug = 'doc-controls'
 
 export const collectionSlugs = [
   'users',
@@ -70,5 +71,6 @@ export const collectionSlugs = [
   rubbishSlug,
   searchBarTestSlug,
   unauthorizedSlug,
+  docControlsSlug,
   'payload-query-presets',
 ]

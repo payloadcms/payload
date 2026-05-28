@@ -25,6 +25,7 @@
   @media (max-width: 1024px) {
     .doc-header {
       flex-direction: column;
+      padding: var(--spacer-2) var(--gutter-h);
     }
 
     .doc-header__title {

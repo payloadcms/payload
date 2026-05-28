@@ -67,7 +67,10 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
+    'doc-controls': DocControl;
+    orderable: Orderable;
+    'search-bar-test': SearchBarTest;
+    'unauthorized-test': UnauthorizedTest;
     'array-fields': ArrayField;
     'blocks-fields': BlocksField;
     'checkbox-fields': CheckboxField;
@@ -75,34 +78,33 @@ export interface Config {
     'collapsible-fields': CollapsibleField;
     'date-fields': DateField;
     'email-fields': EmailField;
-    'folder-items': FolderItem;
-    folders: Folder;
     'group-fields': GroupField;
     'join-fields': JoinField;
     'join-posts': JoinPost;
     'json-fields': JsonField;
     'number-fields': NumberField;
-    orderable: Orderable;
     'password-fields': PasswordField;
     'point-fields': PointField;
     'radio-fields': RadioField;
     'relationship-fields': RelationshipField;
     'rich-text-fields': RichTextField;
     'row-fields': RowField;
-    'search-bar-test': SearchBarTest;
     'select-fields': SelectField;
     'slug-fields': SlugField;
     'tabs-fields': TabsField;
-    tags: Tag;
     'text-fields': TextField;
     'textarea-fields': TextareaField;
     uploads: Upload;
     'upload-fields': UploadField;
-    'draft-versions': DraftVersion;
     autosave: Autosave;
+    'draft-versions': DraftVersion;
+    folders: Folder;
+    'folder-items': FolderItem;
     rubbish: Rubbish;
-    'unauthorized-test': UnauthorizedTest;
+    tags: Tag;
+    users: User;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -122,7 +124,10 @@ export interface Config {
     };
   };
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    'doc-controls': DocControlsSelect<false> | DocControlsSelect<true>;
+    orderable: OrderableSelect<false> | OrderableSelect<true>;
+    'search-bar-test': SearchBarTestSelect<false> | SearchBarTestSelect<true>;
+    'unauthorized-test': UnauthorizedTestSelect<false> | UnauthorizedTestSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
     'checkbox-fields': CheckboxFieldsSelect<false> | CheckboxFieldsSelect<true>;
@@ -130,34 +135,33 @@ export interface Config {
     'collapsible-fields': CollapsibleFieldsSelect<false> | CollapsibleFieldsSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
     'email-fields': EmailFieldsSelect<false> | EmailFieldsSelect<true>;
-    'folder-items': FolderItemsSelect<false> | FolderItemsSelect<true>;
-    folders: FoldersSelect<false> | FoldersSelect<true>;
     'group-fields': GroupFieldsSelect<false> | GroupFieldsSelect<true>;
     'join-fields': JoinFieldsSelect<false> | JoinFieldsSelect<true>;
     'join-posts': JoinPostsSelect<false> | JoinPostsSelect<true>;
     'json-fields': JsonFieldsSelect<false> | JsonFieldsSelect<true>;
     'number-fields': NumberFieldsSelect<false> | NumberFieldsSelect<true>;
-    orderable: OrderableSelect<false> | OrderableSelect<true>;
     'password-fields': PasswordFieldsSelect<false> | PasswordFieldsSelect<true>;
     'point-fields': PointFieldsSelect<false> | PointFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'row-fields': RowFieldsSelect<false> | RowFieldsSelect<true>;
-    'search-bar-test': SearchBarTestSelect<false> | SearchBarTestSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
-    tags: TagsSelect<false> | TagsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'upload-fields': UploadFieldsSelect<false> | UploadFieldsSelect<true>;
-    'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
+    'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
+    folders: FoldersSelect<false> | FoldersSelect<true>;
+    'folder-items': FolderItemsSelect<false> | FolderItemsSelect<true>;
     rubbish: RubbishSelect<false> | RubbishSelect<true>;
-    'unauthorized-test': UnauthorizedTestSelect<false> | UnauthorizedTestSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -175,7 +179,13 @@ export interface Config {
   };
   user: User;
   jobs: {
-    tasks: unknown;
+    tasks: {
+      schedulePublish: TaskSchedulePublish;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -199,29 +209,66 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "doc-controls".
  */
-export interface User {
+export interface DocControl {
   id: string;
-  roles?: ('admin' | 'user')[] | null;
+  title: string;
+  content?: string | null;
+  parent?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders".
+ */
+export interface Folder {
+  id: string;
+  parent?: (string | null) | Folder;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable".
+ */
+export interface Orderable {
+  id: string;
+  _order?: string | null;
+  title: string;
+  priority?: ('high' | 'medium' | 'low') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-bar-test".
+ */
+export interface SearchBarTest {
+  id: string;
+  title: string;
+  description?: string | null;
+  category?: ('news' | 'blog' | 'tutorial' | 'docs') | null;
+  status?: ('draft' | 'published' | 'archived') | null;
+  priority?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unauthorized-test".
+ */
+export interface UnauthorizedTest {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -505,30 +552,6 @@ export interface EmailField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "folder-items".
- */
-export interface FolderItem {
-  id: string;
-  title: string;
-  parent?: (string | null) | Folder;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "folders".
- */
-export interface Folder {
-  id: string;
-  parent?: (string | null) | Folder;
-  name: string;
-  updatedAt: string;
-  createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "group-fields".
  */
 export interface GroupField {
@@ -726,18 +749,6 @@ export interface NumberField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable".
- */
-export interface Orderable {
-  id: string;
-  _order?: string | null;
-  title: string;
-  priority?: ('high' | 'medium' | 'low') | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "password-fields".
  */
 export interface PasswordField {
@@ -852,6 +863,32 @@ export interface RelationshipField {
       } | null);
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  roles?: ('admin' | 'user')[] | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1017,20 +1054,6 @@ export interface RowField {
   billingCity?: string | null;
   shippingStreet?: string | null;
   shippingCity?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search-bar-test".
- */
-export interface SearchBarTest {
-  id: string;
-  title: string;
-  description?: string | null;
-  category?: ('news' | 'blog' | 'tutorial' | 'docs') | null;
-  status?: ('draft' | 'published' | 'archived') | null;
-  priority?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1238,6 +1261,17 @@ export interface UploadField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave".
+ */
+export interface Autosave {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-versions".
  */
 export interface DraftVersion {
@@ -1251,14 +1285,14 @@ export interface DraftVersion {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave".
+ * via the `definition` "folder-items".
  */
-export interface Autosave {
+export interface FolderItem {
   id: string;
   title: string;
+  parent?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1270,16 +1304,6 @@ export interface Rubbish {
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "unauthorized-test".
- */
-export interface UnauthorizedTest {
-  id: string;
-  title?: string | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1300,14 +1324,118 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: string;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'schedulePublish';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'schedulePublish') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'doc-controls';
+        value: string | DocControl;
+      } | null)
+    | ({
+        relationTo: 'orderable';
+        value: string | Orderable;
+      } | null)
+    | ({
+        relationTo: 'search-bar-test';
+        value: string | SearchBarTest;
+      } | null)
+    | ({
+        relationTo: 'unauthorized-test';
+        value: string | UnauthorizedTest;
       } | null)
     | ({
         relationTo: 'array-fields';
@@ -1338,14 +1466,6 @@ export interface PayloadLockedDocument {
         value: string | EmailField;
       } | null)
     | ({
-        relationTo: 'folder-items';
-        value: string | FolderItem;
-      } | null)
-    | ({
-        relationTo: 'folders';
-        value: string | Folder;
-      } | null)
-    | ({
         relationTo: 'group-fields';
         value: string | GroupField;
       } | null)
@@ -1364,10 +1484,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'number-fields';
         value: string | NumberField;
-      } | null)
-    | ({
-        relationTo: 'orderable';
-        value: string | Orderable;
       } | null)
     | ({
         relationTo: 'password-fields';
@@ -1394,10 +1510,6 @@ export interface PayloadLockedDocument {
         value: string | RowField;
       } | null)
     | ({
-        relationTo: 'search-bar-test';
-        value: string | SearchBarTest;
-      } | null)
-    | ({
         relationTo: 'select-fields';
         value: string | SelectField;
       } | null)
@@ -1408,10 +1520,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tabs-fields';
         value: string | TabsField;
-      } | null)
-    | ({
-        relationTo: 'tags';
-        value: string | Tag;
       } | null)
     | ({
         relationTo: 'text-fields';
@@ -1430,20 +1538,32 @@ export interface PayloadLockedDocument {
         value: string | UploadField;
       } | null)
     | ({
+        relationTo: 'autosave';
+        value: string | Autosave;
+      } | null)
+    | ({
         relationTo: 'draft-versions';
         value: string | DraftVersion;
       } | null)
     | ({
-        relationTo: 'autosave';
-        value: string | Autosave;
+        relationTo: 'folders';
+        value: string | Folder;
+      } | null)
+    | ({
+        relationTo: 'folder-items';
+        value: string | FolderItem;
       } | null)
     | ({
         relationTo: 'rubbish';
         value: string | Rubbish;
       } | null)
     | ({
-        relationTo: 'unauthorized-test';
-        value: string | UnauthorizedTest;
+        relationTo: 'tags';
+        value: string | Tag;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1538,26 +1658,49 @@ export interface PayloadQueryPreset {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "doc-controls_select".
  */
-export interface UsersSelect<T extends boolean = true> {
-  roles?: T;
+export interface DocControlsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  parent?: T;
   updatedAt?: T;
   createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable_select".
+ */
+export interface OrderableSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  priority?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-bar-test_select".
+ */
+export interface SearchBarTestSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  category?: T;
+  status?: T;
+  priority?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unauthorized-test_select".
+ */
+export interface UnauthorizedTestSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1819,28 +1962,6 @@ export interface EmailFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "folder-items_select".
- */
-export interface FolderItemsSelect<T extends boolean = true> {
-  title?: T;
-  parent?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "folders_select".
- */
-export interface FoldersSelect<T extends boolean = true> {
-  parent?: T;
-  name?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "group-fields_select".
  */
 export interface GroupFieldsSelect<T extends boolean = true> {
@@ -1922,17 +2043,6 @@ export interface NumberFieldsSelect<T extends boolean = true> {
   priceReadOnly?: T;
   prices?: T;
   pricesReadOnly?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orderable_select".
- */
-export interface OrderableSelect<T extends boolean = true> {
-  _order?: T;
-  title?: T;
-  priority?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2037,19 +2147,6 @@ export interface RowFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search-bar-test_select".
- */
-export interface SearchBarTestSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  category?: T;
-  status?: T;
-  priority?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "select-fields_select".
  */
 export interface SelectFieldsSelect<T extends boolean = true> {
@@ -2128,20 +2225,6 @@ export interface TabsFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tags_select".
- */
-export interface TagsSelect<T extends boolean = true> {
-  _h_tags?: T;
-  name?: T;
-  description?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-  allowedCollections?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "text-fields_select".
  */
 export interface TextFieldsSelect<T extends boolean = true> {
@@ -2199,6 +2282,16 @@ export interface UploadFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave_select".
+ */
+export interface AutosaveSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-versions_select".
  */
 export interface DraftVersionsSelect<T extends boolean = true> {
@@ -2211,13 +2304,25 @@ export interface DraftVersionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave_select".
+ * via the `definition` "folders_select".
  */
-export interface AutosaveSelect<T extends boolean = true> {
-  title?: T;
+export interface FoldersSelect<T extends boolean = true> {
+  parent?: T;
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-items_select".
+ */
+export interface FolderItemsSelect<T extends boolean = true> {
+  title?: T;
+  parent?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2231,12 +2336,40 @@ export interface RubbishSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "unauthorized-test_select".
+ * via the `definition` "tags_select".
  */
-export interface UnauthorizedTestSelect<T extends boolean = true> {
-  title?: T;
+export interface TagsSelect<T extends boolean = true> {
+  _h_tags?: T;
+  name?: T;
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+  allowedCollections?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  roles?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2245,6 +2378,37 @@ export interface UnauthorizedTestSelect<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2324,6 +2488,23 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSchedulePublish".
+ */
+export interface TaskSchedulePublish {
+  input: {
+    type?: ('publish' | 'unpublish') | null;
+    locale?: string | null;
+    doc?: {
+      relationTo: 'doc-controls';
+      value: string | DocControl;
+    } | null;
+    global?: string | null;
+    user?: (string | null) | User;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
