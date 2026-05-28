@@ -884,8 +884,8 @@ export function fieldsToJSONSchema({
           }
         }
 
-        if ('typescriptSchema' in field && field?.typescriptSchema?.length) {
-          for (const schema of field.typescriptSchema) {
+        if ('jsonSchema' in field && field?.jsonSchema?.length) {
+          for (const schema of field.jsonSchema) {
             fieldSchema = schema({ jsonSchema: fieldSchema! })
           }
         }
