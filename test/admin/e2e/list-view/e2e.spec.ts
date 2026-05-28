@@ -43,7 +43,9 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 
 import {
+  clickColumnSelectorItem,
   clickPillSelectorItem,
+  getColumnSelectorItem,
   getPillSelectorItem,
   openListColumns,
   reorderColumns,
@@ -181,9 +183,9 @@ describe('List View', () => {
       )
 
       await page.locator('.list-controls__toggle-columns').click()
-      await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+      await expect(page.locator('.column-selector')).toBeVisible()
 
-      await clickPillSelectorItem({ container: page, label: 'ID' })
+      await clickColumnSelectorItem({ container: page, label: 'ID' })
 
       await page.locator('#heading-id').waitFor({ state: 'detached' })
       await page.locator('.cell-id').first().waitFor({ state: 'detached' })
@@ -381,18 +383,19 @@ describe('List View', () => {
       await page.locator('.list-controls__toggle-columns').click()
 
       // wait until the column toggle UI is visible and fully expanded
-      await expect(page.locator('.pill-selector')).toBeVisible()
+      await expect(page.locator('.column-selector')).toBeVisible()
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
       // ensure the ID column is active
-      const idButton = getPillSelectorItem({ container: page, label: 'ID' })
+      const idButton = getColumnSelectorItem({ container: page, label: 'ID' })
 
       const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
 
       const buttonClasses = await idButton.getAttribute('class')
 
-      if (buttonClasses && !buttonClasses.includes('chip--selected')) {
-        await idButton.locator('.chip__action').click()
+      // New column selector uses --inactive class when column is hidden
+      if (buttonClasses && buttonClasses.includes('column-selector__item--inactive')) {
+        await idButton.locator('.switch').click()
         await expect(page.locator(tableRowLocator).first().locator('.cell-id')).toBeVisible()
       }
 

@@ -6,7 +6,7 @@ export const openListColumns = async (
   page: Page,
   {
     togglerSelector = '.list-controls__toggle-columns',
-    columnContainerSelector = '.list-controls__columns',
+    columnContainerSelector = '.column-selector',
   }: {
     columnContainerSelector?: string
     togglerSelector?: string
@@ -22,7 +22,7 @@ export const openListColumns = async (
     await page.locator(togglerSelector).first().click()
   }
 
-  await expect(page.locator(`${columnContainerSelector}.rah-static--height-auto`)).toBeVisible()
+  await expect(columnContainer).toBeVisible()
 
   return { columnContainer }
 }
