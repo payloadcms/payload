@@ -140,53 +140,13 @@ describe('configToJSONSchema', () => {
         blockFieldWithFields: {
           type: ['array', 'null'],
           items: {
-            oneOf: [
-              {
-                type: 'object',
-                additionalProperties: false,
-                properties: {
-                  id: {
-                    type: ['string', 'null'],
-                  },
-                  blockName: {
-                    type: ['string', 'null'],
-                  },
-                  blockType: {
-                    const: 'test',
-                  },
-                  field: {
-                    type: ['string', 'null'],
-                  },
-                },
-                required: ['blockType'],
-              },
-            ],
+            oneOf: [{ $ref: '#/definitions/Test' }],
           },
         },
         blockFieldWithFieldsRequired: {
           type: ['array', 'null'],
           items: {
-            oneOf: [
-              {
-                type: 'object',
-                additionalProperties: false,
-                properties: {
-                  id: {
-                    type: ['string', 'null'],
-                  },
-                  blockName: {
-                    type: ['string', 'null'],
-                  },
-                  blockType: {
-                    const: 'test',
-                  },
-                  field: {
-                    type: 'string',
-                  },
-                },
-                required: ['blockType', 'field'],
-              },
-            ],
+            oneOf: [{ $ref: '#/definitions/Test' }],
           },
         },
       },

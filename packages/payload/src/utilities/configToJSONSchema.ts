@@ -465,9 +465,6 @@ export function fieldsToJSONSchema(
                       }
 
                       if (!opts.forceInlineBlocks) {
-                        // Always register the block as a top-level definition,
-                        // using the user's `interfaceName` override if set or a
-                        // PascalCase fallback derived from the slug.
                         const interfaceName = block.interfaceName ?? toWords(block.slug, true)
                         interfaceNameDefinitions.set(interfaceName, blockSchema)
 
@@ -1385,8 +1382,6 @@ export function configToJSONSchema(
         required: ['blockType', ...blockFieldSchemas.required],
       }
 
-      // `block.interfaceName` is treated as an override of the auto-derived
-      // PascalCase name. Without it, blocks still get a top-level interface.
       const interfaceName = block.interfaceName ?? toWords(block.slug, true)
       interfaceNameDefinitions.set(interfaceName, blockSchema)
 
