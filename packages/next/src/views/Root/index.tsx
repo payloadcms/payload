@@ -319,6 +319,7 @@ export const RootPage = async ({
       params,
       payload: req.payload,
       searchParams,
+      server: req.server,
       viewActions,
     } satisfies AdminViewServerPropsOnly,
   })
