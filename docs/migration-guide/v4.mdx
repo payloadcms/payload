@@ -151,6 +151,60 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 
 Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
 
+### `next/navigation` and `next/link` replaced by framework-agnostic `RouterAdapter` hooks
+
+`@payloadcms/ui` no longer depends on `next` directly. Custom admin components (field components, custom views, plugins) that previously imported router hooks or the `Link` component from `next/*` must now import the framework-agnostic equivalents from `@payloadcms/ui`. Behavior is identical when running on Next.js — the `NextRouterAdapter` shipped by `@payloadcms/next` wires `next/navigation` hooks and `next/link` into the same context — but ui code can now also run on non-Next adapters (e.g. TanStack Start) without modification.
+
+**Hooks** — import from `@payloadcms/ui` instead of `next/navigation`:
+
+| Old import                                          | New import                                         |
+| --------------------------------------------------- | -------------------------------------------------- |
+| `import { useRouter } from 'next/navigation'`       | `import { useRouter } from '@payloadcms/ui'`       |
+| `import { usePathname } from 'next/navigation'`     | `import { usePathname } from '@payloadcms/ui'`     |
+| `import { useSearchParams } from 'next/navigation'` | `import { useSearchParams } from '@payloadcms/ui'` |
+| `import { useParams } from 'next/navigation'`       | `import { useParams } from '@payloadcms/ui'`       |
+
+**`Link` component** — use `PayloadLink` from `@payloadcms/ui`:
+
+```diff
+- import Link from 'next/link'
++ import { PayloadLink as Link } from '@payloadcms/ui'
+```
+
+**Types** — `LinkProps` from `next/link` is replaced by `LinkAdapterProps` from `payload`:
+
+```diff
+- import type { LinkProps } from 'next/link'
++ import type { LinkAdapterProps } from 'payload'
+```
+
+`LinkAdapterProps` is a framework-neutral shape: `href: string`, optional `prefetch` / `replace` / `scroll` / `ref`, plus standard `AnchorHTMLAttributes<HTMLAnchorElement>` (minus `href`). The Next adapter forwards these to `next/link`.
+
+**`RouterAdapterRouter` shape** — the object returned by `useRouter()` now has a stable, framework-agnostic surface:
+
+```ts
+type RouterAdapterRouter = {
+  back: () => void
+  push: (path: string, options?: { scroll?: boolean }) => void
+  refresh: () => void
+  replace: (path: string, options?: { scroll?: boolean }) => void
+}
+```
+
+If you were relying on Next-specific extras like `prefetch()` on the router instance, switch to the `Link` component's `prefetch` prop instead.
+
+**Custom apps embedding `RootProvider`** — `RootProvider` now requires a `RouterAdapter` prop. Apps using the default Next.js admin layout get this wired automatically. If you assemble `RootProvider` yourself, pass the framework's adapter component:
+
+```diff
++ import { NextRouterAdapter } from '@payloadcms/next/elements/RouterAdapter'
+
+  <RootProvider
++   RouterAdapter={NextRouterAdapter}
+    config={clientConfig}
+    /* ... */
+  />
+```
+
 ### `title` and `setDocumentTitle` removed from `useDocumentInfo`
 
 For performance reasons, the document title state has been split out of `DocumentInfoContext` into its own `DocumentTitleContext`. Access it through the `useDocumentTitle` hook, which exposes the same `title` and `setDocumentTitle` API. Components that subscribed to `useDocumentInfo` solely for the title will no longer re-render when unrelated document state changes.

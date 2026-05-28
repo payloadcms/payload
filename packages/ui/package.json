@@ -172,7 +172,6 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": ">=16.2.6 <17.0.0",
     "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
