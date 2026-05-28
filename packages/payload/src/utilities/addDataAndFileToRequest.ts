@@ -3,6 +3,8 @@ import type { PayloadRequest } from '../types/index.js'
 import { APIError } from '../errors/APIError.js'
 import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
 
+const MAX_SAFE_BUFFER_LENGTH = 0x7fffffff
+
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 
 /**
@@ -102,12 +104,21 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
           throw new APIError('Expected response from the upload handler.')
         }
 
+        const parsedSize = Number(size)
+        const normalizedSize = Number.isFinite(parsedSize) && parsedSize >= 0 ? parsedSize : 0
+
+        let data = Buffer.alloc(0)
+        // Node cannot allocate buffers larger than 2^31 - 1 bytes, so avoid materializing oversized remote uploads in memory.
+        if (normalizedSize > 0 && normalizedSize <= MAX_SAFE_BUFFER_LENGTH) {
+          data = Buffer.from(await response.arrayBuffer())
+        }
+
         req.file = {
           name: filename,
           clientUploadContext,
-          data: Buffer.from(await response.arrayBuffer()),
+          data,
           mimetype: response.headers.get('Content-Type') || mimeType,
-          size,
+          size: normalizedSize,
         }
       }
     }
