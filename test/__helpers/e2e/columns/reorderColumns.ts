@@ -3,13 +3,13 @@ import type { Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
-import { getPillSelectorItem } from './clickPillSelectorItem.js'
+import { getColumnSelectorItem } from './clickPillSelectorItem.js'
 
 export const reorderColumns = async (
   page: Page,
   {
     togglerSelector = '.list-controls__toggle-columns',
-    columnContainerSelector = '.list-controls__columns',
+    columnContainerSelector = '.column-selector',
     fromColumn = 'Number',
     toColumn = 'ID',
   }: {
@@ -26,14 +26,14 @@ export const reorderColumns = async (
     await page.locator(togglerSelector).first().click()
   }
 
-  await expect(page.locator(`${columnContainerSelector}.rah-static--height-auto`)).toBeVisible()
+  await expect(columnContainer).toBeVisible()
 
-  const fromBoundingBox = await getPillSelectorItem({
+  const fromBoundingBox = await getColumnSelectorItem({
     container: columnContainer,
     label: fromColumn,
   }).boundingBox()
 
-  const toBoundingBox = await getPillSelectorItem({
+  const toBoundingBox = await getColumnSelectorItem({
     container: columnContainer,
     label: toColumn,
   }).boundingBox()
@@ -49,9 +49,7 @@ export const reorderColumns = async (
   await page.mouse.move(toBoundingBox.x - 2, toBoundingBox.y - 2, { steps: 10 })
   await page.mouse.up()
 
-  await expect(
-    columnContainer.locator('.pill-selector .pill-selector__draggable-item').first(),
-  ).toHaveText(fromColumn)
+  await expect(columnContainer.locator('.column-selector__item').first()).toHaveText(fromColumn)
 
   await expect(page.locator('table thead tr th').nth(1).first()).toHaveText(fromColumn)
   // TODO: This wait makes sure the preferences are actually saved. Just waiting for the UI to update is not enough. We should replace this wait

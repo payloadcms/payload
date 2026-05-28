@@ -10,7 +10,7 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
-  getPillSelectorItem,
+  getColumnSelectorItem,
   openListColumns,
   toggleColumn,
 } from '../__helpers/e2e/columns/index.js'
@@ -2148,38 +2148,42 @@ describe('Uploads', () => {
 
     await openListColumns(page, {})
 
-    await expect(getPillSelectorItem({ container: page, label: 'Sizes > one > URL' })).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > one > Width' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > one > URL' }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > one > Height' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > one > Width' }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > one > MIME Type' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > one > Height' }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > one > File Size' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > one > MIME Type' }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > one > File Name' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > one > File Size' }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page, label: 'Sizes > one > File Name' }),
     ).toBeHidden()
 
-    await expect(getPillSelectorItem({ container: page, label: 'Sizes > two > URL' })).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > two > Width' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > two > URL' }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > two > Height' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > two > Width' }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > two > MIME Type' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > two > Height' }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > two > File Size' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > two > MIME Type' }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > two > File Name' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > two > File Size' }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page, label: 'Sizes > two > File Name' }),
     ).toBeHidden()
   })
 
@@ -2189,41 +2193,41 @@ describe('Uploads', () => {
     await openListColumns(page, {})
 
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > URL' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > three > URL' }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > Width' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > three > Width' }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > Height' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > three > Height' }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > MIME Type' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > three > MIME Type' }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > File Size' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > three > File Size' }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > File Name' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > three > File Name' }),
     ).toBeVisible()
 
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > URL' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > four > URL' }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > Width' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > four > Width' }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > Height' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > four > Height' }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > MIME Type' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > four > MIME Type' }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > File Size' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > four > File Size' }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > File Name' }),
+      getColumnSelectorItem({ container: page, label: 'Sizes > four > File Name' }),
     ).toBeVisible()
   })
 

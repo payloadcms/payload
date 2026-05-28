@@ -13,7 +13,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
-import { getPillSelectorItem } from '../__helpers/e2e/columns/index.js'
+import { getColumnSelectorItem } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -178,7 +178,7 @@ describe('i18n', () => {
       await page.locator('.list-controls__toggle-columns').click()
 
       // expecting the label to fall back to english as default fallbackLng
-      await expect(getPillSelectorItem({ container: page, label: 'es-label' })).toBeVisible()
+      await expect(getColumnSelectorItem({ container: page, label: 'es-label' })).toBeVisible()
     })
 
     test('should show fallback pill field label', async () => {
@@ -189,7 +189,7 @@ describe('i18n', () => {
       await page.locator('.list-controls__toggle-columns').click()
 
       // expecting the label to fall back to english as default fallbackLng
-      await expect(getPillSelectorItem({ container: page, label: 'en-label' })).toBeVisible()
+      await expect(getColumnSelectorItem({ container: page, label: 'en-label' })).toBeVisible()
     })
 
     test('should show translated field label in where builder', async () => {

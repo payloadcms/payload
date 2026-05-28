@@ -390,7 +390,7 @@ export async function switchTab(page: Page, selector: string) {
 
 export const openColumnControls = async (page: Page) => {
   await page.locator('.list-controls__toggle-columns').click()
-  await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+  await expect(page.locator('.column-selector')).toBeVisible()
 }
 
 /**
