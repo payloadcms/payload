@@ -105,6 +105,29 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     timezones: sanitizedConfig.admin!.timezones.supportedTimezones as Timezone[],
   })
 
+  // Validate `admin.serverFunctions` registry. This is intentionally lightweight:
+  // - Keys must be non-empty strings (`Object.entries` already gives us strings, so
+  //   we only need to reject the empty-string case which would silently break lookup).
+  // - Values must be functions; anything else means the plugin/integrator wired it up
+  //   incorrectly and would otherwise fail with an opaque error at call time.
+  // We do not warn on cross-plugin key collisions here because plugins mutate the
+  // config one-by-one before `sanitizeConfig` runs — by the time we see the merged
+  // map the colliding entry is already overwritten. Plugins are expected to
+  // namespace their keys (e.g. `'@my-plugin/foo'`).
+  const serverFunctions = sanitizedConfig.admin?.serverFunctions
+  if (serverFunctions) {
+    for (const [key, value] of Object.entries(serverFunctions)) {
+      if (!key) {
+        throw new InvalidConfiguration(`admin.serverFunctions: keys must be non-empty strings.`)
+      }
+      if (typeof value !== 'function') {
+        throw new InvalidConfiguration(
+          `admin.serverFunctions["${key}"]: value must be a function, received ${typeof value}.`,
+        )
+      }
+    }
+  }
+
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
 }
 

@@ -16,6 +16,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { ServerFunction } from '../admin/functions/index.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
   CustomStatus,
@@ -1119,6 +1120,23 @@ export type Config = {
        */
       unauthorized?: `/${string}`
     }
+    /**
+     * Register custom server functions callable from the admin via
+     * `useServerFunctions().serverFunction({ name, args })`.
+     *
+     * This registry is intended for plugins that need to ship a server function
+     * without forcing every integrator to import and pass it into the
+     * `serverFunctions` prop on `<RootLayout />` in `(payload)/layout.tsx`.
+     *
+     * Plugins should namespace their keys to avoid collisions
+     * (e.g. `'@my-plugin/render-foo'`).
+     *
+     * Lookup order in `handleServerFunctions`:
+     *   1. integrator-supplied `serverFunctions` prop on `<RootLayout />` (highest priority — back-compat)
+     *   2. `config.admin.serverFunctions`
+     *   3. built-in payload server functions
+     */
+    serverFunctions?: Record<string, ServerFunction>
     /**
      * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.
      * Useful in scenarios where the server-rendered HTML might intentionally differ from the client-rendered DOM.
