@@ -57,7 +57,7 @@ export const Condition: React.FC<Props> = (props) => {
 
   const { t } = useTranslation()
 
-  const reducedField = reducedFields.find((field) => field.value === fieldPath)
+  const reducedField = reducedFields.find((field) => field.fieldPath === fieldPath)
 
   const [internalValue, setInternalValue] = useState<Value>(value)
 
@@ -93,9 +93,7 @@ export const Condition: React.FC<Props> = (props) => {
     void updateValue(debouncedValue)
   }, [debouncedValue])
 
-  const disabled =
-    (!reducedField?.value && typeof reducedField?.value !== 'number') ||
-    isFieldDisabled(reducedField?.field, 'filter')
+  const disabled = !reducedField?.fieldPath || isFieldDisabled(reducedField?.field, 'filter')
 
   const handleFieldChange = useCallback(
     async (field: Option<string>) => {
@@ -103,7 +101,7 @@ export const Condition: React.FC<Props> = (props) => {
       await updateCondition({
         type: 'field',
         andIndex,
-        field: reducedFields.find((option) => option.value === field.value),
+        field: reducedFields.find((option) => option.fieldPath === field.value),
         operator,
         orIndex,
         value: undefined,
@@ -153,12 +151,10 @@ export const Condition: React.FC<Props> = (props) => {
               }
               isClearable={false}
               onChange={handleFieldChange}
-              options={reducedFields.filter((field) => !isFieldDisabled(field.field, 'filter'))}
-              value={
-                reducedField || {
-                  value: reducedField?.value,
-                }
-              }
+              options={reducedFields
+                .filter((field) => !isFieldDisabled(field.field, 'filter'))
+                .map((f) => ({ ...f, value: f.fieldPath }))}
+              value={reducedField ? { ...reducedField, value: reducedField.fieldPath } : undefined}
             />
           </div>
           <div className={`${baseClass}__operator`}>

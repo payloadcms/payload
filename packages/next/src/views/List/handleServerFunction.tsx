@@ -119,6 +119,7 @@ export const renderListHandler: ServerFunction<
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},
+    server: req.server,
     viewType: 'list',
   })
 

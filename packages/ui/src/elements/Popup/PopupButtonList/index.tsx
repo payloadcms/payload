@@ -1,5 +1,5 @@
 'use client'
-import type { LinkProps } from 'next/link.js'
+import type { LinkAdapterProps } from 'payload'
 
 import * as React from 'react'
 
@@ -30,10 +30,30 @@ export const ButtonGroup: React.FC<{
 }
 
 /**
- * A ButtonGroup variant that reserves space for icons on the left,
- * ensuring text aligns consistently whether items have icons or not.
+ * A ButtonGroup variant for action menu items.
+ * @param size - 'large' for 24px icons (default), 'small' for 16px icons
  */
-export const IconButtonGroup: React.FC<{
+export const MenuItem: React.FC<{
+  children: React.ReactNode
+  className?: string
+  size?: 'large' | 'small'
+}> = ({ children, className, size = 'large' }) => {
+  const classes = [
+    baseClass,
+    className,
+    `${baseClass}--with-actions`,
+    size === 'large' && `${baseClass}--large`,
+  ]
+    .filter(Boolean)
+    .join(' ')
+  return <div className={classes}>{children}</div>
+}
+
+/**
+ * A ButtonGroup variant for radio-style selection items.
+ * Uses 16px icons with padding on label - ideal for checkbox/selection rows.
+ */
+export const RadioGroup: React.FC<{
   children: React.ReactNode
   className?: string
 }> = ({ children, className }) => {
@@ -46,7 +66,7 @@ type MenuButtonProps = {
   children: React.ReactNode
   className?: string
   disabled?: boolean
-  href?: LinkProps['href']
+  href?: LinkAdapterProps['href']
   icon?: React.ReactNode
   id?: string
   onClick?: (e?: React.MouseEvent) => void
@@ -71,16 +91,8 @@ export const Button: React.FC<MenuButtonProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  // Render icon column: checkmark if active, otherwise passed icon, otherwise empty placeholder
-  const iconElement = active ? (
-    <span className={`${baseClass}__icon`}>
-      <CheckIcon size={16} />
-    </span>
-  ) : icon ? (
-    <span className={`${baseClass}__icon`}>{icon}</span>
-  ) : (
-    <span className={`${baseClass}__icon`} />
-  )
+  // Always render icon element - CSS hides it outside RadioGroup/MenuItem
+  const iconElement = <span className={`${baseClass}__icon`}>{icon}</span>
 
   if (!disabled) {
     if (href) {
@@ -97,7 +109,7 @@ export const Button: React.FC<MenuButtonProps> = ({
           prefetch={false}
         >
           {iconElement}
-          {children}
+          <span className={`${baseClass}__label`}>{children}</span>
         </Link>
       )
     }
@@ -115,7 +127,7 @@ export const Button: React.FC<MenuButtonProps> = ({
           type="button"
         >
           {iconElement}
-          {children}
+          <span className={`${baseClass}__label`}>{children}</span>
         </button>
       )
     }
@@ -124,7 +136,15 @@ export const Button: React.FC<MenuButtonProps> = ({
   return (
     <div className={classes} id={id}>
       {iconElement}
-      {children}
+      <span className={`${baseClass}__label`}>{children}</span>
     </div>
   )
+}
+
+/**
+ * A Button variant for use within RadioGroup.
+ * Automatically shows a checkmark icon when active.
+ */
+export const RadioGroupItem: React.FC<Omit<MenuButtonProps, 'icon'>> = (props) => {
+  return <Button {...props} icon={props.active ? <CheckIcon size={16} /> : undefined} />
 }

@@ -12,7 +12,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { Fragment } from 'react'
 
 import { DocumentTabLink } from './TabLink.js'
-import './index.scss'
+import './index.css'
 
 export const baseClass = 'doc-tab'
 
@@ -82,6 +82,7 @@ export const DefaultDocumentTab: React.FC<{
                 payload: req.payload,
                 permissions,
                 req,
+                server: req.server,
                 user: req.user,
               } satisfies DocumentTabServerPropsOnly,
             })}

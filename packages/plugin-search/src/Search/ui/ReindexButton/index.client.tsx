@@ -8,9 +8,9 @@ import {
   useConfig,
   useLocale,
   useModal,
+  useRouter,
   useTranslation,
 } from '@payloadcms/ui'
-import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useMemo, useState } from 'react'
 

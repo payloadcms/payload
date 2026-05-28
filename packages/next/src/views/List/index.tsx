@@ -42,6 +42,7 @@ import { handleHierarchy } from './handleHierarchy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
+import './index.css'
 
 /**
  * @internal
@@ -462,6 +463,7 @@ export const renderListView = async (
     payload,
     permissions,
     searchParams,
+    server: req.server,
     user,
   }
 

@@ -20,7 +20,7 @@
   }
 
   .radio-input__styled-radio {
-    border: 1px solid var(--color-border-strong);
+    border: var(--stroke-width-small) solid var(--color-border-strong);
     background-color: transparent;
     width: 1rem;
     height: 1rem;

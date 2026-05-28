@@ -7,9 +7,7 @@
   }
 
   .versions__wrap {
-    padding-top: 0;
-    padding-bottom: var(--spacing-view-bottom);
-    margin-top: var(--spacer-3);
+    padding: 0 var(--gutter-h) var(--spacing-view-bottom) var(--gutter-h);
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -40,6 +38,23 @@
     overflow: auto;
   }
 
+  .versions .table th:first-child {
+    padding-inline-start: var(--spacer-2-5);
+  }
+
+  .versions .table td:first-child:not(.cell--linked) {
+    padding-inline-start: var(--spacer-2-5);
+  }
+
+  .versions .table td.cell--linked {
+    padding: 0;
+  }
+
+  .versions .table td.cell--linked > a {
+    padding: 0 var(--spacer-2-5);
+    width: 100%;
+  }
+
   .versions .paginator {
     margin-bottom: 0;
   }
@@ -48,7 +63,7 @@
   /* this is to visually indicate overflowing content */
   @media (max-width: 768px) {
     .versions__wrap {
-      padding-top: 0;
+      padding: 0 0 var(--spacing-view-bottom) 0;
       margin-top: 0;
     }
 

@@ -54,6 +54,12 @@ export {
   useCellProps,
 } from '../../providers/TableColumns/RenderDefaultCell/index.js'
 export { DateCell } from '../../elements/Table/DefaultCell/fields/Date/index.js'
+export { TableSection } from '../../elements/TableSection/index.js'
+export type {
+  TableSectionContentProps,
+  TableSectionHeaderProps,
+  TableSectionProps,
+} from '../../elements/TableSection/index.js'
 
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
@@ -118,6 +124,8 @@ export type { InputStepperProps } from '../../elements/InputStepper/index.js'
 
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
+export { ListControlsBar } from '../../elements/ListControlsBar/index.js'
+export type { ListControlsBarProps } from '../../elements/ListControlsBar/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
 export type {
   ListDrawerProps,
@@ -146,7 +154,6 @@ export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { GroupByHeader } from '../../views/List/GroupByHeader/index.js'
 export { PageControls, PageControlsComponent } from '../../elements/PageControls/index.js'
-export { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 
 export { GroupByPageControls } from '../../elements/PageControls/GroupByPageControls.js'
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
@@ -164,6 +171,8 @@ export { NoListResults } from '../../elements/NoListResults/index.js'
 export { NavContext, NavProvider, useNav } from '../../elements/Nav/context.js'
 export { NavGroup } from '../../elements/NavGroup/index.js'
 export { Pagination } from '../../elements/Pagination/index.js'
+export { SimplePagination } from '../../elements/Pagination/SimplePagination/index.js'
+export type { SimplePaginationProps } from '../../elements/Pagination/SimplePagination/index.js'
 export { PerPage } from '../../elements/PerPage/index.js'
 export { Pill } from '../../elements/Pill/index.js'
 import * as PopupList from '../../elements/Popup/PopupButtonList/index.js'
@@ -202,6 +211,7 @@ export { toast }
 export { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 export { Upload } from '../../elements/Upload/index.js'
 export { SearchFilter } from '../../elements/SearchFilter/index.js'
+export { FilterTrigger } from '../../elements/FilterTrigger/index.js'
 export { EditUpload } from '../../elements/EditUpload/index.js'
 export { FileDetails } from '../../elements/FileDetails/index.js'
 export { PreviewSizes } from '../../elements/PreviewSizes/index.js'
@@ -393,6 +403,13 @@ export { OperationProvider, useOperation } from '../../providers/Operation/index
 export { ParamsProvider, useParams } from '../../providers/Params/index.js'
 export { PreferencesProvider, usePreferences } from '../../providers/Preferences/index.js'
 export { RootProvider } from '../../providers/Root/index.js'
+export {
+  PayloadLink,
+  RouterAdapterContext,
+  usePathname,
+  useRouter,
+} from '../../providers/RouterAdapter/index.js'
+export type { RouterAdapterContextValue } from '../../providers/RouterAdapter/index.js'
 export {
   RouteCache as RouteCacheProvider,
   useRouteCache,

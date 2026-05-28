@@ -70,7 +70,7 @@
     position: relative;
     width: var(--spacer-3);
     height: var(--spacer-3);
-    border: 1px solid var(--color-border-strong);
+    border: var(--stroke-width-small) solid var(--color-border-strong);
     border-radius: var(--radius-medium);
     background: transparent;
 

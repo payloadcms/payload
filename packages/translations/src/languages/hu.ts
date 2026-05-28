@@ -326,6 +326,7 @@ export const huTranslations: DefaultTranslationsObject = {
     export: 'Export',
     fallbackToDefaultLocale: 'Visszatérés az alapértelmezett nyelvhez',
     false: 'Hamis',
+    field: 'Field',
     filter: 'Szűrő',
     filters: 'Szűrők',
     filterWhere: 'Szűrő {{label}} ahol',

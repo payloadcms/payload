@@ -14,7 +14,7 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
     cursor: pointer;
     text-decoration: none;
     color: inherit;
@@ -53,7 +53,7 @@
   .btn.btn--style-secondary {
     color: var(--color-text);
     background-color: var(--color-bg);
-    border: 1px solid var(--special-border-translucent);
+    border: var(--stroke-width-small) solid var(--special-border-translucent);
 
     &:hover:not(.btn--disabled) {
       background-color: var(--color-bg-transparent-hover);
@@ -71,7 +71,7 @@
   .btn--style-dashed {
     color: var(--color-text);
     background-color: transparent;
-    border: 1px dashed var(--special-border-translucent);
+    border: var(--stroke-width-small) dashed var(--special-border-translucent);
 
     &:hover:not(.btn--disabled) {
       background-color: var(--color-bg-transparent-hover);
@@ -139,6 +139,23 @@
     }
   }
 
+  /* Selected state - ghost buttons */
+  .btn.btn--style-ghost.btn--selected,
+  .btn.btn--style-ghost.btn--selected:hover,
+  .btn.btn--style-ghost.btn--selected:active {
+    background-color: var(--color-bg-selected);
+    color: var(--color-text-selected);
+  }
+
+  /* Selected state - secondary buttons */
+  .btn.btn--style-secondary.btn--selected,
+  .btn.btn--style-secondary.btn--selected:hover,
+  .btn.btn--style-secondary.btn--selected:active {
+    background-color: var(--color-bg-selected);
+    color: var(--color-text-selected);
+    border-color: var(--color-border-selected-strong);
+  }
+
   /* Icon */
 
   .btn__icon {
@@ -166,12 +183,6 @@
 
   .btn--has-tooltip {
     position: relative;
-  }
-
-  .btn--icon {
-    .btn__content {
-      gap: 2px;
-    }
   }
 
   .btn--icon-position-left {
@@ -339,7 +350,7 @@
     .popup-button {
       color: var(--color-text);
       background-color: var(--color-bg);
-      border: 1px solid var(--special-border-translucent);
+      border: var(--stroke-width-small) solid var(--special-border-translucent);
 
       &:hover,
       &:active {
