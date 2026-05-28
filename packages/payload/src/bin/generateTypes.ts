@@ -55,7 +55,7 @@ export async function generateTypes(
   compiled = addSelectGenericsToGeneratedTypes({ compiledGeneratedTypes: compiled })
 
   if (typeStringDefinitions.size > 0) {
-    const block = [...typeStringDefinitions.values()].join('\n\n')
+    const block = [...typeStringDefinitions].join('\n\n')
     compiled = `${compiled.trimEnd()}\n\n${block}\n`
   }
 

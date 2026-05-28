@@ -16,7 +16,7 @@ export function generateJobsJSONSchemas(
    * if they have custom ID fields.
    */
   collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
-  typeStringDefinitions: Map<string, string>,
+  typeStringDefinitions: Set<string>,
   i18n?: I18n,
 ): {
   definitions?: Map<string, JSONSchema4>

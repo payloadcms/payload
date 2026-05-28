@@ -165,7 +165,7 @@ function generateWidgetSchemas({
   forceInlineBlocks?: boolean
   i18n?: I18n
   interfaceNameDefinitions: Map<string, JSONSchema4>
-  typeStringDefinitions: Map<string, string>
+  typeStringDefinitions: Set<string>
 }): {
   definitions: Record<string, JSONSchema4>
   schema: JSONSchema4
@@ -372,11 +372,11 @@ export type FieldsToJSONSchemaArgs = {
   /** Allows you to define new top-level interfaces that can be re-used in the output schema. */
   interfaceNameDefinitions: Map<string, JSONSchema4>
   /**
-   * Allows you to append raw TS source to `payload-types.ts`. Keys are used
-   * for de-duplication - identical keys overwrite, so the same string written
-   * from many fields ends up emitted once.
+   * Allows you to append raw TS source to `payload-types.ts`. Identical
+   * strings de-dupe naturally, so the same helper written from many fields
+   * ends up emitted once.
    */
-  typeStringDefinitions: Map<string, string>
+  typeStringDefinitions: Set<string>
 }
 
 export function fieldsToJSONSchema({
@@ -910,7 +910,7 @@ export function entityToJSONSchema(
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig,
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   defaultIDType: 'number' | 'text',
-  typeStringDefinitions: Map<string, string>,
+  typeStringDefinitions: Set<string>,
   collectionIDFieldTypes?: { [key: string]: 'number' | 'string' },
   i18n?: I18n,
   forceInlineBlocks?: boolean,
@@ -1290,11 +1290,11 @@ export function configToJSONSchema(
   defaultIDType?: 'number' | 'text',
   i18n?: I18n,
   { forceInlineBlocks }: ConfigToJSONSchemaOptions = {},
-): { jsonSchema: JSONSchema4; typeStringDefinitions: Map<string, string> } {
+): { jsonSchema: JSONSchema4; typeStringDefinitions: Set<string> } {
   // a mutable Map to store custom top-level `interfaceName` types. Fields with an `interfaceName` property will be moved to the top-level definitions here
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
-  // a mutable Map for raw TS source to be appended to `payload-types.ts`.
-  const typeStringDefinitions: Map<string, string> = new Map()
+  // a mutable Set for raw TS source to be appended to `payload-types.ts`.
+  const typeStringDefinitions: Set<string> = new Set()
 
   //  Used for relationship fields, to determine whether to use a string or number type for the ID.
   const collectionIDFieldTypes = getCollectionIDFieldTypes({
