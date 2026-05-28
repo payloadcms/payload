@@ -45,8 +45,6 @@ export async function CollectionQueryWidget({
 
   const title = titleFromData || getTranslation(collectionConfig.labels.plural, req.i18n)
   const sort = sortField ? `${sortDirection === 'desc' ? '-' : ''}${sortField}` : undefined
-  const collectionLabel = getTranslation(collectionConfig.labels.singular, req.i18n)
-  const collectionPluralLabel = getTranslation(collectionConfig.labels.plural, req.i18n)
 
   const adminRoute = payload.config.routes.admin
   const result = await payload.find({
@@ -65,11 +63,6 @@ export async function CollectionQueryWidget({
     <div className="card collection-query-widget">
       <div className="collection-query-widget__header">
         <h3 className="collection-query-widget__title">{title}</h3>
-        <div className="collection-query-widget__control" title={collectionPluralLabel}>
-          <span className="collection-query-widget__control-muted">{collectionPluralLabel}:</span>
-          <span>{result.totalDocs.toLocaleString()}</span>
-          <CaretIcon />
-        </div>
       </div>
       {docs.length > 0 ? (
         <ul className="collection-query-widget__rows">
@@ -87,7 +80,6 @@ export async function CollectionQueryWidget({
                   })}
                 >
                   <span className="collection-query-widget__row-main">
-                    <span className="collection-query-widget__pill">{collectionLabel}</span>
                     <span className="collection-query-widget__row-title">
                       {getDocLabel({ doc, documentLabelPath })}
                     </span>
@@ -105,22 +97,6 @@ export async function CollectionQueryWidget({
         <p className="collection-query-widget__empty">No documents found.</p>
       )}
     </div>
-  )
-}
-
-function CaretIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="collection-query-widget__control-icon"
-      fill="none"
-      height="12"
-      viewBox="0 0 12 12"
-      width="12"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M3.5 4.75L6 7.25L8.5 4.75" stroke="currentColor" strokeLinecap="round" />
-    </svg>
   )
 }
 
