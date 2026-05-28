@@ -151,13 +151,10 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
         router: {
           autoCodeSplitting: false,
           codeSplittingOptions: { defaultBehavior: [] },
-          // Exclude only generated importMap files. We deliberately do NOT
-          // exclude `*.server-function.ts` here even though the name suggests
-          // a TanStack Start server function — `api.server-function.ts` is
-          // the *route handler* that mounts `/api/server-function` for admin
-          // form saves; excluding it leaves the catch-all `api.$.ts` to fall
-          // through to Payload's `handleEndpoints`, which has no such route
-          // and replies "Route not found", breaking every admin save.
+          // Exclude only generated importMap files. Admin form saves are
+          // dispatched via `runPayloadServerFn` (a TanStack Start
+          // `createServerFn`) rather than a hand-rolled route, so there is
+          // no longer an `api.server-function.ts` to special-case here.
           routeFileIgnorePattern: 'importMap\\.(?:js|server\\.ts)$',
           routesDirectory,
         } as any,

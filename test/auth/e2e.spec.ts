@@ -1,7 +1,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { devUser } from '../credentials.js'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -23,6 +22,7 @@ import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { apiKeysSlug, BASE_PATH, slug } from './shared.js'
 
@@ -347,8 +347,12 @@ describe('Auth', () => {
             return false
           }
           // Next.js server actions POST to the admin page URL;
-          // TanStack Start server functions POST to /api/server-function
-          return isTanStack ? reqUrl.includes('/api/server-function') : reqUrl === url.edit(docID)
+          // TanStack Start server functions POST through `createServerFn`'s
+          // `/_serverFn/<base64-fn-id>` RPC (legacy `/api/server-function`
+          // accepted for backward compatibility with older snapshots).
+          return isTanStack
+            ? reqUrl.includes('/_serverFn/') || reqUrl.includes('/api/server-function')
+            : reqUrl === url.edit(docID)
         })
         await textInput.fill('some text')
         await lockDocRequest

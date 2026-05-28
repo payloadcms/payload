@@ -43,7 +43,9 @@ const dirname = path.resolve(currentFolder, '../../../../')
 
 const formStateUrl =
   currentFramework === 'tanstack-start'
-    ? '/api/server-function'
+    ? // TanStack Start dispatches Payload server functions through
+      // `createServerFn`'s `/_serverFn/<base64-fn-id>` RPC.
+      '/_serverFn/'
     : '/admin/collections/lexical-fields'
 
 const { beforeAll, beforeEach, describe } = test
@@ -1425,9 +1427,7 @@ describe('lexicalBlocks', () => {
 
       await assertNetworkRequests(
         page,
-        currentFramework === 'tanstack-start'
-          ? '/api/server-function'
-          : '/collections/LexicalInBlock/',
+        currentFramework === 'tanstack-start' ? '/_serverFn/' : '/collections/LexicalInBlock/',
         async () => {
           await goToFirstCell(page, serverURL)
           await waitForFormReady(page)

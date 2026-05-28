@@ -53,8 +53,14 @@ export const assertNetworkRequests = async (
   // begin tracking network requests
   page.on('request', async (request) => {
     const requestUrl = request.url()
+    // TanStack Start dispatches Payload server functions through its
+    // `createServerFn` RPC at `/_serverFn/<base64-fn-id>` instead of a hand-
+    // rolled `/api/server-function` route, so accept either URL pattern when
+    // running against the tanstack-start adapter.
     const matches =
-      requestUrl.includes(url) || (isTanStack && requestUrl.includes('/api/server-function'))
+      requestUrl.includes(url) ||
+      (isTanStack &&
+        (requestUrl.includes('/_serverFn/') || requestUrl.includes('/api/server-function')))
 
     if (matches && (requestFilter ? await requestFilter(request) : true)) {
       matchedRequests.push(request)
