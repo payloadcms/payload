@@ -19,10 +19,20 @@ import {
   buildEditorState,
   type DefaultNodeTypes,
   type DefaultTypedEditorState,
-  type RecursiveNodes,
+  type SerializedAutoLinkNode,
   type SerializedBlockNode,
   type SerializedHeadingNode,
+  type SerializedHorizontalRuleNode,
+  type SerializedLineBreakNode,
+  type SerializedLinkNode,
+  type SerializedListItemNode,
+  type SerializedListNode,
+  type SerializedParagraphNode,
+  type SerializedQuoteNode,
+  type SerializedRelationshipNode,
+  type SerializedTabNode,
   type SerializedTextNode,
+  type SerializedUploadNode,
   type TypedEditorState,
 } from '@payloadcms/richtext-lexical'
 import { PayloadSDK } from '@payloadcms/sdk'
@@ -30,6 +40,20 @@ import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 import type {
+  SerializedAutoLinkNode as GenAutoLink,
+  SerializedHeadingNode as GenHeading,
+  SerializedHorizontalRuleNode as GenHR,
+  SerializedLineBreakNode as GenLB,
+  SerializedListItemNode as GenLI,
+  SerializedLinkNode as GenLink,
+  SerializedListNode as GenList,
+  LexicalNodes_A21938DB as GenNodeUnion,
+  SerializedParagraphNode as GenParagraph,
+  SerializedQuoteNode as GenQuote,
+  SerializedRelationshipNode as GenRelationship,
+  SerializedTabNode as GenTab,
+  SerializedTextNode as GenText,
+  SerializedUploadNode as GenUpload,
   Config as LocalConfig,
   Menu,
   MyRadioOptions,
@@ -458,7 +482,7 @@ describe('Types testing', () => {
     })
 
     test('ensure linebreak nodes cannot have children even when nested', () => {
-      // This test verifies that RecursiveNodes doesn't add children to leaf nodes
+      // This test verifies that the self-recursive `DefaultNodeTypes` union doesn't add children to leaf nodes
       type RootChildren = DefaultTypedEditorState['root']['children'][number]
 
       // At top level
@@ -508,7 +532,7 @@ describe('Types testing', () => {
     })
 
     test('accepts complete heading node as part of DefaultNodeTypes if heading node is explicitly typed', () => {
-      const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
+      const headingNode: SerializedHeadingNode<DefaultNodeTypes> = {
         type: 'heading',
         children: [
           {
@@ -543,7 +567,7 @@ describe('Types testing', () => {
     })
 
     test('accepts complete heading node as part of nested children within DefaultNodeTypes if heading node is explicitly typed', () => {
-      const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
+      const headingNode: SerializedHeadingNode<DefaultNodeTypes> = {
         type: 'heading',
         children: [
           {
@@ -574,6 +598,7 @@ describe('Types testing', () => {
               format: 'left',
               indent: 0,
               textFormat: 0,
+              textStyle: '',
               version: 0,
             },
           ],
@@ -622,6 +647,7 @@ describe('Types testing', () => {
               format: 'left',
               indent: 0,
               textFormat: 0,
+              textStyle: '',
               version: 0,
             },
             {
@@ -646,6 +672,7 @@ describe('Types testing', () => {
               format: 'left',
               indent: 0,
               textFormat: 0,
+              textStyle: '',
               version: 0,
             },
           ],
@@ -938,6 +965,107 @@ describe('Types testing', () => {
         expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
       })
     })
+
+    describe('generated <-> runtime per-node compatibility', () => {
+      // Per-node assertions pinpoint which node differs when the whole-tree
+      // assertions above fail.
+
+      test('SerializedTextNode: generated <-> runtime', () => {
+        expect<GenText>().type.toBeAssignableWith<SerializedTextNode>()
+        expect<SerializedTextNode>().type.toBeAssignableWith<GenText>()
+      })
+
+      test('SerializedTabNode: generated <-> runtime', () => {
+        expect<GenTab>().type.toBeAssignableWith<SerializedTabNode>()
+        expect<SerializedTabNode>().type.toBeAssignableWith<GenTab>()
+      })
+
+      test('SerializedLineBreakNode: generated <-> runtime', () => {
+        expect<GenLB>().type.toBeAssignableWith<SerializedLineBreakNode>()
+        expect<SerializedLineBreakNode>().type.toBeAssignableWith<GenLB>()
+      })
+
+      test('SerializedHorizontalRuleNode: generated <-> runtime', () => {
+        expect<GenHR>().type.toBeAssignableWith<SerializedHorizontalRuleNode>()
+        expect<SerializedHorizontalRuleNode>().type.toBeAssignableWith<GenHR>()
+      })
+
+      test('SerializedParagraphNode<T>: generated <-> runtime', () => {
+        expect<GenParagraph<GenNodeUnion>>().type.toBeAssignableWith<
+          SerializedParagraphNode<GenNodeUnion>
+        >()
+        expect<SerializedParagraphNode<GenNodeUnion>>().type.toBeAssignableWith<
+          GenParagraph<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedHeadingNode<T>: generated <-> runtime', () => {
+        expect<GenHeading<GenNodeUnion>>().type.toBeAssignableWith<
+          SerializedHeadingNode<GenNodeUnion>
+        >()
+        expect<SerializedHeadingNode<GenNodeUnion>>().type.toBeAssignableWith<
+          GenHeading<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedQuoteNode<T>: generated <-> runtime', () => {
+        expect<GenQuote<GenNodeUnion>>().type.toBeAssignableWith<
+          SerializedQuoteNode<GenNodeUnion>
+        >()
+        expect<SerializedQuoteNode<GenNodeUnion>>().type.toBeAssignableWith<
+          GenQuote<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedListNode<T>: generated <-> runtime', () => {
+        expect<GenList<GenNodeUnion>>().type.toBeAssignableWith<SerializedListNode<GenNodeUnion>>()
+        expect<SerializedListNode<GenNodeUnion>>().type.toBeAssignableWith<GenList<GenNodeUnion>>()
+      })
+
+      test('SerializedListItemNode<T>: generated <-> runtime', () => {
+        expect<GenLI<GenNodeUnion>>().type.toBeAssignableWith<
+          SerializedListItemNode<GenNodeUnion>
+        >()
+        expect<SerializedListItemNode<GenNodeUnion>>().type.toBeAssignableWith<
+          GenLI<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedLinkNode<T>: generated <-> runtime', () => {
+        expect<GenLink<GenNodeUnion>>().type.toBeAssignableWith<SerializedLinkNode<GenNodeUnion>>()
+        expect<SerializedLinkNode<GenNodeUnion>>().type.toBeAssignableWith<GenLink<GenNodeUnion>>()
+      })
+
+      test('SerializedAutoLinkNode<T>: generated <-> runtime', () => {
+        expect<GenAutoLink<GenNodeUnion>>().type.toBeAssignableWith<
+          SerializedAutoLinkNode<GenNodeUnion>
+        >()
+        expect<SerializedAutoLinkNode<GenNodeUnion>>().type.toBeAssignableWith<
+          GenAutoLink<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedRelationshipNode: generated <-> runtime', () => {
+        type Slugs = keyof LocalConfig['collections']
+        expect<GenRelationship<Slugs>>().type.toBeAssignableWith<SerializedRelationshipNode>()
+        expect<SerializedRelationshipNode>().type.toBeAssignableWith<GenRelationship<Slugs>>()
+      })
+
+      test('SerializedUploadNode: generated <-> runtime', () => {
+        // No upload collections in this config — the generated node falls back
+        // to `{ type: 'upload', version: number, [k]: unknown }`.
+        type GenUploadInUnion = Extract<GenNodeUnion, { type: 'upload' }>
+        expect<GenUploadInUnion>().type.toBeAssignableWith<SerializedUploadNode>()
+        expect<SerializedUploadNode>().type.toBeAssignableWith<GenUploadInUnion>()
+      })
+
+      test('LexicalRichText<T>.root: generated <-> runtime', () => {
+        type Gen = Post['richText']['root']
+        type Run = DefaultTypedEditorState['root']
+        expect<Gen>().type.toBeAssignableWith<Run>()
+        expect<Run>().type.toBeAssignableWith<Gen>()
+      })
+    })
   })
 
   describe('sdk', () => {
@@ -949,6 +1077,7 @@ describe('Types testing', () => {
       const _sdk = new PayloadSDK({ baseURL: '' })
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'media'
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
@@ -965,6 +1094,7 @@ describe('Types testing', () => {
       // ensure collection property of sdk.create has posts in the union type
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'media'
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
@@ -983,7 +1113,14 @@ describe('Types testing', () => {
         data: {
           radioField: 'option-1',
           richText: {
-            root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+            root: {
+              type: 'root',
+              children: [],
+              direction: null,
+              format: '',
+              indent: 0,
+              version: 0,
+            },
           },
           selectField: 'option-1',
           title: 'Test Post',
@@ -1001,7 +1138,14 @@ describe('Types testing', () => {
             invalidProperty: 'should error',
             radioField: 'option-1',
             richText: {
-              root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+              root: {
+                type: 'root',
+                children: [],
+                direction: null,
+                format: '',
+                indent: 0,
+                version: 0,
+              },
             },
             selectField: 'option-1',
             title: 'Test Post',
@@ -1266,20 +1410,21 @@ describe('Types testing', () => {
 
       test('update with draft:true on draft-enabled collection should work', () => {
         expect(
-          payload.update({ collection: 'draft-posts', id: 1, data: { title: 'Test' }, draft: true }),
+          payload.update({
+            collection: 'draft-posts',
+            id: 1,
+            data: { title: 'Test' },
+            draft: true,
+          }),
         ).type.not.toRaiseError()
       })
 
       test('duplicate with draft:true on non-draft collection should error', () => {
-        expect(
-          payload.duplicate({ collection: 'pages', id: 1, draft: true }),
-        ).type.toRaiseError()
+        expect(payload.duplicate({ collection: 'pages', id: 1, draft: true })).type.toRaiseError()
       })
 
       test('duplicate with draft:false on non-draft collection should error', () => {
-        expect(
-          payload.duplicate({ collection: 'pages', id: 1, draft: false }),
-        ).type.toRaiseError()
+        expect(payload.duplicate({ collection: 'pages', id: 1, draft: false })).type.toRaiseError()
       })
 
       test('duplicate with draft:true on draft-enabled collection should work', () => {
@@ -1301,15 +1446,11 @@ describe('Types testing', () => {
       })
 
       test('global update with draft:true on non-draft global should error', () => {
-        expect(
-          payload.updateGlobal({ slug: 'menu', data: {}, draft: true }),
-        ).type.toRaiseError()
+        expect(payload.updateGlobal({ slug: 'menu', data: {}, draft: true })).type.toRaiseError()
       })
 
       test('global update with draft:false on non-draft global should error', () => {
-        expect(
-          payload.updateGlobal({ slug: 'menu', data: {}, draft: false }),
-        ).type.toRaiseError()
+        expect(payload.updateGlobal({ slug: 'menu', data: {}, draft: false })).type.toRaiseError()
       })
 
       test('global update with draft:true on draft-enabled global should work', () => {
@@ -1318,6 +1459,5 @@ describe('Types testing', () => {
         ).type.not.toRaiseError()
       })
     })
-
   })
 })
