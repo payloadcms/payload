@@ -13,7 +13,7 @@ import React from 'react'
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'
 import { DefaultDocumentTab } from './Tab/index.js'
 import { getTabs } from './tabs/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'doc-tabs'
 

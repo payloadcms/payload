@@ -202,6 +202,7 @@ export { toast }
 export { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 export { Upload } from '../../elements/Upload/index.js'
 export { SearchFilter } from '../../elements/SearchFilter/index.js'
+export { FilterTrigger } from '../../elements/FilterTrigger/index.js'
 export { EditUpload } from '../../elements/EditUpload/index.js'
 export { FileDetails } from '../../elements/FileDetails/index.js'
 export { PreviewSizes } from '../../elements/PreviewSizes/index.js'

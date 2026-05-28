@@ -17,7 +17,6 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { TagIcon } from '../../icons/Tag/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
@@ -126,18 +125,11 @@ export function HierarchyListView(props: ListViewClientProps) {
       const ancestorBreadcrumbs = hierarchyData?.breadcrumbs?.slice(0, -1) || []
 
       const baseLabel: StepNavItem = {
-        label: (
-          <div className={`${baseClass}__step-nav-icon-label`}>
-            {HierarchyIcon || <TagIcon />}
-            {collectionLabel}
-          </div>
-        ),
-        url: parent?.id
-          ? formatAdminURL({
-              adminRoute,
-              path: `/collections/${collectionSlug}`,
-            })
-          : undefined,
+        label: collectionLabel,
+        url: formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}`,
+        }),
       }
 
       let navItems = [baseLabel]
@@ -163,9 +155,6 @@ export function HierarchyListView(props: ListViewClientProps) {
     collectionSlug,
     hierarchyData,
     collectionLabel,
-    currentItemTitle,
-    parent,
-    HierarchyIcon,
     parentFieldName,
   ])
 

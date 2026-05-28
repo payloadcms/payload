@@ -10,7 +10,7 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'default-list-view-tabs'
 
@@ -74,7 +74,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   return (
     <div className={baseClass}>
       <Button
-        buttonStyle="pill"
+        buttonStyle={viewType === 'list' ? 'pill' : 'ghost'}
         className={[`${baseClass}__button`, viewType === 'list' && `${baseClass}__button--active`]
           .filter(Boolean)
           .join(' ')}
@@ -88,7 +88,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
 
       {isHierarchyEnabled && (
         <Button
-          buttonStyle="pill"
+          buttonStyle={viewType === 'hierarchy' ? 'pill' : 'ghost'}
           className={[
             `${baseClass}__button`,
             viewType === 'hierarchy' && `${baseClass}__button--active`,
@@ -106,7 +106,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
 
       {isTrashEnabled && (
         <Button
-          buttonStyle="pill"
+          buttonStyle={viewType === 'trash' ? 'pill' : 'ghost'}
           className={[
             `${baseClass}__button`,
             viewType === 'trash' && `${baseClass}__button--active`,

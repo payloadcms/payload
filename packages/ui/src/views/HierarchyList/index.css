@@ -5,16 +5,14 @@
 
   .hierarchy-list__wrap {
     padding-bottom: var(--spacing-view-bottom);
-
-    & > *:not(:last-child) {
-      margin-bottom: var(--spacer-3);
-    }
   }
 
-  .hierarchy-list .list-header {
-    a {
-      text-decoration: none;
-    }
+  .hierarchy-list__wrap > *:not(:last-child) {
+    margin-bottom: var(--spacer-3);
+  }
+
+  .hierarchy-list .list-header a {
+    text-decoration: none;
   }
 
   .hierarchy-list__allowed-types {
@@ -52,13 +50,13 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacer-3);
-
-    & > * {
-      margin: 0;
-    }
   }
 
-  @media (max-width: var(--breakpoint-m-width)) {
+  .hierarchy-list__no-results > * {
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
     .hierarchy-list {
       margin-top: var(--spacer-1);
     }

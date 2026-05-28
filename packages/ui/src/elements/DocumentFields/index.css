@@ -7,7 +7,7 @@
 
   .document-fields--has-sidebar {
     --main-width: 66.66%;
-    --main-border: 1px solid var(--color-border);
+    --main-border: var(--stroke-width-small) solid var(--color-border);
     --main-field-margin: calc(var(--gutter-h) * -1);
   }
 

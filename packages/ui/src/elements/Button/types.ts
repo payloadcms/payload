@@ -41,6 +41,10 @@ export type Props = {
   ref?: React.RefObject<HTMLAnchorElement | HTMLButtonElement | null>
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
+  /**
+   * Applies selected/active styling (e.g., for popup triggers when popup is open)
+   */
+  selected?: boolean
   size?: 'large' | 'medium'
   SubMenuPopupContent?: (props: { close: () => void }) => React.ReactNode
   to?: string
