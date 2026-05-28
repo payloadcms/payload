@@ -1,6 +1,5 @@
-import type { Payload, TypedUser, ViewTypes } from 'payload'
+import type { Payload, ServerAdapter, TypedUser, ViewTypes } from 'payload'
 
-import { unauthorized } from 'next/navigation.js'
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 
 import type { MultiTenantPluginConfig } from '../types.js'
@@ -19,6 +18,7 @@ type Args = {
   docID?: number | string
   headers: Headers
   payload: Payload
+  server: ServerAdapter
   slug: string
   tenantFieldName: string
   tenantsArrayFieldName: string
@@ -34,6 +34,7 @@ export async function getGlobalViewRedirect({
   docID,
   headers,
   payload,
+  server,
   tenantFieldName,
   tenantsArrayFieldName,
   tenantsArrayTenantFieldName,
@@ -51,7 +52,7 @@ export async function getGlobalViewRedirect({
   let redirectRoute: `/${string}` | void = undefined
 
   if (!user) {
-    return unauthorized()
+    return server.unauthorized()
   }
 
   if (!tenant) {

@@ -306,6 +306,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     export: '匯出',
     fallbackToDefaultLocale: '回復至預設語言',
     false: '否',
+    field: '欄位',
     filter: '篩選',
     filters: '篩選條件',
     filterWhere: '篩選 {{label}}，條件為',

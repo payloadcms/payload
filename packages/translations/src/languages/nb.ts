@@ -325,6 +325,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     export: 'Eksport',
     fallbackToDefaultLocale: 'Tilbakestilling til standard språk',
     false: 'Falsk',
+    field: 'Field',
     filter: 'Filtrer',
     filters: 'Filter',
     filterWhere: 'Filtrer {{label}} der',

@@ -106,7 +106,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
             caret={false}
             horizontalAlign="right"
             render={() => (
-              <PopupList.IconButtonGroup>
+              <PopupList.RadioGroup>
                 {collectionSpecificOptions.map(({ label, value }) => {
                   const isActive = selectedFilters?.includes(value)
                   return (
@@ -125,7 +125,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
                     </PopupList.Button>
                   )
                 })}
-              </PopupList.IconButtonGroup>
+              </PopupList.RadioGroup>
             )}
             renderButton={({ active, onClick, onKeyDown }) => (
               <Button

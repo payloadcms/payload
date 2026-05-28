@@ -2,11 +2,11 @@
 import type { CollectionSlug } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { useBulkUpload } from '../../../elements/BulkUpload/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
+import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 

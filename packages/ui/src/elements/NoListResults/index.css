@@ -11,6 +11,10 @@
     gap: var(--spacer-2);
   }
 
+  .no-results--with-margin {
+    margin: var(--spacer-4) var(--gutter-h);
+  }
+
   .no-results__title {
     color: var(--color-text);
     font-family: var(--text-body-large-strong-font-family);

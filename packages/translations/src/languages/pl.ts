@@ -323,6 +323,7 @@ export const plTranslations: DefaultTranslationsObject = {
     export: 'Eksport',
     fallbackToDefaultLocale: 'Powrót do domyślnych ustawień regionalnych',
     false: 'Fałszywe',
+    field: 'Field',
     filter: 'Filtr',
     filters: 'Filtry',
     filterWhere: 'Filtruj gdzie',

@@ -339,7 +339,7 @@ export const DocumentControls: React.FC<{
             className={`${baseClass}__popup`}
             disabled={initializing || processing}
             horizontalAlign="right"
-            size="large"
+            size="medium"
             verticalAlign="bottom"
           >
             <PopupList.ButtonGroup>
