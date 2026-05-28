@@ -11,7 +11,7 @@ import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-ty
 
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { login } from '../__helpers/e2e/auth/login.js'
-import { getPillSelectorItem } from '../__helpers/e2e/columns/index.js'
+import { getColumnSelectorItem } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import {
@@ -922,16 +922,16 @@ describe('Access Control', () => {
         await page.goto(readRestrictedUrl.list)
         await page.locator('.list-controls__toggle-columns').click()
 
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        await expect(page.locator('.column-selector')).toBeVisible()
 
         // Should hide restrictedTopLevel field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Restricted Top Level' }),
+          getColumnSelectorItem({ container: page, label: 'Restricted Top Level' }),
         ).toBeHidden()
 
         // Should show visibleTopLevel field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Visible Top Level' }),
+          getColumnSelectorItem({ container: page, label: 'Visible Top Level' }),
         ).toBeVisible()
       })
 
@@ -939,16 +939,16 @@ describe('Access Control', () => {
         await page.goto(readRestrictedUrl.list)
         await page.locator('.list-controls__toggle-columns').click()
 
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        await expect(page.locator('.column-selector')).toBeVisible()
 
         // Should hide secretPhone field inside contactInfo group
         await expect(
-          getPillSelectorItem({ container: page, label: 'Contact Info > Secret Phone' }),
+          getColumnSelectorItem({ container: page, label: 'Contact Info > Secret Phone' }),
         ).toBeHidden()
 
         // Should show publicPhone field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Contact Info > Public Phone' }),
+          getColumnSelectorItem({ container: page, label: 'Contact Info > Public Phone' }),
         ).toBeVisible()
       })
 
@@ -956,16 +956,16 @@ describe('Access Control', () => {
         await page.goto(readRestrictedUrl.list)
         await page.locator('.list-controls__toggle-columns').click()
 
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        await expect(page.locator('.column-selector')).toBeVisible()
 
         // Should hide restrictedInRow field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Restricted In Row' }),
+          getColumnSelectorItem({ container: page, label: 'Restricted In Row' }),
         ).toBeHidden()
 
         // Should show visibleInRow field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Visible In Row' }),
+          getColumnSelectorItem({ container: page, label: 'Visible In Row' }),
         ).toBeVisible()
       })
 
@@ -973,16 +973,16 @@ describe('Access Control', () => {
         await page.goto(readRestrictedUrl.list)
         await page.locator('.list-controls__toggle-columns').click()
 
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        await expect(page.locator('.column-selector')).toBeVisible()
 
         // Should hide restrictedInCollapsible field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Restricted In Collapsible' }),
+          getColumnSelectorItem({ container: page, label: 'Restricted In Collapsible' }),
         ).toBeHidden()
 
         // Should show visibleInCollapsible field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Visible In Collapsible' }),
+          getColumnSelectorItem({ container: page, label: 'Visible In Collapsible' }),
         ).toBeVisible()
       })
 
@@ -990,11 +990,11 @@ describe('Access Control', () => {
         await page.goto(readRestrictedUrl.list)
         await page.locator('.list-controls__toggle-columns').click()
 
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        await expect(page.locator('.column-selector')).toBeVisible()
 
         // Should hide metadata.analytics.restrictedMetric field
         await expect(
-          getPillSelectorItem({
+          getColumnSelectorItem({
             container: page,
             label: 'Metadata > Analytics > Restricted Metric',
           }),
@@ -1002,7 +1002,10 @@ describe('Access Control', () => {
 
         // Should show metadata.analytics.visibleMetric field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Metadata > Analytics > Visible Metric' }),
+          getColumnSelectorItem({
+            container: page,
+            label: 'Metadata > Analytics > Visible Metric',
+          }),
         ).toBeVisible()
       })
 
@@ -1010,31 +1013,31 @@ describe('Access Control', () => {
         await page.goto(readRestrictedUrl.list)
         await page.locator('.list-controls__toggle-columns').click()
 
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        await expect(page.locator('.column-selector')).toBeVisible()
 
         // Should hide secretInPublicTab field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Secret In Public Tab' }),
+          getColumnSelectorItem({ container: page, label: 'Secret In Public Tab' }),
         ).toBeHidden()
 
         // Should show publicData field
-        await expect(getPillSelectorItem({ container: page, label: 'Public Data' })).toBeVisible()
+        await expect(getColumnSelectorItem({ container: page, label: 'Public Data' })).toBeVisible()
       })
 
       test('should hide field with read: false inside named tab in column selector', async () => {
         await page.goto(readRestrictedUrl.list)
         await page.locator('.list-controls__toggle-columns').click()
 
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        await expect(page.locator('.column-selector')).toBeVisible()
 
         // Should hide restrictedSetting field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Settings > Restricted Setting' }),
+          getColumnSelectorItem({ container: page, label: 'Settings > Restricted Setting' }),
         ).toBeHidden()
 
         // Should show visibleSetting field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Settings > Visible Setting' }),
+          getColumnSelectorItem({ container: page, label: 'Settings > Visible Setting' }),
         ).toBeVisible()
       })
 
@@ -1042,16 +1045,16 @@ describe('Access Control', () => {
         await page.goto(readRestrictedUrl.list)
         await page.locator('.list-controls__toggle-columns').click()
 
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        await expect(page.locator('.column-selector')).toBeVisible()
 
         // Should hide secretPostalCode field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Address > Secret Postal Code' }),
+          getColumnSelectorItem({ container: page, label: 'Address > Secret Postal Code' }),
         ).toBeHidden()
 
         // Should show city field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Address > City' }),
+          getColumnSelectorItem({ container: page, label: 'Address > City' }),
         ).toBeVisible()
       })
 
@@ -1059,16 +1062,16 @@ describe('Access Control', () => {
         await page.goto(readRestrictedUrl.list)
         await page.locator('.list-controls__toggle-columns').click()
 
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        await expect(page.locator('.column-selector')).toBeVisible()
 
         // Should hide restrictedAdvanced field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Advanced > Restricted Advanced' }),
+          getColumnSelectorItem({ container: page, label: 'Advanced > Restricted Advanced' }),
         ).toBeHidden()
 
         // Should show visibleAdvanced field
         await expect(
-          getPillSelectorItem({ container: page, label: 'Advanced > Visible Advanced' }),
+          getColumnSelectorItem({ container: page, label: 'Advanced > Visible Advanced' }),
         ).toBeVisible()
       })
     })

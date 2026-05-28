@@ -1,6 +1,9 @@
 export {
+  clickColumnSelectorItem,
   clickPillSelectorItem,
+  getColumnSelectorItem,
   getPillSelectorItem,
+  isColumnSelectorItemActive,
   isPillSelectorItemSelected,
 } from './clickPillSelectorItem.js'
 export { openListColumns } from './openListColumns.js'
