@@ -3,7 +3,8 @@ import type { Option, SelectFieldServerProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import { HierarchyTypeField } from './index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { HierarchyTypeField } from '../../exports/client/index.js'
 
 type HierarchyTypeFieldServerProps = {
   collectionOptions: Option[]

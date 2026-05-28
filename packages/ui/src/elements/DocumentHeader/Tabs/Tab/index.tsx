@@ -10,8 +10,9 @@ import type React from 'react'
 
 import { Fragment } from 'react'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { DocumentTabLink } from '../../../../exports/client/index.js'
 import { RenderServerComponent } from '../../../RenderServerComponent/index.js'
-import { DocumentTabLink } from './TabLink.js'
 import './index.scss'
 
 export const baseClass = 'doc-tab'

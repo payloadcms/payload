@@ -11,13 +11,17 @@ import './index.css'
 
 import React from 'react'
 
-import { AppHeader } from '../../elements/AppHeader/index.js'
-import { BulkUploadProvider } from '../../elements/BulkUpload/index.js'
+/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
+import {
+  ActionsProvider,
+  AppHeader,
+  BulkUploadProvider,
+  EntityVisibilityProvider,
+  DefaultTemplateWrapper as Wrapper,
+} from '../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { ActionsProvider } from '../../providers/Actions/index.js'
-import { EntityVisibilityProvider } from '../../providers/EntityVisibility/index.js'
-import { Wrapper } from './Wrapper/index.js'
 
 const baseClass = 'template-default'
 

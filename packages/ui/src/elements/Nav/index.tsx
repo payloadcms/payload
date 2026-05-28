@@ -5,13 +5,17 @@ import React from 'react'
 
 import type { EntityToGroup } from '../../utilities/groupNavItems.js'
 
+/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
+import {
+  DefaultNavClient,
+  Logout,
+  NavWrapper,
+  SettingsMenuButton,
+} from '../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
 import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
 import { groupNavItems } from '../../utilities/groupNavItems.js'
-import { Logout } from '../Logout/index.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
-import { DefaultNavClient } from './index.client.js'
-import { NavWrapper } from './NavWrapper/index.js'
-import { SettingsMenuButton } from './SettingsMenuButton/index.js'
 import { SidebarTabs } from './SidebarTabs/index.js'
 import './index.css'
 

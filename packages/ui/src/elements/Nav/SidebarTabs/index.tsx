@@ -5,8 +5,9 @@ import React from 'react'
 
 import type { NavProps } from '../index.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { SidebarTabsClient } from '../../../exports/client/index.js'
 import { RenderServerComponent } from '../../RenderServerComponent/index.js'
-import { SidebarTabsClient } from './index.client.js'
 import './index.css'
 
 type SidebarTabWithReactNode = {
