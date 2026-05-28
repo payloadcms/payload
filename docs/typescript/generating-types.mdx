@@ -186,7 +186,9 @@ export interface Post {
 
 ## Custom Field Interfaces
 
-For `array`, `block`, `group` and named `tab` fields, you can generate top level reusable interfaces. The following group field config:
+`array`, `group` and named `tab` fields generate a top-level interface only when you set `interfaceName` on them. `block` fields always generate a top-level interface — `interfaceName` on a block is an **override** of the auto-derived name (which is a PascalCase form of the slug: `'content-block'` → `ContentBlock`).
+
+The following group field config:
 
 ```ts
 {
