@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacer-2-5);
-    max-height: min(70vh, 520px);
+    max-height: 370px;
     overflow: hidden;
     padding: var(--spacer-2-5);
   }

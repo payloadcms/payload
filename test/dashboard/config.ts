@@ -66,15 +66,10 @@ export default buildConfigWithDefaults({
           {
             data: {
               limit: 3,
-              relatedCollection: 'tickets',
+              relatedCollection: 'revenue',
               sortDirection: 'desc',
-              sortField: 'priority',
-              title: 'Open tickets by priority',
-              where: {
-                status: {
-                  equals: 'open',
-                },
-              },
+              sortField: 'amount',
+              title: 'Top revenue entries',
             },
             widgetSlug: 'collection-query',
             width: 'medium',
@@ -86,6 +81,11 @@ export default buildConfigWithDefaults({
               sortDirection: 'asc',
               sortField: 'startDate',
               title: 'Upcoming events',
+              where: {
+                startDate: {
+                  greater_than: new Date().toISOString(),
+                },
+              },
             },
             widgetSlug: 'collection-query',
             width: 'medium',
