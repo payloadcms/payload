@@ -8,8 +8,8 @@ import { getColumnSelectorItem } from './clickPillSelectorItem.js'
 export const reorderColumns = async (
   page: Page,
   {
-    togglerSelector = '.list-controls__toggle-columns',
-    columnContainerSelector = '.column-selector',
+    togglerSelector = '.columns-button__button',
+    columnContainerSelector = '.popup__content .column-selector',
     fromColumn = 'Number',
     toColumn = 'ID',
   }: {

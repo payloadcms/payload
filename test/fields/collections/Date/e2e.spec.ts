@@ -845,7 +845,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
       const timezoneColumnCell = page.locator('.cell-dateWithTimezoneWithDisabledColumns_tz')
       await expect(timezoneColumnCell).toHaveCount(0)
 
-      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.columns-button__button').click()
 
       const dateColumnOption = page.locator('#dateWithTimezoneWithDisabledColumns')
       await expect(dateColumnOption).toBeVisible()

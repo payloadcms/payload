@@ -52,21 +52,6 @@ export const getPillSelectorItem = ({
 }
 
 /**
- * Check if a pill selector item is selected (has chip--selected class)
- */
-export const isPillSelectorItemSelected = async ({
-  container,
-  label,
-}: {
-  container: Locator | Page
-  label: string
-}): Promise<boolean> => {
-  const pill = getPillSelectorItem({ container, label })
-  const classes = await pill.getAttribute('class')
-  return classes?.includes('chip--selected') ?? false
-}
-
-/**
  * Get a locator for a column selector item (v4 design).
  * The new column selector uses `.column-selector__item` with aria-label for the label text.
  *
@@ -102,20 +87,4 @@ export const clickColumnSelectorItem = async ({
   // Click the switch inside the item to toggle
   await item.locator('.switch').click()
   return item
-}
-
-/**
- * Check if a column selector item is active (shown in table)
- */
-export const isColumnSelectorItemActive = async ({
-  container,
-  label,
-}: {
-  container: Locator | Page
-  label: string
-}): Promise<boolean> => {
-  const item = getColumnSelectorItem({ container, label })
-  const classes = await item.getAttribute('class')
-  // Item is active if it does NOT have the --inactive modifier
-  return !classes?.includes('column-selector__item--inactive')
 }

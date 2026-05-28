@@ -175,10 +175,14 @@ describe('i18n', () => {
       await setUserLanguage('es')
 
       await page.goto(collection1URL.list)
-      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.columns-button__button').click()
 
       // expecting the label to fall back to english as default fallbackLng
+<<<<<<< Updated upstream
       await expect(getColumnSelectorItem({ container: page, label: 'es-label' })).toBeVisible()
+=======
+      await expect(getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'es-label' })).toBeVisible()
+>>>>>>> Stashed changes
     })
 
     test('should show fallback pill field label', async () => {
@@ -186,10 +190,14 @@ describe('i18n', () => {
       await setUserLanguage('de')
 
       await page.goto(collection1URL.list)
-      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.columns-button__button').click()
 
       // expecting the label to fall back to english as default fallbackLng
+<<<<<<< Updated upstream
       await expect(getColumnSelectorItem({ container: page, label: 'en-label' })).toBeVisible()
+=======
+      await expect(getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'en-label' })).toBeVisible()
+>>>>>>> Stashed changes
     })
 
     test('should show translated field label in where builder', async () => {

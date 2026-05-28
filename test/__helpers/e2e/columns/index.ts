@@ -3,8 +3,6 @@ export {
   clickPillSelectorItem,
   getColumnSelectorItem,
   getPillSelectorItem,
-  isColumnSelectorItemActive,
-  isPillSelectorItemSelected,
 } from './clickPillSelectorItem.js'
 export { openListColumns } from './openListColumns.js'
 export { reorderColumns } from './reorderColumns.js'

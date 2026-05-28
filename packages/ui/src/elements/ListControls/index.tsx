@@ -13,7 +13,7 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { Button } from '../Button/index.js'
-import { ColumnSelector } from '../ColumnSelector/index.js'
+import { ColumnsButton } from '../ColumnsButton/index.js'
 import { GroupByControl } from '../GroupByControl/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
 import { SearchBar } from '../SearchBar/index.js'
@@ -115,30 +115,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               fields={collectionConfig.fields}
             />
           )}
-          {enableColumns && (
-            <Popup
-              button={
-                <Button
-                  buttonStyle="secondary"
-                  className={`${baseClass}__toggle-columns`}
-                  icon={<ChevronIcon direction="down" size={16} />}
-                  id="toggle-list-columns"
-                  size="medium"
-                >
-                  {t('general:columns')}
-                </Button>
-              }
-              buttonType="custom"
-              className={`${baseClass}__columns-popup`}
-              horizontalAlign="right"
-              id="list-columns"
-              render={({ close }) => (
-                <ColumnSelector collectionSlug={collectionConfig.slug} onClose={close} />
-              )}
-              theme="auto"
-              verticalAlign="bottom"
-            />
-          )}
+          {enableColumns && <ColumnsButton collectionSlug={collectionConfig.slug} />}
           {enableSort && (
             <Button
               buttonStyle="secondary"

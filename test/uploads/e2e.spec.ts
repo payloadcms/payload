@@ -2148,6 +2148,7 @@ describe('Uploads', () => {
 
     await openListColumns(page, {})
 
+<<<<<<< Updated upstream
     await expect(
       getColumnSelectorItem({ container: page, label: 'Sizes > one > URL' }),
     ).toBeHidden()
@@ -2184,6 +2185,40 @@ describe('Uploads', () => {
     ).toBeHidden()
     await expect(
       getColumnSelectorItem({ container: page, label: 'Sizes > two > File Name' }),
+=======
+    await expect(getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > one > URL' })).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > one > Width' }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > one > Height' }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > one > MIME Type' }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > one > File Size' }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > one > File Name' }),
+    ).toBeHidden()
+
+    await expect(getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > two > URL' })).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > two > Width' }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > two > Height' }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > two > MIME Type' }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > two > File Size' }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > two > File Name' }),
+>>>>>>> Stashed changes
     ).toBeHidden()
   })
 
@@ -2193,6 +2228,7 @@ describe('Uploads', () => {
     await openListColumns(page, {})
 
     await expect(
+<<<<<<< Updated upstream
       getColumnSelectorItem({ container: page, label: 'Sizes > three > URL' }),
     ).toBeVisible()
     await expect(
@@ -2228,6 +2264,43 @@ describe('Uploads', () => {
     ).toBeVisible()
     await expect(
       getColumnSelectorItem({ container: page, label: 'Sizes > four > File Name' }),
+=======
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > three > URL' }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > three > Width' }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > three > Height' }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > three > MIME Type' }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > three > File Size' }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > three > File Name' }),
+    ).toBeVisible()
+
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > four > URL' }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > four > Width' }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > four > Height' }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > four > MIME Type' }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > four > File Size' }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({ container: page.locator('.popup__content .column-selector'), label: 'Sizes > four > File Name' }),
+>>>>>>> Stashed changes
     ).toBeVisible()
   })
 

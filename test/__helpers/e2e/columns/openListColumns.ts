@@ -5,12 +5,12 @@ import { expect } from '@playwright/test'
 export const openListColumns = async (
   page: Page,
   {
-    togglerSelector = '.list-controls__toggle-columns',
-    columnContainerSelector = '.column-selector',
+    togglerSelector = '.columns-button__button',
+    columnContainerSelector = '.popup__content .column-selector',
   }: {
     columnContainerSelector?: string
     togglerSelector?: string
-  },
+  } = {},
 ): Promise<{
   columnContainer: Locator
 }> => {

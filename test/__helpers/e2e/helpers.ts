@@ -389,8 +389,8 @@ export async function switchTab(page: Page, selector: string) {
 }
 
 export const openColumnControls = async (page: Page) => {
-  await page.locator('.list-controls__toggle-columns').click()
-  await expect(page.locator('.column-selector')).toBeVisible()
+  await page.locator('.columns-button__button').click()
+  await expect(page.locator('.popup__content .column-selector')).toBeVisible()
 }
 
 /**
