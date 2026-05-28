@@ -49,14 +49,14 @@ export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
 };`
 
 /**
- * Per-block `fields` schema. Strips Payload's auto-added `id`/`blockName`
- * (every block carries those as base fields) and re-adds them with strict
- * runtime types — required, non-null `id`; required `blockName: string | null`
- * (omitted for inline blocks).
+ * JSON Schema for the `fields:` payload of one (inline) block. Strips
+ * Payload's auto-added `id`/`blockName` (every block carries those as base
+ * fields) and re-adds them with strict runtime types — required, non-null
+ * `id`; required `blockName: string | null` (omitted for inline blocks).
  *
  * Blocks with `interfaceName` are emitted as top-level `$ref` definitions.
  */
-const buildBlockVariantSchema = (
+const buildBlockFieldsSchema = (
   block: Block,
   args: JSONSchemaArgs,
   { isInlineBlock }: { isInlineBlock: boolean },
@@ -94,7 +94,7 @@ const buildBlockVariantSchema = (
     required.push('blockName')
   }
 
-  const variantSchema: JSONSchema4 = {
+  const fieldsSchema: JSONSchema4 = {
     type: 'object',
     additionalProperties: false,
     properties,
@@ -102,27 +102,27 @@ const buildBlockVariantSchema = (
   }
 
   if (block.interfaceName) {
-    args.interfaceNameDefinitions.set(block.interfaceName, variantSchema)
+    args.interfaceNameDefinitions.set(block.interfaceName, fieldsSchema)
     return { $ref: `#/definitions/${block.interfaceName}` }
   }
 
-  return variantSchema
+  return fieldsSchema
 }
 
 export const createBlockNodeJSONSchema =
   (blockConfigs: Block[]): JSONSchemaFn =>
   (args) => {
     args.typeStringDefinitions.add(BLOCK_NODES_TS)
-    const variants = blockConfigs.map((block) =>
-      buildBlockVariantSchema(block, args, { isInlineBlock: false }),
+    const blockFieldsSchemas = blockConfigs.map((block) =>
+      buildBlockFieldsSchema(block, args, { isInlineBlock: false }),
     )
 
     const fieldsSchema: JSONSchema4 =
-      variants.length === 0
+      blockFieldsSchemas.length === 0
         ? { type: 'object', additionalProperties: true }
-        : variants.length === 1
-          ? variants[0]!
-          : { oneOf: variants }
+        : blockFieldsSchemas.length === 1
+          ? blockFieldsSchemas[0]!
+          : { oneOf: blockFieldsSchemas }
 
     const allHaveInterfaceName =
       blockConfigs.length > 0 && blockConfigs.every((b) => Boolean(b.interfaceName))
@@ -148,16 +148,16 @@ export const createInlineBlockNodeJSONSchema =
   (inlineBlockConfigs: Block[]): JSONSchemaFn =>
   (args) => {
     args.typeStringDefinitions.add(BLOCK_NODES_TS)
-    const variants = inlineBlockConfigs.map((block) =>
-      buildBlockVariantSchema(block, args, { isInlineBlock: true }),
+    const blockFieldsSchemas = inlineBlockConfigs.map((block) =>
+      buildBlockFieldsSchema(block, args, { isInlineBlock: true }),
     )
 
     const fieldsSchema: JSONSchema4 =
-      variants.length === 0
+      blockFieldsSchemas.length === 0
         ? { type: 'object', additionalProperties: true }
-        : variants.length === 1
-          ? variants[0]!
-          : { oneOf: variants }
+        : blockFieldsSchemas.length === 1
+          ? blockFieldsSchemas[0]!
+          : { oneOf: blockFieldsSchemas }
 
     const allHaveInterfaceName =
       inlineBlockConfigs.length > 0 && inlineBlockConfigs.every((b) => Boolean(b.interfaceName))

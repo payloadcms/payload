@@ -15,10 +15,6 @@ import { $applyNodeReplacement, DecoratorNode } from 'lexical'
 
 import type { InlineBlockFields, SerializedInlineBlockNode } from '../schema.js'
 
-// Re-export the runtime types from the colocated schema module so existing
-// imports of this path keep working.
-export type { InlineBlockFields, SerializedInlineBlockNode } from '../schema.js'
-
 export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactElement> {
   __cacheBuster: number
   __fields: InlineBlockFields

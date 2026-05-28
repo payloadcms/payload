@@ -14,10 +14,6 @@ import { $applyNodeReplacement, createCommand, DecoratorNode } from 'lexical'
 
 import type { SerializedHorizontalRuleNode } from '../schema.js'
 
-// Re-export the runtime type from the colocated schema module so existing
-// imports of this path keep working.
-export type { SerializedHorizontalRuleNode } from '../schema.js'
-
 export const INSERT_HORIZONTAL_RULE_COMMAND: LexicalCommand<void> = createCommand(
   'INSERT_HORIZONTAL_RULE_COMMAND',
 )

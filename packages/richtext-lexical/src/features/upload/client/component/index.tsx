@@ -25,7 +25,7 @@ import { formatAdminURL, isImage } from 'payload/shared'
 import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'
-import type { UploadData } from '../../server/nodes/UploadNode.js'
+import type { UploadData } from '../../server/schema.js'
 import type { UploadFeaturePropsClient } from '../index.js'
 import type { UploadNode } from '../nodes/UploadNode.js'
 

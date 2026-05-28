@@ -16,14 +16,6 @@ import {
 
 import type { BlockFields, BlockFieldsOptionalID, SerializedBlockNode } from '../schema.js'
 
-// Re-export the runtime types from the colocated schema module so existing
-// imports of this path keep working.
-export type {
-  BlockFields,
-  BlockFieldsOptionalID,
-  SerializedBlockNode,
-} from '../schema.js'
-
 export class ServerBlockNode extends DecoratorBlockNode {
   __cacheBuster: number
   __fields: BlockFields

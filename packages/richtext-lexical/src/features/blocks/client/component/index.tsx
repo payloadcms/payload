@@ -40,7 +40,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { ViewMapBlockComponentProps } from '../../../../types/index.js'
-import type { BlockFields } from '../../server/nodes/BlocksNode.js'
+import type { BlockFields } from '../../server/schema.js'
 
 import './index.css'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'

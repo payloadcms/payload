@@ -173,6 +173,9 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
+              if (!blockConfigs.length) {
+                return []
+              }
               return [
                 {
                   name: 'lexical_blocks',
@@ -198,6 +201,9 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
+              if (!inlineBlockConfigs.length) {
+                return []
+              }
               return [
                 {
                   name: 'lexical_inline_blocks',

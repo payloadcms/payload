@@ -16,10 +16,6 @@ import {
 
 import type { RelationshipData, SerializedRelationshipNode } from '../schema.js'
 
-// Re-export the runtime data types from the colocated schema module so
-// existing imports of this path keep working.
-export type { RelationshipData, SerializedRelationshipNode } from '../schema.js'
-
 function $relationshipElementToServerNode(domNode: HTMLDivElement): DOMConversionOutput | null {
   const id = domNode.getAttribute('data-lexical-relationship-id')
   const relationTo = domNode.getAttribute('data-lexical-relationship-relationTo')
