@@ -180,10 +180,9 @@ describe('List View', () => {
         `${adminRoutes.routes?.admin}/collections/posts/${id}`,
       )
 
-      await page.locator('.list-controls__toggle-columns').click()
-      await expect(page.locator('.column-selector')).toBeVisible()
+      const { columnContainer } = await openListColumns(page)
 
-      await clickColumnSelectorItem({ container: page, label: 'ID' })
+      await clickColumnSelectorItem({ container: columnContainer, label: 'ID' })
 
       await page.locator('#heading-id').waitFor({ state: 'detached' })
       await page.locator('.cell-id').first().waitFor({ state: 'detached' })
@@ -369,14 +368,14 @@ describe('List View', () => {
 
     test('should filter rows', async () => {
       // open the column controls
-      await page.locator('.list-controls__toggle-columns').click()
+      const { columnContainer } = await openListColumns(page)
 
       // wait until the column toggle UI is visible and fully expanded
       await expect(page.locator('.column-selector')).toBeVisible()
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
       // ensure the ID column is active
-      const idButton = getColumnSelectorItem({ container: page, label: 'ID' })
+      const idButton = getColumnSelectorItem({ container: columnContainer, label: 'ID' })
 
       const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
 
@@ -899,45 +898,39 @@ describe('List View', () => {
   describe('table columns', () => {
     test('should hide field column when field.hidden is true', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('.list-controls__toggle-columns').click()
+      const { columnContainer } = await openListColumns(page)
 
-      await expect(page.locator('.column-selector')).toBeVisible()
-
-      await expect(getColumnSelectorItem({ container: page, label: 'Hidden Field' })).toBeHidden()
+      await expect(
+        getColumnSelectorItem({ container: columnContainer, label: 'Hidden Field' }),
+      ).toBeHidden()
     })
 
     test('should show field column despite admin.hidden being true', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('.list-controls__toggle-columns').click()
-
-      await expect(page.locator('.column-selector')).toBeVisible()
+      const { columnContainer } = await openListColumns(page)
 
       await expect(
-        getColumnSelectorItem({ container: page, label: 'Admin Hidden Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Admin Hidden Field' }),
       ).toBeVisible()
     })
 
     test('should hide field in column selector when admin.disableListColumn is true', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('.list-controls__toggle-columns').click()
-
-      await expect(page.locator('.column-selector')).toBeVisible()
+      const { columnContainer } = await openListColumns(page)
 
       // Check if "Disable List Column Text" is not present in the column options
       await expect(
-        getColumnSelectorItem({ container: page, label: 'Disable List Column Text' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Disable List Column Text' }),
       ).toBeHidden()
     })
 
     test('should display field in column selector despite admin.disableListFilter', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('.list-controls__toggle-columns').click()
-
-      await expect(page.locator('.column-selector')).toBeVisible()
+      const { columnContainer } = await openListColumns(page)
 
       // Check if "Disable List Filter Text" is present in the column options
       await expect(
-        getColumnSelectorItem({ container: page, label: 'Disable List Filter Text' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Disable List Filter Text' }),
       ).toBeVisible()
     })
 
@@ -1260,7 +1253,7 @@ describe('List View', () => {
 
       await openListColumns(page, {
         columnContainerSelector: '.column-selector',
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+        togglerSelector: '[id^=list-drawer_1_] .columns-button__button',
       })
 
       // ensure that the columns are in the correct order
@@ -1286,11 +1279,11 @@ describe('List View', () => {
 
       await openListColumns(page, {
         columnContainerSelector: '.column-selector',
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+        togglerSelector: '[id^=list-drawer_1_] .columns-button__button',
       })
 
       await toggleColumn(page, {
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+        togglerSelector: '[id^=list-drawer_1_] .columns-button__button',
         columnContainerSelector: '.column-selector',
         columnLabel: 'ID',
         targetState: 'off',
@@ -1308,7 +1301,7 @@ describe('List View', () => {
 
       await openListColumns(page, {
         columnContainerSelector: '.column-selector',
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+        togglerSelector: '[id^=list-drawer_1_] .columns-button__button',
       })
 
       const columnContainer = page.locator('.column-selector').first()
