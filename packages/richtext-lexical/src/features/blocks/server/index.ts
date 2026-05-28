@@ -11,6 +11,8 @@ import type {
 
 import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
 
+import type { NodeWithHooks } from '../../typesServer.js'
+
 import { applyBaseFilterToFields } from '../../../utilities/applyBaseFilterToFields.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
@@ -19,7 +21,16 @@ import { i18n } from './i18n.js'
 import { getBlockMarkdownTransformers } from './markdown/markdownTransformer.js'
 import { ServerBlockNode } from './nodes/BlocksNode.js'
 import { ServerInlineBlockNode } from './nodes/InlineBlocksNode.js'
+import { createBlockNodeJSONSchema, createInlineBlockNodeJSONSchema } from './schema.js'
 import { blockValidationHOC } from './validate.js'
+
+export type {
+  BlockFields,
+  BlockFieldsOptionalID,
+  InlineBlockFields,
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from './schema.js'
 
 export type BlocksFeatureProps = {
   blocks?: (Block | BlockSlug)[] | Block[]
@@ -95,6 +106,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           field,
           i18n,
           interfaceNameDefinitions,
+          typeStringDefinitions,
         }) => {
           if (!blockConfigs?.length && !inlineBlockConfigs?.length) {
             return currentSchema
@@ -130,13 +142,14 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           if (fields.length) {
             // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
             // we don't actually use the JSON Schema itself in the generated types yet.
-            fieldsToJSONSchema(
+            fieldsToJSONSchema({
               collectionIDFieldTypes,
-              fields,
-              interfaceNameDefinitions,
               config,
+              fields,
               i18n,
-            )
+              interfaceNameDefinitions,
+              typeStringDefinitions,
+            })
           }
 
           return currentSchema
@@ -216,24 +229,21 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
       nodes: [
         createNode({
+          jsonSchema: createBlockNodeJSONSchema(blockConfigs),
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
-              if (blockConfigs?.length) {
-                return [
-                  {
-                    name: 'lexical_blocks',
-                    type: 'blocks',
-                    blocks: blockConfigs,
-                  },
-                ]
-              }
-              return []
+              return [
+                {
+                  name: 'lexical_blocks',
+                  type: 'blocks',
+                  blocks: blockConfigs,
+                },
+              ]
             }
 
             const blockType = node.fields.blockType
-
-            const block = blockConfigs?.find((block) => block.slug === blockType)
+            const block = blockConfigs.find((block) => block.slug === blockType)
             return block?.fields
           },
           getSubFieldsData: ({ node }) => {
@@ -244,24 +254,21 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           validations: [blockValidationHOC(blockConfigs)],
         }),
         createNode({
+          jsonSchema: createInlineBlockNodeJSONSchema(inlineBlockConfigs),
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
-              if (inlineBlockConfigs?.length) {
-                return [
-                  {
-                    name: 'lexical_inline_blocks',
-                    type: 'blocks',
-                    blocks: inlineBlockConfigs,
-                  },
-                ]
-              }
-              return []
+              return [
+                {
+                  name: 'lexical_inline_blocks',
+                  type: 'blocks',
+                  blocks: inlineBlockConfigs,
+                },
+              ]
             }
 
             const blockType = node.fields.blockType
-
-            const block = inlineBlockConfigs?.find((block) => block.slug === blockType)
+            const block = inlineBlockConfigs.find((block) => block.slug === blockType)
             return block?.fields
           },
           getSubFieldsData: ({ node }) => {

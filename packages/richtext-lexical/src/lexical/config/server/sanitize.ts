@@ -79,6 +79,17 @@ export const sanitizeServerFeatures = (
     if (feature.nodes?.length) {
       // Do not concat here. We need to keep the object reference of sanitized.nodes so that function markdown transformers of features automatically get the updated nodes
       for (const node of feature.nodes) {
+        const nodeType = 'with' in node.node ? node.node.replace.getType() : node.node.getType()
+        const alreadyRegistered = sanitized.nodes.some((existing) => {
+          const existingType =
+            'with' in existing.node ? existing.node.replace.getType() : existing.node.getType()
+          return existingType === nodeType
+        })
+        if (alreadyRegistered) {
+          throw new Error(
+            `Lexical editor config: node type "${nodeType}" was registered more than once (feature "${feature.key}"). Each lexical node type may only be registered by a single feature.`,
+          )
+        }
         sanitized.nodes.push(node)
       }
       feature.nodes.forEach((node) => {

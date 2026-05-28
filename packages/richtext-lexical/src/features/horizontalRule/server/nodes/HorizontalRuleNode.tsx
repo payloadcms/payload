@@ -12,15 +12,11 @@ import type * as React from 'react'
 import { addClassNamesToElement } from '@lexical/utils'
 import { $applyNodeReplacement, createCommand, DecoratorNode } from 'lexical'
 
-import type { StronglyTypedLeafNode } from '../../../../types/nodeTypes.js'
+import type { SerializedHorizontalRuleNode } from '../schema.js'
 
-/**
- * Serialized representation of a horizontal rule node. Serialized = converted to JSON. This is what is stored in the database / in the lexical editor state.
- */
-export type SerializedHorizontalRuleNode = StronglyTypedLeafNode<
-  SerializedLexicalNode,
-  'horizontalrule'
->
+// Re-export the runtime type from the colocated schema module so existing
+// imports of this path keep working.
+export type { SerializedHorizontalRuleNode } from '../schema.js'
 
 export const INSERT_HORIZONTAL_RULE_COMMAND: LexicalCommand<void> = createCommand(
   'INSERT_HORIZONTAL_RULE_COMMAND',

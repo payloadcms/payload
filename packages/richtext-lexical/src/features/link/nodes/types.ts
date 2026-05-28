@@ -1,33 +1,5 @@
-import type { SerializedElementNode, SerializedLexicalNode } from 'lexical'
-import type { DefaultDocumentIDType, JsonValue } from 'payload'
-
-import type { StronglyTypedElementNode } from '../../../types/nodeTypes.js'
-
-export type LinkFields = {
-  [key: string]: JsonValue
-  doc?: {
-    relationTo: string
-    value:
-      | {
-          // Actual doc data, populated in afterRead hook
-          [key: string]: JsonValue
-          id: DefaultDocumentIDType
-        }
-      | DefaultDocumentIDType
-  } | null
-  linkType: 'custom' | 'internal'
-  newTab: boolean
-  url?: string
-}
-
-export type SerializedLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
-  fields: LinkFields
-  /**
-   * @todo make required in 4.0 and type AutoLinkNode differently
-   */
-  id?: string // optional if AutoLinkNode
-} & StronglyTypedElementNode<SerializedElementNode, 'link', T>
-
-export type SerializedAutoLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
-  fields: LinkFields
-} & StronglyTypedElementNode<SerializedElementNode, 'autolink', T>
+// Re-export the runtime types from the colocated schema module so existing
+// imports of this path keep working. The canonical definitions live in
+// `../server/schema.ts` next to the JSON Schema builders and the inlined-
+// into-payload-types TS source string.
+export type { LinkFields, SerializedAutoLinkNode, SerializedLinkNode } from '../server/schema.js'
