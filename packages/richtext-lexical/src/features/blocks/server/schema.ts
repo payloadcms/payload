@@ -1,11 +1,9 @@
-import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type { JSONSchema4 } from 'json-schema'
-import type { SerializedLexicalNode } from 'lexical'
 import type { Block, JsonObject } from 'payload'
 
-import { fieldsToJSONSchema, flattenAllFields } from 'payload'
+import { fieldsToJSONSchema, flattenAllFields, toWords } from 'payload'
 
-import type { StronglyTypedLeafNode } from '../../../types/nodeTypes.js'
+import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaArgs, JSONSchemaFn } from '../../typesServer.js'
 
 import { formatSchema } from '../../../types/jsonSchemaHelpers.js'
@@ -28,14 +26,25 @@ export type InlineBlockFields<TFields extends JsonObject = JsonObject> = {
   id: string
 } & TFields
 
-export type SerializedBlockNode<TFields extends JsonObject = JsonObject> = {
-  fields: BlockFields<TFields>
-} & StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'block'>
+export type SerializedBlockNode<TFields extends { blockType: string } = { blockType: string }> = {
+  fields: { blockName: null | string; id: string } & Omit<TFields, 'blockName' | 'id'>
+  format: LexicalElementFormat
+  type: 'block'
+  version: number
+}
 
-export type SerializedInlineBlockNode<TFields extends JsonObject = JsonObject> = {
-  fields: InlineBlockFields<TFields>
-} & StronglyTypedLeafNode<SerializedLexicalNode, 'inlineBlock'>
+export type SerializedInlineBlockNode<
+  TFields extends { blockType: string } = { blockType: string },
+> = {
+  fields: { id: string } & Omit<TFields, 'id'>
+  type: 'inlineBlock'
+  version: number
+}
 
+/**
+ * MUST stay byte-for-byte in sync with the runtime `SerializedBlockNode` and
+ * `SerializedInlineBlockNode` declared above.
+ */
 const BLOCK_NODES_TS = `export type SerializedBlockNode<TFields extends { blockType: string }> = {
   type: 'block';
   format: LexicalElementFormat;
@@ -48,13 +57,14 @@ export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
   fields: { id: string } & Omit<TFields, 'id'>;
 };`
 
+/** Block `interfaceName` if set, otherwise a PascalCase form of the slug. */
+const blockFieldsInterfaceName = (block: Block) => block.interfaceName ?? toWords(block.slug, true)
+
 /**
- * JSON Schema for the `fields:` payload of one (inline) block. Strips
- * Payload's auto-added `id`/`blockName` (every block carries those as base
- * fields) and re-adds them with strict runtime types — required, non-null
- * `id`; required `blockName: string | null` (omitted for inline blocks).
- *
- * Blocks with `interfaceName` are emitted as top-level `$ref` definitions.
+ * JSON Schema for one block's `fields:` payload. Strips Payload's auto-added
+ * `id`/`blockName` and re-adds them with strict runtime types: required
+ * non-null `id`, required `blockName: string | null` (omitted for inline
+ * blocks). Always registers as a top-level `$ref`.
  */
 const buildBlockFieldsSchema = (
   block: Block,
@@ -101,12 +111,9 @@ const buildBlockFieldsSchema = (
     required,
   }
 
-  if (block.interfaceName) {
-    args.interfaceNameDefinitions.set(block.interfaceName, fieldsSchema)
-    return { $ref: `#/definitions/${block.interfaceName}` }
-  }
-
-  return fieldsSchema
+  const definitionName = blockFieldsInterfaceName(block)
+  args.interfaceNameDefinitions.set(definitionName, fieldsSchema)
+  return { $ref: `#/definitions/${definitionName}` }
 }
 
 export const createBlockNodeJSONSchema =
@@ -124,16 +131,14 @@ export const createBlockNodeJSONSchema =
           ? blockFieldsSchemas[0]!
           : { oneOf: blockFieldsSchemas }
 
-    const allHaveInterfaceName =
-      blockConfigs.length > 0 && blockConfigs.every((b) => Boolean(b.interfaceName))
-    const tsType = allHaveInterfaceName
-      ? `SerializedBlockNode<${blockConfigs.map((b) => b.interfaceName!).join(' | ')}>`
-      : undefined
+    const tsType =
+      blockConfigs.length > 0
+        ? `SerializedBlockNode<${blockConfigs.map((b) => blockFieldsInterfaceName(b)).join(' | ')}>`
+        : `SerializedBlockNode<{ blockType: string }>`
 
     return {
       type: 'object',
       additionalProperties: false,
-      ...(tsType ? { tsType } : {}),
       properties: {
         type: { type: 'string', const: 'block' },
         fields: fieldsSchema,
@@ -141,6 +146,7 @@ export const createBlockNodeJSONSchema =
         version: { type: 'integer' },
       },
       required: ['fields', 'format', 'type', 'version'],
+      tsType,
     }
   }
 
@@ -159,21 +165,20 @@ export const createInlineBlockNodeJSONSchema =
           ? blockFieldsSchemas[0]!
           : { oneOf: blockFieldsSchemas }
 
-    const allHaveInterfaceName =
-      inlineBlockConfigs.length > 0 && inlineBlockConfigs.every((b) => Boolean(b.interfaceName))
-    const tsType = allHaveInterfaceName
-      ? `SerializedInlineBlockNode<${inlineBlockConfigs.map((b) => b.interfaceName!).join(' | ')}>`
-      : undefined
+    const tsType =
+      inlineBlockConfigs.length > 0
+        ? `SerializedInlineBlockNode<${inlineBlockConfigs.map((b) => blockFieldsInterfaceName(b)).join(' | ')}>`
+        : `SerializedInlineBlockNode<{ blockType: string }>`
 
     return {
       type: 'object',
       additionalProperties: false,
-      ...(tsType ? { tsType } : {}),
       properties: {
         type: { type: 'string', const: 'inlineBlock' },
         fields: fieldsSchema,
         version: { type: 'integer' },
       },
       required: ['fields', 'type', 'version'],
+      tsType,
     }
   }

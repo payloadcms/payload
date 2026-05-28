@@ -1,20 +1,21 @@
-import type {
-  SerializedHeadingNode as _SerializedHeadingNode,
-  HeadingTagType,
-} from '@lexical/rich-text'
+import type { HeadingTagType } from '@lexical/rich-text'
 import type { JSONSchema4 } from 'json-schema'
 import type { SerializedLexicalNode } from 'lexical'
 
-import type { StronglyTypedElementNode } from '../../../types/nodeTypes.js'
+import type { SerializedLexicalElementBase } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
 
-export type SerializedHeadingNode<
+export interface SerializedHeadingNode<
   TChildren extends SerializedLexicalNode = SerializedLexicalNode,
   TTag extends HeadingTagType = HeadingTagType,
-> = { tag: TTag } & StronglyTypedElementNode<_SerializedHeadingNode, 'heading', TChildren>
+> extends SerializedLexicalElementBase<TChildren> {
+  tag: TTag
+  type: 'heading'
+}
 
 const ALL_HEADING_TAGS: HeadingTagType[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 
+/** MUST stay byte-for-byte in sync with the runtime `SerializedHeadingNode` declared above. */
 const SERIALIZED_HEADING_NODE_TS = `export interface SerializedHeadingNode<
   TChildren,
   TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',

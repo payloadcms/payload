@@ -6,9 +6,9 @@ import type { JSONSchemaFn } from '../features/typesServer.js'
 
 /**
  * Cross-cutting Lexical types shared by every element node. Inlined into
- * `payload-types.ts`. Per-node helpers (text, tab, linebreak, paragraph,
- * the field wrapper, and feature-supplied nodes) live with their respective
- * schemas and are added to `typeStringDefinitions` on demand.
+ * `payload-types.ts`. Must stay byte-for-byte in sync with the runtime twins
+ * in `types/nodeTypes.ts` (`LexicalElementFormat`, `LexicalElementDirection`,
+ * `SerializedLexicalElementBase`) — cross-module assignability depends on it.
  */
 export const CORE_LEXICAL_TYPE_STRING = `/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
 export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
@@ -31,8 +31,10 @@ export interface SerializedLexicalElementBase<TChildren> {
  * schema for that node.
  */
 
+/** MUST stay byte-for-byte in sync with `LexicalTextMode` in `types/nodeTypes.ts`. */
 const LEXICAL_TEXT_MODE_TS = `export type LexicalTextMode = 'normal' | 'token' | 'segmented';`
 
+/** MUST stay byte-for-byte in sync with `SerializedTextNode` in `types/nodeTypes.ts`. */
 const SERIALIZED_TEXT_NODE_TS = `export interface SerializedTextNode {
   type: 'text';
   detail: number;
@@ -43,6 +45,7 @@ const SERIALIZED_TEXT_NODE_TS = `export interface SerializedTextNode {
   version: number;
 }`
 
+/** MUST stay byte-for-byte in sync with `SerializedTabNode` in `types/nodeTypes.ts`. */
 const SERIALIZED_TAB_NODE_TS = `export interface SerializedTabNode {
   type: 'tab';
   detail: number;
@@ -53,11 +56,13 @@ const SERIALIZED_TAB_NODE_TS = `export interface SerializedTabNode {
   version: number;
 }`
 
+/** MUST stay byte-for-byte in sync with `SerializedLineBreakNode` in `types/nodeTypes.ts`. */
 const SERIALIZED_LINE_BREAK_NODE_TS = `export interface SerializedLineBreakNode {
   type: 'linebreak';
   version: number;
 }`
 
+/** MUST stay byte-for-byte in sync with `SerializedParagraphNode` in `types/nodeTypes.ts`. */
 const SERIALIZED_PARAGRAPH_NODE_TS = `export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
   type: 'paragraph';
   textFormat: number;
@@ -141,6 +146,7 @@ export const paragraphNodeJSONSchema: JSONSchemaFn = ({
   })
 }
 
+/** MUST stay byte-for-byte in sync with `LexicalRichText` in `types/nodeTypes.ts`. */
 const ROOT_NODE_TS = `/** Shape of a Lexical \`richText\` field. */
 export interface LexicalRichText<TNode> {
   root: {

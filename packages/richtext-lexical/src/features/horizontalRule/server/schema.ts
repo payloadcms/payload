@@ -1,13 +1,11 @@
-import type { SerializedLexicalNode } from 'lexical'
-
-import type { StronglyTypedLeafNode } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
 
-export type SerializedHorizontalRuleNode = StronglyTypedLeafNode<
-  SerializedLexicalNode,
-  'horizontalrule'
->
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule'
+  version: number
+}
 
+/** MUST stay byte-for-byte in sync with the runtime `SerializedHorizontalRuleNode` declared above. */
 const SERIALIZED_HORIZONTAL_RULE_NODE_TS = `export interface SerializedHorizontalRuleNode {
   type: 'horizontalrule';
   version: number;

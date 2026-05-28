@@ -1,7 +1,5 @@
-import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type { JSONSchema4 } from 'json-schema'
 import type {
-  CollectionSlug,
   DataFromCollectionSlug,
   JsonObject,
   TypedUploadCollection,
@@ -10,7 +8,7 @@ import type {
 
 import { fieldsToJSONSchema, flattenAllFields } from 'payload'
 
-import type { StronglyTypedLeafNode } from '../../../types/nodeTypes.js'
+import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
 import type { UploadFeatureProps } from './index.js'
 
@@ -18,7 +16,7 @@ import { formatSchema } from '../../../types/jsonSchemaHelpers.js'
 import { filterEnabledRelationshipCollections } from '../../relationship/shared/filterEnabledRelationshipCollections.js'
 
 export type UploadData<TFields extends JsonObject = JsonObject> = {
-  [TCollectionSlug in CollectionSlug]: {
+  [TCollectionSlug in UploadCollectionSlug]: {
     fields: TFields
     /** ID of this upload node — NOT the linked document's ID. */
     id: string
@@ -26,7 +24,7 @@ export type UploadData<TFields extends JsonObject = JsonObject> = {
     /** Either the document ID or the full populated document. */
     value: DataFromCollectionSlug<TCollectionSlug> | number | string
   }
-}[CollectionSlug]
+}[UploadCollectionSlug]
 
 /** @internal Adds a pending state to `UploadData`. */
 export type Internal_UploadData<TFields extends JsonObject = JsonObject> = {
@@ -52,9 +50,20 @@ export type UploadDataImproved<TFields extends JsonObject = JsonObject> = {
   }
 }[UploadCollectionSlug]
 
-export type SerializedUploadNode = StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'upload'> &
-  UploadData
+export type SerializedUploadNode<TSlugs extends UploadCollectionSlug = UploadCollectionSlug> = {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug
+    value: DataFromCollectionSlug<TSlug> | number | string
+  }
+}[TSlugs] & {
+  fields: { [k: string]: unknown }
+  format: LexicalElementFormat
+  id: string
+  type: 'upload'
+  version: number
+}
 
+/** MUST stay byte-for-byte in sync with the runtime `SerializedUploadNode` declared above. */
 const SERIALIZED_UPLOAD_NODE_TS = `export type SerializedUploadNode<TSlugs extends keyof Config['collections']> = {
   type: 'upload';
   format: LexicalElementFormat;
@@ -64,7 +73,7 @@ const SERIALIZED_UPLOAD_NODE_TS = `export type SerializedUploadNode<TSlugs exten
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: Config['collections'][TSlug] | (Config['collections'][TSlug] extends { id: infer TID } ? TID : never);
+    value: number | string | Config['collections'][TSlug];
   };
 }[TSlugs];`
 

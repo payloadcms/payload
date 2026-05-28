@@ -1,47 +1,56 @@
 import type { JSONSchema4 } from 'json-schema'
-import type { SerializedElementNode, SerializedLexicalNode } from 'lexical'
-import type { DefaultDocumentIDType, Field, JsonValue } from 'payload'
+import type { SerializedLexicalNode } from 'lexical'
+import type { DefaultDocumentIDType, Field } from 'payload'
 
 import { fieldsToJSONSchema, flattenAllFields } from 'payload'
 
-import type { StronglyTypedElementNode } from '../../../types/nodeTypes.js'
+import type { SerializedLexicalElementBase } from '../../../types/nodeTypes.js'
 import type { JSONSchemaArgs, JSONSchemaFn } from '../../typesServer.js'
 
 export type LinkFields = {
-  [key: string]: JsonValue
+  /** Custom fields added via `LinkFeature`'s `fields` prop. */
+  [k: string]: unknown
   doc?: {
     relationTo: string
-    value:
-      | {
-          // Actual doc data, populated in afterRead hook
-          [key: string]: JsonValue
-          id: DefaultDocumentIDType
-        }
-      | DefaultDocumentIDType
+    /** Document ID, or the full doc when populated by the afterRead hook. */
+    value: { [k: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
   } | null
   linkType: 'custom' | 'internal'
   newTab: boolean
   url?: string
 }
 
-export type SerializedLinkNode<TChildren extends SerializedLexicalNode = SerializedLexicalNode> = {
-  fields: LinkFields
+export interface SerializedLinkNode<
+  TChildren extends SerializedLexicalNode = SerializedLexicalNode,
+  TFields = LinkFields,
+> extends SerializedLexicalElementBase<TChildren> {
+  fields: TFields
   /** @todo make required in 4.0 and type AutoLinkNode differently */
   id?: string
-} & StronglyTypedElementNode<SerializedElementNode, 'link', TChildren>
+  type: 'link'
+}
 
-export type SerializedAutoLinkNode<
+export interface SerializedAutoLinkNode<
   TChildren extends SerializedLexicalNode = SerializedLexicalNode,
-> = {
-  fields: LinkFields
-} & StronglyTypedElementNode<SerializedElementNode, 'autolink', TChildren>
+  TFields = LinkFields,
+> extends SerializedLexicalElementBase<TChildren> {
+  fields: TFields
+  type: 'autolink'
+}
 
+/**
+ * MUST stay byte-for-byte in sync with the runtime `LinkFields`, `SerializedLinkNode`,
+ * and `SerializedAutoLinkNode` declared above.
+ */
 const LINK_NODES_TS = `export interface LexicalLinkFields {
-  doc?: { relationTo: string; value: string | number } | null;
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
   linkType: 'custom' | 'internal';
   newTab: boolean;
   url?: string;
-  [k: string]: unknown;
 }
 export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
   type: 'link';
@@ -88,7 +97,19 @@ const buildLinkFieldsJSONSchema = (
             additionalProperties: false,
             properties: {
               relationTo: { type: 'string' },
-              value: { oneOf: [{ type: 'string' }, { type: 'number' }] },
+              value: {
+                oneOf: [
+                  { type: 'string' },
+                  { type: 'number' },
+                  // Populated form (afterRead inflates `value` into the doc).
+                  {
+                    type: 'object',
+                    additionalProperties: true,
+                    properties: { id: { type: ['string', 'number'] } },
+                    required: ['id'],
+                  },
+                ],
+              },
             },
             required: ['relationTo', 'value'],
           },
@@ -103,19 +124,45 @@ const buildLinkFieldsJSONSchema = (
   }
 }
 
+/** Fields auto-attached by `LinkFeature` (see `transformExtraFields`). */
+const STANDARD_LINK_FIELD_NAMES = new Set(['doc', 'linkType', 'newTab', 'url'])
+
+/**
+ * With custom link fields, emit a per-editor `LexicalLinkFields_<hash>`
+ * interface so the link node picks up their real shape. Without any,
+ * reuse the default `LexicalLinkFields` for cross-alias assignability.
+ */
+const resolveLinkFieldsRef = (
+  sanitizedFieldsWithoutText: Field[],
+  args: JSONSchemaArgs,
+): { fieldsRef: JSONSchema4; fieldsTypeName: string } => {
+  const fieldsSchema = buildLinkFieldsJSONSchema(sanitizedFieldsWithoutText, args)
+  const hasUserExtras = sanitizedFieldsWithoutText.some(
+    (field) => 'name' in field && !STANDARD_LINK_FIELD_NAMES.has(field.name),
+  )
+  if (!hasUserExtras) {
+    return { fieldsRef: fieldsSchema, fieldsTypeName: 'LexicalLinkFields' }
+  }
+  const editorHash = args.nodeUnionName.replace(/^LexicalNodes_/, '')
+  const fieldsTypeName = `LexicalLinkFields_${editorHash}`
+  args.interfaceNameDefinitions.set(fieldsTypeName, fieldsSchema)
+  return { fieldsRef: { $ref: `#/definitions/${fieldsTypeName}` }, fieldsTypeName }
+}
+
 export const createLinkNodeJSONSchema =
   (sanitizedFieldsWithoutText: Field[]): JSONSchemaFn =>
   (args) => {
     const { elementNodeSchema, nodeUnionName, typeStringDefinitions } = args
     typeStringDefinitions.add(LINK_NODES_TS)
+    const { fieldsRef, fieldsTypeName } = resolveLinkFieldsRef(sanitizedFieldsWithoutText, args)
     return elementNodeSchema({
       nodeType: 'link',
       properties: {
         id: { type: 'string' },
-        fields: buildLinkFieldsJSONSchema(sanitizedFieldsWithoutText, args),
+        fields: fieldsRef,
       },
       required: ['fields'],
-      tsType: `SerializedLinkNode<${nodeUnionName}>`,
+      tsType: `SerializedLinkNode<${nodeUnionName}, ${fieldsTypeName}>`,
     })
   }
 
@@ -124,12 +171,13 @@ export const createAutoLinkNodeJSONSchema =
   (args) => {
     const { elementNodeSchema, nodeUnionName, typeStringDefinitions } = args
     typeStringDefinitions.add(LINK_NODES_TS)
+    const { fieldsRef, fieldsTypeName } = resolveLinkFieldsRef(sanitizedFieldsWithoutText, args)
     return elementNodeSchema({
       nodeType: 'autolink',
       properties: {
-        fields: buildLinkFieldsJSONSchema(sanitizedFieldsWithoutText, args),
+        fields: fieldsRef,
       },
       required: ['fields'],
-      tsType: `SerializedAutoLinkNode<${nodeUnionName}>`,
+      tsType: `SerializedAutoLinkNode<${nodeUnionName}, ${fieldsTypeName}>`,
     })
   }

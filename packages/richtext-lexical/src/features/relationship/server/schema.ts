@@ -1,8 +1,7 @@
-import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type { JSONSchema4 } from 'json-schema'
 import type { CollectionSlug, DataFromCollectionSlug } from 'payload'
 
-import type { StronglyTypedLeafNode } from '../../../types/nodeTypes.js'
+import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
 import type { RelationshipFeatureProps } from './index.js'
 
@@ -16,9 +15,18 @@ export type RelationshipData = {
   }
 }[CollectionSlug]
 
-export type SerializedRelationshipNode = RelationshipData &
-  StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'relationship'>
+export type SerializedRelationshipNode<TSlugs extends CollectionSlug = CollectionSlug> = {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug
+    value: DataFromCollectionSlug<TSlug> | number | string
+  }
+}[TSlugs] & {
+  format: LexicalElementFormat
+  type: 'relationship'
+  version: number
+}
 
+/** MUST stay byte-for-byte in sync with the runtime `SerializedRelationshipNode` declared above. */
 const SERIALIZED_RELATIONSHIP_NODE_TS = `export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
   type: 'relationship';
   format: LexicalElementFormat;
@@ -26,7 +34,7 @@ const SERIALIZED_RELATIONSHIP_NODE_TS = `export type SerializedRelationshipNode<
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: Config['collections'][TSlug] | (Config['collections'][TSlug] extends { id: infer TID } ? TID : never);
+    value: number | string | Config['collections'][TSlug];
   };
 }[TSlugs];`
 

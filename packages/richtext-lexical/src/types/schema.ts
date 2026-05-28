@@ -17,16 +17,13 @@ import {
 import { elementNodeSchema } from './jsonSchemaHelpers.js'
 
 /**
- * A placeholder string that will be replaced with the real union name later.
- * Union = a union of all possible node types for this richtext field.
- *
- * We need to replace this *later*, because we're using a hadsh of the schema (like `LexicalNodes_AB12CD34`).
- * We cannot calculate the hash until we've built the whole schema, but we can't build the whole schema
- * until we have the hash as a name for the union - chicken-and-egg problem.
- *
- * We need to hash the actual schema to benefit from deduplication of two identical lexical fields.
+ * The node-union name is a hash of its own schema (so identical editors dedupe).
+ * Since the schema references the union name, we use a placeholder during build
+ * and substitute the real hash once everything's assembled. Features can derive
+ * sibling names (e.g. `LexicalLinkFields_<hash>`) using the bare hash placeholder.
  */
-const NODE_UNION_NAME_PLACEHOLDER = '__LEXICAL_NODE_UNION_NAME__'
+const NODE_UNION_HASH_PLACEHOLDER = '__LEXICAL_NODE_UNION_HASH__'
+const NODE_UNION_NAME_PLACEHOLDER = `LexicalNodes_${NODE_UNION_HASH_PLACEHOLDER}`
 
 export const getFieldToJSONSchema: (args: {
   editorConfig: SanitizedServerEditorConfig
@@ -83,8 +80,21 @@ export const getFieldToJSONSchema: (args: {
     const hash = createHash('sha256').update(nodeUnionJson).digest('hex').slice(0, 8).toUpperCase()
     const nodeUnionName = `LexicalNodes_${hash}`
 
+    // Replacing the hash resolves the union name and any feature-derived
+    // sibling names in one pass.
     const replacePlaceholder = (schemaString: string) =>
-      JSON.parse(schemaString.replaceAll(NODE_UNION_NAME_PLACEHOLDER, nodeUnionName)) as JSONSchema4
+      JSON.parse(schemaString.replaceAll(NODE_UNION_HASH_PLACEHOLDER, hash)) as JSONSchema4
+
+    // Resolve placeholders left in feature-registered definitions so Map keys
+    // and `$ref` targets line up.
+    for (const [oldKey, schema] of [...interfaceNameDefinitions.entries()]) {
+      const newKey = oldKey.replaceAll(NODE_UNION_HASH_PLACEHOLDER, hash)
+      const resolvedSchema = replacePlaceholder(JSON.stringify(schema))
+      if (newKey !== oldKey) {
+        interfaceNameDefinitions.delete(oldKey)
+      }
+      interfaceNameDefinitions.set(newKey, resolvedSchema)
+    }
 
     interfaceNameDefinitions.set(nodeUnionName, replacePlaceholder(nodeUnionJson))
 

@@ -1,41 +1,85 @@
-import type {
-  SerializedLineBreakNode as _SerializedLineBreakNode,
-  SerializedTabNode as _SerializedTabNode,
-  SerializedTextNode as _SerializedTextNode,
-  SerializedEditorState,
-  SerializedElementNode,
-  SerializedLexicalNode,
-} from 'lexical'
+import type { SerializedLexicalNode } from 'lexical'
 
-import type { SerializedQuoteNode } from '../features/blockquote/server/index.js'
-import type { SerializedBlockNode } from '../features/blocks/server/nodes/BlocksNode.js'
-import type { SerializedInlineBlockNode } from '../features/blocks/server/nodes/InlineBlocksNode.js'
+import type { SerializedQuoteNode } from '../features/blockquote/server/schema.js'
+import type {
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from '../features/blocks/server/schema.js'
 import type {
   SerializedTableCellNode,
   SerializedTableNode,
   SerializedTableRowNode,
-} from '../features/experimental_table/server/index.js'
-import type { SerializedHeadingNode } from '../features/heading/server/index.js'
-import type { SerializedHorizontalRuleNode } from '../features/horizontalRule/server/nodes/HorizontalRuleNode.js'
-import type { SerializedAutoLinkNode, SerializedLinkNode } from '../features/link/nodes/types.js'
-import type { SerializedListItemNode, SerializedListNode } from '../features/lists/plugin/index.js'
-import type { SerializedRelationshipNode } from '../features/relationship/server/nodes/RelationshipNode.js'
-import type { SerializedUploadNode } from '../features/upload/server/nodes/UploadNode.js'
+} from '../features/experimental_table/server/schema.js'
+import type { SerializedHeadingNode } from '../features/heading/server/schema.js'
+import type { SerializedHorizontalRuleNode } from '../features/horizontalRule/server/schema.js'
+import type { SerializedAutoLinkNode, SerializedLinkNode } from '../features/link/server/schema.js'
+import type { SerializedListItemNode, SerializedListNode } from '../features/lists/shared/schema.js'
+import type { SerializedRelationshipNode } from '../features/relationship/server/schema.js'
+import type { SerializedUploadNode } from '../features/upload/server/schema.js'
 
-/** Strongly-typed serialized element node with `children` and `type` re-declared. */
-export type StronglyTypedElementNode<
-  TBase,
-  TType extends string,
-  TChildren extends SerializedLexicalNode = SerializedLexicalNode,
-> = {
+// The declarations below must stay byte-for-byte aligned with the TS source
+// strings Payload appends to `payload-types.ts` — twins live in
+// `types/builtInNodes.ts` and per-feature `schema.ts`.
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = '' | 'center' | 'end' | 'justify' | 'left' | 'right' | 'start'
+export type LexicalElementDirection = ('ltr' | 'rtl') | null
+
+export interface SerializedLexicalElementBase<TChildren> {
   children: TChildren[]
-  type: TType
-} & Omit<TBase, 'children' | 'type'>
+  direction: LexicalElementDirection
+  format: LexicalElementFormat
+  indent: number
+  textFormat?: number
+  textStyle?: string
+  version: number
+}
 
-/** Strongly-typed serialized leaf node — no `children`, `type` re-declared. */
-export type StronglyTypedLeafNode<TBase, TType extends string> = {
-  type: TType
-} & Omit<TBase, 'children' | 'type'>
+export type LexicalTextMode = 'normal' | 'segmented' | 'token'
+
+export interface SerializedTextNode {
+  detail: number
+  format: number
+  mode: LexicalTextMode
+  style: string
+  text: string
+  type: 'text'
+  version: number
+}
+
+export interface SerializedTabNode {
+  detail: number
+  format: number
+  mode: LexicalTextMode
+  style: string
+  text: string
+  type: 'tab'
+  version: number
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak'
+  version: number
+}
+
+export interface SerializedParagraphNode<TChildren>
+  extends SerializedLexicalElementBase<TChildren> {
+  textFormat: number
+  textStyle: string
+  type: 'paragraph'
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[]
+    direction: LexicalElementDirection
+    format: LexicalElementFormat
+    indent: number
+    type: 'root'
+    version: number
+  }
+}
 
 export type {
   SerializedAutoLinkNode,
@@ -54,70 +98,58 @@ export type {
   SerializedUploadNode,
 }
 
-export type SerializedParagraphNode<
-  TChildren extends SerializedLexicalNode = SerializedLexicalNode,
-> = {
-  textFormat: number
-} & StronglyTypedElementNode<SerializedElementNode, 'paragraph', TChildren>
-
-export type SerializedTextNode = StronglyTypedLeafNode<_SerializedTextNode, 'text'>
-
-export type SerializedTabNode = StronglyTypedLeafNode<_SerializedTabNode, 'tab'>
-
-export type SerializedLineBreakNode = StronglyTypedLeafNode<_SerializedLineBreakNode, 'linebreak'>
+/** `SerializedEditorState` with nodes narrowed by `type`. No type-casting needed. */
+export type TypedEditorState<TNode extends SerializedLexicalNode = SerializedLexicalNode> =
+  LexicalRichText<TNode>
 
 /**
- * Recursively adds typed children to nodes up to `TDepth` levels (default 4).
- * Distributive over `TNode`; `TOriginalNode` preserves the full union so
- * nested children accept all node types, not just the parent's.
- *
- * @internal — may change or be removed in a minor release.
- */
-export type RecursiveNodes<
-  TNode extends SerializedLexicalNode,
-  TDepth extends number = 4,
-  TOriginalNode extends SerializedLexicalNode = TNode,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-> = TNode extends any
-  ? TDepth extends 0
-    ? TNode
-    : 'children' extends keyof TNode
-      ? { children?: RecursiveNodes<TOriginalNode, DecrementDepth<TDepth>, TOriginalNode>[] } & TNode
-      : TNode
-  : never
-
-/** 4→3, 3→2, 2→1, 1→0, 0→0 */
-type DecrementDepth<TN extends number> = [0, 0, 1, 2, 3, 4][TN]
-
-/**
- * `SerializedEditorState` with nodes narrowed by `type`. No type-casting needed.
- */
-export type TypedEditorState<TNode extends SerializedLexicalNode = SerializedLexicalNode> = {
-  [k: string]: unknown
-} & SerializedEditorState<RecursiveNodes<TNode>>
-
-/**
- * All node types included by default in a lexical editor without configuration.
+ * All node types included by default in a lexical editor. Self-recursive —
+ * each element node's `children` is `DefaultNodeTypes` again, no depth limit.
+ * To compose your own union including the defaults, see {@link DefaultNodeTypesOf}.
  */
 export type DefaultNodeTypes =
-  | SerializedAutoLinkNode
+  | SerializedAutoLinkNode<DefaultNodeTypes>
   //| SerializedBlockNode // Not included by default
-  | SerializedHeadingNode
+  | SerializedHeadingNode<DefaultNodeTypes>
   | SerializedHorizontalRuleNode
   | SerializedLineBreakNode
-  | SerializedLinkNode
-  | SerializedListItemNode
-  | SerializedListNode
-  | SerializedParagraphNode
-  | SerializedQuoteNode
+  | SerializedLinkNode<DefaultNodeTypes>
+  | SerializedListItemNode<DefaultNodeTypes>
+  | SerializedListNode<DefaultNodeTypes>
+  | SerializedParagraphNode<DefaultNodeTypes>
+  | SerializedQuoteNode<DefaultNodeTypes>
   | SerializedRelationshipNode
   | SerializedTabNode
   | SerializedTextNode
   | SerializedUploadNode
 
 /**
- * Like `TypedEditorState` but includes all default node types.
- * You can pass *additional* node types as a generic parameter.
+ * Default node types, parameterised by the union to use for element children.
+ * Use to mix custom nodes with the defaults:
+ *
+ * ```ts
+ * type MyNodes = DefaultNodeTypesOf<MyNodes> | SerializedBlockNode<MyNodes>
+ * ```
+ */
+export type DefaultNodeTypesOf<TNodes extends SerializedLexicalNode> =
+  | SerializedAutoLinkNode<TNodes>
+  | SerializedHeadingNode<TNodes>
+  | SerializedHorizontalRuleNode
+  | SerializedLineBreakNode
+  | SerializedLinkNode<TNodes>
+  | SerializedListItemNode<TNodes>
+  | SerializedListNode<TNodes>
+  | SerializedParagraphNode<TNodes>
+  | SerializedQuoteNode<TNodes>
+  | SerializedRelationshipNode
+  | SerializedTabNode
+  | SerializedTextNode
+  | SerializedUploadNode
+
+/**
+ * Like `TypedEditorState` but includes all default node types. Pass extra
+ * node types as a generic to union them at the top level; for nodes that
+ * should also nest inside default containers, use {@link DefaultNodeTypesOf}.
  */
 export type DefaultTypedEditorState<
   TAdditionalNodeTypes extends null | SerializedLexicalNode = null,
