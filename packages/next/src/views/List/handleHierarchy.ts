@@ -234,6 +234,7 @@ export const handleHierarchy = async ({
 
       if (data.totalDocs > 0) {
         relatedDocumentsByCollection[relatedSlug] = {
+          fieldName,
           hasMany,
           label: getTranslation(relatedCollectionConfig.labels?.plural, req.i18n),
           result: data,

@@ -320,6 +320,7 @@ export const koTranslations: DefaultTranslationsObject = {
     export: '수출',
     fallbackToDefaultLocale: '기본 locale로 대체',
     false: '거짓',
+    field: 'Field',
     filter: '필터',
     filters: '필터',
     filterWhere: '{{label}} 필터링 조건',
