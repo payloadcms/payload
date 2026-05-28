@@ -173,6 +173,7 @@ export type {
 export { TabError } from '../../elements/Nav/SidebarTabs/TabError/index.js'
 export { ShouldRenderTabs } from '../../elements/DocumentHeader/Tabs/ShouldRenderTabs.js'
 export { DocumentTabLink } from '../../elements/DocumentHeader/Tabs/Tab/TabLink.js'
+export { VersionsPill } from '../../elements/DocumentHeader/Tabs/tabs/VersionsPill/index.js'
 export { Wrapper as DefaultTemplateWrapper } from '../../templates/Default/Wrapper/index.js'
 export { FormHeader } from '../../elements/FormHeader/index.js'
 export { HierarchyTypeField } from '../../elements/HierarchyTypeField/index.js'
