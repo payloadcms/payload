@@ -84,9 +84,6 @@ export const sanitizeServerFeatures = (
           )
         }
         sanitized.nodes.push(node)
-      }
-      feature.nodes.forEach((node) => {
-        const nodeType = 'with' in node.node ? node.node.replace.getType() : node.node.getType() // TODO: Idk if this works for node replacements
         if (node?.graphQLPopulationPromises?.length) {
           sanitized.graphQLPopulationPromises.set(nodeType, node.graphQLPopulationPromises)
         }
@@ -111,7 +108,7 @@ export const sanitizeServerFeatures = (
         if (node?.getSubFieldsData) {
           sanitized.getSubFieldsData?.set(nodeType, node.getSubFieldsData)
         }
-      })
+      }
     }
 
     if (feature.markdownTransformers?.length) {

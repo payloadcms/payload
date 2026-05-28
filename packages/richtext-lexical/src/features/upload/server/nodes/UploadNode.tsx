@@ -17,16 +17,6 @@ import type { Internal_UploadData, SerializedUploadNode, UploadData } from '../s
 
 import { $convertUploadElement } from './conversions.js'
 
-// Re-export the runtime data types from the colocated schema module so
-// existing imports of this path keep working. Canonical definitions live in
-// `../schema.ts` next to the JSON Schema builder + inlined TS source string.
-export type {
-  Internal_UploadData,
-  SerializedUploadNode,
-  UploadData,
-  UploadDataImproved,
-} from '../schema.js'
-
 export class UploadServerNode extends DecoratorBlockNode {
   __data: UploadData
 
