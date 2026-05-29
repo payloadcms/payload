@@ -34,9 +34,12 @@ const baseRules = {
       partitionByComment: true,
       partitionByNewLine: true,
       groups: ['top', 'unknown'],
-      customGroups: {
-        top: ['_id', 'id', 'name', 'slug', 'type'],
-      },
+      customGroups: [
+        {
+          groupName: 'top',
+          elementNamePattern: ['_id', 'id', 'name', 'slug', 'type'],
+        },
+      ],
     },
   ],
   /*'perfectionist/sort-object-types': [
