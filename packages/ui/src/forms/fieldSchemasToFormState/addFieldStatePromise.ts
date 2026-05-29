@@ -184,6 +184,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldState.fieldSchema = field
   }
 
+  // Short-circuit when the field fails its condition: skip access checks,
+  // validation, switch processing, recursion into children, filterOptions
+  // resolution, and render. The client re-requests form state when conditions
+  // flip, so a minimal entry is sufficient here.
+  if (passesCondition === false) {
+    if (!filter || filter(args)) {
+      state[path] = fieldState
+    }
+    return
+  }
+
   if (fieldAffectsData(field) && !fieldIsHiddenOrDisabled(field) && field.type !== 'tab') {
     fieldPermissions =
       parentPermissions === true
@@ -808,10 +819,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state[path] = {
         disableFormData: true,
       }
-
-      if (passesCondition === false) {
-        state[path].passesCondition = false
-      }
     }
 
     await iterateFields({
@@ -893,11 +900,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     const pathSegments = path ? path.split('.') : []
 
-    // If passesCondition is false then this should always result to false
-    // If the tab has no admin.condition provided then fallback to passesCondition and let that decide the result
-    let tabPassesCondition = passesCondition
+    // The incoming `passesCondition` is guaranteed to be true here because the
+    // function returns early when it is false. Tab visibility is determined
+    // solely by its own `admin.condition`, if defined.
+    let tabPassesCondition: boolean = true
 
-    if (passesCondition && typeof field.admin?.condition === 'function') {
+    if (typeof field.admin?.condition === 'function') {
       tabPassesCondition = field.admin.condition(fullData, data, {
         blockData,
         operation,
@@ -986,7 +994,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   }
 
-  if (renderFieldFn && !fieldIsHiddenOrDisabled(field) && passesCondition !== false) {
+  if (renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
     const fieldConfig = fieldSchemaMap.get(schemaPath)
 
     if (!fieldConfig && !mockRSCs) {
