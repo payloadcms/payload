@@ -16,6 +16,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
   CustomStatus,
@@ -484,6 +485,12 @@ export type ServerProps = {
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
   readonly searchParams?: Params
+  /**
+   * Framework-agnostic methods for server-side navigation, headers, cookies, and other server-only APIs.
+   * Plugins should call these methods instead of importing directly from `next/navigation`, `next/headers`, etc.
+   * These methods are populated by the given framework adapter, e.g. `@payloadcms/next`.
+   */
+  readonly server: ServerAdapter
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities

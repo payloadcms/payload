@@ -261,7 +261,7 @@ describe('configToJSONSchema', () => {
             {
               name: 'withCustom',
               type: 'text',
-              typescriptSchema: [() => customSchema],
+              jsonSchema: [() => customSchema],
             },
             {
               name: 'jsonWithSchema',
@@ -398,7 +398,7 @@ describe('configToJSONSchema', () => {
               type: 'text',
               required: true,
               defaultValue: 'test',
-              typescriptSchema: [
+              jsonSchema: [
                 () => ({
                   type: 'string',
                   required: false,

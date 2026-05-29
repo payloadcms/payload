@@ -4,6 +4,7 @@ import type React from 'react'
 export type RelatedGroup = {
   collectionSlug: string
   data: PaginatedDocs
+  fieldName: string
   hasMany: boolean
   label: string
 }

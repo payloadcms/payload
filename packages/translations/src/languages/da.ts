@@ -321,6 +321,7 @@ export const daTranslations: DefaultTranslationsObject = {
     export: 'Eksport',
     fallbackToDefaultLocale: 'Tilbagefald til standardlokalitet',
     false: 'Falsk',
+    field: 'Field',
     filter: 'Filter',
     filters: 'Filtre',
     filterWhere: 'Filter {{label}} hvor',

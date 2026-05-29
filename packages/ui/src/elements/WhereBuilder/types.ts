@@ -21,13 +21,14 @@ export type Value = Date | number | number[] | string | string[]
 
 export type ReducedField = {
   field: ClientField
+  /** The field path (e.g. "title" or "author.name") */
+  fieldPath: string
   label: React.ReactNode
   operators: {
     label: string
     value: Operator
   }[]
   plainTextLabel?: string
-  value: Value
 }
 
 export type Relation = 'and' | 'or'
