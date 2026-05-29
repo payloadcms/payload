@@ -162,7 +162,7 @@
     "**/package.json": "sort-package-json",
     "*.{md,mdx,yml,json}": "prettier --write",
     "*.{js,jsx,ts,tsx}": [
-      "eslint --flag v10_config_lookup_from_file --cache --fix",
+      "eslint --cache --fix",
       "prettier --write"
     ],
     "templates/**/pnpm-lock.yaml": "pnpm runts scripts/remove-template-lock-files.ts",
@@ -204,7 +204,7 @@
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.44.7",
     "escape-html": "^1.0.3",
-    "eslint": "9.39.2",
+    "eslint": "10.4.0",
     "execa": "5.1.1",
     "form-data": "3.0.4",
     "fs-extra": "10.1.0",
