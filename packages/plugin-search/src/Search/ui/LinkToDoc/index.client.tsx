@@ -46,7 +46,7 @@ export const LinkToDocClient: React.FC = () => {
           textOverflow: 'ellipsis',
         }}
       >
-        <Link href={href} passHref {...{ rel: 'noopener noreferrer', target: '_blank' }}>
+        <Link href={href} rel="noopener noreferrer" target="_blank">
           {href}
         </Link>
       </div>

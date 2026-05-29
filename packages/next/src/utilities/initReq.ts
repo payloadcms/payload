@@ -12,6 +12,7 @@ import {
   parseCookies,
 } from 'payload'
 
+import { nextServerAdapter } from '../adapters/server.js'
 import { getRequestLocale } from './getRequestLocale.js'
 import { selectiveCache } from './selectiveCache.js'
 
@@ -87,6 +88,7 @@ export const initReq = async function ({
             host: headers.get('host'),
             i18n: i18n as I18n,
             responseHeaders,
+            server: nextServerAdapter,
             user,
             ...(reqOverrides || {}),
           },

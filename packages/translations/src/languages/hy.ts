@@ -321,6 +321,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     export: 'Արտարժույթ',
     fallbackToDefaultLocale: 'Վերադառնալ լռելյայն լոկալին',
     false: 'Կեղծ',
+    field: 'Դաշտ',
     filter: 'Ֆիլտր',
     filters: 'Ֆիլտրեր',
     filterWhere: 'Ֆիլտրել {{label}}-ը, որտեղ',

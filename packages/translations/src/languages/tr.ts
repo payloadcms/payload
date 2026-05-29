@@ -325,6 +325,7 @@ export const trTranslations: DefaultTranslationsObject = {
     export: 'İhracat',
     fallbackToDefaultLocale: 'Varsayılan yerel ayara geri dönme',
     false: 'Yanlış',
+    field: 'Field',
     filter: 'Filtrele',
     filters: 'Filtreler',
     filterWhere: '{{label}} filtrele:',

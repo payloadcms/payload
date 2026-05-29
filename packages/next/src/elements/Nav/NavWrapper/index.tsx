@@ -13,14 +13,13 @@ export const NavWrapper: React.FC<{
 }> = (props) => {
   const { baseClass, children } = props
 
-  const { hydrated, navOpen, navRef, shouldAnimate } = useNav()
+  const { hydrated, navOpen, navRef } = useNav()
 
   return (
     <aside
       className={[
         baseClass,
         navOpen && `${baseClass}--nav-open`,
-        shouldAnimate && `${baseClass}--nav-animate`,
         hydrated && `${baseClass}--nav-hydrated`,
       ]
         .filter(Boolean)

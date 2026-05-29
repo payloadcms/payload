@@ -322,6 +322,7 @@ export const viTranslations: DefaultTranslationsObject = {
     export: 'Xuất',
     fallbackToDefaultLocale: 'Ngôn ngữ mặc định',
     false: 'Sai',
+    field: 'Field',
     filter: 'Lọc',
     filters: 'Bộ lọc',
     filterWhere: 'Lọc {{label}} với điều kiện:',

@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { devUser } from '../credentials.js'
 import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -11,7 +10,6 @@ import type { Config, Post } from './payload-types.js'
 
 import { sortColumn, toggleColumn } from '../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../__helpers/e2e/filters/index.js'
-import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
 import {
   addGroupBy,
   clearGroupBy,
@@ -30,6 +28,7 @@ import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { devUser } from '../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   openCreatePreset,
@@ -93,43 +92,46 @@ test.describe('Group By', () => {
     await expect(page.locator('#toggle-group-by')).toBeHidden()
   })
 
-  test('should open and close group-by dropdown', async () => {
+  test('should open and close group-by popup', async () => {
     await page.goto(url.list)
+    const groupByContent = page.locator('.group-by-control__popup .group-by-control__content')
     await openGroupBy(page)
-    await expect(page.locator('#list-controls-group-by.rah-static--height-auto')).toBeVisible()
+    await expect(groupByContent).toBeVisible()
     await closeGroupBy(page)
-    await expect(page.locator('#list-controls-group-by.rah-static--height-auto')).toBeHidden()
+    await expect(groupByContent).toBeHidden()
   })
 
-  test('should display field options in group-by dropdown', async () => {
+  test('should display field options in group-by popup', async () => {
     await page.goto(url.list)
-    const { groupByContainer } = await openGroupBy(page)
+    const { groupByContent } = await openGroupBy(page)
 
     // TODO: expect no initial selection and for the sort control to be disabled
 
-    const field = groupByContainer.locator('#group-by--field-select')
-    await field.click()
+    const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+    await fieldTrigger.click()
 
     await expect(
-      field.locator('.rs__option', {
+      page.locator('.popup-button-list__button', {
         hasText: exactText('Title'),
       }),
     ).toBeVisible()
   })
 
-  test('should omit unsupported fields from appearing as options in the group-by dropdown', async () => {
+  test('should omit unsupported fields from appearing as options in the group-by popup', async () => {
     await page.goto(url.list)
 
-    await openGroupBy(page)
+    const { groupByContent } = await openGroupBy(page)
 
     // certain fields are not allowed to be grouped by, for example rich text and the ID field itself
     const forbiddenOptions = ['ID', 'Content']
 
-    const field = page.locator('#group-by--field-select')
-    await field.click()
+    const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+    await fieldTrigger.click()
 
     for (const fieldOption of forbiddenOptions) {
-      const optionEl = page.locator('.rs__option', { hasText: exactText(fieldOption) })
+      const optionEl = page.locator('.popup-button-list__button', {
+        hasText: exactText(fieldOption),
+      })
       await expect(optionEl).toHaveCount(0)
     }
   })
@@ -141,10 +143,10 @@ test.describe('Group By', () => {
 
     await expect(page.locator('.table-wrap')).toHaveCount(2)
 
-    await expect(page.locator('.group-by-header')).toHaveCount(2)
+    await expect(page.locator('.table-section__header')).toHaveCount(2)
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
 
     await expect(page.locator('.table-wrap').first().locator('tbody tr')).toHaveCount(10)
@@ -158,7 +160,7 @@ test.describe('Group By', () => {
     await expect(table1CategoryCells.first()).toHaveText(/Category 1/)
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 2') }),
     ).toBeVisible()
 
     const table2 = page.locator('.table-wrap').nth(1)
@@ -201,39 +203,60 @@ test.describe('Group By', () => {
 
   test('should reset group-by using the global "clear" button', async () => {
     await page.goto(url.list)
-    const { groupByContainer } = await openGroupBy(page)
+    const { groupByContent } = await openGroupBy(page)
 
-    const field = groupByContainer.locator('#group-by--field-select')
-    await expect(field.locator('.react-select--single-value')).toHaveText('Select a value')
-    await expect(groupByContainer.locator('#group-by--reset')).toBeHidden()
+    const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+    await expect(fieldTrigger.locator('.group-by-control__select-value')).toHaveText(
+      'Select a value',
+    )
+    // Clear button should not exist when no field is selected
+    await expect(
+      groupByContent.locator('.group-by-control__header-actions button[aria-label="Clear"]'),
+    ).toHaveCount(0)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
     await expect(page.locator('.table-wrap')).toHaveCount(2)
-    await expect(page.locator('.group-by-header')).toHaveCount(2)
+    await expect(page.locator('.table-section__header')).toHaveCount(2)
 
     await clearGroupBy(page)
   })
 
-  test('should reset group-by using the select field\'s "x" button', async () => {
+  test('should reset group-by via clear button in popup header', async () => {
     await page.goto(url.list)
 
-    const { field, groupByContainer } = await addGroupBy(page, {
+    await addGroupBy(page, {
       fieldLabel: 'Category',
       fieldPath: 'category',
     })
 
     await expect(page.locator('.table-wrap')).toHaveCount(2)
-    await expect(page.locator('.group-by-header')).toHaveCount(2)
+    await expect(page.locator('.table-section__header')).toHaveCount(2)
 
-    // click the "x" button on the select field itself
-    await field.locator('.clear-indicator').click()
+    // Re-open the popup (it may have closed after data refresh)
+    const { groupByContent } = await openGroupBy(page)
 
-    await expect(field.locator('.react-select--single-value')).toHaveText('Select a value')
+    // Click the trash/clear button in the popup header
+    const clearButton = groupByContent.locator(
+      '.group-by-control__header-actions button[aria-label="Clear"]',
+    )
+    await clearButton.click()
 
+    // The popup closes automatically after clearing, verify URL and table state first
     await expect(page).not.toHaveURL(/&groupBy=/)
-    await expect(groupByContainer.locator('#field-direction input')).toBeDisabled()
     await expect(page.locator('.table-wrap')).toHaveCount(1)
-    await expect(page.locator('.group-by-header')).toHaveCount(0)
+    await expect(page.locator('.table-section__header')).toHaveCount(0)
+
+    // Re-open the popup to verify the field is cleared and sort is disabled
+    const { groupByContent: reopenedContent } = await openGroupBy(page)
+
+    const fieldTrigger = reopenedContent.locator('.group-by-control__select-trigger').first()
+    await expect(fieldTrigger.locator('.group-by-control__select-value')).toHaveText(
+      'Select a value',
+    )
+
+    // Sort trigger should be disabled when no field is selected
+    const sortTrigger = reopenedContent.locator('.group-by-control__select-trigger').nth(1)
+    await expect(sortTrigger).toBeDisabled()
   })
 
   test('should group by relationships even when their values are null', async () => {
@@ -252,7 +275,7 @@ test.describe('Group By', () => {
     await expect(page.locator('.table-wrap')).toHaveCount(3)
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
@@ -272,7 +295,7 @@ test.describe('Group By', () => {
     await expect(page.locator('.table-wrap')).toHaveCount(1)
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
@@ -310,39 +333,41 @@ test.describe('Group By', () => {
 
     await expect(page.locator('.table-wrap')).toHaveCount(3)
 
-    await expect(page.locator('.group-by-header')).toHaveCount(3)
+    await expect(page.locator('.table-section__header')).toHaveCount(3)
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('True') }),
+      page.locator('.table-section__heading', { hasText: exactText('True') }),
     ).toBeVisible()
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('False') }),
+      page.locator('.table-section__heading', { hasText: exactText('False') }),
     ).toBeVisible()
   })
 
   test('should sort the group-by field globally', async () => {
     await page.goto(url.list)
 
-    const { groupByContainer } = await addGroupBy(page, {
+    const { groupByContent } = await addGroupBy(page, {
       fieldLabel: 'Category',
       fieldPath: 'category',
     })
 
-    const firstHeading = page.locator('.group-by-header__heading').first()
+    const firstHeading = page.locator('.table-section__heading').first()
     await expect(firstHeading).toHaveText(/Category 1/)
-    const secondHeading = page.locator('.group-by-header__heading').nth(1)
+    const secondHeading = page.locator('.table-section__heading').nth(1)
     await expect(secondHeading).toHaveText(/Category 2/)
 
-    await groupByContainer.locator('#group-by--sort').click()
-    await groupByContainer.locator('.rs__option', { hasText: exactText('Descending') })?.click()
+    // Click the sort trigger (second select trigger)
+    const sortTrigger = groupByContent.locator('.group-by-control__select-trigger').nth(1)
+    await sortTrigger.click()
+    await page.locator('.popup-button-list__button', { hasText: exactText('Descending') }).click()
 
-    await expect(page.locator('.group-by-header__heading').first()).toHaveText(/Category 2/)
-    await expect(page.locator('.group-by-header__heading').nth(1)).toHaveText(/Category 1/)
+    await expect(page.locator('.table-section__heading').first()).toHaveText(/Category 2/)
+    await expect(page.locator('.table-section__heading').nth(1)).toHaveText(/Category 1/)
   })
 
   test('should sort by columns within each table (will affect all tables)', async () => {
@@ -487,38 +512,39 @@ test.describe('Group By', () => {
 
     await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
 
-    await expect(page.locator('.sticky-toolbar')).toBeVisible()
+    // Global pagination controls should be visible when group-by produces many groups
+    // The page-controls component is rendered as sibling after collection-list when totalPages > 1
+    await expect(page.locator('.collection-list ~ .page-controls')).toBeVisible()
   })
 
   test('should paginate globally when grouping by virtual relationship field', async () => {
     await page.goto(url.list)
 
-    // Open the group-by dropdown
-    const { groupByContainer } = await openGroupBy(page)
+    // Open the group-by popup
+    const { groupByContent } = await openGroupBy(page)
 
     // Select the virtual field
-    const field = groupByContainer.locator('#group-by--field-select')
-    await field.click()
-    await field
-      .locator('.rs__option', {
+    const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+    await fieldTrigger.click()
+    await page
+      .locator('.popup-button-list__button', {
         hasText: exactText('Virtual Title From Page'),
       })
       .click()
 
     // Wait for the field to be selected
-    await expect(field.locator('.react-select--single-value')).toHaveText('Virtual Title From Page')
+    await expect(fieldTrigger.locator('.group-by-control__select-value')).toHaveText(
+      'Virtual Title From Page',
+    )
 
     // Virtual fields get transformed to their resolved path in the URL (page.title)
     await expect(page).toHaveURL(/&groupBy=page\.title/)
 
-    // Should show sticky toolbar when there are 30 distinct page titles
-    await expect(page.locator('.sticky-toolbar')).toBeVisible()
-
-    // Verify the pagination controls are present
-    await expect(page.locator('.sticky-toolbar .page-controls')).toBeVisible()
+    // Should show global pagination controls when there are 30 distinct page titles
+    await expect(page.locator('.collection-list ~ .page-controls')).toBeVisible()
 
     // Verify we have multiple pages (30 pages with default limit of 10 = 3 pages)
-    const pageInfo = page.locator('.sticky-toolbar .page-controls .page-controls__page-info')
+    const pageInfo = page.locator('.collection-list ~ .page-controls .page-controls__page-info')
     await expect(pageInfo).toBeVisible()
     await expect(pageInfo).toContainText('of 30')
   })
@@ -531,15 +557,15 @@ test.describe('Group By', () => {
     const table1 = page.locator('.table-wrap').first()
     const table2 = page.locator('.table-wrap').nth(1)
 
-    await expect(table1.locator('.page-controls')).toBeVisible()
-    await expect(table2.locator('.page-controls')).toBeVisible()
+    // Per-table pagination uses SimplePagination component
+    await expect(table1.locator('.simple-pagination')).toBeVisible()
+    await expect(table2.locator('.simple-pagination')).toBeVisible()
 
-    await goToNextPage(page, {
-      scope: table1,
-      // TODO: this actually does affect the URL, but not in the same way as traditional pagination
-      // e.g. it manipulates the `?queryByGroup=` param instead of `?page=2`
-      affectsURL: false,
-    })
+    // Click the next page arrow within table1's SimplePagination
+    await table1.locator('.simple-pagination .clickable-arrow--right').click()
+
+    // Verify queryByGroup param is added to URL (per-table pagination uses this instead of ?page=)
+    await expect(page).toHaveURL(/queryByGroup=/)
   })
 
   test('should reset ?queryByGroup= param when other params change', async () => {
@@ -550,13 +576,12 @@ test.describe('Group By', () => {
     const table1 = page.locator('.table-wrap').first()
     const table2 = page.locator('.table-wrap').nth(1)
 
-    await expect(table1.locator('.page-controls')).toBeVisible()
-    await expect(table2.locator('.page-controls')).toBeVisible()
+    // Per-table pagination uses SimplePagination component
+    await expect(table1.locator('.simple-pagination')).toBeVisible()
+    await expect(table2.locator('.simple-pagination')).toBeVisible()
 
-    await goToNextPage(page, {
-      affectsURL: false,
-      scope: table1,
-    })
+    // Click the next page arrow to trigger queryByGroup param
+    await table1.locator('.simple-pagination .clickable-arrow--right').click()
 
     await expect(page).toHaveURL(/queryByGroup=/)
 
@@ -578,7 +603,7 @@ test.describe('Group By', () => {
 
     // the value of the updated at column in the table should match exactly the value in the table cell
     const table1 = page.locator('.table-wrap').first()
-    const firstTableHeading = table1.locator('.group-by-header__heading')
+    const firstTableHeading = table1.locator('.table-section__heading')
     const firstRowUpdatedAtCell = table1.locator('tbody tr td.cell-updatedAt').first()
 
     const headingText = (await firstTableHeading.textContent())?.trim()
@@ -762,16 +787,16 @@ test.describe('Group By', () => {
 
     // Should show populated values first, then "No value"
     await expect(page.locator('.table-wrap')).toHaveCount(2)
-    await expect(page.locator('.group-by-header')).toHaveCount(2)
+    await expect(page.locator('.table-section__header')).toHaveCount(2)
 
     // Check that Category 1 appears as a group
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
 
     // Check that "No value" appears last
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
@@ -786,20 +811,20 @@ test.describe('Group By', () => {
 
     // Should flatten hasMany arrays - each category gets its own group
     await expect(page.locator('.table-wrap')).toHaveCount(3)
-    await expect(page.locator('.group-by-header')).toHaveCount(3)
+    await expect(page.locator('.table-section__header')).toHaveCount(3)
 
     // Both categories should appear as separate groups
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 2') }),
     ).toBeVisible()
 
     // "No value" should appear last
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
@@ -814,19 +839,19 @@ test.describe('Group By', () => {
 
     // Should show groups for both collection types plus "No value"
     await expect(page.locator('.table-wrap')).toHaveCount(3)
-    await expect(page.locator('.group-by-header')).toHaveCount(3)
+    await expect(page.locator('.table-section__header')).toHaveCount(3)
 
     // Check for Category 1 group
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
 
     // Check for Post group (should display the post's title as useAsTitle)
-    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+    await expect(page.locator('.table-section__heading', { hasText: 'Find me' })).toBeVisible()
 
     // "No value" should appear last
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
@@ -842,35 +867,35 @@ test.describe('Group By', () => {
     // Should flatten polymorphic hasMany arrays - each relationship gets its own group
     // Expecting: Category 1, Category 2, Post, and "No value" = 4 groups
     await expect(page.locator('.table-wrap')).toHaveCount(4)
-    await expect(page.locator('.group-by-header')).toHaveCount(4)
+    await expect(page.locator('.table-section__header')).toHaveCount(4)
 
     // Check for both category groups
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
 
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+      page.locator('.table-section__heading', { hasText: exactText('Category 2') }),
     ).toBeVisible()
 
     // Check for post group
-    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+    await expect(page.locator('.table-section__heading', { hasText: 'Find me' })).toBeVisible()
 
     // "No value" should appear last (documents without any relationships)
     await expect(
-      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+      page.locator('.table-section__heading', { hasText: exactText('No value') }),
     ).toBeVisible()
   })
 
   test('should hide field from groupBy options when admin.disableGroupBy is true', async () => {
     await page.goto(url.list)
-    const { groupByContainer } = await openGroupBy(page)
+    const { groupByContent } = await openGroupBy(page)
 
-    const field = groupByContainer.locator('#group-by--field-select')
-    await field.click()
+    const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+    await fieldTrigger.click()
 
     await expect(
-      field.locator('.rs__option', {
+      page.locator('.popup-button-list__button', {
         hasText: exactText('Disabled Virtual Relationship From Category'),
       }),
     ).toBeHidden()
@@ -889,9 +914,7 @@ test.describe('Group By', () => {
       await firstTable.locator('.row-1 .cell-_select input').check()
       await firstTable.locator('.list-selection__button[aria-label="Delete"]').click()
 
-      const firstGroupID = await firstTable
-        .locator('.group-by-header__heading')
-        .getAttribute('data-group-id')
+      const firstGroupID = await firstTable.getAttribute('data-group-id')
 
       const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
       await expect(page.locator(modalId)).toBeVisible()
@@ -923,10 +946,10 @@ test.describe('Group By', () => {
       // Enable group-by on Title
       await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
       await expect(page.locator('.table-wrap')).toHaveCount(1)
-      await expect(page.locator('.group-by-header')).toHaveText('Trashed Post 1')
+      await expect(page.locator('.table-section__heading')).toHaveText('Trashed Post 1')
 
-      await page.locator('#group-by--reset').click()
-      await expect(page.locator('.group-by-header')).toBeHidden()
+      await clearGroupBy(page)
+      await expect(page.locator('.table-section__header')).toHaveCount(0)
     })
 
     test('should properly navigate to trashed doc edit view from group-by in trash view', async () => {
@@ -936,7 +959,7 @@ test.describe('Group By', () => {
       // Enable group-by on Title
       await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
       await expect(page.locator('.table-wrap')).toHaveCount(1)
-      await expect(page.locator('.group-by-header')).toHaveText('Trashed Post 1')
+      await expect(page.locator('.table-section__heading')).toHaveText('Trashed Post 1')
 
       await page.locator('.table-wrap tbody tr td.cell-title a').click()
       await expect(page).toHaveURL(/\/posts\/trash\/\d+/)
@@ -958,16 +981,16 @@ test.describe('Group By', () => {
       await page.goto(url.list)
 
       // Add group by virtual field
-      const { groupByContainer } = await openGroupBy(page)
-      const field = groupByContainer.locator('#group-by--field-select')
-      await field.click()
-      await field
-        .locator('.rs__option', {
+      const { groupByContent } = await openGroupBy(page)
+      const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+      await fieldTrigger.click()
+      await page
+        .locator('.popup-button-list__button', {
           hasText: exactText('Virtual Title From Page'),
         })
         .click()
 
-      await expect(field.locator('.react-select--single-value')).toHaveText(
+      await expect(fieldTrigger.locator('.group-by-control__select-value')).toHaveText(
         'Virtual Title From Page',
       )
       await expect(page).toHaveURL(/&groupBy=page\.title/)
