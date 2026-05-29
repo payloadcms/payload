@@ -20,6 +20,8 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { DocumentHeader, handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { getDocPreferences } from '@payloadcms/ui/utilities/getDocPreferences'
+import { getDocumentData } from '@payloadcms/ui/utilities/getDocumentData'
 import { notFound, redirect } from 'next/navigation.js'
 import { isolateObjectProperty, logError } from 'payload'
 import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
@@ -28,10 +30,7 @@ import React from 'react'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { getPreferences } from '../../utilities/getPreferences.js'
-import { NotFoundView } from '../NotFound/index.js'
-import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
-import { getDocPreferences } from './getDocPreferences.js'
-import { getDocumentData } from './getDocumentData.js'
+import { adminViews } from '../adapter.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
 import { getDocumentView } from './getDocumentView.js'
 import { getIsLocked } from './getIsLocked.js'
@@ -313,13 +312,13 @@ export const renderDocument = async ({
       routeSegments: segments,
     }))
 
-    if (View === UnauthorizedViewWithGutter) {
+    if (View === adminViews.unauthorizedWithGutter.Component) {
       showHeader = false
     }
   }
 
   if (!View) {
-    View = NotFoundView
+    View = adminViews.notFound.Component as React.FC<AdminViewServerProps>
   }
 
   /**

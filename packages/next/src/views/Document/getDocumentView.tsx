@@ -1,4 +1,5 @@
 import type {
+  AdminViewServerProps,
   PayloadComponent,
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,
@@ -10,9 +11,13 @@ import type React from 'react'
 
 import type { ViewToRender } from './index.js'
 
-import { APIView as DefaultAPIView } from '../API/index.js'
-import { EditView as DefaultEditView } from '../Edit/index.js'
-import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
+import { adminViews } from '../adapter.js'
+
+const UnauthorizedViewWithGutter = adminViews.unauthorizedWithGutter
+  .Component as React.FC<AdminViewServerProps>
+import { DefaultEditView } from '@payloadcms/ui'
+import { APIView as DefaultAPIView } from '@payloadcms/ui/views/API'
+
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
 import { getCustomDocumentViewByKey } from './getCustomDocumentViewByKey.js'

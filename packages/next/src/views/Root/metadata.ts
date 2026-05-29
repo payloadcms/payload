@@ -3,27 +3,20 @@ import type { SanitizedConfig } from 'payload'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAccountViewMetadata } from '../Account/metadata.js'
+import { adminViews } from '../adapter.js'
 import { generateCollectionTrashMetadata } from '../CollectionTrash/metadata.js'
-import { generateCreateFirstUserViewMetadata } from '../CreateFirstUser/metadata.js'
-import { generateDashboardViewMetadata } from '../Dashboard/metadata.js'
 import { generateDocumentViewMetadata } from '../Document/metadata.js'
-import { generateForgotPasswordViewMetadata } from '../ForgotPassword/metadata.js'
 import { generateListViewMetadata } from '../List/metadata.js'
-import { generateLoginViewMetadata } from '../Login/metadata.js'
-import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
-import { generateResetPasswordViewMetadata } from '../ResetPassword/metadata.js'
-import { generateUnauthorizedViewMetadata } from '../Unauthorized/metadata.js'
-import { generateVerifyViewMetadata } from '../Verify/metadata.js'
 import { generateCustomViewMetadata } from './generateCustomViewMetadata.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 const oneSegmentMeta = {
-  'create-first-user': generateCreateFirstUserViewMetadata,
-  forgot: generateForgotPasswordViewMetadata,
-  login: generateLoginViewMetadata,
-  logout: generateUnauthorizedViewMetadata,
-  'logout-inactivity': generateUnauthorizedViewMetadata,
-  unauthorized: generateUnauthorizedViewMetadata,
+  'create-first-user': adminViews.createFirstUser.generateMetadata,
+  forgot: adminViews.forgot.generateMetadata,
+  login: adminViews.login.generateMetadata,
+  logout: adminViews.unauthorized.generateMetadata,
+  'logout-inactivity': adminViews.unauthorized.generateMetadata,
+  unauthorized: adminViews.unauthorized.generateMetadata,
 }
 
 type Args = {
@@ -69,7 +62,7 @@ export const generatePageMetadata = async ({
 
   switch (segments.length) {
     case 0: {
-      meta = await generateDashboardViewMetadata({ config, i18n })
+      meta = await adminViews.dashboard.generateMetadata({ config, i18n })
       break
     }
     case 1: {
@@ -92,7 +85,7 @@ export const generatePageMetadata = async ({
     case 2: {
       if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
-        meta = await generateResetPasswordViewMetadata({ config, i18n })
+        meta = await adminViews.reset.generateMetadata({ config, i18n })
       } else if (isCollection) {
         // --> /collections/:collectionSlug
         meta = await generateListViewMetadata({ collectionConfig, config, i18n })
@@ -110,7 +103,7 @@ export const generatePageMetadata = async ({
     default: {
       if (segmentTwo === 'verify') {
         // --> /:collectionSlug/verify/:token
-        meta = await generateVerifyViewMetadata({ config, i18n })
+        meta = await adminViews.verify.generateMetadata({ config, i18n })
       } else if (isCollection) {
         if (segmentThree === 'trash' && segments.length === 3 && collectionConfig) {
           // Collection Trash Views
@@ -161,7 +154,7 @@ export const generatePageMetadata = async ({
         viewConfig,
       })
     } else {
-      meta = await generateNotFoundViewMetadata({ config, i18n })
+      meta = await adminViews.notFound.generateMetadata({ config, i18n })
     }
   }
 

@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
-import { generateMetadata } from '../../utilities/meta.js'
+import { formatNextMetadata } from '../../utilities/meta.js'
 
 export const generateCollectionTrashMetadata = async (
   args: {
@@ -24,7 +24,7 @@ export const generateCollectionTrashMetadata = async (
 
   title = `${title ? `${title} ` : title}${i18n.t('general:trash')}`
 
-  return generateMetadata({
+  return formatNextMetadata({
     ...(config.admin.meta || {}),
     description,
     keywords,

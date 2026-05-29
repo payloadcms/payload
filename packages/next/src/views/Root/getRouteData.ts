@@ -12,22 +12,19 @@ import type {
 } from 'payload'
 import type React from 'react'
 
+import { forgotPasswordBaseClass } from '@payloadcms/ui/views/ForgotPassword'
+import { loginBaseClass } from '@payloadcms/ui/views/Login'
+import { resetPasswordBaseClass } from '@payloadcms/ui/views/ResetPassword'
+import { verifyBaseClass } from '@payloadcms/ui/views/Verify'
 import { parseDocumentID } from 'payload'
 import { formatAdminURL, isNumber } from 'payload/shared'
 
 import { AccountView } from '../Account/index.js'
+import { adminViews } from '../adapter.js'
 import { TrashView } from '../CollectionTrash/index.js'
-import { CreateFirstUserView } from '../CreateFirstUser/index.js'
-import { DashboardView } from '../Dashboard/index.js'
 import { DocumentView } from '../Document/index.js'
-import { forgotPasswordBaseClass, ForgotPasswordView } from '../ForgotPassword/index.js'
 import { HierarchyView } from '../Hierarchy/index.js'
 import { ListView } from '../List/index.js'
-import { loginBaseClass, LoginView } from '../Login/index.js'
-import { LogoutInactivity, LogoutView } from '../Logout/index.js'
-import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
-import { UnauthorizedView } from '../Unauthorized/index.js'
-import { Verify, verifyBaseClass } from '../Verify/index.js'
 import { getSubViewActions, getViewActions } from './attachViewActions.js'
 import { getCustomCollectionViewByRoute } from './getCustomCollectionViewByRoute.js'
 import { getCustomGlobalViewByRoute } from './getCustomGlobalViewByRoute.js'
@@ -55,12 +52,12 @@ export type ViewFromConfig = {
 
 const oneSegmentViews: OneSegmentViews = {
   account: AccountView,
-  createFirstUser: CreateFirstUserView,
-  forgot: ForgotPasswordView,
-  inactivity: LogoutInactivity,
-  login: LoginView,
-  logout: LogoutView,
-  unauthorized: UnauthorizedView,
+  createFirstUser: adminViews.createFirstUser.Component as React.FC<AdminViewServerProps>,
+  forgot: adminViews.forgot.Component as React.FC<AdminViewServerProps>,
+  inactivity: adminViews.logoutInactivity.Component as React.FC<AdminViewServerProps>,
+  login: adminViews.login.Component as React.FC<AdminViewServerProps>,
+  logout: adminViews.logout.Component as React.FC<AdminViewServerProps>,
+  unauthorized: adminViews.unauthorized.Component as React.FC<AdminViewServerProps>,
 }
 
 type GetRouteDataResult = {
@@ -126,7 +123,7 @@ export const getRouteData = ({
     case 0: {
       if (currentRoute === adminRoute) {
         ViewToRender = {
-          Component: DashboardView,
+          Component: adminViews.dashboard.Component as React.FC<AdminViewServerProps>,
         }
         templateClassName = 'dashboard'
         templateType = 'default'
@@ -205,7 +202,7 @@ export const getRouteData = ({
       if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
         ViewToRender = {
-          Component: ResetPassword,
+          Component: adminViews.reset.Component as React.FC<AdminViewServerProps>,
         }
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
@@ -264,7 +261,7 @@ export const getRouteData = ({
         routeParams.token = segmentThree
 
         ViewToRender = {
-          Component: Verify,
+          Component: adminViews.verify.Component as React.FC<AdminViewServerProps>,
         }
 
         templateClassName = 'verify'

@@ -8,9 +8,11 @@ import {
 import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
+import {
+  getDefaultLayoutHandler,
+  renderWidgetHandler,
+} from '@payloadcms/ui/views/Dashboard/serverFunctions'
 
-import { getDefaultLayoutHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
-import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'

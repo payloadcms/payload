@@ -1,19 +1,23 @@
 import type { AdminViewServerProps, DocumentViewServerPropsOnly } from 'payload'
 
-import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
+import {
+  DefaultEditView,
+  DocumentInfoProvider,
+  EditDepthProvider,
+  HydrateAuthProvider,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { DocumentHeader } from '@payloadcms/ui/rsc'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { getDocPreferences } from '@payloadcms/ui/utilities/getDocPreferences'
+import { getDocumentData } from '@payloadcms/ui/utilities/getDocumentData'
 import { notFound } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import { getDocPreferences } from '../Document/getDocPreferences.js'
-import { getDocumentData } from '../Document/getDocumentData.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { getIsLocked } from '../Document/getIsLocked.js'
 import { getVersions } from '../Document/getVersions.js'
-import { EditView } from '../Edit/index.js'
 import { AccountClient } from './index.client.js'
 import { Settings } from './Settings/index.js'
 
@@ -154,7 +158,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
           <HydrateAuthProvider permissions={permissions} />
           {RenderServerComponent({
             Component: config.admin?.components?.views?.account?.Component,
-            Fallback: EditView,
+            Fallback: DefaultEditView,
             importMap: payload.importMap,
             serverProps: {
               doc: data,

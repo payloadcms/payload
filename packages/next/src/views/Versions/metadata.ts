@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
-import { generateMetadata } from '../../utilities/meta.js'
+import { formatNextMetadata } from '../../utilities/meta.js'
 
 /**
  * @todo Remove the `MetaConfig` type assertions. They are currently required because of how the `Metadata` type from `next` consumes the `URL` type.
@@ -56,7 +56,7 @@ export const generateVersionsViewMetadata: GenerateEditViewMetadata = async ({
     }
   }
 
-  return generateMetadata({
+  return formatNextMetadata({
     ...metaToUse,
     serverURL: config.serverURL,
   })

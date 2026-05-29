@@ -4,11 +4,11 @@ import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } fro
 import type { GenerateViewMetadata } from '../Root/index.js'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { generateAPIViewMetadata } from '../API/metadata.js'
-import { generateEditViewMetadata } from '../Edit/metadata.js'
-import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
+import { adminViews } from '../adapter.js'
 import { generateVersionViewMetadata } from '../Version/metadata.js'
 import { generateVersionsViewMetadata } from '../Versions/metadata.js'
+import { generateAPIViewMetadata } from './generateAPIViewMetadata.js'
+import { generateEditViewMetadata } from './generateEditViewMetadata.js'
 import { getDocumentView } from './getDocumentView.js'
 
 export type GenerateEditViewMetadata = (
@@ -170,5 +170,5 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     }
   }
 
-  return generateNotFoundViewMetadata({ config, i18n })
+  return adminViews.notFound.generateMetadata({ config, i18n })
 }

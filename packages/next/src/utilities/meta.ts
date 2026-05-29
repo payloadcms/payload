@@ -50,8 +50,8 @@ const defaultOpenGraph: Metadata['openGraph'] = {
   title: 'Payload App',
 }
 
-export const generateMetadata = async (
-  args: { serverURL: string } & MetaConfig,
+export const formatNextMetadata = async (
+  args: { serverURL?: string } & MetaConfig,
 ): Promise<Metadata> => {
   const { defaultOGImageType, serverURL, titleSuffix, ...rest } = args
 

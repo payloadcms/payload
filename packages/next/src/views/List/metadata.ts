@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
-import { generateMetadata } from '../../utilities/meta.js'
+import { formatNextMetadata } from '../../utilities/meta.js'
 
 export const generateListViewMetadata = async (
   args: {
@@ -22,7 +22,7 @@ export const generateListViewMetadata = async (
     title = getTranslation(collectionConfig.labels.plural, i18n)
   }
 
-  return generateMetadata({
+  return formatNextMetadata({
     ...(config.admin.meta || {}),
     description,
     keywords,

@@ -41,6 +41,21 @@
       "types": "./src/icons/*/index.tsx",
       "default": "./src/icons/*/index.tsx"
     },
+    "./views/Dashboard/serverFunctions": {
+      "import": "./src/views/Dashboard/serverFunctions.ts",
+      "types": "./src/views/Dashboard/serverFunctions.ts",
+      "default": "./src/views/Dashboard/serverFunctions.ts"
+    },
+    "./views/*/metadata": {
+      "import": "./src/views/*/metadata.ts",
+      "types": "./src/views/*/metadata.ts",
+      "default": "./src/views/*/metadata.ts"
+    },
+    "./views/*": {
+      "import": "./src/views/*/index.tsx",
+      "types": "./src/views/*/index.tsx",
+      "default": "./src/views/*/index.tsx"
+    },
     "./elements/*": {
       "import": "./src/elements/*/index.tsx",
       "types": "./src/elements/*/index.tsx",
@@ -55,6 +70,16 @@
       "import": "./src/exports/rsc/index.ts",
       "types": "./src/exports/rsc/index.ts",
       "default": "./src/exports/rsc/index.ts"
+    },
+    "./utilities/getDocPreferences": {
+      "import": "./src/utilities/getDocPreferences.ts",
+      "types": "./src/utilities/getDocPreferences.ts",
+      "default": "./src/utilities/getDocPreferences.ts"
+    },
+    "./utilities/getDocumentData": {
+      "import": "./src/utilities/getDocumentData.ts",
+      "types": "./src/utilities/getDocumentData.ts",
+      "default": "./src/utilities/getDocumentData.ts"
     },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",
@@ -134,6 +159,7 @@
   "dependencies": {
     "@date-fns/tz": "1.2.0",
     "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/modifiers": "9.0.0",
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
     "@faceless-ui/modal": "3.0.0",
@@ -255,6 +281,21 @@
         "import": "./dist/icons/*/index.js",
         "types": "./dist/icons/*/index.d.ts",
         "default": "./dist/icons/*/index.js"
+      },
+      "./views/Dashboard/serverFunctions": {
+        "import": "./dist/views/Dashboard/serverFunctions.js",
+        "types": "./dist/views/Dashboard/serverFunctions.d.ts",
+        "default": "./dist/views/Dashboard/serverFunctions.js"
+      },
+      "./views/*/metadata": {
+        "import": "./dist/views/*/metadata.js",
+        "types": "./dist/views/*/metadata.d.ts",
+        "default": "./dist/views/*/metadata.js"
+      },
+      "./views/*": {
+        "import": "./dist/views/*/index.js",
+        "types": "./dist/views/*/index.d.ts",
+        "default": "./dist/views/*/index.js"
       },
       "./providers/*": {
         "import": "./dist/providers/*/index.js",
