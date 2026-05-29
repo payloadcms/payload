@@ -107,7 +107,7 @@
   .document-fields--force-sidebar-wrap {
     display: block;
     isolation: isolate;
-    --main-border: none;
+    --main-border: none; /* Reset the sidebar divider — the live preview window provides its own border-left */
   }
 
   .document-fields--force-sidebar-wrap .document-fields__main {
