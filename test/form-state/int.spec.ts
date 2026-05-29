@@ -237,7 +237,7 @@ describe('Form State', () => {
     const hiddenDoc = await payload.create({
       collection: conditionsSlug,
       data: {
-        title: 'hide-conditional',
+        showField: false,
       },
     })
 
@@ -265,7 +265,7 @@ describe('Form State', () => {
     const visibleDoc = await payload.create({
       collection: conditionsSlug,
       data: {
-        title: 'show-conditional',
+        showField: true,
       },
     })
 
@@ -299,7 +299,7 @@ describe('Form State', () => {
     const doc = await payload.create({
       collection: conditionsSlug,
       data: {
-        title: 'hide-conditional',
+        showField: false,
       },
     })
 
@@ -321,9 +321,9 @@ describe('Form State', () => {
 
     expect(initialState?.conditionalCustomField).not.toHaveProperty('customComponents')
 
-    // Simulate condition flipping true (user changes title) by re-requesting form
-    // state with `renderAllFields: false` and updated value — same flow as onChange.
-    initialState.title!.value = 'show-conditional'
+    // Simulate condition flipping true (user toggles checkbox) by re-requesting
+    // form state with `renderAllFields: false` and updated value — same flow as onChange.
+    initialState.showField!.value = true
 
     const { state: flippedState } = await buildFormState({
       mockRSCs: true,
