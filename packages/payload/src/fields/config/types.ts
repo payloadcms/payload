@@ -2043,11 +2043,9 @@ export function fieldAffectsData<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
 >(
   field: TField,
-  // Narrows to the field types that hold data (the ones with a `name`). Uses `Extract`, which
-  // picks the matching members out of `TField` and creates no new types. Do not rewrite this as
-  // `TField & (...)`: intersecting `TField` with a union of field types makes the checker build a
-  // new type for every pair of members, and `Field` is a large self-referencing union, so that is
-  // very expensive to check. Narrow field types with `Extract`, never with `&`.
+  // Narrows to field types that hold data (`name` fields). `Extract` keeps the
+  // existing `TField` members instead of creating intersections. Avoid `TField & (...)`
+  // here: with the large recursive `Field` union, it is much slower to typecheck.
 ): field is Extract<TField, FieldAffectingData | FieldAffectingDataClient> {
   return 'name' in field && !fieldIsPresentationalOnly(field)
 }
