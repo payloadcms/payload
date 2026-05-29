@@ -4,19 +4,16 @@ export const conditionsSlug = 'conditions'
 
 export const ConditionsCollection: CollectionConfig = {
   slug: conditionsSlug,
-  admin: {
-    useAsTitle: 'title',
-  },
   fields: [
     {
-      name: 'title',
-      type: 'text',
+      name: 'showField',
+      type: 'checkbox',
     },
     {
       name: 'conditionalCustomField',
       type: 'text',
       admin: {
-        condition: (data) => data?.title === 'show-conditional',
+        condition: (data) => data?.showField === true,
         components: {
           Field: './collections/Posts/TextField.js#CustomTextField',
         },
