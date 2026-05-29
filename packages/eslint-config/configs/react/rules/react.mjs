@@ -13,6 +13,10 @@ export const index = {
   '@eslint-react/no-array-index-key': 'off',
   '@eslint-react/no-unstable-default-props': 'off', // TODO: Evaluate enabling this
   '@eslint-react/no-unstable-context-value': 'off', // TODO: Evaluate enabling this
+  // Too many false positives: flags components returned from memoized custom hooks (e.g. useDocumentDrawer),
+  // components passed via props/context, and components resolved from the import map - none of which are
+  // actually re-created during render. React Compiler rules already cover genuine render-safety hazards.
+  '@eslint-react/static-components': 'off',
 }
 
 export default index
