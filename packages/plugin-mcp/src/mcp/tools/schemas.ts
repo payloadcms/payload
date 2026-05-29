@@ -58,6 +58,12 @@ export const toolSchemas = {
         .string()
         .optional()
         .describe('Optional: fallback locale code to use when requested locale is not available'),
+      joins: z
+        .union([z.boolean(), z.string()])
+        .optional()
+        .describe(
+          'Set to false to disable all join fields. Pass JSON string for specific join field queries.',
+        ),
       limit: z
         .number()
         .int()
@@ -79,6 +85,18 @@ export const toolSchemas = {
         .optional()
         .default(1)
         .describe('Page number for pagination (default: 1)'),
+      pagination: z
+        .boolean()
+        .optional()
+        .describe(
+          'Set to false to skip the count query and avoid overhead. Use with limit to get documents without total count.',
+        ),
+      populate: z
+        .string()
+        .optional()
+        .describe(
+          'Optional JSON to control which fields to include from populated documents. Reduces response size.',
+        ),
       select: z
         .string()
         .optional()
@@ -89,6 +107,12 @@ export const toolSchemas = {
         .string()
         .optional()
         .describe('Field to sort by (e.g., "createdAt", "-updatedAt" for descending)'),
+      trash: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, includes soft-deleted documents. Only applies when collection has trash enabled.',
+        ),
       where: z
         .string()
         .optional()
