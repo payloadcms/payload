@@ -13,7 +13,7 @@ export type SharedNumberFieldProps =
       readonly onChange?: ReactSelectAdapterProps['onChange']
     }
 
-export type NumberInputProps = {
+export type NumberInputProps = SharedNumberFieldProps & {
   readonly AfterInput?: React.ReactNode
   readonly BeforeInput?: React.ReactNode
   readonly className?: string
@@ -36,4 +36,4 @@ export type NumberInputProps = {
   readonly style?: React.CSSProperties
   readonly value?: null | number
   readonly valueToRender?: Option[]
-} & SharedNumberFieldProps
+}

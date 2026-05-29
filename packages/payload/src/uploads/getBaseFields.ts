@@ -7,7 +7,7 @@ import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
 
 const disabledFromImageSize = (
-  sizeAdmin: { disabled?: { column?: boolean; filter?: boolean; groupBy?: boolean } } | undefined,
+  sizeAdmin: undefined | { disabled?: { column?: boolean; filter?: boolean; groupBy?: boolean } },
 ): { disabled: { column: boolean; filter: boolean; groupBy: boolean } } => {
   return {
     disabled: {

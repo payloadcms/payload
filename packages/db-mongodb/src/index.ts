@@ -177,32 +177,32 @@ export interface Args {
   usePipelineInSortLookup?: boolean
 }
 
-export type MongooseAdapter = {
-  afterCreateConnection?: (adapter: MongooseAdapter) => Promise<void> | void
-  afterOpenConnection?: (adapter: MongooseAdapter) => Promise<void> | void
-  bulkOperationsSingleTransaction: boolean
-  collections: {
-    [slug: string]: CollectionModel
+export type MongooseAdapter = Args &
+  BaseDatabaseAdapter & {
+    afterCreateConnection?: (adapter: MongooseAdapter) => Promise<void> | void
+    afterOpenConnection?: (adapter: MongooseAdapter) => Promise<void> | void
+    bulkOperationsSingleTransaction: boolean
+    collections: {
+      [slug: string]: CollectionModel
+    }
+    connection: Connection
+    ensureIndexes: boolean
+    globals: GlobalModel
+    mongoMemoryServer: MongoMemoryReplSet
+    prodMigrations?: {
+      down: (args: MigrateDownArgs) => Promise<void>
+      name: string
+      up: (args: MigrateUpArgs) => Promise<void>
+    }[]
+    sessions: Record<number | string, ClientSession>
+    useAlternativeDropDatabase: boolean
+    useBigIntForNumberIDs: boolean
+    useJoinAggregations: boolean
+    usePipelineInSortLookup: boolean
+    versions: {
+      [slug: string]: CollectionModel
+    }
   }
-  connection: Connection
-  ensureIndexes: boolean
-  globals: GlobalModel
-  mongoMemoryServer: MongoMemoryReplSet
-  prodMigrations?: {
-    down: (args: MigrateDownArgs) => Promise<void>
-    name: string
-    up: (args: MigrateUpArgs) => Promise<void>
-  }[]
-  sessions: Record<number | string, ClientSession>
-  useAlternativeDropDatabase: boolean
-  useBigIntForNumberIDs: boolean
-  useJoinAggregations: boolean
-  usePipelineInSortLookup: boolean
-  versions: {
-    [slug: string]: CollectionModel
-  }
-} & Args &
-  BaseDatabaseAdapter
 
 declare module 'payload' {
   export interface DatabaseAdapter
@@ -223,15 +223,15 @@ declare module 'payload' {
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
     updateGlobal: <T extends Record<string, unknown>>(
-      args: { options?: QueryOptions } & UpdateGlobalArgs<T>,
+      args: UpdateGlobalArgs<T> & { options?: QueryOptions },
     ) => Promise<T>
     updateGlobalVersion: <T extends JsonObject = JsonObject>(
-      args: { options?: QueryOptions } & UpdateGlobalVersionArgs<T>,
+      args: UpdateGlobalVersionArgs<T> & { options?: QueryOptions },
     ) => Promise<TypeWithVersion<T>>
 
-    updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
+    updateOne: (args: UpdateOneArgs & { options?: QueryOptions }) => Promise<Document>
     updateVersion: <T extends JsonObject = JsonObject>(
-      args: { options?: QueryOptions } & UpdateVersionArgs<T>,
+      args: UpdateVersionArgs<T> & { options?: QueryOptions },
     ) => Promise<TypeWithVersion<T>>
     useAlternativeDropDatabase: boolean
     useBigIntForNumberIDs: boolean

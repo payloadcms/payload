@@ -1,5 +1,5 @@
 export type CookieStore = {
-  get: (name: string) => { name: string; value: string } | null | undefined
+  get: (name: string) => null | undefined | { name: string; value: string }
   getAll?: () => Array<{ name: string; value: string }>
   set?: (name: string, value: string, options?: CookieOptions) => void
 }

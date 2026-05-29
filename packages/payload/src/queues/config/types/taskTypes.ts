@@ -130,7 +130,7 @@ export type TaskCallbackArgs = {
 }
 
 export type ShouldRestoreFn = (
-  args: { taskStatus: SingleTaskStatus<string> } & Omit<TaskCallbackArgs, 'taskStatus'>,
+  args: Omit<TaskCallbackArgs, 'taskStatus'> & { taskStatus: SingleTaskStatus<string> },
 ) => MaybePromise<boolean>
 export type TaskCallbackFn = (args: TaskCallbackArgs) => MaybePromise<void>
 

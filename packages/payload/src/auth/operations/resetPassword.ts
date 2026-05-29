@@ -224,7 +224,7 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       fullUser._strategy = 'local-jwt'
     }
 
-    let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
+    let result: Result & { user: DataFromCollectionSlug<TSlug> } = {
       token,
       user: fullUser,
     }

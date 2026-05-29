@@ -17,13 +17,13 @@ import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 
-type PublishManyDrawerContentProps = {
+type PublishManyDrawerContentProps = PublishManyProps & {
   drawerSlug: string
   ids: (number | string)[]
   onSuccess?: () => void
   selectAll: boolean
   where?: Where
-} & PublishManyProps
+}
 
 export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   const {

@@ -28,7 +28,7 @@ import { ScheduleDrawer } from './ScheduleDrawer/index.js'
 
 export function PublishButton({
   label: labelProp,
-}: { label?: string } & PublishButtonClientProps = {}) {
+}: PublishButtonClientProps & { label?: string } = {}) {
   const {
     id,
     collectionSlug,

@@ -58,7 +58,7 @@ export async function resolveJoins({
 
   // Build a map of join paths to their configurations for quick lookup
   // This flattens the nested join structure into a single map keyed by join path
-  const joinMap: Record<string, { targetCollection: string } & SanitizedJoin> = {}
+  const joinMap: Record<string, SanitizedJoin & { targetCollection: string }> = {}
 
   // Add regular joins
   for (const [target, joinList] of Object.entries(collectionConfig.joins)) {
@@ -294,9 +294,9 @@ export async function resolveJoins({
         }
 
         const parentValues = getByPathWithArrays(result, dbFieldName) as (
-          | { relationTo: string; value: number | string }
           | number
           | string
+          | { relationTo: string; value: number | string }
         )[]
 
         if (parentValues.length === 0) {

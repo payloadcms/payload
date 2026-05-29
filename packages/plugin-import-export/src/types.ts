@@ -50,7 +50,7 @@ export type ExportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (a
   /** Transformed batch — flat rows for CSV, nested docs for JSON. Modify and return this. */
   data: Record<string, unknown>[]
   /** Export format. Open-ended to support custom formats in the future. */
-  format: 'csv' | 'json' | ({} & string)
+  format: 'csv' | 'json' | (string & {})
   /**
    * Raw DB documents before format-specific transformation. Read-only reference.
    *
@@ -75,7 +75,7 @@ export type ExportAfterHook = (args: {
   /** The batch data that was written */
   data: Record<string, unknown>[]
   /** Export format */
-  format: 'csv' | 'json' | ({} & string)
+  format: 'csv' | 'json' | (string & {})
   /** Raw DB documents before transformation */
   originalData: Record<string, unknown>[]
   req: PayloadRequest
@@ -99,7 +99,7 @@ export type ImportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (a
    */
   data: Partial<DataFromCollectionSlug<TSlug>>[]
   /** Import format. Open-ended to support custom formats in the future. */
-  format: 'csv' | 'json' | ({} & string)
+  format: 'csv' | 'json' | (string & {})
   /** Raw parsed file rows before unflattening. Read-only reference. */
   originalData: Record<string, unknown>[]
   req: PayloadRequest
@@ -115,7 +115,7 @@ export type ImportAfterHook = (args: {
   /** Current batch number, starting at 1 */
   batchNumber: number
   /** Import format */
-  format: 'csv' | 'json' | ({} & string)
+  format: 'csv' | 'json' | (string & {})
   /**
    * Raw parsed file rows for this batch before unflattening and before-hook
    * transformation. For CSV this is the flat key/value row; for JSON this is
@@ -351,7 +351,7 @@ export type FieldBeforeExportHook = (args: {
   columnName: string
   /** The top-level document being exported. */
   data: Record<string, unknown>
-  format: 'csv' | 'json' | ({} & string)
+  format: 'csv' | 'json' | (string & {})
   /** Writable output at the current level. CSV: the flat row accumulator. JSON: the sibling output object. */
   siblingData: Record<string, unknown>
   /** Read-only source at the current level, before any transformation. */
@@ -367,7 +367,7 @@ export type FieldBeforeImportHook = (args: {
   columnName: string
   /** Full flat row (CSV) or top-level parsed document (JSON). */
   data: Record<string, unknown>
-  format: 'csv' | 'json' | ({} & string)
+  format: 'csv' | 'json' | (string & {})
   /** Data at the current level. CSV: same reference as `data`. JSON: the parent-level object. */
   siblingData: Record<string, unknown>
   /** Read-only source at the current level, before any transformation. CSV: same as `data`. */
@@ -418,7 +418,7 @@ export type PreviewPaginationData = {
 /**
  * Response from export preview endpoint
  */
-export type ExportPreviewResponse = {
+export type ExportPreviewResponse = PreviewPaginationData & {
   /**
    * Column names for CSV format (undefined for JSON)
    */
@@ -431,12 +431,12 @@ export type ExportPreviewResponse = {
    * Actual count of docs that will be exported (respects export limit)
    */
   exportTotalDocs: number
-} & PreviewPaginationData
+}
 
 /**
  * Response from import preview endpoint
  */
-export type ImportPreviewResponse = {
+export type ImportPreviewResponse = PreviewPaginationData & {
   /**
    * Preview documents parsed from the import file
    */
@@ -445,4 +445,4 @@ export type ImportPreviewResponse = {
    * Whether the file exceeds the max limit
    */
   limitExceeded?: boolean
-} & PreviewPaginationData
+}

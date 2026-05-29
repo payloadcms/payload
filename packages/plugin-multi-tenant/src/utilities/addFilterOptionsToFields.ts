@@ -65,7 +65,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
 
       if (hasTenantRelationsips) {
         newField = addRelationshipFilter({
-          field: newField as RelationshipField,
+          field: newField,
           tenantEnabledCollectionSlugs,
           tenantFieldName,
           tenantsArrayFieldName,

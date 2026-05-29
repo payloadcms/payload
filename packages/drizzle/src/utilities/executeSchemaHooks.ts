@@ -8,10 +8,10 @@ type DatabaseSchema = {
   tables: DrizzleAdapter['tables']
 }
 
-type Adapter = {
+type Adapter = DatabaseSchema & {
   afterSchemaInit: DatabaseSchemaHook[]
   beforeSchemaInit: DatabaseSchemaHook[]
-} & DatabaseSchema
+}
 
 type DatabaseSchemaHookArgs = {
   adapter: Record<string, unknown>
@@ -27,9 +27,9 @@ type Args = {
 }
 
 export const executeSchemaHooks = async ({ type, adapter }: Args): Promise<void> => {
-  for (const hook of (adapter as unknown as Adapter)[type]) {
+  for (const hook of adapter[type]) {
     const result = await hook({
-      adapter: adapter as unknown as Adapter,
+      adapter,
       extendTable: extendDrizzleTable,
       schema: {
         enums: adapter.enums,

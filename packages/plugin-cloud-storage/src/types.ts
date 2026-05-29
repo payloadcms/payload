@@ -23,10 +23,10 @@ export type ClientUploadsAccess = (args: {
 }) => boolean | Promise<boolean>
 
 export type ClientUploadsConfig =
+  | boolean
   | {
       access?: ClientUploadsAccess
     }
-  | boolean
 
 export type HandleUpload = (args: {
   clientUploadContext: unknown

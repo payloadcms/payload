@@ -2,14 +2,14 @@ import type { DraggableSyntheticListeners } from '@dnd-kit/core'
 import type { Column } from 'payload'
 import type { HTMLAttributes, Ref } from 'react'
 
-export type Props = {
+export type Props = HTMLAttributes<HTMLTableRowElement> & {
   readonly cellMap: Record<string, number>
   readonly columns: Column[]
   readonly dragAttributes?: HTMLAttributes<unknown>
   readonly dragListeners?: DraggableSyntheticListeners
   readonly ref?: Ref<HTMLTableRowElement>
   readonly rowId: number | string
-} & HTMLAttributes<HTMLTableRowElement>
+}
 
 export const OrderableRow = ({
   cellMap,

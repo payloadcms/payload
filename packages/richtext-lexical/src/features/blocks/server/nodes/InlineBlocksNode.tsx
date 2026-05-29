@@ -17,14 +17,16 @@ import { $applyNodeReplacement, DecoratorNode } from 'lexical'
 
 import type { StronglyTypedLeafNode } from '../../../../types/nodeTypes.js'
 
-export type InlineBlockFields<TInlineBlockFields extends JsonObject = JsonObject> = {
-  blockType: string
-  id: string
-} & TInlineBlockFields
+export type InlineBlockFields<TInlineBlockFields extends JsonObject = JsonObject> =
+  TInlineBlockFields & {
+    blockType: string
+    id: string
+  }
 
-export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObject> = {
-  fields: InlineBlockFields<TBlockFields>
-} & StronglyTypedLeafNode<SerializedLexicalNode, 'inlineBlock'>
+export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObject> =
+  StronglyTypedLeafNode<SerializedLexicalNode, 'inlineBlock'> & {
+    fields: InlineBlockFields<TBlockFields>
+  }
 
 export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactElement> {
   __cacheBuster: number

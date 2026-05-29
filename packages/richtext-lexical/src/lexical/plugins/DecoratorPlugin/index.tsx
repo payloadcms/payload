@@ -208,7 +208,7 @@ export function DecoratorPlugin() {
 
 function $getDecoratorByMouseEvent(
   event: MouseEvent,
-): { element: HTMLElement; node: DecoratorNode<unknown> } | undefined {
+): undefined | { element: HTMLElement; node: DecoratorNode<unknown> } {
   if (!(event.target instanceof HTMLElement)) {
     return undefined
   }

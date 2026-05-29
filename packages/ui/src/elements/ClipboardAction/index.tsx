@@ -17,7 +17,7 @@ import './index.css'
 
 const baseClass = 'clipboard-action'
 
-type Props = {
+type Props = ClipboardCopyData & {
   allowCopy?: boolean
   allowPaste?: boolean
   className?: string
@@ -27,7 +27,7 @@ type Props = {
   isRow?: boolean
   onPaste: OnPasteFn
   pasteClassName?: string
-} & ClipboardCopyData
+}
 
 /**
  * Menu actions for copying and pasting fields. Currently, this is only used in Arrays and Blocks.

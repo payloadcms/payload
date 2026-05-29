@@ -18,7 +18,7 @@ export async function updateGlobal<T extends Record<string, unknown>>(
   const db = getPrimaryDb(this, await getTransaction(this, req))
   const existingGlobal = await db.query[tableName].findFirst({})
 
-  const result = await upsertRow<{ globalType: string } & T>({
+  const result = await upsertRow<T & { globalType: string }>({
     ...(existingGlobal ? { id: existingGlobal.id, operation: 'update' } : { operation: 'create' }),
     adapter: this,
     data,

@@ -15,6 +15,6 @@ export type HTMLConverter<T = any> = {
   nodeTypes: string[]
 }
 
-export type SerializedLexicalNodeWithParent = {
+export type SerializedLexicalNodeWithParent = any & {
   parent?: any
-} & any
+}

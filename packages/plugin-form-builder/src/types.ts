@@ -24,9 +24,9 @@ export interface FieldValues {
   [key: string]: boolean | null | number | string | undefined
 }
 
-export type PaymentFieldConfig = {
+export type PaymentFieldConfig = Partial<Field> & {
   paymentProcessor: Partial<SelectField>
-} & Partial<Field>
+}
 
 export type FieldConfig = Partial<Field> | PaymentFieldConfig
 
@@ -62,8 +62,8 @@ export type FormBuilderPluginConfig = {
    */
   defaultToEmail?: string
   fields?: FieldsConfig
-  formOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
-  formSubmissionOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  formOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields?: FieldsOverride }
+  formSubmissionOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields?: FieldsOverride }
   handlePayment?: HandlePayment
   redirectRelationships?: string[]
   /**

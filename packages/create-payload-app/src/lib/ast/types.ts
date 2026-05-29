@@ -158,11 +158,11 @@ export type WriteResult = {
   success: boolean
 }
 
-export type ConfigureOptions = {
+export type ConfigureOptions = WriteOptions & {
   db?: {
     envVarName?: string
     type: DatabaseAdapter
   }
   removeSharp?: boolean
   storage?: StorageAdapter
-} & WriteOptions
+}

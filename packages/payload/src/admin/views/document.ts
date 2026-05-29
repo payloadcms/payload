@@ -25,34 +25,34 @@ export type RenderDocumentVersionsProperties = {
   useVersionDrawerCreatedAtCell?: boolean
 }
 
-export type DocumentViewServerPropsOnly = {
+export type DocumentViewServerPropsOnly = ServerProps & {
   doc: Data
   hasPublishedDoc: boolean
   initPageResult: InitPageResult
   routeSegments: string[]
   versions?: RenderDocumentVersionsProperties
-} & ServerProps
+}
 
 export type DocumentViewServerProps = DocumentViewClientProps & DocumentViewServerPropsOnly
 
-export type DocumentViewClientProps = {
+export type DocumentViewClientProps = DocumentSlots & {
   documentSubViewType: DocumentSubViewTypes
   formState: FormState
   viewType: ViewTypes
-} & DocumentSlots
+}
 
 /**
  * @todo: This should be renamed to `DocumentSubViewType` (singular)
  */
 export type DocumentSubViewTypes = 'api' | 'default' | 'version' | 'versions'
 
-export type DocumentTabServerPropsOnly = {
+export type DocumentTabServerPropsOnly = ServerProps & {
   readonly apiURL?: string
   readonly collectionConfig?: SanitizedCollectionConfig
   readonly globalConfig?: SanitizedGlobalConfig
   readonly permissions: SanitizedPermissions
   readonly req: PayloadRequest
-} & ServerProps
+}
 
 export type DocumentTabClientProps = {
   path: string
@@ -106,6 +106,6 @@ export type DocumentTabComponent = PayloadComponent<{
 // BeforeDocumentControls
 
 export type BeforeDocumentControlsClientProps = {}
-export type BeforeDocumentControlsServerPropsOnly = {} & ServerProps
+export type BeforeDocumentControlsServerPropsOnly = ServerProps & {}
 export type BeforeDocumentControlsServerProps = BeforeDocumentControlsClientProps &
   BeforeDocumentControlsServerPropsOnly

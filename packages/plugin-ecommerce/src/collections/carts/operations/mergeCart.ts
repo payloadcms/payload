@@ -7,10 +7,10 @@ import type { CartItemData, CartOperationResult } from './types.js'
  */
 const getItemID = (
   field:
-    | { [key: string]: unknown; id: DefaultDocumentIDType }
     | DefaultDocumentIDType
     | null
-    | undefined,
+    | undefined
+    | { [key: string]: unknown; id: DefaultDocumentIDType },
 ): DefaultDocumentIDType | undefined => {
   if (!field) {
     return undefined
@@ -164,7 +164,7 @@ export const mergeCart = async (args: MergeCartArgs): Promise<CartOperationResul
       // In SQL, array items are stored in separate tables with their own IDs,
       // and using IDs from another cart's array would cause conflicts.
       const { id: _omit, ...sourceItemWithoutId } = sourceItem
-      mergedItems.push(sourceItemWithoutId as CartItemData)
+      mergedItems.push(sourceItemWithoutId)
     }
   }
 

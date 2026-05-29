@@ -41,9 +41,9 @@ export const updateOne: UpdateOne = async function updateOne(
   let updateData: UpdateQuery<any> = data
 
   const $inc: Record<string, number> = {}
-  const $push: Record<string, { $each: any[] } | any> = {}
-  const $addToSet: Record<string, { $each: any[] } | any> = {}
-  const $pull: Record<string, { $in: any[] } | any> = {}
+  const $push: Record<string, any | { $each: any[] }> = {}
+  const $addToSet: Record<string, any | { $each: any[] }> = {}
+  const $pull: Record<string, any | { $in: any[] }> = {}
 
   transform({
     $addToSet,

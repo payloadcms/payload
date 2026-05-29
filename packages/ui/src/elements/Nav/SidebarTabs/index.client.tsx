@@ -75,7 +75,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
       try {
         const result = (await serverFunction({
           name: 'render-tab',
-          args: { tabSlug } as RenderTabServerFnArgs,
+          args: { tabSlug },
         })) as RenderTabServerFnReturnType
 
         const newContent = {

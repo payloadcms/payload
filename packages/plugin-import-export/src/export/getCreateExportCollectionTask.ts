@@ -9,10 +9,10 @@ import { createExport } from './createExport.js'
  * When exports are queued as jobs, the user must be serialized as an ID string or number
  * along with the collection name so it can be rehydrated when the job runs.
  */
-export type ExportJobInput = {
+export type ExportJobInput = Export & {
   user: number | string
   userCollection: string
-} & Export
+}
 
 /**
  * Creates a minimal inputSchema for the job queue task.

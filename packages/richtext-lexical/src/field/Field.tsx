@@ -37,9 +37,9 @@ import { ViewSelector } from './ViewSelector.js'
 const baseClass = 'rich-text-lexical'
 
 const RichTextComponent: React.FC<
-  {
+  LexicalRichTextFieldProps & {
     readonly editorConfig: SanitizedClientEditorConfig // With rendered features n stuff
-  } & LexicalRichTextFieldProps
+  }
 > = (props) => {
   const {
     editorConfig,

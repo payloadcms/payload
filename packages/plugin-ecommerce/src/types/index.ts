@@ -225,10 +225,10 @@ export type PaymentAdapter = {
   name: string
 }
 
-export type PaymentAdapterClient = {
+export type PaymentAdapterClient = Pick<PaymentAdapter, 'label' | 'name'> & {
   confirmOrder: boolean
   initiatePayment: boolean
-} & Pick<PaymentAdapter, 'label' | 'name'>
+}
 
 export type Currency = {
   /**
@@ -266,7 +266,7 @@ export type PaymentAdapterArgs = {
   /**
    * Overrides the default fields of the collection. Affects the payment fields on collections such as transactions.
    */
-  groupOverrides?: { fields?: FieldsOverride } & Partial<Omit<GroupField, 'fields'>>
+  groupOverrides?: Partial<Omit<GroupField, 'fields'>> & { fields?: FieldsOverride }
   /**
    * The visually readable label for the payment method.
    * @example 'Bank Transfer'
@@ -523,9 +523,9 @@ export type CartItemMatcherArgs = {
      * regardless of the database adapter's default ID type.
      */
     id?: string
-    product: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
+    product: DefaultDocumentIDType | { [key: string]: unknown; id: DefaultDocumentIDType }
     quantity: number
-    variant?: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
+    variant?: DefaultDocumentIDType | { [key: string]: unknown; id: DefaultDocumentIDType }
   }
   /** The new item being added */
   newItem: {
@@ -782,18 +782,18 @@ export type EcommercePluginConfig = {
 export type SanitizedAccessConfig = Pick<AccessConfig, 'customerOnlyFieldAccess' | 'isCustomer'> &
   Required<Omit<AccessConfig, 'customerOnlyFieldAccess' | 'isCustomer'>>
 
-export type SanitizedEcommercePluginConfig = {
+export type SanitizedEcommercePluginConfig = Omit<
+  Required<EcommercePluginConfig>,
+  'access' | 'addresses' | 'currencies' | 'inventory' | 'payments'
+> & {
   access: SanitizedAccessConfig
-  addresses: { addressFields: Field[] } & Omit<AddressesConfig, 'addressFields'>
+  addresses: Omit<AddressesConfig, 'addressFields'> & { addressFields: Field[] }
   currencies: Required<CurrenciesConfig>
   inventory?: InventoryConfig
   payments: {
     paymentMethods: [] | PaymentAdapter[]
   }
-} & Omit<
-  Required<EcommercePluginConfig>,
-  'access' | 'addresses' | 'currencies' | 'inventory' | 'payments'
->
+}
 
 export type EcommerceCollections = TypedEcommerce['collections']
 

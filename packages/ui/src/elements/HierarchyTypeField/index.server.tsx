@@ -6,10 +6,10 @@ import React from 'react'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
 import { HierarchyTypeField } from '../../exports/client/index.js'
 
-type HierarchyTypeFieldServerProps = {
+type HierarchyTypeFieldServerProps = SelectFieldServerProps & {
   collectionOptions: Option[]
   parentFieldName: string
-} & SelectFieldServerProps
+}
 
 export const HierarchyTypeFieldServer: React.FC<HierarchyTypeFieldServerProps> = ({
   clientField,

@@ -8,13 +8,13 @@ import type { CurrenciesConfig, Currency } from '../../types/index.js'
 
 import { formatPrice } from '../utilities.js'
 
-type Props = {
+type Props = DefaultCellComponentProps & {
   cellData?: number
   currenciesConfig: CurrenciesConfig
   currency?: Currency
   path: string
   rowData: Partial<TypedCollection['products']>
-} & DefaultCellComponentProps
+}
 
 export const PriceCell: React.FC<Props> = (args) => {
   const { i18n, t } = useTranslation()

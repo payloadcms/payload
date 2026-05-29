@@ -36,7 +36,7 @@ export const renderDocumentSlots: (args: {
 }) => DocumentSlots = (args) => {
   const { id, collectionConfig, globalConfig, hasSavePermission, locale, permissions, req } = args
 
-  const components: DocumentSlots = {} as DocumentSlots
+  const components: DocumentSlots = {}
 
   const unsavedDraftWithValidations = undefined
 

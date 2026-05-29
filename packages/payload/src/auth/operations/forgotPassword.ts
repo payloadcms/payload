@@ -22,9 +22,9 @@ import { getLoginOptions } from '../getLoginOptions.js'
 
 export type Arguments<TSlug extends AuthCollectionSlug> = {
   collection: Collection
-  data: {
+  data: AuthOperationsFromCollectionSlug<TSlug>['forgotPassword'] & {
     [key: string]: unknown
-  } & AuthOperationsFromCollectionSlug<TSlug>['forgotPassword']
+  }
   disableEmail?: boolean
   expiration?: number
   overrideAccess?: boolean

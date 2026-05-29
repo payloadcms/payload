@@ -5,10 +5,10 @@ type Listener = {
   ref: React.RefObject<HTMLElement>
 }
 
-const ClickOutsideContext = createContext<{
+const ClickOutsideContext = createContext<null | {
   register: (listener: Listener) => void
   unregister: (listener: Listener) => void
-} | null>(null)
+}>(null)
 
 export const ClickOutsideProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const listeners = useRef<Set<Listener>>(new Set())

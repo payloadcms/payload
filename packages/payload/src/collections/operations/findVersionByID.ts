@@ -17,7 +17,7 @@ import { buildVersionCollectionFields } from '../../versions/buildCollectionFiel
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
-export type Arguments = {
+export type Arguments = Pick<FindOptions<string, SelectType>, 'select'> & {
   collection: Collection
   currentDepth?: number
   depth?: number
@@ -28,7 +28,7 @@ export type Arguments = {
   req: PayloadRequest
   showHiddenFields?: boolean
   trash?: boolean
-} & Pick<FindOptions<string, SelectType>, 'select'>
+}
 
 export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   args: Arguments,

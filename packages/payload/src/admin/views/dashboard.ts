@@ -15,7 +15,10 @@ type WidgetSlugFromWidget<TWidget extends { data?: unknown }> = {
   [TSlug in WidgetSlug]: TypedWidget[TSlug] extends TWidget ? TSlug : never
 }[WidgetSlug]
 
-export type WidgetServerProps<TWidget extends { data?: unknown } | never = never> = {
+export type WidgetServerProps<TWidget extends never | { data?: unknown } = never> = Pick<
+  InitReqResult,
+  'cookies' | 'locale' | 'permissions' | 'req'
+> & {
   widgetData?: [TWidget] extends [never]
     ? Record<string, unknown>
     : WidgetDataFromWidget<Exclude<TWidget, never>> extends Record<string, unknown>
@@ -23,7 +26,7 @@ export type WidgetServerProps<TWidget extends { data?: unknown } | never = never
       : Record<string, unknown>
   widgetSlug: [TWidget] extends [never]
     ? string
-    : [WidgetSlugFromWidget<{ data?: unknown } & Exclude<TWidget, never>>] extends [never]
+    : [WidgetSlugFromWidget<Exclude<TWidget, never> & { data?: unknown }>] extends [never]
       ? string
-      : WidgetSlugFromWidget<{ data?: unknown } & Exclude<TWidget, never>>
-} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
+      : WidgetSlugFromWidget<Exclude<TWidget, never> & { data?: unknown }>
+}

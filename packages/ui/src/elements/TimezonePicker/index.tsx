@@ -18,9 +18,9 @@ import { formatOptions } from '../WhereBuilder/Condition/Select/formatOptions.js
 import './index.css'
 
 const SmallDropdownIndicator: React.FC<
-  {
+  DropdownIndicatorProps<OptionType, true> & {
     innerProps: JSX.IntrinsicElements['button']
-  } & DropdownIndicatorProps<OptionType, true>
+  }
 > = (props) => {
   const {
     innerProps: { ref, ...restInnerProps },
@@ -114,25 +114,23 @@ export const TimezonePicker: React.FC<Props> = (props) => {
         }}
         options={options}
         placeholder={t('general:none')}
-        styles={
-          {
-            control: (base) => ({
-              ...base,
-              flexWrap: 'nowrap',
-            }),
-            option: (base, state) => ({
-              ...base,
-              backgroundColor:
-                state.isFocused || state.isSelected
-                  ? 'var(--color-bg-selected-strong)'
-                  : 'transparent',
-              color:
-                state.isFocused || state.isSelected
-                  ? 'var(--color-text-onselected-strong)'
-                  : 'var(--color-text-ontooltip)',
-            }),
-          } as StylesConfig<OptionType>
-        }
+        styles={{
+          control: (base) => ({
+            ...base,
+            flexWrap: 'nowrap',
+          }),
+          option: (base, state) => ({
+            ...base,
+            backgroundColor:
+              state.isFocused || state.isSelected
+                ? 'var(--color-bg-selected-strong)'
+                : 'transparent',
+            color:
+              state.isFocused || state.isSelected
+                ? 'var(--color-text-onselected-strong)'
+                : 'var(--color-text-ontooltip)',
+          }),
+        }}
         value={selectedTimezone}
       />
     </div>

@@ -2,7 +2,7 @@ import type { FilterOptions, FilterOptionsProps, ResolvedFilterOptions } from 'p
 
 export const resolveFilterOptions = async (
   filterOptions: FilterOptions,
-  options: { relationTo: string | string[] } & Omit<FilterOptionsProps, 'relationTo'>,
+  options: Omit<FilterOptionsProps, 'relationTo'> & { relationTo: string | string[] },
 ): Promise<ResolvedFilterOptions> => {
   const { relationTo } = options
 

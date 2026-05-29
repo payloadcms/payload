@@ -29,10 +29,10 @@ type Args<T extends JsonObject = JsonObject> = {
 }
 
 export async function saveVersion<TData extends JsonObject = JsonObject>(
-  args: { returning: false } & Args<TData>,
+  args: Args<TData> & { returning: false },
 ): Promise<null>
 export async function saveVersion<TData extends JsonObject = JsonObject>(
-  args: { returning: true } & Args<TData>,
+  args: Args<TData> & { returning: true },
 ): Promise<JsonObject>
 export async function saveVersion<TData extends JsonObject = JsonObject>(
   args: Omit<Args<TData>, 'returning'>,
@@ -56,10 +56,10 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   let result: JsonObject | undefined
   let createdNewVersion = false
   const now = new Date().toISOString()
-  const versionData: {
+  const versionData: TData & {
     _status?: 'draft'
     updatedAt?: string
-  } & TData = deepCopyObjectSimple(docWithLocales)
+  } = deepCopyObjectSimple(docWithLocales)
 
   if ((collection?.timestamps || global) && draft) {
     versionData.updatedAt = now

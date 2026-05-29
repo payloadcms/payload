@@ -27,7 +27,17 @@ export type Options = {
   validate?: Validate
 }
 
-export type FieldType<T> = {
+export type FieldType<T> = Pick<
+  FieldState,
+  | 'blocksFilterOptions'
+  | 'customComponents'
+  | 'errorMessage'
+  | 'errorPaths'
+  | 'filterOptions'
+  | 'rows'
+  | 'selectFilterOptions'
+  | 'valid'
+> & {
   disabled: boolean
   formInitializing: boolean
   formProcessing: boolean
@@ -41,14 +51,4 @@ export type FieldType<T> = {
   setValue: (val: unknown, disableModifyingForm?: boolean) => void
   showError: boolean
   value: T
-} & Pick<
-  FieldState,
-  | 'blocksFilterOptions'
-  | 'customComponents'
-  | 'errorMessage'
-  | 'errorPaths'
-  | 'filterOptions'
-  | 'rows'
-  | 'selectFilterOptions'
-  | 'valid'
->
+}

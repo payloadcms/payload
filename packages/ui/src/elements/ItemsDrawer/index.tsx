@@ -143,7 +143,7 @@ export const ItemsDrawer: React.FC<ItemsDrawerProps> = (props) => {
 
       if (typeof _item === 'string') {
         // Handle string references (for blocks)
-        item = config.blocksMap?.[_item] as DrawerItem
+        item = config.blocksMap?.[_item]
       } else {
         item = _item
       }

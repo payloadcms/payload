@@ -32,7 +32,7 @@ class ExtendableError<TData extends object = { [key: string]: unknown }> extends
  * @extends ExtendableError
  */
 export class APIError<
-  TData extends null | object = { [key: string]: unknown } | null,
+  TData extends null | object = null | { [key: string]: unknown },
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
 > extends ExtendableError<TData> {
   /**

@@ -23,13 +23,13 @@ const writeFile = promisify(fs.writeFile)
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-type InitNextArgs = {
+type InitNextArgs = Pick<CliArgs, '--debug'> & {
   dbType: DbType
   nextAppDetails?: NextAppDetails
   packageManager: PackageManager
   projectDir: string
   useDistFiles?: boolean
-} & Pick<CliArgs, '--debug'>
+}
 
 type InitNextResult =
   | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
@@ -142,11 +142,11 @@ async function addPayloadConfigToTsConfig(projectDir: string, isSrcDir: boolean)
 }
 
 async function installAndConfigurePayload(
-  args: {
+  args: InitNextArgs & {
     nextAppDetails: NextAppDetails
     nextConfigType: NextConfigType
     useDistFiles?: boolean
-  } & InitNextArgs,
+  },
 ): Promise<
   | { payloadConfigPath: string; success: true }
   | { payloadConfigPath?: string; reason: string; success: false }

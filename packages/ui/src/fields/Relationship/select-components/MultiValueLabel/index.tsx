@@ -14,12 +14,12 @@ import './index.css'
 const baseClass = 'relationship--multi-value-label'
 
 export const MultiValueLabel: React.FC<
-  {
+  MultiValueProps<Option> & {
     selectProps: {
       // TODO Fix this - moduleResolution 16 breaks our declare module
       customProps: ReactSelectAdapterProps['customProps']
     }
-  } & MultiValueProps<Option>
+  }
 > = (props) => {
   const {
     data: { allowEdit, label, relationTo, value },

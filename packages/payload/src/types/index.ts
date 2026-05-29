@@ -28,7 +28,10 @@ import type { Operator } from './constants.js'
 export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
 
-export type CustomPayloadRequestProperties = {
+export type CustomPayloadRequestProperties = Pick<
+  URL,
+  'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
+> & {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
   fallbackLocale?: TypedFallbackLocale
@@ -50,7 +53,7 @@ export type CustomPayloadRequestProperties = {
    */
   payloadAPI: 'GraphQL' | 'local' | 'REST'
   /** Optimized document loader */
-  payloadDataLoader: {
+  payloadDataLoader: DataLoader<string, TypeWithID> & {
     /**
      * Wraps `payload.find` with a cache to deduplicate requests
      * @experimental This is may be replaced by a more robust cache strategy in future versions
@@ -62,7 +65,7 @@ export type CustomPayloadRequestProperties = {
      * })
      */
     find: Payload['find']
-  } & DataLoader<string, TypeWithID>
+  }
   /** Resized versions of the image that was uploaded during this request */
   payloadUploadSizes?: Record<string, Buffer>
   /** Query params on the request */
@@ -93,10 +96,7 @@ export type CustomPayloadRequestProperties = {
   transactionID?: number | Promise<number | string> | string
   /** The signed-in user */
   user: null | TypedUser
-} & Pick<
-  URL,
-  'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'
->
+}
 type PayloadRequestData = {
   /**
    * Data from the request body
@@ -113,12 +113,12 @@ type PayloadRequestData = {
    * */
   data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
-  file?: {
+  file?: File & {
     /**
      * Context of the file when it was uploaded via client side.
      */
     clientUploadContext?: unknown
-  } & File
+  }
   /** All files from multipart form data, keyed by field name */
   files?: Record<string, File | File[]>
 }
@@ -173,6 +173,7 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
         | false
         | Partial<{
             [K in keyof TypedCollectionJoins[TSlug]]:
+              | false
               | {
                   count?: boolean
                   limit?: number
@@ -180,7 +181,6 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
                   sort?: string
                   where?: Where
                 }
-              | false
           }>
     : never
 

@@ -4,7 +4,7 @@ import type { MultiTenantPluginConfig } from '../../types.js'
 
 import { getGlobalViewRedirect } from '../../utilities/getGlobalViewRedirect.js'
 
-type Args = {
+type Args = ServerProps & {
   collectionSlug: CollectionSlug
   docID?: number | string
   globalSlugs: string[]
@@ -15,7 +15,7 @@ type Args = {
   useAsTitle: string
   userHasAccessToAllTenants: Required<MultiTenantPluginConfig<any>>['userHasAccessToAllTenants']
   viewType: ViewTypes
-} & ServerProps
+}
 
 export const GlobalViewRedirect = async (args: Args) => {
   const collectionSlug = args?.collectionSlug

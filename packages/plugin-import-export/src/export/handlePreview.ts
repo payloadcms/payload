@@ -25,7 +25,7 @@ const applyExportBeforeHook = async (
   hook: ExportBeforeHook | undefined,
   data: Record<string, unknown>[],
   originalDocs: unknown[],
-  format: 'csv' | 'json' | ({} & string),
+  format: 'csv' | 'json' | (string & {}),
   req: PayloadRequest,
 ): Promise<Record<string, unknown>[]> => {
   if (!hook || data.length === 0) {
@@ -258,7 +258,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       // Apply field-level export hooks for JSON format
       let output: Record<string, unknown> = applyFieldHooks({
         type: 'beforeExport',
-        data: doc as Record<string, unknown>,
+        data: doc,
         fieldHooks: exportFieldHooks,
         fields: targetCollection.config.flattenedFields,
         format: 'json',

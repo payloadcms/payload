@@ -14,7 +14,7 @@ export type SharedTextFieldProps =
       readonly onChange?: ReactSelectAdapterProps['onChange']
     }
 
-export type TextInputProps = {
+export type TextInputProps = SharedTextFieldProps & {
   readonly AfterInput?: React.ReactNode
   readonly BeforeInput?: React.ReactNode
   readonly className?: string
@@ -40,4 +40,4 @@ export type TextInputProps = {
   readonly style?: React.CSSProperties
   readonly value?: string
   readonly valueToRender?: Option[]
-} & SharedTextFieldProps
+}

@@ -10,10 +10,10 @@ import { formatOptions, SelectInput } from '../../fields/Select/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
 
-type HierarchyTypeFieldProps = {
+type HierarchyTypeFieldProps = SelectFieldClientProps & {
   options: Option[]
   parentFieldName: string
-} & SelectFieldClientProps
+}
 
 export const HierarchyTypeField: React.FC<HierarchyTypeFieldProps> = ({
   options: allSelectOptions,
@@ -24,9 +24,7 @@ export const HierarchyTypeField: React.FC<HierarchyTypeFieldProps> = ({
     field,
     field: {
       name,
-      admin: { className, isClearable = true, isSortable = true, placeholder } = {} as NonNullable<
-        SelectFieldClientProps['field']['admin']
-      >,
+      admin: { className, isClearable = true, isSortable = true, placeholder } = {},
       hasMany = false,
       label,
       localized,

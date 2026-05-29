@@ -185,7 +185,14 @@ export type GlobalAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
-export type GlobalConfig<TSlug extends GlobalSlug = any> = {
+export type GlobalConfig<TSlug extends GlobalSlug = any> = Pick<
+  WithSelectFn<
+    IsAny<SelectFromGlobalSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromGlobalSlug<TSlug>
+  >,
+  'select'
+> & {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
    * sanitizing the same global multiple times.
@@ -206,12 +213,12 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   graphQL?:
+    | false
     | {
         disableMutations?: true
         disableQueries?: true
         name?: string
       }
-    | false
   hooks?: {
     afterChange?: AfterChangeHook[]
     afterRead?: AfterReadHook[]
@@ -226,10 +233,10 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
    * @default true
    */
   lockDocuments?:
+    | false
     | {
         duration: number
       }
-    | false
   slug: string
   /**
    * Options used in typescript generation
@@ -241,14 +248,7 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     interface?: string
   }
   versions?: boolean | IncomingGlobalVersions
-} & Pick<
-  WithSelectFn<
-    IsAny<SelectFromGlobalSlug<TSlug>> extends true
-      ? SelectIncludeType
-      : SelectFromGlobalSlug<TSlug>
-  >,
-  'select'
->
+}
 
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
@@ -266,6 +266,7 @@ export interface SanitizedGlobalConfig
 export type Globals = {
   config: SanitizedGlobalConfig[]
   graphQL?:
+    | false
     | {
         [slug: string]: {
           mutationInputType: GraphQLNonNull<any>
@@ -273,5 +274,4 @@ export type Globals = {
           versionType?: GraphQLObjectType
         }
       }
-    | false
 }

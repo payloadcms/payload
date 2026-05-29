@@ -98,12 +98,12 @@ export const sanitizeQueryValue = ({
   payload,
   val,
 }: SanitizeQueryValueArgs):
+  | undefined
   | {
       operator?: string
       rawQuery?: unknown
       val?: unknown
-    }
-  | undefined => {
+    } => {
   let formattedValue = val
   let formattedOperator = operator
 

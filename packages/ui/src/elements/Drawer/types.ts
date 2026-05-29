@@ -17,10 +17,10 @@ export type Props = {
   readonly title?: string
 }
 
-export type TogglerProps = {
+export type TogglerProps = HTMLAttributes<HTMLButtonElement> & {
   buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
   children: React.ReactNode
   className?: string
   disabled?: boolean
   slug: string
-} & HTMLAttributes<HTMLButtonElement>
+}

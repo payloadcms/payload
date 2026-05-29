@@ -45,20 +45,26 @@ export type ServerOnlyRootProperties = keyof Pick<
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
 
-export type ClientConfig = {
-  admin: {
+export type ClientConfig = Omit<
+  SanitizedConfig,
+  'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties
+> & {
+  admin: Omit<
+    SanitizedConfig['admin'],
+    'components' | 'dashboard' | 'dependencies' | 'livePreview'
+  > & {
     dashboard?: {
       widgets: ClientWidget[]
     }
     livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
-  } & Omit<SanitizedConfig['admin'], 'components' | 'dashboard' | 'dependencies' | 'livePreview'>
+  }
   blocks: ClientBlock[]
   blocksMap: Record<BlockSlug, ClientBlock>
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
   unauthenticated?: boolean
-} & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
+}
 
 export type UnauthenticatedClientConfig = {
   admin: {
@@ -239,7 +245,7 @@ export const createClientConfig = ({
               continue
             }
 
-            clientConfig.blocksMap[block.slug] = block as ClientBlock
+            clientConfig.blocksMap[block.slug] = block
           }
         }
 

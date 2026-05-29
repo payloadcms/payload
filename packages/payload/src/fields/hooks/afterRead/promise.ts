@@ -22,7 +22,7 @@ import { relationshipPopulationPromise } from './relationshipPopulationPromise.j
 import { traverseFields } from './traverseFields.js'
 import { virtualFieldPopulationPromise } from './virtualFieldPopulationPromise.js'
 
-type Args = {
+type Args = Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>> & {
   /**
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
@@ -69,7 +69,7 @@ type Args = {
   siblingFields?: (Field | TabAsField)[]
   triggerAccessControl?: boolean
   triggerHooks?: boolean
-} & Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>>
+}
 
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response

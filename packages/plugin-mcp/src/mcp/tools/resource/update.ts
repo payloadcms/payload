@@ -216,7 +216,7 @@ ${JSON.stringify(result)}
         const result = await payload.update({
           ...updateOptions,
           data: parsedData,
-        } as any)
+        })
 
         const bulkResult = result as { docs?: unknown[]; errors?: unknown[] }
         const docs = bulkResult.docs || []

@@ -42,11 +42,11 @@ export type RouterAdapterRouter = {
   replace: (path: string, options?: { scroll?: boolean }) => void
 }
 
-export type LinkAdapterProps = {
+export type LinkAdapterProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & {
   children?: React.ReactNode
   href: string
   prefetch?: boolean
   ref?: React.Ref<HTMLAnchorElement>
   replace?: boolean
   scroll?: boolean
-} & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
+}

@@ -1335,7 +1335,7 @@ export function configToJSONSchema(
         acc.auth[authCollection.slug] = authCollectionToOperationsJSONSchema(authCollection)
         return acc
       },
-      { auth: {} as Record<string, JSONSchema4> },
+      { auth: {} },
     )
 
   const jobsSchemas = config.jobs

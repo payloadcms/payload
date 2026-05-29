@@ -76,10 +76,10 @@ export const Tabs: TabsFieldDiffClientComponent = (props) => {
   )
 }
 
-type TabProps = {
+type TabProps = FieldDiffClientProps<TabsFieldClient> & {
   fieldTab: ClientTab
   tab: VersionTab
-} & FieldDiffClientProps<TabsFieldClient>
+}
 
 const Tab: React.FC<TabProps> = ({
   comparisonValue: valueFrom,

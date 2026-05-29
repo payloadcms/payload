@@ -27,7 +27,7 @@ type BaseArgs = {
   tableName: string
 }
 
-type CreateArgs = {
+type CreateArgs = BaseArgs & {
   customID?: number | string
   id?: never
   joinQuery?: never
@@ -35,9 +35,9 @@ type CreateArgs = {
   select?: SelectType
   upsertTarget?: never
   where?: never
-} & BaseArgs
+}
 
-type UpdateArgs = {
+type UpdateArgs = BaseArgs & {
   customID?: never
   id?: number | string
   joinQuery?: JoinQuery
@@ -45,6 +45,6 @@ type UpdateArgs = {
   select?: SelectType
   upsertTarget?: GenericColumn
   where?: SQL<unknown>
-} & BaseArgs
+}
 
 export type Args = CreateArgs | UpdateArgs

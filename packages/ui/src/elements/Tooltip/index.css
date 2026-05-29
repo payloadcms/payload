@@ -87,7 +87,11 @@
 
   .tooltip--position-top {
     top: 0;
-    transform: translate3d(var(--tooltip-x), calc(-100% - var(--caret-height) - var(--caret-offset) + 1px), 0);
+    transform: translate3d(
+      var(--tooltip-x),
+      calc(-100% - var(--caret-height) - var(--caret-offset) + 1px),
+      0
+    );
 
     .tooltip__caret {
       --color-border: var(--ramp-grey-700);

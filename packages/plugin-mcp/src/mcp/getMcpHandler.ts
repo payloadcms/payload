@@ -14,15 +14,6 @@ import {
 } from '../utils/getVirtualFieldNames.js'
 import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
 import { registerTool } from './registerTool.js'
-
-// Tools
-import { findGlobalTool } from './tools/global/find.js'
-import { updateGlobalTool } from './tools/global/update.js'
-import { createResourceTool } from './tools/resource/create.js'
-import { deleteResourceTool } from './tools/resource/delete.js'
-import { findResourceTool } from './tools/resource/find.js'
-import { updateResourceTool } from './tools/resource/update.js'
-
 // Experimental Tools
 /**
  * @experimental This tools are experimental and may change or be removed in the future.
@@ -39,9 +30,16 @@ import { findCollectionTool } from './tools/collection/find.js'
 import { updateCollectionTool } from './tools/collection/update.js'
 import { findConfigTool } from './tools/config/find.js'
 import { updateConfigTool } from './tools/config/update.js'
+// Tools
+import { findGlobalTool } from './tools/global/find.js'
+import { updateGlobalTool } from './tools/global/update.js'
 import { createJobTool } from './tools/job/create.js'
 import { runJobTool } from './tools/job/run.js'
 import { updateJobTool } from './tools/job/update.js'
+import { createResourceTool } from './tools/resource/create.js'
+import { deleteResourceTool } from './tools/resource/delete.js'
+import { findResourceTool } from './tools/resource/find.js'
+import { updateResourceTool } from './tools/resource/update.js'
 
 export const getMCPHandler = (
   pluginOptions: MCPPluginConfig,

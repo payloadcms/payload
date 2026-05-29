@@ -209,7 +209,14 @@ const buildVersionField = ({
   selectedLocales,
   valueFrom,
   valueTo,
-}: {
+}: Omit<
+  BuildVersionFieldsArgs,
+  | 'fields'
+  | 'fieldsPermissions'
+  | 'parentIndexPath'
+  | 'versionFromSiblingData'
+  | 'versionToSiblingData'
+> & {
   clientField: ClientField
   field: Field
   indexPath: string
@@ -222,14 +229,7 @@ const buildVersionField = ({
   schemaPath: string
   valueFrom: unknown
   valueTo: unknown
-} & Omit<
-  BuildVersionFieldsArgs,
-  | 'fields'
-  | 'fieldsPermissions'
-  | 'parentIndexPath'
-  | 'versionFromSiblingData'
-  | 'versionToSiblingData'
->): BaseVersionField | null => {
+}): BaseVersionField | null => {
   let hasReadPermission: boolean = false
   let fieldPermissions: SanitizedFieldPermissions | undefined = undefined
 

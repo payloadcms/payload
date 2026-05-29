@@ -37,7 +37,7 @@ import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
-type Args<TSlug extends GlobalSlug> = {
+type Args<TSlug extends GlobalSlug> = Pick<FindOptions<string, SelectType>, 'select'> & {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   depth?: number
@@ -53,7 +53,7 @@ type Args<TSlug extends GlobalSlug> = {
   showHiddenFields?: boolean
   slug: string
   unpublishAllLocales?: boolean
-} & Pick<FindOptions<string, SelectType>, 'select'>
+}
 
 export const updateOperation = async <
   TSlug extends GlobalSlug,

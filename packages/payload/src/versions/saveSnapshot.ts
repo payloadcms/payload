@@ -29,9 +29,9 @@ export const saveSnapshot = async <T extends JsonObject = JsonObject>({
   req,
   select,
 }: Args<T>): Promise<Omit<TypeWithVersion<T>, 'parent'> | TypeWithVersion<T> | undefined> => {
-  const docData: {
+  const docData: T & {
     _status?: 'draft'
-  } & T = deepCopyObjectSimple<T>(data || ({} as T))
+  } = deepCopyObjectSimple<T>(data || ({} as T))
 
   if (docData._id) {
     delete docData._id

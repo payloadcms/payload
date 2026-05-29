@@ -1,6 +1,7 @@
 import { type FlattenedField } from 'payload'
 
 type FieldWithPresentational =
+  | FlattenedField
   | {
       fields?: FlattenedField[]
       name?: string
@@ -10,7 +11,6 @@ type FieldWithPresentational =
       }[]
       type: 'collapsible' | 'row' | 'tabs'
     }
-  | FlattenedField
 
 export type GetFlattenedFieldKeysOptions = {
   /**

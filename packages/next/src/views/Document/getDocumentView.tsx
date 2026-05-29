@@ -35,10 +35,10 @@ export const getDocumentView = ({
   docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
   globalConfig?: SanitizedGlobalConfig
   routeSegments: string[]
-}): {
+}): null | {
   View: ViewToRender
   viewKey: string
-} | null => {
+} => {
   // Conditionally import and lazy load the default view
   let View: ViewToRender = null
   let viewKey: string

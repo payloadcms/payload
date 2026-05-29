@@ -17,13 +17,17 @@ export type Resolver = (
     select?: boolean
   },
   context: Context,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => Promise<Document>
 
 export function findOne(globalConfig: SanitizedGlobalConfig): Resolver {
   return async function resolver(_, args, context, info) {
-    const req = context.req = isolateObjectProperty(context.req, ['locale', 'fallbackLocale', 'transactionID'])
-    const select = context.select = args.select ? buildSelectForCollection(info) : undefined
+    const req = (context.req = isolateObjectProperty(context.req, [
+      'locale',
+      'fallbackLocale',
+      'transactionID',
+    ]))
+    const select = (context.select = args.select ? buildSelectForCollection(info) : undefined)
     const { slug } = globalConfig
 
     req.locale = args.locale || req.locale

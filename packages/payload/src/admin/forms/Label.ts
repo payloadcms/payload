@@ -15,18 +15,18 @@ export type GenericLabelProps = {
 
 export type FieldLabelClientProps<
   TFieldClient extends Partial<ClientFieldWithOptionalType> = Partial<ClientFieldWithOptionalType>,
-> = {
+> = GenericLabelProps & {
   field?: TFieldClient
-} & GenericLabelProps
+}
 
 export type FieldLabelServerProps<
   TFieldServer extends Field,
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = {
-  clientField: TFieldClient
-  readonly field: TFieldServer
-} & GenericLabelProps &
-  ServerComponentProps
+> = GenericLabelProps &
+  ServerComponentProps & {
+    clientField: TFieldClient
+    readonly field: TFieldServer
+  }
 
 export type SanitizedLabelProps<TFieldClient extends ClientFieldWithOptionalType> = Omit<
   FieldLabelClientProps<TFieldClient>,

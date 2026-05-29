@@ -18,7 +18,10 @@ export type JSXConvertersFunction<
     | SerializedInlineBlockNode<{ blockName?: null | string }>,
 > = (args: { defaultConverters: JSXConverters<DefaultNodeTypes> }) => JSXConverters<T>
 
-type RichTextProps<TNodes extends SerializedNodeBase = SerializedNodeBase> = {
+type RichTextProps<TNodes extends SerializedNodeBase = SerializedNodeBase> = Pick<
+  ConvertLexicalToJSXArgs<TNodes>,
+  'data' | 'disableIndent' | 'disableTextAlign' | 'nodeMap'
+> & {
   /**
    * Override class names for the container.
    */
@@ -32,7 +35,7 @@ type RichTextProps<TNodes extends SerializedNodeBase = SerializedNodeBase> = {
    * If true, removes the container div wrapper.
    */
   disableContainer?: boolean
-} & Pick<ConvertLexicalToJSXArgs<TNodes>, 'data' | 'disableIndent' | 'disableTextAlign' | 'nodeMap'>
+}
 
 export function RichText<TNodes extends SerializedNodeBase = SerializedNodeBase>({
   className,

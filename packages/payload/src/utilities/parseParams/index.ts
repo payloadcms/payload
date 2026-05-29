@@ -32,7 +32,7 @@ type RawParams = {
   where?: string | Where
 }
 
-type ParsedParams = {
+type ParsedParams = Record<string, unknown> & {
   autosave?: boolean
   data?: Record<string, unknown>
   depth?: number
@@ -53,7 +53,7 @@ type ParsedParams = {
   trash?: boolean
   unpublishAllLocales?: boolean
   where?: Where
-} & Record<string, unknown>
+}
 
 export const booleanParams = [
   'autosave',
@@ -100,7 +100,7 @@ export const parseParams = (params: RawParams): ParsedParams => {
   }
 
   if ('joins' in params) {
-    parsedParams.joins = sanitizeJoinParams(params.joins as JoinParams)
+    parsedParams.joins = sanitizeJoinParams(params.joins)
   }
 
   if ('sort' in params) {

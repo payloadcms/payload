@@ -1,9 +1,9 @@
 import type { TypeWithID, Where } from 'payload'
 import type { ReactNode, RefObject } from 'react'
 
-export type HierarchyDocument = {
+export type HierarchyDocument = TypeWithID & {
   [key: string]: unknown
-} & TypeWithID
+}
 
 export type HierarchyInitialData = {
   baseFilter?: null | Where

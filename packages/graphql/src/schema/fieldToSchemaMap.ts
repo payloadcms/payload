@@ -57,7 +57,7 @@ import { withNullableType } from './withNullableType.js'
 function formattedNameResolver({
   field,
   ...rest
-}: { field: Field } & GraphQLFieldConfig<any, Context, any>): GraphQLFieldConfig<
+}: GraphQLFieldConfig<any, Context, any> & { field: Field }): GraphQLFieldConfig<
   any,
   Context,
   any
@@ -85,30 +85,30 @@ type SharedArgs = {
   parentName: string
 }
 
-type GenericFieldToSchemaMap = (args: { field: Field } & SharedArgs) => ObjectTypeConfig
+type GenericFieldToSchemaMap = (args: SharedArgs & { field: Field }) => ObjectTypeConfig
 
 type FieldToSchemaMap = {
-  array: (args: { field: ArrayField } & SharedArgs) => ObjectTypeConfig
-  blocks: (args: { field: BlocksField } & SharedArgs) => ObjectTypeConfig
-  checkbox: (args: { field: CheckboxField } & SharedArgs) => ObjectTypeConfig
-  code: (args: { field: CodeField } & SharedArgs) => ObjectTypeConfig
-  collapsible: (args: { field: CollapsibleField } & SharedArgs) => ObjectTypeConfig
-  date: (args: { field: DateField } & SharedArgs) => ObjectTypeConfig
-  email: (args: { field: EmailField } & SharedArgs) => ObjectTypeConfig
-  group: (args: { field: GroupField } & SharedArgs) => ObjectTypeConfig
-  join: (args: { field: JoinField } & SharedArgs) => ObjectTypeConfig
-  json: (args: { field: JSONField } & SharedArgs) => ObjectTypeConfig
-  number: (args: { field: NumberField } & SharedArgs) => ObjectTypeConfig
-  point: (args: { field: PointField } & SharedArgs) => ObjectTypeConfig
-  radio: (args: { field: RadioField } & SharedArgs) => ObjectTypeConfig
-  relationship: (args: { field: RelationshipField } & SharedArgs) => ObjectTypeConfig
-  richText: (args: { field: RichTextField } & SharedArgs) => ObjectTypeConfig
-  row: (args: { field: RowField } & SharedArgs) => ObjectTypeConfig
-  select: (args: { field: SelectField } & SharedArgs) => ObjectTypeConfig
-  tabs: (args: { field: TabsField } & SharedArgs) => ObjectTypeConfig
-  text: (args: { field: TextField } & SharedArgs) => ObjectTypeConfig
-  textarea: (args: { field: TextareaField } & SharedArgs) => ObjectTypeConfig
-  upload: (args: { field: UploadField } & SharedArgs) => ObjectTypeConfig
+  array: (args: SharedArgs & { field: ArrayField }) => ObjectTypeConfig
+  blocks: (args: SharedArgs & { field: BlocksField }) => ObjectTypeConfig
+  checkbox: (args: SharedArgs & { field: CheckboxField }) => ObjectTypeConfig
+  code: (args: SharedArgs & { field: CodeField }) => ObjectTypeConfig
+  collapsible: (args: SharedArgs & { field: CollapsibleField }) => ObjectTypeConfig
+  date: (args: SharedArgs & { field: DateField }) => ObjectTypeConfig
+  email: (args: SharedArgs & { field: EmailField }) => ObjectTypeConfig
+  group: (args: SharedArgs & { field: GroupField }) => ObjectTypeConfig
+  join: (args: SharedArgs & { field: JoinField }) => ObjectTypeConfig
+  json: (args: SharedArgs & { field: JSONField }) => ObjectTypeConfig
+  number: (args: SharedArgs & { field: NumberField }) => ObjectTypeConfig
+  point: (args: SharedArgs & { field: PointField }) => ObjectTypeConfig
+  radio: (args: SharedArgs & { field: RadioField }) => ObjectTypeConfig
+  relationship: (args: SharedArgs & { field: RelationshipField }) => ObjectTypeConfig
+  richText: (args: SharedArgs & { field: RichTextField }) => ObjectTypeConfig
+  row: (args: SharedArgs & { field: RowField }) => ObjectTypeConfig
+  select: (args: SharedArgs & { field: SelectField }) => ObjectTypeConfig
+  tabs: (args: SharedArgs & { field: TabsField }) => ObjectTypeConfig
+  text: (args: SharedArgs & { field: TextField }) => ObjectTypeConfig
+  textarea: (args: SharedArgs & { field: TextareaField }) => ObjectTypeConfig
+  upload: (args: SharedArgs & { field: UploadField }) => ObjectTypeConfig
 }
 
 export const fieldToSchemaMap: FieldToSchemaMap = {
@@ -1047,7 +1047,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       locale?: GraphQLArgumentConfig
       page?: GraphQLArgumentConfig
       where?: GraphQLArgumentConfig
-    } = {} as any
+    } = {}
 
     const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
       (relation) => graphqlResult.collections[relation].config.versions?.drafts,

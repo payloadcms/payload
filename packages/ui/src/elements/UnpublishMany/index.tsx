@@ -29,7 +29,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
 }
 
 export const UnpublishMany_v4: React.FC<
-  {
+  UnpublishManyProps & {
     count: number
     ids: (number | string)[]
     /**
@@ -39,7 +39,7 @@ export const UnpublishMany_v4: React.FC<
     onSuccess?: () => void
     selectAll: boolean
     where?: Where
-  } & UnpublishManyProps
+  }
 > = (props) => {
   const {
     collection,

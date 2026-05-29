@@ -34,7 +34,7 @@ export const selectDistinct = ({
   selectFields,
   tableName,
   where,
-}: Args): QueryPromise<{ id: number | string }[] & Record<string, GenericColumn>> => {
+}: Args): QueryPromise<Record<string, GenericColumn> & { id: number | string }[]> => {
   if (forceRun || Object.keys(joins).length > 0) {
     let query: SQLiteSelect
     const table = adapter.tables[tableName]
@@ -67,6 +67,6 @@ export const selectDistinct = ({
 
     return queryModifier({
       query,
-    }) as unknown as QueryPromise<{ id: number | string }[] & Record<string, GenericColumn>>
+    }) as unknown as QueryPromise<Record<string, GenericColumn> & { id: number | string }[]>
   }
 }

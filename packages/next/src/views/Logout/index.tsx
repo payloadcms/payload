@@ -8,9 +8,9 @@ import './index.scss'
 const baseClass = 'logout'
 
 export const LogoutView: React.FC<
-  {
+  AdminViewServerProps & {
     inactivity?: boolean
-  } & AdminViewServerProps
+  }
 > = ({ inactivity, initPageResult, searchParams }) => {
   const {
     req: {

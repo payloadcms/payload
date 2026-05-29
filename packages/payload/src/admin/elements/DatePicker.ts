@@ -25,23 +25,23 @@ export type MonthPickerProps = {
 }
 
 export type ConditionalDateProps =
-  | ({
-      pickerAppearance: 'dayOnly'
-    } & DayPickerProps &
-      SharedProps)
-  | ({
-      pickerAppearance: 'monthOnly'
-    } & MonthPickerProps &
-      SharedProps)
-  | ({
-      pickerAppearance: 'timeOnly'
-    } & SharedProps &
-      TimePickerProps)
-  | ({
-      pickerAppearance?: 'dayAndTime'
-    } & DayPickerProps &
+  | (DayPickerProps &
       SharedProps &
-      TimePickerProps)
-  | ({
+      TimePickerProps & {
+        pickerAppearance?: 'dayAndTime'
+      })
+  | (DayPickerProps &
+      SharedProps & {
+        pickerAppearance: 'dayOnly'
+      })
+  | (MonthPickerProps &
+      SharedProps & {
+        pickerAppearance: 'monthOnly'
+      })
+  | (SharedProps &
+      TimePickerProps & {
+        pickerAppearance: 'timeOnly'
+      })
+  | (SharedProps & {
       pickerAppearance?: 'default'
-    } & SharedProps)
+    })

@@ -14,7 +14,7 @@ const {
   title: { maxLength: maxTitleDefault, minLength: minTitleDefault },
 } = defaults
 
-type OverviewProps = {
+type OverviewProps = UIField & {
   descriptionOverrides?: {
     maxLength?: number
     minLength?: number
@@ -26,7 +26,7 @@ type OverviewProps = {
     minLength?: number
   }
   titlePath?: string
-} & UIField
+}
 
 export const OverviewComponent: React.FC<OverviewProps> = ({
   descriptionOverrides,

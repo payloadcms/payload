@@ -16,12 +16,12 @@ import { PUNCTUATION_OR_SPACE } from './utils.js'
 export function findOutermostTextFormatTransformer(
   textNode: TextNode,
   textFormatTransformersIndex: TextFormatTransformersIndex,
-): {
+): null | {
   endIndex: number
   match: RegExpMatchArray
   startIndex: number
   transformer: TextFormatTransformer
-} | null {
+} {
   const textContent = textNode.getTextContent()
   const match = findOutermostMatch(textContent, textFormatTransformersIndex)
 

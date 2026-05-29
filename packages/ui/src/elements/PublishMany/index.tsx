@@ -28,7 +28,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
   )
 }
 
-type PublishMany_v4Props = {
+type PublishMany_v4Props = PublishManyProps & {
   count: number
   ids: (number | string)[]
   /**
@@ -38,7 +38,7 @@ type PublishMany_v4Props = {
   onSuccess?: () => void
   selectAll: boolean
   where?: Where
-} & PublishManyProps
+}
 
 export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
   const {

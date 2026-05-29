@@ -5,9 +5,9 @@ type SentryInstance = {
   captureException: (err: Error, hint: any) => string
 }
 
-type ContextArgs = {
+type ContextArgs = AfterErrorHookArgs & {
   defaultContext: Partial<ScopeContext>
-} & AfterErrorHookArgs
+}
 
 export interface PluginOptions {
   /**

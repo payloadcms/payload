@@ -17,7 +17,7 @@ import { HierarchySearch } from '../Search/index.js'
 import { HierarchyTree } from './index.js'
 
 export const HierarchySidebarTab: React.FC<
-  {
+  SidebarTabClientProps & {
     baseFilter?: Record<string, unknown>
     collectionSpecificOptions?: { label: string; value: string }[]
     hierarchyCollectionSlug: string
@@ -30,7 +30,7 @@ export const HierarchySidebarTab: React.FC<
     treeLimit?: number
     typeFieldName?: string
     useAsTitle?: string
-  } & SidebarTabClientProps
+  }
 > = ({
   baseFilter,
   collectionSpecificOptions,

@@ -1004,7 +1004,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           getCart(storedCartID, { secret: storedSecret || undefined })
             .then((fetchedCart) => {
               setCart(fetchedCart)
-              setCartID(storedCartID as DefaultDocumentIDType)
+              setCartID(storedCartID)
               if (storedSecret) {
                 setCartSecret(storedSecret)
               }

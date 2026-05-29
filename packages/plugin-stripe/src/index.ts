@@ -54,7 +54,7 @@ export const stripePlugin =
 
           return res
         },
-        method: 'post' as Endpoint['method'],
+        method: 'post',
         path: '/stripe/rest',
       })
     }

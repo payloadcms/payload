@@ -28,14 +28,14 @@ export type GenericDescriptionProps = {
 export type FieldDescriptionServerProps<
   TFieldServer extends Field = Field,
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = {
-  clientField: TFieldClient
-  readonly field: TFieldServer
-} & GenericDescriptionProps &
-  ServerComponentProps
+> = GenericDescriptionProps &
+  ServerComponentProps & {
+    clientField: TFieldClient
+    readonly field: TFieldServer
+  }
 
 export type FieldDescriptionClientProps<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = {
+> = GenericDescriptionProps & {
   field: TFieldClient
-} & GenericDescriptionProps
+}

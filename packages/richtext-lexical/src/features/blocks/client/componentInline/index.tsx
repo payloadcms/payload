@@ -40,10 +40,10 @@ import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
 export type InlineBlockComponentProps<
   TFormData extends Record<string, unknown> = InlineBlockFields,
-> = {
+> = Pick<BlockComponentProps<TFormData>, 'cacheBuster' | 'className' | 'formData' | 'nodeKey'> & {
   readonly CustomBlock?: React.FC<ViewMapInlineBlockComponentProps>
   readonly CustomLabel?: React.FC<ViewMapInlineBlockComponentProps>
-} & Pick<BlockComponentProps<TFormData>, 'cacheBuster' | 'className' | 'formData' | 'nodeKey'>
+}
 
 export type InlineBlockComponentContextType = {
   EditButton?: React.FC

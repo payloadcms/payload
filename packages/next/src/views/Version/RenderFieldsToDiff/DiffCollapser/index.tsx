@@ -10,14 +10,7 @@ import { countChangedFields, countChangedFieldsInRows } from '../utilities/count
 
 const baseClass = 'diff-collapser'
 
-type Props = {
-  hideGutter?: boolean
-  initCollapsed?: boolean
-  Label: React.ReactNode
-  locales: string[] | undefined
-  parentIsLocalized: boolean
-  valueTo: unknown
-} & (
+type Props = (
   | {
       // fields collapser
       children: React.ReactNode
@@ -34,7 +27,14 @@ type Props = {
       isIterable: true
       valueFrom?: unknown
     }
-)
+) & {
+  hideGutter?: boolean
+  initCollapsed?: boolean
+  Label: React.ReactNode
+  locales: string[] | undefined
+  parentIsLocalized: boolean
+  valueTo: unknown
+}
 
 export const DiffCollapser: React.FC<Props> = ({
   children,

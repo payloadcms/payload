@@ -31,11 +31,11 @@ export const hasLocalizeStatusEnabled = (config: EntityConfig): boolean => {
  */
 export const hasAutosaveEnabled = (
   config: EntityConfig,
-): config is {
+): config is EntityConfig & {
   versions: {
     drafts: { autosave: Autosave | false }
   }
-} & EntityConfig => {
+} => {
   return Boolean(
     config?.versions &&
       typeof config.versions === 'object' &&
@@ -60,11 +60,11 @@ export const hasDraftValidationEnabled = (config: EntityConfig): boolean => {
 
 export const hasScheduledPublishEnabled = (
   config: EntityConfig,
-): config is {
+): config is EntityConfig & {
   versions: {
     drafts: { schedulePublish: SanitizedDrafts['schedulePublish'] }
   }
-} & EntityConfig => {
+} => {
   return Boolean(
     config?.versions &&
       typeof config.versions === 'object' &&

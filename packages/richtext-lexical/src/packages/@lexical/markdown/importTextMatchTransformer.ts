@@ -12,12 +12,12 @@ import type { TextMatchTransformer } from './MarkdownTransformers.js'
 export function findOutermostTextMatchTransformer(
   textNode_: TextNode,
   textMatchTransformers: Array<TextMatchTransformer>,
-): {
+): null | {
   endIndex: number
   match: RegExpMatchArray
   startIndex: number
   transformer: TextMatchTransformer
-} | null {
+} {
   const textNode = textNode_
 
   let foundMatchStartIndex: number | undefined = undefined
@@ -79,11 +79,11 @@ export function importFoundTextMatchTransformer(
   endIndex: number,
   transformer: TextMatchTransformer,
   match: RegExpMatchArray,
-): {
+): null | {
   nodeAfter: TextNode | undefined // If split
   nodeBefore: TextNode | undefined // If split
   transformedNode?: TextNode
-} | null {
+} {
   let nodeAfter, nodeBefore, transformedNode
 
   if (startIndex === 0) {

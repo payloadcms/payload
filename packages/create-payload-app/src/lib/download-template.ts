@@ -42,5 +42,5 @@ async function downloadTarStream(url: string) {
     throw new Error(`Failed to download: ${url}`)
   }
 
-  return Readable.from(res.body as unknown as NodeJS.ReadableStream)
+  return Readable.from(res.body)
 }

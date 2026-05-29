@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react'
 import type { SelectFieldOption } from '../../types.js'
 
 export const DynamicFieldSelector: React.FC<
-  { validate: SelectFieldValidation } & SelectFieldClientProps
+  SelectFieldClientProps & { validate: SelectFieldValidation }
 > = (props) => {
   const { fields, getDataByPath } = useForm()
 

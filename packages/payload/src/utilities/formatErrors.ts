@@ -3,7 +3,7 @@ import type { ErrorResult } from '../config/types.js'
 import { APIError } from '../errors/APIError.js'
 import { ValidationError } from '../errors/ValidationError.js'
 
-export const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorResult => {
+export const formatErrors = (incoming: APIError | { [key: string]: unknown }): ErrorResult => {
   if (incoming) {
     // Payload 'ValidationError' and 'APIError'
     if ((incoming instanceof ValidationError || incoming instanceof APIError) && incoming.data) {
@@ -11,7 +11,7 @@ export const formatErrors = (incoming: { [key: string]: unknown } | APIError): E
         errors: [
           {
             name: incoming.name,
-            data: incoming.data as Record<string, unknown>,
+            data: incoming.data,
             message: incoming.message,
           },
         ],

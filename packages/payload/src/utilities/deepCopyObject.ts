@@ -127,9 +127,7 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T, filterUndefi
         continue
       }
       ret[k] =
-        typeof v !== 'object' || v === null
-          ? v
-          : (deepCopyObjectSimple(v as T, filterUndefined) as any)
+        typeof v !== 'object' || v === null ? v : deepCopyObjectSimple(v as T, filterUndefined)
     }
     return ret as unknown as T
   }
@@ -161,7 +159,7 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
         return undefined!
       }
 
-      return value as unknown as T
+      return value
     }
     if (value instanceof Date) {
       return new Date(value) as unknown as T
@@ -172,7 +170,7 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
       ret[k] =
         typeof v !== 'object' || v === null
           ? v
-          : (deepCopyObjectSimpleWithoutReactComponents(v as T, opts) as any)
+          : deepCopyObjectSimpleWithoutReactComponents(v as T, opts)
     }
     return ret as unknown as T
   }
@@ -193,7 +191,7 @@ export function deepCopyObjectComplex<T>(object: T, cache: WeakMap<any, any> = n
 
   // Handle File
   if (object instanceof File) {
-    return object as unknown as T
+    return object
   }
 
   // Handle Date

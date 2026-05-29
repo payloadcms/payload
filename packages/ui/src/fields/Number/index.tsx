@@ -17,12 +17,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
   const {
     field,
     field: {
-      admin: {
-        className,
-        description,
-        placeholder,
-        step = 1,
-      } = {} as NumberFieldClientProps['field']['admin'],
+      admin: { className, description, placeholder, step = 1 } = {},
       hasMany = false,
       label,
       localized,

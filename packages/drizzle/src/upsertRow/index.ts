@@ -382,7 +382,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       const relationshipsToInsert = rowToInsert.relationshipsToAppend.map((rel) => {
         const parentId = id || insertedRow.id
         const row: Record<string, unknown> = {
-          parent: parentId as number | string, // Use 'parent' key for Drizzle table
+          parent: parentId, // Use 'parent' key for Drizzle table
           path: rel.path,
         }
 

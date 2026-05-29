@@ -11,6 +11,7 @@ import {
 import { getRangeRequestInfo } from 'payload/internal'
 
 export type SignedDownloadsConfig =
+  | boolean
   | {
       /** @default 7200 */
       expiresIn?: number
@@ -20,7 +21,6 @@ export type SignedDownloadsConfig =
         req: PayloadRequest
       }): boolean | Promise<boolean>
     }
-  | boolean
 
 interface GetFileArgs {
   bucket: string

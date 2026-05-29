@@ -43,10 +43,10 @@ export type WidgetInstanceClient = {
   item: WidgetItem
 }
 
-export type DropTargetWidget = {
+export type DropTargetWidget = null | {
   position: 'after' | 'before'
   widget: WidgetInstanceClient
-} | null
+}
 
 /* eslint-disable perfectionist/sort-objects */
 const WIDTH_TO_PERCENTAGE = {

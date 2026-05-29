@@ -27,7 +27,10 @@ import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublis
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
-export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> = Pick<
+  FindOptions<TSlug, TSelect>,
+  'select'
+> & {
   collection: Collection
   depth?: number
   disableTransaction?: boolean
@@ -38,7 +41,7 @@ export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> 
   req: PayloadRequest
   showHiddenFields?: boolean
   trash?: boolean
-} & Pick<FindOptions<TSlug, TSelect>, 'select'>
+}
 
 export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
   incomingArgs: Arguments<TSlug, TSelect>,

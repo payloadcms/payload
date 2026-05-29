@@ -116,7 +116,7 @@ function findClosestDroppableInRow(
   droppables: DroppablePosition[],
   rowIndex: number,
   posX: number,
-): { droppable: DroppablePosition; index: number } | null {
+): null | { droppable: DroppablePosition; index: number } {
   let closestIndex = -1
   let minXDistance = Infinity
 

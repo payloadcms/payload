@@ -36,7 +36,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 }
 
 export const EditMany_v4: React.FC<
-  {
+  Omit<EditManyProps, 'ids'> & {
     count: number
     ids: (number | string)[]
     /**
@@ -46,7 +46,7 @@ export const EditMany_v4: React.FC<
     onSuccess?: () => void
     selectAll: boolean
     where?: Where
-  } & Omit<EditManyProps, 'ids'>
+  }
 > = ({ collection, count, ids, modalPrefix, onSuccess, selectAll, where }) => {
   const { permissions } = useAuth()
   const { openModal } = useModal()

@@ -21,11 +21,11 @@ export const getFieldByPath = ({
    * The schema path, e.g. `array.group.title`
    */
   path: string
-}): {
+}): null | {
   field: FlattenedField
   localizedPath: string
   pathHasLocalized: boolean
-} | null => {
+} => {
   let currentFields: FlattenedField[] = fields
 
   let currentField: FlattenedField | null = null

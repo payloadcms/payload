@@ -21,7 +21,7 @@ type ResendError = {
   statusCode: number
 }
 
-type ResendResponse = { id: string } | ResendError
+type ResendResponse = ResendError | { id: string }
 
 /**
  * Email adapter for [Resend](https://resend.com) REST API
@@ -95,7 +95,7 @@ function mapPayloadEmailToResendEmail(
     headers: mapHeaders(message.headers),
     html: message.html?.toString() || '',
     text: message.text?.toString() || '',
-  } as ResendSendEmailOptions
+  }
 }
 
 function mapFromAddress(

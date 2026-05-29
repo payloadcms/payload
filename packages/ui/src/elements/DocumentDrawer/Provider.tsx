@@ -32,14 +32,14 @@ export type DocumentDrawerContextProps = {
   }) => Promise<FormState | void> | void
 }
 
-export type DocumentDrawerContextType = {} & DocumentDrawerContextProps
+export type DocumentDrawerContextType = DocumentDrawerContextProps & {}
 
 export const DocumentDrawerCallbacksContext = createContext({} as DocumentDrawerContextType)
 
 export const DocumentDrawerContextProvider: React.FC<
-  {
+  DocumentDrawerContextProps & {
     children: React.ReactNode
-  } & DocumentDrawerContextProps
+  }
 > = ({ children, ...rest }) => {
   return (
     <DocumentDrawerCallbacksContext value={{ ...rest }}>{children}</DocumentDrawerCallbacksContext>

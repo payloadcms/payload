@@ -98,15 +98,7 @@ export type CreateLocalReqOptions = {
 type CreateLocalReq = (options: CreateLocalReqOptions, payload: Payload) => Promise<PayloadRequest>
 
 export const createLocalReq: CreateLocalReq = async (
-  {
-    context,
-    depth,
-    fallbackLocale,
-    locale: localeArg,
-    req = {} as PayloadRequest,
-    urlSuffix,
-    user,
-  },
+  { context, depth, fallbackLocale, locale: localeArg, req = {}, urlSuffix, user },
   payload,
 ): Promise<PayloadRequest> => {
   const localization = payload.config?.localization

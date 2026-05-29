@@ -28,50 +28,50 @@ export type PartialDocumentInfoContext = Pick<
   Pick<DocumentTitleContext, 'title'>
 
 export type GenerateTitle<T = any> = (
-  args: {
+  args: PartialDocumentInfoContext & {
     collectionConfig?: CollectionConfig
     doc: T
     globalConfig?: GlobalConfig
     locale?: string
     req: PayloadRequest
-  } & PartialDocumentInfoContext,
+  },
 ) => Promise<string> | string
 
 export type GenerateDescription<T = any> = (
-  args: {
+  args: PartialDocumentInfoContext & {
     collectionConfig?: CollectionConfig
     doc: T
     globalConfig?: GlobalConfig
     locale?: string
     req: PayloadRequest
-  } & PartialDocumentInfoContext,
+  },
 ) => Promise<string> | string
 
 export type GenerateImage<T = any> = (
-  args: {
+  args: PartialDocumentInfoContext & {
     collectionConfig?: CollectionConfig
     doc: T
     globalConfig?: GlobalConfig
     locale?: string
     req: PayloadRequest
-  } & PartialDocumentInfoContext,
-) => { id: number | string } | number | Promise<{ id: number | string } | number | string> | string
+  },
+) => number | Promise<number | string | { id: number | string }> | string | { id: number | string }
 
 export type GenerateURL<T = any> = (
-  args: {
+  args: PartialDocumentInfoContext & {
     collectionConfig?: CollectionConfig
     doc: T
     globalConfig?: GlobalConfig
     locale?: string
     req: PayloadRequest
-  } & PartialDocumentInfoContext,
+  },
 ) => Promise<string> | string
 
 export type SEOPluginConfig = {
   /**
    * Collections to include the SEO fields in
    */
-  collections?: ({} | CollectionSlug)[]
+  collections?: (CollectionSlug | {})[]
   /**
    * Override the default fields inserted by the SEO plugin via a function that receives the default fields and returns the new fields
    *
@@ -88,7 +88,7 @@ export type SEOPluginConfig = {
   /**
    * Globals to include the SEO fields in
    */
-  globals?: ({} | GlobalSlug)[]
+  globals?: (GlobalSlug | {})[]
   interfaceName?: string
   /**
    * Group fields into tabs, your content will be automatically put into a general tab and the SEO fields into an SEO tab
@@ -99,7 +99,7 @@ export type SEOPluginConfig = {
   /**
    * The slug of the collection used to handle image uploads
    */
-  uploadsCollection?: {} | UploadCollectionSlug
+  uploadsCollection?: UploadCollectionSlug | {}
 }
 
 export type Meta = {

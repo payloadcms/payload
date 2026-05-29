@@ -5,7 +5,10 @@ import './index.css'
 
 const baseClass = 'sidebar-row'
 
-export type SidebarRowProps<T extends React.ElementType = 'div'> = {
+export type SidebarRowProps<T extends React.ElementType = 'div'> = Omit<
+  React.ComponentPropsWithoutRef<T>,
+  'as' | 'className' | 'title'
+> & {
   /**
    * The element type to render. Defaults to 'div'.
    * Use 'a' for links, 'button' for clickable items.
@@ -25,7 +28,7 @@ export type SidebarRowProps<T extends React.ElementType = 'div'> = {
    * Title text to display. Will be truncated with ellipsis if too long.
    */
   title?: React.ReactNode
-} & Omit<React.ComponentPropsWithoutRef<T>, 'as' | 'className' | 'title'>
+}
 
 export function SidebarRow<T extends React.ElementType = 'div'>({
   as,

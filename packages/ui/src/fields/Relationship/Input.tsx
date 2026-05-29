@@ -366,7 +366,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     ],
   )
 
-  const updateSearch = useDebouncedCallback<{ search: string } & HasManyValueUnion>(
+  const updateSearch = useDebouncedCallback<HasManyValueUnion & { search: string }>(
     ({ hasMany: hasManyArg, search: searchArg, value }) => {
       updateResultsEffectEvent({
         filterOptions,
@@ -392,7 +392,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   )
 
   const handleInputChange = useCallback(
-    (options: { search: string } & HasManyValueUnion) => {
+    (options: HasManyValueUnion & { search: string }) => {
       if (search !== options.search) {
         setIsLoading(true)
         setLastLoadedPage({})

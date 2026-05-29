@@ -153,7 +153,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
                         fields: {},
                         relationTo: newDoc.collectionSlug,
                         value: newDoc.doc.id,
-                      } as UploadData,
+                      },
                     }),
                   )
                 }

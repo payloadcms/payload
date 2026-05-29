@@ -42,7 +42,10 @@ import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
-export type Arguments<TSlug extends CollectionSlug> = {
+export type Arguments<TSlug extends CollectionSlug> = Pick<
+  FindOptions<TSlug, SelectType>,
+  'select'
+> & {
   autosave?: boolean
   collection: Collection
   data: RequiredDataFromCollectionSlug<TSlug>
@@ -59,7 +62,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   req: PayloadRequest
   selectedLocales?: string[]
   showHiddenFields?: boolean
-} & Pick<FindOptions<TSlug, SelectType>, 'select'>
+}
 
 export const createOperation = async <
   TSlug extends CollectionSlug,

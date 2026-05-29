@@ -205,7 +205,7 @@ export { SaveButton } from '../../elements/SaveButton/index.js'
 export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 export { UnpublishButton } from '../../elements/UnpublishButton/index.js'
 
-export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
+export { ReactSelect, type Option as ReactSelectOption } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'
 export type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 export { RenderTitle } from '../../elements/RenderTitle/index.js'

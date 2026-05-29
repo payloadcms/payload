@@ -10,18 +10,18 @@ export type GenericErrorProps = {
 
 export type FieldErrorClientProps<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = {
+> = GenericErrorProps & {
   field: TFieldClient
-} & GenericErrorProps
+}
 
 export type FieldErrorServerProps<
   TFieldServer extends Field,
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = {
-  clientField: TFieldClient
-  readonly field: TFieldServer
-} & GenericErrorProps &
-  ServerComponentProps
+> = GenericErrorProps &
+  ServerComponentProps & {
+    clientField: TFieldClient
+    readonly field: TFieldServer
+  }
 
 export type FieldErrorClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,

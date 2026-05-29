@@ -9,7 +9,7 @@ export type DisabledOptions = {
 }
 
 export const isFieldDisabled = (
-  field: { admin?: null | Record<string, unknown> } | null | undefined,
+  field: null | undefined | { admin?: null | Record<string, unknown> },
   area: DisabledArea,
 ): boolean => {
   if (!field || !field.admin) {

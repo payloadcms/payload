@@ -47,13 +47,13 @@ export type Export = {
   where?: Where
 }
 
-export type CreateExportArgs = {
+export type CreateExportArgs = Export & {
   /**
    * If true, stream the file instead of saving it
    */
   download?: boolean
   req: PayloadRequest
-} & Export
+}
 
 export const createExport = async (args: CreateExportArgs) => {
   const {
@@ -336,7 +336,7 @@ export const createExport = async (args: CreateExportArgs) => {
           const batchRows = result.docs.map((doc) =>
             filterDisabledCSV(
               flattenObject({
-                data: doc as Record<string, unknown>,
+                data: doc,
                 fields,
                 format,
                 exportFieldHooks,
@@ -421,7 +421,7 @@ export const createExport = async (args: CreateExportArgs) => {
             (doc) =>
               filterDisabledJSON(
                 applyFieldHooks({
-                  data: doc as Record<string, unknown>,
+                  data: doc,
                   fieldHooks: exportFieldHooks,
                   fields: collectionConfig.flattenedFields,
                   format,

@@ -19,7 +19,7 @@ export const getTransaction = async <T extends DrizzleAdapter = DrizzleAdapter>(
 ): Promise<T['drizzle']> => {
   if (!req?.transactionID) {
     if (shouldReadFromPrimary(adapter)) {
-      return adapter.primaryDrizzle as T['drizzle']
+      return adapter.primaryDrizzle
     }
     return adapter.drizzle
   }

@@ -29,7 +29,10 @@ import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
-type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = Pick<
+  FindOptions<TSlug, TSelect>,
+  'select'
+> & {
   /**
    * the Collection slug to operate against.
    */
@@ -110,14 +113,14 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-} & Pick<FindOptions<TSlug, TSelect>, 'select'>
+}
 
 export type Options<
   TSlug extends CollectionSlug,
   TSelect extends SelectType,
 > = GeneratedTypes extends { strictDraftTypes: true }
   ? CollectionsWithoutDrafts extends TSlug
-    ? {
+    ? BaseOptions<TSlug, TSelect> & {
         /**
          * The data for the document to create.
          */
@@ -126,42 +129,42 @@ export type Options<
          * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
          */
         draft?: boolean
-      } & BaseOptions<TSlug, TSelect>
+      }
     : TSlug extends CollectionsWithoutDrafts
-      ? {
+      ? BaseOptions<TSlug, TSelect> & {
           data: RequiredDataFromCollectionSlug<TSlug>
           /**
            * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
            */
           draft?: never
-        } & BaseOptions<TSlug, TSelect>
-      : (
-          | {
-              /**
-               * The data for the document to create.
-               */
-              data: RequiredDataFromCollectionSlug<TSlug>
-              /**
-               * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-               * Omit this property or set to `false` to create a published document.
-               */
-              draft?: false
-            }
-          | {
-              /**
-               * The data for the document to create.
-               * When creating a draft, required fields are optional as validation is skipped by default.
-               */
-              data: DraftDataFromCollectionSlug<TSlug>
-              /**
-               * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-               */
-              draft: true
-            }
-        ) &
-          BaseOptions<TSlug, TSelect>
+        }
+      : BaseOptions<TSlug, TSelect> &
+          (
+            | {
+                /**
+                 * The data for the document to create.
+                 */
+                data: RequiredDataFromCollectionSlug<TSlug>
+                /**
+                 * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+                 * Omit this property or set to `false` to create a published document.
+                 */
+                draft?: false
+              }
+            | {
+                /**
+                 * The data for the document to create.
+                 * When creating a draft, required fields are optional as validation is skipped by default.
+                 */
+                data: DraftDataFromCollectionSlug<TSlug>
+                /**
+                 * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+                 */
+                draft: true
+              }
+          )
   :
-      | ({
+      | (BaseOptions<TSlug, TSelect> & {
           /**
            * The data for the document to create.
            */
@@ -170,8 +173,8 @@ export type Options<
            * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
            */
           draft?: false
-        } & BaseOptions<TSlug, TSelect>)
-      | ({
+        })
+      | (BaseOptions<TSlug, TSelect> & {
           /**
            * The data for the document to create.
            * When creating a draft, required fields are optional as validation is skipped by default.
@@ -181,7 +184,7 @@ export type Options<
            * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
            */
           draft: true
-        } & BaseOptions<TSlug, TSelect>)
+        })
 
 export async function createLocal<
   TSlug extends CollectionSlug,

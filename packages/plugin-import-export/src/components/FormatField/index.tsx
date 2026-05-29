@@ -23,8 +23,7 @@ export const FormatField: SelectFieldClientComponent = (props) => {
   const { value: targetCollectionSlug } = useField<string>({ path: 'collectionSlug' })
 
   const targetCollectionConfig = getEntityConfig({ collectionSlug: targetCollectionSlug })
-  const forcedFormat = targetCollectionConfig?.admin?.custom?.['plugin-import-export']
-    ?.exportFormat as Format | undefined
+  const forcedFormat = targetCollectionConfig?.admin?.custom?.['plugin-import-export']?.exportFormat
 
   const options = useMemo<ReactSelectOption[]>(() => {
     if (forcedFormat) {
@@ -50,9 +49,9 @@ export const FormatField: SelectFieldClientComponent = (props) => {
         return
       }
       if (Array.isArray(selected)) {
-        setValue((selected[0]?.value as Format) ?? 'csv')
+        setValue(selected[0]?.value ?? 'csv')
       } else {
-        setValue((selected?.value as Format) ?? 'csv')
+        setValue(selected?.value ?? 'csv')
       }
     },
     [forcedFormat, setValue],

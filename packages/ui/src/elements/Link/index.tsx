@@ -19,7 +19,7 @@ function isModifiedEvent(event: React.MouseEvent): boolean {
   )
 }
 
-type Props = {
+type Props = LinkAdapterProps & {
   /**
    * Force a hard navigation using window.location instead of client-side routing
    */
@@ -30,7 +30,7 @@ type Props = {
    * @default true
    */
   preventDefault?: boolean
-} & { ref?: React.Ref<HTMLAnchorElement> } & LinkAdapterProps
+} & { ref?: React.Ref<HTMLAnchorElement> }
 
 export const Link: React.FC<Props> = ({
   children,

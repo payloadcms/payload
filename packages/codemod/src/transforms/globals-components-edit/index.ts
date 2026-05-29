@@ -6,7 +6,7 @@ import type { Transform } from '../../types.js'
 
 const isObjectLiteral = (
   property: PropertyAssignment | undefined,
-): property is { getInitializer(): ObjectLiteralExpression } & PropertyAssignment => {
+): property is PropertyAssignment & { getInitializer(): ObjectLiteralExpression } => {
   if (!property) {
     return false
   }

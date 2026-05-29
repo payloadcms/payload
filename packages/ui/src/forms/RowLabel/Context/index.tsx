@@ -16,9 +16,9 @@ const RowLabel = React.createContext<RowLabelType>({
   rowNumber: undefined,
 })
 
-type Props<T> = {
+type Props<T> = Omit<RowLabelType<T>, 'data'> & {
   readonly children: React.ReactNode
-} & Omit<RowLabelType<T>, 'data'>
+}
 
 export const RowLabelProvider: React.FC<Props<unknown>> = ({ children, path, rowNumber }) => {
   const { getDataByPath, getSiblingData } = useWatchForm()

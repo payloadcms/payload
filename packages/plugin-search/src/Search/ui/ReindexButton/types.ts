@@ -8,9 +8,9 @@ export type ReindexButtonProps = {
   searchSlug: string
 }
 
-export type ReindexButtonServerProps = {
+export type ReindexButtonServerProps = Omit<ReindexButtonProps, 'collectionLabels'> & {
   collectionLabels: CollectionLabels
-} & Omit<ReindexButtonProps, 'collectionLabels'>
+}
 
 export type SearchReindexButtonClientComponent = ReindexButtonProps
 

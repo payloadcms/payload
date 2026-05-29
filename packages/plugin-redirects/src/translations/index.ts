@@ -13,7 +13,7 @@ export const translations = {
   fr,
   ja,
   pt,
-  sv
+  sv,
 }
 
 export type RedirectsTranslations = GenericTranslationsObject

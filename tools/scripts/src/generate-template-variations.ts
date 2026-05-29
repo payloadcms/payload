@@ -22,7 +22,7 @@ import path from 'path'
 
 type TemplateVariation = {
   /** Base template to copy from */
-  base?: 'none' | ({} & string)
+  base?: 'none' | (string & {})
   configureConfig?: boolean
   db: DbType
   /** Directory in templates dir */

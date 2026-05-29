@@ -6,7 +6,7 @@ import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 function hasKey<T, K extends string>(
   obj: null | T | undefined,
   key: K,
-): obj is { [P in K]: PayloadComponent | PayloadComponent[] } & T {
+): obj is T & { [P in K]: PayloadComponent | PayloadComponent[] } {
   return obj != null && Object.prototype.hasOwnProperty.call(obj, key)
 }
 

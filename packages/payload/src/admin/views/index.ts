@@ -41,7 +41,7 @@ export type AdminViewClientProps = {
   viewType: ViewTypes
 }
 
-export type AdminViewServerPropsOnly = {
+export type AdminViewServerPropsOnly = ServerProps & {
   readonly clientConfig: ClientConfig
   readonly collectionConfig?: SanitizedCollectionConfig
   readonly disableActions?: boolean
@@ -59,7 +59,7 @@ export type AdminViewServerPropsOnly = {
   readonly redirectAfterDuplicate?: boolean
   readonly redirectAfterRestore?: boolean
   readonly viewActions?: CustomComponent[]
-} & ServerProps
+}
 
 export type AdminViewServerProps = AdminViewClientProps & AdminViewServerPropsOnly
 
@@ -101,7 +101,7 @@ export type ViewTypes =
   | 'trash'
   | 'verify'
   | 'version'
-  | ({} & string)
+  | (string & {})
 
 export type ServerPropsFromView = {
   collectionConfig?: SanitizedConfig['collections'][number]
@@ -115,6 +115,6 @@ export type ViewDescriptionClientProps = {
   description: StaticDescription
 }
 
-export type ViewDescriptionServerPropsOnly = {} & ServerProps
+export type ViewDescriptionServerPropsOnly = ServerProps & {}
 
 export type ViewDescriptionServerProps = ViewDescriptionClientProps & ViewDescriptionServerPropsOnly

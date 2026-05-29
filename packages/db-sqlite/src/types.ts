@@ -30,7 +30,7 @@ type SQLiteSchemaHookArgs = {
 
 export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
 
-export type Args = {
+export type Args = BaseSQLiteArgs & {
   /**
    * Transform the schema after it's built.
    * You can use it to customize the schema with features that aren't supported by Payload.
@@ -63,7 +63,7 @@ export type Args = {
   busyTimeout?: number
   client: Config
   wal?: boolean | Partial<WalConfig>
-} & BaseSQLiteArgs
+}
 
 export type GenericColumns = {
   [x: string]: AnySQLiteColumn
@@ -130,7 +130,7 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
   ? T['schema']
   : GeneratedDatabaseSchema['schemaUntyped']
 
-type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
+type Drizzle = LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>> & { $client: Client }
 
 export type WalConfig = {
   /**
@@ -151,17 +151,17 @@ export type WalConfig = {
   synchronous: 'EXTRA' | 'FULL' | 'NORMAL' | 'OFF'
 }
 
-export type SQLiteAdapter = {
-  busyTimeout: number
-  client: Client
-  clientConfig: Args['client']
-  drizzle: Drizzle
-  /**
-   * Write-Ahead Logging (WAL) configuration. If false or not set, WAL mode is disabled.
-   */
-  wal: false | WalConfig
-} & BaseSQLiteAdapter &
-  SQLiteDrizzleAdapter
+export type SQLiteAdapter = BaseSQLiteAdapter &
+  SQLiteDrizzleAdapter & {
+    busyTimeout: number
+    client: Client
+    clientConfig: Args['client']
+    drizzle: Drizzle
+    /**
+     * Write-Ahead Logging (WAL) configuration. If false or not set, WAL mode is disabled.
+     */
+    wal: false | WalConfig
+  }
 
 export type IDType = 'integer' | 'numeric' | 'text'
 
@@ -230,8 +230,8 @@ export type MigrateDownArgs = {
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
-      DrizzleAdapter {
+    extends DrizzleAdapter,
+      Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'> {
     beginTransaction: (options?: SQLiteTransactionConfig) => Promise<null | number | string>
     busyTimeout: number
     drizzle: Drizzle

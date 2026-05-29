@@ -36,7 +36,10 @@ import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
 
-export type Arguments<TSlug extends CollectionSlug> = {
+export type Arguments<TSlug extends CollectionSlug> = Pick<
+  FindOptions<TSlug, SelectType>,
+  'select'
+> & {
   autosave?: boolean
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
@@ -62,7 +65,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   trash?: boolean
   unpublishAllLocales?: boolean
   where: Where
-} & Pick<FindOptions<TSlug, SelectType>, 'select'>
+}
 
 export const updateOperation = async <
   TSlug extends CollectionSlug,

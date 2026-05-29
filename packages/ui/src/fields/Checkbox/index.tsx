@@ -35,7 +35,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     disableFormData,
     field,
     field: {
-      admin: { className, description } = {} as CheckboxFieldClientProps['field']['admin'],
+      admin: { className, description } = {},
       label,
       required,
     } = {} as CheckboxFieldClientProps['field'],

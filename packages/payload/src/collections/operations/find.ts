@@ -35,7 +35,7 @@ import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 
-export type Arguments = {
+export type Arguments = Pick<FindOptions<string, SelectType>, 'select'> & {
   collection: Collection
   currentDepth?: number
   depth?: number
@@ -53,7 +53,7 @@ export type Arguments = {
   sort?: Sort
   trash?: boolean
   where?: Where
-} & Pick<FindOptions<string, SelectType>, 'select'>
+}
 
 const lockDurationDefault = 300 // Default 5 minutes in seconds
 

@@ -49,26 +49,26 @@ export type DeleteByIDOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
-> = {
+> = DeleteBaseOptions<T, TSlug, TSelect> & {
   /**
    * The ID of the document to delete.
    */
   id: number | string
 
   where?: never
-} & DeleteBaseOptions<T, TSlug, TSelect>
+}
 
 export type DeleteManyOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
-> = {
+> = DeleteBaseOptions<T, TSlug, TSelect> & {
   id?: never
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where: Where
-} & DeleteBaseOptions<T, TSlug, TSelect>
+}
 
 export type DeleteOptions<
   T extends PayloadTypesShape,

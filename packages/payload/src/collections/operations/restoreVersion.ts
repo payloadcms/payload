@@ -24,7 +24,7 @@ import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVe
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
-export type Arguments = {
+export type Arguments = Pick<FindOptions<string, SelectType>, 'select'> & {
   collection: Collection
   currentDepth?: number
   depth?: number
@@ -36,7 +36,7 @@ export type Arguments = {
   populate?: PopulateType
   req: PayloadRequest
   showHiddenFields?: boolean
-} & Pick<FindOptions<string, SelectType>, 'select'>
+}
 
 export const restoreVersionOperation = async <
   TData extends JsonObject & TypeWithID = JsonObject & TypeWithID,

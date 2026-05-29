@@ -25,11 +25,12 @@ import type {
 } from '../types.js'
 
 export type ClientTab =
-  | ({ fields: ClientField[]; passesCondition?: boolean; readonly path?: string } & Omit<
-      NamedTab,
-      'fields'
-    >)
-  | ({ fields: ClientField[]; passesCondition?: boolean } & Omit<UnnamedTab, 'fields'>)
+  | (Omit<NamedTab, 'fields'> & {
+      fields: ClientField[]
+      passesCondition?: boolean
+      readonly path?: string
+    })
+  | (Omit<UnnamedTab, 'fields'> & { fields: ClientField[]; passesCondition?: boolean })
 
 type TabsFieldBaseClientProps = FieldPaths
 

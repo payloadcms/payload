@@ -24,9 +24,9 @@ import type { GenerateImage } from '../../types.js'
 
 import { Pill } from '../../ui/Pill.js'
 
-type MetaImageProps = {
+type MetaImageProps = UploadFieldClientProps & {
   readonly hasGenerateImageFn: boolean
-} & UploadFieldClientProps
+}
 
 export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
   const {

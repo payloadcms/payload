@@ -25,9 +25,12 @@ export type InitReqResult = {
   req: PayloadRequest
 }
 
-export type DefaultServerFunctionArgs = {
+export type DefaultServerFunctionArgs = Pick<
+  InitReqResult,
+  'cookies' | 'locale' | 'permissions' | 'req'
+> & {
   importMap: ImportMap
-} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
+}
 
 export type ServerFunctionArgs = {
   args: Record<string, unknown>
@@ -52,7 +55,7 @@ export type ServerFunctionConfig = {
 }
 
 export type ServerFunctionHandler = (
-  args: {
+  args: ServerFunctionClientArgs & {
     config: Promise<SanitizedConfig> | SanitizedConfig
     importMap: ImportMap
     /**
@@ -80,10 +83,10 @@ export type ServerFunctionHandler = (
      * }, [serverFunction])
      */
     serverFunctions?: Record<string, ServerFunction<any, any>>
-  } & ServerFunctionClientArgs,
+  },
 ) => Promise<unknown>
 
-export type ListQuery = {
+export type ListQuery = Record<string, unknown> & {
   /*
    * This is an of strings, i.e. `['title', '-slug']`
    * Use `transformColumnsToPreferences` and `transformColumnsToSearchParams` to convert it back and forth
@@ -104,7 +107,7 @@ export type ListQuery = {
   search?: string
   sort?: Sort
   where?: Where
-} & Record<string, unknown>
+}
 
 export type BuildTableStateArgs = {
   /**
@@ -129,8 +132,8 @@ export type BuildTableStateArgs = {
   tableAppearance?: 'condensed' | 'default'
 }
 
-export type SlugifyServerFunctionArgs = {
+export type SlugifyServerFunctionArgs = Omit<Parameters<Slugify>[0], 'req'> & {
   collectionSlug?: CollectionSlug
   globalSlug?: GlobalSlug
   path?: FieldPaths['path']
-} & Omit<Parameters<Slugify>[0], 'req'>
+}

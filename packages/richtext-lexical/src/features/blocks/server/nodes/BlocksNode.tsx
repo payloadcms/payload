@@ -18,23 +18,26 @@ import {
 
 import type { StronglyTypedLeafNode } from '../../../../types/nodeTypes.js'
 
-type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = {
+type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = TBlockFields & {
   /** Block form data */
   blockName: string
   blockType: string
-} & TBlockFields
+}
 
-export type BlockFields<TBlockFields extends JsonObject = JsonObject> = {
-  id: string
-} & BaseBlockFields<TBlockFields>
+export type BlockFields<TBlockFields extends JsonObject = JsonObject> =
+  BaseBlockFields<TBlockFields> & {
+    id: string
+  }
 
-export type BlockFieldsOptionalID<TBlockFields extends JsonObject = JsonObject> = {
-  id?: string
-} & BaseBlockFields<TBlockFields>
+export type BlockFieldsOptionalID<TBlockFields extends JsonObject = JsonObject> =
+  BaseBlockFields<TBlockFields> & {
+    id?: string
+  }
 
-export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = {
-  fields: BlockFields<TBlockFields>
-} & StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'block'>
+export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> =
+  StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'block'> & {
+    fields: BlockFields<TBlockFields>
+  }
 
 export class ServerBlockNode extends DecoratorBlockNode {
   __cacheBuster: number

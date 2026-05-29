@@ -35,7 +35,7 @@ type TableGridPopupProps = {
   isOpen: boolean
   onClose: () => void
   onInsert: (cols: number, rows: number) => void
-  position: { left: number; top: number } | null
+  position: null | { left: number; top: number }
 }
 
 export function TableGridPopup({

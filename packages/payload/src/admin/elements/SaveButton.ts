@@ -4,6 +4,6 @@ export type SaveButtonClientProps = {
   label?: string
 }
 
-export type SaveButtonServerPropsOnly = {} & ServerProps
+export type SaveButtonServerPropsOnly = ServerProps & {}
 
 export type SaveButtonServerProps = SaveButtonClientProps & SaveButtonServerPropsOnly

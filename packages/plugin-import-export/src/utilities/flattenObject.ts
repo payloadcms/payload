@@ -10,7 +10,7 @@ type Args = {
   data: Record<string, unknown>
   exportFieldHooks: Record<string, ExportFieldHookEntry>
   fields?: string[]
-  format: 'csv' | 'json' | ({} & string)
+  format: 'csv' | 'json' | (string & {})
   path?: string
   req: PayloadRequest
 }

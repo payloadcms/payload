@@ -22,10 +22,10 @@ import './index.scss'
 
 const baseClass = 'tenantField'
 
-type Props = {
+type Props = RelationshipFieldClientProps & {
   debug?: boolean
   unique?: boolean
-} & RelationshipFieldClientProps
+}
 
 export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   const { entityType, options, selectedTenantID, setEntityType, setTenant } = useTenantSelection()

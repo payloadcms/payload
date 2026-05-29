@@ -50,7 +50,7 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
       data,
       entity: config,
       entityType: 'collection',
-      fetchData: id ? true : (false as true),
+      fetchData: id ? true : false,
       operations: collectionOperations,
       req,
     })

@@ -145,9 +145,9 @@ export type BinScriptConfig = {
 
 export type BinScript = (config: SanitizedConfig) => Promise<void> | void
 
-type Prettify<T> = {
+type Prettify<T> = NonNullable<unknown> & {
   [K in keyof T]: T[K]
-} & NonNullable<unknown>
+}
 
 /**
  * @experimental The plugin API (`order`, `slug`, `options`) may change before being declared stable.
@@ -202,9 +202,9 @@ export interface StorageAdapter {
  *
  * @experimental
  */
-export type PluginsMap = {
-  [K in keyof RegisteredPlugins]: ({ options: RegisteredPlugins[K] } & Plugin) | undefined
-} & Record<string, Plugin | undefined>
+export type PluginsMap = Record<string, Plugin | undefined> & {
+  [K in keyof RegisteredPlugins]: (Plugin & { options: RegisteredPlugins[K] }) | undefined
+}
 
 export type LivePreviewURLType = null | string | undefined
 
@@ -248,10 +248,10 @@ export type LivePreviewConfig = {
     | LivePreviewURLType
 }
 
-export type RootLivePreviewConfig = {
+export type RootLivePreviewConfig = LivePreviewConfig & {
   collections?: string[]
   globals?: string[]
-} & LivePreviewConfig
+}
 
 export type OGImageConfig = {
   alt?: string
@@ -268,7 +268,7 @@ export type OGImageConfig = {
  */
 type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
 
-export type MetaConfig = {
+export type MetaConfig = DeepClone<Metadata> & {
   /**
    * When `static`, a pre-made image will be used for all pages.
    * When `dynamic`, a unique image will be generated for each page based on page content and given overrides.
@@ -281,7 +281,7 @@ export type MetaConfig = {
    * @example `" - Custom CMS"`
    */
   titleSuffix?: string
-} & DeepClone<Metadata>
+}
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<RootLivePreviewConfig, 'url'>
 
@@ -321,9 +321,9 @@ export type GraphQLInfo = {
 }
 export type GraphQLExtension = (
   graphQL: typeof GraphQL,
-  context: {
+  context: GraphQLInfo & {
     config: SanitizedConfig
-  } & GraphQLInfo,
+  },
 ) => Record<string, unknown>
 
 export type InitOptions = {
@@ -456,21 +456,21 @@ type BaseDocumentViewConfig = {
   To render just a tab component without an accompanying view, you can omit the `path` and `Component` properties altogether.
 */
 export type CustomDocumentViewConfig =
-  | ({
+  | (BaseDocumentViewConfig & {
       Component: DocumentViewComponent
       path: `/${string}`
-    } & BaseDocumentViewConfig)
-  | ({
+    })
+  | (BaseDocumentViewConfig & {
       Component?: DocumentViewComponent
       path?: never
-    } & BaseDocumentViewConfig)
+    })
 
 /*
   If your view does originates from a "known" key, e.g. `api`, then it is considered a "default" view and cannot accept a `path`, etc.
 */
-export type DefaultDocumentViewConfig = {
+export type DefaultDocumentViewConfig = BaseDocumentViewConfig & {
   Component?: DocumentViewComponent
-} & BaseDocumentViewConfig
+}
 
 export type DocumentViewConfig = CustomDocumentViewConfig | DefaultDocumentViewConfig
 
@@ -528,9 +528,9 @@ export type TimezonesConfig = {
   supportedTimezones?: SupportedTimezonesFn | Timezone[]
 }
 
-type SanitizedTimezoneConfig = {
+type SanitizedTimezoneConfig = Omit<TimezonesConfig, 'supportedTimezones'> & {
   supportedTimezones: Timezone[]
-} & Omit<TimezonesConfig, 'supportedTimezones'>
+}
 
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
@@ -587,17 +587,17 @@ export type BaseLocalizationConfig = {
 }
 
 export type LocalizationConfigWithNoLabels = Prettify<
-  {
+  BaseLocalizationConfig & {
     /**
      * List of supported locales
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     locales: string[]
-  } & BaseLocalizationConfig
+  }
 >
 
 export type LocalizationConfigWithLabels = Prettify<
-  {
+  BaseLocalizationConfig & {
     /**
      * List of supported locales with labels
      * @example {
@@ -607,17 +607,17 @@ export type LocalizationConfigWithLabels = Prettify<
      * }
      */
     locales: Locale[]
-  } & BaseLocalizationConfig
+  }
 >
 
 export type SanitizedLocalizationConfig = Prettify<
-  {
+  LocalizationConfigWithLabels & {
     /**
      * List of supported locales
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     localeCodes: string[]
-  } & LocalizationConfigWithLabels
+  }
 >
 
 /**
@@ -673,7 +673,7 @@ export interface AdminDependencies {
   [key: string]: AdminComponent | AdminFunction
 }
 
-export type FetchAPIFileUploadOptions = {
+export type FetchAPIFileUploadOptions = Partial<BusboyConfig> & {
   /**
    * Returns a HTTP 413 when the file is bigger than the size limit if `true`.
    * Otherwise, it will add a `truncated = true` to the resulting file structure.
@@ -769,7 +769,7 @@ export type FetchAPIFileUploadOptions = {
    * @default false
    */
   useTempFiles?: boolean | undefined
-} & Partial<BusboyConfig>
+}
 
 export type ErrorResult = {
   data?: any
@@ -782,11 +782,11 @@ export type ErrorResult = {
   stack?: string
 }
 
-export type AfterErrorResult = {
+export type AfterErrorResult = void | {
   graphqlResult?: GraphQLFormattedError
   response?: Partial<ErrorResult> & Record<string, unknown>
   status?: number
-} | void
+}
 
 export type AfterErrorHookArgs = {
   /** The Collection that the hook is operating on. This will be undefined if the hook is executed from a non-collection endpoint or GraphQL. */
@@ -909,6 +909,7 @@ export type Config = {
   admin?: {
     /** Automatically log in as a user */
     autoLogin?:
+      | false
       | {
           /**
            * The email address of the user to login as
@@ -925,7 +926,6 @@ export type Config = {
           /** The username of the user to login as */
           username?: string
         }
-      | false
     /**
      * Automatically refresh user tokens for users logged into the dashboard
      *
@@ -1324,7 +1324,7 @@ export type Config = {
   }
   /** i18n config settings */
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  i18n?: I18nOptions<{} | DefaultTranslationsObject> // loosen the type here to allow for custom translations
+  i18n?: I18nOptions<DefaultTranslationsObject | {}> // loosen the type here to allow for custom translations
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
   indexSortableFields?: boolean
   /**
@@ -1370,7 +1370,7 @@ export type Config = {
    *
    * ```
    */
-  logger?: 'sync' | { destination?: DestinationStream; options: LoggerOptions } | PayloadLogger
+  logger?: 'sync' | PayloadLogger | { destination?: DestinationStream; options: LoggerOptions }
 
   /**
    * Override the log level of errors for Payload's error handler or disable logging with `false`.
@@ -1553,6 +1553,7 @@ export type Config = {
 
     /** Disable declare block in generated types file */
     declare?:
+      | false
       | {
           /**
            * @internal internal use only to allow for multiple declarations within a monorepo and suppress the "Duplicate identifier GeneratedTypes" error
@@ -1563,7 +1564,6 @@ export type Config = {
            */
           ignoreTSError?: boolean
         }
-      | false
 
     /** Filename to write the generated types to */
     outputFile?: string
@@ -1621,32 +1621,7 @@ export type Config = {
  * @todo remove the `DeepRequired` in v4.
  * We don't actually guarantee that all properties are set when sanitizing configs.
  */
-export type SanitizedConfig = {
-  admin: {
-    timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']>
-  blocks?: FlattenedBlock[]
-  collections: SanitizedCollectionConfig[]
-  /** Default richtext editor to use for richText fields */
-  editor?: RichTextAdapter<any, any, any>
-  endpoints: Endpoint[]
-  globals: SanitizedGlobalConfig[]
-  i18n: Required<I18nOptions>
-  jobs: SanitizedJobsConfig
-  localization: false | SanitizedLocalizationConfig
-  paths: {
-    config: string
-    configDir: string
-    rawConfig: string
-  }
-  storage: StorageAdapter[]
-  upload: {
-    /**
-     * Deduped list of adapters used in the project
-     */
-    adapters: string[]
-  } & FetchAPIFileUploadOptions
-} & Omit<
+export type SanitizedConfig = Omit<
   // TODO: DeepRequired breaks certain, advanced TypeScript types / certain type information is lost. We should remove it when possible.
   // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
   // the result type is different
@@ -1662,7 +1637,32 @@ export type SanitizedConfig = {
   | 'localization'
   | 'storage'
   | 'upload'
->
+> & {
+  admin: DeepRequired<Config['admin']> & {
+    timezones: SanitizedTimezoneConfig
+  }
+  blocks?: FlattenedBlock[]
+  collections: SanitizedCollectionConfig[]
+  /** Default richtext editor to use for richText fields */
+  editor?: RichTextAdapter<any, any, any>
+  endpoints: Endpoint[]
+  globals: SanitizedGlobalConfig[]
+  i18n: Required<I18nOptions>
+  jobs: SanitizedJobsConfig
+  localization: false | SanitizedLocalizationConfig
+  paths: {
+    config: string
+    configDir: string
+    rawConfig: string
+  }
+  storage: StorageAdapter[]
+  upload: FetchAPIFileUploadOptions & {
+    /**
+     * Deduped list of adapters used in the project
+     */
+    adapters: string[]
+  }
+}
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
 
@@ -1779,10 +1779,10 @@ export type SharedEntityViews = {
    * ```
    */
   [key: string]:
-    | { actions?: CustomComponent[]; Component?: PayloadComponent }
     | AdminViewConfig
     | EditConfig
     | undefined
+    | { actions?: CustomComponent[]; Component?: PayloadComponent }
   /**
    * Replace, modify, or add new "document" views.
    * @link https://payloadcms.com/docs/custom-components/document-views

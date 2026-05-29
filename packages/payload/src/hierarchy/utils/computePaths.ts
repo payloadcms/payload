@@ -207,7 +207,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
       }
 
       return {
-        slugPath: slugValue !== undefined ? (slugValue as string) : slugify(titleValue as string),
+        slugPath: slugValue !== undefined ? slugValue : slugify(titleValue as string),
         titlePath: titleValue as string,
       }
     }
@@ -425,7 +425,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
       }
 
       return {
-        slugPath: slugValue !== undefined ? (slugValue as string) : slugify(titleValue as string),
+        slugPath: slugValue !== undefined ? slugValue : slugify(titleValue as string),
         titlePath: titleValue as string,
       }
     }
@@ -583,8 +583,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
 
     // Single locale case
     return {
-      slugPath:
-        rootSlugValue !== undefined ? (rootSlugValue as string) : slugify(titleValue as string),
+      slugPath: rootSlugValue !== undefined ? rootSlugValue : slugify(titleValue as string),
       titlePath: titleValue as string,
     }
   }

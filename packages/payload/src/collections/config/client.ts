@@ -43,12 +43,11 @@ export type ServerOnlyUploadProperties = keyof Pick<
   | 'withMetadata'
 >
 
-export type ClientCollectionConfig = {
-  admin: {
-    description?: StaticDescription
-    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
-    preview?: boolean
-  } & Omit<
+export type ClientCollectionConfig = Omit<
+  SanitizedCollectionConfig,
+  'admin' | 'auth' | 'fields' | 'hierarchy' | 'labels' | ServerOnlyCollectionProperties
+> & {
+  admin: Omit<
     SanitizedCollectionConfig['admin'],
     | 'components'
     | 'description'
@@ -57,21 +56,21 @@ export type ClientCollectionConfig = {
     | 'livePreview'
     | 'preview'
     | ServerOnlyCollectionAdminProperties
-  >
-  auth?: { verify?: true } & Omit<
-    SanitizedCollectionConfig['auth'],
-    'forgotPassword' | 'strategies' | 'verify'
-  >
+  > & {
+    description?: StaticDescription
+    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+    preview?: boolean
+  }
+  auth?: Omit<SanitizedCollectionConfig['auth'], 'forgotPassword' | 'strategies' | 'verify'> & {
+    verify?: true
+  }
   fields: ClientField[]
   hierarchy?: ClientHierarchyConfig | false
   labels: {
     plural: StaticLabel
     singular: StaticLabel
   }
-} & Omit<
-  SanitizedCollectionConfig,
-  'admin' | 'auth' | 'fields' | 'hierarchy' | 'labels' | ServerOnlyCollectionProperties
->
+}
 
 const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
   'hooks',
@@ -130,7 +129,7 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.admin = {} as ClientCollectionConfig['admin']
+        clientCollection.admin = {}
 
         for (const adminKey in collection.admin) {
           if (serverOnlyCollectionAdminProperties.includes(adminKey as any)) {
@@ -185,7 +184,7 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.auth = {} as { verify?: true } & SanitizedCollectionConfig['auth']
+        clientCollection.auth = {} as SanitizedCollectionConfig['auth'] & { verify?: true }
 
         if (collection.auth.cookies) {
           clientCollection.auth.cookies = collection.auth.cookies
@@ -250,7 +249,7 @@ export const createClientCollectionConfig = ({
 
         // Strip slugify function as it can't cross server-client boundary
         const { slugify: _slugify, ...clientHierarchy } = collection.hierarchy
-        clientCollection.hierarchy = clientHierarchy as ClientHierarchyConfig
+        clientCollection.hierarchy = clientHierarchy
 
         break
       }

@@ -22,24 +22,24 @@ import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
-export type GlobalFindOneArgs = {
-  /**
-   * You may pass the document data directly which will skip the `db.findOne` database query.
-   * This is useful if you want to use this endpoint solely for running hooks and populating data.
-   */
-  data?: Record<string, unknown>
-  depth?: number
-  disableErrors?: boolean
-  draft?: boolean
-  globalConfig: SanitizedGlobalConfig
-  includeLockStatus?: boolean
-  overrideAccess?: boolean
-  populate?: PopulateType
-  req: PayloadRequest
-  showHiddenFields?: boolean
-  slug: string
-} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
-  Pick<FindOptions<string, SelectType>, 'select'>
+export type GlobalFindOneArgs = Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
+  Pick<FindOptions<string, SelectType>, 'select'> & {
+    /**
+     * You may pass the document data directly which will skip the `db.findOne` database query.
+     * This is useful if you want to use this endpoint solely for running hooks and populating data.
+     */
+    data?: Record<string, unknown>
+    depth?: number
+    disableErrors?: boolean
+    draft?: boolean
+    globalConfig: SanitizedGlobalConfig
+    includeLockStatus?: boolean
+    overrideAccess?: boolean
+    populate?: PopulateType
+    req: PayloadRequest
+    showHiddenFields?: boolean
+    slug: string
+  }
 
 export const findOneOperation = async <T extends Record<string, unknown>>(
   args: GlobalFindOneArgs,

@@ -287,7 +287,7 @@ export function $isLinkNode(node: LexicalNode | null | undefined): node is LinkN
 export const TOGGLE_LINK_COMMAND: LexicalCommand<LinkPayload | null> =
   createCommand('TOGGLE_LINK_COMMAND')
 
-export function $toggleLink(payload: ({ fields: LinkFields } & LinkPayload) | null): void {
+export function $toggleLink(payload: (LinkPayload & { fields: LinkFields }) | null): void {
   const selection = $getSelection()
 
   if (!$isRangeSelection(selection) && (payload === null || !payload.selectedNodes?.length)) {

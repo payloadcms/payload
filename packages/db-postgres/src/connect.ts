@@ -62,7 +62,7 @@ export const connect: Connect = async function connect(
     this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
 
     if (this.readReplicaOptions) {
-      this.primaryDrizzle = this.drizzle as any
+      this.primaryDrizzle = this.drizzle
       const readReplicas = this.readReplicaOptions.map((connectionString) => {
         const options = {
           ...this.poolOptions,

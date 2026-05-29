@@ -5,15 +5,15 @@ import Stripe from 'stripe'
 
 import type { StripePluginConfig } from '../types.js'
 
-type HookArgsWithCustomCollection = {
+type HookArgsWithCustomCollection = Omit<Parameters<CollectionAfterDeleteHook>[0], 'collection'> & {
   collection: CollectionConfig
-} & Omit<Parameters<CollectionAfterDeleteHook>[0], 'collection'>
+}
 
 export type CollectionAfterDeleteHookWithArgs = (
-  args: {
+  args: HookArgsWithCustomCollection & {
     collection?: CollectionConfig
     pluginConfig?: StripePluginConfig
-  } & HookArgsWithCustomCollection,
+  },
 ) => Promise<void>
 
 export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) => {

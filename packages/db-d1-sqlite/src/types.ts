@@ -25,7 +25,7 @@ type SQLiteSchemaHookArgs = {
 
 export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
 
-export type Args = {
+export type Args = BaseSQLiteArgs & {
   binding: AnyD1Database
   /**
    * Experimental. Enables read replicas support with the `first-primary` strategy.
@@ -36,7 +36,7 @@ export type Args = {
    * ```readReplicas: 'first-primary'```
    */
   readReplicas?: 'first-primary'
-} & BaseSQLiteArgs
+}
 
 export type GenericColumns = {
   [x: string]: AnySQLiteColumn
@@ -102,22 +102,22 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
   ? T['schema']
   : GeneratedDatabaseSchema['schemaUntyped']
 
-type Drizzle = { $client: AnyD1Database } & DrizzleD1Database<Record<string, any>>
+type Drizzle = DrizzleD1Database<Record<string, any>> & { $client: AnyD1Database }
 
-export type SQLiteD1Adapter = {
-  binding: Args['binding']
-  client: AnyD1Database
-  drizzle: Drizzle
-  /**
-   * Experimental. Enables read replicas support with the `first-primary` strategy.
-   *
-   * @example
-   *
-   * ```readReplicas: 'first-primary'```
-   */
-  readReplicas?: 'first-primary'
-} & BaseSQLiteAdapter &
-  SQLiteDrizzleAdapter
+export type SQLiteD1Adapter = BaseSQLiteAdapter &
+  SQLiteDrizzleAdapter & {
+    binding: Args['binding']
+    client: AnyD1Database
+    drizzle: Drizzle
+    /**
+     * Experimental. Enables read replicas support with the `first-primary` strategy.
+     *
+     * @example
+     *
+     * ```readReplicas: 'first-primary'```
+     */
+    readReplicas?: 'first-primary'
+  }
 
 export type IDType = 'integer' | 'numeric' | 'text'
 
@@ -186,8 +186,8 @@ export type MigrateDownArgs = {
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
-      DrizzleAdapter {
+    extends DrizzleAdapter,
+      Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'> {
     beginTransaction: (options?: SQLiteTransactionConfig) => Promise<null | number | string>
     drizzle: Drizzle
     /**

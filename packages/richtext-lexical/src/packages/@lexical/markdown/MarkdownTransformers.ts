@@ -94,6 +94,7 @@ export type MultilineElementTransformer = {
    * This regex determines when to stop matching. Anything in between regExpStart and regExpEnd will be matched
    */
   regExpEnd?:
+    | RegExp
     | {
         /**
          * Whether the end match is optional. If true, the end match is not required to match for the transformer to be triggered.
@@ -102,7 +103,6 @@ export type MultilineElementTransformer = {
         optional?: true
         regExp: RegExp
       }
-    | RegExp
   /**
    * This regex determines when to start matching
    */

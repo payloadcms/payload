@@ -23,9 +23,9 @@ const baseClass = 'nav'
 
 import { getNavPrefs } from './getNavPrefs.js'
 
-export type NavProps = {
+export type NavProps = ServerProps & {
   req?: PayloadRequest
-} & ServerProps
+}
 
 export const DefaultNav: React.FC<NavProps> = async (props) => {
   const {

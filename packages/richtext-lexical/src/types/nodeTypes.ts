@@ -34,10 +34,10 @@ export type StronglyTypedElementNode<
   TBase,
   TType extends string,
   TChildren extends SerializedLexicalNode = SerializedLexicalNode,
-> = {
+> = Omit<TBase, 'children' | 'type'> & {
   children: TChildren[]
   type: TType
-} & Omit<TBase, 'children' | 'type'>
+}
 
 /**
  * Helper type to create strongly typed leaf nodes (nodes without children).
@@ -46,9 +46,12 @@ export type StronglyTypedElementNode<
  * @param TBase - The base Lexical node type (e.g., _SerializedTextNode)
  * @param TType - The node type string (e.g., 'text')
  */
-export type StronglyTypedLeafNode<TBase, TType extends string> = {
+export type StronglyTypedLeafNode<TBase, TType extends string> = Omit<
+  TBase,
+  'children' | 'type'
+> & {
   type: TType
-} & Omit<TBase, 'children' | 'type'>
+}
 
 export type {
   SerializedAutoLinkNode,
@@ -67,9 +70,10 @@ export type {
   SerializedUploadNode,
 }
 
-export type SerializedParagraphNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
-  textFormat: number
-} & StronglyTypedElementNode<SerializedElementNode, 'paragraph', T>
+export type SerializedParagraphNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
+  StronglyTypedElementNode<SerializedElementNode, 'paragraph', T> & {
+    textFormat: number
+  }
 
 export type SerializedTextNode = StronglyTypedLeafNode<_SerializedTextNode, 'text'>
 
@@ -97,7 +101,7 @@ export type RecursiveNodes<
   ? Depth extends 0
     ? T
     : 'children' extends keyof T
-      ? { children?: RecursiveNodes<OriginalUnion, DecrementDepth<Depth>, OriginalUnion>[] } & T
+      ? T & { children?: RecursiveNodes<OriginalUnion, DecrementDepth<Depth>, OriginalUnion>[] }
       : T // Skip leaf nodes
   : never
 
@@ -109,9 +113,10 @@ type DecrementDepth<N extends number> = [0, 0, 1, 2, 3, 4][N]
  * more strictly, narrowing down nodes based on the `type` without having to manually
  * type-cast.
  */
-export type TypedEditorState<T extends SerializedLexicalNode = SerializedLexicalNode> = {
-  [k: string]: unknown
-} & SerializedEditorState<RecursiveNodes<T>>
+export type TypedEditorState<T extends SerializedLexicalNode = SerializedLexicalNode> =
+  SerializedEditorState<RecursiveNodes<T>> & {
+    [k: string]: unknown
+  }
 
 /**
  * All node types included by default in a lexical editor without configuration.

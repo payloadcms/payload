@@ -91,17 +91,17 @@ type Drizzle =
   | NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
   | PgWithReplicas<NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>>
 
-export type PostgresAdapter = {
+export type PostgresAdapter = BasePostgresAdapter & {
   drizzle: Drizzle
   pg: PgDependency
   pool: Pool
   poolOptions: PoolConfig
-} & BasePostgresAdapter
+}
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
-      DrizzleAdapter {
+    extends DrizzleAdapter,
+      Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'> {
     afterSchemaInit: PostgresSchemaHook[]
 
     beforeSchemaInit: PostgresSchemaHook[]
@@ -120,7 +120,7 @@ declare module 'payload' {
     logger: DrizzleConfig['logger']
     /** Optionally inject your own node-postgres. This is required if you wish to instrument the driver with @payloadcms/plugin-sentry. */
     pg?: PgDependency
-    pgSchema?: { table: PgTableFn } | PgSchema
+    pgSchema?: PgSchema | { table: PgTableFn }
     pool: Pool
     poolOptions: Args['pool']
     prodMigrations?: {

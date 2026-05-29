@@ -1,5 +1,5 @@
 export const extractID = <IDType extends number | string>(
-  objectOrID: { id: IDType } | IDType,
+  objectOrID: IDType | { id: IDType },
 ): IDType => {
   if (typeof objectOrID === 'string' || typeof objectOrID === 'number') {
     return objectOrID

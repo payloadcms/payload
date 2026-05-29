@@ -66,7 +66,7 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
 
   useEffect(() => {
     return editor.registerCommand<{
-      replace: { nodeKey: string } | false
+      replace: false | { nodeKey: string }
     }>(
       INSERT_UPLOAD_WITH_DRAWER_COMMAND,
       (payload) => {
@@ -99,7 +99,7 @@ const UploadDrawerComponentFallback: React.FC = () => {
 
   useEffect(() => {
     return editor.registerCommand<{
-      replace: { nodeKey: string } | false
+      replace: false | { nodeKey: string }
     }>(
       INSERT_UPLOAD_WITH_DRAWER_COMMAND,
       () => {

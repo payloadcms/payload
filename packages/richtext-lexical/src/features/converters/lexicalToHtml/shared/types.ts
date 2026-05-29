@@ -5,6 +5,6 @@ export type ProvidedCSS = {
   'text-align'?: string
 }
 
-export type SerializedLexicalNodeWithParent = {
+export type SerializedLexicalNodeWithParent = SerializedLexicalNode & {
   parent?: SerializedLexicalNode
-} & SerializedLexicalNode
+}

@@ -20,7 +20,7 @@ export type FindByIDOptions<
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
-> = {
+> = Pick<FindOptions<TSlug, SelectType & TSelect>, 'select'> & {
   /**
    * the Collection slug to operate against.
    */
@@ -64,7 +64,7 @@ export type FindByIDOptions<
    * @default false
    */
   trash?: boolean
-} & Pick<FindOptions<TSlug, SelectType & TSelect>, 'select'>
+}
 
 export async function findByID<
   T extends PayloadTypesShape,

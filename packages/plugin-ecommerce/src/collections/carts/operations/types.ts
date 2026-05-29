@@ -10,9 +10,9 @@ export type CartItemData = {
    * regardless of the database adapter's default ID type.
    */
   id?: string
-  product: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
+  product: DefaultDocumentIDType | { [key: string]: unknown; id: DefaultDocumentIDType }
   quantity: number
-  variant?: { [key: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
+  variant?: DefaultDocumentIDType | { [key: string]: unknown; id: DefaultDocumentIDType }
 }
 
 /**
@@ -93,31 +93,31 @@ export type BaseCartOperationArgs = {
 /**
  * Arguments for the addItem operation.
  */
-export type AddItemArgs = {
+export type AddItemArgs = BaseCartOperationArgs & {
   /** Custom matcher function to determine item uniqueness */
   cartItemMatcher?: CartItemMatcher
   /** The item to add */
   item: NewCartItem
   /** Quantity to add (defaults to 1) */
   quantity?: number
-} & BaseCartOperationArgs
+}
 
 /**
  * Arguments for the removeItem operation.
  */
-export type RemoveItemArgs = {
+export type RemoveItemArgs = BaseCartOperationArgs & {
   /**
    * The cart item row ID to remove.
    * Array item IDs are always strings in Payload, regardless of the database adapter's default ID type.
    */
   itemID: string
-} & BaseCartOperationArgs
+}
 
 /**
  * Arguments for the updateItem operation.
  * Supports MongoDB-style operators for flexible updates.
  */
-export type UpdateItemArgs = {
+export type UpdateItemArgs = BaseCartOperationArgs & {
   /**
    * The cart item row ID to update.
    * Array item IDs are always strings in Payload, regardless of the database adapter's default ID type.
@@ -143,7 +143,7 @@ export type UpdateItemArgs = {
   quantity: FieldWithOperator<number>
   /** Whether to remove the item if quantity reaches 0 (defaults to true) */
   removeOnZero?: boolean
-} & BaseCartOperationArgs
+}
 
 /**
  * Arguments for the clearCart operation.

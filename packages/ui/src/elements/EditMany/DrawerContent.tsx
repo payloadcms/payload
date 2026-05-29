@@ -114,7 +114,7 @@ const SaveDraftButton: React.FC<{
   )
 }
 
-type EditManyDrawerContentProps = {
+type EditManyDrawerContentProps = EditManyProps & {
   /**
    * The total count of selected items
    */
@@ -144,7 +144,7 @@ type EditManyDrawerContentProps = {
    */
   setSelectedFields: (fields: FieldOption[]) => void
   where?: Where
-} & EditManyProps
+}
 
 export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (props) => {
   const {

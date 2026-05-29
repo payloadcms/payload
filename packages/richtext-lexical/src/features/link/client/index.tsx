@@ -23,11 +23,11 @@ import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor/index.js'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor/commands.js'
 import { LinkPlugin } from './plugins/link/index.js'
 
-export type ClientProps = {
+export type ClientProps = ExclusiveLinkCollectionsProps & {
   defaultLinkType?: string
   defaultLinkURL?: string
   disableAutoLinks?: 'creationOnly' | true
-} & ExclusiveLinkCollectionsProps
+}
 
 const toolbarGroups: ToolbarGroup[] = [
   toolbarFeatureButtonsGroupWithItems([

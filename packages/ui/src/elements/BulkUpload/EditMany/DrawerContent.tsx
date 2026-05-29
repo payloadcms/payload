@@ -29,11 +29,11 @@ import './index.scss'
 import '../../../forms/RenderFields/index.css'
 
 export const EditManyBulkUploadsDrawerContent: React.FC<
-  {
+  EditManyBulkUploadsProps & {
     collection: ClientCollectionConfig
     drawerSlug: string
     forms: State['forms']
-  } & EditManyBulkUploadsProps
+  }
 > = (props) => {
   const {
     collection: { fields, labels: { plural, singular } } = {},

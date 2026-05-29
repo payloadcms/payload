@@ -40,7 +40,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
   ref,
   selectedIds,
   useAsTitle = 'id',
-}: { ref?: React.RefObject<HierarchyColumnBrowserRef | null> } & HierarchyColumnBrowserProps) {
+}: HierarchyColumnBrowserProps & { ref?: React.RefObject<HierarchyColumnBrowserRef | null> }) {
   const { i18n } = useTranslation()
   const { permissions } = useAuth()
   const {
@@ -156,7 +156,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         : undefined
 
       const allItems: ColumnItemData[] = (data.docs || []).map(
-        (doc: { id: number | string } & Record<string, unknown>) => ({
+        (doc: Record<string, unknown> & { id: number | string }) => ({
           id: doc.id,
           allowedCollections: typeFieldName
             ? (doc[typeFieldName] as string[] | undefined)

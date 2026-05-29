@@ -29,7 +29,7 @@ export const MetaImageField: FieldFunction = ({ hasGenerateFn = false, overrides
     label: 'Meta Image',
     localized: true,
     relationTo,
-    ...((overrides ?? {}) as { hasMany: boolean } & Partial<UploadField>),
+    ...((overrides ?? {}) as Partial<UploadField> & { hasMany: boolean }),
   } as UploadField
 
   return imageField

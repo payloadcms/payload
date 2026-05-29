@@ -8,6 +8,7 @@ import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
  * Can also provide an options object for more granular control.
  */
 export type AcceptValues =
+  | boolean
   | {
       /**
        * When `false`, will accept the values from the server _UNLESS_ the value has been modified locally since the request was made.
@@ -16,7 +17,6 @@ export type AcceptValues =
        */
       overrideLocalChanges?: boolean
     }
-  | boolean
 
 type Args = {
   acceptValues?: AcceptValues
@@ -39,11 +39,11 @@ type Args = {
  * parseArrayFieldPath('blocks.0.items.1.title')
  * // Returns: { arrayPath: 'blocks.0.items', rowIndex: 1, fieldPath: 'title' }
  */
-function parseArrayFieldPath(path: string): {
+function parseArrayFieldPath(path: string): null | {
   arrayPath: string
   fieldPath: string
   rowIndex: number
-} | null {
+} {
   const segments = path.split('.')
 
   // Find the last numeric index (indicates array row)

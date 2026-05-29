@@ -1,4 +1,4 @@
-/* eslint-disable perfectionist/sort-object-types  */ // Need to disable this rule because the order of the overloads is important
+// Need to disable this rule because the order of the overloads is important
 'use client'
 import type {
   ClientCollectionConfig,
@@ -15,16 +15,16 @@ import { useControllableState } from '../../hooks/useControllableState.js'
 type GetEntityConfigFn = {
   // Overload #1: collectionSlug only
   // @todo remove "{} |" in 4.0, which would be a breaking change
-  (args: { collectionSlug: {} | CollectionSlug; globalSlug?: never }): ClientCollectionConfig
+  (args: { collectionSlug: CollectionSlug | {}; globalSlug?: never }): ClientCollectionConfig
 
   // Overload #2: globalSlug only
   // @todo remove "{} |" in 4.0, which would be a breaking change
-  (args: { collectionSlug?: never; globalSlug: {} | GlobalSlug }): ClientGlobalConfig
+  (args: { collectionSlug?: never; globalSlug: GlobalSlug | {} }): ClientGlobalConfig
 
   // Overload #3: both/none (fall back to union | null)
   (args: {
-    collectionSlug?: {} | CollectionSlug
-    globalSlug?: {} | GlobalSlug
+    collectionSlug?: CollectionSlug | {}
+    globalSlug?: GlobalSlug | {}
   }): ClientCollectionConfig | ClientGlobalConfig | null
 }
 

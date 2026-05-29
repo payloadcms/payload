@@ -44,18 +44,19 @@ export type UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> =
  * Internal use only - UploadData type that can contain a pending state
  * @internal
  */
-export type Internal_UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
-  pending?: {
-    /**
-     * ID that corresponds to the bulk upload form ID
-     */
-    formID: string
-    /**
-     * src value of the image dom element
-     */
-    src: string
+export type Internal_UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> =
+  UploadData<TUploadExtraFieldsData> & {
+    pending?: {
+      /**
+       * ID that corresponds to the bulk upload form ID
+       */
+      formID: string
+      /**
+       * src value of the image dom element
+       */
+      src: string
+    }
   }
-} & UploadData<TUploadExtraFieldsData>
 
 /**
  * UploadDataImproved is a more precise type, and will replace UploadData in Payload v4.

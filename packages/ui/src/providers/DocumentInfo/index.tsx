@@ -25,9 +25,9 @@ export type * from './types.js'
 export const useDocumentInfo = (): DocumentInfoContext => use(Context)
 
 const DocumentInfo: React.FC<
-  {
+  DocumentInfoProps & {
     readonly children: React.ReactNode
-  } & DocumentInfoProps
+  }
 > = ({ children, ...props }) => {
   const {
     id,
@@ -108,11 +108,11 @@ const DocumentInfo: React.FC<
     'idle',
   )
 
-  const documentLockState = useRef<{
+  const documentLockState = useRef<null | {
     hasShownLockedModal: boolean
     isLocked: boolean
     user: ClientUser | number | string
-  } | null>({
+  }>({
     hasShownLockedModal: false,
     isLocked: false,
     user: null,
@@ -388,9 +388,9 @@ const DocumentInfo: React.FC<
 }
 
 export const DocumentInfoProvider: React.FC<
-  {
+  DocumentInfoProps & {
     readonly children: React.ReactNode
-  } & DocumentInfoProps
+  }
 > = (props) => {
   return (
     <UploadEditsProvider>

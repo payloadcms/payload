@@ -24,7 +24,7 @@ export const fetchVersion = async <TVersionData extends object = object>({
   depth?: number
   globalSlug?: string
   id: number | string
-  locale?: 'all' | ({} & string)
+  locale?: 'all' | (string & {})
   overrideAccess?: boolean
   req: PayloadRequest
   select?: SelectType
@@ -81,7 +81,7 @@ export const fetchVersions = async <TVersionData extends object = object>({
   draft?: boolean
   globalSlug?: string
   limit?: number
-  locale?: 'all' | ({} & string)
+  locale?: 'all' | (string & {})
   overrideAccess?: boolean
   page?: number
   parentID?: number | string
@@ -154,7 +154,7 @@ export const fetchLatestVersion = async <TVersionData extends object = object>({
   collectionSlug?: string
   depth?: number
   globalSlug?: string
-  locale?: 'all' | ({} & string)
+  locale?: 'all' | (string & {})
   overrideAccess?: boolean
   parentID?: number | string
   req: PayloadRequest

@@ -252,13 +252,13 @@ export type Tenant<IDType = number | string> = {
   name: string
 }
 
-export type UserWithTenantsField = {
+export type UserWithTenantsField = TypedUser & {
   tenants?:
+    | null
     | {
         tenant: number | string | Tenant
       }[]
-    | null
-} & TypedUser
+}
 
 type AllAccessKeysT<T extends readonly string[]> = T[number] extends keyof Omit<
   Required<CollectionConfig>['access'],
@@ -276,7 +276,7 @@ export type AllAccessKeys = AllAccessKeysT<
 export type CollectionAccessResultOverride = ({
   accessKey,
   accessResult,
-}: {
+}: AccessArgs & {
   accessKey: AllAccessKeys[number]
   accessResult: AccessResult
-} & AccessArgs) => AccessResult | Promise<AccessResult>
+}) => AccessResult | Promise<AccessResult>

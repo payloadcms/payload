@@ -16,11 +16,11 @@ import { runJobs } from './operations/runJobs/index.js'
 import { updateJob, updateJobs } from './utilities/updateJob.js'
 
 export type RunJobsSilent =
+  | boolean
   | {
       error?: boolean
       info?: boolean
     }
-  | boolean
 export const getJobsLocalAPI = (payload: Payload) => ({
   handleSchedules: async (args?: {
     /**

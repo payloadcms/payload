@@ -170,7 +170,7 @@ export function filterDataToSelectedLocales({
                   ) {
                     return filterDataToSelectedLocales({
                       configBlockReferences,
-                      docWithLocales: localeValue as JsonObject,
+                      docWithLocales: localeValue,
                       fields: field.fields,
                       parentIsLocalized: fieldIsLocalized,
                       selectedLocales,

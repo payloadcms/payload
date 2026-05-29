@@ -22,7 +22,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findVersionsOperation } from '../findVersions.js'
 
-export type Options<TSlug extends GlobalSlug> = {
+export type Options<TSlug extends GlobalSlug> = Pick<FindOptions<string, SelectType>, 'select'> & {
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -97,7 +97,7 @@ export type Options<TSlug extends GlobalSlug> = {
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-} & Pick<FindOptions<string, SelectType>, 'select'>
+}
 
 export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,

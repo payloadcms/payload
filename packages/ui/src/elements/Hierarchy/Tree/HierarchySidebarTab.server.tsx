@@ -10,9 +10,9 @@ import { HierarchySidebarTab } from '../../../exports/client/index.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
 import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 
-export type HierarchySidebarTabServerProps = {
+export type HierarchySidebarTabServerProps = SidebarTabServerProps & {
   hierarchyCollectionSlug: string
-} & SidebarTabServerProps
+}
 
 export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps> = async ({
   hierarchyCollectionSlug,

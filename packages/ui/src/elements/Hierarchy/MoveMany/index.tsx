@@ -71,10 +71,10 @@ export function MoveMany({
 
   const { getSelectionsWithMetadata } = useDocumentSelection()
 
-  const [destination, setDestination] = useState<{
+  const [destination, setDestination] = useState<null | {
     id: null | number | string
     title: string
-  } | null>(null)
+  }>(null)
 
   const confirmMoveDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-move-many`
 

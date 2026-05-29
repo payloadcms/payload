@@ -37,11 +37,11 @@ export const SortBy: SelectFieldClientComponent = (props) => {
   const { collection } = useImportExport()
 
   // ReactSelect's displayed option
-  const [displayedValue, setDisplayedValue] = useState<{
+  const [displayedValue, setDisplayedValue] = useState<null | {
     id: string
     label: ReactNode
     value: string
-  } | null>(null)
+  }>(null)
 
   const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
   const fieldOptions = useMemo(
@@ -108,7 +108,7 @@ export const SortBy: SelectFieldClientComponent = (props) => {
   }, [id, query?.groupBy, query?.sort, sortRaw, fieldOptions, setSort, setSortOrder])
 
   // When user selects a different field, store it with the current order applied
-  const onChange = (option: { id: string; label: ReactNode; value: string } | null) => {
+  const onChange = (option: null | { id: string; label: ReactNode; value: string }) => {
     if (!option) {
       setSort('')
       setDisplayedValue(null)

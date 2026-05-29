@@ -63,7 +63,7 @@ export function createUploadthingAdapter({
       getFile({
         clientUploadContext,
         collection,
-        doc: doc as unknown as Record<string, unknown> | undefined,
+        doc,
         filename,
         incomingHeaders: headers || new Headers(),
         req,

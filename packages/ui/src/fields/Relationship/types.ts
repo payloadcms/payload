@@ -75,17 +75,17 @@ export type HasManyValueUnion =
     }
 
 export type UpdateResults = (
-  args: {
+  args: HasManyValueUnion & {
     filterOptions?: FilterOptionsResult
     lastFullyLoadedRelation?: number
     lastLoadedPage: Record<string, number>
     onSuccess?: () => void
     search?: string
     sort?: boolean
-  } & HasManyValueUnion,
+  },
 ) => void
 
-export type RelationshipInputProps = {
+export type RelationshipInputProps = SharedRelationshipInputProps & {
   readonly AfterInput?: React.ReactNode
   readonly allowCreate?: boolean
   readonly allowEdit?: boolean
@@ -112,7 +112,7 @@ export type RelationshipInputProps = {
   readonly showError?: boolean
   readonly sortOptions?: Partial<Record<CollectionSlug, string>>
   readonly style?: React.CSSProperties
-} & SharedRelationshipInputProps
+}
 
 type SharedRelationshipInputProps =
   | {

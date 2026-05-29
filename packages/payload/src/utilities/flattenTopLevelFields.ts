@@ -21,11 +21,11 @@ import {
 } from '../fields/config/types.js'
 
 type FlattenedField<TField> = TField extends ClientField
-  ? { accessor?: string; labelWithPrefix?: string } & (
-      | FieldAffectingDataClient
-      | FieldPresentationalOnlyClient
-    )
-  : { accessor?: string; labelWithPrefix?: string } & (FieldAffectingData | FieldPresentationalOnly)
+  ? (FieldAffectingDataClient | FieldPresentationalOnlyClient) & {
+      accessor?: string
+      labelWithPrefix?: string
+    }
+  : (FieldAffectingData | FieldPresentationalOnly) & { accessor?: string; labelWithPrefix?: string }
 
 type TabType<TField> = TField extends ClientField ? ClientTab : Tab
 

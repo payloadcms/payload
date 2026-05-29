@@ -176,7 +176,6 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
     options: DeleteByIDOptions<T, TSlug, TSelect>,
     init?: RequestInit,
   ): Promise<TransformCollectionWithSelect<T, TSlug, TSelect>>
-
   /**
    * @description Update one or more documents
    * @param options
@@ -321,9 +320,9 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
     const response = await this.fetch(`${this.baseURL}${path}${buildSearchParams(args)}`, init)
 
     if (!response.ok) {
-      let errorData: {
+      let errorData: Partial<ErrorResult> & {
         message?: string
-      } & Partial<ErrorResult> = {}
+      } = {}
 
       try {
         errorData = await response.json()
@@ -373,12 +372,10 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
     options: UpdateManyOptions<T, TSlug, TSelect>,
     init?: RequestInit,
   ): Promise<BulkOperationResult<T, TSlug, TSelect>>
-
   update<TSlug extends CollectionSlug<T>, TSelect extends SelectFromCollectionSlug<T, TSlug>>(
     options: UpdateByIDOptions<T, TSlug, TSelect>,
     init?: RequestInit,
   ): Promise<TransformCollectionWithSelect<T, TSlug, TSelect>>
-
   /**
    * @description Update one or more documents
    * @param options

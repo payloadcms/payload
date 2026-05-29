@@ -1,8 +1,8 @@
 import * as qs from 'qs-esm'
 
-type GetOptions = {
+type GetOptions = RequestInit & {
   params?: Record<string, unknown>
-} & RequestInit
+}
 
 export const requests = {
   delete: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {

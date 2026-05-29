@@ -457,9 +457,9 @@ export type {
 export type {
   BuildFormStateArgs,
   Data,
+  FilterOptionsResult,
   FieldState as FormField,
   FieldStateWithoutComponents as FormFieldWithoutComponents,
-  FilterOptionsResult,
   FormState,
   FormStateWithoutComponents,
   Row,
@@ -532,23 +532,27 @@ export type RenderFieldConfigArgs = {
   schemaPath: string
 }
 
-export type RenderConfigArgs = {
+export type RenderConfigArgs = (
+  | RenderEntityConfigArgs
+  | RenderFieldConfigArgs
+  | RenderRootConfigArgs
+) & {
   action: Action.RenderConfig
   config: Promise<SanitizedConfig> | SanitizedConfig
   i18n: I18nClient
   importMap: ImportMap
   languageCode: AcceptedLanguages
   serverProps?: any
-} & (RenderEntityConfigArgs | RenderFieldConfigArgs | RenderRootConfigArgs)
+}
 
 export type PayloadServerAction = (
   args:
+    | RenderConfigArgs
     | {
         [key: string]: any
         action: Action
         i18n: I18nClient
-      }
-    | RenderConfigArgs,
+      },
 ) => Promise<string>
 
 export type RenderedField = {
@@ -611,6 +615,12 @@ export type {
   BeforeDocumentControlsClientProps,
   BeforeDocumentControlsServerProps,
   BeforeDocumentControlsServerPropsOnly,
+  /**
+   * @deprecated
+   * The `ClientSideEditViewProps` type is deprecated and will be removed in the next major version.
+   * Use `DocumentViewClientProps` instead.
+   */
+  DocumentViewClientProps as ClientSideEditViewProps,
   DocumentSubViewTypes,
   DocumentTabClientProps,
   /**
@@ -629,23 +639,17 @@ export type {
   DocumentTabServerProps as DocumentTabProps,
   DocumentTabServerProps,
   DocumentTabServerPropsOnly,
-  /**
-   * @deprecated
-   * The `ClientSideEditViewProps` type is deprecated and will be removed in the next major version.
-   * Use `DocumentViewClientProps` instead.
-   */
-  DocumentViewClientProps as ClientSideEditViewProps,
   DocumentViewClientProps,
+  DocumentViewServerProps,
+  DocumentViewServerPropsOnly,
+  EditViewProps,
+  RenderDocumentVersionsProperties,
   /**
    * @deprecated
    * The `ServerSideEditViewProps` is deprecated and will be removed in the next major version.
    * Use `DocumentViewServerProps` instead.
    */
   DocumentViewServerProps as ServerSideEditViewProps,
-  DocumentViewServerProps,
-  DocumentViewServerPropsOnly,
-  EditViewProps,
-  RenderDocumentVersionsProperties,
 } from './views/document.js'
 
 export type { RelatedDocumentsGrouped } from './views/hierarchyList.js'
@@ -697,25 +701,25 @@ export type {
   ListViewSlotSharedClientProps,
 } from './views/list.js'
 
-type SchemaPath = {} & string
+type SchemaPath = string & {}
 export type FieldSchemaMap = Map<
   SchemaPath,
-  | {
-      fields: Field[]
-    }
   | Block
   | Field
   | Tab
+  | {
+      fields: Field[]
+    }
 >
 
 export type ClientFieldSchemaMap = Map<
   SchemaPath,
-  | {
-      fields: ClientField[]
-    }
   | ClientBlock
   | ClientField
   | ClientTab
+  | {
+      fields: ClientField[]
+    }
 >
 
 export type DocumentEvent = {

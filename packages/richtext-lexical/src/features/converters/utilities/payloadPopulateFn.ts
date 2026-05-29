@@ -5,15 +5,7 @@ import type { HTMLPopulateFn } from '../lexicalToHtml/async/types.js'
 import { populate } from '../../../populateGraphQL/populate.js'
 
 export const getPayloadPopulateFn: (
-  args: {
-    currentDepth: number
-    depth: number
-    draft?: boolean
-    locale?: TypedLocale
-
-    overrideAccess?: boolean
-    showHiddenFields?: boolean
-  } & (
+  args: (
     | {
         /**
          * This payload property will only be used if req is undefined. If localization is enabled, you must pass `req` instead.
@@ -36,7 +28,15 @@ export const getPayloadPopulateFn: (
          */
         req: PayloadRequest
       }
-  ),
+  ) & {
+    currentDepth: number
+    depth: number
+    draft?: boolean
+    locale?: TypedLocale
+
+    overrideAccess?: boolean
+    showHiddenFields?: boolean
+  },
 ) => Promise<HTMLPopulateFn> = async ({
   currentDepth,
   depth,

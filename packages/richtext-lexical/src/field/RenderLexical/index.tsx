@@ -23,11 +23,10 @@ import type { DefaultTypedEditorState } from '../../types/nodeTypes.js'
  * @todo - replace this with a general utility that works for all fields. Maybe merge with packages/ui/src/forms/RenderFields/RenderField.tsx
  */
 export const RenderLexical: React.FC<
-  /**
+  RenderFieldServerFnArgs<LexicalRichTextField> /**
    * If value or setValue, or both, is provided, this component will manage its own value.
    * If neither is passed, it will rely on the parent form to manage the value.
-   */
-  {
+   */ & {
     /**
      * Override the loading state while the field component is being fetched and rendered.
      */
@@ -35,7 +34,7 @@ export const RenderLexical: React.FC<
 
     setValue?: FieldType<DefaultTypedEditorState | undefined>['setValue']
     value?: FieldType<DefaultTypedEditorState | undefined>['value']
-  } & RenderFieldServerFnArgs<LexicalRichTextField>
+  }
 > = (args) => {
   const { field, initialValue, Loading, path, schemaPath, setValue, value } = args
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
@@ -50,7 +49,7 @@ export const RenderLexical: React.FC<
     async function render() {
       const { Field } = await _internal_renderField({
         field: {
-          ...((field as RichTextField) || {}),
+          ...(field || {}),
           type: 'richText',
           admin: {
             ...((field as RichTextField)?.admin || {}),

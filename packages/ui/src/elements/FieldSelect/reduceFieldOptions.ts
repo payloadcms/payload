@@ -45,10 +45,10 @@ export const reduceFieldOptions = ({
   readonly parentPath?: string
   readonly path?: string
   readonly permissions:
+    | SanitizedFieldPermissions
     | {
         [fieldName: string]: SanitizedFieldPermissions
       }
-    | SanitizedFieldPermissions
 }): FieldOption[] => {
   if (!fields) {
     return []

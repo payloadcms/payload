@@ -136,7 +136,7 @@ export type RequireDrizzleKit = () => {
   upSnapshot?: (snapshot: Record<string, unknown>) => DrizzleSnapshotJSON
 }
 
-export type Migration = {
+export type Migration = MigrationData & {
   down: ({
     db,
     payload,
@@ -155,7 +155,7 @@ export type Migration = {
     payload: Payload
     req: PayloadRequest
   }) => Promise<void>
-} & MigrationData
+}
 
 export type CreateJSONQueryArgs = {
   column?: Column | string
@@ -234,76 +234,76 @@ export type BaseRawColumn = {
  * Postgres: native timestamp type
  * SQLite: text column, defaultNow achieved through strftime('%Y-%m-%dT%H:%M:%fZ', 'now'). withTimezone/precision have no any effect.
  */
-export type TimestampRawColumn = {
+export type TimestampRawColumn = BaseRawColumn & {
   defaultNow?: boolean
   mode: 'date' | 'string'
   precision: Precision
   type: 'timestamp'
   withTimezone?: boolean
-} & BaseRawColumn
+}
 
 /**
  * Postgres: native UUID type and db lavel defaultRandom
  * SQLite: text type and defaultRandom in the app level
  */
-export type UUIDRawColumn = {
+export type UUIDRawColumn = BaseRawColumn & {
   defaultRandom?: boolean
   /** App-side UUID v7 default (Postgres & SQLite); mutually exclusive with defaultRandom in practice */
   defaultV7?: boolean
   type: 'uuid'
-} & BaseRawColumn
+}
 
 /**
  * Accepts either `locale: true` to have options from locales or `options` string array
  * Postgres: native enums
  * SQLite: text column with checks.
  */
-export type EnumRawColumn = (
-  | {
-      enumName: string
-      options: string[]
-      type: 'enum'
-    }
-  | {
-      locale: true
-      type: 'enum'
-    }
-) &
-  BaseRawColumn
+export type EnumRawColumn = BaseRawColumn &
+  (
+    | {
+        enumName: string
+        options: string[]
+        type: 'enum'
+      }
+    | {
+        locale: true
+        type: 'enum'
+      }
+  )
 
-export type IntegerRawColumn = {
+export type IntegerRawColumn = BaseRawColumn & {
   /**
    * SQLite only.
    * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for primary key to ensure that the same ID cannot be reused from previously deleted rows.
    */
   autoIncrement?: boolean
   type: 'integer'
-} & BaseRawColumn
+}
 
-export type VectorRawColumn = {
+export type VectorRawColumn = BaseRawColumn & {
   dimensions?: number
   type: 'vector'
-} & BaseRawColumn
+}
 
-export type HalfVecRawColumn = {
+export type HalfVecRawColumn = BaseRawColumn & {
   dimensions?: number
   type: 'halfvec'
-} & BaseRawColumn
+}
 
-export type SparseVecRawColumn = {
+export type SparseVecRawColumn = BaseRawColumn & {
   dimensions?: number
   type: 'sparsevec'
-} & BaseRawColumn
+}
 
-export type BinaryVecRawColumn = {
+export type BinaryVecRawColumn = BaseRawColumn & {
   dimensions?: number
   type: 'bit'
-} & BaseRawColumn
+}
 
 export type RawColumn =
-  | ({
+  | (BaseRawColumn & {
       type: 'boolean' | 'geometry' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
-    } & BaseRawColumn)
+    })
   | BinaryVecRawColumn
   | EnumRawColumn
   | HalfVecRawColumn

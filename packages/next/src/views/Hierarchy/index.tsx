@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation.js'
 
 import { renderListView } from '../List/index.js'
 
-type RenderHierarchyViewArgs = {
+type RenderHierarchyViewArgs = AdminViewServerProps & {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
@@ -17,7 +17,7 @@ type RenderHierarchyViewArgs = {
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   redirectAfterRestore?: boolean
-} & AdminViewServerProps
+}
 
 export const HierarchyView: React.FC<Omit<RenderHierarchyViewArgs, 'enableRowSelections'>> = async (
   args,

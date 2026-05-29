@@ -17,13 +17,13 @@ import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 
-type UnpublishManyDrawerContentProps = {
+type UnpublishManyDrawerContentProps = UnpublishManyProps & {
   drawerSlug: string
   ids: (number | string)[]
   onSuccess?: () => void
   selectAll: boolean
   where?: Where
-} & UnpublishManyProps
+}
 
 export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProps) {
   const {

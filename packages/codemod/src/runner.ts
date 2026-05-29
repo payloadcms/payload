@@ -9,10 +9,10 @@ export type RunTransformsArgs = {
   transforms: Transform[]
 }
 
-export type TransformRunResult = {
+export type TransformRunResult = TransformResult & {
   error?: Error
   name: string
-} & TransformResult
+}
 
 export type RunTransformsResult = {
   failed: boolean

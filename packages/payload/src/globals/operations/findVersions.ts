@@ -14,7 +14,7 @@ import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.j
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 
-export type Arguments = {
+export type Arguments = Pick<FindOptions<string, SelectType>, 'select'> & {
   depth?: number
   globalConfig: SanitizedGlobalConfig
   limit?: number
@@ -26,7 +26,7 @@ export type Arguments = {
   showHiddenFields?: boolean
   sort?: Sort
   where?: Where
-} & Pick<FindOptions<string, SelectType>, 'select'>
+}
 
 export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   args: Arguments,

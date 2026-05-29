@@ -234,7 +234,7 @@ export interface UntypedPayloadTypes {
   db: {
     defaultIDType: number | string
   }
-  fallbackLocale: 'false' | 'none' | 'null' | ({} & string)[] | ({} & string) | false | null
+  fallbackLocale: 'false' | 'none' | 'null' | (string & {})[] | false | null | (string & {})
   globals: {
     [slug: string]: JsonObject
   }
@@ -390,10 +390,10 @@ type HasPayloadJobsType = GeneratedTypes extends { collections: infer C }
 export type Job<
   TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
 > = HasPayloadJobsType extends true
-  ? {
+  ? Omit<TypedCollection['payload-jobs'], 'input' | 'taskStatus'> & {
       input: BaseJob<TWorkflowSlugOrInput>['input']
       taskStatus: BaseJob<TWorkflowSlugOrInput>['taskStatus']
-    } & Omit<TypedCollection['payload-jobs'], 'input' | 'taskStatus'>
+    }
   : BaseJob<TWorkflowSlugOrInput>
 
 const filename = fileURLToPath(import.meta.url)
@@ -405,6 +405,127 @@ let checkedDependencies = false
  * @description Payload
  */
 export class BasePayload {
+  authStrategies!: AuthStrategy[]
+
+  blocks: Record<BlockSlug, FlattenedBlock> = {}
+
+  collections: Record<CollectionSlug, Collection> = {}
+
+  config!: SanitizedConfig
+
+  crons: Cron[] = []
+  db!: DatabaseAdapter
+
+  decrypt = decrypt
+
+  email!: InitializedEmailAdapter
+
+  encrypt = encrypt
+
+  extensions!: (args: {
+    args: OperationArgs<any>
+    req: graphQLRequest<unknown, unknown>
+    result: ExecutionResult
+  }) => Promise<any>
+  globals!: Globals
+
+  importMap!: ImportMap
+
+  jobs = getJobsLocalAPI(this)
+
+  /**
+   * Key Value storage
+   */
+  kv!: KVAdapter
+
+  logger!: Logger
+
+  // TODO: re-implement or remove?
+  // errorHandler: ErrorHandler
+
+  schema!: GraphQLSchema
+
+  secret!: string
+
+  sendEmail!: InitializedEmailAdapter['sendEmail']
+
+  types!: {
+    arrayTypes: any
+    blockInputTypes: any
+    blockTypes: any
+    fallbackLocaleInputType?: any
+    groupTypes: any
+    localeInputType?: any
+    tabTypes: any
+  }
+
+  validationRules!: (args: OperationArgs<any>) => ValidationRule[]
+
+  versions: {
+    [slug: string]: any // TODO: Type this
+  } = {}
+
+  async _initializeCrons() {
+    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild()) {
+      const DEFAULT_CRON = '* * * * *'
+      const DEFAULT_LIMIT = 10
+
+      const cronJobs =
+        typeof this.config.jobs.autoRun === 'function'
+          ? await this.config.jobs.autoRun(this)
+          : this.config.jobs.autoRun
+
+      await Promise.all(
+        cronJobs.map((cronConfig) => {
+          const jobAutorunCron = new Cron(
+            cronConfig.cron ?? DEFAULT_CRON,
+            async () => {
+              if (
+                _internal_jobSystemGlobals.shouldAutoSchedule &&
+                !cronConfig.disableScheduling &&
+                this.config.jobs.scheduling
+              ) {
+                await this.jobs.handleSchedules({
+                  allQueues: cronConfig.allQueues,
+                  queue: cronConfig.queue,
+                })
+              }
+
+              if (!_internal_jobSystemGlobals.shouldAutoRun) {
+                return
+              }
+
+              if (typeof this.config.jobs.shouldAutoRun === 'function') {
+                const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+                if (!shouldAutoRun) {
+                  jobAutorunCron.stop()
+                  return
+                }
+              }
+
+              await this.jobs.run({
+                allQueues: cronConfig.allQueues,
+                limit: cronConfig.limit ?? DEFAULT_LIMIT,
+                queue: cronConfig.queue,
+                silent: cronConfig.silent,
+              })
+            },
+            {
+              catch: (err) => {
+                this.logger.error({ err, msg: 'Error in job queue cron job handler' })
+              },
+              // Do not run consecutive crons if previous crons still ongoing
+              protect: true,
+            },
+          )
+
+          this.crons.push(jobAutorunCron)
+        }),
+      )
+    }
+  }
+
   /**
    * @description Authorization and Authentication using headers and cookies to run auth user strategies
    * @returns permissions: Permissions
@@ -414,13 +535,31 @@ export class BasePayload {
     return authLocal(this, options)
   }
 
-  authStrategies!: AuthStrategy[]
+  async bin({
+    args,
+    cwd,
+    log,
+  }: {
+    args: string[]
+    cwd?: string
+    log?: boolean
+  }): Promise<{ code: number }> {
+    return new Promise((resolve, reject) => {
+      const spawned = spawn('node', [path.resolve(dirname, '../bin.js'), ...args], {
+        cwd,
+        stdio: log || log === undefined ? 'inherit' : 'ignore',
+      })
 
-  blocks: Record<BlockSlug, FlattenedBlock> = {}
+      spawned.on('exit', (code) => {
+        resolve({ code: code! })
+      })
 
-  collections: Record<CollectionSlug, Collection> = {}
+      spawned.on('error', (error) => {
+        reject(error)
+      })
+    })
+  }
 
-  config!: SanitizedConfig
   /**
    * @description Performs count operation
    * @param options
@@ -465,10 +604,22 @@ export class BasePayload {
     return createLocal<TSlug, TSelect>(this, options)
   }
 
-  crons: Cron[] = []
-  db!: DatabaseAdapter
-
-  decrypt = decrypt
+  /**
+   * @description delete one or more documents
+   * @param options
+   * @returns Updated document(s)
+   */
+  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: DeleteByIDOptions<TSlug, TSelect>,
+  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
+  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: DeleteManyOptions<TSlug, TSelect>,
+  ): Promise<BulkOperationResult<TSlug, TSelect>>
+  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
+    options: DeleteOptions<TSlug, TSelect>,
+  ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
+    return deleteLocal<TSlug, TSelect>(this, options)
+  }
 
   destroy = async () => {
     if (this.crons.length) {
@@ -488,19 +639,6 @@ export class BasePayload {
     return duplicateLocal<TSlug, TSelect>(this, options)
   }
 
-  email!: InitializedEmailAdapter
-
-  // TODO: re-implement or remove?
-  // errorHandler: ErrorHandler
-
-  encrypt = encrypt
-
-  extensions!: (args: {
-    args: OperationArgs<any>
-    req: graphQLRequest<unknown, unknown>
-    result: ExecutionResult
-  }) => Promise<any>
-
   /**
    * @description Find documents with criteria
    * @param options
@@ -511,7 +649,7 @@ export class BasePayload {
     TSelect extends SelectFromCollectionSlug<TSlug>,
     TDraft extends boolean = false,
   >(
-    options: { draft?: TDraft } & FindOptions<TSlug, TSelect>,
+    options: FindOptions<TSlug, TSelect> & { draft?: TDraft },
   ): Promise<
     PaginatedDocs<
       TDraft extends true
@@ -622,198 +760,6 @@ export class BasePayload {
       path: '',
       serverURL: this.config.serverURL,
     })
-
-  globals!: Globals
-
-  importMap!: ImportMap
-
-  jobs = getJobsLocalAPI(this)
-
-  /**
-   * Key Value storage
-   */
-  kv!: KVAdapter
-
-  logger!: Logger
-
-  login = async <TSlug extends CollectionSlug>(
-    options: LoginOptions<TSlug>,
-  ): Promise<LoginResult<TSlug>> => {
-    return loginLocal<TSlug>(this, options)
-  }
-
-  resetPassword = async <TSlug extends CollectionSlug>(
-    options: ResetPasswordOptions<TSlug>,
-  ): Promise<ResetPasswordResult> => {
-    return resetPasswordLocal<TSlug>(this, options)
-  }
-
-  /**
-   * @description Restore global version by ID
-   * @param options
-   * @returns version with specified ID
-   */
-  restoreGlobalVersion = async <TSlug extends GlobalSlug>(
-    options: RestoreGlobalVersionOptions<TSlug>,
-  ): Promise<DataFromGlobalSlug<TSlug>> => {
-    return restoreGlobalVersionLocal<TSlug>(this, options)
-  }
-
-  /**
-   * @description Restore version by ID
-   * @param options
-   * @returns version with specified ID
-   */
-  restoreVersion = async <TSlug extends CollectionSlug>(
-    options: RestoreVersionOptions<TSlug>,
-  ): Promise<DataFromCollectionSlug<TSlug>> => {
-    return restoreVersionLocal<TSlug>(this, options)
-  }
-
-  schema!: GraphQLSchema
-
-  secret!: string
-
-  sendEmail!: InitializedEmailAdapter['sendEmail']
-
-  types!: {
-    arrayTypes: any
-    blockInputTypes: any
-    blockTypes: any
-    fallbackLocaleInputType?: any
-    groupTypes: any
-    localeInputType?: any
-    tabTypes: any
-  }
-
-  unlock = async <TSlug extends CollectionSlug>(
-    options: UnlockOptions<TSlug>,
-  ): Promise<boolean> => {
-    return unlockLocal<TSlug>(this, options)
-  }
-
-  updateGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
-    options: UpdateGlobalOptions<TSlug, TSelect>,
-  ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
-    return updateGlobalLocal<TSlug, TSelect>(this, options)
-  }
-
-  validationRules!: (args: OperationArgs<any>) => ValidationRule[]
-
-  verifyEmail = async <TSlug extends CollectionSlug>(
-    options: VerifyEmailOptions<TSlug>,
-  ): Promise<boolean> => {
-    return verifyEmailLocal(this, options)
-  }
-
-  versions: {
-    [slug: string]: any // TODO: Type this
-  } = {}
-
-  async _initializeCrons() {
-    if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild()) {
-      const DEFAULT_CRON = '* * * * *'
-      const DEFAULT_LIMIT = 10
-
-      const cronJobs =
-        typeof this.config.jobs.autoRun === 'function'
-          ? await this.config.jobs.autoRun(this)
-          : this.config.jobs.autoRun
-
-      await Promise.all(
-        cronJobs.map((cronConfig) => {
-          const jobAutorunCron = new Cron(
-            cronConfig.cron ?? DEFAULT_CRON,
-            async () => {
-              if (
-                _internal_jobSystemGlobals.shouldAutoSchedule &&
-                !cronConfig.disableScheduling &&
-                this.config.jobs.scheduling
-              ) {
-                await this.jobs.handleSchedules({
-                  allQueues: cronConfig.allQueues,
-                  queue: cronConfig.queue,
-                })
-              }
-
-              if (!_internal_jobSystemGlobals.shouldAutoRun) {
-                return
-              }
-
-              if (typeof this.config.jobs.shouldAutoRun === 'function') {
-                const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
-
-                if (!shouldAutoRun) {
-                  jobAutorunCron.stop()
-                  return
-                }
-              }
-
-              await this.jobs.run({
-                allQueues: cronConfig.allQueues,
-                limit: cronConfig.limit ?? DEFAULT_LIMIT,
-                queue: cronConfig.queue,
-                silent: cronConfig.silent,
-              })
-            },
-            {
-              catch: (err) => {
-                this.logger.error({ err, msg: 'Error in job queue cron job handler' })
-              },
-              // Do not run consecutive crons if previous crons still ongoing
-              protect: true,
-            },
-          )
-
-          this.crons.push(jobAutorunCron)
-        }),
-      )
-    }
-  }
-
-  async bin({
-    args,
-    cwd,
-    log,
-  }: {
-    args: string[]
-    cwd?: string
-    log?: boolean
-  }): Promise<{ code: number }> {
-    return new Promise((resolve, reject) => {
-      const spawned = spawn('node', [path.resolve(dirname, '../bin.js'), ...args], {
-        cwd,
-        stdio: log || log === undefined ? 'inherit' : 'ignore',
-      })
-
-      spawned.on('exit', (code) => {
-        resolve({ code: code! })
-      })
-
-      spawned.on('error', (error) => {
-        reject(error)
-      })
-    })
-  }
-
-  /**
-   * @description delete one or more documents
-   * @param options
-   * @returns Updated document(s)
-   */
-  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: DeleteByIDOptions<TSlug, TSelect>,
-  ): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
-
-  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: DeleteManyOptions<TSlug, TSelect>,
-  ): Promise<BulkOperationResult<TSlug, TSelect>>
-
-  delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: DeleteOptions<TSlug, TSelect>,
-  ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
-    return deleteLocal<TSlug, TSelect>(this, options)
-  }
 
   /**
    * @description Initializes Payload
@@ -1010,10 +956,49 @@ export class BasePayload {
     return this
   }
 
+  login = async <TSlug extends CollectionSlug>(
+    options: LoginOptions<TSlug>,
+  ): Promise<LoginResult<TSlug>> => {
+    return loginLocal<TSlug>(this, options)
+  }
+
+  resetPassword = async <TSlug extends CollectionSlug>(
+    options: ResetPasswordOptions<TSlug>,
+  ): Promise<ResetPasswordResult> => {
+    return resetPasswordLocal<TSlug>(this, options)
+  }
+
+  /**
+   * @description Restore global version by ID
+   * @param options
+   * @returns version with specified ID
+   */
+  restoreGlobalVersion = async <TSlug extends GlobalSlug>(
+    options: RestoreGlobalVersionOptions<TSlug>,
+  ): Promise<DataFromGlobalSlug<TSlug>> => {
+    return restoreGlobalVersionLocal<TSlug>(this, options)
+  }
+
+  /**
+   * @description Restore version by ID
+   * @param options
+   * @returns version with specified ID
+   */
+  restoreVersion = async <TSlug extends CollectionSlug>(
+    options: RestoreVersionOptions<TSlug>,
+  ): Promise<DataFromCollectionSlug<TSlug>> => {
+    return restoreVersionLocal<TSlug>(this, options)
+  }
+
+  unlock = async <TSlug extends CollectionSlug>(
+    options: UnlockOptions<TSlug>,
+  ): Promise<boolean> => {
+    return unlockLocal<TSlug>(this, options)
+  }
+
   update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: UpdateManyOptions<TSlug, TSelect>,
   ): Promise<BulkOperationResult<TSlug, TSelect>>
-
   /**
    * @description Update one or more documents
    * @param options
@@ -1022,11 +1007,22 @@ export class BasePayload {
   update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: UpdateByIDOptions<TSlug, TSelect>,
   ): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
-
   update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: UpdateOptions<TSlug, TSelect>,
   ): Promise<BulkOperationResult<TSlug, TSelect> | TransformCollectionWithSelect<TSlug, TSelect>> {
     return updateLocal<TSlug, TSelect>(this, options)
+  }
+
+  updateGlobal = async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
+    options: UpdateGlobalOptions<TSlug, TSelect>,
+  ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+    return updateGlobalLocal<TSlug, TSelect>(this, options)
+  }
+
+  verifyEmail = async <TSlug extends CollectionSlug>(
+    options: VerifyEmailOptions<TSlug>,
+  ): Promise<boolean> => {
+    return verifyEmailLocal(this, options)
   }
 }
 
@@ -1133,7 +1129,7 @@ if (!_cached) {
  * - adds HMR support and reloads the payload instance when the config changes.
  */
 export const getPayload = async (
-  options: {
+  options: InitOptions & {
     /**
      * A unique key to identify the payload instance. You can pass your own key if you want to cache this payload instance separately.
      * This is useful if you pass a different payload config for each instance.
@@ -1141,7 +1137,7 @@ export const getPayload = async (
      * @default 'default'
      */
     key?: string
-  } & InitOptions,
+  },
 ): Promise<Payload> => {
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
@@ -1342,6 +1338,13 @@ export {
 } from './collections/config/client.js'
 
 export type {
+  AuthCollection,
+  AuthOperationsFromCollectionSlug,
+  BaseFilter,
+  BaseListFilter,
+  BulkOperationResult,
+  Collection,
+  CollectionAdminOptions,
   AfterChangeHook as CollectionAfterChangeHook,
   AfterDeleteHook as CollectionAfterDeleteHook,
   AfterErrorHook as CollectionAfterErrorHook,
@@ -1352,24 +1355,17 @@ export type {
   AfterOperationHook as CollectionAfterOperationHook,
   AfterReadHook as CollectionAfterReadHook,
   AfterRefreshHook as CollectionAfterRefreshHook,
-  AuthCollection,
-  AuthOperationsFromCollectionSlug,
-  BaseFilter,
-  BaseListFilter,
   BeforeChangeHook as CollectionBeforeChangeHook,
   BeforeDeleteHook as CollectionBeforeDeleteHook,
   BeforeLoginHook as CollectionBeforeLoginHook,
   BeforeOperationHook as CollectionBeforeOperationHook,
   BeforeReadHook as CollectionBeforeReadHook,
   BeforeValidateHook as CollectionBeforeValidateHook,
-  BulkOperationResult,
-  Collection,
-  CollectionAdminOptions,
   CollectionConfig,
-  DataFromCollectionSlug,
-  HookOperationType,
   MeHook as CollectionMeHook,
   RefreshHook as CollectionRefreshHook,
+  DataFromCollectionSlug,
+  HookOperationType,
   RequiredDataFromCollection,
   RequiredDataFromCollectionSlug,
   SanitizedCollectionConfig,
@@ -1730,14 +1726,14 @@ export {
   type ServerOnlyGlobalProperties,
 } from './globals/config/client.js'
 export type {
+  DataFromGlobalSlug,
+  GlobalAdminOptions,
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
   BeforeChangeHook as GlobalBeforeChangeHook,
   BeforeOperationHook as GlobalBeforeOperationHook,
   BeforeReadHook as GlobalBeforeReadHook,
   BeforeValidateHook as GlobalBeforeValidateHook,
-  DataFromGlobalSlug,
-  GlobalAdminOptions,
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
@@ -1779,14 +1775,14 @@ export * from './kv/index.js'
 export type {
   CollapsedPreferences,
   CollectionPreferences,
-  /**
-   * @deprecated Use `CollectionPreferences` instead.
-   */
-  CollectionPreferences as ListPreferences,
   ColumnPreference,
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
+  /**
+   * @deprecated Use `CollectionPreferences` instead.
+   */
+  CollectionPreferences as ListPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
   TabsPreferences,

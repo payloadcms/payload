@@ -56,11 +56,11 @@ type BaseGetGlobalArgs = {
 }
 
 interface GetGlobal {
-  (args: { versions?: false | undefined } & BaseGetGlobalArgs): {
+  (args: BaseGetGlobalArgs & { versions?: false | undefined }): {
     globalConfig: SanitizedGlobalConfig
     Model: GlobalModel
   }
-  (args: { versions?: true } & BaseGetGlobalArgs): {
+  (args: BaseGetGlobalArgs & { versions?: true }): {
     globalConfig: SanitizedGlobalConfig
     Model: CollectionModel
   }

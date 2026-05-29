@@ -174,7 +174,7 @@ export const getFields = ({
           name: size.name,
           type: 'group',
           fields: [...(adapter?.fields || []), sizeURLField],
-        } as Field
+        }
       }),
     }
 

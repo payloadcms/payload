@@ -59,9 +59,9 @@ export type S3StorageOptions = {
   collections: Partial<
     Record<
       UploadCollectionSlug,
-      | ({
+      | (Omit<CollectionOptions, 'adapter'> & {
           signedDownloads?: SignedDownloadsConfig
-        } & Omit<CollectionOptions, 'adapter'>)
+        })
       | true
     >
   >

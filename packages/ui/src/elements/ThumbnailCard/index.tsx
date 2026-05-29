@@ -12,7 +12,7 @@ export type ThumbnailCardProps = {
   alignLabel?: 'center' | 'left'
   className?: string
   collection?: ClientCollectionConfig
-  doc?: { filename?: string } & TypeWithID
+  doc?: TypeWithID & { filename?: string }
   isSelected?: boolean
   label?: string
   onClick?: () => void

@@ -33,11 +33,11 @@ export type HTMLConverters<
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided
 > = {
   [key: string]:
+    | HTMLConverter<any>
+    | undefined
     | {
         [blockSlug: string]: HTMLConverter<any>
       }
-    | HTMLConverter<any>
-    | undefined
 } & {
   [nodeType in Exclude<NonNullable<T['type']>, 'block' | 'inlineBlock'>]?: HTMLConverter<
     Extract<T, { type: nodeType }>

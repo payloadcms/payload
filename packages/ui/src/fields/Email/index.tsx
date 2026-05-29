@@ -23,12 +23,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
     field,
     field: {
-      admin: {
-        autoComplete,
-        className,
-        description,
-        placeholder,
-      } = {} as EmailFieldClientProps['field']['admin'],
+      admin: { autoComplete, className, description, placeholder } = {},
       label,
       localized,
       required,

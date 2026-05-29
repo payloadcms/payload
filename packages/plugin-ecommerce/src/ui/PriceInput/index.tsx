@@ -6,11 +6,11 @@ import type { CurrenciesConfig, Currency } from '../../types/index.js'
 
 import { FormattedInput } from './FormattedInput.js'
 
-type Props = {
+type Props = NumberFieldServerProps & {
   currenciesConfig: CurrenciesConfig
   currency?: Currency
   path: string
-} & NumberFieldServerProps
+}
 
 export const PriceInput: React.FC<Props> = (args) => {
   const {

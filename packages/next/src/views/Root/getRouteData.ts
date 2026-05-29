@@ -169,7 +169,7 @@ export const getRouteData = ({
         // If this custom view is overriding a built-in view (viewKey matches a built-in),
         // use the built-in's template settings and viewType
         if (viewKey && oneSegmentViews[viewKey]) {
-          viewType = viewKey as ViewTypes
+          viewType = viewKey
           templateClassName = baseClasses[viewKey] || viewKey
           templateType = 'minimal'
 
@@ -190,7 +190,7 @@ export const getRouteData = ({
           Component: oneSegmentViews[viewKey],
         }
 
-        viewType = viewKey as ViewTypes
+        viewType = viewKey
 
         templateClassName = baseClasses[viewKey]
         templateType = 'minimal'

@@ -47,10 +47,10 @@ export type Import = {
   userID?: number | string
 }
 
-export type CreateImportArgs = {
+export type CreateImportArgs = Import & {
   defaultVersionStatus?: 'draft' | 'published'
   req: PayloadRequest
-} & Import
+}
 
 export const createImport = async ({
   batchSize = 100,

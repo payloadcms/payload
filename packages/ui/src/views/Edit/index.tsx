@@ -233,7 +233,7 @@ export function DefaultEditView({
           documentLockState.current = {
             hasShownLockedModal: documentLockState.current?.hasShownLockedModal || false,
             isLocked: true,
-            user: lockedState.user as ClientUser,
+            user: lockedState.user,
           }
           setCurrentEditor(lockedState.user as ClientUser)
         }

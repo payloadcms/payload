@@ -141,10 +141,7 @@ export const buildEntityPolicy = (args: BuildEntityPolicy) => {
   return fields
 }
 
-type BuildPolicyType = {
-  scope?: AccessScopes
-  typeSuffix?: string
-} & (
+type BuildPolicyType = (
   | {
       entity: CollectionConfig
       type: 'collection'
@@ -153,7 +150,10 @@ type BuildPolicyType = {
       entity: GlobalConfig
       type: 'global'
     }
-)
+) & {
+  scope?: AccessScopes
+  typeSuffix?: string
+}
 export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
   const { type, entity, scope, typeSuffix } = args
   const { slug, fields, graphQL, versions } = entity

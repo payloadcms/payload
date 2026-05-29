@@ -9,5 +9,5 @@ export const createRequestFromPayloadRequest = (req: PayloadRequest) => {
     duplex: 'half',
     headers: req.headers,
     method: req.method,
-  } as { duplex: 'half' } & RequestInit)
+  } as RequestInit & { duplex: 'half' })
 }
