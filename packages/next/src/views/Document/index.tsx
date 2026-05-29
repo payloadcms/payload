@@ -288,7 +288,7 @@ export const renderDocument = async ({
         : '',
   })
 
-  let View: ViewToRender = null
+  let View: ViewToRender
 
   let showHeader = true
 

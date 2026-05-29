@@ -81,7 +81,7 @@ export const RenderJSON = ({
         {isOpen &&
           objectKeys.map((key, keyIndex) => {
             let value = object[key]
-            let type = 'string'
+            let type: string
             const isLastKey = keyIndex === objectLength - 1
 
             if (value === null) {

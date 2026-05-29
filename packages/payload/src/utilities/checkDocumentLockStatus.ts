@@ -39,7 +39,7 @@ export const checkDocumentLockStatus = async ({
 
   const isLockingEnabled = lockDocumentsProp !== false
 
-  let lockedDocumentQuery = {}
+  let lockedDocumentQuery
 
   if (collectionSlug) {
     lockedDocumentQuery = {

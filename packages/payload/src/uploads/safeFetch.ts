@@ -37,7 +37,7 @@ const ssrfFilterInterceptor: LookupFunction = (hostname, options, callback) => {
     if (err) {
       callback(err, address, family)
     } else {
-      let ips = [] as string[]
+      let ips
       if (Array.isArray(address)) {
         ips = address.map((a) => a.address)
       } else {

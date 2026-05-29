@@ -75,9 +75,6 @@ export const HasManyUploadDiff: React.FC<{
   const { field, i18n, locale, nestingLevel, polymorphic, req, valueFrom, valueTo } = args
   const ReactDOMServer = (await import('react-dom/server')).default
 
-  let From: React.ReactNode = ''
-  let To: React.ReactNode = ''
-
   const showCollectionSlug = Array.isArray(field.relationTo)
 
   const getUploadDocKey = (uploadDoc: UploadDoc): number | string => {
@@ -136,8 +133,9 @@ export const HasManyUploadDiff: React.FC<{
       '</div>',
     tokenizeByCharacter: false,
   })
-  From = diffResult.From
-  To = diffResult.To
+
+  const From: React.ReactNode = diffResult.From
+  const To: React.ReactNode = diffResult.To
 
   return (
     <FieldDiffContainer
@@ -167,9 +165,6 @@ export const SingleUploadDiff: React.FC<{
   const { field, i18n, locale, nestingLevel, polymorphic, req, valueFrom, valueTo } = args
 
   const ReactDOMServer = (await import('react-dom/server')).default
-
-  let From: React.ReactNode = ''
-  let To: React.ReactNode = ''
 
   const showCollectionSlug = Array.isArray(field.relationTo)
 
@@ -206,8 +201,8 @@ export const SingleUploadDiff: React.FC<{
     toHTML: toHtml,
     tokenizeByCharacter: false,
   })
-  From = diffResult.From
-  To = diffResult.To
+  const From: React.ReactNode = diffResult.From
+  const To: React.ReactNode = diffResult.To
 
   return (
     <FieldDiffContainer

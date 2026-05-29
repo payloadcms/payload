@@ -53,7 +53,7 @@ export const DiffCollapser: React.FC<Props> = ({
   const [isCollapsed, setIsCollapsed] = useState(initCollapsed)
   const { config } = useConfig()
 
-  let changeCount = 0
+  let changeCount
 
   if (isIterable) {
     if (!fieldIsArrayType(field) && !fieldIsBlockType(field)) {

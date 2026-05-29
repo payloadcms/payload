@@ -73,7 +73,7 @@ export const runJobsEndpoint: Endpoint = {
       runJobsArgs.limit = parsedLimit
     }
 
-    let noJobsRemaining = false
+    let noJobsRemaining
     let remainingJobsFromQueried = 0
     try {
       const result = await runJobs(runJobsArgs)

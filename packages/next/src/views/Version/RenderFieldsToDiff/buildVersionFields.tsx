@@ -308,7 +308,7 @@ const buildVersionField = ({
         parentSchemaPath: schemaPath,
       })
 
-      let tabFieldsPermissions: SanitizedFieldsPermissions = undefined
+      let tabFieldsPermissions: SanitizedFieldsPermissions
 
       // The tabs field does not have its own permissions as it's unnamed => use parentFieldsPermissions
       if (typeof parentFieldsPermissions === 'boolean') {
@@ -358,7 +358,7 @@ const buildVersionField = ({
     }
   } // At this point, we are dealing with a `row`, `collapsible`, array`, etc
   else if ('fields' in field) {
-    let subFieldsPermissions: SanitizedFieldsPermissions = undefined
+    let subFieldsPermissions: SanitizedFieldsPermissions
 
     if ('name' in field && typeof fieldPermissions !== 'undefined') {
       // Named fields like arrays
@@ -470,7 +470,7 @@ const buildVersionField = ({
         }
       }
 
-      let blockFieldsPermissions: SanitizedFieldsPermissions = undefined
+      let blockFieldsPermissions: SanitizedFieldsPermissions
 
       // fieldPermissions will be set here, as the blocks field has a name
       if (typeof fieldPermissions === 'boolean') {

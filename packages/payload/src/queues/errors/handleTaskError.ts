@@ -73,7 +73,7 @@ export async function handleTaskError({
     }
   }
 
-  let maxRetries: number = 0
+  let maxRetries: number
 
   if (retriesConfig?.attempts === undefined || retriesConfig?.attempts === null) {
     // Inherit retries from workflow config, if they are undefined and the workflow config has retries configured
