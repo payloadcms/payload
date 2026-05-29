@@ -65,6 +65,22 @@ describe('buildActions', () => {
     expect(groups).toHaveLength(1)
     expect(groups[0].actions.map((a) => a.id)).toEqual(['collection-posts'])
   })
+
+  it('excludes entities with admin.group === false', () => {
+    const hidden = {
+      admin: { group: false },
+      labels: { plural: 'secret', singular: 'secret' },
+      slug: 'secret',
+    } as unknown as ClientCollectionConfig
+    const groups = buildActions({
+      adminRoute: '/admin',
+      collections: [hidden],
+      globals: [],
+      i18n,
+      permissions: { collections: { secret: { read: true } } } as unknown as SanitizedPermissions,
+    })
+    expect(groups).toHaveLength(0)
+  })
 })
 
 describe('filterActions', () => {

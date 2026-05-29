@@ -1,4 +1,5 @@
-import type { CommandPaletteGroup } from './types.js'
+import type { FuzzyMatchResult } from '../../utilities/fuzzyMatch.js'
+import type { CommandPaletteAction, CommandPaletteGroup } from './types.js'
 
 import { fuzzyMatch } from '../../utilities/fuzzyMatch.js'
 
@@ -15,7 +16,10 @@ export function filterActions(groups: CommandPaletteGroup[], query: string): Com
   return groups.reduce<CommandPaletteGroup[]>((filtered, group) => {
     const actions = group.actions
       .map((action) => ({ action, match: fuzzyMatch(query, action.label) }))
-      .filter((scored) => scored.match !== null)
+      .filter(
+        (scored): scored is { action: CommandPaletteAction; match: FuzzyMatchResult } =>
+          scored.match !== null,
+      )
       .sort((a, b) => b.match.score - a.match.score)
       .map((scored) => scored.action)
 

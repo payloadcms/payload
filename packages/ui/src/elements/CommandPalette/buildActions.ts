@@ -29,7 +29,7 @@ export function buildActions({
 }: BuildActionsArgs): CommandPaletteGroup[] {
   const collectionActions: CommandPaletteAction[] = collections
     .filter(
-      (entity) => entity.admin?.group !== false && permissions?.collections?.[entity.slug]?.read,
+      (entity) => entity.admin.group !== false && permissions?.collections?.[entity.slug]?.read,
     )
     .map((entity) => {
       const canCreate = Boolean(permissions?.collections?.[entity.slug]?.create)
@@ -41,12 +41,12 @@ export function buildActions({
           ? formatAdminURL({ adminRoute, path: `/collections/${entity.slug}/create` })
           : undefined,
         href: formatAdminURL({ adminRoute, path: `/collections/${entity.slug}` }),
-        label: getTranslation(entity.labels?.plural, i18n),
+        label: getTranslation(entity.labels.plural, i18n),
       }
     })
 
   const globalActions: CommandPaletteAction[] = globals
-    .filter((entity) => entity.admin?.group !== false && permissions?.globals?.[entity.slug]?.read)
+    .filter((entity) => entity.admin.group !== false && permissions?.globals?.[entity.slug]?.read)
     .map((entity) => ({
       id: `global-${entity.slug}`,
       type: 'global' as const,
