@@ -88,6 +88,16 @@ export default buildConfigWithDefaults({
             }),
           ],
         },
+        {
+          name: 'requiredWithAdminCondition',
+          type: 'number',
+          required: true,
+          defaultValue: 42,
+          jsonSchema: [() => ({ type: 'number', minimum: 0 })],
+          admin: {
+            condition: () => true,
+          },
+        },
       ],
     },
     {
