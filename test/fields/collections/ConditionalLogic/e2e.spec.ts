@@ -10,6 +10,8 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
+import { addArrayRow } from '../../../__helpers/e2e/fields/array/index.js'
+import { addBlock } from '../../../__helpers/e2e/fields/blocks/index.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
@@ -287,6 +289,25 @@ describe('Conditional Logic', () => {
     await saveDocAndAssert(page)
 
     await expect(fieldWithOperationCondition).toBeHidden()
+  })
+
+  test('should hide entire tabs field UI when admin.condition is false', async () => {
+    await page.goto(url.create)
+
+    const tabsField = page.locator('.tabs-field').filter({
+      has: page.locator('button:has-text("Tab With Condition 1")'),
+    })
+
+    await expect(tabsField).toBeHidden()
+
+    const enableTabsToggle = page.locator('label[for=field-enableTabs]')
+    await enableTabsToggle.click()
+
+    await expect(tabsField).toBeVisible()
+    await expect(tabsField.locator('button:has-text("Tab With Condition 1")')).toBeVisible()
+
+    await enableTabsToggle.click()
+    await expect(tabsField).toBeHidden()
   })
 
   test('should toggle conditional field when radio changes inside a block', async () => {
