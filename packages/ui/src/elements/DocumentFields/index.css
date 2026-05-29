@@ -107,6 +107,7 @@
   .document-fields--force-sidebar-wrap {
     display: block;
     isolation: isolate;
+    --main-border: none;
   }
 
   .document-fields--force-sidebar-wrap .document-fields__main {
