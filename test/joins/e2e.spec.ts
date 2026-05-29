@@ -652,6 +652,7 @@ describe('Join Field', () => {
     await page.goto(foldersURL.edit(rootParentID))
     const joinField = page.locator('#field-children.field-type.join')
     await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
 
     const addNewPopupBtn = joinField.locator('.relationship-table__add-new-polymorphic')
     await expect(addNewPopupBtn).toBeVisible()
