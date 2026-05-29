@@ -88,7 +88,7 @@
     align-items: center;
     gap: var(--spacer-2);
     font-family: var(--text-body-medium-font-family);
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     line-height: 1;
     color: var(--color-text-secondary);
     background: transparent;
