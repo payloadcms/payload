@@ -8,8 +8,8 @@
       position: relative;
       width: 100%;
       min-height: var(--spacer-5);
-      background: var(--color-bg-field);
-      border: var(--stroke-width-small) solid var(--color-border-field);
+      background: var(--field-color-bg);
+      border: var(--stroke-width-small) solid var(--field-color-border);
       border-radius: var(--radius-medium);
       color: var(--color-text);
       font-family: var(--text-body-medium-font-family);
@@ -28,7 +28,7 @@
       gap: var(--spacer-1);
 
       &.rs__control--is-focused {
-        border-color: var(--accessibility-focus-color);
+        border-color: var(--field-color-border-focus);
       }
 
       &:has(.clear-indicator) {
@@ -36,7 +36,7 @@
       }
 
       &:hover:not(:focus-within) {
-        border-color: var(--color-border-field-hover);
+        border-color: var(--field-color-border-hover);
       }
     }
 
@@ -121,21 +121,21 @@
     }
 
     &.rs--is-disabled .rs__control {
-      background: var(--color-bg);
-      border-color: var(--color-border);
-      color: var(--color-text-disabled);
+      background: var(--field-color-bg-disabled);
+      border-color: var(--field-color-border-disabled);
+      color: var(--field-color-text-disabled);
     }
 
     &.react-select--error .rs__control:not(.rs__control--is-focused) {
       &:hover {
-        border-color: var(--color-border-danger-strong);
+        border-color: var(--field-color-border-error);
       }
     }
   }
 
   .react-select--error {
     div.rs__control {
-      border: var(--stroke-width-small) solid var(--color-border-danger-strong);
+      border: var(--stroke-width-small) solid var(--field-color-border-error);
 
       & > div.rs__indicator > button.dropdown-indicator[type='button'] {
         border: none;
@@ -144,12 +144,12 @@
   }
 
   .react-select--error .rs__control:hover {
-    border-color: var(--color-border-danger-strong);
+    border-color: var(--field-color-border-error);
   }
 
   .react-select--error:focus-within {
     div.rs__control {
-      border-color: var(--accessibility-focus-color);
+      border-color: var(--field-color-border-focus);
     }
   }
 }

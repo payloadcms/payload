@@ -40,13 +40,13 @@
       &:focus-within,
       &:focus {
         .checkbox-input__input {
-          border-color: var(--accessibility-focus-color);
+          border-color: var(--field-color-border-focus);
         }
       }
 
       &:hover {
         .checkbox-input__input {
-          border-color: var(--color-border-selected-strong);
+          border-color: var(--field-color-toggle-border-hover);
         }
       }
     }
@@ -79,7 +79,7 @@
     position: relative;
     width: var(--spacer-3);
     height: var(--spacer-3);
-    border: var(--stroke-width-small) solid var(--color-border-strong);
+    border: var(--stroke-width-small) solid var(--field-color-toggle-border);
     border-radius: var(--radius-medium);
     background: transparent;
 
@@ -120,8 +120,8 @@
   /* Partial/indeterminate state - same blue background as checked */
   .checkbox-input:has(.checkbox-input__icon.partial) {
     .checkbox-input__input {
-      background-color: var(--color-bg-brand);
-      border-color: var(--color-border-selected);
+      background-color: var(--field-color-toggle-bg-checked);
+      border-color: var(--field-color-toggle-border-checked);
     }
 
     &:has(:focus-visible) .checkbox-input__input {
@@ -132,8 +132,8 @@
 
   .checkbox-input--checked {
     .checkbox-input__input {
-      background-color: var(--color-bg-brand);
-      border-color: var(--color-border-selected);
+      background-color: var(--field-color-toggle-bg-checked);
+      border-color: var(--field-color-toggle-border-checked);
     }
 
     &:has(:focus-visible) .checkbox-input__input {
@@ -144,19 +144,19 @@
     .checkbox-input__icon {
       svg {
         opacity: 1;
-        color: var(--color-icon-onbrand);
+        color: var(--field-color-toggle-icon);
       }
     }
   }
 
   .checkbox-input--read-only {
     .checkbox-input__input {
-      background: var(--color-bg-disabled);
-      border-color: var(--color-border-disabled);
+      background: var(--field-color-toggle-bg-disabled);
+      border-color: var(--field-color-toggle-border-disabled);
     }
 
     label {
-      color: var(--color-text-disabled);
+      color: var(--field-color-text-disabled);
     }
   }
 
@@ -170,7 +170,7 @@
     &:not(.checkbox-input--read-only):not(.checkbox-input--checked) {
       &:hover {
         .checkbox-input__input {
-          border-color: var(--color-border-selected-strong);
+          border-color: var(--field-color-toggle-border-hover);
         }
       }
     }
@@ -178,16 +178,16 @@
     /* Ensure checked state overrides muted base styles */
     &.checkbox-input--checked {
       .checkbox-input__input {
-        background-color: var(--color-bg-brand);
-        border-color: var(--color-border-selected);
+        background-color: var(--field-color-toggle-bg-checked);
+        border-color: var(--field-color-toggle-border-checked);
       }
     }
 
     /* Ensure partial state overrides muted base styles */
     &:has(.checkbox-input__icon.partial) {
       .checkbox-input__input {
-        background-color: var(--color-bg-brand);
-        border-color: var(--color-border-selected);
+        background-color: var(--field-color-toggle-bg-checked);
+        border-color: var(--field-color-toggle-border-checked);
       }
     }
   }
@@ -195,22 +195,22 @@
   .checkbox.error {
     .checkbox-input--checked {
       .checkbox-input__input {
-        background-color: var(--color-bg-danger);
-        border-color: var(--color-border-danger-strong);
+        background-color: var(--field-color-error-bg);
+        border-color: var(--field-color-border-error);
       }
 
       &:hover .checkbox-input__input {
-        border-color: var(--color-border-danger-strong);
+        border-color: var(--field-color-border-error);
       }
     }
 
     .checkbox-input:not(.checkbox-input--checked) {
       .checkbox-input__input {
-        border-color: var(--color-border-danger-strong);
+        border-color: var(--field-color-border-error);
       }
 
       &:hover .checkbox-input__input {
-        border-color: var(--color-border-danger-strong);
+        border-color: var(--field-color-border-error);
       }
     }
   }

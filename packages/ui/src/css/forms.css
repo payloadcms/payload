@@ -2,10 +2,10 @@
   .form-input {
     width: 100%;
     min-height: var(--spacer-5);
-    background: var(--color-bg-field);
-    border: var(--stroke-width-small) solid var(--color-border-field);
+    background: var(--field-color-bg);
+    border: var(--stroke-width-small) solid var(--field-color-border);
     border-radius: var(--radius-medium);
-    color: var(--color-text);
+    color: var(--field-color-text);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
@@ -23,22 +23,22 @@
     }
 
     &::placeholder {
-      color: var(--color-text-tertiary);
+      color: var(--field-color-placeholder);
       font-weight: var(--text-body-medium-font-weight);
       font-size: var(--text-body-medium-font-size);
     }
 
     &:where(:hover:not(:focus):not(:disabled):not(:read-only)) {
-      border-color: var(--color-border-field-hover);
+      border-color: var(--field-color-border-hover);
     }
 
     &:focus {
-      border-color: var(--color-border-selected);
+      border-color: var(--field-color-border-focus);
       border-radius: var(--radius-medium);
     }
 
     &:read-only:focus {
-      border-color: var(--color-border-field-hover);
+      border-color: var(--field-color-border-hover);
     }
 
     &:focus-visible {
@@ -46,17 +46,17 @@
     }
 
     &:disabled {
-      color: var(--color-text-disabled);
-      border-color: var(--color-border);
-      background: none;
+      color: var(--field-color-text-disabled);
+      border-color: var(--field-color-border-disabled);
+      background: var(--field-color-bg-disabled);
     }
   }
 
   .form-input-error {
-    border-color: var(--color-border-danger-strong);
+    border-color: var(--field-color-border-error);
 
     &:focus {
-      border-color: var(--color-border-selected);
+      border-color: var(--field-color-border-focus);
     }
   }
 
@@ -64,8 +64,8 @@
     display: flex;
     position: relative;
     align-items: stretch;
-    background: var(--color-bg-field);
-    border: var(--stroke-width-small) solid var(--color-border-field);
+    background: var(--field-color-bg);
+    border: var(--stroke-width-small) solid var(--field-color-border);
     border-radius: var(--radius-medium);
     min-height: var(--spacer-5);
     transition-property: box-shadow, background-color;
@@ -73,18 +73,18 @@
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
     &:where(:hover:not(:focus-within):not(:has(input:disabled)):not(:has(input:read-only))) {
-      border-color: var(--color-border-field-hover);
+      border-color: var(--field-color-border-hover);
     }
 
     &:focus-within {
       outline: none;
-      border-color: var(--color-border-selected);
+      border-color: var(--field-color-border-focus);
     }
 
     &:has(input:disabled) {
-      background: transparent;
-      border-color: var(--color-border-disabled);
-      color: var(--color-text-disabled);
+      background: var(--field-color-bg-disabled);
+      border-color: var(--field-color-border-disabled);
+      color: var(--field-color-text-disabled);
     }
 
     input.form-input {
@@ -103,10 +103,10 @@
   }
 
   .form-input-group-error {
-    border-color: var(--color-border-danger-strong);
+    border-color: var(--field-color-border-error);
 
     &:focus-within {
-      border-color: var(--color-border-selected);
+      border-color: var(--field-color-border-focus);
     }
   }
 }
