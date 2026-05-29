@@ -39,16 +39,21 @@ export const CommandPalette: React.FC = () => {
   const isOpen = Boolean(modalState[commandPaletteSlug]?.isOpen)
 
   const [query, setQuery] = useState('')
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [rawActiveIndex, setActiveIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const listboxId = useId()
 
+  const open = useCallback(
+    (event: KeyboardEvent) => {
+      event.preventDefault()
+      openModal(commandPaletteSlug)
+    },
+    [openModal],
+  )
+
   // Open at edit depth 1 (top level). Re-press while open is handled inside onKeyDown.
-  useHotkey({ cmdCtrlKey: true, editDepth: 1, keyCodes: cmdKKeyCodes }, (event) => {
-    event.preventDefault()
-    openModal(commandPaletteSlug)
-  })
+  useHotkey({ cmdCtrlKey: true, editDepth: 1, keyCodes: cmdKKeyCodes }, open)
 
   const groups = useMemo(
     () => buildActions({ adminRoute, collections, globals, i18n, permissions, visibleEntities }),
@@ -62,6 +67,17 @@ export const CommandPalette: React.FC = () => {
     [filteredGroups],
   )
 
+  const indexByAction = useMemo(
+    () => new Map(flatActions.map((action, index) => [action, index])),
+    [flatActions],
+  )
+
+  // Clamp at read time so a shrinking result set can't leave a stale selection
+  // pointing past the end of the list (avoids a setState-in-effect round-trip).
+  const activeIndex = Math.min(rawActiveIndex, Math.max(0, flatActions.length - 1))
+  const activeAction = flatActions[activeIndex]
+  const activeOptionId = activeAction ? optionId(activeAction) : null
+
   // Reset state whenever the palette opens, and focus the input.
   useEffect(() => {
     if (isOpen) {
@@ -71,22 +87,15 @@ export const CommandPalette: React.FC = () => {
     }
   }, [isOpen])
 
-  // Keep the active index in range as results change.
+  // Scroll the selected option into view when the selection itself changes
+  // (keyed on the option id, not the array, so typing/hover don't re-trigger it).
   useEffect(() => {
-    setActiveIndex((current) => Math.min(current, Math.max(0, flatActions.length - 1)))
-  }, [flatActions.length])
-
-  // Scroll active option into view on keyboard navigation.
-  useEffect(() => {
-    const active = flatActions[activeIndex]
-    if (active) {
-      document.getElementById(optionId(active))?.scrollIntoView({ block: 'nearest' })
+    if (activeOptionId) {
+      document.getElementById(activeOptionId)?.scrollIntoView({ block: 'nearest' })
     }
-  }, [activeIndex, flatActions])
+  }, [activeOptionId])
 
   const close = useCallback(() => closeModal(commandPaletteSlug), [closeModal])
-
-  const activeAction = flatActions[activeIndex]
 
   const runAction = useCallback(
     (action: CommandPaletteAction | undefined, create: boolean) => {
@@ -177,7 +186,7 @@ export const CommandPalette: React.FC = () => {
                 {group.label}
               </div>
               {group.actions.map((action) => {
-                const flatIndex = flatActions.indexOf(action)
+                const flatIndex = indexByAction.get(action) ?? -1
                 const isActive = action === activeAction
                 return (
                   // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus -- keyboard events are handled by the combobox input; focus stays in the input per ARIA combobox pattern
