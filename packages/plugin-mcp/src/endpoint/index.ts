@@ -1,5 +1,5 @@
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/server'
-import { AuthenticationError, type PayloadHandler } from 'payload'
+import { APIError, type PayloadHandler } from 'payload'
 
 import { buildMcpServer } from '../mcp/buildMcpServer.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
@@ -7,7 +7,7 @@ import { getAuthorizedMCP } from './access.js'
 
 export const mcpEndpoint: PayloadHandler = async (req) => {
   if (!req.url) {
-    throw new AuthenticationError()
+    throw new APIError('Missing request URL', 400)
   }
 
   req.payloadAPI = 'MCP' as const
