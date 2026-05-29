@@ -10,7 +10,7 @@ import type { GeneratedTypes } from '../../../__helpers/shared/sdk/types.js'
 import type { Config } from '../../payload-types.js'
 
 import {
-  getPillSelectorItem,
+  getColumnSelectorItem,
   openListColumns,
   toggleColumn,
 } from '../../../__helpers/e2e/columns/index.js'
@@ -88,7 +88,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Hidden Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Hidden Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -112,7 +112,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Disabled Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Disabled Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -138,7 +138,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Admin Hidden Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Admin Hidden Text Field' }),
       ).toBeVisible()
 
       await selectTableRow(page, 'Seeded text document')
@@ -182,7 +182,7 @@ describe('Text', () => {
     await page.goto(url.list)
     await openListColumns(page, {})
     await expect(
-      getPillSelectorItem({ container: page, label: 'Disable List Column Text' }),
+      getColumnSelectorItem({ container: page, label: 'Disable List Column Text' }),
     ).toBeHidden()
 
     await expect(page.locator('#heading-disableListColumnText')).toBeHidden()

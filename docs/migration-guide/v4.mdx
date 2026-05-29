@@ -205,6 +205,44 @@ If you were relying on Next-specific extras like `prefetch()` on the router inst
   />
 ```
 
+### `@payloadcms/next/client`, `@payloadcms/next/rsc`, and `@payloadcms/next/templates` removed
+
+The `./client`, `./rsc`, and `./templates` subpath exports on `@payloadcms/next` were thin re-exports of components that now live in `@payloadcms/ui`. All admin elements (DocumentHeader, FormHeader, HierarchyTypeField, Logo, Nav) and templates (DefaultTemplate, MinimalTemplate) have been relocated to `@payloadcms/ui` and no longer depend on `next/*` modules. Import them directly from the canonical source.
+
+| Symbol                     | Old source                   | New source           |
+| -------------------------- | ---------------------------- | -------------------- |
+| `DefaultTemplate`          | `@payloadcms/next/templates` | `@payloadcms/ui/rsc` |
+| `MinimalTemplate`          | `@payloadcms/next/templates` | `@payloadcms/ui/rsc` |
+| `CollectionCards`          | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
+| `DefaultNav`               | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
+| `DocumentHeader`           | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
+| `HierarchyTypeFieldServer` | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
+| `Logo`                     | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
+| `DefaultNavClient`         | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `HierarchyTypeField`       | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `NavSidebarToggle`         | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `NavWrapper`               | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsAccessCell`   | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsColumnField`  | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsColumnsCell`  | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsGroupByCell`  | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsGroupByField` | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsWhereCell`    | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsWhereField`   | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `SlugField`                | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+
+```diff
+- import { DefaultTemplate, MinimalTemplate } from '@payloadcms/next/templates'
+- import { DocumentHeader, Logo } from '@payloadcms/next/rsc'
+- import { HierarchyTypeField, SlugField } from '@payloadcms/next/client'
++ import { DefaultTemplate, DocumentHeader, Logo, MinimalTemplate } from '@payloadcms/ui/rsc'
++ import { HierarchyTypeField, SlugField } from '@payloadcms/ui'
+```
+
+If you reference any of these components by string path in your Payload config (e.g. `Component: '@payloadcms/next/rsc#CollectionCards'`), update the path string too — then regenerate the import map with `payload generate:importmap`.
+
+Run `npx @payloadcms/codemod --transform migrate-next-subpath-exports` to migrate automatically. It rewrites both `import` declarations and string component paths.
+
 ### `title` and `setDocumentTitle` removed from `useDocumentInfo`
 
 For performance reasons, the document title state has been split out of `DocumentInfoContext` into its own `DocumentTitleContext`. Access it through the `useDocumentTitle` hook, which exposes the same `title` and `setDocumentTitle` API. Components that subscribed to `useDocumentInfo` solely for the title will no longer re-render when unrelated document state changes.
@@ -382,6 +420,51 @@ The deprecated `HTMLConverterFeature`, `lexicalHTML`, and the per-node `converte
 ```
 
 Custom nodes that define `converters.html` should export their converters instead.
+
+### RichText adapter `outputSchema` renamed to `jsonSchema`
+
+The optional `outputSchema` function on rich-text editor adapters (`RichTextAdapter`) has been renamed to `jsonSchema` — it returns JSON Schema, not TypeScript, so the old name was misleading. Same arguments, same `JSONSchema4` return value.
+
+```diff
+  myAdapter: RichTextAdapter = {
+-   outputSchema: ({ collectionIDFieldTypes, config, field, i18n, interfaceNameDefinitions, isRequired }) => {
++   jsonSchema: ({ collectionIDFieldTypes, config, field, i18n, interfaceNameDefinitions, isRequired }) => {
+      // return JSONSchema4
+    },
+  }
+```
+
+`@payloadcms/richtext-lexical` is updated. Only custom third-party adapters need attention.
+
+### Lexical: feature `generatedTypes.modifyOutputSchema` renamed to `modifyJSONSchema`
+
+If you authored a custom lexical feature that hooks into type generation, rename `generatedTypes.modifyOutputSchema` to `modifyJSONSchema` (and its sanitized counterpart `modifyOutputSchemas` to `modifyJSONSchemas`) — it operates on JSON Schema, matching the adapter rename above.
+
+```diff
+  createServerFeature({
+    feature: () => ({
+      generatedTypes: {
+-       modifyOutputSchema: ({ currentSchema, interfaceNameDefinitions }) => currentSchema,
++       modifyJSONSchema: ({ currentSchema, interfaceNameDefinitions }) => currentSchema,
+      },
+    }),
+  })
+```
+
+### Field `typescriptSchema` renamed to `jsonSchema`
+
+`typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of `({ jsonSchema }) => JSONSchema4` transforms.
+
+```diff
+  {
+    name: 'tags',
+    type: 'json',
+-   typescriptSchema: [() => ({ type: 'array', items: { type: 'string' } })],
++   jsonSchema: [() => ({ type: 'array', items: { type: 'string' } })],
+  }
+```
+
+Rename `typescriptSchema` → `jsonSchema` wherever you set it on a field config.
 
 ### Jobs: `jobs.depth` and `jobs.runHooks` have been removed ([#16414](https://github.com/payloadcms/payload/pull/16414))
 

@@ -3,7 +3,7 @@ import type { SerializedLexicalNode } from 'lexical'
 
 import { QuoteNode } from '@lexical/rich-text'
 
-import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
+import type { StronglyTypedElementNode } from '../../../types/nodeTypes.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'

@@ -15,7 +15,7 @@ import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement, DecoratorNode } from 'lexical'
 
-import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
+import type { StronglyTypedLeafNode } from '../../../../types/nodeTypes.js'
 
 export type InlineBlockFields<TInlineBlockFields extends JsonObject = JsonObject> = {
   blockType: string
