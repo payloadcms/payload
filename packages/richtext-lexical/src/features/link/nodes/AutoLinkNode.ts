@@ -2,7 +2,7 @@ import type { ElementNode, LexicalNode, LexicalUpdateJSON, RangeSelection } from
 
 import { $applyNodeReplacement, $isElementNode } from 'lexical'
 
-import type { LinkFields, SerializedAutoLinkNode } from './types.js'
+import type { LinkFields, SerializedAutoLinkNode } from '../server/schema.js'
 
 import { LinkNode } from './LinkNode.js'
 

@@ -48,7 +48,7 @@ import type {
  * Used as the generic constraint for node map types.
  * Extends the base SerializedLexicalNode with optional type for flexibility.
  */
-export type SerializedNodeBase = { [key: string]: unknown; type?: string }
+export type SerializedNodeBase = { type?: string }
 
 export type LexicalFieldAdminProps = {
   /**
