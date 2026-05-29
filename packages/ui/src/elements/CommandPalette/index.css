@@ -131,6 +131,15 @@
     color: var(--color-text-secondary);
   }
 
+  /* Shortcut glyphs (⌘ ⏎ ↑↓) have tall metrics that read oversized at body
+     size; render them smaller, relative to their surrounding text, and reset
+     the default monospace kbd font. */
+  .cmd-palette__key {
+    font-family: inherit;
+    font-size: 0.85em;
+    line-height: 1;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .cmd-palette,
     .cmd-palette__inner {

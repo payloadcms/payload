@@ -213,7 +213,8 @@ export const CommandPalette: React.FC = () => {
                         }}
                         type="button"
                       >
-                        {t('commandPalette:createNew')} ⌘⏎
+                        {t('commandPalette:createNew')}{' '}
+                        <kbd className={`${baseClass}__key`}>⌘⏎</kbd>
                       </button>
                     ) : null}
                   </div>
@@ -230,10 +231,20 @@ export const CommandPalette: React.FC = () => {
         </div>
 
         <div className={`${baseClass}__footer`}>
-          <span>↑↓ {t('commandPalette:hintNavigate')}</span>
-          <span>⏎ {t('commandPalette:hintSelect')}</span>
-          {hasCreatableAction ? <span>⌘⏎ {t('commandPalette:hintCreate')}</span> : null}
-          <span>esc {t('commandPalette:hintClose')}</span>
+          <span>
+            <kbd className={`${baseClass}__key`}>↑↓</kbd> {t('commandPalette:hintNavigate')}
+          </span>
+          <span>
+            <kbd className={`${baseClass}__key`}>⏎</kbd> {t('commandPalette:hintSelect')}
+          </span>
+          {hasCreatableAction ? (
+            <span>
+              <kbd className={`${baseClass}__key`}>⌘⏎</kbd> {t('commandPalette:hintCreate')}
+            </span>
+          ) : null}
+          <span>
+            <kbd className={`${baseClass}__key`}>esc</kbd> {t('commandPalette:hintClose')}
+          </span>
         </div>
       </div>
     </Modal>
