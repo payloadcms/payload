@@ -184,14 +184,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldState.fieldSchema = field
   }
 
-  // Short-circuit when the field fails its condition: skip access checks,
-  // validation, switch processing, recursion into children, filterOptions
-  // resolution, and render. The client re-requests form state when conditions
-  // flip, so a minimal entry is sufficient here.
+  // Short-circuit to prevent hidden fields from recursing and rendering.
   if (passesCondition === false) {
     if (!filter || filter(args)) {
       state[path] = fieldState
     }
+
     return
   }
 
