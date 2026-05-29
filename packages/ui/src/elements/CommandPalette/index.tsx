@@ -216,7 +216,7 @@ export const CommandPalette: React.FC = () => {
                         {t('commandPalette:createNew')}
                         <span className={`${baseClass}__keys`}>
                           <kbd className={`${baseClass}__key`}>⌘</kbd>
-                          <kbd className={`${baseClass}__key`}>⏎</kbd>
+                          <kbd className={`${baseClass}__key`}>↵</kbd>
                         </span>
                       </button>
                     ) : null}
@@ -243,14 +243,14 @@ export const CommandPalette: React.FC = () => {
           </span>
           <span className={`${baseClass}__hint`}>
             {t('commandPalette:hintSelect')}
-            <kbd className={`${baseClass}__key`}>⏎</kbd>
+            <kbd className={`${baseClass}__key`}>↵</kbd>
           </span>
           {hasCreatableAction ? (
             <span className={`${baseClass}__hint`}>
               {t('commandPalette:hintCreate')}
               <span className={`${baseClass}__keys`}>
                 <kbd className={`${baseClass}__key`}>⌘</kbd>
-                <kbd className={`${baseClass}__key`}>⏎</kbd>
+                <kbd className={`${baseClass}__key`}>↵</kbd>
               </span>
             </span>
           ) : null}
