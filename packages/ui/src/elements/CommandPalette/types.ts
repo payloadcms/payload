@@ -9,6 +9,11 @@ export type CommandPaletteAction = {
   id: string
   /** Pre-translated label shown to the user and used for fuzzy matching. */
   label: string
+  /**
+   * Target-string indices that matched the active query; populated by filterActions for
+   * highlighting. Absent for the unfiltered (empty-query) list.
+   */
+  matchIndices?: number[]
   type: CommandPaletteActionType
 }
 

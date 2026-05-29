@@ -2,6 +2,7 @@
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
+import type { LabelSegment } from './highlightLabel.js'
 import type { CommandPaletteAction } from './types.js'
 
 import { useHotkey } from '../../hooks/useHotkey.js'
@@ -12,6 +13,7 @@ import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { buildActions } from './buildActions.js'
 import { filterActions } from './filterActions.js'
+import { splitLabelByMatches } from './highlightLabel.js'
 import './index.css'
 
 export const commandPaletteSlug = 'command-palette'
@@ -190,7 +192,18 @@ export const CommandPalette: React.FC = () => {
                     onMouseEnter={() => setActiveIndex(flatIndex)}
                     role="option"
                   >
-                    <span className={`${baseClass}__option-label`}>{action.label}</span>
+                    <span className={`${baseClass}__option-label`}>
+                      {splitLabelByMatches(action.label, action.matchIndices).map(
+                        (segment: LabelSegment, i: number) =>
+                          segment.isMatch ? (
+                            <strong className={`${baseClass}__option-match`} key={i}>
+                              {segment.text}
+                            </strong>
+                          ) : (
+                            segment.text
+                          ),
+                      )}
+                    </span>
                     {isActive && action.createHref ? (
                       <button
                         className={`${baseClass}__option-create`}

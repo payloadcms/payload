@@ -21,7 +21,7 @@ export function filterActions(groups: CommandPaletteGroup[], query: string): Com
           scored.match !== null,
       )
       .sort((a, b) => b.match.score - a.match.score)
-      .map((scored) => scored.action)
+      .map((scored) => ({ ...scored.action, matchIndices: scored.match.indices }))
 
     if (actions.length > 0) {
       filtered.push({ ...group, actions })
