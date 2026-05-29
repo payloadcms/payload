@@ -502,6 +502,8 @@ export const getGenerateSignedURLHandler = ({
 
     const body = (await req.json()) as {
       collectionSlug?: unknown
+    } & {
+      partSize?: number
     } & Partial<MultipartCreateFields> &
       Partial<SignedURLRequest>
     const action = body.action || multipartAction.generateSignedURL
