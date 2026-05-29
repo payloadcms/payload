@@ -3,10 +3,14 @@ import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { Block, Field, Tab } from '../../fields/config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
-function hasKey<T, K extends string>(
-  obj: null | T | undefined,
+// `obj` is `unknown` so this predicate only asserts the key exists, nothing more. Do not type it
+// as `<T>(obj: T): obj is { ... } & T`: intersecting `& T` with the field components type forces
+// the checker to expand that large type on every call, which is expensive. Callers read
+// `field.admin.components.X` straight off `field`, so the `& T` narrowing is not needed anyway.
+function hasKey<K extends string>(
+  obj: unknown,
   key: K,
-): obj is { [P in K]: PayloadComponent | PayloadComponent[] } & T {
+): obj is { [P in K]: PayloadComponent | PayloadComponent[] } {
   return obj != null && Object.prototype.hasOwnProperty.call(obj, key)
 }
 

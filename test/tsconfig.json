@@ -39,9 +39,10 @@
     "dist/**/*.js",
     "**/dist/**/*.js"
   ],
-  // Each test suite (for example ./fields) has its own tsconfig that lists only its own files.
-  // This root config only covers the top-level files and the few folders that don't have their
-  // own tsconfig. That way, opening one test file doesn't load every test in the whole folder.
+  // Each test suite (for example ./fields) has its own tsconfig listing only its own files, so
+  // opening one test file does not pull the whole test/ folder into the program. This root config
+  // is only the fallback for top-level files and the folders without their own tsconfig. Give a
+  // new suite its own tsconfig rather than adding it here.
   "include": [
     "./*.ts",
     "./*.tsx",
