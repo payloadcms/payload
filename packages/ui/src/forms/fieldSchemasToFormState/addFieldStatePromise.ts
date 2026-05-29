@@ -186,6 +186,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
   // Short-circuit to prevent hidden fields from recursing and rendering.
   if (passesCondition === false && field.type !== 'tabs' && field.type !== 'tab') {
+    if (fieldAffectsData(field) && data?.[field.name] !== undefined) {
+      fieldState.value = data[field.name]
+      fieldState.initialValue = data[field.name]
+    }
+
     if (!filter || filter(args)) {
       state[path] = fieldState
     }
