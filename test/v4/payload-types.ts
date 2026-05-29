@@ -93,6 +93,7 @@ export interface Config {
     'select-fields': SelectField;
     'slug-fields': SlugField;
     'tabs-fields': TabsField;
+    'tag-items': TagItem;
     tags: Tag;
     'text-fields': TextField;
     'textarea-fields': TextareaField;
@@ -149,6 +150,7 @@ export interface Config {
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
+    'tag-items': TagItemsSelect<false> | TagItemsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
@@ -905,7 +907,7 @@ export interface Tag {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  allowedCollections?: 'text-fields'[] | null;
+  allowedCollections?: ('tag-items' | 'text-fields')[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1178,6 +1180,18 @@ export interface TabsField {
   pushNotifications?: boolean | null;
   autoBackup?: boolean | null;
   backupFrequency?: ('daily' | 'weekly' | 'monthly') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tag-items".
+ */
+export interface TagItem {
+  id: string;
+  title: string;
+  description?: string | null;
+  _h_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1484,6 +1498,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tabs-fields';
         value: string | TabsField;
+      } | null)
+    | ({
+        relationTo: 'tag-items';
+        value: string | TagItem;
       } | null)
     | ({
         relationTo: 'tags';
@@ -2204,6 +2222,17 @@ export interface TabsFieldsSelect<T extends boolean = true> {
   pushNotifications?: T;
   autoBackup?: T;
   backupFrequency?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tag-items_select".
+ */
+export interface TagItemsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  _h_tags?: T;
   updatedAt?: T;
   createdAt?: T;
 }

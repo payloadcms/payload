@@ -1,0 +1,106 @@
+@layer payload-default {
+  .group-by-control__popup .popup__scroll-container {
+    padding: 0;
+  }
+
+  .group-by-control__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--spacer-6);
+    padding-left: var(--spacer-2);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-large) var(--radius-large) 0 0;
+  }
+
+  .group-by-control__title {
+    align-self: stretch;
+    align-items: center;
+    display: flex;
+    flex: 1;
+    padding: var(--spacer-2);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    color: var(--color-text);
+  }
+
+  .group-by-control__header-actions {
+    display: flex;
+    gap: var(--spacer-1);
+    padding: var(--spacer-2);
+  }
+
+  .group-by-control__body {
+    padding: var(--spacer-2) 0;
+  }
+
+  .group-by-control__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: var(--spacer-2);
+    align-items: center;
+    padding: var(--spacer-1) var(--spacer-3);
+  }
+
+  .group-by-control__label {
+    display: flex;
+    align-items: center;
+    height: var(--spacer-4);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .group-by-control__input {
+    width: 100%;
+  }
+
+  .group-by-control__select-popup {
+    width: 100%;
+  }
+
+  .group-by-control__select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: var(--spacer-4);
+    padding: 0 var(--spacer-1) 0 var(--spacer-2);
+    background: var(--color-bg);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-medium);
+    cursor: pointer;
+    color: var(--color-text);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .group-by-control__select-trigger:hover:not(.group-by-control__select-trigger--disabled) {
+    border-color: var(--color-border-hover);
+  }
+
+  .group-by-control__select-trigger--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .group-by-control__select-trigger svg {
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .group-by-control__select-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

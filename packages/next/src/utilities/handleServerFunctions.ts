@@ -1,11 +1,14 @@
 import type { DefaultServerFunctionArgs, ServerFunction, ServerFunctionHandler } from 'payload'
 
-import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
+import {
+  _internal_renderFieldHandler,
+  copyDataFromLocaleHandler,
+  renderTabHandler,
+} from '@payloadcms/ui/rsc'
 import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 
-import { renderTabHandler } from '../elements/Nav/SidebarTabs/renderTabServerFn.js'
 import { getDefaultLayoutHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
 import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'

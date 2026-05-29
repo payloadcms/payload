@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 
-import type { SerializedListItemNode, SerializedListNode } from '../../../../../nodeTypes.js'
+import type { SerializedListItemNode, SerializedListNode } from '../../../../../types/nodeTypes.js'
 import type { HTMLConvertersAsync } from '../types.js'
 
 const ALLOWED_LIST_TAGS = new Set(['ol', 'ul'])

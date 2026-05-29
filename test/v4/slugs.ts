@@ -25,6 +25,7 @@ export const foldersSlug = 'folders'
 export const folderItemsSlug = 'folder-items'
 export const draftVersionsSlug = 'draft-versions'
 export const tagsSlug = 'tags'
+export const tagItemsSlug = 'tag-items'
 export const autosaveSlug = 'autosave'
 export const hierarchySlug = 'hierarchy'
 export const joinFieldsSlug = 'join-fields'
@@ -63,6 +64,7 @@ export const collectionSlugs = [
   folderItemsSlug,
   draftVersionsSlug,
   tagsSlug,
+  tagItemsSlug,
   autosaveSlug,
   hierarchySlug,
   joinFieldsSlug,

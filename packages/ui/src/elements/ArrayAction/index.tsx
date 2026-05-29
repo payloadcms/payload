@@ -50,7 +50,7 @@ export const ArrayAction: React.FC<Props> = ({
       horizontalAlign="right"
       render={({ close }) => {
         return (
-          <PopupList.IconButtonGroup>
+          <PopupList.MenuItem>
             {isSortable && index !== 0 && (
               <PopupList.Button
                 className={`${baseClass}__action ${baseClass}__move-up`}
@@ -129,7 +129,7 @@ export const ArrayAction: React.FC<Props> = ({
             >
               {t('general:remove')}
             </PopupList.Button>
-          </PopupList.IconButtonGroup>
+          </PopupList.MenuItem>
         )
       }}
       size="medium"

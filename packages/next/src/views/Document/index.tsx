@@ -17,7 +17,7 @@ import {
   LivePreviewProvider,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
+import { DocumentHeader, handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
@@ -27,7 +27,6 @@ import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
-import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
