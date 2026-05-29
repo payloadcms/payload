@@ -69,7 +69,7 @@
   }
 
   .cmd-palette__option--active {
-    background: var(--color-bg-secondary);
+    background: var(--color-bg-selected);
     color: var(--color-text);
     /* Left accent bar as a non-color selection indicator (accessibility) */
     box-shadow: inset 2px 0 0 0 var(--color-border-brand);
