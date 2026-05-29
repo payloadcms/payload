@@ -235,7 +235,7 @@ export const DocumentControls: React.FC<{
           )}
           {(collectionHasDraftsEnabled || globalHasDraftsEnabled) && (
             <Fragment>
-              {autosaveEnabled && (globalConfig || (collectionConfig && isEditing)) && (
+              {(globalConfig || (collectionConfig && isEditing)) && (
                 <li className={`${baseClass}__status ${baseClass}__list-item`}>
                   <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
                 </li>
