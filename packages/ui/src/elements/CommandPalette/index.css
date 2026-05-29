@@ -86,16 +86,14 @@
   .cmd-palette__option-create {
     display: inline-flex;
     align-items: center;
-    /* Explicit height caps the border-box so the button can never force the row taller */
-    height: 1.375rem;
+    gap: var(--spacer-2);
     font-family: var(--text-body-medium-font-family);
     font-size: 0.75rem;
     line-height: 1;
     color: var(--color-text-secondary);
-    background: var(--color-bg-secondary);
-    border: var(--stroke-width-small) solid var(--color-border);
-    border-radius: var(--radius-small);
-    padding: 0 var(--spacer-1);
+    background: transparent;
+    border: 0;
+    padding: 0;
     cursor: pointer;
     white-space: nowrap;
   }
@@ -123,7 +121,9 @@
 
   .cmd-palette__footer {
     display: flex;
-    gap: var(--spacer-3);
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacer-4);
     padding: var(--spacer-2) var(--spacer-4);
     border-top: var(--stroke-width-small) solid var(--color-border);
     font-family: var(--text-body-medium-font-family);
@@ -131,13 +131,36 @@
     color: var(--color-text-secondary);
   }
 
-  /* Shortcut glyphs (⌘ ⏎ ↑↓) have tall metrics that read oversized at body
-     size; render them smaller, relative to their surrounding text, and reset
-     the default monospace kbd font. */
+  /* A hint pairs a description (left) with its key chip(s) (right). */
+  .cmd-palette__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  /* Groups multiple key chips for a single shortcut (e.g. ⌘ + ⏎). */
+  .cmd-palette__keys {
+    display: inline-flex;
+    gap: var(--spacer-1);
+  }
+
+  /* Each shortcut glyph renders as a rounded key chip. font-family: inherit
+     resets the default monospace kbd font; the fixed square-ish box keeps
+     single glyphs centered. */
   .cmd-palette__key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 var(--spacer-1);
     font-family: inherit;
-    font-size: 0.85em;
+    font-size: 0.8125rem;
     line-height: 1;
+    color: var(--color-text);
+    background: var(--color-bg-secondary);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-small);
   }
 
   @media (prefers-reduced-motion: reduce) {

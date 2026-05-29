@@ -213,8 +213,11 @@ export const CommandPalette: React.FC = () => {
                         }}
                         type="button"
                       >
-                        {t('commandPalette:createNew')}{' '}
-                        <kbd className={`${baseClass}__key`}>⌘⏎</kbd>
+                        {t('commandPalette:createNew')}
+                        <span className={`${baseClass}__keys`}>
+                          <kbd className={`${baseClass}__key`}>⌘</kbd>
+                          <kbd className={`${baseClass}__key`}>⏎</kbd>
+                        </span>
                       </button>
                     ) : null}
                   </div>
@@ -231,19 +234,29 @@ export const CommandPalette: React.FC = () => {
         </div>
 
         <div className={`${baseClass}__footer`}>
-          <span>
-            <kbd className={`${baseClass}__key`}>↑↓</kbd> {t('commandPalette:hintNavigate')}
+          <span className={`${baseClass}__hint`}>
+            {t('commandPalette:hintNavigate')}
+            <span className={`${baseClass}__keys`}>
+              <kbd className={`${baseClass}__key`}>↑</kbd>
+              <kbd className={`${baseClass}__key`}>↓</kbd>
+            </span>
           </span>
-          <span>
-            <kbd className={`${baseClass}__key`}>⏎</kbd> {t('commandPalette:hintSelect')}
+          <span className={`${baseClass}__hint`}>
+            {t('commandPalette:hintSelect')}
+            <kbd className={`${baseClass}__key`}>⏎</kbd>
           </span>
           {hasCreatableAction ? (
-            <span>
-              <kbd className={`${baseClass}__key`}>⌘⏎</kbd> {t('commandPalette:hintCreate')}
+            <span className={`${baseClass}__hint`}>
+              {t('commandPalette:hintCreate')}
+              <span className={`${baseClass}__keys`}>
+                <kbd className={`${baseClass}__key`}>⌘</kbd>
+                <kbd className={`${baseClass}__key`}>⏎</kbd>
+              </span>
             </span>
           ) : null}
-          <span>
-            <kbd className={`${baseClass}__key`}>esc</kbd> {t('commandPalette:hintClose')}
+          <span className={`${baseClass}__hint`}>
+            {t('commandPalette:hintClose')}
+            <kbd className={`${baseClass}__key`}>esc</kbd>
           </span>
         </div>
       </div>
