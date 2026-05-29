@@ -102,7 +102,7 @@ describe('configToJSONSchema', () => {
               type: 'blocks',
               blocks: [
                 {
-                  slug: 'test',
+                  slug: 'testRequired',
                   fields: [
                     {
                       name: 'field',
@@ -146,13 +146,75 @@ describe('configToJSONSchema', () => {
         blockFieldWithFieldsRequired: {
           type: ['array', 'null'],
           items: {
-            oneOf: [{ $ref: '#/definitions/Test' }],
+            oneOf: [{ $ref: '#/definitions/TestRequired' }],
           },
         },
       },
       required: ['id', 'blockFieldRequired'],
       title: 'Test',
     })
+  })
+
+  it('disambiguates colliding block interface names with a stable content hash', async () => {
+    // @ts-expect-error - partial config for testing
+    const config: Config = {
+      collections: [
+        {
+          slug: 'pages',
+          fields: [
+            {
+              name: 'layout',
+              type: 'blocks',
+              blocks: [
+                { slug: 'hero', fields: [{ name: 'title', type: 'text' }] },
+                { slug: 'cta', fields: [{ name: 'label', type: 'text' }] },
+              ],
+            },
+          ],
+          timestamps: false,
+        },
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'layout',
+              type: 'blocks',
+              // Same slug `hero`, DIFFERENT fields → name collision.
+              blocks: [{ slug: 'hero', fields: [{ name: 'heading', type: 'text' }] }],
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const schema = configToJSONSchema(sanitizedConfig, 'text')
+    const defs = schema.definitions!
+
+    // Unique block keeps its clean name; no bare `Hero` exists (both collided).
+    expect(defs.Cta).toBeDefined()
+    expect(defs.Hero).toBeUndefined()
+
+    // Both colliding `hero` blocks are disambiguated with distinct content hashes.
+    const heroNames = Object.keys(defs).filter((k) => /^Hero_[0-9A-F]{8}$/.test(k))
+    expect(heroNames).toHaveLength(2)
+    expect(heroNames[0]).not.toBe(heroNames[1])
+
+    // The disambiguated interface carries the explanatory JSDoc note.
+    expect((defs[heroNames[0]!] as { description?: string }).description).toContain('content hash')
+
+    // Block fields reference the hashed name, never a bare `Hero`.
+    const pagesLayout = (defs.pages as { properties: { layout: { items: { oneOf: Array<{ $ref: string }> } } } })
+      .properties.layout.items.oneOf
+    expect(pagesLayout.some((r) => /^#\/definitions\/Hero_[0-9A-F]{8}$/.test(r.$ref))).toBe(true)
+    expect(pagesLayout.some((r) => r.$ref === '#/definitions/Cta')).toBe(true)
+
+    // Hashing is deterministic: regenerating yields identical names.
+    const schema2 = configToJSONSchema(sanitizedConfig, 'text')
+    expect(Object.keys(schema2.definitions!).filter((k) => /^Hero_/.test(k)).sort()).toStrictEqual(
+      heroNames.sort(),
+    )
   })
 
   it('should handle tabs and named tabs with required fields', async () => {

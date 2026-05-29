@@ -1,6 +1,8 @@
 import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 
+import { createHash } from 'crypto'
+
 import type { Auth } from '../auth/types.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
@@ -347,6 +349,12 @@ function entityOrFieldToJsDocs({
 }
 
 type ConfigToJSONSchemaOptions = {
+  /**
+   * @internal Resolves a block's top-level interface name, applying a content-hash
+   * suffix when its auto-derived name collides with a differently-shaped block.
+   * Set internally by `configToJSONSchema`; falls back to the plain base name.
+   */
+  blockInterfaceNameResolver?: (block: BlockForNaming) => string
   forceInlineBlocks?: boolean
 }
 
@@ -437,7 +445,7 @@ export function fieldsToJSONSchema(
 
                         if (!opts.forceInlineBlocks) {
                           return {
-                            $ref: `#/definitions/${resolvedBlock.interfaceName ?? toWords(resolvedBlock.slug, true)}`,
+                            $ref: `#/definitions/${opts.blockInterfaceNameResolver?.(resolvedBlock) ?? blockBaseInterfaceName(resolvedBlock)}`,
                           }
                         }
 
@@ -465,7 +473,12 @@ export function fieldsToJSONSchema(
                       }
 
                       if (!opts.forceInlineBlocks) {
-                        const interfaceName = block.interfaceName ?? toWords(block.slug, true)
+                        const baseName = blockBaseInterfaceName(block)
+                        const interfaceName =
+                          opts.blockInterfaceNameResolver?.(block) ?? baseName
+                        if (interfaceName !== baseName) {
+                          blockSchema.description = blockInterfaceCollisionNote(baseName)
+                        }
                         interfaceNameDefinitions.set(interfaceName, blockSchema)
 
                         return {
@@ -1254,6 +1267,132 @@ function generateAuthOperationSchemas(collections: SanitizedCollectionConfig[]):
   }
 }
 
+type BlockForNaming = { flattenedFields: FlattenedField[]; interfaceName?: string; slug: string }
+
+/** Auto-derived top-level interface name for a block: its `interfaceName` override, else PascalCase of the slug. */
+const blockBaseInterfaceName = (block: { interfaceName?: string; slug: string }): string =>
+  block.interfaceName ?? toWords(block.slug, true)
+
+/** Builds the `{ type: 'object', ... }` JSON schema for a single block's value. */
+const buildBlockSchema = (
+  block: BlockForNaming,
+  collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
+  interfaceNameDefinitions: Map<string, JSONSchema4>,
+  config: SanitizedConfig | undefined,
+  i18n: I18n | undefined,
+  opts: ConfigToJSONSchemaOptions,
+): JSONSchema4 => {
+  const blockFieldSchemas = fieldsToJSONSchema(
+    collectionIDFieldTypes,
+    block.flattenedFields,
+    interfaceNameDefinitions,
+    config,
+    i18n,
+    opts,
+  )
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties: { ...blockFieldSchemas.properties, blockType: { const: block.slug } },
+    required: ['blockType', ...blockFieldSchemas.required],
+  }
+}
+
+/** JSDoc note attached to hash-disambiguated block interfaces in the generated types. */
+export const blockInterfaceCollisionNote = (baseName: string): string =>
+  `Multiple blocks resolve to the \`${baseName}\` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique \`interfaceName\` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions`
+
+/**
+ * Blocks always generate a top-level interface named after their slug. When two
+ * blocks resolve to the same auto-derived name but have *different* fields, a
+ * clean shared name would silently mistype one of them. This walks every block
+ * in the config, groups auto-derived names by a content hash of each block's
+ * schema, and returns a resolver that:
+ *
+ * - keeps the clean `MyBlock` name when the name maps to a single schema,
+ * - appends a stable content hash (`MyBlock_3F2A`) to every block sharing a
+ *   colliding name (same schema → same hash, so it's stable across builds),
+ * - always honors an explicit `interfaceName` verbatim.
+ */
+const buildBlockInterfaceNameResolver = (
+  config: SanitizedConfig,
+  collectionIDFieldTypes: { [key: string]: 'number' | 'string' },
+  i18n: I18n | undefined,
+  opts: ConfigToJSONSchemaOptions,
+): ((block: BlockForNaming) => string) => {
+  const autoNameToHashes = new Map<string, Set<string>>()
+  const blockToHash = new Map<BlockForNaming, string>()
+  const visited = new Set<BlockForNaming>()
+
+  const hashBlock = (block: BlockForNaming): string => {
+    const cached = blockToHash.get(block)
+    if (cached) {
+      return cached
+    }
+    const schema = buildBlockSchema(block, collectionIDFieldTypes, new Map(), config, i18n, opts)
+    const hash = createHash('sha256').update(JSON.stringify(schema)).digest('hex').slice(0, 8).toUpperCase()
+    blockToHash.set(block, hash)
+    return hash
+  }
+
+  const walkBlocks = (fields: FlattenedField[] | undefined): void => {
+    for (const field of fields ?? []) {
+      if (field.type === 'blocks') {
+        for (const ref of field.blockReferences ?? field.blocks) {
+          const block = typeof ref === 'string' ? config.blocks?.find((b) => b.slug === ref) : ref
+          if (block) {
+            visit(block)
+          }
+        }
+      } else if ('flattenedFields' in field && field.flattenedFields) {
+        walkBlocks(field.flattenedFields)
+      }
+    }
+  }
+
+  const visit = (block: BlockForNaming): void => {
+    if (visited.has(block)) {
+      return
+    }
+    visited.add(block)
+    if (!block.interfaceName) {
+      const name = toWords(block.slug, true)
+      let hashes = autoNameToHashes.get(name)
+      if (!hashes) {
+        hashes = new Set()
+        autoNameToHashes.set(name, hashes)
+      }
+      hashes.add(hashBlock(block))
+    }
+    walkBlocks(block.flattenedFields)
+  }
+
+  for (const collection of config.collections) {
+    walkBlocks(collection.flattenedFields)
+  }
+  for (const global of config.globals) {
+    walkBlocks(global.flattenedFields)
+  }
+  for (const block of config.blocks ?? []) {
+    visit(block)
+  }
+
+  const collidingAutoNames = new Set<string>()
+  for (const [name, hashes] of autoNameToHashes) {
+    if (hashes.size > 1) {
+      collidingAutoNames.add(name)
+    }
+  }
+
+  return (block: BlockForNaming): string => {
+    if (block.interfaceName) {
+      return block.interfaceName
+    }
+    const name = toWords(block.slug, true)
+    return collidingAutoNames.has(name) ? `${name}_${hashBlock(block)}` : name
+  }
+}
+
 /**
  * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
  */
@@ -1275,6 +1414,19 @@ export function configToJSONSchema(
     config,
     defaultIDType: defaultIDType!,
   })
+
+  // Pre-pass: resolve collision-safe block interface names before any block is
+  // registered, so every site (inline blocks, block references, config.blocks)
+  // agrees on the same name. Threaded through `opts`.
+  opts = {
+    ...opts,
+    blockInterfaceNameResolver: buildBlockInterfaceNameResolver(
+      config,
+      collectionIDFieldTypes,
+      i18n,
+      opts,
+    ),
+  }
 
   // Collections and Globals have to be moved to the top-level definitions as well. Reason: The top-level type will be the `Config` type - we don't want all collection and global
   // types to be inlined inside the `Config` type
@@ -1382,7 +1534,11 @@ export function configToJSONSchema(
         required: ['blockType', ...blockFieldSchemas.required],
       }
 
-      const interfaceName = block.interfaceName ?? toWords(block.slug, true)
+      const baseName = blockBaseInterfaceName(block)
+      const interfaceName = opts.blockInterfaceNameResolver?.(block) ?? baseName
+      if (interfaceName !== baseName) {
+        blockSchema.description = blockInterfaceCollisionNote(baseName)
+      }
       interfaceNameDefinitions.set(interfaceName, blockSchema)
 
       blocksDefinition.properties![block.slug] = {
