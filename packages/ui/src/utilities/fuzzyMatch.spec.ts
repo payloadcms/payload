@@ -33,4 +33,10 @@ describe('fuzzyMatch', () => {
     const gapped = fuzzyMatch('ps', 'Posts')
     expect(consecutive!.score).toBeGreaterThan(gapped!.score)
   })
+
+  it('returns a non-null match with a negative score for a very sparse match', () => {
+    const result = fuzzyMatch('az', 'abcdefghijklmnopqrstuvwxyz')
+    expect(result).not.toBeNull()
+    expect(result!.score).toBeLessThan(0)
+  })
 })

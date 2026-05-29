@@ -1,7 +1,11 @@
 export type FuzzyMatchResult = {
   /** Indices in the target string that matched the query, in order. */
   indices: number[]
-  /** Higher is a better match. */
+  /**
+   * Higher is a better match. Intended for relative ranking among matches of the same query only —
+   * a successful match can have a negative score for sparse/gapped matches, so do not treat score
+   * as an absolute quality threshold (a non-null result is the match signal).
+   */
   score: number
 }
 
