@@ -197,9 +197,6 @@ export interface Condition {
   id: string;
   showField?: boolean | null;
   conditionalCustomField?: string | null;
-  showTabs?: boolean | null;
-  tabOneField?: string | null;
-  tabTwoField?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -381,9 +378,6 @@ export interface AutosavePostsSelect<T extends boolean = true> {
 export interface ConditionsSelect<T extends boolean = true> {
   showField?: T;
   conditionalCustomField?: T;
-  showTabs?: T;
-  tabOneField?: T;
-  tabTwoField?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -19,38 +19,5 @@ export const ConditionsCollection: CollectionConfig = {
         },
       },
     },
-    {
-      name: 'showTabs',
-      type: 'checkbox',
-    },
-    {
-      type: 'tabs',
-      admin: {
-        condition: (data) => data?.showTabs === true,
-      },
-      tabs: [
-        {
-          label: 'Tab One',
-          admin: {
-            description: 'This tab should be fully hidden when "showTabs" is unchecked',
-          },
-          fields: [
-            {
-              name: 'tabOneField',
-              type: 'text',
-            },
-          ],
-        },
-        {
-          label: 'Tab Two',
-          fields: [
-            {
-              name: 'tabTwoField',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    },
   ],
 }

@@ -184,7 +184,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldState.fieldSchema = field
   }
 
-  // Short-circuit to prevent hidden fields from recursing and rendering. `tabs`/`tab` excluded so their branches still iterate children, leaving the container and tab headers visible while inner fields hide.
+  // Short-circuit to prevent hidden fields from recursing and rendering.
   if (passesCondition === false && field.type !== 'tabs' && field.type !== 'tab') {
     if (!filter || filter(args)) {
       state[path] = fieldState
