@@ -22,6 +22,7 @@ import {
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
+import { getDocumentPermissions } from '@payloadcms/ui/utilities/getDocumentPermissions'
 import { notFound } from 'next/navigation.js'
 import {
   appendDateTimezoneSelectFields,
@@ -35,7 +36,6 @@ import {
 } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'

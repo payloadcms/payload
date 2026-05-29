@@ -6,8 +6,9 @@ import type {
   Where,
 } from 'payload'
 
-import { sanitizeID } from '@payloadcms/ui/shared'
 import { extractID } from 'payload/shared'
+
+import { sanitizeID } from './sanitizeID.js'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig

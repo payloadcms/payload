@@ -1,14 +1,16 @@
-import { sanitizeID, traverseForLocalizedFields } from '@payloadcms/ui/shared'
-import {
-  combineQueries,
-  extractAccessFromPermission,
-  type Payload,
-  type SanitizedCollectionConfig,
-  type SanitizedDocumentPermissions,
-  type SanitizedGlobalConfig,
-  type TypedUser,
+import type {
+  Payload,
+  SanitizedCollectionConfig,
+  SanitizedDocumentPermissions,
+  SanitizedGlobalConfig,
+  TypedUser,
 } from 'payload'
+
+import { combineQueries, extractAccessFromPermission } from 'payload'
 import { hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
+
+import { sanitizeID } from './sanitizeID.js'
+import { traverseForLocalizedFields } from './traverseForLocalizedFields.js'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig

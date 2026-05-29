@@ -6,12 +6,11 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import {
-  hasSavePermission as getHasSavePermission,
-  isEditing as getIsEditing,
-} from '@payloadcms/ui/shared'
 import { docAccessOperation, docAccessOperationGlobal, logError } from 'payload'
 import { hasDraftsEnabled } from 'payload/shared'
+
+import { hasSavePermission as getHasSavePermission } from './hasSavePermission.js'
+import { isEditing as getIsEditing } from './isEditing.js'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig

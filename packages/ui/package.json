@@ -71,6 +71,21 @@
       "types": "./src/exports/rsc/index.ts",
       "default": "./src/exports/rsc/index.ts"
     },
+    "./utilities/getDocumentPermissions": {
+      "import": "./src/utilities/getDocumentPermissions.ts",
+      "types": "./src/utilities/getDocumentPermissions.ts",
+      "default": "./src/utilities/getDocumentPermissions.ts"
+    },
+    "./utilities/getIsLocked": {
+      "import": "./src/utilities/getIsLocked.ts",
+      "types": "./src/utilities/getIsLocked.ts",
+      "default": "./src/utilities/getIsLocked.ts"
+    },
+    "./utilities/getVersions": {
+      "import": "./src/utilities/getVersions.ts",
+      "types": "./src/utilities/getVersions.ts",
+      "default": "./src/utilities/getVersions.ts"
+    },
     "./utilities/getDocPreferences": {
       "import": "./src/utilities/getDocPreferences.ts",
       "types": "./src/utilities/getDocPreferences.ts",
