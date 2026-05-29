@@ -10,8 +10,10 @@ import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
 import { migrateHideAPIURL } from './transforms/migrate-hide-api-url/index.js'
 import { migrateImportExportHooks } from './transforms/migrate-import-export-hooks/index.js'
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
+import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
 import { renameStorageAdaptersToStorage } from './transforms/rename-storage-adapters-to-storage/index.js'
+import { renameTypescriptSchemaToJsonSchema } from './transforms/rename-typescript-schema-to-json-schema/index.js'
 
 export const transforms: Transform[] = [
   exampleNoop,
@@ -26,4 +28,6 @@ export const transforms: Transform[] = [
   renameStorageAdaptersToStorage,
   migrateImportExportHooks,
   migrateDbTypesSubpath,
+  migrateNextSubpathExports,
+  renameTypescriptSchemaToJsonSchema,
 ]
