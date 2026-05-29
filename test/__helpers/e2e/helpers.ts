@@ -426,12 +426,12 @@ export async function switchTab(page: Page, selector: string) {
 }
 
 export const openColumnControls = async (page: Page) => {
-  const expanded = page.locator('.list-controls__columns.rah-static--height-auto')
+  const columnSelector = page.locator('.popup__content .column-selector')
   await expect(async () => {
-    if (!(await expanded.isVisible())) {
-      await page.locator('.list-controls__toggle-columns').click()
+    if (!(await columnSelector.isVisible())) {
+      await page.locator('.columns-button__button').click()
     }
-    await expect(expanded).toBeVisible({ timeout: 1500 })
+    await expect(columnSelector).toBeVisible({ timeout: 1500 })
   }).toPass({ timeout: 18000 })
 }
 
@@ -546,6 +546,7 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       !msg.text().includes('Error getting document data') &&
       !msg.text().includes('Failed trying to load default language strings') &&
       !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
+      !msg.text().includes('TypeError: network error') && // Transient network errors during chunk loading
       !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') && // This is a weird error that happens in the console
       // Conditionally ignore CORS errors based on the `ignoreCORS` option
       !(

@@ -167,6 +167,7 @@ describe('Join Field', () => {
 
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('#field-relatedPosts.field-type.join')
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
     await expect(joinField.locator('.row-1 > .cell-title')).toContainText('z')
     await expect(joinField.locator('.relationship-table-pagination')).toBeVisible()
     const rows = joinField.locator('.relationship-table tbody tr')
@@ -305,8 +306,7 @@ describe('Join Field', () => {
     await expect(link).toBeHidden()
 
     await reorderColumns(page, {
-      togglerSelector: '.relationship-table__toggle-columns',
-      columnContainerSelector: '.relationship-table__columns',
+      togglerSelector: '#field-relatedPosts .columns-button__button',
       fromColumn: 'Category',
       toColumn: 'Title',
     })
@@ -319,8 +319,7 @@ describe('Join Field', () => {
 
     // put columns back in original order for the next test
     await reorderColumns(page, {
-      togglerSelector: '.relationship-table__toggle-columns',
-      columnContainerSelector: '.relationship-table__columns',
+      togglerSelector: '#field-relatedPosts .columns-button__button',
       fromColumn: 'Title',
       toColumn: 'Category',
     })
@@ -654,6 +653,7 @@ describe('Join Field', () => {
     await page.goto(foldersURL.edit(rootParentID))
     const joinField = page.locator('#field-children.field-type.join')
     await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
 
     const addNewPopupBtn = joinField.locator('.relationship-table__add-new-polymorphic')
     await expect(addNewPopupBtn).toBeVisible()
