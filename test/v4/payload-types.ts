@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    users: User;
     'doc-controls': DocControl;
     orderable: Orderable;
     'search-bar-test': SearchBarTest;
@@ -94,15 +95,15 @@ export interface Config {
     'tabs-fields': TabsField;
     'text-fields': TextField;
     'textarea-fields': TextareaField;
+    folders: Folder;
+    'folder-items': FolderItem;
+    tags: Tag;
+    'tag-items': TagItem;
+    rubbish: Rubbish;
     uploads: Upload;
     'upload-fields': UploadField;
     autosave: Autosave;
     'draft-versions': DraftVersion;
-    folders: Folder;
-    'folder-items': FolderItem;
-    rubbish: Rubbish;
-    tags: Tag;
-    users: User;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -124,6 +125,7 @@ export interface Config {
     };
   };
   collectionsSelect: {
+    users: UsersSelect<false> | UsersSelect<true>;
     'doc-controls': DocControlsSelect<false> | DocControlsSelect<true>;
     orderable: OrderableSelect<false> | OrderableSelect<true>;
     'search-bar-test': SearchBarTestSelect<false> | SearchBarTestSelect<true>;
@@ -151,15 +153,15 @@ export interface Config {
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
+    folders: FoldersSelect<false> | FoldersSelect<true>;
+    'folder-items': FolderItemsSelect<false> | FolderItemsSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
+    'tag-items': TagItemsSelect<false> | TagItemsSelect<true>;
+    rubbish: RubbishSelect<false> | RubbishSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'upload-fields': UploadFieldsSelect<false> | UploadFieldsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
     'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
-    folders: FoldersSelect<false> | FoldersSelect<true>;
-    'folder-items': FolderItemsSelect<false> | FolderItemsSelect<true>;
-    rubbish: RubbishSelect<false> | RubbishSelect<true>;
-    tags: TagsSelect<false> | TagsSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -206,6 +208,32 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  roles?: ('admin' | 'user')[] | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -866,32 +894,6 @@ export interface RelationshipField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  roles?: ('admin' | 'user')[] | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "text-fields".
  */
 export interface TextField {
@@ -940,7 +942,7 @@ export interface Tag {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  allowedCollections?: 'text-fields'[] | null;
+  allowedCollections?: ('text-fields' | 'tag-items')[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -948,81 +950,31 @@ export interface Tag {
  */
 export interface RichTextField {
   id: string;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+  content?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  table?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+      }[]
+    | null;
+  table?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  code?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+      }[]
+    | null;
+  code?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  typography?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+      }[]
+    | null;
+  typography?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  lists?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+      }[]
+    | null;
+  lists?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1159,21 +1111,11 @@ export interface SlugField {
 export interface TabsField {
   id: string;
   title?: string | null;
-  postContent?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+  postContent?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+      }[]
+    | null;
   featuredImage: string;
   metaTitle?: string | null;
   metaDescription?: string | null;
@@ -1225,6 +1167,40 @@ export interface TextareaField {
   contentDisabled?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-items".
+ */
+export interface FolderItem {
+  id: string;
+  title: string;
+  parent?: (string | null) | Folder;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tag-items".
+ */
+export interface TagItem {
+  id: string;
+  title: string;
+  description?: string | null;
+  _h_tags?: (string | Tag)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish".
+ */
+export interface Rubbish {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1282,28 +1258,6 @@ export interface DraftVersion {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "folder-items".
- */
-export interface FolderItem {
-  id: string;
-  title: string;
-  parent?: (string | null) | Folder;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rubbish".
- */
-export interface Rubbish {
-  id: string;
-  title: string;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1422,6 +1376,10 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
         relationTo: 'doc-controls';
         value: string | DocControl;
       } | null)
@@ -1530,6 +1488,26 @@ export interface PayloadLockedDocument {
         value: string | TextareaField;
       } | null)
     | ({
+        relationTo: 'folders';
+        value: string | Folder;
+      } | null)
+    | ({
+        relationTo: 'folder-items';
+        value: string | FolderItem;
+      } | null)
+    | ({
+        relationTo: 'tags';
+        value: string | Tag;
+      } | null)
+    | ({
+        relationTo: 'tag-items';
+        value: string | TagItem;
+      } | null)
+    | ({
+        relationTo: 'rubbish';
+        value: string | Rubbish;
+      } | null)
+    | ({
         relationTo: 'uploads';
         value: string | Upload;
       } | null)
@@ -1544,26 +1522,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'draft-versions';
         value: string | DraftVersion;
-      } | null)
-    | ({
-        relationTo: 'folders';
-        value: string | Folder;
-      } | null)
-    | ({
-        relationTo: 'folder-items';
-        value: string | FolderItem;
-      } | null)
-    | ({
-        relationTo: 'rubbish';
-        value: string | Rubbish;
-      } | null)
-    | ({
-        relationTo: 'tags';
-        value: string | Tag;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1655,6 +1613,29 @@ export interface PayloadQueryPreset {
   isTemp?: boolean | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  roles?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2251,6 +2232,63 @@ export interface TextareaFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_select".
+ */
+export interface FoldersSelect<T extends boolean = true> {
+  parent?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-items_select".
+ */
+export interface FolderItemsSelect<T extends boolean = true> {
+  title?: T;
+  parent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_select".
+ */
+export interface TagsSelect<T extends boolean = true> {
+  _h_tags?: T;
+  name?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+  allowedCollections?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tag-items_select".
+ */
+export interface TagItemsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  _h_tags?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish_select".
+ */
+export interface RubbishSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "uploads_select".
  */
 export interface UploadsSelect<T extends boolean = true> {
@@ -2301,75 +2339,6 @@ export interface DraftVersionsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "folders_select".
- */
-export interface FoldersSelect<T extends boolean = true> {
-  parent?: T;
-  name?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "folder-items_select".
- */
-export interface FolderItemsSelect<T extends boolean = true> {
-  title?: T;
-  parent?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rubbish_select".
- */
-export interface RubbishSelect<T extends boolean = true> {
-  title?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tags_select".
- */
-export interface TagsSelect<T extends boolean = true> {
-  _h_tags?: T;
-  name?: T;
-  description?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-  allowedCollections?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
- */
-export interface UsersSelect<T extends boolean = true> {
-  roles?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

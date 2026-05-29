@@ -74,6 +74,7 @@ import Rubbish from './collections/Trash/index.js'
 import Unauthorized from './collections/Unauthorized/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
+import Users from './collections/Users/index.js'
 import {
   codeContent,
   getRichTextContent,
@@ -91,6 +92,8 @@ const withGroup = (collection: CollectionConfig, group: string): CollectionConfi
 })
 
 export const collections: CollectionConfig[] = [
+  // Auth
+  withGroup(Users, 'Auth'),
   // Elements
   withGroup(DocControls, 'Elements'),
   withGroup(Orderable, 'Elements'),
@@ -120,45 +123,19 @@ export const collections: CollectionConfig[] = [
   withGroup(TabsFields, 'Fields'),
   withGroup(TextFields, 'Fields'),
   withGroup(TextareaFields, 'Fields'),
+  // Hierarchy
+  withGroup(Folders, 'Hierarchy'),
+  withGroup(FolderItems, 'Hierarchy'),
+  withGroup(Tags, 'Hierarchy'),
+  withGroup(TagItems, 'Hierarchy'),
+  // Trash
+  withGroup(Rubbish, 'Trash'),
   // Uploads
-  Uploads,
-  UploadFields,
+  withGroup(Uploads, 'Uploads'),
+  withGroup(UploadFields, 'Uploads'),
   // Versions
-  Autosave,
-  DraftVersions,
-  // Views
-  withGroup(Folders, 'Views'),
-  withGroup(FolderItems, 'Views'),
-  withGroup(Rubbish, 'Views'),
-  withGroup(Tags, 'Views'),
-  withGroup(TagItems, 'Views'),
-  withGroup(
-    {
-      slug: 'users',
-      admin: {
-        useAsTitle: 'email',
-      },
-      auth: true,
-      access: {
-        admin: ({ req: { user } }) => {
-          return Boolean(user?.roles?.includes('admin'))
-        },
-      },
-      fields: [
-        {
-          name: 'roles',
-          type: 'select',
-          hasMany: true,
-          defaultValue: ['user'],
-          options: [
-            { label: 'Admin', value: 'admin' },
-            { label: 'User', value: 'user' },
-          ],
-        },
-      ],
-    },
-    'Views',
-  ),
+  withGroup(Autosave, 'Versions'),
+  withGroup(DraftVersions, 'Versions'),
 ]
 
 export const baseConfig: Partial<Config> = {

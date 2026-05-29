@@ -4,9 +4,7 @@ import { uploadsSlug } from '../../slugs.js'
 
 const Uploads: CollectionConfig = {
   slug: uploadsSlug,
-  admin: {
-    group: 'Uploads',
-  },
+  admin: {},
   upload: true,
   fields: [
     {
