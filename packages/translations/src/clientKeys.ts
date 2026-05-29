@@ -63,6 +63,15 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'authentication:verifyUser',
   'authentication:youAreInactive',
 
+  'commandPalette:createNew',
+  'commandPalette:hintClose',
+  'commandPalette:hintCreate',
+  'commandPalette:hintNavigate',
+  'commandPalette:hintSelect',
+  'commandPalette:noResults',
+  'commandPalette:placeholder',
+  'commandPalette:title',
+
   'dashboard:addWidget',
   'dashboard:deleteWidget',
   'dashboard:searchWidgets',

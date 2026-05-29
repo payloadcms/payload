@@ -82,6 +82,16 @@ export const roTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Dacă nu ați solicitat acest lucru, vă rugăm să ignorați acest email și parola dvs. va rămâne neschimbată.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Adaugă +',
     addWidget: 'Adaugați widget',

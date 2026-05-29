@@ -79,6 +79,16 @@ export const etTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Kui te seda ei taotlenud, ignoreerige seda e-kirja ja teie parool jääb muutmata.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Lisa +',
     addWidget: 'Lisa vidin',

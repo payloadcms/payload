@@ -82,6 +82,16 @@ export const frTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si vous ne l’avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Ajouter +',
     addWidget: 'Ajouter un Widget',

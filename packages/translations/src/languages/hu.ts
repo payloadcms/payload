@@ -82,6 +82,16 @@ export const huTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ha nem Ön kérte ezt, kérjük, hagyja figyelmen kívül ezt az e-mailt, és jelszava változatlan marad.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Adj hozzá +',
     addWidget: 'Adjon hozzá widgetet',

@@ -79,6 +79,16 @@ export const heTranslations: DefaultTranslationsObject = {
       'קיבלת הודעה זו מכיוון שאתה (או מישהו אחר) ביקשת לאפס את הסיסמה של החשבון שלך. אנא לחץ על הקישור הבא או הדבק אותו בשורת הכתובת בדפדפן שלך כדי להשלים את התהליך:',
     youDidNotRequestPassword: 'אם לא ביקשת זאת, אנא התעלם מההודעה והסיסמה שלך תישאר ללא שינוי.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'הוסף +',
     addWidget: "הוסף וידג'ט",

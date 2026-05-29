@@ -81,6 +81,16 @@ export const ptTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Se você não fez essa requisição, por favor ignore esse email e sua senha permanecerá igual.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Adicionar +',
     addWidget: 'Adicionar Widget',

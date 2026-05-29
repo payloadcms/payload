@@ -80,6 +80,16 @@ export const bgTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ако не си заявил това, игнорирай този имейл и паролата ти ще остане непроменена.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Добавете +',
     addWidget: 'Добави джаджа',

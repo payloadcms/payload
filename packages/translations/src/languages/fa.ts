@@ -79,6 +79,16 @@ export const faTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'اگر شما درخواست بازنشانی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید. رمز عبور شما تغییری نخواهد کرد.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'اضافه کنید +',
     addWidget: 'اضافه کردن ویجت',

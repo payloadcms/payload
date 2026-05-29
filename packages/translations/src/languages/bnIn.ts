@@ -80,6 +80,16 @@ export const bnInTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'আপনি যদি এটি অনুরোধ না করে থাকেন, তাহলে এই ইমেইলটি উপেক্ষা করুন এবং আপনার পাসওয়ার্ড অপরিবর্তিত থাকবে।',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'যোগ করুন +',
     addWidget: 'উইজেট যোগ করুন',

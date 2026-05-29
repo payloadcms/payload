@@ -80,6 +80,16 @@ export const lvTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ja neesat pieprasījis paroles atiestatīšanu, lūdzu, ignorējiet šo e-pastu, un parole paliks nemainīta.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Pievienot +',
     addWidget: 'Pievienot logrīku',

@@ -81,6 +81,16 @@ export const ukTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Якщо ви не сторювали цей запит, будь ласка, проігноруйте це повідомлення',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Додати +',
     addWidget: 'Додати віджет',

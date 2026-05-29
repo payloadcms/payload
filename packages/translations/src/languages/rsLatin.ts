@@ -81,6 +81,16 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili promenu lozinke ignorišite ovu poruku i lozinka će ostati nepromenjena.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Dodaj +',
     addWidget: 'Dodaj widget',

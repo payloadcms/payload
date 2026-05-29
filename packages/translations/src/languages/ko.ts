@@ -80,6 +80,16 @@ export const koTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       '비밀번호 초기화를 요청하지 않았다면 이 이메일을 무시하시고 비밀번호를 변경하지 마세요.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: '더하다',
     addWidget: '위젯 추가',

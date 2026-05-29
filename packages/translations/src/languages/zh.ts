@@ -78,6 +78,16 @@ export const zhTranslations: DefaultTranslationsObject = {
       '您收到此邮件是因为您（或其他人）已请求重置您账号的密码。请点击以下链接，或将其粘贴到您的浏览器中以完成该过程：',
     youDidNotRequestPassword: '如果您没有要求这样做，请忽略这封邮件，您的密码将保持不变。',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: '添加 +',
     addWidget: '添加小部件',

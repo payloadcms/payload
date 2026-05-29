@@ -80,6 +80,16 @@ export const itTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       "Se non l'hai richiesto, ignora questa email e la tua password rimarrà invariata.",
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Aggiungi +',
     addWidget: 'Aggiungi Widget',

@@ -77,6 +77,16 @@ export const zhTwTranslations: DefaultTranslationsObject = {
       '您會收到這封郵件是因為您（或其他人）請求重設此帳戶的密碼。請點選以下連結，或將該連結貼至瀏覽器以完成操作：',
     youDidNotRequestPassword: '如果這不是您本人操作，請忽略這封郵件，您的密碼將不會改變。',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: '添加 +',
     addWidget: '添加小工具',

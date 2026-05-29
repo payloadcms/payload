@@ -81,6 +81,16 @@ export const ltTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jei to neprašėte, prašome ignoruoti šį el. laišką ir jūsų slaptažodis išliks nepakeistas.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Pridėti +',
     addWidget: 'Pridėti valdiklį',

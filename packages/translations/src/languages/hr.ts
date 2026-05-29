@@ -81,6 +81,16 @@ export const hrTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili ovo, molimo ignorirajte ovaj e-mail i Vaša će lozinka ostati nepromijenjena.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Dodaj +',
     addWidget: 'Dodaj widget',

@@ -81,6 +81,16 @@ export const rsTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ако нисте затражили промену лозинке игноришите ову поруку и лозинка ће остати непромењена.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'Dodaj +',
     addWidget: 'Dodaj Widget',

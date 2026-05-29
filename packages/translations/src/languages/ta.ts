@@ -79,6 +79,16 @@ export const taTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'இதை நீங்கள் கோரவில்லை என்றால், இந்த மின்னஞ்சலை புறக்கணிக்கவும். உங்கள் கடவுச்சொல் மாறாது இருக்கும்.',
   },
+  commandPalette: {
+    createNew: 'Create new',
+    hintClose: 'close',
+    hintCreate: 'create new',
+    hintNavigate: 'navigate',
+    hintSelect: 'open',
+    noResults: 'No results found.',
+    placeholder: 'Type a command or search…',
+    title: 'Command palette',
+  },
   dashboard: {
     addButton: 'சேர் +',
     addWidget: 'விக்கெட் சேர்',
