@@ -39,6 +39,18 @@
     "dist/**/*.js",
     "**/dist/**/*.js"
   ],
-  "include": ["./**/*.ts", "./**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts", "setup.js"],
+  // Each test suite (for example ./fields) has its own tsconfig that lists only its own files.
+  // This root config only covers the top-level files and the few folders that don't have their
+  // own tsconfig. That way, opening one test file doesn't load every test in the whole folder.
+  "include": [
+    "./*.ts",
+    "./*.tsx",
+    "./__helpers/**/*.ts",
+    "./__helpers/**/*.tsx",
+    "./app/**/*.ts",
+    "./app/**/*.tsx",
+    "./evals/**/*.ts",
+    "./evals/**/*.tsx"
+  ],
   "references": []
 }
