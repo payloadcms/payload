@@ -136,7 +136,7 @@ export const slugField: SlugField = ({
               clientProps: {
                 useAsSlug,
               } satisfies SlugFieldClientPropsOnly,
-              path: '@payloadcms/next/client#SlugField',
+              path: '@payloadcms/ui#SlugField',
             },
           },
           width: '100%',
