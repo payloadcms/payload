@@ -3,10 +3,9 @@ import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { Block, Field, Tab } from '../../fields/config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
-// `obj` is `unknown` so this predicate only asserts the key exists, nothing more. Do not type it
-// as `<T>(obj: T): obj is { ... } & T`: intersecting `& T` with the field components type forces
-// the checker to expand that large type on every call, which is expensive. Callers read
-// `field.admin.components.X` straight off `field`, so the `& T` narrowing is not needed anyway.
+// Only checks that `obj` has `key`.
+// Keep this narrow: adding `& T` makes TypeScript expand large field types at every call,
+// and callers already read components from `field` directly and don't need extra type info from this function.
 function hasKey<K extends string>(
   obj: unknown,
   key: K,
