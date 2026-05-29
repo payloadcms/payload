@@ -7,6 +7,7 @@ import type { CommandPaletteAction } from './types.js'
 import { useHotkey } from '../../hooks/useHotkey.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEntityVisibility } from '../../providers/EntityVisibility/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { buildActions } from './buildActions.js'
@@ -24,6 +25,7 @@ export const CommandPalette: React.FC = () => {
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
+  const { visibleEntities } = useEntityVisibility()
   const {
     config: {
       collections,
@@ -47,8 +49,8 @@ export const CommandPalette: React.FC = () => {
   })
 
   const groups = useMemo(
-    () => buildActions({ adminRoute, collections, globals, i18n, permissions }),
-    [adminRoute, collections, globals, i18n, permissions],
+    () => buildActions({ adminRoute, collections, globals, i18n, permissions, visibleEntities }),
+    [adminRoute, collections, globals, i18n, permissions, visibleEntities],
   )
 
   const filteredGroups = useMemo(() => filterActions(groups, query), [groups, query])

@@ -1,5 +1,10 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientCollectionConfig, ClientGlobalConfig, SanitizedPermissions } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientGlobalConfig,
+  SanitizedPermissions,
+  VisibleEntities,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
@@ -12,13 +17,15 @@ type BuildActionsArgs = {
   globals: ClientGlobalConfig[]
   i18n: I18nClient
   permissions: SanitizedPermissions
+  visibleEntities: VisibleEntities
 }
 
 /**
  * Derives the grouped command-palette action list from the client config and the
- * current user's permissions. Phase 1 produces navigate + create actions for
- * collections and navigate actions for globals; custom action providers will be
- * merged here in a later phase.
+ * current user's permissions. Respects entity visibility (parity with the nav) —
+ * entities hidden via `admin.hidden` are excluded when `visibleEntities` is provided.
+ * Phase 1 produces navigate + create actions for collections and navigate actions for
+ * globals; custom action providers will be merged here in a later phase.
  */
 export function buildActions({
   adminRoute,
@@ -26,10 +33,14 @@ export function buildActions({
   globals,
   i18n,
   permissions,
+  visibleEntities,
 }: BuildActionsArgs): CommandPaletteGroup[] {
   const collectionActions: CommandPaletteAction[] = collections
     .filter(
-      (entity) => entity.admin.group !== false && permissions?.collections?.[entity.slug]?.read,
+      (entity) =>
+        entity.admin.group !== false &&
+        permissions?.collections?.[entity.slug]?.read &&
+        (!visibleEntities?.collections || visibleEntities.collections.includes(entity.slug)),
     )
     .map((entity) => {
       const canCreate = Boolean(permissions?.collections?.[entity.slug]?.create)
@@ -46,7 +57,12 @@ export function buildActions({
     })
 
   const globalActions: CommandPaletteAction[] = globals
-    .filter((entity) => entity.admin.group !== false && permissions?.globals?.[entity.slug]?.read)
+    .filter(
+      (entity) =>
+        entity.admin.group !== false &&
+        permissions?.globals?.[entity.slug]?.read &&
+        (!visibleEntities?.globals || visibleEntities.globals.includes(entity.slug)),
+    )
     .map((entity) => ({
       id: `global-${entity.slug}`,
       type: 'global' as const,

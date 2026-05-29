@@ -1,5 +1,10 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientCollectionConfig, ClientGlobalConfig, SanitizedPermissions } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientGlobalConfig,
+  SanitizedPermissions,
+  VisibleEntities,
+} from 'payload'
 
 import { describe, expect, it } from 'vitest'
 
@@ -19,12 +24,19 @@ const makeCollection = (slug: string) =>
 const makeGlobal = (slug: string) =>
   ({ admin: {}, label: slug, slug }) as unknown as ClientGlobalConfig
 
-const args = (permissions: SanitizedPermissions) => ({
+const args = (
+  permissions: SanitizedPermissions,
+  visibleEntities: VisibleEntities = {
+    collections: ['posts', 'pages', 'media'],
+    globals: ['settings'],
+  },
+) => ({
   adminRoute: '/admin',
   collections: [makeCollection('posts'), makeCollection('pages'), makeCollection('media')],
   globals: [makeGlobal('settings')],
   i18n,
   permissions,
+  visibleEntities,
 })
 
 describe('buildActions', () => {
@@ -78,7 +90,21 @@ describe('buildActions', () => {
       globals: [],
       i18n,
       permissions: { collections: { secret: { read: true } } } as unknown as SanitizedPermissions,
+      visibleEntities: { collections: ['secret'], globals: [] },
     })
+    expect(groups).toHaveLength(0)
+  })
+
+  it('excludes entities not in visibleEntities even when read permission is granted', () => {
+    const groups = buildActions(
+      args(
+        {
+          collections: { posts: { read: true }, pages: { read: true } },
+          globals: { settings: { read: true } },
+        } as unknown as SanitizedPermissions,
+        { collections: [], globals: [] },
+      ),
+    )
     expect(groups).toHaveLength(0)
   })
 })
