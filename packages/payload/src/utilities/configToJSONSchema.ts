@@ -734,10 +734,10 @@ export function fieldsToJSONSchema(
             if (typeof field.editor === 'function') {
               throw new Error('Attempted to access unsanitized rich text editor.')
             }
-            if (field.editor.outputSchema) {
+            if (field.editor.jsonSchema) {
               fieldSchema = {
                 ...baseFieldSchema,
-                ...field.editor.outputSchema({
+                ...field.editor.jsonSchema({
                   collectionIDFieldTypes,
                   config,
                   field,
@@ -857,8 +857,8 @@ export function fieldsToJSONSchema(
           }
         }
 
-        if ('typescriptSchema' in field && field?.typescriptSchema?.length) {
-          for (const schema of field.typescriptSchema) {
+        if ('jsonSchema' in field && field?.jsonSchema?.length) {
+          for (const schema of field.jsonSchema) {
             fieldSchema = schema({ jsonSchema: fieldSchema! })
           }
         }

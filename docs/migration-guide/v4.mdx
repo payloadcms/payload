@@ -421,6 +421,51 @@ The deprecated `HTMLConverterFeature`, `lexicalHTML`, and the per-node `converte
 
 Custom nodes that define `converters.html` should export their converters instead.
 
+### RichText adapter `outputSchema` renamed to `jsonSchema`
+
+The optional `outputSchema` function on rich-text editor adapters (`RichTextAdapter`) has been renamed to `jsonSchema` — it returns JSON Schema, not TypeScript, so the old name was misleading. Same arguments, same `JSONSchema4` return value.
+
+```diff
+  myAdapter: RichTextAdapter = {
+-   outputSchema: ({ collectionIDFieldTypes, config, field, i18n, interfaceNameDefinitions, isRequired }) => {
++   jsonSchema: ({ collectionIDFieldTypes, config, field, i18n, interfaceNameDefinitions, isRequired }) => {
+      // return JSONSchema4
+    },
+  }
+```
+
+`@payloadcms/richtext-lexical` is updated. Only custom third-party adapters need attention.
+
+### Lexical: feature `generatedTypes.modifyOutputSchema` renamed to `modifyJSONSchema`
+
+If you authored a custom lexical feature that hooks into type generation, rename `generatedTypes.modifyOutputSchema` to `modifyJSONSchema` (and its sanitized counterpart `modifyOutputSchemas` to `modifyJSONSchemas`) — it operates on JSON Schema, matching the adapter rename above.
+
+```diff
+  createServerFeature({
+    feature: () => ({
+      generatedTypes: {
+-       modifyOutputSchema: ({ currentSchema, interfaceNameDefinitions }) => currentSchema,
++       modifyJSONSchema: ({ currentSchema, interfaceNameDefinitions }) => currentSchema,
+      },
+    }),
+  })
+```
+
+### Field `typescriptSchema` renamed to `jsonSchema`
+
+`typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of `({ jsonSchema }) => JSONSchema4` transforms.
+
+```diff
+  {
+    name: 'tags',
+    type: 'json',
+-   typescriptSchema: [() => ({ type: 'array', items: { type: 'string' } })],
++   jsonSchema: [() => ({ type: 'array', items: { type: 'string' } })],
+  }
+```
+
+Rename `typescriptSchema` → `jsonSchema` wherever you set it on a field config.
+
 ### Jobs: `jobs.depth` and `jobs.runHooks` have been removed ([#16414](https://github.com/payloadcms/payload/pull/16414))
 
 The deprecated `jobs.depth` and `jobs.runHooks` config options have been removed. Job operations now always use direct database calls with depth `0`.

@@ -1,7 +1,7 @@
 import type { SerializedElementNode, SerializedLexicalNode } from 'lexical'
 import type { DefaultDocumentIDType, JsonValue } from 'payload'
 
-import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
+import type { StronglyTypedElementNode } from '../../../types/nodeTypes.js'
 
 export type LinkFields = {
   [key: string]: JsonValue

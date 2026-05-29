@@ -21,27 +21,27 @@ import type {
   StaticLabel,
 } from 'payload'
 
-import type { BlockComponentContextType } from './features/blocks/client/component/BlockContent.js'
+import type { BlockComponentContextType } from '../features/blocks/client/component/BlockContent.js'
 export type { BlockComponentContextType }
-import type { BlockComponentProps } from './features/blocks/client/component/index.js'
-import type { InlineBlockComponentContextType } from './features/blocks/client/componentInline/index.js'
+import type { BlockComponentProps } from '../features/blocks/client/component/index.js'
+import type { InlineBlockComponentContextType } from '../features/blocks/client/componentInline/index.js'
 import type {
   JSXConverterArgs,
   JSXConverters,
   SerializedLexicalNodeWithParent,
-} from './features/converters/lexicalToJSX/converter/types.js'
+} from '../features/converters/lexicalToJSX/converter/types.js'
 import type {
   BaseClientFeatureProps,
   FeatureProviderProviderClient,
-} from './features/typesClient.js'
-import type { FeatureProviderServer } from './features/typesServer.js'
-import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
+} from '../features/typesClient.js'
+import type { FeatureProviderServer } from '../features/typesServer.js'
+import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
+import type { InitialLexicalFormState } from '../utilities/buildInitialState.js'
 import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
 } from './nodeTypes.js'
-import type { InitialLexicalFormState } from './utilities/buildInitialState.js'
 
 /**
  * Base constraint for serialized Lexical node types.
