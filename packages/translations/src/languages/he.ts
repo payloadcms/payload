@@ -313,6 +313,7 @@ export const heTranslations: DefaultTranslationsObject = {
     export: 'יצוא',
     fallbackToDefaultLocale: 'חזרה לשפת ברירת המחדל',
     false: 'False',
+    field: 'שדה',
     filter: 'סינון',
     filters: 'מסננים',
     filterWhere: 'סנן {{label}} בהם',

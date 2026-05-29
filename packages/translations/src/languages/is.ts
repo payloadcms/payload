@@ -321,6 +321,7 @@ export const isTranslations: DefaultTranslationsObject = {
     export: 'Flytja út',
     fallbackToDefaultLocale: 'Nota sjálfgefna staðfærslu',
     false: 'Ósatt',
+    field: 'Reitur',
     filter: 'Sía',
     filters: 'Síur',
     filterWhere: 'Sía {{label}} þar sem',

@@ -326,6 +326,7 @@ export const myTranslations: DefaultTranslationsObject = {
     export: 'တင်ပို့',
     fallbackToDefaultLocale: 'မူရင်းဒေသသို့ ပြန်ပြောင်းပါ။',
     false: 'မှား',
+    field: 'အကွက်',
     filter: 'ဇကာ',
     filters: 'စစ်ထုတ်မှုများ',
     filterWhere: 'နေရာတွင် စစ်ထုတ်ပါ။',

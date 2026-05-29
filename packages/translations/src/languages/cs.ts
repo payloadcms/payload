@@ -321,6 +321,7 @@ export const csTranslations: DefaultTranslationsObject = {
     export: 'Vývoz',
     fallbackToDefaultLocale: 'Zpětné přepnutí do výchozího locale',
     false: 'Nepravda',
+    field: 'Pole',
     filter: 'Filtr',
     filters: 'Filtry',
     filterWhere: 'Filtrovat {{label}} kde',

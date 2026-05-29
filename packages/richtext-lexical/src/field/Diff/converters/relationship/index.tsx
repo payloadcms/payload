@@ -7,7 +7,7 @@ import './index.css'
 import { formatAdminURL } from 'payload/shared'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
-import type { SerializedRelationshipNode } from '../../../../nodeTypes.js'
+import type { SerializedRelationshipNode } from '../../../../types/nodeTypes.js'
 
 const baseClass = 'lexical-relationship-diff'
 

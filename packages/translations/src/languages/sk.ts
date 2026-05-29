@@ -324,6 +324,7 @@ export const skTranslations: DefaultTranslationsObject = {
     export: 'Export',
     fallbackToDefaultLocale: 'Zálohovať do predvoleného jazyka',
     false: 'Nepravdivé',
+    field: 'Pole',
     filter: 'Filter',
     filters: 'Filtry',
     filterWhere: 'Filtrovat kde je {{label}}',

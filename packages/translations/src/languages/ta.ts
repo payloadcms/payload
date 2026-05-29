@@ -321,6 +321,7 @@ export const taTranslations: DefaultTranslationsObject = {
     export: 'ஏற்றுமதி',
     fallbackToDefaultLocale: 'இயல்புநிலை மொழிக்கு மாறுக',
     false: 'பொய்',
+    field: 'Field',
     filter: 'வடிகட்டு',
     filters: 'வடிகட்டிகள்',
     filterWhere: '{{label}}-ஐ வடிகட்டு',

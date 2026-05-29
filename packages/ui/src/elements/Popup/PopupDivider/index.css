@@ -2,10 +2,9 @@
 
 @layer payload-default {
   .popup-divider {
-    width: calc(100% + var(--spacer-2) * 2);
-    height: 1px;
+    height: var(--stroke-width-small);
     background-color: var(--color-border);
     border: none;
-    margin: var(--spacer-2) calc(var(--spacer-2) * -1);
+    margin-block: var(--spacer-2);
   }
 }

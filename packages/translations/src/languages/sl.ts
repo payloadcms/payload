@@ -322,6 +322,7 @@ export const slTranslations: DefaultTranslationsObject = {
     export: 'Izvoz',
     fallbackToDefaultLocale: 'Uporabi privzeti jezik',
     false: 'Ne',
+    field: 'Polje',
     filter: 'Filter',
     filters: 'Filtri',
     filterWhere: 'Filtriraj {{label}} kjer',

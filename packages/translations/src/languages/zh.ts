@@ -307,6 +307,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     export: '导出',
     fallbackToDefaultLocale: '回退到默认语言环境',
     false: '否',
+    field: '字段',
     filter: '过滤条件',
     filters: '过滤条件',
     filterWhere: '过滤 {{label}}',

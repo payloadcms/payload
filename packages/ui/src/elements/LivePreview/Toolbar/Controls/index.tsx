@@ -4,7 +4,6 @@ import type { EditViewProps } from 'payload'
 
 import React from 'react'
 
-import { CheckIcon } from '../../../../icons/Check/index.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { CollapseIcon } from '../../../../icons/Collapse/index.js'
 import { ExpandIcon } from '../../../../icons/Expand/index.js'
@@ -46,14 +45,13 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           className={`${baseClass}__breakpoint`}
           horizontalAlign="right"
           render={({ close }) => (
-            <PopupList.IconButtonGroup>
+            <PopupList.RadioGroup>
               <React.Fragment>
                 {breakpoints.map((bp) => {
                   const isActive = bp.name == breakpoint
                   return (
-                    <PopupList.Button
+                    <PopupList.RadioGroupItem
                       active={isActive}
-                      icon={isActive ? <CheckIcon size={16} /> : undefined}
                       key={bp.name}
                       onClick={() => {
                         setBreakpoint(bp.name)
@@ -61,24 +59,23 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
                       }}
                     >
                       {bp.label}
-                    </PopupList.Button>
+                    </PopupList.RadioGroupItem>
                   )
                 })}
                 {/* Dynamically add this option so that it only appears when the width and height inputs are explicitly changed */}
                 {breakpoint === 'custom' && (
-                  <PopupList.Button
+                  <PopupList.RadioGroupItem
                     active={breakpoint == customOption.value}
-                    icon={breakpoint == customOption.value ? <CheckIcon size={16} /> : undefined}
                     onClick={() => {
                       setBreakpoint(customOption.value)
                       close()
                     }}
                   >
                     {customOption.label}
-                  </PopupList.Button>
+                  </PopupList.RadioGroupItem>
                 )}
               </React.Fragment>
-            </PopupList.IconButtonGroup>
+            </PopupList.RadioGroup>
           )}
           renderButton={(buttonProps) => (
             <Button {...buttonProps} buttonStyle="secondary" icon={<ChevronIcon size={16} />}>
@@ -96,14 +93,13 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           className={`${baseClass}__zoom`}
           horizontalAlign="right"
           render={({ close }) => (
-            <PopupList.IconButtonGroup>
+            <PopupList.RadioGroup>
               <React.Fragment>
                 {zoomOptions.map((zoomValue) => {
                   const isActive = zoom * 100 == zoomValue
                   return (
-                    <PopupList.Button
+                    <PopupList.RadioGroupItem
                       active={isActive}
-                      icon={isActive ? <CheckIcon size={16} /> : undefined}
                       key={zoomValue}
                       onClick={() => {
                         setZoom(zoomValue / 100)
@@ -111,11 +107,11 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
                       }}
                     >
                       {zoomValue}%
-                    </PopupList.Button>
+                    </PopupList.RadioGroupItem>
                   )
                 })}
               </React.Fragment>
-            </PopupList.IconButtonGroup>
+            </PopupList.RadioGroup>
           )}
           renderButton={(buttonProps) => (
             <Button {...buttonProps} buttonStyle="pill" icon={<ChevronIcon size={16} />}>

@@ -324,6 +324,7 @@ export const svTranslations: DefaultTranslationsObject = {
     export: 'Exportera',
     fallbackToDefaultLocale: 'Återgå till standardspråk',
     false: 'Falskt',
+    field: 'Field',
     filter: 'Filter',
     filters: 'Filter',
     filterWhere: 'Filtrera {{label}} där',

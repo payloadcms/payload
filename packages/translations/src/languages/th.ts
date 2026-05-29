@@ -317,6 +317,7 @@ export const thTranslations: DefaultTranslationsObject = {
     export: 'ส่งออก',
     fallbackToDefaultLocale: 'สำรองไปยังตำแหน่งที่ตั้งเริ่มต้น',
     false: 'เท็จ',
+    field: 'Field',
     filter: 'กรอง',
     filters: 'กรอง',
     filterWhere: 'กรอง {{label}} เฉพาะ',

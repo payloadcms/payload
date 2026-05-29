@@ -317,6 +317,7 @@ export const faTranslations: DefaultTranslationsObject = {
     export: 'خروجی گرفتن',
     fallbackToDefaultLocale: 'استفاده از زبان پیش‌فرض',
     false: 'خیر',
+    field: 'فیلد',
     filter: 'فیلتر',
     filters: 'فیلترها',
     filterWhere: 'فیلتر کردن {{label}} بر اساس',

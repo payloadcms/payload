@@ -326,6 +326,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     export: 'Eksportas',
     fallbackToDefaultLocale: 'Grįžkite į numatytąją vietovę',
     false: 'Netiesa',
+    field: 'Field',
     filter: 'Filtruoti',
     filters: 'Filtrai',
     filterWhere: 'Filtruoti {{label}}, kur',

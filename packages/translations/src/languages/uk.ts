@@ -321,6 +321,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     export: 'Експорт',
     fallbackToDefaultLocale: 'Перехід на мову за замовчуванням',
     false: 'Ні',
+    field: 'Field',
     filter: 'Фільтрувати',
     filters: 'Фільтри',
     filterWhere: 'Де фільтрувати {{label}}',

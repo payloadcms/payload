@@ -322,6 +322,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     export: 'Izvoz',
     fallbackToDefaultLocale: 'Vraćanje na zadani jezik',
     false: 'Netočno',
+    field: 'Field',
     filter: 'Filter',
     filters: 'Filteri',
     filterWhere: 'Filter {{label}} gdje',

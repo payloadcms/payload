@@ -324,6 +324,7 @@ export const enTranslations = {
     export: 'Export',
     fallbackToDefaultLocale: 'Fallback to default locale',
     false: 'False',
+    field: 'Field',
     filter: 'Filter',
     filters: 'Filters',
     filterWhere: 'Filter {{label}} where',

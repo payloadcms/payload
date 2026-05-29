@@ -326,6 +326,7 @@ export const azTranslations: DefaultTranslationsObject = {
     export: 'İxrac',
     fallbackToDefaultLocale: 'Standart lokalə keçid',
     false: 'Yalan',
+    field: 'Field',
     filter: 'Filter',
     filters: 'Filtərlər',
     filterWhere: '{{label}} filtrlə',

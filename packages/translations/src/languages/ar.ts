@@ -314,6 +314,7 @@ export const arTranslations: DefaultTranslationsObject = {
     export: 'تصدير',
     fallbackToDefaultLocale: 'الرجوع إلى اللغة الافتراضية',
     false: 'كاذب',
+    field: 'حقل',
     filter: 'تصفية',
     filters: 'عوامل التصفية',
     filterWhere: 'تصفية {{label}} حيث',

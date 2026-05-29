@@ -321,6 +321,7 @@ export const etTranslations: DefaultTranslationsObject = {
     export: 'Eksport',
     fallbackToDefaultLocale: 'Kasuta vaikekeelt',
     false: 'Väär',
+    field: 'Väli',
     filter: 'Filter',
     filters: 'Filtrid',
     filterWhere: 'Filtreeri {{label}} kus',
