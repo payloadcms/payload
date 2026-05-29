@@ -383,6 +383,21 @@ The deprecated `HTMLConverterFeature`, `lexicalHTML`, and the per-node `converte
 
 Custom nodes that define `converters.html` should export their converters instead.
 
+### Field `typescriptSchema` renamed to `jsonSchema`
+
+`typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of `({ jsonSchema }) => JSONSchema4` transforms.
+
+```diff
+  {
+    name: 'tags',
+    type: 'json',
+-   typescriptSchema: [() => ({ type: 'array', items: { type: 'string' } })],
++   jsonSchema: [() => ({ type: 'array', items: { type: 'string' } })],
+  }
+```
+
+Rename `typescriptSchema` → `jsonSchema` wherever you set it on a field config.
+
 ### Jobs: `jobs.depth` and `jobs.runHooks` have been removed ([#16414](https://github.com/payloadcms/payload/pull/16414))
 
 The deprecated `jobs.depth` and `jobs.runHooks` config options have been removed. Job operations now always use direct database calls with depth `0`.
