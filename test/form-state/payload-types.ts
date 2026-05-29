@@ -195,6 +195,7 @@ export interface AutosavePost {
  */
 export interface Condition {
   id: string;
+  title?: string | null;
   showField?: boolean | null;
   conditionalCustomField?: string | null;
   updatedAt: string;
@@ -376,6 +377,7 @@ export interface AutosavePostsSelect<T extends boolean = true> {
  * via the `definition` "conditions_select".
  */
 export interface ConditionsSelect<T extends boolean = true> {
+  title?: T;
   showField?: T;
   conditionalCustomField?: T;
   updatedAt?: T;
