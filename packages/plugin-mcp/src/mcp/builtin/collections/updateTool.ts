@@ -73,62 +73,91 @@ export const updateCollectionTool = defineCollectionTool({
         .optional(),
     })
   },
-}).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
-  const payload = req.payload
-  const logger = getLogger({ payload })
+  // `input` must precede `handler` so TS infers TSchema from the function-form input before typing the handler
+  handler: async ({ authorizedMCP, collectionSlug, input, req }) => {
+    const payload = req.payload
+    const logger = getLogger({ payload })
 
-  const {
-    id,
-    data,
-    depth,
-    draft,
-    fallbackLocale,
-    filePath,
-    locale,
-    overrideLock,
-    overwriteExistingFiles,
-    select,
-    where,
-  } = input
+    const {
+      id,
+      data,
+      depth,
+      draft,
+      fallbackLocale,
+      filePath,
+      locale,
+      overrideLock,
+      overwriteExistingFiles,
+      select,
+      where,
+    } = input
 
-  logger.info(
-    `Updating document in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
-  )
+    logger.info(
+      `Updating document in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
+    )
 
-  try {
-    if (!id && !where) {
-      return {
-        content: [{ type: 'text', text: 'Error: Either id or where clause must be provided' }],
+    try {
+      if (!id && !where) {
+        return {
+          content: [{ type: 'text', text: 'Error: Either id or where clause must be provided' }],
+        }
       }
-    }
 
-    let parsedData = transformPointDataToPayload(data as Record<string, unknown>)
-    const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
-    parsedData = stripVirtualFields(parsedData, virtualFieldNames)
+      let parsedData = transformPointDataToPayload(data as Record<string, unknown>)
+      const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
+      parsedData = stripVirtualFields(parsedData, virtualFieldNames)
 
-    let whereClause: Record<string, unknown> = {}
-    if (where) {
-      try {
-        whereClause = JSON.parse(where) as Record<string, unknown>
-      } catch {
-        logger.error(`Invalid where clause JSON: ${where}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] }
+      let whereClause: Record<string, unknown> = {}
+      if (where) {
+        try {
+          whereClause = JSON.parse(where) as Record<string, unknown>
+        } catch {
+          logger.error(`Invalid where clause JSON: ${where}`)
+          return { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] }
+        }
       }
-    }
 
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
+      let selectClause: SelectType | undefined
+      if (select) {
+        try {
+          selectClause = JSON.parse(select) as SelectType
+        } catch {
+          logger.warn(`Invalid select clause JSON: ${select}`)
+          return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
+        }
       }
-    }
 
-    if (id) {
+      if (id) {
+        const updateOptions = {
+          id,
+          collection: collectionSlug,
+          data: parsedData,
+          depth,
+          draft,
+          overrideLock,
+          req,
+          ...localAPIDefaults(authorizedMCP),
+          ...(filePath ? { filePath } : {}),
+          ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
+          ...(locale ? { locale } : {}),
+          ...(fallbackLocale ? { fallbackLocale } : {}),
+          ...(selectClause ? { select: selectClause } : {}),
+        }
+
+        const result = await payload.update(updateOptions as any)
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Document updated successfully in collection "${collectionSlug}"!\nUpdated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+            },
+          ],
+          doc: result as Record<string, unknown>,
+        }
+      }
+
       const updateOptions = {
-        id,
         collection: collectionSlug,
         data: parsedData,
         depth,
@@ -136,6 +165,7 @@ export const updateCollectionTool = defineCollectionTool({
         overrideLock,
         req,
         ...localAPIDefaults(authorizedMCP),
+        where: whereClause,
         ...(filePath ? { filePath } : {}),
         ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
         ...(locale ? { locale } : {}),
@@ -145,61 +175,33 @@ export const updateCollectionTool = defineCollectionTool({
 
       const result = await payload.update(updateOptions as any)
 
+      const bulkResult = result as { docs?: unknown[]; errors?: unknown[] }
+      const docs = bulkResult.docs || []
+      const errors = bulkResult.errors || []
+
+      let responseText = `Multiple documents updated in collection "${collectionSlug}"!\nUpdated: ${docs.length} documents\nErrors: ${errors.length}\n---`
+      if (docs.length > 0) {
+        responseText += `\n\nUpdated documents:\n\`\`\`json\n${JSON.stringify(docs)}\n\`\`\``
+      }
+      if (errors.length > 0) {
+        responseText += `\n\nErrors:\n\`\`\`json\n${JSON.stringify(errors)}\n\`\`\``
+      }
+
+      return {
+        content: [{ type: 'text', text: responseText }],
+        doc: { docs, errors } as unknown as Record<string, unknown>,
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error(`Error updating document in ${collectionSlug}: ${errorMessage}`)
       return {
         content: [
           {
             type: 'text',
-            text: `Document updated successfully in collection "${collectionSlug}"!\nUpdated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+            text: `Error updating document in collection "${collectionSlug}": ${errorMessage}`,
           },
         ],
-        doc: result as Record<string, unknown>,
       }
     }
-
-    const updateOptions = {
-      collection: collectionSlug,
-      data: parsedData,
-      depth,
-      draft,
-      overrideLock,
-      req,
-      ...localAPIDefaults(authorizedMCP),
-      where: whereClause,
-      ...(filePath ? { filePath } : {}),
-      ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
-      ...(locale ? { locale } : {}),
-      ...(fallbackLocale ? { fallbackLocale } : {}),
-      ...(selectClause ? { select: selectClause } : {}),
-    }
-
-    const result = await payload.update(updateOptions as any)
-
-    const bulkResult = result as { docs?: unknown[]; errors?: unknown[] }
-    const docs = bulkResult.docs || []
-    const errors = bulkResult.errors || []
-
-    let responseText = `Multiple documents updated in collection "${collectionSlug}"!\nUpdated: ${docs.length} documents\nErrors: ${errors.length}\n---`
-    if (docs.length > 0) {
-      responseText += `\n\nUpdated documents:\n\`\`\`json\n${JSON.stringify(docs)}\n\`\`\``
-    }
-    if (errors.length > 0) {
-      responseText += `\n\nErrors:\n\`\`\`json\n${JSON.stringify(errors)}\n\`\`\``
-    }
-
-    return {
-      content: [{ type: 'text', text: responseText }],
-      doc: { docs, errors } as unknown as Record<string, unknown>,
-    }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error updating document in ${collectionSlug}: ${errorMessage}`)
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error updating document in collection "${collectionSlug}": ${errorMessage}`,
-        },
-      ],
-    }
-  }
+  },
 })

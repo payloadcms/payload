@@ -132,23 +132,24 @@ export default buildConfigWithDefaults({
               input: z.object({
                 id: z.string().describe('The post ID to publish.'),
               }),
-            }).handler(async ({ collectionSlug, input, authorizedMCP, req }) => {
-              const result = await req.payload.update({
-                id: input.id,
-                collection: collectionSlug,
-                data: { _status: 'published' },
-                req,
-                overrideAccess: authorizedMCP.overrideAccess,
-                user: authorizedMCP.user,
-              })
-              return {
-                content: [
-                  {
-                    type: 'text' as const,
-                    text: `Published ${collectionSlug} ${input.id}.\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-                  },
-                ],
-              }
+              handler: async ({ collectionSlug, input, authorizedMCP, req }) => {
+                const result = await req.payload.update({
+                  id: input.id,
+                  collection: collectionSlug,
+                  data: { _status: 'published' },
+                  req,
+                  overrideAccess: authorizedMCP.overrideAccess,
+                  user: authorizedMCP.user,
+                })
+                return {
+                  content: [
+                    {
+                      type: 'text' as const,
+                      text: `Published ${collectionSlug} ${input.id}.\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+                    },
+                  ],
+                }
+              },
             }),
           },
         },
@@ -188,35 +189,35 @@ export default buildConfigWithDefaults({
               .default(6)
               .describe('Number of sides on the dice (default: 6)'),
           }),
-        }).handler(async ({ input, authorizedMCP, req }) => {
-          const sides = input.sides
-          const result = Math.floor(Math.random() * sides) + 1
+          handler: async ({ input, authorizedMCP, req }) => {
+            const sides = input.sides
+            const result = Math.floor(Math.random() * sides) + 1
+            req.payload.logger.info(
+              `Dice Roll MCP Tool rolled a ${sides} sided die and got a ${result}`,
+            )
 
-          req.payload.logger.info(
-            `Dice Roll MCP Tool rolled a ${sides} sided die and got a ${result}`,
-          )
-
-          await req.payload.create({
-            collection: 'rolls',
-            data: {
-              sides,
-              result,
-              user: req.user?.id,
-            },
-            req,
-            draft: true,
-            overrideAccess: authorizedMCP.overrideAccess,
-            user: authorizedMCP.user,
-          })
-
-          return {
-            content: [
-              {
-                type: 'text' as const,
-                text: `# Dice Roll Result\n\n**Sides:** ${sides}\n**Result:** ${result}\n\n🎲 You rolled a **${result}** on a ${sides}-sided die!`,
+            await req.payload.create({
+              collection: 'rolls',
+              data: {
+                sides,
+                result,
+                user: req.user?.id,
               },
-            ],
-          }
+              req,
+              draft: true,
+              overrideAccess: authorizedMCP.overrideAccess,
+              user: authorizedMCP.user,
+            })
+
+            return {
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `# Dice Roll Result\n\n**Sides:** ${sides}\n**Result:** ${result}\n\n🎲 You rolled a **${result}** on a ${sides}-sided die!`,
+                },
+              ],
+            }
+          },
         }),
       },
       prompts: {
@@ -224,41 +225,42 @@ export default buildConfigWithDefaults({
           argsSchema: z.object({ message: z.string() }),
           description: 'Creates a prompt to process a message',
           title: 'Echo Prompt',
-        }).handler(async ({ input: { message }, req }) => {
-          const { payload } = req
+          handler: async ({ input: { message }, req }) => {
+            const { payload } = req
 
-          payload.logger.info(`Echo Prompt was sent: ${message}`)
+            payload.logger.info(`Echo Prompt was sent: ${message}`)
 
-          const modifiedPrompt = `This prompt was sent: ${message}`
+            const modifiedPrompt = `This prompt was sent: ${message}`
 
-          await payload.create({
-            collection: 'modified-prompts',
-            data: {
-              original: message,
-              modified: modifiedPrompt,
-              user: req.user?.id,
-            },
-            req,
-            draft: true,
-            overrideAccess: false,
-            user: req.user,
-          })
-
-          return {
-            messages: [
-              {
-                content: { type: 'text', text: modifiedPrompt },
-                role: 'user',
+            await payload.create({
+              collection: 'modified-prompts',
+              data: {
+                original: message,
+                modified: modifiedPrompt,
+                user: req.user?.id,
               },
-              {
-                content: {
-                  type: 'text',
-                  text: `This prompt was sent by userId: ${req.user?.id}`,
+              req,
+              draft: true,
+              overrideAccess: false,
+              user: req.user,
+            })
+
+            return {
+              messages: [
+                {
+                  content: { type: 'text', text: modifiedPrompt },
+                  role: 'user',
                 },
-                role: 'assistant',
-              },
-            ],
-          }
+                {
+                  content: {
+                    type: 'text',
+                    text: `This prompt was sent by userId: ${req.user?.id}`,
+                  },
+                  role: 'assistant',
+                },
+              ],
+            }
+          },
         }),
       },
       resources: {

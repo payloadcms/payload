@@ -55,64 +55,66 @@ export const updateGlobalTool = defineGlobalTool({
         .optional(),
     })
   },
-}).handler(async ({ authorizedMCP, globalSlug, input, req }) => {
-  const payload = req.payload
-  const logger = getLogger({ payload })
+  // `input` must precede `handler` so TS infers TSchema from the function-form input before typing the handler
+  handler: async ({ authorizedMCP, globalSlug, input, req }) => {
+    const payload = req.payload
+    const logger = getLogger({ payload })
 
-  const { data, depth, draft, fallbackLocale, locale, select } = input
+    const { data, depth, draft, fallbackLocale, locale, select } = input
 
-  logger.info(
-    `Updating global: ${globalSlug}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
-  )
+    logger.info(
+      `Updating global: ${globalSlug}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
+    )
 
-  try {
-    const virtualFieldNames = getGlobalVirtualFieldNames(payload.config, globalSlug)
-    const parsedData = stripVirtualFields(data as Record<string, unknown>, virtualFieldNames)
+    try {
+      const virtualFieldNames = getGlobalVirtualFieldNames(payload.config, globalSlug)
+      const parsedData = stripVirtualFields(data as Record<string, unknown>, virtualFieldNames)
 
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON for global: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
+      let selectClause: SelectType | undefined
+      if (select) {
+        try {
+          selectClause = JSON.parse(select) as SelectType
+        } catch {
+          logger.warn(`Invalid select clause JSON for global: ${select}`)
+          return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
+        }
+      }
+
+      const updateOptions: Parameters<typeof payload.updateGlobal>[0] = {
+        slug: globalSlug,
+        data: parsedData,
+        depth,
+        draft,
+        ...localAPIDefaults(authorizedMCP),
+      }
+
+      if (locale) {
+        updateOptions.locale = locale
+      }
+      if (fallbackLocale) {
+        updateOptions.fallbackLocale = fallbackLocale
+      }
+      if (selectClause) {
+        updateOptions.select = selectClause
+      }
+
+      const result = await payload.updateGlobal(updateOptions)
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Global "${globalSlug}" updated successfully!\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+          },
+        ],
+        doc: result as Record<string, unknown>,
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error(`Error updating global ${globalSlug}: ${errorMessage}`)
+      return {
+        content: [{ type: 'text', text: `Error updating global "${globalSlug}": ${errorMessage}` }],
       }
     }
-
-    const updateOptions: Parameters<typeof payload.updateGlobal>[0] = {
-      slug: globalSlug,
-      data: parsedData,
-      depth,
-      draft,
-      ...localAPIDefaults(authorizedMCP),
-    }
-
-    if (locale) {
-      updateOptions.locale = locale
-    }
-    if (fallbackLocale) {
-      updateOptions.fallbackLocale = fallbackLocale
-    }
-    if (selectClause) {
-      updateOptions.select = selectClause
-    }
-
-    const result = await payload.updateGlobal(updateOptions)
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Global "${globalSlug}" updated successfully!\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-        },
-      ],
-      doc: result as Record<string, unknown>,
-    }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error updating global ${globalSlug}: ${errorMessage}`)
-    return {
-      content: [{ type: 'text', text: `Error updating global "${globalSlug}": ${errorMessage}` }],
-    }
-  }
+  },
 })

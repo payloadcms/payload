@@ -53,64 +53,66 @@ export const createCollectionTool = defineCollectionTool({
         )
         .optional(),
     }),
-}).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
-  const payload = req.payload
-  const logger = getLogger({ payload })
+  // `input` must precede `handler` so TS infers TSchema from the function-form input before typing the handler
+  handler: async ({ authorizedMCP, collectionSlug, input, req }) => {
+    const payload = req.payload
+    const logger = getLogger({ payload })
 
-  const { data, depth, draft, fallbackLocale, locale, select } = input
+    const { data, depth, draft, fallbackLocale, locale, select } = input
 
-  logger.info(
-    `Creating document in collection: ${collectionSlug}${locale ? ` with locale: ${locale}` : ''}`,
-  )
+    logger.info(
+      `Creating document in collection: ${collectionSlug}${locale ? ` with locale: ${locale}` : ''}`,
+    )
 
-  try {
-    let parsedData = transformPointDataToPayload(data as Record<string, unknown>)
-    const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
-    parsedData = stripVirtualFields(parsedData, virtualFieldNames)
+    try {
+      let parsedData = transformPointDataToPayload(data as Record<string, unknown>)
+      const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
+      parsedData = stripVirtualFields(parsedData, virtualFieldNames)
 
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
+      let selectClause: SelectType | undefined
+      if (select) {
+        try {
+          selectClause = JSON.parse(select) as SelectType
+        } catch {
+          logger.warn(`Invalid select clause JSON: ${select}`)
+          return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
+        }
+      }
+
+      const result = await payload.create({
+        collection: collectionSlug,
+        data: parsedData,
+        depth,
+        draft,
+        req,
+        ...localAPIDefaults(authorizedMCP),
+        ...(locale ? { locale } : {}),
+        ...(fallbackLocale ? { fallbackLocale } : {}),
+        ...(selectClause ? { select: selectClause } : {}),
+      })
+
+      logger.info(`Successfully created document in ${collectionSlug} with ID: ${result.id}`)
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Document created successfully in collection "${collectionSlug}"!\nCreated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+          },
+        ],
+        doc: result as Record<string, unknown>,
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error(`Error creating document in ${collectionSlug}: ${errorMessage}`)
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error creating document in collection "${collectionSlug}": ${errorMessage}`,
+          },
+        ],
       }
     }
-
-    const result = await payload.create({
-      collection: collectionSlug,
-      data: parsedData,
-      depth,
-      draft,
-      req,
-      ...localAPIDefaults(authorizedMCP),
-      ...(locale ? { locale } : {}),
-      ...(fallbackLocale ? { fallbackLocale } : {}),
-      ...(selectClause ? { select: selectClause } : {}),
-    })
-
-    logger.info(`Successfully created document in ${collectionSlug} with ID: ${result.id}`)
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Document created successfully in collection "${collectionSlug}"!\nCreated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
-        },
-      ],
-      doc: result as Record<string, unknown>,
-    }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error creating document in ${collectionSlug}: ${errorMessage}`)
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error creating document in collection "${collectionSlug}": ${errorMessage}`,
-        },
-      ],
-    }
-  }
+  },
 })

@@ -1,44 +1,47 @@
-import type { CollectionTool, GlobalTool, Prompt, Tool, ToolInputSchema } from './types.js'
+import type { MaybePromise } from 'payload'
+
+import type {
+  CollectionTool,
+  CollectionToolHandlerArgs,
+  GlobalTool,
+  GlobalToolHandlerArgs,
+  MCPToolResponse,
+  Prompt,
+  PromptHandlerArgs,
+  Tool,
+  ToolHandlerArgs,
+  ToolInputSchema,
+} from './types.js'
 
 /**
- * Two-stage builder: pass the schema/metadata first, then chain `.handler(fn)`. Splitting the
- * call lets TypeScript resolve `TSchema` from `input` (call 1) before contextually typing the
- * handler (call 2). A single-call API hit a TS limitation where property order in the literal
- * decided whether `TSchema` was inferred or pinned to its default.
+ * Identity helpers that exist solely so TypeScript infers `TSchema` from `input` (or
+ * `argsSchema` for prompts) and then types the handler's `input` against it.
  *
- *     defineCollectionTool({ description, input })
- *       .handler(({ input }) => …)   // ← input is fully typed here regardless of order
- *
- * Config and handler signatures are derived from `Tool` / `CollectionTool` / `GlobalTool` /
- * `Prompt` via `Omit` + indexed access so there's no duplication with `types.ts`.
+ * The `NoInfer<>` wrapper on the handler's args is what makes this work in a single
+ * call: it tells TS not to use the handler signature when inferring `TSchema`, so
+ * inference is driven solely by the schema field.
  */
 
-export const defineTool = <
-  TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
->(
-  args: Omit<Tool<TSchema>, 'handler'>,
-): { handler: (fn: Tool<TSchema>['handler']) => Tool } => ({
-  handler: (fn) => ({ ...args, handler: fn }) as unknown as Tool,
-})
+export const defineTool = <TSchema extends ToolInputSchema | undefined = undefined>(
+  tool: {
+    handler: (args: ToolHandlerArgs<NoInfer<TSchema>>) => MaybePromise<MCPToolResponse>
+  } & Omit<Tool<TSchema>, 'handler'>,
+): Tool => tool as unknown as Tool
 
-export const defineCollectionTool = <
-  TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
->(
-  args: Omit<CollectionTool<TSchema>, 'handler'>,
-): { handler: (fn: CollectionTool<TSchema>['handler']) => CollectionTool } => ({
-  handler: (fn) => ({ ...args, handler: fn }) as unknown as CollectionTool,
-})
+export const defineCollectionTool = <TSchema extends ToolInputSchema | undefined = undefined>(
+  tool: {
+    handler: (args: CollectionToolHandlerArgs<NoInfer<TSchema>>) => MaybePromise<MCPToolResponse>
+  } & Omit<CollectionTool<TSchema>, 'handler'>,
+): CollectionTool => tool as unknown as CollectionTool
 
-export const defineGlobalTool = <
-  TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
->(
-  args: Omit<GlobalTool<TSchema>, 'handler'>,
-): { handler: (fn: GlobalTool<TSchema>['handler']) => GlobalTool } => ({
-  handler: (fn) => ({ ...args, handler: fn }) as unknown as GlobalTool,
-})
+export const defineGlobalTool = <TSchema extends ToolInputSchema | undefined = undefined>(
+  tool: {
+    handler: (args: GlobalToolHandlerArgs<NoInfer<TSchema>>) => MaybePromise<MCPToolResponse>
+  } & Omit<GlobalTool<TSchema>, 'handler'>,
+): GlobalTool => tool as unknown as GlobalTool
 
 export const definePrompt = <TSchema extends ToolInputSchema = ToolInputSchema>(
-  args: Omit<Prompt<TSchema>, 'handler'>,
-): { handler: (fn: Prompt<TSchema>['handler']) => Prompt } => ({
-  handler: (fn) => ({ ...args, handler: fn }) as unknown as Prompt,
-})
+  prompt: {
+    handler: (args: PromptHandlerArgs<NoInfer<TSchema>>) => ReturnType<Prompt<TSchema>['handler']>
+  } & Omit<Prompt<TSchema>, 'handler'>,
+): Prompt => prompt as unknown as Prompt
