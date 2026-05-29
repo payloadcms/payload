@@ -7,7 +7,7 @@ import type {
   ServerFunction,
 } from 'payload'
 
-import { canAccessAdmin, formatErrors, UnauthorizedError } from 'payload'
+import { afterRead, canAccessAdmin, formatErrors, UnauthorizedError } from 'payload'
 import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
@@ -173,6 +173,62 @@ export const buildFormState = async (
   // If there is form state but no data, deduce data from that form state, e.g. on initial load
   // Otherwise, use the incoming data as the source of truth, e.g. on subsequent saves
   const data = incomingData || reduceFieldsToValues(formState, true)
+
+  const isTopLevelSchema = schemaPath === collectionSlug || schemaPath === globalSlug
+
+  if (isTopLevelSchema) {
+    const collectionConfig = collectionSlug ? payload.collections[collectionSlug]?.config : null
+    const globalConfig = globalSlug
+      ? (payload.config.globals?.find((g) => g.slug === globalSlug) ?? null)
+      : null
+
+    // Run field-level afterRead hooks
+    const hookedData = await afterRead({
+      collection: collectionConfig ?? null,
+      context: req.context,
+      depth: 0,
+      doc: data,
+      draft: false,
+      fallbackLocale: req.fallbackLocale,
+      flattenLocales: false,
+      global: globalConfig ?? null,
+      locale: req.locale,
+      overrideAccess: true,
+      req,
+      showHiddenFields: false,
+    })
+
+    // Run collection-level afterRead hooks
+    if (collectionConfig?.hooks?.afterRead?.length) {
+      let result = hookedData
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            overrideAccess: true,
+            req,
+          })) || result
+      }
+      Object.assign(data, result)
+    } else if (globalConfig?.hooks?.afterRead?.length) {
+      let result = hookedData
+      for (const hook of globalConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            context: req.context,
+            doc: result,
+            global: globalConfig,
+            overrideAccess: true,
+            req,
+          })) || result
+      }
+      Object.assign(data, result)
+    } else {
+      Object.assign(data, hookedData)
+    }
+  }
 
   let documentData = undefined
 

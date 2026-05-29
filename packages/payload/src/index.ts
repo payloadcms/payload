@@ -1682,6 +1682,7 @@ export interface GlobalAdminCustom extends Record<string, any> {}
 export { getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 
+export { afterRead } from './fields/hooks/afterRead/index.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 
