@@ -3,7 +3,6 @@
 import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
@@ -25,6 +24,7 @@ import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'

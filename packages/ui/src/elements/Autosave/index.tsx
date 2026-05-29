@@ -1,5 +1,4 @@
 'use client'
-// TODO: abstract the `next/navigation` dependency out from this component
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'

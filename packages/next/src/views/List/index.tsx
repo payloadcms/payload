@@ -463,6 +463,7 @@ export const renderListView = async (
     payload,
     permissions,
     searchParams,
+    server: req.server,
     user,
   }
 

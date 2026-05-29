@@ -2,12 +2,12 @@
 import type { OptionObject, SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-// TODO: abstract the `next/navigation` dependency out from this component
-import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
 import { sortableFieldTypes } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useEffect, useState } from 'react'
+
+import { usePathname, useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 
 export type SortComplexProps = {
   collection: SanitizedCollectionConfig

@@ -35,7 +35,7 @@ export type DefaultTemplateProps = {
   viewActions?: CustomComponent[]
   viewType?: ViewTypes
   visibleEntities: VisibleEntities
-} & ServerProps
+} & Omit<ServerProps, 'server'>
 
 export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   children,
@@ -89,6 +89,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     permissions,
     req,
     searchParams,
+    server: req?.server,
     user,
   }
 

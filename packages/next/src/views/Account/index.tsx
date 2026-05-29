@@ -167,6 +167,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
               permissions,
               routeSegments: [],
               searchParams,
+              server: req.server,
               user,
             } satisfies DocumentViewServerPropsOnly,
           })}

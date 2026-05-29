@@ -61,6 +61,7 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
           payload={payload}
           permissions={permissions}
           searchParams={searchParams}
+          server={req.server}
           user={user}
         />
       </div>
@@ -74,6 +75,7 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
           payload,
           permissions,
           searchParams,
+          server: req.server,
           user,
         } satisfies ServerProps,
       })}
@@ -95,6 +97,7 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
           payload,
           permissions,
           searchParams,
+          server: req.server,
           user,
         } satisfies ServerProps,
       })}

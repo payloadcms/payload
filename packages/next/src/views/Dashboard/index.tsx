@@ -45,6 +45,7 @@ export async function DashboardView(props: AdminViewServerProps) {
           navGroups,
           payload,
           permissions,
+          server: req.server,
           user,
           visibleEntities,
         } satisfies DashboardViewServerPropsOnly,
