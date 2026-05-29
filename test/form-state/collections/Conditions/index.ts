@@ -15,7 +15,7 @@ export const ConditionsCollection: CollectionConfig = {
       admin: {
         condition: (data) => data?.showField === true,
         components: {
-          Field: './collections/Posts/TextField.js#CustomTextField',
+          Field: './collections/Conditions/CustomField.js#CustomTextField',
         },
       },
     },
