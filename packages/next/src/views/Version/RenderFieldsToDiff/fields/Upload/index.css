@@ -14,6 +14,14 @@
     padding: var(--spacer-2) var(--spacer-2-5);
   }
 
+  .upload-diff-container .field-diff-content > .html-diff__diff-old {
+    padding-left: 0;
+  }
+
+  .upload-diff-container .field-diff-content > .html-diff__diff-new {
+    padding-right: 0;
+  }
+
   @media (max-width: 768px) {
     /* Stack hasMany columns vertically */
     .upload-diff-container--hasMany .field-diff-content {
