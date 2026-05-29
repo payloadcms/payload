@@ -323,6 +323,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     export: 'Exportação',
     fallbackToDefaultLocale: 'Recuo para o local padrão',
     false: 'Falso',
+    field: 'Campo',
     filter: 'Filtro',
     filters: 'Filtros',
     filterWhere: 'Filtrar {{label}} em que',

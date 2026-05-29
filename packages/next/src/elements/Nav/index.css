@@ -7,7 +7,6 @@
     height: 100vh;
     width: var(--nav-width);
     border-right: 1px solid var(--color-border);
-    opacity: 0;
     overflow: hidden;
     --nav-padding-inline-start: var(--spacer-2-5);
     --nav-padding-inline-end: var(--spacer-2-5);
@@ -18,14 +17,6 @@
   [dir='rtl'] .nav {
     border-right: none;
     border-left: 1px solid var(--color-border);
-  }
-
-  .nav--nav-animate {
-    transition: opacity var(--nav-trans-time) ease-in-out;
-  }
-
-  .nav--nav-open {
-    opacity: 1;
   }
 
   .nav__mobile-close {

@@ -1,9 +1,5 @@
 @layer payload-default {
   .page-controls {
-    width: calc(100% + var(--gutter-h) * 2);
-    margin-left: calc(var(--gutter-h) * -1);
-    margin-right: calc(var(--gutter-h) * -1);
-    margin-bottom: calc(var(--spacing-view-bottom) * -1);
     display: flex;
     flex-direction: column;
     background: var(--color-bg);
@@ -19,7 +15,7 @@
     justify-content: flex-end;
     row-gap: var(--spacer-2-5);
     column-gap: var(--spacer-4);
-    padding: var(--spacer-2-5) var(--gutter-h);
+    padding: var(--spacer-2-5);
 
     .paginator {
       margin-right: auto;
@@ -54,7 +50,7 @@
     }
 
     .page-controls > .collection-list__list-selection {
-      padding: var(--spacer-2) var(--gutter-h);
+      padding: var(--spacer-2) var(--spacer-2-5);
       border-bottom: var(--stroke-width-small) solid var(--color-border);
 
       &:not(:has(.list-selection)) {

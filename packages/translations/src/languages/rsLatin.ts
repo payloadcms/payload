@@ -322,6 +322,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     export: 'Izvoz',
     fallbackToDefaultLocale: 'Vraćanje na zadati jezik',
     false: 'Lažno',
+    field: 'Polje',
     filter: 'Filter',
     filters: 'Filteri',
     filterWhere: 'Filter {{label}} gde',

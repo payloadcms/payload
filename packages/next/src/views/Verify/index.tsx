@@ -61,6 +61,7 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
           payload={payload}
           permissions={permissions}
           searchParams={searchParams}
+          server={req.server}
           user={user}
         />
       </div>
