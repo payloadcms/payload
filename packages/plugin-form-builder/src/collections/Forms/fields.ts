@@ -5,33 +5,43 @@ import type { PaymentFieldConfig } from '../../types.js'
 const name: Field = {
   name: 'name',
   type: 'text',
-  label: 'Name (lowercase, no special characters)',
+  label: ({ t }) =>
+    // @ts-expect-error - translations are not typed in plugins yet
+    t('plugin-form-builder:name'),
   required: true,
 }
 
 const label: Field = {
   name: 'label',
   type: 'text',
-  label: 'Label',
+  label: ({ t }) =>
+    // @ts-expect-error - translations are not typed in plugins yet
+    t('plugin-form-builder:label'),
   localized: true,
 }
 
 const required: Field = {
   name: 'required',
   type: 'checkbox',
-  label: 'Required',
+  label: ({ t }) =>
+    // @ts-expect-error - translations are not typed in plugins yet
+    t('plugin-form-builder:required'),
 }
 
 const width: Field = {
   name: 'width',
   type: 'number',
-  label: 'Field Width (percentage)',
+  label: ({ t }) =>
+    // @ts-expect-error - translations are not typed in plugins yet
+    t('plugin-form-builder:fieldWidth'),
 }
 
 const placeholder: Field = {
   name: 'placeholder',
   type: 'text',
-  label: 'Placeholder',
+  label: ({ t }) =>
+    // @ts-expect-error - translations are not typed in plugins yet
+    t('plugin-form-builder:placeholder'),
 }
 
 const Radio: Block = {
@@ -69,7 +79,9 @@ const Radio: Block = {
           admin: {
             width: '50%',
           },
-          label: 'Default Value',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:defaultValue'),
           localized: true,
         },
       ],
@@ -87,7 +99,9 @@ const Radio: Block = {
               admin: {
                 width: '50%',
               },
-              label: 'Label',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:label'),
               localized: true,
               required: true,
             },
@@ -97,23 +111,35 @@ const Radio: Block = {
               admin: {
                 width: '50%',
               },
-              label: 'Value',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:value'),
               required: true,
             },
           ],
         },
       ],
-      label: 'Radio Attribute Options',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:radioOptionsLabel'),
       labels: {
-        plural: 'Options',
-        singular: 'Option',
+        plural: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:optionPlural'),
+        singular: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:optionSingular'),
       },
     },
     required,
   ],
   labels: {
-    plural: 'Radio Fields',
-    singular: 'Radio',
+    plural: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:radioLabelPlural'),
+    singular: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:radioLabelSingular'),
   },
 }
 
@@ -152,7 +178,9 @@ const Select: Block = {
           admin: {
             width: '50%',
           },
-          label: 'Default Value',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:defaultValue'),
           localized: true,
         },
       ],
@@ -178,7 +206,9 @@ const Select: Block = {
               admin: {
                 width: '50%',
               },
-              label: 'Label',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:label'),
               localized: true,
               required: true,
             },
@@ -188,23 +218,35 @@ const Select: Block = {
               admin: {
                 width: '50%',
               },
-              label: 'Value',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:value'),
               required: true,
             },
           ],
         },
       ],
-      label: 'Select Attribute Options',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:selectOptionsLabel'),
       labels: {
-        plural: 'Options',
-        singular: 'Option',
+        plural: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:optionPlural'),
+        singular: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:optionSingular'),
       },
     },
     required,
   ],
   labels: {
-    plural: 'Select Fields',
-    singular: 'Select',
+    plural: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:selectLabelPlural'),
+    singular: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:selectLabelSingular'),
   },
 }
 
@@ -243,7 +285,9 @@ const Text: Block = {
           admin: {
             width: '50%',
           },
-          label: 'Default Value',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:defaultValue'),
           localized: true,
         },
       ],
@@ -251,8 +295,12 @@ const Text: Block = {
     required,
   ],
   labels: {
-    plural: 'Text Fields',
-    singular: 'Text',
+    plural: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:textLabelPlural'),
+    singular: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:textLabelSingular'),
   },
 }
 
@@ -291,7 +339,9 @@ const TextArea: Block = {
           admin: {
             width: '50%',
           },
-          label: 'Default Value',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:defaultValue'),
           localized: true,
         },
       ],
@@ -299,8 +349,12 @@ const TextArea: Block = {
     required,
   ],
   labels: {
-    plural: 'Text Area Fields',
-    singular: 'Text Area',
+    plural: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:textareaLabelPlural'),
+    singular: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:textareaLabelSingular'),
   },
 }
 
@@ -339,15 +393,21 @@ const Number: Block = {
           admin: {
             width: '50%',
           },
-          label: 'Default Value',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:defaultValue'),
         },
       ],
     },
     required,
   ],
   labels: {
-    plural: 'Number Fields',
-    singular: 'Number',
+    plural: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:numberLabelPlural'),
+    singular: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:numberLabelSingular'),
   },
 }
 
@@ -375,8 +435,12 @@ const Email: Block = {
     required,
   ],
   labels: {
-    plural: 'Email Fields',
-    singular: 'Email',
+    plural: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:emailLabelPlural'),
+    singular: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:emailLabelSingular'),
   },
 }
 
@@ -404,8 +468,12 @@ const State: Block = {
     required,
   ],
   labels: {
-    plural: 'State Fields',
-    singular: 'State',
+    plural: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:stateLabelPlural'),
+    singular: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:stateLabelSingular'),
   },
 }
 
@@ -433,8 +501,12 @@ const Country: Block = {
     required,
   ],
   labels: {
-    plural: 'Country Fields',
-    singular: 'Country',
+    plural: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:countryLabelPlural'),
+    singular: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:countryLabelSingular'),
   },
 }
 
@@ -478,12 +550,18 @@ const Checkbox: Block = {
     {
       name: 'defaultValue',
       type: 'checkbox',
-      label: 'Checked by default',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:checkedByDefault'),
     },
   ],
   labels: {
-    plural: 'Checkbox Fields',
-    singular: 'Checkbox',
+    plural: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:checkboxLabelPlural'),
+    singular: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:checkboxLabelSingular'),
   },
 }
 
@@ -527,28 +605,36 @@ const Date: Block = {
     {
       name: 'defaultValue',
       type: 'date',
-      label: 'Default Value',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:defaultValue'),
     },
   ],
   labels: {
-    plural: 'Date Fields',
-    singular: 'Date',
+    plural: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:dateLabelPlural'),
+    singular: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:dateLabelSingular'),
   },
 }
 
 const Payment = (fieldConfig: PaymentFieldConfig): Block => {
-  let paymentProcessorField = null
+  let paymentProcessorField: Field | null = null
   if (fieldConfig?.paymentProcessor) {
     paymentProcessorField = {
       name: 'paymentProcessor',
       type: 'select',
-      label: 'Payment Processor',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:paymentProcessorLabel'),
       options: [],
       ...fieldConfig.paymentProcessor,
     }
   }
 
-  const fields = {
+  const fields: Block = {
     slug: 'payment',
     fields: [
       {
@@ -583,11 +669,13 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
             admin: {
               width: '50%',
             },
-            label: 'Base Price',
+            label: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-form-builder:basePriceLabel'),
           },
         ],
       },
-      paymentProcessorField,
+      ...(paymentProcessorField ? [paymentProcessorField] : []),
       {
         name: 'priceConditions',
         type: 'array',
@@ -605,18 +693,26 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
             name: 'condition',
             type: 'select',
             defaultValue: 'hasValue',
-            label: 'Condition',
+            label: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-form-builder:conditionLabel'),
             options: [
               {
-                label: 'Has Any Value',
+                label: ({ t }) =>
+                  // @ts-expect-error - translations are not typed in plugins yet
+                  t('plugin-form-builder:hasAnyValueLabel'),
                 value: 'hasValue',
               },
               {
-                label: 'Equals',
+                label: ({ t }) =>
+                  // @ts-expect-error - translations are not typed in plugins yet
+                  t('plugin-form-builder:equalsLabel'),
                 value: 'equals',
               },
               {
-                label: 'Does Not Equal',
+                label: ({ t }) =>
+                  // @ts-expect-error - translations are not typed in plugins yet
+                  t('plugin-form-builder:doesNotEqualLabel'),
                 value: 'notEquals',
               },
             ],
@@ -628,7 +724,9 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
               condition: (_: any, { condition }: any) =>
                 condition === 'equals' || condition === 'notEquals',
             },
-            label: 'Value',
+            label: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-form-builder:valueLabel'),
           },
           {
             name: 'operator',
@@ -636,19 +734,27 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
             defaultValue: 'add',
             options: [
               {
-                label: 'Add',
+                label: ({ t }) =>
+                  // @ts-expect-error - translations are not typed in plugins yet
+                  t('plugin-form-builder:addLabel'),
                 value: 'add',
               },
               {
-                label: 'Subtract',
+                label: ({ t }) =>
+                  // @ts-expect-error - translations are not typed in plugins yet
+                  t('plugin-form-builder:subtractLabel'),
                 value: 'subtract',
               },
               {
-                label: 'Multiply',
+                label: ({ t }) =>
+                  // @ts-expect-error - translations are not typed in plugins yet
+                  t('plugin-form-builder:multiplyLabel'),
                 value: 'multiply',
               },
               {
-                label: 'Divide',
+                label: ({ t }) =>
+                  // @ts-expect-error - translations are not typed in plugins yet
+                  t('plugin-form-builder:divideLabel'),
                 value: 'divide',
               },
             ],
@@ -660,14 +766,20 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
               width: '100%',
             },
             defaultValue: 'static',
-            label: 'Value Type',
+            label: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-form-builder:valueTypeLabel'),
             options: [
               {
-                label: 'Static Value',
+                label: ({ t }) =>
+                  // @ts-expect-error - translations are not typed in plugins yet
+                  t('plugin-form-builder:staticValueLabel'),
                 value: 'static',
               },
               {
-                label: 'Value Of Field',
+                label: ({ t }) =>
+                  // @ts-expect-error - translations are not typed in plugins yet
+                  t('plugin-form-builder:valueOfFieldLabel'),
                 value: 'valueOfField',
               },
             ],
@@ -680,20 +792,32 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
                 Field: '@payloadcms/plugin-form-builder/client#DynamicPriceSelector',
               },
             },
-            label: 'Value',
+            label: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-form-builder:valueLabel'),
           },
         ],
-        label: 'Price Conditions',
+        label: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:priceConditionsLabel'),
         labels: {
-          plural: 'Price Conditions',
-          singular: 'Price Condition',
+          plural: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:priceConditionsLabelPlural'),
+          singular: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:priceConditionsLabelSingular'),
         },
       },
       required,
-    ].filter(Boolean) as Field[],
+    ],
     labels: {
-      plural: 'Payment Fields',
-      singular: 'Payment',
+      plural: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:paymentFieldPlural'),
+      singular: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:paymentFieldSingular'),
     },
   }
 
@@ -710,8 +834,12 @@ const Message: Block = {
     },
   ],
   labels: {
-    plural: 'Message Blocks',
-    singular: 'Message',
+    plural: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:messageLabelPlural'),
+    singular: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:messageLabelSingular'),
   },
 }
 
@@ -740,9 +868,13 @@ const Upload = (uploadCollections: UploadCollectionSlug[]): Block => {
         name: 'uploadCollection',
         type: 'select',
         admin: {
-          description: 'Select which upload collection to store files in',
+          description: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:uploadCollectionDescription'),
         },
-        label: 'Upload Collection',
+        label: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:uploadCollectionLabel'),
         options: uploadCollections.map((slug) => ({ label: slug, value: slug })),
         required: true,
       },
@@ -750,21 +882,30 @@ const Upload = (uploadCollections: UploadCollectionSlug[]): Block => {
         name: 'mimeTypes',
         type: 'array',
         admin: {
-          description:
-            'Restrict allowed file types (e.g., image/*, application/pdf). Leave empty to allow all types.',
+          description: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:allowedFileTypesDescription'),
         },
         fields: [
           {
             name: 'mimeType',
             type: 'text',
-            label: 'MIME Type',
+            label: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-form-builder:mimeTypeLabel'),
             required: true,
           },
         ],
-        label: 'Allowed File Types',
+        label: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:allowedFileTypesLabel'),
         labels: {
-          plural: 'MIME Types',
-          singular: 'MIME Type',
+          plural: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:mimeTypePlural'),
+          singular: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:mimeTypeSingular'),
         },
       },
       {
@@ -780,10 +921,14 @@ const Upload = (uploadCollections: UploadCollectionSlug[]): Block => {
             name: 'maxFileSize',
             type: 'number',
             admin: {
-              description: 'Maximum file size in bytes. Leave empty for no limit.',
+              description: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:maxFileSizeDescription'),
               width: '50%',
             },
-            label: 'Max File Size (bytes)',
+            label: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-form-builder:maxFileSizeLabel'),
           },
         ],
       },
@@ -802,14 +947,20 @@ const Upload = (uploadCollections: UploadCollectionSlug[]): Block => {
             admin: {
               width: '50%',
             },
-            label: 'Allow Multiple Files',
+            label: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-form-builder:allowMultipleFilesLabel'),
           },
         ],
       },
     ],
     labels: {
-      plural: 'Upload Fields',
-      singular: 'Upload',
+      plural: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:uploadFieldPlural'),
+      singular: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:uploadFieldSingular'),
     },
   }
 }

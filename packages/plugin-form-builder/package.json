@@ -62,6 +62,7 @@
     "test": "echo \"No tests available.\""
   },
   "dependencies": {
+    "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "escape-html": "^1.0.3"
   },

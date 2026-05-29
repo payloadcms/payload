@@ -1,16 +1,28 @@
 import type { Config } from 'payload'
 
+import { deepMergeSimple } from 'payload/shared'
+
 import type { FormBuilderPluginConfig } from './types.js'
 
 import { generateFormCollection } from './collections/Forms/index.js'
 import { generateSubmissionCollection } from './collections/FormSubmissions/index.js'
+import { translations } from './translations/index.js'
 
 export { fields } from './collections/Forms/fields.js'
+export { translations as formBuilderTranslations } from './translations/index.js'
 export { getPaymentTotal } from './utilities/getPaymentTotal.js'
 
 export const formBuilderPlugin =
   (incomingFormConfig: FormBuilderPluginConfig) =>
   (config: Config): Config => {
+    if (!config.i18n) {
+      config.i18n = {}
+    }
+
+    if (!config.i18n?.translations) {
+      config.i18n.translations = {}
+    }
+
     const formConfig: FormBuilderPluginConfig = {
       ...incomingFormConfig,
       fields: {
@@ -47,5 +59,9 @@ export const formBuilderPlugin =
         generateFormCollection(formConfig, config?.collections),
         generateSubmissionCollection(formConfig),
       ],
+      i18n: {
+        ...config.i18n,
+        translations: deepMergeSimple(translations, config.i18n?.translations ?? {}),
+      },
     }
   }
