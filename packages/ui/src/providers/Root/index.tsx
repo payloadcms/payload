@@ -18,6 +18,7 @@ import React from 'react'
 import type { Theme } from '../Theme/index.js'
 
 import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
+import { CommandPalette } from '../../elements/CommandPalette/index.js'
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
@@ -143,6 +144,7 @@ export const RootProvider: React.FC<Props> = ({
                                 </HierarchyProvider>
                               </PreferencesProvider>
                               <ModalContainer />
+                              <CommandPalette />
                               <StayLoggedInModal />
                             </AuthProvider>
                           </ModalProvider>
