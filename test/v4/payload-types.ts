@@ -82,6 +82,7 @@ export interface Config {
     'join-posts': JoinPost;
     'json-fields': JsonField;
     'number-fields': NumberField;
+    orderable: Orderable;
     'password-fields': PasswordField;
     'point-fields': PointField;
     'radio-fields': RadioField;
@@ -92,6 +93,7 @@ export interface Config {
     'select-fields': SelectField;
     'slug-fields': SlugField;
     'tabs-fields': TabsField;
+    'tag-items': TagItem;
     tags: Tag;
     'text-fields': TextField;
     'textarea-fields': TextareaField;
@@ -136,6 +138,7 @@ export interface Config {
     'join-posts': JoinPostsSelect<false> | JoinPostsSelect<true>;
     'json-fields': JsonFieldsSelect<false> | JsonFieldsSelect<true>;
     'number-fields': NumberFieldsSelect<false> | NumberFieldsSelect<true>;
+    orderable: OrderableSelect<false> | OrderableSelect<true>;
     'password-fields': PasswordFieldsSelect<false> | PasswordFieldsSelect<true>;
     'point-fields': PointFieldsSelect<false> | PointFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
@@ -146,6 +149,7 @@ export interface Config {
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
+    'tag-items': TagItemsSelect<false> | TagItemsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
@@ -201,6 +205,7 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  roles?: ('admin' | 'user')[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -723,6 +728,18 @@ export interface NumberField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable".
+ */
+export interface Orderable {
+  id: string;
+  _order?: string | null;
+  title: string;
+  priority?: ('high' | 'medium' | 'low') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "password-fields".
  */
 export interface PasswordField {
@@ -888,7 +905,7 @@ export interface Tag {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  allowedCollections?: 'text-fields'[] | null;
+  allowedCollections?: ('tag-items' | 'text-fields')[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1165,6 +1182,18 @@ export interface TabsField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tag-items".
+ */
+export interface TagItem {
+  id: string;
+  title: string;
+  description?: string | null;
+  _h_tags?: (string | Tag)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "textarea-fields".
  */
 export interface TextareaField {
@@ -1351,6 +1380,10 @@ export interface PayloadLockedDocument {
         value: string | NumberField;
       } | null)
     | ({
+        relationTo: 'orderable';
+        value: string | Orderable;
+      } | null)
+    | ({
         relationTo: 'password-fields';
         value: string | PasswordField;
       } | null)
@@ -1389,6 +1422,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tabs-fields';
         value: string | TabsField;
+      } | null)
+    | ({
+        relationTo: 'tag-items';
+        value: string | TagItem;
       } | null)
     | ({
         relationTo: 'tags';
@@ -1522,6 +1559,7 @@ export interface PayloadQueryPreset {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  roles?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1907,6 +1945,17 @@ export interface NumberFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable_select".
+ */
+export interface OrderableSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  priority?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "password-fields_select".
  */
 export interface PasswordFieldsSelect<T extends boolean = true> {
@@ -2092,6 +2141,17 @@ export interface TabsFieldsSelect<T extends boolean = true> {
   pushNotifications?: T;
   autoBackup?: T;
   backupFrequency?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tag-items_select".
+ */
+export interface TagItemsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  _h_tags?: T;
   updatedAt?: T;
   createdAt?: T;
 }

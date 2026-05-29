@@ -1,6 +1,27 @@
 @layer payload-default {
+  .modular-dashboard {
+    margin: calc(var(--spacer-2-5) / -2);
+    width: calc(100% + var(--spacer-2-5));
+  }
+
+  .modular-dashboard .widget {
+    padding: calc(var(--spacer-2-5) / 2);
+  }
+
   .modular-dashboard .widget-content {
     height: 100%;
+  }
+
+  .widget-config-drawer__content {
+    height: 100%;
+
+    .form-submit {
+      margin-top: var(--spacer-2-5);
+
+      .btn {
+        width: auto;
+      }
+    }
   }
 
   @media (max-width: 768px) {
@@ -124,26 +145,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: var(--theme-text);
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    background: var(--color-text);
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    color: var(--theme-elevation-0);
+    color: var(--color-bg);
     transition: all 0.2s ease;
 
     & .icon {
-      width: 16px;
-      height: 16px;
+      width: var(--spacer-3);
+      height: var(--spacer-3);
     }
 
     &:hover {
-      background: var(--theme-elevation-800);
+      background: var(--color-text-secondary);
     }
 
     &:active {
-      background: var(--theme-elevation-900);
+      background: var(--color-text-tertiary);
     }
 
     & svg {

@@ -42,6 +42,7 @@ import { handleGroupBy } from './handleGroupBy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
+import './index.css'
 
 export type ListViewData = {
   collectionPreferences: CollectionPreferences
@@ -422,6 +423,7 @@ export async function getListViewData(args: GetListViewDataArgs): Promise<ListVi
     permissions,
     renderComponent: render,
     searchParams,
+    server: req.server,
     user,
   }
 

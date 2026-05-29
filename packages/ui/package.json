@@ -708,11 +708,6 @@
       "types": "./src/elements/Nav/getNavData.ts",
       "default": "./src/elements/Nav/getNavData.ts"
     },
-    "./elements/Nav/Server": {
-      "import": "./src/elements/Nav/Server.tsx",
-      "types": "./src/elements/Nav/Server.tsx",
-      "default": "./src/elements/Nav/Server.tsx"
-    },
     "./elements/Nav/SidebarTabs": {
       "import": "./src/elements/Nav/SidebarTabs/index.tsx",
       "types": "./src/elements/Nav/SidebarTabs/index.tsx",
@@ -1763,11 +1758,6 @@
         "import": "./dist/elements/Nav/getNavData.js",
         "types": "./dist/elements/Nav/getNavData.d.ts",
         "default": "./dist/elements/Nav/getNavData.js"
-      },
-      "./elements/Nav/Server": {
-        "import": "./dist/elements/Nav/Server.js",
-        "types": "./dist/elements/Nav/Server.d.ts",
-        "default": "./dist/elements/Nav/Server.js"
       },
       "./elements/Nav/SidebarTabs": {
         "import": "./dist/elements/Nav/SidebarTabs/index.js",

@@ -325,6 +325,7 @@ export const itTranslations: DefaultTranslationsObject = {
     export: 'Esportazione',
     fallbackToDefaultLocale: 'Fallback al locale predefinito',
     false: 'Falso',
+    field: 'Field',
     filter: 'Filtro',
     filters: 'Filtri',
     filterWhere: 'Filtra {{label}} se',
@@ -394,6 +395,7 @@ export const itTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       'Eliminato definitivamente {{count}} {{label}} con successo.',
     perPage: 'Per Pagina: {{limit}}',
+    perPageLabel: 'Per pagina:',
     previous: 'Precedente',
     reindex: 'Reindicizza',
     reindexingAll: "Rifacendo l'indice di tutte le {{collections}}.",

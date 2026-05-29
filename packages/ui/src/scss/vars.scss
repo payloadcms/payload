@@ -132,7 +132,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
   @include inputShadow;
   font-family: var(--font-body);
   width: 100%;
-  border: 1px solid var(--theme-elevation-150);
+  border: var(--stroke-width-small) solid var(--theme-elevation-150);
   border-radius: var(--style-radius-s);
   background: var(--theme-input-bg);
   color: var(--theme-elevation-800);
@@ -179,12 +179,12 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
 @mixin lightInputError {
   background-color: var(--theme-error-50);
-  border: 1px solid var(--theme-error-500);
+  border: var(--stroke-width-small) solid var(--theme-error-500);
 }
 
 @mixin darkInputError {
   background-color: var(--theme-error-100);
-  border: 1px solid var(--theme-error-400);
+  border: var(--stroke-width-small) solid var(--theme-error-400);
 
   &:hover {
     border-color: var(--theme-error-500);

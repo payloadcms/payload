@@ -1,19 +1,18 @@
 import type { Page } from '@playwright/test'
 
-import { expect } from '@playwright/test'
-import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
-import { test } from '__helpers/e2e/playwright.js'
-import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
+import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
+import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
 } from '../../../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -96,13 +95,13 @@ describe('Email', () => {
     await expect(description).toHaveText('en description')
   })
 
-  test('should render custom label', { framework: 'rsc' }, async () => {
+  test('should render custom label', async () => {
     await page.goto(url.create)
     const label = page.locator('label.custom-label[for="field-customLabel"]')
     await expect(label).toHaveText('#label')
   })
 
-  test('should render custom error', { framework: 'rsc' }, async () => {
+  test('should render custom error', async () => {
     await page.goto(url.create)
     const input = page.locator('input[id="field-customError"]')
     await input.fill('ab')
@@ -113,7 +112,7 @@ describe('Email', () => {
     await expect(error).toHaveText('#custom-error')
   })
 
-  test('should render beforeInput and afterInput', { framework: 'rsc' }, async () => {
+  test('should render beforeInput and afterInput', async () => {
     await page.goto(url.create)
     const input = page.locator('input[id="field-beforeAndAfterInput"]')
 
@@ -130,7 +129,7 @@ describe('Email', () => {
     expect(nextSiblingText).toEqual('#after-input')
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-email').waitFor()

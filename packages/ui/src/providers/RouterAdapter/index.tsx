@@ -45,7 +45,10 @@ export function useParams(): Record<string, string | string[]> {
   return useRouterAdapterContext().params
 }
 
-export const PayloadLink: React.FC<LinkAdapterProps> = ({ ref, ...props }) => {
+export const PayloadLink: React.FC<{ ref?: React.Ref<HTMLAnchorElement> } & LinkAdapterProps> = ({
+  ref,
+  ...props
+}: { ref?: React.RefObject<HTMLAnchorElement | null> } & LinkAdapterProps) => {
   const { Link: LinkComponent } = useRouterAdapterContext()
   return <LinkComponent {...props} ref={ref} />
 }

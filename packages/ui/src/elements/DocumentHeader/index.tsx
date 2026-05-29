@@ -8,10 +8,10 @@ import type {
 
 import React from 'react'
 
-import { Gutter } from '../Gutter/index.js'
-import { RenderTitle } from '../RenderTitle/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { Gutter, RenderTitle } from '../../exports/client/index.js'
 import { DocumentTabs } from './Tabs/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = `doc-header`
 

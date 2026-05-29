@@ -3,15 +3,15 @@ import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient 
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
-import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { getNavPrefs } from '@payloadcms/ui/rsc'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { Inter, Roboto_Mono } from 'next/font/google'
 import { cookies as nextCookies } from 'next/headers.js'
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { NextRouterAdapter } from '../../elements/RouterAdapter/index.js'
+import { NextRouterAdapter } from '../../adapters/router.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
@@ -205,6 +205,7 @@ const RootLayoutContent = async ({
                 payload: req.payload,
                 permissions,
                 renderComponent: RenderServerComponent,
+                server: req.server,
                 user: req.user,
               }}
             >

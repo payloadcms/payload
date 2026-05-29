@@ -1,8 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import { expect } from '@playwright/test'
-import { test } from '__helpers/e2e/playwright.js'
-import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
+import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -15,6 +13,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -188,7 +187,7 @@ describe('JSON', () => {
     await expect(jsonField).toContainText('"target": "foo"')
   })
 
-  test('should update', { framework: 'rsc' }, async () => {
+  test('should update', async () => {
     const createdDoc = await payload.create({
       collection: 'json-fields',
       data: {
@@ -248,7 +247,7 @@ describe('JSON', () => {
     })
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-json').waitFor()

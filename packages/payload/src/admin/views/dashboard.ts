@@ -1,5 +1,5 @@
 import type { InitReqResult, TypedWidget, WidgetSlug } from '../../index.js'
-import type { ComponentRenderer } from '../adapters.js'
+import type { ComponentRenderer } from '../adapters/render.js'
 
 export enum EntityType {
   collection = 'collections',

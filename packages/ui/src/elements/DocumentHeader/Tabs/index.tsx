@@ -10,11 +10,12 @@ import type {
 
 import React from 'react'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { ShouldRenderTabs } from '../../../exports/client/index.js'
 import { RenderClientComponent } from '../../RenderServerComponent/clientOnly.js'
-import { ShouldRenderTabs } from './ShouldRenderTabs.js'
 import { DefaultDocumentTab } from './Tab/index.js'
 import { getTabs } from './tabs/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'doc-tabs'
 
@@ -65,6 +66,7 @@ export const DocumentTabs: React.FC<{
                     permissions,
                     renderComponent: render,
                     req,
+                    server: req.server,
                     user: req.user,
                   } satisfies DocumentTabServerPropsOnly,
                 })

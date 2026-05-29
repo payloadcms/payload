@@ -11,7 +11,6 @@ type NavContextType = {
   navOpen: boolean
   navRef: React.RefObject<HTMLDivElement | null>
   setNavOpen: (value: boolean) => void
-  shouldAnimate: boolean
 }
 
 /**
@@ -22,7 +21,6 @@ export const NavContext = React.createContext<NavContextType>({
   navOpen: true,
   navRef: null,
   setNavOpen: () => {},
-  shouldAnimate: false,
 })
 
 export const useNav = () => React.use(NavContext)
@@ -60,7 +58,6 @@ export const NavProvider: React.FC<{
   // we will open it after the preference is loaded
   const [navOpen, setNavOpen] = React.useState(initialIsOpen)
 
-  const [shouldAnimate, setShouldAnimate] = React.useState(false)
   const [hydrated, setHydrated] = React.useState(false)
 
   // on load check the user's preference and set "initial" state
@@ -103,13 +100,6 @@ export const NavProvider: React.FC<{
       setNavOpen(false)
     }
     setHydrated(true)
-
-    const timeout = setTimeout(() => {
-      setShouldAnimate(true)
-    }, 100)
-    return () => {
-      clearTimeout(timeout)
-    }
   }, [largeBreak, midBreak, smallBreak])
 
   // when the component unmounts, clear all body scroll locks
@@ -121,9 +111,5 @@ export const NavProvider: React.FC<{
     }
   }, [])
 
-  return (
-    <NavContext value={{ hydrated, navOpen, navRef, setNavOpen, shouldAnimate }}>
-      {children}
-    </NavContext>
-  )
+  return <NavContext value={{ hydrated, navOpen, navRef, setNavOpen }}>{children}</NavContext>
 }

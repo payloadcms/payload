@@ -80,6 +80,25 @@ export const tanstackServerAdapter: ServerAdapter = {
     throw redirect({ to: path })
   },
 
+  permanentRedirect: (path: string) => {
+    // TanStack Router does not have a separate permanent redirect primitive;
+    // fall back to a regular redirect so existing behavior is preserved.
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
+    throw redirect({ to: path })
+  },
+
+  forbidden: () => {
+    // TanStack Router does not have a dedicated forbidden() helper; surface
+    // a generic error so the request boundary still terminates the request.
+    throw new Error('Forbidden')
+  },
+
+  unauthorized: () => {
+    // TanStack Router does not have a dedicated unauthorized() helper; surface
+    // a generic error so the request boundary still terminates the request.
+    throw new Error('Unauthorized')
+  },
+
   setCookie: (name: string, value: string, options?: CookieOptions) => {
     setResponseHeader('Set-Cookie', serializeCookie(name, value, options))
   },

@@ -1,6 +1,5 @@
 @layer payload-default {
   .table {
-    margin-bottom: var(--spacer-3);
     overflow: auto;
     max-width: 100%;
     isolation: isolate;
@@ -16,47 +15,85 @@
         font-weight: normal;
         text-align: left;
         vertical-align: middle;
+        height: calc(var(--spacer-4) * 2);
       }
     }
 
     th,
     td {
-      vertical-align: top;
-      padding: var(--spacer-2-5);
+      vertical-align: middle;
+      padding: var(--spacer-2) var(--spacer-2-5);
       min-width: 150px;
       position: relative;
       z-index: 1;
+      height: calc(var(--spacer-4) * 2);
 
       &:first-child {
-        padding-inline-start: var(--spacer-3);
+        padding-inline-start: var(--gutter-h);
+        padding-inline-end: var(--spacer-2);
       }
 
       &:last-child {
-        padding-inline-end: var(--spacer-3);
+        padding-inline-end: var(--spacer-2);
       }
     }
 
-    .cell-_select,
+    /* Linked cells: move padding to the anchor for full-cell clickability */
+    .cell--linked {
+      padding: 0;
+
+      > a {
+        display: flex;
+        align-items: center;
+        padding: var(--spacer-2) var(--spacer-2-5);
+        min-height: calc(var(--spacer-4) * 2);
+      }
+
+      &:first-child > a {
+        padding-inline-start: var(--spacer-2);
+        padding-inline-end: var(--spacer-2);
+      }
+    }
+
+    #heading-_select,
+    .cell-_select {
+      width: var(--spacer-5);
+      min-width: var(--spacer-5);
+      padding-inline-end: var(--spacer-2);
+      padding-block: var(--spacer-2);
+      text-align: center;
+    }
+
+    #heading-_dragHandle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #heading-_dragHandle,
     .cell-_dragHandle {
       width: var(--spacer-4);
+      min-width: var(--spacer-4);
+      padding: var(--spacer-2) 0;
+      text-align: center;
+      vertical-align: middle;
     }
 
     tbody tr {
       position: relative;
+      border-top: var(--stroke-width-small) solid var(--color-border);
 
-      &:nth-child(odd) {
+      &:hover {
         background: var(--color-bg-secondary);
-        border-radius: var(--radius-small);
+      }
 
-        td:first-child {
-          border-top-left-radius: inherit;
-          border-bottom-left-radius: inherit;
-        }
+      &:focus-within {
+        outline: none;
+        background: var(--color-bg-secondary);
+      }
 
-        td:last-child {
-          border-top-right-radius: inherit;
-          border-bottom-right-radius: inherit;
-        }
+      &:has(.select-row input:checked) {
+        background: var(--color-bg-selected);
       }
     }
 
@@ -82,6 +119,10 @@
     thead {
       background: var(--color-bg-secondary);
 
+      th {
+        height: var(--spacer-5);
+      }
+
       th:first-child {
         border-top-left-radius: var(--radius-medium);
       }
@@ -93,14 +134,6 @@
 
     tbody tr {
       background: var(--color-bg);
-
-      &:nth-child(odd) {
-        background: var(--color-bg);
-
-        &::after {
-          display: none;
-        }
-      }
 
       &:last-child {
         td:first-child {
@@ -120,7 +153,7 @@
       height: var(--spacer-5);
       line-height: var(--text-body-medium-line-height);
       vertical-align: middle;
-      border-right: 1px solid var(--color-border);
+      border-right: var(--stroke-width-small) solid var(--color-border);
 
       &:last-child {
         border-right: none;
@@ -138,12 +171,26 @@
       }
     }
 
+    /* Linked cells: move padding to the anchor for full-cell clickability */
+    .cell--linked {
+      padding: 0;
+
+      > a {
+        padding: 0 var(--spacer-2-5);
+        min-height: var(--spacer-5);
+      }
+
+      &:first-child > a {
+        padding-inline-start: var(--spacer-2-5);
+      }
+    }
+
     tbody td {
-      border-top: 1px solid var(--color-border);
+      border-top: var(--stroke-width-small) solid var(--color-border);
     }
 
     th {
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: var(--stroke-width-small) solid var(--color-border);
     }
   }
 

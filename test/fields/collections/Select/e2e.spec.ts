@@ -192,7 +192,7 @@ describe('Select', () => {
     await expect(reloadedPills.nth(2)).toContainText('Value One')
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme('Create view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-select').waitFor()

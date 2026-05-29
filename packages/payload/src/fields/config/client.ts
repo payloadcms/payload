@@ -40,8 +40,8 @@ export type ServerOnlyFieldProperties =
   | 'enumName' // can be a function
   | 'filterOptions' // This is a `relationship`, `upload`, and `select` only property
   | 'graphQL'
+  | 'jsonSchema'
   | 'label'
-  | 'typescriptSchema'
   | 'validate'
   | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks'>
 
@@ -59,7 +59,7 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'filterOptions', // This is a `relationship`, `upload`, and `select` only property
   'editor', // This is a `richText` only property
   'custom',
-  'typescriptSchema',
+  'jsonSchema',
   'dbName', // can be a function
   'enumName', // can be a function
   'graphQL', // client does not need graphQL

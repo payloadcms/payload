@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 
-import { getAdminMeta } from '@payloadcms/tanstack-start/server'
+import { getAdminMeta } from '@payloadcms/tanstack-start'
 import { loadAdminPageRSC } from '../../functions/adminPageRSC.functions.js'
 
 export const Route = createFileRoute('/_payload/admin/')({

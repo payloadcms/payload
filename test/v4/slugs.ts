@@ -25,10 +25,12 @@ export const foldersSlug = 'folders'
 export const folderItemsSlug = 'folder-items'
 export const draftVersionsSlug = 'draft-versions'
 export const tagsSlug = 'tags'
+export const tagItemsSlug = 'tag-items'
 export const autosaveSlug = 'autosave'
 export const hierarchySlug = 'hierarchy'
 export const joinFieldsSlug = 'join-fields'
 export const joinPostsSlug = 'join-posts'
+export const orderableSlug = 'orderable'
 export const rubbishSlug = 'rubbish'
 export const searchBarTestSlug = 'search-bar-test'
 export const unauthorizedSlug = 'unauthorized-test'
@@ -61,10 +63,12 @@ export const collectionSlugs = [
   folderItemsSlug,
   draftVersionsSlug,
   tagsSlug,
+  tagItemsSlug,
   autosaveSlug,
   hierarchySlug,
   joinFieldsSlug,
   joinPostsSlug,
+  orderableSlug,
   rubbishSlug,
   searchBarTestSlug,
   unauthorizedSlug,

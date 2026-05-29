@@ -11,6 +11,7 @@ import type {
   WidgetServerProps,
 } from 'payload'
 
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { AccountViewRSC } from '@payloadcms/ui/views/Account/AccountViewRSC'
 import { CreateFirstUserViewRSC } from '@payloadcms/ui/views/CreateFirstUser/CreateFirstUserViewRSC'
 import { DashboardViewRSC } from '@payloadcms/ui/views/Dashboard/DashboardViewRSC'
@@ -26,8 +27,6 @@ import { LoginViewRSC } from '@payloadcms/ui/views/Login/LoginViewRSC'
 import { notFound, redirect } from 'next/navigation.js'
 import { logError } from 'payload'
 import React from 'react'
-
-import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 
 /**
  * Translates the shared "throw `Error('not-found')` / `Error('redirect:<url>')`"

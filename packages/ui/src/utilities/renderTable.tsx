@@ -24,6 +24,11 @@ import React from 'react'
 import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
 
 import {
+  TableSectionContent,
+  TableSectionHeader,
+  TableSectionRoot,
+} from '../elements/TableSection/index.js'
+import {
   GroupByHeader,
   GroupByPageControls,
   OrderableTable,
@@ -263,27 +268,28 @@ export const renderTable = ({
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
-        <div
+        <TableSectionRoot
           className={['table-wrap', groupByValue !== undefined && `table-wrap--group-by`]
             .filter(Boolean)
             .join(' ')}
+          data-group-id={groupByValue}
           key={key}
         >
           <SelectionProvider docs={data?.docs || []} totalDocs={data?.totalDocs || 0}>
-            <GroupByHeader
-              collectionConfig={clientCollectionConfig}
-              groupByFieldPath={groupByFieldPath}
-              groupByValue={groupByValue}
-              heading={heading}
-            />
-            <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
-            <GroupByPageControls
-              collectionConfig={clientCollectionConfig}
-              data={data}
-              groupByValue={groupByValue}
-            />
+            <TableSectionHeader heading={heading}>
+              <GroupByHeader
+                collectionConfig={clientCollectionConfig}
+                groupByFieldPath={groupByFieldPath}
+                groupByValue={groupByValue}
+                heading={heading}
+              />
+              <GroupByPageControls data={data} groupByValue={groupByValue} />
+            </TableSectionHeader>
+            <TableSectionContent>
+              <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+            </TableSectionContent>
           </SelectionProvider>
-        </div>
+        </TableSectionRoot>
       ),
     }
   }
@@ -293,19 +299,22 @@ export const renderTable = ({
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
-        <div className="table-wrap" key={key}>
+        <TableSectionRoot className="table-wrap" key={key}>
           {showHeading && heading && (
-            <div className="table-wrap__heading">
+            <TableSectionHeader>
               <h4>{heading}</h4>
-            </div>
+            </TableSectionHeader>
           )}
-          <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
-        </div>
+          <TableSectionContent>
+            <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+          </TableSectionContent>
+        </TableSectionRoot>
       ),
     }
   }
 
-  columnsToUse.unshift({
+  // Insert after _select column (index 1) so order is: _select, _dragHandle, ...rest
+  columnsToUse.splice(enableRowSelections ? 1 : 0, 0, {
     accessor: '_dragHandle',
     active: true,
     field: {
@@ -322,14 +331,16 @@ export const renderTable = ({
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
     Table: (
-      <div className="table-wrap" key={key}>
-        <OrderableTable
-          appearance={tableAppearance}
-          collection={clientCollectionConfig}
-          columns={columnsToUse}
-          data={data?.docs || []}
-        />
-      </div>
+      <TableSectionRoot className="table-wrap" key={key}>
+        <TableSectionContent>
+          <OrderableTable
+            appearance={tableAppearance}
+            collection={clientCollectionConfig}
+            columns={columnsToUse}
+            data={data?.docs || []}
+          />
+        </TableSectionContent>
+      </TableSectionRoot>
     ),
   }
 }

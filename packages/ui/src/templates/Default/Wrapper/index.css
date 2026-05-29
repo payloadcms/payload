@@ -4,18 +4,6 @@
     display: grid;
     position: relative;
     isolation: isolate;
-
-    @media (prefers-reduced-motion) {
-      transition: none;
-    }
-  }
-
-  .template-default--nav-animate {
-    transition: grid-template-columns var(--nav-trans-time) linear;
-  }
-
-  .template-default--nav-open .template-default__nav-overlay {
-    transition: opacity var(--nav-trans-time) linear;
   }
 
   @media (min-width: 1441px) {

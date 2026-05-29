@@ -249,7 +249,7 @@ type RichTextAdapterBase<
    * `json-schema-to-typescript` which is used to generate types for this richtext field
    * payload-types.ts)
    */
-  outputSchema?: (args: {
+  jsonSchema?: (args: {
     collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
     config?: SanitizedConfig
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>

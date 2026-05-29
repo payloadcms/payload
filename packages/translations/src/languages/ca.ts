@@ -323,6 +323,7 @@ export const caTranslations: DefaultTranslationsObject = {
     export: 'Exportació',
     fallbackToDefaultLocale: 'Torna al idioma per defecte',
     false: 'Fals',
+    field: 'Camp',
     filter: 'Filtra',
     filters: 'Filtres',
     filterWhere: 'Filtra {{label}} on',
@@ -393,6 +394,7 @@ export const caTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       "S'ha eliminat permanentment {{count}} {{label}} amb èxit.",
     perPage: 'Per pagian: {{limit}}',
+    perPageLabel: 'Per pàgina:',
     previous: 'Previ',
     reindex: 'Reindexa',
     reindexingAll: 'Reindexa tots el {{collections}}.',

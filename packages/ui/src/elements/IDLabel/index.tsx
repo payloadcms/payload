@@ -27,8 +27,8 @@ export const IDLabel: React.FC<{ className?: string; id: string; prefix?: string
 
   const sanitizedID = sanitizeID(id)
 
-  // Only render as link if we're in a nested drawer and have document context
-  const shouldRenderLink = drawerDepth > 1 && (collectionSlug || globalSlug)
+  // Only render as link if we're inside a drawer and have document context
+  const shouldRenderLink = drawerDepth > 0 && (collectionSlug || globalSlug)
 
   if (shouldRenderLink) {
     const docPath = formatAdminURL({

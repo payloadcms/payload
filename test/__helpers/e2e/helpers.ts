@@ -14,6 +14,7 @@ import { formatAdminURL, wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
 import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
+import { hideNextDevTools } from './hideNextDevTools.js'
 
 export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
 
@@ -80,6 +81,9 @@ export async function ensureCompilationIsDone({
   }
 
   const page = pageFromArgs ?? (await browser!.newPage())
+
+  // Hide Next.js dev tools to prevent them from blocking interactions
+  await hideNextDevTools(page)
 
   const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 

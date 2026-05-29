@@ -9,8 +9,8 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatDate } from '../../../utilities/formatDocTitle/formatDateTitle.js'
-import './index.scss'
 import { getVersionLabel } from './getVersionLabel.js'
+import './index.css'
 
 const baseClass = 'version-pill-label'
 

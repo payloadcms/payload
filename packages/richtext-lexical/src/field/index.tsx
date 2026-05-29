@@ -8,7 +8,7 @@ import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
-import type { LexicalFieldAdminClientProps, LexicalRichTextFieldProps } from '../types.js'
+import type { LexicalFieldAdminClientProps, LexicalRichTextFieldProps } from '../types/index.js'
 
 import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
 import { loadClientFeatures } from '../lexical/config/client/loader.js'

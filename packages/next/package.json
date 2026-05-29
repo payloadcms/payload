@@ -50,11 +50,6 @@
       "types": "./src/exports/auth.ts",
       "default": "./src/exports/auth.ts"
     },
-    "./templates": {
-      "import": "./src/exports/templates.ts",
-      "types": "./src/exports/templates.ts",
-      "default": "./src/exports/templates.ts"
-    },
     "./utilities": {
       "import": "./src/exports/utilities.ts",
       "types": "./src/exports/utilities.ts",
@@ -64,22 +59,6 @@
       "import": "./src/exports/views.ts",
       "types": "./src/exports/views.ts",
       "default": "./src/exports/views.ts"
-    },
-    "./client": {
-      "import": "./src/exports/client.ts",
-      "types": "./src/exports/client.ts",
-      "default": "./src/exports/client.ts"
-    },
-    "./rsc": {
-      "types": "./src/exports/rsc.ts",
-      "browser": "./src/exports/rsc.browser.ts",
-      "import": "./src/exports/rsc.ts",
-      "default": "./src/exports/rsc.ts"
-    },
-    "./elements/RenderServerComponent": {
-      "import": "./src/elements/RenderServerComponent/index.tsx",
-      "types": "./src/elements/RenderServerComponent/index.tsx",
-      "default": "./src/elements/RenderServerComponent/index.tsx"
     }
   },
   "main": "./src/index.js",
@@ -177,11 +156,6 @@
         "types": "./dist/exports/routes.d.ts",
         "default": "./dist/exports/routes.js"
       },
-      "./templates": {
-        "import": "./dist/exports/templates.js",
-        "types": "./dist/exports/templates.d.ts",
-        "default": "./dist/exports/templates.js"
-      },
       "./auth": {
         "import": "./dist/exports/auth.js",
         "types": "./dist/exports/auth.d.ts",
@@ -196,22 +170,6 @@
         "import": "./dist/exports/views.js",
         "types": "./dist/exports/views.d.ts",
         "default": "./dist/exports/views.js"
-      },
-      "./client": {
-        "import": "./dist/exports/client.js",
-        "types": "./dist/exports/client.d.ts",
-        "default": "./dist/exports/client.js"
-      },
-      "./rsc": {
-        "types": "./dist/exports/rsc.d.ts",
-        "browser": "./dist/exports/rsc.browser.js",
-        "import": "./dist/exports/rsc.js",
-        "default": "./dist/exports/rsc.js"
-      },
-      "./elements/RenderServerComponent": {
-        "import": "./dist/elements/RenderServerComponent/index.js",
-        "types": "./dist/elements/RenderServerComponent/index.d.ts",
-        "default": "./dist/elements/RenderServerComponent/index.js"
       }
     },
     "main": "./dist/index.js",

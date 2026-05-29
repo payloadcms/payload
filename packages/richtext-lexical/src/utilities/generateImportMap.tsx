@@ -4,7 +4,7 @@ import { genImportMapIterateFields } from 'payload'
 import { isRSCEnabled } from 'payload/shared'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
-import type { LexicalEditorProps } from '../types.js'
+import type { LexicalEditorProps } from '../types/index.js'
 
 export const getGenerateImportMap =
   (args: {

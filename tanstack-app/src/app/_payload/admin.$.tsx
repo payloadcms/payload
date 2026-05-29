@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 
 import { loadAdminPageRSC } from '../../functions/adminPageRSC.functions.js'
-import { getAdminMeta } from '@payloadcms/tanstack-start/server'
+import { getAdminMeta } from '@payloadcms/tanstack-start'
 
 export const Route = createFileRoute('/_payload/admin/$')({
   // Pass URL search params straight through so they appear in `loaderDeps`.

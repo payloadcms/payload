@@ -2,7 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { extractHeaderLanguage } from '@payloadcms/translations'
 
-import type { CookieStore } from '../admin/adapters.js'
+import type { CookieStore } from '../admin/adapters/cookies.js'
 import type { SanitizedConfig } from '../config/types.js'
 
 type GetRequestLanguageArgs = {

@@ -52,6 +52,7 @@ export const renderDocumentSlots: (args: {
     payload: req.payload,
     permissions,
     renderComponent: render,
+    server: req.server,
     user: req.user,
     // TODO: Add remaining serverProps
   }

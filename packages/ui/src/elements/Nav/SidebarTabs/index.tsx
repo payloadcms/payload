@@ -3,10 +3,11 @@ import type { NavPreferences, PayloadComponent, SidebarTab } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { NavServerProps } from '../Server.js'
+import type { NavProps } from '../index.js'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { SidebarTabsClient } from '../../../exports/client/index.js'
 import { RenderServerComponent } from '../../RenderServerComponent/index.js'
-import { SidebarTabsClient } from './index.client.js'
 import './index.css'
 
 type SidebarTabWithReactNode = {
@@ -19,7 +20,7 @@ type SidebarTabWithReactNode = {
 export type SidebarTabsProps = {
   navPreferences: NavPreferences
   tabs: SidebarTabWithReactNode[]
-} & NavServerProps
+} & NavProps
 
 const baseClass = 'sidebar-tabs'
 

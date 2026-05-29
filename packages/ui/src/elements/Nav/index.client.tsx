@@ -3,7 +3,7 @@
 import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
+import { EntityType, formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import type { groupNavItems } from '../../utilities/groupNavItems.js'
@@ -11,7 +11,6 @@ import type { groupNavItems } from '../../utilities/groupNavItems.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { usePathname } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { EntityType } from '../../utilities/groupNavItems.js'
 import { Link } from '../Link/index.js'
 import { NavGroup } from '../NavGroup/index.js'
 

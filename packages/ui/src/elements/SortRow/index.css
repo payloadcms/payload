@@ -1,0 +1,24 @@
+@layer payload-default {
+  .sort-row {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-icon-secondary);
+    cursor: not-allowed;
+    border-radius: var(--radius-medium);
+
+    &.active {
+      cursor: grab;
+
+      &:hover {
+        color: var(--color-icon);
+      }
+
+      &:focus-visible {
+        outline: var(--accessibility-outline);
+        outline-offset: var(--accessibility-outline-offset);
+        color: var(--color-icon);
+      }
+    }
+  }
+}

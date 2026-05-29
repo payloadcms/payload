@@ -504,6 +504,12 @@ export interface FieldBase {
     beforeValidate?: FieldHook[]
   }
   index?: boolean
+  /**
+   * Allows you to modify the base JSON schema that is generated for this field.
+   * This JSON schema will be used to generate the TypeScript interface of this field, and to
+   * validate the field's value in the MCP plugin.
+   */
+  jsonSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   label?: false | LabelFunction | StaticLabel
   localized?: boolean
   /**
@@ -515,11 +521,6 @@ export interface FieldBase {
   name: string
   required?: boolean
   saveToJWT?: boolean | string
-  /**
-   * Allows you to modify the base JSON schema that is generated during generate:types for this field.
-   * This JSON schema will be used to generate the TypeScript interface of this field.
-   */
-  typescriptSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   unique?: boolean
   validate?: Validate
   /**
@@ -530,27 +531,13 @@ export interface FieldBase {
   virtual?: boolean | string
 }
 
-export interface FieldBaseClient {
+export interface FieldBaseClient
+  extends Pick<
+    FieldBase,
+    'hidden' | 'index' | 'jsonSchema' | 'localized' | 'name' | 'required' | 'saveToJWT' | 'unique'
+  > {
   admin?: AdminClient
-  hidden?: boolean
-  index?: boolean
   label?: StaticLabel
-  localized?: boolean
-  /**
-   * The name of the field. Must be alphanumeric and cannot contain ' . '
-   *
-   * Must not be one of reserved field names: ['__v', 'salt', 'hash', 'file']
-   * @link https://payloadcms.com/docs/fields/overview#field-names
-   */
-  name: string
-  required?: boolean
-  saveToJWT?: boolean | string
-  /**
-   * Allows you to modify the base JSON schema that is generated during generate:types for this field.
-   * This JSON schema will be used to generate the TypeScript interface of this field.
-   */
-  typescriptSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
-  unique?: boolean
 }
 
 export type NumberField = {
@@ -2094,12 +2081,7 @@ export function fieldShouldBeLocalized({
   field: ClientField | ClientTab | Field | Tab
   parentIsLocalized: boolean
 }): boolean {
-  return (
-    'localized' in field &&
-    field.localized! &&
-    (!parentIsLocalized ||
-      process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true')
-  )
+  return 'localized' in field && field.localized! && !parentIsLocalized
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {

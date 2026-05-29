@@ -9,7 +9,7 @@ import type {
 
 import React from 'react'
 
-import { DefaultNavServer } from '../../elements/Nav/Server.js'
+import { DefaultNav } from '../../elements/Nav/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { DefaultTemplate as DefaultTemplateUI } from './index.js'
 
@@ -99,7 +99,7 @@ export const DefaultTemplateServer: React.FC<DefaultTemplateServerProps> = ({
   const NavComponent = RenderServerComponent({
     clientProps,
     Component: CustomNav,
-    Fallback: DefaultNavServer,
+    Fallback: DefaultNav,
     importMap: payload.importMap,
     serverProps,
   })

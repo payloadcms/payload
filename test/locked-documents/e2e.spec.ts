@@ -247,6 +247,7 @@ describe('Locked Documents', () => {
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.list-selection__button[aria-label="Publish"]').click()
       await page.locator('#publish-posts #confirm-action').click()
+      await expect(page.locator('#publish-posts')).toBeHidden()
 
       await goToNextPage(page)
       await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
@@ -769,7 +770,7 @@ describe('Locked Documents', () => {
       // save buttons should be readOnly / disabled
       await expect(page.locator('#action-save-draft')).toBeDisabled()
       await expect(page.locator('#action-save')).toBeDisabled()
-      await expect(page.locator('.doc-controls__dots')).toBeHidden()
+      await expect(page.locator('.doc-controls__popup')).toBeHidden()
 
       // fields should be readOnly / disabled
       await expect(page.locator('#field-text')).toBeDisabled()

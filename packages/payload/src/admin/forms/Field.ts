@@ -6,7 +6,7 @@ import type { ClientBlock, ClientField, Field } from '../../fields/config/types.
 import type { TypedUser } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, Payload, PayloadRequest } from '../../types/index.js'
-import type { ComponentRenderer } from '../adapters.js'
+import type { ComponentRenderer } from '../adapters/render.js'
 import type {
   ClientFieldSchemaMap,
   ClientTab,

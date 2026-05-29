@@ -19,7 +19,7 @@ import type {
   LexicalEditorViewMap,
   LexicalFieldAdminClientProps,
   LexicalRichTextFieldProps,
-} from '../types.js'
+} from '../types/index.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { RichTextField } from '../exports/client/index.js'

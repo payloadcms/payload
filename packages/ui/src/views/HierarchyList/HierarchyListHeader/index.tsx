@@ -10,7 +10,7 @@ import { DefaultListViewTabs } from '../../../elements/DefaultListViewTabs/index
 import { ListHeader } from '../../../elements/ListHeader/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { DocumentListSelection } from '../DocumentListSelection/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-list-header'
 

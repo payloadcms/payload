@@ -15,7 +15,8 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
-import type { ComponentRenderer } from '../admin/adapters.js'
+import type { ComponentRenderer } from '../admin/adapters/render.js'
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
   CustomStatus,
@@ -522,6 +523,14 @@ export type ServerProps = {
    */
   readonly renderComponent?: ComponentRenderer
   readonly searchParams?: Params
+  /**
+   * Framework-agnostic methods for server-side navigation, headers, cookies, and other server-only APIs.
+   * Plugins should call these methods instead of importing directly from `next/navigation`, `next/headers`, etc.
+   * These methods are populated by the given framework adapter, e.g. `@payloadcms/next`.
+   *
+   * Optional because non-framework contexts (jobs, scripts, tests) may not have an adapter attached.
+   */
+  readonly server?: ServerAdapter
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
@@ -1241,21 +1250,6 @@ export type Config = {
    * @see https://payloadcms.com/docs/configuration/collections#collection-configs
    */
   collections?: CollectionConfig[]
-  /**
-   * Compatibility flags for prior Payload versions
-   */
-  compatibility?: {
-    /**
-     * By default, Payload will remove the `localized: true` property
-     * from fields if a parent field is localized. Set this property
-     * to `true` only if you have an existing Payload database from pre-3.0
-     * that you would like to maintain without migrating. This is only
-     * relevant for MongoDB databases.
-     *
-     * @todo Remove in v4
-     */
-    allowLocalizedWithinLocalized: true
-  }
   /**
    * Prefix a string to all cookies that Payload sets.
    *

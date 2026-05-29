@@ -23,12 +23,6 @@ export type Props = {
   iconPosition?: 'left' | 'right'
   id?: string
   /**
-   * @deprecated
-   * This prop is deprecated and will be removed in the next major version.
-   * Components now import their own `Link` directly from `next/link`.
-   */
-  Link?: React.ElementType
-  /**
    * Shows a loading spinner and hides content. Disables interactions.
    */
   loading?: boolean
@@ -47,6 +41,10 @@ export type Props = {
   ref?: React.RefObject<HTMLAnchorElement | HTMLButtonElement | null>
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
+  /**
+   * Applies selected/active styling (e.g., for popup triggers when popup is open)
+   */
+  selected?: boolean
   size?: 'large' | 'medium'
   SubMenuPopupContent?: (props: { close: () => void }) => React.ReactNode
   to?: string

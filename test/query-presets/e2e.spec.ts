@@ -611,7 +611,7 @@ describe('Query Presets', () => {
 
     await expect(page).toHaveURL(/groupBy=text/)
 
-    await expect(page.locator('.group-by-header').first()).toBeVisible()
+    await expect(page.locator('.table-section__header').first()).toBeVisible()
   })
 
   test('should clear groupBy when deselecting a preset', async ({ page }) => {
@@ -632,13 +632,13 @@ describe('Query Presets', () => {
 
     // Verify groupBy is in URL and grouped view is active
     await expect(page).toHaveURL(/groupBy=text/)
-    await expect(page.locator('.group-by-header').first()).toBeVisible()
+    await expect(page.locator('.table-section__header').first()).toBeVisible()
 
     await clearSelectedPreset({ page })
 
     // Verify groupBy is removed from URL and grouped view is gone
     await expect(page).not.toHaveURL(/groupBy=/)
-    await expect(page.locator('.group-by-header')).toHaveCount(0)
+    await expect(page.locator('.table-section__header')).toHaveCount(0)
   })
 
   test('should update groupBy when saving changes to an active preset', async ({ page }) => {
@@ -672,7 +672,7 @@ describe('Query Presets', () => {
 
     // Verify groupBy is applied from the preset
     await expect(page).toHaveURL(/groupBy=text/)
-    await expect(page.locator('.group-by-header').first()).toBeVisible()
+    await expect(page.locator('.table-section__header').first()).toBeVisible()
   })
 
   test('create preset with title, columns (Text + ID) and groupBy Text, then verify list view', async ({
@@ -717,7 +717,7 @@ describe('Query Presets', () => {
     await expect(page).toHaveURL(/preset=/)
     await expect(page).toHaveURL(/groupBy=text/)
     await expect(page.locator('#select-preset', { hasText: exactText(presetTitle) })).toBeVisible()
-    await expect(page.locator('.group-by-header').first()).toBeVisible()
+    await expect(page.locator('.table-section__header').first()).toBeVisible()
     await expect(
       page.locator('.collection-list .table th', { hasText: exactText('Text') }).first(),
     ).toBeVisible()
@@ -766,18 +766,15 @@ describe('Query Presets', () => {
 
     // Verify groupBy is in URL and grouped view is visible
     await expect(page).toHaveURL(/groupBy=text/)
-    await expect(page.locator('.group-by-header').first()).toBeVisible()
+    await expect(page.locator('.table-section__header').first()).toBeVisible()
 
     // Verify reset/save buttons are not visible initially (no modifications)
     await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
 
     // Clear the groupBy (modify the preset)
     await clearGroupBy(page)
-    // With an active preset, an empty `groupBy=` is intentionally preserved
-    // to mark the user's clear-override; only the previous non-empty value
-    // (e.g. `groupBy=text`) must be gone.
-    await expect(page).not.toHaveURL(/[?&]groupBy=[^&]+/)
-    await expect(page.locator('.group-by-header')).toHaveCount(0)
+    await expect(page).not.toHaveURL(/groupBy=/)
+    await expect(page.locator('.table-section__header')).toHaveCount(0)
 
     // Verify reset button becomes visible after modification
     await checkPresetModifiedOptions({ page, expectReset: true, expectSave: true })
@@ -787,7 +784,7 @@ describe('Query Presets', () => {
 
     // Verify groupBy is restored from preset
     await expect(page).toHaveURL(/groupBy=text/)
-    await expect(page.locator('.group-by-header').first()).toBeVisible()
+    await expect(page.locator('.table-section__header').first()).toBeVisible()
 
     // Verify reset button is hidden again after reset
     await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })

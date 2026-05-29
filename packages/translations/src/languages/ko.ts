@@ -320,6 +320,7 @@ export const koTranslations: DefaultTranslationsObject = {
     export: '수출',
     fallbackToDefaultLocale: '기본 locale로 대체',
     false: '거짓',
+    field: 'Field',
     filter: '필터',
     filters: '필터',
     filterWhere: '{{label}} 필터링 조건',
@@ -389,6 +390,7 @@ export const koTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       '영구적으로 {{count}} {{label}}가 성공적으로 삭제되었습니다.',
     perPage: '페이지당 개수: {{limit}}',
+    perPageLabel: '페이지당:',
     previous: '이전',
     reindex: '재인덱싱',
     reindexingAll: '모든 {{collections}}를 다시 인덱싱하는 중입니다.',

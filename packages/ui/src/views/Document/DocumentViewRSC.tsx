@@ -251,6 +251,7 @@ export const renderDocument = async ({
     permissions,
     routeSegments: segments,
     searchParams,
+    server: req.server,
     user,
     versions,
   }

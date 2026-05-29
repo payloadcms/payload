@@ -5,7 +5,7 @@ import { Link } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import type { LexicalRichTextCellProps } from '../types.js'
+import type { LexicalRichTextCellProps } from '../types/index.js'
 
 function recurseEditorState(
   editorState: SerializedLexicalNode[],

@@ -9,7 +9,7 @@ import type {
   BaseClientFeatureProps,
   FeatureProviderProviderClient,
 } from '../features/typesClient.js'
-import type { FeatureClientSchemaMap, LexicalRichTextFieldProps } from '../types.js'
+import type { FeatureClientSchemaMap, LexicalRichTextFieldProps } from '../types/index.js'
 
 import { RichTextField } from './index.js'
 

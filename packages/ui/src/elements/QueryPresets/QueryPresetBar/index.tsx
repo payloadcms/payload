@@ -12,19 +12,17 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 
 import { CheckIcon } from '../../../icons/Check/index.js'
 import { EditIcon } from '../../../icons/Edit/index.js'
-import { FilterIcon } from '../../../icons/Filter/index.js'
 import { GearIcon } from '../../../icons/Gear/index.js'
 import { PlusIcon } from '../../../icons/Plus/index.js'
 import { RefreshIcon } from '../../../icons/Refresh/index.js'
 import { TrashIcon } from '../../../icons/Trash/index.js'
-import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/context.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { Button } from '../../Button/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
+import { FilterTrigger } from '../../FilterTrigger/index.js'
 import { useListDrawer } from '../../ListDrawer/index.js'
 import { useModal } from '../../Modal/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
@@ -292,129 +290,130 @@ export const QueryPresetBar: React.FC<{
           horizontalAlign="left"
           portalClassName={`${baseClass}__popup-content`}
           render={({ close }) => (
-            <PopupList.IconButtonGroup>
-              {presets.map((preset) => (
-                <PopupList.Button
-                  active={activePreset?.id === preset.id}
-                  key={preset.id}
-                  onClick={async () => {
-                    close()
-                    await handlePresetChange(preset)
-                  }}
-                >
-                  {preset.title}
-                </PopupList.Button>
-              ))}
+            <Fragment>
+              <PopupList.RadioGroup>
+                {presets.map((preset) => {
+                  const isActive = activePreset?.id === preset.id
+                  return (
+                    <PopupList.RadioGroupItem
+                      active={isActive}
+                      key={preset.id}
+                      onClick={async () => {
+                        close()
+                        await handlePresetChange(preset)
+                      }}
+                    >
+                      {preset.title}
+                    </PopupList.RadioGroupItem>
+                  )
+                })}
+              </PopupList.RadioGroup>
               {activePreset && (
                 <Fragment>
                   <PopupList.Divider />
-                  {hasModifiedPreset && (
-                    <PopupList.Button
-                      icon={<RefreshIcon />}
-                      id="reset-preset"
-                      onClick={async () => {
-                        close()
-                        await handleResetPreset()
-                      }}
-                    >
-                      {t('general:reset')}
-                    </PopupList.Button>
-                  )}
-                  {hasModifiedPreset && queryPresetPermissions?.update && (
-                    <PopupList.Button
-                      icon={<CheckIcon />}
-                      id="save-preset"
-                      onClick={async () => {
-                        close()
-                        await saveCurrentChanges()
-                      }}
-                    >
-                      {activePreset?.isShared
-                        ? t('general:updateForEveryone')
-                        : t('fields:saveChanges')}
-                    </PopupList.Button>
-                  )}
-                  {queryPresetPermissions?.update && (
-                    <PopupList.Button
-                      icon={<EditIcon />}
-                      id="edit-preset"
-                      onClick={() => {
-                        close()
-                        openPresetDrawer()
-                      }}
-                    >
-                      {t('general:editLabel', {
-                        label: getTranslation(presetConfig?.labels?.singular, i18n),
-                      })}
-                    </PopupList.Button>
-                  )}
-                  {queryPresetPermissions?.delete && (
-                    <PopupList.Button
-                      className={`${baseClass}__delete`}
-                      icon={<TrashIcon small />}
-                      id="delete-preset"
-                      onClick={() => {
-                        close()
-                        openModal(deletePresetModalSlug)
-                      }}
-                    >
-                      {t('general:deleteLabel', {
-                        label: getTranslation(presetConfig?.labels?.singular, i18n),
-                      })}
-                    </PopupList.Button>
-                  )}
+                  <PopupList.MenuItem size="small">
+                    {hasModifiedPreset && (
+                      <PopupList.Button
+                        icon={<RefreshIcon size={16} />}
+                        id="reset-preset"
+                        onClick={async () => {
+                          close()
+                          await handleResetPreset()
+                        }}
+                      >
+                        {t('general:reset')}
+                      </PopupList.Button>
+                    )}
+                    {hasModifiedPreset && queryPresetPermissions?.update && (
+                      <PopupList.Button
+                        icon={<CheckIcon size={16} />}
+                        id="save-preset"
+                        onClick={async () => {
+                          close()
+                          await saveCurrentChanges()
+                        }}
+                      >
+                        {activePreset?.isShared
+                          ? t('general:updateForEveryone')
+                          : t('fields:saveChanges')}
+                      </PopupList.Button>
+                    )}
+                    {queryPresetPermissions?.update && (
+                      <PopupList.Button
+                        icon={<EditIcon size={16} />}
+                        id="edit-preset"
+                        onClick={() => {
+                          close()
+                          openPresetDrawer()
+                        }}
+                      >
+                        {t('general:editLabel', {
+                          label: getTranslation(presetConfig?.labels?.singular, i18n),
+                        })}
+                      </PopupList.Button>
+                    )}
+                    {queryPresetPermissions?.delete && (
+                      <PopupList.Button
+                        className={`${baseClass}__delete`}
+                        icon={<TrashIcon size={16} />}
+                        id="delete-preset"
+                        onClick={() => {
+                          close()
+                          openModal(deletePresetModalSlug)
+                        }}
+                      >
+                        {t('general:deleteLabel', {
+                          label: getTranslation(presetConfig?.labels?.singular, i18n),
+                        })}
+                      </PopupList.Button>
+                    )}
+                  </PopupList.MenuItem>
                 </Fragment>
               )}
               {(presets.length > 0 || activePreset) && <PopupList.Divider />}
-              {queryPresetPermissions?.create && (
+              <PopupList.MenuItem size="small">
+                {queryPresetPermissions?.create && (
+                  <PopupList.Button
+                    icon={<PlusIcon size={16} />}
+                    id="create-new-preset"
+                    onClick={() => {
+                      close()
+                      openCreateNewDrawer()
+                    }}
+                  >
+                    {t('general:createNewLabel', {
+                      label: getTranslation(presetConfig?.labels?.singular, i18n),
+                    })}
+                  </PopupList.Button>
+                )}
                 <PopupList.Button
-                  icon={<PlusIcon />}
-                  id="create-new-preset"
+                  icon={<GearIcon size={16} />}
+                  id="manage-presets"
                   onClick={() => {
                     close()
-                    openCreateNewDrawer()
+                    openListDrawer()
                   }}
                 >
-                  {t('general:createNewLabel', {
-                    label: getTranslation(presetConfig?.labels?.singular, i18n),
+                  {t('general:manageLabel', {
+                    label: getTranslation(presetConfig?.labels?.plural, i18n),
                   })}
                 </PopupList.Button>
-              )}
-              <PopupList.Button
-                icon={<GearIcon />}
-                id="manage-presets"
-                onClick={() => {
-                  close()
-                  openListDrawer()
-                }}
-              >
-                {t('general:manageLabel', {
-                  label: getTranslation(presetConfig?.labels?.plural, i18n),
-                })}
-              </PopupList.Button>
-            </PopupList.IconButtonGroup>
+              </PopupList.MenuItem>
+            </Fragment>
           )}
-          renderButton={({ onClick, onKeyDown, ...ariaProps }) => (
-            <div className={`${baseClass}__trigger-wrap`}>
-              <Button
-                {...ariaProps}
-                buttonStyle="secondary"
-                className={`${baseClass}__trigger`}
-                extraButtonProps={{ onKeyDown }}
-                icon={<FilterIcon hasBadgeCutout={hasModifiedPreset} size={24} />}
-                iconPosition="left"
-                id="select-preset"
-                onClick={onClick}
-                size="medium"
-              >
-                {buttonLabel}
-              </Button>
-              {activePreset && (
-                <button className={`${baseClass}__clear`} onClick={handleClearPreset} type="button">
-                  <XIcon size={16} />
-                </button>
-              )}
-            </div>
+          renderButton={({ active, onClick, onKeyDown }) => (
+            <FilterTrigger
+              className={`${baseClass}__trigger`}
+              id="select-preset"
+              isActive={Boolean(activePreset)}
+              onClear={handleClearPreset}
+              onClick={onClick}
+              onKeyDown={onKeyDown}
+              popupActive={active}
+              showBadge={hasModifiedPreset}
+            >
+              {buttonLabel}
+            </FilterTrigger>
           )}
           size="large"
           verticalAlign="bottom"

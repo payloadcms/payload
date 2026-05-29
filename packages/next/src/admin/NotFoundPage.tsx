@@ -1,12 +1,12 @@
 import type { ImportMap, SanitizedConfig } from 'payload'
 
+import { DefaultTemplate } from '@payloadcms/ui/rsc'
 import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { NotFoundClient } from '@payloadcms/ui/views/NotFound/index.client'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { DefaultTemplate } from '../templates/Default/index.js'
 import { initReq } from '../utilities/initReq.js'
 
 /**

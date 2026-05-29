@@ -106,6 +106,41 @@ To find the correct icon:
 4. Delete `index.scss`
 5. Wrap in `@layer payload-default {}`
 6. **Convert legacy `var(--base)` to `--spacer` tokens** (see below)
+7. **Check for SCSS-only variables** (see below)
+
+---
+
+#### SCSS Variable Dependencies
+
+**CRITICAL:** The `packages/ui/src/scss/` folder is being deprecated. Any CSS variables defined there must be migrated to `packages/ui/src/css/` before use.
+
+**Before using a variable, verify it exists in the CSS folder:**
+
+```bash
+grep -r "variable-name" packages/ui/src/css/
+```
+
+**If a variable is only in SCSS:**
+
+1. Check if there's an equivalent in the CSS folder
+2. If not, add it to the appropriate CSS file:
+   - `spacing.css` — spacers, gutters, layout spacing, breakpoints
+   - `colors.css` — color tokens
+   - `typography.css` — font tokens
+   - `radius.css` — border-radius tokens
+   - `utilities.css` — accessibility, misc utilities
+
+**Common SCSS-only variables to watch for:**
+
+| SCSS Variable           | CSS Equivalent / Action                          |
+| ----------------------- | ------------------------------------------------ |
+| `--spacing-view-bottom` | Defined in `spacing.css`                         |
+| `--breakpoint-m-width`  | Defined in `spacing.css` (1024px)                |
+| `--breakpoint-s-width`  | Defined in `spacing.css` (768px)                 |
+| `--gutter-h`            | Defined in `spacing.css`                         |
+| `$breakpoint-m-width`   | Use `var(--breakpoint-m-width)` in media queries |
+| `@include mid-break`    | Use `@media (max-width: 1024px)`                 |
+| `@include small-break`  | Use `@media (max-width: 768px)`                  |
 
 ---
 

@@ -1,0 +1,229 @@
+@layer payload-default {
+  .slot-table {
+    overflow: auto;
+    max-width: 100%;
+
+    table {
+      min-width: 100%;
+      border-spacing: 0;
+    }
+
+    thead {
+      color: var(--color-text-secondary);
+
+      th {
+        font-weight: normal;
+        text-align: left;
+        vertical-align: middle;
+        height: calc(var(--spacer-4) * 2);
+      }
+    }
+
+    tbody {
+      color: var(--color-text-secondary);
+
+      tr {
+        border-top: 1px solid var(--color-border);
+
+        &:hover {
+          background: var(--color-bg-secondary);
+        }
+
+        &:focus-within {
+          outline: none;
+          background: var(--color-bg-secondary);
+        }
+
+        &:has(.slot-table__checkbox input:checked) {
+          background: var(--color-bg-selected);
+        }
+      }
+    }
+  }
+
+  .slot-table__th {
+    padding: var(--spacer-2) var(--spacer-2-5);
+    min-width: 150px;
+    position: relative;
+
+    [dir='rtl'] & {
+      text-align: right;
+    }
+
+    &:first-child {
+      padding-inline-start: var(--spacer-2);
+      padding-inline-end: var(--spacer-2);
+    }
+
+    &:last-child {
+      padding-inline-end: var(--spacer-2);
+    }
+  }
+
+  .slot-table__th--drag {
+    width: var(--spacer-4);
+    min-width: var(--spacer-4);
+    padding: 0;
+  }
+
+  .slot-table__th--checkbox {
+    width: var(--spacer-5);
+    min-width: var(--spacer-5);
+    padding: var(--spacer-2);
+    text-align: center;
+  }
+
+  .slot-table__tr {
+    position: relative;
+    line-height: 1;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .slot-table__tr--clickable {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-bg-secondary);
+    }
+
+    &:focus {
+      outline: none;
+      background: var(--color-bg-secondary);
+    }
+  }
+
+  .slot-table__tr--selected {
+    background: var(--color-bg-selected) !important;
+  }
+
+  .slot-table__td {
+    vertical-align: middle;
+    padding: var(--spacer-2) var(--spacer-2-5);
+    min-width: 150px;
+    position: relative;
+    height: calc(var(--spacer-4) * 2);
+
+    [dir='rtl'] & {
+      text-align: right;
+    }
+
+    &:first-child {
+      padding-inline-start: var(--spacer-2);
+    }
+
+    &:last-child {
+      padding-inline-end: var(--spacer-2);
+    }
+  }
+
+  .slot-table__td--drag {
+    width: var(--spacer-4);
+    min-width: var(--spacer-4);
+    padding: 0;
+    text-align: center;
+  }
+
+  .slot-table__td--checkbox {
+    width: var(--spacer-5);
+    min-width: var(--spacer-5);
+    padding: var(--spacer-2);
+    text-align: center;
+  }
+
+  .slot-table__drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    color: var(--color-icon-tertiary);
+    padding: var(--spacer-1);
+
+    &:hover {
+      color: var(--color-icon-secondary);
+    }
+
+    svg {
+      width: var(--spacer-3);
+      height: var(--spacer-3);
+    }
+  }
+
+  .slot-table__drag-header {
+    display: block;
+    width: var(--spacer-3);
+    height: var(--spacer-3);
+  }
+
+  .slot-table__checkbox {
+    /* Uses CheckboxInput component - no additional styles needed */
+  }
+
+  .slot-table__th-merged {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  /* Condensed appearance */
+  .slot-table--appearance-condensed {
+    border-radius: var(--radius-small);
+
+    table {
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--color-bg-secondary);
+
+      th:first-child {
+        border-top-left-radius: var(--radius-small);
+      }
+
+      th:last-child {
+        border-top-right-radius: var(--radius-small);
+      }
+    }
+
+    tbody tr {
+      &:nth-child(odd) {
+        background: transparent;
+
+        td:first-child,
+        td:last-child {
+          border-radius: 0;
+        }
+      }
+
+      &:last-child {
+        td:first-child {
+          border-bottom-left-radius: var(--radius-small);
+        }
+
+        td:last-child {
+          border-bottom-right-radius: var(--radius-small);
+        }
+      }
+    }
+
+    .slot-table__th,
+    .slot-table__td {
+      padding: var(--spacer-1);
+      border: 0.5px solid var(--color-border);
+
+      &:first-child {
+        padding-inline-start: var(--spacer-2-5);
+      }
+
+      &:last-child {
+        padding-inline-end: var(--spacer-2-5);
+      }
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .slot-table__th,
+    .slot-table__td {
+      max-width: 70vw;
+    }
+  }
+}

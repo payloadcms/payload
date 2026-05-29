@@ -11,13 +11,12 @@ import type { CollectionOption } from '../../elements/CreateDocumentButton/index
 import type { StepNavItem } from '../../elements/StepNav/index.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
-import { Gutter } from '../../elements/Gutter/index.js'
+import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { TagIcon } from '../../icons/Tag/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
@@ -28,7 +27,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
 import { TypeFilter } from './TypeFilter/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-list'
 
@@ -126,18 +125,11 @@ export function HierarchyListView(props: ListViewClientProps) {
       const ancestorBreadcrumbs = hierarchyData?.breadcrumbs?.slice(0, -1) || []
 
       const baseLabel: StepNavItem = {
-        label: (
-          <div className={`${baseClass}__step-nav-icon-label`}>
-            {HierarchyIcon || <TagIcon />}
-            {collectionLabel}
-          </div>
-        ),
-        url: parent?.id
-          ? formatAdminURL({
-              adminRoute,
-              path: `/collections/${collectionSlug}`,
-            })
-          : undefined,
+        label: collectionLabel,
+        url: formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}`,
+        }),
       }
 
       let navItems = [baseLabel]
@@ -163,9 +155,6 @@ export function HierarchyListView(props: ListViewClientProps) {
     collectionSlug,
     hierarchyData,
     collectionLabel,
-    currentItemTitle,
-    parent,
-    HierarchyIcon,
     parentFieldName,
   ])
 
@@ -307,6 +296,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       .map(([slug, related]) => ({
         collectionSlug: slug,
         data: related.result,
+        fieldName: related.fieldName,
         hasMany: related.hasMany,
         label: related.label,
       }))
@@ -328,7 +318,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         {BeforeList}
         <DocumentSelectionProvider collectionData={collectionData}>
-          <Gutter className={`${baseClass}__wrap`}>
+          <div className={`${baseClass}__wrap`}>
             <HierarchyListHeader
               collectionConfig={collectionConfig}
               currentItemTitle={currentItemTitle}
@@ -361,7 +351,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               viewType={viewType}
             />
 
-            <div className={`${baseClass}__controls`}>
+            <ListControlsBar className={`${baseClass}__controls`}>
               <div className={`${baseClass}__controls-left`}>
                 <SearchBar
                   label={t('general:searchBy', {
@@ -386,7 +376,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                   onSave={handleSave}
                 />
               )}
-            </div>
+            </ListControlsBar>
 
             <HierarchyTable
               baseFilter={baseFilter}
@@ -407,7 +397,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               search={searchFromURL}
               useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
             />
-          </Gutter>
+          </div>
         </DocumentSelectionProvider>
         {AfterList}
       </div>

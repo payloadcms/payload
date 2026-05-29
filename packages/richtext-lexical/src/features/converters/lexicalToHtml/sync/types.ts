@@ -4,7 +4,7 @@ import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../../nodeTypes.js'
+} from '../../../../types/nodeTypes.js'
 import type { SerializedLexicalNodeWithParent } from '../shared/types.js'
 
 export type HTMLConverter<T extends { [key: string]: any; type?: string } = SerializedLexicalNode> =

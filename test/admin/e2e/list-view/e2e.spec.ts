@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import { expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
 import * as qs from 'qs-esm'
 
@@ -13,7 +13,6 @@ import {
   initPageConsoleErrorCatch,
   openColumnControls,
 } from '../../../__helpers/e2e/helpers.js'
-import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { BASE_PATH, customAdminRoutes } from '../../shared.js'
@@ -44,6 +43,8 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 
 import {
+  clickPillSelectorItem,
+  getPillSelectorItem,
   openListColumns,
   reorderColumns,
   sortColumn,
@@ -55,6 +56,7 @@ import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellV
 import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
+import { expectPerPageLimits, setPerPageLimit } from '../../../__helpers/e2e/setPerPageLimit.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -181,11 +183,7 @@ describe('List View', () => {
       await page.locator('.list-controls__toggle-columns').click()
       await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('ID'),
-        })
-        .click()
+      await clickPillSelectorItem({ container: page, label: 'ID' })
 
       await page.locator('#heading-id').waitFor({ state: 'detached' })
       await page.locator('.cell-id').first().waitFor({ state: 'detached' })
@@ -196,27 +194,23 @@ describe('List View', () => {
       )
     })
 
-    test(
-      'should hide create new button when allowCreate is false',
-      { framework: 'rsc' },
-      async () => {
-        await page.goto(withListViewUrl.list)
+    test('should hide create new button when allowCreate is false', async () => {
+      await page.goto(withListViewUrl.list)
 
-        const drawerButton = page.locator('button', { hasText: 'Select Posts' })
-        await expect(drawerButton).toBeVisible()
-        await drawerButton.click()
+      const drawerButton = page.locator('button', { hasText: 'Select Posts' })
+      await expect(drawerButton).toBeVisible()
+      await drawerButton.click()
 
-        const drawer = page.locator('.drawer__content')
-        await expect(drawer).toBeVisible()
+      const drawer = page.locator('.drawer__content')
+      await expect(drawer).toBeVisible()
 
-        const createButton = page.locator('button', { hasText: 'Create New' })
-        await expect(createButton).toBeHidden()
-      },
-    )
+      const createButton = page.locator('button', { hasText: 'Create New' })
+      await expect(createButton).toBeHidden()
+    })
   })
 
   describe('list view custom components', () => {
-    test('should render custom beforeList component', { framework: 'rsc' }, async () => {
+    test('should render custom beforeList component', async () => {
       await page.goto(postsUrl.list)
       await expect(
         page.locator('.collection-list--posts').locator('div', {
@@ -225,16 +219,16 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should render custom beforeListTable component', { framework: 'rsc' }, async () => {
+    test('should render custom beforeListTable component', async () => {
       await page.goto(postsUrl.list)
       await expect(
-        page.locator('.collection-list__wrap').locator('div', {
+        page.locator('.collection-list').locator('div', {
           hasText: exactText('BeforeListTable custom component'),
         }),
       ).toBeVisible()
     })
 
-    test('should render custom Cell component in table', { framework: 'rsc' }, async () => {
+    test('should render custom Cell component in table', async () => {
       await page.goto(postsUrl.list)
       await expect(
         page
@@ -246,16 +240,16 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should render custom afterList component', { framework: 'rsc' }, async () => {
+    test('should render custom afterListTable component', async () => {
       await page.goto(postsUrl.list)
       await expect(
-        page.locator('.collection-list__wrap').locator('div', {
+        page.locator('.collection-list').locator('div', {
           hasText: exactText('AfterListTable custom component'),
         }),
       ).toBeVisible()
     })
 
-    test('should render custom listMenuItems component', { framework: 'rsc' }, async () => {
+    test('should render custom listMenuItems component', async () => {
       await page.goto(postsUrl.list)
       const kebabMenu = page.locator('.list-controls__popup')
       await expect(kebabMenu).toBeVisible()
@@ -268,15 +262,6 @@ describe('List View', () => {
             hasText: 'listMenuItems',
           })
           .first(),
-      ).toBeVisible()
-    })
-
-    test('should render custom afterListTable component', { framework: 'rsc' }, async () => {
-      await page.goto(postsUrl.list)
-      await expect(
-        page.locator('.collection-list--posts').locator('div', {
-          hasText: exactText('AfterList custom component'),
-        }),
       ).toBeVisible()
     })
   })
@@ -310,7 +295,7 @@ describe('List View', () => {
       await expect(tableItems).toHaveCount(1)
     })
 
-    test('should search by title or description', { framework: 'next' }, async () => {
+    test('should search by title or description', async () => {
       await createPost({
         description: 'this is fun',
         title: 'find me',
@@ -353,33 +338,29 @@ describe('List View', () => {
   })
 
   describe('filters', () => {
-    test(
-      'should not close where builder when clearing final condition',
-      { framework: 'next' },
-      async () => {
-        await page.goto(postsUrl.list)
+    test('should not close where builder when clearing final condition', async () => {
+      await page.goto(postsUrl.list)
 
-        await addListFilter({
-          page,
-          fieldLabel: 'Relationship',
-          operatorLabel: 'equals',
-          value: 'post1',
-        })
+      await addListFilter({
+        page,
+        fieldLabel: 'Relationship',
+        operatorLabel: 'equals',
+        value: 'post1',
+      })
 
-        const encodedQueryString =
-          '&' + encodeURIComponent('where[or][0][and][0][relationship][equals]') + '='
+      const encodedQueryString =
+        '&' + encodeURIComponent('where[or][0][and][0][relationship][equals]') + '='
 
-        await page.waitForURL(new RegExp(encodedQueryString + '[^&]*'))
+      await page.waitForURL(new RegExp(encodedQueryString + '[^&]*'))
 
-        await page.locator('.condition__actions .btn.condition__actions-remove').click()
+      await page.locator('.condition__actions .btn.condition__actions-remove').click()
 
-        await page.waitForURL(new RegExp(encodedQueryString))
+      await page.waitForURL(new RegExp(encodedQueryString))
 
-        await expect(
-          page.locator('.list-controls__where.rah-static.rah-static--height-auto'),
-        ).toBeVisible()
-      },
-    )
+      await expect(
+        page.locator('.list-controls__where.rah-static.rah-static--height-auto'),
+      ).toBeVisible()
+    })
 
     test('should respect base list filters', async () => {
       await page.goto(baseListFiltersUrl.list)
@@ -395,16 +376,14 @@ describe('List View', () => {
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
       // ensure the ID column is active
-      const idButton = page.locator('.pill-selector .pill-selector__pill', {
-        hasText: exactText('ID'),
-      })
+      const idButton = getPillSelectorItem({ container: page, label: 'ID' })
 
       const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
 
       const buttonClasses = await idButton.getAttribute('class')
 
-      if (buttonClasses && !buttonClasses.includes('pill-selector__pill--selected')) {
-        await idButton.click()
+      if (buttonClasses && !buttonClasses.includes('chip--selected')) {
+        await idButton.locator('.chip__action').click()
         await expect(page.locator(tableRowLocator).first().locator('.cell-id')).toBeVisible()
       }
 
@@ -700,7 +679,7 @@ describe('List View', () => {
 
       await expect(tableItems).toHaveCount(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.per-page button')).toContainText('5')
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
 
       await addListFilter({
@@ -923,11 +902,7 @@ describe('List View', () => {
 
       await expect(page.locator('.pill-selector')).toBeVisible()
 
-      await expect(
-        page.locator(`.pill-selector .pill-selector__pill`, {
-          hasText: exactText('Hidden Field'),
-        }),
-      ).toBeHidden()
+      await expect(getPillSelectorItem({ container: page, label: 'Hidden Field' })).toBeHidden()
     })
 
     test('should show field column despite admin.hidden being true', async () => {
@@ -937,9 +912,7 @@ describe('List View', () => {
       await expect(page.locator('.pill-selector')).toBeVisible()
 
       await expect(
-        page.locator(`.pill-selector .pill-selector__pill`, {
-          hasText: exactText('Admin Hidden Field'),
-        }),
+        getPillSelectorItem({ container: page, label: 'Admin Hidden Field' }),
       ).toBeVisible()
     })
 
@@ -951,9 +924,7 @@ describe('List View', () => {
 
       // Check if "Disable List Column Text" is not present in the column options
       await expect(
-        page.locator(`.pill-selector .pill-selector__pill`, {
-          hasText: exactText('Disable List Column Text'),
-        }),
+        getPillSelectorItem({ container: page, label: 'Disable List Column Text' }),
       ).toBeHidden()
     })
 
@@ -965,9 +936,7 @@ describe('List View', () => {
 
       // Check if "Disable List Filter Text" is present in the column options
       await expect(
-        page.locator(`.pill-selector .pill-selector__pill`, {
-          hasText: exactText('Disable List Filter Text'),
-        }),
+        getPillSelectorItem({ container: page, label: 'Disable List Filter Text' }),
       ).toBeVisible()
     })
 
@@ -1162,11 +1131,7 @@ describe('List View', () => {
       await createPost({ namedGroup: { someTextField: 'nested group text field' } })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Group > Some Text Field'),
-        })
-        .click()
+      await clickPillSelectorItem({ container: page, label: 'Named Group > Some Text Field' })
       await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
@@ -1176,11 +1141,7 @@ describe('List View', () => {
       await createPost({ textFieldInUnnamedGroup: 'nested text in unnamed group' })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Text Field In Unnamed Group'),
-        })
-        .click()
+      await clickPillSelectorItem({ container: page, label: 'Text Field In Unnamed Group' })
       await expect(page.locator('.row-1 .cell-textFieldInUnnamedGroup')).toHaveText(
         'nested text in unnamed group',
       )
@@ -1190,32 +1151,21 @@ describe('List View', () => {
       await createPost({ namedGroup: { someTextField: 'nested group text field' } })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await expect(
-        page.locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Group'),
-        }),
-      ).toBeHidden()
+      await expect(getPillSelectorItem({ container: page, label: 'Named Group' })).toBeHidden()
     })
 
-    test(
-      'should render group field as top level column when custom cell is defined',
-      { framework: 'rsc' },
-      async () => {
-        await createPost({
-          groupWithCustomCell: {
-            nestedTextFieldInGroupWithCustomCell:
-              'nested group text field in group with custom cell',
-          },
-        })
-        await page.goto(postsUrl.list)
-        await openColumnControls(page)
-        await expect(
-          page.locator('.pill-selector .pill-selector__pill', {
-            hasText: exactText('Group With Custom Cell'),
-          }),
-        ).toBeVisible()
-      },
-    )
+    test('should render group field as top level column when custom cell is defined', async () => {
+      await createPost({
+        groupWithCustomCell: {
+          nestedTextFieldInGroupWithCustomCell: 'nested group text field in group with custom cell',
+        },
+      })
+      await page.goto(postsUrl.list)
+      await openColumnControls(page)
+      await expect(
+        getPillSelectorItem({ container: page, label: 'Group With Custom Cell' }),
+      ).toBeVisible()
+    })
 
     test('should render top-level field and group field with same name in separate columns', async () => {
       await createPost({
@@ -1227,18 +1177,10 @@ describe('List View', () => {
       await openColumnControls(page)
 
       // Enable top-level column
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Some Text Field'),
-        })
-        .click()
+      await clickPillSelectorItem({ container: page, label: 'Some Text Field' })
 
       // Enable group column
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Group > Some Text Field'),
-        })
-        .click()
+      await clickPillSelectorItem({ container: page, label: 'Named Group > Some Text Field' })
 
       // Expect top-level cell
       await expect(page.locator('.row-1 .cell-someTextField')).toHaveText('top-level text field')
@@ -1253,11 +1195,10 @@ describe('List View', () => {
       await createPost({ namedTab: { nestedTextFieldInNamedTab: 'nested text in named tab' } })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Tab > Nested Text Field In Named Tab'),
-        })
-        .click()
+      await clickPillSelectorItem({
+        container: page,
+        label: 'Named Tab > Nested Text Field In Named Tab',
+      })
       await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
       )
@@ -1267,11 +1208,7 @@ describe('List View', () => {
       await createPost({ nestedTextFieldInUnnamedTab: 'nested text in unnamed tab' })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Nested Text Field In Unnamed Tab'),
-        })
-        .click()
+      await clickPillSelectorItem({ container: page, label: 'Nested Text Field In Unnamed Tab' })
       await expect(page.locator('.row-1 .cell-nestedTextFieldInUnnamedTab')).toHaveText(
         'nested text in unnamed tab',
       )
@@ -1284,7 +1221,7 @@ describe('List View', () => {
       await page.reload()
 
       await expect(
-        page.locator('.list-controls .pill-selector .pill-selector__pill').first(),
+        page.locator('.list-controls .pill-selector .pill-selector__draggable-item').first(),
       ).toHaveText('Number')
 
       await expect(page.locator('table thead tr th').nth(1)).toHaveText('Number')
@@ -1325,7 +1262,9 @@ describe('List View', () => {
       // ensure that the columns are in the correct order
       await expect(
         page
-          .locator('[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__pill')
+          .locator(
+            '[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__draggable-item',
+          )
           .first(),
       ).toHaveText('Number')
     })
@@ -1374,11 +1313,9 @@ describe('List View', () => {
 
       const columnContainer = page.locator('.list-controls__columns').first()
 
-      const column = columnContainer.locator(`.pill-selector .pill-selector__pill`, {
-        hasText: exactText('ID'),
-      })
+      const column = getPillSelectorItem({ container: columnContainer, label: 'ID' })
 
-      await expect(column).not.toHaveClass(/pill-selector__pill--selected/)
+      await expect(column).not.toHaveClass(/chip--selected/)
     })
 
     test('should render custom table cell component', async () => {
@@ -1391,7 +1328,7 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should reset default columns', { framework: 'rsc' }, async () => {
+    test('should reset default columns', async () => {
       await page.goto(postsUrl.list)
       await toggleColumn(page, { columnLabel: 'ID', targetState: 'off', columnName: 'id' })
 
@@ -1469,8 +1406,8 @@ describe('List View', () => {
 
       await page.goto(postsUrl.list)
       await expect
-        .poll(async () => await page.locator('.per-page .per-page__base-button').textContent())
-        .toContain('Per Page: 5')
+        .poll(async () => await page.locator('.per-page button').textContent())
+        .toContain('5')
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
 
@@ -1485,17 +1422,9 @@ describe('List View', () => {
 
       await wait(1000)
 
-      await expect
-        .poll(async () => await page.locator('.per-page .popup-button').isVisible())
-        .toBe(true)
+      await expect.poll(async () => await page.locator('.per-page button').isVisible()).toBe(true)
 
-      await page.locator('.per-page .popup-button').click()
-      await wait(500)
-      const options = page.locator('.popup__content button.per-page__button')
-      await expect.poll(async () => await options.count()).toBe(3)
-      await expect(options.nth(0)).toContainText('5')
-      await expect(options.nth(1)).toContainText('10')
-      await expect(options.nth(2)).toContainText('15')
+      await expectPerPageLimits({ page, expectedLimits: [5, 10, 15] })
     })
 
     test('should paginate', async () => {
@@ -1505,13 +1434,15 @@ describe('List View', () => {
         await createPost()
       })
 
-      await page.reload()
+      await page.goto(postsUrl.list)
 
       await wait(1000)
 
+      // Set per-page limit to 5
+      await setPerPageLimit({ page, limit: 5 })
+
       await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
 
       await wait(500)
 
@@ -1531,35 +1462,28 @@ describe('List View', () => {
         await createPost()
       })
 
-      await page.reload()
+      await page.goto(postsUrl.list)
 
       await wait(1000)
+
+      // Set per-page limit to 5 first
+      await setPerPageLimit({ page, limit: 5 })
 
       const tableItems = page.locator(tableRowLocator)
       await expect.poll(async () => await tableItems.count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
 
       await wait(500)
 
-      await page.locator('.per-page .popup-button').click()
-
-      await wait(500)
-
-      await page
-        .locator('.popup__content button.per-page__button', {
-          hasText: '15',
-        })
-        .click()
-      await wait(500)
-
+      // Now change to 15
+      await setPerPageLimit({ page, limit: 15 })
       await expect(tableItems).toHaveCount(15)
-      await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 15')
 
       await goToNextPage(page)
+
       await wait(500)
       await expect(tableItems).toHaveCount(1)
-      await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
+      await expectPerPageLimits({ page, expectedLimits: [5, 10, 15] })
       await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
     })
 
@@ -1572,9 +1496,7 @@ describe('List View', () => {
 
       await wait(1000)
 
-      await page.locator('.per-page .popup-button').click()
-      await page.getByRole('button', { name: '5', exact: true }).click()
-      await page.waitForURL(/limit=5/)
+      await setPerPageLimit({ page, limit: 5 })
 
       const firstPageIds = await page.locator('.cell-id').allInnerTexts()
       await goToNextPage(page)
@@ -1585,7 +1507,7 @@ describe('List View', () => {
       expect(firstPageIds).not.toContain(secondPageIds[0])
     })
 
-    test('should persist per-page limit in list drawer', { framework: 'rsc' }, async () => {
+    test('should persist per-page limit in list drawer', async () => {
       await payload.delete({
         collection: listDrawerSlug,
         where: {},
@@ -1619,14 +1541,12 @@ describe('List View', () => {
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
-      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 10')
+      await expect(page.locator('.list-drawer .per-page button')).toContainText('10')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
 
       // Change per-page to 5
-      await page.locator('.list-drawer .per-page .popup-button').click()
-      await page.getByRole('button', { name: '5', exact: true }).click()
+      await setPerPageLimit({ page, limit: 5, scope: listDrawer, waitForURL: false })
 
-      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
 
       await page.locator('.list-drawer .list-drawer__header .close-modal-button').click()
@@ -1638,7 +1558,7 @@ describe('List View', () => {
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
-      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer .per-page button')).toContainText('5')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
     })
   })
@@ -1677,11 +1597,7 @@ describe('List View', () => {
     test('should allow sorting by nested field within group in separate column', async () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Group > Some Text Field'),
-        })
-        .click()
+      await clickPillSelectorItem({ container: page, label: 'Named Group > Some Text Field' })
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
@@ -1713,11 +1629,10 @@ describe('List View', () => {
     test('should allow sorting by nested field within tab in separate column', async () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Tab > Nested Text Field In Named Tab'),
-        })
-        .click()
+      await clickPillSelectorItem({
+        container: page,
+        label: 'Named Tab > Nested Text Field In Named Tab',
+      })
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
@@ -1755,14 +1670,12 @@ describe('List View', () => {
       await page.locator('#heading-title button.sort-column__asc').click()
       await page.waitForURL(/sort=title/)
 
-      const columnAfterSort = page.locator(
-        `.list-controls__columns .pill-selector .pill-selector__pill`,
-        {
-          hasText: exactText('ID'),
-        },
-      )
+      const columnAfterSort = getPillSelectorItem({
+        container: page.locator('.list-controls__columns'),
+        label: 'ID',
+      })
 
-      await expect(columnAfterSort).not.toHaveClass('pill-selector__pill--selected')
+      await expect(columnAfterSort).not.toHaveClass('chip--selected')
       await expect(page.locator('#heading-id')).toBeHidden()
       await expect(page.locator('.cell-id')).toHaveCount(0)
     })
@@ -1800,14 +1713,12 @@ describe('List View', () => {
 
       await page.locator('#heading-_status').waitFor({ state: 'visible' })
 
-      const columnAfterSort = page.locator(
-        `.list-controls__columns .pill-selector .pill-selector__pill`,
-        {
-          hasText: exactText('Status'),
-        },
-      )
+      const columnAfterSort = getPillSelectorItem({
+        container: page.locator('.list-controls__columns'),
+        label: 'Status',
+      })
 
-      await expect(columnAfterSort).toHaveClass(/pill-selector__pill--selected/)
+      await expect(columnAfterSort).toHaveClass(/chip--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
 
@@ -1840,14 +1751,12 @@ describe('List View', () => {
       await wait(500)
 
       // ensure the column is still visible
-      const columnAfterSecondSort = page.locator(
-        `.list-controls__columns .pill-selector .pill-selector__pill`,
-        {
-          hasText: exactText('Status'),
-        },
-      )
+      const columnAfterSecondSort = getPillSelectorItem({
+        container: page.locator('.list-controls__columns'),
+        label: 'Status',
+      })
 
-      await expect(columnAfterSecondSort).toHaveClass(/pill-selector__pill--selected/)
+      await expect(columnAfterSecondSort).toHaveClass(/chip--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
     })
@@ -1948,17 +1857,19 @@ describe('List View', () => {
     await Promise.all(Array.from({ length: 12 }, (_, i) => createPost({ title: `post${i + 1}` })))
     await page.goto(postsUrl.list)
 
-    const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
-    await expect(pageOneButton).toBeVisible()
-    await pageOneButton.click()
+    // Ensure we're on page 1
+    const paginatorInput = page.locator('.paginator__page-input')
+    await expect(paginatorInput).toBeVisible()
+    await expect(paginatorInput).toHaveValue('1')
 
     await page.locator('.checkbox-input:has(#select-all)').locator('input').click()
     await expect(page.locator('.checkbox-input:has(#select-all)').locator('input')).toBeChecked()
     await expect(page.locator('.list-selection')).toContainText('5 selected')
 
-    const pageTwoButton = page.locator('.paginator__page', { hasText: '2' })
-    await expect(pageTwoButton).toBeVisible()
-    await pageTwoButton.click()
+    // Navigate to page 2 using the right arrow
+    const nextPageButton = page.locator('.clickable-arrow--right')
+    await expect(nextPageButton).toBeVisible()
+    await nextPageButton.click()
 
     await expect(
       page.locator('.checkbox-input:has(#select-all) input:not([checked])'),
@@ -1997,17 +1908,7 @@ describe('List View', () => {
 
     await drawer.locator('.list-header__create-new-button.doc-drawer__toggler').click()
     const createNewDrawer = page.locator('[id^=doc-drawer_custom-list-drawer_1_]')
-
-    // The custom create button POSTs to /api/custom-list-drawer and then
-    // calls the outer list drawer's refresh(). Wait for both the POST and
-    // the toast so the row-count assertion below isn't racing the refresh.
-    const createResponsePromise = page.waitForResponse(
-      (response) =>
-        response.url().endsWith('/api/custom-list-drawer') &&
-        response.request().method() === 'POST',
-    )
     await createNewDrawer.locator('#create-custom-list-drawer-doc').click()
-    await createResponsePromise
 
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 

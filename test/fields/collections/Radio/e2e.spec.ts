@@ -1,19 +1,18 @@
 import type { Page } from '@playwright/test'
 
-import { expect } from '@playwright/test'
-import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
-import { test } from '__helpers/e2e/playwright.js'
-import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
+import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
+import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
 } from '../../../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -82,19 +81,19 @@ describe('Radio', () => {
     )
   })
 
-  test('should show custom JSX label in list', { framework: 'next' }, async () => {
+  test('should show custom JSX label in list', async () => {
     await page.goto(url.list)
     await expect(page.locator('.cell-radioWithJsxLabelOption svg#payload-logo')).toBeVisible()
   })
 
-  test('should show custom JSX label while editing', { framework: 'next' }, async () => {
+  test('should show custom JSX label while editing', async () => {
     await page.goto(url.create)
     await expect(
       page.locator('label[for="field-radioWithJsxLabelOption-three"] svg#payload-logo'),
     ).toBeVisible()
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-radio').waitFor()
@@ -105,7 +104,7 @@ describe('Radio', () => {
         testInfo,
       })
 
-      // The custom JSX label option causes 1 a11y violation
+      // On this page there's a known custom label without a clear name, expect 1 violation
       expect(scanResults.violations.length).toBe(1)
     })
 

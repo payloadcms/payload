@@ -13,7 +13,7 @@ import { VersionDrawerCreatedAtCell } from '../Version/SelectComparison/VersionD
 import { buildVersionColumns } from './buildColumns.js'
 import { getVersionsViewData } from './getVersionsViewData.js'
 import { VersionsViewClient } from './index.client.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'versions'
 

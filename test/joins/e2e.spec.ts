@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -18,6 +17,7 @@ import {
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
 import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -497,7 +497,7 @@ describe('Join Field', () => {
     await editButton.click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const popupButton = drawer.locator('.doc-controls__popup button.popup-button')
+    const popupButton = drawer.locator('.doc-controls__popup .popup__trigger-wrap button')
     await expect(popupButton).toBeVisible()
     await popupButton.click()
     const deleteButton = page.locator('.popup__content #action-delete')

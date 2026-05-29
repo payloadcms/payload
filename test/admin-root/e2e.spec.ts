@@ -66,14 +66,6 @@ test.describe('Admin Panel (Root)', () => {
     })
   })
 
-  // test.beforeEach(async () => {
-  //   await throttleTest({
-  //     page,
-  //     context,
-  //     delay: 'Fast 4G',
-  //   })
-  // })
-
   test('should redirect `${adminRoute}/collections` to `${adminRoute}', async () => {
     const collectionsURL = `${url.admin}/collections`
     await page.goto(collectionsURL)
@@ -112,7 +104,7 @@ test.describe('Admin Panel (Root)', () => {
     const textField = page.locator('#field-text')
     await textField.fill('test')
     await saveDocAndAssert(page)
-    await page.locator('.doc-controls__popup >> .popup-button').click()
+    await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
     await expect(page.locator('#copy-locale-data__button')).toBeHidden()
   })
 

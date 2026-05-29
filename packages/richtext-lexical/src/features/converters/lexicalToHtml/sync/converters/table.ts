@@ -2,7 +2,7 @@ import type {
   SerializedTableCellNode,
   SerializedTableNode,
   SerializedTableRowNode,
-} from '../../../../../nodeTypes.js'
+} from '../../../../../types/nodeTypes.js'
 import type { HTMLConverters } from '../types.js'
 
 import { isSafeCssColor } from '../../shared/cssColors.js'
@@ -30,7 +30,7 @@ export const TableHTMLConverter: HTMLConverters<
     const TagName = node.headerState > 0 ? 'th' : 'td'
     const headerStateClass = `lexical-table-cell-header-${node.headerState}`
 
-    let style = 'border: 1px solid #ccc; padding: 8px;' + providedCSSString
+    let style = 'border: var(--stroke-width-small) solid #ccc; padding: 8px;' + providedCSSString
     if (node.backgroundColor && isSafeCssColor(node.backgroundColor)) {
       style += ` background-color: ${node.backgroundColor};`
     }

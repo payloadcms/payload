@@ -325,6 +325,7 @@ export const myTranslations: DefaultTranslationsObject = {
     export: 'တင်ပို့',
     fallbackToDefaultLocale: 'မူရင်းဒေသသို့ ပြန်ပြောင်းပါ။',
     false: 'မှား',
+    field: 'အကွက်',
     filter: 'ဇကာ',
     filters: 'စစ်ထုတ်မှုများ',
     filterWhere: 'နေရာတွင် စစ်ထုတ်ပါ။',
@@ -395,6 +396,7 @@ export const myTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully:
       '{{count}} {{label}} telah berjaya dipadamkan secara kekal.',
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
+    perPageLabel: 'တစ်အုပ်စာမျက်နှာ။',
     previous: 'ယခင်',
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',

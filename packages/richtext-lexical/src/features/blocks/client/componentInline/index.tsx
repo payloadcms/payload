@@ -30,7 +30,7 @@ import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
-import type { ViewMapInlineBlockComponentProps } from '../../../../types.js'
+import type { ViewMapInlineBlockComponentProps } from '../../../../types/index.js'
 import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
 import type { BlockComponentProps } from '../component/index.js'
 

@@ -167,6 +167,8 @@ export async function checkFocusIndicators(
   let cycleComplete = false
   let consecutiveBodyFocus = 0
   const maxConsecutiveBodyFocus = 3 // Stop if we focus body 3 times in a row
+  const visitedOutsideScopeElements: Set<string> = new Set()
+  let hasEnteredScope = false
 
   while (!cycleComplete) {
     // Press Tab to focus the next element
@@ -211,7 +213,7 @@ export async function checkFocusIndicators(
             tagName: string
             textContent: string
           }
-        | { outsideScope: true }
+        | { elementPath: string; outsideScope: true }
         | null => {
         const el = document.activeElement
         if (!el || el === document.body) {
@@ -221,15 +223,6 @@ export async function checkFocusIndicators(
         // Skip Next.js portal elements (dev mode only)
         if (el.closest('nextjs-portal')) {
           return null
-        }
-
-        // If we have a scope selector, check if the focused element is within scope
-        if (scopeSelector) {
-          const scopeElement = document.querySelector(scopeSelector)
-          if (scopeElement && !scopeElement.contains(el)) {
-            // Element is outside our scope, return special marker
-            return { outsideScope: true } as const
-          }
         }
 
         // Generate a unique identifier for this element
@@ -264,6 +257,15 @@ export async function checkFocusIndicators(
         }
 
         const elementPath = xpath(el)
+
+        // If we have a scope selector, check if the focused element is within scope
+        if (scopeSelector) {
+          const scopeElement = document.querySelector(scopeSelector)
+          if (scopeElement && !scopeElement.contains(el)) {
+            // Element is outside our scope, return special marker
+            return { elementPath, outsideScope: true } as const
+          }
+        }
 
         // Generate a useful CSS selector for this element
         const generateSelector = (): string => {
@@ -587,6 +589,13 @@ export async function checkFocusIndicators(
 
     // Check if element is outside scope (only relevant when selector is provided)
     if ('outsideScope' in focusInfo) {
+      if (!hasEnteredScope && !visitedOutsideScopeElements.has(focusInfo.elementPath)) {
+        if (verbose) {
+          console.log('Focused element is outside scope before scoped elements, continuing')
+        }
+        visitedOutsideScopeElements.add(focusInfo.elementPath)
+        continue
+      }
       if (verbose) {
         console.log('Focused element is outside scope, tab cycle complete')
       }
@@ -596,6 +605,7 @@ export async function checkFocusIndicators(
 
     // Reset body focus counter since we found a focusable element
     consecutiveBodyFocus = 0
+    hasEnteredScope = true
 
     // At this point, TypeScript knows focusInfo has the full element info
     // Skip if we've seen this element before (we've cycled through)

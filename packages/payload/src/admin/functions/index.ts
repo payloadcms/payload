@@ -13,7 +13,7 @@ import type {
 } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
-import type { ComponentRenderer } from '../adapters.js'
+import type { ComponentRenderer } from '../adapters/render.js'
 
 export type InitReqResult = {
   cookies: Map<string, string>

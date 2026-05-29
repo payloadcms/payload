@@ -703,7 +703,7 @@ describe('General', () => {
       await page.goto(disableCopyToLocale.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await expect(page.locator('#copy-locale-data__button')).toBeHidden()
     })
   })
@@ -1072,7 +1072,7 @@ describe('General', () => {
       await page.goto(disableDuplicateURL.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await expect(page.locator('#action-duplicate')).toBeHidden()
     })
 
@@ -1094,9 +1094,7 @@ describe('General', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page
-        .locator('#leave-without-saving .alert-modal__controls .btn--style-primary')
-        .click()
+      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
 
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)

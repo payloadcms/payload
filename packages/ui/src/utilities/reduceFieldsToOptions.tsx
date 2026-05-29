@@ -257,9 +257,9 @@ export const reduceFieldsToOptions = ({
         }
 
         const formattedField: ReducedField = {
+          fieldPath,
           label: formattedLabel,
           plainTextLabel: `${labelPrefix ? labelPrefix + ' > ' : ''}${localizedLabel}`,
-          value: fieldPath,
           ...fieldTypeConditions[field.type],
           field,
           operators,
