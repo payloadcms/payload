@@ -151,13 +151,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 1.5rem;
-    height: 1.5rem;
+    min-width: 1.125rem;
+    height: 1.125rem;
     padding: 0 var(--spacer-1);
     font-family: inherit;
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     line-height: 1;
-    color: var(--color-text);
+    color: var(--color-text-secondary);
     background: var(--color-bg-secondary);
     border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-small);
