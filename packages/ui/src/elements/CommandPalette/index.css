@@ -55,7 +55,11 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--spacer-2);
-    padding: var(--spacer-2) var(--spacer-4);
+    /* Fixed height so the row geometry is identical whether or not the
+       create-hint button is rendered (font 0.75rem + 2px padding + 1px border
+       each side ≈ 1.375rem total; 2.25rem gives comfortable breathing room). */
+    height: 2.25rem;
+    padding: 0 var(--spacer-4);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
@@ -72,13 +76,18 @@
   }
 
   .cmd-palette__option-create {
+    display: inline-flex;
+    align-items: center;
+    /* Explicit height caps the border-box so the button can never force the row taller */
+    height: 1.375rem;
     font-family: var(--text-body-medium-font-family);
     font-size: 0.75rem;
+    line-height: 1;
     color: var(--color-text-secondary);
     background: var(--color-bg-secondary);
     border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-small);
-    padding: 2px var(--spacer-1);
+    padding: 0 var(--spacer-1);
     cursor: pointer;
     white-space: nowrap;
   }
