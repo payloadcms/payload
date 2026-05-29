@@ -30,16 +30,6 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
-      name: 'conditionalCustomField',
-      type: 'text',
-      admin: {
-        condition: (data) => data?.title === 'show-conditional',
-        components: {
-          Field: './collections/Posts/TextField.js#CustomTextField',
-        },
-      },
-    },
-    {
       name: 'validateUsingEvent',
       type: 'text',
       admin: {
