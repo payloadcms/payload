@@ -1,5 +1,6 @@
 @layer payload-default {
   .cmd-palette {
+    display: flex;
     align-items: flex-start;
     justify-content: center;
     padding-top: 12vh;
