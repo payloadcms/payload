@@ -37,7 +37,7 @@ const baseRules = {
       customGroups: [
         {
           groupName: 'top',
-          elementNamePattern: ['_id', 'id', 'name', 'slug', 'type'],
+          elementNamePattern: '^(_id|id|name|slug|type)$',
         },
       ],
     },
