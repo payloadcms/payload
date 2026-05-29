@@ -16,6 +16,9 @@ import './index.css'
 export const commandPaletteSlug = 'command-palette'
 const baseClass = 'cmd-palette'
 
+const cmdKKeyCodes = ['k']
+const optionId = (action: CommandPaletteAction) => `${baseClass}-option-${action.id}`
+
 export const CommandPalette: React.FC = () => {
   const { closeModal, modalState, openModal } = useModal()
   const router = useRouter()
@@ -38,7 +41,7 @@ export const CommandPalette: React.FC = () => {
   const listboxId = useId()
 
   // Open at edit depth 1 (top level). Re-press while open is handled inside onKeyDown.
-  useHotkey({ cmdCtrlKey: true, editDepth: 1, keyCodes: ['k'] }, (event) => {
+  useHotkey({ cmdCtrlKey: true, editDepth: 1, keyCodes: cmdKKeyCodes }, (event) => {
     event.preventDefault()
     openModal(commandPaletteSlug)
   })
@@ -69,7 +72,17 @@ export const CommandPalette: React.FC = () => {
     setActiveIndex((current) => Math.min(current, Math.max(0, flatActions.length - 1)))
   }, [flatActions.length])
 
+  // Scroll active option into view on keyboard navigation.
+  useEffect(() => {
+    const active = flatActions[activeIndex]
+    if (active) {
+      document.getElementById(optionId(active))?.scrollIntoView({ block: 'nearest' })
+    }
+  }, [activeIndex, flatActions])
+
   const close = useCallback(() => closeModal(commandPaletteSlug), [closeModal])
+
+  const activeAction = flatActions[activeIndex]
 
   const runAction = useCallback(
     (action: CommandPaletteAction | undefined, create: boolean) => {
@@ -85,9 +98,6 @@ export const CommandPalette: React.FC = () => {
     },
     [close, router],
   )
-
-  const optionId = (action: CommandPaletteAction) => `${baseClass}-option-${action.id}`
-  const activeAction = flatActions[activeIndex]
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -121,6 +131,7 @@ export const CommandPalette: React.FC = () => {
   }
 
   const hasResults = flatActions.length > 0
+  const hasCreatableAction = flatActions.some((action) => action.createHref)
 
   return (
     <Modal className={baseClass} slug={commandPaletteSlug}>
@@ -129,7 +140,7 @@ export const CommandPalette: React.FC = () => {
         <input
           aria-activedescendant={activeAction ? optionId(activeAction) : undefined}
           aria-controls={listboxId}
-          aria-expanded={true}
+          aria-expanded={isOpen}
           aria-label={t('commandPalette:title')}
           autoComplete="off"
           className={`${baseClass}__input`}
@@ -162,6 +173,7 @@ export const CommandPalette: React.FC = () => {
                 {group.label}
               </div>
               {group.actions.map((action) => {
+                const flatIndex = flatActions.indexOf(action)
                 const isActive = action === activeAction
                 return (
                   // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus -- keyboard events are handled by the combobox input; focus stays in the input per ARIA combobox pattern
@@ -173,7 +185,7 @@ export const CommandPalette: React.FC = () => {
                     id={optionId(action)}
                     key={action.id}
                     onClick={() => runAction(action, false)}
-                    onMouseEnter={() => setActiveIndex(flatActions.indexOf(action))}
+                    onMouseEnter={() => setActiveIndex(flatIndex)}
                     role="option"
                   >
                     <span className={`${baseClass}__option-label`}>{action.label}</span>
@@ -205,7 +217,7 @@ export const CommandPalette: React.FC = () => {
         <div className={`${baseClass}__footer`}>
           <span>↑↓ {t('commandPalette:hintNavigate')}</span>
           <span>⏎ {t('commandPalette:hintSelect')}</span>
-          <span>⌘⏎ {t('commandPalette:hintCreate')}</span>
+          {hasCreatableAction ? <span>⌘⏎ {t('commandPalette:hintCreate')}</span> : null}
           <span>esc {t('commandPalette:hintClose')}</span>
         </div>
       </div>

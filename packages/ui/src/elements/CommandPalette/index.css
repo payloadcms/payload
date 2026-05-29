@@ -13,10 +13,7 @@
     background: var(--color-bg-elevated);
     border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-large);
-    box-shadow:
-      0 2px 6px 0 rgba(0, 0, 0, 0.12),
-      0 10px 16px 0 rgba(0, 0, 0, 0.08),
-      0 20px 60px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: var(--elevation-500-modal-window);
     overflow: hidden;
   }
 
@@ -46,7 +43,7 @@
   .cmd-palette__group-label {
     padding: var(--spacer-1) var(--spacer-4);
     font-family: var(--text-body-medium-strong-font-family);
-    font-size: 0.6875rem;
+    font-size: var(--text-body-medium-font-size);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--color-text-secondary);
@@ -88,6 +85,9 @@
   .cmd-palette__option-label {
     flex: 1;
     min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .cmd-palette__empty {
@@ -104,7 +104,7 @@
     padding: var(--spacer-2) var(--spacer-4);
     border-top: var(--stroke-width-small) solid var(--color-border);
     font-family: var(--text-body-medium-font-family);
-    font-size: 0.6875rem;
+    font-size: var(--text-body-medium-font-size);
     color: var(--color-text-secondary);
   }
 
