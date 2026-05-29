@@ -13,7 +13,7 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { Button } from '../Button/index.js'
-import { ColumnSelector } from '../ColumnSelector/index.js'
+import { ColumnsButton } from '../ColumnsButton/index.js'
 import { GroupByControl } from '../GroupByControl/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
 import { SearchBar } from '../SearchBar/index.js'
@@ -115,24 +115,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               fields={collectionConfig.fields}
             />
           )}
-          {enableColumns && (
-            <Button
-              buttonStyle="secondary"
-              className={`${baseClass}__toggle-columns`}
-              extraButtonProps={{
-                'aria-controls': `${baseClass}-columns`,
-                'aria-expanded': visibleDrawer === 'columns',
-              }}
-              icon={
-                <ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} size={16} />
-              }
-              id="toggle-list-columns"
-              onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
-              size="medium"
-            >
-              {t('general:columns')}
-            </Button>
-          )}
+          {enableColumns && <ColumnsButton collectionSlug={collectionConfig.slug} />}
           {enableSort && (
             <Button
               buttonStyle="secondary"
@@ -179,15 +162,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           )}
         </div>
       </div>
-      {enableColumns && (
-        <AnimateHeight
-          className={`${baseClass}__columns`}
-          height={visibleDrawer === 'columns' ? 'auto' : 0}
-          id={`${baseClass}-columns`}
-        >
-          <ColumnSelector collectionSlug={collectionConfig.slug} />
-        </AnimateHeight>
-      )}
       <AnimateHeight
         className={`${baseClass}__where`}
         height={visibleDrawer === 'where' ? 'auto' : 0}
