@@ -27,8 +27,8 @@
     color: var(--color-text);
     background: transparent;
     border: 0;
-    border-bottom: var(--stroke-width-small) solid var(--color-border);
-    outline: none;
+    /* The global :focus-visible outline (clipped to its bottom edge by the
+       inner's overflow: hidden) is the separator below the input. */
 
     &::placeholder {
       color: var(--color-text-tertiary);
@@ -39,6 +39,14 @@
     flex: 1;
     overflow-y: auto;
     padding: var(--spacer-1) 0;
+    /* Hide the scrollbar (matches Combobox/Nav) so it can't overlap the input
+       outline; content still scrolls via wheel, trackpad, and keyboard. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .cmd-palette__group-label {
