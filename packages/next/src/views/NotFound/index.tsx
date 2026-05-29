@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 import type { AdminViewServerProps, ImportMap, SanitizedConfig } from 'payload'
 
+import { DefaultTemplate } from '@payloadcms/ui/rsc'
 import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { initReq } from '../../utilities/initReq.js'
 import { NotFoundClient } from './index.client.js'

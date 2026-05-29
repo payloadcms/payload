@@ -21,7 +21,7 @@ import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
 
-import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
+import type { StronglyTypedLeafNode } from '../../../../types/nodeTypes.js'
 
 import { $convertUploadElement } from './conversions.js'
 

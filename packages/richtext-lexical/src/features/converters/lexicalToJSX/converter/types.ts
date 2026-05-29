@@ -4,7 +4,7 @@ import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../../nodeTypes.js'
+} from '../../../../types/nodeTypes.js'
 
 export type JSXConverterArgs<
   TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,

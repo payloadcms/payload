@@ -88,7 +88,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
       generatedTypes: {
-        modifyOutputSchema: ({
+        modifyJSONSchema: ({
           collectionIDFieldTypes,
           config,
           currentSchema,
