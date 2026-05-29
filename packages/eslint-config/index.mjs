@@ -26,6 +26,8 @@ const baseRules = {
   'object-shorthand': 'warn',
   'no-useless-escape': 'warn',
   'import-x/no-duplicates': 'warn',
+  // TODO: investigate turning on in the future
+  'perfectionist/sort-modules': 'off',
   'perfectionist/sort-objects': [
     'error',
     {
