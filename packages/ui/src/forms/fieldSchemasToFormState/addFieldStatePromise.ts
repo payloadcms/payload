@@ -184,8 +184,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldState.fieldSchema = field
   }
 
-  // Short-circuit to prevent hidden fields from recursing and rendering.
-  if (passesCondition === false) {
+  // Short-circuit to prevent hidden fields from recursing and rendering. `tabs`/`tab` excluded so their branches still iterate children, leaving the container and tab headers visible while inner fields hide.
+  if (passesCondition === false && field.type !== 'tabs' && field.type !== 'tab') {
     if (!filter || filter(args)) {
       state[path] = fieldState
     }
@@ -898,12 +898,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     const pathSegments = path ? path.split('.') : []
 
-    // The incoming `passesCondition` is guaranteed to be true here because the
-    // function returns early when it is false. Tab visibility is determined
-    // solely by its own `admin.condition`, if defined.
-    let tabPassesCondition: boolean = true
+    // If passesCondition is false then this should always result to false
+    // If the tab has no admin.condition provided then fallback to passesCondition and let that decide the result
+    let tabPassesCondition = passesCondition
 
-    if (typeof field.admin?.condition === 'function') {
+    if (passesCondition && typeof field.admin?.condition === 'function') {
       tabPassesCondition = field.admin.condition(fullData, data, {
         blockData,
         operation,
