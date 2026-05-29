@@ -1,11 +1,11 @@
 import React from 'react'
 
+import type { SerializedNodeBase } from '../../../../types/index.js'
 import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../../nodeTypes.js'
-import type { SerializedNodeBase } from '../../../../types.js'
+} from '../../../../types/nodeTypes.js'
 import type { JSXConverters } from '../converter/types.js'
 
 import { defaultJSXConverters } from '../converter/defaultConverters.js'

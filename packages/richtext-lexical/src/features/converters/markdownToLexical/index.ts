@@ -3,7 +3,7 @@ import type { SerializedLexicalNode } from 'lexical'
 import { createHeadlessEditor } from '@lexical/headless'
 
 import type { SanitizedServerEditorConfig } from '../../../lexical/config/types.js'
-import type { DefaultNodeTypes, TypedEditorState } from '../../../nodeTypes.js'
+import type { DefaultNodeTypes, TypedEditorState } from '../../../types/nodeTypes.js'
 
 import { getEnabledNodes } from '../../../lexical/nodes/index.js'
 import { $convertFromMarkdownString } from '../../../packages/@lexical/markdown/index.js'

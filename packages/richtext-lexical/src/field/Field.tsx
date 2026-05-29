@@ -27,7 +27,7 @@ import '../lexical/theme/EditorTheme.css'
 import './bundled.css'
 import './index.css'
 
-import type { LexicalRichTextFieldProps } from '../types.js'
+import type { LexicalRichTextFieldProps } from '../types/index.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'

@@ -82,7 +82,7 @@ export default buildConfigWithDefaults({
         {
           name: 'externalType',
           type: 'text',
-          typescriptSchema: [
+          jsonSchema: [
             () => ({
               $ref: './test/types/schemas/custom-type.json',
             }),
