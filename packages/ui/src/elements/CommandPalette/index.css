@@ -159,7 +159,7 @@
     line-height: 1;
     color: var(--color-text-secondary);
     background: var(--color-bg-secondary);
-    border: var(--stroke-width-small) solid var(--color-border);
+    border: 0;
     border-radius: var(--radius-small);
   }
 
