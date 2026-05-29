@@ -481,5 +481,13 @@ export async function DocumentView(props: AdminViewServerProps) {
     if (error.message === 'not-found') {
       notFound()
     }
+
+    // Re-throw unhandled errors so Next.js error boundaries can catch them.
+    // Without this, the function returns `undefined` and React renders an
+    // empty Suspense boundary — producing a blank edit view with no visible
+    // error. This is especially common on edge runtimes (e.g. Cloudflare
+    // Workers) where auth-context or streaming failures produce errors that
+    // are neither 'not-found' nor 'NEXT_REDIRECT'.
+    throw error
   }
 }
