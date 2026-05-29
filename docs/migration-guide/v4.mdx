@@ -205,6 +205,44 @@ If you were relying on Next-specific extras like `prefetch()` on the router inst
   />
 ```
 
+### `@payloadcms/next/client`, `@payloadcms/next/rsc`, and `@payloadcms/next/templates` removed
+
+The `./client`, `./rsc`, and `./templates` subpath exports on `@payloadcms/next` were thin re-exports of components that now live in `@payloadcms/ui`. All admin elements (DocumentHeader, FormHeader, HierarchyTypeField, Logo, Nav) and templates (DefaultTemplate, MinimalTemplate) have been relocated to `@payloadcms/ui` and no longer depend on `next/*` modules. Import them directly from the canonical source.
+
+| Symbol                     | Old source                   | New source           |
+| -------------------------- | ---------------------------- | -------------------- |
+| `DefaultTemplate`          | `@payloadcms/next/templates` | `@payloadcms/ui/rsc` |
+| `MinimalTemplate`          | `@payloadcms/next/templates` | `@payloadcms/ui/rsc` |
+| `CollectionCards`          | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
+| `DefaultNav`               | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
+| `DocumentHeader`           | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
+| `HierarchyTypeFieldServer` | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
+| `Logo`                     | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
+| `DefaultNavClient`         | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `HierarchyTypeField`       | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `NavSidebarToggle`         | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `NavWrapper`               | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsAccessCell`   | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsColumnField`  | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsColumnsCell`  | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsGroupByCell`  | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsGroupByField` | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsWhereCell`    | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `QueryPresetsWhereField`   | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+| `SlugField`                | `@payloadcms/next/client`    | `@payloadcms/ui`     |
+
+```diff
+- import { DefaultTemplate, MinimalTemplate } from '@payloadcms/next/templates'
+- import { DocumentHeader, Logo } from '@payloadcms/next/rsc'
+- import { HierarchyTypeField, SlugField } from '@payloadcms/next/client'
++ import { DefaultTemplate, DocumentHeader, Logo, MinimalTemplate } from '@payloadcms/ui/rsc'
++ import { HierarchyTypeField, SlugField } from '@payloadcms/ui'
+```
+
+If you reference any of these components by string path in your Payload config (e.g. `Component: '@payloadcms/next/rsc#CollectionCards'`), update the path string too — then regenerate the import map with `payload generate:importmap`.
+
+Run `npx @payloadcms/codemod --transform migrate-next-subpath-exports` to migrate automatically. It rewrites both `import` declarations and string component paths.
+
 ### `title` and `setDocumentTitle` removed from `useDocumentInfo`
 
 For performance reasons, the document title state has been split out of `DocumentInfoContext` into its own `DocumentTitleContext`. Access it through the `useDocumentTitle` hook, which exposes the same `title` and `setDocumentTitle` API. Components that subscribed to `useDocumentInfo` solely for the title will no longer re-render when unrelated document state changes.
