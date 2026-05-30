@@ -27,11 +27,13 @@
     color: var(--color-text);
     background: transparent;
     border-bottom: var(--stroke-width-small) solid var(--color-border);
-    /* Straight muted hairline under the input as the separator; the input's own
-       focus outline is suppressed so it doesn't compete. */
+    /* Straight muted hairline under the input as the separator. The global
+       :focus-visible rule adds an outline AND a border-radius to the focused
+       input; both are reset here so the hairline stays square and uncluttered. */
 
     &:focus,
     &:focus-visible {
+      border-radius: 0;
       outline: none;
     }
 
