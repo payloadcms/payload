@@ -128,13 +128,6 @@ export interface Page {
   title: string;
   slug: string;
   fullTitle?: string | null;
-  testArray?:
-    | {
-        testField?: string | null;
-        testField2?: string | null;
-        id?: string | null;
-      }[]
-    | null;
   parent?: (string | null) | Page;
   breadcrumbs?:
     | {
@@ -285,13 +278,6 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   fullTitle?: T;
-  testArray?:
-    | T
-    | {
-        testField?: T;
-        testField2?: T;
-        id?: T;
-      };
   parent?: T;
   breadcrumbs?:
     | T
