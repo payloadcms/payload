@@ -325,7 +325,7 @@ async function processImportBatch({
           if (isMatchingById && importMode === 'upsert' && !isValidObjectIdFormat) {
             existingDocResult = { docs: [] }
           } else if (isMatchingById && importMode === 'update' && !isValidObjectIdFormat) {
-            throw new Error(`Invalid ID format for update: ${matchValueStr}`)
+            throw new Error(`Invalid ID format for update: ${matchValueStr}`, { cause: error })
           } else {
             throw error
           }

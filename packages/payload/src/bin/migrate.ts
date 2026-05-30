@@ -107,7 +107,7 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
         })
       } catch (err) {
         const error = err instanceof Error ? err.message : 'Unknown error'
-        throw new Error(`Error creating migration: ${error}`)
+        throw new Error(`Error creating migration: ${error}`, { cause: err })
       }
       break
     case 'migrate:down':

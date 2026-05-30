@@ -579,7 +579,9 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
             // eslint-disable-next-line no-console
             console.error('Error initiating payment:', error)
           }
-          throw new Error(error instanceof Error ? error.message : 'Failed to initiate payment')
+          throw new Error(error instanceof Error ? error.message : 'Failed to initiate payment', {
+            cause: error,
+          })
         }
       } else {
         throw new Error(`Payment method "${paymentMethodID}" does not support payment initiation`)
@@ -675,6 +677,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       setUser(null)
       throw new Error(
         `Failed to fetch user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        { cause: error },
       )
     }
   }, [baseAPIURL, customersSlug, debug])
@@ -722,6 +725,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       setAddresses(undefined)
       throw new Error(
         `Failed to fetch addresses: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        { cause: error },
       )
     }
   }, [user, baseAPIURL, addressesSlug, debug])
@@ -763,6 +767,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
         throw new Error(
           `Failed to update or create address: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          { cause: error },
         )
       }
     },
@@ -806,6 +811,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
         throw new Error(
           `Failed to update or create address: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          { cause: error },
         )
       }
     },

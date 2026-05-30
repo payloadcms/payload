@@ -112,6 +112,6 @@ export const connect: Connect = async function connect(
       err,
       msg,
     })
-    throw new Error(`Error: cannot connect to MongoDB: ${msg}`)
+    throw new Error(`Error: cannot connect to MongoDB: ${msg}`, { cause: err })
   }
 }

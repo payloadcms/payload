@@ -132,6 +132,8 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
     } catch (error) {
       payload.logger.error({ err: error, msg: 'Error initiating payment with Stripe' })
 
-      throw new Error(error instanceof Error ? error.message : 'Unknown error initiating payment')
+      throw new Error(error instanceof Error ? error.message : 'Unknown error initiating payment', {
+        cause: error,
+      })
     }
   }

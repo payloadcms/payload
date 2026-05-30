@@ -51,7 +51,7 @@ export const connect: Connect = async function connect(
       this.rejectInitializing()
     }
     console.error(err)
-    throw new Error(`Error: cannot connect to SQLite: ${message}`)
+    throw new Error(`Error: cannot connect to SQLite: ${message}`, { cause: err })
   }
 
   // Only push schema if not in production

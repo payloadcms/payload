@@ -141,6 +141,8 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
     } catch (error) {
       payload.logger.error({ err: error, msg: 'Error confirming order with Stripe' })
 
-      throw new Error(error instanceof Error ? error.message : 'Unknown error initiating payment')
+      throw new Error(error instanceof Error ? error.message : 'Unknown error initiating payment', {
+        cause: error,
+      })
     }
   }
