@@ -146,8 +146,12 @@
     padding: 0;
     cursor: pointer;
 
-    &:hover {
+    &:hover:not(:disabled) {
       color: var(--color-text);
+    }
+
+    &:disabled {
+      cursor: default;
     }
   }
 

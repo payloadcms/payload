@@ -249,10 +249,15 @@ export const CommandPalette: React.FC = () => {
               </span>
             </button>
           ) : null}
-          <span className={`${baseClass}__hint`}>
+          <button
+            className={`${baseClass}__hint`}
+            disabled={!activeAction}
+            onClick={() => runAction(activeAction, false)}
+            type="button"
+          >
             {t('commandPalette:hintSelect')}
             <kbd className={`${baseClass}__key`}>↵</kbd>
-          </span>
+          </button>
         </div>
       </div>
     </Modal>
