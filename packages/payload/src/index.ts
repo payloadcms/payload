@@ -475,54 +475,52 @@ export class BasePayload {
           ? await this.config.jobs.autoRun(this)
           : this.config.jobs.autoRun
 
-      await Promise.all(
-        cronJobs.map((cronConfig) => {
-          const jobAutorunCron = new Cron(
-            cronConfig.cron ?? DEFAULT_CRON,
-            async () => {
-              if (
-                _internal_jobSystemGlobals.shouldAutoSchedule &&
-                !cronConfig.disableScheduling &&
-                this.config.jobs.scheduling
-              ) {
-                await this.jobs.handleSchedules({
-                  allQueues: cronConfig.allQueues,
-                  queue: cronConfig.queue,
-                })
-              }
+      for (const cronConfig of cronJobs) {
+        const jobAutorunCron = new Cron(
+          cronConfig.cron ?? DEFAULT_CRON,
+          async () => {
+            if (
+              _internal_jobSystemGlobals.shouldAutoSchedule &&
+              !cronConfig.disableScheduling &&
+              this.config.jobs.scheduling
+            ) {
+              await this.jobs.handleSchedules({
+                allQueues: cronConfig.allQueues,
+                queue: cronConfig.queue,
+              })
+            }
 
-              if (!_internal_jobSystemGlobals.shouldAutoRun) {
+            if (!_internal_jobSystemGlobals.shouldAutoRun) {
+              return
+            }
+
+            if (typeof this.config.jobs.shouldAutoRun === 'function') {
+              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+              if (!shouldAutoRun) {
+                jobAutorunCron.stop()
                 return
               }
+            }
 
-              if (typeof this.config.jobs.shouldAutoRun === 'function') {
-                const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
-
-                if (!shouldAutoRun) {
-                  jobAutorunCron.stop()
-                  return
-                }
-              }
-
-              await this.jobs.run({
-                allQueues: cronConfig.allQueues,
-                limit: cronConfig.limit ?? DEFAULT_LIMIT,
-                queue: cronConfig.queue,
-                silent: cronConfig.silent,
-              })
+            await this.jobs.run({
+              allQueues: cronConfig.allQueues,
+              limit: cronConfig.limit ?? DEFAULT_LIMIT,
+              queue: cronConfig.queue,
+              silent: cronConfig.silent,
+            })
+          },
+          {
+            catch: (err) => {
+              this.logger.error({ err, msg: 'Error in job queue cron job handler' })
             },
-            {
-              catch: (err) => {
-                this.logger.error({ err, msg: 'Error in job queue cron job handler' })
-              },
-              // Do not run consecutive crons if previous crons still ongoing
-              protect: true,
-            },
-          )
+            // Do not run consecutive crons if previous crons still ongoing
+            protect: true,
+          },
+        )
 
-          this.crons.push(jobAutorunCron)
-        }),
-      )
+        this.crons.push(jobAutorunCron)
+      }
     }
   }
 
@@ -625,7 +623,9 @@ export class BasePayload {
     if (this.crons.length) {
       // Remove all crons from the list before stopping them
       const cronsToStop = this.crons.splice(0, this.crons.length)
-      await Promise.all(cronsToStop.map((cron) => cron.stop()))
+      for (const cron of cronsToStop) {
+        cron.stop()
+      }
     }
 
     if (this.db?.destroy && typeof this.db.destroy === 'function') {

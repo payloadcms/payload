@@ -301,7 +301,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     [getFields, path],
   )
 
-  const hasMaxRows = maxRows && rows.length >= maxRows
+  const hasMaxRows = Boolean(maxRows && rows.length >= maxRows)
 
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && errorPaths.length > 0

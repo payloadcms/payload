@@ -208,6 +208,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
             const rowId = getRowId(row, rowIndex)
             const isSelected = selectedIds.has(rowId)
             const isClickable = Boolean(onRowClick)
+            const lockedUser = getRowLockedUser?.(row, rowIndex)
 
             return (
               <tr
@@ -226,22 +227,16 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
               >
                 {enableCheckbox && (
                   <td className={`${baseClass}__td ${baseClass}__td--checkbox`}>
-                    {(() => {
-                      const lockedUser = getRowLockedUser?.(row, rowIndex)
-
-                      if (lockedUser) {
-                        return <Locked user={lockedUser} />
-                      }
-
-                      return (
-                        <CheckboxInput
-                          checked={isSelected}
-                          className={`${baseClass}__checkbox`}
-                          onToggle={() => handleRowCheckbox(row, rowIndex, isSelected)}
-                          variant="muted"
-                        />
-                      )
-                    })()}
+                    {lockedUser ? (
+                      <Locked user={lockedUser} />
+                    ) : (
+                      <CheckboxInput
+                        checked={isSelected}
+                        className={`${baseClass}__checkbox`}
+                        onToggle={() => handleRowCheckbox(row, rowIndex, isSelected)}
+                        variant="muted"
+                      />
+                    )}
                   </td>
                 )}
                 {enableDragHandle && (

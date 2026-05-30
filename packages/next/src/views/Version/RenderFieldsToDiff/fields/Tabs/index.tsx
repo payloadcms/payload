@@ -32,43 +32,45 @@ export const Tabs: TabsFieldDiffClientComponent = (props) => {
         if (!fieldTab) {
           return null
         }
+
+        let tabContent: React.ReactNode
+        if ('name' in fieldTab && selectedLocales && fieldTab.localized) {
+          // Named localized tab
+          tabContent = selectedLocales.map((locale, index) => {
+            const localizedTabProps: TabProps = {
+              ...props,
+              comparisonValue: valueFrom?.[tab.name]?.[locale],
+              fieldTab,
+              locale,
+              tab,
+              versionValue: valueTo?.[tab.name]?.[locale],
+            }
+            return (
+              <div className={`${baseClass}__tab-locale`} key={[locale, index].join('-')}>
+                <div className={`${baseClass}__tab-locale-value`}>
+                  <Tab key={locale} {...localizedTabProps} />
+                </div>
+              </div>
+            )
+          })
+        } else if ('name' in tab && tab.name) {
+          // Named tab
+          const namedTabProps: TabProps = {
+            ...props,
+            comparisonValue: valueFrom?.[tab.name],
+            fieldTab,
+            tab,
+            versionValue: valueTo?.[tab.name],
+          }
+          tabContent = <Tab key={i} {...namedTabProps} />
+        } else {
+          // Unnamed tab
+          tabContent = <Tab fieldTab={fieldTab} key={i} {...props} tab={tab} />
+        }
+
         return (
           <div className={`${baseClass}__tab`} key={i}>
-            {(() => {
-              if ('name' in fieldTab && selectedLocales && fieldTab.localized) {
-                // Named localized tab
-                return selectedLocales.map((locale, index) => {
-                  const localizedTabProps: TabProps = {
-                    ...props,
-                    comparisonValue: valueFrom?.[tab.name]?.[locale],
-                    fieldTab,
-                    locale,
-                    tab,
-                    versionValue: valueTo?.[tab.name]?.[locale],
-                  }
-                  return (
-                    <div className={`${baseClass}__tab-locale`} key={[locale, index].join('-')}>
-                      <div className={`${baseClass}__tab-locale-value`}>
-                        <Tab key={locale} {...localizedTabProps} />
-                      </div>
-                    </div>
-                  )
-                })
-              } else if ('name' in tab && tab.name) {
-                // Named tab
-                const namedTabProps: TabProps = {
-                  ...props,
-                  comparisonValue: valueFrom?.[tab.name],
-                  fieldTab,
-                  tab,
-                  versionValue: valueTo?.[tab.name],
-                }
-                return <Tab key={i} {...namedTabProps} />
-              } else {
-                // Unnamed tab
-                return <Tab fieldTab={fieldTab} key={i} {...props} tab={tab} />
-              }
-            })()}
+            {tabContent}
           </div>
         )
       })}

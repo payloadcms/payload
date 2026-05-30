@@ -19,6 +19,7 @@ import {
   BulkUploadProvider,
   EntityVisibilityProvider,
   DefaultTemplateWrapper as Wrapper,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../exports/client/index.js'
 
 const baseClass = 'template-default'

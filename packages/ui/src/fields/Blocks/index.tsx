@@ -314,7 +314,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     [getFields, path, replaceState, setModified],
   )
 
-  const hasMaxRows = maxRows && rows.length >= maxRows
+  const hasMaxRows = Boolean(maxRows && rows.length >= maxRows)
 
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
