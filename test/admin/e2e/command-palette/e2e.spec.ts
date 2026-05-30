@@ -149,4 +149,67 @@ test.describe('Command Palette', () => {
 
     await expect(page).toHaveURL(new RegExp(`${adminRoute}/globals/`))
   })
+
+  test('should navigate to collection list when the footer open hint is clicked', async () => {
+    await openPalette(page)
+    await expect(page.locator('.cmd-palette__inner')).toBeVisible()
+
+    await page.locator('.cmd-palette__input').fill(postsCollectionSlug)
+
+    const option = page
+      .locator('[role="option"]')
+      .filter({ has: page.locator('.cmd-palette__option-label', { hasText: /^Posts$/i }) })
+      .first()
+    await expect(option).toBeVisible()
+
+    const openHint = page.locator('.cmd-palette__footer button').filter({ hasText: 'open' })
+    await expect(openHint).toBeVisible()
+    await openHint.click()
+
+    await expect(page).toHaveURL(
+      new RegExp(`${adminRoute}/collections/${postsCollectionSlug}(\\?|$)`),
+    )
+  })
+
+  test('should navigate to collection create when the footer create hint is clicked', async () => {
+    await openPalette(page)
+    await expect(page.locator('.cmd-palette__inner')).toBeVisible()
+
+    await page.locator('.cmd-palette__input').fill(postsCollectionSlug)
+
+    const option = page
+      .locator('[role="option"]')
+      .filter({ has: page.locator('.cmd-palette__option-label', { hasText: /^Posts$/i }) })
+      .first()
+    await expect(option).toBeVisible()
+
+    const createHint = page.locator('.cmd-palette__footer button').filter({ hasText: 'create new' })
+    await expect(createHint).toBeVisible()
+    await createHint.click()
+
+    await expect(page).toHaveURL(
+      new RegExp(`${adminRoute}/collections/${postsCollectionSlug}/create`),
+    )
+  })
+
+  test('should hide the footer create hint when a global is the active row', async () => {
+    await openPalette(page)
+    await expect(page.locator('.cmd-palette__inner')).toBeVisible()
+
+    await page.locator('.cmd-palette__input').fill(globalSlug)
+
+    const option = page
+      .locator('[role="option"]')
+      .filter({ hasText: /global/i })
+      .first()
+    await expect(option).toBeVisible()
+    // Hover to force the global row active so the footer reflects it (not whichever row ranked first).
+    await option.hover()
+
+    // Globals are singletons with no create action, so the footer create hint must not render.
+    const createHint = page.locator('.cmd-palette__footer button').filter({ hasText: 'create new' })
+    await expect(createHint).toBeHidden()
+
+    await page.keyboard.press('Escape')
+  })
 })
