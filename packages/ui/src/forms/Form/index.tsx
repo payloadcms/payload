@@ -856,6 +856,8 @@ export const Form: React.FC<FormProps> = (props) => {
   useDebouncedEffect(
     () => {
       if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
+        // executeOnChange is a non-reactive Effect Event called inside useDebouncedEffect, a custom effect wrapper the rule doesn't recognize as an Effect
+        // eslint-disable-next-line react-hooks/rules-of-hooks, @eslint-react/rules-of-hooks
         executeOnChange(submitted)
       }
 

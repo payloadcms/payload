@@ -368,6 +368,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const updateSearch = useDebouncedCallback<HasManyValueUnion & { search: string }>(
     ({ hasMany: hasManyArg, search: searchArg, value }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks, @eslint-react/rules-of-hooks -- intentional non-reactive Effect Event called from a debounced callback (never called during render)
       updateResultsEffectEvent({
         filterOptions,
         lastLoadedPage: {},
@@ -852,6 +853,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                     setMenuIsOpen(true)
                     if (!hasLoadedFirstPageRef.current) {
                       setIsLoading(true)
+                      // eslint-disable-next-line react-hooks/rules-of-hooks, @eslint-react/rules-of-hooks -- intentional non-reactive Effect Event called from the menu-open handler (never called during render)
                       updateResultsEffectEvent({
                         filterOptions,
                         lastLoadedPage: {},
@@ -874,6 +876,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 }}
                 onMenuScrollToBottom={() => {
                   setIsLoading(true)
+                  // eslint-disable-next-line react-hooks/rules-of-hooks, @eslint-react/rules-of-hooks -- intentional non-reactive Effect Event called from the scroll handler (never called during render)
                   updateResultsEffectEvent({
                     filterOptions,
                     lastFullyLoadedRelation,
