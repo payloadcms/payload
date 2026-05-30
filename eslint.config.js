@@ -72,6 +72,19 @@ export const rootEslintConfig = [
     },
   },
   {
+    // These files intentionally disable rules-of-hooks for valid useEffectEvent calls (see inline comments).
+    // React Compiler won't optimize a component once a rule is disabled, so it would error here too - warn instead.
+    files: [
+      'packages/ui/src/forms/Form/index.tsx',
+      'packages/ui/src/fields/Relationship/Input.tsx',
+      'packages/ui/src/providers/Auth/index.tsx',
+      'packages/ui/src/elements/WhereBuilder/Condition/Relationship/index.tsx',
+    ],
+    rules: {
+      'react-compiler/react-compiler': 'warn',
+    },
+  },
+  {
     files: ['scripts/**/*.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
