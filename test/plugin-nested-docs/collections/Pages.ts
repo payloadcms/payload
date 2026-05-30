@@ -41,7 +41,7 @@ export const Pages: CollectionConfig = {
       },
       admin: {
         components: {
-          Field: null,
+          Field: undefined,
         },
       },
     },
