@@ -61,9 +61,12 @@
     padding: var(--spacer-1) var(--spacer-4);
     font-family: var(--text-body-medium-strong-font-family);
     font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--color-text-secondary);
+    /* Tertiary + bold reads as a non-interactive section header, distinct from
+       the selectable rows below it. */
+    color: var(--color-text-tertiary);
   }
 
   .cmd-palette__option {
@@ -91,21 +94,6 @@
     box-shadow: inset 2px 0 0 0 var(--color-border-brand);
   }
 
-  .cmd-palette__option-create {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacer-2);
-    font-family: var(--text-body-medium-font-family);
-    font-size: 0.6875rem;
-    line-height: 1;
-    color: var(--color-text-secondary);
-    background: transparent;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
   .cmd-palette__option-label {
     flex: 1;
     min-width: 0;
@@ -131,7 +119,9 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: var(--spacer-4);
+    /* spacer-2 each side of the pipe divider keeps it symmetric (the divider is
+       a flex child of the trailing hint, separated by that hint's own spacer-2). */
+    gap: var(--spacer-2);
     padding: var(--spacer-2) var(--spacer-4);
     border-top: var(--stroke-width-small) solid var(--color-border);
     font-family: var(--text-body-medium-font-family);
@@ -144,6 +134,29 @@
     display: inline-flex;
     align-items: center;
     gap: var(--spacer-2);
+  }
+
+  /* The create hint doubles as the ⌘↵ click target; strip native button chrome
+     so it reads identically to the static select hint, with a hover cue. */
+  button.cmd-palette__hint {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-text);
+    }
+  }
+
+  /* Muted pipe between footer hints. Adjacent-sibling selector means it only
+     renders when a second hint actually follows, so it self-hides when the
+     create hint is absent. */
+  .cmd-palette__hint + .cmd-palette__hint::before {
+    content: '|';
+    color: color-mix(in srgb, var(--color-border) 50%, transparent);
   }
 
   /* Groups multiple key chips for a single shortcut (e.g. ⌘ + ⏎). */

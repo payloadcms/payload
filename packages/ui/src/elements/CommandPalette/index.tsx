@@ -154,7 +154,6 @@ export const CommandPalette: React.FC = () => {
   }
 
   const hasResults = flatActions.length > 0
-  const hasCreatableAction = flatActions.some((action) => action.createHref)
 
   return (
     <Modal className={baseClass} onClick={onBackdropClick} slug={commandPaletteSlug}>
@@ -223,22 +222,6 @@ export const CommandPalette: React.FC = () => {
                           ),
                       )}
                     </span>
-                    {isActive && action.createHref ? (
-                      <button
-                        className={`${baseClass}__option-create`}
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          runAction(action, true)
-                        }}
-                        type="button"
-                      >
-                        {t('commandPalette:createNew')}
-                        <span className={`${baseClass}__keys`}>
-                          <kbd className={`${baseClass}__key`}>⌘</kbd>
-                          <kbd className={`${baseClass}__key`}>↵</kbd>
-                        </span>
-                      </button>
-                    ) : null}
                   </div>
                 )
               })}
@@ -253,19 +236,23 @@ export const CommandPalette: React.FC = () => {
         </div>
 
         <div className={`${baseClass}__footer`}>
-          <span className={`${baseClass}__hint`}>
-            {t('commandPalette:hintSelect')}
-            <kbd className={`${baseClass}__key`}>↵</kbd>
-          </span>
-          {hasCreatableAction ? (
-            <span className={`${baseClass}__hint`}>
+          {activeAction?.createHref ? (
+            <button
+              className={`${baseClass}__hint`}
+              onClick={() => runAction(activeAction, true)}
+              type="button"
+            >
               {t('commandPalette:hintCreate')}
               <span className={`${baseClass}__keys`}>
                 <kbd className={`${baseClass}__key`}>⌘</kbd>
                 <kbd className={`${baseClass}__key`}>↵</kbd>
               </span>
-            </span>
+            </button>
           ) : null}
+          <span className={`${baseClass}__hint`}>
+            {t('commandPalette:hintSelect')}
+            <kbd className={`${baseClass}__key`}>↵</kbd>
+          </span>
         </div>
       </div>
     </Modal>
