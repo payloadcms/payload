@@ -1,11 +1,14 @@
 'use client'
 
-import { CopyToClipboard, Link, useConfig, useField } from '@payloadcms/ui'
+import { CopyToClipboard, Link, useConfig, useField, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-export const LinkToDocClient: React.FC = () => {
+import type { PluginSearchTranslationKeys, PluginSearchTranslations } from '../../../translations/index.js'
+
+export const LinkToDocClient: React.FC<{ label?: React.JSX.Element | string }> = ({ label }) => {
   const { config } = useConfig()
+  const { t } = useTranslation<PluginSearchTranslations, PluginSearchTranslationKeys>()
 
   const {
     routes: {
@@ -35,7 +38,7 @@ export const LinkToDocClient: React.FC = () => {
             color: '#9A9A9A',
           }}
         >
-          Doc URL
+          {typeof label === 'string' ? label : t('plugin-search:resultDocumentUrl')}
         </span>
         <CopyToClipboard value={href} />
       </div>
