@@ -3,10 +3,13 @@ import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { Block, Field, Tab } from '../../fields/config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
-function hasKey<T, K extends string>(
-  obj: null | T | undefined,
+// Only checks that `obj` has `key`.
+// Keep this narrow: adding `& T` makes TypeScript expand large field types at every call,
+// and callers already read components from `field` directly and don't need extra type info from this function.
+function hasKey<K extends string>(
+  obj: unknown,
   key: K,
-): obj is T & { [P in K]: PayloadComponent | PayloadComponent[] } {
+): obj is { [P in K]: PayloadComponent | PayloadComponent[] } {
   return obj != null && Object.prototype.hasOwnProperty.call(obj, key)
 }
 

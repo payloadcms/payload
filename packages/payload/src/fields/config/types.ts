@@ -1967,7 +1967,7 @@ export type FieldWithMaxDepthClient = JoinFieldClient | RelationshipFieldClient 
 
 export function fieldHasSubFields<TField extends ClientField | Field | TabAsField>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithSubFieldsClient : FieldWithSubFields) {
+): field is Extract<TField, FieldWithSubFields | FieldWithSubFieldsClient> {
   return (
     field.type === 'group' ||
     field.type === 'array' ||
@@ -1978,19 +1978,19 @@ export function fieldHasSubFields<TField extends ClientField | Field | TabAsFiel
 
 export function fieldIsArrayType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? ArrayFieldClient : ArrayField) {
+): field is Extract<TField, ArrayField | ArrayFieldClient> {
   return field.type === 'array'
 }
 
 export function fieldIsBlockType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? BlocksFieldClient : BlocksField) {
+): field is Extract<TField, BlocksField | BlocksFieldClient> {
   return field.type === 'blocks'
 }
 
 export function fieldIsGroupType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? GroupFieldClient : GroupField) {
+): field is Extract<TField, GroupField | GroupFieldClient> {
   return field.type === 'group'
 }
 
@@ -2008,13 +2008,13 @@ export function optionIsValue(option: Option): option is string {
 
 export function fieldSupportsMany<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithManyClient : FieldWithMany) {
+): field is Extract<TField, FieldWithMany | FieldWithManyClient> {
   return field.type === 'select' || field.type === 'relationship' || field.type === 'upload'
 }
 
 export function fieldHasMaxDepth<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithMaxDepthClient : FieldWithMaxDepth) {
+): field is Extract<TField, FieldWithMaxDepth | FieldWithMaxDepthClient> {
   return (
     (field.type === 'upload' || field.type === 'relationship' || field.type === 'join') &&
     typeof field.maxDepth === 'number'
@@ -2023,9 +2023,7 @@ export function fieldHasMaxDepth<TField extends ClientField | Field>(
 
 export function fieldIsPresentationalOnly<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
->(
-  field: TField,
-): field is TField & (TField extends ClientField | TabAsFieldClient ? UIFieldClient : UIField) {
+>(field: TField): field is Extract<TField, UIField | UIFieldClient> {
   return field.type === 'ui'
 }
 
@@ -2061,8 +2059,10 @@ export function fieldAffectsData<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
 >(
   field: TField,
-): field is TField &
-  (TField extends ClientField | TabAsFieldClient ? FieldAffectingDataClient : FieldAffectingData) {
+  // Narrows to field types that hold data (`name` fields). `Extract` keeps the
+  // existing `TField` members instead of creating intersections. Avoid `TField & (...)`
+  // here: with the large recursive `Field` union, it is much slower to typecheck.
+): field is Extract<TField, FieldAffectingData | FieldAffectingDataClient> {
   return 'name' in field && !fieldIsPresentationalOnly(field)
 }
 
