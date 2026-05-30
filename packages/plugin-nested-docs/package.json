@@ -47,6 +47,7 @@
     "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
+    "@payloadcms/translations": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*"
   },
