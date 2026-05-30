@@ -26,7 +26,8 @@
     line-height: var(--text-body-medium-line-height);
     color: var(--color-text);
     background: transparent;
-    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    border-bottom: var(--stroke-width-small) solid
+      color-mix(in srgb, var(--color-border) 50%, transparent);
     /* Straight muted hairline under the input as the separator. The global
        :focus-visible rule adds an outline AND a border-radius to the focused
        input; both are reset here so the hairline stays square and uncluttered. */
