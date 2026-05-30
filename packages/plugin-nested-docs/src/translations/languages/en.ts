@@ -1,7 +1,7 @@
 import type { GenericTranslationsObject } from '@payloadcms/translations'
 
 export const en: GenericTranslationsObject = {
-  $schema: './translation-schema.json',
+  $schema: '../translation-schema.json',
   'plugin-nested-docs': {
     breadcrumbsPlural: 'Breadcrumbs',
     breadcrumbsSingular: 'Breadcrumb',

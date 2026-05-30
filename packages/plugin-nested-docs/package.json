@@ -29,6 +29,16 @@
       "import": "./src/exports/types.ts",
       "types": "./src/exports/types.ts",
       "default": "./src/exports/types.ts"
+    },
+    "./translations/languages/all": {
+      "import": "./src/translations/index.ts",
+      "types": "./src/translations/index.ts",
+      "default": "./src/translations/index.ts"
+    },
+    "./translations/languages/*": {
+      "import": "./src/translations/languages/*.ts",
+      "types": "./src/translations/languages/*.ts",
+      "default": "./src/translations/languages/*.ts"
     }
   },
   "main": "./src/index.ts",
@@ -46,10 +56,12 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
-  "devDependencies": {
+  "dependencies": {
     "@payloadcms/translations": "workspace:*",
-    "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*"
