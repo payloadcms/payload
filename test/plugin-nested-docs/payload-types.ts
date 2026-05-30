@@ -92,6 +92,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -125,6 +128,13 @@ export interface Page {
   title: string;
   slug: string;
   fullTitle?: string | null;
+  testArray?:
+    | {
+        testField?: string | null;
+        testField2?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   parent?: (string | null) | Page;
   breadcrumbs?:
     | {
@@ -275,6 +285,13 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   fullTitle?: T;
+  testArray?:
+    | T
+    | {
+        testField?: T;
+        testField2?: T;
+        id?: T;
+      };
   parent?: T;
   breadcrumbs?:
     | T
@@ -368,6 +385,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
