@@ -50,7 +50,7 @@ export function RichText<TNodes extends SerializedNodeBase = SerializedNodeBase>
     return null
   }
 
-  let finalConverters: JSXConverters = {}
+  let finalConverters: JSXConverters
   if (converters) {
     if (typeof converters === 'function') {
       finalConverters = converters({ defaultConverters: defaultJSXConverters })

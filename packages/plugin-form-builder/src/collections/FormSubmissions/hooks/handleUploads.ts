@@ -219,7 +219,7 @@ export const handleUploads = async (
 
       // Validate each file
       for (const fileId of fileIds) {
-        let fileDoc: (FileData & TypeWithID) | null = null
+        let fileDoc: (FileData & TypeWithID) | null
         let fileIsValid = true
 
         try {
@@ -233,7 +233,6 @@ export const handleUploads = async (
             field: name,
             message: `${fieldLabel}: File with ID "${fileId}" not found in collection "${uploadCollection}"`,
           })
-          fileIsValid = false
           continue
         }
 
@@ -242,7 +241,6 @@ export const handleUploads = async (
             field: name,
             message: `${fieldLabel}: File with ID "${fileId}" not found`,
           })
-          fileIsValid = false
           continue
         }
 
@@ -256,7 +254,6 @@ export const handleUploads = async (
               field: name,
               message: `${fieldLabel}: File type "${fileMimeType}" is not allowed. Allowed types: ${allowedPatterns.join(', ')}`,
             })
-            fileIsValid = false
             continue
           }
         }

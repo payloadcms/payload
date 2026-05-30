@@ -186,7 +186,7 @@ export const Form: React.FC<FormProps> = (props) => {
         const pathSegments = path ? path.split('.') : []
 
         if (field.passesCondition !== false) {
-          let validationResult: boolean | string = validatedField.valid
+          let validationResult: boolean | string
 
           if ('validate' in field && typeof field.validate === 'function') {
             let valueToValidate = field.value

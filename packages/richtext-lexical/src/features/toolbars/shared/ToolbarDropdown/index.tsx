@@ -50,18 +50,13 @@ const ToolbarItem = ({
   }
 
   let title = item.key
-  let croppedTitle = item.key
   if (item.label) {
     title =
       typeof item.label === 'function'
         ? item.label({ featureClientSchemaMap, i18n, schemaPath })
         : item.label
   }
-  if (title.length > 25) {
-    croppedTitle = title.substring(0, 25) + '...'
-  } else {
-    croppedTitle = title
-  }
+  const croppedTitle = title.length > 25 ? title.substring(0, 25) + '...' : title
 
   return (
     <DropDownItem

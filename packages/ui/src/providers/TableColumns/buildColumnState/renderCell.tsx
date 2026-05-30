@@ -194,7 +194,7 @@ export function renderCell({
     rowData: doc,
   }
 
-  let CustomCell = null
+  let CustomCell: React.ReactNode
 
   if (serverField?.type === 'richText') {
     if (!serverField?.editor) {

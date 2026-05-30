@@ -184,7 +184,7 @@ export function parseParams({
                     not_like: { operator: 'not like', wildcard: '%' },
                   }
 
-                  let formattedValue = val
+                  let formattedValue
                   if (
                     adapter.name === 'sqlite' &&
                     operator === 'equals' &&

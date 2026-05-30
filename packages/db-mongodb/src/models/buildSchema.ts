@@ -564,7 +564,7 @@ const relationship: FieldSchemaGenerator<RelationshipField> = (
   parentIsLocalized,
 ) => {
   const hasManyRelations = Array.isArray(field.relationTo)
-  let schemaToReturn: { [key: string]: any } = {}
+  let schemaToReturn: { [key: string]: any }
 
   const valueType = getRelationshipValueType(field, payload)
 
@@ -572,7 +572,7 @@ const relationship: FieldSchemaGenerator<RelationshipField> = (
     schemaToReturn = {
       _id: false,
       type: payload.config.localization.localeCodes.reduce((locales, locale) => {
-        let localeSchema: { [key: string]: any } = {}
+        let localeSchema: { [key: string]: any }
 
         if (hasManyRelations) {
           localeSchema = {
@@ -804,7 +804,7 @@ const upload: FieldSchemaGenerator<UploadField> = (
   parentIsLocalized,
 ): void => {
   const hasManyRelations = Array.isArray(field.relationTo)
-  let schemaToReturn: { [key: string]: any } = {}
+  let schemaToReturn: { [key: string]: any }
 
   const valueType = getRelationshipValueType(field, payload)
 
@@ -812,7 +812,7 @@ const upload: FieldSchemaGenerator<UploadField> = (
     schemaToReturn = {
       _id: false,
       type: payload.config.localization.localeCodes.reduce((locales, locale) => {
-        let localeSchema: { [key: string]: any } = {}
+        let localeSchema: { [key: string]: any }
 
         if (hasManyRelations) {
           localeSchema = {

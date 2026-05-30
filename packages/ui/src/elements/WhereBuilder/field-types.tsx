@@ -164,7 +164,7 @@ export const getValidFieldOperators = ({
   let validOperators: {
     label: string
     value: string
-  }[] = []
+  }[]
 
   if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
     // Polymorphic relationships store {relationTo, value} - in/not_in only match value, not both properties

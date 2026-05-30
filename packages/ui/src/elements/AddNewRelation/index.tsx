@@ -59,7 +59,7 @@ export const AddNewRelation: React.FC<Props> = ({
         (operation === 'update' && hasAutosaveEnabled(collectionConfig))
       ) {
         // ensure the value is not already in the array
-        let isNewValue = false
+        let isNewValue: boolean
         if (!value) {
           isNewValue = true
         } else {

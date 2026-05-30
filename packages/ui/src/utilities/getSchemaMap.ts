@@ -26,13 +26,11 @@ export const getSchemaMap = cache(
     }
 
     const cacheKey = collectionSlug || globalSlug || `widget:${widgetSlug}`
-    let cachedEntityFieldMap = cachedSchemaMap.get(cacheKey)
+    const cachedEntityFieldMap = cachedSchemaMap.get(cacheKey)
 
     if (cachedEntityFieldMap) {
       return cachedEntityFieldMap
     }
-
-    cachedEntityFieldMap = new Map()
 
     const { fieldSchemaMap: entityFieldMap } = buildFieldSchemaMap({
       collectionSlug,

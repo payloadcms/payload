@@ -374,12 +374,11 @@ function getMarkdownTransformerForBlock(
             // Now handle beforeStartLine and afterEndLine. If those are not empty, we need to add them as text nodes before and after the block node.
             // However, those themselves can contain other markdown matches, so we need to parse them as well.
             // Example where this is needed: "Hello <InlineCode>inline code</InlineCode> test."
-            let prevNodes: null | SerializedLexicalNode[] = null
-            let nextNodes: null | SerializedLexicalNode[] = null
             // TODO: Might not need this prevNodes and nextNodes handling if inline nodes are handled by textmatch transformers
 
             if (beforeStartLine?.length) {
-              prevNodes = markdownToLexical({ markdown: beforeStartLine })?.root?.children ?? []
+              const prevNodes: SerializedLexicalNode[] =
+                markdownToLexical({ markdown: beforeStartLine })?.root?.children ?? []
 
               const firstPrevNode = prevNodes?.[0]
               if (firstPrevNode) {
@@ -390,7 +389,7 @@ function getMarkdownTransformerForBlock(
             rootNode.append(node)
 
             if (afterEndLine?.length) {
-              nextNodes = markdownToLexical({ markdown: afterEndLine })?.root?.children
+              const nextNodes = markdownToLexical({ markdown: afterEndLine })?.root?.children
               const lastChild = rootNode.getChildren()[rootNode.getChildren().length - 1]
 
               const children = ($parseSerializedNode(nextNodes[0]!) as ElementNode)?.getChildren()
@@ -422,12 +421,9 @@ function getMarkdownTransformerForBlock(
           linesInBetween = [line]
         }
 
-        let childrenString = ''
-        if (block?.jsx?.doNotTrimChildren) {
-          childrenString = linesInBetween.join('\n')
-        } else {
-          childrenString = linesInBetween.join('\n').trim()
-        }
+        const childrenString = block?.jsx?.doNotTrimChildren
+          ? linesInBetween.join('\n')
+          : linesInBetween.join('\n').trim()
 
         const propsString = openMatch[1]?.trim()
 

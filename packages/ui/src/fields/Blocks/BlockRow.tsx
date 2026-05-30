@@ -97,7 +97,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  let blockPermissions: RenderFieldsProps['permissions'] = true
+  let blockPermissions: RenderFieldsProps['permissions']
 
   if (permissions === true) {
     blockPermissions = true

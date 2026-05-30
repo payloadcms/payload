@@ -46,7 +46,7 @@ export async function convertLexicalToHTMLAsync({
   populate,
 }: ConvertLexicalToHTMLAsyncArgs): Promise<string> {
   if (hasText(data)) {
-    let finalConverters: HTMLConvertersAsync = {}
+    let finalConverters: HTMLConvertersAsync
     if (converters) {
       if (typeof converters === 'function') {
         finalConverters = converters({ defaultConverters: defaultHTMLConvertersAsync })

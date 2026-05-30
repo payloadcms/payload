@@ -24,7 +24,7 @@ export const generateLabelFromValue = async ({
 }): Promise<string> => {
   let relatedDoc: number | string | TypeWithID
   let relationTo: string = field.relationTo as string
-  let valueToReturn: string = ''
+  let valueToReturn: string
 
   if (typeof value === 'object' && 'relationTo' in value) {
     relatedDoc = value.value

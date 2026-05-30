@@ -142,8 +142,7 @@ export async function resolveJoins({
       const parentIDs = docs.map((d) => (versions ? (d.parent ?? d._id ?? d.id) : (d._id ?? d.id)))
 
       // Build the base query
-      let whereQuery: null | Record<string, unknown> = null
-      whereQuery = isPolymorphicJoin
+      let whereQuery: null | Record<string, unknown> = isPolymorphicJoin
         ? filterWhereForCollection(
             joinQuery.where || {},
             targetConfig.flattenedFields,

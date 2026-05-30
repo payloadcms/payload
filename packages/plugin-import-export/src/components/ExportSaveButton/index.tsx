@@ -48,7 +48,7 @@ export const ExportSaveButton: React.FC = () => {
   const label = t('general:save')
 
   const handleDownload = async () => {
-    let timeoutID: null | ReturnType<typeof setTimeout> = null
+    let timeoutID: null | ReturnType<typeof setTimeout>
     let toastID: null | number | string = null
 
     try {

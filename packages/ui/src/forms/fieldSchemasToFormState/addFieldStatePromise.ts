@@ -190,8 +190,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         ? parentPermissions
         : deepCopyObjectSimple(parentPermissions?.[field.name])
 
-    let hasPermission: boolean =
-      fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
+    let hasPermission: boolean
 
     if (typeof field?.access?.read === 'function') {
       hasPermission = await field.access.read({
@@ -858,7 +857,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       type: 'tab',
     }
 
-    let childPermissions: SanitizedFieldsPermissions = undefined
+    let childPermissions: SanitizedFieldsPermissions
 
     if (isNamedTab) {
       const shouldContinue = stripUnselectedFields({

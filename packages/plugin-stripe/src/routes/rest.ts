@@ -10,7 +10,7 @@ export const stripeREST = async (args: {
   pluginConfig: StripePluginConfig
   req: PayloadRequest
 }): Promise<any> => {
-  let responseStatus = 200
+  let responseStatus: number
   let responseJSON
 
   const { pluginConfig, req } = args

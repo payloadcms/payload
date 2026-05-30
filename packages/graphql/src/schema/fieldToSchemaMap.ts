@@ -564,7 +564,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     const relationshipName = combineParentName(parentName, toWords(field.name, true))
 
     let type: GraphQLOutputType
-    let relationToType = null
+    let relationToType
 
     const graphQLCollections = config.collections.filter(
       (collectionConfig) => collectionConfig.graphQL !== false,
@@ -990,7 +990,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     const relationshipName = combineParentName(parentName, toWords(field.name, true))
 
     let type
-    let relationToType = null
+    let relationToType
 
     const graphQLCollections = config.collections.filter(
       (collectionConfig) => collectionConfig.graphQL !== false,

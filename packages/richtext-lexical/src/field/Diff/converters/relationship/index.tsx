@@ -17,7 +17,7 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
 }) => HTMLConvertersAsync<SerializedRelationshipNode> = ({ i18n, req }) => {
   return {
     relationship: async ({ node, populate, providedCSSString }) => {
-      let data: (Record<string, any> & TypeWithID) | undefined = undefined
+      let data: (Record<string, any> & TypeWithID) | undefined
 
       const id = typeof node.value === 'object' ? node.value.id : node.value
 

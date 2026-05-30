@@ -74,7 +74,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         return
       }
 
-      let disableFormModification = false
+      let disableFormModification: boolean
       if (isPolymorphic) {
         disableFormModification =
           Array.isArray(value) &&
@@ -112,7 +112,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         return
       }
 
-      let disableFormModification = false
+      let disableFormModification: boolean
       if (isPolymorphic) {
         disableFormModification =
           value &&

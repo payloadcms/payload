@@ -21,7 +21,7 @@ export const SelectCell: React.FC<SelectCellProps> = ({ cellData, field: { optio
       })
       .join(', ')
 
-  let content = ''
+  let content: string
   if (optionsAreObjects(options)) {
     content = Array.isArray(cellData)
       ? findLabel(cellData) // hasMany

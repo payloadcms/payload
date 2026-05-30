@@ -450,7 +450,7 @@ const buildVersionField = ({
           (block) => typeof block !== 'string' && block.slug === blockSlugToMatch,
         ) as FlattenedBlock | undefined)
 
-      let fields = []
+      let fields: Field[]
 
       if (toRow.blockType === fromRow.blockType) {
         fields = toBlock.fields
