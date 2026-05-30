@@ -97,6 +97,16 @@ export const CommandPalette: React.FC = () => {
 
   const close = useCallback(() => closeModal(commandPaletteSlug), [closeModal])
 
+  const onBackdropClick = useCallback(
+    (event: React.MouseEvent) => {
+      // Only close when the click lands on the backdrop itself, not the panel or its children.
+      if (event.target === event.currentTarget) {
+        close()
+      }
+    },
+    [close],
+  )
+
   const runAction = useCallback(
     (action: CommandPaletteAction | undefined, create: boolean) => {
       if (!action) {
@@ -147,7 +157,7 @@ export const CommandPalette: React.FC = () => {
   const hasCreatableAction = flatActions.some((action) => action.createHref)
 
   return (
-    <Modal className={baseClass} slug={commandPaletteSlug}>
+    <Modal className={baseClass} onClick={onBackdropClick} slug={commandPaletteSlug}>
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- keyboard handling is delegated to the input (combobox pattern) */}
       <div className={`${baseClass}__inner`} onKeyDown={onKeyDown}>
         <input
@@ -244,13 +254,6 @@ export const CommandPalette: React.FC = () => {
 
         <div className={`${baseClass}__footer`}>
           <span className={`${baseClass}__hint`}>
-            {t('commandPalette:hintNavigate')}
-            <span className={`${baseClass}__keys`}>
-              <kbd className={`${baseClass}__key`}>↑</kbd>
-              <kbd className={`${baseClass}__key`}>↓</kbd>
-            </span>
-          </span>
-          <span className={`${baseClass}__hint`}>
             {t('commandPalette:hintSelect')}
             <kbd className={`${baseClass}__key`}>↵</kbd>
           </span>
@@ -263,10 +266,6 @@ export const CommandPalette: React.FC = () => {
               </span>
             </span>
           ) : null}
-          <span className={`${baseClass}__hint`}>
-            {t('commandPalette:hintClose')}
-            <kbd className={`${baseClass}__key`}>esc</kbd>
-          </span>
         </div>
       </div>
     </Modal>

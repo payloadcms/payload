@@ -26,9 +26,14 @@
     line-height: var(--text-body-medium-line-height);
     color: var(--color-text);
     background: transparent;
-    border: 0;
-    /* The global :focus-visible outline (clipped to its bottom edge by the
-       inner's overflow: hidden) is the separator below the input. */
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    /* Straight muted hairline under the input as the separator; the input's own
+       focus outline is suppressed so it doesn't compete. */
+
+    &:focus,
+    &:focus-visible {
+      outline: none;
+    }
 
     &::placeholder {
       color: var(--color-text-tertiary);
