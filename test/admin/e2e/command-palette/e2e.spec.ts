@@ -11,6 +11,7 @@ import {
   getRoutes,
   initPageConsoleErrorCatch,
 } from '../../../__helpers/e2e/helpers.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { BASE_PATH, customAdminRoutes } from '../../shared.js'
@@ -63,6 +64,14 @@ test.describe('Command Palette', () => {
   })
 
   test.beforeEach(async () => {
+    // Restore the seeded DB snapshot (incl. the auto-login dev user). Siblings disable the
+    // onInit seed and re-seed here per test; without this the DB is empty and the admin shows
+    // the "create first user" screen, so the nav (and the palette trigger) never render.
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'adminTests',
+    })
+
     await page.goto(`${serverURL}${adminRoute}`)
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
     // Wait for the sidebar nav and the account link to be visible. The account link is rendered
