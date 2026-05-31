@@ -1,7 +1,7 @@
 /** @type {import('eslint').Linter.Config} */
 export const index = {
-  '@eslint-react/dom/no-dangerously-set-innerhtml': 'off',
-  '@eslint-react/dom/no-dangerously-set-innerhtml-with-children': 'off',
+  '@eslint-react/dom-no-dangerously-set-innerhtml': 'off',
+  '@eslint-react/dom-no-dangerously-set-innerhtml-with-children': 'off',
   '@eslint-react/no-unsafe-component-will-mount': 'off',
   '@eslint-react/no-unsafe-component-will-receive-props': 'off',
   '@eslint-react/no-unsafe-component-will-update': 'off',
