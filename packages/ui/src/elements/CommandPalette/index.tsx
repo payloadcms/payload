@@ -84,10 +84,17 @@ export const CommandPalette: React.FC = () => {
 
   // Scroll the selected option into view when the selection itself changes
   // (keyed on the option id, not the array, so typing/hover don't re-trigger it).
+  // When the option is the first in its group, scroll its group label into view instead:
+  // the label sits directly above the option, so aligning the option to the top edge would
+  // clip the header (e.g. "Favorites" vanishing after scrolling down then back up).
   useEffect(() => {
-    if (activeOptionId) {
-      document.getElementById(activeOptionId)?.scrollIntoView({ block: 'nearest' })
+    const optionEl = activeOptionId ? document.getElementById(activeOptionId) : null
+    if (!optionEl) {
+      return
     }
+    const previous = optionEl.previousElementSibling
+    const target = previous?.classList.contains(`${baseClass}__group-label`) ? previous : optionEl
+    target.scrollIntoView({ block: 'nearest' })
   }, [activeOptionId])
 
   const close = useCallback(() => closeModal(commandPaletteSlug), [closeModal])
