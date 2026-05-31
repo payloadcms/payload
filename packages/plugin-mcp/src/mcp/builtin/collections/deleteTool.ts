@@ -88,7 +88,7 @@ export const deleteCollectionTool = defineCollectionTool({
             text: `Document deleted successfully from collection "${collectionSlug}"!\nDeleted document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
-        doc: result as Record<string, unknown>,
+        doc: result,
       }
     }
 

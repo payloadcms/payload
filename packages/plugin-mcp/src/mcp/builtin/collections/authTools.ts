@@ -94,7 +94,7 @@ export const forgotPasswordCollectionTool = defineCollectionTool({
           text: `# Forgot Password Email Sent\n\n**Collection:** ${collectionSlug}\n**Email:** ${input.email}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
         },
       ],
-      doc: { result } as Record<string, unknown>,
+      doc: { result },
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -195,7 +195,7 @@ export const unlockCollectionTool = defineCollectionTool({
           text: `# Account Unlocked\n\n**Collection:** ${collectionSlug}\n**Email:** ${input.email}\n**Result:** ${result ? 'Success' : 'Failed'}`,
         },
       ],
-      doc: { result } as Record<string, unknown>,
+      doc: { result },
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -223,7 +223,7 @@ export const verifyCollectionTool = defineCollectionTool({
           text: `# Email Verification Successful\n\n**Collection:** ${collectionSlug}\n**Result:** ${result ? 'Success' : 'Failed'}`,
         },
       ],
-      doc: { result } as Record<string, unknown>,
+      doc: { result },
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'

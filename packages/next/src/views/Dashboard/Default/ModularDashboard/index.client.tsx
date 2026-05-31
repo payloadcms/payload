@@ -86,9 +86,7 @@ export function ModularDashboardClient({
 
   const draggedWidget = useMemo(
     () =>
-      activeDragId
-        ? currentLayout?.find((widget) => widget.item.id === activeDragId)
-        : undefined,
+      activeDragId ? currentLayout?.find((widget) => widget.item.id === activeDragId) : undefined,
     [activeDragId, currentLayout],
   )
 

@@ -15,9 +15,9 @@ type ClientItem = ClientMCPPluginConfig['items'][number]
 type ScopeKey = 'collections' | 'globals'
 type FlatKey = 'prompts' | 'resources' | 'tools'
 
-type Props = {
+type Props = JSONFieldClientProps & {
   pluginConfig: ClientMCPPluginConfig
-} & JSONFieldClientProps
+}
 
 /** Drop a key from an object and return a new object — or `undefined` if it'd be empty. */
 const without = <T extends Record<string, unknown>>(

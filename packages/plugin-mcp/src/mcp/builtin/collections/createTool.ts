@@ -99,7 +99,7 @@ export const createCollectionTool = defineCollectionTool({
           text: `Document created successfully in collection "${collectionSlug}"!\nCreated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
         },
       ],
-      doc: result as Record<string, unknown>,
+      doc: result,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'

@@ -106,7 +106,7 @@ export const updateGlobalTool = defineGlobalTool({
           text: `Global "${globalSlug}" updated successfully!\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
         },
       ],
-      doc: result as Record<string, unknown>,
+      doc: result,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'

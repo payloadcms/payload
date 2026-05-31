@@ -126,7 +126,7 @@ export const findCollectionTool = defineCollectionTool({
               text: `Document from collection "${collectionSlug}":\n${JSON.stringify(doc)}`,
             },
           ],
-          doc: doc as Record<string, unknown>,
+          doc,
         }
       } catch {
         logger.warn(`Document not found with ID: ${id} in collection: ${collectionSlug}`)
