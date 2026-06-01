@@ -13,6 +13,7 @@ import type {
 import type React from 'react'
 
 import { TrashView } from '@payloadcms/ui/views/CollectionTrash'
+import { DocumentView } from '@payloadcms/ui/views/Document'
 import { forgotPasswordBaseClass } from '@payloadcms/ui/views/ForgotPassword'
 import { HierarchyView } from '@payloadcms/ui/views/Hierarchy'
 import { ListView } from '@payloadcms/ui/views/List'
@@ -23,7 +24,6 @@ import { parseDocumentID } from 'payload'
 import { formatAdminURL, isNumber } from 'payload/shared'
 
 import { adminViews } from '../adapter.js'
-import { DocumentView } from '../Document/index.js'
 import { getSubViewActions, getViewActions } from './attachViewActions.js'
 import { getCustomCollectionViewByRoute } from './getCustomCollectionViewByRoute.js'
 import { getCustomGlobalViewByRoute } from './getCustomGlobalViewByRoute.js'

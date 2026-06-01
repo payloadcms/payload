@@ -12,10 +12,10 @@ import {
   getDefaultLayoutHandler,
   renderWidgetHandler,
 } from '@payloadcms/ui/views/Dashboard/serverFunctions'
+import { renderDocumentHandler } from '@payloadcms/ui/views/Document/handleServerFunction'
+import { renderDocumentSlotsHandler } from '@payloadcms/ui/views/Document/renderDocumentSlots'
 import { renderListHandler } from '@payloadcms/ui/views/List/handleServerFunction'
 
-import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
-import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { initReq } from './initReq.js'
 import { slugifyHandler } from './slugify.js'
 
