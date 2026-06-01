@@ -247,6 +247,7 @@ export const deTranslations: DefaultTranslationsObject = {
     cancel: 'Abbrechen',
     changesNotSaved:
       'Deine Änderungen wurden nicht gespeichert. Wenn du diese Seite verlässt, gehen deine Änderungen verloren.',
+    checked: 'Überprüft',
     clear: 'Leeren',
     clearAll: 'Alles leeren',
     close: 'Schließen',
@@ -462,6 +463,7 @@ export const deTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} wurde in den Papierkorb verschoben.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
+    unchecked: 'Nicht ausgewählt',
     unlock: 'Entsperren',
     unsavedChanges:
       'Du hast ungespeicherte Änderungen. Speichere oder verwerfe sie, bevor du fortfährst.',

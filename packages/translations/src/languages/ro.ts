@@ -244,6 +244,7 @@ export const roTranslations: DefaultTranslationsObject = {
     cancel: 'Anulați',
     changesNotSaved:
       'Modificările dvs. nu au fost salvate. Dacă plecați acum, vă veți pierde modificările.',
+    checked: 'Verificat',
     clear: 'Clar',
     clearAll: 'Șterge tot',
     close: 'Închide',
@@ -459,6 +460,7 @@ export const roTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} mutate la coșul de gunoi.',
     true: 'Adevărat',
     unauthorized: 'neautorizat(ă)',
+    unchecked: 'Necompletat',
     unlock: 'Deblocare',
     unsavedChanges: 'Aveți modificări nesalvate. Salvați sau renunțați înainte de a continua.',
     unsavedChangesDuplicate: 'Aveți modificări nesalvate. Doriți să continuați să duplicați?',

@@ -239,6 +239,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     by: 'Autors',
     cancel: 'Atcelt',
     changesNotSaved: 'Jūsu izmaiņas nav saglabātas. Ja tagad pametīsiet, izmaiņas tiks zaudētas.',
+    checked: 'Pārbaudīts',
     clear:
       'Izpratiet oriģinālteksta nozīmi Payload kontekstā. Šeit ir saraksts ar Payload terminiem, kas ir ļoti specifiskas nozīmes:\n    - Kolekcija: Kolekcija ir dokumentu grupa, kuriem ir kopīga struktūra un mērķis. Kolekcijas tiek izmantotas saturu organizēšanai un pārvaldīšanai Payload.\n    - Lauks: Lauks ir konkrēts datu fragments dokumentā iekš kolekcijas. Lauki definē struktūru un dat',
     clearAll: 'Notīrīt visu',
@@ -454,6 +455,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} pārvietoti uz miskasti.',
     true: 'Patiesi',
     unauthorized: 'Neautorizēts',
+    unchecked: 'Neatzīmēts',
     unlock: 'Atslēgt',
     unsavedChanges: 'Jums ir nesaglabātas izmaiņas. Saglabājiet vai atceliet pirms turpināšanas.',
     unsavedChangesDuplicate: 'Jums ir nesaglabātas izmaiņas. Vai vēlaties turpināt dublēšanu?',

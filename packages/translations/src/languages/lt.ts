@@ -242,6 +242,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     cancel: 'Atšaukti',
     changesNotSaved:
       'Jūsų pakeitimai nebuvo išsaugoti. Jei dabar išeisite, prarasite savo pakeitimus.',
+    checked: 'Patikrinta',
     clear: 'Aišku',
     clearAll: 'Išvalyti viską',
     close: 'Uždaryti',
@@ -455,6 +456,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} perkeltas į šiukšlinę.',
     true: 'Tiesa',
     unauthorized: 'Neleistinas',
+    unchecked: 'Nežymėta',
     unlock: 'Atrakinti',
     unsavedChanges: 'Turite neišsaugotų pakeitimų. Išsaugokite arba atmestkite prieš tęsdami.',
     unsavedChangesDuplicate: 'Jūs turite neišsaugotų pakeitimų. Ar norėtumėte tęsti dubliavimą?',

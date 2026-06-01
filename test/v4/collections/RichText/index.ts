@@ -13,6 +13,9 @@ import { richTextFieldsSlug } from '../../slugs.js'
 
 const RichTextFields: CollectionConfig = {
   slug: richTextFieldsSlug,
+  versions: {
+    drafts: true,
+  },
   fields: [
     {
       name: 'content',

@@ -964,6 +964,9 @@ export interface ConditionalLogic {
         blockType: 'blockWithRadioCondition';
       }[]
     | null;
+  enableTabs?: boolean | null;
+  conditionalTabsField1?: string | null;
+  conditionalTabsField2?: string | null;
   arrayOne?:
     | {
         title?: string | null;
@@ -2825,6 +2828,9 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  enableTabs?: T;
+  conditionalTabsField1?: T;
+  conditionalTabsField2?: T;
   arrayOne?:
     | T
     | {

@@ -242,6 +242,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     cancel: 'বাতিল করুন',
     changesNotSaved:
       'আপনার পরিবর্তনগুলি সংরক্ষণ করা হয়নি। আপনি যদি এখন চলে যান, তাহলে আপনার পরিবর্তনগুলি হারিয়ে যাবে।',
+    checked: 'পরীক্ষিত',
     clear: 'স্পষ্ট',
     clearAll: 'সমস্ত সাফ করুন',
     close: 'বন্ধ করুন',
@@ -458,6 +459,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} ট্র্যাশে সরানো হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
+    unchecked: 'অচিহ্নিত',
     unlock: 'আনলক করুন',
     unsavedChanges:
       'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। চালিয়ে যাওয়ার আগে সংরক্ষণ করুন বা বাতিল করুন।',
