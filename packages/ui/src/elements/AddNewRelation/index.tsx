@@ -152,10 +152,8 @@ export const AddNewRelation: React.FC<Props> = ({
             ]
               .filter(Boolean)
               .join(' ')}
-            extraButtonProps={{
-              onMouseEnter: () => setShowTooltip(true),
-              onMouseLeave: () => setShowTooltip(false),
-            }}
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
           >
             {ButtonFromProps ? (
               ButtonFromProps
