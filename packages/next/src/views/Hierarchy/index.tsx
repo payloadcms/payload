@@ -1,9 +1,8 @@
 import type { AdminViewServerProps, ListQuery } from 'payload'
 import type React from 'react'
 
+import { renderListView } from '@payloadcms/ui/views/List'
 import { notFound } from 'next/navigation.js'
-
-import { renderListView } from '../List/index.js'
 
 type RenderHierarchyViewArgs = {
   customCellProps?: Record<string, any>
