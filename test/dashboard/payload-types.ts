@@ -101,6 +101,7 @@ export interface Config {
     'page-query': PageQueryWidget;
     configurable: ConfigurableWidget;
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
   };
   user: User;
   jobs: {
@@ -447,6 +448,29 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'tickets' | 'revenue' | 'events' | 'payload-kv';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -60,9 +60,7 @@ export default buildConfigWithDefaults({
           })
         }
 
-        // `collection-query` is injected while sanitizing the config, so this test config's widget
-        // slug union does not know about it yet.
-        const collectionQueryWidgets = [
+        const collectionQueryWidgets: WidgetInstance[] = [
           {
             data: {
               limit: 3,
@@ -90,6 +88,7 @@ export default buildConfigWithDefaults({
             widgetSlug: 'collection-query',
             width: 'medium',
           },
+          // These intentionally stale widget configs simulate persisted JSON after migrations.
           {
             data: {
               limit: 3,
@@ -100,7 +99,7 @@ export default buildConfigWithDefaults({
             },
             widgetSlug: 'collection-query',
             width: 'x-small',
-          },
+          } as unknown as WidgetInstance,
           {
             data: {
               limit: 3,
@@ -144,7 +143,7 @@ export default buildConfigWithDefaults({
             widgetSlug: 'collection-query',
             width: 'x-small',
           },
-        ] as unknown as WidgetInstance[]
+        ]
 
         baseWidgets.push(...collectionQueryWidgets)
 
