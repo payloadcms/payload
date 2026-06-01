@@ -6,3 +6,161 @@
 #custom-css::after {
   content: 'custom-css';
 }
+
+/* ============================================================
+   STEAM THEME
+   Overrides the full Payload design token set so the entire
+   admin panel looks like the Steam store/client.
+
+   Steam palette reference:
+     Dark navy bg:    #1b2838
+     Darker navy:     #171a21
+     Darkest/footer:  #c6d4df (text on dark)
+     Mid panel:       #2a475e
+     Light panel:     #c7d5e0
+     Steam green:     #4c6b22 / #8cb12d
+     Steam blue:      #57cbde / #66c0f4
+     Steam red/err:   #c94f2c
+   ============================================================ */
+
+/* --- Raw palette overrides: point the ramp vars at Steam colors --- */
+:root {
+  /* Backgrounds */
+  --color-bg: #1b2838;
+  --color-bg-hover: #1e3a52;
+  --color-bg-pressed: #234560;
+  --color-bg-secondary: #171a21;
+  --color-bg-secondary-hover: #1e2a36;
+  --color-bg-secondary-pressed: #243040;
+  --color-bg-tertiary: #233344;
+  --color-bg-elevated: #2a475e;
+  --color-bg-disabled: #152231;
+
+  /* Brand (Steam green) */
+  --color-bg-brand: #4c6b22;
+  --color-bg-brand-hover: #5c8229;
+  --color-bg-brand-pressed: #3d5519;
+  --color-bg-brand-secondary: #3d5519;
+  --color-bg-brand-tertiary: #2a3b10;
+  --color-bg-brand-tertiary-hover: #354b15;
+
+  /* Selected (Steam blue) */
+  --color-bg-selected: #1a3a5c;
+  --color-bg-selected-hover: #1e4570;
+  --color-bg-selected-pressed: #1a3a5c;
+  --color-bg-selected-strong: #4b90c4;
+  --color-bg-selected-strong-hover: #57a0d6;
+  --color-bg-selected-strong-pressed: #3a7aaa;
+
+  /* Danger */
+  --color-bg-danger: #3d1b11;
+  --color-bg-danger-hover: #4d2318;
+  --color-bg-danger-pressed: #5d2b1e;
+  --color-bg-danger-tertiary: #2a100a;
+  --color-bg-danger-tertiary-hover: #371510;
+
+  /* Success */
+  --color-bg-success: #4c6b22;
+  --color-bg-success-hover: #5c8229;
+  --color-bg-success-pressed: #3d5519;
+  --color-bg-success-tertiary: #2a3b10;
+  --color-bg-success-tertiary-hover: #354b15;
+
+  /* Inverse / menus */
+  --color-bg-inverse: #c6d4df;
+  --color-bg-inverse-hover: #b0c0cc;
+  --color-bg-inverse-pressed: #9aaebb;
+  --color-bg-menu: #171a21;
+  --color-bg-tooltip: #233344;
+
+  /* Transparent overlays */
+  --color-bg-transparent-hover: rgba(255, 255, 255, 0.05);
+  --color-bg-transparent-pressed: rgba(255, 255, 255, 0.1);
+
+  /* Borders */
+  --color-border: #2a475e;
+  --color-border-strong: #4b6a85;
+  --color-border-disabled: #1e3347;
+  --color-border-selected: #4b90c4;
+  --color-border-selected-strong: #57cbde;
+  --color-border-brand: #4c6b22;
+  --color-border-brand-strong: #8cb12d;
+  --color-border-danger: #7a2a1a;
+  --color-border-danger-strong: #c94f2c;
+  --color-border-success: #4c6b22;
+  --color-border-success-strong: #8cb12d;
+
+  /* Text */
+  --color-text: #c6d4df;
+  --color-text-secondary: #8ba1b3;
+  --color-text-tertiary: #6b8999;
+  --color-text-disabled: #4d7594;
+  --color-text-brand: #8cb12d;
+  --color-text-brand-secondary: #8cb12d;
+  --color-text-onbrand: #ffffff;
+  --color-text-onbrand-secondary: rgba(255, 255, 255, 0.7);
+  --color-text-danger: #e8705a;
+  --color-text-danger-secondary: #e8705a;
+  --color-text-ondanger: #f5c8bf;
+  --color-text-ondanger-secondary: rgba(245, 200, 191, 0.7);
+  --color-text-selected: #57cbde;
+  --color-text-onselected-strong: #ffffff;
+  --color-text-oninverse: #1b2838;
+  --color-text-oninverse-secondary: #2a475e;
+  --color-text-ontooltip: #c6d4df;
+  --color-text-success: #8cb12d;
+  --color-text-onsuccess: #ffffff;
+
+  /* Icons */
+  --color-icon: #c6d4df;
+  --color-icon-hover: #ffffff;
+  --color-icon-secondary: #8ba1b3;
+  --color-icon-secondary-hover: #c6d4df;
+  --color-icon-tertiary: #6b8999;
+  --color-icon-disabled: #4d7594;
+  --color-icon-brand: #8cb12d;
+  --color-icon-onbrand: #ffffff;
+  --color-icon-selected: #57cbde;
+  --color-icon-onselected-strong: #ffffff;
+  --color-icon-danger: #e8705a;
+  --color-icon-ondanger: #ffffff;
+  --color-icon-oninverse: #1b2838;
+  --color-icon-success: #8cb12d;
+
+  /* Special translucent borders (used for field borders) */
+  --special-border-translucent: #2a475e;
+  --special-border-translucent-strong: #4b6a85;
+
+  /* Misc */
+  --color-drawer-backdrop: rgba(0, 0, 0, 0.6);
+  --color-modalbackdrop: rgba(0, 0, 0, 0.75);
+
+  /* ── Field-specific vars ── */
+  --field-color-bg: #1b2838;
+  --field-color-border: #2a475e;
+  --field-color-text: #c6d4df;
+  --field-color-placeholder: #6b8999;
+  --field-color-border-hover: #4b6a85;
+  --field-color-border-focus: #57cbde;
+  --field-color-bg-disabled: transparent;
+  --field-color-border-disabled: #1e3347;
+  --field-color-text-disabled: #4d7594;
+  --field-color-bg-readonly: #151c26;
+  --field-color-border-readonly: #2a475e;
+  --field-color-text-readonly: #6b8999;
+  --field-color-border-error: #c94f2c;
+  --field-color-error-bg: #3d1b11;
+  --field-color-error-text: #f5c8bf;
+  --field-color-label: #c6d4df;
+  --field-color-label-required: #e8705a;
+  --field-color-description: #6b8999;
+  --field-color-toggle-border: #4b6a85;
+  --field-color-toggle-border-hover: #57cbde;
+  --field-color-toggle-bg-checked: #4c6b22;
+  --field-color-toggle-border-checked: #8cb12d;
+  --field-color-toggle-icon: #ffffff;
+  --field-color-toggle-bg-disabled: #151c26;
+  --field-color-toggle-border-disabled: #1e3347;
+  --field-color-upload-bg: #171a21;
+  --field-color-upload-border: #2a475e;
+}

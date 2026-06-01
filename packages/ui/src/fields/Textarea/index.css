@@ -15,11 +15,11 @@
     textarea {
       overflow-y: auto;
       resize: vertical;
-      min-height: calc(var(--spacer-5) * 2);
+      min-height: calc(var(--field-min-height) * 2);
       height: auto;
       display: flex;
       field-sizing: content;
-      padding: var(--spacer-2);
+      padding: var(--field-padding-inline);
 
       &:hover:not(:focus):not(:disabled):not(:read-only) {
         border-color: var(--field-color-border-hover);

@@ -11,7 +11,7 @@
     /* Theme */
     background: var(--field-color-bg);
     border: var(--stroke-width-small) solid var(--field-color-border);
-    border-radius: var(--radius-medium);
+    border-radius: var(--field-border-radius);
     box-shadow: none;
 
     /* Typography */

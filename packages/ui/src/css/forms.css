@@ -1,16 +1,16 @@
 @layer payload-default {
   .form-input {
     width: 100%;
-    min-height: var(--spacer-5);
+    min-height: var(--field-min-height);
     background: var(--field-color-bg);
     border: var(--stroke-width-small) solid var(--field-color-border);
-    border-radius: var(--radius-medium);
+    border-radius: var(--field-border-radius);
     color: var(--field-color-text);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    padding: 0 var(--spacer-2);
+    padding: 0 var(--field-padding-inline);
     appearance: none;
     -webkit-appearance: none;
     transition-property: box-shadow, background-color;
@@ -34,7 +34,7 @@
 
     &:focus {
       border-color: var(--field-color-border-focus);
-      border-radius: var(--radius-medium);
+      border-radius: var(--field-border-radius);
     }
 
     &:read-only:focus {
@@ -66,8 +66,8 @@
     align-items: stretch;
     background: var(--field-color-bg);
     border: var(--stroke-width-small) solid var(--field-color-border);
-    border-radius: var(--radius-medium);
-    min-height: var(--spacer-5);
+    border-radius: var(--field-border-radius);
+    min-height: var(--field-min-height);
     transition-property: box-shadow, background-color;
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);

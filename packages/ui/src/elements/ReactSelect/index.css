@@ -7,10 +7,10 @@
     .rs__control {
       position: relative;
       width: 100%;
-      min-height: var(--spacer-5);
+      min-height: var(--field-min-height);
       background: var(--field-color-bg);
       border: var(--stroke-width-small) solid var(--field-color-border);
-      border-radius: var(--radius-medium);
+      border-radius: var(--field-border-radius);
       color: var(--color-text);
       font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
@@ -23,7 +23,7 @@
       transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
       height: auto;
       padding-block: calc(var(--spacer-1) + 1px);
-      padding-inline: var(--spacer-2) var(--spacer-5);
+      padding-inline: var(--field-padding-inline) var(--spacer-5);
       flex-wrap: wrap;
       gap: var(--spacer-1);
 
@@ -61,7 +61,7 @@
       position: absolute;
       right: var(--spacer-1);
       top: -1px; /* Adjust for border */
-      min-height: var(--spacer-5);
+      min-height: var(--field-min-height);
       display: flex;
     }
 
