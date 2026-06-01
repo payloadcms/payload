@@ -1,8 +1,19 @@
 import type { ObjectLiteralExpression, PropertyAssignment, SourceFile } from 'ts-morph'
 
-import { SyntaxKind } from 'ts-morph'
+import { Node, SyntaxKind } from 'ts-morph'
 
 import type { Transform } from '../../types.js'
+
+const isObjectLiteral = (
+  property: PropertyAssignment | undefined,
+  // eslint-disable-next-line perfectionist/sort-intersection-types -- order matters: the custom `getInitializer(): ObjectLiteralExpression` overload must come first to win type resolution
+): property is { getInitializer(): ObjectLiteralExpression } & PropertyAssignment => {
+  if (!property) {
+    return false
+  }
+  const initializer = property.getInitializer()
+  return Boolean(initializer && Node.isObjectLiteralExpression(initializer))
+}
 
 const getObjectProperty = (
   obj: ObjectLiteralExpression,
@@ -17,10 +28,11 @@ const getObjectProperty = (
 
 const transformAdminComponents = (componentsObject: ObjectLiteralExpression): boolean => {
   const elements = getObjectProperty(componentsObject, 'elements')
-  const elementsObject = elements?.getInitializerIfKind(SyntaxKind.ObjectLiteralExpression)
-  if (!elements || !elementsObject) {
+  if (!isObjectLiteral(elements)) {
     return false
   }
+
+  const elementsObject = elements.getInitializer()
 
   // Hoist Description out of elements to top-level components, preserving its initializer text.
   const description = getObjectProperty(elementsObject, 'Description')
@@ -37,8 +49,8 @@ const transformAdminComponents = (componentsObject: ObjectLiteralExpression): bo
 
   // Rename `elements` -> `edit`. If `edit` already exists, merge elements into it.
   const existingEdit = getObjectProperty(componentsObject, 'edit')
-  const editObject = existingEdit?.getInitializerIfKind(SyntaxKind.ObjectLiteralExpression)
-  if (editObject) {
+  if (isObjectLiteral(existingEdit)) {
+    const editObject = existingEdit.getInitializer()
     for (const prop of elementsObject.getProperties()) {
       if (prop.getKind() !== SyntaxKind.PropertyAssignment) {
         continue
