@@ -28,6 +28,7 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
       ? hierarchyCollectionConfig.hierarchy
       : undefined
   const IconComponent = hierarchyConfig?.admin.components.Icon
+  const SmallIconComponent = hierarchyConfig?.admin.components.SmallIcon
 
   // Render the custom icon if provided, otherwise use FolderIcon directly
   // Important: Must render the icon here on server to avoid hydration mismatch
@@ -43,12 +44,30 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
     })
   )
 
+  // Render the small icon for compact display (pill button)
+  // Reuse the full icon if SmallIcon is the same component
+  const isDefaultSmallIcon =
+    !SmallIconComponent || SmallIconComponent === '@payloadcms/ui#FolderIcon'
+  const renderedSmallIcon =
+    SmallIconComponent === IconComponent ? (
+      renderedIcon
+    ) : isDefaultSmallIcon ? (
+      <FolderIcon />
+    ) : (
+      RenderServerComponent({
+        Component: SmallIconComponent,
+        importMap: payload.importMap,
+        key: `hierarchy-button-small-icon-${hierarchyCollectionSlug}`,
+      })
+    )
+
   return (
     <HierarchyButtonClient
       fieldName={fieldName}
       hasMany={hasMany}
       hierarchyCollectionSlug={hierarchyCollectionSlug}
       Icon={renderedIcon}
+      SmallIcon={renderedSmallIcon}
     />
   )
 }

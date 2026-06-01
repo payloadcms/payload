@@ -25,9 +25,15 @@ export type HierarchyConfig = {
      */
     components?: {
       /**
-       * Custom icon component for hierarchy items
+       * Custom icon component for hierarchy items.
+       * - 24x24 size icon.
        */
       Icon?: PayloadComponent
+      /**
+       * Small icon component for compact hierarchy contexts:
+       * - 16x16 size icon.
+       */
+      SmallIcon?: PayloadComponent
     }
     /**
      * Whether to inject a sidebar tab for this hierarchy collection
@@ -112,6 +118,7 @@ export type SanitizedHierarchyConfig = {
   admin: {
     components: {
       Icon: PayloadComponent
+      SmallIcon: PayloadComponent
     }
     injectSidebarTab: boolean
     treeLimit: number
