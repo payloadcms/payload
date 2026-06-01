@@ -52,8 +52,6 @@
     justify-content: center;
     flex-shrink: 0;
     color: var(--color-icon-secondary);
-    width: var(--spacer-3);
-    height: var(--spacer-3);
   }
 
   .sidebar-row__title {
