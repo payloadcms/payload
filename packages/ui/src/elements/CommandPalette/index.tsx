@@ -219,7 +219,7 @@ export const CommandPalette: React.FC = () => {
                       id={optionId(action)}
                       key={action.id}
                       onClick={() => runAction(action, 'navigate')}
-                      onMouseEnter={() => setActiveIndex(flatIndex)}
+                      onMouseMove={() => setActiveIndex(flatIndex)}
                       role="option"
                     >
                       <span className={`${baseClass}__option-label`}>
