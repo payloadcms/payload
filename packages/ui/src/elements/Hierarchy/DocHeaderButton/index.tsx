@@ -20,6 +20,7 @@ export type HierarchyButtonClientProps = {
   hierarchyCollectionSlug: string
   Icon?: React.ReactNode
   readOnly?: boolean
+  SmallIcon?: React.ReactNode
 }
 
 export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
@@ -28,6 +29,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   hierarchyCollectionSlug,
   Icon,
   readOnly: readOnlyFromProps,
+  SmallIcon,
 }) => {
   const { t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
@@ -136,7 +138,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
         buttonStyle="secondary"
         className={[baseClass, readOnly && `${baseClass}--read-only`].filter(Boolean).join(' ')}
         disabled={readOnly}
-        icon={Icon}
+        icon={SmallIcon ?? Icon}
         iconPosition="left"
         margin={false}
         onClick={handleClick}
