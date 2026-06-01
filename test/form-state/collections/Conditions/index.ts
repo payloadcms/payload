@@ -6,10 +6,6 @@ export const ConditionsCollection: CollectionConfig = {
   slug: conditionsSlug,
   fields: [
     {
-      name: 'title',
-      type: 'text',
-    },
-    {
       name: 'showField',
       type: 'checkbox',
     },
