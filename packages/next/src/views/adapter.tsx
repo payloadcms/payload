@@ -6,6 +6,8 @@ import type {
 } from 'payload'
 import type React from 'react'
 
+import { AccountView } from '@payloadcms/ui/views/Account'
+import { generateAccountMetadata } from '@payloadcms/ui/views/Account/metadata'
 import { CreateFirstUserView } from '@payloadcms/ui/views/CreateFirstUser'
 import { generateCreateFirstUserMetadata } from '@payloadcms/ui/views/CreateFirstUser/metadata'
 import { DashboardView } from '@payloadcms/ui/views/Dashboard'
@@ -30,6 +32,10 @@ import { formatNextMetadata } from '../utilities/meta.js'
 const LogoutInactivityView: React.FC<AdminViewServerProps> = (props) => (
   <LogoutView inactivity {...props} />
 )
+
+const formatAccountMetadata = async (
+  args: Parameters<GenerateMetadataDescriptor>[0],
+): Promise<Metadata> => formatNextMetadata(await generateAccountMetadata(args))
 
 const formatDashboardMetadata = async (
   args: Parameters<GenerateMetadataDescriptor>[0],
@@ -68,6 +74,10 @@ const formatVerifyMetadata = async (
 ): Promise<Metadata> => formatNextMetadata(await generateVerifyMetadata(args))
 
 export const adminViews: Record<string, AdminViewAdapterEntry<AdminViewServerProps, Metadata>> = {
+  account: {
+    Component: AccountView,
+    generateMetadata: formatAccountMetadata,
+  },
   createFirstUser: {
     Component: CreateFirstUserView,
     generateMetadata: formatCreateFirstUserMetadata,
