@@ -50,6 +50,14 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: var(--spacer-2);
+
+    .query-inspector__api-url-open-button {
+      color: var(--color-icon-secondary);
+
+      &:hover {
+        color: var(--color-icon);
+      }
+    }
   }
 
   .query-inspector__api-url-field {
