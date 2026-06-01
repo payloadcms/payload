@@ -10,8 +10,6 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
-import { addArrayRow } from '../../../__helpers/e2e/fields/array/index.js'
-import { addBlock } from '../../../__helpers/e2e/fields/blocks/index.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
