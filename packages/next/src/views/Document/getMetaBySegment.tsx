@@ -5,10 +5,10 @@ import type { GenerateViewMetadata } from '../Root/index.js'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { adminViews } from '../adapter.js'
-import { generateVersionViewMetadata } from '../Version/metadata.js'
-import { generateVersionsViewMetadata } from './generateVersionsViewMetadata.js'
 import { generateAPIViewMetadata } from './generateAPIViewMetadata.js'
 import { generateEditViewMetadata } from './generateEditViewMetadata.js'
+import { generateVersionsViewMetadata } from './generateVersionsViewMetadata.js'
+import { generateVersionViewMetadata } from './generateVersionViewMetadata.js'
 import { getDocumentView } from './getDocumentView.js'
 
 export type GenerateEditViewMetadata = (
