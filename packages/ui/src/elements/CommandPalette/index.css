@@ -146,18 +146,24 @@
     padding: 0;
     cursor: pointer;
 
-    &:hover:not(:disabled) {
+    &:hover {
       color: var(--color-text);
-    }
-
-    &:disabled {
-      cursor: default;
     }
   }
 
-  /* Muted pipe between footer hints. Adjacent-sibling selector means it only
-     renders when a second hint actually follows, so it self-hides when the
-     create hint is absent. */
+  /* The primary action (Enter): emphasized so it reads as the default. Selector is
+     element-qualified to outrank button.cmd-palette__hint's `font`/`color: inherit`. */
+  button.cmd-palette__hint--primary {
+    font-weight: var(--text-body-medium-strong-font-weight);
+    color: var(--color-text);
+
+    & .cmd-palette__key {
+      color: var(--color-text);
+    }
+  }
+
+  /* Muted pipe between footer hints. Adjacent-sibling selector renders it only between
+     two hints, so a single hint shows no divider regardless of which hints are present. */
   .cmd-palette__hint + .cmd-palette__hint::before {
     content: '|';
     color: color-mix(in srgb, var(--color-border) 50%, transparent);

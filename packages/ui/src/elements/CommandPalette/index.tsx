@@ -248,30 +248,31 @@ export const CommandPalette: React.FC = () => {
           ) : null}
         </div>
 
-        <div className={`${baseClass}__footer`}>
-          {activeAction?.createHref ? (
+        {activeAction ? (
+          <div className={`${baseClass}__footer`}>
             <button
-              className={`${baseClass}__hint`}
-              onClick={() => runAction(activeAction, 'create')}
+              className={`${baseClass}__hint ${baseClass}__hint--primary`}
+              onClick={() => runAction(activeAction, 'navigate')}
               type="button"
             >
-              {t('commandPalette:hintCreate')}
-              <span className={`${baseClass}__keys`}>
-                <kbd className={`${baseClass}__key`}>⌘</kbd>
-                <kbd className={`${baseClass}__key`}>↵</kbd>
-              </span>
+              {t('commandPalette:hintSelect')}
+              <kbd className={`${baseClass}__key`}>↵</kbd>
             </button>
-          ) : null}
-          <button
-            className={`${baseClass}__hint`}
-            disabled={!activeAction}
-            onClick={() => runAction(activeAction, 'navigate')}
-            type="button"
-          >
-            {t('commandPalette:hintSelect')}
-            <kbd className={`${baseClass}__key`}>↵</kbd>
-          </button>
-        </div>
+            {activeAction.createHref ? (
+              <button
+                className={`${baseClass}__hint`}
+                onClick={() => runAction(activeAction, 'create')}
+                type="button"
+              >
+                {t('commandPalette:hintCreate')}
+                <span className={`${baseClass}__keys`}>
+                  <kbd className={`${baseClass}__key`}>⌘</kbd>
+                  <kbd className={`${baseClass}__key`}>↵</kbd>
+                </span>
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </Modal>
   )
