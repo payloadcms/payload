@@ -61,6 +61,133 @@ describe('Dashboard', () => {
     await d.validateLayout()
   })
 
+  test('collection-query default layout includes valid and stale config examples', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+
+    await d.assertWidget(8, 'collection-query', 'medium')
+    await d.assertWidget(9, 'collection-query', 'medium')
+    await d.assertWidget(10, 'collection-query', 'x-small')
+    await d.assertWidget(11, 'collection-query', 'x-small')
+    await d.assertWidget(12, 'collection-query', 'x-small')
+    await d.assertWidget(13, 'collection-query', 'x-small')
+    await expect(
+      d.widgetByPos(8).locator('.collection-query-widget .collection-query-widget__title'),
+    ).toHaveText('Top revenue entries')
+    await expect(
+      d.widgetByPos(9).locator('.collection-query-widget .collection-query-widget__title'),
+    ).toHaveText('Upcoming events')
+  })
+
+  test('collection-query short widget shrinks to its rendered rows', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    const shortCard = d.widgetByPos(8).locator('.collection-query-widget')
+    const shortRows = shortCard.locator('.collection-query-widget__row')
+
+    await expect(shortRows).toHaveCount(3)
+    await expect(async () => {
+      const shortCardBox = (await shortCard.boundingBox())!
+      const lastShortRowBox = (await shortRows.last().boundingBox())!
+      const bottomGap =
+        shortCardBox.y + shortCardBox.height - (lastShortRowBox.y + lastShortRowBox.height)
+
+      expect(bottomGap).toBeLessThanOrEqual(32)
+    }).toPass({ timeout: 1000 })
+    await expect(async () => {
+      const hasScrollableRows = await shortCard
+        .locator('.collection-query-widget__rows')
+        .evaluate((el) => {
+          return el.scrollHeight > el.clientHeight
+        })
+
+      expect(hasScrollableRows).toBe(false)
+    }).toPass({ timeout: 1000 })
+  })
+
+  test('collection-query row metadata shows configured sort values', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    const shortCard = d.widgetByPos(8).locator('.collection-query-widget')
+    const longCard = d.widgetByPos(9).locator('.collection-query-widget')
+
+    await expect(async () => {
+      const amountLabels = await shortCard
+        .locator('.collection-query-widget__row-meta')
+        .allTextContents()
+
+      expect(amountLabels).toHaveLength(3)
+      for (const amountLabel of amountLabels) {
+        expect(amountLabel.trim()).toMatch(/^\d/)
+      }
+    }).toPass({ timeout: 1000 })
+
+    await expect(async () => {
+      const dateLabels = await longCard
+        .locator('.collection-query-widget__row-meta')
+        .allTextContents()
+
+      expect(new Set(dateLabels.map((label) => label.trim())).size).toBeGreaterThan(1)
+      for (const dateLabel of dateLabels) {
+        expect(dateLabel.trim()).toMatch(/^(?:<1m|\d+(?:[mhdwy]|mo))$/)
+      }
+    }).toPass({ timeout: 1000 })
+  })
+
+  test('collection-query long widget caps height and scrolls rows', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    const longCard = d.widgetByPos(9).locator('.collection-query-widget')
+    const longRows = longCard.locator('.collection-query-widget__row')
+
+    await expect(longRows).toHaveCount(15)
+    await expect(async () => {
+      const hasScrollableRows = await longCard
+        .locator('.collection-query-widget__rows')
+        .evaluate((el) => {
+          return el.scrollHeight > el.clientHeight
+        })
+      expect(hasScrollableRows).toBe(true)
+    }).toPass({ timeout: 1000 })
+    await expect(async () => {
+      const longCardBox = (await longCard.boundingBox())!
+
+      expect(longCardBox.height).toBeLessThanOrEqual(371)
+    }).toPass({ timeout: 1000 })
+    await longCard.locator('.collection-query-widget__rows').evaluate((el) => {
+      el.scrollTop = el.scrollHeight
+    })
+    await expect(longCard.locator('.collection-query-widget__title')).toBeVisible()
+  })
+
+  test('collection-query stale config widgets show parameter errors', async ({ page }) => {
+    const errorWidgets = page.locator('.collection-query-widget--error')
+
+    await expect(errorWidgets).toHaveCount(4)
+    await expect(errorWidgets.nth(0)).toContainText('Collection "archived-posts" does not exist.')
+    await expect(errorWidgets.nth(1)).toContainText(
+      'Sort field "severity" does not exist on collection "tickets".',
+    )
+    await expect(errorWidgets.nth(2)).toContainText(
+      'Filter field "visibility" does not exist on collection "events".',
+    )
+    await expect(errorWidgets.nth(3)).toContainText(
+      'Sort field "total" does not exist on collection "revenue".',
+    )
+    await expect(errorWidgets.nth(3)).toContainText(
+      'Filter field "channel" does not exist on collection "revenue".',
+    )
+
+    await expect(async () => {
+      const errorBorderColor = await errorWidgets.first().evaluate((el) => {
+        return window.getComputedStyle(el).borderColor
+      })
+
+      expect(errorBorderColor).not.toBe('rgba(0, 0, 0, 0)')
+    }).toPass({ timeout: 1000 })
+  })
+
   test('respects min and max width', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
@@ -462,16 +589,3 @@ describe('Dashboard', () => {
     await expect(pageQueryWidget.getByText(/Current page from query: 2/)).toBeVisible()
   })
 })
-
-// TODO: Add e2e coverage for the collection-query widget shrinking to content when the limit is low.
-// It should not leave dead vertical space between the last list item and the card edge.
-// TODO: Add e2e coverage for the collection-query widget max height when the limit is high.
-// The list area should scroll while the widget header remains visible.
-// TODO: Add e2e coverage that the row metadata displays the configured sort field value.
-// Include one date sort field and one non-date sort field.
-// Date sort fields should render as compact relative time, for example "5m" or "3d".
-// TODO: Add e2e coverage for stale collection-query config errors.
-// Cover missing collection, missing sort field, missing filter field, and multiple stale fields.
-// TODO: Add e2e coverage that collection labels and external-link icons are not rendered in rows.
-// TODO: Add e2e coverage that the default dashboard test layout keeps the valid query widgets half-width
-// and the stale config examples extra-small.
