@@ -23,7 +23,7 @@
   .auth-fields__controls {
     display: flex;
     align-items: center;
-    gap: calc(var(--spacer-2) + calc(var(--spacer-1) / 2));
+    gap: calc(var(--spacer-2));
     flex-wrap: wrap;
   }
 
@@ -38,7 +38,7 @@
     margin: 0;
     font-family: var(--text-body-medium-strong-font-family);
     font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--font-weight-strong, var(--text-body-medium-strong-font-weight));
+    font-weight: var(--text-body-medium-strong-font-weight);
     line-height: var(--text-body-medium-strong-line-height);
     letter-spacing: var(--text-body-medium-strong-letter-spacing);
   }
@@ -106,7 +106,6 @@
   .auth-fields .api-key__toggle-button-wrap {
     position: absolute;
     top: 50%;
-    right: calc(var(--spacer-2) - 5px);
     display: flex;
     align-items: center;
     justify-content: center;
