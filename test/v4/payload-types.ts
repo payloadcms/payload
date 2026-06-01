@@ -93,6 +93,7 @@ export interface Config {
     'select-fields': SelectField;
     'slug-fields': SlugField;
     'tabs-fields': TabsField;
+    'tag-items': TagItem;
     tags: Tag;
     'text-fields': TextField;
     'textarea-fields': TextareaField;
@@ -102,6 +103,7 @@ export interface Config {
     autosave: Autosave;
     rubbish: Rubbish;
     'unauthorized-test': UnauthorizedTest;
+    'versions-diff': VersionsDiff;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -148,6 +150,7 @@ export interface Config {
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
+    'tag-items': TagItemsSelect<false> | TagItemsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
@@ -157,6 +160,7 @@ export interface Config {
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
     rubbish: RubbishSelect<false> | RubbishSelect<true>;
     'unauthorized-test': UnauthorizedTestSelect<false> | UnauthorizedTestSelect<true>;
+    'versions-diff': VersionsDiffSelect<false> | VersionsDiffSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -903,7 +907,7 @@ export interface Tag {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  allowedCollections?: 'text-fields'[] | null;
+  allowedCollections?: ('tag-items' | 'text-fields')[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -988,6 +992,7 @@ export interface RichTextField {
   } | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1180,6 +1185,18 @@ export interface TabsField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tag-items".
+ */
+export interface TagItem {
+  id: string;
+  title: string;
+  description?: string | null;
+  _h_tags?: (string | Tag)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "textarea-fields".
  */
 export interface TextareaField {
@@ -1280,6 +1297,79 @@ export interface UnauthorizedTest {
   title?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions-diff".
+ */
+export interface VersionsDiff {
+  id: string;
+  title: string;
+  array?:
+    | {
+        arrayText?: string | null;
+        nestedArray?:
+          | {
+              nestedText?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | (
+        | {
+            blockText?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textBlock';
+          }
+        | {
+            blockNumber?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'numberBlock';
+          }
+      )[]
+    | null;
+  checkbox?: boolean | null;
+  code?: string | null;
+  date?: string | null;
+  description?: string | null;
+  email?: string | null;
+  group?: {
+    nestedText?: string | null;
+    nestedNumber?: number | null;
+  };
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  number?: number | null;
+  numberMany?: number[] | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  radio?: ('small' | 'medium' | 'large') | null;
+  relationship?: (string | null) | Tag;
+  relationshipMany?: (string | Tag)[] | null;
+  select?: ('option-1' | 'option-2' | 'option-3') | null;
+  selectMany?: ('option-1' | 'option-2' | 'option-3')[] | null;
+  tabText?: string | null;
+  tabNumber?: number | null;
+  upload?: (string | null) | Upload;
+  uploadMany?: (string | Upload)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1410,6 +1500,10 @@ export interface PayloadLockedDocument {
         value: string | TabsField;
       } | null)
     | ({
+        relationTo: 'tag-items';
+        value: string | TagItem;
+      } | null)
+    | ({
         relationTo: 'tags';
         value: string | Tag;
       } | null)
@@ -1444,6 +1538,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'unauthorized-test';
         value: string | UnauthorizedTest;
+      } | null)
+    | ({
+        relationTo: 'versions-diff';
+        value: string | VersionsDiff;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -2004,6 +2102,7 @@ export interface RichTextFieldsSelect<T extends boolean = true> {
   lists?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2128,6 +2227,17 @@ export interface TabsFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tag-items_select".
+ */
+export interface TagItemsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  _h_tags?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tags_select".
  */
 export interface TagsSelect<T extends boolean = true> {
@@ -2237,6 +2347,70 @@ export interface UnauthorizedTestSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions-diff_select".
+ */
+export interface VersionsDiffSelect<T extends boolean = true> {
+  title?: T;
+  array?:
+    | T
+    | {
+        arrayText?: T;
+        nestedArray?:
+          | T
+          | {
+              nestedText?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              blockText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        numberBlock?:
+          | T
+          | {
+              blockNumber?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  checkbox?: T;
+  code?: T;
+  date?: T;
+  description?: T;
+  email?: T;
+  group?:
+    | T
+    | {
+        nestedText?: T;
+        nestedNumber?: T;
+      };
+  json?: T;
+  number?: T;
+  numberMany?: T;
+  point?: T;
+  radio?: T;
+  relationship?: T;
+  relationshipMany?: T;
+  select?: T;
+  selectMany?: T;
+  tabText?: T;
+  tabNumber?: T;
+  upload?: T;
+  uploadMany?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

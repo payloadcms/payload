@@ -75,6 +75,7 @@ export const Button: React.FC<Props> = (props) => {
     newTab,
     onClick,
     onMouseDown,
+    popupIconSize,
     ref,
     round,
     selected,
@@ -204,7 +205,7 @@ export const Button: React.FC<Props> = (props) => {
       <div className={styleClasses}>
         {buttonElement}
         <Popup
-          button={<ChevronIcon />}
+          button={<ChevronIcon size={popupIconSize} />}
           buttonSize={size}
           className={disabled && !enableSubMenu ? `${baseClass}--popup-disabled` : ''}
           disabled={disabled && !enableSubMenu}
@@ -212,7 +213,7 @@ export const Button: React.FC<Props> = (props) => {
           id={`${id}-popup`}
           noBackground
           render={({ close }) => SubMenuPopupContent({ close: () => close() })}
-          size="large"
+          size="small"
           verticalAlign="bottom"
         />
       </div>

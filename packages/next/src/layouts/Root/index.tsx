@@ -3,6 +3,7 @@ import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient 
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
+import { getNavPrefs } from '@payloadcms/ui/rsc'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 // @ts-expect-error - TS6 NodeNext rejects deep imports into `next` (no `exports` field), but Next.js compiler requires this exact specifier
 import { Inter, Roboto_Mono } from 'next/font/google'
@@ -11,7 +12,6 @@ import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
 import { NextRouterAdapter } from '../../adapters/router.js'
-import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'

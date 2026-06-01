@@ -8,6 +8,7 @@ const FolderItems: CollectionConfig = {
   slug: folderItemsSlug,
   admin: {
     useAsTitle: 'title',
+    group: 'Hierarchy Collections',
   },
   fields: [
     {

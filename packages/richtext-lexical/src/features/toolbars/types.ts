@@ -3,7 +3,7 @@ import type { BaseSelection, LexicalEditor } from 'lexical'
 import type React from 'react'
 
 import type { EditorConfigContextType } from '../../lexical/config/client/EditorConfigProvider.js'
-import type { FeatureClientSchemaMap } from '../../types.js'
+import type { FeatureClientSchemaMap } from '../../types/index.js'
 
 export type ToolbarGroup = ToolbarButtonsGroup | ToolbarDropdownGroup
 

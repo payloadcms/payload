@@ -957,6 +957,16 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state,
     })
   } else if (field.type === 'tabs') {
+    if (!filter || filter(args)) {
+      state[path] = {
+        disableFormData: true,
+      }
+
+      if (passesCondition === false) {
+        state[path].passesCondition = false
+      }
+    }
+
     return iterateFields({
       id,
       addErrorPathToParent: addErrorPathToParentArg,

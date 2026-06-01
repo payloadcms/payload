@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
+import { getColumnSelectorItem } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../../../__helpers/e2e/filters/addListFilter.js'
 import {
   ensureCompilationIsDone,
@@ -845,12 +846,21 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
       const timezoneColumnCell = page.locator('.cell-dateWithTimezoneWithDisabledColumns_tz')
       await expect(timezoneColumnCell).toHaveCount(0)
 
-      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.columns-button__button').click()
 
-      const dateColumnOption = page.locator('#dateWithTimezoneWithDisabledColumns')
+      const columnSelector = page.locator('.popup__content .column-selector')
+      await expect(columnSelector).toBeVisible()
+
+      const dateColumnOption = getColumnSelectorItem({
+        container: columnSelector,
+        label: 'Date With Timezone With Disabled Columns',
+      })
       await expect(dateColumnOption).toBeVisible()
 
-      const timezoneColumnOption = page.locator('#dateWithTimezoneWithDisabledColumns_tz')
+      const timezoneColumnOption = getColumnSelectorItem({
+        container: columnSelector,
+        label: 'Date With Timezone With Disabled Columns Tz',
+      })
       await expect(timezoneColumnOption).toBeHidden()
     })
 

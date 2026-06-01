@@ -54,6 +54,12 @@ export {
   useCellProps,
 } from '../../providers/TableColumns/RenderDefaultCell/index.js'
 export { DateCell } from '../../elements/Table/DefaultCell/fields/Date/index.js'
+export { TableSection } from '../../elements/TableSection/index.js'
+export type {
+  TableSectionContentProps,
+  TableSectionHeaderProps,
+  TableSectionProps,
+} from '../../elements/TableSection/index.js'
 
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
@@ -118,6 +124,8 @@ export type { InputStepperProps } from '../../elements/InputStepper/index.js'
 
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
+export { ListControlsBar } from '../../elements/ListControlsBar/index.js'
+export type { ListControlsBarProps } from '../../elements/ListControlsBar/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
 export type {
   ListDrawerProps,
@@ -146,7 +154,6 @@ export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { GroupByHeader } from '../../views/List/GroupByHeader/index.js'
 export { PageControls, PageControlsComponent } from '../../elements/PageControls/index.js'
-export { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 
 export { GroupByPageControls } from '../../elements/PageControls/GroupByPageControls.js'
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
@@ -154,16 +161,37 @@ export { FormLoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { LoadingOverlay } from '../../elements/Loading/index.js'
 export { Spinner } from '../../elements/Spinner/index.js'
 export type { SpinnerProps } from '../../elements/Spinner/index.js'
+export { Switch } from '../../elements/Switch/index.js'
+export type { SwitchProps } from '../../elements/Switch/index.js'
 export { DelayedSpinner } from '../../elements/DelayedSpinner/index.js'
 export type { DelayedSpinnerProps } from '../../elements/DelayedSpinner/index.js'
 export { Logout } from '../../elements/Logout/index.js'
 export { AlertModal, Modal, useModal } from '../../elements/Modal/index.js'
 export type { AlertModalProps } from '../../elements/Modal/index.js'
 export { NavToggler } from '../../elements/Nav/NavToggler/index.js'
+export { NavSidebarToggle } from '../../elements/Nav/NavSidebarToggle/index.js'
+export { NavWrapper } from '../../elements/Nav/NavWrapper/index.js'
+export { SettingsMenuButton } from '../../elements/Nav/SettingsMenuButton/index.js'
+export type { SettingsMenuButtonProps } from '../../elements/Nav/SettingsMenuButton/index.js'
+export { DefaultNavClient } from '../../elements/Nav/index.client.js'
+export { SidebarTabsClient } from '../../elements/Nav/SidebarTabs/index.client.js'
+export type {
+  SidebarTabsClientProps,
+  TabMetadata,
+} from '../../elements/Nav/SidebarTabs/index.client.js'
+export { TabError } from '../../elements/Nav/SidebarTabs/TabError/index.js'
+export { ShouldRenderTabs } from '../../elements/DocumentHeader/Tabs/ShouldRenderTabs.js'
+export { DocumentTabLink } from '../../elements/DocumentHeader/Tabs/Tab/TabLink.js'
+export { VersionsPill } from '../../elements/DocumentHeader/Tabs/tabs/VersionsPill/index.js'
+export { Wrapper as DefaultTemplateWrapper } from '../../templates/Default/Wrapper/index.js'
+export { FormHeader } from '../../elements/FormHeader/index.js'
+export { HierarchyTypeField } from '../../elements/HierarchyTypeField/index.js'
 export { NoListResults } from '../../elements/NoListResults/index.js'
 export { NavContext, NavProvider, useNav } from '../../elements/Nav/context.js'
 export { NavGroup } from '../../elements/NavGroup/index.js'
 export { Pagination } from '../../elements/Pagination/index.js'
+export { SimplePagination } from '../../elements/Pagination/SimplePagination/index.js'
+export type { SimplePaginationProps } from '../../elements/Pagination/SimplePagination/index.js'
 export { PerPage } from '../../elements/PerPage/index.js'
 export { Pill } from '../../elements/Pill/index.js'
 import * as PopupList from '../../elements/Popup/PopupButtonList/index.js'

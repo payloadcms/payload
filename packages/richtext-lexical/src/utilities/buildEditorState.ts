@@ -1,6 +1,10 @@
 import type { SerializedLexicalNode } from 'lexical'
 
-import type { DefaultNodeTypes, DefaultTypedEditorState, TypedEditorState } from '../nodeTypes.js'
+import type {
+  DefaultNodeTypes,
+  DefaultTypedEditorState,
+  TypedEditorState,
+} from '../types/nodeTypes.js'
 
 /**
  * Helper to build lexical editor state JSON from text and/or nodes.

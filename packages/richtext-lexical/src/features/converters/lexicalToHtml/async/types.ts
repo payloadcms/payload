@@ -5,7 +5,7 @@ import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../../nodeTypes.js'
+} from '../../../../types/nodeTypes.js'
 import type { SerializedLexicalNodeWithParent } from '../shared/types.js'
 export type HTMLPopulateArguments = {
   collectionSlug: string

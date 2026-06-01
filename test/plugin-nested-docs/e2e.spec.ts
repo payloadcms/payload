@@ -83,7 +83,7 @@ describe('Nested Docs Plugin', () => {
       await expect(slug).toHaveValue('child-slug')
 
       // TODO: remove when error states are fixed
-      const apiTabButton = page.locator('text=API')
+      const apiTabButton = page.getByRole('link', { name: 'API', exact: true })
       await apiTabButton.click()
       const breadcrumbs = page.locator('text=/parent-slug').first()
       await expect(breadcrumbs).toBeVisible()
@@ -114,7 +114,7 @@ describe('Nested Docs Plugin', () => {
       await page.goto(url.edit(draftChildID))
 
       // TODO: remove when error states are fixed
-      const apiTabButton = page.locator('text=API')
+      const apiTabButton = page.getByRole('link', { name: 'API', exact: true })
       await apiTabButton.click()
       const breadcrumbs = page.locator('text=/parent-slug-draft').first()
       await expect(breadcrumbs).toBeVisible()

@@ -9,7 +9,7 @@ import * as React from 'react'
 import { createContext, use, useMemo, useRef, useState } from 'react'
 
 import type { InlineBlockNode } from '../../../features/blocks/client/nodes/InlineBlocksNode.js'
-import type { LexicalRichTextFieldProps } from '../../../types.js'
+import type { LexicalRichTextFieldProps } from '../../../types/index.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
 // Should always produce a 20 character pseudo-random string

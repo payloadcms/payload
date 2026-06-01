@@ -4,7 +4,7 @@ import type { Field, FlattenedBlock, Payload } from 'payload'
 import { createHeadlessEditor } from '@lexical/headless'
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
-import type { LexicalRichTextAdapter } from '../../types.js'
+import type { LexicalRichTextAdapter } from '../../types/index.js'
 
 import { getEnabledNodes } from '../../lexical/nodes/index.js'
 

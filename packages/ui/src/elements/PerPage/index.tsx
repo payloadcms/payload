@@ -36,9 +36,9 @@ export const PerPage: React.FC<PerPageProps> = ({
       <Popup
         horizontalAlign="right"
         render={({ close }) => (
-          <PopupList.IconButtonGroup>
+          <PopupList.RadioGroup>
             {limits.map((limitNumber, i) => (
-              <PopupList.Button
+              <PopupList.RadioGroupItem
                 active={limitNumber === limitToUse}
                 key={i}
                 onClick={() => {
@@ -49,9 +49,9 @@ export const PerPage: React.FC<PerPageProps> = ({
                 }}
               >
                 {limitNumber}
-              </PopupList.Button>
+              </PopupList.RadioGroupItem>
             ))}
-          </PopupList.IconButtonGroup>
+          </PopupList.RadioGroup>
         )}
         renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
           <Button
