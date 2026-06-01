@@ -470,7 +470,7 @@ export { SelectAll } from '../../elements/SelectAll/index.js'
 export { SelectRow } from '../../elements/SelectRow/index.js'
 export { SelectMany } from '../../elements/SelectMany/index.js'
 
-export { DefaultListView } from '../../views/List/index.js'
+export { DefaultListView } from '../../views/List/index.client.js'
 export { HierarchyListView } from '../../views/HierarchyList/index.js'
 
 export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'

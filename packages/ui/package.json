@@ -46,6 +46,11 @@
       "types": "./src/views/Dashboard/serverFunctions.ts",
       "default": "./src/views/Dashboard/serverFunctions.ts"
     },
+    "./views/List/handleServerFunction": {
+      "import": "./src/views/List/handleServerFunction.tsx",
+      "types": "./src/views/List/handleServerFunction.tsx",
+      "default": "./src/views/List/handleServerFunction.tsx"
+    },
     "./views/*/metadata": {
       "import": "./src/views/*/metadata.ts",
       "types": "./src/views/*/metadata.ts",
@@ -301,6 +306,11 @@
         "import": "./dist/views/Dashboard/serverFunctions.js",
         "types": "./dist/views/Dashboard/serverFunctions.d.ts",
         "default": "./dist/views/Dashboard/serverFunctions.js"
+      },
+      "./views/List/handleServerFunction": {
+        "import": "./dist/views/List/handleServerFunction.js",
+        "types": "./dist/views/List/handleServerFunction.d.ts",
+        "default": "./dist/views/List/handleServerFunction.js"
       },
       "./views/*/metadata": {
         "import": "./dist/views/*/metadata.js",
