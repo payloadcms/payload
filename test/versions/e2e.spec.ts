@@ -593,12 +593,9 @@ describe('Versions', () => {
       await saveDocAndAssert(page)
 
       const updatedAtWrapper = page.locator(
-        '.doc-controls .doc-controls__content .doc-controls__list-item',
-        {
-          hasText: 'Last Modified',
-        },
+        '.doc-controls .doc-controls__content .doc-controls__value-wrap',
       )
-      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const initialTitle = await updatedAtWrapper.getAttribute('title')
 
       // wait for 1 second so that the timestamp can be different
       await wait(1000)
@@ -606,9 +603,10 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('changed description')
       await saveDocAndAssert(page)
 
-      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
-
-      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
+      await expect(async () => {
+        const newTitle = updatedAtWrapper
+        await expect(newTitle).not.toHaveAttribute('title', initialTitle!)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('collection - should update updatedAt on autosave', async () => {
@@ -618,12 +616,9 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('autosave title')
 
       const updatedAtWrapper = page.locator(
-        '.doc-controls .doc-controls__content .doc-controls__list-item',
-        {
-          hasText: 'Last Modified',
-        },
+        '.doc-controls .doc-controls__content .doc-controls__value-wrap',
       )
-      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const initialTitle = await updatedAtWrapper.getAttribute('title')
 
       // wait for 1 second so that the timestamp can be different
       await wait(1000)
@@ -631,9 +626,10 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('autosave title updated')
       await waitForAutoSaveToRunAndComplete(page)
 
-      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
-
-      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
+      await expect(async () => {
+        const newTitle = updatedAtWrapper
+        await expect(newTitle).not.toHaveAttribute('title', initialTitle!)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should retain localized data during autosave', async () => {
@@ -1376,13 +1372,11 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('scheduled publish description')
 
       // schedule publish should not be available before document has been saved
-      await page.locator('#action-save-popup').click()
-      await expect(page.locator('#schedule-publish')).toBeHidden()
+      await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
       await saveDocAndAssert(page)
-      await page.locator('#action-save-popup').click()
-      await page.locator('#schedule-publish').click()
+      await page.locator('#schedule-publish-button').click()
 
       // drawer should open
       await expect(page.locator('.drawer__header')).toBeVisible()
@@ -1411,13 +1405,11 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('scheduled publish description')
 
       // schedule publish should not be available before document has been saved
-      await page.locator('#action-save-popup').click()
-      await expect(page.locator('#schedule-publish')).toBeHidden()
+      await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
       await saveDocAndAssert(page)
-      await page.locator('#action-save-popup').click()
-      await page.locator('#schedule-publish').click()
+      await page.locator('#schedule-publish-button').click()
 
       // drawer should open
       await expect(page.locator('.drawer__header')).toBeVisible()
@@ -1450,10 +1442,8 @@ describe('Versions', () => {
 
       await waitForAutoSaveToRunAndComplete(page)
 
-      await page.locator('#action-save-popup').click()
-
       await expect(async () => {
-        await expect(page.locator('#schedule-publish')).toBeVisible()
+        await expect(page.locator('#schedule-publish-button')).toBeVisible()
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
@@ -2947,13 +2937,7 @@ describe('Versions', () => {
         }),
       )
 
-      const publishDropdown = page.locator('.doc-controls__controls .popup-button')
-      await publishDropdown.click()
-
-      const schedulePublishButton = page.locator(
-        '.popup__content .popup-button-list__button:has-text("Schedule Publish")',
-      )
-      await schedulePublishButton.click()
+      await page.locator('#schedule-publish-button').click()
 
       const drawerContent = page.locator('.schedule-publish__scheduler')
 
