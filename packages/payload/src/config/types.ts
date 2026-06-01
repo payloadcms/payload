@@ -16,6 +16,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
   CustomStatus,
@@ -484,6 +485,12 @@ export type ServerProps = {
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
   readonly searchParams?: Params
+  /**
+   * Framework-agnostic methods for server-side navigation, headers, cookies, and other server-only APIs.
+   * Plugins should call these methods instead of importing directly from `next/navigation`, `next/headers`, etc.
+   * These methods are populated by the given framework adapter, e.g. `@payloadcms/next`.
+   */
+  readonly server: ServerAdapter
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
@@ -1616,8 +1623,16 @@ export type Config = {
  */
 export type SanitizedConfig = {
   admin: {
+    /**
+     * `Required` (shallow) marks the top-level dashboard props as required, mainly `defaultLayout`,
+     * which sanitizing always fills in. Do not switch this to the `DeepRequired` used below: it
+     * recurses into the widgets and re-expands the whole `Field` type (a large self-referencing
+     * union), which is very expensive to check. Never run a `Field`-bearing type through
+     * `DeepRequired`.
+     */
+    dashboard: Required<NonNullable<NonNullable<Config['admin']>['dashboard']>>
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']>
+  } & DeepRequired<Omit<NonNullable<Config['admin']>, 'dashboard'>>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */

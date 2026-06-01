@@ -1,6 +1,6 @@
 import type { AdminViewServerProps } from 'payload'
 
-import { MinimalTemplate } from '@payloadcms/next/templates'
+import { MinimalTemplate } from '@payloadcms/ui/rsc'
 import React from 'react'
 
 import { UploadFormTestClient } from './index.client.js'

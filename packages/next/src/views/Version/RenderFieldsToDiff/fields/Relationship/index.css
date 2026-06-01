@@ -1,0 +1,213 @@
+@layer payload-default {
+  .relationship-diff-container .field-diff-content {
+    padding: 0;
+    background: unset;
+  }
+
+  .relationship-diff-container .diff-no-value {
+    padding: 0;
+  }
+
+  .relationship-diff-container--hasOne .relationship-diff {
+    min-width: 100%;
+    max-width: fit-content;
+  }
+
+  .relationship-diff-container--hasOne .relationship-diff[data-match-type] {
+    outline: none;
+    background-color: transparent;
+  }
+
+  .relationship-diff-container--hasOne .field-diff-content {
+    padding-block: var(--spacer-2);
+    background: var(--color-bg-secondary);
+  }
+
+  .relationship-diff-container--hasOne .field-diff-content > .html-diff {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+  }
+
+  .relationship-diff-container--hasOne
+    .field-diff-content
+    > .html-diff:is(
+      :has(.relationship-diff[data-match-type='create']),
+      :has(.relationship-diff[data-match-type='delete'])
+    )::before {
+    content: '';
+    position: absolute;
+    inset: calc(var(--spacer-2) * -1) 0;
+    display: block;
+    z-index: -1;
+  }
+
+  .relationship-diff-container--hasOne
+    .field-diff-content
+    > .html-diff:has(.relationship-diff[data-match-type='create'])::before {
+    background-color: var(--diff-create-parent-bg);
+  }
+
+  .relationship-diff-container--hasOne
+    .field-diff-content
+    > .html-diff:has(.relationship-diff[data-match-type='delete'])::before {
+    background-color: var(--diff-delete-parent-bg);
+  }
+
+  .relationship-diff-container--hasMany .field-diff-content {
+    background: var(--color-bg-secondary);
+    padding-block: var(--spacer-1);
+
+    .html-diff {
+      display: flex;
+      flex-direction: row;
+      min-width: 0;
+      max-width: unset;
+      flex-wrap: wrap;
+      gap: var(--spacer-1);
+      justify-content: flex-start;
+    }
+
+    .relationship-diff {
+      padding: var(--spacer-1);
+    }
+  }
+
+  .relationship-diff {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    border-radius: var(--radius-medium);
+    outline: var(--stroke-width-small) solid var(--color-border);
+    outline-offset: calc(var(--stroke-width-small) * -1);
+    background-color: var(--color-bg);
+    position: relative;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    padding: var(--spacer-2) var(--spacer-1);
+    height: min-content;
+
+    &[data-match-type='create'] {
+      background-color: var(--diff-create-parent-bg);
+      outline-color: var(--diff-create-pill-border);
+    }
+
+    &[data-match-type='delete'] {
+      background-color: var(--diff-delete-parent-bg);
+      outline-color: var(--diff-delete-pill-border);
+      text-decoration-line: none;
+    }
+  }
+
+  /* Override HTMLDiff generic [data-match-type] styles (specificity 0,4,1 from :not(img)) */
+  .html-diff .relationship-diff.relationship-diff.relationship-diff[data-match-type='create'],
+  .html-diff .relationship-diff.relationship-diff.relationship-diff[data-match-type='delete'] {
+    border-radius: var(--radius-medium);
+    padding: var(--spacer-2) var(--spacer-1);
+    text-decoration-line: none;
+    color: inherit;
+  }
+
+  /* hasMany pills stay compact at 24px */
+  .relationship-diff-container--hasMany
+    .html-diff
+    .relationship-diff.relationship-diff.relationship-diff[data-match-type='create'],
+  .relationship-diff-container--hasMany
+    .html-diff
+    .relationship-diff.relationship-diff.relationship-diff[data-match-type='delete'] {
+    padding: var(--spacer-1);
+  }
+
+  /* hasOne pills: no padding, field-diff-content provides row height */
+  .relationship-diff-container--hasOne
+    .html-diff
+    .relationship-diff.relationship-diff.relationship-diff[data-match-type='create'],
+  .relationship-diff-container--hasOne
+    .html-diff
+    .relationship-diff.relationship-diff.relationship-diff[data-match-type='delete'] {
+    padding: 0;
+  }
+
+  .html-diff .relationship-diff.relationship-diff.relationship-diff[data-match-type='create'] {
+    background-color: var(--diff-create-parent-bg);
+    outline-color: var(--diff-create-pill-border);
+  }
+
+  .html-diff .relationship-diff.relationship-diff.relationship-diff[data-match-type='delete'] {
+    background-color: var(--diff-delete-parent-bg);
+    outline-color: var(--diff-delete-pill-border);
+  }
+
+  .relationship-diff__pill {
+    display: inline-flex;
+    align-items: center;
+    height: var(--spacer-3);
+    border-radius: var(--radius-medium);
+    padding-inline: var(--spacer-1);
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .relationship-diff[data-match-type='create'] .relationship-diff__pill {
+    background-color: var(--color-bg-brand);
+    color: var(--color-text-onbrand);
+  }
+
+  .relationship-diff[data-match-type='delete'] .relationship-diff__pill {
+    background-color: var(--color-bg-danger);
+    color: var(--color-text-oncomponent);
+
+    * {
+      text-decoration-line: none;
+      color: var(--color-text-oncomponent);
+      background-color: transparent;
+    }
+  }
+
+  .relationship-diff__info {
+    padding-inline-end: var(--spacer-1);
+    font-weight: var(--text-body-medium-font-weight);
+    color: var(--color-text);
+    white-space: nowrap;
+  }
+
+  .relationship-diff[data-match-type='create'] .relationship-diff__info {
+    color: var(--diff-create-parent-color);
+  }
+
+  .relationship-diff[data-match-type='delete'] .relationship-diff__info {
+    color: var(--color-text-danger);
+    text-decoration-line: line-through;
+  }
+
+  @media (max-width: 768px) {
+    .relationship-diff-container--hasOne .field-diff-content {
+      padding: 0;
+      background: transparent;
+    }
+
+    .relationship-diff-container--hasOne .field-diff-content > .html-diff {
+      justify-content: center;
+    }
+
+    .relationship-diff-container--hasOne
+      .field-diff-content
+      > .html-diff:has(.relationship-diff[data-match-type='create'])::before,
+    .relationship-diff-container--hasOne
+      .field-diff-content
+      > .html-diff:has(.relationship-diff[data-match-type='delete'])::before {
+      inset: calc(var(--spacer-1) * -1) calc(var(--spacer-2) * -1);
+    }
+
+    .relationship-diff-container--hasMany .field-diff-content {
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
+      gap: calc(var(--stroke-width-small) * 2);
+    }
+  }
+}

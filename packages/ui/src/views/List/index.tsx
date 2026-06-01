@@ -3,13 +3,11 @@
 import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
-import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { useModal } from '../../elements/Modal/index.js'
@@ -18,13 +16,13 @@ import { PageControls } from '../../elements/PageControls/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
-import { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -237,119 +235,115 @@ export function DefaultListView(props: ListViewClientProps) {
               renderedFilters={renderedFilters}
               resolvedFilterOptions={resolvedFilterOptions}
             />
-            <Gutter className={`${baseClass}__wrap`}>
-              {BeforeListTable}
-              {hierarchyData ? (
-                <DocumentSelectionProvider
-                  collectionData={{
-                    [collectionSlug]: { docs: hierarchyData.childrenData.docs },
-                    ...Object.fromEntries(
-                      Object.entries(hierarchyData.relatedDocumentsByCollection).map(
-                        ([slug, related]) => [slug, { docs: related.result.docs }],
-                      ),
+            {BeforeListTable}
+            {hierarchyData ? (
+              <DocumentSelectionProvider
+                collectionData={{
+                  [collectionSlug]: { docs: hierarchyData.childrenData.docs },
+                  ...Object.fromEntries(
+                    Object.entries(hierarchyData.relatedDocumentsByCollection).map(
+                      ([slug, related]) => [slug, { docs: related.result.docs }],
                     ),
-                  }}
-                >
-                  <HierarchyTable
-                    childrenData={hierarchyData.childrenData}
-                    collectionSlug={collectionSlug}
-                    hierarchyLabel={collectionLabel}
-                    key={hierarchyData.parentId}
-                    parentId={hierarchyData.parentId}
-                    relatedGroups={Object.entries(hierarchyData.relatedDocumentsByCollection).map(
-                      ([slug, related]) => ({
-                        collectionSlug: slug,
-                        data: related.result,
-                        hasMany: related.hasMany,
-                        label: related.label,
-                      }),
-                    )}
-                    useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
-                  />
-                  <DocumentListSelection
-                    disableBulkDelete={disableBulkDelete}
-                    disableBulkEdit={disableBulkEdit}
-                  />
-                </DocumentSelectionProvider>
-              ) : docs?.length > 0 ? (
-                <div className={`${baseClass}__tables`}>
-                  <RelationshipProvider>{Table}</RelationshipProvider>
-                </div>
-              ) : null}
-              {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
-              {docs?.length === 0 && (
-                <NoListResults
-                  Actions={
-                    hasCreatePermission && newDocumentURL && viewType !== 'trash'
-                      ? [
-                          isInDrawer ? (
-                            <Button
-                              el="button"
-                              key="create"
-                              onClick={() => openModal(createNewDrawerSlug)}
-                            >
-                              {i18n.t('general:createNewLabel', {
-                                label: getTranslation(labels?.singular, i18n),
-                              })}
-                            </Button>
-                          ) : (
-                            <Button el="link" key="create" to={newDocumentURL}>
-                              {i18n.t('general:createNewLabel', {
-                                label: getTranslation(labels?.singular, i18n),
-                              })}
-                            </Button>
-                          ),
-                        ]
-                      : []
-                  }
-                  description={
-                    viewType === 'trash'
-                      ? i18n.t('general:noTrashResults', {
-                          label: getTranslation(labels?.plural, i18n),
-                        })
-                      : i18n.t('general:noResultsDescription')
-                  }
-                  title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
+                  ),
+                }}
+              >
+                <HierarchyTable
+                  childrenData={hierarchyData.childrenData}
+                  collectionSlug={collectionSlug}
+                  hierarchyLabel={collectionLabel}
+                  key={hierarchyData.parentId}
+                  parentId={hierarchyData.parentId}
+                  relatedGroups={Object.entries(hierarchyData.relatedDocumentsByCollection).map(
+                    ([slug, related]) => ({
+                      collectionSlug: slug,
+                      data: related.result,
+                      fieldName: related.fieldName,
+                      hasMany: related.hasMany,
+                      label: related.label,
+                    }),
+                  )}
+                  useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
                 />
-              )}
-              {AfterListTable}
-              {AfterList}
-              {docs?.length > 0 && !isGroupingBy && (
-                <PageControls
-                  AfterPageControls={
-                    smallBreak ? (
-                      <div className={`${baseClass}__list-selection`}>
-                        <ListSelection
-                          collectionConfig={collectionConfig}
-                          disableBulkDelete={disableBulkDelete}
-                          disableBulkEdit={disableBulkEdit}
-                          label={collectionLabel}
-                          showSelectAllAcrossPages={!isGroupingBy}
-                        />
-                        <div className={`${baseClass}__list-selection-actions`}>
-                          {enableRowSelections && typeof onBulkSelect === 'function'
-                            ? beforeActions
-                              ? [
-                                  ...beforeActions,
-                                  <SelectMany key="select-many" onClick={onBulkSelect} />,
-                                ]
-                              : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                            : beforeActions}
-                        </div>
+                <DocumentListSelection
+                  disableBulkDelete={disableBulkDelete}
+                  disableBulkEdit={disableBulkEdit}
+                />
+              </DocumentSelectionProvider>
+            ) : docs?.length > 0 ? (
+              <RelationshipProvider>{Table}</RelationshipProvider>
+            ) : null}
+            {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
+            {docs?.length === 0 && (
+              <NoListResults
+                Actions={
+                  hasCreatePermission && newDocumentURL && viewType !== 'trash'
+                    ? [
+                        isInDrawer ? (
+                          <Button
+                            el="button"
+                            key="create"
+                            onClick={() => openModal(createNewDrawerSlug)}
+                          >
+                            {i18n.t('general:createNewLabel', {
+                              label: getTranslation(labels?.singular, i18n),
+                            })}
+                          </Button>
+                        ) : (
+                          <Button el="link" key="create" to={newDocumentURL}>
+                            {i18n.t('general:createNewLabel', {
+                              label: getTranslation(labels?.singular, i18n),
+                            })}
+                          </Button>
+                        ),
+                      ]
+                    : []
+                }
+                description={
+                  viewType === 'trash'
+                    ? i18n.t('general:noTrashResults', {
+                        label: getTranslation(labels?.plural, i18n),
+                      })
+                    : i18n.t('general:noResultsDescription')
+                }
+                title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
+                withMargin
+              />
+            )}
+            {AfterListTable}
+            {AfterList}
+            {docs?.length > 0 && !isGroupingBy && (
+              <PageControls
+                AfterPageControls={
+                  smallBreak ? (
+                    <div className={`${baseClass}__list-selection`}>
+                      <ListSelection
+                        collectionConfig={collectionConfig}
+                        disableBulkDelete={disableBulkDelete}
+                        disableBulkEdit={disableBulkEdit}
+                        label={collectionLabel}
+                        showSelectAllAcrossPages={!isGroupingBy}
+                      />
+                      <div className={`${baseClass}__list-selection-actions`}>
+                        {enableRowSelections && typeof onBulkSelect === 'function'
+                          ? beforeActions
+                            ? [
+                                ...beforeActions,
+                                <SelectMany key="select-many" onClick={onBulkSelect} />,
+                              ]
+                            : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                          : beforeActions}
                       </div>
-                    ) : null
-                  }
-                  collectionConfig={collectionConfig}
-                />
-              )}
-            </Gutter>
+                    </div>
+                  ) : null
+                }
+                collectionConfig={collectionConfig}
+              />
+            )}
           </SelectionProvider>
         </div>
       </TableColumnsProvider>
       {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
-        <StickyToolbar>
-          <PageControls collectionConfig={collectionConfig} />
-        </StickyToolbar>
+        <PageControls collectionConfig={collectionConfig} />
       )}
     </Fragment>
   )

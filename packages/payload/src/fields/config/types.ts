@@ -504,6 +504,12 @@ export interface FieldBase {
     beforeValidate?: FieldHook[]
   }
   index?: boolean
+  /**
+   * Allows you to modify the base JSON schema that is generated for this field.
+   * This JSON schema will be used to generate the TypeScript interface of this field, and to
+   * validate the field's value in the MCP plugin.
+   */
+  jsonSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   label?: false | LabelFunction | StaticLabel
   localized?: boolean
   /**
@@ -515,11 +521,6 @@ export interface FieldBase {
   name: string
   required?: boolean
   saveToJWT?: boolean | string
-  /**
-   * Allows you to modify the base JSON schema that is generated during generate:types for this field.
-   * This JSON schema will be used to generate the TypeScript interface of this field.
-   */
-  typescriptSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   unique?: boolean
   validate?: Validate
   /**
@@ -530,27 +531,13 @@ export interface FieldBase {
   virtual?: boolean | string
 }
 
-export interface FieldBaseClient {
+export interface FieldBaseClient
+  extends Pick<
+    FieldBase,
+    'hidden' | 'index' | 'jsonSchema' | 'localized' | 'name' | 'required' | 'saveToJWT' | 'unique'
+  > {
   admin?: AdminClient
-  hidden?: boolean
-  index?: boolean
   label?: StaticLabel
-  localized?: boolean
-  /**
-   * The name of the field. Must be alphanumeric and cannot contain ' . '
-   *
-   * Must not be one of reserved field names: ['__v', 'salt', 'hash', 'file']
-   * @link https://payloadcms.com/docs/fields/overview#field-names
-   */
-  name: string
-  required?: boolean
-  saveToJWT?: boolean | string
-  /**
-   * Allows you to modify the base JSON schema that is generated during generate:types for this field.
-   * This JSON schema will be used to generate the TypeScript interface of this field.
-   */
-  typescriptSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
-  unique?: boolean
 }
 
 export type NumberField = {
@@ -1964,7 +1951,7 @@ export type FieldWithMaxDepthClient = JoinFieldClient | RelationshipFieldClient 
 
 export function fieldHasSubFields<TField extends ClientField | Field | TabAsField>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithSubFieldsClient : FieldWithSubFields) {
+): field is Extract<TField, FieldWithSubFields | FieldWithSubFieldsClient> {
   return (
     field.type === 'group' ||
     field.type === 'array' ||
@@ -1975,19 +1962,19 @@ export function fieldHasSubFields<TField extends ClientField | Field | TabAsFiel
 
 export function fieldIsArrayType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? ArrayFieldClient : ArrayField) {
+): field is Extract<TField, ArrayField | ArrayFieldClient> {
   return field.type === 'array'
 }
 
 export function fieldIsBlockType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? BlocksFieldClient : BlocksField) {
+): field is Extract<TField, BlocksField | BlocksFieldClient> {
   return field.type === 'blocks'
 }
 
 export function fieldIsGroupType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? GroupFieldClient : GroupField) {
+): field is Extract<TField, GroupField | GroupFieldClient> {
   return field.type === 'group'
 }
 
@@ -2005,13 +1992,13 @@ export function optionIsValue(option: Option): option is string {
 
 export function fieldSupportsMany<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithManyClient : FieldWithMany) {
+): field is Extract<TField, FieldWithMany | FieldWithManyClient> {
   return field.type === 'select' || field.type === 'relationship' || field.type === 'upload'
 }
 
 export function fieldHasMaxDepth<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithMaxDepthClient : FieldWithMaxDepth) {
+): field is Extract<TField, FieldWithMaxDepth | FieldWithMaxDepthClient> {
   return (
     (field.type === 'upload' || field.type === 'relationship' || field.type === 'join') &&
     typeof field.maxDepth === 'number'
@@ -2020,9 +2007,7 @@ export function fieldHasMaxDepth<TField extends ClientField | Field>(
 
 export function fieldIsPresentationalOnly<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
->(
-  field: TField,
-): field is TField & (TField extends ClientField | TabAsFieldClient ? UIFieldClient : UIField) {
+>(field: TField): field is Extract<TField, UIField | UIFieldClient> {
   return field.type === 'ui'
 }
 
@@ -2058,8 +2043,10 @@ export function fieldAffectsData<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
 >(
   field: TField,
-): field is TField &
-  (TField extends ClientField | TabAsFieldClient ? FieldAffectingDataClient : FieldAffectingData) {
+  // Narrows to field types that hold data (`name` fields). `Extract` keeps the
+  // existing `TField` members instead of creating intersections. Avoid `TField & (...)`
+  // here: with the large recursive `Field` union, it is much slower to typecheck.
+): field is Extract<TField, FieldAffectingData | FieldAffectingDataClient> {
   return 'name' in field && !fieldIsPresentationalOnly(field)
 }
 

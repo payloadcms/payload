@@ -37,7 +37,7 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
-export type { FieldState } from './admin/forms/Form.js'
+export type * from './admin/adapters/index.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
@@ -119,6 +119,7 @@ import {
   updateGlobalLocal,
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
+export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
 /**
@@ -161,6 +162,7 @@ export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
 export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
+export { defaultUserCollection } from './auth/defaultUser.js'
 
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'

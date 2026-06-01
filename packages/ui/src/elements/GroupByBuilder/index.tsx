@@ -71,7 +71,7 @@ export const GroupByBuilder: React.FC<Props> = ({
     [fields, fieldPermissions, i18n],
   )
 
-  const groupByField = reducedFields.find((field) => field.value === groupByFieldName)
+  const groupByField = reducedFields.find((field) => field.fieldPath === groupByFieldName)
 
   const handleFieldChange = useMemo(() => {
     if (isFormMode) {
@@ -175,12 +175,14 @@ export const GroupByBuilder: React.FC<Props> = ({
           isClearable
           isMulti={false}
           onChange={handleFieldChange}
-          options={reducedFields.filter(
-            (field) =>
-              !isFieldDisabled(field.field, 'groupBy') &&
-              field.value !== 'id' &&
-              supportedFieldTypes.includes(field.field.type),
-          )}
+          options={reducedFields
+            .filter(
+              (field) =>
+                !isFieldDisabled(field.field, 'groupBy') &&
+                field.fieldPath !== 'id' &&
+                supportedFieldTypes.includes(field.field.type),
+            )
+            .map((f) => ({ ...f, value: f.fieldPath }))}
           value={{
             label: groupByField?.label || t('general:selectValue'),
             value: groupByFieldName || '',

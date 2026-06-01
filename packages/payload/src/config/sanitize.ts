@@ -52,7 +52,6 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
-
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
     const firstCollectionWithAuth = sanitizedConfig.collections!.find(({ auth }) => Boolean(auth))
@@ -129,7 +128,7 @@ const addDefaultDashboardWidgets = async ({
       type: 'json',
       admin: {
         components: {
-          Field: '@payloadcms/next/client#QueryPresetsWhereField',
+          Field: '@payloadcms/ui#QueryPresetsWhereField',
         },
       },
       label: 'Filters',
@@ -139,7 +138,7 @@ const addDefaultDashboardWidgets = async ({
       type: 'text',
       admin: {
         components: {
-          Field: '@payloadcms/next/client#CollectionQuerySortField',
+          Field: '@payloadcms/ui#CollectionQuerySortField',
         },
       },
       label: 'Sort Field',
@@ -175,12 +174,12 @@ const addDefaultDashboardWidgets = async ({
 
   dashboard.widgets.push({
     slug: 'collections',
-    Component: '@payloadcms/next/rsc#CollectionCards',
+    Component: '@payloadcms/ui/rsc#CollectionCards',
     minWidth: 'full',
   })
   dashboard.widgets.push({
     slug: 'collection-query',
-    Component: '@payloadcms/next/rsc#CollectionQueryWidget',
+    Component: '@payloadcms/ui/rsc#CollectionQueryWidget',
     fields: await sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),

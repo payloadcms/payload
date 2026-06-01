@@ -48,6 +48,7 @@ export const renderDocumentSlots: (args: {
     locale,
     payload: req.payload,
     permissions,
+    server: req.server,
     user: req.user,
     // TODO: Add remaining serverProps
   }

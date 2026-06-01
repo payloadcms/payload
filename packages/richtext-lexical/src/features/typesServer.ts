@@ -27,7 +27,7 @@ import type {
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { Transformer } from '../packages/@lexical/markdown/index.js'
-import type { LexicalRichTextField } from '../types.js'
+import type { LexicalRichTextField } from '../types/index.js'
 import type { BaseClientFeatureProps } from './typesClient.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = (args: {
@@ -285,7 +285,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     | ImportMapGenerators[0]
     | PayloadComponent[]
   generatedTypes?: {
-    modifyOutputSchema: (args: {
+    modifyJSONSchema: (args: {
       collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
       config?: SanitizedConfig
       /**
@@ -357,7 +357,7 @@ export type SanitizedServerFeatures = {
   /** The keys of all enabled features */
   enabledFeatures: string[]
   generatedTypes: {
-    modifyOutputSchemas: Array<
+    modifyJSONSchemas: Array<
       (args: {
         collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
         config?: SanitizedConfig

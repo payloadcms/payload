@@ -12,8 +12,8 @@ const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 import type { AdminViewServerProps } from 'payload'
 
-import { MinimalTemplate } from '@payloadcms/next/templates'
 import { Button } from '@payloadcms/ui'
+import { MinimalTemplate } from '@payloadcms/ui/rsc'
 
 import { customViewPath } from '../../../shared.js'
 import './index.scss'

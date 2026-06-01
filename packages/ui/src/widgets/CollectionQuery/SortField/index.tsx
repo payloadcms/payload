@@ -49,9 +49,9 @@ export const CollectionQuerySortField: TextFieldClientComponent = ({
       i18n,
     })
       .filter(({ field }) => isCollectionQuerySortableField(field))
-      .map(({ plainTextLabel, value }) => ({
-        label: plainTextLabel,
-        value: String(value),
+      .map(({ fieldPath, plainTextLabel }) => ({
+        label: plainTextLabel ?? fieldPath,
+        value: fieldPath,
       }))
 
     return [

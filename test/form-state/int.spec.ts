@@ -138,6 +138,12 @@ describe('Form State', () => {
     })
 
     expect(state).toStrictEqual({
+      '_index-7': {
+        disableFormData: true,
+      },
+      '_index-7-0-0': {
+        disableFormData: true,
+      },
       title: {
         value: postData.title,
         initialValue: postData.title,

@@ -2,6 +2,7 @@
   .popup-button-list {
     display: flex;
     flex-direction: column;
+    padding: 0 var(--spacer-2);
     text-align: left;
   }
 
@@ -26,21 +27,25 @@
   }
 
   .popup-button-list__button {
-    padding: 0 var(--spacer-2);
-    margin: 0 var(--spacer-2);
     cursor: pointer;
     text-align: inherit;
     text-decoration: none;
+    white-space: nowrap;
     border-radius: var(--radius-medium);
-    min-height: var(--spacer-4);
     display: flex;
-    align-items: center;
+    align-items: stretch;
     color: var(--color-text);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-letter-spacing);
+  }
+
+  .popup-button-list__label {
+    display: flex;
+    align-items: center;
+    padding: var(--spacer-1) var(--spacer-2) var(--spacer-1) var(--spacer-1);
   }
 
   .popup-button-list__button:focus-visible {
@@ -76,15 +81,14 @@
     color: var(--color-text-onselected-strong);
   }
 
-  /* Hide icon element by default (outside IconButtonGroup) */
+  /* Hide icon element by default (outside RadioGroup/MenuItem) */
   .popup-button-list__icon {
     display: none;
   }
 
-  /* IconButtonGroup - reserves space for icons so text aligns consistently */
+  /* RadioGroup - for radio-style selection rows with 16px icons */
   .popup-button-list--with-icons .popup-button-list__button {
-    gap: var(--spacer-1);
-    padding-inline-start: var(--spacer-1);
+    padding-right: var(--spacer-2);
   }
 
   .popup-button-list--with-icons .popup-button-list__icon {
@@ -92,6 +96,35 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    width: calc(var(--spacer-3) + var(--spacer-1));
+    padding: var(--spacer-1) 0 var(--spacer-1) var(--spacer-1);
+  }
+
+  .popup-button-list--with-icons .popup-button-list__label {
+    padding: var(--spacer-1) 0 var(--spacer-1) var(--spacer-1);
+  }
+
+  /* MenuItem - for action menu items with 16px icons (default) */
+  .popup-button-list--with-actions .popup-button-list__button {
+    padding-right: var(--spacer-2);
+    align-items: center;
+  }
+
+  .popup-button-list--with-actions .popup-button-list__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: calc(var(--spacer-3) + var(--spacer-1));
+    padding: var(--spacer-1) 0 var(--spacer-1) var(--spacer-1);
+  }
+
+  .popup-button-list--with-actions .popup-button-list__label {
+    padding: var(--spacer-1) 0 var(--spacer-1) var(--spacer-1);
+  }
+
+  .popup-button-list--large .popup-button-list__icon {
     width: var(--spacer-4);
+    padding: 0;
   }
 }

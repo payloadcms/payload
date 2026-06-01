@@ -1,9 +1,9 @@
 import type { AdminViewServerProps } from 'payload'
 
+import { Logo } from '@payloadcms/ui/rsc'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import { Logo } from '../../elements/Logo/index.js'
 import { ToastAndRedirect } from './index.client.js'
 import './index.scss'
 
@@ -61,6 +61,7 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
           payload={payload}
           permissions={permissions}
           searchParams={searchParams}
+          server={req.server}
           user={user}
         />
       </div>

@@ -2,12 +2,12 @@ import type { AdminViewServerProps, DocumentViewServerPropsOnly } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { DocumentHeader } from '@payloadcms/ui/rsc'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { getDocPreferences } from '../Document/getDocPreferences.js'
 import { getDocumentData } from '../Document/getDocumentData.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
@@ -167,6 +167,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
               permissions,
               routeSegments: [],
               searchParams,
+              server: req.server,
               user,
             } satisfies DocumentViewServerPropsOnly,
           })}
