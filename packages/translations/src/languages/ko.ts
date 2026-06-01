@@ -472,6 +472,7 @@ export const koTranslations: DefaultTranslationsObject = {
     viewing: '열람',
     viewReadOnly: '읽기 전용으로 보기',
     welcome: '환영합니다',
+    where: '어디에서',
     yes: '네',
   },
   hierarchy: {

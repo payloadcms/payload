@@ -6,16 +6,25 @@
     border-bottom: var(--stroke-width-small) solid var(--color-border);
 
     .pill-selector,
-    .where-builder,
     .sort-complex,
     .group-by-builder {
       margin-top: var(--spacer-2);
+    }
+
+    .where-builder {
+      margin-top: var(--spacer-2-5);
     }
 
     .search-bar {
       min-width: 180px;
       width: 180px;
     }
+  }
+
+  /* Full-bleed the filter panel so its top border spans the full width.
+     Applied to the animating wrapper so the breakout isn't clipped mid-animation. */
+  .list-controls__where {
+    margin-inline: calc(var(--gutter-h) * -1);
   }
 
   .list-controls__search-row {

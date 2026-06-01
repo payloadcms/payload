@@ -466,6 +466,7 @@ export const thTranslations: DefaultTranslationsObject = {
     viewing: 'การดู',
     viewReadOnly: 'ดูในโหมดอ่านอย่างเดียว',
     welcome: 'ยินดีต้อนรับ',
+    where: 'ที่ไหน',
     yes: 'ใช่',
   },
   hierarchy: {

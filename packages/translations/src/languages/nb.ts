@@ -476,6 +476,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     viewing: 'Visning',
     viewReadOnly: 'Vis skrivebeskyttet',
     welcome: 'Velkommen',
+    where: 'Hvor',
     yes: 'Ja',
   },
   hierarchy: {

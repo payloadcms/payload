@@ -472,6 +472,7 @@ export const skTranslations: DefaultTranslationsObject = {
     viewing: 'Prezeranie',
     viewReadOnly: 'Zobraziť iba na čítanie',
     welcome: 'Vitajte',
+    where: 'Kde',
     yes: 'Áno',
   },
   hierarchy: {

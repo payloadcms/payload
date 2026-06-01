@@ -473,6 +473,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     viewing: 'Преглеждане',
     viewReadOnly: 'Преглед само за четене',
     welcome: 'Добре дошъл',
+    where: 'Къде',
     yes: 'Да',
   },
   hierarchy: {

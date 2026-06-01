@@ -452,6 +452,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     viewing: '檢視中',
     viewReadOnly: '唯讀檢視',
     welcome: '歡迎',
+    where: '在哪裡',
     yes: '是',
   },
   hierarchy: {

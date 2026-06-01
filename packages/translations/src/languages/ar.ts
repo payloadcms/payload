@@ -464,6 +464,7 @@ export const arTranslations: DefaultTranslationsObject = {
     viewing: 'عرض',
     viewReadOnly: 'عرض للقراءة فقط',
     welcome: 'مرحبًا',
+    where: 'أين',
     yes: 'نعم',
   },
   hierarchy: {

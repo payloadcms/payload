@@ -472,6 +472,7 @@ export const csTranslations: DefaultTranslationsObject = {
     viewing: 'Prohlížení',
     viewReadOnly: 'Zobrazit pouze pro čtení',
     welcome: 'Vítejte',
+    where: 'Kde',
     yes: 'Ano',
   },
   hierarchy: {

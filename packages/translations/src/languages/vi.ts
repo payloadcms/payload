@@ -473,6 +473,7 @@ export const viTranslations: DefaultTranslationsObject = {
     viewing: 'Xem',
     viewReadOnly: 'Xem chỉ đọc',
     welcome: 'Xin chào',
+    where: 'Nơi',
     yes: 'Có',
   },
   hierarchy: {

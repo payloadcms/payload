@@ -473,6 +473,7 @@ export const taTranslations: DefaultTranslationsObject = {
     viewing: 'பார்க்கிறது',
     viewReadOnly: 'வாசிப்பதற்கே காட்டு',
     welcome: 'வரவேற்பு',
+    where: 'எங்கு',
     yes: 'ஆம்',
   },
   hierarchy: {

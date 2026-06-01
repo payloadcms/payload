@@ -1,0 +1,65 @@
+@layer payload-default {
+  .where-builder {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    /* Content is aligned to the gutter; the full-bleed breakout lives on the
+       animating wrapper (.list-controls__where) so the top border isn't clipped
+       by AnimateHeight's overflow during the open/close transition. */
+    padding: var(--spacer-3) var(--gutter-h);
+    /* The parent list-controls already adds its own bottom padding, so subtract
+       it here to keep the total visible bottom padding equal to spacer-3. */
+    padding-bottom: calc(var(--spacer-3) - var(--spacer-2-5));
+    border-top: var(--stroke-width-small) solid var(--color-border);
+
+    .btn {
+      margin: 0;
+      align-self: flex-start;
+    }
+  }
+
+  .where-builder__label {
+    margin: 0;
+    color: var(--color-text);
+  }
+
+  .where-builder__add-or.btn {
+    color: var(--color-text-secondary);
+    /* Align with the field dropdown: offset past the join column (48px) plus the wrap gap. */
+    margin-left: calc(var(--spacer-4) * 2 + var(--spacer-2));
+
+    .icon--circle-plus {
+      width: var(--spacer-4);
+      height: var(--spacer-4);
+    }
+  }
+
+  .where-builder__or-filters,
+  .where-builder__and-filters {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .where-builder__or-filters li,
+  .where-builder__and-filters li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  @media (max-width: 1024px) {
+    .where-builder__add-or.btn {
+      margin-left: 0;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .where-builder {
+      padding-top: var(--spacer-2);
+    }
+  }
+}

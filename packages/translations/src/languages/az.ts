@@ -479,6 +479,7 @@ export const azTranslations: DefaultTranslationsObject = {
     viewing: 'Baxış',
     viewReadOnly: 'Yalnız oxu rejimində bax',
     welcome: 'Xoş gəldiniz',
+    where: 'Harada',
     yes: 'Bəli',
   },
   hierarchy: {

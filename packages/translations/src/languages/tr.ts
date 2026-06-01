@@ -479,6 +479,7 @@ export const trTranslations: DefaultTranslationsObject = {
     viewing: 'Görüntüleme',
     viewReadOnly: 'Salt okunur olarak görüntüle',
     welcome: 'Hoşgeldiniz',
+    where: 'Nerede',
     yes: 'Evet',
   },
   hierarchy: {

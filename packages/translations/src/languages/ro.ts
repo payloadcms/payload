@@ -479,6 +479,7 @@ export const roTranslations: DefaultTranslationsObject = {
     viewing: 'Vizualizare',
     viewReadOnly: 'Vizualizare doar pentru citire',
     welcome: 'Bine ați venit',
+    where: 'Unde',
     yes: 'Da',
   },
   hierarchy: {

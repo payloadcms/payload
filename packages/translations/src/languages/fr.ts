@@ -486,6 +486,7 @@ export const frTranslations: DefaultTranslationsObject = {
     viewing: 'Visualisation',
     viewReadOnly: 'Afficher en lecture seule',
     welcome: 'Bienvenue',
+    where: 'Où',
     yes: 'Oui',
   },
   hierarchy: {

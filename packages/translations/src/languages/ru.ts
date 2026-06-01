@@ -477,6 +477,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     viewing: 'Просмотр',
     viewReadOnly: 'Просмотр только для чтения',
     welcome: 'Добро пожаловать',
+    where: 'Где',
     yes: 'Да',
   },
   hierarchy: {

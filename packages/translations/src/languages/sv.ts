@@ -476,6 +476,7 @@ export const svTranslations: DefaultTranslationsObject = {
     viewing: 'Visar',
     viewReadOnly: 'Visa som skrivskyddad',
     welcome: 'Välkommen',
+    where: 'Var',
     yes: 'Ja',
   },
   hierarchy: {

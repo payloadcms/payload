@@ -104,6 +104,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} size={16} />}
               id="toggle-list-filters"
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
+              selected={visibleDrawer === 'where'}
               size="medium"
             >
               {t('general:filters')}
@@ -171,6 +172,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
           fields={collectionConfig?.fields}
+          isWhereOpen={visibleDrawer === 'where'}
+          onClose={() => setVisibleDrawer(undefined)}
           renderedFilters={renderedFilters}
           resolvedFilterOptions={resolvedFilterOptions}
         />

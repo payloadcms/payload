@@ -467,6 +467,7 @@ export const faTranslations: DefaultTranslationsObject = {
     viewing: 'در حال مشاهده',
     viewReadOnly: 'مشاهده (فقط خواندنی)',
     welcome: 'خوش آمدید',
+    where: 'کجا',
     yes: 'بله',
   },
   hierarchy: {

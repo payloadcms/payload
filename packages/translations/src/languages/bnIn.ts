@@ -480,6 +480,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     viewing: 'দর্শন',
     viewReadOnly: 'শুধুমাত্র পড়ার জন্য দেখুন',
     welcome: 'স্বাগতম',
+    where: 'কোথায়',
     yes: 'হ্যাঁ',
   },
   hierarchy: {

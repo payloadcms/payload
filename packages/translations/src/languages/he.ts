@@ -461,6 +461,7 @@ export const heTranslations: DefaultTranslationsObject = {
     viewing: 'צפיה',
     viewReadOnly: 'הצג קריאה בלבד',
     welcome: 'ברוך הבא',
+    where: 'היכן',
     yes: 'כן',
   },
   hierarchy: {

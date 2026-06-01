@@ -473,6 +473,7 @@ export const slTranslations: DefaultTranslationsObject = {
     viewing: 'Ogled',
     viewReadOnly: 'Ogled samo za branje',
     welcome: 'Dobrodošli',
+    where: 'Kjer',
     yes: 'Da',
   },
   hierarchy: {

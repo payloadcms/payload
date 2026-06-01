@@ -10,8 +10,12 @@ export type WhereBuilderProps = {
   readonly collectionPluralLabel?: SanitizedCollectionConfig['labels']['plural']
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly fields?: ClientField[]
+  /** Whether the filters panel is currently open. Used to auto-add a first condition on open. */
+  readonly isWhereOpen?: boolean
   /** When set, WhereBuilder is controlled by the form (value + onChange) instead of list query. */
   readonly onChange?: (where: Where) => void
+  /** Called when the last condition is removed, so the parent can close the filters panel. */
+  readonly onClose?: () => void
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
   readonly value?: Where
@@ -95,5 +99,15 @@ export type RemoveCondition = ({
   orIndex,
 }: {
   andIndex: number
+  orIndex: number
+}) => Promise<void> | void
+
+export type UpdateJoin = ({
+  andIndex,
+  join,
+  orIndex,
+}: {
+  andIndex: number
+  join: Relation
   orIndex: number
 }) => Promise<void> | void

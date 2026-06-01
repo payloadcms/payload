@@ -474,6 +474,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     viewing: 'Pregled',
     viewReadOnly: 'Pregledaj samo za čitanje',
     welcome: 'Dobrodošli',
+    where: 'Gde',
     yes: 'Da',
   },
   hierarchy: {
