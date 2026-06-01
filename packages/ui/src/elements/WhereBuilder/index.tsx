@@ -39,7 +39,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     fields: fieldsProp,
     isWhereOpen,
     onChange,
-    onClose,
     renderedFilters = undefined,
     resolvedFilterOptions = undefined,
     value: valueProp,
@@ -169,12 +168,8 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
       }
 
       await handleWhereChange({ or: newConditions })
-
-      if (newConditions.length === 0) {
-        onClose?.()
-      }
     },
-    [conditions, handleWhereChange, onClose],
+    [conditions, handleWhereChange],
   )
 
   const updateJoin: UpdateJoin = React.useCallback(
