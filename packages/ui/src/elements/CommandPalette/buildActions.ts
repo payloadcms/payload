@@ -11,6 +11,8 @@ import { formatAdminURL } from 'payload/shared'
 
 import type { CommandPaletteAction, CommandPaletteGroup } from './types.js'
 
+import { isNavEntityVisible } from '../../utilities/isNavEntityVisible.js'
+
 type BuildActionsArgs = {
   adminRoute: string
   collections: ClientCollectionConfig[]
@@ -38,8 +40,10 @@ export function buildActions({
   const collectionActions: CommandPaletteAction[] = collections
     .filter(
       (entity) =>
-        entity.admin.group !== false &&
-        permissions?.collections?.[entity.slug]?.read &&
+        isNavEntityVisible({
+          adminGroup: entity.admin.group,
+          entityPermissions: permissions?.collections?.[entity.slug],
+        }) &&
         (!visibleEntities?.collections || visibleEntities.collections.includes(entity.slug)),
     )
     .map((entity) => {
@@ -59,8 +63,10 @@ export function buildActions({
   const globalActions: CommandPaletteAction[] = globals
     .filter(
       (entity) =>
-        entity.admin.group !== false &&
-        permissions?.globals?.[entity.slug]?.read &&
+        isNavEntityVisible({
+          adminGroup: entity.admin.group,
+          entityPermissions: permissions?.globals?.[entity.slug],
+        }) &&
         (!visibleEntities?.globals || visibleEntities.globals.includes(entity.slug)),
     )
     .map((entity) => ({
