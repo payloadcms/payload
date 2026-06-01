@@ -21,9 +21,8 @@ import type {
 
 import { ViewDescription } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { getDocumentPermissions } from '@payloadcms/ui/utilities/getDocumentPermissions'
 import { hasDraftsEnabled } from 'payload/shared'
-
-import { getDocumentPermissions } from './getDocumentPermissions.js'
 
 export const renderDocumentSlots: (args: {
   collectionConfig?: SanitizedCollectionConfig
