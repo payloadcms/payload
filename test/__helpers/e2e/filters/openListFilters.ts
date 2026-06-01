@@ -21,7 +21,12 @@ export const openListFilters = async (
   await expect(page.locator(togglerSelector)).toBeVisible()
   const filterContainer = page.locator(filterContainerSelector).first()
 
-  const isAlreadyOpen = await filterContainer.isVisible()
+  // Use the "open" class rather than visibility, since the container remains
+  // visible during the close animation. Keying off visibility could cause us to
+  // skip the toggle click while the panel is mid-close, leaving it closed.
+  const isAlreadyOpen = await page
+    .locator(`${filterContainerSelector}.rah-static--height-auto`)
+    .isVisible()
 
   if (!isAlreadyOpen) {
     await page.locator(togglerSelector).first().click()
