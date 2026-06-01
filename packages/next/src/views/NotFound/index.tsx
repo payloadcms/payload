@@ -1,12 +1,7 @@
 import type { Metadata } from 'next'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
-import { DefaultTemplate } from '@payloadcms/ui/rsc'
-import { getVisibleEntities } from '@payloadcms/ui/shared'
-import { NotFoundClient } from '@payloadcms/ui/views/NotFound'
-import { formatAdminURL } from 'payload/shared'
-import * as qs from 'qs-esm'
-import React from 'react'
+import { renderNotFoundPage } from '@payloadcms/ui/views/NotFound/page'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { initReq } from '../../utilities/initReq.js'
@@ -28,11 +23,11 @@ export const generateNotFoundViewMetadata = async ({
   }
 }
 
-export const NotFoundPage = async ({
-  config: configPromise,
+export const NotFoundPage = ({
+  config,
   importMap,
-  params: paramsPromise,
-  searchParams: searchParamsPromise,
+  params,
+  searchParams,
 }: {
   config: Promise<SanitizedConfig>
   importMap: ImportMap
@@ -42,55 +37,11 @@ export const NotFoundPage = async ({
   searchParams: Promise<{
     [key: string]: string | string[]
   }>
-}) => {
-  const config = await configPromise
-  const { routes: { admin: adminRoute } = {} } = config
-
-  const searchParams = await searchParamsPromise
-  const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
-
-  const {
-    locale,
-    permissions,
-    req,
-    req: { payload },
-  } = await initReq({
-    configPromise: config,
+}) =>
+  renderNotFoundPage({
+    config,
     importMap,
-    key: 'RootLayout',
-    overrides: {
-      fallbackLocale: false,
-      req: {
-        query: qs.parse(queryString, {
-          depth: 10,
-          ignoreQueryPrefix: true,
-        }),
-      },
-      // intentionally omit `serverURL` to keep URL relative
-      urlSuffix: `${formatAdminURL({ adminRoute, path: '/not-found' })}${searchParams ? queryString : ''}`,
-    },
+    initReq,
+    params,
+    searchParams,
   })
-
-  if (!req.user || !permissions.canAccessAdmin) {
-    return <NotFoundClient />
-  }
-
-  const params = await paramsPromise
-  const visibleEntities = getVisibleEntities({ req })
-
-  return (
-    <DefaultTemplate
-      i18n={req.i18n}
-      locale={locale}
-      params={params}
-      payload={payload}
-      permissions={permissions}
-      req={req}
-      searchParams={searchParams}
-      user={req.user}
-      visibleEntities={visibleEntities}
-    >
-      <NotFoundClient />
-    </DefaultTemplate>
-  )
-}
