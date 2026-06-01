@@ -39,6 +39,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     fields: fieldsProp,
     isWhereOpen,
     onChange,
+    onClose,
     renderedFilters = undefined,
     resolvedFilterOptions = undefined,
     value: valueProp,
@@ -168,8 +169,13 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
       }
 
       await handleWhereChange({ or: newConditions })
+
+      // Removing the last remaining condition closes the filters panel.
+      if (newConditions.length === 0) {
+        onClose?.()
+      }
     },
-    [conditions, handleWhereChange],
+    [conditions, handleWhereChange, onClose],
   )
 
   const updateJoin: UpdateJoin = React.useCallback(
