@@ -175,7 +175,7 @@ export const handleGroupBy = async ({
         const option = groupByField.options?.find(
           (opt) => (typeof opt === 'string' ? opt : opt.value) === valueOrRelationshipID,
         )
-        if (option && typeof option !== 'string') {
+        if (option && typeof option !== 'string' && typeof option.label === 'string') {
           heading = getTranslation(option.label, req.i18n)
         } else {
           heading = String(valueOrRelationshipID)

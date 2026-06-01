@@ -24,12 +24,6 @@
       text-decoration: none;
       border-radius: var(--button-radius);
 
-      &:focus-visible {
-        outline: var(--accessibility-outline);
-        outline-offset: var(--accessibility-outline-offset);
-        border-radius: var(--button-radius);
-      }
-
       label {
         cursor: pointer;
       }

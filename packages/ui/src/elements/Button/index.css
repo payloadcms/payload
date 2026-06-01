@@ -24,12 +24,6 @@
     &.btn--disabled {
       cursor: not-allowed;
     }
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-      border-radius: var(--button-radius);
-    }
   }
 
   .btn--disabled,
