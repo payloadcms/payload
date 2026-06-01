@@ -3,7 +3,7 @@ import type { SanitizedConfig } from 'payload'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { adminViews } from '../adapter.js'
-import { generateCollectionTrashMetadata } from '../CollectionTrash/metadata.js'
+import { generateCollectionTrashMetadata } from '../Document/generateCollectionTrashMetadata.js'
 import { generateListViewMetadata } from '../Document/generateListViewMetadata.js'
 import { generateDocumentViewMetadata } from '../Document/metadata.js'
 import { generateCustomViewMetadata } from './generateCustomViewMetadata.js'
