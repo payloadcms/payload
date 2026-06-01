@@ -864,18 +864,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     })
   } else if (field.type === 'tab') {
     const isNamedTab = tabHasName(field)
-    let tabSelect: SelectType | undefined
-
-    const tabField: TabAsField = {
-      ...field,
-      type: 'tab',
-    }
-
-    let childPermissions: SanitizedFieldsPermissions = undefined
 
     if (isNamedTab) {
       const shouldContinue = stripUnselectedFields({
-        field: tabField,
+        field: { ...field, type: 'tab' },
         select,
         selectMode,
         siblingDoc: data?.[field.name] || {},
@@ -884,16 +876,30 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       if (!shouldContinue) {
         return
       }
+    }
 
+    // Tab visibility on the client is keyed by `field.id` (see
+    // packages/ui/src/fields/Tabs/index.tsx). `passesCondition` was already
+    // resolved by `iterateFields`, so use it directly.
+    if (field?.id) {
+      state[field.id] = {
+        passesCondition,
+      }
+    }
+
+    if (!passesCondition) {
+      return
+    }
+
+    let childPermissions: SanitizedFieldsPermissions
+    let tabSelect: SelectType | undefined
+
+    if (isNamedTab) {
       if (parentPermissions === true) {
         childPermissions = true
       } else {
         const tabPermissions = parentPermissions?.[field.name]
-        if (tabPermissions === true) {
-          childPermissions = true
-        } else {
-          childPermissions = tabPermissions?.fields
-        }
+        childPermissions = tabPermissions === true ? true : tabPermissions?.fields
       }
 
       if (typeof select?.[field.name] === 'object') {
@@ -902,21 +908,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     } else {
       childPermissions = parentPermissions
       tabSelect = select
-    }
-
-    // `passesCondition` was already resolved by `iterateFields` (combining the
-    // tab's own `admin.condition` with the parent's condition), so use it
-    // directly rather than re-evaluating.
-    if (field?.id) {
-      state[field.id] = {
-        passesCondition,
-      }
-    }
-
-    // Skip recursion into children when the tab is hidden — its descendants
-    // would all short-circuit anyway.
-    if (!passesCondition) {
-      return
     }
 
     return iterateFields({
