@@ -146,6 +146,41 @@
       "types": "./src/utilities/getClientConfig.ts",
       "default": "./src/utilities/getClientConfig.ts"
     },
+    "./utilities/getRouteWithoutAdmin": {
+      "import": "./src/utilities/getRouteWithoutAdmin.ts",
+      "types": "./src/utilities/getRouteWithoutAdmin.ts",
+      "default": "./src/utilities/getRouteWithoutAdmin.ts"
+    },
+    "./utilities/isCustomAdminView": {
+      "import": "./src/utilities/isCustomAdminView.ts",
+      "types": "./src/utilities/isCustomAdminView.ts",
+      "default": "./src/utilities/isCustomAdminView.ts"
+    },
+    "./utilities/isPublicAdminRoute": {
+      "import": "./src/utilities/isPublicAdminRoute.ts",
+      "types": "./src/utilities/isPublicAdminRoute.ts",
+      "default": "./src/utilities/isPublicAdminRoute.ts"
+    },
+    "./utilities/handleAuthRedirect": {
+      "import": "./src/utilities/handleAuthRedirect.ts",
+      "types": "./src/utilities/handleAuthRedirect.ts",
+      "default": "./src/utilities/handleAuthRedirect.ts"
+    },
+    "./utilities/getPreferences": {
+      "import": "./src/utilities/getPreferences.ts",
+      "types": "./src/utilities/getPreferences.ts",
+      "default": "./src/utilities/getPreferences.ts"
+    },
+    "./views/Root/getCustomViewByRoute": {
+      "import": "./src/views/Root/getCustomViewByRoute.ts",
+      "types": "./src/views/Root/getCustomViewByRoute.ts",
+      "default": "./src/views/Root/getCustomViewByRoute.ts"
+    },
+    "./views/NotFound/page": {
+      "import": "./src/views/NotFound/page.tsx",
+      "types": "./src/views/NotFound/page.tsx",
+      "default": "./src/views/NotFound/page.tsx"
+    },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
