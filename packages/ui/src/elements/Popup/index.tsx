@@ -207,8 +207,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
       top = triggerRect.bottom + window.scrollY + offset
 
       if (triggerRect.bottom + popupRect.height + offset > window.innerHeight) {
-        top = triggerRect.top + window.scrollY - popupRect.height - offset
-        onTop = true
+        // Try to flip above — only do so if there's actually enough room
+        const topIfAbove = triggerRect.top + window.scrollY - popupRect.height - offset
+        if (topIfAbove >= window.scrollY) {
+          top = topIfAbove
+          onTop = true
+        }
+        // else: not enough room above either — keep below and let it overflow rather than going off-screen
       }
     } else {
       top = triggerRect.top + window.scrollY - popupRect.height - offset
@@ -383,9 +388,21 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // Initial Position
     // Calculate and apply popup position.
     // getBoundingClientRect() forces synchronous layout.
+    //
+    // We call updatePosition() twice: once synchronously (so the popup
+    // snaps to roughly the right place immediately rather than flashing
+    // from -9999px) and once in a requestAnimationFrame, which fires
+    // after the browser has finished laying out the newly-visible popup
+    // content. The rAF call is the authoritative one — it catches cases
+    // where the popup height wasn't stable yet during the first call
+    // (e.g. ColumnSelector content rendering after hidden → visible
+    // class switch), which was causing incorrect flip-to-top decisions.
     // /////////////////////////////////////
 
     updatePosition()
+    const rafId = requestAnimationFrame(() => {
+      updatePosition()
+    })
 
     // /////////////////////////////////////
     // Focus Management
@@ -415,6 +432,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     popup.addEventListener('click', handleActionableClick)
 
     return () => {
+      cancelAnimationFrame(rafId)
       window.removeEventListener('resize', updatePosition)
       window.removeEventListener('scroll', updatePosition, { capture: true })
       document.removeEventListener('mousedown', handleClickOutside)
