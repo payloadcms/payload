@@ -333,12 +333,21 @@ export const DocumentControls: React.FC<{
         </div>
         {showDotMenu && !readOnlyForIncomingUser && (
           <Popup
-            button={<MoreIcon />}
             buttonClassName={`${baseClass}__popup-button`}
             caret={false}
             className={`${baseClass}__popup`}
             disabled={initializing || processing}
             horizontalAlign="right"
+            renderButton={({ active, ...buttonProps }) => (
+              <Button
+                {...buttonProps}
+                buttonStyle="ghost"
+                className={`${baseClass}__popup-button`}
+                icon={<MoreIcon />}
+                selected={active}
+                size="medium"
+              />
+            )}
             size="medium"
             verticalAlign="bottom"
           >

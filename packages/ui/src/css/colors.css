@@ -83,11 +83,6 @@
     /* Field upload card */
     --field-color-upload-bg: var(--color-bg-secondary);
     --field-color-upload-border: var(--color-border);
-
-    /* Field sizing — override to create compact or spacious themes */
-    --field-min-height: var(--spacer-5);
-    --field-padding-inline: var(--spacer-2);
-    --field-border-radius: var(--radius-medium);
   }
 
   /* ——————————————————————————————————————————————

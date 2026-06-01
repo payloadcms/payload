@@ -4,7 +4,7 @@
     align-items: stretch;
     height: var(--spacer-4);
     border: var(--stroke-width-small) solid transparent;
-    border-radius: var(--radius-medium);
+    border-radius: var(--field-border-radius);
     background: var(--color-bg-secondary);
     overflow: hidden;
 

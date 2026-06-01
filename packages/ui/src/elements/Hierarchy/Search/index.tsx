@@ -130,7 +130,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
             renderButton={({ active, onClick, onKeyDown }) => (
               <Button
                 aria-label={t('general:filter')}
-                buttonStyle="ghost"
+                buttonStyle="secondary"
                 className={`${baseClass}__filter`}
                 extraButtonProps={{ onKeyDown }}
                 icon={<FilterIcon hasBadgeCutout={hasActiveFilters} size={16} />}

@@ -33,6 +33,7 @@
     list-style: none;
     padding: 0;
     gap: var(--spacer-3);
+    color: var(--color-text);
     margin: 0;
     width: 100%;
 
@@ -102,6 +103,10 @@
 
   .doc-controls__popup {
     position: relative;
+  }
+
+  .doc-controls__popup-button {
+    padding-inline: 0;
   }
 
   .doc-controls__popup-button.popup-button--active,

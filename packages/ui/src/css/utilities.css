@@ -17,4 +17,11 @@
     white-space: nowrap;
     border-width: 0;
   }
+
+  /* Global focus ring */
+  :focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+    border-radius: var(--button-radius);
+  }
 }

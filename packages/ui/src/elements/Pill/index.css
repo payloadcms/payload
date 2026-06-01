@@ -15,7 +15,7 @@
     display: inline-flex;
     background: var(--color-black-200);
     color: var(--color-text);
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     cursor: inherit;
     border: 0;
     align-items: center;

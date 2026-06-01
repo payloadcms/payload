@@ -7,15 +7,11 @@
 
   .hierarchy-search__controls {
     display: flex;
-    align-items: center;
     gap: var(--spacer-2);
   }
 
   .hierarchy-search__filter {
     flex-shrink: 0;
-    width: var(--spacer-4);
-    height: var(--spacer-4);
-    background: var(--color-bg-secondary);
   }
 
   .hierarchy-search__filter:hover:not(.btn--selected) {
@@ -26,20 +22,18 @@
     display: flex;
     align-items: center;
     flex: 1;
-    height: var(--spacer-4);
-    background: var(--color-bg-secondary);
-    border-radius: var(--radius-medium);
-    border: var(--stroke-width-small) solid transparent;
-    padding-inline-end: var(--spacer-2);
+    min-height: var(--control-height);
+    background: var(--field-color-bg);
+    border-radius: var(--field-border-radius);
+    border: var(--stroke-width-small) solid var(--field-color-border);
+    padding-inline: var(--field-padding-inline) var(--spacer-2);
 
-    &:has(input:focus-visible) {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
+    &:hover:not(:focus-within) {
+      border-color: var(--field-color-border-hover);
     }
 
-    .icon--search {
-      width: var(--spacer-3);
-      height: var(--spacer-3);
+    &:has(input:focus-visible) {
+      border-color: var(--field-color-border-focus);
     }
   }
 

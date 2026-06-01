@@ -29,9 +29,9 @@
     top: -9999px;
     left: -9999px;
     z-index: var(--z-popup);
-    background: var(--color-bg-elevated);
+    background: var(--popup-bg, var(--color-bg-elevated));
     color: var(--color-text);
-    border-radius: var(--radius-large);
+    border-radius: var(--popup-radius);
     min-width: 80px;
     max-width: 400px;
     box-shadow:

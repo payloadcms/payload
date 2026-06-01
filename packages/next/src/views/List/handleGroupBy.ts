@@ -12,6 +12,7 @@ import type {
   Where,
 } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { renderTable } from '@payloadcms/ui/rsc'
 import { formatDate } from '@payloadcms/ui/shared'
 import { flattenAllFields } from 'payload'
@@ -169,6 +170,15 @@ export const handleGroupBy = async ({
         }
         if (valueOrRelationshipID === false) {
           heading = req.i18n.t('general:false')
+        }
+      } else if (groupByField?.type === 'select' || groupByField?.type === 'radio') {
+        const option = groupByField.options?.find(
+          (opt) => (typeof opt === 'string' ? opt : opt.value) === valueOrRelationshipID,
+        )
+        if (option && typeof option !== 'string') {
+          heading = getTranslation(option.label, req.i18n)
+        } else {
+          heading = String(valueOrRelationshipID)
         }
       } else {
         heading = String(valueOrRelationshipID)

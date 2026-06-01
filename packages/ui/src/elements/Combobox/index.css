@@ -28,7 +28,7 @@
     background: var(--bg-default-secondary);
     color: var(--text-default);
     border: none;
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     padding: calc(var(--base) * 0.25) calc(var(--base) * 0.5);
     outline: none;
     box-shadow: none;

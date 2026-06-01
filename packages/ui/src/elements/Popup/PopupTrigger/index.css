@@ -8,7 +8,7 @@
     font-family: inherit;
     cursor: pointer;
     display: inline-flex;
-    border-radius: var(--radius-medium, 0.3125rem);
+    border-radius: var(--button-radius, 0.3125rem);
   }
 
   .popup-button--background {

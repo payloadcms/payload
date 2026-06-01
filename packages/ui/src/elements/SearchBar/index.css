@@ -2,19 +2,21 @@
   .search-bar {
     display: flex;
     align-items: center;
-    background-color: var(--color-bg-secondary);
-    border-radius: var(--radius-medium);
-    outline: var(--stroke-width-small) solid transparent;
-    outline-offset: calc(var(--stroke-width-small) * -1);
+    box-sizing: content-box;
+    min-height: var(--control-height);
+    background-color: var(--field-color-bg);
+    border-radius: var(--field-border-radius);
+    border: var(--stroke-width-small) solid var(--field-color-border);
+    padding-inline: var(--field-padding-inline);
     position: relative;
     isolation: isolate;
 
     &:hover {
-      outline-color: var(--color-border);
+      border-color: var(--field-color-border-hover);
     }
 
     &:focus-within {
-      outline-color: var(--accessibility-focus-color);
+      border-color: var(--field-color-border-focus);
     }
 
     &:has(:disabled) {
