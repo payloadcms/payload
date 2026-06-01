@@ -46,6 +46,16 @@
       "types": "./src/views/Dashboard/serverFunctions.ts",
       "default": "./src/views/Dashboard/serverFunctions.ts"
     },
+    "./views/Document/handleServerFunction": {
+      "import": "./src/views/Document/handleServerFunction.tsx",
+      "types": "./src/views/Document/handleServerFunction.tsx",
+      "default": "./src/views/Document/handleServerFunction.tsx"
+    },
+    "./views/Document/renderDocumentSlots": {
+      "import": "./src/views/Document/renderDocumentSlots.tsx",
+      "types": "./src/views/Document/renderDocumentSlots.tsx",
+      "default": "./src/views/Document/renderDocumentSlots.tsx"
+    },
     "./views/List/handleServerFunction": {
       "import": "./src/views/List/handleServerFunction.tsx",
       "types": "./src/views/List/handleServerFunction.tsx",
@@ -197,6 +207,7 @@
     "dequal": "2.0.3",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
+    "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
     "react-datepicker": "7.6.0",
     "react-image-crop": "10.1.8",
@@ -311,6 +322,16 @@
         "import": "./dist/views/Dashboard/serverFunctions.js",
         "types": "./dist/views/Dashboard/serverFunctions.d.ts",
         "default": "./dist/views/Dashboard/serverFunctions.js"
+      },
+      "./views/Document/handleServerFunction": {
+        "import": "./dist/views/Document/handleServerFunction.js",
+        "types": "./dist/views/Document/handleServerFunction.d.ts",
+        "default": "./dist/views/Document/handleServerFunction.js"
+      },
+      "./views/Document/renderDocumentSlots": {
+        "import": "./dist/views/Document/renderDocumentSlots.js",
+        "types": "./dist/views/Document/renderDocumentSlots.d.ts",
+        "default": "./dist/views/Document/renderDocumentSlots.js"
       },
       "./views/List/handleServerFunction": {
         "import": "./dist/views/List/handleServerFunction.js",
