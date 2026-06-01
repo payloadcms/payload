@@ -59,7 +59,7 @@ export const renderWidgetHandler: ServerFunction<
 
   try {
     const localeFilteredData = widgetConfig.fields?.length
-      ? extractLocaleData(widgetData || {}, req.locale || 'en', widgetConfig.fields)
+      ? extractLocaleData(widgetData || {}, req.locale || 'en', widgetConfig.fields as Field[])
       : widgetData || {}
 
     const serverProps: WidgetServerProps = {

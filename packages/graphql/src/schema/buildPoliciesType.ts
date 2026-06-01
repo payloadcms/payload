@@ -158,7 +158,7 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
   const { type, entity, scope, typeSuffix } = args
   const { slug, fields, graphQL, versions } = entity
 
-  let operations: string[]
+  let operations: OperationType[]
 
   if (graphQL === false) {
     return null

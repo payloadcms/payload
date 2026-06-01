@@ -1330,7 +1330,7 @@ export function configToJSONSchema(
 
   const authOperationDefinitions = [...config.collections]
     .filter(({ auth }) => Boolean(auth))
-    .reduce(
+    .reduce<{ auth: Record<string, JSONSchema4> }>(
       (acc, authCollection) => {
         acc.auth[authCollection.slug] = authCollectionToOperationsJSONSchema(authCollection)
         return acc

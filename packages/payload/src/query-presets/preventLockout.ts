@@ -18,7 +18,7 @@ import { queryPresetsCollectionSlug } from './config.js'
 export const preventLockout: Validate = async (
   value,
   { data, overrideAccess, req: incomingReq },
-) => {
+): Promise<true> => {
   // Use context to ensure an infinite loop doesn't occur
   if (!incomingReq.context._preventLockout && !overrideAccess) {
     const req = await createLocalReq(

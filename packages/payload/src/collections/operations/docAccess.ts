@@ -50,7 +50,8 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
       data,
       entity: config,
       entityType: 'collection',
-      fetchData: id ? true : false,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- build's TypeScript needs the literal `true` to match the discriminated-union Args; lint's TS service disagrees
+      fetchData: id ? true : (false as true),
       operations: collectionOperations,
       req,
     })

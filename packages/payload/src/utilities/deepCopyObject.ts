@@ -120,7 +120,7 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T, filterUndefi
     if (value instanceof Date) {
       return new Date(value) as unknown as T
     }
-    const ret: { [key: string]: T } = {}
+    const ret: { [key: string]: unknown } = {}
     for (const k in value) {
       const v = value[k]
       if (filterUndefined && v === undefined) {
@@ -164,7 +164,7 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
     if (value instanceof Date) {
       return new Date(value) as unknown as T
     }
-    const ret: { [key: string]: T } = {}
+    const ret: { [key: string]: unknown } = {}
     for (const k in value) {
       const v = value[k]
       ret[k] =

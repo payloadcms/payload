@@ -41,7 +41,7 @@ export const createAddressesCollection: (props: Props) => CollectionConfig = (pr
         t('plugin-ecommerce:customer'),
       relationTo: customersSlug,
     },
-    ...addressFields.map((field) => {
+    ...addressFields.map((field): Field => {
       if ('name' in field && field.name === 'country') {
         return {
           name: 'country',
