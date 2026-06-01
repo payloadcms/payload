@@ -195,6 +195,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state[path] = fieldState
     }
 
+    // Tab visibility on the client is keyed by `field.id` in form state
+    // (see packages/ui/src/fields/Tabs/index.tsx). The tab branch normally
+    // writes `state[field.id]` — when short-circuiting, mirror that write so
+    // hidden tabs are correctly flagged.
+    if (field.type === 'tab' && field.id) {
+      state[field.id] = { passesCondition: false }
+    }
+
     return
   }
 
