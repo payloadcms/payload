@@ -752,7 +752,7 @@ describe('Relationship Field', () => {
 
     await page.goto(versionedRelationshipFieldURL.list)
     await wait(300)
-    await page.locator('.list-controls__toggle-columns').click()
+    await page.locator('.columns-button__button').click()
 
     await addListFilter({
       page,

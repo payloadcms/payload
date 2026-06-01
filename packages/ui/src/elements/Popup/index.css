@@ -42,7 +42,7 @@
   }
 
   .popup__content.popup--size-small {
-    min-width: 100px;
+    min-width: 80px;
   }
 
   .popup__content.popup--size-large {
