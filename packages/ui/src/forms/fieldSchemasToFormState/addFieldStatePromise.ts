@@ -184,14 +184,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldState.fieldSchema = field
   }
 
-  // Short-circuit when the field fails its condition: skip access checks,
-  // validation, switch processing, recursion into children, filterOptions
-  // resolution, and render. The client re-requests form state when conditions
-  // flip, so a minimal entry is sufficient here.
+  // Short-circuit to prevent hidden fields from recursing and rendering.
   if (passesCondition === false) {
+    if (fieldAffectsData(field) && data?.[field.name] !== undefined) {
+      fieldState.value = data[field.name]
+      fieldState.initialValue = data[field.name]
+    }
+
     if (!filter || filter(args)) {
       state[path] = fieldState
     }
+
     return
   }
 
@@ -900,9 +903,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     const pathSegments = path ? path.split('.') : []
 
-    // The incoming `passesCondition` is guaranteed to be true here because the
-    // function returns early when it is false. Tab visibility is determined
-    // solely by its own `admin.condition`, if defined.
+    // `passesCondition` is guaranteed `true` here because the function returns
+    // early when it is `false`. Tab visibility is determined solely by its own
+    // `admin.condition`, if defined.
     let tabPassesCondition: boolean = true
 
     if (typeof field.admin?.condition === 'function') {
@@ -958,10 +961,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (!filter || filter(args)) {
       state[path] = {
         disableFormData: true,
-      }
-
-      if (passesCondition === false) {
-        state[path].passesCondition = false
       }
     }
 
