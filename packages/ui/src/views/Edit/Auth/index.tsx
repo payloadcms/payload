@@ -255,70 +255,69 @@ export const Auth: React.FC<Props> = (props) => {
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
-      {enableFields && (
-        <div className={`${baseClass}__card`}>
-          <div className={`${baseClass}__header`}>
-            <div className={`${baseClass}__title`}>{t('authentication:account')}</div>
-            {Controls}
-          </div>
-          <div className={`${baseClass}__body`}>
-            <EmailAndUsernameFields
-              loginWithUsername={loginWithUsername}
-              operation={operation}
-              permissions={docPermissions?.fields}
-              readOnly={readOnly || isTrashed}
-              t={t}
-            />
-            {(changingPassword || requirePassword) && (!disableLocalStrategy || !enableFields) && (
-              <div className={`${baseClass}__changing-password`}>
-                <PasswordField
-                  autoComplete="new-password"
-                  field={{
-                    name: 'password',
-                    label: t('authentication:newPassword'),
-                    required: true,
-                  }}
-                  indexPath=""
-                  parentPath=""
-                  parentSchemaPath=""
-                  path="password"
-                  schemaPath="password"
-                />
-                <ConfirmPasswordField disabled={readOnly || isTrashed} />
-              </div>
-            )}
-            {useAPIKey && (
-              <div className={`${baseClass}__api-key`}>
-                {canReadApiKey && (
-                  <Fragment>
-                    <CheckboxField
+      <div className={`${baseClass}__card`}>
+        <div className={`${baseClass}__header`}>
+          <div className={`${baseClass}__title`}>{t('authentication:account')}</div>
+          {Controls}
+        </div>
+        <div className={`${baseClass}__body`}>
+          {showAuthBlock && (
+            <Fragment>
+              <EmailAndUsernameFields
+                loginWithUsername={loginWithUsername}
+                operation={operation}
+                permissions={docPermissions?.fields}
+                readOnly={readOnly || isTrashed}
+                t={t}
+              />
+              {(changingPassword || requirePassword) &&
+                (!disableLocalStrategy || !enableFields) && (
+                  <div className={`${baseClass}__changing-password`}>
+                    <PasswordField
+                      autoComplete="new-password"
                       field={{
-                        name: 'enableAPIKey',
-                        admin: { disabled, readOnly: enableAPIKeyReadOnly },
-                        label: t('authentication:enableAPIKey'),
+                        name: 'password',
+                        label: t('authentication:newPassword'),
+                        required: true,
                       }}
-                      path="enableAPIKey"
-                      schemaPath={`${collectionSlug}.enableAPIKey`}
+                      indexPath=""
+                      parentPath=""
+                      parentSchemaPath=""
+                      path="password"
+                      schemaPath="password"
                     />
-                    <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />
-                  </Fragment>
+                    <ConfirmPasswordField disabled={readOnly || isTrashed} />
+                  </div>
                 )}
-              </div>
-            )}
-            {verify && isEditing && (
+            </Fragment>
+          )}
+          {showAPIKeyBlock && (
+            <div className={`${baseClass}__api-key`}>
               <CheckboxField
                 field={{
-                  name: '_verified',
-                  admin: { disabled, readOnly },
-                  label: t('authentication:verified'),
+                  name: 'enableAPIKey',
+                  admin: { disabled, readOnly: enableAPIKeyReadOnly },
+                  label: t('authentication:enableAPIKey'),
                 }}
-                path="_verified"
-                schemaPath={`${collectionSlug}._verified`}
+                path="enableAPIKey"
+                schemaPath={`${collectionSlug}.enableAPIKey`}
               />
-            )}
-          </div>
+              <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />
+            </div>
+          )}
+          {showVerifyBlock && (
+            <CheckboxField
+              field={{
+                name: '_verified',
+                admin: { disabled, readOnly },
+                label: t('authentication:verified'),
+              }}
+              path="_verified"
+              schemaPath={`${collectionSlug}._verified`}
+            />
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

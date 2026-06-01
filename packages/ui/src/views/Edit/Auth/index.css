@@ -84,6 +84,7 @@
     min-height: unset;
     outline: none;
     padding: 0 var(--spacer-2);
+    padding-inline-end: calc(var(--spacer-4) + var(--spacer-3));
     appearance: none;
     -webkit-appearance: none;
   }
@@ -106,6 +107,7 @@
   .auth-fields .api-key__toggle-button-wrap {
     position: absolute;
     top: 50%;
+    right: calc(var(--spacer-2) - 5px); /* 8px input padding - 5px icon viewBox internal padding */
     display: flex;
     align-items: center;
     justify-content: center;
