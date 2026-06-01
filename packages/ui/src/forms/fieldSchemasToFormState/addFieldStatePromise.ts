@@ -184,10 +184,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldState.fieldSchema = field
   }
 
-  // Short-circuit to prevent hidden fields from recursing and rendering.
-  // `tab` is excluded because tab visibility is keyed by `field.id` rather
-  // than `path` — the tab branch below owns that write and the skip-recursion
-  // logic.
+  /**
+   * Short-circuit to prevent hidden fields from recursing and rendering.
+   * Note: `tab` is excluded bc tab visibility is keyed by `field.id` rather than `path`.
+   * The tab branch below owns that write and the skip-recursion.
+   */
   if (passesCondition === false && field.type !== 'tab') {
     if (fieldAffectsData(field) && data?.[field.name] !== undefined) {
       fieldState.value = data[field.name]
@@ -878,9 +879,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
 
-    // Tab visibility on the client is keyed by `field.id` (see
-    // packages/ui/src/fields/Tabs/index.tsx). `passesCondition` was already
-    // resolved by `iterateFields`, so use it directly.
+    /**
+     * Tab visibility on the client is keyed by `field.id`, not `path` (like all other fields).
+     */
     if (field?.id) {
       state[field.id] = {
         passesCondition,
