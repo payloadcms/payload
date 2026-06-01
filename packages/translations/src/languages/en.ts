@@ -240,6 +240,7 @@ export const enTranslations = {
     cancel: 'Cancel',
     changesNotSaved:
       'Your changes have not been saved. If you leave now, you will lose your changes.',
+    checked: 'Checked',
     clear: 'Clear',
     clearAll: 'Clear All',
     close: 'Close',
@@ -455,6 +456,7 @@ export const enTranslations = {
     trashedCountSuccessfully: '{{count}} {{label}} moved to trash.',
     true: 'True',
     unauthorized: 'Unauthorized',
+    unchecked: 'Unchecked',
     unlock: 'Unlock',
     unsavedChanges: 'You have unsaved changes. Save or discard before continuing.',
     unsavedChangesDuplicate: 'You have unsaved changes. Would you like to continue to duplicate?',

@@ -230,6 +230,7 @@ export const heTranslations: DefaultTranslationsObject = {
     by: 'על ידי',
     cancel: 'ביטול',
     changesNotSaved: 'השינויים שלך לא נשמרו. אם תצא כעת, תאבד את השינויים שלך.',
+    checked: 'נבדק',
     clear:
       'בהתחשב במשמעות של הטקסט המקורי בהקשר של Payload. הנה רשימה של מונחים מקוריים של Payload שנושאים משמעויות מסוימות:\n- אוסף: אוסף הוא קבוצה של מסמכים ששותפים למבנה ולמטרה משות',
     clearAll: 'נקה הכל',
@@ -442,6 +443,7 @@ export const heTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} הועברו לפח.',
     true: 'True',
     unauthorized: 'אין הרשאה',
+    unchecked: 'לא מסומן',
     unlock: 'שחרר',
     unsavedChanges: 'יש לך שינויים שלא נשמרו. שמור או מחק לפני שתמשיך.',
     unsavedChangesDuplicate: 'יש לך שינויים שלא נשמרו. האם ברצונך להמשיך לשכפל?',

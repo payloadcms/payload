@@ -238,6 +238,7 @@ export const plTranslations: DefaultTranslationsObject = {
     cancel: 'Anuluj',
     changesNotSaved:
       'Twoje zmiany nie zostały zapisane. Jeśli teraz wyjdziesz, stracisz swoje zmiany.',
+    checked: 'Sprawdzone',
     clear: 'Jasne',
     clearAll: 'Wyczyść wszystko',
     close: 'Zamknij',
@@ -453,6 +454,7 @@ export const plTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} przeniesiono do kosza.',
     true: 'Prawda',
     unauthorized: 'Brak autoryzacji',
+    unchecked: 'Niezaznaczone',
     unlock: 'Odblokuj',
     unsavedChanges: 'Masz niezapisane zmiany. Zapisz lub odrzuć, zanim kontynuujesz.',
     unsavedChangesDuplicate: 'Masz niezapisane zmiany. Czy chcesz kontynuować duplikowanie?',

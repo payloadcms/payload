@@ -35,6 +35,7 @@ export const rubbishSlug = 'rubbish'
 export const searchBarTestSlug = 'search-bar-test'
 export const unauthorizedSlug = 'unauthorized-test'
 export const docControlsSlug = 'doc-controls'
+export const versionsDiffSlug = 'versions-diff'
 
 export const collectionSlugs = [
   'users',
@@ -74,5 +75,6 @@ export const collectionSlugs = [
   searchBarTestSlug,
   unauthorizedSlug,
   docControlsSlug,
+  versionsDiffSlug,
   'payload-query-presets',
 ]

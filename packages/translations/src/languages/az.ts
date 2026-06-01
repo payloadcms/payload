@@ -241,6 +241,7 @@ export const azTranslations: DefaultTranslationsObject = {
     cancel: 'Ləğv et',
     changesNotSaved:
       'Dəyişiklikləriniz saxlanılmayıb. İndi çıxsanız, dəyişikliklərinizi itirəcəksiniz.',
+    checked: 'Yoxlanılıb',
     clear:
       'Payload kontekstində orijinal mətnin mənasını qoruya. İşte Payload terminləri siyahısıdır ki, onlar üzərində çox xüsusi mənalar gəlir:\n    - Kolleksiya: Kolleksiya sənədlərin hamıya ortaq struktur və məqsəd sərbəst olan bir qrupdur. Kolleksiyalar Payload-da məzmunu təşkil etmək və idarə etmək üçün istifadə edilir.\n    - Sahə: Sahə',
     clearAll: 'Hamısını təmizlə',
@@ -458,6 +459,7 @@ export const azTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} zibilə köçürüldü.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
+    unchecked: 'Seçilməmiş',
     unlock: 'Açın',
     unsavedChanges:
       'Sizin saxlanılmamış dəyişiklikləriniz var. Davam etmədən əvvəl saxlayın və ya atın.',

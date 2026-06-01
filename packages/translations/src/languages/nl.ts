@@ -246,6 +246,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     cancel: 'Annuleren',
     changesNotSaved:
       'Uw wijzigingen zijn niet bewaard. Als u weggaat zullen de wijzigingen verloren gaan.',
+    checked: 'Gecontroleerd',
     clear: 'Wissen',
     clearAll: 'Alles wissen',
     close: 'Sluiten',
@@ -463,6 +464,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} verplaatst naar prullenbak.',
     true: 'Waar',
     unauthorized: 'Onbevoegd',
+    unchecked: 'Niet geselecteerd',
     unlock: 'Ontgrendelen',
     unsavedChanges: 'U heeft niet-opgeslagen wijzigingen. Sla op of verwijder voordat u doorgaat.',
     unsavedChangesDuplicate: 'U heeft onbewaarde wijzigingen. Wilt u doorgaan met dupliceren?',

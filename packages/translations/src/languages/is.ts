@@ -239,6 +239,7 @@ export const isTranslations: DefaultTranslationsObject = {
     cancel: 'Hætta við',
     changesNotSaved:
       'Breytingarnar þínar hafa ekki verið vistaðar. Ef þú ferð núna muntu missa breytingarnar þínar.',
+    checked: 'Staðfest',
     clear: 'Hreinsa',
     clearAll: 'Hreinsa allt',
     close: 'Loka',
@@ -452,6 +453,7 @@ export const isTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} færð í rusl.',
     true: 'Satt',
     unauthorized: 'Óheimilt',
+    unchecked: 'Óhakið',
     unlock: 'Opnaðu',
     unsavedChanges:
       'Þú ert með óvistaðar breytingar. Vistaðu eða hættu við áður en þú heldur áfram.',

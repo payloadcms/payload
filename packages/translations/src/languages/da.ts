@@ -239,6 +239,7 @@ export const daTranslations: DefaultTranslationsObject = {
     cancel: 'Anuller',
     changesNotSaved:
       'Dine ændringer er ikke blevet gemt. Hvis du forlader siden, vil din ændringer gå tabt.',
+    checked: 'Kontrolleret',
     clear: 'Klar',
     clearAll: 'Ryd alt',
     close: 'Luk',
@@ -455,6 +456,7 @@ export const daTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} flyttet til papirkurven.',
     true: 'Sandt',
     unauthorized: 'Uautoriseret',
+    unchecked: 'Ikke markeret',
     unlock: 'Oplås',
     unsavedChanges: 'Du har ikke gemte ændringer. Gem eller kassér før fortsættelse.',
     unsavedChangesDuplicate: 'Du har ikke-gemte ændringer. Vil du fortsætte med at duplikere?',

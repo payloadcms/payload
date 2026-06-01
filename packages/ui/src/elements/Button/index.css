@@ -313,6 +313,7 @@
     .popup-button {
       border-radius: var(--radius-medium);
       align-items: center;
+      justify-content: center;
 
       html:not([dir='RTL']) & {
         border-left: var(--stroke-width-small) solid var(--separator-color);
@@ -427,14 +428,60 @@
 
   .btn--withPopup.btn--style-ghost {
     --separator-color: transparent;
+    border-radius: var(--radius-medium);
+    padding-left: var(--spacer-2);
+    padding-right: var(--spacer-1);
+
     .btn,
     .popup-button {
       color: var(--color-text);
       background-color: transparent;
+    }
+
+    .btn {
+      padding: 0;
 
       &:hover,
       &:active {
-        background-color: var(--color-bg-transparent-hover);
+        background-color: transparent;
+      }
+    }
+
+    .popup-button {
+      align-self: center;
+      border-radius: var(--radius-medium);
+      border: none;
+      height: auto;
+      margin-left: var(--spacer-1);
+
+      html:not([dir='RTL']) & {
+        border-top-left-radius: var(--radius-medium);
+        border-bottom-left-radius: var(--radius-medium);
+      }
+
+      html[dir='RTL'] & {
+        border-top-right-radius: var(--radius-medium);
+        border-bottom-right-radius: var(--radius-medium);
+      }
+    }
+
+    &:hover,
+    &:active {
+      background-color: var(--color-bg-transparent-hover);
+    }
+
+    .popup-button:hover {
+      background-color: var(--color-bg-transparent-hover);
+    }
+
+    .popup-button:active {
+      background-color: var(--color-bg-transparent-pressed);
+    }
+
+    &.btn--disabled {
+      &:hover,
+      &:active {
+        background-color: transparent;
       }
     }
 

@@ -104,6 +104,7 @@ export interface Config {
     'upload-fields': UploadField;
     autosave: Autosave;
     'draft-versions': DraftVersion;
+    'versions-diff': VersionsDiff;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -977,6 +978,7 @@ export interface RichTextField {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2095,6 +2097,7 @@ export interface RichTextFieldsSelect<T extends boolean = true> {
   lists?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2485,6 +2488,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

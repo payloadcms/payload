@@ -234,6 +234,7 @@ export const faTranslations: DefaultTranslationsObject = {
     cancel: 'انصراف',
     changesNotSaved:
       'تغییرات شما ذخیره نشده‌اند. در صورت خروج از این صفحه، این تغییرات از بین خواهند رفت.',
+    checked: 'بررسی شد',
     clear: 'پاک کردن',
     clearAll: 'پاک کردن همه',
     close: 'بستن',
@@ -447,6 +448,7 @@ export const faTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} به سطل زباله منتقل شد.',
     true: 'بله',
     unauthorized: 'غیرمجاز',
+    unchecked: 'لغو انتخاب',
     unlock: 'باز کردن',
     unsavedChanges: 'تغییرات ذخیره نشده‌ای دارید. قبل از ادامه، آن‌ها را ذخیره یا لغو کنید.',
     unsavedChangesDuplicate:

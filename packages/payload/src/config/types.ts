@@ -1623,8 +1623,16 @@ export type Config = {
  */
 export type SanitizedConfig = {
   admin: {
+    /**
+     * `Required` (shallow) marks the top-level dashboard props as required, mainly `defaultLayout`,
+     * which sanitizing always fills in. Do not switch this to the `DeepRequired` used below: it
+     * recurses into the widgets and re-expands the whole `Field` type (a large self-referencing
+     * union), which is very expensive to check. Never run a `Field`-bearing type through
+     * `DeepRequired`.
+     */
+    dashboard: Required<NonNullable<NonNullable<Config['admin']>['dashboard']>>
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']>
+  } & DeepRequired<Omit<NonNullable<Config['admin']>, 'dashboard'>>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */

@@ -240,6 +240,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Endringene dine er ikke lagret. Hvis du forlater nå, vil du miste endringene dine.',
+    checked: 'Kontrollert',
     clear: 'Tydelig',
     clearAll: 'Tøm alt',
     close: 'Lukk',
@@ -457,6 +458,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} flyttet til søppel.',
     true: 'Sann',
     unauthorized: 'Ikke autorisert',
+    unchecked: 'Uavhuket',
     unlock: 'Lås opp',
     unsavedChanges: 'Du har ulagrede endringer. Lagre eller forkast før du fortsetter.',
     unsavedChangesDuplicate: 'Du har ulagrede endringer. Vil du fortsette å duplisere?',

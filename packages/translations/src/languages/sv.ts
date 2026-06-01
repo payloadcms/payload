@@ -240,6 +240,7 @@ export const svTranslations: DefaultTranslationsObject = {
     cancel: 'Avbryt',
     changesNotSaved:
       'Dina ändringar har inte sparats. Om du lämnar nu kommer du att förlora dina ändringar.',
+    checked: 'Kontrollerad',
     clear: 'Rensa',
     clearAll: 'Rensa alla',
     close: 'Stäng',
@@ -457,6 +458,7 @@ export const svTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} flyttades till papperskorgen.',
     true: 'Sann',
     unauthorized: 'Obehörig',
+    unchecked: 'Omarkerad',
     unlock: 'Lås upp',
     unsavedChanges: 'Du har osparade ändringar. Spara innan du fortsätter.',
     unsavedChangesDuplicate: 'Du har osparade ändringar. Vill du fortsätta att duplicera?',

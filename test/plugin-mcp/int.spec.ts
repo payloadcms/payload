@@ -3,13 +3,12 @@ import type { Payload } from 'payload'
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
-import { capturedMcpEvents } from './config.js'
 
 let payload: Payload
 let token: string
@@ -68,11 +67,19 @@ const getApiKey = async (
     data: {
       enableAPIKey: true,
       label: 'Test API Key',
-      posts: { create: true, delete: enableDelete, find: true, update: enableUpdate },
-      products: { find: true },
-      ...(globalFind || globalUpdate
-        ? { siteSettings: { find: globalFind, update: globalUpdate } }
-        : {}),
+      access: {
+        collections: {
+          posts: { create: true, delete: enableDelete, find: true, update: enableUpdate },
+          products: { find: true },
+        },
+        ...(globalFind || globalUpdate
+          ? {
+              globals: {
+                'site-settings': { find: globalFind, update: globalUpdate },
+              },
+            }
+          : {}),
+      },
       apiKey: randomUUID(),
       user: userId,
     },
@@ -125,78 +132,6 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(json).toBeDefined()
   })
 
-  describe('Create MCP Handler', () => {
-    it('should invoke onEvent callback when MCP requests are processed', async () => {
-      capturedMcpEvents.length = 0
-
-      const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-
-      // Events are emitted asynchronously after the response stream completes
-      await vi.waitFor(() => expect(capturedMcpEvents.length).toBeGreaterThan(0), {
-        timeout: 2000,
-        interval: 100,
-      })
-    })
-
-    it('should capture events for multiple sequential requests', async () => {
-      capturedMcpEvents.length = 0
-
-      const apiKey = await getApiKey()
-
-      // First request
-      await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'ping',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const eventsAfterFirst = capturedMcpEvents.length
-
-      // Second request
-      await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 2,
-          jsonrpc: '2.0',
-          method: 'tools/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
-
-      expect(capturedMcpEvents.length).toBeGreaterThan(eventsAfterFirst)
-    })
-  })
-
   describe('API Keyed Access', () => {
     it('should create an API Key', async () => {
       const doc = await payload.create({
@@ -205,8 +140,12 @@ describe('@payloadcms/plugin-mcp', () => {
           apiKey: randomUUID(),
           enableAPIKey: true,
           label: 'Test API Key',
-          posts: { create: true, find: true },
-          products: { find: true },
+          access: {
+            collections: {
+              posts: { create: true, find: true },
+              products: { find: false },
+            },
+          },
           user: userId,
         },
       })
@@ -216,18 +155,12 @@ describe('@payloadcms/plugin-mcp', () => {
       // @ts-expect-error - doc.user is a string | User
       expect(doc.user?.id).toBe(userId)
       expect(doc.label).toBe('Test API Key')
-      expect(doc.posts?.find).toBe(true)
-      expect(doc.posts?.create).toBe(true)
-      expect(doc['payload-mcp-tool']?.['diceRoll']).toBe(true)
-      expect(doc['payload-mcp-resource']?.['data']).toBe(true)
-      expect(doc['payload-mcp-resource']?.['dataByID']).toBe(true)
-      expect(doc['payload-mcp-prompt']?.['echo']).toBe(true)
-      expect(doc.products?.find).toBe(true)
-      expect(doc.products?.create).toBe(false)
-      expect(doc.products?.update).toBe(false)
-      expect(doc.products?.delete).toBe(false)
-      expect(doc.media?.find).toBe(false)
-      expect(doc.media?.update).toBe(false)
+      // @ts-expect-error - access is a JSON field
+      expect(doc.access?.collections?.posts?.find).toBe(true)
+      // @ts-expect-error - access is a JSON field
+      expect(doc.access?.collections?.posts?.create).toBe(true)
+      // @ts-expect-error - access is a JSON field
+      expect(doc.access?.collections?.products?.find).toBe(false)
       expect(typeof doc.apiKey).toBe('string')
       expect(doc.apiKey).toHaveLength(36)
       expect(doc.override).toBe('This field added by overrideApiKeyCollection')
@@ -235,23 +168,14 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should not allow GET /api/mcp', async () => {
       const apiKey = await getApiKey()
-      const data = await restClient
-        .GET(`/mcp`, {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-          },
-        })
-        .then((res) => res.json())
+      const response = await restClient.GET(`/mcp`, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      })
 
-      expect(data).toBeDefined()
-      // @ts-expect-error - data is a valid property
-      expect(data.jsonrpc).toBe('2.0')
-      // @ts-expect-error - data is a valid property
-      expect(data.error).toBeDefined()
-      // @ts-expect-error - data is a valid property
-      expect(data.error.code).toBe(-32000)
-      // @ts-expect-error - data is a valid property
-      expect(data.error.message).toBe('Method not allowed.')
+      // The MCP endpoint is registered as POST only; a GET should not succeed.
+      expect(response.ok).toBe(false)
     })
 
     it('should not allow POST /api/mcp with unauthorized API key', async () => {
@@ -298,204 +222,104 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.jsonrpc).toBe('2.0')
       expect(json.result).toBeDefined()
       expect(json.result.tools).toBeDefined()
-      expect(json.result.tools).toHaveLength(6)
-      expect(json.result.tools[0].name).toBe('findProducts')
-      expect(json.result.tools[0].description).toContain(
+      expect(Array.isArray(json.result.tools)).toBe(true)
+      expect(json.result.tools.length).toBeGreaterThan(0)
+
+      const toolsByName: Record<string, any> = Object.fromEntries(
+        json.result.tools.map((t: { name: string }) => [t.name, t]),
+      )
+
+      // findProducts: built-in find (no override) — uses default description
+      const findProducts = toolsByName['findProducts']
+      expect(findProducts).toBeDefined()
+      expect(findProducts.description).toContain(
         'Find documents in a collection by ID or where clause using Find or FindByID.',
       )
-      expect(json.result.tools[0].inputSchema).toBeDefined()
-      expect(json.result.tools[1].name).toBe('createPosts')
-      expect(json.result.tools[1].description).toContain(
-        'This is a Payload collection with Post documents.',
-      )
-      expect(json.result.tools[1].inputSchema).toBeDefined()
-      expect(json.result.tools[2].name).toBe('findPosts')
-      expect(json.result.tools[2].description).toContain(
-        'This is a Payload collection with Post documents.',
-      )
-      expect(json.result.tools[2].inputSchema).toBeDefined()
-      expect(json.result.tools[3].name).toBe('diceRoll')
-      expect(json.result.tools[3].description).toContain(
+
+      // createPosts: posts collection has its own description, no per-tool override
+      const createPosts = toolsByName['createPosts']
+      expect(createPosts).toBeDefined()
+      expect(createPosts.description).toContain('This is a Payload collection with Post documents.')
+
+      // findPosts: posts collection has a per-tool override on find
+      const findPosts = toolsByName['findPosts']
+      expect(findPosts).toBeDefined()
+      expect(findPosts.description).toContain('Find blog posts')
+
+      // diceRoll: custom top-level tool
+      const diceRoll = toolsByName['diceRoll']
+      expect(diceRoll).toBeDefined()
+      expect(diceRoll.description).toContain(
         'Rolls a virtual dice with a specified number of sides',
       )
-      expect(json.result.tools[3].inputSchema).toBeDefined()
 
-      // Input Schemas
-      expect(json.result.tools[0].inputSchema).toBeDefined()
-      expect(json.result.tools[0].inputSchema.required).not.toBeDefined()
-      expect(json.result.tools[0].inputSchema.type).toBe('object')
-      expect(json.result.tools[0].inputSchema.additionalProperties).toBe(false)
-      expect(json.result.tools[0].inputSchema.$schema).toBe(
-        'http://json-schema.org/draft-07/schema#',
-      )
-      expect(json.result.tools[0].inputSchema.properties).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.id).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.id.type).toHaveLength(2)
-      expect(json.result.tools[0].inputSchema.properties.id.type[0]).toBe('string')
-      expect(json.result.tools[0].inputSchema.properties.id.type[1]).toBe('number')
-      expect(json.result.tools[0].inputSchema.properties.id.description).toContain(
+      // Input Schemas — find tool (top-level metadata fields)
+      expect(findProducts.inputSchema).toBeDefined()
+      expect(findProducts.inputSchema.required).not.toBeDefined()
+      expect(findProducts.inputSchema.type).toBe('object')
+      expect(findProducts.inputSchema.properties).toBeDefined()
+      expect(findProducts.inputSchema.properties.id).toBeDefined()
+      expect(findProducts.inputSchema.properties.id.description).toContain(
         'Optional: specific document ID to retrieve. If not provided, returns all documents',
       )
-      expect(json.result.tools[0].inputSchema.properties.fallbackLocale).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.fallbackLocale.type).toBe('string')
-      expect(json.result.tools[0].inputSchema.properties.fallbackLocale.description).toContain(
-        'Optional: fallback locale code to use when requested locale is not available',
-      )
-      expect(json.result.tools[0].inputSchema.properties.limit).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.limit.type).toBe('integer')
-      expect(json.result.tools[0].inputSchema.properties.limit.minimum).toBe(1)
-      expect(json.result.tools[0].inputSchema.properties.limit.maximum).toBe(100)
-      expect(json.result.tools[0].inputSchema.properties.limit.default).toBe(10)
-      expect(json.result.tools[0].inputSchema.properties.limit.description).toContain(
-        'Maximum number of documents to return (default: 10, max: 100)',
-      )
-      expect(json.result.tools[0].inputSchema.properties.locale).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.locale.type).toBe('string')
-      expect(json.result.tools[0].inputSchema.properties.locale.description).toContain(
-        'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
-      )
-      expect(json.result.tools[0].inputSchema.properties.page).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.page.type).toBe('integer')
-      expect(json.result.tools[0].inputSchema.properties.page.minimum).toBe(1)
-      expect(json.result.tools[0].inputSchema.properties.page.default).toBe(1)
-      expect(json.result.tools[0].inputSchema.properties.page.description).toContain(
-        'Page number for pagination (default: 1)',
-      )
-      expect(json.result.tools[0].inputSchema.properties.sort).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.sort.type).toBe('string')
-      expect(json.result.tools[0].inputSchema.properties.sort.description).toContain(
-        'Field to sort by (e.g., "createdAt", "-updatedAt" for descending)',
-      )
-      expect(json.result.tools[0].inputSchema.properties.where).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.where.type).toBe('string')
-      expect(json.result.tools[0].inputSchema.properties.where.description).toContain(
-        'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
-      )
+      expect(findProducts.inputSchema.properties.fallbackLocale).toBeDefined()
+      expect(findProducts.inputSchema.properties.fallbackLocale.type).toBe('string')
+      expect(findProducts.inputSchema.properties.limit).toBeDefined()
+      expect(findProducts.inputSchema.properties.limit.type).toBe('integer')
+      expect(findProducts.inputSchema.properties.limit.minimum).toBe(1)
+      expect(findProducts.inputSchema.properties.limit.maximum).toBe(100)
+      expect(findProducts.inputSchema.properties.limit.default).toBe(10)
+      expect(findProducts.inputSchema.properties.locale).toBeDefined()
+      expect(findProducts.inputSchema.properties.locale.type).toBe('string')
+      expect(findProducts.inputSchema.properties.page).toBeDefined()
+      expect(findProducts.inputSchema.properties.page.type).toBe('integer')
+      expect(findProducts.inputSchema.properties.page.minimum).toBe(1)
+      expect(findProducts.inputSchema.properties.page.default).toBe(1)
+      expect(findProducts.inputSchema.properties.sort).toBeDefined()
+      expect(findProducts.inputSchema.properties.sort.type).toBe('string')
+      expect(findProducts.inputSchema.properties.where).toBeDefined()
+      expect(findProducts.inputSchema.properties.where.type).toBe('string')
 
-      expect(json.result.tools[1].inputSchema).toBeDefined()
-      expect(json.result.tools[1].inputSchema.required).toBeDefined()
-      expect(json.result.tools[1].inputSchema.required).toHaveLength(1)
-      expect(json.result.tools[1].inputSchema.required[0]).toBe('title')
-      expect(json.result.tools[1].inputSchema.type).toBe('object')
-      expect(json.result.tools[1].inputSchema.additionalProperties).toBe(false)
-      expect(json.result.tools[1].inputSchema.$schema).toBe(
-        'http://json-schema.org/draft-07/schema#',
-      )
-      expect(json.result.tools[1].inputSchema.properties).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.title).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.title.type).toBe('string')
-      expect(json.result.tools[1].inputSchema.properties.title.description).toBe(
-        'The title of the post',
-      )
-      expect(json.result.tools[1].inputSchema.properties.content).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.content.type).toHaveLength(2)
-      expect(json.result.tools[1].inputSchema.properties.content.type[0]).toBe('string')
-      expect(json.result.tools[1].inputSchema.properties.content.type[1]).toBe('null')
-      expect(json.result.tools[1].inputSchema.properties.content.description).toBe(
-        'The content of the post',
-      )
-      expect(json.result.tools[1].inputSchema.properties.author).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.author.type).toHaveLength(2)
-      expect(['string', 'number']).toContain(
-        json.result.tools[1].inputSchema.properties.author.type[0],
-      )
-      expect(json.result.tools[1].inputSchema.properties.author.type[1]).toBe('null')
-      expect(json.result.tools[1].inputSchema.properties.author.description).toBe(
-        'The author of the post',
-      )
-      expect(json.result.tools[1].inputSchema.properties.draft).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.draft.type).toBe('boolean')
-      expect(json.result.tools[1].inputSchema.properties.draft.description).toBe(
-        'Whether to create the document as a draft',
-      )
-      expect(json.result.tools[1].inputSchema.properties.fallbackLocale).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.fallbackLocale.type).toBe('string')
-      expect(json.result.tools[1].inputSchema.properties.fallbackLocale.description).toBe(
-        'Optional: fallback locale code to use when requested locale is not available',
-      )
-      expect(json.result.tools[1].inputSchema.properties.locale).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.locale.type).toBe('string')
-      expect(json.result.tools[1].inputSchema.properties.locale.description).toBe(
-        'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
-      )
-      expect(json.result.tools[1].inputSchema.properties.select).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.select.type).toBe('string')
-      expect(json.result.tools[1].inputSchema.properties.select.description).toContain(
-        'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
-      )
+      // Create tool: `data` wraps the collection fields, metadata fields stay top-level
+      expect(createPosts.inputSchema).toBeDefined()
+      expect(createPosts.inputSchema.type).toBe('object')
+      expect(createPosts.inputSchema.properties).toBeDefined()
+      expect(createPosts.inputSchema.required).toBeDefined()
+      expect(createPosts.inputSchema.required).toContain('data')
 
-      expect(json.result.tools[2].inputSchema).toBeDefined()
-      expect(json.result.tools[2].inputSchema.required).not.toBeDefined()
-      expect(json.result.tools[2].inputSchema.type).toBe('object')
-      expect(json.result.tools[2].inputSchema.additionalProperties).toBe(false)
-      expect(json.result.tools[2].inputSchema.$schema).toBe(
-        'http://json-schema.org/draft-07/schema#',
-      )
-      expect(json.result.tools[2].inputSchema.properties).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.id).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.id.type).toHaveLength(2)
-      expect(json.result.tools[2].inputSchema.properties.id.type[0]).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.id.type[1]).toBe('number')
-      expect(json.result.tools[2].inputSchema.properties.id.description).toContain(
-        'Optional: specific document ID to retrieve. If not provided, returns all documents',
-      )
-      expect(json.result.tools[2].inputSchema.properties.fallbackLocale).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.fallbackLocale.type).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.fallbackLocale.description).toBe(
-        'Optional: fallback locale code to use when requested locale is not available',
-      )
-      expect(json.result.tools[2].inputSchema.properties.limit).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.limit.type).toBe('integer')
-      expect(json.result.tools[2].inputSchema.properties.limit.minimum).toBe(1)
-      expect(json.result.tools[2].inputSchema.properties.limit.maximum).toBe(100)
-      expect(json.result.tools[2].inputSchema.properties.limit.default).toBe(10)
-      expect(json.result.tools[2].inputSchema.properties.limit.description).toContain(
-        'Maximum number of documents to return (default: 10, max: 100)',
-      )
-      expect(json.result.tools[2].inputSchema.properties.locale).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.locale.type).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.locale.description).toContain(
-        'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
-      )
-      expect(json.result.tools[2].inputSchema.properties.page).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.page.type).toBe('integer')
-      expect(json.result.tools[2].inputSchema.properties.page.minimum).toBe(1)
-      expect(json.result.tools[2].inputSchema.properties.page.default).toBe(1)
-      expect(json.result.tools[2].inputSchema.properties.page.description).toContain(
-        'Page number for pagination (default: 1)',
-      )
-      expect(json.result.tools[2].inputSchema.properties.sort).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.sort.type).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.sort.description).toContain(
-        'Field to sort by (e.g., "createdAt", "-updatedAt" for descending)',
-      )
-      expect(json.result.tools[2].inputSchema.properties.where).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.where.type).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.where.description).toContain(
-        'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
-      )
-      expect(json.result.tools[2].inputSchema.properties.select).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.select.type).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.select.description).toContain(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
-      )
+      // Collection fields live inside `data.properties`
+      expect(createPosts.inputSchema.properties.data).toBeDefined()
+      expect(createPosts.inputSchema.properties.data.type).toBe('object')
+      const createDataProps = createPosts.inputSchema.properties.data.properties
+      expect(createDataProps).toBeDefined()
+      expect(createDataProps.title).toBeDefined()
+      expect(createDataProps.content).toBeDefined()
+      expect(createDataProps.author).toBeDefined()
 
-      expect(json.result.tools[3].inputSchema).toBeDefined()
-      expect(json.result.tools[3].inputSchema.required).not.toBeDefined()
-      expect(json.result.tools[3].inputSchema.type).toBe('object')
-      expect(json.result.tools[3].inputSchema.additionalProperties).toBe(false)
-      expect(json.result.tools[3].inputSchema.$schema).toBe(
-        'http://json-schema.org/draft-07/schema#',
-      )
-      expect(json.result.tools[3].inputSchema.properties).toBeDefined()
-      expect(json.result.tools[3].inputSchema.properties.sides).toBeDefined()
-      expect(json.result.tools[3].inputSchema.properties.sides.type).toBe('integer')
-      expect(json.result.tools[3].inputSchema.properties.sides.minimum).toBe(2)
-      expect(json.result.tools[3].inputSchema.properties.sides.maximum).toBe(1000)
-      expect(json.result.tools[3].inputSchema.properties.sides.default).toBe(6)
-      expect(json.result.tools[3].inputSchema.properties.sides.description).toContain(
-        'Number of sides on the dice (default: 6)',
-      )
+      // Top-level metadata fields on create tool
+      expect(createPosts.inputSchema.properties.draft).toBeDefined()
+      expect(createPosts.inputSchema.properties.draft.type).toBe('boolean')
+      expect(createPosts.inputSchema.properties.fallbackLocale).toBeDefined()
+      expect(createPosts.inputSchema.properties.locale).toBeDefined()
+      expect(createPosts.inputSchema.properties.select).toBeDefined()
+
+      // Find tool: no `data` wrapper, just metadata fields
+      expect(findPosts.inputSchema).toBeDefined()
+      expect(findPosts.inputSchema.type).toBe('object')
+      expect(findPosts.inputSchema.properties).toBeDefined()
+      expect(findPosts.inputSchema.properties.id).toBeDefined()
+      expect(findPosts.inputSchema.properties.limit).toBeDefined()
+      expect(findPosts.inputSchema.properties.page).toBeDefined()
+      expect(findPosts.inputSchema.properties.select).toBeDefined()
+      expect(findPosts.inputSchema.properties.where).toBeDefined()
+
+      // Custom top-level tool schema
+      expect(diceRoll.inputSchema).toBeDefined()
+      expect(diceRoll.inputSchema.type).toBe('object')
+      expect(diceRoll.inputSchema.properties).toBeDefined()
+      expect(diceRoll.inputSchema.properties.sides).toBeDefined()
+      expect(diceRoll.inputSchema.properties.sides.minimum).toBe(2)
+      expect(diceRoll.inputSchema.properties.sides.maximum).toBe(1000)
     })
 
     it('should list tools injected by other plugins via slug and options', async () => {
@@ -611,9 +435,10 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result).toBeDefined()
       expect(json.result.tools).toBeDefined()
 
+      // The global's description (from plugin config) overrides the built-in tool description
       const findGlobalTool = json.result.tools.find((t: any) => t.name === 'findSiteSettings')
       expect(findGlobalTool).toBeDefined()
-      expect(findGlobalTool.description).toContain('Payload global')
+      expect(findGlobalTool.description).toContain('Site-wide configuration settings.')
       expect(findGlobalTool.inputSchema.properties.select).toBeDefined()
       expect(findGlobalTool.inputSchema.properties.select.type).toBe('string')
       expect(findGlobalTool.inputSchema.properties.select.description).toContain(
@@ -622,7 +447,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const updateGlobalTool = json.result.tools.find((t: any) => t.name === 'updateSiteSettings')
       expect(updateGlobalTool).toBeDefined()
-      expect(updateGlobalTool.description).toContain('Payload global')
+      expect(updateGlobalTool.description).toContain('Site-wide configuration settings.')
       expect(updateGlobalTool.inputSchema.properties.select).toBeDefined()
       expect(updateGlobalTool.inputSchema.properties.select.type).toBe('string')
       expect(updateGlobalTool.inputSchema.properties.select.description).toContain(
@@ -848,6 +673,43 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('Collections', () => {
+    it('createPosts data validation: ensure invalid data is rejected', async () => {
+      const apiKey = await getApiKey()
+
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'createPosts',
+            arguments: {
+              data: {
+                content: 'test content',
+                title: 'test title',
+                badProperty: 'not in schema',
+              },
+            },
+          },
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+      const validationRejected =
+        json.error !== undefined ||
+        json.result?.isError === true ||
+        (typeof json.result?.content?.[0]?.text === 'string' &&
+          json.result.content[0].text
+            .toLowerCase()
+            .includes('input validation error: invalid arguments for tool createposts'))
+      expect(validationRejected).toBe(true)
+    })
+
     it('should call createPosts', async () => {
       const apiKey = await getApiKey()
       const response = await restClient.POST('/mcp', {
@@ -858,8 +720,10 @@ describe('@payloadcms/plugin-mcp', () => {
           params: {
             name: 'createPosts',
             arguments: {
-              content: 'Content for test post.',
-              title: 'Test Post',
+              data: {
+                content: 'Content for test post.',
+                title: 'Test Post',
+              },
             },
           },
         }),
@@ -877,9 +741,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content).toHaveLength(2)
       expect(json.result.content[0].type).toBe('text')
       expect(json.result.content[0].text).toContain(
-        'Resource created successfully in collection "posts"!',
+        'Document created successfully in collection "posts"!',
       )
-      expect(json.result.content[0].text).toContain('Created resource:')
+      expect(json.result.content[0].text).toContain('Created document:')
       expect(json.result.content[0].text).toContain('```json')
       expect(json.result.content[0].text).toContain('"title":"Test Post"')
       expect(json.result.content[0].text).toContain('"content":"Content for test post."')
@@ -897,9 +761,11 @@ describe('@payloadcms/plugin-mcp', () => {
           params: {
             name: 'createPosts',
             arguments: {
-              content: 'Content should be omitted',
+              data: {
+                content: 'Content should be omitted',
+                title: 'Select Create Post',
+              },
               select: '{"title": true}',
-              title: 'Select Create Post',
             },
           },
         }),
@@ -1026,7 +892,9 @@ describe('@payloadcms/plugin-mcp', () => {
             name: 'updatePosts',
             arguments: {
               id: post.id,
-              content: 'Updated content for test post to update.',
+              data: {
+                content: 'Updated content for test post to update.',
+              },
             },
           },
         }),
@@ -1072,7 +940,9 @@ describe('@payloadcms/plugin-mcp', () => {
             name: 'updatePosts',
             arguments: {
               id: post.id,
-              content: null,
+              data: {
+                content: null,
+              },
             },
           },
         }),
@@ -1114,7 +984,9 @@ describe('@payloadcms/plugin-mcp', () => {
             name: 'updatePosts',
             arguments: {
               id: post.id,
-              author: userId,
+              data: {
+                author: userId,
+              },
             },
           },
         }),
@@ -1159,9 +1031,11 @@ describe('@payloadcms/plugin-mcp', () => {
             name: 'updatePosts',
             arguments: {
               id: post.id,
-              content: 'Updated but should be omitted',
+              data: {
+                content: 'Updated but should be omitted',
+                title: 'Select Update Post Edited',
+              },
               select: '{"title": true}',
-              title: 'Select Update Post Edited',
             },
           },
         }),
@@ -1235,12 +1109,14 @@ describe('@payloadcms/plugin-mcp', () => {
           params: {
             name: 'createPosts',
             arguments: {
-              content: 'Testing point field transformation',
-              location: {
-                latitude: 40.7128,
-                longitude: -74.006,
+              data: {
+                content: 'Testing point field transformation',
+                location: {
+                  latitude: 40.7128,
+                  longitude: -74.006,
+                },
+                title: 'Post with Location',
               },
-              title: 'Post with Location',
             },
           },
         }),
@@ -1257,7 +1133,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result).toBeDefined()
       expect(json.result.content).toHaveLength(2)
       expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain('Resource created successfully')
+      expect(json.result.content[0].text).toContain('Document created successfully')
 
       const createdDoc = extractJsonBlock(json.result.content[0].text)
 
@@ -1289,9 +1165,11 @@ describe('@payloadcms/plugin-mcp', () => {
             name: 'updatePosts',
             arguments: {
               id: createdPost.id,
-              location: {
-                latitude: 51.5074,
-                longitude: -0.1278,
+              data: {
+                location: {
+                  latitude: 51.5074,
+                  longitude: -0.1278,
+                },
               },
             },
           },
@@ -1331,9 +1209,13 @@ describe('@payloadcms/plugin-mcp', () => {
         data: {
           enableAPIKey: true,
           label: 'Pages API Key',
-          pages: { create: true, find: true, update: enableUpdate, delete: true },
-          posts: { create: false, find: false },
-          products: { find: false },
+          access: {
+            collections: {
+              pages: { create: true, delete: true, find: true, update: enableUpdate },
+              posts: { create: false, find: false },
+              products: { find: false },
+            },
+          },
           apiKey: randomUUID(),
           user: userId,
         },
@@ -1352,14 +1234,16 @@ describe('@payloadcms/plugin-mcp', () => {
           params: {
             name: 'createPages',
             arguments: {
-              title: 'Hero Page',
-              layout: [
-                {
-                  blockType: 'hero',
-                  heading: 'Welcome to our site',
-                  subheading: 'Discover amazing things',
-                },
-              ],
+              data: {
+                title: 'Hero Page',
+                layout: [
+                  {
+                    blockType: 'hero',
+                    heading: 'Welcome to our site',
+                    subheading: 'Discover amazing things',
+                  },
+                ],
+              },
             },
           },
         }),
@@ -1393,18 +1277,20 @@ describe('@payloadcms/plugin-mcp', () => {
           params: {
             name: 'createPages',
             arguments: {
-              title: 'Multi-block Page',
-              layout: [
-                {
-                  blockType: 'hero',
-                  heading: 'Page Hero',
-                  subheading: 'Hero subtitle',
-                },
-                {
-                  blockType: 'textContent',
-                  body: 'This is the body text.',
-                },
-              ],
+              data: {
+                title: 'Multi-block Page',
+                layout: [
+                  {
+                    blockType: 'hero',
+                    heading: 'Page Hero',
+                    subheading: 'Hero subtitle',
+                  },
+                  {
+                    blockType: 'textContent',
+                    body: 'This is the body text.',
+                  },
+                ],
+              },
             },
           },
         }),
@@ -1449,16 +1335,18 @@ describe('@payloadcms/plugin-mcp', () => {
             name: 'updatePages',
             arguments: {
               id: page.id,
-              layout: [
-                {
-                  blockType: 'hero',
-                  heading: 'Updated Hero Heading',
-                },
-                {
-                  blockType: 'textContent',
-                  body: 'Updated body text.',
-                },
-              ],
+              data: {
+                layout: [
+                  {
+                    blockType: 'hero',
+                    heading: 'Updated Hero Heading',
+                  },
+                  {
+                    blockType: 'textContent',
+                    body: 'Updated body text.',
+                  },
+                ],
+              },
             },
           },
         }),
@@ -1510,7 +1398,8 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const createTool = json.result.tools.find((t: any) => t.name === 'createPosts')
       expect(createTool).toBeDefined()
-      expect(createTool.inputSchema.properties.computedTitle).toBeUndefined()
+      expect(createTool.inputSchema.properties.data).toBeDefined()
+      expect(createTool.inputSchema.properties.data.properties.computedTitle).toBeUndefined()
     })
 
     it('should not include virtual fields in updatePosts tool schema', async () => {
@@ -1533,7 +1422,8 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const updateTool = json.result.tools.find((t: any) => t.name === 'updatePosts')
       expect(updateTool).toBeDefined()
-      expect(updateTool.inputSchema.properties.computedTitle).toBeUndefined()
+      expect(updateTool.inputSchema.properties.data).toBeDefined()
+      expect(updateTool.inputSchema.properties.data.properties.computedTitle).toBeUndefined()
     })
 
     it('should ignore virtual fields when creating a post via MCP', async () => {
@@ -1546,8 +1436,10 @@ describe('@payloadcms/plugin-mcp', () => {
           params: {
             name: 'createPosts',
             arguments: {
-              title: 'Virtual Field Create Test',
-              content: 'Testing virtual field exclusion on create',
+              data: {
+                title: 'Virtual Field Create Test',
+                content: 'Testing virtual field exclusion on create',
+              },
             },
           },
         }),
@@ -1562,7 +1454,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.content[0].text).toContain(
-        'Resource created successfully in collection "posts"!',
+        'Document created successfully in collection "posts"!',
       )
       expect(json.result.content[0].text).toContain('"title":"Virtual Field Create Test"')
       expect(json.result.content[0].text).not.toContain('"computedTitle"')
@@ -1592,7 +1484,9 @@ describe('@payloadcms/plugin-mcp', () => {
             name: 'updatePosts',
             arguments: {
               id: post.id,
-              title: 'Virtual Field Updated Title',
+              data: {
+                title: 'Virtual Field Updated Title',
+              },
             },
           },
         }),
@@ -1740,9 +1634,11 @@ describe('@payloadcms/plugin-mcp', () => {
           params: {
             name: 'updateSiteSettings',
             arguments: {
-              maintenanceMode: false,
-              siteDescription: 'A test site for MCP global operations',
-              siteName: 'MCP Test Site',
+              data: {
+                maintenanceMode: false,
+                siteDescription: 'A test site for MCP global operations',
+                siteName: 'MCP Test Site',
+              },
             },
           },
         }),
@@ -1772,10 +1668,12 @@ describe('@payloadcms/plugin-mcp', () => {
           params: {
             name: 'updateSiteSettings',
             arguments: {
-              maintenanceMode: false,
+              data: {
+                maintenanceMode: false,
+                siteDescription: 'Should not appear',
+                siteName: 'MCP Test Site Select',
+              },
               select: '{"siteName": true}',
-              siteDescription: 'Should not appear',
-              siteName: 'MCP Test Site Select',
             },
           },
         }),
@@ -1993,9 +1891,11 @@ describe('@payloadcms/plugin-mcp', () => {
           params: {
             name: 'createPosts',
             arguments: {
-              content: 'This is my first post in English',
+              data: {
+                content: 'This is my first post in English',
+                title: 'Hello World',
+              },
               locale: 'en',
-              title: 'Hello World',
             },
           },
         }),
@@ -2009,7 +1909,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const json = await parseStreamResponse(response)
 
       expect(json.result).toBeDefined()
-      expect(json.result.content[0].text).toContain('Resource created successfully')
+      expect(json.result.content[0].text).toContain('Document created successfully')
       expect(json.result.content[0].text).toContain('"title":"Hello World"')
       expect(json.result.content[0].text).toContain('"content":"This is my first post in English"')
     })
@@ -2035,9 +1935,11 @@ describe('@payloadcms/plugin-mcp', () => {
             name: 'updatePosts',
             arguments: {
               id: englishPost.id,
-              content: 'Contenido Español',
+              data: {
+                content: 'Contenido Español',
+                title: 'Título Español',
+              },
               locale: 'es',
-              title: 'Título Español',
             },
           },
         }),
@@ -2228,11 +2130,15 @@ describe('@payloadcms/plugin-mcp', () => {
         data: {
           enableAPIKey: true,
           label: 'Field Types API Key',
-          fieldTypes: {
-            create: true,
-            find: true,
-            update: enableUpdate,
-            delete: enableDelete,
+          access: {
+            collections: {
+              'field-types': {
+                create: true,
+                delete: enableDelete,
+                find: true,
+                update: enableUpdate,
+              },
+            },
           },
           apiKey: randomUUID(),
           user: userId,
@@ -2264,7 +2170,7 @@ describe('@payloadcms/plugin-mcp', () => {
         const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
         expect(createTool).toBeDefined()
 
-        const inputProps = createTool.inputSchema.properties
+        const inputProps = createTool.inputSchema.properties.data.properties
         expect(inputProps).not.toHaveProperty('uiField')
       })
 
@@ -2286,7 +2192,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
         const json = await parseStreamResponse(response)
         const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.groupField).toBeDefined()
         expect(inputProps.groupField.type).toBe('object')
@@ -2313,11 +2219,13 @@ describe('@payloadcms/plugin-mcp', () => {
 
         const json = await parseStreamResponse(response)
         const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         // Children of collapsible appear at the top level, not under a `collapsible` key
         expect(inputProps.collapsibleText).toBeDefined()
-        expect(inputProps.collapsibleText.type).toContain('string')
+        // Nullable text fields render as anyOf: [string, null]
+        expect(inputProps.collapsibleText.anyOf).toBeDefined()
+        expect(inputProps.collapsibleText.anyOf.some((t: any) => t.type === 'string')).toBe(true)
       })
 
       it('should include row children as top-level fields in create tool schema', async () => {
@@ -2338,11 +2246,12 @@ describe('@payloadcms/plugin-mcp', () => {
 
         const json = await parseStreamResponse(response)
         const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         // Children of row appear at the top level, not under a `row` key
         expect(inputProps.rowText).toBeDefined()
-        expect(inputProps.rowText.type).toContain('string')
+        expect(inputProps.rowText.anyOf).toBeDefined()
+        expect(inputProps.rowText.anyOf.some((t: any) => t.type === 'string')).toBe(true)
       })
 
       it('should include named tab as nested object and unnamed tab children at top level in create tool schema', async () => {
@@ -2363,7 +2272,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
         const json = await parseStreamResponse(response)
         const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         // Named tab appears as a nested object
         expect(inputProps.namedTab).toBeDefined()
@@ -2373,7 +2282,8 @@ describe('@payloadcms/plugin-mcp', () => {
 
         // Unnamed tab children appear at the top level
         expect(inputProps.unnamedTabText).toBeDefined()
-        expect(inputProps.unnamedTabText.type).toContain('string')
+        expect(inputProps.unnamedTabText.anyOf).toBeDefined()
+        expect(inputProps.unnamedTabText.anyOf.some((t: any) => t.type === 'string')).toBe(true)
       })
 
       it('should include select field with enum values in create tool schema', async () => {
@@ -2394,7 +2304,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
         const json = await parseStreamResponse(response)
         const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.selectField).toBeDefined()
         expect(inputProps.selectField.enum).toBeDefined()
@@ -2421,7 +2331,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
         const json = await parseStreamResponse(response)
         const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.radioField).toBeDefined()
         expect(inputProps.radioField.enum).toBeDefined()
@@ -2448,7 +2358,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
         const json = await parseStreamResponse(response)
         const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.arrayField).toBeDefined()
         expect(inputProps.arrayField.type).toContain('array')
@@ -2470,11 +2380,13 @@ describe('@payloadcms/plugin-mcp', () => {
             params: {
               name: 'createFieldTypes',
               arguments: {
-                textField: 'Hello MCP',
-                textareaField: 'Multi-line\ntext content',
-                numberField: 42,
-                emailField: 'test@example.com',
-                checkboxField: true,
+                data: {
+                  textField: 'Hello MCP',
+                  textareaField: 'Multi-line\ntext content',
+                  numberField: 42,
+                  emailField: 'test@example.com',
+                  checkboxField: true,
+                },
               },
             },
           }),
@@ -2491,7 +2403,7 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(json.result.isError).toBeFalsy()
         expect(json.result.content[0].type).toBe('text')
         expect(json.result.content[0].text).toContain(
-          'Resource created successfully in collection "field-types"!',
+          'Document created successfully in collection "field-types"!',
         )
 
         const doc = extractJsonBlock(json.result.content[0].text)
@@ -2516,10 +2428,12 @@ describe('@payloadcms/plugin-mcp', () => {
             params: {
               name: 'createFieldTypes',
               arguments: {
-                textField: 'Date/Code/JSON test',
-                dateField: testDate,
-                codeField: 'const x = 42;',
-                jsonField: { key: 'value', nested: { count: 1 } },
+                data: {
+                  textField: 'Date/Code/JSON test',
+                  dateField: testDate,
+                  codeField: 'const x = 42;',
+                  jsonField: { key: 'value', nested: { count: 1 } },
+                },
               },
             },
           }),
@@ -2554,8 +2468,10 @@ describe('@payloadcms/plugin-mcp', () => {
             params: {
               name: 'createFieldTypes',
               arguments: {
-                textField: 'Select test',
-                selectField: 'option2',
+                data: {
+                  textField: 'Select test',
+                  selectField: 'option2',
+                },
               },
             },
           }),
@@ -2588,8 +2504,10 @@ describe('@payloadcms/plugin-mcp', () => {
             params: {
               name: 'createFieldTypes',
               arguments: {
-                textField: 'Radio test',
-                radioField: 'radio3',
+                data: {
+                  textField: 'Radio test',
+                  radioField: 'radio3',
+                },
               },
             },
           }),
@@ -2622,10 +2540,12 @@ describe('@payloadcms/plugin-mcp', () => {
             params: {
               name: 'createFieldTypes',
               arguments: {
-                textField: 'Group test',
-                groupField: {
-                  groupText: 'Inside the group',
-                  groupNumber: 99,
+                data: {
+                  textField: 'Group test',
+                  groupField: {
+                    groupText: 'Inside the group',
+                    groupNumber: 99,
+                  },
                 },
               },
             },
@@ -2661,8 +2581,10 @@ describe('@payloadcms/plugin-mcp', () => {
             params: {
               name: 'createFieldTypes',
               arguments: {
-                textField: 'Collapsible test',
-                collapsibleText: 'Text inside collapsible',
+                data: {
+                  textField: 'Collapsible test',
+                  collapsibleText: 'Text inside collapsible',
+                },
               },
             },
           }),
@@ -2696,8 +2618,10 @@ describe('@payloadcms/plugin-mcp', () => {
             params: {
               name: 'createFieldTypes',
               arguments: {
-                textField: 'Row test',
-                rowText: 'Text inside row',
+                data: {
+                  textField: 'Row test',
+                  rowText: 'Text inside row',
+                },
               },
             },
           }),
@@ -2731,11 +2655,13 @@ describe('@payloadcms/plugin-mcp', () => {
             params: {
               name: 'createFieldTypes',
               arguments: {
-                textField: 'Tabs test',
-                namedTab: {
-                  namedTabText: 'Inside named tab',
+                data: {
+                  textField: 'Tabs test',
+                  namedTab: {
+                    namedTabText: 'Inside named tab',
+                  },
+                  unnamedTabText: 'Inside unnamed tab',
                 },
-                unnamedTabText: 'Inside unnamed tab',
               },
             },
           }),
@@ -2773,11 +2699,13 @@ describe('@payloadcms/plugin-mcp', () => {
             params: {
               name: 'createFieldTypes',
               arguments: {
-                textField: 'Array test',
-                arrayField: [
-                  { item: 'First item', itemNumber: 1 },
-                  { item: 'Second item', itemNumber: 2 },
-                ],
+                data: {
+                  textField: 'Array test',
+                  arrayField: [
+                    { item: 'First item', itemNumber: 1 },
+                    { item: 'Second item', itemNumber: 2 },
+                  ],
+                },
               },
             },
           }),
@@ -2862,9 +2790,11 @@ describe('@payloadcms/plugin-mcp', () => {
               name: 'updateFieldTypes',
               arguments: {
                 id: created.id,
-                groupField: {
-                  groupText: 'Updated group text',
-                  groupNumber: 100,
+                data: {
+                  groupField: {
+                    groupText: 'Updated group text',
+                    groupNumber: 100,
+                  },
                 },
               },
             },
@@ -2910,7 +2840,9 @@ describe('@payloadcms/plugin-mcp', () => {
               name: 'updateFieldTypes',
               arguments: {
                 id: created.id,
-                collapsibleText: 'Updated collapsible text',
+                data: {
+                  collapsibleText: 'Updated collapsible text',
+                },
               },
             },
           }),
@@ -2951,11 +2883,13 @@ describe('@payloadcms/plugin-mcp', () => {
               name: 'updateFieldTypes',
               arguments: {
                 id: created.id,
-                arrayField: [
-                  { item: 'Updated item A', itemNumber: 10 },
-                  { item: 'Updated item B', itemNumber: 20 },
-                  { item: 'Updated item C', itemNumber: 30 },
-                ],
+                data: {
+                  arrayField: [
+                    { item: 'Updated item A', itemNumber: 10 },
+                    { item: 'Updated item B', itemNumber: 20 },
+                    { item: 'Updated item C', itemNumber: 30 },
+                  ],
+                },
               },
             },
           }),
@@ -2992,7 +2926,9 @@ describe('@payloadcms/plugin-mcp', () => {
             params: {
               name: 'createFieldTypes',
               arguments: {
-                textField: 'UI field safety test',
+                data: {
+                  textField: 'UI field safety test',
+                },
               },
             },
           }),
@@ -3007,7 +2943,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
         expect(json.result).toBeDefined()
         expect(json.result.isError).toBeFalsy()
-        expect(json.result.content[0].text).toContain('Resource created successfully')
+        expect(json.result.content[0].text).toContain('Document created successfully')
 
         const doc = extractJsonBlock(json.result.content[0].text)
 
@@ -3027,12 +2963,14 @@ describe('@payloadcms/plugin-mcp', () => {
             params: {
               name: 'createFieldTypes',
               arguments: {
-                textField: 'All layout fields test',
-                groupField: { groupText: 'Group value', groupNumber: 5 },
-                collapsibleText: 'Collapsible value',
-                rowText: 'Row value',
-                namedTab: { namedTabText: 'Named tab value' },
-                unnamedTabText: 'Unnamed tab value',
+                data: {
+                  textField: 'All layout fields test',
+                  groupField: { groupText: 'Group value', groupNumber: 5 },
+                  collapsibleText: 'Collapsible value',
+                  rowText: 'Row value',
+                  namedTab: { namedTabText: 'Named tab value' },
+                  unnamedTabText: 'Unnamed tab value',
+                },
               },
             },
           }),

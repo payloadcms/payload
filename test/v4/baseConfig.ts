@@ -62,7 +62,7 @@ import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
 import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
-import { SearchBarTest } from './collections/SearchBarTest/index.js'
+import SearchBarTest from './collections/SearchBarTest/index.js'
 import SelectFields from './collections/Select/index.js'
 import SlugFields from './collections/Slug/index.js'
 import TabsFields from './collections/Tabs/index.js'
@@ -75,6 +75,7 @@ import Unauthorized from './collections/Unauthorized/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
 import Users from './collections/Users/index.js'
+import { VersionsDiff } from './collections/VersionsDiff/index.js'
 import {
   codeContent,
   getRichTextContent,
@@ -135,6 +136,7 @@ export const collections: CollectionConfig[] = [
   withGroup(UploadFields, 'Uploads'),
   // Versions
   withGroup(Autosave, 'Versions'),
+  withGroup(VersionsDiff, 'Versions'),
   withGroup(DraftVersions, 'Versions'),
 ]
 

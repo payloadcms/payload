@@ -17,7 +17,7 @@ import { requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 
-import './index.scss'
+import './index.css'
 
 import React, { Fragment, useCallback, useState } from 'react'
 
@@ -121,11 +121,12 @@ export const Restore: React.FC<Props> = ({
     <Fragment>
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
         <Button
-          buttonStyle="primary"
+          buttonStyle="ghost"
           className={[canRestoreAsDraft && `${baseClass}__restore-as-draft-button`]
             .filter(Boolean)
             .join(' ')}
           onClick={() => toggleModal(modalSlug)}
+          popupIconSize={16}
           size="medium"
           SubMenuPopupContent={
             canRestoreAsDraft
@@ -139,7 +140,7 @@ export const Restore: React.FC<Props> = ({
               : null
           }
         >
-          {t('version:restoreThisVersion')}
+          {t('general:restore')}
         </Button>
       </div>
       <ConfirmationModal

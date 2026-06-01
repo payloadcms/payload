@@ -2,7 +2,7 @@
 const baseClass = 'render-field-diffs'
 import type { VersionField } from 'payload'
 
-import './index.scss'
+import './index.css'
 
 import { ShimmerEffect } from '@payloadcms/ui'
 import React, { Fragment, useEffect } from 'react'

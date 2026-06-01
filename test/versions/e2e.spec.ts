@@ -2294,8 +2294,8 @@ describe('Versions', () => {
 
       const checkbox = page.locator('[data-field-path="checkbox"]')
 
-      await expect(checkbox.locator('.html-diff__diff-old')).toHaveText('true')
-      await expect(checkbox.locator('.html-diff__diff-new')).toHaveText('false')
+      await expect(checkbox.locator('.checkbox-diff__label--delete')).toHaveText('Checked')
+      await expect(checkbox.locator('.checkbox-diff__label--create')).toHaveText('Unchecked')
     })
 
     test('correctly renders diff for code fields', async () => {
@@ -2427,7 +2427,7 @@ describe('Versions', () => {
 
       const zeroDepthRelationship = page.locator('[data-field-path="zeroDepthRelationship"]')
 
-      await expect(zeroDepthRelationship.locator('.html-diff__diff-old')).toBeEmpty()
+      await expect(zeroDepthRelationship.locator('.diff-no-value')).toHaveText('No value')
       await expect(
         zeroDepthRelationship.locator('.html-diff__diff-new .relationship-diff__info'),
       ).toHaveText('dev@payloadcms.com')
