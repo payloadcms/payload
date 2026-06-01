@@ -92,7 +92,7 @@
   }
 
   .query-inspector__bracket--position-end {
-    left: 2px;
+    left: var(--stroke-width-medium);
     width: calc(100% - var(--spacer-1));
   }
 
