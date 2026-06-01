@@ -38,7 +38,7 @@ export const CommandPalette: React.FC = () => {
 
   const isOpen = Boolean(modalState[commandPaletteSlug]?.isOpen)
 
-  const [query, setQuery] = useState('')
+  const [search, setSearch] = useState('')
   const [rawActiveIndex, setActiveIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -60,7 +60,7 @@ export const CommandPalette: React.FC = () => {
     [adminRoute, collections, globals, i18n, permissions, visibleEntities],
   )
 
-  const filteredGroups = useMemo(() => filterActions(groups, query), [groups, query])
+  const filteredGroups = useMemo(() => filterActions(groups, search), [groups, search])
 
   const flatActions = useMemo(
     () => filteredGroups.flatMap((group) => group.actions),
@@ -76,7 +76,7 @@ export const CommandPalette: React.FC = () => {
   // Reset state whenever the palette opens, and focus the input.
   useEffect(() => {
     if (isOpen) {
-      setQuery('')
+      setSearch('')
       setActiveIndex(0)
       requestAnimationFrame(() => inputRef.current?.focus())
     }
@@ -169,7 +169,7 @@ export const CommandPalette: React.FC = () => {
           autoComplete="off"
           className={`${baseClass}__input`}
           onChange={(event) => {
-            setQuery(event.target.value)
+            setSearch(event.target.value)
             setActiveIndex(0)
           }}
           placeholder={t('commandPalette:placeholder')}
@@ -177,7 +177,7 @@ export const CommandPalette: React.FC = () => {
           role="combobox"
           spellCheck={false}
           type="text"
-          value={query}
+          value={search}
         />
 
         <div
