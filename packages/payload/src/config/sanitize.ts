@@ -7,6 +7,7 @@ import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../i
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type {
   Config,
+  DashboardConfig,
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
@@ -51,84 +52,6 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
-  ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
-    slug: 'collections',
-    Component: '@payloadcms/next/rsc#CollectionCards',
-    minWidth: 'full',
-  })
-  sanitizedConfig.admin!.dashboard.widgets.push({
-    slug: 'collection-query',
-    Component: '@payloadcms/next/rsc#CollectionQueryWidget',
-    fields: [
-      {
-        name: 'title',
-        type: 'text',
-        defaultValue: 'Recent documents',
-        label: 'Title',
-      },
-      {
-        name: 'relatedCollection',
-        type: 'select',
-        label: 'Collection',
-        options: (sanitizedConfig.collections ?? []).map((collection) => ({
-          label: collection.labels?.plural || collection.slug,
-          value: collection.slug,
-        })),
-        required: true,
-      },
-      {
-        name: 'where',
-        type: 'json',
-        admin: {
-          components: {
-            Field: '@payloadcms/next/client#QueryPresetsWhereField',
-          },
-        },
-        label: 'Filters',
-      },
-      {
-        name: 'sortField',
-        type: 'text',
-        admin: {
-          components: {
-            Field: '@payloadcms/next/client#CollectionQuerySortField',
-          },
-        },
-        label: 'Sort Field',
-      },
-      {
-        name: 'sortDirection',
-        type: 'select',
-        defaultValue: 'desc',
-        label: 'Sort Direction',
-        options: [
-          {
-            label: 'Ascending',
-            value: 'asc',
-          },
-          {
-            label: 'Descending',
-            value: 'desc',
-          },
-        ],
-      },
-      {
-        name: 'limit',
-        type: 'number',
-        defaultValue: 5,
-        label: 'Limit',
-        max: 25,
-        min: 1,
-      },
-    ],
-    minWidth: 'x-small',
-  })
-  sanitizedConfig.admin!.dashboard.defaultLayout ??= [
-    {
-      widgetSlug: 'collections',
-      width: 'full',
-    } satisfies WidgetInstance,
-  ]
 
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
@@ -173,6 +96,107 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   })
 
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
+}
+
+const addDefaultDashboardWidgets = async ({
+  config,
+  richTextSanitizationPromises,
+  validRelationships,
+}: {
+  config: Partial<SanitizedConfig>
+  richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>>
+  validRelationships: string[]
+}) => {
+  const collectionQueryFields: NonNullable<Widget['fields']> = [
+    {
+      name: 'title',
+      type: 'text',
+      defaultValue: 'Recent documents',
+      label: 'Title',
+    },
+    {
+      name: 'relatedCollection',
+      type: 'select',
+      label: 'Collection',
+      options: (config.collections ?? []).map((collection) => ({
+        label: collection.labels?.plural || collection.slug,
+        value: collection.slug,
+      })),
+      required: true,
+    },
+    {
+      name: 'where',
+      type: 'json',
+      admin: {
+        components: {
+          Field: '@payloadcms/next/client#QueryPresetsWhereField',
+        },
+      },
+      label: 'Filters',
+    },
+    {
+      name: 'sortField',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '@payloadcms/next/client#CollectionQuerySortField',
+        },
+      },
+      label: 'Sort Field',
+    },
+    {
+      name: 'sortDirection',
+      type: 'select',
+      defaultValue: 'desc',
+      label: 'Sort Direction',
+      options: [
+        {
+          label: 'Ascending',
+          value: 'asc',
+        },
+        {
+          label: 'Descending',
+          value: 'desc',
+        },
+      ],
+    },
+    {
+      name: 'limit',
+      type: 'number',
+      defaultValue: 5,
+      label: 'Limit',
+      max: 25,
+      min: 1,
+    },
+  ]
+
+  const adminConfig = config.admin as NonNullable<Config['admin']>
+  const dashboard: DashboardConfig = (adminConfig.dashboard ??= { widgets: [] })
+
+  dashboard.widgets.push({
+    slug: 'collections',
+    Component: '@payloadcms/next/rsc#CollectionCards',
+    minWidth: 'full',
+  })
+  dashboard.widgets.push({
+    slug: 'collection-query',
+    Component: '@payloadcms/next/rsc#CollectionQueryWidget',
+    fields: await sanitizeFields({
+      config: config as unknown as Config,
+      existingFieldNames: new Set(),
+      fields: collectionQueryFields,
+      parentIsLocalized: false,
+      richTextSanitizationPromises,
+      validRelationships,
+    }),
+    minWidth: 'x-small',
+  })
+  dashboard.defaultLayout ??= [
+    {
+      widgetSlug: 'collections',
+      width: 'full',
+    } satisfies WidgetInstance,
+  ]
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
@@ -517,6 +541,12 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       ),
     )
   }
+
+  await addDefaultDashboardWidgets({
+    config,
+    richTextSanitizationPromises,
+    validRelationships,
+  })
 
   if (config.serverURL !== '') {
     config.csrf!.push(config.serverURL!)

@@ -9,17 +9,7 @@ import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../../utilities/reduceFieldsToOptions.js'
-
-const sortableFieldTypes = new Set([
-  'checkbox',
-  'date',
-  'email',
-  'number',
-  'radio',
-  'select',
-  'text',
-  'textarea',
-])
+import { isCollectionQuerySortableField } from '../shared.js'
 
 export const CollectionQuerySortField: TextFieldClientComponent = ({
   field,
@@ -58,10 +48,10 @@ export const CollectionQuerySortField: TextFieldClientComponent = ({
       fields: collectionConfig.fields,
       i18n,
     })
-      .filter(({ field }) => sortableFieldTypes.has(field.type))
-      .map(({ label, value }) => ({
-        label,
-        value,
+      .filter(({ field }) => isCollectionQuerySortableField(field))
+      .map(({ plainTextLabel, value }) => ({
+        label: plainTextLabel,
+        value: String(value),
       }))
 
     return [

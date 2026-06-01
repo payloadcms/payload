@@ -167,7 +167,7 @@ describe('Dashboard', () => {
     await expect(errorWidgets).toHaveCount(4)
     await expect(errorWidgets.nth(0)).toContainText('Collection "archived-posts" does not exist.')
     await expect(errorWidgets.nth(1)).toContainText(
-      'Sort field "severity" does not exist on collection "tickets".',
+      'Sort field "assignee" is not sortable on collection "tickets".',
     )
     await expect(errorWidgets.nth(2)).toContainText(
       'Filter field "visibility" does not exist on collection "events".',

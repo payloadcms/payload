@@ -1,12 +1,13 @@
-import type { CollectionSlug, Where, WidgetServerProps } from 'payload'
+import type { CollectionSlug, Field, Where, WidgetServerProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatDistanceToNow } from 'date-fns'
-import { formatAdminURL } from 'payload/shared'
+import { fieldAffectsData, fieldHasSubFields, formatAdminURL, tabHasName } from 'payload/shared'
 import React from 'react'
 
 import '../../elements/Card/index.css'
 import './index.css'
+import { isCollectionQuerySortableField } from './shared.js'
 
 type CollectionQueryWidgetData = {
   limit?: number
@@ -24,6 +25,11 @@ type QueryDoc = {
 } & Record<string, unknown>
 
 const baseFieldPaths = ['createdAt', 'id', 'updatedAt']
+
+type CollectionFieldPathSets = {
+  fieldPaths: Set<string>
+  sortableFieldPaths: Set<string>
+}
 
 export async function CollectionQueryWidget({
   req,
@@ -47,12 +53,15 @@ export async function CollectionQueryWidget({
     (collectionConfig
       ? getTranslation(collectionConfig.labels.plural, req.i18n)
       : 'Collection query')
-  const fieldPaths = collectionConfig
-    ? getCollectionFieldPaths(collectionConfig.fields)
-    : new Set<string>()
+  const fieldPathSets = collectionConfig
+    ? getCollectionFieldPathSets(collectionConfig.fields)
+    : {
+        fieldPaths: new Set<string>(),
+        sortableFieldPaths: new Set<string>(),
+      }
   const validationErrors = getValidationErrors({
     collectionConfig,
-    fieldPaths,
+    fieldPathSets,
     relatedCollection,
     sortField,
     where,
@@ -191,52 +200,83 @@ function getDocLabel({ doc, documentLabelPath }: { doc: QueryDoc; documentLabelP
   return typeof title === 'string' && title ? title : String(doc.id)
 }
 
-function getCollectionFieldPaths(fields: unknown[]) {
-  const paths = new Set(baseFieldPaths)
+function getCollectionFieldPathSets(fields: Field[]): CollectionFieldPathSets {
+  const fieldPathSets: CollectionFieldPathSets = {
+    fieldPaths: new Set(baseFieldPaths),
+    sortableFieldPaths: new Set(baseFieldPaths),
+  }
 
-  addFieldPaths({ fields, paths })
+  addFieldPathSets({ fieldPathSets, fields })
 
-  return paths
+  return fieldPathSets
 }
 
-function addFieldPaths({
+function addFieldPathSets({
+  fieldPathSets,
   fields,
   parentPath,
-  paths,
 }: {
-  fields: unknown[]
+  fieldPathSets: CollectionFieldPathSets
+  fields: Field[]
   parentPath?: string
-  paths: Set<string>
 }) {
   for (const field of fields) {
-    if (!field || typeof field !== 'object') {
+    if ('virtual' in field && field.virtual === true) {
       continue
     }
 
-    const fieldConfig = field as { fields?: unknown[]; name?: string }
-    const path = fieldConfig.name
-      ? [parentPath, fieldConfig.name].filter(Boolean).join('.')
-      : parentPath
+    if (field.type === 'tabs') {
+      for (const tab of field.tabs) {
+        addFieldPathSets({
+          fieldPathSets,
+          fields: tab.fields,
+          parentPath: tabHasName(tab) ? getFieldPath({ parentPath, path: tab.name }) : parentPath,
+        })
+      }
 
-    if (path) {
-      paths.add(path)
+      continue
     }
 
-    if (Array.isArray(fieldConfig.fields)) {
-      addFieldPaths({ fields: fieldConfig.fields, parentPath: path, paths })
+    if (field.type === 'row' || field.type === 'collapsible') {
+      addFieldPathSets({ fieldPathSets, fields: field.fields, parentPath })
+
+      continue
+    }
+
+    if (!fieldAffectsData(field)) {
+      continue
+    }
+
+    const path = getFieldPath({
+      parentPath,
+      path: typeof field.virtual === 'string' ? field.virtual : field.name,
+    })
+
+    fieldPathSets.fieldPaths.add(path)
+
+    if (isCollectionQuerySortableField(field)) {
+      fieldPathSets.sortableFieldPaths.add(path)
+    }
+
+    if (fieldHasSubFields(field)) {
+      addFieldPathSets({ fieldPathSets, fields: field.fields, parentPath: path })
     }
   }
 }
 
+function getFieldPath({ parentPath, path }: { parentPath?: string; path: string }) {
+  return [parentPath, path].filter(Boolean).join('.')
+}
+
 function getValidationErrors({
   collectionConfig,
-  fieldPaths,
+  fieldPathSets,
   relatedCollection,
   sortField,
   where,
 }: {
   collectionConfig: unknown
-  fieldPaths: Set<string>
+  fieldPathSets: CollectionFieldPathSets
   relatedCollection?: CollectionSlug
   sortField?: string
   where?: Where
@@ -255,12 +295,16 @@ function getValidationErrors({
     return errors
   }
 
-  if (sortField && !fieldPaths.has(sortField)) {
-    errors.push(`Sort field "${sortField}" does not exist on collection "${relatedCollection}".`)
+  if (sortField) {
+    if (!fieldPathSets.fieldPaths.has(sortField)) {
+      errors.push(`Sort field "${sortField}" does not exist on collection "${relatedCollection}".`)
+    } else if (!fieldPathSets.sortableFieldPaths.has(sortField)) {
+      errors.push(`Sort field "${sortField}" is not sortable on collection "${relatedCollection}".`)
+    }
   }
 
   for (const fieldPath of getWhereFieldPaths(where)) {
-    if (!fieldPaths.has(fieldPath)) {
+    if (!fieldPathSets.fieldPaths.has(fieldPath)) {
       errors.push(
         `Filter field "${fieldPath}" does not exist on collection "${relatedCollection}".`,
       )
@@ -304,11 +348,7 @@ function collectWhereFieldPaths({
       continue
     }
 
-    if (!whereOperatorKeys.has(key)) {
-      fieldPaths.add(key)
-    }
-
-    collectWhereFieldPaths({ fieldPaths, value: childValue })
+    fieldPaths.add(key)
   }
 }
 
@@ -387,21 +427,3 @@ const relativeDateUnitLabels: Record<string, string> = {
   year: 'y',
   years: 'y',
 }
-
-const whereOperatorKeys = new Set([
-  'all',
-  'contains',
-  'equals',
-  'exists',
-  'greater_than',
-  'greater_than_equal',
-  'in',
-  'intersects',
-  'less_than',
-  'less_than_equal',
-  'like',
-  'near',
-  'not_equals',
-  'not_in',
-  'within',
-])
