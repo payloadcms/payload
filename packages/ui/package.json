@@ -51,6 +51,11 @@
       "types": "./src/views/List/handleServerFunction.tsx",
       "default": "./src/views/List/handleServerFunction.tsx"
     },
+    "./views/Versions/fetchVersions": {
+      "import": "./src/views/Versions/fetchVersions.ts",
+      "types": "./src/views/Versions/fetchVersions.ts",
+      "default": "./src/views/Versions/fetchVersions.ts"
+    },
     "./views/*/metadata": {
       "import": "./src/views/*/metadata.ts",
       "types": "./src/views/*/metadata.ts",
@@ -311,6 +316,11 @@
         "import": "./dist/views/List/handleServerFunction.js",
         "types": "./dist/views/List/handleServerFunction.d.ts",
         "default": "./dist/views/List/handleServerFunction.js"
+      },
+      "./views/Versions/fetchVersions": {
+        "import": "./dist/views/Versions/fetchVersions.js",
+        "types": "./dist/views/Versions/fetchVersions.d.ts",
+        "default": "./dist/views/Versions/fetchVersions.js"
       },
       "./views/*/metadata": {
         "import": "./dist/views/*/metadata.js",
