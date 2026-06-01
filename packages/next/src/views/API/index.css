@@ -27,6 +27,10 @@
     .query-inspector__content {
       grid-template-columns: 1fr;
     }
+
+    .query-inspector__results-wrapper {
+      border: 0;
+    }
   }
 
   .query-inspector__content {
@@ -46,36 +50,34 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: var(--spacer-2);
-
-    .copy-to-clipboard {
-      color: var(--color-icon-secondary);
-    }
   }
 
   .query-inspector__api-url-field {
     margin-bottom: var(--spacer-3);
-    background: var(--color-bg-secondary);
-    border-radius: var(--radius-medium);
-    padding: var(--spacer-2) var(--spacer-1) var(--spacer-2) var(--spacer-2);
+  }
 
-    a {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      text-decoration: none;
-      color: var(--color-text);
+  .query-inspector__api-url-input {
+    gap: 0;
+
+    .field-type__wrap {
+      gap: 0;
     }
+
+    .form-input {
+      user-select: text;
+      -webkit-user-select: text;
+      cursor: text;
+    }
+  }
+
+  .query-inspector__label {
+    font-weight: var(--text-body-large-strong-font-weight);
   }
 
   .query-inspector__form-fields {
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-3);
-  }
-
-  .query-inspector__label {
-    font-weight: var(--text-body-large-strong-font-weight);
+    gap: var(--spacing-field);
   }
 
   .query-inspector__filter-query-checkboxes {
@@ -98,6 +100,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     background-color: var(--color-bg-secondary);
+    border-inline-start: var(--stroke-width-small) solid var(--color-border);
 
     ul {
       margin: 0;
@@ -112,10 +115,6 @@
     position: sticky;
     top: 0;
     z-index: 1;
-
-    @media (max-width: 1024px) {
-      display: none;
-    }
   }
 
   .query-inspector__toggle-fullscreen-button {
@@ -150,11 +149,26 @@
 
   @media (max-width: 1024px) {
     .query-inspector__content {
-      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      gap: var(--spacer-3);
     }
 
     .query-inspector__configuration {
       padding-inline-end: var(--gutter-h);
+    }
+
+    .query-inspector__results-wrapper {
+      border-inline-start: 0;
+      border-top: var(--stroke-width-small) solid var(--color-border);
+      flex: 1;
+      max-height: none;
+      min-height: 0;
+    }
+
+    .query-inspector--fullscreen .query-inspector__results-wrapper {
+      border-top: 0;
     }
   }
 }

@@ -11,8 +11,6 @@
   }
 
   .render-fields {
-    --spacing-field: var(--spacer-3);
-
     & > .field-type {
       margin-bottom: var(--spacing-field);
       position: relative;
@@ -59,8 +57,5 @@
       }
     }
 
-    @media (max-width: 768px) {
-      --spacing-field: var(--spacer-2-5);
-    }
   }
 }

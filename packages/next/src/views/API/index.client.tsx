@@ -1,13 +1,14 @@
 'use client'
 
 import {
+  Button,
   CheckboxField,
-  CopyToClipboard,
+  ExternalLinkIcon,
   Form,
-  Gutter,
   MinimizeMaximizeIcon,
   NumberField,
   SetDocumentStepNav,
+  TextInput,
   toast,
   useConfig,
   useDocumentInfo,
@@ -140,12 +141,28 @@ export const APIViewClient: React.FC = () => {
         <div className={`${baseClass}__configuration`}>
           <div className={`${baseClass}__api-url`}>
             <span className={`${baseClass}__label`}>API URL</span>
-            <CopyToClipboard value={fetchURL} />
+            <Button
+              aria-label={t('general:openInNewWindow')}
+              buttonStyle="ghost"
+              className={`${baseClass}__api-url-open-button`}
+              el="anchor"
+              icon={<ExternalLinkIcon size={16} />}
+              margin={false}
+              newTab
+              url={fetchURL}
+            />
           </div>
           <div className={`${baseClass}__api-url-field`}>
-            <a href={fetchURL} rel="noopener noreferrer" target="_blank">
-              {fetchURL}
-            </a>
+            <TextInput
+              className={`${baseClass}__api-url-input`}
+              htmlAttributes={{
+                'aria-label': 'API URL',
+                readOnly: true,
+              }}
+              path="api-url"
+              readOnly={false}
+              value={fetchURL}
+            />
           </div>
           <Form
             initialState={{

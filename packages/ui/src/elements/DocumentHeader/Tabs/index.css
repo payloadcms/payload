@@ -46,9 +46,5 @@
     .doc-tabs__tabs-container {
       margin-right: var(--spacer-6);
     }
-
-    .doc-tabs__tabs {
-      gap: var(--spacer-6);
-    }
   }
 }
