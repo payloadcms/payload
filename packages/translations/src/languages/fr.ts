@@ -249,6 +249,7 @@ export const frTranslations: DefaultTranslationsObject = {
     cancel: 'Annuler',
     changesNotSaved:
       'Vos modifications n’ont pas été enregistrées. Vous perdrez vos modifications si vous quittez maintenant.',
+    checked: 'Vérifié',
     clear: 'Clair',
     clearAll: 'Tout effacer',
     close: 'Fermer',
@@ -464,6 +465,7 @@ export const frTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} déplacé à la corbeille.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
+    unchecked: 'Non coché',
     unlock: 'Déverrouiller',
     unsavedChanges:
       'Vous avez des modifications non enregistrées. Enregistrez ou supprimez avant de continuer.',

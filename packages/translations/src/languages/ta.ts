@@ -237,6 +237,7 @@ export const taTranslations: DefaultTranslationsObject = {
     by: 'மூலம்',
     cancel: 'ரத்து செய்',
     changesNotSaved: 'உங்கள் மாற்றங்கள் சேமிக்கப்படவில்லை. இப்போது வெளியேறினால், அவை இழக்கப்படும்.',
+    checked: 'சரிபாரிக்கப்பட்டது',
     clear: 'அழிக்கவும்',
     clearAll: 'அனைத்தையும் அழிக்கவும்',
     close: 'மூடவும்',
@@ -452,6 +453,7 @@ export const taTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} குப்பைக்குச் செலுத்தப்பட்டது.',
     true: 'உண்மை',
     unauthorized: 'அனுமதி இல்லை',
+    unchecked: 'தேர்வு செய்யப்படாத',
     unlock: 'திறக்க',
     unsavedChanges:
       'சேமிக்கப்படாத மாற்றங்கள் உள்ளன. தொடருவதற்கு முன் சேமிக்கவும் அல்லது நிராகரிக்கவும்.',

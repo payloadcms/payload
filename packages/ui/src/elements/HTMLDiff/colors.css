@@ -1,0 +1,17 @@
+@layer payload-default {
+  :root {
+    --diff-delete-pill-bg: var(--color-bg-danger-tertiary-hover);
+    --diff-delete-pill-color: var(--color-text-danger);
+    --diff-delete-pill-border: var(--color-border-danger);
+    --diff-delete-parent-bg: var(--color-bg-danger-tertiary);
+    --diff-delete-parent-color: var(--color-text-danger);
+    --diff-delete-link-color: var(--color-text-danger);
+
+    --diff-create-pill-bg: var(--color-bg-brand-tertiary-hover);
+    --diff-create-pill-color: var(--color-text-brand);
+    --diff-create-pill-border: var(--color-border-brand);
+    --diff-create-parent-bg: var(--color-bg-brand-tertiary);
+    --diff-create-parent-color: var(--color-text-brand);
+    --diff-create-link-color: var(--color-text-brand);
+  }
+}

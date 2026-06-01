@@ -15,15 +15,6 @@
   .checkbox-input {
     display: flex;
 
-    .tooltip:not([aria-hidden='true']) {
-      left: calc(-1 * var(--spacer-2));
-      right: calc(-1 * var(--spacer-2));
-      position: absolute;
-      transform: translateY(calc(var(--caret-size) * -1));
-      margin-bottom: 0.2em;
-      max-width: fit-content;
-    }
-
     &:hover:not(.checkbox-input--read-only) {
       label,
       input {
@@ -55,7 +46,7 @@
       &:hover {
         cursor: pointer;
 
-        svg {
+        .checkbox-input__icon svg {
           opacity: 0.2;
         }
       }
@@ -160,6 +151,58 @@
     }
   }
 
+   .checkbox-input--has-tooltip {
+    position: relative;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  /* Allow Wrap */
+  .checkbox-input__tooltip {
+    --tooltip-x: 0;
+    left: 0;
+    width: max-content;
+    max-width: 280px;
+    white-space: normal;
+    text-align: start;
+  }
+
+  /* Center the caret on the checkbox box itself (0.5rem from the row's
+     left edge = center of the 1rem-wide checkbox input). */
+  .checkbox-input__tooltip.tooltip--caret-left .tooltip__caret {
+    left: 0.5rem;
+    transform: translateX(-50%);
+  }
+
+  .checkbox-input__tooltip.tooltip--caret-left.tooltip--position-bottom .tooltip__caret {
+    transform: translateX(-50%) rotate(180deg);
+  }
+
+  .checkbox-input--has-tooltip {
+    position: relative;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  /* Allow Wrap */
+  .checkbox-input__tooltip {
+    --tooltip-x: 0;
+    left: 0;
+    width: max-content;
+    max-width: 280px;
+    white-space: normal;
+    text-align: start;
+  }
+
+  /* Center the caret on the checkbox box itself (0.5rem from the row's
+     left edge = center of the 1rem-wide checkbox input). */
+  .checkbox-input__tooltip.tooltip--caret-left .tooltip__caret {
+    left: 0.5rem;
+    transform: translateX(-50%);
+  }
+
+  .checkbox-input__tooltip.tooltip--caret-left.tooltip--position-bottom .tooltip__caret {
+    transform: translateX(-50%) rotate(180deg);
   /* Muted variant - used in tables with lighter appearance */
   .checkbox-input--muted {
     .checkbox-input__input {

@@ -6,6 +6,7 @@ import { type CollectionConfig, type Config } from 'payload'
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
 import { blocksSeedData } from './seed/blocksSeedData.js'
+import { seedVersionsDiff } from './seed/versionsDiffData.js'
 import {
   blocksFieldsSlug,
   collectionSlugs,
@@ -74,20 +75,31 @@ import Rubbish from './collections/Trash/index.js'
 import Unauthorized from './collections/Unauthorized/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
+import { VersionsDiff } from './collections/VersionsDiff/index.js'
 import {
   codeContent,
   getRichTextContent,
   getTypographyContent,
+  getUpdatedRichTextContent,
+  getUpdatedTypographyContent,
   listsContent,
   tableContent,
+  updatedCodeContent,
+  updatedListsContent,
 } from './seed/richTextData.js'
 
 export const collections: CollectionConfig[] = [
   {
     slug: 'users',
+    admin: {
+      useAsTitle: 'email',
+    },
+    auth: {
+      useAPIKey: true,
+    },
     access: {
       admin: ({ req: { user } }) => {
-        return Boolean(user?.roles?.includes('admin'))
+        return Boolean(user && 'roles' in user && user.roles?.includes('admin'))
       },
     },
     admin: {
@@ -143,6 +155,7 @@ export const collections: CollectionConfig[] = [
   Autosave,
   Rubbish,
   Unauthorized,
+  VersionsDiff,
 ]
 
 export const baseConfig: Partial<Config> = {
@@ -258,7 +271,7 @@ export const baseConfig: Partial<Config> = {
 
       const richTextContent = getRichTextContent(formattedUploadID, formattedUserID)
 
-      await payload.create({
+      const richTextDoc = await payload.create({
         collection: richTextFieldsSlug,
         data: {
           code: codeContent,
@@ -267,6 +280,18 @@ export const baseConfig: Partial<Config> = {
           table: tableContent,
           title: 'Data harvest \u2013 how AI and sensors are revolutionizing farming',
           typography: getTypographyContent(formattedUserID),
+        },
+      })
+
+      // Create a second version with updated content for diff testing
+      await payload.update({
+        id: richTextDoc.id,
+        collection: richTextFieldsSlug,
+        data: {
+          content: getUpdatedRichTextContent(formattedUploadID, formattedUserID),
+          lists: updatedListsContent,
+          typography: getUpdatedTypographyContent(formattedUserID),
+          code: updatedCodeContent,
         },
       })
     }
@@ -499,6 +524,9 @@ export const baseConfig: Partial<Config> = {
         },
       },
     })
+
+    // Seed versions-diff collection with two versions for diff testing
+    await seedVersionsDiff(payload)
 
     // Seed draft-versions collection with many versions for pagination testing
     const { id: draftVersionsDocID } = await payload.create({
