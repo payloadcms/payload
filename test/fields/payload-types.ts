@@ -283,21 +283,11 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
-    richTextField?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
+    richTextField?:
+      | {
           [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+        }[]
+      | null;
     subArray?:
       | {
           text?: string | null;
@@ -650,21 +640,11 @@ export interface BlockField {
  */
 export interface ContentBlock {
   text: string;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+  richText?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+      }[]
+    | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -736,21 +716,11 @@ export interface TabsBlock {
  */
 export interface LocalizedContentBlock {
   text: string;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+  richText?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+      }[]
+    | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
@@ -944,21 +914,11 @@ export interface ConditionalLogic {
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
   customServerFieldWithCondition?: string | null;
-  conditionalRichText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+  conditionalRichText?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+      }[]
+    | null;
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;

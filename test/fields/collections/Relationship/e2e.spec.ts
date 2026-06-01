@@ -803,8 +803,6 @@ describe('relationship', () => {
     await openListFilters(page, {})
     const whereBuilder = page.locator('.where-builder')
 
-    // Add first filter
-    await whereBuilder.locator('.where-builder__add-first-filter').click()
     const condition = whereBuilder.locator('.where-builder__or-filters > li').last()
 
     // Select relationship field
