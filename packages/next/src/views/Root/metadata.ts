@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { generateAccountViewMetadata } from '../Account/metadata.js'
 import { adminViews } from '../adapter.js'
 import { generateCollectionTrashMetadata } from '../CollectionTrash/metadata.js'
 import { generateDocumentViewMetadata } from '../Document/metadata.js'
@@ -68,7 +67,7 @@ export const generatePageMetadata = async ({
     case 1: {
       if (segmentOne === 'account') {
         // --> /account
-        meta = await generateAccountViewMetadata({ config, i18n })
+        meta = await adminViews.account.generateMetadata({ config, i18n })
         break
       } else if (oneSegmentMeta[segmentOne]) {
         // --> /create-first-user

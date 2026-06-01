@@ -19,7 +19,6 @@ import { verifyBaseClass } from '@payloadcms/ui/views/Verify'
 import { parseDocumentID } from 'payload'
 import { formatAdminURL, isNumber } from 'payload/shared'
 
-import { AccountView } from '../Account/index.js'
 import { adminViews } from '../adapter.js'
 import { TrashView } from '../CollectionTrash/index.js'
 import { DocumentView } from '../Document/index.js'
@@ -51,7 +50,7 @@ export type ViewFromConfig = {
 }
 
 const oneSegmentViews: OneSegmentViews = {
-  account: AccountView,
+  account: adminViews.account.Component as React.FC<AdminViewServerProps>,
   createFirstUser: adminViews.createFirstUser.Component as React.FC<AdminViewServerProps>,
   forgot: adminViews.forgot.Component as React.FC<AdminViewServerProps>,
   inactivity: adminViews.logoutInactivity.Component as React.FC<AdminViewServerProps>,
