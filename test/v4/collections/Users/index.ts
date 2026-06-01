@@ -5,10 +5,12 @@ const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
   },
-  auth: true,
+  auth: {
+    useAPIKey: true,
+  },
   access: {
     admin: ({ req: { user } }) => {
-      return Boolean(user?.roles?.includes('admin'))
+      return Boolean(user && 'roles' in user && user.roles?.includes('admin'))
     },
   },
   fields: [
