@@ -886,6 +886,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       state[field.id] = {
         passesCondition,
       }
+
+      // Flag newly added tab entries so the client accepts them during merge.
+      // Without this, tabs revealed after a previously hidden ancestor flips
+      // visible never make it into client form state (see mergeServerFormState).
+      if (!renderAllFields && !previousFormState?.[field.id]) {
+        state[field.id].addedByServer = true
+      }
     }
 
     if (!passesCondition) {
