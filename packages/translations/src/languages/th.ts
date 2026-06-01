@@ -232,6 +232,7 @@ export const thTranslations: DefaultTranslationsObject = {
     by: 'โดย',
     cancel: 'ยกเลิก',
     changesNotSaved: 'การเปลี่ยนแปลงยังไม่ได้ถูกบันทึก ถ้าคุณออกตอนนี้ สิ่งที่แก้ไขไว้จะหายไป',
+    checked: 'ตรวจสอบแล้ว',
     clear:
       'ให้เคารพความหมายของข้อความต้นฉบับภายในบริบทของ Payload นี่คือรายการของคำที่มักใช้ใน Payload ที่มีความหมายที่เฉพาะเจาะจงมาก:\n    - Collection: Collection คือกลุ่มของเอกสารที่มีโครงสร้างและจุดประสงค์ท',
     clearAll: 'ล้างทั้งหมด',
@@ -446,6 +447,7 @@ export const thTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} ถูกย้ายไปยังถังขยะ',
     true: 'จริง',
     unauthorized: 'ไม่ได้รับอนุญาต',
+    unchecked: 'ยังไม่ได้เลือก',
     unlock: 'ปลดล็อค',
     unsavedChanges: 'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก บันทึกหรือทิ้งก่อนที่จะดำเนินการต่อ',
     unsavedChangesDuplicate: 'คุณมีการแก้ไขที่ยังไม่ถูกบันทึก คุณต้องการทำสำเนาต่อหรือไม่?',

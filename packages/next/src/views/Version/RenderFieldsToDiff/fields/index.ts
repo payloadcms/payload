@@ -1,5 +1,6 @@
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldTypes } from 'payload'
 
+import { Checkbox } from './Checkbox/index.js'
 import { Collapsible } from './Collapsible/index.js'
 import { DateDiffComponent } from './Date/index.js'
 import { Group } from './Group/index.js'
@@ -17,7 +18,7 @@ export const diffComponents: Record<
 > = {
   array: Iterable,
   blocks: Iterable,
-  checkbox: Text,
+  checkbox: Checkbox,
   code: Text,
   collapsible: Collapsible,
   date: DateDiffComponent,

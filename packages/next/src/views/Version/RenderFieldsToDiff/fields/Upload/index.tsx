@@ -9,9 +9,11 @@ import type {
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { FieldDiffContainer, File, getHTMLDiffComponents } from '@payloadcms/ui/rsc'
 
-import './index.scss'
+import './index.css'
 
 import React from 'react'
+
+import { DiffCollapser } from '../../DiffCollapser/index.js'
 
 const baseClass = 'upload-diff'
 
@@ -30,7 +32,8 @@ export const Upload: UploadFieldDiffServerComponent = (args) => {
     req,
     versionValue: valueTo,
   } = args
-  const hasMany = 'hasMany' in field && field.hasMany && Array.isArray(valueTo)
+  const hasMany =
+    'hasMany' in field && field.hasMany && (Array.isArray(valueTo) || Array.isArray(valueFrom))
   const polymorphic = Array.isArray(field.relationTo)
 
   if (hasMany) {
@@ -75,7 +78,13 @@ export const HasManyUploadDiff: React.FC<{
   const { field, i18n, locale, nestingLevel, polymorphic, req, valueFrom, valueTo } = args
   const ReactDOMServer = (await import('react-dom/server')).default
 
-  const showCollectionSlug = Array.isArray(field.relationTo)
+  let From: React.ReactNode = ''
+  let To: React.ReactNode = ''
+
+  const NoValue = <div className="diff-no-value">{i18n.t('general:noValue')}</div>
+
+  const hasFrom = valueFrom && valueFrom.length > 0
+  const hasTo = valueTo && valueTo.length > 0
 
   const getUploadDocKey = (uploadDoc: UploadDoc): number | string => {
     if (typeof uploadDoc === 'object' && 'relationTo' in uploadDoc) {
@@ -87,68 +96,106 @@ export const HasManyUploadDiff: React.FC<{
     return typeof uploadDoc === 'object' ? uploadDoc.id : uploadDoc
   }
 
-  const FromComponents = valueFrom
-    ? valueFrom.map((uploadDoc) => (
-        <UploadDocumentDiff
-          i18n={i18n}
-          key={getUploadDocKey(uploadDoc)}
-          polymorphic={polymorphic}
-          relationTo={field.relationTo}
-          req={req}
-          showCollectionSlug={showCollectionSlug}
-          uploadDoc={uploadDoc}
-        />
-      ))
-    : null
-  const ToComponents = valueTo
-    ? valueTo.map((uploadDoc) => (
-        <UploadDocumentDiff
-          i18n={i18n}
-          key={getUploadDocKey(uploadDoc)}
-          polymorphic={polymorphic}
-          relationTo={field.relationTo}
-          req={req}
-          showCollectionSlug={showCollectionSlug}
-          uploadDoc={uploadDoc}
-        />
-      ))
-    : null
+  if (hasFrom || hasTo) {
+    const FromComponents = hasFrom
+      ? valueFrom.map((uploadDoc) => (
+          <UploadDocumentDiff
+            i18n={i18n}
+            key={getUploadDocKey(uploadDoc)}
+            polymorphic={polymorphic}
+            relationTo={field.relationTo}
+            req={req}
+            uploadDoc={uploadDoc}
+          />
+        ))
+      : null
+    const ToComponents = hasTo
+      ? valueTo.map((uploadDoc) => (
+          <UploadDocumentDiff
+            i18n={i18n}
+            key={getUploadDocKey(uploadDoc)}
+            polymorphic={polymorphic}
+            relationTo={field.relationTo}
+            req={req}
+            uploadDoc={uploadDoc}
+          />
+        ))
+      : null
 
-  const diffResult = getHTMLDiffComponents({
-    fromHTML:
-      `<div class="${baseClass}-hasMany">` +
-      (FromComponents
-        ? FromComponents.map(
-            (component) => `<div>${ReactDOMServer.renderToStaticMarkup(component)}</div>`,
-          ).join('')
-        : '') +
-      '</div>',
-    toHTML:
-      `<div class="${baseClass}-hasMany">` +
-      (ToComponents
-        ? ToComponents.map(
-            (component) => `<div>${ReactDOMServer.renderToStaticMarkup(component)}</div>`,
-          ).join('')
-        : '') +
-      '</div>',
-    tokenizeByCharacter: false,
-  })
+    const diffResult = getHTMLDiffComponents({
+      fromHTML:
+        `<div class="${baseClass}-hasMany">` +
+        (FromComponents
+          ? FromComponents.map(
+              (component) => `<div>${ReactDOMServer.renderToStaticMarkup(component)}</div>`,
+            ).join('')
+          : '') +
+        '</div>',
+      toHTML:
+        `<div class="${baseClass}-hasMany">` +
+        (ToComponents
+          ? ToComponents.map(
+              (component) => `<div>${ReactDOMServer.renderToStaticMarkup(component)}</div>`,
+            ).join('')
+          : '') +
+        '</div>',
+      tokenizeByCharacter: false,
+    })
 
-  const From: React.ReactNode = diffResult.From
-  const To: React.ReactNode = diffResult.To
+    From = hasFrom ? diffResult.From : NoValue
+    To = hasTo ? diffResult.To : NoValue
+  }
+
+  const effectiveNesting = nestingLevel || 0
+
+  // Count individual upload changes
+  const fromLength = valueFrom?.length || 0
+  const toLength = valueTo?.length || 0
+  const maxLength = Math.max(fromLength, toLength)
+  let uploadChangeCount = 0
+
+  for (let i = 0; i < maxLength; i++) {
+    const fromKey = i < fromLength ? getUploadDocKey(valueFrom[i]) : undefined
+    const toKey = i < toLength ? getUploadDocKey(valueTo[i]) : undefined
+
+    if (fromKey !== toKey) {
+      uploadChangeCount++
+    }
+  }
+
+  const uploadGutterOffset = (effectiveNesting + 1) * 6.5
 
   return (
-    <FieldDiffContainer
-      className={`${baseClass}-container ${baseClass}-container--hasMany`}
-      From={From}
-      i18n={i18n}
-      label={{
-        label: field.label,
-        locale,
-      }}
-      nestingLevel={nestingLevel}
-      To={To}
-    />
+    <div className={`${baseClass}-container ${baseClass}-container--hasMany`}>
+      <DiffCollapser
+        changeCountOverride={uploadChangeCount}
+        fields={[]}
+        Label={
+          <span>
+            {locale && <span className="field-diff__locale-label">{locale}</span>}
+            {typeof field.label !== 'function' &&
+              field.label !== false &&
+              getTranslation(field.label, i18n)}
+          </span>
+        }
+        locales={undefined}
+        parentIsLocalized={false}
+        valueFrom={valueFrom}
+        valueTo={valueTo}
+      >
+        <div
+          className="field-diff-content"
+          style={
+            {
+              '--field-diff-columns': `calc(50% - ${uploadGutterOffset}px) calc(50% + ${uploadGutterOffset}px)`,
+            } as React.CSSProperties
+          }
+        >
+          {From}
+          {To}
+        </div>
+      </DiffCollapser>
+    </div>
   )
 }
 
@@ -166,7 +213,10 @@ export const SingleUploadDiff: React.FC<{
 
   const ReactDOMServer = (await import('react-dom/server')).default
 
-  const showCollectionSlug = Array.isArray(field.relationTo)
+  let From: React.ReactNode = ''
+  let To: React.ReactNode = ''
+
+  const NoValue = <div className="diff-no-value">{i18n.t('general:noValue')}</div>
 
   const FromComponent = valueFrom ? (
     <UploadDocumentDiff
@@ -174,7 +224,6 @@ export const SingleUploadDiff: React.FC<{
       polymorphic={polymorphic}
       relationTo={field.relationTo}
       req={req}
-      showCollectionSlug={showCollectionSlug}
       uploadDoc={valueFrom}
     />
   ) : null
@@ -184,25 +233,23 @@ export const SingleUploadDiff: React.FC<{
       polymorphic={polymorphic}
       relationTo={field.relationTo}
       req={req}
-      showCollectionSlug={showCollectionSlug}
       uploadDoc={valueTo}
     />
   ) : null
 
-  const fromHtml = FromComponent
-    ? ReactDOMServer.renderToStaticMarkup(FromComponent)
-    : '<p>' + '' + '</p>'
-  const toHtml = ToComponent
-    ? ReactDOMServer.renderToStaticMarkup(ToComponent)
-    : '<p>' + '' + '</p>'
+  if (FromComponent || ToComponent) {
+    const fromHtml = FromComponent ? ReactDOMServer.renderToStaticMarkup(FromComponent) : '<p></p>'
+    const toHtml = ToComponent ? ReactDOMServer.renderToStaticMarkup(ToComponent) : '<p></p>'
 
-  const diffResult = getHTMLDiffComponents({
-    fromHTML: fromHtml,
-    toHTML: toHtml,
-    tokenizeByCharacter: false,
-  })
-  const From: React.ReactNode = diffResult.From
-  const To: React.ReactNode = diffResult.To
+    const diffResult = getHTMLDiffComponents({
+      fromHTML: fromHtml,
+      toHTML: toHtml,
+      tokenizeByCharacter: false,
+    })
+
+    From = FromComponent ? diffResult.From : NoValue
+    To = ToComponent ? diffResult.To : NoValue
+  }
 
   return (
     <FieldDiffContainer
@@ -227,7 +274,7 @@ const UploadDocumentDiff = (args: {
   showCollectionSlug?: boolean
   uploadDoc: UploadDoc
 }) => {
-  const { i18n, polymorphic, relationTo, req, showCollectionSlug, uploadDoc } = args
+  const { i18n, polymorphic, relationTo, req, uploadDoc } = args
 
   let thumbnailSRC: string = ''
 
@@ -249,9 +296,9 @@ const UploadDocumentDiff = (args: {
     filename = `${i18n.t('general:untitled')} - ID: ${uploadDoc as number | string}`
   }
 
-  let pillLabel: null | string = null
+  let pillLabel: null | string
 
-  if (showCollectionSlug) {
+  {
     let collectionSlug: string
     if (polymorphic && typeof uploadDoc === 'object' && 'relationTo' in uploadDoc) {
       collectionSlug = uploadDoc.relationTo
@@ -277,12 +324,19 @@ const UploadDocumentDiff = (args: {
   const alt =
     (value && typeof value === 'object' && (value as { alt?: string }).alt) || filename || ''
 
+  let resolvedRelationTo: string
+  if (polymorphic && typeof uploadDoc === 'object' && 'relationTo' in uploadDoc) {
+    resolvedRelationTo = uploadDoc.relationTo
+  } else {
+    resolvedRelationTo = typeof relationTo === 'string' ? relationTo : relationTo[0]
+  }
+
   return (
     <div
       className={`${baseClass}`}
       data-enable-match="true"
       data-id={id}
-      data-relation-to={relationTo}
+      data-relation-to={resolvedRelationTo}
     >
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__thumbnail`}>
@@ -294,7 +348,7 @@ const UploadDocumentDiff = (args: {
           </div>
         )}
         <div className={`${baseClass}__info`} data-enable-match="false">
-          <strong>{filename}</strong>
+          {filename}
         </div>
       </div>
     </div>

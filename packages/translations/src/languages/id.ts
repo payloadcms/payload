@@ -241,6 +241,7 @@ export const idTranslations: DefaultTranslationsObject = {
     cancel: 'Batal',
     changesNotSaved:
       'Perubahan Anda belum disimpan. Jika Anda pergi sekarang, Anda akan kehilangan perubahan Anda.',
+    checked: 'Diperiksa',
     clear: 'Hapus',
     clearAll: 'Hapus Semua',
     close: 'Tutup',
@@ -456,6 +457,7 @@ export const idTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} dipindahkan ke tempat sampah.',
     true: 'Benar',
     unauthorized: 'Tidak Sah',
+    unchecked: 'Belum dicentang',
     unlock: 'Buka Kunci',
     unsavedChanges:
       'Anda memiliki perubahan yang belum disimpan. Simpan atau buang sebelum melanjutkan.',

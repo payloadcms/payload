@@ -237,6 +237,7 @@ export const koTranslations: DefaultTranslationsObject = {
     by: '작성자',
     cancel: '취소',
     changesNotSaved: '변경 사항이 저장되지 않았습니다. 지금 떠나면 변경 사항을 잃게 됩니다.',
+    checked: '확인됨',
     clear:
       '페이로드의 맥락 내에서 원문의 의미를 존중하십시오. 다음은 페이로드에서 사용되는 특정 의미를 내포하는 일반적인 페이로드 용어 목록입니다: \n- Collection: 컬렉션은 공통의 구조와 목적을 공유하는 문서의 그룹입니다. 컬렉션은 페이로드에서 콘텐츠를 정리하고 관리하는 데 사용됩니다.\n- Field: 필드는 컬렉',
     clearAll: '모두 지우기',
@@ -452,6 +453,7 @@ export const koTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}}가 휴지통으로 이동했습니다.',
     true: '참',
     unauthorized: '권한 없음',
+    unchecked: '선택되지 않음',
     unlock: '잠금 해제',
     unsavedChanges: '저장되지 않은 변경 사항이 있습니다. 계속하기 전에 저장하거나 무시하십시오.',
     unsavedChangesDuplicate: '저장되지 않은 변경 사항이 있습니다. 복제를 계속하시겠습니까?',
