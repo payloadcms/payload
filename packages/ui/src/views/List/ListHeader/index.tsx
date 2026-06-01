@@ -71,7 +71,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   const { config, getEntityConfig } = useConfig()
   const { drawerSlug, isInDrawer, selectedOption } = useListDrawerContext()
   const isTrashRoute = viewType === 'trash'
-  const { isGroupingBy } = useListQuery()
+  const { isGroupingBy, query } = useListQuery()
 
   if (isInDrawer) {
     return (
@@ -115,6 +115,7 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             label={getTranslation(collectionConfig?.labels?.plural, i18n)}
             showSelectAllAcrossPages={!isGroupingBy}
             viewType={viewType}
+            where={query?.where}
           />
         ),
         <DefaultListViewTabs

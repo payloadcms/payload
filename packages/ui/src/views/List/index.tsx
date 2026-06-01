@@ -81,7 +81,7 @@ export function DefaultListView(props: ListViewClientProps) {
   } = useConfig()
   const router = useRouter()
 
-  const { data, isGroupingBy } = useListQuery()
+  const { data, isGroupingBy, query } = useListQuery()
 
   const { openModal } = useModal()
   const { drawerSlug: bulkUploadDrawerSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
@@ -322,6 +322,7 @@ export function DefaultListView(props: ListViewClientProps) {
                         disableBulkEdit={disableBulkEdit}
                         label={collectionLabel}
                         showSelectAllAcrossPages={!isGroupingBy}
+                        where={query?.where}
                       />
                       <div className={`${baseClass}__list-selection-actions`}>
                         {enableRowSelections && typeof onBulkSelect === 'function'
