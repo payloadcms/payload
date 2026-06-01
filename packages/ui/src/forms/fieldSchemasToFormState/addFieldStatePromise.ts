@@ -185,7 +185,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   }
 
   // Short-circuit to prevent hidden fields from recursing and rendering.
-  if (passesCondition === false) {
+  // `tab` is excluded because tab visibility is keyed by `field.id` rather
+  // than `path` — the tab branch below owns that write and the skip-recursion
+  // logic.
+  if (passesCondition === false && field.type !== 'tab') {
     if (fieldAffectsData(field) && data?.[field.name] !== undefined) {
       fieldState.value = data[field.name]
       fieldState.initialValue = data[field.name]
@@ -193,14 +196,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     if (!filter || filter(args)) {
       state[path] = fieldState
-    }
-
-    // Tab visibility on the client is keyed by `field.id` in form state
-    // (see packages/ui/src/fields/Tabs/index.tsx). The tab branch normally
-    // writes `state[field.id]` — when short-circuiting, mirror that write so
-    // hidden tabs are correctly flagged.
-    if (field.type === 'tab' && field.id) {
-      state[field.id] = { passesCondition: false }
     }
 
     return
@@ -909,26 +904,19 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       tabSelect = select
     }
 
-    const pathSegments = path ? path.split('.') : []
-
-    // `passesCondition` is guaranteed `true` here because the function returns
-    // early when it is `false`. Tab visibility is determined solely by its own
-    // `admin.condition`, if defined.
-    let tabPassesCondition: boolean = true
-
-    if (typeof field.admin?.condition === 'function') {
-      tabPassesCondition = field.admin.condition(fullData, data, {
-        blockData,
-        operation,
-        path: pathSegments,
-        user: req.user,
-      })
-    }
-
+    // `passesCondition` was already resolved by `iterateFields` (combining the
+    // tab's own `admin.condition` with the parent's condition), so use it
+    // directly rather than re-evaluating.
     if (field?.id) {
       state[field.id] = {
-        passesCondition: tabPassesCondition,
+        passesCondition,
       }
+    }
+
+    // Skip recursion into children when the tab is hidden — its descendants
+    // would all short-circuit anyway.
+    if (!passesCondition) {
+      return
     }
 
     return iterateFields({
@@ -949,7 +937,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       omitParents,
       operation,
       parentIndexPath: indexPath,
-      parentPassesCondition: tabPassesCondition,
+      parentPassesCondition: passesCondition,
       parentPath: path,
       parentSchemaPath: schemaPath,
       permissions: childPermissions,
