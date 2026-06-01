@@ -20,6 +20,7 @@ const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
 
+const TOTAL_WIDGETS = 13
 const url = new AdminUrlUtil(serverURL, 'users')
 
 describe('Dashboard', () => {
@@ -41,7 +42,7 @@ describe('Dashboard', () => {
 
   test('initial dashboard', async ({ page }) => {
     const d = new DashboardHelper(page)
-    await expect(d.widgets).toHaveCount(7)
+    await expect(d.widgets).toHaveCount(TOTAL_WIDGETS)
 
     await d.assertIsEditing(false)
     await d.assertWidget(1, 'collections', 'full')
@@ -51,19 +52,31 @@ describe('Dashboard', () => {
     await d.assertWidget(5, 'count', 'x-small')
     await d.assertWidget(6, 'revenue', 'full')
     await d.assertWidget(7, 'private', 'full')
+    await d.assertWidget(8, 'collection-query', 'medium')
+    await d.assertWidget(9, 'collection-query', 'medium')
+    await d.assertWidget(10, 'collection-query', 'x-small')
+    await d.assertWidget(11, 'collection-query', 'x-small')
+    await d.assertWidget(12, 'collection-query', 'x-small')
+    await d.assertWidget(13, 'collection-query', 'x-small')
     await d.validateLayout()
   })
 
   test('respects min and max width', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    await d.assertWidthRange({ position: 1, min: 'full', max: 'full' })
-    await d.assertWidthRange({ position: 2, min: 'x-small', max: 'medium' })
-    await d.assertWidthRange({ position: 3, min: 'x-small', max: 'medium' })
-    await d.assertWidthRange({ position: 4, min: 'x-small', max: 'medium' })
-    await d.assertWidthRange({ position: 5, min: 'x-small', max: 'medium' })
-    await d.assertWidthRange({ position: 6, min: 'medium', max: 'full' })
-    await d.assertWidthRange({ position: 7, min: 'x-small', max: 'full' })
+    await d.assertWidthRange({ max: 'full', min: 'full', position: 1 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 2 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 3 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 4 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 5 })
+    await d.assertWidthRange({ max: 'full', min: 'medium', position: 6 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 7 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 8 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 9 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 10 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 11 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 12 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 13 })
   })
 
   test('resize widget', async ({ page }) => {
@@ -79,7 +92,7 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.addWidget('revenue')
-    await d.assertWidget(8, 'revenue', 'medium')
+    await d.assertWidget(TOTAL_WIDGETS + 1, 'revenue', 'medium')
     await d.saveChangesAndValidate()
   })
 
@@ -89,7 +102,7 @@ describe('Dashboard', () => {
     await d.deleteWidget(1)
     await d.assertWidget(1, 'count', 'x-small')
     await d.assertWidget(6, 'private', 'full')
-    await expect(d.widgets).toHaveCount(6)
+    await expect(d.widgets).toHaveCount(TOTAL_WIDGETS - 1)
     await d.saveChangesAndValidate()
   })
 
@@ -136,13 +149,9 @@ describe('Dashboard', () => {
   test('empty dashboard - delete all widgets', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
+    while ((await d.widgets.count()) > 0) {
+      await d.deleteWidget(1)
+    }
     await expect(d.widgets).toHaveCount(0)
     await expect(page.getByText('There are no widgets on your dashboard')).toBeVisible()
     await d.saveChangesAndValidate()
@@ -164,7 +173,7 @@ describe('Dashboard', () => {
     await d.setEditing()
     await d.addWidget('revenue')
     await d.cancelEditing()
-    await expect(d.widgets).toHaveCount(7)
+    await expect(d.widgets).toHaveCount(TOTAL_WIDGETS)
     await d.validateLayout()
   })
 
@@ -174,7 +183,7 @@ describe('Dashboard', () => {
     await d.addWidget('revenue')
     await d.saveChangesAndValidate()
     await d.resetLayout()
-    await expect(d.widgets).toHaveCount(7)
+    await expect(d.widgets).toHaveCount(TOTAL_WIDGETS)
     await d.validateLayout()
   })
 
@@ -184,8 +193,8 @@ describe('Dashboard', () => {
     // moveWidget already contains validations
     await d.moveWidget(2, 1) // to first position
     await d.moveWidget(1, 2, 'after') // after last in row
-    await d.moveWidget(2, 7, 'after') // to last position
-    await d.moveWidget(3, 6, 'before') // before first in row
+    await d.moveWidget(2, TOTAL_WIDGETS, 'after') // to last position
+    await d.moveWidget(TOTAL_WIDGETS, 5, 'before') // before first full-width row after counts
     await d.saveChangesAndValidate()
   })
 
@@ -209,7 +218,7 @@ describe('Dashboard', () => {
 
   test('Responsiveness - all widgets have a 100% width on mobile', async ({ page }) => {
     // Set viewport to mobile size
-    await page.setViewportSize({ width: 500, height: 667 })
+    await page.setViewportSize({ height: 667, width: 500 })
     const d = new DashboardHelper(page)
     const widgets = await d.widgets.all()
     for (const widget of widgets) {
@@ -430,7 +439,7 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.addWidget('page query')
-    await d.assertWidget(8, 'page-query', 'x-small')
+    await d.assertWidget(TOTAL_WIDGETS + 1, 'page-query', 'x-small')
     await d.saveChangesAndValidate()
 
     // Find the page-query widget
