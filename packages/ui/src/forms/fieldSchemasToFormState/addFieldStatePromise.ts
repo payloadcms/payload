@@ -184,11 +184,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldState.fieldSchema = field
   }
 
-  /**
-   * Short-circuit to prevent hidden fields from recursing and rendering.
-   * Note: `tab` is excluded bc tab visibility is keyed by `field.id` rather than `path`.
-   * The tab branch below owns that write and the skip-recursion.
-   */
+  // Short-circuit to prevent hidden fields from recursing and rendering.
+  // Note: `tab` is excluded bc tab visibility is keyed by `field.id` rather than `path`.
+  // The tab branch below owns that write and the skip-recursion.
   if (passesCondition === false && field.type !== 'tab') {
     if (fieldAffectsData(field) && data?.[field.name] !== undefined) {
       fieldState.value = data[field.name]
@@ -879,17 +877,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
     }
 
-    /**
-     * Tab visibility on the client is keyed by `field.id`, not `path` (like all other fields).
-     */
+    // Tab visibility on the client is keyed by `field.id`, not `path` (like all other fields).
     if (field?.id) {
       state[field.id] = {
         passesCondition,
       }
 
       // Flag newly added tab entries so the client accepts them during merge.
-      // Without this, tabs revealed after a previously hidden ancestor flips
-      // visible never make it into client form state (see mergeServerFormState).
+      // Otherwise, tabs revealed after a hidden ancestor becomes visible would never make it into client form state.
       if (!renderAllFields && !previousFormState?.[field.id]) {
         state[field.id].addedByServer = true
       }
