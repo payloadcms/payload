@@ -19,7 +19,7 @@ import { DefaultEditView } from '@payloadcms/ui'
 import { APIView as DefaultAPIView } from '@payloadcms/ui/views/API'
 
 import { VersionView as DefaultVersionView } from '../Version/index.js'
-import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
+import { VersionsView as DefaultVersionsView } from '@payloadcms/ui/views/Versions'
 import { getCustomDocumentViewByKey } from './getCustomDocumentViewByKey.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
