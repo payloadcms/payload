@@ -237,6 +237,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     cancel: 'Չեղարկել',
     changesNotSaved:
       'Ձեր փոփոխությունները չեն պահպանվել։ Եթե հիմա հեռանաք, կկորցնեք չպահպանված փոփոխությունները։',
+    checked: 'Ստուգված',
     clear:
       'Հիմնական տեքստի իմաստը պետք է պահպանվի Payload կոնտեքստի մեջ: Այս այս այստեղ են հաճախակի',
     clearAll: 'Մաքրել բոլորը',
@@ -454,6 +455,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} տեղափոխվել է աղբարկղում։',
     true: 'Ճիշտ',
     unauthorized: 'Չթույլատրված',
+    unchecked: 'Չնշված',
     unlock: 'Բացարձակել',
     unsavedChanges:
       'Դուք ունեք չպահպանված փոփոխություններ։ Պահպանեք կամ հեռացեք նախքան շարունակելը։',
