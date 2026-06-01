@@ -22,41 +22,5 @@ export const PostsCollection: CollectionConfig = {
         features: ({ defaultFeatures }) => [...defaultFeatures],
       }),
     },
-    {
-      name: 'enableTabs',
-      type: 'checkbox',
-      label: 'Enable Tabs',
-      defaultValue: false,
-    },
-    {
-      type: 'tabs',
-      admin: {
-        condition: (data) => data.enableTabs === true,
-      },
-      tabs: [
-        {
-          label: 'Tab 1',
-          description: 'Test description for Tab 1',
-          fields: [
-            {
-              name: 'test1',
-              type: 'text',
-              label: 'Test Field 1',
-            },
-          ],
-        },
-        {
-          label: 'Tab 2',
-          description: 'Test description for Tab 2',
-          fields: [
-            {
-              name: 'test2',
-              type: 'text',
-              label: 'Test Field 2',
-            },
-          ],
-        },
-      ],
-    },
   ],
 }
