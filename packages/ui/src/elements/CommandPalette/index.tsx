@@ -67,11 +67,6 @@ export const CommandPalette: React.FC = () => {
     [filteredGroups],
   )
 
-  const indexByAction = useMemo(
-    () => new Map(flatActions.map((action, index) => [action, index])),
-    [flatActions],
-  )
-
   // Clamp at read time so a shrinking result set can't leave a stale selection
   // pointing past the end of the list (avoids a setState-in-effect round-trip).
   const activeIndex = Math.min(rawActiveIndex, Math.max(0, flatActions.length - 1))
@@ -108,11 +103,11 @@ export const CommandPalette: React.FC = () => {
   )
 
   const runAction = useCallback(
-    (action: CommandPaletteAction | undefined, create: boolean) => {
+    (action: CommandPaletteAction | undefined, intent: 'create' | 'navigate') => {
       if (!action) {
         return
       }
-      const href = create ? action.createHref : action.href
+      const href = intent === 'create' ? action.createHref : action.href
       if (!href) {
         return
       }
@@ -143,7 +138,7 @@ export const CommandPalette: React.FC = () => {
       }
       if (event.key === 'Enter') {
         event.preventDefault()
-        runAction(activeAction, isCmdCtrl)
+        runAction(activeAction, isCmdCtrl ? 'create' : 'navigate')
       }
     },
     [activeAction, close, flatActions.length, runAction],
@@ -160,7 +155,7 @@ export const CommandPalette: React.FC = () => {
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- keyboard handling is delegated to the input (combobox pattern) */}
       <div className={`${baseClass}__inner`} onKeyDown={onKeyDown}>
         <input
-          aria-activedescendant={activeAction ? optionId(activeAction) : undefined}
+          aria-activedescendant={activeOptionId ?? undefined}
           aria-controls={listboxId}
           aria-expanded={isOpen}
           aria-label={t('commandPalette:title')}
@@ -184,49 +179,60 @@ export const CommandPalette: React.FC = () => {
           id={listboxId}
           role="listbox"
         >
-          {filteredGroups.map((group) => (
-            <div
-              aria-label={group.label}
-              className={`${baseClass}__group`}
-              key={group.label}
-              role="group"
-            >
-              <div aria-hidden="true" className={`${baseClass}__group-label`}>
-                {group.label}
+          {filteredGroups.map((group, groupIndex) => {
+            // Offset of this group's first action within the flat list, so hover can
+            // map a row back to its flat index without a lookup table.
+            const groupOffset = filteredGroups
+              .slice(0, groupIndex)
+              .reduce((total, prior) => total + prior.actions.length, 0)
+
+            return (
+              <div
+                aria-label={group.label}
+                className={`${baseClass}__group`}
+                key={group.label}
+                role="group"
+              >
+                <div aria-hidden="true" className={`${baseClass}__group-label`}>
+                  {group.label}
+                </div>
+                {group.actions.map((action, actionIndex) => {
+                  const flatIndex = groupOffset + actionIndex
+                  const isActive = action === activeAction
+                  return (
+                    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus -- keyboard events are handled by the combobox input; focus stays in the input per ARIA combobox pattern
+                    <div
+                      aria-selected={isActive}
+                      className={[
+                        `${baseClass}__option`,
+                        isActive && `${baseClass}__option--active`,
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      id={optionId(action)}
+                      key={action.id}
+                      onClick={() => runAction(action, 'navigate')}
+                      onMouseEnter={() => setActiveIndex(flatIndex)}
+                      role="option"
+                    >
+                      <span className={`${baseClass}__option-label`}>
+                        {splitLabelByMatches(action.label, action.matchIndices).map(
+                          (segment: LabelSegment, i: number) =>
+                            segment.isMatch ? (
+                              <strong className={`${baseClass}__option-match`} key={i}>
+                                {segment.text}
+                              </strong>
+                            ) : (
+                              segment.text
+                            ),
+                        )}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
-              {group.actions.map((action) => {
-                const flatIndex = indexByAction.get(action) ?? -1
-                const isActive = action === activeAction
-                return (
-                  // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus -- keyboard events are handled by the combobox input; focus stays in the input per ARIA combobox pattern
-                  <div
-                    aria-selected={isActive}
-                    className={[`${baseClass}__option`, isActive && `${baseClass}__option--active`]
-                      .filter(Boolean)
-                      .join(' ')}
-                    id={optionId(action)}
-                    key={action.id}
-                    onClick={() => runAction(action, false)}
-                    onMouseEnter={() => setActiveIndex(flatIndex)}
-                    role="option"
-                  >
-                    <span className={`${baseClass}__option-label`}>
-                      {splitLabelByMatches(action.label, action.matchIndices).map(
-                        (segment: LabelSegment, i: number) =>
-                          segment.isMatch ? (
-                            <strong className={`${baseClass}__option-match`} key={i}>
-                              {segment.text}
-                            </strong>
-                          ) : (
-                            segment.text
-                          ),
-                      )}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          ))}
+            )
+          })}
 
           {!hasResults ? (
             <div aria-live="polite" className={`${baseClass}__empty`} role="status">
@@ -239,7 +245,7 @@ export const CommandPalette: React.FC = () => {
           {activeAction?.createHref ? (
             <button
               className={`${baseClass}__hint`}
-              onClick={() => runAction(activeAction, true)}
+              onClick={() => runAction(activeAction, 'create')}
               type="button"
             >
               {t('commandPalette:hintCreate')}
@@ -252,7 +258,7 @@ export const CommandPalette: React.FC = () => {
           <button
             className={`${baseClass}__hint`}
             disabled={!activeAction}
-            onClick={() => runAction(activeAction, false)}
+            onClick={() => runAction(activeAction, 'navigate')}
             type="button"
           >
             {t('commandPalette:hintSelect')}
