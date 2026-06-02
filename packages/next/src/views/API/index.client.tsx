@@ -257,6 +257,7 @@ export const APIViewClient: React.FC = () => {
                 fixedOverflowWidgets: true,
                 folding: true,
                 lineNumbers: 'on',
+                stickyScroll: { enabled: false },
                 wordWrap: 'off',
               }}
               readOnly
