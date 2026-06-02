@@ -13,7 +13,7 @@
 
   .paginator__page-input {
     box-sizing: content-box;
-    min-width: 3ch;
+    min-width: calc(var(--spacer-3) - 2px); /* -2px for content-box sizing */
     min-height: calc(var(--control-height) - 2px);
     padding: 0 var(--spacer-1);
     border: var(--stroke-width-small) solid var(--field-color-border);
