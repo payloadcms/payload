@@ -96,6 +96,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Търсене на джаджи...',
     widgetCollectionRequired: 'Collection е задължително.',
     widgetConfigurationError: 'Грешка при конфигуриране на уиджета',
+    widgetExcludedCollectionsLabel: 'Изключени колекции',
     widgetInvalidCollection: 'Collection "{{collection}}" не съществува.',
     widgetInvalidFilterField:
       'Филтър полето "{{field}}" не съществува в колекцията "{{collection}}".',
@@ -105,6 +106,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Полето за сортиране "{{field}}" не може да бъде сортирано в Collection "{{collection}}".',
     widgetQueryError: 'Неуспешно зареждане на документи за този уиджет.',
+    widgetRecentlyViewedEmpty: 'Все още не сте разгледали нито един документ.',
+    widgetRecentlyViewedTitle: 'Последно прегледани',
     widgetSelectCollectionFirst: 'Изберете Collection, преди да изберете начин на сортиране.',
     widgetSelectSortField: 'Изберете поле за сортиране',
     widgetSortDirectionLabel: 'Посока на сортиране',

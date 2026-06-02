@@ -96,6 +96,7 @@ export const azTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Widgetləri axtarın...',
     widgetCollectionRequired: 'Collection tələb olunur.',
     widgetConfigurationError: 'Vidjet konfiqurasiyası xətası',
+    widgetExcludedCollectionsLabel: 'İstisna edilmiş Collections',
     widgetInvalidCollection: 'Collection "{{collection}}" mövcud deyil.',
     widgetInvalidFilterField:
       'Filter sahəsi "{{field}}" "{{collection}}" kolleksiyasında mövcud deyil.',
@@ -105,6 +106,8 @@ export const azTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Sıralama sahəsi "{{field}}" "{{collection}}" kolleksiyasında sıralana bilmir.',
     widgetQueryError: 'Bu vidjet üçün sənədləri yükləmək mümkün olmadı.',
+    widgetRecentlyViewedEmpty: 'Siz hələ heç bir sənədə baxmamısınız.',
+    widgetRecentlyViewedTitle: 'Siz son baxdığınız',
     widgetSelectCollectionFirst: 'Sıralama seçməzdən əvvəl bir Collection seçin',
     widgetSelectSortField: 'Sıralamaq üçün bir Field seçin',
     widgetSortDirectionLabel: 'Sıralama İstiqaməti',

@@ -95,6 +95,7 @@ export const taTranslations: DefaultTranslationsObject = {
     searchWidgets: 'தேடல் கருவிகள்...',
     widgetCollectionRequired: 'Collection அவசியமாக 필요.',
     widgetConfigurationError: 'விட்ஜெட் உள்ளமைவு பிழை',
+    widgetExcludedCollectionsLabel: 'குறிக்கப்பட்டுள்ள இல்லாத Collections',
     widgetInvalidCollection: 'Collection "{{collection}}" இல்லை.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" குறிப்பாக Collection "{{collection}}" இல் இருப்பதில்லை.',
@@ -104,6 +105,8 @@ export const taTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'வரிசைப்படுத்தும் களம் "{{field}}" என்பது தொகுப்பு "{{collection}}" இல் வரிசைப்படுத்த முடியாததாகும்.',
     widgetQueryError: 'இந்த வித்‌ஜெட்டிற்கான ஆவணங்களை ஏற்ற முடியவில்லை.',
+    widgetRecentlyViewedEmpty: 'நீங்கள் எந்த Documents-ஐயும் இதுவரை காணவில்லை.',
+    widgetRecentlyViewedTitle: 'நீங்கள் சமீபத்தில் பார்க்கப்பட்டது',
     widgetSelectCollectionFirst:
       'வரிசை தேர்வு செய்வதற்கு முன்பு ஒரு Collection-ஐ தேர்ந்தெடுக்கவும்.',
     widgetSelectSortField: 'வரிசைப்படுத்தத் தலைப்பைத் தேர்ந்தெடுக்கவும்',

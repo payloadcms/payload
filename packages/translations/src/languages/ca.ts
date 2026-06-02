@@ -96,6 +96,7 @@ export const caTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Cerca de ginys...',
     widgetCollectionRequired: 'Cal especificar una Collection.',
     widgetConfigurationError: 'Error de configuració del widget',
+    widgetExcludedCollectionsLabel: 'Col·leccions excloses',
     widgetInvalidCollection: 'La Collection "{{collection}}" no existeix.',
     widgetInvalidFilterField:
       'El camp de filtre "{{field}}" no existeix a la Collection "{{collection}}".',
@@ -105,6 +106,8 @@ export const caTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'El camp d’ordenació "{{field}}" no es pot ordenar a la col·lecció "{{collection}}".',
     widgetQueryError: "No s'han pogut carregar els documents per a aquest widget.",
+    widgetRecentlyViewedEmpty: 'Encara no heu visualitzat cap document.',
+    widgetRecentlyViewedTitle: 'Vostè ha vist recentment',
     widgetSelectCollectionFirst: "Seleccioneu una Collection abans de triar l'ordre",
     widgetSelectSortField: 'Seleccioneu un camp per ordenar',
     widgetSortDirectionLabel: "Direcció d'ordenació",

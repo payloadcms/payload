@@ -20,7 +20,7 @@ const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
 
-const TOTAL_WIDGETS = 14
+const TOTAL_WIDGETS = 15
 const url = new AdminUrlUtil(serverURL, 'users')
 
 describe('Dashboard', () => {
@@ -59,6 +59,7 @@ describe('Dashboard', () => {
     await d.assertWidget(12, 'collection-query', 'x-small')
     await d.assertWidget(13, 'collection-query', 'x-small')
     await d.assertWidget(14, 'collection-query', 'medium')
+    await d.assertWidget(15, 'activity', 'medium')
     await d.validateLayout()
   })
 
@@ -256,6 +257,36 @@ describe('Dashboard', () => {
     }).toPass({ timeout: 1000 })
   })
 
+  test('activity widget lists recently viewed documents, most recent first', async ({ page }) => {
+    const ticketsUrl = new AdminUrlUtil(serverURL, 'tickets')
+
+    // Fetch two tickets to view. page.request shares the authenticated browser context cookies.
+    const response = await page.request.get(`${serverURL}/api/tickets?limit=2&sort=title`)
+    const { docs } = await response.json()
+    const [firstDoc, secondDoc] = docs
+
+    // Visiting a document edit view records it as recently viewed server-side in renderDocument.
+    await page.goto(ticketsUrl.edit(firstDoc.id))
+    await expect(page.locator('#field-title')).toHaveValue(firstDoc.title)
+    await page.goto(ticketsUrl.edit(secondDoc.id))
+    await expect(page.locator('#field-title')).toHaveValue(secondDoc.title)
+
+    await page.goto(url.admin)
+
+    const d = new DashboardHelper(page)
+    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
+
+    await expect(activityCard.locator('.recently-viewed-widget__title')).toHaveText(
+      'You recently viewed',
+    )
+
+    const rowTitles = activityCard.locator('.recently-viewed-widget__row-title')
+    await expect(rowTitles).toHaveCount(2)
+    // The most recently viewed document is listed first.
+    await expect(rowTitles.nth(0)).toHaveText(secondDoc.title)
+    await expect(rowTitles.nth(1)).toHaveText(firstDoc.title)
+  })
+
   test('respects min and max width', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
@@ -273,6 +304,7 @@ describe('Dashboard', () => {
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 12 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 13 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 14 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 15 })
   })
 
   test('resize widget', async ({ page }) => {

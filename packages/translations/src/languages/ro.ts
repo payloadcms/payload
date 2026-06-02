@@ -98,6 +98,7 @@ export const roTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Caută widgeturi...',
     widgetCollectionRequired: 'Colecția este obligatorie.',
     widgetConfigurationError: 'Eroare de configurare a widgetului',
+    widgetExcludedCollectionsLabel: 'Colecții excluse',
     widgetInvalidCollection: 'Colecția "{{collection}}" nu există.',
     widgetInvalidFilterField:
       'Câmpul de filtrare "{{field}}" nu există în colecția "{{collection}}".',
@@ -106,6 +107,8 @@ export const roTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Câmpul de sortare "{{field}}" nu poate fi sortat în colecția "{{collection}}".',
     widgetQueryError: 'Nu s-au putut încărca documentele pentru acest widget.',
+    widgetRecentlyViewedEmpty: 'Nu ați vizualizat încă niciun document.',
+    widgetRecentlyViewedTitle: 'Ați vizualizat recent',
     widgetSelectCollectionFirst: 'Selectați o colecție înainte de a alege ordonarea',
     widgetSelectSortField: 'Selectați un câmp după care să sortați',
     widgetSortDirectionLabel: 'Direcție de sortare',

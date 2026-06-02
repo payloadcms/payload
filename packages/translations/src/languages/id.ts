@@ -97,6 +97,7 @@ export const idTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Cari widget...',
     widgetCollectionRequired: 'Collection wajib diisi.',
     widgetConfigurationError: 'Kesalahan konfigurasi widget',
+    widgetExcludedCollectionsLabel: 'Koleksi yang dikecualikan',
     widgetInvalidCollection: 'Collection "{{collection}}" tidak ada.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" tidak ada pada Collection "{{collection}}".',
@@ -105,6 +106,8 @@ export const idTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Field pengurutan "{{field}}" tidak dapat diurutkan pada Collection "{{collection}}".',
     widgetQueryError: 'Tidak dapat memuat dokumen untuk widget ini.',
+    widgetRecentlyViewedEmpty: 'Anda belum melihat dokumen apa pun.',
+    widgetRecentlyViewedTitle: 'Baru-baru ini Anda lihat',
     widgetSelectCollectionFirst: 'Pilih sebuah Collection sebelum memilih urutan',
     widgetSelectSortField: 'Pilih Field untuk diurutkan',
     widgetSortDirectionLabel: 'Arah Pengurutan',

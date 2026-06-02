@@ -96,6 +96,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Meklēt logrīkus...',
     widgetCollectionRequired: 'Kolekcija ir obligāta.',
     widgetConfigurationError: 'Sīkrīka konfigurācijas kļūda',
+    widgetExcludedCollectionsLabel: 'Izslēgtās kolekcijas',
     widgetInvalidCollection: 'Collection "{{collection}}" neeksistē.',
     widgetInvalidFilterField: 'Filtra lauks "{{field}}" neeksistē kolekcijā "{{collection}}".',
     widgetInvalidSortField: 'Kārtošanas lauks "{{field}}" neeksistē kolekcijā "{{collection}}".',
@@ -103,6 +104,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Kārtot lauku "{{field}}" kolekcijā "{{collection}}" nav iespējams.',
     widgetQueryError: 'Neizdevās ielādēt dokumentus šim logrīkam.',
+    widgetRecentlyViewedEmpty: 'Jūs vēl neesat apskatījis nevienu dokumentu.',
+    widgetRecentlyViewedTitle: 'Jūs nesen skatījāt',
     widgetSelectCollectionFirst: 'Izvēlieties Collection pirms kārtošanas izvēles',
     widgetSelectSortField: 'Izvēlieties Field, pēc kura kārtot',
     widgetSortDirectionLabel: 'Kārtošanas virziens',

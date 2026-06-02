@@ -97,6 +97,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Pretraži dodatke...',
     widgetCollectionRequired: 'Kolekcija je obavezna.',
     widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
+    widgetExcludedCollectionsLabel: 'Isključene kolekcije',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" ne postoji.',
     widgetInvalidFilterField:
       'Polje za filtriranje "{{field}}" ne postoji u kolekciji "{{collection}}".',
@@ -105,6 +106,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Polje za sortiranje "{{field}}" nije moguće sortirati u kolekciji "{{collection}}".',
     widgetQueryError: 'Nije moguće učitati dokumente za ovaj vidžet.',
+    widgetRecentlyViewedEmpty: 'Još uvek niste pregledali nijedan dokument.',
+    widgetRecentlyViewedTitle: 'Nedavno ste pregledali',
     widgetSelectCollectionFirst: 'Izaberite Collection pre nego što izaberete sortiranje',
     widgetSelectSortField: 'Izaberite polje po kojem želite da sortirate',
     widgetSortDirectionLabel: 'Smer sortiranja',

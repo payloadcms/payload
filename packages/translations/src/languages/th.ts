@@ -94,6 +94,7 @@ export const thTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ค้นหาวิดเจ็ต...',
     widgetCollectionRequired: 'Collection เป็นข้อมูลที่จำเป็น',
     widgetConfigurationError: 'เกิดข้อผิดพลาดในการกำหนดค่าของวิดเจ็ต',
+    widgetExcludedCollectionsLabel: 'คอลเลกชันที่ถูกยกเว้น',
     widgetInvalidCollection: 'Collection "{{collection}}" ไม่มีอยู่ในระบบ',
     widgetInvalidFilterField: 'ฟิลด์ตัวกรอง "{{field}}" ไม่มีอยู่ใน Collection "{{collection}}"',
     widgetInvalidSortField:
@@ -102,6 +103,8 @@ export const thTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'ไม่สามารถจัดเรียง field "{{field}}" ใน Collection "{{collection}}" ได้',
     widgetQueryError: 'ไม่สามารถโหลดเอกสารสำหรับวิดเจ็ตนี้ได้',
+    widgetRecentlyViewedEmpty: 'คุณยังไม่ได้เปิดดูเอกสารใด ๆ',
+    widgetRecentlyViewedTitle: 'คุณได้ดูเมื่อเร็ว ๆ นี้',
     widgetSelectCollectionFirst: 'โปรดเลือก Collection ก่อนเลือกการจัดลำดับ',
     widgetSelectSortField: 'เลือก Field เพื่อจัดลำดับ',
     widgetSortDirectionLabel: 'ทิศทางการจัดเรียง',

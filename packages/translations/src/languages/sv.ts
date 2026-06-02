@@ -96,6 +96,7 @@ export const svTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Sök efter widget...',
     widgetCollectionRequired: 'Collection är obligatorisk.',
     widgetConfigurationError: 'Fel i widgetkonfiguration',
+    widgetExcludedCollectionsLabel: 'Exkluderade Collectioner',
     widgetInvalidCollection: 'Collection "{{collection}}" finns inte.',
     widgetInvalidFilterField: 'Filterfältet "{{field}}" finns inte i Collection "{{collection}}".',
     widgetInvalidSortField:
@@ -104,6 +105,8 @@ export const svTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Sorteringsfältet "{{field}}" kan inte sorteras i Collection "{{collection}}".',
     widgetQueryError: 'Kunde inte läsa in dokument för denna widget.',
+    widgetRecentlyViewedEmpty: 'Du har ännu inte visat några dokument.',
+    widgetRecentlyViewedTitle: 'Du har nyligen visat',
     widgetSelectCollectionFirst: 'Välj en Collection innan du väljer sortering',
     widgetSelectSortField: 'Välj ett fält att sortera efter',
     widgetSortDirectionLabel: 'Sorteringsriktning',

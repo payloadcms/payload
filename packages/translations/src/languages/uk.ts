@@ -97,6 +97,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Пошук віджетів...',
     widgetCollectionRequired: 'Collection є обов’язковим.',
     widgetConfigurationError: 'Помилка конфігурації віджета',
+    widgetExcludedCollectionsLabel: 'Виключені Collections',
     widgetInvalidCollection: 'Collection "{{collection}}" не існує.',
     widgetInvalidFilterField: 'Поле фільтрації "{{field}}" не існує у колекції "{{collection}}".',
     widgetInvalidSortField: 'Поле сортування "{{field}}" не існує у Collection "{{collection}}".',
@@ -104,6 +105,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Поле сортування «{{field}}» не можна сортувати в колекції «{{collection}}».',
     widgetQueryError: 'Не вдалося завантажити документи для цього віджета.',
+    widgetRecentlyViewedEmpty: 'Ви ще не переглядали жодного документа.',
+    widgetRecentlyViewedTitle: 'Ви нещодавно переглядали',
     widgetSelectCollectionFirst: 'Виберіть Collection перед вибором сортування',
     widgetSelectSortField: 'Виберіть поле для сортування',
     widgetSortDirectionLabel: 'Напрямок сортування',

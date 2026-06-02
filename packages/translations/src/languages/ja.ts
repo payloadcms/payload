@@ -97,6 +97,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ウィジェットを検索...',
     widgetCollectionRequired: 'Collectionは必須です。',
     widgetConfigurationError: 'ウィジェット設定エラー',
+    widgetExcludedCollectionsLabel: '除外されたCollection',
     widgetInvalidCollection: 'Collection「{{collection}}」は存在しません。',
     widgetInvalidFilterField:
       'コレクション「{{collection}}」にフィルターField「{{field}}」は存在しません。',
@@ -106,6 +107,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'コレクション「{{collection}}」でソートフィールド「{{field}}」はソートできません。',
     widgetQueryError: 'このウィジェットのドキュメントを読み込めませんでした。',
+    widgetRecentlyViewedEmpty: 'まだドキュメントを閲覧していません。',
+    widgetRecentlyViewedTitle: '最近閲覧した',
     widgetSelectCollectionFirst: '並べ替えを選択する前に、Collectionを選択してください。',
     widgetSelectSortField: '並べ替えに使用するFieldを選択してください',
     widgetSortDirectionLabel: '並び順の方向',

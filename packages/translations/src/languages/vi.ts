@@ -96,6 +96,7 @@ export const viTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Tìm kiếm các widget...',
     widgetCollectionRequired: 'Collection là bắt buộc.',
     widgetConfigurationError: 'Lỗi cấu hình Widget',
+    widgetExcludedCollectionsLabel: 'Các Collection bị loại trừ',
     widgetInvalidCollection: 'Collection "{{collection}}" không tồn tại.',
     widgetInvalidFilterField:
       'Trường lọc "{{field}}" không tồn tại trong Collection "{{collection}}".',
@@ -105,6 +106,8 @@ export const viTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Trường sắp xếp "{{field}}" không thể sắp xếp được trên Collection "{{collection}}".',
     widgetQueryError: 'Không thể tải tài liệu cho tiện ích này.',
+    widgetRecentlyViewedEmpty: 'Bạn chưa xem bất kỳ tài liệu nào.',
+    widgetRecentlyViewedTitle: 'Bạn đã xem gần đây',
     widgetSelectCollectionFirst: 'Chọn một Collection trước khi chọn sắp xếp',
     widgetSelectSortField: 'Chọn một trường để sắp xếp theo',
     widgetSortDirectionLabel: 'Hướng sắp xếp',

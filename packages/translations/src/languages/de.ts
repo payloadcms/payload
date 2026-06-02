@@ -98,6 +98,7 @@ export const deTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Suche Widgets...',
     widgetCollectionRequired: 'Collection ist erforderlich.',
     widgetConfigurationError: 'Widget-Konfigurationsfehler',
+    widgetExcludedCollectionsLabel: 'Ausgeschlossene Collections',
     widgetInvalidCollection: 'Collection „{{collection}}“ existiert nicht.',
     widgetInvalidFilterField:
       'Das Filter-Feld "{{field}}" existiert nicht in der Collection "{{collection}}".',
@@ -107,6 +108,8 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Das Sortierfeld "{{field}}" ist in der Collection "{{collection}}" nicht sortierbar.',
     widgetQueryError: 'Dokumente für dieses Widget konnten nicht geladen werden.',
+    widgetRecentlyViewedEmpty: 'Sie haben noch keine Dokumente angesehen.',
+    widgetRecentlyViewedTitle: 'Sie haben kürzlich angesehen',
     widgetSelectCollectionFirst:
       'Wählen Sie eine Collection aus, bevor Sie eine Sortierung auswählen',
     widgetSelectSortField: 'Wählen Sie ein Feld zum Sortieren aus',

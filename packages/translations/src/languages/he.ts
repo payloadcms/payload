@@ -94,6 +94,7 @@ export const heTranslations: DefaultTranslationsObject = {
     searchWidgets: "חפש ווידג'טים...",
     widgetCollectionRequired: 'Collection נדרשת.',
     widgetConfigurationError: "שגיאת תצורת ווידג'ט",
+    widgetExcludedCollectionsLabel: 'אוספים שלא נכללו',
     widgetInvalidCollection: 'ה-Collection "{{collection}}" אינו קיים.',
     widgetInvalidFilterField: 'שדה הסינון "{{field}}" אינו קיים ב-Collection "{{collection}}".',
     widgetInvalidSortField: 'שדה המיון "{{field}}" אינו קיים ב-Collection "{{collection}}".',
@@ -101,6 +102,8 @@ export const heTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'שדה המיון "{{field}}" אינו ניתן למיון ב-Collection "{{collection}}".',
     widgetQueryError: "לא ניתן היה לטעון מסמכים עבור ווידג'ט זה.",
+    widgetRecentlyViewedEmpty: 'לא צפית במסמכים כלשהם עדיין.',
+    widgetRecentlyViewedTitle: 'צפית לאחרונה',
     widgetSelectCollectionFirst: 'בחר אוסף לפני בחירת סדר',
     widgetSelectSortField: 'בחר שדה למיון',
     widgetSortDirectionLabel: 'כיוון מיון',

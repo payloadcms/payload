@@ -37,6 +37,7 @@ import { getDocumentView } from './getDocumentView.js'
 import { getIsLocked } from './getIsLocked.js'
 import { getMetaBySegment } from './getMetaBySegment.js'
 import { getVersions } from './getVersions.js'
+import { recordRecentlyViewed } from './recordRecentlyViewed.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
@@ -210,6 +211,13 @@ export const renderDocument = async ({
 
   const operation = (collectionSlug && idFromArgs) || globalSlug ? 'update' : 'create'
 
+  // Record the document as recently viewed (collections only, never on the create route or for
+  // trashed docs). Runs concurrently with the work below and never throws.
+  const recentlyViewedPromise =
+    collectionSlug && idFromArgs && doc && !isTrashedDoc
+      ? recordRecentlyViewed({ id: idFromArgs, collectionSlug, req })
+      : undefined
+
   const [
     { hasPublishedDoc, mostRecentVersionIsAutosaved, unpublishedVersionCount, versionCount },
     { state: formState },
@@ -241,6 +249,8 @@ export const renderDocument = async ({
       skipValidation: true,
     }),
   ])
+
+  await recentlyViewedPromise
 
   const documentViewServerProps: DocumentViewServerPropsOnly = {
     doc,

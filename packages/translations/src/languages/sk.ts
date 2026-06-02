@@ -97,6 +97,7 @@ export const skTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Hľadať doplnky...',
     widgetCollectionRequired: 'Collection je povinná.',
     widgetConfigurationError: 'Chyba v konfigurácii widgetu',
+    widgetExcludedCollectionsLabel: 'Vylúčené kolekcie',
     widgetInvalidCollection: 'Kolekcia „{{collection}}“ neexistuje.',
     widgetInvalidFilterField: 'Filtrované pole "{{field}}" neexistuje v kolekcii "{{collection}}".',
     widgetInvalidSortField: 'Triediace pole "{{field}}" neexistuje v kolekcii "{{collection}}".',
@@ -104,6 +105,8 @@ export const skTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Triediace pole "{{field}}" nie je možné triediť v kolekcii "{{collection}}".',
     widgetQueryError: 'Nepodarilo sa načítať dokumenty pre tento widget.',
+    widgetRecentlyViewedEmpty: 'Zatiaľ ste si nepozreli žiadne dokumenty.',
+    widgetRecentlyViewedTitle: 'Nedávno ste si prezerali',
     widgetSelectCollectionFirst: 'Vyberte najprv Collection pred výberom spôsobu zoradenia.',
     widgetSelectSortField: 'Vyberte pole, podľa ktorého chcete zoradiť',
     widgetSortDirectionLabel: 'Smer triedenia',

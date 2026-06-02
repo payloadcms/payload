@@ -96,6 +96,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Søk widgets...',
     widgetCollectionRequired: 'Collectie er påkrevd.',
     widgetConfigurationError: 'Feil i widget-konfigurasjon',
+    widgetExcludedCollectionsLabel: 'Ekskluderte Collecties',
     widgetInvalidCollection: 'Collection "{{collection}}" finnes ikke.',
     widgetInvalidFilterField:
       'Filter-feltet "{{field}}" finnes ikke i kolleksjonen "{{collection}}".',
@@ -105,6 +106,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Sorteringsfeltet "{{field}}" kan ikke sorteres i Collection "{{collection}}".',
     widgetQueryError: 'Kunne ikke laste dokumenter for denne widgeten.',
+    widgetRecentlyViewedEmpty: 'Du har ikke sett noen dokumenter ennå.',
+    widgetRecentlyViewedTitle: 'Du har nylig sett',
     widgetSelectCollectionFirst: 'Velg en Collection før du velger sortering',
     widgetSelectSortField: 'Velg et Field du vil sortere etter',
     widgetSortDirectionLabel: 'Sorteringsretning',

@@ -172,6 +172,23 @@ const addDefaultDashboardWidgets = async ({
     },
   ]
 
+  const recentlyViewedFields: NonNullable<Widget['fields']> = [
+    {
+      name: 'excludedCollections',
+      type: 'select',
+      hasMany: true,
+      label: ({ t }) => t('dashboard:widgetExcludedCollectionsLabel'),
+      // Exclusion list, so an empty value shows every collection and newly added collections are
+      // included by default. Hidden collections are never offered as options.
+      options: (config.collections ?? [])
+        .filter((collection) => collection.admin?.hidden !== true)
+        .map((collection) => ({
+          label: collection.labels?.plural || collection.slug,
+          value: collection.slug,
+        })),
+    },
+  ]
+
   const adminConfig = config.admin as NonNullable<Config['admin']>
   const dashboard: DashboardConfig = (adminConfig.dashboard ??= { widgets: [] })
 
@@ -191,6 +208,20 @@ const addDefaultDashboardWidgets = async ({
       richTextSanitizationPromises,
       validRelationships,
     }),
+    minWidth: 'x-small',
+  })
+  dashboard.widgets.push({
+    slug: 'activity',
+    Component: '@payloadcms/ui/rsc#RecentlyViewedWidget',
+    fields: await sanitizeFields({
+      config: config as unknown as Config,
+      existingFieldNames: new Set(),
+      fields: recentlyViewedFields,
+      parentIsLocalized: false,
+      richTextSanitizationPromises,
+      validRelationships,
+    }),
+    label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
     minWidth: 'x-small',
   })
   dashboard.defaultLayout ??= [

@@ -96,6 +96,7 @@ export const slTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Išči gradnike...',
     widgetCollectionRequired: 'Zbirka je obvezna.',
     widgetConfigurationError: 'Napaka pri konfiguraciji gradnika',
+    widgetExcludedCollectionsLabel: 'Izključene zbirke',
     widgetInvalidCollection: 'Zbirka "{{collection}}" ne obstaja.',
     widgetInvalidFilterField: 'Filter polje "{{field}}" ne obstaja v zbirki "{{collection}}".',
     widgetInvalidSortField: 'Početno polje "{{field}}" ne obstaja v zbirki "{{collection}}".',
@@ -103,6 +104,8 @@ export const slTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Polje za razvrščanje "{{field}}" ni mogoče razvrstiti v zbirki "{{collection}}".',
     widgetQueryError: 'Dokumentov za to komponento ni bilo mogoče naložiti.',
+    widgetRecentlyViewedEmpty: 'Še niste pregledali nobenega dokumenta.',
+    widgetRecentlyViewedTitle: 'Nedavno ste si ogledali',
     widgetSelectCollectionFirst: 'Najprej izberite zbirko, preden izberete način razvrščanja.',
     widgetSelectSortField: 'Izberite polje za razvrščanje',
     widgetSortDirectionLabel: 'Smer razvrščanja',

@@ -97,6 +97,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Zoek widgets...',
     widgetCollectionRequired: 'Collectie is vereist.',
     widgetConfigurationError: 'Fout in de configuratie van de widget',
+    widgetExcludedCollectionsLabel: 'Uitgesloten collecties',
     widgetInvalidCollection: 'Collectie "{{collection}}" bestaat niet.',
     widgetInvalidFilterField: 'Filterveld "{{field}}" bestaat niet in collectie "{{collection}}".',
     widgetInvalidSortField: 'Sorteerveld "{{field}}" bestaat niet in collectie "{{collection}}".',
@@ -104,6 +105,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Sorteerveld "{{field}}" kan niet worden gesorteerd in collectie "{{collection}}".',
     widgetQueryError: 'Kan documenten voor deze widget niet laden.',
+    widgetRecentlyViewedEmpty: 'U heeft nog geen documenten bekeken.',
+    widgetRecentlyViewedTitle: 'U heeft recent bekeken',
     widgetSelectCollectionFirst: 'Selecteer een collectie voordat u een sorteervolgorde kiest',
     widgetSelectSortField: 'Selecteer een veld om op te sorteren',
     widgetSortDirectionLabel: 'Sorteerrichting',

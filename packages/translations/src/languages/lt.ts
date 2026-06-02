@@ -97,6 +97,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Ieškokite valdiklių...',
     widgetCollectionRequired: 'Collection yra privaloma.',
     widgetConfigurationError: 'Valdiklio konfigūracijos klaida',
+    widgetExcludedCollectionsLabel: 'Išskirtos kolekcijos',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" neegzistuoja.',
     widgetInvalidFilterField:
       'Filtravimo laukas „{{field}}“ neegzistuoja kolekcijoje „{{collection}}“.',
@@ -106,6 +107,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Rūšiavimo laukas "{{field}}" negali būti rūšiuojamas kolekcijoje "{{collection}}".',
     widgetQueryError: 'Nepavyko įkelti dokumentų šiam valdikliui.',
+    widgetRecentlyViewedEmpty: 'Jūs dar neperžiūrėjote jokių dokumentų.',
+    widgetRecentlyViewedTitle: 'Jūs neseniai peržiūrėjote',
     widgetSelectCollectionFirst: 'Pasirinkite Collection prieš pasirinkdami rūšiavimą',
     widgetSelectSortField: 'Pasirinkite lauką rūšiavimui',
     widgetSortDirectionLabel: 'Rikiavimo kryptis',

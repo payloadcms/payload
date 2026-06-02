@@ -96,6 +96,7 @@ export const arTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ابحث عن الأدوات...',
     widgetCollectionRequired: 'المجموعة مطلوبة.',
     widgetConfigurationError: 'خطأ في تكوين الودجة',
+    widgetExcludedCollectionsLabel: 'المجموعات المستبعدة',
     widgetInvalidCollection: 'مجموعة "{{collection}}" غير موجودة.',
     widgetInvalidFilterField: 'حقل التصفية "{{field}}" غير موجود في المجموعة "{{collection}}".',
     widgetInvalidSortField: 'حقل الفرز "{{field}}" غير موجود في Collection "{{collection}}".',
@@ -103,6 +104,8 @@ export const arTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'حقل الفرز "{{field}}" غير قابل للفرز في Collection "{{collection}}".',
     widgetQueryError: 'تعذّر تحميل المستندات لهذا المكون.',
+    widgetRecentlyViewedEmpty: 'لم تقم بعرض أي مستندات بعد.',
+    widgetRecentlyViewedTitle: 'لقد قمت بعرض',
     widgetSelectCollectionFirst: 'يرجى تحديد Collection قبل اختيار ترتيب الفرز',
     widgetSelectSortField: 'اختر حقلًا للفرز حسبه',
     widgetSortDirectionLabel: 'اتجاه الفرز',

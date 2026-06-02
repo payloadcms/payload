@@ -95,6 +95,7 @@ export const koTranslations: DefaultTranslationsObject = {
     searchWidgets: '위젯 검색...',
     widgetCollectionRequired: 'Collection이 필요합니다.',
     widgetConfigurationError: '위젯 구성 오류',
+    widgetExcludedCollectionsLabel: '제외된 Collection',
     widgetInvalidCollection: 'Collection "{{collection}}"이(가) 존재하지 않습니다.',
     widgetInvalidFilterField:
       '컬렉션 "{{collection}}"에 필터 필드 "{{field}}"가 존재하지 않습니다.',
@@ -103,6 +104,8 @@ export const koTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       '정렬 필드 "{{field}}"는 컬렉션 "{{collection}}"에서 정렬할 수 없습니다.',
     widgetQueryError: '이 위젯에 대한 문서를 불러올 수 없습니다.',
+    widgetRecentlyViewedEmpty: '아직 어떠한 Document도 열람하지 않으셨습니다.',
+    widgetRecentlyViewedTitle: '최근에 본 항목',
     widgetSelectCollectionFirst: '정렬을 선택하기 전에 Collection을 선택하십시오.',
     widgetSelectSortField: '정렬할 Field를 선택하십시오.',
     widgetSortDirectionLabel: '정렬 방향',

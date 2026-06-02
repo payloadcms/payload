@@ -95,6 +95,7 @@ export const etTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Otsi vidinaid...',
     widgetCollectionRequired: 'Kogu on nõutav.',
     widgetConfigurationError: 'Vidina konfiguratsiooni viga',
+    widgetExcludedCollectionsLabel: 'Välistatud kollektsioonid',
     widgetInvalidCollection: 'Kogumikku "{{collection}}" ei eksisteeri.',
     widgetInvalidFilterField: 'Filtri väli "{{field}}" ei eksisteeri kogumikus "{{collection}}".',
     widgetInvalidSortField:
@@ -103,6 +104,8 @@ export const etTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Sortimisväli "{{field}}" ei ole kogu "{{collection}}" puhul sorditav.',
     widgetQueryError: 'Selle vidina jaoks ei õnnestunud dokumente laadida.',
+    widgetRecentlyViewedEmpty: 'Te ei ole veel ühtegi dokumenti vaadanud.',
+    widgetRecentlyViewedTitle: 'Te vaatasite hiljuti',
     widgetSelectCollectionFirst: 'Valige kogu enne sortimise valimist',
     widgetSelectSortField: 'Valige väli, mille alusel sorteerida',
     widgetSortDirectionLabel: 'Sorteerimissuund',

@@ -97,6 +97,7 @@ export const isTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Leita að græjum...',
     widgetCollectionRequired: 'Safn er skylt.',
     widgetConfigurationError: 'Villa við stillingu búnaðar',
+    widgetExcludedCollectionsLabel: 'Útilokuð söfn',
     widgetInvalidCollection: 'Kolekcja „{{collection}}” nie istnieje.',
     widgetInvalidFilterField: 'Sía reitur "{{field}}" er ekki til í safni "{{collection}}".',
     widgetInvalidSortField: 'Röðunarreiturinn "{{field}}" er ekki til í safninu "{{collection}}".',
@@ -104,6 +105,8 @@ export const isTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Sortureiturinn "{{field}}" er ekki raðhæfur á Collection "{{collection}}".',
     widgetQueryError: 'Ekki tókst að hlaða skjölum fyrir þessa fjölvísir.',
+    widgetRecentlyViewedEmpty: 'Þú hefur ekki skoðað nein skjöl enn.',
+    widgetRecentlyViewedTitle: 'Þú skoðaðir nýlega',
     widgetSelectCollectionFirst: 'Veldu safn áður en röðun er valin',
     widgetSelectSortField: 'Veldu reit til að raða eftir',
     widgetSortDirectionLabel: 'Raðstefna',

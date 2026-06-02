@@ -97,6 +97,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Pretraži widgete...',
     widgetCollectionRequired: 'Collection je obvezan.',
     widgetConfigurationError: 'Pogreška u konfiguraciji widgeta',
+    widgetExcludedCollectionsLabel: 'Isključene kolekcije',
     widgetInvalidCollection: 'Collection "{{collection}}" ne postoji.',
     widgetInvalidFilterField: 'Filter polje "{{field}}" ne postoji u kolekciji "{{collection}}".',
     widgetInvalidSortField:
@@ -105,6 +106,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Polje sortiranja "{{field}}" nije moguće sortirati u kolekciji "{{collection}}".',
     widgetQueryError: 'Nije bilo moguće učitati dokumente za ovaj widget.',
+    widgetRecentlyViewedEmpty: 'Još niste pregledali nijedan dokument.',
+    widgetRecentlyViewedTitle: 'Nedavno ste pregledali',
     widgetSelectCollectionFirst: 'Odaberite Collection prije odabira sortiranja.',
     widgetSelectSortField: 'Odaberite polje za sortiranje',
     widgetSortDirectionLabel: 'Smjer sortiranja',
