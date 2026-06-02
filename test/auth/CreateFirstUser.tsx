@@ -1,6 +1,6 @@
 import type { AdminViewServerProps } from 'payload'
 
-import { CreateFirstUserView } from '@payloadcms/next/views'
+import { CreateFirstUserView } from '@payloadcms/ui/views/CreateFirstUser'
 import React from 'react'
 
 export async function CreateFirstUser(props: AdminViewServerProps) {
