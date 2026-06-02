@@ -146,6 +146,11 @@
       "types": "./src/utilities/slugify.ts",
       "default": "./src/utilities/slugify.ts"
     },
+    "./utilities/getHierarchyAncestry": {
+      "import": "./src/utilities/getHierarchyAncestry.ts",
+      "types": "./src/utilities/getHierarchyAncestry.ts",
+      "default": "./src/utilities/getHierarchyAncestry.ts"
+    },
     "./utilities/getClientConfig": {
       "import": "./src/utilities/getClientConfig.ts",
       "types": "./src/utilities/getClientConfig.ts",
