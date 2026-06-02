@@ -122,14 +122,15 @@ export const TimezonePicker: React.FC<Props> = (props) => {
             }),
             option: (base, state) => ({
               ...base,
-              backgroundColor:
-                state.isFocused || state.isSelected
-                  ? 'var(--color-bg-selected-strong)'
+              backgroundColor: state.isSelected
+                ? 'var(--popup-item-bg-selected-dark, var(--color-bg-selected))'
+                : state.isFocused
+                  ? 'var(--popup-item-bg-hover-dark, var(--color-bg-selected-strong))'
                   : 'transparent',
               color:
                 state.isFocused || state.isSelected
-                  ? 'var(--color-text-onselected-strong)'
-                  : 'var(--color-text-ontooltip)',
+                  ? 'var(--popup-item-color-hover-dark, var(--color-text-onselected-strong))'
+                  : 'var(--popup-item-color-dark, var(--color-text-ontooltip))',
             }),
           } as StylesConfig<OptionType>
         }
