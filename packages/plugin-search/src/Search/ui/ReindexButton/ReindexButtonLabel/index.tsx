@@ -1,4 +1,4 @@
-import { Button, ChevronIcon, useTranslation } from '@payloadcms/ui'
+import { Button, useTranslation } from '@payloadcms/ui'
 
 export const ReindexButtonLabel = () => {
   const {

@@ -20,6 +20,8 @@ export const generateSearchCollection = (
       admin: {
         readOnly: true,
       },
+      // @ts-expect-error - translations are not typed in plugins yet
+      label: ({ t }) => t('plugin-search:resultTitle'),
       localized: pluginConfig.localize,
     },
     {
@@ -28,6 +30,8 @@ export const generateSearchCollection = (
       admin: {
         position: 'sidebar',
       },
+      // @ts-expect-error - translations are not typed in plugins yet
+      label: ({ t }) => t('plugin-search:resultPriority'),
     },
     {
       name: 'doc',
@@ -37,6 +41,8 @@ export const generateSearchCollection = (
         readOnly: true,
       },
       index: true,
+      // @ts-expect-error - translations are not typed in plugins yet
+      label: ({ t }) => t('plugin-search:resultDocument'),
       maxDepth: 0,
       relationTo: searchCollections,
       required: true,
@@ -52,6 +58,8 @@ export const generateSearchCollection = (
         },
         position: 'sidebar',
       },
+      // @ts-expect-error - translations are not typed in plugins yet
+      label: ({ t }) => t('plugin-search:resultDocumentUrl'),
     },
   ]
 
@@ -85,8 +93,8 @@ export const generateSearchCollection = (
         },
       },
       defaultColumns: ['title'],
-      description:
-        'This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.',
+      // @ts-expect-error - translations are not typed in plugins yet
+      description: ({ t }) => t('plugin-search:searchResultsDescription'),
       enableRichTextRelationship: false,
       useAsTitle: 'title',
       ...(pluginConfig?.searchOverrides?.admin || {}),
@@ -106,8 +114,10 @@ export const generateSearchCollection = (
         : defaultFields,
     labels: {
       ...(pluginConfig?.searchOverrides?.labels || {
-        plural: 'Search Results',
-        singular: 'Search Result',
+        // @ts-expect-error - translations are not typed in plugins yet
+        plural: ({ t }): string => t('plugin-search:searchResults'),
+        // @ts-expect-error - translations are not typed in plugins yet
+        singular: ({ t }): string => t('plugin-search:searchResult'),
       }),
     },
   }
