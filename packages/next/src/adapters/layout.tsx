@@ -5,7 +5,6 @@ import React from 'react'
 
 import { NextRouterAdapter } from './router.js'
 import { nextServerAdapter } from './server.js'
-import { switchLanguageAction } from './switchLanguageAction.js'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -30,11 +29,7 @@ export { metadata } from '@payloadcms/ui/layouts'
 
 type Props = Omit<
   React.ComponentProps<typeof UIRootLayout>,
-  | 'additionalDependencyChecks'
-  | 'fonts'
-  | 'RouterAdapter'
-  | 'serverAdapter'
-  | 'switchLanguageServerAction'
+  'additionalDependencyChecks' | 'fonts' | 'RouterAdapter' | 'serverAdapter'
 >
 
 export const RootLayout = (props: Props) => (
@@ -47,6 +42,5 @@ export const RootLayout = (props: Props) => (
     ]}
     RouterAdapter={NextRouterAdapter}
     serverAdapter={nextServerAdapter}
-    switchLanguageServerAction={switchLanguageAction}
   />
 )

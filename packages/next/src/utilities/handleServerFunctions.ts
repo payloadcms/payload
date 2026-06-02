@@ -17,6 +17,7 @@ import { renderDocumentHandler } from '../views/Document/handleServerFunction.js
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { slugifyHandler } from './slugify.js'
+import { switchLanguageHandler } from './switchLanguageHandler.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
@@ -30,6 +31,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'render-widget': renderWidgetHandler,
   'schedule-publish': schedulePublishHandler,
   slugify: slugifyHandler,
+  'switch-language': switchLanguageHandler,
   'table-state': buildTableStateHandler,
 }
 

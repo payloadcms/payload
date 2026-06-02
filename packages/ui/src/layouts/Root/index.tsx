@@ -77,13 +77,6 @@ type RootLayoutProps = {
    */
   readonly serverAdapter: ServerAdapter
   readonly serverFunction: ServerFunctionClient
-  /**
-   * Framework-specific server action that writes the language cookie. Defined at module level
-   * (not inline) so React Server Action closure analysis does not try to serialize the framework
-   * adapter across the server/client boundary. Called with the bound `cookieName` and the new
-   * `lang` value chosen by the user.
-   */
-  readonly switchLanguageServerAction: (cookieName: string, lang: string) => Promise<void>
 }
 
 export const RootLayout = (props: RootLayoutProps) => {
@@ -108,7 +101,6 @@ const RootLayoutContent = async ({
   RouterAdapter,
   serverAdapter,
   serverFunction,
-  switchLanguageServerAction,
 }: RootLayoutProps) => {
   const {
     cookies,
@@ -150,11 +142,6 @@ const RootLayoutContent = async ({
     return acc
   }, [])
 
-  const boundSwitchLanguage = switchLanguageServerAction.bind(
-    null,
-    `${config.cookiePrefix || 'payload'}-lng`,
-  )
-
   const navPrefs = await getNavPrefs(req)
 
   const clientConfig = getClientConfig({
@@ -195,7 +182,6 @@ const RootLayoutContent = async ({
           permissions={req.user ? permissions : null}
           RouterAdapter={RouterAdapter}
           serverFunction={serverFunction}
-          switchLanguageServerAction={boundSwitchLanguage}
           theme={theme}
           translations={req.i18n.translations}
           user={req.user}
