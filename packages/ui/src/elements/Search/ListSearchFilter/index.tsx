@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 
-import { useDebounce } from '../../hooks/useDebounce.js'
+import { useDebounce } from '../../../hooks/useDebounce.js'
 import { SearchInput } from '../SearchInput/index.js'
 
 type ListSearchFilterProps = {

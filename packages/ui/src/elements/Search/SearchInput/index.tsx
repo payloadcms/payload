@@ -2,9 +2,9 @@
 
 import React, { useCallback } from 'react'
 
-import { SearchIcon } from '../../icons/Search/index.js'
-import { XIcon } from '../../icons/X/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
+import { SearchIcon } from '../../../icons/Search/index.js'
+import { XIcon } from '../../../icons/X/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import './index.css'
 
 const baseClass = 'search-input'
