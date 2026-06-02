@@ -1471,6 +1471,7 @@ describe('Versions', () => {
         }),
       )
 
+      await expect(localPage.locator('#schedule-publish-button')).toBeVisible()
       await localPage.locator('#schedule-publish-button').click()
 
       const drawerContent = localPage.locator('.schedule-publish__scheduler')
