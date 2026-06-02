@@ -10,7 +10,7 @@ Decouple the admin `RootLayout` from Next.js so the heavy implementation lives i
 ## Constraints
 
 - `packages/ui` currently has **zero** dependency on `next` or `@payloadcms/next`. Preserve that boundary — no `next/*` imports introduced in ui.
-- Existing public API `import { RootLayout } from '@payloadcms/next/layouts'` keeps working for current Next.js apps with **no behavior change**. The thin Next wrapper still calls `checkDependencies()` on behalf of Next consumers.
+- Existing public API `import { RootLayout } from '@payloadcms/next/layouts'` keeps working for current Next.js apps with **no behavior change**. Dependency checking runs inside ui `RootLayout`; the Next wrapper supplies its framework-specific constraints (Next ≥ 15.0.0) via the `additionalDependencyChecks` prop.
 - `'use server'` directive inside `RootLayout` continues to work — `packages/ui` exports source files, so the consuming Next.js compiler processes the directive.
 
 ## New file layout
@@ -25,13 +25,14 @@ Decouple the admin `RootLayout` from Next.js so the heavy implementation lives i
 - `packages/ui/src/utilities/selectiveCache.ts` — pure React-`cache` util, moved.
 - `packages/ui/src/utilities/getRequestLocale.ts` — moved.
 - `packages/ui/src/utilities/getPreferences.ts` — moved.
+- `packages/ui/src/utilities/checkDependencies.ts` — generic gating + React/react-dom version checks. Accepts an optional `additional: CheckDependenciesArgs` parameter for framework-specific dep groups/versions.
 - `packages/ui/src/exports/layouts.ts` — new barrel exporting `metadata` and `RootLayout` from `../layouts/Root/index.js`.
 - `packages/ui/package.json` — new `"./layouts"` export entry. Add `"./utilities/initReq"` export if `@payloadcms/next` needs to import it directly.
 
 ### `packages/next` — modified
 
-- `packages/next/src/adapters/layout.tsx` — new thin wrapper (relocated from `packages/next/src/layouts/Root/index.tsx`): calls `checkDependencies()`, loads `Inter`/`Roboto_Mono` via `next/font/google`, imports `NextRouterAdapter` and `nextServerAdapter`, delegates to `UIRootLayout`. Re-exports `metadata`. Sits next to existing flat adapters (`router.tsx`, `server.ts`).
-- `packages/next/src/utilities/checkDependencies.ts` — relocated from `packages/next/src/layouts/Root/checkDependencies.ts`. Generic version check.
+- `packages/next/src/adapters/layout.tsx` — new thin wrapper (relocated from `packages/next/src/layouts/Root/index.tsx`): loads `Inter`/`Roboto_Mono` via `next/font/google`, imports `NextRouterAdapter` and `nextServerAdapter`, delegates to `UIRootLayout`. Re-exports `metadata`. Passes Next-specific `additionalDependencyChecks` (Next ≥ 15.0.0) into ui RootLayout. Sits next to existing flat adapters (`router.tsx`, `server.ts`).
+- `packages/next/src/utilities/checkDependencies.ts` — **deleted**. Generic gating + React/react-dom version checks now live in `packages/ui/src/utilities/checkDependencies.ts`. Framework-specific constraints flow via the `additionalDependencyChecks` prop on ui `RootLayout`.
 - `packages/next/src/layouts/` — directory removed.
 - `packages/next/src/esbuildEntry.ts` — `RootLayout` re-export points at the new `./adapters/layout.js` path.
 - `packages/next/src/utilities/initReq.ts` — **deleted**.
@@ -55,6 +56,7 @@ Decouple the admin `RootLayout` from Next.js so the heavy implementation lives i
 type Font = { className?: string; variable?: string }
 
 type RootLayoutProps = {
+  readonly additionalDependencyChecks?: CheckDependenciesArgs
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   readonly fonts?: Font[]
@@ -73,10 +75,10 @@ export { metadata, RootLayout } from '@payloadcms/ui/layouts'
 
 ```tsx
 import { RootLayout as UIRootLayout } from '@payloadcms/ui/layouts'
-// @ts-expect-error - Next compiler resolves this
 import { Inter, Roboto_Mono } from 'next/font/google'
-import { NextRouterAdapter } from '../../adapters/router.js'
-import { checkDependencies } from './checkDependencies.js'
+
+import { NextRouterAdapter } from './router.js'
+import { nextServerAdapter } from './server.js'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-family-sans' })
 const robotoMono = Roboto_Mono({
@@ -84,28 +86,31 @@ const robotoMono = Roboto_Mono({
   variable: '--font-family-mono',
 })
 
+const nextDependencyChecks = {
+  dependencyVersions: {
+    next: { required: false, version: '>=15.0.0' },
+  },
+}
+
 export { metadata } from '@payloadcms/ui/layouts'
 
 type Props = Omit<
   React.ComponentProps<typeof UIRootLayout>,
-  'fonts' | 'RouterAdapter' | 'serverAdapter'
+  'additionalDependencyChecks' | 'fonts' | 'RouterAdapter' | 'serverAdapter'
 >
 
-export const RootLayout = (props: Props) => {
-  checkDependencies()
-
-  return (
-    <UIRootLayout
-      {...props}
-      fonts={[
-        { className: inter.className, variable: inter.variable },
-        { className: robotoMono.className, variable: robotoMono.variable },
-      ]}
-      RouterAdapter={NextRouterAdapter}
-      serverAdapter={nextServerAdapter}
-    />
-  )
-}
+export const RootLayout = (props: Props) => (
+  <UIRootLayout
+    {...props}
+    additionalDependencyChecks={nextDependencyChecks}
+    fonts={[
+      { className: inter.className, variable: inter.variable },
+      { className: robotoMono.className, variable: robotoMono.variable },
+    ]}
+    RouterAdapter={NextRouterAdapter}
+    serverAdapter={nextServerAdapter}
+  />
+)
 ```
 
 ## Behavior changes inside ui `RootLayout`
@@ -115,7 +120,7 @@ Compared to current implementation:
 1. **Fonts.** Drops `next/font` import and the local `inter`/`robotoMono` constants. Reads them from `props.fonts`. Each entry's `variable ?? className` is merged into the `<html>` class list.
 2. **Server action for language switching.** Inlined `'use server'` function. Body uses the `serverAdapter.setCookie(...)` prop (closed over) instead of `next/headers` `cookies().set(...)`.
 3. **`NextRouterAdapter` and `nextServerAdapter` imports removed.** Both become required props (`RouterAdapter` and `serverAdapter`); passed into `RootProvider` and `initReq` respectively.
-4. **`checkDependencies()` call removed from ui layer.** Moved to the Next wrapper — Next apps still get the warning, ui is framework-agnostic.
+4. **`checkDependencies()` lives in ui.** The universal React/react-dom check runs inside ui `RootLayout`. Framework adapters add their own constraints via the `additionalDependencyChecks` prop.
 5. **Internal imports.** Relative paths to `RootProvider`, `ProgressBar`, `getNavPrefs`, `getClientConfig` (no `@payloadcms/ui/*` self-references).
 
 ## `initReq` decoupling
@@ -144,7 +149,7 @@ The `serverAdapter` is added as a new required argument to `initReq` (alongside 
 
 ### Existing Next.js apps
 
-No change required. `import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'` still works. `checkDependencies()` still runs (now called inside the Next wrapper).
+No change required. `import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'` still works. Dependency checking still runs (now invoked inside ui `RootLayout` with the Next wrapper supplying its `additionalDependencyChecks`).
 
 ### Non-Next frameworks
 
