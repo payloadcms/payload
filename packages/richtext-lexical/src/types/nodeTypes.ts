@@ -62,8 +62,9 @@ export interface SerializedLineBreakNode {
   version: number
 }
 
-export interface SerializedParagraphNode<TChildren>
-  extends SerializedLexicalElementBase<TChildren> {
+export interface SerializedParagraphNode<
+  TChildren extends SerializedLexicalNode = SerializedLexicalNode,
+> extends SerializedLexicalElementBase<TChildren> {
   textFormat: number
   textStyle: string
   type: 'paragraph'

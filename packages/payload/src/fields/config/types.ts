@@ -4,7 +4,7 @@ import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
 import type React from 'react'
-import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
+import type { DeepUndefinable, MarkOptional, MarkRequired } from 'ts-essentials'
 
 import type {
   JoinFieldClientProps,
@@ -1371,8 +1371,8 @@ export type RadioFieldClient = {
 
 type BlockFields = {
   [key: string]: any
-  blockName?: string
-  blockType?: string
+  blockName?: null | string
+  blockType: string
 }
 
 export type BlockJSX = {
@@ -1430,7 +1430,7 @@ export type BlockJSX = {
     markdownToLexical: (props: { markdown: string }) => Record<string, any>
     openMatch?: RegExpMatchArray
     props: Record<string, any>
-  }) => BlockFields | false
+  }) => false | MarkOptional<BlockFields, 'blockType'>
 }
 
 export type Block = {
