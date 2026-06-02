@@ -4,7 +4,6 @@
   .btn {
     display: flex;
     align-items: center;
-    box-sizing: content-box;
 
     * {
       pointer-events: none;

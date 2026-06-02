@@ -5,9 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import type { SearchFilterProps } from './types.js'
 
 import { useDebounce } from '../../hooks/useDebounce.js'
-import './index.css'
-
-const baseClass = 'search-filter'
+import { SearchInput } from '../SearchInput/index.js'
 
 export function SearchFilter(props: SearchFilterProps) {
   const { disabled, handleChange, initialParams, label, searchQueryParam } = props
@@ -51,20 +49,16 @@ export function SearchFilter(props: SearchFilterProps) {
   }, [debouncedSearch, handleChange])
 
   return (
-    <div className={baseClass}>
-      <input
-        aria-label={label}
-        className={`${baseClass}__input`}
-        disabled={disabled}
-        id="search-filter-input"
-        onChange={(e) => {
-          shouldUpdateState.current = true
-          setSearch(e.target.value)
-        }}
-        placeholder={label}
-        type="text"
-        value={search || ''}
-      />
-    </div>
+    <SearchInput
+      aria-label={label}
+      disabled={disabled}
+      id="search-filter-input"
+      onChange={(value) => {
+        shouldUpdateState.current = true
+        setSearch(value)
+      }}
+      placeholder={label}
+      value={search || ''}
+    />
   )
 }
