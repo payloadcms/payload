@@ -88,7 +88,7 @@ export function HierarchyListView(props: ListViewClientProps) {
   // Get search from URL params
   const searchFromURL = searchParams.get('search') || ''
 
-  // Update URL when search changes (debouncing is handled by SearchFilter)
+  // Update URL when search changes (debouncing is handled by SearchBar)
   // This triggers a server refetch via Next.js router
   const handleSearchChange = useCallback(
     (value: string) => {
