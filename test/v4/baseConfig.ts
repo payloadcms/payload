@@ -71,6 +71,7 @@ import Tags from './collections/Tags/index.js'
 import TextFields from './collections/Text/index.js'
 import TextareaFields from './collections/Textarea/index.js'
 import Rubbish from './collections/Trash/index.js'
+import RubbishWithDrafts from './collections/TrashWithDrafts/index.js'
 import Unauthorized from './collections/Unauthorized/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
@@ -131,6 +132,7 @@ export const collections: CollectionConfig[] = [
   withGroup(TagItems, 'Hierarchy'),
   // Trash
   withGroup(Rubbish, 'Trash'),
+  withGroup(RubbishWithDrafts, 'Trash With Drafts'),
   // Uploads
   withGroup(Uploads, 'Uploads'),
   withGroup(UploadFields, 'Uploads'),
