@@ -986,6 +986,7 @@ describe('Types testing', () => {
             root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
           },
           selectField: 'option-1',
+          requiredWithAdminCondition: 42,
           title: 'Test Post',
         },
       })
@@ -1266,20 +1267,21 @@ describe('Types testing', () => {
 
       test('update with draft:true on draft-enabled collection should work', () => {
         expect(
-          payload.update({ collection: 'draft-posts', id: 1, data: { title: 'Test' }, draft: true }),
+          payload.update({
+            collection: 'draft-posts',
+            id: 1,
+            data: { title: 'Test' },
+            draft: true,
+          }),
         ).type.not.toRaiseError()
       })
 
       test('duplicate with draft:true on non-draft collection should error', () => {
-        expect(
-          payload.duplicate({ collection: 'pages', id: 1, draft: true }),
-        ).type.toRaiseError()
+        expect(payload.duplicate({ collection: 'pages', id: 1, draft: true })).type.toRaiseError()
       })
 
       test('duplicate with draft:false on non-draft collection should error', () => {
-        expect(
-          payload.duplicate({ collection: 'pages', id: 1, draft: false }),
-        ).type.toRaiseError()
+        expect(payload.duplicate({ collection: 'pages', id: 1, draft: false })).type.toRaiseError()
       })
 
       test('duplicate with draft:true on draft-enabled collection should work', () => {
@@ -1301,15 +1303,11 @@ describe('Types testing', () => {
       })
 
       test('global update with draft:true on non-draft global should error', () => {
-        expect(
-          payload.updateGlobal({ slug: 'menu', data: {}, draft: true }),
-        ).type.toRaiseError()
+        expect(payload.updateGlobal({ slug: 'menu', data: {}, draft: true })).type.toRaiseError()
       })
 
       test('global update with draft:false on non-draft global should error', () => {
-        expect(
-          payload.updateGlobal({ slug: 'menu', data: {}, draft: false }),
-        ).type.toRaiseError()
+        expect(payload.updateGlobal({ slug: 'menu', data: {}, draft: false })).type.toRaiseError()
       })
 
       test('global update with draft:true on draft-enabled global should work', () => {
@@ -1318,6 +1316,59 @@ describe('Types testing', () => {
         ).type.not.toRaiseError()
       })
     })
+  })
 
+  describe('Issue #16797 - typescriptSchema with admin.condition should allow required fields', () => {
+    test('field with required:true and admin.condition should be non-optional', () => {
+      // Before the fix, this would have been `requiredWithAdminCondition?: number`
+      // After the fix, it should be `requiredWithAdminCondition: number`
+      expect<Post>().type.toHaveProperty('requiredWithAdminCondition')
+      expect<Post['requiredWithAdminCondition']>().type.toBe<number>()
+    })
+
+    test('can create a Post with requiredWithAdminCondition should work', () => {
+      expect(
+        payload.create({
+          collection: 'posts',
+          data: {
+            richText: {
+              root: {
+                type: 'root',
+                children: [],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            },
+            selectField: 'option-1',
+            radioField: 'option-1',
+            requiredWithAdminCondition: 123,
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
+    test('requiredWithAdminCondition has correct schema constraint from jsonSchema', () => {
+      // The jsonSchema callback adds minimum: 0 constraint
+      // This is more of a runtime validation test but we verify the type exists
+      expect<Post['requiredWithAdminCondition']>().type.toBe<number>()
+    })
+
+    test('Post interface should include requiredWithAdminCondition as a direct required property', () => {
+      const post: Post = {
+        id: '1',
+        richText: {
+          root: { type: 'root', children: [], direction: 'ltr', format: '', indent: 0, version: 1 },
+        },
+        selectField: 'option-1' as MySelectOptions,
+        radioField: 'option-1' as MyRadioOptions,
+        requiredWithAdminCondition: 42,
+        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+      }
+
+      expect(post.requiredWithAdminCondition).type.toBe<number>()
+    })
   })
 })

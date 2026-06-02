@@ -177,6 +177,7 @@ export interface Post {
   };
   radioField: MyRadioOptions;
   externalType?: CustomType;
+  requiredWithAdminCondition: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -350,6 +351,7 @@ export interface PostsSelect<T extends boolean = true> {
       };
   radioField?: T;
   externalType?: T;
+  requiredWithAdminCondition?: T;
   updatedAt?: T;
   createdAt?: T;
 }

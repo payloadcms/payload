@@ -864,7 +864,11 @@ export function fieldsToJSONSchema(
         }
 
         if (fieldSchema! && fieldAffectsData(field)) {
-          if (isRequired && fieldSchema.required !== false) {
+          const fieldHasRequiredProperty = 'required' in field && field.required === true
+          if (
+            (isRequired || fieldSchema.required === true || fieldHasRequiredProperty) &&
+            fieldSchema.required !== false
+          ) {
             requiredFieldNames.add(field.name)
           }
           fieldSchemas.set(field.name, fieldSchema)
