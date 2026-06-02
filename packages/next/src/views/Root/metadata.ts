@@ -6,8 +6,9 @@ import { adminViews } from '../adapter.js'
 import { generateCollectionTrashMetadata } from '../Document/generateCollectionTrashMetadata.js'
 import { generateListViewMetadata } from '../Document/generateListViewMetadata.js'
 import { generateDocumentViewMetadata } from '../Document/metadata.js'
+import { getCustomViewByRoute } from '@payloadcms/ui/views/Root/getCustomViewByRoute'
+
 import { generateCustomViewMetadata } from './generateCustomViewMetadata.js'
-import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 const oneSegmentMeta = {
   'create-first-user': adminViews.createFirstUser.generateMetadata,
