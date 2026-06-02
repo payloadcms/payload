@@ -41,7 +41,7 @@ export const NotFoundPage = ({
   renderNotFoundPage({
     config,
     importMap,
-    initReq,
+    initReq: initReq as Parameters<typeof renderNotFoundPage>[0]['initReq'],
     params,
     searchParams,
   })

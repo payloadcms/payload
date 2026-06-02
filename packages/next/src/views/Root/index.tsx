@@ -33,10 +33,10 @@ export const RootPage = ({
   renderRoot({
     config,
     importMap,
-    initReq,
+    initReq: initReq as Parameters<typeof renderRoot>[0]['initReq'],
     notFound,
     params,
     redirect,
-    routeDataGetter: getRouteData,
+    routeDataGetter: getRouteData as Parameters<typeof renderRoot>[0]['routeDataGetter'],
     searchParams,
   })

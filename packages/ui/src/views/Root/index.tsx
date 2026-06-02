@@ -4,6 +4,7 @@ import type {
   AdminViewClientProps,
   AdminViewServerPropsOnly,
   CollectionPreferences,
+  createLocalReq,
   CustomComponent,
   DocumentSubViewTypes,
   ImportMap,
@@ -61,17 +62,11 @@ type RouteDataGetter = (args: {
 }) => RouteDataResult
 
 type InitReqFn = (args: {
+  canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
-  overrides?: {
-    [key: string]: unknown
-    fallbackLocale?: boolean
-    req?: {
-      query?: Record<string, unknown>
-    }
-    urlSuffix?: string
-  }
+  overrides?: Parameters<typeof createLocalReq>[0]
 }) => Promise<InitReqResult>
 
 export type RenderRootArgs = {

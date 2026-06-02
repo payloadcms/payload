@@ -1,6 +1,6 @@
 'use server'
 
-import type { ImportMap, InitReqResult, SanitizedConfig } from 'payload'
+import type { createLocalReq, ImportMap, InitReqResult, SanitizedConfig } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -11,17 +11,11 @@ import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 import { NotFoundClient } from './index.client.js'
 
 type InitReqFn = (args: {
+  canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
-  overrides?: {
-    [key: string]: unknown
-    fallbackLocale?: boolean
-    req?: {
-      query?: Record<string, unknown>
-    }
-    urlSuffix?: string
-  }
+  overrides?: Parameters<typeof createLocalReq>[0]
 }) => Promise<InitReqResult>
 
 export type RenderNotFoundPageArgs = {
