@@ -786,7 +786,7 @@ describe('Localization', () => {
 
   test('should use label in search filter when string or object', async () => {
     await page.goto(url.list)
-    const searchInput = page.locator('.search-filter__input')
+    const searchInput = page.locator('#search-filter-input')
     await expect(searchInput).toBeVisible()
     await expect(searchInput).toHaveAttribute('placeholder', 'Search')
   })

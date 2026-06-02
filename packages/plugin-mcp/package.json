@@ -69,11 +69,6 @@
     "tsx": "4.21.0",
     "zod": "^4.0.0"
   },
-  "//deps_notes": {
-    "zod": "zod is a hard dependency of @modelcontextprotocol/server, thus we can safely use it without it impacting bundle size. Make extra sure the zod version here matches exactly what's defined in the dependencies of @modelcontextprotocol/server to avoid duplicate versions being installed.",
-    "@cfworker/json-schema": "Should be able to remove in next @modelcontextprotocol/server alpha release. Marked as an optional peer of @modelcontextprotocol/server, but its bundle does an eager top-level `import { Validator } from '@cfworker/json-schema'`, so it must be installed even when only zod-registered tools are used. Drop once upstream lazy-loads the validator. See: https://github.com/modelcontextprotocol/typescript-sdk",
-    "tsx": "Required by the `bin.js` stdio mcp. Keep the version pinned to whatever `payload` ships to avoid duplicate installs."
-  },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/ui": "workspace:*",
@@ -106,6 +101,11 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
+  },
+  "//deps_notes": {
+    "zod": "zod is a hard dependency of @modelcontextprotocol/server, thus we can safely use it without it impacting bundle size. Make extra sure the zod version here matches exactly what's defined in the dependencies of @modelcontextprotocol/server to avoid duplicate versions being installed.",
+    "@cfworker/json-schema": "Should be able to remove in next @modelcontextprotocol/server alpha release. Marked as an optional peer of @modelcontextprotocol/server, but its bundle does an eager top-level `import { Validator } from '@cfworker/json-schema'`, so it must be installed even when only zod-registered tools are used. Drop once upstream lazy-loads the validator. See: https://github.com/modelcontextprotocol/typescript-sdk",
+    "tsx": "Required by the `bin.js` stdio mcp. Keep the version pinned to whatever `payload` ships to avoid duplicate installs."
   },
   "homepage:": "https://payloadcms.com"
 }
