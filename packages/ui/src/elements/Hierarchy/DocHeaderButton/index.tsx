@@ -10,7 +10,7 @@ import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { useHierarchyDrawer } from '../Drawer/useHierarchyDrawer.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-button'
 
@@ -20,6 +20,7 @@ export type HierarchyButtonClientProps = {
   hierarchyCollectionSlug: string
   Icon?: React.ReactNode
   readOnly?: boolean
+  SmallIcon?: React.ReactNode
 }
 
 export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
@@ -27,12 +28,14 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   hasMany = false,
   hierarchyCollectionSlug,
   Icon,
-  readOnly,
+  readOnly: readOnlyFromProps,
+  SmallIcon,
 }) => {
   const { t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
   const { collectionSlug: documentCollectionSlug } = useDocumentInfo()
-  const { setModified } = useForm()
+  const { disabled: formDisabled, setModified } = useForm()
+  const readOnly = readOnlyFromProps || formDisabled
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
 
   const currentFieldValue = useFormFields(([fields]) => (fields && fields?.[fieldName]) || null)
@@ -132,10 +135,10 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   return (
     <>
       <Button
-        buttonStyle="pill"
+        buttonStyle="secondary"
         className={[baseClass, readOnly && `${baseClass}--read-only`].filter(Boolean).join(' ')}
         disabled={readOnly}
-        icon={Icon}
+        icon={SmallIcon ?? Icon}
         iconPosition="left"
         margin={false}
         onClick={handleClick}

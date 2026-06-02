@@ -134,7 +134,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
             <Button
               buttonStyle="ghost"
               className={`${baseClass}__toggle-button`}
-              icon={<EyeIcon active={showKey} />}
+              icon={<EyeIcon active={showKey} size={24} />}
               onClick={() => setShowKey((prev) => !prev)}
             />
           </div>

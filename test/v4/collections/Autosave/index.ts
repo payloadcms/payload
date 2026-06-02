@@ -6,7 +6,6 @@ const Autosave: CollectionConfig = {
   slug: autosaveSlug,
   admin: {
     useAsTitle: 'title',
-    group: 'Versions',
   },
   versions: {
     drafts: {

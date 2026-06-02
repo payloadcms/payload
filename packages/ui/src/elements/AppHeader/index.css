@@ -68,6 +68,10 @@
     flex-grow: 0;
     gap: var(--spacer-1);
     width: 100%;
+
+    .app-header__step-nav-wrapper .btn {
+      padding: var(--spacer-1) var(--spacer-2);
+    }
   }
 
   .app-header__controls-wrapper {
@@ -148,11 +152,22 @@
 
     .app-header__actions {
       max-width: 300px;
-      margin-right: var(--spacer-3);
     }
   }
 
   @media (max-width: 768px) {
+    .app-header__content {
+      padding: var(--spacer-2-5);
+    }
+
+    .app-header__controls-wrapper {
+      flex-wrap: wrap;
+    }
+
+    .app-header__step-nav-wrapper {
+      width: unset;
+    }
+
     .app-header--nav-open .app-header__localizer {
       display: none;
     }

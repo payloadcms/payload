@@ -81,9 +81,13 @@ export type ListViewClientProps = {
    */
   hierarchyData?: HierarchyViewData
   /**
-   * Resolved icon component for hierarchy collections
+   * Resolved full-size icon component for hierarchy collections (used in drawer subheader)
    */
   HierarchyIcon?: React.ReactNode
+  /**
+   * Resolved small icon component for hierarchy collections (used in table rows)
+   */
+  HierarchySmallIcon?: React.ReactNode
   /**
    * @deprecated
    */
