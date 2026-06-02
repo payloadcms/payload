@@ -80,6 +80,22 @@ export const arTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'إن لم تطلب هذا ، يرجى تجاهل هذا البريد الإلكتروني وستبقى كلمة مرورك ذاتها بدون تغيير.',
   },
+  commandPalette: {
+    actions: 'الإجراءات',
+    createNew: 'إنشاء جديد',
+    favorites: 'المفضلة',
+    hintActions: 'الإجراءات',
+    hintClose: 'إغلاق',
+    hintCreate: 'إنشاء جديد',
+    hintNavigate: 'تنقل',
+    hintSelect: 'فتح',
+    noResults: 'لم يتم العثور على نتائج',
+    pinToFavorites: 'تثبيت في المفضلة',
+    placeholder: 'اكتب أمرًا أو ابحث...',
+    recentlyVisited: 'تمت الزيارة مؤخرًا',
+    removeFromFavorites: 'إزالة من المفضلة',
+    title: 'لوحة الأوامر',
+  },
   dashboard: {
     addButton: 'اضف +',
     addWidget: 'أضف الواجهة البيانية',

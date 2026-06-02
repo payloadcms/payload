@@ -81,6 +81,22 @@ export const ruTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Если вы не запрашивали этого, пожалуйста, проигнорируйте это письмо, и ваш пароль останется неизменным.',
   },
+  commandPalette: {
+    actions: 'Действия',
+    createNew: 'Создать новый',
+    favorites: 'Избранное',
+    hintActions: 'Действия',
+    hintClose: 'Закрыть',
+    hintCreate: 'Создать новый',
+    hintNavigate: 'Навигация',
+    hintSelect: 'Открыть',
+    noResults: 'Результаты не найдены',
+    pinToFavorites: 'Закрепить в избранное',
+    placeholder: 'Введите команду или выполните поиск…',
+    recentlyVisited: 'Недавно посещённые',
+    removeFromFavorites: 'Удалить из избранного',
+    title: 'Палитра команд',
+  },
   dashboard: {
     addButton: 'Добавить +',
     addWidget: 'Добавить виджет',

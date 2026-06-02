@@ -80,6 +80,22 @@ export const viTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Nếu bạn không phải là người yêu cầu thay đổi mật khẩu, xin hãy bỏ qua tin nhắn này và mật khẩu của bạn sẽ được giữ nguyên.',
   },
+  commandPalette: {
+    actions: 'Hành động',
+    createNew: 'Tạo Mới',
+    favorites: 'Mục yêu thích',
+    hintActions: 'Hành động',
+    hintClose: 'Đóng',
+    hintCreate: 'Tạo Mới',
+    hintNavigate: 'Điều hướng',
+    hintSelect: 'Mở',
+    noResults: 'Không tìm thấy kết quả nào',
+    pinToFavorites: 'Ghim vào Mục yêu thích',
+    placeholder: 'Nhập lệnh hoặc tìm kiếm…',
+    recentlyVisited: 'Đã truy cập gần đây',
+    removeFromFavorites: 'Xóa khỏi Mục yêu thích',
+    title: 'Bảng Lệnh',
+  },
   dashboard: {
     addButton: 'Thêm +',
     addWidget: 'Thêm Widget',

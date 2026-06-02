@@ -80,6 +80,22 @@ export const nbTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Hvis du ikke har bedt om dette, kan du ignorere denne e-posten, og passordet ditt vil forbli uendret.',
   },
+  commandPalette: {
+    actions: 'Handlinger',
+    createNew: 'Opprett ny',
+    favorites: 'Favoritter',
+    hintActions: 'Handlinger',
+    hintClose: 'Lukk',
+    hintCreate: 'Opprett ny',
+    hintNavigate: 'Naviger',
+    hintSelect: 'Åpne',
+    noResults: 'Ingen resultater funnet',
+    pinToFavorites: 'Fest til favoritter',
+    placeholder: 'Skriv inn en kommando eller søk…',
+    recentlyVisited: 'Nylig besøkt',
+    removeFromFavorites: 'Fjern fra favoritter',
+    title: 'Kommando-palett',
+  },
   dashboard: {
     addButton: 'Legg til +',
     addWidget: 'Legg til widget',

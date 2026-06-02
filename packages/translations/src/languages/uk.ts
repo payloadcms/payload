@@ -81,6 +81,22 @@ export const ukTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Якщо ви не сторювали цей запит, будь ласка, проігноруйте це повідомлення',
   },
+  commandPalette: {
+    actions: 'Дії',
+    createNew: 'Створити новий',
+    favorites: 'Обране',
+    hintActions: 'Дії',
+    hintClose: 'Закрити',
+    hintCreate: 'Створити новий',
+    hintNavigate: 'Навігація',
+    hintSelect: 'Відкрити',
+    noResults: 'Результатів не знайдено',
+    pinToFavorites: 'Закріпити до вибраного',
+    placeholder: 'Введіть команду або виконайте пошук…',
+    recentlyVisited: 'Нещодавно відвідані',
+    removeFromFavorites: 'Видалити з обраного',
+    title: 'Палітра команд',
+  },
   dashboard: {
     addButton: 'Додати +',
     addWidget: 'Додати віджет',

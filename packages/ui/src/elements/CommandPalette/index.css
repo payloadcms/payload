@@ -1,0 +1,201 @@
+@layer payload-default {
+  .cmd-palette {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 12vh;
+  }
+
+  .cmd-palette__inner {
+    display: flex;
+    flex-direction: column;
+    width: min(640px, 92vw);
+    max-height: 60vh;
+    background: var(--color-bg-elevated);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--radius-large);
+    box-shadow: var(--elevation-500-modal-window);
+    overflow: hidden;
+  }
+
+  .cmd-palette__input {
+    padding: var(--spacer-3) var(--spacer-4);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--color-text);
+    background: transparent;
+    border-bottom: var(--stroke-width-small) solid
+      color-mix(in srgb, var(--color-border) 50%, transparent);
+    /* Straight muted hairline under the input as the separator. The global
+       :focus-visible rule adds an outline AND a border-radius to the focused
+       input; both are reset here so the hairline stays square and uncluttered. */
+
+    &:focus,
+    &:focus-visible {
+      border-radius: 0;
+      outline: none;
+    }
+
+    &::placeholder {
+      color: var(--color-text-tertiary);
+    }
+  }
+
+  .cmd-palette__results {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacer-1) 0;
+    /* Hide the scrollbar (matches Combobox/Nav) so it can't overlap the input
+       outline; content still scrolls via wheel, trackpad, and keyboard. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .cmd-palette__group-label {
+    padding: var(--spacer-1) var(--spacer-4);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    /* Tertiary + bold reads as a non-interactive section header, distinct from
+       the selectable rows below it. */
+    color: var(--color-text-tertiary);
+  }
+
+  .cmd-palette__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacer-2);
+    /* Fixed height so the row geometry is identical whether or not the
+       create-hint button is rendered (font 0.75rem + 2px padding + 1px border
+       each side ≈ 1.375rem total; 2.25rem gives comfortable breathing room). */
+    height: 2.25rem;
+    padding: 0 var(--spacer-4);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+  }
+
+  .cmd-palette__option--active {
+    background: var(--color-bg-selected);
+    color: var(--color-text);
+  }
+
+  .cmd-palette__option-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cmd-palette__option-match {
+    font-weight: var(--text-body-medium-strong-font-weight);
+    color: var(--color-text);
+  }
+
+  .cmd-palette__empty {
+    padding: var(--spacer-4);
+    text-align: center;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    color: var(--color-text-secondary);
+  }
+
+  .cmd-palette__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    /* spacer-2 each side of the pipe divider keeps it symmetric (the divider is
+       a flex child of the trailing hint, separated by that hint's own spacer-2). */
+    gap: var(--spacer-2);
+    padding: var(--spacer-2) var(--spacer-4);
+    border-top: var(--stroke-width-small) solid var(--color-border);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    color: var(--color-text-secondary);
+  }
+
+  /* A hint pairs a description (left) with its key chip(s) (right). */
+  .cmd-palette__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  /* The create hint doubles as the ⌘↵ click target; strip native button chrome
+     so it reads identically to the static select hint, with a hover cue. */
+  button.cmd-palette__hint {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-text);
+    }
+  }
+
+  /* The primary action (Enter): emphasized so it reads as the default. Selector is
+     element-qualified to outrank button.cmd-palette__hint's `font`/`color: inherit`. */
+  button.cmd-palette__hint--primary {
+    font-weight: var(--text-body-medium-strong-font-weight);
+    color: var(--color-text);
+
+    & .cmd-palette__key {
+      color: var(--color-text);
+    }
+  }
+
+  /* Muted pipe between footer hints. Adjacent-sibling selector renders it only between
+     two hints, so a single hint shows no divider regardless of which hints are present. */
+  .cmd-palette__hint + .cmd-palette__hint::before {
+    content: '|';
+    color: color-mix(in srgb, var(--color-border) 50%, transparent);
+  }
+
+  /* Groups multiple key chips for a single shortcut (e.g. ⌘ + ⏎). */
+  .cmd-palette__keys {
+    display: inline-flex;
+    gap: var(--spacer-1);
+  }
+
+  /* Each shortcut glyph renders as a rounded key chip. font-family: inherit
+     resets the default monospace kbd font; the fixed square-ish box keeps
+     single glyphs centered. */
+  .cmd-palette__key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.125rem;
+    height: 1.125rem;
+    padding: 0 var(--spacer-1);
+    font-family: inherit;
+    font-size: 0.6875rem;
+    line-height: 1;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-secondary);
+    border: 0;
+    border-radius: var(--radius-small);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cmd-palette,
+    .cmd-palette__inner {
+      transition: none;
+    }
+  }
+}

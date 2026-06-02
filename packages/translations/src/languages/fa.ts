@@ -79,6 +79,22 @@ export const faTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'اگر شما درخواست بازنشانی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید. رمز عبور شما تغییری نخواهد کرد.',
   },
+  commandPalette: {
+    actions: 'اقدامات',
+    createNew: 'ایجاد جدید',
+    favorites: 'علاقه‌مندی‌ها',
+    hintActions: 'اقدامات',
+    hintClose: 'بستن',
+    hintCreate: 'ایجاد جدید',
+    hintNavigate: 'مسیریابی کنید',
+    hintSelect: 'باز کردن',
+    noResults: 'نتیجه‌ای یافت نشد',
+    pinToFavorites: 'افزودن به علاقه‌مندی‌ها',
+    placeholder: 'یک دستور وارد کنید یا جستجو کنید…',
+    recentlyVisited: 'به‌تازگی بازدید شده',
+    removeFromFavorites: 'حذف از علاقه‌مندی‌ها',
+    title: 'پنل فرمان',
+  },
   dashboard: {
     addButton: 'اضافه کنید +',
     addWidget: 'اضافه کردن ویجت',
