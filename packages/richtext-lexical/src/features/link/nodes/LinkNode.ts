@@ -9,6 +9,7 @@ import type {
   LexicalUpdateJSON,
   NodeKey,
   RangeSelection,
+  SerializedElementNode,
 } from 'lexical'
 
 import { addClassNamesToElement, isHTMLAnchorElement } from '@lexical/utils'
@@ -244,7 +245,8 @@ export class LinkNode extends ElementNode {
     return false
   }
 
-  override updateFromJSON(serializedNode: LexicalUpdateJSON<SerializedLinkNode>): this {
+  override updateFromJSON(_serializedNode: LexicalUpdateJSON<SerializedElementNode>): this {
+    const serializedNode = _serializedNode as unknown as SerializedLinkNode
     return super
       .updateFromJSON(serializedNode)
       .setFields(serializedNode.fields)

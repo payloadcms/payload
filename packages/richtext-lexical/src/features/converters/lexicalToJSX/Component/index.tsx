@@ -14,8 +14,8 @@ import { convertLexicalToJSX, type ConvertLexicalToJSXArgs } from '../converter/
 export type JSXConvertersFunction<
   T extends SerializedNodeBase =
     | DefaultNodeTypes
-    | SerializedBlockNode<{ blockName?: null | string }>
-    | SerializedInlineBlockNode<{ blockName?: null | string }>,
+    | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
+    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
 > = (args: { defaultConverters: JSXConverters<DefaultNodeTypes> }) => JSXConverters<T>
 
 type RichTextProps<TNodes extends SerializedNodeBase = SerializedNodeBase> = {

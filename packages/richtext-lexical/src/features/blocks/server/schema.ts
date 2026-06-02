@@ -9,7 +9,7 @@ import type { JSONSchemaArgs, JSONSchemaFn } from '../../typesServer.js'
 import { formatSchema } from '../../../types/jsonSchemaHelpers.js'
 
 type BaseBlockFields<TFields extends JsonObject = JsonObject> = {
-  blockName: string
+  blockName?: null | string
   blockType: string
 } & TFields
 

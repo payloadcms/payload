@@ -77,6 +77,6 @@ export type HTMLConverters<
 export type HTMLConvertersFunction<
   T extends { [key: string]: any; type?: string } =
     | DefaultNodeTypes
-    | SerializedBlockNode<{ blockName?: null | string }>
+    | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
 > = (args: { defaultConverters: HTMLConverters<DefaultNodeTypes> }) => HTMLConverters<T>
