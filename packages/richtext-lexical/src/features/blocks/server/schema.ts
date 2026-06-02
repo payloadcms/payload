@@ -27,7 +27,7 @@ export type InlineBlockFields<TFields extends JsonObject = JsonObject> = {
 } & TFields
 
 export type SerializedBlockNode<TFields extends { blockType: string } = { blockType: string }> = {
-  fields: { blockName: null | string; id: string } & Omit<TFields, 'blockName' | 'id'>
+  fields: { blockName?: string | null; id: string } & Omit<TFields, 'blockName' | 'id'>
   format: LexicalElementFormat
   type: 'block'
   version: number
@@ -49,7 +49,7 @@ const BLOCK_NODES_TS = `export type SerializedBlockNode<TFields extends { blockT
   type: 'block';
   format: LexicalElementFormat;
   version: number;
-  fields: { id: string; blockName: string | null } & Omit<TFields, 'id' | 'blockName'>;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
 };
 export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
   type: 'inlineBlock';
@@ -63,7 +63,7 @@ const blockFieldsInterfaceName = (block: Block) => block.interfaceName ?? toWord
 /**
  * JSON Schema for one block's `fields:` payload. Strips Payload's auto-added
  * `id`/`blockName` and re-adds them with strict runtime types: required
- * non-null `id`, required `blockName: string | null` (omitted for inline
+ * non-null `id`, optional `blockName?: string | null` (omitted for inline
  * blocks). Always registers as a top-level `$ref`.
  */
 const buildBlockFieldsSchema = (
@@ -101,7 +101,6 @@ const buildBlockFieldsSchema = (
 
   if (!isInlineBlock) {
     properties.blockName = { type: ['string', 'null'] }
-    required.push('blockName')
   }
 
   const fieldsSchema: JSONSchema4 = {
