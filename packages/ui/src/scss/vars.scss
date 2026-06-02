@@ -110,6 +110,8 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
   &:after {
     backdrop-filter: blur(8px);
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 }
 
