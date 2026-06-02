@@ -61,6 +61,7 @@ type RootLayoutProps = {
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
   readonly RouterAdapter: React.FC<{ children: React.ReactNode }>
+  readonly serverAdapter: ServerAdapter
   readonly serverFunction: ServerFunctionClient
 }
 
@@ -86,7 +87,7 @@ export { metadata } from '@payloadcms/ui/layouts'
 
 type Props = Omit<
   React.ComponentProps<typeof UIRootLayout>,
-  'fonts' | 'RouterAdapter'
+  'fonts' | 'RouterAdapter' | 'serverAdapter'
 >
 
 export const RootLayout = (props: Props) => {
@@ -100,6 +101,7 @@ export const RootLayout = (props: Props) => {
         { className: robotoMono.className, variable: robotoMono.variable },
       ]}
       RouterAdapter={NextRouterAdapter}
+      serverAdapter={nextServerAdapter}
     />
   )
 }
@@ -110,8 +112,8 @@ export const RootLayout = (props: Props) => {
 Compared to current implementation:
 
 1. **Fonts.** Drops `next/font` import and the local `inter`/`robotoMono` constants. Reads them from `props.fonts`. Each entry's `variable ?? className` is merged into the `<html>` class list.
-2. **Server action for language switching.** Inlined `'use server'` function. Body uses `config.server.setCookie(...)` instead of `next/headers` `cookies().set(...)`.
-3. **`NextRouterAdapter` import removed.** Now a required prop; passed straight into `RootProvider`.
+2. **Server action for language switching.** Inlined `'use server'` function. Body uses the `serverAdapter.setCookie(...)` prop (closed over) instead of `next/headers` `cookies().set(...)`.
+3. **`NextRouterAdapter` and `nextServerAdapter` imports removed.** Both become required props (`RouterAdapter` and `serverAdapter`); passed into `RootProvider` and `initReq` respectively.
 4. **`checkDependencies()` call removed from ui layer.** Moved to the Next wrapper — Next apps still get the warning, ui is framework-agnostic.
 5. **Internal imports.** Relative paths to `RootProvider`, `ProgressBar`, `getNavPrefs`, `getClientConfig` (no `@payloadcms/ui/*` self-references).
 
@@ -129,12 +131,11 @@ const cookies = parseCookies(headers)
 After move to `packages/ui/src/utilities/initReq.ts`:
 
 ```typescript
-const config = await configPromise
-const headers = await config.server.getHeaders()
+const headers = await serverAdapter.getHeaders()
 const cookies = parseCookies(headers)
 ```
 
-`config` must be resolved before reading headers (currently done later). `createLocalReq` already receives `req.server = config.server` indirectly via the sanitized config — no extra wiring needed.
+The `serverAdapter` is added as a new required argument to `initReq` (alongside `configPromise`, `importMap`, `key`, etc.). Inside `createLocalReq`, `req.server = serverAdapter`. The Next-side wrapper supplies `nextServerAdapter`; the same value flows through `handleServerFunctions` for server-function dispatch.
 
 `selectiveCache`, `getRequestLocale`, `getPreferences` move alongside since they form `initReq`'s import chain and are framework-pure (`react` `cache()` only).
 

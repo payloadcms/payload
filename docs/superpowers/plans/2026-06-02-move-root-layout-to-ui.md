@@ -440,20 +440,15 @@ git commit -m "chore(ui): add getRequestHighContrast utility (moving from @paylo
 
 ## Phase 2: Move `initReq` to ui using `ServerAdapter`
 
-### Task 6: Create ui `initReq` decoupled from `next/headers`
+### Task 6: Create ui `initReq` accepting a `serverAdapter` argument
 
 **Files:**
 
 - Create: `packages/ui/src/utilities/initReq.ts`
 
-- [ ] **Step 1: Confirm `ServerAdapter.getHeaders` available on `config.server`**
+**Design note:** The earlier plan attempted to read `config.server.getHeaders()`, assuming `Config`/`SanitizedConfig` carried a `server: ServerAdapter` field. It does not — the `server` field on `ServerProps` is request-scoped, not config-scoped. Instead, `initReq` accepts the adapter as an explicit argument. The Next-side wrapper supplies `nextServerAdapter`, and `handleServerFunctions` does the same when it calls `initReq`.
 
-Run: `grep -n "server:\|server?:" packages/payload/src/config/types.ts | head -5`
-Expected: a `server: ServerAdapter` field on `SanitizedConfig`. The Next side already wires `config.server = nextServerAdapter` during init (verify with `grep -rn "config.server = \|server: nextServerAdapter" packages/next/src/`).
-
-If the wiring is missing or only happens later than `initReq` runs, stop and resolve the gap before continuing. Without `config.server.getHeaders`, this task cannot be completed.
-
-- [ ] **Step 2: Create the new file**
+- [ ] **Step 1: Create the new file**
 
 Write `packages/ui/src/utilities/initReq.ts`:
 
@@ -464,6 +459,7 @@ import type {
   InitReqResult,
   PayloadRequest,
   SanitizedConfig,
+  ServerAdapter,
 } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
@@ -489,7 +485,7 @@ const reqCache = selectiveCache<InitReqResult>('req')
 
 /**
  * Initializes a full request object, including the `req` object and access control.
- * Reads headers/cookies through `config.server` (`ServerAdapter`) so the function is
+ * Reads headers/cookies through the supplied `serverAdapter` so the function is
  * framework-agnostic; the consuming framework wires its own adapter.
  */
 export const initReq = async function ({
@@ -498,18 +494,20 @@ export const initReq = async function ({
   importMap,
   key,
   overrides,
+  serverAdapter,
 }: {
   canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
   overrides?: Parameters<typeof createLocalReq>[0]
+  serverAdapter: ServerAdapter
 }): Promise<InitReqResult> {
-  const config = await configPromise
-  const headers = await config.server.getHeaders()
+  const headers = await serverAdapter.getHeaders()
   const cookies = parseCookies(headers)
 
   const partialResult = await partialReqCache.get(async () => {
+    const config = await configPromise
     const payload = await getPayload({ config, cron: true, importMap })
     const languageCode = getRequestLanguage({
       config,
@@ -552,7 +550,7 @@ export const initReq = async function ({
             host: headers.get('host'),
             i18n: i18n as I18n,
             responseHeaders,
-            server: config.server,
+            server: serverAdapter,
             user,
             ...(reqOverrides || {}),
           },
@@ -599,21 +597,43 @@ export const initReq = async function ({
 }
 ```
 
-Two substantive deltas vs the old `next` version:
+Substantive deltas vs the old `next` version:
 
-1. `const config = await configPromise; const headers = await config.server.getHeaders()` replaces `const headers = await getHeaders()` and moves the config resolution above the partial cache.
-2. `server: config.server` (inside `createLocalReq`'s `req`) replaces `server: nextServerAdapter`.
+1. New required arg `serverAdapter: ServerAdapter`.
+2. `const headers = await serverAdapter.getHeaders()` replaces `const headers = await getHeaders()` (from `next/headers`).
+3. `server: serverAdapter` (inside `createLocalReq`'s `req`) replaces `server: nextServerAdapter`.
+4. The structure (config resolution still happens inside `partialReqCache`, headers read outside) matches the original.
+
+- [ ] **Step 2: Verify `ServerAdapter` exported from payload root**
+
+Run: `grep -rn "export.*ServerAdapter" packages/payload/src/exports/index.ts`
+Expected: a line like `export type { ServerAdapter } from '../admin/adapters/server.js'`. If not present, add it.
+
+If the type isn't re-exported, add it. In `packages/payload/src/exports/index.ts`, add:
+
+```typescript
+export type { ServerAdapter } from '../admin/adapters/server.js'
+```
+
+(Insert near other admin-adapter type exports if any, otherwise just append.)
+
+Commit that separately if added:
+
+```bash
+git add packages/payload/src/exports/index.ts
+git commit -m "feat(payload): export ServerAdapter type"
+```
 
 - [ ] **Step 3: Type-check ui**
 
 Run: `pnpm --filter @payloadcms/ui exec tsc --noEmit`
-Expected: PASS
+Expected: 5 pre-existing errors only.
 
 - [ ] **Step 4: Commit**
 
 ```bash
 git add packages/ui/src/utilities/initReq.ts
-git commit -m "chore(ui): add initReq utility using ServerAdapter (moving from @payloadcms/next)"
+git commit -m "chore(ui): add initReq utility accepting ServerAdapter (moving from @payloadcms/next)"
 ```
 
 ---
@@ -718,6 +738,7 @@ import type {
   ImportMap,
   LanguageOptions,
   SanitizedConfig,
+  ServerAdapter,
   ServerFunctionClient,
 } from 'payload'
 
@@ -779,6 +800,11 @@ type RootLayoutProps = {
    * (for Next.js use the `NextRouterAdapter` exported from `@payloadcms/next`).
    */
   readonly RouterAdapter: React.FC<{ children: React.ReactNode }>
+  /**
+   * Server adapter providing framework-specific access to headers, cookies, redirects,
+   * and other server APIs (for Next.js use `nextServerAdapter` from `@payloadcms/next`).
+   */
+  readonly serverAdapter: ServerAdapter
   readonly serverFunction: ServerFunctionClient
 }
 
@@ -800,6 +826,7 @@ const RootLayoutContent = async ({
   htmlProps = {},
   importMap,
   RouterAdapter,
+  serverAdapter,
   serverFunction,
 }: RootLayoutProps) => {
   const {
@@ -811,7 +838,12 @@ const RootLayoutContent = async ({
     req: {
       payload: { config },
     },
-  } = await initReq({ configPromise, importMap, key: 'RootLayout' })
+  } = await initReq({
+    configPromise,
+    importMap,
+    key: 'RootLayout',
+    serverAdapter,
+  })
 
   const theme = getRequestTheme({
     config,
@@ -846,7 +878,7 @@ const RootLayoutContent = async ({
 
   async function switchLanguageServerAction(lang: string): Promise<void> {
     'use server'
-    await config.server.setCookie(
+    await serverAdapter.setCookie(
       `${config.cookiePrefix || 'payload'}-lng`,
       lang,
       {
@@ -1023,6 +1055,7 @@ import { Inter, Roboto_Mono } from 'next/font/google'
 import React from 'react'
 
 import { NextRouterAdapter } from '../../adapters/router.js'
+import { nextServerAdapter } from '../../adapters/server.js'
 import { checkDependencies } from './checkDependencies.js'
 
 const inter = Inter({
@@ -1039,7 +1072,7 @@ export { metadata } from '@payloadcms/ui/layouts'
 
 type Props = Omit<
   React.ComponentProps<typeof UIRootLayout>,
-  'fonts' | 'RouterAdapter'
+  'fonts' | 'RouterAdapter' | 'serverAdapter'
 >
 
 export const RootLayout = (props: Props) => {
@@ -1053,6 +1086,7 @@ export const RootLayout = (props: Props) => {
         { className: robotoMono.className, variable: robotoMono.variable },
       ]}
       RouterAdapter={NextRouterAdapter}
+      serverAdapter={nextServerAdapter}
     />
   )
 }
@@ -1094,56 +1128,59 @@ Expected: only the files listed above. If others show up, add them to this task 
 
 - [ ] **Step 2: Update `handleServerFunctions.ts`**
 
-In `packages/next/src/utilities/handleServerFunctions.ts`, replace:
+In `packages/next/src/utilities/handleServerFunctions.ts`:
 
-```typescript
-import { initReq } from './initReq.js'
-```
-
-with:
-
-```typescript
-import { initReq } from '@payloadcms/ui/utilities/initReq'
-```
+1. Replace:
+   ```typescript
+   import { initReq } from './initReq.js'
+   ```
+   with:
+   ```typescript
+   import { initReq } from '@payloadcms/ui/utilities/initReq'
+   import { nextServerAdapter } from '../adapters/server.js'
+   ```
+2. Find every call site of `initReq(...)` in this file and add `serverAdapter: nextServerAdapter` to the argument object. Each call to `initReq` already passes an object like `{ configPromise, importMap, key: ... }`; add `serverAdapter: nextServerAdapter` as another field.
 
 - [ ] **Step 3: Update `views/NotFound/index.tsx`**
 
-In `packages/next/src/views/NotFound/index.tsx`, replace:
+In `packages/next/src/views/NotFound/index.tsx`:
 
-```typescript
-import { initReq } from '../../utilities/initReq.js'
-```
-
-with:
-
-```typescript
-import { initReq } from '@payloadcms/ui/utilities/initReq'
-```
+1. Replace:
+   ```typescript
+   import { initReq } from '../../utilities/initReq.js'
+   ```
+   with:
+   ```typescript
+   import { initReq } from '@payloadcms/ui/utilities/initReq'
+   import { nextServerAdapter } from '../../adapters/server.js'
+   ```
+2. Add `serverAdapter: nextServerAdapter` to the `initReq(...)` argument object.
 
 - [ ] **Step 4: Update `views/Root/index.tsx`**
 
-In `packages/next/src/views/Root/index.tsx`, replace both:
+In `packages/next/src/views/Root/index.tsx`:
+
+1. Replace:
+   ```typescript
+   import { initReq } from '../../utilities/initReq.js'
+   import { getPreferences } from '../../utilities/getPreferences.js'
+   ```
+   with:
+   ```typescript
+   import { initReq } from '@payloadcms/ui/utilities/initReq'
+   import { getPreferences } from '@payloadcms/ui/rsc'
+   import { nextServerAdapter } from '../../adapters/server.js'
+   ```
+   (Imports above shown stacked for clarity; insert each as its own line per project conventions.)
+2. Add `serverAdapter: nextServerAdapter` to the `initReq(...)` argument object.
+
+If `getPreferences` is NOT yet exported from `@payloadcms/ui/rsc`, first add this line to `packages/ui/src/exports/rsc/index.ts`:
 
 ```typescript
-import { initReq } from '../../utilities/initReq.js'
+export { getPreferences } from '../../utilities/getPreferences.js'
 ```
 
-```typescript
-import { getPreferences } from '../../utilities/getPreferences.js'
-```
-
-with the corresponding ui imports. `getPreferences` is exposed via the existing `@payloadcms/ui/rsc` export — verify:
-
-Run: `grep -n "getPreferences" packages/ui/src/exports/rsc/index.ts`
-
-- If it is already exported, use `import { getPreferences } from '@payloadcms/ui/rsc'`.
-- If not, add this single line to `packages/ui/src/exports/rsc/index.ts`:
-  ```typescript
-  export { getPreferences } from '../../utilities/getPreferences.js'
-  ```
-  and then use the same import path in `views/Root/index.tsx`.
-
-The `initReq` import becomes `import { initReq } from '@payloadcms/ui/utilities/initReq'`.
+Verify before/after with: `grep -n "getPreferences" packages/ui/src/exports/rsc/index.ts`.
 
 - [ ] **Step 5: Update `views/Document/index.tsx`**
 
