@@ -94,6 +94,23 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Det er ingen widgets på dashbordet ditt. Du kan legge dem til fra "Dashboard" -menyen som ligger i toppfeltet.',
     resetLayout: 'Tilbakestill layout',
     searchWidgets: 'Søk widgets...',
+    widgetCollectionRequired: 'Collectie er påkrevd.',
+    widgetConfigurationError: 'Feil i widget-konfigurasjon',
+    widgetInvalidCollection: 'Collection "{{collection}}" finnes ikke.',
+    widgetInvalidFilterField:
+      'Filter-feltet "{{field}}" finnes ikke i kolleksjonen "{{collection}}".',
+    widgetInvalidSortField:
+      'Sorteringsfeltet "{{field}}" finnes ikke i kolleksjonen "{{collection}}".',
+    widgetLimitLabel: 'Begrens',
+    widgetNonSortableSortField:
+      'Sorteringsfeltet "{{field}}" kan ikke sorteres i Collection "{{collection}}".',
+    widgetQueryError: 'Kunne ikke laste dokumenter for denne widgeten.',
+    widgetSelectCollectionFirst: 'Velg en Collection før du velger sortering',
+    widgetSelectSortField: 'Velg et Field du vil sortere etter',
+    widgetSortDirectionLabel: 'Sorteringsretning',
+    widgetSortFieldLabel: 'Sorter Field',
+    widgetTitleFallback: 'Forespørsel om Collection',
+    widgetTitleLabel: 'Tittel',
   },
   error: {
     accountAlreadyActivated: 'Denne kontoen er allerede aktivert.',

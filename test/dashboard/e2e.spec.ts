@@ -20,7 +20,7 @@ const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
 
-const TOTAL_WIDGETS = 13
+const TOTAL_WIDGETS = 14
 const url = new AdminUrlUtil(serverURL, 'users')
 
 describe('Dashboard', () => {
@@ -58,6 +58,7 @@ describe('Dashboard', () => {
     await d.assertWidget(11, 'collection-query', 'x-small')
     await d.assertWidget(12, 'collection-query', 'x-small')
     await d.assertWidget(13, 'collection-query', 'x-small')
+    await d.assertWidget(14, 'collection-query', 'medium')
     await d.validateLayout()
   })
 
@@ -231,6 +232,30 @@ describe('Dashboard', () => {
     }).toPass({ timeout: 1000 })
   })
 
+  test('collection-query sorts and renders a nested (dot-path) field', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    const nestedCard = d.widgetByPos(14).locator('.collection-query-widget')
+
+    await expect(nestedCard.locator('.collection-query-widget__title')).toHaveText(
+      'Events by priority',
+    )
+    // The nested sort field is valid, so the widget renders rows instead of a config error.
+    await expect(d.widgetByPos(14).locator('.collection-query-widget--error')).toHaveCount(0)
+
+    const rows = nestedCard.locator('.collection-query-widget__row')
+    await expect(rows).toHaveCount(4)
+
+    // Row metadata reflects `details.priority`, sorted descending (seed priorities: 10, 30, 20, 5).
+    await expect(async () => {
+      const priorityLabels = (
+        await nestedCard.locator('.collection-query-widget__row-meta').allTextContents()
+      ).map((label) => label.trim())
+
+      expect(priorityLabels).toEqual(['30', '20', '10', '5'])
+    }).toPass({ timeout: 1000 })
+  })
+
   test('respects min and max width', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
@@ -247,6 +272,7 @@ describe('Dashboard', () => {
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 11 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 12 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 13 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 14 })
   })
 
   test('resize widget', async ({ page }) => {

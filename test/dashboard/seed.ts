@@ -110,6 +110,28 @@ export const seed = async (payload: BasePayload) => {
       })
     }
 
+    // Dedicated events for the "Events by priority" widget, which sorts by the nested
+    // `details.priority` field. Priorities are intentionally unordered so a descending sort
+    // produces a deterministic order (30, 20, 10, 5) the e2e test can assert.
+    const nestedDemoPriorities = [10, 30, 20, 5]
+    for (const [index, priority] of nestedDemoPriorities.entries()) {
+      await payload.create({
+        collection: 'events',
+        data: {
+          type: 'workshop',
+          description: `Nested field demo event ${index + 1}`,
+          details: {
+            priority,
+            room: `Room ${priority}`,
+          },
+          location: 'Nested field demo',
+          startDate: currentDate.toISOString(),
+          status: 'scheduled',
+          title: `Nested Event ${index + 1}`,
+        },
+      })
+    }
+
     for (let i = 1; i <= 550; i++) {
       const eventDate = new Date(currentDate)
       eventDate.setDate(currentDate.getDate() + Math.floor(Math.random() * 365) - 180) // Random date within ±6 months

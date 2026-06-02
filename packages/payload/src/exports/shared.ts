@@ -51,7 +51,9 @@ export {
 export { getFieldPaths } from '../fields/getFieldPaths.js'
 export { isFieldDisabled } from '../fields/isFieldDisabled.js'
 export type { DisabledArea, DisabledOptions } from '../fields/isFieldDisabled.js'
+export { sortableFieldTypes } from '../fields/sortableFieldTypes.js'
 export * from '../fields/validations.js'
+
 export {
   DEFAULT_HIERARCHY_LIST_LIMIT,
   DEFAULT_HIERARCHY_TREE_LIMIT,
@@ -63,21 +65,21 @@ export type { ClientHierarchyConfig, FolderBreadcrumb } from '../hierarchy/types
 export { PREFERENCE_KEYS } from '../preferences/keys.js'
 
 export { validOperators, validOperatorSet } from '../types/constants.js'
-
 export { formatFilesize } from '../uploads/formatFilesize.js'
 export { isImage } from '../uploads/isImage.js'
 export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
+
 export { applyLocaleFiltering } from '../utilities/applyLocaleFiltering.js'
 
 export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
-
 export {
   deepCopyObject,
   deepCopyObjectComplex,
   deepCopyObjectSimple,
   deepCopyObjectSimpleWithoutReactComponents,
 } from '../utilities/deepCopyObject.js'
+
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
@@ -86,7 +88,6 @@ export {
 } from '../utilities/deepMerge.js'
 
 export { extractID } from '../utilities/extractID.js'
-
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatAdminURL } from '../utilities/formatAdminURL.js'

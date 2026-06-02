@@ -194,6 +194,10 @@ export interface Event {
   type: 'meeting' | 'conference' | 'workshop' | 'webinar' | 'other';
   organizer?: (string | null) | User;
   status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  details?: {
+    priority?: number | null;
+    room?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -318,6 +322,12 @@ export interface EventsSelect<T extends boolean = true> {
   type?: T;
   organizer?: T;
   status?: T;
+  details?:
+    | T
+    | {
+        priority?: T;
+        room?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

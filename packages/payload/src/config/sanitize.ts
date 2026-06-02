@@ -110,17 +110,20 @@ const addDefaultDashboardWidgets = async ({
     {
       name: 'title',
       type: 'text',
-      defaultValue: 'Recent documents',
-      label: 'Title',
+      label: ({ t }) => t('dashboard:widgetTitleLabel'),
     },
     {
       name: 'relatedCollection',
       type: 'select',
-      label: 'Collection',
-      options: (config.collections ?? []).map((collection) => ({
-        label: collection.labels?.plural || collection.slug,
-        value: collection.slug,
-      })),
+      label: ({ t }) => t('general:collection'),
+      // Only offer collections that are visible in the admin UI. Collections hidden via a function
+      // are kept since they may still be visible for some users.
+      options: (config.collections ?? [])
+        .filter((collection) => collection.admin?.hidden !== true)
+        .map((collection) => ({
+          label: collection.labels?.plural || collection.slug,
+          value: collection.slug,
+        })),
       required: true,
     },
     {
@@ -131,7 +134,7 @@ const addDefaultDashboardWidgets = async ({
           Field: '@payloadcms/ui#QueryPresetsWhereField',
         },
       },
-      label: 'Filters',
+      label: ({ t }) => t('general:filters'),
     },
     {
       name: 'sortField',
@@ -141,20 +144,20 @@ const addDefaultDashboardWidgets = async ({
           Field: '@payloadcms/ui#CollectionQuerySortField',
         },
       },
-      label: 'Sort Field',
+      label: ({ t }) => t('dashboard:widgetSortFieldLabel'),
     },
     {
       name: 'sortDirection',
       type: 'select',
       defaultValue: 'desc',
-      label: 'Sort Direction',
+      label: ({ t }) => t('dashboard:widgetSortDirectionLabel'),
       options: [
         {
-          label: 'Ascending',
+          label: ({ t }) => t('general:ascending'),
           value: 'asc',
         },
         {
-          label: 'Descending',
+          label: ({ t }) => t('general:descending'),
           value: 'desc',
         },
       ],
@@ -163,7 +166,7 @@ const addDefaultDashboardWidgets = async ({
       name: 'limit',
       type: 'number',
       defaultValue: 5,
-      label: 'Limit',
+      label: ({ t }) => t('dashboard:widgetLimitLabel'),
       max: 25,
       min: 1,
     },

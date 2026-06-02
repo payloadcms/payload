@@ -92,6 +92,22 @@ export const thTranslations: DefaultTranslationsObject = {
     noItems: 'ไม่มีวิดเจ็ตในแดชบอร์ดของคุณ คุณสามารถเพิ่มได้จากเมนู "แดชบอร์ด" ที่ตั้งอยู่บนแถบบน',
     resetLayout: 'รีเซ็ตเลย์เอาท์',
     searchWidgets: 'ค้นหาวิดเจ็ต...',
+    widgetCollectionRequired: 'Collection เป็นข้อมูลที่จำเป็น',
+    widgetConfigurationError: 'เกิดข้อผิดพลาดในการกำหนดค่าของวิดเจ็ต',
+    widgetInvalidCollection: 'Collection "{{collection}}" ไม่มีอยู่ในระบบ',
+    widgetInvalidFilterField: 'ฟิลด์ตัวกรอง "{{field}}" ไม่มีอยู่ใน Collection "{{collection}}"',
+    widgetInvalidSortField:
+      'เขตข้อมูลเรียงลำดับ "{{field}}" ไม่มีอยู่ใน Collection "{{collection}}"',
+    widgetLimitLabel: 'จำกัด',
+    widgetNonSortableSortField:
+      'ไม่สามารถจัดเรียง field "{{field}}" ใน Collection "{{collection}}" ได้',
+    widgetQueryError: 'ไม่สามารถโหลดเอกสารสำหรับวิดเจ็ตนี้ได้',
+    widgetSelectCollectionFirst: 'โปรดเลือก Collection ก่อนเลือกการจัดลำดับ',
+    widgetSelectSortField: 'เลือก Field เพื่อจัดลำดับ',
+    widgetSortDirectionLabel: 'ทิศทางการจัดเรียง',
+    widgetSortFieldLabel: 'จัดเรียง Field',
+    widgetTitleFallback: 'การค้นหาข้อมูลใน Collection',
+    widgetTitleLabel: 'ชื่อเรื่อง',
   },
   error: {
     accountAlreadyActivated: 'บัญชีนี้ถูกเปิดใช้งานไปแล้ว',

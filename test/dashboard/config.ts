@@ -143,6 +143,24 @@ export default buildConfigWithDefaults({
             widgetSlug: 'collection-query',
             width: 'x-small',
           },
+          // Sorts by a nested group field (`details.priority`) to exercise dot-path
+          // sorting/filtering in the widget.
+          {
+            data: {
+              limit: 5,
+              relatedCollection: 'events',
+              sortDirection: 'desc',
+              sortField: 'details.priority',
+              title: 'Events by priority',
+              where: {
+                location: {
+                  equals: 'Nested field demo',
+                },
+              },
+            },
+            widgetSlug: 'collection-query',
+            width: 'medium',
+          },
         ]
 
         baseWidgets.push(...collectionQueryWidgets)

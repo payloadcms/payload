@@ -94,6 +94,23 @@ export const viTranslations: DefaultTranslationsObject = {
       'Trên bảng điều khiển của bạn không có tiện ích nào. Bạn có thể thêm chúng từ menu "Bảng điều khiển" nằm ở thanh trên cùng.',
     resetLayout: 'Đặt lại Bố cục',
     searchWidgets: 'Tìm kiếm các widget...',
+    widgetCollectionRequired: 'Collection là bắt buộc.',
+    widgetConfigurationError: 'Lỗi cấu hình Widget',
+    widgetInvalidCollection: 'Collection "{{collection}}" không tồn tại.',
+    widgetInvalidFilterField:
+      'Trường lọc "{{field}}" không tồn tại trong Collection "{{collection}}".',
+    widgetInvalidSortField:
+      'Trường sắp xếp "{{field}}" không tồn tại trong Collection "{{collection}}".',
+    widgetLimitLabel: 'Giới hạn',
+    widgetNonSortableSortField:
+      'Trường sắp xếp "{{field}}" không thể sắp xếp được trên Collection "{{collection}}".',
+    widgetQueryError: 'Không thể tải tài liệu cho tiện ích này.',
+    widgetSelectCollectionFirst: 'Chọn một Collection trước khi chọn sắp xếp',
+    widgetSelectSortField: 'Chọn một trường để sắp xếp theo',
+    widgetSortDirectionLabel: 'Hướng sắp xếp',
+    widgetSortFieldLabel: 'Sắp xếp Field',
+    widgetTitleFallback: 'Truy vấn Collection',
+    widgetTitleLabel: 'Tiêu đề',
   },
   error: {
     accountAlreadyActivated: 'Lỗi - Tài khoản này đã được kích hoạt.',

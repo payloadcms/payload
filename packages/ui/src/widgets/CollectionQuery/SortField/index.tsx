@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject, TextFieldClientComponent } from 'payload'
+import type { Field, OptionObject, TextFieldClientComponent } from 'payload'
 
 import React, { useCallback, useMemo } from 'react'
 
@@ -9,7 +9,9 @@ import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../../utilities/reduceFieldsToOptions.js'
-import { isCollectionQuerySortableField } from '../shared.js'
+import { getCollectionFieldPaths } from '../getCollectionFieldPaths.js'
+
+const baseFieldValues = new Set(['createdAt', 'id', 'updatedAt'])
 
 export const CollectionQuerySortField: TextFieldClientComponent = ({
   field,
@@ -28,7 +30,7 @@ export const CollectionQuerySortField: TextFieldClientComponent = ({
   const relatedCollection = relatedCollectionField.value as string | undefined
   const { config } = useConfig()
   const { permissions } = useAuth()
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const collectionConfig = useMemo(() => {
     if (!relatedCollection) {
@@ -43,12 +45,20 @@ export const CollectionQuerySortField: TextFieldClientComponent = ({
       return []
     }
 
+    // Reuse the same sortable-path rules as the server widget so the dropdown only offers fields
+    // the API can actually sort by (e.g. excluding array sub-fields).
+    const { sortableFieldPaths } = getCollectionFieldPaths(
+      collectionConfig.fields as unknown as Field[],
+    )
+
     const fieldOptions = reduceFieldsToOptions({
       fieldPermissions: permissions?.collections?.[relatedCollection]?.fields ?? true,
       fields: collectionConfig.fields,
       i18n,
     })
-      .filter(({ field }) => isCollectionQuerySortableField(field))
+      .filter(
+        ({ fieldPath }) => sortableFieldPaths.has(fieldPath) && !baseFieldValues.has(fieldPath),
+      )
       .map(({ fieldPath, plainTextLabel }) => ({
         label: plainTextLabel ?? fieldPath,
         value: fieldPath,
@@ -56,11 +66,11 @@ export const CollectionQuerySortField: TextFieldClientComponent = ({
 
     return [
       { label: 'ID', value: 'id' },
-      { label: 'Created At', value: 'createdAt' },
-      { label: 'Updated At', value: 'updatedAt' },
+      { label: t('general:createdAt'), value: 'createdAt' },
+      { label: t('general:updatedAt'), value: 'updatedAt' },
       ...fieldOptions,
     ]
-  }, [collectionConfig, i18n, permissions, relatedCollection])
+  }, [collectionConfig, i18n, permissions, relatedCollection, t])
 
   const onChange = useCallback(
     (selectedOption: OptionObject | OptionObject[]) => {
@@ -88,7 +98,9 @@ export const CollectionQuerySortField: TextFieldClientComponent = ({
       options={options}
       path={path}
       placeholder={
-        relatedCollection ? 'Select a field to sort by' : 'Select a collection before choosing sort'
+        relatedCollection
+          ? t('dashboard:widgetSelectSortField')
+          : t('dashboard:widgetSelectCollectionFirst')
       }
       readOnly={readOnly || !relatedCollection}
       required={required}

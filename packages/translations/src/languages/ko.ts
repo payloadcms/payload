@@ -93,6 +93,22 @@ export const koTranslations: DefaultTranslationsObject = {
     noItems: '대시보드에 위젯이 없습니다. 상단 바에 위치한 "대시보드" 메뉴에서 추가할 수 있습니다.',
     resetLayout: '레이아웃 재설정',
     searchWidgets: '위젯 검색...',
+    widgetCollectionRequired: 'Collection이 필요합니다.',
+    widgetConfigurationError: '위젯 구성 오류',
+    widgetInvalidCollection: 'Collection "{{collection}}"이(가) 존재하지 않습니다.',
+    widgetInvalidFilterField:
+      '컬렉션 "{{collection}}"에 필터 필드 "{{field}}"가 존재하지 않습니다.',
+    widgetInvalidSortField: '정렬 필드 "{{field}}"는 컬렉션 "{{collection}}"에 존재하지 않습니다.',
+    widgetLimitLabel: '제한',
+    widgetNonSortableSortField:
+      '정렬 필드 "{{field}}"는 컬렉션 "{{collection}}"에서 정렬할 수 없습니다.',
+    widgetQueryError: '이 위젯에 대한 문서를 불러올 수 없습니다.',
+    widgetSelectCollectionFirst: '정렬을 선택하기 전에 Collection을 선택하십시오.',
+    widgetSelectSortField: '정렬할 Field를 선택하십시오.',
+    widgetSortDirectionLabel: '정렬 방향',
+    widgetSortFieldLabel: '정렬 필드',
+    widgetTitleFallback: '컬렉션 쿼리',
+    widgetTitleLabel: '제목',
   },
   error: {
     accountAlreadyActivated: '이 계정은 이미 활성화되었습니다.',
