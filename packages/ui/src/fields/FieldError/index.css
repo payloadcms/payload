@@ -4,12 +4,12 @@
     left: auto;
     max-width: 75%;
     right: 0;
-    color: var(--color-text-ondanger);
-    background-color: var(--color-bg-danger);
+    color: var(--field-color-error-text);
+    background-color: var(--field-color-error-bg);
 
     &::after {
-      border-top-color: var(--color-bg-danger);
-      border-bottom-color: var(--color-bg-danger);
+      border-top-color: var(--field-color-error-bg);
+      border-bottom-color: var(--field-color-error-bg);
     }
   }
 }

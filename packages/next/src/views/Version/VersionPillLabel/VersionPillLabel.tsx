@@ -11,12 +11,17 @@ import { getVersionLabel } from './getVersionLabel.js'
 
 const baseClass = 'version-pill-label'
 
-const renderPill = (label: React.ReactNode, pillStyle: Parameters<typeof Pill>[0]['pillStyle']) => {
-  return (
-    <Pill pillStyle={pillStyle} size="small">
-      {label}
-    </Pill>
-  )
+const statusModifierMap: Record<string, string> = {
+  currentDraft: 'draft',
+  currentlyPublished: 'published',
+  draft: 'draft',
+  previouslyPublished: 'previously-published',
+  published: 'published',
+}
+
+const renderStatus = (label: React.ReactNode, name: string) => {
+  const modifier = statusModifierMap[name] || 'draft'
+  return <span className={`status-cell status-cell--${modifier}`}>{label}</span>
 }
 
 export const VersionPillLabel: React.FC<{
@@ -65,7 +70,7 @@ export const VersionPillLabel: React.FC<{
   const { i18n, t } = useTranslation()
   const { code: currentLocale } = useLocale()
 
-  const { label, pillStyle } = getVersionLabel({
+  const { name, label } = getVersionLabel({
     currentLocale,
     currentlyPublishedVersion,
     latestDraftVersion,
@@ -99,7 +104,7 @@ export const VersionPillLabel: React.FC<{
       {labelFirst ? (
         <React.Fragment>
           {labelStyle === 'pill' ? (
-            renderPill(labelText, pillStyle)
+            renderStatus(labelText, name)
           ) : (
             <span className={`${baseClass}-text`}>{labelText}</span>
           )}
@@ -109,7 +114,7 @@ export const VersionPillLabel: React.FC<{
         <React.Fragment>
           {showDate && <span className={`${baseClass}-date`}>{formattedDate}</span>}
           {labelStyle === 'pill' ? (
-            renderPill(labelText, pillStyle)
+            renderStatus(labelText, name)
           ) : (
             <span className={`${baseClass}-text`}>{labelText}</span>
           )}

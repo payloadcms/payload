@@ -7,10 +7,10 @@
     .rs__control {
       position: relative;
       width: 100%;
-      min-height: var(--spacer-5);
-      background: var(--color-bg-secondary);
-      border: var(--stroke-width-small) solid transparent;
-      border-radius: var(--radius-medium);
+      min-height: var(--field-min-height);
+      background: var(--field-color-bg);
+      border: var(--stroke-width-small) solid var(--field-color-border);
+      border-radius: var(--field-border-radius);
       color: var(--color-text);
       font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
@@ -23,12 +23,12 @@
       transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
       height: auto;
       padding-block: calc(var(--spacer-1) + 1px);
-      padding-inline: var(--spacer-2) var(--spacer-5);
+      padding-inline: var(--field-padding-inline) var(--spacer-5);
       flex-wrap: wrap;
       gap: var(--spacer-1);
 
       &.rs__control--is-focused {
-        border-color: var(--accessibility-focus-color);
+        border-color: var(--field-color-border-focus);
       }
 
       &:has(.clear-indicator) {
@@ -36,7 +36,7 @@
       }
 
       &:hover:not(:focus-within) {
-        border-color: var(--color-border);
+        border-color: var(--field-color-border-hover);
       }
     }
 
@@ -61,7 +61,7 @@
       position: absolute;
       right: var(--spacer-1);
       top: -1px; /* Adjust for border */
-      min-height: var(--spacer-5);
+      min-height: var(--field-min-height);
       display: flex;
     }
 
@@ -121,21 +121,21 @@
     }
 
     &.rs--is-disabled .rs__control {
-      background: var(--color-bg);
-      border-color: var(--color-border);
-      color: var(--color-text-disabled);
+      background: var(--field-color-bg-disabled);
+      border-color: var(--field-color-border-disabled);
+      color: var(--field-color-text-disabled);
     }
 
     &.react-select--error .rs__control:not(.rs__control--is-focused) {
       &:hover {
-        border-color: var(--color-border-danger-strong);
+        border-color: var(--field-color-border-error);
       }
     }
   }
 
   .react-select--error {
     div.rs__control {
-      border: var(--stroke-width-small) solid var(--color-border-danger-strong);
+      border: var(--stroke-width-small) solid var(--field-color-border-error);
 
       & > div.rs__indicator > button.dropdown-indicator[type='button'] {
         border: none;
@@ -144,12 +144,12 @@
   }
 
   .react-select--error .rs__control:hover {
-    border-color: var(--color-border-danger-strong);
+    border-color: var(--field-color-border-error);
   }
 
   .react-select--error:focus-within {
     div.rs__control {
-      border-color: var(--accessibility-focus-color);
+      border-color: var(--field-color-border-focus);
     }
   }
 }
