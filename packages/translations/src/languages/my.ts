@@ -242,6 +242,7 @@ export const myTranslations: DefaultTranslationsObject = {
     cancel: 'မလုပ်တော့ပါ။',
     changesNotSaved:
       'သင်၏ပြောင်းလဲမှုများကို မသိမ်းဆည်းရသေးပါ။ ယခု စာမျက်နှာက ထွက်လိုက်ပါက သင်၏ပြောင်းလဲမှုများ အကုန် ဆုံးရှုံးသွားပါမည်။ အကုန်နော်။',
+    checked: 'စစ်ဆေးပြီး',
     clear: 'Jelas',
     clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
     close: 'ပိတ်',
@@ -284,6 +285,7 @@ export const myTranslations: DefaultTranslationsObject = {
     decrement: 'လျော့ချသည်',
     delete: 'ဖျက်မည်။',
     deleted: 'ဖျက်ထား',
+    deletedAgo: '{{distance}} ကြာပြီးသည့်အချိန်တွင် ဖျက်သိမ်းပြီးပါပြီ။',
     deletedAt: 'Dihapus Pada',
     deletedCountSuccessfully: '{{count}} {{label}} ကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
     deletedSuccessfully: 'အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ။',
@@ -459,6 +461,7 @@ export const myTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} သို့ ဖယ်ရှားလိုက်သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
+    unchecked: 'မစစ်ဆေးရသေးပါ',
     unlock: 'ဖွင့်',
     unsavedChanges:
       'Anda mempunyai perubahan yang belum disimpan. Simpan atau buang sebelum meneruskan.',
@@ -466,6 +469,7 @@ export const myTranslations: DefaultTranslationsObject = {
       'သင့်တွင် မသိမ်းဆည်းရသေးသော ပြောင်းလဲမှုများ ရှိနေပါသည်။ ပုံတူပွားမှာ သေချာပြီလား။',
     untitled: 'ခေါင်းစဥ်မဲ့',
     upcomingEvents: 'လာမည့် အစီအစဉ်များ',
+    updatedAgo: 'နောက်ဆုံး အပ်ဒိတ်လုပ်ခဲ့သည် {{distance}} ကလောက် ဖြစ်ပါသည်။',
     updatedAt: 'ပြင်ဆင်ခဲ့သည့်အချိန်',
     updatedCountSuccessfully: '{{count}} {{label}} ကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ခဲ့သည်။',
     updatedLabelSuccessfully: 'Berjaya mengemas kini {{label}}.',

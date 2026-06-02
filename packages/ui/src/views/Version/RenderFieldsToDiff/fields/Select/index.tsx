@@ -12,12 +12,12 @@ import {
   unescapeDiffHTML,
 } from '../../../../../elements/HTMLDiff/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'select-diff'
 
 const getOptionsToRender = (
-  value: string,
+  value: string | string[],
   options: SelectField['options'],
   hasMany: boolean,
 ): Option | Option[] => {
@@ -65,24 +65,19 @@ const getTranslatedOptions = (options: Option | Option[], i18n: I18nClient): str
 
 export const Select: SelectFieldDiffClientComponent = ({
   comparisonValue: valueFrom,
-  diffMethod,
   field,
   locale,
   nestingLevel,
   versionValue: valueTo,
 }) => {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const options = 'options' in field && field.options
 
   const renderedValueFrom =
     typeof valueFrom !== 'undefined'
       ? getTranslatedOptions(
-          getOptionsToRender(
-            typeof valueFrom === 'string' ? valueFrom : JSON.stringify(valueFrom),
-            options,
-            field.hasMany,
-          ),
+          getOptionsToRender(valueFrom as string | string[], options, field.hasMany),
           i18n,
         )
       : ''
@@ -90,33 +85,31 @@ export const Select: SelectFieldDiffClientComponent = ({
   const renderedValueTo =
     typeof valueTo !== 'undefined'
       ? getTranslatedOptions(
-          getOptionsToRender(
-            typeof valueTo === 'string' ? valueTo : JSON.stringify(valueTo),
-            options,
-            field.hasMany,
-          ),
+          getOptionsToRender(valueTo as string | string[], options, field.hasMany),
           i18n,
         )
       : ''
 
+  const NoValue = <div className="diff-no-value">{t('general:noValue')}</div>
+
   const { From, To } = getHTMLDiffComponents({
-    fromHTML: '<p>' + escapeDiffHTML(renderedValueFrom) + '</p>',
+    fromHTML: renderedValueFrom ? '<p>' + escapeDiffHTML(renderedValueFrom) + '</p>' : '<p></p>',
     postProcess: unescapeDiffHTML,
-    toHTML: '<p>' + escapeDiffHTML(renderedValueTo) + '</p>',
+    toHTML: renderedValueTo ? '<p>' + escapeDiffHTML(renderedValueTo) + '</p>' : '<p></p>',
     tokenizeByCharacter: true,
   })
 
   return (
     <FieldDiffContainer
       className={baseClass}
-      From={From}
+      From={renderedValueFrom ? From : NoValue}
       i18n={i18n}
       label={{
         label: field.label,
         locale,
       }}
       nestingLevel={nestingLevel}
-      To={To}
+      To={renderedValueTo ? To : NoValue}
     />
   )
 }

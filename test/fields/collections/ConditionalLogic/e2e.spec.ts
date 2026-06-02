@@ -266,6 +266,25 @@ describe('Conditional Logic', () => {
     await expect(fieldWithOperationCondition).toBeHidden()
   })
 
+  test('should hide entire tabs field UI when admin.condition is false', async () => {
+    await page.goto(url.create)
+
+    const tabsField = page.locator('.tabs-field').filter({
+      has: page.locator('button:has-text("Tab With Condition 1")'),
+    })
+
+    await expect(tabsField).toBeHidden()
+
+    const enableTabsToggle = page.locator('label[for=field-enableTabs]')
+    await enableTabsToggle.click()
+
+    await expect(tabsField).toBeVisible()
+    await expect(tabsField.locator('button:has-text("Tab With Condition 1")')).toBeVisible()
+
+    await enableTabsToggle.click()
+    await expect(tabsField).toBeHidden()
+  })
+
   test('should toggle conditional field when radio changes inside a block', async () => {
     await page.goto(url.create)
 

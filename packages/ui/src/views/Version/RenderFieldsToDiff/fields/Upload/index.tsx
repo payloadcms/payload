@@ -10,8 +10,9 @@ import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import React from 'react'
 
 import { FieldDiffContainer } from '../../../../../elements/FieldDiffContainer/index.js'
-import './index.scss'
 import { File } from '../../../../../graphics/File/index.js'
+import { DiffCollapser } from '../../DiffCollapser/index.js'
+import './index.css'
 
 const baseClass = 'upload-diff'
 
@@ -30,7 +31,8 @@ export const Upload: UploadFieldDiffServerComponent = (args) => {
     req,
     versionValue: valueTo,
   } = args
-  const hasMany = 'hasMany' in field && field.hasMany && Array.isArray(valueTo)
+  const hasMany =
+    'hasMany' in field && field.hasMany && (Array.isArray(valueTo) || Array.isArray(valueFrom))
   const polymorphic = Array.isArray(field.relationTo)
 
   if (hasMany) {
@@ -74,7 +76,8 @@ export const HasManyUploadDiff: React.FC<{
 }> = (args) => {
   const { field, i18n, locale, nestingLevel, polymorphic, req, valueFrom, valueTo } = args
 
-  const showCollectionSlug = Array.isArray(field.relationTo)
+  const hasFrom = valueFrom && valueFrom.length > 0
+  const hasTo = valueTo && valueTo.length > 0
 
   const getUploadDocKey = (uploadDoc: UploadDoc): number | string => {
     if (typeof uploadDoc === 'object' && 'relationTo' in uploadDoc) {
@@ -86,7 +89,9 @@ export const HasManyUploadDiff: React.FC<{
     return typeof uploadDoc === 'object' ? uploadDoc.id : uploadDoc
   }
 
-  const FromComponents = valueFrom
+  const showCollectionSlug = Array.isArray(field.relationTo)
+
+  const FromComponents = hasFrom
     ? valueFrom.map((uploadDoc) => (
         <UploadDocumentDiff
           i18n={i18n}
@@ -99,7 +104,7 @@ export const HasManyUploadDiff: React.FC<{
         />
       ))
     : null
-  const ToComponents = valueTo
+  const ToComponents = hasTo
     ? valueTo.map((uploadDoc) => (
         <UploadDocumentDiff
           i18n={i18n}
@@ -128,18 +133,55 @@ export const HasManyUploadDiff: React.FC<{
     </div>
   )
 
+  const effectiveNesting = nestingLevel || 0
+
+  const fromLength = valueFrom?.length || 0
+  const toLength = valueTo?.length || 0
+  const maxLength = Math.max(fromLength, toLength)
+  let uploadChangeCount = 0
+
+  for (let i = 0; i < maxLength; i++) {
+    const fromKey = i < fromLength ? getUploadDocKey(valueFrom[i]) : undefined
+    const toKey = i < toLength ? getUploadDocKey(valueTo[i]) : undefined
+
+    if (fromKey !== toKey) {
+      uploadChangeCount++
+    }
+  }
+
+  const uploadGutterOffset = (effectiveNesting + 1) * 6.5
+
   return (
-    <FieldDiffContainer
-      className={`${baseClass}-container ${baseClass}-container--hasMany`}
-      From={From}
-      i18n={i18n}
-      label={{
-        label: field.label,
-        locale,
-      }}
-      nestingLevel={nestingLevel}
-      To={To}
-    />
+    <div className={`${baseClass}-container ${baseClass}-container--hasMany`}>
+      <DiffCollapser
+        changeCountOverride={uploadChangeCount}
+        fields={[]}
+        Label={
+          <span>
+            {locale && <span className="field-diff__locale-label">{locale}</span>}
+            {typeof field.label !== 'function' &&
+              field.label !== false &&
+              getTranslation(field.label, i18n)}
+          </span>
+        }
+        locales={undefined}
+        parentIsLocalized={false}
+        valueFrom={valueFrom}
+        valueTo={valueTo}
+      >
+        <div
+          className="field-diff-content"
+          style={
+            {
+              '--field-diff-columns': `calc(50% - ${uploadGutterOffset}px) calc(50% + ${uploadGutterOffset}px)`,
+            } as React.CSSProperties
+          }
+        >
+          {From}
+          {To}
+        </div>
+      </DiffCollapser>
+    </div>
   )
 }
 
@@ -163,7 +205,6 @@ export const SingleUploadDiff: React.FC<{
       polymorphic={polymorphic}
       relationTo={field.relationTo}
       req={req}
-      showCollectionSlug={showCollectionSlug}
       uploadDoc={valueFrom}
     />
   ) : null
@@ -173,7 +214,6 @@ export const SingleUploadDiff: React.FC<{
       polymorphic={polymorphic}
       relationTo={field.relationTo}
       req={req}
-      showCollectionSlug={showCollectionSlug}
       uploadDoc={valueTo}
     />
   ) : null
@@ -228,7 +268,7 @@ const UploadDocumentDiff = (args: {
 
   let pillLabel: null | string = null
 
-  if (showCollectionSlug) {
+  {
     let collectionSlug: string
     if (polymorphic && typeof uploadDoc === 'object' && 'relationTo' in uploadDoc) {
       collectionSlug = uploadDoc.relationTo
@@ -254,12 +294,19 @@ const UploadDocumentDiff = (args: {
   const alt =
     (value && typeof value === 'object' && (value as { alt?: string }).alt) || filename || ''
 
+  let resolvedRelationTo: string
+  if (polymorphic && typeof uploadDoc === 'object' && 'relationTo' in uploadDoc) {
+    resolvedRelationTo = uploadDoc.relationTo
+  } else {
+    resolvedRelationTo = typeof relationTo === 'string' ? relationTo : relationTo[0]
+  }
+
   return (
     <div
       className={`${baseClass}`}
       data-enable-match="true"
       data-id={id}
-      data-relation-to={relationTo}
+      data-relation-to={resolvedRelationTo}
     >
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__thumbnail`}>
@@ -271,7 +318,7 @@ const UploadDocumentDiff = (args: {
           </div>
         )}
         <div className={`${baseClass}__info`} data-enable-match="false">
-          <strong>{filename}</strong>
+          {filename}
         </div>
       </div>
     </div>

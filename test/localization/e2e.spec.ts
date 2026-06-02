@@ -951,7 +951,7 @@ describe('Localization', () => {
         await page.goto(urlAllFieldsLocalized.versions(docID))
 
         const firstRow = page.locator('tbody tr').first()
-        await expect(firstRow.locator('.pill__label span')).toHaveText('Currently Published')
+        await expect(firstRow.locator('.status-cell span')).toHaveText('Currently Published')
       })
 
       test('should only show published status when viewing the published locale', async () => {
@@ -978,7 +978,7 @@ describe('Localization', () => {
         await changeLocale(page, defaultLocale)
 
         const firstRow = page.locator('tbody tr').first()
-        await expect(firstRow.locator('.pill__label span')).toHaveText('Current Draft')
+        await expect(firstRow.locator('.status-cell span')).toHaveText('Current Draft')
       })
     })
   })

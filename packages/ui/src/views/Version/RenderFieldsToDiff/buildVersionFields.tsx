@@ -395,7 +395,7 @@ const buildVersionField = ({
           fieldsPermissions: subFieldsPermissions,
           i18n,
           modifiedOnly,
-          nestingLevel: nestingLevel + 1,
+          nestingLevel: nestingLevel + 2,
           parentIndexPath: 'name' in field ? '' : indexPath,
           parentIsLocalized: parentIsLocalized || field.localized,
           parentPath: ('name' in field ? path : parentPath) + '.' + i,
@@ -464,7 +464,7 @@ const buildVersionField = ({
       if (toRow.blockType === fromRow.blockType) {
         fields = toBlock.fields
       } else {
-        const fromBlockSlugToMatch: string = toRow?.blockType ?? fromRow?.blockType
+        const fromBlockSlugToMatch: string = fromRow?.blockType ?? toRow?.blockType
 
         const fromBlock =
           req.payload.blocks[fromBlockSlugToMatch] ??
@@ -503,7 +503,7 @@ const buildVersionField = ({
         fieldsPermissions: blockFieldsPermissions,
         i18n,
         modifiedOnly,
-        nestingLevel: nestingLevel + 1,
+        nestingLevel: nestingLevel + 2,
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: ('name' in field ? path : parentPath) + '.' + i,

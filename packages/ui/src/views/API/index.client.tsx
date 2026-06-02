@@ -4,11 +4,12 @@ import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
 import * as React from 'react'
 import { toast } from 'sonner'
 
-import { CopyToClipboard } from '../../elements/CopyToClipboard/index.js'
-import { Gutter } from '../../elements/Gutter/index.js'
+import { Button } from '../../elements/Button/index.js'
 import { CheckboxField } from '../../fields/Checkbox/index.js'
 import { NumberField } from '../../fields/Number/index.js'
+import { TextInput } from '../../fields/Text/Input.js'
 import { Form } from '../../forms/Form/index.js'
+import { ExternalLinkIcon } from '../../icons/ExternalLink/index.js'
 import { MinimizeMaximizeIcon } from '../../icons/MinimizeMaximize/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -18,7 +19,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { SetDocumentStepNav } from '../Edit/SetDocumentStepNav/index.js'
 import { LocaleSelector } from './LocaleSelector/index.js'
 import { RenderJSON } from './RenderJSON/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'query-inspector'
 
@@ -118,9 +119,8 @@ export const APIViewClient: React.FC = () => {
   }, [i18n.language, fetchURL, authenticated])
 
   return (
-    <Gutter
+    <div
       className={[baseClass, fullscreen && `${baseClass}--fullscreen`].filter(Boolean).join(' ')}
-      right={false}
     >
       <SetDocumentStepNav
         collectionSlug={collectionSlug}
@@ -132,92 +132,113 @@ export const APIViewClient: React.FC = () => {
         useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
         view="API"
       />
-      <div className={`${baseClass}__configuration`}>
-        <div className={`${baseClass}__api-url`}>
-          <span className={`${baseClass}__label`}>
-            API URL <CopyToClipboard value={fetchURL} />
-          </span>
-          <a href={fetchURL} rel="noopener noreferrer" target="_blank">
-            {fetchURL}
-          </a>
-        </div>
-        <Form
-          initialState={{
-            authenticated: {
-              initialValue: authenticated || false,
-              valid: true,
-              value: authenticated || false,
-            },
-            depth: {
-              initialValue: Number(depth || 0),
-              valid: true,
-              value: Number(depth || 0),
-            },
-            draft: {
-              initialValue: draft || false,
-              valid: true,
-              value: draft || false,
-            },
-            locale: {
-              initialValue: locale,
-              valid: true,
-              value: locale,
-            },
-          }}
-        >
-          <div className={`${baseClass}__form-fields`}>
-            <div className={`${baseClass}__filter-query-checkboxes`}>
-              {draftsEnabled && (
-                <CheckboxField
-                  field={{
-                    name: 'draft',
-                    label: t('version:draft'),
-                  }}
-                  onChange={() => setDraft(!draft)}
-                  path="draft"
-                />
-              )}
-              <CheckboxField
-                field={{
-                  name: 'authenticated',
-                  label: t('authentication:authenticated'),
-                }}
-                onChange={() => setAuthenticated(!authenticated)}
-                path="authenticated"
-              />
-            </div>
-            {localeOptions && <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />}
-            <NumberField
-              field={{
-                name: 'depth',
-                admin: {
-                  step: 1,
-                },
-                label: t('general:depth'),
-                max: 10,
-                min: 0,
-              }}
-              onChange={(value) => setDepth(value?.toString())}
-              path="depth"
+      <div className={`${baseClass}__content`}>
+        <div className={`${baseClass}__configuration`}>
+          <div className={`${baseClass}__api-url`}>
+            <span className={`${baseClass}__label`}>API URL</span>
+            <Button
+              aria-label={t('general:openInNewWindow')}
+              buttonStyle="ghost"
+              className={`${baseClass}__api-url-open-button`}
+              el="anchor"
+              icon={<ExternalLinkIcon size={16} />}
+              margin={false}
+              newTab
+              url={fetchURL}
             />
           </div>
-        </Form>
-      </div>
-      <div className={`${baseClass}__results-wrapper`}>
-        <div className={`${baseClass}__toggle-fullscreen-button-container`}>
-          <button
-            aria-label="toggle fullscreen"
-            className={`${baseClass}__toggle-fullscreen-button`}
-            onClick={() => setFullscreen(!fullscreen)}
-            type="button"
+          <div className={`${baseClass}__api-url-field`}>
+            <TextInput
+              className={`${baseClass}__api-url-input`}
+              htmlAttributes={{
+                'aria-label': 'API URL',
+                readOnly: true,
+              }}
+              path="api-url"
+              readOnly={false}
+              value={fetchURL}
+            />
+          </div>
+          <Form
+            initialState={{
+              authenticated: {
+                initialValue: authenticated || false,
+                valid: true,
+                value: authenticated || false,
+              },
+              depth: {
+                initialValue: Number(depth || 0),
+                valid: true,
+                value: Number(depth || 0),
+              },
+              draft: {
+                initialValue: draft || false,
+                valid: true,
+                value: draft || false,
+              },
+              locale: {
+                initialValue: locale,
+                valid: true,
+                value: locale,
+              },
+            }}
           >
-            <MinimizeMaximizeIcon isMinimized={!fullscreen} />
-          </button>
+            <div className={`${baseClass}__form-fields`}>
+              <div className={`${baseClass}__filter-query-checkboxes`}>
+                {draftsEnabled && (
+                  <CheckboxField
+                    field={{
+                      name: 'draft',
+                      label: t('version:draft'),
+                    }}
+                    onChange={() => setDraft(!draft)}
+                    path="draft"
+                  />
+                )}
+                <CheckboxField
+                  field={{
+                    name: 'authenticated',
+                    label: t('authentication:authenticated'),
+                  }}
+                  onChange={() => setAuthenticated(!authenticated)}
+                  path="authenticated"
+                />
+              </div>
+              {localeOptions && (
+                <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />
+              )}
+              <NumberField
+                field={{
+                  name: 'depth',
+                  admin: {
+                    step: 1,
+                  },
+                  label: t('general:depth'),
+                  max: 10,
+                  min: 0,
+                }}
+                onChange={(value) => setDepth(value?.toString())}
+                path="depth"
+              />
+            </div>
+          </Form>
         </div>
-        <div className={`${baseClass}__results`}>
-          <RenderJSON object={data} />
+        <div className={`${baseClass}__results-wrapper`}>
+          <div className={`${baseClass}__toggle-fullscreen-button-container`}>
+            <button
+              aria-label="toggle fullscreen"
+              className={`${baseClass}__toggle-fullscreen-button`}
+              onClick={() => setFullscreen(!fullscreen)}
+              type="button"
+            >
+              <MinimizeMaximizeIcon isMinimized={!fullscreen} />
+            </button>
+          </div>
+          <div className={`${baseClass}__results`}>
+            <RenderJSON object={data} />
+          </div>
         </div>
       </div>
-    </Gutter>
+    </div>
   )
 }

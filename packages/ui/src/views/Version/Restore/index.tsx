@@ -15,7 +15,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 import { requests } from '../../../utilities/api.js'
 
 const baseClass = 'restore-version'
@@ -118,11 +118,12 @@ export const Restore: React.FC<Props> = ({
     <Fragment>
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
         <Button
-          buttonStyle="primary"
+          buttonStyle="ghost"
           className={[canRestoreAsDraft && `${baseClass}__restore-as-draft-button`]
             .filter(Boolean)
             .join(' ')}
           onClick={() => toggleModal(modalSlug)}
+          popupIconSize={16}
           size="medium"
           SubMenuPopupContent={
             canRestoreAsDraft
@@ -136,7 +137,7 @@ export const Restore: React.FC<Props> = ({
               : null
           }
         >
-          {t('version:restoreThisVersion')}
+          {t('general:restore')}
         </Button>
       </div>
       <ConfirmationModal

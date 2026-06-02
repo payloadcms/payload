@@ -8,7 +8,7 @@ import { ResetPreferences } from '../ResetPreferences/index.js'
 import { ToggleHighContrast } from '../ToggleHighContrast/index.js'
 import { ToggleTheme } from '../ToggleTheme/index.js'
 import { LanguageSelector } from './LanguageSelector.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'payload-settings'
 

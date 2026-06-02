@@ -241,6 +241,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     cancel: 'Отмена',
     changesNotSaved:
       'Ваши изменения не были сохранены. Если вы сейчас уйдете, то потеряете свои изменения.',
+    checked: 'Проверено',
     clear: 'Четкий',
     clearAll: 'Очистить все',
     close: 'Закрыть',
@@ -283,6 +284,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     decrement: 'Уменьшение',
     delete: 'Удалить',
     deleted: 'Удалено',
+    deletedAgo: 'Удалено {{distance}} назад',
     deletedAt: 'Удалено В',
     deletedCountSuccessfully: 'Удалено {{count}} {{label}} успешно.',
     deletedSuccessfully: 'Удален успешно.',
@@ -455,6 +457,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} перемещено в корзину.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
+    unchecked: 'Не отмечено',
     unlock: 'Разблокировать',
     unsavedChanges:
       'У вас есть несохраненные изменения. Сохраните или отмените их перед продолжением.',
@@ -462,6 +465,7 @@ export const ruTranslations: DefaultTranslationsObject = {
       'У вас есть несохраненные изменения. Вы хотите продолжить дублирование?',
     untitled: 'Без названия',
     upcomingEvents: 'Предстоящие события',
+    updatedAgo: 'Обновлено {{distance}} назад',
     updatedAt: 'Дата правки',
     updatedCountSuccessfully: 'Обновлено {{count}} {{label}} успешно.',
     updatedLabelSuccessfully: 'Успешно обновлено {{label}}.',

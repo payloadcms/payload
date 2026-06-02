@@ -29,10 +29,11 @@ export const Locked: React.FC<{
       tabIndex={0}
     >
       <Tooltip
-        alignCaret="center"
+        alignCaret="left"
         className={`${baseClass}__tooltip`}
-        position="top"
+        position="bottom"
         show={hovered}
+        staticPositioning
       >{`${userToUse} ${t('general:isEditing')}`}</Tooltip>
       <LockIcon />
     </div>

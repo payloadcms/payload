@@ -2,7 +2,7 @@
 const baseClass = 'render-field-diffs'
 import type { VersionField } from 'payload'
 
-import './index.scss'
+import './index.css'
 
 import React, { Fragment, useEffect } from 'react'
 

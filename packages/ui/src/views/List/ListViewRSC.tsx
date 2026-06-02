@@ -79,6 +79,7 @@ export const ListViewRSC = async (args: ListViewRSCArgs): Promise<React.ReactNod
 
   let hierarchyData: HierarchyViewData | undefined
   let HierarchyIcon: React.ReactNode | undefined
+  let HierarchySmallIcon: React.ReactNode | undefined
   let hierarchyParentId: null | number | string = null
   let baseFilterConstraint: null | undefined | Where = null
 
@@ -128,6 +129,16 @@ export const ListViewRSC = async (args: ListViewRSCArgs): Promise<React.ReactNod
       importMap: payload.importMap,
       key: `hierarchy-icon-${collectionSlug}`,
     })
+
+    const smallIconComponent = hierarchyConfig?.admin?.components?.SmallIcon
+    HierarchySmallIcon =
+      smallIconComponent === hierarchyConfig?.admin?.components?.Icon
+        ? HierarchyIcon
+        : RenderServerComponent({
+            Component: smallIconComponent,
+            importMap: payload.importMap,
+            key: `hierarchy-small-icon-${collectionSlug}`,
+          })
   }
 
   // ---- Render the list view component ----
@@ -137,6 +148,7 @@ export const ListViewRSC = async (args: ListViewRSCArgs): Promise<React.ReactNod
       baseFilter: baseFilterConstraint,
       hierarchyData,
       HierarchyIcon,
+      HierarchySmallIcon,
     },
     Component: ComponentOverride ?? View,
     Fallback: isHierarchyView ? HierarchyListView : DefaultListView,

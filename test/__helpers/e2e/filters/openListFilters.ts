@@ -24,16 +24,27 @@ export const openListFilters = async (
 ): Promise<{
   filterContainer: Locator
 }> => {
-  await expect(page.locator(togglerSelector)).toBeVisible()
-  const filterContainer = page.locator(filterContainerSelector).first()
-  const expandedFilterContainer = page.locator(`${filterContainerSelector}.rah-static--height-auto`)
+  const toggler = page.locator(togglerSelector).first()
+  await expect(toggler).toBeVisible()
 
+  // Drive the drawer open off the toggler's `aria-expanded` state (the source of truth)
+  // rather than a point-in-time visibility check of the container. The container flickers
+  // visible mid-animation, and a preceding re-render (e.g. a group-by/sort change) can drop
+  // the open click before it updates React state. Retrying the toggle until `aria-expanded`
+  // reports open makes this idempotent and resilient to that race.
+  //
+  // The `toPass` outer wrapper also handles the dev/SSR case (notably the TanStack Start
+  // tests) where the very first click can land on the SSR'd button before React has finished
+  // hydrating and the `onClick` handler hasn't attached yet.
   await expect(async () => {
-    if (!(await expandedFilterContainer.isVisible())) {
-      await page.locator(togglerSelector).first().click()
+    if ((await toggler.getAttribute('aria-expanded')) !== 'true') {
+      await toggler.click()
     }
-    await expect(expandedFilterContainer).toBeVisible({ timeout: 1500 })
+
+    await expect(toggler).toHaveAttribute('aria-expanded', 'true', { timeout: 1500 })
   }).toPass({ timeout: 18000 })
 
-  return { filterContainer }
+  await expect(page.locator(`${filterContainerSelector}.rah-static--height-auto`)).toBeVisible()
+
+  return { filterContainer: page.locator(filterContainerSelector).first() }
 }

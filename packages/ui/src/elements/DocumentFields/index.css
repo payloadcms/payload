@@ -58,7 +58,7 @@
   }
 
   .document-fields__edit {
-    padding-top: var(--spacer-5);
+    padding-top: var(--spacer-4);
     padding-bottom: var(--spacing-view-bottom);
     flex-grow: 1;
   }
@@ -107,6 +107,7 @@
   .document-fields--force-sidebar-wrap {
     display: block;
     isolation: isolate;
+    --main-border: none; /* Reset the sidebar divider — the live preview window provides its own border-left */
   }
 
   .document-fields--force-sidebar-wrap .document-fields__main {

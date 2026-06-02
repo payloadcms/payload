@@ -54,7 +54,6 @@ tanstack-app/media
 *payloadtests.db-journal
 *payloadtests.db-shm
 *payloadtests.db-wal
-*payload.db
 /versions
 /uploads
 no-restrict-file-*
@@ -364,6 +363,7 @@ licenses.csv
 
 # SQLite DB
 payload.db
+test/payload.db
 
 # TanStack Router auto-generated route tree
 tanstack-app/src/routeTree.gen.ts

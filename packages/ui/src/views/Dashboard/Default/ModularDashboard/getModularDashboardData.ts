@@ -1,7 +1,6 @@
 import type { TFunction } from '@payloadcms/translations'
 import type {
   ClientWidget,
-  Field,
   PayloadComponent,
   PayloadRequest,
   TypedUser,
@@ -46,7 +45,7 @@ export async function getModularDashboardData({
     const widgetSlug = layoutItem.id.slice(0, layoutItem.id.lastIndexOf('-'))
     const widgetConfig = widgets.find((widget) => widget.slug === widgetSlug)
     const widgetData = widgetConfig?.fields?.length
-      ? extractLocaleData(layoutItem.data || {}, req.locale || 'en', widgetConfig.fields as Field[])
+      ? extractLocaleData(layoutItem.data || {}, req.locale || 'en', widgetConfig.fields)
       : layoutItem.data || {}
 
     return {

@@ -3,7 +3,7 @@ import type { GroupFieldDiffClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
-import './index.scss'
+import './index.css'
 
 import React from 'react'
 

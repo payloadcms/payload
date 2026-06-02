@@ -237,6 +237,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     cancel: 'Չեղարկել',
     changesNotSaved:
       'Ձեր փոփոխությունները չեն պահպանվել։ Եթե հիմա հեռանաք, կկորցնեք չպահպանված փոփոխությունները։',
+    checked: 'Ստուգված',
     clear:
       'Հիմնական տեքստի իմաստը պետք է պահպանվի Payload կոնտեքստի մեջ: Այս այս այստեղ են հաճախակի',
     clearAll: 'Մաքրել բոլորը',
@@ -280,6 +281,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     decrement: 'Նվազեցնել',
     delete: 'Ջնջել',
     deleted: 'Ջնջված',
+    deletedAgo: 'Ջնջվել է {{distance}} առաջ',
     deletedAt: 'Ջնջված է',
     deletedCountSuccessfully: '{{count}} {{label}} հաջողությամբ ջնջված է։',
     deletedSuccessfully: 'Հաջողությամբ ջնջված է։',
@@ -454,6 +456,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} տեղափոխվել է աղբարկղում։',
     true: 'Ճիշտ',
     unauthorized: 'Չթույլատրված',
+    unchecked: 'Չնշված',
     unlock: 'Բացարձակել',
     unsavedChanges:
       'Դուք ունեք չպահպանված փոփոխություններ։ Պահպանեք կամ հեռացեք նախքան շարունակելը։',
@@ -461,6 +464,7 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Դուք ունեք չպահպանված փոփոխություններ։ Ցանկանու՞մ եք շարունակել կրկնօրինակումը։',
     untitled: 'Անվերնագիր',
     upcomingEvents: 'Սպասվող իրադարձություններ',
+    updatedAgo: 'Թարմացվել է {{distance}} առաջ',
     updatedAt: 'Թարմացված է',
     updatedCountSuccessfully: '{{count}} {{label}} հաջողությամբ թարմացվել է։',
     updatedLabelSuccessfully: '',

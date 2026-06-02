@@ -247,6 +247,7 @@ export const deTranslations: DefaultTranslationsObject = {
     cancel: 'Abbrechen',
     changesNotSaved:
       'Deine Änderungen wurden nicht gespeichert. Wenn du diese Seite verlässt, gehen deine Änderungen verloren.',
+    checked: 'Überprüft',
     clear: 'Leeren',
     clearAll: 'Alles leeren',
     close: 'Schließen',
@@ -289,6 +290,7 @@ export const deTranslations: DefaultTranslationsObject = {
     decrement: 'Dekrement',
     delete: 'Löschen',
     deleted: 'Gelöscht',
+    deletedAgo: 'Vor {{distance}} gelöscht',
     deletedAt: 'Gelöscht am',
     deletedCountSuccessfully: '{{count}} {{label}} erfolgreich gelöscht.',
     deletedSuccessfully: 'Erfolgreich gelöscht.',
@@ -462,6 +464,7 @@ export const deTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} wurde in den Papierkorb verschoben.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
+    unchecked: 'Nicht ausgewählt',
     unlock: 'Entsperren',
     unsavedChanges:
       'Du hast ungespeicherte Änderungen. Speichere oder verwerfe sie, bevor du fortfährst.',
@@ -469,6 +472,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Du hast ungespeicherte Änderungen. Möchtest du mit dem Duplizieren fortfahren?',
     untitled: 'Ohne Titel',
     upcomingEvents: 'Bevorstehende Ereignisse',
+    updatedAgo: 'Aktualisiert vor {{distance}}',
     updatedAt: 'Aktualisiert am',
     updatedCountSuccessfully: '{{count}} {{label}} erfolgreich aktualisiert.',
     updatedLabelSuccessfully: '{{label}} erfolgreich aktualisiert.',
