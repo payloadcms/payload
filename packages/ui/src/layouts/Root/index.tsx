@@ -12,8 +12,8 @@ import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-import { RootProvider } from '../../providers/Root/index.js'
-import { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { ProgressBar, RootProvider } from '../../exports/client/index.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
