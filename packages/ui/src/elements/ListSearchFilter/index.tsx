@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { SearchInput } from '../SearchInput/index.js'
 
-type SearchBarProps = {
+type ListSearchFilterProps = {
   className?: string
   disabled?: boolean
   label?: string
@@ -13,13 +13,13 @@ type SearchBarProps = {
   searchQueryParam?: string
 }
 
-export function SearchBar({
+export function ListSearchFilter({
   className,
   disabled,
   label = 'Search...',
   onSearchChange,
   searchQueryParam,
-}: SearchBarProps) {
+}: ListSearchFilterProps) {
   const [search, setSearch] = useState(
     typeof searchQueryParam === 'string' ? searchQueryParam : undefined,
   )

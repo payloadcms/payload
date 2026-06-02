@@ -229,7 +229,7 @@ import { toast } from 'sonner'
 export { toast }
 export { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 export { Upload } from '../../elements/Upload/index.js'
-export { SearchBar } from '../../elements/SearchBar/index.js'
+export { ListSearchFilter } from '../../elements/ListSearchFilter/index.js'
 export { SearchInput } from '../../elements/SearchInput/index.js'
 export { FilterTrigger } from '../../elements/FilterTrigger/index.js'
 export { EditUpload } from '../../elements/EditUpload/index.js'

@@ -876,7 +876,7 @@ describe('relationship', () => {
 
     const relationshipField = page.locator('#field-relationshipDrawer')
     await relationshipField.click()
-    const searchField = page.locator('.list-drawer .search-filter')
+    const searchField = page.locator('.list-drawer .search-input')
     await expect(searchField).toBeVisible()
 
     const searchInput = searchField.locator('input')
