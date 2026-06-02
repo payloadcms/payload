@@ -35,6 +35,8 @@ import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { getDocumentView } from './getDocumentView.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
+export { getDocumentView } from './getDocumentView.js'
+
 export type ViewToRender =
   | EditViewComponent
   | PayloadComponent<DocumentViewServerProps>
