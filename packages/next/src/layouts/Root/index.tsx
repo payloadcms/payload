@@ -1,5 +1,5 @@
 import { RootLayout as UIRootLayout } from '@payloadcms/ui/layouts'
-// @ts-expect-error - TS6 NodeNext rejects deep imports into `next` (no `exports` field), but Next.js compiler requires this exact specifier
+// @ts-ignore - TS6 NodeNext rejects deep imports into `next` (no `exports` field), but Next.js compiler requires this exact specifier
 import { Inter, Roboto_Mono } from 'next/font/google'
 import React from 'react'
 
