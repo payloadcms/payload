@@ -14,7 +14,7 @@
       border-color: var(--field-color-border-hover);
     }
 
-    &:focus-within {
+    &:has(input:focus-visible) {
       border-color: var(--field-color-border-focus);
     }
 
@@ -41,7 +41,7 @@
   .search-input__input {
     flex: 1;
     min-width: 0;
-    padding-inline-start: var(--spacer-4);
+    padding-inline: var(--spacer-4) var(--spacer-3);
     background: transparent;
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
@@ -61,27 +61,20 @@
   }
 
   .search-input__clear {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: transparent;
-    cursor: pointer;
+    position: absolute;
+    inset-inline-end: var(--spacer-1);
+    top: 50%;
+    transform: translateY(-50%);
     color: var(--color-icon-secondary);
-    padding: 0;
-    width: var(--spacer-3);
-    height: var(--spacer-3);
-    border-radius: var(--radius-small);
-    margin-inline-start: var(--spacer-1);
 
-    &:hover,
-    &:focus-visible {
-      color: var(--color-icon);
+    &.btn {
+      height: unset;
+      width: unset;
     }
 
-    .icon--x {
-      width: var(--spacer-3);
-      height: var(--spacer-3);
+    &:hover:not(.btn--disabled),
+    &:focus-visible {
+      color: var(--color-icon);
     }
   }
 }

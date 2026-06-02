@@ -58,6 +58,10 @@ export function ListSearchFilter({
         shouldUpdateState.current = true
         setSearch(value)
       }}
+      onClear={() => {
+        shouldUpdateState.current = true
+        setSearch('')
+      }}
       placeholder={label}
       value={search || ''}
     />

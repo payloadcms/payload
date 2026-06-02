@@ -5,6 +5,7 @@ import React, { useCallback } from 'react'
 import { SearchIcon } from '../../../icons/Search/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { Button } from '../../Button/index.js'
 import './index.css'
 
 const baseClass = 'search-input'
@@ -58,14 +59,16 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         value={value}
       />
       {onClear && value.length > 0 && (
-        <button
+        <Button
           aria-label={t('general:clear')}
+          buttonStyle="ghost"
           className={`${baseClass}__clear`}
+          icon={<XIcon size={16} />}
+          margin={false}
           onClick={onClear}
-          type="button"
-        >
-          <XIcon />
-        </button>
+          round
+          size="medium"
+        />
       )}
     </div>
   )
