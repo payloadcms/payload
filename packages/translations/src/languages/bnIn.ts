@@ -80,6 +80,22 @@ export const bnInTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'আপনি যদি এটি অনুরোধ না করে থাকেন, তাহলে এই ইমেইলটি উপেক্ষা করুন এবং আপনার পাসওয়ার্ড অপরিবর্তিত থাকবে।',
   },
+  commandPalette: {
+    actions: 'কর্মসমূহ',
+    createNew: 'নতুন তৈরি করুন',
+    favorites: 'পছন্দসমূহ',
+    hintActions: 'ক্রিয়াসমূহ',
+    hintClose: 'বন্ধ করুন',
+    hintCreate: 'নতুন তৈরি করুন',
+    hintNavigate: 'নেভিগেট করুন',
+    hintSelect: 'খুলুন',
+    noResults: 'কোনো ফলাফল পাওয়া যায়নি',
+    pinToFavorites: 'প্রিয় তালিকায় পিন করুন',
+    placeholder: 'একটি কমান্ড টাইপ করুন অথবা অনুসন্ধান করুন…',
+    recentlyVisited: 'সাম্প্রতিকভাবে পরিদর্শিত',
+    removeFromFavorites: 'ফেভারিট থেকে অপসারণ করুন',
+    title: 'কমান্ড পেলেট',
+  },
   dashboard: {
     addButton: 'যোগ করুন +',
     addWidget: 'উইজেট যোগ করুন',

@@ -81,6 +81,22 @@ export const skTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ak ste o to nepožiadali, ignorujte prosím tento e-mail a vaše heslo zostane nezmenené.',
   },
+  commandPalette: {
+    actions: 'Akcie',
+    createNew: 'Vytvoriť nové',
+    favorites: 'Obľúbené položky',
+    hintActions: 'Akcie',
+    hintClose: 'Zavrieť',
+    hintCreate: 'Vytvoriť nové',
+    hintNavigate: 'Navigovať',
+    hintSelect: 'Otvoriť',
+    noResults: 'Nenašli sa žiadne výsledky',
+    pinToFavorites: 'Pripnúť do obľúbených',
+    placeholder: 'Zadajte príkaz alebo vyhľadajte…',
+    recentlyVisited: 'Nedávno navštívené',
+    removeFromFavorites: 'Odstrániť z obľúbených',
+    title: 'Príkazová paleta',
+  },
   dashboard: {
     addButton: 'Pridať +',
     addWidget: 'Pridať Widget',

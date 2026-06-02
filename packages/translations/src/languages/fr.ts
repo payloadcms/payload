@@ -82,6 +82,22 @@ export const frTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si vous ne l’avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé.',
   },
+  commandPalette: {
+    actions: 'Actions',
+    createNew: 'Créer un nouveau',
+    favorites: 'Favoris',
+    hintActions: 'Actions',
+    hintClose: 'Fermer',
+    hintCreate: 'Créer nouveau',
+    hintNavigate: 'Naviguer',
+    hintSelect: 'Ouvrir',
+    noResults: 'Aucun résultat trouvé',
+    pinToFavorites: 'Épingler aux favoris',
+    placeholder: 'Tapez une commande ou effectuez une recherche…',
+    recentlyVisited: 'Récemment consulté',
+    removeFromFavorites: 'Retirer des Favoris',
+    title: 'Palette de commandes',
+  },
   dashboard: {
     addButton: 'Ajouter +',
     addWidget: 'Ajouter un Widget',

@@ -81,6 +81,22 @@ export const jaTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'もし望まない場合は、このメールを無視してください。パスワードは変更されません。',
   },
+  commandPalette: {
+    actions: 'アクション',
+    createNew: '新規作成',
+    favorites: 'お気に入り',
+    hintActions: 'アクション',
+    hintClose: '閉じる',
+    hintCreate: '新規作成',
+    hintNavigate: 'ナビゲート',
+    hintSelect: '開く',
+    noResults: '結果が見つかりませんでした',
+    pinToFavorites: 'お気に入りにピン留め',
+    placeholder: 'コマンドを入力するか、検索してください…',
+    recentlyVisited: '最近閲覧した',
+    removeFromFavorites: 'お気に入りから削除',
+    title: 'コマンドパレット',
+  },
   dashboard: {
     addButton: '追加 +',
     addWidget: 'ウィジェットを追加する',

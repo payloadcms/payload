@@ -79,6 +79,22 @@ export const etTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Kui te seda ei taotlenud, ignoreerige seda e-kirja ja teie parool jääb muutmata.',
   },
+  commandPalette: {
+    actions: 'Tegevused',
+    createNew: 'Loo uus',
+    favorites: 'Lemmikud',
+    hintActions: 'Tegevused',
+    hintClose: 'Sulge',
+    hintCreate: 'Loo uus',
+    hintNavigate: 'Navigeeri',
+    hintSelect: 'Ava',
+    noResults: 'Tulemusi ei leitud',
+    pinToFavorites: 'Kinnita lemmikute hulka',
+    placeholder: 'Tippige käsk või otsige…',
+    recentlyVisited: 'Hiljuti külastatud',
+    removeFromFavorites: 'Eemalda lemmikutest',
+    title: 'Käsukeskus',
+  },
   dashboard: {
     addButton: 'Lisa +',
     addWidget: 'Lisa vidin',

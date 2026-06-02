@@ -79,6 +79,22 @@ export const thTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'หากคุณไม่ได้ร้องขอให้มีการรีเซ็ตรหัสผ่าน คุณสามารถเพิกเฉยข้อความนี้ได้ โดยรหัสผ่านของคุณจะคงอยู่เช่นเดิม',
   },
+  commandPalette: {
+    actions: 'การดำเนินการ',
+    createNew: 'สร้างใหม่',
+    favorites: 'รายการโปรด',
+    hintActions: 'การดำเนินการ',
+    hintClose: 'ปิด',
+    hintCreate: 'สร้างใหม่',
+    hintNavigate: 'นำทาง',
+    hintSelect: 'เปิด',
+    noResults: 'ไม่พบผลลัพธ์',
+    pinToFavorites: 'ปักหมุดไว้ในรายการโปรด',
+    placeholder: 'พิมพ์คำสั่งหรือค้นหา…',
+    recentlyVisited: 'เข้าชมล่าสุด',
+    removeFromFavorites: 'ลบออกจากรายการโปรด',
+    title: 'แถบคำสั่ง',
+  },
   dashboard: {
     addButton: 'เพิ่ม +',
     addWidget: 'เพิ่มวิดเจ็ต',

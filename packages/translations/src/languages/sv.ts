@@ -80,6 +80,22 @@ export const svTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Om du inte begärde detta, ignorera detta e-postmeddelande och ditt lösenord kommer att förbli oförändrat.',
   },
+  commandPalette: {
+    actions: 'Åtgärder',
+    createNew: 'Skapa ny',
+    favorites: 'Favoriter',
+    hintActions: 'Åtgärder',
+    hintClose: 'Stäng',
+    hintCreate: 'Skapa ny',
+    hintNavigate: 'Navigera',
+    hintSelect: 'Öppna',
+    noResults: 'Inga resultat hittades',
+    pinToFavorites: 'Fäst till favoriter',
+    placeholder: 'Skriv ett kommando eller sök…',
+    recentlyVisited: 'Senast besökta',
+    removeFromFavorites: 'Ta bort från Favoriter',
+    title: 'Kommandopalett',
+  },
   dashboard: {
     addButton: 'Lägg till +',
     addWidget: 'Lägg till Widget',

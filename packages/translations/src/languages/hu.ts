@@ -82,6 +82,22 @@ export const huTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ha nem Ön kérte ezt, kérjük, hagyja figyelmen kívül ezt az e-mailt, és jelszava változatlan marad.',
   },
+  commandPalette: {
+    actions: 'Műveletek',
+    createNew: 'Új létrehozása',
+    favorites: 'Kedvencek',
+    hintActions: 'Műveletek',
+    hintClose: 'Bezárás',
+    hintCreate: 'Új létrehozása',
+    hintNavigate: 'Navigálás',
+    hintSelect: 'Megnyitás',
+    noResults: 'Nincs találat',
+    pinToFavorites: 'Rögzítés a kedvencekhez',
+    placeholder: 'Írjon be egy parancsot vagy keressen…',
+    recentlyVisited: 'Legutóbb megtekintett',
+    removeFromFavorites: 'Eltávolítás a kedvencek közül',
+    title: 'Parancs paletta',
+  },
   dashboard: {
     addButton: 'Adj hozzá +',
     addWidget: 'Adjon hozzá widgetet',
