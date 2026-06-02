@@ -1471,15 +1471,10 @@ describe('Versions', () => {
         }),
       )
 
-      await expect(localPage.locator('#schedule-publish-button')).toBeVisible()
+      await waitForFormReady(localPage)
+      await localPage.locator('#schedule-publish-button').click()
 
-      // Retry clicking until the drawer actually opens — the button may be visible before hydration completes
       const drawerContent = localPage.locator('.schedule-publish__scheduler')
-      await expect(async () => {
-        await localPage.locator('#schedule-publish-button').click()
-        await expect(drawerContent).toBeVisible()
-      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-
       const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
       const timezoneOptionSelector = drawerContent.locator(
         `.timezone-picker .rs__menu .rs__option:has-text("Paris")`,
