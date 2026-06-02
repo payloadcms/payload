@@ -175,18 +175,6 @@ export const APIViewClient: React.FC = () => {
             }}
           >
             <div className={`${baseClass}__form-fields`}>
-              <div className={`${baseClass}__filter-query-checkboxes`}>
-                {draftsEnabled && (
-                  <CheckboxField
-                    field={{
-                      name: 'draft',
-                      label: t('version:draft'),
-                    }}
-                    onChange={() => setDraft(!draft)}
-                    path="draft"
-                  />
-                )}
-              </div>
               {localeOptions && (
                 <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />
               )}
@@ -203,6 +191,16 @@ export const APIViewClient: React.FC = () => {
                 onChange={(value) => setDepth(value?.toString())}
                 path="depth"
               />
+              {draftsEnabled && (
+                <CheckboxField
+                  field={{
+                    name: 'draft',
+                    label: t('version:draft'),
+                  }}
+                  onChange={() => setDraft(!draft)}
+                  path="draft"
+                />
+              )}
               <CheckboxField
                 field={{
                   name: 'authenticated',
@@ -227,32 +225,40 @@ export const APIViewClient: React.FC = () => {
                 readOnly={false}
                 value={fetchURL}
               />
+            </div>
+            <div className={`${baseClass}__results-bar-actions`}>
               <Button
                 aria-label={t('general:openInNewWindow')}
-                buttonStyle="ghost"
-                className={`${baseClass}__api-url-inline-button`}
+                buttonStyle="secondary"
+                className={`${baseClass}__api-url-open-button`}
                 el="anchor"
                 icon={<ExternalLinkIcon size={16} />}
                 margin={false}
                 newTab
+                size="large"
                 url={fetchURL}
               />
-            </div>
-            <div className={`${baseClass}__results-bar-actions`}>
-              <button
+              <Button
                 aria-label="toggle fullscreen"
+                buttonStyle="secondary"
                 className={`${baseClass}__toggle-fullscreen-button`}
+                icon={<MinimizeMaximizeIcon isMinimized={!fullscreen} />}
+                margin={false}
                 onClick={() => setFullscreen(!fullscreen)}
-                type="button"
-              >
-                <MinimizeMaximizeIcon isMinimized={!fullscreen} />
-              </button>
+                size="large"
+              />
             </div>
           </div>
           <div className={`${baseClass}__results`}>
             <CodeEditorLazy
               defaultLanguage="json"
-              options={{ folding: true, lineNumbers: 'on', wordWrap: 'off' }}
+              height="100%"
+              options={{
+                fixedOverflowWidgets: true,
+                folding: true,
+                lineNumbers: 'on',
+                wordWrap: 'off',
+              }}
               readOnly
               recalculatedHeightAt={recalculatedHeightAt}
               value={jsonString}
