@@ -20,7 +20,8 @@ import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.j
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { NestProviders } from './NestProviders.js'
-import '../../scss/app.scss'
+// eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full SCSS chain (design tokens, preflight, etc.) in prod builds
+import '@payloadcms/ui/scss/app.scss'
 
 type Font = {
   className?: string
