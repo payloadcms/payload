@@ -1,9 +1,11 @@
 import { RootLayout as UIRootLayout } from '@payloadcms/ui/layouts'
+// @ts-expect-error - TS6 NodeNext rejects deep imports into `next` (no `exports` field), but Next.js compiler requires this exact specifier
 import { Inter, Roboto_Mono } from 'next/font/google'
 import React from 'react'
 
 import { NextRouterAdapter } from './router.js'
 import { nextServerAdapter } from './server.js'
+import { switchLanguageAction } from './switchLanguageAction.js'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -28,7 +30,11 @@ export { metadata } from '@payloadcms/ui/layouts'
 
 type Props = Omit<
   React.ComponentProps<typeof UIRootLayout>,
-  'additionalDependencyChecks' | 'fonts' | 'RouterAdapter' | 'serverAdapter'
+  | 'additionalDependencyChecks'
+  | 'fonts'
+  | 'RouterAdapter'
+  | 'serverAdapter'
+  | 'switchLanguageServerAction'
 >
 
 export const RootLayout = (props: Props) => (
@@ -41,5 +47,6 @@ export const RootLayout = (props: Props) => (
     ]}
     RouterAdapter={NextRouterAdapter}
     serverAdapter={nextServerAdapter}
+    switchLanguageServerAction={switchLanguageAction}
   />
 )
