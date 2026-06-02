@@ -102,7 +102,7 @@ describe('configToJSONSchema', () => {
               type: 'blocks',
               blocks: [
                 {
-                  slug: 'test',
+                  slug: 'testRequired',
                   fields: [
                     {
                       name: 'field',
@@ -140,59 +140,92 @@ describe('configToJSONSchema', () => {
         blockFieldWithFields: {
           type: ['array', 'null'],
           items: {
-            oneOf: [
-              {
-                type: 'object',
-                additionalProperties: false,
-                properties: {
-                  id: {
-                    type: ['string', 'null'],
-                  },
-                  blockName: {
-                    type: ['string', 'null'],
-                  },
-                  blockType: {
-                    const: 'test',
-                  },
-                  field: {
-                    type: ['string', 'null'],
-                  },
-                },
-                required: ['blockType'],
-              },
-            ],
+            oneOf: [{ $ref: '#/definitions/Test' }],
           },
         },
         blockFieldWithFieldsRequired: {
           type: ['array', 'null'],
           items: {
-            oneOf: [
-              {
-                type: 'object',
-                additionalProperties: false,
-                properties: {
-                  id: {
-                    type: ['string', 'null'],
-                  },
-                  blockName: {
-                    type: ['string', 'null'],
-                  },
-                  blockType: {
-                    const: 'test',
-                  },
-                  field: {
-                    type: 'string',
-                  },
-                },
-                required: ['blockType', 'field'],
-              },
-            ],
+            oneOf: [{ $ref: '#/definitions/TestRequired' }],
           },
         },
       },
       required: ['id', 'blockFieldRequired'],
       title: 'Test',
     })
+  })
+
+  it('keeps the first block interface name clean and content-hashes the colliding one', async () => {
+    // @ts-expect-error - partial config for testing
+    const config: Config = {
+      collections: [
+        {
+          slug: 'pages',
+          fields: [
+            {
+              name: 'layout',
+              type: 'blocks',
+              blocks: [
+                { slug: 'hero', fields: [{ name: 'title', type: 'text' }] },
+                { slug: 'cta', fields: [{ name: 'label', type: 'text' }] },
+              ],
+            },
+          ],
+          timestamps: false,
+        },
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'layout',
+              type: 'blocks',
+              // Same slug `hero`, DIFFERENT fields → name collision with pages' hero.
+              blocks: [{ slug: 'hero', fields: [{ name: 'heading', type: 'text' }] }],
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
+    const defs = schema.definitions!
+
+    // The first `hero` keeps the clean name; the unique block is unaffected.
+    expect(defs.Hero).toBeDefined()
+    expect(defs.Cta).toBeDefined()
+
+    // Only the second, differently-shaped `hero` is disambiguated with a content hash.
+    const hashedHeroNames = Object.keys(defs).filter((k) => /^Hero_[0-9A-F]{8}$/.test(k))
+    expect(hashedHeroNames).toHaveLength(1)
+
+    // The disambiguated interface carries the explanatory JSDoc note; the clean one does not.
+    expect((defs[hashedHeroNames[0]!] as { description?: string }).description).toContain(
+      'content hash',
+    )
+    expect((defs.Hero as { description?: string }).description).toBeUndefined()
+
+    // Each collection's block field references its own block's interface.
+    const refsOf = (slug: string): string[] =>
+      (
+        defs[slug] as { properties: { layout: { items: { oneOf: Array<{ $ref: string }> } } } }
+      ).properties.layout.items.oneOf.map((r) => r.$ref)
+    expect(refsOf('pages')).toContain('#/definitions/Hero')
+    expect(refsOf('pages')).toContain('#/definitions/Cta')
+    expect(refsOf('posts')).toStrictEqual([`#/definitions/${hashedHeroNames[0]}`])
+
+    // Hashing is deterministic: regenerating yields identical names.
+    const { jsonSchema: schema2 } = configToJSONSchema(sanitizedConfig, 'text')
+    expect(
+      Object.keys(schema2.definitions!)
+        .filter((k) => /^Hero/.test(k))
+        .sort(),
+    ).toStrictEqual(
+      Object.keys(defs)
+        .filter((k) => /^Hero/.test(k))
+        .sort(),
+    )
   })
 
   it('should handle tabs and named tabs with required fields', async () => {

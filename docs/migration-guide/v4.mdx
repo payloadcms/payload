@@ -556,7 +556,7 @@ Now **every block always emits a top-level interface**. The name comes from the 
 
 The same rule applies to lexical block nodes — they now emit as `SerializedBlockNode<…>` / `SerializedInlineBlockNode<…>` referencing the per-block interface, instead of inlining a `{ [k: string]: unknown }` shape.
 
-If a block's auto-derived name collides with another type in your generated file (a collection, an array's `interfaceName`, etc.), set `interfaceName` on the block to disambiguate.
+When two **different** blocks resolve to the same auto-derived name (same slug, different fields — e.g. a shared block overridden in one collection), the first keeps the clean name and any later block with a different shape gets a stable content-hash suffix (`Hero_3F2A1B0C`), so neither is silently mistyped. To choose the name yourself — or to resolve a collision with another type in your generated file (a collection, an array's `interfaceName`, etc.) — set an explicit `interfaceName` on the block. See [Block interface name collisions](/docs/typescript/generating-types#block-interface-name-collisions).
 
 ### Lexical: generated `payload-types.ts` shape changed
 

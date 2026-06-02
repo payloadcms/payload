@@ -1512,14 +1512,9 @@ export type Block = {
   /**
    * Override the name of the top-level TypeScript interface and GraphQL
    * type generated for this block. Blocks **always** generate a top-level
-   * interface — by default it's a PascalCase form of the slug
+   * interface - by default it's a PascalCase form of the slug
    * (`'content-block'` → `ContentBlock`). Set this to take control of the
-   * generated name (useful for disambiguating slug-PascalCase collisions
-   * or referencing the type elsewhere under a name of your choosing).
-   *
-   * **Note**: Top-level types share a namespace with collections, arrays,
-   * groups, tabs, and other blocks — set an explicit `interfaceName` to
-   * resolve any collisions.
+   * generated name
    */
   interfaceName?: string
   jsx?: BlockJSX

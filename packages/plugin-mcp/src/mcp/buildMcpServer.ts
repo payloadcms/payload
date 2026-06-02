@@ -64,12 +64,12 @@ export const buildMcpServer = ({
     return rest
   }
 
-  const configSchema = configToJSONSchema(
+  const { jsonSchema: configSchema } = configToJSONSchema(
     req.payload.config,
     req.payload.db.defaultIDType,
     req.i18n,
     { forceInlineBlocks: true },
-  ) as JsonSchemaType
+  ) as { jsonSchema: JsonSchemaType; typeStringDefinitions: Set<string> }
 
   try {
     for (const item of authorizedMCP.items) {

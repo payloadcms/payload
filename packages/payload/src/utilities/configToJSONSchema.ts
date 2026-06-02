@@ -1,6 +1,8 @@
 import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 
+import { createHash } from 'crypto'
+
 import type { Auth } from '../auth/types.js'
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
@@ -450,22 +452,16 @@ export function fieldsToJSONSchema({
               type: withNullableJSONSchemaType('array', isRequired),
               items: hasBlocks
                 ? {
-                    oneOf: (field.blockReferences ?? field.blocks).map((block) => {
-                      if (typeof block === 'string') {
-                        const resolvedBlock = config?.blocks?.find((b) => b.slug === block)
+                    oneOf: (field.blockReferences ?? field.blocks).map((blockOrReference) => {
+                      const block =
+                        typeof blockOrReference === 'string'
+                          ? config?.blocks?.find((b) => b.slug === blockOrReference)
+                          : blockOrReference
 
-                        if (!resolvedBlock) {
-                          return {}
-                        }
-
-                        if (!forceInlineBlocks) {
-                          return {
-                            $ref: `#/definitions/${resolvedBlock.interfaceName ?? toWords(resolvedBlock.slug, true)}`,
-                          }
-                        }
-
-                        block = resolvedBlock
+                      if (!block) {
+                        return {}
                       }
+
                       const blockFieldSchemas = fieldsToJSONSchema({
                         collectionIDFieldTypes,
                         config,
@@ -488,19 +484,11 @@ export function fieldsToJSONSchema({
                         required: ['blockType', ...blockFieldSchemas.required],
                       }
 
-                      if (!forceInlineBlocks) {
-                        // Always register the block as a top-level definition,
-                        // using the user's `interfaceName` override if set or a
-                        // PascalCase fallback derived from the slug.
-                        const interfaceName = block.interfaceName ?? toWords(block.slug, true)
-                        interfaceNameDefinitions.set(interfaceName, blockSchema)
-
-                        return {
-                          $ref: `#/definitions/${interfaceName}`,
-                        }
-                      }
-
-                      return blockSchema
+                      return forceInlineBlocks
+                        ? blockSchema
+                        : {
+                            $ref: `#/definitions/${registerBlockInterface(block, blockSchema, interfaceNameDefinitions)}`,
+                          }
                     }),
                   }
                 : {},
@@ -1286,6 +1274,45 @@ function generateAuthOperationSchemas(collections: SanitizedCollectionConfig[]):
   }
 }
 
+const hashBlockSchema = (schema: JSONSchema4): string =>
+  createHash('sha256').update(JSON.stringify(schema)).digest('hex').slice(0, 8).toUpperCase()
+
+/**
+ * Registers a block's schema as a top-level definition and returns its name.
+ *
+ * The name is the block's `interfaceName`, or a PascalCase form of its slug. If a different
+ * block already uses that name, this one gets a content-hash suffix (`Hero_3F2A1B0C`) so the
+ * two don't overwrite each other. Registering the same block shape again reuses its name.
+ */
+function registerBlockInterface(
+  block: { interfaceName?: string; slug: string },
+  blockSchema: JSONSchema4,
+  interfaceNameDefinitions: Map<string, JSONSchema4>,
+): string {
+  const baseName = block.interfaceName ?? toWords(block.slug, true)
+  const existing = interfaceNameDefinitions.get(baseName)
+
+  // Use the clean name if it is free, or if the block sets an explicit interfaceName.
+  if (!existing || block.interfaceName) {
+    interfaceNameDefinitions.set(baseName, blockSchema)
+    return baseName
+  }
+
+  const hash = hashBlockSchema(blockSchema)
+
+  // The same block shape is already registered under this name, so reuse it.
+  if (hashBlockSchema(existing) === hash) {
+    return baseName
+  }
+
+  // A different block already owns the clean name. Disambiguate this one with its hash.
+  blockSchema.description = `Multiple blocks resolve to the \`${baseName}\` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique \`interfaceName\` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions`
+
+  const uniqueName = `${baseName}_${hash}`
+  interfaceNameDefinitions.set(uniqueName, blockSchema)
+  return uniqueName
+}
+
 /**
  * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
  */
@@ -1298,8 +1325,9 @@ export function configToJSONSchema(
   // a mutable Map of top-level definitions in the generated JSON Schema.
   // - `array`/`group`/named-`tab` fields are registered here when they set
   //   `interfaceName` (otherwise they stay inline).
-  // - `block` configs always register here, keyed by `block.interfaceName`
-  //   if set, otherwise a PascalCase form of the slug via `toWords`.
+  // - `block` configs always register here via `registerBlockInterface`, keyed by
+  //   `block.interfaceName` if set, else a PascalCase form of the slug (with a
+  //   content-hash suffix when two different blocks resolve to the same name).
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
   // a mutable Set for raw TS source to be appended to `payload-types.ts`.
   const typeStringDefinitions: Set<string> = new Set()
@@ -1420,13 +1448,8 @@ export function configToJSONSchema(
         required: ['blockType', ...blockFieldSchemas.required],
       }
 
-      // `block.interfaceName` is treated as an override of the auto-derived
-      // PascalCase name. Without it, blocks still get a top-level interface.
-      const interfaceName = block.interfaceName ?? toWords(block.slug, true)
-      interfaceNameDefinitions.set(interfaceName, blockSchema)
-
       blocksDefinition.properties![block.slug] = {
-        $ref: `#/definitions/${interfaceName}`,
+        $ref: `#/definitions/${registerBlockInterface(block, blockSchema, interfaceNameDefinitions)}`,
       }
       ;(blocksDefinition.required as string[]).push(block.slug)
     }
