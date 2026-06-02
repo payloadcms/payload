@@ -80,6 +80,22 @@ export const hyTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Եթե Դուք չեք ուղարկել հարցումը, խնդրում ենք անտեսել այս էլ. նամակը, և Ձեր գաղտնաբառը կմնա անփոփոխ։',
   },
+  commandPalette: {
+    actions: 'Գործողություններ',
+    createNew: 'Ստեղծել Նոր',
+    favorites: 'Ընտրյալներ',
+    hintActions: 'Գործողություններ',
+    hintClose: 'Փակել',
+    hintCreate: 'Ստեղծել Նոր',
+    hintNavigate: 'Նավարկել',
+    hintSelect: 'Բացել',
+    noResults: 'Արդյունքներ չեն հայտնաբերվել',
+    pinToFavorites: 'Ավելացնել ընտրյալներին',
+    placeholder: 'Մուտքագրեք հրահանգ կամ որոնման հարց…',
+    recentlyVisited: 'Վերջին այցերը',
+    removeFromFavorites: 'Հեռացնել ընտրյալներից',
+    title: 'Հրամանների վահանակ',
+  },
   dashboard: {
     addButton: 'Ավելացնել +',
     addWidget: 'Ավելացնել վիճակագրություն',

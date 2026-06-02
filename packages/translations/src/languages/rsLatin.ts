@@ -81,6 +81,22 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili promenu lozinke ignorišite ovu poruku i lozinka će ostati nepromenjena.',
   },
+  commandPalette: {
+    actions: 'Akcije',
+    createNew: 'Kreiraj novo',
+    favorites: 'Omiljeni',
+    hintActions: 'Akcije',
+    hintClose: 'Zatvori',
+    hintCreate: 'Kreiraj Novo',
+    hintNavigate: 'Navigirajte',
+    hintSelect: 'Otvori',
+    noResults: 'Nema pronađenih rezultata',
+    pinToFavorites: 'Prikvači u Omiljene',
+    placeholder: 'Ukucajte komandu ili pretražujte…',
+    recentlyVisited: 'Nedavno posećeno',
+    removeFromFavorites: 'Uklonite iz omiljenih',
+    title: 'Komandna paleta',
+  },
   dashboard: {
     addButton: 'Dodaj +',
     addWidget: 'Dodaj widget',

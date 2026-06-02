@@ -81,6 +81,22 @@ export const hrTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili ovo, molimo ignorirajte ovaj e-mail i Vaša će lozinka ostati nepromijenjena.',
   },
+  commandPalette: {
+    actions: 'Radnje',
+    createNew: 'Kreiraj novo',
+    favorites: 'Omiljeni',
+    hintActions: 'Radnje',
+    hintClose: 'Zatvori',
+    hintCreate: 'Stvori novo',
+    hintNavigate: 'Navigirajte',
+    hintSelect: 'Otvoreno',
+    noResults: 'Nema pronađenih rezultata',
+    pinToFavorites: 'Prikvači u favorite',
+    placeholder: 'Upišite naredbu ili pretražujte…',
+    recentlyVisited: 'Nedavno posjećeno',
+    removeFromFavorites: 'Ukloni iz favorita',
+    title: 'Paleta naredbi',
+  },
   dashboard: {
     addButton: 'Dodaj +',
     addWidget: 'Dodaj widget',

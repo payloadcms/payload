@@ -80,6 +80,22 @@ export const slTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Če tega niste zahtevali, prezrite to e-pošto in vaše geslo bo ostalo nespremenjeno.',
   },
+  commandPalette: {
+    actions: 'Dejanja',
+    createNew: 'Ustvari novo',
+    favorites: 'Priljubljene',
+    hintActions: 'Dejanja',
+    hintClose: 'Zapri',
+    hintCreate: 'Ustvari novo',
+    hintNavigate: 'Krmariti',
+    hintSelect: 'Odpri',
+    noResults: 'Ni najdenih rezultatov',
+    pinToFavorites: 'Pripni med priljubljene',
+    placeholder: 'Vnesite ukaz ali iskanje…',
+    recentlyVisited: 'Nedavno obiskano',
+    removeFromFavorites: 'Odstrani iz priljubljenih',
+    title: 'Ukazna paleta',
+  },
   dashboard: {
     addButton: 'Dodaj +',
     addWidget: 'Dodaj pripomoček',

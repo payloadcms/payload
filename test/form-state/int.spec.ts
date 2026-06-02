@@ -11,6 +11,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
+import { conditionsSlug } from './collections/Conditions/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
@@ -234,6 +235,123 @@ describe('Form State', () => {
     expect(stateWithTitle?.['array.1.customTextField']).toHaveProperty('lastRenderedPath')
     expect(stateWithTitle?.['array.1.customTextField']).toHaveProperty('customComponents')
     expect(stateWithTitle?.['array.1.customTextField']?.customComponents?.Field).toBeDefined()
+  })
+
+  it('should not render custom Field components for fields hidden by admin.condition', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const hiddenDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+      },
+    })
+
+    const { state: stateHidden } = await buildFormState({
+      mockRSCs: true,
+      id: hiddenDoc.id,
+      collectionSlug: conditionsSlug,
+      data: hiddenDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(stateHidden?.conditionalCustomField).toBeDefined()
+    expect(stateHidden?.conditionalCustomField?.passesCondition).toBe(false)
+    expect(stateHidden?.conditionalCustomField).not.toHaveProperty('customComponents')
+    expect(stateHidden?.conditionalCustomField?.lastRenderedPath).toBeUndefined()
+
+    const visibleDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: true,
+      },
+    })
+
+    const { state: stateVisible } = await buildFormState({
+      mockRSCs: true,
+      id: visibleDoc.id,
+      collectionSlug: conditionsSlug,
+      data: visibleDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(stateVisible?.conditionalCustomField?.passesCondition).not.toBe(false)
+    expect(stateVisible?.conditionalCustomField).toHaveProperty('customComponents')
+    expect(stateVisible?.conditionalCustomField?.customComponents?.Field).toBeDefined()
+
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+    await payload.delete({ collection: conditionsSlug, id: visibleDoc.id })
+  })
+
+  it('should render custom Field component when admin.condition flips from false to true via onChange', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const doc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+      },
+    })
+
+    const { state: initialState } = await buildFormState({
+      mockRSCs: true,
+      id: doc.id,
+      collectionSlug: conditionsSlug,
+      data: doc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(initialState?.conditionalCustomField).not.toHaveProperty('customComponents')
+
+    // Simulate condition flipping true (user toggles checkbox) by re-requesting
+    // form state with `renderAllFields: false` and updated value — same flow as onChange.
+    initialState.showField!.value = true
+
+    const { state: flippedState } = await buildFormState({
+      mockRSCs: true,
+      id: doc.id,
+      collectionSlug: conditionsSlug,
+      formState: initialState,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    expect(flippedState?.conditionalCustomField?.passesCondition).not.toBe(false)
+    expect(flippedState?.conditionalCustomField).toHaveProperty('customComponents')
+    expect(flippedState?.conditionalCustomField?.customComponents?.Field).toBeDefined()
+
+    await payload.delete({ collection: conditionsSlug, id: doc.id })
   })
 
   it('should add `addedByServer` flag to fields that originate on the server', async () => {

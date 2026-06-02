@@ -79,6 +79,22 @@ export const taTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'இதை நீங்கள் கோரவில்லை என்றால், இந்த மின்னஞ்சலை புறக்கணிக்கவும். உங்கள் கடவுச்சொல் மாறாது இருக்கும்.',
   },
+  commandPalette: {
+    actions: 'செயல்கள்',
+    createNew: 'புதியதை உருவாக்கவும்',
+    favorites: 'பிடித்தவை',
+    hintActions: 'செயல்கள்',
+    hintClose: 'மூடுக',
+    hintCreate: 'புதியதை உருவாக்கு',
+    hintNavigate: 'நெavigate',
+    hintSelect: 'திறக்கு',
+    noResults: 'எந்தவொரு முடிவுகளும் கண்டுபிடிக்கப்படவில்லை',
+    pinToFavorites: 'பிடித்தவற்றிற்கு பொருத்துக',
+    placeholder: 'கட்டளையை தருக அல்லது தேடவும்…',
+    recentlyVisited: 'சமீபத்தில் பார்வையிடப்பட்டது',
+    removeFromFavorites: 'பிடித்தவை இலிருந்து அகற்று',
+    title: 'கமாண்டு பேலெட்',
+  },
   dashboard: {
     addButton: 'சேர் +',
     addWidget: 'விக்கெட் சேர்',

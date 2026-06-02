@@ -82,6 +82,22 @@ export const roTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Dacă nu ați solicitat acest lucru, vă rugăm să ignorați acest email și parola dvs. va rămâne neschimbată.',
   },
+  commandPalette: {
+    actions: 'Acțiuni',
+    createNew: 'Creează nou',
+    favorites: 'Favorite',
+    hintActions: 'Acțiuni',
+    hintClose: 'Închide',
+    hintCreate: 'Creează nou',
+    hintNavigate: 'Navigați',
+    hintSelect: 'Deschide',
+    noResults: 'Nu au fost găsite rezultate',
+    pinToFavorites: 'Fixați la favorite',
+    placeholder: 'Tastați o comandă sau căutați...',
+    recentlyVisited: 'Vizitate recent',
+    removeFromFavorites: 'Elimină din Favorite',
+    title: 'Paletă de comenzi',
+  },
   dashboard: {
     addButton: 'Adaugă +',
     addWidget: 'Adaugați widget',

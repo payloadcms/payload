@@ -80,6 +80,22 @@ export const plTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość, a Twoje hasło pozostanie niezmienione.',
   },
+  commandPalette: {
+    actions: 'Działania',
+    createNew: 'Utwórz nowy',
+    favorites: 'Ulubione',
+    hintActions: 'Działania',
+    hintClose: 'Zamknij',
+    hintCreate: 'Utwórz nowy',
+    hintNavigate: 'Nawiguj',
+    hintSelect: 'Otwórz',
+    noResults: 'Nie znaleziono wyników',
+    pinToFavorites: 'Przypnij do ulubionych',
+    placeholder: 'Wpisz polecenie lub wyszukaj…',
+    recentlyVisited: 'Ostatnio odwiedzane',
+    removeFromFavorites: 'Usuń z Ulubionych',
+    title: 'Paleta poleceń',
+  },
   dashboard: {
     addButton: 'Dodaj +',
     addWidget: 'Dodaj Widżet',

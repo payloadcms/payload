@@ -81,6 +81,22 @@ export const ltTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jei to neprašėte, prašome ignoruoti šį el. laišką ir jūsų slaptažodis išliks nepakeistas.',
   },
+  commandPalette: {
+    actions: 'Veiksmai',
+    createNew: 'Sukurti naują',
+    favorites: 'Mėgstamiausi',
+    hintActions: 'Veiksmai',
+    hintClose: 'Uždaryti',
+    hintCreate: 'Sukurti naują',
+    hintNavigate: 'Naršyti',
+    hintSelect: 'Atidaryti',
+    noResults: 'Rezultatų nerasta',
+    pinToFavorites: 'Prisegti prie mėgstamiausių',
+    placeholder: 'Įveskite komandą arba ieškokite…',
+    recentlyVisited: 'Neseniai aplankyta',
+    removeFromFavorites: 'Pašalinti iš Mėgstamiausių',
+    title: 'Komandų paletė',
+  },
   dashboard: {
     addButton: 'Pridėti +',
     addWidget: 'Pridėti valdiklį',

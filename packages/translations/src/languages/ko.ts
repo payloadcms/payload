@@ -80,6 +80,22 @@ export const koTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       '비밀번호 초기화를 요청하지 않았다면 이 이메일을 무시하시고 비밀번호를 변경하지 마세요.',
   },
+  commandPalette: {
+    actions: '작업',
+    createNew: '새로 만들기',
+    favorites: '즐겨찾기',
+    hintActions: '작업',
+    hintClose: '닫기',
+    hintCreate: '새로 만들기',
+    hintNavigate: '이동합니다.',
+    hintSelect: '열기',
+    noResults: '결과를 찾을 수 없습니다.',
+    pinToFavorites: '즐겨찾기에 고정',
+    placeholder: '명령을 입력하거나 검색하십시오…',
+    recentlyVisited: '최근 방문함',
+    removeFromFavorites: '즐겨찾기에서 제거',
+    title: '명령 팔레트',
+  },
   dashboard: {
     addButton: '더하다',
     addWidget: '위젯 추가',

@@ -80,6 +80,22 @@ export const bgTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ако не си заявил това, игнорирай този имейл и паролата ти ще остане непроменена.',
   },
+  commandPalette: {
+    actions: 'Действия',
+    createNew: 'Създаване на нов',
+    favorites: 'Любими',
+    hintActions: 'Действия',
+    hintClose: 'Затвори',
+    hintCreate: 'Създаване на нов',
+    hintNavigate: 'Навигирайте',
+    hintSelect: 'Отвори',
+    noResults: 'Няма намерени резултати',
+    pinToFavorites: 'Закачване към любими',
+    placeholder: 'Въведете команда или търсене…',
+    recentlyVisited: 'Наскоро посетени',
+    removeFromFavorites: 'Премахване от любими',
+    title: 'Палитра с команди',
+  },
   dashboard: {
     addButton: 'Добавете +',
     addWidget: 'Добави джаджа',
