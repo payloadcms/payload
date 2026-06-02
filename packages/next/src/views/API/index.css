@@ -153,6 +153,13 @@
     overflow: hidden;
   }
 
+  /* Flush, full-panel */
+  .query-inspector__results .code-editor.read-only {
+    background: var(--color-bg-secondary);
+    border: 0;
+    border-radius: 0;
+  }
+
   @media (max-width: 1024px) {
     .query-inspector__content {
       display: flex;
