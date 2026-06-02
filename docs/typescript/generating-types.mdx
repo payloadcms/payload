@@ -236,18 +236,18 @@ appending the field type to the end, i.e. `MetaGroup` or similar.
 
 ### Block interface name collisions
 
-Every `block` generates a top-level interface named after its slug (`'hero'` → `Hero`). If two **different** blocks resolve to the same name but have different fields — for example a `hero` block reused across collections but overridden in one of them — a single shared `Hero` interface couldn't represent both shapes. To keep the generated types correct and stable, Payload appends a short content hash to each colliding block's name:
+Every `block` generates a top-level interface named after its slug (`'hero'` → `Hero`). If two **different** blocks resolve to the same name but have different fields — for example a `hero` block reused across collections but overridden in one of them — a single shared `Hero` interface couldn't represent both shapes. The first block keeps the clean name; any later block with a different shape gets a short content-hash suffix, so neither is silently mistyped:
 
 ```ts
-export interface Hero_3F2A1B0C {
-  /* one shape */
+export interface Hero {
+  /* the first shape */
 }
 export interface Hero_9C7E4012 {
-  /* the other shape */
+  /* the differing shape */
 }
 ```
 
-The hash is derived from the block's fields, so the **same schema always produces the same name** across regenerations — it only changes when the block's fields change. If you import a hashed interface and later change that block, you'll get a type error that points you at the change instead of silently receiving the wrong shape.
+The suffix is derived from the block's fields, so the **same schema always produces the same name** across regenerations — it only changes when the block's fields change. If you import a hashed interface and later change that block, you'll get a type error that points you at the change instead of silently receiving the wrong shape.
 
 To choose the name yourself and avoid the hash, set an explicit [`interfaceName`](/docs/fields/blocks) on the block — explicit names are always used verbatim. This is the recommended fix when two blocks intentionally share a slug, or when you want a stable, human-readable name to import.
 

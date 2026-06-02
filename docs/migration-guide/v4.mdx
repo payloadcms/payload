@@ -427,7 +427,7 @@ Before, a block's fields only became a top-level interface in `payload-types.ts`
 
 Now **every block always emits a top-level interface**. The name comes from the slug, converted to PascalCase (`'content-block'` → `ContentBlock`, `'richTextBlock'` → `RichTextBlock`). `interfaceName` still works, but it's now an _override_ for that default name rather than the switch that enables generation.
 
-When two **different** blocks resolve to the same auto-derived name (same slug, different fields — e.g. a shared block overridden in one collection), Payload appends a stable content hash to each colliding name (`Hero_3F2A1B0C`) so the types stay correct and don't silently overwrite one another. Set an explicit `interfaceName` on the block to choose a clean, stable name instead. See [Block interface name collisions](/docs/typescript/generating-types#block-interface-name-collisions).
+When two **different** blocks resolve to the same auto-derived name (same slug, different fields — e.g. a shared block overridden in one collection), the first keeps the clean name and any later block with a different shape gets a stable content-hash suffix (`Hero_3F2A1B0C`), so the types stay correct and don't silently overwrite one another. Set an explicit `interfaceName` on the block to choose a clean, stable name instead. See [Block interface name collisions](/docs/typescript/generating-types#block-interface-name-collisions).
 
 ### RichText adapter `outputSchema` renamed to `jsonSchema`
 

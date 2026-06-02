@@ -155,7 +155,7 @@ describe('configToJSONSchema', () => {
     })
   })
 
-  it('disambiguates colliding block interface names with a stable content hash', async () => {
+  it('keeps the first block interface name clean and content-hashes the colliding one', async () => {
     // @ts-expect-error - partial config for testing
     const config: Config = {
       collections: [
@@ -179,7 +179,7 @@ describe('configToJSONSchema', () => {
             {
               name: 'layout',
               type: 'blocks',
-              // Same slug `hero`, DIFFERENT fields → name collision.
+              // Same slug `hero`, DIFFERENT fields → name collision with pages' hero.
               blocks: [{ slug: 'hero', fields: [{ name: 'heading', type: 'text' }] }],
             },
           ],
@@ -192,28 +192,39 @@ describe('configToJSONSchema', () => {
     const schema = configToJSONSchema(sanitizedConfig, 'text')
     const defs = schema.definitions!
 
-    // Unique block keeps its clean name; no bare `Hero` exists (both collided).
+    // The first `hero` keeps the clean name; the unique block is unaffected.
+    expect(defs.Hero).toBeDefined()
     expect(defs.Cta).toBeDefined()
-    expect(defs.Hero).toBeUndefined()
 
-    // Both colliding `hero` blocks are disambiguated with distinct content hashes.
-    const heroNames = Object.keys(defs).filter((k) => /^Hero_[0-9A-F]{8}$/.test(k))
-    expect(heroNames).toHaveLength(2)
-    expect(heroNames[0]).not.toBe(heroNames[1])
+    // Only the second, differently-shaped `hero` is disambiguated with a content hash.
+    const hashedHeroNames = Object.keys(defs).filter((k) => /^Hero_[0-9A-F]{8}$/.test(k))
+    expect(hashedHeroNames).toHaveLength(1)
 
-    // The disambiguated interface carries the explanatory JSDoc note.
-    expect((defs[heroNames[0]!] as { description?: string }).description).toContain('content hash')
+    // The disambiguated interface carries the explanatory JSDoc note; the clean one does not.
+    expect((defs[hashedHeroNames[0]!] as { description?: string }).description).toContain(
+      'content hash',
+    )
+    expect((defs.Hero as { description?: string }).description).toBeUndefined()
 
-    // Block fields reference the hashed name, never a bare `Hero`.
-    const pagesLayout = (defs.pages as { properties: { layout: { items: { oneOf: Array<{ $ref: string }> } } } })
-      .properties.layout.items.oneOf
-    expect(pagesLayout.some((r) => /^#\/definitions\/Hero_[0-9A-F]{8}$/.test(r.$ref))).toBe(true)
-    expect(pagesLayout.some((r) => r.$ref === '#/definitions/Cta')).toBe(true)
+    // Each collection's block field references its own block's interface.
+    const refsOf = (slug: string): string[] =>
+      (
+        defs[slug] as { properties: { layout: { items: { oneOf: Array<{ $ref: string }> } } } }
+      ).properties.layout.items.oneOf.map((r) => r.$ref)
+    expect(refsOf('pages')).toContain('#/definitions/Hero')
+    expect(refsOf('pages')).toContain('#/definitions/Cta')
+    expect(refsOf('posts')).toStrictEqual([`#/definitions/${hashedHeroNames[0]}`])
 
     // Hashing is deterministic: regenerating yields identical names.
     const schema2 = configToJSONSchema(sanitizedConfig, 'text')
-    expect(Object.keys(schema2.definitions!).filter((k) => /^Hero_/.test(k)).sort()).toStrictEqual(
-      heroNames.sort(),
+    expect(
+      Object.keys(schema2.definitions!)
+        .filter((k) => /^Hero/.test(k))
+        .sort(),
+    ).toStrictEqual(
+      Object.keys(defs)
+        .filter((k) => /^Hero/.test(k))
+        .sort(),
     )
   })
 
