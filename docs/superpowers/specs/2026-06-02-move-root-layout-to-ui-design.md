@@ -30,9 +30,10 @@ Decouple the admin `RootLayout` from Next.js so the heavy implementation lives i
 
 ### `packages/next` — modified
 
-- `packages/next/src/layouts/Root/index.tsx` — rewritten as a thin wrapper: calls `checkDependencies()`, loads `Inter`/`Roboto_Mono` via `next/font/google`, imports `NextRouterAdapter`, delegates to `UIRootLayout`. Re-exports `metadata`.
-- `packages/next/src/layouts/Root/NestProviders.tsx` — **deleted** (now in ui).
-- `packages/next/src/layouts/Root/checkDependencies.ts` — stays in place. Invoked from the wrapper.
+- `packages/next/src/adapters/layout.tsx` — new thin wrapper (relocated from `packages/next/src/layouts/Root/index.tsx`): calls `checkDependencies()`, loads `Inter`/`Roboto_Mono` via `next/font/google`, imports `NextRouterAdapter` and `nextServerAdapter`, delegates to `UIRootLayout`. Re-exports `metadata`. Sits next to existing flat adapters (`router.tsx`, `server.ts`).
+- `packages/next/src/utilities/checkDependencies.ts` — relocated from `packages/next/src/layouts/Root/checkDependencies.ts`. Generic version check.
+- `packages/next/src/layouts/` — directory removed.
+- `packages/next/src/esbuildEntry.ts` — `RootLayout` re-export points at the new `./adapters/layout.js` path.
 - `packages/next/src/utilities/initReq.ts` — **deleted**.
 - `packages/next/src/utilities/getRequestTheme.ts` — **deleted**.
 - `packages/next/src/utilities/getRequestHighContrast.ts` — **deleted**.
@@ -44,7 +45,7 @@ Decouple the admin `RootLayout` from Next.js so the heavy implementation lives i
 - `packages/next/src/views/Root/index.tsx` — update `initReq` and `getPreferences` imports.
 - `packages/next/src/views/Document/index.tsx` — update `getPreferences` import.
 - `packages/next/src/views/Dashboard/Default/ModularDashboard/utils/getItemsFromPreferences.ts` — update `getPreferences` import.
-- `packages/next/src/exports/layouts.ts` — keeps `metadata`, `RootLayout`, `handleServerFunctions`.
+- `packages/next/src/exports/layouts.ts` — `metadata` + `RootLayout` re-export updated to point at `../adapters/layout.js`. Still exports `handleServerFunctions`.
 
 ## API surface
 
