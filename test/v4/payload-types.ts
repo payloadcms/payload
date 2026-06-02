@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -100,11 +101,13 @@ export interface Config {
     tags: Tag;
     'tag-items': TagItem;
     rubbish: Rubbish;
+    'rubbish-with-drafts': RubbishWithDraft;
     uploads: Upload;
     'upload-fields': UploadField;
     autosave: Autosave;
-    'draft-versions': DraftVersion;
     'versions-diff': VersionsDiff;
+    'draft-versions': DraftVersion;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -159,10 +162,13 @@ export interface Config {
     tags: TagsSelect<false> | TagsSelect<true>;
     'tag-items': TagItemsSelect<false> | TagItemsSelect<true>;
     rubbish: RubbishSelect<false> | RubbishSelect<true>;
+    'rubbish-with-drafts': RubbishWithDraftsSelect<false> | RubbishWithDraftsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'upload-fields': UploadFieldsSelect<false> | UploadFieldsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
+    'versions-diff': VersionsDiffSelect<false> | VersionsDiffSelect<true>;
     'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -180,7 +186,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -210,6 +216,24 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface PayloadMcpApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -219,6 +243,9 @@ export interface User {
   roles?: ('admin' | 'user')[] | null;
   updatedAt: string;
   createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -1206,6 +1233,18 @@ export interface Rubbish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish-with-drafts".
+ */
+export interface RubbishWithDraft {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "uploads".
  */
 export interface Upload {
@@ -1250,6 +1289,79 @@ export interface Autosave {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions-diff".
+ */
+export interface VersionsDiff {
+  id: string;
+  title: string;
+  array?:
+    | {
+        arrayText?: string | null;
+        nestedArray?:
+          | {
+              nestedText?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | (
+        | {
+            blockText?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textBlock';
+          }
+        | {
+            blockNumber?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'numberBlock';
+          }
+      )[]
+    | null;
+  checkbox?: boolean | null;
+  code?: string | null;
+  date?: string | null;
+  description?: string | null;
+  email?: string | null;
+  group?: {
+    nestedText?: string | null;
+    nestedNumber?: number | null;
+  };
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  number?: number | null;
+  numberMany?: number[] | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  radio?: ('small' | 'medium' | 'large') | null;
+  relationship?: (string | null) | Tag;
+  relationshipMany?: (string | Tag)[] | null;
+  select?: ('option-1' | 'option-2' | 'option-3') | null;
+  selectMany?: ('option-1' | 'option-2' | 'option-3')[] | null;
+  tabText?: string | null;
+  tabNumber?: number | null;
+  upload?: (string | null) | Upload;
+  uploadMany?: (string | Upload)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-versions".
  */
 export interface DraftVersion {
@@ -1260,6 +1372,49 @@ export interface DraftVersion {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
+  /**
+   * Access for this API key — uncheck to revoke individual tools.
+   */
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1510,6 +1665,10 @@ export interface PayloadLockedDocument {
         value: string | Rubbish;
       } | null)
     | ({
+        relationTo: 'rubbish-with-drafts';
+        value: string | RubbishWithDraft;
+      } | null)
+    | ({
         relationTo: 'uploads';
         value: string | Upload;
       } | null)
@@ -1522,14 +1681,27 @@ export interface PayloadLockedDocument {
         value: string | Autosave;
       } | null)
     | ({
+        relationTo: 'versions-diff';
+        value: string | VersionsDiff;
+      } | null)
+    | ({
         relationTo: 'draft-versions';
         value: string | DraftVersion;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1539,10 +1711,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -1624,6 +1801,9 @@ export interface UsersSelect<T extends boolean = true> {
   roles?: T;
   updatedAt?: T;
   createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
@@ -2292,6 +2472,17 @@ export interface RubbishSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish-with-drafts_select".
+ */
+export interface RubbishWithDraftsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "uploads_select".
  */
 export interface UploadsSelect<T extends boolean = true> {
@@ -2333,6 +2524,70 @@ export interface AutosaveSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions-diff_select".
+ */
+export interface VersionsDiffSelect<T extends boolean = true> {
+  title?: T;
+  array?:
+    | T
+    | {
+        arrayText?: T;
+        nestedArray?:
+          | T
+          | {
+              nestedText?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              blockText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        numberBlock?:
+          | T
+          | {
+              blockNumber?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  checkbox?: T;
+  code?: T;
+  date?: T;
+  description?: T;
+  email?: T;
+  group?:
+    | T
+    | {
+        nestedText?: T;
+        nestedNumber?: T;
+      };
+  json?: T;
+  number?: T;
+  numberMany?: T;
+  point?: T;
+  radio?: T;
+  relationship?: T;
+  relationshipMany?: T;
+  select?: T;
+  selectMany?: T;
+  tabText?: T;
+  tabNumber?: T;
+  upload?: T;
+  uploadMany?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-versions_select".
  */
 export interface DraftVersionsSelect<T extends boolean = true> {
@@ -2342,6 +2597,22 @@ export interface DraftVersionsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  overrideAccess?: T;
+  access?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2488,6 +2759,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
