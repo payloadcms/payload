@@ -102,6 +102,7 @@ export interface Config {
     tags: Tag;
     'tag-items': TagItem;
     rubbish: Rubbish;
+    'rubbish-with-drafts': RubbishWithDraft;
     uploads: Upload;
     'upload-fields': UploadField;
     autosave: Autosave;
@@ -166,6 +167,7 @@ export interface Config {
     tags: TagsSelect<false> | TagsSelect<true>;
     'tag-items': TagItemsSelect<false> | TagItemsSelect<true>;
     rubbish: RubbishSelect<false> | RubbishSelect<true>;
+    'rubbish-with-drafts': RubbishWithDraftsSelect<false> | RubbishWithDraftsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'upload-fields': UploadFieldsSelect<false> | UploadFieldsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
@@ -1517,6 +1519,18 @@ export interface Rubbish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish-with-drafts".
+ */
+export interface RubbishWithDraft {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "upload-fields".
  */
 export interface UploadField {
@@ -1920,6 +1934,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'rubbish';
         value: string | Rubbish;
+      } | null)
+    | ({
+        relationTo: 'rubbish-with-drafts';
+        value: string | RubbishWithDraft;
       } | null)
     | ({
         relationTo: 'uploads';
@@ -2841,6 +2859,17 @@ export interface RubbishSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish-with-drafts_select".
+ */
+export interface RubbishWithDraftsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
