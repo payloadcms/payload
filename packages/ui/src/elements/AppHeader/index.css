@@ -64,10 +64,6 @@
     flex-grow: 0;
     gap: var(--spacer-1);
     width: 100%;
-
-    .app-header__step-nav-wrapper .btn {
-      padding: var(--spacer-1) var(--spacer-2);
-    }
   }
 
   .app-header__controls-wrapper {

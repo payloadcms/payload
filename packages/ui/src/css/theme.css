@@ -21,28 +21,8 @@
     /* Compact controls — search inputs, paginator inputs, toolbar inputs */
     --control-height: var(--spacer-4);
 
-    /* Popup menus
-     * --popup-bg: background of the popup panel (defaults to --color-bg-elevated via Popup/index.css fallback)
-     * --popup-radius: corner radius of the popup panel
-     * --popup-item-radius: corner radius of each popup list item
-     * --popup-item-bg-hover / --popup-item-color-hover: hover state of list items
-     * --popup-item-bg-selected: selected item background
-     */
+    /* Popup menus */
     --popup-radius: var(--radius-large);
     --popup-item-radius: var(--button-radius);
-    --popup-item-bg-hover: var(--color-bg-selected-strong);
-    --popup-item-color-hover: var(--color-text-onselected-strong);
-    --popup-item-bg-selected: var(--color-bg-selected);
-  }
-
-  /* Popup menus — dark theme item color overrides
-   * These are set on the popup element (which carries data-theme="dark" by default)
-   * and inherited by child popup list items.
-   */
-  html[data-theme='dark'],
-  [data-theme='dark'] {
-    --popup-item-bg-hover: var(--color-bg-selected-strong);
-    --popup-item-color-hover: var(--color-text-onselected-strong);
-    --popup-item-bg-selected: var(--color-bg-selected);
   }
 }

@@ -34,7 +34,7 @@
     border-radius: var(--popup-item-radius);
     display: flex;
     align-items: stretch;
-    color: var(--color-text);
+    color: var(--popup-item-color, var(--color-text));
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
@@ -55,8 +55,8 @@
   }
   .popup-button-list__button:hover {
     outline: none;
-    background-color: var(--popup-item-bg-hover);
-    color: var(--popup-item-color-hover);
+    background-color: var(--popup-item-bg-hover, var(--color-bg-selected-strong));
+    color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
   }
 
   .popup-button-list__disabled {
@@ -72,13 +72,13 @@
   }
 
   .popup-button-list__button--selected {
-    background-color: var(--popup-item-bg-selected);
-    color: var(--color-text);
+    background-color: var(--popup-item-bg-selected, var(--color-bg-selected));
+    color: var(--popup-item-color-selected, var(--popup-item-color, var(--color-text)));
   }
 
   .popup-button-list__button--selected:hover {
-    background-color: var(--popup-item-bg-hover);
-    color: var(--popup-item-color-hover);
+    background-color: var(--popup-item-bg-hover, var(--color-bg-selected-strong));
+    color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
   }
 
   /* Hide icon element by default (outside RadioGroup/MenuItem) */

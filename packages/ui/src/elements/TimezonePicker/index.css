@@ -28,7 +28,8 @@
       .rs__menu {
         overflow: hidden;
         border-radius: var(--radius-large);
-        background: var(--color-bg-menu);
+        background: var(--popup-bg-dark, var(--color-bg-menu));
+        color: var(--popup-item-color-dark, var(--color-text-ontooltip));
         padding: var(--spacer-2);
         min-width: 280px;
         max-height: 280px;
