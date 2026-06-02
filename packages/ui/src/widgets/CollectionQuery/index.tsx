@@ -1,7 +1,6 @@
 import type { CollectionSlug, Field, Where, WidgetServerProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatDistanceToNow } from 'date-fns'
 import { fieldAffectsData, fieldHasSubFields, formatAdminURL, tabHasName } from 'payload/shared'
 import React from 'react'
 
@@ -85,6 +84,7 @@ export async function CollectionQueryWidget({
   })
   const docs = result.docs as QueryDoc[]
   const documentLabelPath = getCollectionDocumentLabelPath(collectionConfig.admin)
+  const relativeTimeFormat = getRelativeTimeFormat(req.i18n.language)
 
   return (
     <div className="card collection-query-widget">
@@ -94,7 +94,7 @@ export async function CollectionQueryWidget({
       {docs.length > 0 ? (
         <ul className="collection-query-widget__rows">
           {docs.map((doc) => {
-            const sortMeta = getDocSortMeta({ doc, sortField })
+            const sortMeta = getDocSortMeta({ doc, relativeTimeFormat, sortField })
 
             return (
               <li className="collection-query-widget__row" key={doc.id}>
@@ -154,7 +154,15 @@ function getCollectionDocumentLabelPath(adminConfig: { useAsTitle?: string }) {
   return adminConfig.useAsTitle || 'id'
 }
 
-function getDocSortMeta({ doc, sortField }: { doc: QueryDoc; sortField?: string }) {
+function getDocSortMeta({
+  doc,
+  relativeTimeFormat,
+  sortField,
+}: {
+  doc: QueryDoc
+  relativeTimeFormat: Intl.RelativeTimeFormat
+  sortField?: string
+}) {
   const value = sortField
     ? getValueByPath({ object: doc, path: sortField })
     : doc.updatedAt || doc.createdAt
@@ -168,7 +176,7 @@ function getDocSortMeta({ doc, sortField }: { doc: QueryDoc; sortField?: string 
 
     return {
       dateTime,
-      label: formatRelativeDate(dateTime),
+      label: formatRelativeDate({ relativeTimeFormat, value: dateTime }),
     }
   }
 
@@ -176,7 +184,7 @@ function getDocSortMeta({ doc, sortField }: { doc: QueryDoc; sortField?: string 
     if (isDateString(value)) {
       return {
         dateTime: value,
-        label: formatRelativeDate(value),
+        label: formatRelativeDate({ relativeTimeFormat, value }),
       }
     }
 
@@ -377,53 +385,50 @@ function getValueByPath({ object, path }: { object: Record<string, unknown>; pat
   }, object)
 }
 
-function formatRelativeDate(value: string) {
+function getRelativeTimeFormat(language: string) {
+  try {
+    return new Intl.RelativeTimeFormat(language, { numeric: 'auto', style: 'narrow' })
+  } catch {
+    return new Intl.RelativeTimeFormat('en', { numeric: 'auto', style: 'narrow' })
+  }
+}
+
+const relativeTimeDivisions: { amount: number; unit: Intl.RelativeTimeFormatUnit }[] = [
+  { amount: 60, unit: 'seconds' },
+  { amount: 60, unit: 'minutes' },
+  { amount: 24, unit: 'hours' },
+  { amount: 7, unit: 'days' },
+  { amount: 4.34524, unit: 'weeks' },
+  { amount: 12, unit: 'months' },
+  { amount: Number.POSITIVE_INFINITY, unit: 'years' },
+]
+
+function formatRelativeDate({
+  relativeTimeFormat,
+  value,
+}: {
+  relativeTimeFormat: Intl.RelativeTimeFormat
+  value: string
+}) {
   const date = new Date(value)
 
   if (Number.isNaN(date.getTime())) {
     return value
   }
 
-  return formatCompactDistance(formatDistanceToNow(date))
-}
+  let duration = (date.getTime() - Date.now()) / 1000
 
-function formatCompactDistance(distance: string) {
-  if (distance.startsWith('less than') || distance.startsWith('half')) {
-    return '<1m'
+  for (const division of relativeTimeDivisions) {
+    if (Math.abs(duration) < division.amount) {
+      return relativeTimeFormat.format(Math.round(duration), division.unit)
+    }
+
+    duration /= division.amount
   }
 
-  const normalizedDistance = distance.replace(/^(?:about|almost|over)\s/, '')
-  const match = normalizedDistance.match(/^(a|an|\d+)\s+([a-z]+)/)
-
-  if (!match) {
-    return distance
-  }
-
-  const amount = match[1] === 'a' || match[1] === 'an' ? 1 : Number(match[1])
-  const unit = relativeDateUnitLabels[match[2]]
-
-  if (!unit) {
-    return distance
-  }
-
-  return `${amount}${unit}`
+  return relativeTimeFormat.format(Math.round(duration), 'years')
 }
 
 function isDateString(value: string) {
   return /^\d{4}-\d{2}-\d{2}/.test(value) && !Number.isNaN(new Date(value).getTime())
-}
-
-const relativeDateUnitLabels: Record<string, string> = {
-  day: 'd',
-  days: 'd',
-  hour: 'h',
-  hours: 'h',
-  minute: 'm',
-  minutes: 'm',
-  month: 'mo',
-  months: 'mo',
-  second: 's',
-  seconds: 's',
-  year: 'y',
-  years: 'y',
 }

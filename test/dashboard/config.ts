@@ -74,14 +74,14 @@ export default buildConfigWithDefaults({
           },
           {
             data: {
-              limit: 15,
+              limit: 25,
               relatedCollection: 'events',
               sortDirection: 'asc',
               sortField: 'startDate',
-              title: 'Upcoming events',
+              title: 'Event timeline',
               where: {
-                startDate: {
-                  greater_than: new Date().toISOString(),
+                location: {
+                  equals: 'Dashboard demo',
                 },
               },
             },

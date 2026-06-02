@@ -47,12 +47,30 @@ export const seed = async (payload: BasePayload) => {
 
     // Create sample events
     const currentDate = new Date()
+    // Demo events span past and future so the "Event timeline" widget can render both
+    // relative directions ("... ago" and "in ...") and overflow the widget height cap.
     const dashboardEventOffsets = [
+      { amount: -6, unit: 'months' },
+      { amount: -3, unit: 'months' },
+      { amount: -1, unit: 'months' },
+      { amount: -2, unit: 'weeks' },
+      { amount: -1, unit: 'weeks' },
+      { amount: -4, unit: 'days' },
+      { amount: -2, unit: 'days' },
+      { amount: -5, unit: 'hours' },
+      { amount: -2, unit: 'hours' },
+      { amount: -30, unit: 'minutes' },
+      { amount: -5, unit: 'minutes' },
       { amount: 5, unit: 'minutes' },
-      { amount: 3, unit: 'hours' },
+      { amount: 30, unit: 'minutes' },
+      { amount: 2, unit: 'hours' },
+      { amount: 5, unit: 'hours' },
       { amount: 2, unit: 'days' },
+      { amount: 4, unit: 'days' },
       { amount: 1, unit: 'weeks' },
-      { amount: 2, unit: 'months' },
+      { amount: 2, unit: 'weeks' },
+      { amount: 1, unit: 'months' },
+      { amount: 3, unit: 'months' },
       { amount: 6, unit: 'months' },
     ]
 

@@ -77,7 +77,7 @@ describe('Dashboard', () => {
     ).toHaveText('Top revenue entries')
     await expect(
       d.widgetByPos(9).locator('.collection-query-widget .collection-query-widget__title'),
-    ).toHaveText('Upcoming events')
+    ).toHaveText('Event timeline')
   })
 
   test('collection-query short widget shrinks to its rendered rows', async ({ page }) => {
@@ -124,14 +124,56 @@ describe('Dashboard', () => {
     }).toPass({ timeout: 1000 })
 
     await expect(async () => {
-      const dateLabels = await longCard
-        .locator('.collection-query-widget__row-meta')
-        .allTextContents()
+      const dateLabels = (
+        await longCard.locator('.collection-query-widget__row-meta').allTextContents()
+      ).map((label) => label.trim())
 
-      expect(new Set(dateLabels.map((label) => label.trim())).size).toBeGreaterThan(1)
+      expect(new Set(dateLabels).size).toBeGreaterThan(1)
+      // The timeline spans past and future, so labels render in both relative directions
+      // (e.g. "5m ago", "last week", "in 2d", "next month") via Intl.RelativeTimeFormat.
       for (const dateLabel of dateLabels) {
-        expect(dateLabel.trim()).toMatch(/^(?:<1m|\d+(?:[mhdwy]|mo))$/)
+        expect(dateLabel).toMatch(
+          /^(?:now|today|yesterday|tomorrow|last\s.+|next\s.+|in\s.+|.+\sago)$/,
+        )
       }
+      expect(dateLabels.some((label) => /\sago|^yesterday$|^last\s/.test(label))).toBe(true)
+      expect(dateLabels.some((label) => /^in\s|^tomorrow$|^next\s/.test(label))).toBe(true)
+    }).toPass({ timeout: 1000 })
+  })
+
+  test('collection-query renders relative dates in the active admin language', async ({ page }) => {
+    // Force the admin UI language to Spanish for this request. The server resolves the
+    // language from the `payload-lng` cookie, which the widget reads via req.i18n.language.
+    await page.context().addCookies([
+      {
+        name: 'payload-lng',
+        domain: new URL(serverURL).hostname,
+        path: '/',
+        value: 'es',
+      },
+    ])
+    await page.goto(url.admin)
+
+    const d = new DashboardHelper(page)
+    const timelineCard = d.widgetByPos(9).locator('.collection-query-widget')
+
+    // Spanish relative time via Intl.RelativeTimeFormat('es'): "hace ...", "dentro de ...",
+    // "la semana pasada", "el próximo mes". None of these strings appear in the English output.
+    const englishMarker = /(?:\sago$|^in\s|^now$|^today$|^tomorrow$|^yesterday$|^(?:next|last)\s)/
+    const spanishPast = /^hace\s|pasad[ao]|^ayer$|^anteayer$/
+    const spanishFuture = /^dentro de\s|^en\s|próxim[ao]|^mañana$/
+
+    await expect(async () => {
+      const dateLabels = (
+        await timelineCard.locator('.collection-query-widget__row-meta').allTextContents()
+      ).map((label) => label.trim())
+
+      expect(dateLabels.length).toBeGreaterThan(1)
+      for (const dateLabel of dateLabels) {
+        expect(dateLabel).not.toMatch(englishMarker)
+      }
+      expect(dateLabels.some((label) => spanishPast.test(label))).toBe(true)
+      expect(dateLabels.some((label) => spanishFuture.test(label))).toBe(true)
     }).toPass({ timeout: 1000 })
   })
 
@@ -141,7 +183,8 @@ describe('Dashboard', () => {
     const longCard = d.widgetByPos(9).locator('.collection-query-widget')
     const longRows = longCard.locator('.collection-query-widget__row')
 
-    await expect(longRows).toHaveCount(15)
+    // Matches the number of seeded "Dashboard demo" events in test/dashboard/seed.ts.
+    await expect(longRows).toHaveCount(22)
     await expect(async () => {
       const hasScrollableRows = await longCard
         .locator('.collection-query-widget__rows')
