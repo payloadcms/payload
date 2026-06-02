@@ -149,9 +149,21 @@
   --button-radius: 2px;
 
   /* Popup menus */
-  --popup-bg: #1e3a52;
   --popup-radius: 2px;
   --popup-item-radius: 2px;
+
+  /* Light popup (theme="light") */
+  --popup-bg: #2a475e;
+  --popup-item-bg-hover: #1a3a5c;
+  --popup-item-color-hover: #c6d4df;
+  --popup-item-bg-selected: #1e3a52;
+}
+
+/* Dark popup (theme="dark", Payload default) */
+.popup__content[data-theme='dark'] {
+  --popup-bg: #171a21;
+  --popup-text: #c6d4df;
+  --popup-item-color: #c6d4df;
   --popup-item-bg-hover: #2a475e;
   --popup-item-color-hover: #c6d4df;
   --popup-item-bg-selected: #1a3a5c;
