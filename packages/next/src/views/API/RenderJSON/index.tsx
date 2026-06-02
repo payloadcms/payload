@@ -2,7 +2,7 @@
 import { ChevronIcon } from '@payloadcms/ui'
 import * as React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const chars = {
   leftCurlyBracket: '\u007B',
