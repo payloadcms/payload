@@ -152,7 +152,7 @@ export const baseConfig: Partial<Config> = {
     },
     livePreview: {
       collections: [docControlsSlug],
-      url: 'http://localhost:3001',
+      url: 'http://localhost:3000',
     },
     components: {
       actions: [

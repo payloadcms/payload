@@ -80,6 +80,22 @@ export const myTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'ယခု လုပ်ဆောင်ချက်ကို သင်မတောင်းဆိုထားပါက ဤအီးမေးလ်ကို လျစ်လျူရှုထားခြင်းဖြင့် သင့်စကားဝှက်သည် ပြောင်းလဲမည်မဟုတ်ပါ။',
   },
+  commandPalette: {
+    actions: 'လုပ်ဆောင်ချက်များ',
+    createNew: 'အသစ်တစ်ခု ဖန်တီးပါ',
+    favorites: 'အကြိုက်ဆုံးများ',
+    hintActions: 'လှုပ်ရှားမှုများ',
+    hintClose: 'ပိတ်ရန်',
+    hintCreate: 'အသစ်တစ်ခု ဖန်တီးပါ',
+    hintNavigate: 'သွားရောက်ရန်',
+    hintSelect: 'ဖွင့်ပါ',
+    noResults: 'ရလဒ်မတွေ့ရှိပါ။',
+    pinToFavorites: 'အကြိုက်ဆုံးများသို့ တပ်ဆင်ပါ',
+    placeholder: 'အမိန့်တစ်ခုရိုက်ထည့်ပါ သို့မဟုတ် ရှာဖွေရန်စာသားရိုက်ထည့်ပါ…',
+    recentlyVisited: 'Visited မကြာသေးမီ',
+    removeFromFavorites: 'အကြိုက်စာရင်းမှ ဖယ်ရှားပါ',
+    title: 'Command Palette (ကမန်း့ ပလက်လက်)',
+  },
   dashboard: {
     addButton: 'Tambah +',
     addWidget: 'Tambah Widget',

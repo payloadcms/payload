@@ -199,6 +199,7 @@ export { PopupList }
 export { Popup } from '../../elements/Popup/index.js'
 export { Combobox } from '../../elements/Combobox/index.js'
 export type { ComboboxEntry, ComboboxProps } from '../../elements/Combobox/index.js'
+export { CommandPalette, commandPaletteSlug } from '../../elements/CommandPalette/index.js'
 export { PublishMany } from '../../elements/PublishMany/index.js'
 export { PublishButton } from '../../elements/PublishButton/index.js'
 export { SaveButton } from '../../elements/SaveButton/index.js'

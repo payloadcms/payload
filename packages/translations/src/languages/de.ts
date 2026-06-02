@@ -82,6 +82,22 @@ export const deTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Solltest du dies nicht angefordert haben, ignoriere diese E-Mail. Dein Passwort bleibt unverändert.',
   },
+  commandPalette: {
+    actions: 'Aktionen',
+    createNew: 'Neu erstellen',
+    favorites: 'Favoriten',
+    hintActions: 'Aktionen',
+    hintClose: 'Schließen',
+    hintCreate: 'Neu erstellen',
+    hintNavigate: 'Navigieren',
+    hintSelect: 'Öffnen',
+    noResults: 'Keine Ergebnisse gefunden',
+    pinToFavorites: 'Zu Favoriten hinzufügen',
+    placeholder: 'Geben Sie einen Befehl ein oder suchen Sie …',
+    recentlyVisited: 'Kürzlich besucht',
+    removeFromFavorites: 'Aus Favoriten entfernen',
+    title: 'Befehls-Palette',
+  },
   dashboard: {
     addButton: 'Hinzufügen +',
     addWidget: 'Widget hinzufügen',

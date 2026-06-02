@@ -80,6 +80,22 @@ export const caTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si no has sol·licitat això, ignora aquest correu i la teva contrasenya romandrà inalterada.',
   },
+  commandPalette: {
+    actions: 'Accions',
+    createNew: 'Crear nou',
+    favorites: 'Favorits',
+    hintActions: 'Accions',
+    hintClose: 'Tancar',
+    hintCreate: 'Crear nou',
+    hintNavigate: 'Navega',
+    hintSelect: 'Obre',
+    noResults: "No s'han trobat resultats",
+    pinToFavorites: 'Fixa als preferits',
+    placeholder: 'Escrigui una ordre o cerqui...',
+    recentlyVisited: 'Recentment visitat',
+    removeFromFavorites: 'Elimina dels preferits',
+    title: 'Paleta d’ordres',
+  },
   dashboard: {
     addButton: 'Afegeix +',
     addWidget: 'Afegeix Widget',
