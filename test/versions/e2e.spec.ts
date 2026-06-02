@@ -328,12 +328,10 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('v2')
       await page.goto(`${savedDocURL}/api`)
       await page.locator('#field-draft').check()
-      const values = page.locator('.query-inspector__value')
-      const count = await values.count()
-
-      for (let i = 0; i < count; i++) {
-        await expect(values.nth(i)).not.toHaveText(/published/i)
-      }
+      // The API view renders JSON via the Monaco editor. Wait for the restored v2 draft
+      // content to render, then assert v3's "published" description value is absent.
+      await expect(page.locator('.query-inspector__results')).toContainText('restore me as draft')
+      await expect(page.locator('.query-inspector__results')).not.toContainText(/published/i)
     })
 
     test('should show currently published version status in versions view', async () => {
