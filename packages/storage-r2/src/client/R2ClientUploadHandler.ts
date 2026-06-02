@@ -50,9 +50,12 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
       throw new Error('Failed to initialize multipart upload')
     }
 
-    const { filename: sanitizedFilename, ...multipartUpload } = (await multipart.json()) as {
+    const { filename: sanitizedFilename, ...multipartUpload } = (await multipart.json()) as Pick<
+      R2MultipartUpload,
+      'key' | 'uploadId'
+    > & {
       filename?: string
-    } & Pick<R2MultipartUpload, 'key' | 'uploadId'>
+    }
 
     if (sanitizedFilename && sanitizedFilename !== file.name) {
       updateFilename(sanitizedFilename)

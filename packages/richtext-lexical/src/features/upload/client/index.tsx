@@ -12,13 +12,13 @@ import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer/commands.js'
 import { $isUploadNode, UploadNode } from './nodes/UploadNode.js'
 import { UploadPlugin } from './plugin/index.js'
 
-export type UploadFeaturePropsClient = {
+export type UploadFeaturePropsClient = ExclusiveUploadFeatureProps & {
   collections: {
     [collection: string]: {
       hasExtraFields: boolean
     }
   }
-} & ExclusiveUploadFeatureProps
+}
 
 export const UploadFeatureClient = createClientFeature<UploadFeaturePropsClient>({
   nodes: [UploadNode],

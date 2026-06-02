@@ -14,7 +14,7 @@ import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 
-export type Arguments = {
+export type Arguments = Pick<FindOptions<string, SelectType>, 'select'> & {
   currentDepth?: number
   depth?: number
   disableErrors?: boolean
@@ -24,7 +24,7 @@ export type Arguments = {
   populate?: PopulateType
   req: PayloadRequest
   showHiddenFields?: boolean
-} & Pick<FindOptions<string, SelectType>, 'select'>
+}
 
 export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = any>(
   args: Arguments,

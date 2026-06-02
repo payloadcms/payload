@@ -40,7 +40,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
   ref,
   selectedIds,
   useAsTitle = 'id',
-}: { ref?: React.RefObject<HierarchyColumnBrowserRef | null> } & HierarchyColumnBrowserProps) {
+}: HierarchyColumnBrowserProps & { ref?: React.RefObject<HierarchyColumnBrowserRef | null> }) {
   const { i18n } = useTranslation()
   const { permissions } = useAuth()
   const {
@@ -156,7 +156,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         : undefined
 
       const allItems: ColumnItemData[] = (data.docs || []).map(
-        (doc: { id: number | string } & Record<string, unknown>) => ({
+        (doc: Record<string, unknown> & { id: number | string }) => ({
           id: doc.id,
           allowedCollections: typeFieldName
             ? (doc[typeFieldName] as string[] | undefined)
@@ -263,13 +263,11 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
 
     // Fetch all columns in parallel
     const results = await Promise.all(
-      parentIds.map(async (parentId, index) => {
+      parentIds.map(async (parentId) => {
         try {
           const { hasNextPage, items, totalDocs } = await fetchItems({ page: 1, parentId })
-          let parentTitle: string | undefined
-          if (index > 0 && parentId !== null) {
-            // Will be filled in after all fetches complete
-          }
+          // parentTitle is filled in after all fetches complete (see columnsWithTitles below)
+          const parentTitle: string | undefined = undefined
           return {
             hasNextPage,
             isLoading: false,

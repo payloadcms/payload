@@ -12,7 +12,6 @@
     display: flex;
     flex-direction: column;
     background-color: var(--color-bg);
-
   }
 
   @media (max-width: 768px) {

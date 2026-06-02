@@ -225,7 +225,6 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
  * @todo deprecate /types subpath export in 4.0
  */
 export type {
-  Args as SQLiteAdapterArgs,
   CountDistinct,
   DeleteWhere,
   DropDatabase,
@@ -239,6 +238,7 @@ export type {
   MigrateDownArgs,
   MigrateUpArgs,
   SQLiteD1Adapter as SQLiteAdapter,
+  Args as SQLiteAdapterArgs,
   SQLiteSchemaHook,
 } from './types.js'
 

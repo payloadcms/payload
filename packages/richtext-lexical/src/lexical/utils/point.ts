@@ -1,5 +1,13 @@
 'use client'
 export class Point {
+  get x(): number {
+    return this._x
+  }
+
+  get y(): number {
+    return this._y
+  }
+
   private readonly _x: number
 
   private readonly _y: number
@@ -31,14 +39,6 @@ export class Point {
 
   public equals({ x, y }: Point): boolean {
     return this.x === x && this.y === y
-  }
-
-  get x(): number {
-    return this._x
-  }
-
-  get y(): number {
-    return this._y
   }
 }
 

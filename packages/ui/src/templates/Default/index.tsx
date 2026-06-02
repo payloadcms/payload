@@ -11,21 +11,20 @@ import './index.css'
 
 import React from 'react'
 
-/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
+import { DefaultNav } from '../../elements/Nav/index.js'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import {
   ActionsProvider,
   AppHeader,
   BulkUploadProvider,
   EntityVisibilityProvider,
   DefaultTemplateWrapper as Wrapper,
+  // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../exports/client/index.js'
-/* eslint-enable payload/no-imports-from-exports-dir */
-import { DefaultNav } from '../../elements/Nav/index.js'
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 const baseClass = 'template-default'
 
-export type DefaultTemplateProps = {
+export type DefaultTemplateProps = Omit<ServerProps, 'server'> & {
   children?: React.ReactNode
   className?: string
   collectionSlug?: string
@@ -36,7 +35,7 @@ export type DefaultTemplateProps = {
   viewActions?: CustomComponent[]
   viewType?: ViewTypes
   visibleEntities: VisibleEntities
-} & Omit<ServerProps, 'server'>
+}
 
 export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   children,
@@ -74,12 +73,12 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     visibleEntities,
   }
 
-  const serverProps: {
+  const serverProps: ServerProps & {
     collectionSlug: string
     docID: number | string
     globalSlug: string
     req: PayloadRequest
-  } & ServerProps = {
+  } = {
     collectionSlug,
     docID,
     globalSlug,

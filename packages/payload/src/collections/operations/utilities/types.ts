@@ -206,17 +206,6 @@ export type BeforeOperationArg<TOperationGeneric extends CollectionSlug> = {
   req: PayloadRequest
 } & (
   | {
-      args:
-        | Parameters<OperationMap<TOperationGeneric>['find']>[0]
-        | Parameters<OperationMap<TOperationGeneric>['findByID']>[0]
-      /**
-       * @deprecated Use 'find' or 'findByID' operation instead
-       *
-       * TODO: v4 - remove this union option
-       */
-      operation: 'read'
-    }
-  | {
       args: Parameters<OperationMap<TOperationGeneric>['count']>[0]
       operation: 'count'
     }
@@ -296,5 +285,16 @@ export type BeforeOperationArg<TOperationGeneric extends CollectionSlug> = {
   | {
       args: Parameters<OperationMap<TOperationGeneric>['updateByID']>[0]
       operation: 'updateByID'
+    }
+  | {
+      args:
+        | Parameters<OperationMap<TOperationGeneric>['find']>[0]
+        | Parameters<OperationMap<TOperationGeneric>['findByID']>[0]
+      /**
+       * @deprecated Use 'find' or 'findByID' operation instead
+       *
+       * TODO: v4 - remove this union option
+       */
+      operation: 'read'
     }
 )

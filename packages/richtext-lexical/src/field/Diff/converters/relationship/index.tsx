@@ -15,7 +15,7 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
 }) => HTMLConvertersAsync<SerializedRelationshipNode> = ({ i18n, req }) => {
   return {
     relationship: async ({ node, populate, providedCSSString }) => {
-      let data: (Record<string, any> & TypeWithID) | undefined = undefined
+      let data: (Record<string, any> & TypeWithID) | undefined
 
       const id = typeof node.value === 'object' ? node.value.id : node.value
 
@@ -29,7 +29,7 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
           collectionSlug: node.relationTo,
         })
       } else {
-        data = node.value as unknown as FileData & TypeWithID
+        data = node.value
       }
 
       const relatedCollection = req.payload.collections[node.relationTo]?.config

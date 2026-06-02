@@ -182,7 +182,7 @@ export function DefaultEditView({
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
   const [showStaleDataModal, setShowStaleDataModal] = useState(false)
 
-  const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
+  const [editSessionStartTime, setEditSessionStartTime] = useState(() => Date.now())
 
   const hasCheckedForStaleDataRef = useRef(false)
   const originalUpdatedAtRef = useRef(data?.updatedAt)
@@ -233,7 +233,7 @@ export function DefaultEditView({
           documentLockState.current = {
             hasShownLockedModal: documentLockState.current?.hasShownLockedModal || false,
             isLocked: true,
-            user: lockedState.user as ClientUser,
+            user: lockedState.user,
           }
           setCurrentEditor(lockedState.user as ClientUser)
         }
@@ -244,7 +244,7 @@ export function DefaultEditView({
         }
       }
     },
-    [documentLockState, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
+    [setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
   )
 
   const handleStaleDataReload = useCallback(() => {
@@ -286,7 +286,6 @@ export function DefaultEditView({
   }, [
     collectionSlug,
     documentIsLocked,
-    documentLockState,
     globalSlug,
     id,
     isLockingEnabled,

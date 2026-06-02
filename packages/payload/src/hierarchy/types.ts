@@ -5,9 +5,12 @@ import type { JoinField } from '../fields/config/types.js'
  * User-configurable options for the hierarchy join field.
  * Excludes properties that are auto-generated: type, collection, on, hasMany
  */
-export type HierarchyJoinFieldConfig = {
+export type HierarchyJoinFieldConfig = Omit<
+  Partial<JoinField>,
+  'collection' | 'hasMany' | 'name' | 'on' | 'type'
+> & {
   name: string
-} & Omit<Partial<JoinField>, 'collection' | 'hasMany' | 'name' | 'on' | 'type'>
+}
 
 /**
  * Configuration options for hierarchy feature
@@ -64,6 +67,7 @@ export type HierarchyConfig = {
    * @default false
    */
   collectionSpecific?:
+    | boolean
     | {
         /**
          * Name of the select field for specifying allowed collections
@@ -71,7 +75,6 @@ export type HierarchyConfig = {
          */
         fieldName?: string
       }
-    | boolean
   /**
    * Configure a join field to query all children (nested hierarchy items and related documents)
    * If not set, no join field is created.
@@ -126,10 +129,10 @@ export type SanitizedHierarchyConfig = {
   }
   allowHasMany: boolean
   collectionSpecific:
+    | false
     | {
         fieldName: string
       }
-    | false
   /**
    * Join field configuration, or undefined if not enabled
    */

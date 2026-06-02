@@ -47,9 +47,9 @@ export type SlashMenuGroup = {
     | string
 }
 
-export type SlashMenuItemInternal = {
+export type SlashMenuItemInternal = SlashMenuItem & {
   ref: RefObject<HTMLButtonElement | null>
-} & SlashMenuItem
+}
 
 export type SlashMenuGroupInternal = Spread<
   {

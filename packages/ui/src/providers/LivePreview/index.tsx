@@ -14,7 +14,10 @@ import { customCollisionDetection } from './collisionDetection.js'
 import { LivePreviewContext } from './context.js'
 import { sizeReducer } from './sizeReducer.js'
 
-export type LivePreviewProviderProps = {
+export type LivePreviewProviderProps = Pick<
+  LivePreviewContextType,
+  'typeofLivePreviewURL' | 'url'
+> & {
   appIsReady?: boolean
   breakpoints?: LivePreviewConfig['breakpoints']
   children: React.ReactNode
@@ -32,7 +35,7 @@ export type LivePreviewProviderProps = {
    * This specifically relates to `admin.preview` function in the config instead of live preview.
    */
   previewURL?: string
-} & Pick<LivePreviewContextType, 'typeofLivePreviewURL' | 'url'>
+}
 
 export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   breakpoints: incomingBreakpoints,

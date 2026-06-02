@@ -34,11 +34,11 @@ import { UIField } from '../../fields/UI/index.js'
 import { UploadField } from '../../fields/Upload/index.js'
 import { useFormFields } from '../../forms/Form/index.js'
 
-type RenderFieldProps = {
-  clientFieldConfig: ClientField
-  permissions: SanitizedFieldPermissions
-} & FieldPaths &
-  Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'>
+type RenderFieldProps = FieldPaths &
+  Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'> & {
+    clientFieldConfig: ClientField
+    permissions: SanitizedFieldPermissions
+  }
 
 export function RenderField({
   clientFieldConfig,

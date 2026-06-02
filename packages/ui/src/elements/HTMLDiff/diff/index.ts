@@ -143,6 +143,198 @@ export class HtmlDiff {
     this.operationList = this.getOperationList()
   }
 
+  public getSideBySideContents(): string[] {
+    if (this.sideBySideContents !== undefined) {
+      return this.sideBySideContents
+    }
+
+    let oldHtml = ''
+    let newHtml = ''
+    let equalSequence = 0
+    this.operationList.forEach((operation) => {
+      switch (operation.type) {
+        case 'create': {
+          newHtml += this.dressUpDiffContent(
+            'create',
+            this.newTokens.slice(operation.newStart, operation.newEnd),
+          )
+          break
+        }
+
+        case 'delete': {
+          const deletedTokens = this.oldTokens.slice(operation.oldStart, operation.oldEnd)
+          oldHtml += this.dressUpDiffContent('delete', deletedTokens)
+          break
+        }
+        case 'equal': {
+          const equalTokens = this.newTokens.slice(operation.newStart, operation.newEnd)
+          let equalString = ''
+          for (const token of equalTokens) {
+            // find start tags and add data-seq to enable sync scroll
+            const startTagMatch = token.match(htmlStartTagReg)
+            if (startTagMatch) {
+              equalSequence += 1
+              const tagNameLength = (startTagMatch?.groups?.name?.length ?? 0) + 1
+              equalString += `${token.slice(0, tagNameLength)} data-seq="${equalSequence}"${token.slice(tagNameLength)}`
+            } else {
+              equalString += token
+            }
+          }
+          oldHtml += equalString
+          newHtml += equalString
+          break
+        }
+
+        case 'replace': {
+          oldHtml += this.dressUpDiffContent(
+            'delete',
+            this.oldTokens.slice(operation.oldStart, operation.oldEnd),
+          )
+          newHtml += this.dressUpDiffContent(
+            'create',
+            this.newTokens.slice(operation.newStart, operation.newEnd),
+          )
+          break
+        }
+
+        default: {
+          // eslint-disable-next-line no-console
+          console.error('Richtext diff error - invalid operation: ' + String(operation.type))
+        }
+      }
+    })
+
+    const result: [string, string] = [oldHtml, newHtml]
+    this.sideBySideContents = result
+    return result
+  }
+
+  public getUnifiedContent(): string {
+    if (this.unifiedContent !== undefined) {
+      return this.unifiedContent
+    }
+
+    let result = ''
+    this.operationList.forEach((operation) => {
+      switch (operation.type) {
+        case 'create': {
+          result += this.dressUpDiffContent(
+            'create',
+            this.newTokens.slice(operation.newStart, operation.newEnd),
+          )
+          break
+        }
+
+        case 'delete': {
+          result += this.dressUpDiffContent(
+            'delete',
+            this.oldTokens.slice(operation.oldStart, operation.oldEnd),
+          )
+          break
+        }
+
+        case 'equal': {
+          for (const token of this.newTokens.slice(operation.newStart, operation.newEnd)) {
+            result += token
+          }
+          break
+        }
+
+        case 'replace': {
+          // handle specially tag replace
+          const olds = this.oldTokens.slice(operation.oldStart, operation.oldEnd)
+          const news = this.newTokens.slice(operation.newStart, operation.newEnd)
+          if (
+            olds.length === 1 &&
+            news.length === 1 &&
+            olds[0]?.match(htmlTagReg) &&
+            news[0]?.match(htmlTagReg)
+          ) {
+            result += news[0]
+            break
+          }
+
+          const deletedTokens: string[] = []
+          const createdTokens: string[] = []
+          let createIndex = operation.newStart
+          for (
+            let deleteIndex = operation.oldStart;
+            deleteIndex < operation.oldEnd;
+            deleteIndex++
+          ) {
+            const deletedToken = this.oldTokens[deleteIndex]
+
+            if (!deletedToken) {
+              continue
+            }
+
+            const matchTagResultD = deletedToken?.match(htmlTagWithNameReg)
+            if (matchTagResultD) {
+              // handle replaced tag token
+
+              // skip special tag
+              if ([htmlImgTagReg, htmlVideoTagReg].some((item) => deletedToken?.match(item))) {
+                deletedTokens.push(deletedToken)
+                continue
+              }
+
+              // handle normal tag
+              result += this.dressUpDiffContent('delete', deletedTokens)
+              deletedTokens.splice(0)
+              let isTagInNewFind = false
+              for (
+                let tempCreateIndex = createIndex;
+                tempCreateIndex < operation.newEnd;
+                tempCreateIndex++
+              ) {
+                const createdToken = this.newTokens[tempCreateIndex]
+                if (!createdToken) {
+                  continue
+                }
+                const matchTagResultC = createdToken?.match(htmlTagWithNameReg)
+                if (
+                  matchTagResultC &&
+                  matchTagResultC.groups?.name === matchTagResultD.groups?.name &&
+                  matchTagResultC.groups?.isEnd === matchTagResultD.groups?.isEnd
+                ) {
+                  // find first matched tag, but not maybe the expected tag(to optimize)
+                  isTagInNewFind = true
+                  result += this.dressUpDiffContent('create', createdTokens)
+                  result += createdToken
+                  createdTokens.splice(0)
+                  createIndex = tempCreateIndex + 1
+                  break
+                } else {
+                  createdTokens.push(createdToken)
+                }
+              }
+              if (!isTagInNewFind) {
+                result += deletedToken
+                createdTokens.splice(0)
+              }
+            } else {
+              // token is not a tag
+              deletedTokens.push(deletedToken)
+            }
+          }
+          if (createIndex < operation.newEnd) {
+            createdTokens.push(...this.newTokens.slice(createIndex, operation.newEnd))
+          }
+          result += this.dressUpDiffContent('delete', deletedTokens)
+          result += this.dressUpDiffContent('create', createdTokens)
+          break
+        }
+
+        default: {
+          // eslint-disable-next-line no-console
+          console.error('Richtext diff error - invalid operation: ' + String(operation.type))
+        }
+      }
+    })
+    this.unifiedContent = result
+    return result
+  }
+
   // Find the longest matched block between tokens
   private computeBestMatchedBlock(
     oldStart: number,
@@ -511,197 +703,5 @@ export class HtmlDiff {
         /<picture[^>]*>.*?<\/picture>|<video[^>]*>.*?<\/video>|<[^>]+>|\w+\b|\s+|[^<>\w]/gs,
       ) || []
     )
-  }
-
-  public getSideBySideContents(): string[] {
-    if (this.sideBySideContents !== undefined) {
-      return this.sideBySideContents
-    }
-
-    let oldHtml = ''
-    let newHtml = ''
-    let equalSequence = 0
-    this.operationList.forEach((operation) => {
-      switch (operation.type) {
-        case 'create': {
-          newHtml += this.dressUpDiffContent(
-            'create',
-            this.newTokens.slice(operation.newStart, operation.newEnd),
-          )
-          break
-        }
-
-        case 'delete': {
-          const deletedTokens = this.oldTokens.slice(operation.oldStart, operation.oldEnd)
-          oldHtml += this.dressUpDiffContent('delete', deletedTokens)
-          break
-        }
-        case 'equal': {
-          const equalTokens = this.newTokens.slice(operation.newStart, operation.newEnd)
-          let equalString = ''
-          for (const token of equalTokens) {
-            // find start tags and add data-seq to enable sync scroll
-            const startTagMatch = token.match(htmlStartTagReg)
-            if (startTagMatch) {
-              equalSequence += 1
-              const tagNameLength = (startTagMatch?.groups?.name?.length ?? 0) + 1
-              equalString += `${token.slice(0, tagNameLength)} data-seq="${equalSequence}"${token.slice(tagNameLength)}`
-            } else {
-              equalString += token
-            }
-          }
-          oldHtml += equalString
-          newHtml += equalString
-          break
-        }
-
-        case 'replace': {
-          oldHtml += this.dressUpDiffContent(
-            'delete',
-            this.oldTokens.slice(operation.oldStart, operation.oldEnd),
-          )
-          newHtml += this.dressUpDiffContent(
-            'create',
-            this.newTokens.slice(operation.newStart, operation.newEnd),
-          )
-          break
-        }
-
-        default: {
-          // eslint-disable-next-line no-console
-          console.error('Richtext diff error - invalid operation: ' + String(operation.type))
-        }
-      }
-    })
-
-    const result: [string, string] = [oldHtml, newHtml]
-    this.sideBySideContents = result
-    return result
-  }
-
-  public getUnifiedContent(): string {
-    if (this.unifiedContent !== undefined) {
-      return this.unifiedContent
-    }
-
-    let result = ''
-    this.operationList.forEach((operation) => {
-      switch (operation.type) {
-        case 'create': {
-          result += this.dressUpDiffContent(
-            'create',
-            this.newTokens.slice(operation.newStart, operation.newEnd),
-          )
-          break
-        }
-
-        case 'delete': {
-          result += this.dressUpDiffContent(
-            'delete',
-            this.oldTokens.slice(operation.oldStart, operation.oldEnd),
-          )
-          break
-        }
-
-        case 'equal': {
-          for (const token of this.newTokens.slice(operation.newStart, operation.newEnd)) {
-            result += token
-          }
-          break
-        }
-
-        case 'replace': {
-          // handle specially tag replace
-          const olds = this.oldTokens.slice(operation.oldStart, operation.oldEnd)
-          const news = this.newTokens.slice(operation.newStart, operation.newEnd)
-          if (
-            olds.length === 1 &&
-            news.length === 1 &&
-            olds[0]?.match(htmlTagReg) &&
-            news[0]?.match(htmlTagReg)
-          ) {
-            result += news[0]
-            break
-          }
-
-          const deletedTokens: string[] = []
-          const createdTokens: string[] = []
-          let createIndex = operation.newStart
-          for (
-            let deleteIndex = operation.oldStart;
-            deleteIndex < operation.oldEnd;
-            deleteIndex++
-          ) {
-            const deletedToken = this.oldTokens[deleteIndex]
-
-            if (!deletedToken) {
-              continue
-            }
-
-            const matchTagResultD = deletedToken?.match(htmlTagWithNameReg)
-            if (matchTagResultD) {
-              // handle replaced tag token
-
-              // skip special tag
-              if ([htmlImgTagReg, htmlVideoTagReg].some((item) => deletedToken?.match(item))) {
-                deletedTokens.push(deletedToken)
-                continue
-              }
-
-              // handle normal tag
-              result += this.dressUpDiffContent('delete', deletedTokens)
-              deletedTokens.splice(0)
-              let isTagInNewFind = false
-              for (
-                let tempCreateIndex = createIndex;
-                tempCreateIndex < operation.newEnd;
-                tempCreateIndex++
-              ) {
-                const createdToken = this.newTokens[tempCreateIndex]
-                if (!createdToken) {
-                  continue
-                }
-                const matchTagResultC = createdToken?.match(htmlTagWithNameReg)
-                if (
-                  matchTagResultC &&
-                  matchTagResultC.groups?.name === matchTagResultD.groups?.name &&
-                  matchTagResultC.groups?.isEnd === matchTagResultD.groups?.isEnd
-                ) {
-                  // find first matched tag, but not maybe the expected tag(to optimize)
-                  isTagInNewFind = true
-                  result += this.dressUpDiffContent('create', createdTokens)
-                  result += createdToken
-                  createdTokens.splice(0)
-                  createIndex = tempCreateIndex + 1
-                  break
-                } else {
-                  createdTokens.push(createdToken)
-                }
-              }
-              if (!isTagInNewFind) {
-                result += deletedToken
-                createdTokens.splice(0)
-              }
-            } else {
-              // token is not a tag
-              deletedTokens.push(deletedToken)
-            }
-          }
-          if (createIndex < operation.newEnd) {
-            createdTokens.push(...this.newTokens.slice(createIndex, operation.newEnd))
-          }
-          result += this.dressUpDiffContent('delete', deletedTokens)
-          result += this.dressUpDiffContent('create', createdTokens)
-          break
-        }
-
-        default: {
-          // eslint-disable-next-line no-console
-          console.error('Richtext diff error - invalid operation: ' + String(operation.type))
-        }
-      }
-    })
-    this.unifiedContent = result
-    return result
   }
 }

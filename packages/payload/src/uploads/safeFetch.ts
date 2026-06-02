@@ -37,7 +37,7 @@ const ssrfFilterInterceptor: LookupFunction = (hostname, options, callback) => {
     if (err) {
       callback(err, address, family)
     } else {
-      let ips = [] as string[]
+      let ips
       if (Array.isArray(address)) {
         ips = address.map((a) => a.address)
       } else {
@@ -82,17 +82,17 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>): Promis
         throw new Error(`Blocked unsafe attempt to ${hostname}`)
       }
     }
-    return (await undiciFetch(url, {
+    return await undiciFetch(url, {
       ...options,
       dispatcher: safeDispatcher,
       redirect: 'manual', // Prevent automatic redirects
-    })) as unknown as Response
+    })
   } catch (error) {
     if (error instanceof Error) {
       if (error.cause instanceof Error && error.cause.message.includes('unsafe')) {
         // Errors thrown from within interceptors always have 'fetch error' as the message
         // The desired message we want to bubble up is in the cause
-        throw new Error(error.cause.message)
+        throw new Error(error.cause.message, { cause: error })
       } else {
         let stringifiedUrl: string | undefined = undefined
         if (typeof unverifiedUrl === 'string') {
@@ -103,7 +103,9 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>): Promis
           stringifiedUrl = unverifiedUrl.url
         }
 
-        throw new Error(`Failed to fetch from ${stringifiedUrl}, ${error.message}`)
+        throw new Error(`Failed to fetch from ${stringifiedUrl}, ${error.message}`, {
+          cause: error,
+        })
       }
     }
     throw error

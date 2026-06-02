@@ -26,6 +26,8 @@ const baseRules = {
   'object-shorthand': 'warn',
   'no-useless-escape': 'warn',
   'import-x/no-duplicates': 'warn',
+  // TODO: investigate turning on in the future
+  'perfectionist/sort-modules': 'off',
   'perfectionist/sort-objects': [
     'error',
     {
@@ -34,9 +36,12 @@ const baseRules = {
       partitionByComment: true,
       partitionByNewLine: true,
       groups: ['top', 'unknown'],
-      customGroups: {
-        top: ['_id', 'id', 'name', 'slug', 'type'],
-      },
+      customGroups: [
+        {
+          groupName: 'top',
+          elementNamePattern: '^(_id|id|name|slug|type)$',
+        },
+      ],
     },
   ],
   /*'perfectionist/sort-object-types': [

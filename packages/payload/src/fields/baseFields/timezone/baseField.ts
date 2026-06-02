@@ -2,7 +2,7 @@ import type { StaticLabel } from '../../../config/types.js'
 import type { SelectField } from '../../config/types.js'
 
 export const baseTimezoneField: (
-  args: { label?: StaticLabel } & Partial<SelectField>,
+  args: Partial<SelectField> & { label?: StaticLabel },
 ) => SelectField = ({ name, defaultValue, label, options, required }) => {
   return {
     name: name!,

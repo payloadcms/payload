@@ -132,7 +132,7 @@ function init(modules: { typescript: typeof tslib }) {
 function parsePayloadComponent(
   context: PayloadComponentContext,
   nodeText: string,
-): { exportName: string; path: string } | undefined {
+): undefined | { exportName: string; path: string } {
   let pathAndMaybeExport: string
   let exportNameOverride: string | undefined
 

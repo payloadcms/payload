@@ -35,7 +35,6 @@ export function linesFromStartToContentAndPropsString({
 
   let bracketCount = 0
   let quoteChar: null | string = null
-  let isSelfClosing = false
   let isWithinCodeBlockAmount = 0
 
   const beforeStartLine = linesCopy[0]!.slice(0, startMatch.index)
@@ -78,7 +77,6 @@ export function linesFromStartToContentAndPropsString({
         }
 
         if (char === '/' && nextChar === '>' && bracketCount === 0 && !quoteChar) {
-          isSelfClosing = true
           endLineIndex = lineIndex
           endlineLastCharIndex = charIndex + 2
 
@@ -154,7 +152,7 @@ export function linesFromStartToContentAndPropsString({
       }
     }
 
-    if (lineIndex === linesCopy.length - 1 && !isEndOptional && !isSelfClosing) {
+    if (lineIndex === linesCopy.length - 1 && !isEndOptional) {
       throw new Error(
         'End match not found for lines ' +
           lines.join('\n') +

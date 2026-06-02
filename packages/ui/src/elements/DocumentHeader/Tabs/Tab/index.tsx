@@ -24,7 +24,7 @@ export const DefaultDocumentTab: React.FC<{
   path?: string
   permissions?: SanitizedPermissions
   req: PayloadRequest
-  tabConfig: { readonly Pill_Component?: React.FC } & DocumentTabConfig
+  tabConfig: DocumentTabConfig & { readonly Pill_Component?: React.FC }
 }> = (props) => {
   const {
     apiURL,

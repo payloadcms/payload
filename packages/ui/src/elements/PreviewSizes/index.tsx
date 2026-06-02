@@ -9,9 +9,9 @@ import './index.scss'
 
 const baseClass = 'preview-sizes'
 
-type FileInfo = {
+type FileInfo = FileSize & {
   url: string
-} & FileSize
+}
 type FilesSizesWithUrl = {
   [key: string]: FileInfo
 }
@@ -77,9 +77,9 @@ const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
 }
 
 export type PreviewSizesProps = {
-  doc: {
+  doc: Data & {
     sizes?: FilesSizesWithUrl
-  } & Data
+  }
   imageCacheTag?: string
   uploadConfig: SanitizedCollectionConfig['upload']
 }

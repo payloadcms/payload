@@ -78,21 +78,21 @@ export type UpdateByIDOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
-> = {
+> = UpdateBaseOptions<T, TSlug, TSelect> & {
   id: number | string
   limit?: never
   where?: never
-} & UpdateBaseOptions<T, TSlug, TSelect>
+}
 
 export type UpdateManyOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
-> = {
+> = UpdateBaseOptions<T, TSlug, TSelect> & {
   id?: never
   limit?: number
   where: Where
-} & UpdateBaseOptions<T, TSlug, TSelect>
+}
 
 export type UpdateOptions<
   T extends PayloadTypesShape,

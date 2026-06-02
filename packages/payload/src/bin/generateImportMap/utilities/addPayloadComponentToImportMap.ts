@@ -42,10 +42,10 @@ export function addPayloadComponentToImportMap({
   importMapToBaseDirPath: string
   imports: Imports
   payloadComponent: PayloadComponent
-}): {
+}): null | {
   path: string
   specifier: string
-} | null {
+} {
   if (!payloadComponent) {
     return null
   }

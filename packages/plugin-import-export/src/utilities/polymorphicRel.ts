@@ -1,6 +1,6 @@
 export type PolymorphicRelValue = {
   relationTo: string
-  value: { id: number | string } | number | string
+  value: number | string | { id: number | string }
 }
 
 export const isPolymorphicRelValue = (v: unknown): v is PolymorphicRelValue =>

@@ -30,7 +30,7 @@ export type HierarchyDrawerProps = {
   readonly showMoveToRoot?: boolean
 }
 
-export type HierarchyDrawerInternalProps = {
+export type HierarchyDrawerInternalProps = HierarchyDrawerProps & {
   /** Base filter constraint (e.g., tenant filter) to apply to all queries */
   readonly baseFilter?: null | Where
   readonly closeDrawer: () => void
@@ -46,14 +46,14 @@ export type HierarchyDrawerInternalProps = {
   readonly Icon?: React.ReactNode
   readonly parentFieldName: string
   readonly useAsTitle?: string
-} & HierarchyDrawerProps
+}
 
-export type HierarchyDrawerTogglerProps = {
+export type HierarchyDrawerTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   children?: React.ReactNode
   className?: string
   disabled?: boolean
   drawerSlug?: string
-} & HTMLAttributes<HTMLButtonElement>
+}
 
 export type UseHierarchyDrawer = (args: UseHierarchyDrawerArgs) => [
   React.FC<HierarchyDrawerProps>,

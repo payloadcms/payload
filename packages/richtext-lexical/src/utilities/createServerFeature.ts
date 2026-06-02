@@ -9,7 +9,10 @@ import type {
 } from '../features/typesServer.js'
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 
-export type CreateServerFeatureArgs<UnSanitizedProps, SanitizedProps, ClientProps> = {
+export type CreateServerFeatureArgs<UnSanitizedProps, SanitizedProps, ClientProps> = Pick<
+  FeatureProviderServer<UnSanitizedProps, ClientProps>,
+  'dependencies' | 'dependenciesPriority' | 'dependenciesSoft' | 'key'
+> & {
   feature:
     | ((props: {
         config: SanitizedConfig
@@ -26,10 +29,7 @@ export type CreateServerFeatureArgs<UnSanitizedProps, SanitizedProps, ClientProp
         | Promise<ServerFeature<SanitizedProps, ClientProps>>
         | ServerFeature<SanitizedProps, ClientProps>)
     | Omit<ServerFeature<SanitizedProps, ClientProps>, 'sanitizedServerFeatureProps'>
-} & Pick<
-  FeatureProviderServer<UnSanitizedProps, ClientProps>,
-  'dependencies' | 'dependenciesPriority' | 'dependenciesSoft' | 'key'
->
+}
 
 export const createServerFeature: <
   UnSanitizedProps = undefined,

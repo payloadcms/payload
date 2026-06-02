@@ -212,121 +212,6 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
     this.tempFolderPath = path.resolve(this.adapter.migrationDir, TEMP_FOLDER_NAME)
   }
 
-  private ensureTempFolder(): void {
-    if (!existsSync(this.tempFolderPath)) {
-      mkdirSync(this.tempFolderPath, { recursive: true })
-    }
-  }
-
-  private *fetchEntitiesFromJsonBatches(): IterableIterator<BlocksToJsonEntityToMigrate[]> {
-    if (!existsSync(this.tempFolderPath)) {
-      return
-    }
-
-    const files = readdirSync(this.tempFolderPath)
-      .filter((file) => file.startsWith('entities-batch-') && file.endsWith('.json'))
-      .sort((a, b) => {
-        const aNum = parseInt(a.match(/\d+/)?.[0] || '0', 10)
-        const bNum = parseInt(b.match(/\d+/)?.[0] || '0', 10)
-        return aNum - bNum
-      })
-
-    for (const file of files) {
-      const filePath = path.join(this.tempFolderPath, file)
-      const fileContent = readFileSync(filePath, 'utf-8')
-      const batchEntities = JSON.parse(fileContent) as BlocksToJsonEntityToMigrate[]
-      yield batchEntities
-    }
-  }
-
-  private async migrateEntities(
-    entities: BlocksToJsonEntityToMigrate[],
-    req: PayloadRequest,
-  ): Promise<void> {
-    this.adapter.blocksAsJSON = true
-    this.resetSchema()
-    await this.adapter.init()
-    await this.adapter.connect()
-
-    await this.syncTransactionDrizzleInstance(req)
-
-    const totalEntities = entities.length
-    let processed = 0
-
-    for (const entity of entities) {
-      switch (entity.type) {
-        case 'collection': {
-          await this.adapter.updateOne({
-            collection: entity.slug,
-            data: entity.originalData,
-            joins: false,
-            req,
-            where: {
-              id: {
-                equals: entity.id,
-              },
-            },
-          })
-          break
-        }
-        case 'collectionVersion': {
-          await this.adapter.updateVersion({
-            id: entity.id,
-            collection: entity.slug,
-            req,
-            versionData: entity.originalData as any,
-          })
-
-          break
-        }
-        case 'global': {
-          await this.adapter.updateGlobal({
-            slug: entity.slug,
-            data: entity.originalData,
-            req,
-          })
-          break
-        }
-        case 'globalVersion': {
-          await this.adapter.updateGlobalVersion({
-            id: entity.id,
-            global: entity.slug,
-            req,
-            versionData: entity.originalData as any,
-          })
-          break
-        }
-      }
-
-      processed++
-      if (processed % this.batchSize === 0 || processed === totalEntities) {
-        this.adapter.payload.logger.info(
-          `Migrated ${processed}/${totalEntities} entities (${Math.round((processed / totalEntities) * 100)}%)`,
-        )
-      }
-    }
-  }
-
-  private resetSchema() {
-    this.adapter.schema = {}
-    this.adapter.tables = {}
-    this.adapter.indexes = new Set()
-    this.adapter.foreignKeys = new Set()
-    this.adapter.relations = {}
-    this.adapter.rawTables = {}
-    this.adapter.rawRelations = {}
-    this.adapter.tableNameMap = new Map()
-    this.adapter.enums = {}
-  }
-
-  private async syncTransactionDrizzleInstance(req: PayloadRequest) {
-    const tsx = (await getTransaction(this.adapter, req)) as any
-
-    tsx._ = this.adapter.drizzle._
-    tsx.schema = this.adapter.drizzle._
-    tsx.session.schema = (this.adapter.drizzle as any).session.schema
-  }
-
   cleanupTempFolder(): void {
     rmSync(this.tempFolderPath, { force: true, recursive: true })
 
@@ -722,6 +607,121 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
 
     writeFileSync(configPath, output, 'utf-8')
     this.adapter.payload.logger.info(`Updated ${configPath} with blocksAsJSON: true`)
+  }
+
+  private ensureTempFolder(): void {
+    if (!existsSync(this.tempFolderPath)) {
+      mkdirSync(this.tempFolderPath, { recursive: true })
+    }
+  }
+
+  private *fetchEntitiesFromJsonBatches(): IterableIterator<BlocksToJsonEntityToMigrate[]> {
+    if (!existsSync(this.tempFolderPath)) {
+      return
+    }
+
+    const files = readdirSync(this.tempFolderPath)
+      .filter((file) => file.startsWith('entities-batch-') && file.endsWith('.json'))
+      .sort((a, b) => {
+        const aNum = parseInt(a.match(/\d+/)?.[0] || '0', 10)
+        const bNum = parseInt(b.match(/\d+/)?.[0] || '0', 10)
+        return aNum - bNum
+      })
+
+    for (const file of files) {
+      const filePath = path.join(this.tempFolderPath, file)
+      const fileContent = readFileSync(filePath, 'utf-8')
+      const batchEntities = JSON.parse(fileContent) as BlocksToJsonEntityToMigrate[]
+      yield batchEntities
+    }
+  }
+
+  private async migrateEntities(
+    entities: BlocksToJsonEntityToMigrate[],
+    req: PayloadRequest,
+  ): Promise<void> {
+    this.adapter.blocksAsJSON = true
+    this.resetSchema()
+    await this.adapter.init()
+    await this.adapter.connect()
+
+    await this.syncTransactionDrizzleInstance(req)
+
+    const totalEntities = entities.length
+    let processed = 0
+
+    for (const entity of entities) {
+      switch (entity.type) {
+        case 'collection': {
+          await this.adapter.updateOne({
+            collection: entity.slug,
+            data: entity.originalData,
+            joins: false,
+            req,
+            where: {
+              id: {
+                equals: entity.id,
+              },
+            },
+          })
+          break
+        }
+        case 'collectionVersion': {
+          await this.adapter.updateVersion({
+            id: entity.id,
+            collection: entity.slug,
+            req,
+            versionData: entity.originalData as any,
+          })
+
+          break
+        }
+        case 'global': {
+          await this.adapter.updateGlobal({
+            slug: entity.slug,
+            data: entity.originalData,
+            req,
+          })
+          break
+        }
+        case 'globalVersion': {
+          await this.adapter.updateGlobalVersion({
+            id: entity.id,
+            global: entity.slug,
+            req,
+            versionData: entity.originalData as any,
+          })
+          break
+        }
+      }
+
+      processed++
+      if (processed % this.batchSize === 0 || processed === totalEntities) {
+        this.adapter.payload.logger.info(
+          `Migrated ${processed}/${totalEntities} entities (${Math.round((processed / totalEntities) * 100)}%)`,
+        )
+      }
+    }
+  }
+
+  private resetSchema() {
+    this.adapter.schema = {}
+    this.adapter.tables = {}
+    this.adapter.indexes = new Set()
+    this.adapter.foreignKeys = new Set()
+    this.adapter.relations = {}
+    this.adapter.rawTables = {}
+    this.adapter.rawRelations = {}
+    this.adapter.tableNameMap = new Map()
+    this.adapter.enums = {}
+  }
+
+  private async syncTransactionDrizzleInstance(req: PayloadRequest) {
+    const tsx = (await getTransaction(this.adapter, req)) as any
+
+    tsx._ = this.adapter.drizzle._
+    tsx.schema = this.adapter.drizzle._
+    tsx.session.schema = (this.adapter.drizzle as any).session.schema
   }
 }
 

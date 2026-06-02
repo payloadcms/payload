@@ -15,12 +15,12 @@ import './index.css'
 const baseClass = 'relationship--single-value'
 
 export const SingleValue: React.FC<
-  {
+  SingleValueProps<Option> & {
     selectProps: {
       // TODO Fix this - moduleResolution 16 breaks our declare module
       customProps: ReactSelectAdapterProps['customProps']
     }
-  } & SingleValueProps<Option>
+  }
 > = (props) => {
   const {
     children,

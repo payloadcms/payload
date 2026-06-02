@@ -31,7 +31,10 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 import { updateByIDOperation } from '../updateByID.js'
 
-export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = Pick<
+  FindOptions<TSlug, TSelect>,
+  'select'
+> & {
   /**
    * Whether the current update should be marked as from autosave.
    * `versions.drafts.autosave` should be specified.
@@ -137,57 +140,57 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-} & Pick<FindOptions<TSlug, TSelect>, 'select'>
+}
 
 export type ByIDOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-> = {
-  /**
-   * The ID of the document to update.
-   */
-  id: number | string
-  /**
-   * Limit documents to update
-   */
-  limit?: never
-  /**
-   * Sort the documents, can be a string or an array of strings
-   * @example '-createdAt' // Sort DESC by createdAt
-   * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
-   */
-  sort?: never
-  /**
-   * A filter [query](https://payloadcms.com/docs/queries/overview)
-   */
-  where?: never
-} & BaseOptions<TSlug, TSelect> &
-  DraftFlagFromCollectionSlug<TSlug>
+> = BaseOptions<TSlug, TSelect> &
+  DraftFlagFromCollectionSlug<TSlug> & {
+    /**
+     * The ID of the document to update.
+     */
+    id: number | string
+    /**
+     * Limit documents to update
+     */
+    limit?: never
+    /**
+     * Sort the documents, can be a string or an array of strings
+     * @example '-createdAt' // Sort DESC by createdAt
+     * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
+     */
+    sort?: never
+    /**
+     * A filter [query](https://payloadcms.com/docs/queries/overview)
+     */
+    where?: never
+  }
 
 export type ManyOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-> = {
-  /**
-   * The ID of the document to update.
-   */
-  id?: never
-  /**
-   * Limit documents to update
-   */
-  limit?: number
-  /**
-   * Sort the documents, can be a string or an array of strings
-   * @example '-createdAt' // Sort DESC by createdAt
-   * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
-   */
-  sort?: Sort
-  /**
-   * A filter [query](https://payloadcms.com/docs/queries/overview)
-   */
-  where: Where
-} & BaseOptions<TSlug, TSelect> &
-  DraftFlagFromCollectionSlug<TSlug>
+> = BaseOptions<TSlug, TSelect> &
+  DraftFlagFromCollectionSlug<TSlug> & {
+    /**
+     * The ID of the document to update.
+     */
+    id?: never
+    /**
+     * Limit documents to update
+     */
+    limit?: number
+    /**
+     * Sort the documents, can be a string or an array of strings
+     * @example '-createdAt' // Sort DESC by createdAt
+     * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
+     */
+    sort?: Sort
+    /**
+     * A filter [query](https://payloadcms.com/docs/queries/overview)
+     */
+    where: Where
+  }
 
 export type Options<
   TSlug extends CollectionSlug,

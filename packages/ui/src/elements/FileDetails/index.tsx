@@ -9,9 +9,9 @@ import { StaticFileDetails } from './StaticFileDetails/index.js'
 type SharedFileDetailsProps = {
   collectionSlug: string
   customUploadActions?: React.ReactNode[]
-  doc: {
+  doc: Data & {
     sizes?: FileSizes
-  } & Data
+  }
   enableAdjustments?: boolean
   hasImageSizes?: boolean
   hideRemoveFile?: boolean

@@ -209,7 +209,14 @@ const buildVersionField = ({
   selectedLocales,
   valueFrom,
   valueTo,
-}: {
+}: Omit<
+  BuildVersionFieldsArgs,
+  | 'fields'
+  | 'fieldsPermissions'
+  | 'parentIndexPath'
+  | 'versionFromSiblingData'
+  | 'versionToSiblingData'
+> & {
   clientField: ClientField
   field: Field
   indexPath: string
@@ -222,14 +229,7 @@ const buildVersionField = ({
   schemaPath: string
   valueFrom: unknown
   valueTo: unknown
-} & Omit<
-  BuildVersionFieldsArgs,
-  | 'fields'
-  | 'fieldsPermissions'
-  | 'parentIndexPath'
-  | 'versionFromSiblingData'
-  | 'versionToSiblingData'
->): BaseVersionField | null => {
+}): BaseVersionField | null => {
   let hasReadPermission: boolean = false
   let fieldPermissions: SanitizedFieldPermissions | undefined = undefined
 
@@ -308,7 +308,7 @@ const buildVersionField = ({
         parentSchemaPath: schemaPath,
       })
 
-      let tabFieldsPermissions: SanitizedFieldsPermissions = undefined
+      let tabFieldsPermissions: SanitizedFieldsPermissions
 
       // The tabs field does not have its own permissions as it's unnamed => use parentFieldsPermissions
       if (typeof parentFieldsPermissions === 'boolean') {
@@ -358,7 +358,7 @@ const buildVersionField = ({
     }
   } // At this point, we are dealing with a `row`, `collapsible`, array`, etc
   else if ('fields' in field) {
-    let subFieldsPermissions: SanitizedFieldsPermissions = undefined
+    let subFieldsPermissions: SanitizedFieldsPermissions
 
     if ('name' in field && typeof fieldPermissions !== 'undefined') {
       // Named fields like arrays
@@ -450,7 +450,7 @@ const buildVersionField = ({
           (block) => typeof block !== 'string' && block.slug === blockSlugToMatch,
         ) as FlattenedBlock | undefined)
 
-      let fields = []
+      let fields: Field[]
 
       if (toRow.blockType === fromRow.blockType) {
         fields = toBlock.fields
@@ -470,7 +470,7 @@ const buildVersionField = ({
         }
       }
 
-      let blockFieldsPermissions: SanitizedFieldsPermissions = undefined
+      let blockFieldsPermissions: SanitizedFieldsPermissions
 
       // fieldPermissions will be set here, as the blocks field has a name
       if (typeof fieldPermissions === 'boolean') {

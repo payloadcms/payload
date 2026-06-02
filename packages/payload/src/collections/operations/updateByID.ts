@@ -34,7 +34,10 @@ import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { updateDocument } from './utilities/update.js'
 
-export type Arguments<TSlug extends CollectionSlug> = {
+export type Arguments<TSlug extends CollectionSlug> = Pick<
+  FindOptions<TSlug, SelectType>,
+  'select'
+> & {
   autosave?: boolean
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
@@ -53,7 +56,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   showHiddenFields?: boolean
   trash?: boolean
   unpublishAllLocales?: boolean
-} & Pick<FindOptions<TSlug, SelectType>, 'select'>
+}
 
 export const updateByIDOperation = async <
   TSlug extends CollectionSlug,

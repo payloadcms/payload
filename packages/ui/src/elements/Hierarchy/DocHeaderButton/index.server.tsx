@@ -2,10 +2,10 @@ import type { Payload } from 'payload'
 
 import React from 'react'
 
-import { FolderIcon } from '../../../icons/Folder/index.js'
-import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
 import { HierarchyButtonClient } from '../../../exports/client/index.js'
+import { FolderIcon } from '../../../icons/Folder/index.js'
+import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 
 export type HierarchyButtonServerProps = {
   fieldName: string

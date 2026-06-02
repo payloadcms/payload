@@ -9,7 +9,7 @@ import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { formatDate } from '../../../../../utilities/formatDocTitle/formatDateTitle.js'
 
 export const DateCell: React.FC<
-  DefaultCellComponentProps<{ accessor?: string } & DateFieldClient>
+  DefaultCellComponentProps<DateFieldClient & { accessor?: string }>
 > = (props) => {
   const {
     cellData,

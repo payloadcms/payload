@@ -21,13 +21,13 @@ export type ComboboxEntry = {
  * @internal
  * @experimental
  */
-export type ComboboxProps = {
+export type ComboboxProps = Omit<PopupProps, 'children' | 'render'> & {
   entries: ComboboxEntry[]
   /** Minimum number of entries required to show search */
   minEntriesForSearch?: number
   onSelect?: (entry: ComboboxEntry) => void
   searchPlaceholder?: string
-} & Omit<PopupProps, 'children' | 'render'>
+}
 
 /**
  * A wrapper on top of Popup + PopupList.ButtonGroup that adds search functionality.

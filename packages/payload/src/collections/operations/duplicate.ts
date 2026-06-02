@@ -6,10 +6,13 @@ import type { RequiredDataFromCollectionSlug, SelectFromCollectionSlug } from '.
 
 import { type Arguments as CreateArguments, createOperation } from './create.js'
 
-export type Arguments<TSlug extends CollectionSlug> = {
+export type Arguments<TSlug extends CollectionSlug> = Omit<
+  CreateArguments<TSlug>,
+  'data' | 'duplicateFromID'
+> & {
   data?: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   id: number | string
-} & Omit<CreateArguments<TSlug>, 'data' | 'duplicateFromID'>
+}
 
 export const duplicateOperation = async <
   TSlug extends CollectionSlug,

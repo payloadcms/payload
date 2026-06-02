@@ -69,7 +69,7 @@ export const renderDocument = async ({
   searchParams,
   versions,
   viewType,
-}: {
+}: AdminViewServerProps & {
   drawerSlug?: string
   overrideEntityVisibility?: boolean
   readonly redirectAfterCreate?: boolean
@@ -77,7 +77,7 @@ export const renderDocument = async ({
   readonly redirectAfterDuplicate?: boolean
   readonly redirectAfterRestore?: boolean
   versions?: RenderDocumentVersionsProperties
-} & AdminViewServerProps): Promise<{
+}): Promise<{
   data: Data
   Document: React.ReactNode
 }> => {
@@ -288,7 +288,7 @@ export const renderDocument = async ({
         : '',
   })
 
-  let View: ViewToRender = null
+  let View: ViewToRender
 
   let showHeader = true
 

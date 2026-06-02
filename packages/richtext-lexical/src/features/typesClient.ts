@@ -199,21 +199,23 @@ export type BaseClientFeatureProps<ClientFeatureProps> = ClientFeatureProps exte
       featureKey: string
       order: number
     }
-  : {
+  : ClientFeatureProps & {
       featureKey: string
       order: number
-    } & ClientFeatureProps
+    }
 
-export type ResolvedClientFeature<ClientFeatureProps> = {
+export type ResolvedClientFeature<ClientFeatureProps> = ClientFeature<ClientFeatureProps> & {
   key: string
   order: number
-} & ClientFeature<ClientFeatureProps>
+}
 
 export type ResolvedClientFeatureMap = Map<string, ResolvedClientFeature<any>>
 
 export type ClientFeatureProviderMap = Map<string, FeatureProviderClient<any, any>>
 
-export type SanitizedClientFeatures = {
+export type SanitizedClientFeatures = Required<
+  Pick<ResolvedClientFeature<unknown>, 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'>
+> & {
   /** The keys of all enabled features */
   enabledFeatures: string[]
   enabledFormats: TextFormatType[]
@@ -239,6 +241,4 @@ export type SanitizedClientFeatures = {
      */
     groups: SlashMenuGroup[]
   }
-} & Required<
-  Pick<ResolvedClientFeature<unknown>, 'nodes' | 'providers' | 'toolbarFixed' | 'toolbarInline'>
->
+}

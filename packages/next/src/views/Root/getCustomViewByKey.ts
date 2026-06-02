@@ -8,10 +8,10 @@ export const getCustomViewByKey = ({
 }: {
   config: SanitizedConfig
   viewKey: string
-}): {
+}): null | {
   view: ViewFromConfig
   viewKey: string
-} | null => {
+} => {
   const customViewComponent = config.admin.components?.views?.[viewKey]
 
   if (!customViewComponent) {

@@ -3,16 +3,16 @@ import type { JoinQuery } from '../types/index.js'
 import { isNumber } from './isNumber.js'
 
 export type JoinParams =
+  | false
   | {
       [schemaPath: string]:
+        | false
         | {
             limit?: unknown
             sort?: string
             where?: unknown
           }
-        | false
     }
-  | false
 
 /**
  * Convert request JoinQuery object from strings to numbers

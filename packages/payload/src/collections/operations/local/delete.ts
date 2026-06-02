@@ -21,7 +21,10 @@ import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { deleteOperation } from '../delete.js'
 import { deleteByIDOperation } from '../deleteByID.js'
 
-export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = Pick<
+  FindOptions<TSlug, TSelect>,
+  'select'
+> & {
   /**
    * the Collection slug to operate against.
    */
@@ -88,12 +91,12 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-} & Pick<FindOptions<TSlug, TSelect>, 'select'>
+}
 
 export type ByIDOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-> = {
+> = BaseOptions<TSlug, TSelect> & {
   /**
    * The ID of the document to delete.
    */
@@ -102,12 +105,12 @@ export type ByIDOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: never
-} & BaseOptions<TSlug, TSelect>
+}
 
 export type ManyOptions<
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
-> = {
+> = BaseOptions<TSlug, TSelect> & {
   /**
    * The ID of the document to delete.
    */
@@ -116,7 +119,7 @@ export type ManyOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where: Where
-} & BaseOptions<TSlug, TSelect>
+}
 
 export type Options<
   TSlug extends CollectionSlug,

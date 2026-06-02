@@ -24,11 +24,11 @@ type BuildFindQueryArgs = {
   versions?: boolean
 }
 
-export type Result = {
-  with?: {
+export type Result = DBQueryConfig<'many', true, any, any> & {
+  with?: DBQueryConfig<'many', true, any, any> & {
     _locales?: DBQueryConfig<'many', true, any, any>
-  } & DBQueryConfig<'many', true, any, any>
-} & DBQueryConfig<'many', true, any, any>
+  }
+}
 
 // Generate the Drizzle query for findMany based on
 // a collection field structure

@@ -6,7 +6,7 @@ import { ErrorBox } from './ErrorBox.js'
 import './index.css'
 import { OptionsSelect } from './OptionsSelect.js'
 
-type Props = {} & SelectFieldServerProps
+type Props = SelectFieldServerProps & {}
 
 export const VariantOptionsSelector: React.FC<Props> = async (props) => {
   const { clientField, data, field, path, req, user } = props

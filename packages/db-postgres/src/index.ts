@@ -243,9 +243,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
 }
 
 export type {
-  Args as PostgresAdapterArgs,
   GeneratedDatabaseSchema,
   PostgresAdapter,
+  Args as PostgresAdapterArgs,
 } from './types.js'
 export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
 export { geometryColumn } from '@payloadcms/drizzle/postgres'

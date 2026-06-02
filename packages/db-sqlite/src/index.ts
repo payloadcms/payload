@@ -87,7 +87,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       not_like: notLike,
     } as unknown as Operators
 
-    let wal: false | WalConfig = false
+    let wal: false | WalConfig
 
     const defaultJournalSizeLimit = 67108864 // 64MB
 
@@ -248,7 +248,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
  * @todo deprecate /types subpath export in 4.0
  */
 export type {
-  Args as SQLiteAdapterArgs,
   CountDistinct,
   DeleteWhere,
   DropDatabase,
@@ -262,6 +261,7 @@ export type {
   MigrateDownArgs,
   MigrateUpArgs,
   SQLiteAdapter,
+  Args as SQLiteAdapterArgs,
   SQLiteSchemaHook,
 } from './types.js'
 

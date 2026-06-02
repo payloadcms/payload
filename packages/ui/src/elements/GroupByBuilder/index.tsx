@@ -75,13 +75,13 @@ export const GroupByBuilder: React.FC<Props> = ({
 
   const handleFieldChange = useMemo(() => {
     if (isFormMode) {
-      return (v: { value: string } | null) => {
+      return (v: null | { value: string }) => {
         const value = v === null ? undefined : v.value
         const newGroupBy = value ? (groupByRaw?.startsWith('-') ? `-${value}` : value) : ''
         onChange?.(newGroupBy)
       }
     }
-    return (v: { value: string } | null) => {
+    return (v: null | { value: string }) => {
       void (async () => {
         if (typeof listQuery.refineListData !== 'function') {
           return

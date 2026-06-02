@@ -26,7 +26,10 @@ import {
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 
-type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = Pick<
+  FindOptions<string, SelectType>,
+  'select'
+> & {
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -99,10 +102,13 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-} & Pick<FindOptions<string, SelectType>, 'select'>
+}
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> =
-  BaseOptions<TSlug, TSelect> & DraftFlagFromGlobalSlug<TSlug>
+export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromGlobalSlug<TSlug>
 
 export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
@@ -133,7 +139,7 @@ export async function updateGlobalLocal<
   }
 
   return updateOperation<TSlug, TSelect>({
-    slug: globalSlug as string,
+    slug: globalSlug,
     data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
     draft,

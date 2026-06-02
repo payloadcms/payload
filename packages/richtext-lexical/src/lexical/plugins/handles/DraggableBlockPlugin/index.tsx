@@ -76,11 +76,11 @@ function useDraggableBlockMenu(
   const isDraggingBlockRef = useRef<boolean>(false)
   const highlightTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const [draggableBlockElem, setDraggableBlockElem] = useState<HTMLElement | null>(null)
-  const [lastTargetBlock, setLastTargetBlock] = useState<{
+  const [lastTargetBlock, setLastTargetBlock] = useState<null | {
     boundingBox?: DOMRect
     elem: HTMLElement | null
     isBelow: boolean
-  } | null>(null)
+  }>(null)
 
   const { editorConfig } = useEditorConfigContext()
 

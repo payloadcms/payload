@@ -103,7 +103,7 @@ const traverseFields = ({
               result[field.saveToJWT] = data[field.name]
               delete result[field.name]
             } else {
-              result[field.name] = data[field.name] as Record<string, unknown>
+              result[field.name] = data[field.name]
             }
           } else if (field.saveToJWT === false) {
             delete result[field.name]

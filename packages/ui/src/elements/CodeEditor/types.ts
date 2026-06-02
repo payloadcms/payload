@@ -1,6 +1,6 @@
 import type { EditorProps } from '@monaco-editor/react'
 
-export type Props = {
+export type Props = EditorProps & {
   maxHeight?: number
   /**
    * @default 56 (3 lines)
@@ -8,4 +8,4 @@ export type Props = {
   minHeight?: number
   readOnly?: boolean
   recalculatedHeightAt?: number
-} & EditorProps
+}

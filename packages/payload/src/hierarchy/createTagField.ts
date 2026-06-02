@@ -7,7 +7,10 @@ import { getHierarchyFieldName } from './constants.js'
  * All RelationshipFieldMany properties are available except name, type, and relationTo
  * which are managed by the tag system.
  */
-export type CreateTagFieldOptions = {
+export type CreateTagFieldOptions = Pick<
+  Partial<RelationshipField>,
+  'admin' | 'label' | 'required'
+> & {
   /**
    * Whether to allow multiple tags (defaults to true)
    * @default true
@@ -17,7 +20,7 @@ export type CreateTagFieldOptions = {
    * The slug of the hierarchy collection this field references (e.g., 'tags')
    */
   relationTo: string
-} & Pick<Partial<RelationshipField>, 'admin' | 'label' | 'required'>
+}
 
 /**
  * Creates a relationship field for tag-style hierarchies (multi-select by default).

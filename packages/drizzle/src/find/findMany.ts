@@ -11,13 +11,13 @@ import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js
 import { getTransaction } from '../utilities/getTransaction.js'
 import { buildFindManyArgs } from './buildFindManyArgs.js'
 
-type Args = {
+type Args = Omit<FindArgs, 'collection'> & {
   adapter: DrizzleAdapter
   collectionSlug?: string
   fields: FlattenedField[]
   tableName: string
   versions?: boolean
-} & Omit<FindArgs, 'collection'>
+}
 
 export const findMany = async function find({
   adapter,
@@ -106,7 +106,7 @@ export const findMany = async function find({
       oneToManyJoinedTableNames.has(getNameFromDrizzleTable(column.table)),
     )
 
-  let selectDistinctResult: { id: number | string }[] | undefined
+  let selectDistinctResult: undefined | { id: number | string }[]
 
   // avoid duplicate results by using a group query instead of select distinct when there is a sort on a one-to-many joined table
   if (hasSortOnOneToMany) {

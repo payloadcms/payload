@@ -74,14 +74,14 @@ type TemplateOrExample =
     }
 
 export async function createProject(
-  args: {
+  args: TemplateOrExample & {
     agentType?: AgentType
     cliArgs: CliArgs
     dbDetails?: DbDetails
     packageManager: PackageManager
     projectDir: string
     projectName: string
-  } & TemplateOrExample,
+  },
 ): Promise<void> {
   const { agentType, cliArgs, dbDetails, packageManager, projectDir, projectName } = args
 

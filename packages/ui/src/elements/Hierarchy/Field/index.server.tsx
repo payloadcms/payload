@@ -2,9 +2,9 @@ import type { RelationshipFieldServerComponent } from 'payload'
 
 import React from 'react'
 
-import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
 import { HierarchyFieldClient } from '../../../exports/client/index.js'
+import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 
 export const HierarchyField: RelationshipFieldServerComponent = (props) => {
   const { clientField, field, payload } = props

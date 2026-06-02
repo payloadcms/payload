@@ -197,7 +197,7 @@ async function processImportBatch({
 
     try {
       let savedDocument: Record<string, unknown> | undefined
-      let existingDocResult: { docs: Array<Record<string, unknown>> } | undefined
+      let existingDocResult: undefined | { docs: Array<Record<string, unknown>> }
 
       if (importMode === 'create') {
         const createData = { ...document }
@@ -325,7 +325,7 @@ async function processImportBatch({
           if (isMatchingById && importMode === 'upsert' && !isValidObjectIdFormat) {
             existingDocResult = { docs: [] }
           } else if (isMatchingById && importMode === 'update' && !isValidObjectIdFormat) {
-            throw new Error(`Invalid ID format for update: ${matchValueStr}`)
+            throw new Error(`Invalid ID format for update: ${matchValueStr}`, { cause: error })
           } else {
             throw error
           }
@@ -647,14 +647,14 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
 
       const batchToProcess: Record<string, unknown>[] =
         hooks?.before && currentBatch.length > 0
-          ? ((await hooks.before({
+          ? await hooks.before({
               batchNumber,
-              data: currentBatch as Parameters<ImportBeforeHook>[0]['data'],
+              data: currentBatch,
               format,
               originalData: originalBatch,
               req,
               totalBatches,
-            })) as Record<string, unknown>[])
+            })
           : currentBatch
 
       const batchResult = await processImportBatch({

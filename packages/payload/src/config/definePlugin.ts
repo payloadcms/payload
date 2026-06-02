@@ -9,7 +9,7 @@ function buildPluginsMap(plugins: Plugin[] | undefined): PluginsMap {
       }
     }
   }
-  return map as PluginsMap
+  return map
 }
 
 /**
@@ -42,12 +42,12 @@ export function definePlugin(descriptor: {
 }): () => Plugin
 export function definePlugin<TOptions extends Record<string, unknown>>(descriptor: {
   order?: number
-  plugin: (args: { config: Config; plugins: PluginsMap } & TOptions) => Config | Promise<Config>
+  plugin: (args: TOptions & { config: Config; plugins: PluginsMap }) => Config | Promise<Config>
   slug?: string
 }): (options: TOptions) => Plugin
 export function definePlugin<TOptions extends Record<string, unknown>>(descriptor: {
   order?: number
-  plugin: (args: { config: Config; plugins: PluginsMap } & TOptions) => Config | Promise<Config>
+  plugin: (args: TOptions & { config: Config; plugins: PluginsMap }) => Config | Promise<Config>
   slug?: string
 }): (options?: TOptions) => Plugin {
   return (options?: TOptions): Plugin => {
@@ -58,12 +58,12 @@ export function definePlugin<TOptions extends Record<string, unknown>>(descripto
         ...options,
         config,
         plugins,
-      } as { config: Config; plugins: PluginsMap } & TOptions
+      } as TOptions & { config: Config; plugins: PluginsMap }
 
       return descriptor.plugin(args)
     }
 
-    pluginFn.options = options as Record<string, unknown>
+    pluginFn.options = options
 
     if (descriptor.slug !== undefined) {
       pluginFn.slug = descriptor.slug

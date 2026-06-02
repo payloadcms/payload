@@ -22,7 +22,7 @@ import './index.css'
 
 export function PublishButton({
   label: labelProp,
-}: { label?: string } & PublishButtonClientProps = {}) {
+}: PublishButtonClientProps & { label?: string } = {}) {
   const {
     id,
     collectionSlug,

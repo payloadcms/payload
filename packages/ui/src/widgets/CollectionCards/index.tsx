@@ -63,8 +63,6 @@ export async function CollectionCards(props: WidgetServerProps) {
                     }
 
                     if (type === EntityType.global) {
-                      title = getTranslation(label, i18n)
-
                       buttonAriaLabel = t('general:editLabel', {
                         label: getTranslation(label, i18n),
                       })

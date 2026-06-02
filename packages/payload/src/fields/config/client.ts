@@ -75,9 +75,9 @@ const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] 
   'components',
 ]
 
-type FieldWithDescription = {
+type FieldWithDescription = ClientField & {
   admin: AdminClient
-} & ClientField
+}
 
 export const createClientBlocks = ({
   blocks,
@@ -196,7 +196,7 @@ export const createClientField = ({
           break
         }
 
-        clientField.admin = {} as AdminClient
+        clientField.admin = {}
 
         for (const adminKey in incomingField.admin) {
           if (serverOnlyFieldAdminProperties.includes(adminKey as any)) {
@@ -431,7 +431,7 @@ export const createClientField = ({
               // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
               clientTab[key] = tabProp({ t: i18n.t })
             } else if (key === 'admin') {
-              clientTab.admin = {} as AdminClient
+              clientTab.admin = {}
 
               for (const adminKey in tab.admin) {
                 if (serverOnlyFieldAdminProperties.includes(adminKey as any)) {

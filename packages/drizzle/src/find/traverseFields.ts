@@ -586,7 +586,7 @@ export const traverseFields = ({
               query = query.where(and(...collectionQueryWhere))
             }
             if (currentQuery === null) {
-              currentQuery = query as unknown as SQLSelect
+              currentQuery = query
             } else {
               currentQuery = currentQuery.unionAll(query) as SQLSelect
             }

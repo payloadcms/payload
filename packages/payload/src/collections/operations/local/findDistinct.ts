@@ -42,7 +42,7 @@ export type Options<
   /**
    * The field to get distinct values for
    */
-  field: ({} & string) | TField
+  field: (string & {}) | TField
   /**
    * The maximum distinct field values to be returned.
    * By default the operation returns all the values.
@@ -146,5 +146,5 @@ export async function findDistinct<
     sort,
     trash,
     where,
-  }) as Promise<PaginatedDistinctDocs<Record<TField, DataFromCollectionSlug<TSlug>[TField]>>>
+  })
 }

@@ -45,7 +45,7 @@ export type ExclusiveLinkCollectionsProps =
       enabledCollections?: CollectionSlug[]
     }
 
-export type LinkFeatureServerProps = {
+export type LinkFeatureServerProps = ExclusiveLinkCollectionsProps & {
   /**
    * Disables the automatic creation of links from URLs pasted into the editor, as well
    * as auto link nodes.
@@ -79,7 +79,7 @@ export type LinkFeatureServerProps = {
    * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
-} & ExclusiveLinkCollectionsProps
+}
 
 export const LinkFeature = createServerFeature<
   LinkFeatureServerProps,

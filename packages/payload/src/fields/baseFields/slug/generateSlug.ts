@@ -6,10 +6,10 @@ import { hasAutosaveEnabled } from '../../../utilities/getVersionsConfig.js'
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
 import { countVersions } from './countVersions.js'
 
-type HookArgs = {
-  slugFieldName: NonNullable<SlugFieldArgs['name']>
-} & Pick<SlugFieldArgs, 'slugify'> &
-  Required<Pick<SlugFieldArgs, 'useAsSlug'>>
+type HookArgs = Pick<SlugFieldArgs, 'slugify'> &
+  Required<Pick<SlugFieldArgs, 'useAsSlug'>> & {
+    slugFieldName: NonNullable<SlugFieldArgs['name']>
+  }
 
 const slugify = ({
   customSlugify,

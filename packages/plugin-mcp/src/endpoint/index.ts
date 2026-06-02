@@ -29,7 +29,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
     duplex: 'half',
     headers: req.headers,
     method: req.method,
-  } as { duplex: 'half' } & RequestInit)
+  } as RequestInit & { duplex: 'half' })
 
   return await transport.handleRequest(mcpRequest)
 }

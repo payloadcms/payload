@@ -76,7 +76,7 @@ export async function updateLatestVersion<TData extends JsonObject>({
     },
   }
 
-  let versionUpdateFailed: boolean | undefined = undefined
+  let versionUpdateFailed: boolean | undefined
 
   try {
     if (collection) {

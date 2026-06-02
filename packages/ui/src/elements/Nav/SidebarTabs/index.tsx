@@ -10,17 +10,17 @@ import { SidebarTabsClient } from '../../../exports/client/index.js'
 import { RenderServerComponent } from '../../RenderServerComponent/index.js'
 import './index.css'
 
-type SidebarTabWithReactNode = {
+type SidebarTabWithReactNode = Omit<SidebarTab, 'components'> & {
   components: {
     Content: PayloadComponent | React.ReactNode
     Icon: PayloadComponent | React.ReactNode
   }
-} & Omit<SidebarTab, 'components'>
+}
 
-export type SidebarTabsProps = {
+export type SidebarTabsProps = NavProps & {
   navPreferences: NavPreferences
   tabs: SidebarTabWithReactNode[]
-} & NavProps
+}
 
 const baseClass = 'sidebar-tabs'
 

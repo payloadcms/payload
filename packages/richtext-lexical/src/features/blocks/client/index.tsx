@@ -111,7 +111,7 @@ export const BlocksFeatureClient = createClientFeature(
             : null,
           clientInlineBlocks?.length
             ? {
-                items: clientInlineBlocks.map((inlineBlock) => {
+                items: clientInlineBlocks.map((inlineBlock): SlashMenuItem => {
                   return {
                     Icon: InlineBlocksIcon,
                     key: 'inlineBlocks-' + inlineBlock.slug,
@@ -129,7 +129,7 @@ export const BlocksFeatureClient = createClientFeature(
                         blockType: inlineBlock.slug,
                       })
                     },
-                  } as SlashMenuItem
+                  }
                 }),
                 key: 'inlineBlocks',
                 label: ({
@@ -149,7 +149,7 @@ export const BlocksFeatureClient = createClientFeature(
             ? {
                 type: 'dropdown',
                 ChildComponent: BlockIcon,
-                items: clientBlocks.map((block, index) => {
+                items: clientBlocks.map((block, index): ToolbarGroupItem => {
                   return {
                     isActive: undefined, // At this point, we would be inside a sub-richtext-editor. And at this point this will be run against the focused sub-editor, not the parent editor which has the actual block. Thus, no point in running this
                     key: 'block-' + block.slug,
@@ -167,7 +167,7 @@ export const BlocksFeatureClient = createClientFeature(
                       })
                     },
                     order: index,
-                  } as ToolbarGroupItem
+                  }
                 }),
                 key: 'blocks',
                 order: 20,
@@ -177,7 +177,7 @@ export const BlocksFeatureClient = createClientFeature(
             ? {
                 type: 'dropdown',
                 ChildComponent: InlineBlocksIcon,
-                items: clientInlineBlocks.map((inlineBlock, index) => {
+                items: clientInlineBlocks.map((inlineBlock, index): ToolbarGroupItem => {
                   return {
                     isActive: undefined,
                     key: 'inlineBlock-' + inlineBlock.slug,
@@ -195,7 +195,7 @@ export const BlocksFeatureClient = createClientFeature(
                       })
                     },
                     order: index,
-                  } as ToolbarGroupItem
+                  }
                 }),
                 key: 'inlineBlocks',
                 order: 25,

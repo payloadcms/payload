@@ -70,7 +70,7 @@ export const buildWhereInputType = ({ name, fields, parentName }: Args): GraphQL
 
   if (!idField) {
     fieldTypes.id = {
-      type: withOperators({ name: 'id', type: 'text' } as FieldAffectingData, parentName),
+      type: withOperators({ name: 'id', type: 'text' }, parentName),
     }
   }
 

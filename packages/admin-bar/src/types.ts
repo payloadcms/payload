@@ -1,12 +1,12 @@
 import type { CSSProperties, ReactElement } from 'react'
 
 export type PayloadMeUser =
+  | null
+  | undefined
   | {
       email: string
       id: string
     }
-  | null
-  | undefined
 
 export type PayloadAdminBarProps = {
   adminPath?: string

@@ -262,10 +262,10 @@ export type UploadConfig = {
    * @default true (client-side fetching enabled)
    */
   pasteURL?:
+    | false
     | {
         allowList: AllowList
       }
-    | false
   /**
    * Sharp resize options for the original image.
    * @link https://sharp.pixelplumbing.com/api-resize#resize
@@ -301,9 +301,9 @@ export type checkFileRestrictionsParams = {
   req: PayloadRequest
 }
 
-export type SanitizedUploadConfig = {
+export type SanitizedUploadConfig = UploadConfig & {
   staticDir: UploadConfig['staticDir']
-} & UploadConfig
+}
 
 export type File = {
   /**

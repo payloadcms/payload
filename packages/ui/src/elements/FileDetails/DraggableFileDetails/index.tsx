@@ -17,9 +17,9 @@ import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 export type DraggableFileDetailsProps = {
   collectionSlug: string
   customUploadActions?: React.ReactNode[]
-  doc: {
+  doc: Data & {
     sizes?: FileSizes
-  } & Data
+  }
   enableAdjustments?: boolean
   hasImageSizes?: boolean
   hasMany: boolean

@@ -73,7 +73,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const { i18n, t } = useTranslation<object, 'lexical:link:loadingWithEllipsis'>()
 
   const [stateData, setStateData] = useState<
-    ({ id?: string; text: string } & LinkFields) | undefined
+    (LinkFields & { id?: string; text: string }) | undefined
   >()
 
   const editDepth = useEditDepth()
@@ -139,7 +139,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     const fields = focusLinkParent.getFields()
 
     // Initial state:
-    const data: { text: string } & LinkFields = {
+    const data: LinkFields & { text: string } = {
       ...fields,
       id: focusLinkParent.getID(),
       text: focusLinkParent.getTextContent(),
@@ -427,7 +427,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         drawerTitle={t('fields:editLink')}
         featureKey="link"
         handleDrawerSubmit={(fields: FormState, data: Data) => {
-          const newLinkPayload = data as { text: string } & LinkFields
+          const newLinkPayload = data as LinkFields & { text: string }
 
           const bareLinkFields: LinkFields = {
             ...newLinkPayload,

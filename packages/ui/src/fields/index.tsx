@@ -78,12 +78,12 @@ export const fieldComponents: FieldTypesComponents = {
   upload: UploadField,
 }
 
-export type FieldComponentsWithSlots = {
+export type FieldComponentsWithSlots = FieldTypesComponents & {
   Description: React.FC<GenericDescriptionProps>
   Error: React.FC<GenericErrorProps>
   Label: React.FC<GenericLabelProps>
   RowLabel: React.FC
-} & FieldTypesComponents
+}
 
 export const allFieldComponents: FieldComponentsWithSlots = {
   ...fieldComponents,

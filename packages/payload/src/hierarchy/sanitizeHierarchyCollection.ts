@@ -90,7 +90,7 @@ export const sanitizeHierarchyCollection = (
     collectionConfig.hierarchy.titlePathFieldName || HIERARCHY_TITLE_PATH_FIELD
   const allowHasMany = collectionConfig.hierarchy.allowHasMany ?? DEFAULT_ALLOW_HAS_MANY
   const rawCollectionSpecific = collectionConfig.hierarchy.collectionSpecific
-  const collectionSpecific: { fieldName: string } | false =
+  const collectionSpecific: false | { fieldName: string } =
     rawCollectionSpecific === true
       ? { fieldName: 'hierarchyType' }
       : rawCollectionSpecific

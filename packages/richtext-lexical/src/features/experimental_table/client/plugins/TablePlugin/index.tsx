@@ -88,15 +88,14 @@ export const TablePlugin: PluginComponent = () => {
   const [editor] = useLexicalComposerContext()
   const cellContext = use(CellContext)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
-  const [popupPosition, setPopupPosition] = useState<{ left: number; top: number } | null>(null)
+  const [popupPosition, setPopupPosition] = useState<null | { left: number; top: number }>(null)
   const selectionRef = useRef<BaseSelection | null>(null)
   const [anchorElem, setAnchorElem] = useState<HTMLElement | null>(null)
 
   useEffect(() => {
     const rootElement = editor.getRootElement()
     if (rootElement) {
-      const editorWrapper: HTMLElement | null =
-        (rootElement.closest('.editor') as HTMLElement) ?? null
+      const editorWrapper: HTMLElement | null = rootElement.closest('.editor') ?? null
       setAnchorElem(editorWrapper ?? rootElement.parentElement)
     }
   }, [editor])
@@ -118,7 +117,7 @@ export const TablePlugin: PluginComponent = () => {
           }
 
           const anchorRect = anchor.getBoundingClientRect()
-          let pos: { left: number; top: number } | null = null
+          let pos: null | { left: number; top: number } = null
 
           editor.getEditorState().read(() => {
             const selection = $getSelection()

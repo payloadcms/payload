@@ -81,8 +81,8 @@ export type JoinQuery<T extends PayloadTypesShape, TSlug extends CollectionSlug<
         | false
         | Partial<{
             [K in keyof T['collectionsJoins'][TSlug]]:
-              | { count?: boolean; limit?: number; page?: number; sort?: Sort; where?: Where }
               | false
+              | { count?: boolean; limit?: number; page?: number; sort?: Sort; where?: Where }
           }>
     : never
 

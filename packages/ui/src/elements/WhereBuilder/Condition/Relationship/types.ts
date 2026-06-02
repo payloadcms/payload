@@ -9,10 +9,10 @@ import type {
 
 import type { DefaultFilterProps } from '../types.js'
 
-export type RelationshipFilterProps = {
+export type RelationshipFilterProps = DefaultFilterProps & {
   readonly field: RelationshipFieldClient | UploadFieldClient
   readonly filterOptions: ResolvedFilterOptions
-} & DefaultFilterProps
+}
 
 export type Option = {
   label: string

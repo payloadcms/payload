@@ -34,7 +34,7 @@ export type RenderListServerFnReturnType = {
   preferences: CollectionPreferences
 }
 
-export type ListDrawerProps = {
+export type ListDrawerProps = ListDrawerContextProps & {
   readonly allowCreate?: boolean
   readonly collectionSlugs: SanitizedCollectionConfig['slug'][]
   readonly disableQueryPresets?: boolean
@@ -43,14 +43,14 @@ export type ListDrawerProps = {
   readonly filterOptions?: FilterOptionsResult
   readonly overrideEntityVisibility?: boolean
   readonly selectedCollection?: string
-} & ListDrawerContextProps
+}
 
-export type ListTogglerProps = {
+export type ListTogglerProps = HTMLAttributes<HTMLButtonElement> & {
   children?: React.ReactNode
   className?: string
   disabled?: boolean
   drawerSlug?: string
-} & HTMLAttributes<HTMLButtonElement>
+}
 
 export type UseListDrawer = (args: {
   collectionSlugs?: SanitizedCollectionConfig['slug'][]

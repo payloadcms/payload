@@ -22,14 +22,14 @@ export type DashboardViewClientProps = {
 // It is recommended to use the modular dashboard widgets, which have props
 // that are more agnostic to their content.
 
-export type DashboardViewServerPropsOnly = {
+export type DashboardViewServerPropsOnly = AdminViewServerPropsOnly & {
   globalData: Array<{
     data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
     lockDuration?: number
     slug: string
   }>
   navGroups?: ReturnType<typeof groupNavItems>
-} & AdminViewServerPropsOnly
+}
 
 export type DashboardViewServerProps = DashboardViewClientProps & DashboardViewServerPropsOnly
 

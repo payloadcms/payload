@@ -165,22 +165,13 @@ export const Button: React.FC<Props> = (props) => {
       break
 
     case 'link':
-      if (isDisabled) {
-        buttonElement = (
-          <div {...buttonProps}>
-            <ButtonContents
-              icon={icon}
-              loading={loading}
-              showTooltip={showTooltip}
-              tooltip={tooltip}
-            >
-              {children}
-            </ButtonContents>
-          </div>
-        )
-      }
-
-      buttonElement = (
+      buttonElement = isDisabled ? (
+        <div {...buttonProps}>
+          <ButtonContents icon={icon} loading={loading} showTooltip={showTooltip} tooltip={tooltip}>
+            {children}
+          </ButtonContents>
+        </div>
+      ) : (
         <Link {...buttonProps} href={to || url} prefetch={false}>
           <ButtonContents icon={icon} loading={loading} showTooltip={showTooltip} tooltip={tooltip}>
             {children}

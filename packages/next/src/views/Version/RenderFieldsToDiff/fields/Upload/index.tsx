@@ -274,7 +274,7 @@ const UploadDocumentDiff = (args: {
   showCollectionSlug?: boolean
   uploadDoc: UploadDoc
 }) => {
-  const { i18n, polymorphic, relationTo, req, showCollectionSlug, uploadDoc } = args
+  const { i18n, polymorphic, relationTo, req, uploadDoc } = args
 
   let thumbnailSRC: string = ''
 
@@ -296,7 +296,7 @@ const UploadDocumentDiff = (args: {
     filename = `${i18n.t('general:untitled')} - ID: ${uploadDoc as number | string}`
   }
 
-  let pillLabel: null | string = null
+  let pillLabel: null | string
 
   {
     let collectionSlug: string

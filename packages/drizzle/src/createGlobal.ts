@@ -20,7 +20,7 @@ export async function createGlobal<T extends Record<string, unknown>>(
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
-  const result = await upsertRow<{ globalType: string } & T>({
+  const result = await upsertRow<T & { globalType: string }>({
     adapter: this,
     data,
     db,

@@ -23,20 +23,20 @@ export type BlockPermissions = {
 }
 
 export type SanitizedBlockPermissions =
+  | true
   | {
       fields: SanitizedFieldsPermissions
     }
-  | true
 
 export type BlocksPermissions = {
   [blockSlug: string]: BlockPermissions
 }
 
 export type SanitizedBlocksPermissions =
+  | true
   | {
       [blockSlug: string]: SanitizedBlockPermissions
     }
-  | true
 
 export type FieldPermissions = {
   blocks?: BlocksPermissions
@@ -47,6 +47,7 @@ export type FieldPermissions = {
 }
 
 export type SanitizedFieldPermissions =
+  | true
   | {
       blocks?: SanitizedBlocksPermissions
       create: true
@@ -54,13 +55,12 @@ export type SanitizedFieldPermissions =
       read: true
       update: true
     }
-  | true
 
 export type SanitizedFieldsPermissions =
+  | true
   | {
       [fieldName: string]: SanitizedFieldPermissions
     }
-  | true
 
 export type CollectionPermission = {
   create?: Permission
@@ -129,17 +129,17 @@ type BaseUser = {
 /**
  * @deprecated Use `TypedUser` instead. This will be removed in 4.0.
  */
-export type UntypedUser = {
+export type UntypedUser = BaseUser & {
   [key: string]: any
-} & BaseUser
+}
 
 /**
  * `collection` is not available one the client. It's only available on the server (req.user)
  * On the client, you can access the collection via config.admin.user. Config can be accessed using the useConfig() hook
  */
-export type ClientUser = {
+export type ClientUser = BaseUser & {
   [key: string]: any
-} & BaseUser
+}
 
 export type UserSession = { createdAt: Date | string; expiresAt: Date | string; id: string }
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
@@ -183,11 +183,11 @@ export type AuthStrategyFunctionArgs = {
 export type AuthStrategyResult = {
   responseHeaders?: Headers
   user:
-    | ({
+    | null
+    | (TypedUser & {
         _strategy?: string
         collection?: string
-      } & TypedUser)
-    | null
+      })
 }
 
 export type AuthStrategyFunction = (
@@ -229,6 +229,7 @@ export interface IncomingAuthType {
    * Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.
    */
   disableLocalStrategy?:
+    | true
     | {
         /**
          * Include auth fields on the collection even though the local strategy is disabled.
@@ -237,7 +238,6 @@ export interface IncomingAuthType {
         enableFields?: true
         optionalPassword?: true
       }
-    | true
   /**
    * Customize the way that the forgotPassword operation functions.
    * @link https://payloadcms.com/docs/authentication/email#forgot-password
@@ -298,11 +298,11 @@ export interface IncomingAuthType {
    * @link https://payloadcms.com/docs/authentication/email#email-verification
    */
   verify?:
+    | boolean
     | {
         generateEmailHTML?: GenerateVerifyEmailHTML
         generateEmailSubject?: GenerateVerifyEmailSubject
       }
-    | boolean
 }
 
 export type VerifyConfig = {

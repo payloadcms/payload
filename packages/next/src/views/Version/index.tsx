@@ -262,7 +262,7 @@ export async function VersionView(props: DocumentViewServerProps) {
         date:
           typeof versionTo.updatedAt === 'string'
             ? new Date(versionTo.updatedAt)
-            : (versionTo.updatedAt as Date),
+            : versionTo.updatedAt,
         i18n,
         pattern: config.admin.dateFormat,
       })

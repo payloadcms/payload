@@ -43,10 +43,10 @@ function useAddBlockHandle(
   const blockHandleHorizontalOffset = editorConfig?.admin?.hideGutter ? -24 : 12
 
   const menuRef = useRef<HTMLButtonElement>(null)
-  const [hoveredElement, setHoveredElement] = useState<{
+  const [hoveredElement, setHoveredElement] = useState<null | {
     elem: HTMLElement
     node: LexicalNode
-  } | null>(null)
+  }>(null)
 
   useEffect(() => {
     function onDocumentMouseMove(event: MouseEvent) {

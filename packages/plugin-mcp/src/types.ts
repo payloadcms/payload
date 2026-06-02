@@ -54,7 +54,7 @@ export type ClientMCPPluginConfig = {
   }>
 }
 
-export type MCPToolResponse = {
+export type MCPToolResponse = Pick<CallToolResult, '_meta' | 'isError' | 'structuredContent'> & {
   content: ContentBlock[]
   /**
    * If available, return the document fetched within the
@@ -62,7 +62,7 @@ export type MCPToolResponse = {
    * overrideResponse functions and stripped before going on the wire.
    */
   doc?: Record<string, unknown>
-} & Pick<CallToolResult, '_meta' | 'isError' | 'structuredContent'>
+}
 
 export type MCPResponseOverride = (
   response: MCPToolResponse,
@@ -87,13 +87,13 @@ export type ToolHandlerArgs<TSchema = undefined> = {
   serverContext: ServerContext
 }
 
-export type CollectionToolHandlerArgs<TSchema = undefined> = {
+export type CollectionToolHandlerArgs<TSchema = undefined> = ToolHandlerArgs<TSchema> & {
   collectionSlug: CollectionSlug
-} & ToolHandlerArgs<TSchema>
+}
 
-export type GlobalToolHandlerArgs<TSchema = undefined> = {
+export type GlobalToolHandlerArgs<TSchema = undefined> = ToolHandlerArgs<TSchema> & {
   globalSlug: GlobalSlug
-} & ToolHandlerArgs<TSchema>
+}
 
 export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> = {
   description: string
@@ -112,16 +112,16 @@ export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema |
  */
 export type CollectionTool<
   TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
-> = {
+> = Pick<Tool, 'description' | 'overrideResponse'> & {
   handler: (args: CollectionToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
   input?: ((args: { collectionSchema: JsonSchemaType }) => TSchema) | TSchema
-} & Pick<Tool, 'description' | 'overrideResponse'>
+}
 
 export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> =
-  {
+  Pick<Tool, 'description' | 'overrideResponse'> & {
     handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
     input?: ((args: { globalSchema: JsonSchemaType }) => TSchema) | TSchema
-  } & Pick<Tool, 'description' | 'overrideResponse'>
+  }
 
 /**
  * Configures (or disables) a built-in tool without replacing it.
@@ -147,9 +147,9 @@ export type MCPCollectionToolsMap = {
   [K in MCPCollectionBuiltinName]?: false | MCPBuiltInToolOverride
 }
 
-export type MCPAuthCollectionToolsMap = {
+export type MCPAuthCollectionToolsMap = MCPCollectionToolsMap & {
   [K in MCPCollectionAuthToolName]?: MCPBuiltInToolOverride | true
-} & MCPCollectionToolsMap
+}
 
 /** Auth-enabled collections get auth-tool name autocomplete; others get CRUD-only. */
 export type MCPToolsMapForCollection<Slug extends CollectionSlug> = Slug extends AuthCollectionSlug
@@ -245,10 +245,13 @@ export type MCPPluginConfig = {
   userCollection?: CollectionSlug
 }
 
-export type SanitizedMCPPluginConfig = {
+export type SanitizedMCPPluginConfig = Pick<
+  MCPPluginConfig,
+  'disabled' | 'mcp' | 'overrideApiKeyCollection' | 'overrideAuth'
+> & {
   items: MCPItem[]
   userCollection: CollectionSlug
-} & Pick<MCPPluginConfig, 'disabled' | 'mcp' | 'overrideApiKeyCollection' | 'overrideAuth'>
+}
 
 export type MCPServerOptions = {
   options?: ConstructorParameters<typeof McpServer>[1]
@@ -311,28 +314,28 @@ export type MCPItemBase = {
 }
 
 export type MCPItem =
-  | ({
+  | (MCPItemBase & {
       collectionSlug: CollectionSlug
       tool: CollectionTool
       type: 'collectionTool'
-    } & MCPItemBase)
-  | ({
+    })
+  | (MCPItemBase & {
       globalSlug: GlobalSlug
       tool: GlobalTool
       type: 'globalTool'
-    } & MCPItemBase)
-  | ({
+    })
+  | (MCPItemBase & {
       prompt: Prompt
       type: 'prompt'
-    } & MCPItemBase)
-  | ({
+    })
+  | (MCPItemBase & {
       resource: Resource
       type: 'resource'
-    } & MCPItemBase)
-  | ({
+    })
+  | (MCPItemBase & {
       tool: Tool
       type: 'tool'
-    } & MCPItemBase)
+    })
 
 /**
  * The caller's identity + the MCP items they can use for this request. Returned

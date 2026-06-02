@@ -16,5 +16,5 @@ export const sanitizePopulateParam = (unsanitizedPopulate: unknown): PopulateTyp
     )
   }
 
-  return unsanitizedPopulate as PopulateType
+  return unsanitizedPopulate
 }

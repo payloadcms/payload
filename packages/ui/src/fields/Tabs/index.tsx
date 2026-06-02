@@ -198,7 +198,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 
 export const TabsField = withCondition(TabsFieldComponent)
 
-type ActiveTabProps = {
+type ActiveTabProps = Pick<ClientComponentProps, 'forceRender'> & {
   readonly description: StaticDescription
   readonly field: ClientTab
   readonly hidden: boolean
@@ -210,7 +210,7 @@ type ActiveTabProps = {
   readonly permissions: SanitizedFieldPermissions
   readonly readOnly: boolean
   readonly tabIndex: number
-} & Pick<ClientComponentProps, 'forceRender'>
+}
 
 function TabContent({
   description,

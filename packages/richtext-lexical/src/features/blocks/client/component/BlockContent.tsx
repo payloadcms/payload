@@ -59,10 +59,10 @@ export type BlockCollapsibleProps = {
   showRowNumber?: boolean
 }
 
-export type BlockCollapsibleWithErrorProps = {
+export type BlockCollapsibleWithErrorProps = BlockCollapsibleProps & {
   errorCount?: number
   fieldHasErrors?: boolean
-} & BlockCollapsibleProps
+}
 
 export type BlockContentProps = {
   baseClass: string
@@ -82,9 +82,12 @@ export type BlockContentProps = {
   RemoveButton: React.FC
 }
 
-export type BlockComponentContextType = {
+export type BlockComponentContextType = Omit<
+  BlockContentProps,
+  'Collapsible' | 'CustomBlock' | 'CustomLabel'
+> & {
   BlockCollapsible: React.FC<BlockCollapsibleProps>
-} & Omit<BlockContentProps, 'Collapsible' | 'CustomBlock' | 'CustomLabel'>
+}
 
 const BlockComponentContext = createContext<BlockComponentContextType>({
   baseClass: 'LexicalEditorTheme__block',

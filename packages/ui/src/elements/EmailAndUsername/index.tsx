@@ -17,10 +17,10 @@ type RenderEmailAndUsernameFieldsProps = {
   loginWithUsername?: false | LoginWithUsernameOptions
   operation?: 'create' | 'update'
   permissions?:
+    | true
     | {
         [fieldName: string]: SanitizedFieldPermissions
       }
-    | true
   readOnly: boolean
   t: TFunction
 }

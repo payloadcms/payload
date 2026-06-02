@@ -33,9 +33,9 @@ interface D1Response {
   success: true
 }
 
-type D1Result<T = unknown> = {
+type D1Result<T = unknown> = D1Response & {
   results: T[]
-} & D1Response
+}
 
 export const execute: Execute<any> = function execute({ db, drizzle, raw, sql: statement }) {
   const executeFrom: any = (db ?? drizzle)!

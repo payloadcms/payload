@@ -16,9 +16,9 @@ export type ChipProps = {
   children: React.ReactNode
   className?: string
   disabled?: boolean
-  elementProps?: {
+  elementProps?: HTMLAttributes<HTMLElement> & {
     ref?: React.RefCallback<HTMLElement>
-  } & HTMLAttributes<HTMLElement>
+  }
   icon?: React.ReactNode
   id?: string
   onClick?: () => void

@@ -275,10 +275,10 @@ const sanitizeDate = ({
 }
 
 type Args = {
-  $addToSet?: Record<string, { $each: any[] } | any>
+  $addToSet?: Record<string, any | { $each: any[] }>
   $inc?: Record<string, number>
-  $pull?: Record<string, { $in: any[] } | any>
-  $push?: Record<string, { $each: any[] } | any>
+  $pull?: Record<string, any | { $in: any[] }>
+  $push?: Record<string, any | { $each: any[] }>
   /** instance of the adapter */
   adapter: MongooseAdapter
   /** data to transform, can be an array of documents or a single document */

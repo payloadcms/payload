@@ -57,7 +57,7 @@ const getInitialDrawerData = ({
   }
 
   if (field.type === 'relationship' || field.type === 'upload') {
-    let value: { relationTo: string; value: number | string } | number | string = docID
+    let value: number | string | { relationTo: string; value: number | string } = docID
     if (Array.isArray(field.relationTo)) {
       value = {
         relationTo: collectionSlug,
@@ -154,7 +154,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       return null
     }
 
-    let value: { relationTo: string; value: number | string } | number | string = docID
+    let value: number | string | { relationTo: string; value: number | string } = docID
 
     if (Array.isArray(field.targetField.relationTo)) {
       value = {

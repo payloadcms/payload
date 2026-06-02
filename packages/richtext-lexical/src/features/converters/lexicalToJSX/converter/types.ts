@@ -32,11 +32,11 @@ export type JSXConverters<
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided
 > = {
   [key: string]:
+    | JSXConverter<any>
+    | undefined
     | {
         [blockSlug: string]: JSXConverter<any>
       }
-    | JSXConverter<any>
-    | undefined
 } & {
   [nodeType in Exclude<NonNullable<TNodes['type']>, 'block' | 'inlineBlock'>]?: JSXConverter<
     Extract<TNodes, { type: nodeType }>
@@ -72,6 +72,6 @@ export type JSXConverters<
   }
   unknown?: JSXConverter<SerializedLexicalNode>
 }
-export type SerializedLexicalNodeWithParent = {
+export type SerializedLexicalNodeWithParent = SerializedLexicalNode & {
   parent?: SerializedLexicalNode
-} & SerializedLexicalNode
+}

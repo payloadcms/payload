@@ -53,7 +53,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
     })
   }
   return async ({ config, isRoot, parentIsLocalized }) => {
-    let features: FeatureProviderServer<unknown, unknown, unknown>[] = []
+    let features: FeatureProviderServer<unknown, unknown, unknown>[]
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only

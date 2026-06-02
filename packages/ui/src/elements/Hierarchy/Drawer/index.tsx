@@ -26,10 +26,10 @@ import './index.css'
 
 export const baseClass = 'hierarchy-drawer'
 
-type HierarchyDrawerContentProps = {
+type HierarchyDrawerContentProps = HierarchyDrawerInternalProps & {
   columnBrowserRef?: React.RefObject<HierarchyColumnBrowserRef | null>
   onCreateNew?: (params: { parentId: null | number | string }) => void
-} & HierarchyDrawerInternalProps
+}
 
 export type HierarchyDrawerContentRef = {
   selectItem: (id: number | string) => void
@@ -52,7 +52,7 @@ export const HierarchyDrawerContent = function HierarchyDrawerContent({
   ref,
   showMoveToRoot,
   useAsTitle,
-}: { ref?: React.RefObject<HierarchyDrawerContentRef | null> } & HierarchyDrawerContentProps) {
+}: HierarchyDrawerContentProps & { ref?: React.RefObject<HierarchyDrawerContentRef | null> }) {
   const { i18n, t } = useTranslation()
   // NOTE: Do NOT use useModal() here - it causes re-renders when any modal state changes
   // Use closeDrawer prop instead which already handles closing the modal

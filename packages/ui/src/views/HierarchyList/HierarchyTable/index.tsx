@@ -105,16 +105,16 @@ export function HierarchyTable({
   const [relatedState, setRelatedState] = useState<
     Record<
       string,
-      {
+      Partial<PaginatedDocs> & {
         isLoading: boolean
-      } & Partial<PaginatedDocs>
+      }
     >
   >(() => {
     const initial: Record<
       string,
-      {
+      Partial<PaginatedDocs> & {
         isLoading: boolean
-      } & Partial<PaginatedDocs>
+      }
     > = {}
     for (const group of relatedGroups) {
       initial[group.collectionSlug] = {

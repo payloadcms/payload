@@ -31,7 +31,7 @@ export type ListQueryProps = {
   readonly query?: ListQuery
 }
 
-export type IListQueryContext = {
+export type IListQueryContext = ContextHandlers & {
   collectionSlug: ClientCollectionConfig['slug']
   data: ListQueryProps['data']
   defaultLimit?: number
@@ -45,4 +45,4 @@ export type IListQueryContext = {
   query: ListQuery
   refineListData: (args: ListQuery, setModified?: boolean) => Promise<void>
   setModified: (modified: boolean) => void
-} & ContextHandlers
+}

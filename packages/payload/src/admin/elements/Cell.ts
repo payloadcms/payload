@@ -90,9 +90,9 @@ export type DefaultCellComponentProps<
 export type DefaultServerCellComponentProps<
   TField extends ClientField = ClientField,
   TCellData = any,
-> = {
+> = Omit<DefaultCellComponentProps<TField, TCellData>, 'field'> & {
   collectionConfig: SanitizedCollectionConfig
   field: Field
   i18n: I18nClient
   payload: Payload
-} & Omit<DefaultCellComponentProps<TField, TCellData>, 'field'>
+}

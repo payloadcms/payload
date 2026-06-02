@@ -178,6 +178,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     if (relationshipToLoad[0] && !relationshipToLoad[1].hasLoadedAll) {
       const abortController = new AbortController()
 
+      // eslint-disable-next-line react-hooks/rules-of-hooks, @eslint-react/rules-of-hooks -- intentional non-reactive Effect Event called from a scroll event handler (never called during render)
       void loadOptions({
         abortController,
         relationSlug: relationshipToLoad[0],

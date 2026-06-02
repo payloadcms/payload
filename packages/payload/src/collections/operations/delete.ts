@@ -32,7 +32,7 @@ import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublis
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
-export type Arguments = {
+export type Arguments = Pick<FindOptions<string, SelectType>, 'select'> & {
   collection: Collection
   depth?: number
   disableTransaction?: boolean
@@ -43,7 +43,7 @@ export type Arguments = {
   showHiddenFields?: boolean
   trash?: boolean
   where: Where
-} & Pick<FindOptions<string, SelectType>, 'select'>
+}
 
 export const deleteOperation = async <
   TSlug extends CollectionSlug,

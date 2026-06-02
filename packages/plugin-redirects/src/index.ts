@@ -35,9 +35,9 @@ export const redirectsPlugin =
         pluginConfig?.redirectTypes?.includes(option.value),
       ),
       required: true,
-      ...((pluginConfig?.redirectTypeFieldOverride || {}) as {
+      ...((pluginConfig?.redirectTypeFieldOverride || {}) as Partial<SelectField> & {
         hasMany: boolean
-      } & Partial<SelectField>),
+      }),
     }
 
     const defaultFields: Field[] = [

@@ -51,7 +51,7 @@ export function ListSelection_v4({ count, ListActions, SelectionActions }: ListS
   )
 }
 
-type ListSelectionButtonProps = {} & ButtonProps
+type ListSelectionButtonProps = ButtonProps & {}
 export function ListSelectionButton({ children, className, ...props }: ListSelectionButtonProps) {
   return (
     <Button

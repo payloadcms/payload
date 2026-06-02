@@ -30,10 +30,10 @@ export type FieldSelectProps = {
   readonly fields: ClientField[]
   readonly onChange: OnFieldSelect
   readonly permissions:
+    | SanitizedFieldPermissions
     | {
         [fieldName: string]: SanitizedFieldPermissions
       }
-    | SanitizedFieldPermissions
 }
 
 export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, onChange, permissions }) => {

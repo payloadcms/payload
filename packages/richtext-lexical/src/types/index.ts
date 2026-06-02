@@ -73,9 +73,9 @@ export type LexicalFieldAdminProps = {
   placeholder?: LabelFunction | StaticLabel
 }
 
-export type LexicalFieldAdminClientProps = {
+export type LexicalFieldAdminClientProps = Omit<LexicalFieldAdminProps, 'placeholder'> & {
   placeholder?: string
-} & Omit<LexicalFieldAdminProps, 'placeholder'>
+}
 
 export type FeaturesInput =
   | (({
@@ -131,17 +131,17 @@ export type NodeMapValue<TNode extends SerializedNodeBase = SerializedLexicalNod
    */
   Component?: (
     args:
-      | ({
+      | (JSXConverterArgs<TNode> & {
           isEditor: false
           isJSXConverter: true
-        } & JSXConverterArgs<TNode>)
-      | ({
+        })
+      | (Omit<WithinEditorArgs, 'node'> & {
           isEditor: true
           isJSXConverter: false
-          node: {
+          node: DecoratorNode<React.ReactNode> & {
             _originalDecorate?: (editor: LexicalEditor, config: EditorConfig) => React.ReactNode
-          } & DecoratorNode<React.ReactNode>
-        } & Omit<WithinEditorArgs, 'node'>),
+          }
+        }),
   ) => React.ReactNode
   /**
    * Provide a function to create the DOM element for the node.
@@ -170,19 +170,19 @@ export type NodeMapValue<TNode extends SerializedNodeBase = SerializedLexicalNod
    */
   html?: (
     args:
-      | ({
+      | (JSXConverterArgs<TNode> & {
           isEditor: false
           isJSXConverter: true
-        } & JSXConverterArgs<TNode>)
-      | ({
+        })
+      | (WithinEditorArgs & {
           isEditor: true
           isJSXConverter: false
-        } & WithinEditorArgs),
+        }),
   ) => string
 }
 
 type SharedViewMapBlockEditorProps<TNode extends SerializedBlockNode | SerializedInlineBlockNode> =
-  {
+  Pick<BlockComponentProps<TNode['fields']>, 'className' | 'formData' | 'nodeKey'> & {
     /**
      * True when rendering in the admin editor.
      */
@@ -191,7 +191,7 @@ type SharedViewMapBlockEditorProps<TNode extends SerializedBlockNode | Serialize
      * False when rendering in the admin editor.
      */
     isJSXConverter: false
-  } & Pick<BlockComponentProps<TNode['fields']>, 'className' | 'formData' | 'nodeKey'>
+  }
 
 /**
  * Props passed to a custom Block component in editor mode.
@@ -199,14 +199,15 @@ type SharedViewMapBlockEditorProps<TNode extends SerializedBlockNode | Serialize
  *
  * @experimental - This API is experimental and may change in a minor release.
  */
-export type ViewMapBlockEditorProps<TNode extends SerializedBlockNode> = {
-  /**
-   * Hook to access block UI components (BlockCollapsible, EditButton, etc.).
-   * Call this inside your component to get the context values.
-   * Passed as a prop so you don't need to import from @payloadcms/richtext-lexical/client.
-   */
-  useBlockComponentContext: () => BlockComponentContextType
-} & SharedViewMapBlockEditorProps<TNode>
+export type ViewMapBlockEditorProps<TNode extends SerializedBlockNode> =
+  SharedViewMapBlockEditorProps<TNode> & {
+    /**
+     * Hook to access block UI components (BlockCollapsible, EditButton, etc.).
+     * Call this inside your component to get the context values.
+     * Passed as a prop so you don't need to import from @payloadcms/richtext-lexical/client.
+     */
+    useBlockComponentContext: () => BlockComponentContextType
+  }
 
 /**
  * Props passed to a custom Block component in editor mode.
@@ -214,9 +215,10 @@ export type ViewMapBlockEditorProps<TNode extends SerializedBlockNode> = {
  *
  * @experimental - This API is experimental and may change in a minor release.
  */
-export type ViewMapInlineBlockEditorProps<TNode extends SerializedInlineBlockNode> = {
-  useInlineBlockComponentContext: () => InlineBlockComponentContextType
-} & SharedViewMapBlockEditorProps<TNode>
+export type ViewMapInlineBlockEditorProps<TNode extends SerializedInlineBlockNode> =
+  SharedViewMapBlockEditorProps<TNode> & {
+    useInlineBlockComponentContext: () => InlineBlockComponentContextType
+  }
 
 /**
  * Props passed to a custom Block component in JSX converter mode (frontend).
@@ -304,7 +306,10 @@ export type ViewMapInlineBlockComponentProps<
  * @experimental - This API is experimental and may change in a minor release.
  * @internal
  */
-export type NodeMapBlockValue<TNode extends SerializedBlockNode = SerializedBlockNode> = {
+export type NodeMapBlockValue<TNode extends SerializedBlockNode = SerializedBlockNode> = Pick<
+  NodeMapValue<TNode>,
+  'Component' | 'createDOM' | 'html'
+> & {
   /**
    * A React component that replaces the entire block, including the header/collapsible.
    * Works for both admin editor and frontend JSX conversion.
@@ -330,11 +335,11 @@ export type NodeMapBlockValue<TNode extends SerializedBlockNode = SerializedBloc
    * Use `useBlockComponentContext()` hook to access block context.
    */
   Label?: React.FC<ViewMapBlockComponentProps<TNode>>
-} & Pick<NodeMapValue<TNode>, 'Component' | 'createDOM' | 'html'>
+}
 
 export type NodeMapInlineBlockValue<
   TNode extends SerializedInlineBlockNode = SerializedInlineBlockNode,
-> = {
+> = Pick<NodeMapValue<TNode>, 'Component' | 'createDOM' | 'html'> & {
   /**
    * A React component that replaces the entire block, including the header/collapsible.
    * Works for both admin editor and frontend JSX conversion.
@@ -360,7 +365,7 @@ export type NodeMapInlineBlockValue<
    * Use `useBlockComponentContext()` hook to access block context.
    */
   Label?: React.FC<ViewMapInlineBlockComponentProps<TNode>>
-} & Pick<NodeMapValue<TNode>, 'Component' | 'createDOM' | 'html'>
+}
 
 /**
  * @experimental - This API is experimental and may change in a minor release.
@@ -376,11 +381,11 @@ export type LexicalEditorNodeMap<
   // 'blocks' and 'inlineBlocks' properties use NodeMapBlockValue (which adds Block/Label props).
   // TypeScript requires that intersection properties be assignable to index signatures.
   [key: string]:
+    | NodeMapValue<any>
+    | undefined
     | {
         [blockSlug: string]: NodeMapBlockValue<any> | NodeMapInlineBlockValue<any>
       }
-    | NodeMapValue<any>
-    | undefined
 } & {
   [nodeType in Exclude<NonNullable<TNodes['type']>, 'block' | 'inlineBlock'>]?: NodeMapValue<
     Extract<TNodes, { type: nodeType }>
@@ -489,10 +494,10 @@ export type LexicalEditorProps = {
   views?: PayloadComponent
 }
 
-export type LexicalRichTextAdapter = {
+export type LexicalRichTextAdapter = RichTextAdapter<SerializedEditorState, AdapterProps> & {
   editorConfig: SanitizedServerEditorConfig
   features: FeatureProviderServer<any, any, any>[]
-} & RichTextAdapter<SerializedEditorState, AdapterProps>
+}
 
 export type LexicalRichTextAdapterProvider =
   /**
@@ -515,21 +520,21 @@ export type FeatureClientSchemaMap = {
   [featureKey: string]: SingleFeatureClientSchemaMap
 }
 
-export type LexicalRichTextFieldProps = {
-  admin?: LexicalFieldAdminClientProps
-  // clientFeatures is added through the rsc field
-  clientFeatures: ClientFeaturesMap
-  /**
-   * Part of the import map that contains client components for all lexical features of this field that
-   * have been added through `feature.componentImports`.
-   */
-  featureClientImportMap?: Record<string, any>
-  featureClientSchemaMap: FeatureClientSchemaMap
-  initialLexicalFormState: InitialLexicalFormState
-  lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used
-  views?: LexicalEditorViewMap
-} & Pick<ServerFieldBase, 'permissions'> &
-  RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
+export type LexicalRichTextFieldProps = Pick<ServerFieldBase, 'permissions'> &
+  RichTextFieldClientProps<SerializedEditorState, AdapterProps, object> & {
+    admin?: LexicalFieldAdminClientProps
+    // clientFeatures is added through the rsc field
+    clientFeatures: ClientFeaturesMap
+    /**
+     * Part of the import map that contains client components for all lexical features of this field that
+     * have been added through `feature.componentImports`.
+     */
+    featureClientImportMap?: Record<string, any>
+    featureClientSchemaMap: FeatureClientSchemaMap
+    initialLexicalFormState: InitialLexicalFormState
+    lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used
+    views?: LexicalEditorViewMap
+  }
 
 export type LexicalRichTextCellProps = DefaultServerCellComponentProps<
   RichTextFieldClient<SerializedEditorState, AdapterProps, object>,

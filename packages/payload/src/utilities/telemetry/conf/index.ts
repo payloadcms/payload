@@ -35,13 +35,36 @@ const checkValueType = (key: string, value: unknown): void => {
 export class Conf<T extends Record<string, any> = Record<string, unknown>>
   implements Iterable<[keyof T, T[keyof T]]>
 {
-  readonly #options: Readonly<Partial<Options>>
-  private readonly _deserialize: Deserialize<T> = (value) => JSON.parse(value)
-  private readonly _serialize: Serialize<T> = (value) => JSON.stringify(value, undefined, '\t')
-
   readonly events: EventTarget
-
   readonly path: string
+  get size(): number {
+    return Object.keys(this.store).length
+  }
+
+  get store(): T {
+    try {
+      const dataString = fs.readFileSync(this.path, 'utf8')
+      const deserializedData = this._deserialize(dataString)
+      return Object.assign(createPlainObject(), deserializedData)
+    } catch (error: unknown) {
+      if ((error as any)?.code === 'ENOENT') {
+        this._ensureDirectory()
+        return createPlainObject()
+      }
+
+      throw error
+    }
+  }
+
+  set store(value: T) {
+    this._ensureDirectory()
+
+    this._write(value)
+
+    this.events.dispatchEvent(new Event('change'))
+  }
+
+  readonly #options: Readonly<Partial<Options>>
 
   constructor() {
     const options: Partial<Options> = {
@@ -68,17 +91,6 @@ export class Conf<T extends Record<string, any> = Record<string, unknown>>
     } catch {
       this.store = store
     }
-  }
-
-  private _ensureDirectory(): void {
-    // Ensure the directory exists as it could have been deleted in the meantime.
-    fs.mkdirSync(path.dirname(this.path), { recursive: true })
-  }
-
-  private _write(value: T): void {
-    const data: string | Uint8Array = this._serialize(value)
-
-    fs.writeFileSync(this.path, data, { mode: this.#options.configFileMode })
   }
 
   /**
@@ -144,30 +156,18 @@ export class Conf<T extends Record<string, any> = Record<string, unknown>>
       yield [key, value]
     }
   }
-  get size(): number {
-    return Object.keys(this.store).length
+
+  private readonly _deserialize: Deserialize<T> = (value) => JSON.parse(value)
+  private _ensureDirectory(): void {
+    // Ensure the directory exists as it could have been deleted in the meantime.
+    fs.mkdirSync(path.dirname(this.path), { recursive: true })
   }
-  get store(): T {
-    try {
-      const dataString = fs.readFileSync(this.path, 'utf8')
-      const deserializedData = this._deserialize(dataString)
-      return Object.assign(createPlainObject(), deserializedData)
-    } catch (error: unknown) {
-      if ((error as any)?.code === 'ENOENT') {
-        this._ensureDirectory()
-        return createPlainObject()
-      }
+  private readonly _serialize: Serialize<T> = (value) => JSON.stringify(value, undefined, '\t')
 
-      throw error
-    }
-  }
+  private _write(value: T): void {
+    const data: string | Uint8Array = this._serialize(value)
 
-  set store(value: T) {
-    this._ensureDirectory()
-
-    this._write(value)
-
-    this.events.dispatchEvent(new Event('change'))
+    fs.writeFileSync(this.path, data, { mode: this.#options.configFileMode })
   }
 }
 

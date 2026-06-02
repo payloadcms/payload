@@ -27,9 +27,9 @@ import '../index.scss'
 
 const { maxLength: maxLengthDefault, minLength: minLengthDefault } = defaults.title
 
-type MetaTitleProps = {
+type MetaTitleProps = TextFieldClientProps & {
   readonly hasGenerateTitleFn: boolean
-} & TextFieldClientProps
+}
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {

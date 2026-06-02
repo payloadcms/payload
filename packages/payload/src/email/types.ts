@@ -2,9 +2,9 @@ import type { SendMailOptions as NodemailerSendMailOptions } from 'nodemailer'
 
 import type { Payload } from '../types/index.js'
 
-type Prettify<T> = {
+type Prettify<T> = NonNullable<unknown> & {
   [K in keyof T]: T[K]
-} & NonNullable<unknown>
+}
 
 /**
  * Options for sending an email. Allows access to the PayloadRequest object

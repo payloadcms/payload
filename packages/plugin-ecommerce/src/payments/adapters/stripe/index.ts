@@ -25,7 +25,7 @@ type StripeWebhookHandlers = {
   [webhookName: string]: StripeWebhookHandler
 }
 
-export type StripeAdapterArgs = {
+export type StripeAdapterArgs = PaymentAdapterArgs & {
   /**
    * This library's types only reflect the latest API version.
    *
@@ -44,7 +44,7 @@ export type StripeAdapterArgs = {
   secretKey: string
   webhooks?: StripeWebhookHandlers
   webhookSecret?: string
-} & PaymentAdapterArgs
+}
 
 export const stripeAdapter: (props: StripeAdapterArgs) => PaymentAdapter = (props) => {
   const { apiVersion, appInfo, groupOverrides, secretKey, webhooks, webhookSecret } = props
@@ -99,7 +99,7 @@ export const stripeAdapter: (props: StripeAdapterArgs) => PaymentAdapter = (prop
   }
 }
 
-export type StripeAdapterClientArgs = {
+export type StripeAdapterClientArgs = PaymentAdapterClientArgs & {
   /**
    * This library's types only reflect the latest API version.
    *
@@ -115,7 +115,7 @@ export type StripeAdapterClientArgs = {
   apiVersion?: Stripe.StripeConfig['apiVersion']
   appInfo?: Stripe.StripeConfig['appInfo']
   publishableKey: string
-} & PaymentAdapterClientArgs
+}
 
 export const stripeAdapterClient: (props: StripeAdapterClientArgs) => PaymentAdapterClient = (
   props,

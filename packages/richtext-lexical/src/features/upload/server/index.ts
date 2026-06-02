@@ -35,7 +35,7 @@ export type ExclusiveUploadFeatureProps =
       enabledCollections?: UploadCollectionSlug[]
     }
 
-export type UploadFeatureProps = {
+export type UploadFeatureProps = ExclusiveUploadFeatureProps & {
   collections?: {
     [collection: UploadCollectionSlug]: {
       fields: Field[]
@@ -48,7 +48,7 @@ export type UploadFeatureProps = {
    * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
-} & ExclusiveUploadFeatureProps
+}
 
 export const UploadFeature = createServerFeature<
   UploadFeatureProps,

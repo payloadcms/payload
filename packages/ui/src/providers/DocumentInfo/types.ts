@@ -56,16 +56,16 @@ export type DocumentInfoProps = {
   readonly versionCount: number
 }
 
-export type DocumentInfoContext = {
+export type DocumentInfoContext = DocumentInfoProps & {
   currentEditor?: ClientUser | null | number | string
   data?: Data
   docConfig?: ClientCollectionConfig | ClientGlobalConfig
   documentIsLocked?: boolean
-  documentLockState: React.RefObject<{
+  documentLockState: React.RefObject<null | {
     hasShownLockedModal: boolean
     isLocked: boolean
     user: ClientUser | number | string
-  } | null>
+  }>
   getDocPermissions: GetDocPermissions
   getDocPreferences: () => Promise<DocumentPreferences>
   incrementVersionCount: () => void
@@ -80,7 +80,7 @@ export type DocumentInfoContext = {
   setData: (data: Data) => void
   setDocFieldPreferences: (
     field: string,
-    fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
+    fieldPreferences: Partial<InsideFieldsPreferences> & { [key: string]: unknown },
   ) => void
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
@@ -98,6 +98,6 @@ export type DocumentInfoContext = {
   updateSavedDocumentData: (data: Data) => void
   uploadStatus?: 'failed' | 'idle' | 'uploading'
   versionCount: number
-} & DocumentInfoProps
+}
 
 export const DocumentTitleContext = React.createContext<string>('')

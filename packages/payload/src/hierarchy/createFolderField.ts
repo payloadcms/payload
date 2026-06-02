@@ -7,12 +7,15 @@ import { getHierarchyFieldName } from './constants.js'
  * All SingleRelationshipField properties are available except name, type, relationTo, and hasMany
  * which are managed by the folder system.
  */
-export type CreateFolderFieldOptions = {
+export type CreateFolderFieldOptions = Pick<
+  Partial<SingleRelationshipField>,
+  'admin' | 'label' | 'required'
+> & {
   /**
    * The slug of the hierarchy collection this field references (e.g., 'folders')
    */
   relationTo: string
-} & Pick<Partial<SingleRelationshipField>, 'admin' | 'label' | 'required'>
+}
 
 /**
  * Creates a relationship field for folder-style hierarchies (single-select).
@@ -65,5 +68,5 @@ export function createFolderField(options: CreateFolderFieldOptions): Relationsh
     label: label ?? 'Folder',
     relationTo,
     ...restOptions,
-  } as RelationshipField
+  }
 }

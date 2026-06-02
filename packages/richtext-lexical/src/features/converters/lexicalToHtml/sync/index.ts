@@ -39,7 +39,7 @@ export function convertLexicalToHTML({
   disableTextAlign,
 }: ConvertLexicalToHTMLArgs): string {
   if (hasText(data)) {
-    let finalConverters: HTMLConverters = {}
+    let finalConverters: HTMLConverters
     if (converters) {
       if (typeof converters === 'function') {
         finalConverters = converters({ defaultConverters: defaultHTMLConverters })

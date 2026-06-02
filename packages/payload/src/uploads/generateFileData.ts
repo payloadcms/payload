@@ -134,7 +134,7 @@ export const generateFileData = async <T>({
       } else if (filename && url) {
         // File is remote
         file = await getExternalFile({
-          data: incomingFileData as unknown as FileData,
+          data: incomingFileData,
           req,
           uploadConfig: collectionConfig.upload,
         })

@@ -21,9 +21,9 @@ import type {
 
 type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
 
-type ArrayFieldBaseClientProps = {
+type ArrayFieldBaseClientProps = FieldPaths & {
   readonly validate?: ArrayFieldValidation
-} & FieldPaths
+}
 
 type ArrayFieldBaseServerProps = Pick<FieldPaths, 'path'>
 

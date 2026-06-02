@@ -20,7 +20,7 @@ import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 export function UnpublishButton({
   label: labelProp,
-}: { label?: string } & UnpublishButtonClientProps = {}) {
+}: UnpublishButtonClientProps & { label?: string } = {}) {
   const {
     id,
     collectionSlug,

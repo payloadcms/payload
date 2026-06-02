@@ -97,7 +97,7 @@ export const featuresInputToEditorConfig = async (args: {
   resolvedFeatureMap: ResolvedServerFeatureMap
   sanitizedConfig: SanitizedServerEditorConfig
 }> => {
-  let features: FeatureProviderServer<unknown, unknown, unknown>[] = []
+  let features: FeatureProviderServer<unknown, unknown, unknown>[]
   if (args.features && typeof args.features === 'function') {
     const rootEditor = args.config.editor
     let rootEditorFeatures: FeatureProviderServer<unknown, unknown, unknown>[] = []

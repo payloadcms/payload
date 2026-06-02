@@ -43,10 +43,10 @@ export type WidgetInstanceClient = {
   item: WidgetItem
 }
 
-export type DropTargetWidget = {
+export type DropTargetWidget = null | {
   position: 'after' | 'before'
   widget: WidgetInstanceClient
-} | null
+}
 
 /* eslint-disable perfectionist/sort-objects */
 const WIDTH_TO_PERCENTAGE = {
@@ -83,6 +83,12 @@ export function ModularDashboardClient({
 
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
   const sensors = useDashboardSensors()
+
+  const draggedWidget = useMemo(
+    () =>
+      activeDragId ? currentLayout?.find((widget) => widget.item.id === activeDragId) : undefined,
+    [activeDragId, currentLayout],
+  )
 
   return (
     <div>
@@ -202,26 +208,17 @@ export function ModularDashboardClient({
             // Uses custom modifier that only applies for pointer, not keyboard navigation.
             modifiers={[snapCenterToCursorOnlyForPointer]}
           >
-            {activeDragId
-              ? (() => {
-                  const draggedWidget = currentLayout?.find(
-                    (widget) => widget.item.id === activeDragId,
-                  )
-                  return draggedWidget ? (
-                    <div
-                      style={{
-                        transform: 'scale(0.25)',
-                      }}
-                    >
-                      <div
-                        className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}
-                      >
-                        <div className="widget-content">{draggedWidget.component}</div>
-                      </div>
-                    </div>
-                  ) : null
-                })()
-              : null}
+            {draggedWidget ? (
+              <div
+                style={{
+                  transform: 'scale(0.25)',
+                }}
+              >
+                <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>
+                  <div className="widget-content">{draggedWidget.component}</div>
+                </div>
+              </div>
+            ) : null}
           </DragOverlay>
         </div>
       </DndContext>

@@ -169,6 +169,7 @@ export function AuthProvider({
           setForceLogoutBufferMs(nextForceLogoutBufferMs)
 
           reminderTimeoutRef.current = setTimeout(
+            // eslint-disable-next-line react-hooks/rules-of-hooks, @eslint-react/rules-of-hooks -- intentional non-reactive Effect Event, scheduled via setTimeout (never called during render)
             handleReminderTimeout,
             Math.max(expiresInMs - nextForceLogoutBufferMs, 0),
           )

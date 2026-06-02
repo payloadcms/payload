@@ -43,7 +43,7 @@ export async function selectDb(
   projectName: string,
   template?: ProjectTemplate,
 ): Promise<DbDetails> {
-  let dbType: DbType | symbol | undefined = undefined
+  let dbType: DbType | symbol | undefined
   if (args['--db']) {
     if (!Object.values(dbChoiceRecord).some((dbChoice) => dbChoice.value === args['--db'])) {
       throw new Error(

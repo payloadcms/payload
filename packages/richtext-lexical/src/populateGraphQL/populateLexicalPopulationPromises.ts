@@ -6,12 +6,12 @@ import type { AdapterProps } from '../types/index.js'
 
 import { recurseNodes } from '../utilities/forEachNodeRecursively.js'
 
-export type Args = {
+export type Args = Parameters<
+  NonNullable<RichTextAdapter<SerializedEditorState, AdapterProps>['graphQLPopulationPromises']>
+>[0] & {
   editorPopulationPromises: Map<string, Array<PopulationPromise>>
   parentIsLocalized: boolean
-} & Parameters<
-  NonNullable<RichTextAdapter<SerializedEditorState, AdapterProps>['graphQLPopulationPromises']>
->[0]
+}
 
 /**
  * Appends all new populationPromises to the populationPromises prop

@@ -309,7 +309,7 @@ export type JSONFieldValidation = Validate<
   string,
   unknown,
   unknown,
-  { jsonError?: string } & JSONField
+  JSONField & { jsonError?: string }
 >
 
 export const json: JSONFieldValidation = (
@@ -543,10 +543,10 @@ export async function validateBlocksFilterOptions({
   req,
   siblingData,
   value,
-}: { value: Parameters<BlocksFieldValidation>[0] } & Pick<
+}: Pick<
   Parameters<BlocksFieldValidation>[1],
   'data' | 'filterOptions' | 'id' | 'req' | 'siblingData'
->): Promise<{
+> & { value: Parameters<BlocksFieldValidation>[0] }): Promise<{
   /**
    * All block slugs found in the value of the blocks field
    */

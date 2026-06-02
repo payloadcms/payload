@@ -16,16 +16,13 @@ import type {
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
-import type {
-  DataFromCollectionSlug,
-  DraftFlagFromCollectionSlug,
-} from '../../config/types.js'
+import type { DataFromCollectionSlug, DraftFlagFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findVersionsOperation } from '../findVersions.js'
 
-type BaseOptions<TSlug extends CollectionSlug> = {
+type BaseOptions<TSlug extends CollectionSlug> = Pick<FindOptions<TSlug, SelectType>, 'select'> & {
   /**
    * the Collection slug to operate against.
    */
@@ -109,10 +106,10 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-} & Pick<FindOptions<TSlug, SelectType>, 'select'>
+}
 
-export type Options<TSlug extends CollectionSlug> =
-  BaseOptions<TSlug> & DraftFlagFromCollectionSlug<TSlug>
+export type Options<TSlug extends CollectionSlug> = BaseOptions<TSlug> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 export async function findVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,

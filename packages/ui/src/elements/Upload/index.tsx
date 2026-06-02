@@ -128,11 +128,11 @@ export const Upload: React.FC<UploadProps> = (props) => {
   )
 }
 
-export type UploadProps_v4 = {
+export type UploadProps_v4 = UploadProps & {
   readonly resetUploadEdits?: () => void
   readonly updateUploadEdits?: (args: UploadEdits) => void
   readonly uploadEdits?: UploadEdits
-} & UploadProps
+}
 
 export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const {

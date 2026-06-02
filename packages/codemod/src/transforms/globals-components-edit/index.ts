@@ -6,6 +6,7 @@ import type { Transform } from '../../types.js'
 
 const isObjectLiteral = (
   property: PropertyAssignment | undefined,
+  // eslint-disable-next-line perfectionist/sort-intersection-types -- order matters: the custom `getInitializer(): ObjectLiteralExpression` overload must come first to win type resolution
 ): property is { getInitializer(): ObjectLiteralExpression } & PropertyAssignment => {
   if (!property) {
     return false

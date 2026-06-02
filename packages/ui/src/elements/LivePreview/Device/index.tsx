@@ -21,7 +21,7 @@ export const DeviceContainer: React.FC<{
 
   const { size: outerFrameSize } = useResize(outerFrameRef.current)
 
-  let deviceIsLargerThanFrame: boolean = false
+  let deviceIsLargerThanFrame: boolean
 
   // Sync the measured device size with the context so that other components can use it
   // This happens from the bottom up so that as this component mounts and unmounts,

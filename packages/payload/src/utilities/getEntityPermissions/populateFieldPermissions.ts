@@ -87,7 +87,7 @@ export const populateFieldPermissions = ({
 
       if ('name' in field && field.name) {
         if (!permissionsObject[field.name]) {
-          permissionsObject[field.name] = {} as FieldPermissions
+          permissionsObject[field.name] = {}
         }
         const fieldPermissions: FieldPermissions = permissionsObject[field.name]!
 
@@ -269,7 +269,7 @@ export const populateFieldPermissions = ({
         for (const tab of field.tabs) {
           if (tabHasName(tab)) {
             if (!permissionsObject[tab.name]) {
-              permissionsObject[tab.name] = { fields: {} } as FieldPermissions
+              permissionsObject[tab.name] = { fields: {} }
             }
 
             const tabPermissions = permissionsObject[tab.name]!

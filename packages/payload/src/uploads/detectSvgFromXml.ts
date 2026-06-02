@@ -12,7 +12,7 @@ export function detectSvgFromXml(buffer: Buffer): boolean {
     const declaredEncoding = xmlDeclMatch?.[1]?.toLowerCase()
 
     // Only support safe encodings
-    if (declaredEncoding && !['ascii', 'utf-8', 'utf8'].includes(declaredEncoding)) {
+    if (declaredEncoding && !['ascii', 'utf8', 'utf-8'].includes(declaredEncoding)) {
       return false
     }
 

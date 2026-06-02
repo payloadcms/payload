@@ -56,7 +56,7 @@ export type SearchPluginConfig<ConfigTypes = unknown> = {
    * @default 50
    */
   reindexBatchSize?: number
-  searchOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  searchOverrides?: Partial<Omit<CollectionConfig, 'fields'>> & { fields?: FieldsOverride }
   /**
    * Determine whether to skip syncing a document for a specific locale.
    * Useful for multi-tenant applications, conditional indexing, or any scenario where
@@ -94,24 +94,26 @@ export type ResolvedCollectionLabels = {
   [collection: string]: StaticLabel
 }
 
-export type SearchPluginConfigWithLocales<ConfigTypes = unknown> = {
-  labels?: CollectionLabels
-} & SearchPluginConfig<ConfigTypes>
+export type SearchPluginConfigWithLocales<ConfigTypes = unknown> =
+  SearchPluginConfig<ConfigTypes> & {
+    labels?: CollectionLabels
+  }
 
-export type SanitizedSearchPluginConfig<ConfigTypes = unknown> = {
-  reindexBatchSize: number
-  syncDrafts: boolean
-} & SearchPluginConfigWithLocales<ConfigTypes>
+export type SanitizedSearchPluginConfig<ConfigTypes = unknown> =
+  SearchPluginConfigWithLocales<ConfigTypes> & {
+    reindexBatchSize: number
+    syncDrafts: boolean
+  }
 
-export type SyncWithSearchArgs = {
+export type SyncWithSearchArgs = Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'> & {
   collection: string
   pluginConfig: SanitizedSearchPluginConfig
-} & Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'>
+}
 
-export type SyncDocArgs = {
+export type SyncDocArgs = Omit<SyncWithSearchArgs, 'context' | 'previousDoc'> & {
   locale?: Locale['code']
   onSyncError?: () => void
-} & Omit<SyncWithSearchArgs, 'context' | 'previousDoc'>
+}
 
 // Extend the `CollectionAfterChangeHook` with more function args
 // Convert the `collection` arg from `SanitizedCollectionConfig` to a string

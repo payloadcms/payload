@@ -20,7 +20,10 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { duplicateOperation } from '../duplicate.js'
 
-type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = Pick<
+  FindOptions<TSlug, TSelect>,
+  'select'
+> & {
   /**
    * the Collection slug to operate against.
    */
@@ -87,10 +90,13 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-} & Pick<FindOptions<TSlug, TSelect>, 'select'>
+}
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
-  BaseOptions<TSlug, TSelect> & DraftFlagFromCollectionSlug<TSlug>
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 export async function duplicateLocal<
   TSlug extends CollectionSlug,

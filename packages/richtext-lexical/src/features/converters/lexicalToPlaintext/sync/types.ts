@@ -32,11 +32,11 @@ export type PlaintextConverters<
   T extends { [key: string]: any; type?: string } = DefaultPlaintextNodeTypes,
 > = {
   [key: string]:
+    | PlaintextConverter<any>
+    | undefined
     | {
         [blockSlug: string]: PlaintextConverter<any>
       }
-    | PlaintextConverter<any>
-    | undefined
 } & {
   [nodeType in Exclude<NonNullable<T['type']>, 'block' | 'inlineBlock'>]?: PlaintextConverter<
     Extract<T, { type: nodeType }>

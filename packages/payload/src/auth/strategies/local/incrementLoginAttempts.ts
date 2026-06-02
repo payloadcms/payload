@@ -22,8 +22,8 @@ export const incrementLoginAttempts = async ({
 
   const currentTime = Date.now()
 
-  let updatedLockUntil: null | string = null
-  let updatedLoginAttempts: null | number = null
+  let updatedLockUntil: null | string
+  let updatedLoginAttempts: null | number
 
   if (user.lockUntil && !isUserLocked(new Date(user.lockUntil))) {
     // Expired lock, restart count at 1

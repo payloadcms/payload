@@ -8,16 +8,7 @@ import { QueryError } from '../../errors/QueryError.js'
 import { validOperatorSet } from '../../types/constants.js'
 import { validateSearchParam } from './validateSearchParams.js'
 
-type Args = {
-  errors?: { path: string }[]
-  overrideAccess: boolean
-  // TODO: Rename to permissions or entityPermissions in 4.0
-  policies?: EntityPolicies
-  polymorphicJoin?: boolean
-  req: PayloadRequest
-  versionFields?: FlattenedField[]
-  where: Where
-} & (
+type Args = (
   | {
       collectionConfig: SanitizedCollectionConfig
       globalConfig?: never | undefined
@@ -26,7 +17,16 @@ type Args = {
       collectionConfig?: never | undefined
       globalConfig: SanitizedGlobalConfig
     }
-)
+) & {
+  errors?: { path: string }[]
+  overrideAccess: boolean
+  // TODO: Rename to permissions or entityPermissions in 4.0
+  policies?: EntityPolicies
+  polymorphicJoin?: boolean
+  req: PayloadRequest
+  versionFields?: FlattenedField[]
+  where: Where
+}
 
 export async function validateQueryPaths({
   collectionConfig,

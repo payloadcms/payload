@@ -29,27 +29,27 @@ import type {
 } from '../../utilities/schedulePublishHandler.js'
 
 type GetFormStateClient = (
-  args: {
+  args: Omit<BuildFormStateArgs, 'clientConfig' | 'req'> & {
     signal?: AbortSignal
-  } & Omit<BuildFormStateArgs, 'clientConfig' | 'req'>,
+  },
 ) => ReturnType<typeof buildFormStateHandler>
 
 type SchedulePublishClient = (
-  args: {
+  args: Omit<SchedulePublishHandlerArgs, 'clientConfig' | 'req'> & {
     signal?: AbortSignal
-  } & Omit<SchedulePublishHandlerArgs, 'clientConfig' | 'req'>,
+  },
 ) => ReturnType<typeof schedulePublishHandler>
 
 type GetTableStateClient = (
-  args: {
+  args: Omit<BuildTableStateArgs, 'clientConfig' | 'req'> & {
     signal?: AbortSignal
-  } & Omit<BuildTableStateArgs, 'clientConfig' | 'req'>,
+  },
 ) => ReturnType<typeof buildTableStateHandler>
 
 type SlugifyClient = (
-  args: {
+  args: Omit<SlugifyServerFunctionArgs, 'clientConfig' | 'req'> & {
     signal?: AbortSignal
-  } & Omit<SlugifyServerFunctionArgs, 'clientConfig' | 'req'>,
+  },
 ) => ReturnType<Slugify>
 
 export type RenderDocumentResult = {
@@ -85,15 +85,15 @@ export type RenderDocumentServerFunction = ServerFunction<
 
 type RenderDocumentServerFunctionHookFn = (
   // No req or importMap - those are augmented by handleServerFunctions
-  args: {
+  args: RenderDocumentBaseArgs & {
     signal?: AbortSignal
-  } & RenderDocumentBaseArgs,
+  },
 ) => Promise<RenderDocumentResult>
 
 type CopyDataFromLocaleClient = (
-  args: {
+  args: Omit<CopyDataFromLocaleArgs, 'req'> & {
     signal?: AbortSignal
-  } & Omit<CopyDataFromLocaleArgs, 'req'>,
+  },
 ) => Promise<{ data: Data }>
 
 type GetDocumentSlots = (args: {
@@ -232,7 +232,7 @@ export const ServerFunctionsProvider: React.FC<{
           args: {
             fallbackLocale: false,
             ...rest,
-          } as Parameters<RenderDocumentServerFunctionHookFn>[0],
+          },
         })) as Awaited<ReturnType<RenderDocumentServerFunctionHookFn>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
@@ -247,10 +247,10 @@ export const ServerFunctionsProvider: React.FC<{
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
 
-      const result = (await serverFunction({
+      const result = await serverFunction({
         name: 'copy-data-from-locale',
         args: rest,
-      })) as Data
+      })
 
       if (!remoteSignal?.aborted) {
         return { data: result }

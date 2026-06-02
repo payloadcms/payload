@@ -268,7 +268,6 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   // We intentionally guard this hook call with a mode that is fixed on first render.
   // The order is consistent across renders. Silence the linter’s false positive.
 
-  // eslint-disable-next-line react-compiler/react-compiler
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  // eslint-disable-next-line react-compiler/react-compiler, react-hooks/rules-of-hooks, @eslint-react/rules-of-hooks
   return useFieldInForm<TValue>(options)
 }

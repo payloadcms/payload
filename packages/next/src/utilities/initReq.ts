@@ -16,10 +16,10 @@ import { nextServerAdapter } from '../adapters/server.js'
 import { getRequestLocale } from './getRequestLocale.js'
 import { selectiveCache } from './selectiveCache.js'
 
-type PartialResult = {
-  i18n: I18nClient
-} & Pick<InitReqResult, 'languageCode'> &
-  Pick<PayloadRequest, 'payload' | 'responseHeaders' | 'user'>
+type PartialResult = Pick<InitReqResult, 'languageCode'> &
+  Pick<PayloadRequest, 'payload' | 'responseHeaders' | 'user'> & {
+    i18n: I18nClient
+  }
 
 // Create cache instances for different parts of our application
 const partialReqCache = selectiveCache<PartialResult>('partialReq')

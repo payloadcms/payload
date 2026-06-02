@@ -6,9 +6,9 @@ type RelationMap = {
 }
 
 type CreateRelationMap = (
-  args: {
+  args: HasManyValueUnion & {
     relationTo: string[]
-  } & HasManyValueUnion,
+  },
 ) => RelationMap
 
 export const createRelationMap: CreateRelationMap = ({ hasMany, relationTo, value }) => {

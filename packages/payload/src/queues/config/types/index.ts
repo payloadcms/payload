@@ -81,7 +81,7 @@ export type CancelJobAccessArgs = {
 export type CancelJobAccess = (args: CancelJobAccessArgs) => MaybePromise<boolean>
 export type QueueJobAccess = (args: QueueJobAccessArgs) => MaybePromise<boolean>
 
-export type SanitizedJobsConfig = {
+export type SanitizedJobsConfig = JobsConfig & {
   /**
    * If set to `true`, the job system is enabled and a payload-jobs collection exists.
    * This property is automatically set during sanitization.
@@ -97,7 +97,7 @@ export type SanitizedJobsConfig = {
    * This property is automatically set during sanitization.
    */
   stats?: boolean
-} & JobsConfig
+}
 export type JobsConfig = {
   /**
    * Specify access control to determine who can interact with jobs.
@@ -161,13 +161,13 @@ export type JobsConfig = {
    */
   processingOrder?:
     | ((args: RunJobsArgs) => Promise<Sort> | Sort)
+    | Sort
     | {
         default?: Sort
         queues: {
           [queue: string]: Sort
         }
       }
-    | Sort
   /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
    * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.

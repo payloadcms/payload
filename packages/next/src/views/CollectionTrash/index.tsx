@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation.js'
 
 import { renderListView } from '../List/index.js'
 
-type RenderTrashViewArgs = {
+type RenderTrashViewArgs = AdminViewServerProps & {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
@@ -17,7 +17,7 @@ type RenderTrashViewArgs = {
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   redirectAfterRestore?: boolean
-} & AdminViewServerProps
+}
 
 export const TrashView: React.FC<Omit<RenderTrashViewArgs, 'enableRowSelections'>> = async (
   args,

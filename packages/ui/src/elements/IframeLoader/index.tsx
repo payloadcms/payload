@@ -3,9 +3,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import './index.scss'
 
-export type IframeLoaderProps = {
+export type IframeLoaderProps = React.IframeHTMLAttributes<HTMLIFrameElement> & {
   ref?: React.Ref<HTMLIFrameElement>
-} & React.IframeHTMLAttributes<HTMLIFrameElement>
+}
 
 const shimmerDelays = {
   minVisible: 300,

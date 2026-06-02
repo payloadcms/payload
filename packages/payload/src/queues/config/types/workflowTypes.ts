@@ -84,24 +84,28 @@ export type WorkflowTypes = StringKeyOf<TypedJobs['workflows']>
 /**
  * @deprecated - will be removed in 4.0. Use `Job` type instead.
  */
-export type RunningJob<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> = {
+export type RunningJob<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> = Omit<
+  TypedCollection['payload-jobs'],
+  'input' | 'taskStatus'
+> & {
   input: TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
     ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
     : TWorkflowSlugOrInput
   taskStatus: JobTaskStatus
-} & Omit<TypedCollection['payload-jobs'], 'input' | 'taskStatus'>
+}
 
 /**
  * @deprecated - will be removed in 4.0. Use `Job` type instead.
  */
-export type RunningJobSimple<TWorkflowInput extends object> = {
+export type RunningJobSimple<TWorkflowInput extends object> = TypedCollection['payload-jobs'] & {
   input: TWorkflowInput
-} & TypedCollection['payload-jobs']
+}
 
 // Simplified version of RunningJob that doesn't break TypeScript (TypeScript seems to stop evaluating RunningJob when it's too complex)
-export type RunningJobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> = {
-  input: TypedJobs['tasks'][TTaskSlug]['input']
-} & TypedCollection['payload-jobs']
+export type RunningJobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> =
+  TypedCollection['payload-jobs'] & {
+    input: TypedJobs['tasks'][TTaskSlug]['input']
+  }
 
 export type WorkflowHandler<
   TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,

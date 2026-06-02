@@ -276,7 +276,7 @@ export type RichTextAdapter<
   Value extends object = any,
   AdapterProps = any,
   ExtraFieldProperties = any,
-> = {
+> = RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties> & {
   /**
    * Component that will be displayed in the list view. Can be typed as
    * `DefaultCellComponentProps` or `DefaultServerCellComponentProps`.
@@ -294,7 +294,7 @@ export type RichTextAdapter<
    * Component that will be displayed in the edit view.
    */
   FieldComponent: PayloadComponent<RichTextFieldServerProps, RichTextFieldClientProps>
-} & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
+}
 
 export type RichTextAdapterProvider<
   Value extends object = object,

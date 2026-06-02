@@ -22,7 +22,7 @@ export const getDBName = ({
   target = 'dbName',
   versions = false,
 }: Args): string => {
-  let result: null | string = null
+  let result: null | string
   let custom = config[target]
 
   if (!custom && target === 'enumName') {

@@ -2,10 +2,10 @@ import { status as httpStatus } from 'http-status'
 
 import type { SanitizedConfig } from '../config/types.js'
 
-type PayloadError = {
+type PayloadError = Error & {
   isPublic?: boolean
   status?: number
-} & Error
+}
 
 /**
  * Determines if an error should be shown to the user.

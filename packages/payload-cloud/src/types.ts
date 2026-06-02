@@ -65,12 +65,12 @@ export interface PluginOptions {
    * @default true
    */
   email?:
+    | false
     | {
         defaultFromAddress: string
         defaultFromName: string
         skipVerify?: boolean
       }
-    | false
 
   /**
    *
@@ -112,6 +112,7 @@ export interface PluginOptions {
    */
 
   uploadCaching?:
+    | false
     | {
         /**
          * Caching configuration per-collection
@@ -122,7 +123,6 @@ export interface PluginOptions {
          */
         maxAge?: number
       }
-    | false
 }
 
 export type CollectionCachingConfig = {

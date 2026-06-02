@@ -29,7 +29,7 @@ export type ExclusiveRelationshipFeatureProps =
       enabledCollections?: CollectionSlug[]
     }
 
-export type RelationshipFeatureProps = {
+export type RelationshipFeatureProps = ExclusiveRelationshipFeatureProps & {
   /**
    * Sets a maximum population depth for this relationship, regardless of the remaining depth when the respective field is reached.
    * This behaves exactly like the maxDepth properties of relationship and upload fields.
@@ -37,7 +37,7 @@ export type RelationshipFeatureProps = {
    * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
-} & ExclusiveRelationshipFeatureProps
+}
 
 export const RelationshipFeature = createServerFeature<
   RelationshipFeatureProps,

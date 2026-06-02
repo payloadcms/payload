@@ -186,7 +186,7 @@ export const Form: React.FC<FormProps> = (props) => {
         const pathSegments = path ? path.split('.') : []
 
         if (field.passesCondition !== false) {
-          let validationResult: boolean | string = validatedField.valid
+          let validationResult: boolean | string
 
           if ('validate' in field && typeof field.validate === 'function') {
             let valueToValidate = field.value
@@ -256,7 +256,7 @@ export const Form: React.FC<FormProps> = (props) => {
         method: methodToUse = method,
         overrides: overridesFromArgs = {},
         skipValidation,
-      } = options || ({} as SubmitOptions)
+      } = options || {}
 
       const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
 
@@ -650,7 +650,7 @@ export const Form: React.FC<FormProps> = (props) => {
         skipValidation: true,
       })
 
-      contextRef.current = { ...initContextState } as FormContextType
+      contextRef.current = { ...initContextState }
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
 
@@ -672,7 +672,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const replaceState = useCallback(
     (state: FormState) => {
-      contextRef.current = { ...initContextState } as FormContextType
+      contextRef.current = { ...initContextState }
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state })
     },
@@ -800,7 +800,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useEffect(() => {
     if (initialState) {
-      contextRef.current = { ...initContextState } as FormContextType
+      contextRef.current = { ...initContextState }
       dispatchFields({
         type: 'REPLACE_STATE',
         optimize: false,
@@ -856,6 +856,8 @@ export const Form: React.FC<FormProps> = (props) => {
   useDebouncedEffect(
     () => {
       if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
+        // executeOnChange is a non-reactive Effect Event called inside useDebouncedEffect, a custom effect wrapper the rule doesn't recognize as an Effect
+        // eslint-disable-next-line react-hooks/rules-of-hooks, @eslint-react/rules-of-hooks
         executeOnChange(submitted)
       }
 

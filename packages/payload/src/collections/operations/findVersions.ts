@@ -19,7 +19,7 @@ import { buildVersionCollectionFields } from '../../versions/buildCollectionFiel
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
-export type Arguments = {
+export type Arguments = Pick<FindOptions<string, SelectType>, 'select'> & {
   collection: Collection
   depth?: number
   limit?: number
@@ -32,7 +32,7 @@ export type Arguments = {
   sort?: Sort
   trash?: boolean
   where?: Where
-} & Pick<FindOptions<string, SelectType>, 'select'>
+}
 
 export const findVersionsOperation = async <TData extends TypeWithVersion<TData>>(
   args: Arguments,

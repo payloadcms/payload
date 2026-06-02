@@ -165,7 +165,7 @@ export type MigrateDownArgs = {
   session?: ClientSession
 }
 
-export type MongooseMigration = {
+export type MongooseMigration = MigrationData & {
   down: (args: MigrateDownArgs) => Promise<void>
   up: (args: MigrateUpArgs) => Promise<void>
-} & MigrationData
+}

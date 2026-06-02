@@ -12,12 +12,12 @@ import { generateVersionsViewMetadata } from '../Versions/metadata.js'
 import { getDocumentView } from './getDocumentView.js'
 
 export type GenerateEditViewMetadata = (
-  args: {
+  args: Parameters<GenerateViewMetadata>[0] & {
     collectionConfig?: null | SanitizedCollectionConfig
     globalConfig?: null | SanitizedGlobalConfig
     isReadOnly?: boolean
     view?: keyof EditConfig
-  } & Parameters<GenerateViewMetadata>[0],
+  },
 ) => Promise<Metadata>
 
 export const getMetaBySegment: GenerateEditViewMetadata = async ({

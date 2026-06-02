@@ -83,7 +83,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
             disabled={readOnly}
             id={`field-${path.replace(/\./g, '__')}`}
             name={path}
-            onChange={onChange as (e: ChangeEvent<HTMLInputElement>) => void}
+            onChange={onChange}
             onKeyDown={onKeyDown}
             placeholder={getTranslation(placeholder, i18n)}
             ref={inputRef}

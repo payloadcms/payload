@@ -7,15 +7,18 @@ import type { StripePluginConfig } from '../types.js'
 
 import { deepen } from '../utilities/deepen.js'
 
-type HookArgsWithCustomCollection = {
+type HookArgsWithCustomCollection = Omit<
+  Parameters<CollectionBeforeValidateHook>[0],
+  'collection'
+> & {
   collection: CollectionConfig
-} & Omit<Parameters<CollectionBeforeValidateHook>[0], 'collection'>
+}
 
 export type CollectionBeforeValidateHookWithArgs = (
-  args: {
+  args: HookArgsWithCustomCollection & {
     collection?: CollectionConfig
     pluginConfig?: StripePluginConfig
-  } & HookArgsWithCustomCollection,
+  },
 ) => Promise<Partial<any>>
 
 export const createNewInStripe: CollectionBeforeValidateHookWithArgs = async (args) => {

@@ -1,11 +1,11 @@
 import type { ValueWithRelation } from 'payload'
 
-export type Props = {
+export type Props = SharedRelationshipInputProps & {
   readonly Button?: React.ReactNode
   readonly path: string
   readonly relationTo: string | string[]
   readonly unstyled?: boolean
-} & SharedRelationshipInputProps
+}
 
 type SharedRelationshipInputProps =
   | {

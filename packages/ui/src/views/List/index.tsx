@@ -108,7 +108,7 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const docs = React.useMemo(() => {
     if (isUploadCollection) {
-      return data.docs.map((doc) => {
+      return data?.docs?.map((doc) => {
         return {
           ...doc,
           filesize: formatFilesize(doc.filesize),

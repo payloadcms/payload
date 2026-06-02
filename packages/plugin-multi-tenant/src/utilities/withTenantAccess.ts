@@ -63,7 +63,7 @@ export const withTenantAccess =
         fieldName,
         tenantsArrayFieldName,
         tenantsArrayTenantFieldName,
-        user: args.req.user as UserWithTenantsField,
+        user: args.req.user,
       })
 
       // User with no tenants should have no access to tenant-scoped documents

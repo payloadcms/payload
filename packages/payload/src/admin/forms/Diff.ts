@@ -8,10 +8,10 @@ import type {
   SanitizedFieldsPermissions,
 } from '../../index.js'
 
-export type VersionTab = {
+export type VersionTab = Pick<Tab, 'label'> & {
   fields: VersionField[]
   name?: string
-} & Pick<Tab, 'label'>
+}
 
 export type BaseVersionField = {
   CustomComponent?: React.ReactNode
@@ -75,13 +75,13 @@ export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalTyp
 export type FieldDiffServerProps<
   TField extends Field = Field,
   TClientField extends ClientFieldWithOptionalType = ClientField,
-> = {
+> = Omit<FieldDiffClientProps, 'field'> & {
   clientField: TClientField
   field: TField
   i18n: I18nClient
   req: PayloadRequest
   selectedLocales: string[]
-} & Omit<FieldDiffClientProps, 'field'>
+}
 
 export type FieldDiffClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,

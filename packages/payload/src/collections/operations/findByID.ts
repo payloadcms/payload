@@ -33,27 +33,27 @@ import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDr
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
-export type FindByIDArgs = {
-  collection: Collection
-  currentDepth?: number
-  /**
-   * You may pass the document data directly which will skip the `db.findOne` database query.
-   * This is useful if you want to use this endpoint solely for running hooks and populating data.
-   */
-  data?: Record<string, unknown>
-  depth?: number
-  disableErrors?: boolean
-  draft?: boolean
-  id: number | string
-  includeLockStatus?: boolean
-  joins?: JoinQuery
-  overrideAccess?: boolean
-  populate?: PopulateType
-  req: PayloadRequest
-  showHiddenFields?: boolean
-  trash?: boolean
-} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
-  Pick<FindOptions<string, SelectType>, 'select'>
+export type FindByIDArgs = Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
+  Pick<FindOptions<string, SelectType>, 'select'> & {
+    collection: Collection
+    currentDepth?: number
+    /**
+     * You may pass the document data directly which will skip the `db.findOne` database query.
+     * This is useful if you want to use this endpoint solely for running hooks and populating data.
+     */
+    data?: Record<string, unknown>
+    depth?: number
+    disableErrors?: boolean
+    draft?: boolean
+    id: number | string
+    includeLockStatus?: boolean
+    joins?: JoinQuery
+    overrideAccess?: boolean
+    populate?: PopulateType
+    req: PayloadRequest
+    showHiddenFields?: boolean
+    trash?: boolean
+  }
 
 export const findByIDOperation = async <
   TSlug extends CollectionSlug,
@@ -177,7 +177,7 @@ export const findByIDOperation = async <
       locale: locale!,
       req: {
         transactionID: req.transactionID,
-      } as PayloadRequest,
+      },
       select: dbSelect,
       where: fullWhere,
     }

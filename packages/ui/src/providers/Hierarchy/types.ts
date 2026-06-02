@@ -1,9 +1,9 @@
 import type { PaginatedDocs, TypeWithID, Where } from 'payload'
 
-export type HierarchyDocument = {
+export type HierarchyDocument = TypeWithID & {
   [key: string]: unknown
   _hasChildren?: boolean
-} & TypeWithID
+}
 
 export type HierarchyInitialData = {
   baseFilter?: null | Where

@@ -106,11 +106,11 @@ export type CreateDatabase = (args?: {
 }) => Promise<boolean>
 
 type Schema =
+  | PgSchema
   | {
       enum: typeof pgEnum
       table: PgTableFn<string>
     }
-  | PgSchema
 
 type PostgresSchema = {
   enums: Record<string, GenericEnum>
@@ -128,7 +128,7 @@ export type PostgresSchemaHook = (
   args: PostgresSchemaHookArgs,
 ) => PostgresSchema | Promise<PostgresSchema>
 
-export type BasePostgresAdapter = {
+export type BasePostgresAdapter = PostgresDrizzleAdapter & {
   afterSchemaInit: PostgresSchemaHook[]
   beforeSchemaInit: PostgresSchemaHook[]
   countDistinct: CountDistinct
@@ -178,7 +178,7 @@ export type BasePostgresAdapter = {
   tables: Record<string, GenericTable>
   tablesFilter?: string[]
   versionsSuffix?: string
-} & PostgresDrizzleAdapter
+}
 
 export type PostgresDrizzleAdapter = Omit<
   DrizzleAdapter,

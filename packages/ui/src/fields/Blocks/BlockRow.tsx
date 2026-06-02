@@ -21,7 +21,7 @@ import { SectionTitle } from './SectionTitle/index.js'
 
 const baseClass = 'blocks-field'
 
-type BlocksFieldProps = {
+type BlocksFieldProps = UseDraggableSortableReturn & {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ClientBlock
   blocks: (ClientBlock | string)[] | ClientBlock[]
@@ -46,7 +46,7 @@ type BlocksFieldProps = {
   rowIndex: number
   schemaPath: string
   setCollapse: (id: string, collapsed: boolean) => void
-} & UseDraggableSortableReturn
+}
 
 export const BlockRow: React.FC<BlocksFieldProps> = ({
   addRow,
@@ -97,7 +97,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  let blockPermissions: RenderFieldsProps['permissions'] = true
+  let blockPermissions: RenderFieldsProps['permissions']
 
   if (permissions === true) {
     blockPermissions = true

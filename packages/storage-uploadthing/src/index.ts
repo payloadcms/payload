@@ -32,11 +32,11 @@ export type UploadthingStorageOptions = {
    * Do uploads directly on the client, to bypass limits on Vercel.
    */
   clientUploads?:
+    | boolean
     | {
         access?: ClientUploadsAccess
         routerInputConfig?: FileRouterInputConfig
       }
-    | boolean
 
   /**
    * Collection options to apply the adapter to.
@@ -55,12 +55,12 @@ export type UploadthingStorageOptions = {
   /**
    * Uploadthing Options
    */
-  options: {
+  options: UTApiOptions & {
     /**
      * @default 'public-read'
      */
     acl?: ACL
-  } & UTApiOptions
+  }
 }
 
 type UploadthingStorageFactory = (

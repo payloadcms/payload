@@ -290,9 +290,11 @@ export function HierarchyListView(props: ListViewClientProps) {
     return hierarchyData.childrenData
   }, [hierarchyData?.childrenData])
 
+  const relatedDocumentsByCollection = hierarchyData?.relatedDocumentsByCollection
+
   // Filter related groups based on selected types
   const filteredRelatedGroups = useMemo(() => {
-    return Object.entries(hierarchyData?.relatedDocumentsByCollection || {})
+    return Object.entries(relatedDocumentsByCollection || {})
       .filter(([slug]) => selectedTypes.includes(slug))
       .map(([slug, related]) => ({
         collectionSlug: slug,
@@ -301,7 +303,7 @@ export function HierarchyListView(props: ListViewClientProps) {
         hasMany: related.hasMany,
         label: related.label,
       }))
-  }, [hierarchyData?.relatedDocumentsByCollection, selectedTypes])
+  }, [relatedDocumentsByCollection, selectedTypes])
 
   const collectionData = hierarchyData
     ? {

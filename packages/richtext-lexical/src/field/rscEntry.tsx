@@ -26,12 +26,12 @@ import { buildInitialState } from '../utilities/buildInitialState.js'
 import { initLexicalFeatures } from '../utilities/initLexicalFeatures.js'
 
 export const RscEntryLexicalField: React.FC<
-  {
-    sanitizedEditorConfig: SanitizedServerEditorConfig
-  } & ClientComponentProps &
+  ClientComponentProps &
     Pick<FieldPaths, 'path'> &
     Pick<LexicalEditorProps, 'admin' | 'views'> &
-    ServerComponentProps
+    ServerComponentProps & {
+      sanitizedEditorConfig: SanitizedServerEditorConfig
+    }
 > = async (args) => {
   const field: RichTextFieldType = args.field as RichTextFieldType
   const path = args.path ?? (args.clientField as RichTextFieldClient).name

@@ -98,17 +98,17 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 
 type Drizzle = NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
 
-export type VercelPostgresAdapter = {
+export type VercelPostgresAdapter = BasePostgresAdapter & {
   drizzle: Drizzle
   forceUseVercelPostgres?: boolean
   pool?: VercelPool
   poolOptions?: Args['pool']
-} & BasePostgresAdapter
+}
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
-      DrizzleAdapter {
+    extends DrizzleAdapter,
+      Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'> {
     afterSchemaInit: PostgresSchemaHook[]
     beforeSchemaInit: PostgresSchemaHook[]
     beginTransaction: (options?: PgTransactionConfig) => Promise<null | number | string>
@@ -125,7 +125,7 @@ declare module 'payload' {
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
-    pgSchema?: { table: PgTableFn } | PgSchema
+    pgSchema?: PgSchema | { table: PgTableFn }
     pool: VercelPool
     poolOptions: Args['pool']
     prodMigrations?: {

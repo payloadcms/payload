@@ -42,18 +42,18 @@ type BuildFormStateSuccessResult = {
   state: FormState
 }
 
-type BuildFormStateErrorResult = {
+type BuildFormStateErrorResult = (
+  | ErrorResult
+  | {
+      message: string
+    }
+) & {
   livePreviewURL?: never
   lockedState?: never
   previewURL?: never
   staleDataState?: never
   state?: never
-} & (
-  | {
-      message: string
-    }
-  | ErrorResult
-)
+}
 
 export type BuildFormStateResult = BuildFormStateErrorResult | BuildFormStateSuccessResult
 

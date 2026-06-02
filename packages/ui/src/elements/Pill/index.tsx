@@ -22,9 +22,9 @@ export type PillProps = {
   children?: React.ReactNode
   className?: string
   draggable?: boolean
-  elementProps?: {
+  elementProps?: HTMLAttributes<HTMLElement> & {
     ref: React.RefCallback<HTMLElement>
-  } & HTMLAttributes<HTMLElement>
+  }
   icon?: React.ReactNode
   id?: string
   /**

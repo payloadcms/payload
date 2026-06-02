@@ -141,7 +141,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
 
   const entityPermissions: ReturnType<TEntityType> = {
     fields: fieldsPermissions,
-  } as ReturnType<TEntityType>
+  }
 
   const promises: Promise<void>[] = []
 
@@ -162,7 +162,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
       if (typeof accessFunction === 'function') {
         accessResults.push({
           operation,
-          result: Promise.resolve(accessFunction({ id, data, req })) as Promise<boolean | Where>,
+          result: Promise.resolve(accessFunction({ id, data, req })),
         })
       } else {
         entityPermissions[operation] = {
@@ -291,7 +291,7 @@ const processWhereQuery = ({
         entityPermissions[operation] = {
           permission: hasPermission,
           where: accessResult,
-        } as Permission
+        }
       }),
     )
   } else {
@@ -299,6 +299,6 @@ const processWhereQuery = ({
     // have the document data available. This seems more secure.
     // Alternatively, we could set permission to a third state, like 'unknown'.
     // Even after calling sanitizePermissions, the permissions will still be true if the where query is returned but ignored as we don't have the document data available.
-    entityPermissions[operation] = { permission: true, where: accessResult } as Permission
+    entityPermissions[operation] = { permission: true, where: accessResult }
   }
 }

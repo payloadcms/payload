@@ -20,6 +20,6 @@ export type SidebarTabClientProps = {
   viewType?: ViewTypes
 }
 
-export type SidebarTabServerPropsOnly = { req?: PayloadRequest } & ServerProps
+export type SidebarTabServerPropsOnly = ServerProps & { req?: PayloadRequest }
 
 export type SidebarTabServerProps = SidebarTabClientProps & SidebarTabServerPropsOnly

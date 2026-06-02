@@ -23,7 +23,7 @@ export const UploadDiffHTMLConverterAsync: (args: {
     upload: async ({ node, populate, providedCSSString }) => {
       const uploadNode = node as UploadDataImproved
 
-      let uploadDoc: (FileData & TypeWithID) | undefined = undefined
+      let uploadDoc: (FileData & TypeWithID) | undefined
 
       // If there's no valid upload data, populate return an empty string
       if (typeof uploadNode.value !== 'object') {

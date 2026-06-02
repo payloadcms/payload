@@ -7,7 +7,7 @@ import { useParams as useNextParams } from '../RouterAdapter/index.js'
 export type Params = ReturnType<typeof useNextParams>
 interface IParamsContext extends Params {}
 
-const Context = createContext<IParamsContext>({} as IParamsContext)
+const Context = createContext<IParamsContext>({})
 
 /**
  * @deprecated

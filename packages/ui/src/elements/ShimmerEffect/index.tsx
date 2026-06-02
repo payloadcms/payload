@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useDelay } from '../../hooks/useDelay.js'
 import './index.scss'
 
-export type ShimmerEffectProps = {
+export type ShimmerEffectProps = React.HTMLAttributes<HTMLDivElement> & {
   readonly animationDelay?: string
   readonly className?: string
   readonly disableInlineStyles?: boolean
@@ -14,7 +14,7 @@ export type ShimmerEffectProps = {
    */
   transparent?: boolean
   readonly width?: number | string
-} & React.HTMLAttributes<HTMLDivElement>
+}
 
 const baseClass = 'shimmer-effect'
 

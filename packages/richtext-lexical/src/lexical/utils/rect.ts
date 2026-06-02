@@ -12,6 +12,30 @@ interface ContainsPointReturn {
 }
 
 export class Rect {
+  get bottom(): number {
+    return this._bottom
+  }
+
+  get height(): number {
+    return Math.abs(this._bottom - this._top)
+  }
+
+  get left(): number {
+    return this._left
+  }
+
+  get right(): number {
+    return this._right
+  }
+
+  get top(): number {
+    return this._top
+  }
+
+  get width(): number {
+    return Math.abs(this._left - this._right)
+  }
+
   private readonly _bottom: number
 
   private readonly _left: number
@@ -56,9 +80,7 @@ export class Rect {
   }
 
   public contains({ x, y }: Point): ContainsPointReturn
-
   public contains({ bottom, left, right, top }: Rect): boolean
-
   public contains(target: Point | Rect): boolean | ContainsPointReturn {
     if (isPoint(target)) {
       const { x, y } = target
@@ -166,29 +188,5 @@ export class Rect {
     const minX = x1 <= x2 ? x1 : x2
     const minY = y1 <= y2 ? y1 : y2
     return maxX - minX <= w1 + w2 && maxY - minY <= h1 + h2
-  }
-
-  get bottom(): number {
-    return this._bottom
-  }
-
-  get height(): number {
-    return Math.abs(this._bottom - this._top)
-  }
-
-  get left(): number {
-    return this._left
-  }
-
-  get right(): number {
-    return this._right
-  }
-
-  get top(): number {
-    return this._top
-  }
-
-  get width(): number {
-    return Math.abs(this._left - this._right)
   }
 }

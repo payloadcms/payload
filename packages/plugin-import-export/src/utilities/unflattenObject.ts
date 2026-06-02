@@ -8,7 +8,7 @@ import { postProcessDocument } from './unflattenPostProcess.js'
 type UnflattenArgs = {
   data: Record<string, unknown>
   fields: FlattenedField[]
-  format?: 'csv' | 'json' | ({} & string)
+  format?: 'csv' | 'json' | (string & {})
   importFieldHooks?: Record<string, ImportFieldHookEntry>
   req: PayloadRequest
 }

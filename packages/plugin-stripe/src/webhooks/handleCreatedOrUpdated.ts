@@ -5,10 +5,10 @@ import type { SanitizedStripePluginConfig, StripeWebhookHandler } from '../types
 import { deepen } from '../utilities/deepen.js'
 
 type HandleCreatedOrUpdated = (
-  args: {
+  args: Parameters<StripeWebhookHandler>[0] & {
     resourceType: string
     syncConfig: SanitizedStripePluginConfig['sync'][0]
-  } & Parameters<StripeWebhookHandler>[0],
+  },
 ) => Promise<void>
 
 export const handleCreatedOrUpdated: HandleCreatedOrUpdated = async (args) => {

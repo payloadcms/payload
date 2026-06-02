@@ -28,10 +28,10 @@ import { TextPlugin } from './plugins/TextPlugin/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
 
 export const LexicalEditor: React.FC<
-  {
+  Pick<LexicalProviderProps, 'editorConfig' | 'onChange' | 'rtl'> & {
     editorContainerRef: React.RefObject<HTMLDivElement | null>
     isSmallWidthViewport: boolean
-  } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange' | 'rtl'>
+  }
 > = (props) => {
   const { editorConfig, editorContainerRef, isSmallWidthViewport, onChange, rtl } = props
   const editorConfigContext = useEditorConfigContext()

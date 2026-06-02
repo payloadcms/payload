@@ -30,7 +30,15 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
   },
 ) => Promise<FormState | void> | void
 
-export type FormProps = {
+export type FormProps = (
+  | {
+      action: (formData: FormData) => Promise<void>
+    }
+  | {
+      action?: string
+      method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
+    }
+) & {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
   children?: React.ReactNode
   className?: string
@@ -74,15 +82,7 @@ export type FormProps = {
   uuid?: string
   validationOperation?: 'create' | 'update'
   waitForAutocomplete?: boolean
-} & (
-  | {
-      action: (formData: FormData) => Promise<void>
-    }
-  | {
-      action?: string
-      method?: 'DELETE' | 'GET' | 'PATCH' | 'POST'
-    }
-)
+}
 
 export type SubmitOptions<C = Record<string, unknown>> = {
   acceptValues?: AcceptValues
@@ -117,12 +117,14 @@ export type DispatchFields = React.Dispatch<any>
 export type Submit = <T extends Response, C extends Record<string, unknown>>(
   options?: SubmitOptions<C>,
   e?: React.FormEvent<HTMLFormElement>,
-) => Promise</**
- * Returns the form state and the response from the server.
- *
- * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own risk.
- */
-{ formState?: FormState; res: T } | void>
+) => Promise<
+  | void /**
+   * Returns the form state and the response from the server.
+   *
+   * @experimental - Note: the `{ res: ... }` return type is experimental and may change in the future. Use at your own risk.
+   */
+  | { formState?: FormState; res: T }
+>
 
 export type ValidateForm = () => Promise<boolean>
 
@@ -175,10 +177,10 @@ export type MODIFY_CONDITION = {
   user: TypedUser
 }
 
-export type UPDATE = {
+export type UPDATE = Partial<FormField> & {
   path: string
   type: 'UPDATE'
-} & Partial<FormField>
+}
 
 export type UPDATE_MANY = {
   formState: FormState

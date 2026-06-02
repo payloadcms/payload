@@ -493,10 +493,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   } else {
     const jobPromises = jobs.map(runSingleJob)
-    resultsArray = (await Promise.all(jobPromises)) as {
-      id: number | string
-      result: RunJobResult
-    }[]
+    resultsArray = await Promise.all(jobPromises)
   }
 
   if (jobsConfig.deleteJobOnComplete && successfullyCompletedJobs.length) {

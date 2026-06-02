@@ -54,17 +54,17 @@ export type ListViewSlots = {
  * This is because `ListViewClientProps` is a union which is impossible to exclude from
  * Exporting explicitly defined `ListViewServerPropsOnly`, etc. allows for the strictest typing
  */
-export type ListViewServerPropsOnly = {
+export type ListViewServerPropsOnly = ServerProps & {
   collectionConfig: SanitizedCollectionConfig
   data: Data
   limit: number
   listPreferences: CollectionPreferences
   listSearchableFields: CollectionAdminOptions['listSearchableFields']
-} & ServerProps
+}
 
 export type ListViewServerProps = ListViewClientProps & ListViewServerPropsOnly
 
-export type ListViewClientProps = {
+export type ListViewClientProps = ListViewSlots & {
   baseFilter?: Where
   beforeActions?: React.ReactNode[]
   collectionSlug: SanitizedCollectionConfig['slug']
@@ -102,7 +102,7 @@ export type ListViewClientProps = {
   renderedFilters?: Map<string, React.ReactNode>
   resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
   viewType: ViewTypes
-} & ListViewSlots
+}
 
 export type ListViewSlotSharedClientProps = {
   collectionSlug: SanitizedCollectionConfig['slug']
@@ -114,20 +114,20 @@ export type ListViewSlotSharedClientProps = {
 
 // BeforeList
 export type BeforeListClientProps = ListViewSlotSharedClientProps
-export type BeforeListServerPropsOnly = {} & ListViewServerPropsOnly
+export type BeforeListServerPropsOnly = ListViewServerPropsOnly & {}
 export type BeforeListServerProps = BeforeListClientProps & BeforeListServerPropsOnly
 
 // BeforeListTable
 export type BeforeListTableClientProps = ListViewSlotSharedClientProps
-export type BeforeListTableServerPropsOnly = {} & ListViewServerPropsOnly
+export type BeforeListTableServerPropsOnly = ListViewServerPropsOnly & {}
 export type BeforeListTableServerProps = BeforeListTableClientProps & BeforeListTableServerPropsOnly
 
 // AfterList
 export type AfterListClientProps = ListViewSlotSharedClientProps
-export type AfterListServerPropsOnly = {} & ListViewServerPropsOnly
+export type AfterListServerPropsOnly = ListViewServerPropsOnly & {}
 export type AfterListServerProps = AfterListClientProps & AfterListServerPropsOnly
 
 // AfterListTable
 export type AfterListTableClientProps = ListViewSlotSharedClientProps
-export type AfterListTableServerPropsOnly = {} & ListViewServerPropsOnly
+export type AfterListTableServerPropsOnly = ListViewServerPropsOnly & {}
 export type AfterListTableServerProps = AfterListTableClientProps & AfterListTableServerPropsOnly

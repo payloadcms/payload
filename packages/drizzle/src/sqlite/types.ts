@@ -141,9 +141,9 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
   ? T['schema']
   : GeneratedDatabaseSchema['schemaUntyped']
 
-type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
+type Drizzle = LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>> & { $client: Client }
 
-export type BaseSQLiteAdapter = {
+export type BaseSQLiteAdapter = SQLiteDrizzleAdapter & {
   afterSchemaInit: SQLiteSchemaHook[]
   autoIncrement: boolean
   beforeSchemaInit: SQLiteSchemaHook[]
@@ -180,7 +180,7 @@ export type BaseSQLiteAdapter = {
   tables: Record<string, GenericTable>
   transactionOptions: SQLiteTransactionConfig
   versionsSuffix?: string
-} & SQLiteDrizzleAdapter
+}
 
 export type IDType = 'integer' | 'numeric' | 'text'
 

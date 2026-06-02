@@ -18,7 +18,7 @@ import type { Config } from '../config/types.js'
  * const queryString = qs.stringify({ where, limit, page }, { addQueryPrefix: true })
  * formatAdminURL({ apiRoute: api, path: `/${slug}${queryString}`, serverURL })
  */
-type BaseFormatURLArgs = {
+type BaseFormatURLArgs = Pick<Config, 'serverURL'> & {
   /**
    * The subpath of your application, if specified.
    * @see https://nextjs.org/docs/app/api-reference/config/next-config-js/basePath
@@ -32,17 +32,17 @@ type BaseFormatURLArgs = {
    * Useful for route-matching, etc.
    */
   relative?: boolean
-} & Pick<Config, 'serverURL'>
+}
 
 type FormatURLArgs =
-  | ({
+  | (BaseFormatURLArgs & {
       adminRoute: NonNullable<Config['routes']>['admin']
       apiRoute?: never
-    } & BaseFormatURLArgs)
-  | ({
+    })
+  | (BaseFormatURLArgs & {
       adminRoute?: never
       apiRoute: NonNullable<Config['routes']>['api']
-    } & BaseFormatURLArgs)
+    })
 
 export const formatAdminURL = (args: FormatURLArgs): string => {
   const {

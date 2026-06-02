@@ -45,9 +45,9 @@ export async function VersionsView(props: DocumentViewServerProps) {
     serverURL,
   } = config
 
-  const whereQuery: {
+  const whereQuery: Where & {
     and: Array<{ parent?: { equals: number | string }; snapshot?: { not_equals: boolean } }>
-  } & Where = {
+  } = {
     and: [],
   }
   if (localization && draftsEnabled) {
@@ -72,7 +72,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
     page: page ? parseInt(page.toString(), 10) : undefined,
     parentID: id,
     req,
-    sort: sort as string,
+    sort,
     user,
     where: whereQuery,
   })
@@ -183,7 +183,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
             orderableFieldName={collectionConfig?.orderable === true ? '_order' : undefined}
             query={{
               limit: limitToUse,
-              sort: sort as string,
+              sort,
             }}
           >
             <VersionsViewClient

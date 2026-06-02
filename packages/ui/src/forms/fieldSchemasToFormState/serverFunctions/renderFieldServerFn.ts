@@ -39,7 +39,7 @@ export type RenderFieldServerFnArgs<TField = Field> = {
    */
   schemaPath: string
 }
-export type RenderFieldServerFnReturnType = {} & FieldState['customComponents']
+export type RenderFieldServerFnReturnType = FieldState['customComponents'] & {}
 
 /**
  * @experimental - may break in minor releases

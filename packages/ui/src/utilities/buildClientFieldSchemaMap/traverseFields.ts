@@ -61,12 +61,13 @@ export const traverseFields = ({
 
       case 'blocks':
         ;(field.blockReferences ?? field.blocks).map((_block) => {
-          const block =
+          const block = (
             typeof _block === 'string'
               ? config.blocksMap
                 ? config.blocksMap[_block]
                 : config.blocks.find((block) => typeof block !== 'string' && block.slug === _block)
               : _block
+          ) as ClientBlock
 
           const blockSchemaPath = `${schemaPath}.${block.slug}`
 

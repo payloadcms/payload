@@ -51,7 +51,7 @@ const defaultOpenGraph: Metadata['openGraph'] = {
 }
 
 export const generateMetadata = async (
-  args: { serverURL: string } & MetaConfig,
+  args: MetaConfig & { serverURL: string },
 ): Promise<Metadata> => {
   const { defaultOGImageType, serverURL, titleSuffix, ...rest } = args
 

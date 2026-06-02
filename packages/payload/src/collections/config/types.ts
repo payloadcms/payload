@@ -321,7 +321,7 @@ export type RefreshHook<T extends TypeWithID = any> = (args: {
 export type MeHook<T extends TypeWithID = any> = (args: {
   args: MeArguments
   user: T
-}) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
+}) => Promise<void | { exp: number; user: T }> | (void | { exp: number; user: T })
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
@@ -334,7 +334,7 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
 }) => any
 
 export type AfterErrorHook = (
-  args: { collection: SanitizedCollectionConfig } & AfterErrorHookArgs,
+  args: AfterErrorHookArgs & { collection: SanitizedCollectionConfig },
 ) => AfterErrorResult | Promise<AfterErrorResult>
 
 export type AfterForgotPasswordHook = (args: {
@@ -363,10 +363,10 @@ export type FoldersConfig = {
     useHeaderButton?: boolean
   }
   collectionSpecific?:
+    | boolean
     | {
         fieldName?: string
       }
-    | boolean
   joinField?: HierarchyJoinFieldConfig
   parentFieldName?: string
   slugField?: string
@@ -379,9 +379,9 @@ export type FoldersConfig = {
  * Configuration options for tags hierarchy preset.
  * Same as FoldersConfig but allowHasMany can be overridden.
  */
-export type TagsConfig = {
+export type TagsConfig = FoldersConfig & {
   allowHasMany?: boolean
-} & FoldersConfig
+}
 
 export type BaseFilter = (args: {
   limit: number
@@ -420,7 +420,7 @@ export type CollectionAdminOptions = {
   /**
    * Custom admin components
    */
-  components?: {
+  components?: Omit<SharedAdminComponents, 'edit' | 'views'> & {
     afterList?: CustomComponent[]
     afterListTable?: CustomComponent[]
     beforeList?: CustomComponent[]
@@ -428,15 +428,15 @@ export type CollectionAdminOptions = {
     /**
      * Components within the edit view
      */
-    edit?: {
+    edit?: SharedEditViewComponents & {
       /**
        * Replaces the "Upload" section
        * + upload must be enabled
        */
       Upload?: CustomUpload
-    } & SharedEditViewComponents
+    }
     listMenuItems?: CustomComponent[]
-    views?: {
+    views?: SharedEntityViews & {
       /**
        * Replace or modify the "list" view.
        * @link https://payloadcms.com/docs/custom-components/list-view
@@ -445,8 +445,8 @@ export type CollectionAdminOptions = {
         actions?: CustomComponent[]
         Component?: PayloadComponent
       }
-    } & SharedEntityViews
-  } & Omit<SharedAdminComponents, 'edit' | 'views'>
+    }
+  }
   /** Extension point to add your custom data. Available in server and client. */
   custom?: CollectionAdminCustom
   /**
@@ -529,7 +529,14 @@ export type CollectionAdminOptions = {
 }
 
 /** Manage all aspects of a data collection */
-export type CollectionConfig<TSlug extends CollectionSlug = any> = {
+export type CollectionConfig<TSlug extends CollectionSlug = any> = Pick<
+  WithSelectFn<
+    IsAny<SelectFromCollectionSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromCollectionSlug<TSlug>
+  >,
+  'select'
+> & {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
    * sanitizing the same collection multiple times.
@@ -604,13 +611,13 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * GraphQL configuration
    */
   graphQL?:
+    | false
     | {
         disableMutations?: true
         disableQueries?: true
         pluralName?: string
         singularName?: string
       }
-    | false
   /**
    * Enable hierarchical tree structure for this collection
    *
@@ -686,10 +693,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @default true
    */
   lockDocuments?:
+    | false
     | {
         duration: number
       }
-    | false
   /**
    * If true, enables custom ordering for the collection, and documents in the listView can be reordered via drag and drop.
    * New documents are inserted at the end of the list according to this parameter.
@@ -749,14 +756,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @default false // disable versioning
    */
   versions?: boolean | IncomingCollectionVersions
-} & Pick<
-  WithSelectFn<
-    IsAny<SelectFromCollectionSlug<TSlug>> extends true
-      ? SelectIncludeType
-      : SelectFromCollectionSlug<TSlug>
-  >,
-  'select'
->
+}
 
 export type SanitizedJoin = {
   /**

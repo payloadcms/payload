@@ -54,7 +54,7 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
 
   useEffect(() => {
     return editor.registerCommand<{
-      replace: { nodeKey: string } | false
+      replace: false | { nodeKey: string }
     }>(
       INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND,
       (payload) => {
@@ -87,7 +87,7 @@ const RelationshipDrawerComponentFallback: React.FC = () => {
 
   useEffect(() => {
     return editor.registerCommand<{
-      replace: { nodeKey: string } | false
+      replace: false | { nodeKey: string }
     }>(
       INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND,
       () => {

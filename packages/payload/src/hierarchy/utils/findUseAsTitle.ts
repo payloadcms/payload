@@ -16,7 +16,7 @@ export function findUseAsTitleField(collectionConfig: CollectionConfig): {
 export function findFieldByName(
   collectionConfig: CollectionConfig,
   fieldName: string,
-): { fieldName: string; localized: boolean } | undefined {
+): undefined | { fieldName: string; localized: boolean } {
   try {
     const result = iterateFields({ fields: collectionConfig.fields, titleFieldName: fieldName })
     return { fieldName: result.titleFieldName, localized: result.localized }
@@ -29,7 +29,7 @@ function iterateFields({ fields, titleFieldName }: { fields: Field[]; titleField
   localized: boolean
   titleFieldName: string
 } {
-  let titleField: { localized: boolean; titleFieldName: string } | undefined
+  let titleField: undefined | { localized: boolean; titleFieldName: string }
 
   if (titleFieldName === 'id') {
     return {
@@ -40,18 +40,8 @@ function iterateFields({ fields, titleFieldName }: { fields: Field[]; titleField
 
   for (const field of fields) {
     switch (field.type) {
-      case 'text':
-      case 'number':
-      case 'textarea':
-        if (field.name === titleFieldName) {
-          return {
-            localized: Boolean(field.localized),
-            titleFieldName: field.name,
-          }
-        }
-        break
-      case 'row':
       case 'collapsible':
+      case 'row':
         {
           const result = iterateFields({ fields: field.fields, titleFieldName })
           if (result) {
@@ -64,6 +54,16 @@ function iterateFields({ fields, titleFieldName }: { fields: Field[]; titleField
           const result = iterateFields({ fields: field.fields, titleFieldName })
           if (result) {
             titleField = result
+          }
+        }
+        break
+      case 'number':
+      case 'text':
+      case 'textarea':
+        if (field.name === titleFieldName) {
+          return {
+            localized: Boolean(field.localized),
+            titleFieldName: field.name,
           }
         }
         break

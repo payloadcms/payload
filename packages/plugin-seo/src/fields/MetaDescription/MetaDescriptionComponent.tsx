@@ -26,9 +26,9 @@ import { LengthIndicator } from '../../ui/LengthIndicator.js'
 
 const { maxLength: maxLengthDefault, minLength: minLengthDefault } = defaults.description
 
-type MetaDescriptionProps = {
+type MetaDescriptionProps = TextareaFieldClientProps & {
   readonly hasGenerateDescriptionFn: boolean
-} & TextareaFieldClientProps
+}
 
 export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) => {
   const {

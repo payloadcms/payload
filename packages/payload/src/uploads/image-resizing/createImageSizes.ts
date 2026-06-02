@@ -123,7 +123,7 @@ export async function createImageSizes({
       }
 
       const imageToResize = sharpBase.clone()
-      let resized = imageToResize
+      let resized
 
       if (resizeAction === 'resizeWithFocalPoint') {
         let { height: resizeHeight, width: resizeWidth } = imageResizeConfig

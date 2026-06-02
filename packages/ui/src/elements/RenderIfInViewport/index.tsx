@@ -6,10 +6,10 @@ import React from 'react'
 import { useIntersect } from '../../hooks/useIntersect.js'
 
 export const RenderIfInViewport: React.FC<
-  {
+  Pick<ClientComponentProps, 'forceRender'> & {
     children: React.ReactNode
     className?: string
-  } & Pick<ClientComponentProps, 'forceRender'>
+  }
 > = ({ children, className, forceRender }) => {
   const [hasRendered, setHasRendered] = React.useState(Boolean(forceRender))
   const [intersectionRef, entry] = useIntersect(

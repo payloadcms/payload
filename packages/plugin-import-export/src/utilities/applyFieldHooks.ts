@@ -20,7 +20,7 @@ export type Args = {
   data: Record<string, unknown>
   fieldHooks: Record<string, FieldHookEntry>
   fields: FlattenedField[]
-  format: 'csv' | 'json' | ({} & string)
+  format: 'csv' | 'json' | (string & {})
   operation: 'export' | 'import'
   req: PayloadRequest
   type: 'beforeExport' | 'beforeImport'
@@ -28,11 +28,11 @@ export type Args = {
 
 const operationLabel = { export: 'Export', import: 'Import' } as const
 
-type TraverseArgs = {
+type TraverseArgs = Args & {
   path: string | undefined
   schemaPath: string | undefined
   siblingData: Record<string, unknown>
-} & Args
+}
 
 const traverseFields = ({
   type,
@@ -56,7 +56,7 @@ const traverseFields = ({
     const fieldPath = joinPath(path, field.name)
     const fieldSchemaPath = joinPath(schemaPath, field.name)
     const entry = fieldHooks[fieldSchemaPath]
-    const hook = entry?.type === type ? (entry.fn as FieldHook) : undefined
+    const hook = entry?.type === type ? entry.fn : undefined
 
     if (typeof hook === 'function' && field.name in result) {
       try {

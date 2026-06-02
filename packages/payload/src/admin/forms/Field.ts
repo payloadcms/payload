@@ -107,18 +107,18 @@ export type ServerComponentProps = {
 
 export type ClientFieldBase<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = {
+> = Omit<ClientComponentProps, 'customComponents' | 'field'> & {
   readonly field: TFieldClient
-} & Omit<ClientComponentProps, 'customComponents' | 'field'>
+}
 
 export type ServerFieldBase<
   TFieldServer extends Field = Field,
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
-> = {
-  readonly clientField: TFieldClient
-  readonly field: TFieldServer
-} & Omit<ClientComponentProps, 'field'> &
-  Omit<ServerComponentProps, 'clientField' | 'field'>
+> = Omit<ClientComponentProps, 'field'> &
+  Omit<ServerComponentProps, 'clientField' | 'field'> & {
+    readonly clientField: TFieldClient
+    readonly field: TFieldServer
+  }
 
 export type FieldClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,

@@ -38,7 +38,7 @@ export const RenderWidget: React.FC<{
           args: {
             widgetData,
             widgetSlug,
-          } as RenderWidgetServerFnArgs,
+          },
         })) as RenderWidgetServerFnReturnType
 
         if (requestID !== requestIDRef.current) {

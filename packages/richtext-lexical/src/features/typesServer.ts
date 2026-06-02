@@ -279,11 +279,11 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    * If an object is provided, the imported components will automatically be made available to the client feature, keyed by the object's keys.
    */
   componentImports?:
+    | ImportMapGenerators[0]
+    | PayloadComponent[]
     | {
         [key: string]: PayloadComponent
       }
-    | ImportMapGenerators[0]
-    | PayloadComponent[]
   generatedTypes?: {
     modifyJSONSchema: (args: {
       collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
@@ -339,21 +339,23 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   sanitizedServerFeatureProps?: ServerProps
 }
 
-export type ResolvedServerFeature<ServerProps, ClientFeatureProps> = {
-  order: number
-} & Required<
+export type ResolvedServerFeature<ServerProps, ClientFeatureProps> = Required<
   Pick<
     FeatureProviderServer<ServerProps, ClientFeatureProps>,
     'dependencies' | 'dependenciesPriority' | 'dependenciesSoft' | 'key'
   >
 > &
-  ServerFeature<ServerProps, ClientFeatureProps>
+  ServerFeature<ServerProps, ClientFeatureProps> & {
+    order: number
+  }
 
 export type ResolvedServerFeatureMap = Map<string, ResolvedServerFeature<any, any>>
 
 export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<any, any, any>>
 
-export type SanitizedServerFeatures = {
+export type SanitizedServerFeatures = Required<
+  Pick<ResolvedServerFeature<any, any>, 'i18n' | 'nodes'>
+> & {
   /** The keys of all enabled features */
   enabledFeatures: string[]
   generatedTypes: {
@@ -396,4 +398,4 @@ export type SanitizedServerFeatures = {
   } /**  The node types mapped to their populationPromises */
   /**  The node types mapped to their validations */
   validations: Map<string, Array<NodeValidation>>
-} & Required<Pick<ResolvedServerFeature<any, any>, 'i18n' | 'nodes'>>
+}

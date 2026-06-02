@@ -22,7 +22,7 @@ export async function resolveImportMapFilePath({
   importMapFile?: string
   rootDir: string
 }): Promise<Error | string> {
-  let importMapFilePath: string | undefined = undefined
+  let importMapFilePath: string | undefined
 
   if (importMapFile?.length) {
     if (!(await pathOrFileExists(importMapFile))) {

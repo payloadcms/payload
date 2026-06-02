@@ -64,7 +64,7 @@ export async function getFile({
         })
 
         if (result) {
-          retrievedDoc = result as Record<string, unknown>
+          retrievedDoc = result
         }
       }
 

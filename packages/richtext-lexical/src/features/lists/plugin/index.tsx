@@ -11,13 +11,15 @@ import React from 'react'
 import type { StronglyTypedElementNode } from '../../../types/nodeTypes.js'
 import type { PluginComponent } from '../../typesClient.js'
 
-export type SerializedListItemNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
-  checked?: boolean
-} & StronglyTypedElementNode<_SerializedListItemNode, 'listitem', T>
+export type SerializedListItemNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
+  StronglyTypedElementNode<_SerializedListItemNode, 'listitem', T> & {
+    checked?: boolean
+  }
 
-export type SerializedListNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
-  checked?: boolean
-} & StronglyTypedElementNode<_SerializedListNode, 'list', T>
+export type SerializedListNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
+  StronglyTypedElementNode<_SerializedListNode, 'list', T> & {
+    checked?: boolean
+  }
 
 export const LexicalListPlugin: PluginComponent<undefined> = () => {
   return <ListPlugin />
