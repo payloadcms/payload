@@ -216,7 +216,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
                   className={`${baseClass}__upload-drawer-toggler`}
                   disabled={!isEditable}
                   el="button"
-                  icon="edit"
+                  icon="write"
                   onClick={toggleDrawer}
                   round
                   size="medium"

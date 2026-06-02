@@ -593,12 +593,9 @@ describe('Versions', () => {
       await saveDocAndAssert(page)
 
       const updatedAtWrapper = page.locator(
-        '.doc-controls .doc-controls__content .doc-controls__list-item',
-        {
-          hasText: 'Last Modified',
-        },
+        '.doc-controls .doc-controls__content .doc-controls__value-wrap',
       )
-      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const initialTitle = await updatedAtWrapper.getAttribute('title')
 
       // wait for 1 second so that the timestamp can be different
       await wait(1000)
@@ -606,9 +603,10 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('changed description')
       await saveDocAndAssert(page)
 
-      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
-
-      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
+      await expect(async () => {
+        const newTitle = updatedAtWrapper
+        await expect(newTitle).not.toHaveAttribute('title', initialTitle!)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('collection - should update updatedAt on autosave', async () => {
@@ -618,12 +616,9 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('autosave title')
 
       const updatedAtWrapper = page.locator(
-        '.doc-controls .doc-controls__content .doc-controls__list-item',
-        {
-          hasText: 'Last Modified',
-        },
+        '.doc-controls .doc-controls__content .doc-controls__value-wrap',
       )
-      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const initialTitle = await updatedAtWrapper.getAttribute('title')
 
       // wait for 1 second so that the timestamp can be different
       await wait(1000)
@@ -631,9 +626,10 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('autosave title updated')
       await waitForAutoSaveToRunAndComplete(page)
 
-      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
-
-      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
+      await expect(async () => {
+        const newTitle = updatedAtWrapper
+        await expect(newTitle).not.toHaveAttribute('title', initialTitle!)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should retain localized data during autosave', async () => {
@@ -1365,6 +1361,11 @@ describe('Versions', () => {
   })
 
   describe('Scheduled publish', () => {
+    // Required so test.use applies to the fixture page used in 'correctly sets a UTC date' test
+    test.use({
+      timezoneId: londonTimezone,
+    })
+
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
@@ -1376,13 +1377,11 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('scheduled publish description')
 
       // schedule publish should not be available before document has been saved
-      await page.locator('#action-save-popup').click()
-      await expect(page.locator('#schedule-publish')).toBeHidden()
+      await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
       await saveDocAndAssert(page)
-      await page.locator('#action-save-popup').click()
-      await page.locator('#schedule-publish').click()
+      await page.locator('#schedule-publish-button').click()
 
       // drawer should open
       await expect(page.locator('.drawer__header')).toBeVisible()
@@ -1411,13 +1410,11 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('scheduled publish description')
 
       // schedule publish should not be available before document has been saved
-      await page.locator('#action-save-popup').click()
-      await expect(page.locator('#schedule-publish')).toBeHidden()
+      await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
       await saveDocAndAssert(page)
-      await page.locator('#action-save-popup').click()
-      await page.locator('#schedule-publish').click()
+      await page.locator('#schedule-publish-button').click()
 
       // drawer should open
       await expect(page.locator('.drawer__header')).toBeVisible()
@@ -1450,13 +1447,75 @@ describe('Versions', () => {
 
       await waitForAutoSaveToRunAndComplete(page)
 
-      await page.locator('#action-save-popup').click()
-
       await expect(async () => {
-        await expect(page.locator('#schedule-publish')).toBeVisible()
+        await expect(page.locator('#schedule-publish-button')).toBeVisible()
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
+    })
+
+    test('correctly sets a UTC date for the chosen timezone', async ({ page: localPage }) => {
+      const post = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'new post',
+          description: 'new description',
+        },
+      })
+
+      await localPage.goto(
+        formatAdminURL({
+          adminRoute,
+          path: `/collections/${draftCollectionSlug}/${post.id}`,
+          serverURL,
+        }),
+      )
+
+      await waitForFormReady(localPage)
+      await localPage.locator('#schedule-publish-button').click()
+
+      const drawerContent = localPage.locator('.schedule-publish__scheduler')
+      const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
+      const timezoneOptionSelector = drawerContent.locator(
+        `.timezone-picker .rs__menu .rs__option:has-text("Paris")`,
+      )
+      await dropdownControlSelector.click()
+      await timezoneOptionSelector.click()
+
+      const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
+      // Create a date for 2049-01-01 18:00:00 UTC, so it is timezone-invariant across CI environments
+      const date = new Date(Date.UTC(2049, 0, 1, 18, 0))
+
+      await dateInput.fill(date.toISOString())
+      await localPage.keyboard.press('Enter') // formats the date to the correct format
+
+      const saveButton = drawerContent.locator('.schedule-publish__actions button')
+
+      await saveButton.click()
+
+      const upcomingContent = localPage.locator('.schedule-publish__upcoming')
+      const createdDate = await upcomingContent.locator('.row-1 .cell-waitUntil').textContent()
+
+      await expect(() => {
+        expect(createdDate).toContain('6:00:00 PM')
+      }).toPass({ timeout: 10000, intervals: [100] })
+
+      const {
+        docs: [createdJob],
+      } = await payload.find({
+        collection: 'payload-jobs',
+        where: {
+          'input.doc.value': {
+            equals: String(post.id),
+          },
+        },
+      })
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(createdJob).toBeTruthy()
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(createdJob?.waitUntil).toEqual('2049-01-01T17:00:00.000Z')
     })
   })
 
@@ -2304,8 +2363,8 @@ describe('Versions', () => {
 
       const checkbox = page.locator('[data-field-path="checkbox"]')
 
-      await expect(checkbox.locator('.html-diff__diff-old')).toHaveText('true')
-      await expect(checkbox.locator('.html-diff__diff-new')).toHaveText('false')
+      await expect(checkbox.locator('.checkbox-diff__label--delete')).toHaveText('Checked')
+      await expect(checkbox.locator('.checkbox-diff__label--create')).toHaveText('Unchecked')
     })
 
     test('correctly renders diff for code fields', async () => {
@@ -2437,7 +2496,7 @@ describe('Versions', () => {
 
       const zeroDepthRelationship = page.locator('[data-field-path="zeroDepthRelationship"]')
 
-      await expect(zeroDepthRelationship.locator('.html-diff__diff-old')).toBeEmpty()
+      await expect(zeroDepthRelationship.locator('.diff-no-value')).toHaveText('No value')
       await expect(
         zeroDepthRelationship.locator('.html-diff__diff-new .relationship-diff__info'),
       ).toHaveText('dev@payloadcms.com')
@@ -2922,82 +2981,6 @@ describe('Versions', () => {
 
       // Cleanup
       await payload.delete({ collection: diffCollectionSlug, id: doc.id })
-    })
-  })
-
-  describe('Scheduled publish', () => {
-    test.use({
-      timezoneId: londonTimezone,
-    })
-
-    test('correctly sets a UTC date for the chosen timezone', async () => {
-      const post = await payload.create({
-        collection: draftCollectionSlug,
-        data: {
-          title: 'new post',
-          description: 'new description',
-        },
-      })
-
-      await page.goto(
-        formatAdminURL({
-          adminRoute,
-          path: `/collections/${draftCollectionSlug}/${post.id}`,
-          serverURL,
-        }),
-      )
-
-      const publishDropdown = page.locator('.doc-controls__controls .popup-button')
-      await publishDropdown.click()
-
-      const schedulePublishButton = page.locator(
-        '.popup__content .popup-button-list__button:has-text("Schedule Publish")',
-      )
-      await schedulePublishButton.click()
-
-      const drawerContent = page.locator('.schedule-publish__scheduler')
-
-      const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
-      const timezoneOptionSelector = drawerContent.locator(
-        `.timezone-picker .rs__menu .rs__option:has-text("Paris")`,
-      )
-      await dropdownControlSelector.click()
-      await timezoneOptionSelector.click()
-
-      const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
-      // Create a date for 2049-01-01 18:00:00
-      const date = new Date(2049, 0, 1, 18, 0)
-
-      await dateInput.fill(date.toISOString())
-      await page.keyboard.press('Enter') // formats the date to the correct format
-
-      const saveButton = drawerContent.locator('.schedule-publish__actions button')
-
-      await saveButton.click()
-
-      const upcomingContent = page.locator('.schedule-publish__upcoming')
-      const createdDate = await upcomingContent.locator('.row-1 .cell-waitUntil').textContent()
-
-      await expect(() => {
-        expect(createdDate).toContain('6:00:00 PM')
-      }).toPass({ timeout: 10000, intervals: [100] })
-
-      const {
-        docs: [createdJob],
-      } = await payload.find({
-        collection: 'payload-jobs',
-        where: {
-          'input.doc.value': {
-            equals: String(post.id),
-          },
-        },
-      })
-
-      // eslint-disable-next-line payload/no-flaky-assertions
-      expect(createdJob).toBeTruthy()
-
-      // eslint-disable-next-line payload/no-flaky-assertions
-      expect(createdJob?.waitUntil).toEqual('2049-01-01T17:00:00.000Z')
     })
   })
 })

@@ -9,6 +9,7 @@ import { blocksSeedData } from './seed/blocksSeedData.js'
 import {
   blocksFieldsSlug,
   collectionSlugs,
+  docControlsSlug,
   draftVersionsSlug,
   folderItemsSlug,
   foldersSlug,
@@ -44,6 +45,7 @@ import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
 import DateFields from './collections/Date/index.js'
+import DocControls from './collections/DocControls/index.js'
 import DraftVersions from './collections/DraftVersions/index.js'
 import EmailFields from './collections/Email/index.js'
 import FolderItems from './collections/FolderItems/index.js'
@@ -60,7 +62,7 @@ import RadioFields from './collections/Radio/index.js'
 import RelationshipFields from './collections/Relationship/index.js'
 import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
-import SearchBarTest from './collections/SearchBarTest/index.js'
+import { SearchBarTest } from './collections/SearchBarTest/index.js'
 import SelectFields from './collections/Select/index.js'
 import SlugFields from './collections/Slug/index.js'
 import TabsFields from './collections/Tabs/index.js'
@@ -72,6 +74,8 @@ import Rubbish from './collections/Trash/index.js'
 import Unauthorized from './collections/Unauthorized/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
+import Users from './collections/Users/index.js'
+import { VersionsDiff } from './collections/VersionsDiff/index.js'
 import {
   codeContent,
   getRichTextContent,
@@ -80,66 +84,60 @@ import {
   tableContent,
 } from './seed/richTextData.js'
 
-export const collections: CollectionConfig[] = [
-  {
-    slug: 'users',
-    admin: {
-      useAsTitle: 'email',
-    },
-    auth: true,
-    access: {
-      admin: ({ req: { user } }) => {
-        return Boolean(user?.roles?.includes('admin'))
-      },
-    },
-    fields: [
-      {
-        name: 'roles',
-        type: 'select',
-        hasMany: true,
-        defaultValue: ['user'],
-        options: [
-          { label: 'Admin', value: 'admin' },
-          { label: 'User', value: 'user' },
-        ],
-      },
-    ],
+const withGroup = (collection: CollectionConfig, group: string): CollectionConfig => ({
+  ...collection,
+  admin: {
+    ...collection.admin,
+    group,
   },
-  ArrayFields,
-  BlocksFields,
-  CheckboxFields,
-  CodeFields,
-  CollapsibleFields,
-  DateFields,
-  EmailFields,
-  FolderItems,
-  Folders,
-  GroupFields,
-  JoinFields,
-  JoinPosts,
-  JSONFields,
-  NumberFields,
-  Orderable,
-  PasswordFields,
-  PointFields,
-  RadioFields,
-  RelationshipFields,
-  RichTextFields,
-  RowFields,
-  SearchBarTest,
-  SelectFields,
-  SlugFields,
-  TabsFields,
-  TagItems,
-  Tags,
-  TextFields,
-  TextareaFields,
-  Uploads,
-  UploadFields,
-  DraftVersions,
-  Autosave,
-  Rubbish,
-  Unauthorized,
+})
+
+export const collections: CollectionConfig[] = [
+  // Auth
+  withGroup(Users, 'Auth'),
+  // Elements
+  withGroup(DocControls, 'Elements'),
+  withGroup(Orderable, 'Elements'),
+  withGroup(SearchBarTest, 'Elements'),
+  withGroup(Unauthorized, 'Elements'),
+  // Fields
+  withGroup(ArrayFields, 'Fields'),
+  withGroup(BlocksFields, 'Fields'),
+  withGroup(CheckboxFields, 'Fields'),
+  withGroup(CodeFields, 'Fields'),
+  withGroup(CollapsibleFields, 'Fields'),
+  withGroup(DateFields, 'Fields'),
+  withGroup(EmailFields, 'Fields'),
+  withGroup(GroupFields, 'Fields'),
+  withGroup(JoinFields, 'Fields'),
+  withGroup(JoinPosts, 'Fields'),
+  withGroup(JSONFields, 'Fields'),
+  withGroup(NumberFields, 'Fields'),
+  withGroup(PasswordFields, 'Fields'),
+  withGroup(PointFields, 'Fields'),
+  withGroup(RadioFields, 'Fields'),
+  withGroup(RelationshipFields, 'Fields'),
+  withGroup(RichTextFields, 'Fields'),
+  withGroup(RowFields, 'Fields'),
+  withGroup(SelectFields, 'Fields'),
+  withGroup(SlugFields, 'Fields'),
+  withGroup(TabsFields, 'Fields'),
+  withGroup(TextFields, 'Fields'),
+  withGroup(TextareaFields, 'Fields'),
+  // Hierarchy
+  withGroup(Folders, 'Hierarchy'),
+  withGroup(FolderItems, 'Hierarchy'),
+  withGroup(Tags, 'Hierarchy'),
+  withGroup(TagItems, 'Hierarchy'),
+  // Trash
+  withGroup(Rubbish, 'Trash'),
+  // Uploads
+  withGroup(Uploads, 'Uploads'),
+  withGroup(UploadFields, 'Uploads'),
+  // Versions
+  withGroup(Autosave, 'Versions'),
+  withGroup(VersionsDiff, 'Versions'),
+  withGroup(DraftVersions, 'Versions'),
 ]
 
 export const baseConfig: Partial<Config> = {
@@ -155,6 +153,10 @@ export const baseConfig: Partial<Config> = {
       password: devUser.password,
       prefillOnly: true,
     },
+    livePreview: {
+      collections: [docControlsSlug],
+      url: 'http://localhost:3001',
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -163,7 +165,7 @@ export const baseConfig: Partial<Config> = {
         './components/HeaderAction.tsx#HeaderAction',
         './components/HeaderAction.tsx#HeaderAction2',
       ],
-      afterNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
+      beforeNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
       views: {
         components: {
           Component: './views/Components/index.js#ComponentsView',

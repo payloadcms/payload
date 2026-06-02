@@ -11,7 +11,7 @@ import type { Config } from '../../payload-types.js'
 
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import {
-  getPillSelectorItem,
+  getColumnSelectorItem,
   openListColumns,
   toggleColumn,
 } from '../../../__helpers/e2e/columns/index.js'
@@ -89,7 +89,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Hidden Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Hidden Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -113,7 +113,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Disabled Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Disabled Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -139,7 +139,7 @@ describe('Textarea', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Admin Hidden Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Admin Hidden Text Field' }),
       ).toBeVisible()
 
       await selectTableRow(page, 'Seeded text document')
@@ -178,7 +178,7 @@ describe('Textarea', () => {
     await page.goto(url.list)
     await openListColumns(page, {})
     await expect(
-      getPillSelectorItem({ container: page, label: 'Disable List Column Text' }),
+      getColumnSelectorItem({ container: page, label: 'Disable List Column Text' }),
     ).toBeHidden()
 
     await expect(page.locator('#heading-disableListColumnText')).toBeHidden()

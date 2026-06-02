@@ -37,7 +37,7 @@
       font-family: var(--font-body);
 
       > .icon:first-child {
-        color: var(--color-white-400);
+        color: var(--ramp-white-400);
         flex-shrink: 0;
       }
 
@@ -65,7 +65,7 @@
     .link-input__divider {
       width: var(--stroke-width-small);
       align-self: stretch;
-      background-color: var(--color-white-400);
+      background-color: var(--ramp-white-400);
       margin-left: var(--spacer-2);
     }
 

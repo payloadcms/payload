@@ -30,6 +30,7 @@
     cursor: pointer;
     text-align: inherit;
     text-decoration: none;
+    white-space: nowrap;
     border-radius: var(--radius-medium);
     display: flex;
     align-items: stretch;

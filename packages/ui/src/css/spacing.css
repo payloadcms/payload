@@ -11,6 +11,7 @@
 
     /* Layout spacing */
     --gutter-h: var(--spacer-5);
+    --spacing-field: var(--spacer-3);
     --spacing-view-bottom: var(--gutter-h);
 
     /* Breakpoints */
@@ -27,6 +28,7 @@
   @media (max-width: 768px) {
     :root {
       --gutter-h: var(--spacer-3);
+      --spacing-field: var(--spacer-2-5);
       --spacing-view-bottom: var(--spacer-6);
     }
   }

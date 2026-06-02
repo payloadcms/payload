@@ -8,8 +8,13 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
-import React, { Fragment, useEffect } from 'react'
+import {
+  formatAdminURL,
+  hasAutosaveEnabled,
+  hasDraftsEnabled,
+  hasScheduledPublishEnabled,
+} from 'payload/shared'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
@@ -20,13 +25,12 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
+import { formatDate, formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { Autosave } from '../Autosave/index.js'
 import { Button } from '../Button/index.js'
 import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
-import { Gutter } from '../Gutter/index.js'
 import { LivePreviewToggler } from '../LivePreview/Toggler/index.js'
 import { Locked } from '../Locked/index.js'
 import { PermanentlyDeleteButton } from '../PermanentlyDeleteButton/index.js'
@@ -37,6 +41,7 @@ import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { RestoreButton } from '../RestoreButton/index.js'
 import { SaveButton } from '../SaveButton/index.js'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
+import { SchedulePublishButton } from '../SchedulePublishButton/index.js'
 import { Status } from '../Status/index.js'
 import { UnpublishButton } from '../UnpublishButton/index.js'
 import './index.css'
@@ -140,9 +145,20 @@ export const DocumentControls: React.FC<{
   // Settings these in state to avoid hydration issues if there is a mismatch between the server and client
   const [updatedAt, setUpdatedAt] = React.useState<string>('')
   const [createdAt, setCreatedAt] = React.useState<string>('')
+  const [relativeTime, setRelativeTime] = useState<string>('')
 
   const processing = useFormProcessing()
   const initializing = useFormInitializing()
+
+  const i18nRef = useRef(i18n)
+  i18nRef.current = i18n
+
+  const updateRelativeTime = useCallback(() => {
+    const date = data?.updatedAt || data?.createdAt
+    if (date) {
+      setRelativeTime(formatTimeToNow({ date, i18n: i18nRef.current }))
+    }
+  }, [data?.updatedAt, data?.createdAt])
 
   useEffect(() => {
     if (data?.updatedAt) {
@@ -151,7 +167,13 @@ export const DocumentControls: React.FC<{
     if (data?.createdAt) {
       setCreatedAt(formatDate({ date: data.createdAt, i18n, pattern: dateFormat }))
     }
-  }, [data, i18n, dateFormat])
+    updateRelativeTime()
+  }, [data, i18n, dateFormat, updateRelativeTime])
+
+  useEffect(() => {
+    const interval = setInterval(updateRelativeTime, 60000)
+    return () => clearInterval(interval)
+  }, [updateRelativeTime])
 
   const hasCreatePermission = permissions && 'create' in permissions && permissions.create
 
@@ -201,7 +223,7 @@ export const DocumentControls: React.FC<{
         <ul className={`${baseClass}__meta`}>
           {collectionConfig && !isEditing && !isAccountView && (
             <li className={`${baseClass}__list-item`}>
-              <p className={`${baseClass}__value`}>
+              <p className={`${baseClass}__creating-new`}>
                 {i18n.t('general:creatingNewLabel', {
                   label: getTranslation(
                     collectionConfig?.labels?.singular ?? i18n.t('general:document'),
@@ -214,11 +236,7 @@ export const DocumentControls: React.FC<{
           {(collectionHasDraftsEnabled || globalHasDraftsEnabled) && (
             <Fragment>
               {(globalConfig || (collectionConfig && isEditing)) && (
-                <li
-                  className={[`${baseClass}__status`, `${baseClass}__list-item`]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
+                <li className={`${baseClass}__status ${baseClass}__list-item`}>
                   <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
                 </li>
               )}
@@ -237,44 +255,36 @@ export const DocumentControls: React.FC<{
                 )}
             </Fragment>
           )}
-          {collectionConfig?.timestamps && (isEditing || isAccountView) && (
-            <Fragment>
-              <li
-                className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
-                  .filter(Boolean)
-                  .join(' ')}
-                title={data?.updatedAt ? updatedAt : ''}
-              >
-                <p className={`${baseClass}__label`}>
-                  {i18n.t(isTrashed ? 'general:deleted' : 'general:lastModified')}:&nbsp;
-                </p>
-
-                {data?.updatedAt && <p className={`${baseClass}__value`}>{updatedAt}</p>}
-              </li>
-              <li
-                className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
-                  .filter(Boolean)
-                  .join(' ')}
-                title={data?.createdAt ? createdAt : ''}
-              >
-                <p className={`${baseClass}__label`}>{i18n.t('general:created')}:&nbsp;</p>
-                {data?.createdAt && <p className={`${baseClass}__value`}>{createdAt}</p>}
-              </li>
-            </Fragment>
+          {collectionConfig?.timestamps && (isEditing || isAccountView) && relativeTime && (
+            <li
+              className={`${baseClass}__list-item ${baseClass}__value-wrap`}
+              title={updatedAt || createdAt || undefined}
+            >
+              <p className={`${baseClass}__value`}>
+                {t(isTrashed ? 'general:deletedAgo' : 'general:updatedAgo', {
+                  distance: relativeTime,
+                })}
+              </p>
+            </li>
           )}
         </ul>
       </div>
       <div className={`${baseClass}__controls-wrapper`}>
         <div className={`${baseClass}__controls`}>
           {BeforeDocumentControls}
-          {isLivePreviewEnabled && !isInDrawer && <LivePreviewToggler />}
-          {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
-            <RenderCustomComponent
-              CustomComponent={CustomPreviewButton}
-              Fallback={<PreviewButton />}
-            />
-          )}
-          {hasSavePermission && !isTrashed && (
+          <div className={`${baseClass}__icon-buttons`}>
+            {isLivePreviewEnabled && !isInDrawer && <LivePreviewToggler />}
+            {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
+              <RenderCustomComponent
+                CustomComponent={CustomPreviewButton}
+                Fallback={<PreviewButton />}
+              />
+            )}
+            {hasScheduledPublishEnabled(collectionConfig || globalConfig) && !isTrashed && (
+              <SchedulePublishButton disabled={readOnlyForIncomingUser} />
+            )}
+          </div>
+          {hasSavePermission && !isTrashed && !readOnlyForIncomingUser && (
             <Fragment>
               {collectionHasDraftsEnabled || globalHasDraftsEnabled ? (
                 <Fragment>

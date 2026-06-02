@@ -1,7 +1,7 @@
 import type { AdminViewProps } from 'payload'
 
-import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
+import { DefaultTemplate } from '@payloadcms/ui/rsc'
 import React from 'react'
 
 export const CustomDefaultRootView: React.FC<AdminViewProps> = ({
