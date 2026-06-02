@@ -242,6 +242,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     cancel: 'বাতিল করুন',
     changesNotSaved:
       'আপনার পরিবর্তনগুলি সংরক্ষণ করা হয়নি। আপনি যদি এখন চলে যান, তাহলে আপনার পরিবর্তনগুলি হারিয়ে যাবে।',
+    checked: 'পরীক্ষিত',
     clear: 'স্পষ্ট',
     clearAll: 'সমস্ত সাফ করুন',
     close: 'বন্ধ করুন',
@@ -284,6 +285,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     decrement: 'ডিক্রিমেন্ট',
     delete: 'মুছুন',
     deleted: 'মুছে ফেলা হয়েছে',
+    deletedAgo: '{{distance}} আগে মুছে ফেলা হয়েছে',
     deletedAt: 'মুছে ফেলার সময়',
     deletedCountSuccessfully: '{{count}} {{label}} সফলভাবে মুছে ফেলা হয়েছে।',
     deletedSuccessfully: 'সফলভাবে মুছে ফেলা হয়েছে।',
@@ -458,6 +460,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} ট্র্যাশে সরানো হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
+    unchecked: 'অচিহ্নিত',
     unlock: 'আনলক করুন',
     unsavedChanges:
       'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। চালিয়ে যাওয়ার আগে সংরক্ষণ করুন বা বাতিল করুন।',
@@ -465,6 +468,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
       'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। আপনি কি ডুপ্লিকেট করতে চালিয়ে যেতে চান?',
     untitled: 'শিরোনামহীন',
     upcomingEvents: 'আসন্ন ইভেন্টগুলি',
+    updatedAgo: 'আপডেট করা হয়েছে {{distance}} পূর্বে',
     updatedAt: 'আপডেট করা হয়েছে',
     updatedCountSuccessfully: '{{count}} {{label}} সফলভাবে আপডেট করা হয়েছে।',
     updatedLabelSuccessfully: '{{label}} সফলভাবে আপডেট করা হয়েছে।',

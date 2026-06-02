@@ -5,7 +5,7 @@ import type { FieldDiffClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { useConfig, useTranslation } from '@payloadcms/ui'
 
-import './index.scss'
+import './index.css'
 
 import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React from 'react'
@@ -87,10 +87,8 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
                 <div className={`${baseClass}__row`} key={i}>
                   <DiffCollapser
                     fields={fields}
-                    hideGutter={true}
                     Label={
                       <div className={`${baseClass}-label-container`}>
-                        <div className={`${baseClass}-label-prefix`}></div>
                         <span className={`${baseClass}__label`}>{rowLabel}</span>
                       </div>
                     }

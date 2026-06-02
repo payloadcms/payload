@@ -5,7 +5,6 @@ import {
   CheckboxInput,
   ChevronIcon,
   formatTimeToNow,
-  Gutter,
   Pill,
   type SelectablePill,
   useConfig,
@@ -20,7 +19,7 @@ import React, { type FormEventHandler, useCallback, useEffect, useMemo, useState
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
 import { Restore } from '../Restore/index.js'
-import './index.scss'
+import './index.css'
 import { SelectComparison } from '../SelectComparison/index.js'
 import { type SelectedLocaleOnChange, SelectLocales } from '../SelectLocales/index.js'
 import { SelectedLocalesContext } from './SelectedLocalesContext.js'
@@ -180,9 +179,15 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     [versionFromCreatedAt, i18n, t],
   )
 
+  const selectedLocaleNames = useMemo(() => locales.map((locale) => locale.name), [locales])
+  const selectedLocalesContextValue = useMemo(
+    () => ({ selectedLocales: selectedLocaleNames }),
+    [selectedLocaleNames],
+  )
+
   return (
     <main className={baseClass}>
-      <Gutter className={`${baseClass}-controls-top`}>
+      <div className={`${baseClass}-controls-top`}>
         <div className={`${baseClass}-controls-top__wrapper`}>
           <h2>{i18n.t('version:compareVersions')}</h2>
           <div className={`${baseClass}-controls-top__wrapper-actions`}>
@@ -225,8 +230,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             onChange={onChangeSelectedLocales}
           />
         )}
-      </Gutter>
-      <Gutter className={`${baseClass}-controls-bottom`}>
+      </div>
+      <div className={`${baseClass}-controls-bottom`}>
         <div className={`${baseClass}-controls-bottom__wrapper`}>
           <div className={`${baseClass}__version-from`}>
             <div className={`${baseClass}__version-from-labels`}>
@@ -267,7 +272,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             </div>
           </div>
         </div>
-      </Gutter>
+      </div>
       <SetStepNav
         collectionConfig={collectionConfig}
         globalConfig={globalConfig}
@@ -276,11 +281,11 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         versionToCreatedAtFormatted={versionToCreatedAtFormatted}
         versionToID={versionToID}
       />
-      <Gutter className={`${baseClass}__diff-wrap`}>
-        <SelectedLocalesContext value={{ selectedLocales: locales.map((locale) => locale.name) }}>
+      <div className={`${baseClass}__diff-wrap`}>
+        <SelectedLocalesContext value={selectedLocalesContextValue}>
           {versionToCreatedAt && RenderedDiff}
         </SelectedLocalesContext>
-      </Gutter>
+      </div>
     </main>
   )
 }

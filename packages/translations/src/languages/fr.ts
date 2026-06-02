@@ -249,6 +249,7 @@ export const frTranslations: DefaultTranslationsObject = {
     cancel: 'Annuler',
     changesNotSaved:
       'Vos modifications n’ont pas été enregistrées. Vous perdrez vos modifications si vous quittez maintenant.',
+    checked: 'Vérifié',
     clear: 'Clair',
     clearAll: 'Tout effacer',
     close: 'Fermer',
@@ -291,6 +292,7 @@ export const frTranslations: DefaultTranslationsObject = {
     decrement: 'Décrémenter',
     delete: 'Supprimer',
     deleted: 'Supprimé',
+    deletedAgo: 'Supprimé il y a {{distance}}',
     deletedAt: 'Supprimé à',
     deletedCountSuccessfully: '{{count}} {{label}} supprimé avec succès.',
     deletedSuccessfully: 'Supprimé(e) avec succès.',
@@ -464,6 +466,7 @@ export const frTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} déplacé à la corbeille.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
+    unchecked: 'Non coché',
     unlock: 'Déverrouiller',
     unsavedChanges:
       'Vous avez des modifications non enregistrées. Enregistrez ou supprimez avant de continuer.',
@@ -471,6 +474,7 @@ export const frTranslations: DefaultTranslationsObject = {
       'Vous avez des changements non enregistrés. Souhaitez-vous continuer la duplication ?',
     untitled: 'Sans titre',
     upcomingEvents: 'Événements à venir',
+    updatedAgo: 'Mis à jour il y a {{distance}}',
     updatedAt: 'Modifié le',
     updatedCountSuccessfully: '{{count}} {{label}} mis à jour avec succès.',
     updatedLabelSuccessfully: '{{label}} mis à jour avec succès.',

@@ -5,7 +5,7 @@ import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
 import { ResetPreferences } from '../ResetPreferences/index.js'
-import './index.scss'
+import './index.css'
 import { ToggleHighContrast } from '../ToggleHighContrast/index.js'
 import { ToggleTheme } from '../ToggleTheme/index.js'
 import { LanguageSelector } from './LanguageSelector.js'

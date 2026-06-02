@@ -647,3 +647,81 @@ Remove any `apiBasePath` key from your search plugin config.
 The sha1 HMAC fallback for API key authentication has been removed. API keys are now matched exclusively against the sha256 index. Any API key that was created before v3.46.0 and never re-saved will no longer authenticate.
 
 **How to migrate:** Open the user document for each affected API key holder and save it — this regenerates the key under sha256. Alternatively, generate a new API key from the admin panel.
+
+### `@payloadcms/plugin-mcp` refactored: config API, built-in tool inputs, and API keys
+
+The MCP plugin was refactored. The public config API, the built-in tool inputs, and the API key collection schema all changed. Update your plugin config and delete + recreate any existing API keys.
+
+**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default with the standard CRUD tools (find, create, update, delete); turn individual ones off via `tools: { <op>: false }`.
+
+```diff
+mcpPlugin({
+  collections: {
+-   posts: { enabled: true },
+-   users: { enabled: { find: true } },
++   // posts is exposed automatically, no entry needed
++   users: { tools: { create: false, update: false, delete: false } }, // find only
+  },
+})
+```
+
+After upgrading, collections you never listed before are reachable over MCP. Review what's exposed and disable anything that shouldn't be.
+
+**Custom tools, prompts and resources moved from arrays under `mcp` to top-level records.** Use the new `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt` builders. `parameters` (a Zod raw shape) became `input` (a Zod/Valibot schema or raw JSON Schema), and handlers take one object argument instead of positional ones.
+
+```diff
+mcpPlugin({
+- mcp: {
+-   tools: [
+-     {
+-       name: 'getPostScores',
+-       description: 'Score recent posts',
+-       parameters: z.object({ since: z.string() }).shape,
+-       handler: async (args, req) => ({ content: [...] }),
+-     },
+-   ],
+- },
++ tools: {
++   getPostScores: defineTool({
++     description: 'Score recent posts',
++     input: z.object({ since: z.string() }),
++   }).handler(async ({ input, req }) => ({ content: [...] })),
++ },
+})
+```
+
+Prompts and resources move the same way, into top-level `prompts` and `resources` records.
+
+**Built-in `create` / `update` tool inputs now take a `data` object.** Document fields used to sit at the top level alongside options like `depth`, `draft` and `locale`. They are now nested under `data`. `_status`, `id`, `createdAt` and `updatedAt` are also no longer accepted there; set publish state with a custom tool if you need to.
+
+```ts
+// arguments to a `createPosts` tool call
+
+// before
+{ title: 'Hello', _status: 'draft', draft: true, depth: 2 }
+
+// after
+{ data: { title: 'Hello' }, draft: true, depth: 2 }
+```
+
+**Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per collection via `tools: { login: true }`, and the wire name becomes `login<Collection>` (e.g. `loginUsers`).
+
+```diff
+- mcpPlugin({ experimental: { tools: { auth: { enabled: true } } } })
++ mcpPlugin({ collections: { users: { tools: { login: true } } } })
+```
+
+**`mcp.handlerOptions` is gone.** `verboseLogs` moved to `mcp.verboseLogs`. `onEvent`, `maxDuration`, `disableSse`, `redisUrl` and `basePath` were removed. The `experimental.tools` block (auth, plus the collection / job / config codegen tools) was removed entirely. The unused `GET /api/mcp` route was dropped; only `POST` remains.
+
+**`overrideAuth` signature changed.** It now receives one argument object and returns an `AuthorizedMCP` instead of the old `MCPAccessSettings` (the type was removed).
+
+```diff
+mcpPlugin({
+- overrideAuth: (req, getDefaultMcpAccessSettings) => { ... },
++ overrideAuth: ({ req, pluginConfig, getAPIKeyDoc, getAuthorizedMCP }) => { ... },
+})
+```
+
+**API keys must be recreated.** The `payload-mcp-api-keys` collection keeps its slug, but its fields changed completely. The old per-collection / per-global / per-tool checkbox fields are now a single `access` JSON field, plus an `overrideAccess` option. Existing keys keep authenticating but lose their permissions (an empty `access` is treated as "allow everything"), so an un-migrated key silently gets full access. Delete your existing API keys after upgrading and create fresh ones.
+
+**Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`, and moved to `zod` v4. If your custom tools import `zod` directly, make sure it resolves to v4. `@payloadcms/ui` and `react` 19 are now peer dependencies; any Payload 4 project already provides both.
