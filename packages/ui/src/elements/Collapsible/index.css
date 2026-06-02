@@ -1,7 +1,7 @@
 @layer payload-default {
   .collapsible {
     position: relative;
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     background: var(--color-bg);
   }
 
@@ -13,7 +13,7 @@
     align-items: center;
     background: var(--color-bg-secondary);
     border: var(--stroke-width-small) solid var(--color-border);
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     height: var(--spacer-5);
     z-index: 2;
     cursor: pointer;
@@ -42,7 +42,7 @@
     position: relative;
     cursor: grab;
     touch-action: none;
-    border-radius: var(--radius-medium, 0.3125rem);
+    border-radius: var(--button-radius, 0.3125rem);
 
     &:active {
       cursor: grabbing;
@@ -64,7 +64,7 @@
     cursor: pointer;
     text-align: left;
     outline: none;
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
 
     &:focus-visible {
       outline: var(--accessibility-outline);
@@ -107,7 +107,7 @@
 
   /* When expanded, toggle should only have top corners rounded */
   .collapsible:not(.collapsible--collapsed) > .collapsible__toggle-wrap {
-    border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+    border-radius: var(--button-radius) var(--button-radius) 0 0;
   }
 
   /* When collapsed, animate border-radius after content finishes closing */
@@ -121,8 +121,8 @@
       border-bottom-right-radius: 0;
     }
     to {
-      border-bottom-left-radius: var(--radius-medium);
-      border-bottom-right-radius: var(--radius-medium);
+      border-bottom-left-radius: var(--button-radius);
+      border-bottom-right-radius: var(--button-radius);
     }
   }
 
@@ -130,7 +130,7 @@
   .collapsible:not(.collapsible--collapsed)
     > .collapsible__toggle-wrap
     .collapsible__toggle:focus-visible {
-    border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+    border-radius: var(--button-radius) var(--button-radius) 0 0;
   }
 
   /* Focus ring: when collapsed, animate border-radius after content finishes closing */
@@ -164,7 +164,7 @@
     justify-content: center;
     min-width: var(--spacer-4);
     min-height: var(--spacer-4);
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     flex-shrink: 0;
     pointer-events: all;
     cursor: pointer;
@@ -181,7 +181,7 @@
 
   .collapsible__indicator:focus-visible {
     border: var(--stroke-width-small) solid var(--accessibility-focus-color);
-    border-radius: var(--radius-medium, 0.3125rem);
+    border-radius: var(--button-radius, 0.3125rem);
     background: var(--color-bg-secondary);
   }
 
@@ -193,7 +193,7 @@
     background-color: var(--color-bg);
     border: var(--stroke-width-small) solid var(--color-border);
     border-top: none;
-    border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+    border-radius: 0 0 var(--button-radius) var(--button-radius);
     padding: var(--spacer-3);
     z-index: 1;
   }
