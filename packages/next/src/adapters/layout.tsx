@@ -2,7 +2,6 @@ import { RootLayout as UIRootLayout } from '@payloadcms/ui/layouts'
 import { Inter, Roboto_Mono } from 'next/font/google'
 import React from 'react'
 
-import { checkDependencies } from '../utilities/checkDependencies.js'
 import { NextRouterAdapter } from './router.js'
 import { nextServerAdapter } from './server.js'
 
@@ -16,25 +15,31 @@ const robotoMono = Roboto_Mono({
   variable: '--font-family-mono',
 })
 
+const nextDependencyChecks = {
+  dependencyVersions: {
+    next: {
+      required: false,
+      version: '>=15.0.0',
+    },
+  },
+}
+
 export { metadata } from '@payloadcms/ui/layouts'
 
 type Props = Omit<
   React.ComponentProps<typeof UIRootLayout>,
-  'fonts' | 'RouterAdapter' | 'serverAdapter'
+  'additionalDependencyChecks' | 'fonts' | 'RouterAdapter' | 'serverAdapter'
 >
 
-export const RootLayout = (props: Props) => {
-  checkDependencies()
-
-  return (
-    <UIRootLayout
-      {...props}
-      fonts={[
-        { className: inter.className, variable: inter.variable },
-        { className: robotoMono.className, variable: robotoMono.variable },
-      ]}
-      RouterAdapter={NextRouterAdapter}
-      serverAdapter={nextServerAdapter}
-    />
-  )
-}
+export const RootLayout = (props: Props) => (
+  <UIRootLayout
+    {...props}
+    additionalDependencyChecks={nextDependencyChecks}
+    fonts={[
+      { className: inter.className, variable: inter.variable },
+      { className: robotoMono.className, variable: robotoMono.variable },
+    ]}
+    RouterAdapter={NextRouterAdapter}
+    serverAdapter={nextServerAdapter}
+  />
+)

@@ -14,6 +14,7 @@ import React, { Suspense } from 'react'
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { RootProvider } from '../../providers/Root/index.js'
 import { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
+import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
@@ -32,6 +33,12 @@ export const metadata = {
 }
 
 type RootLayoutProps = {
+  /**
+   * Framework-specific peer-dependency version constraints, merged on top of the
+   * universal React/react-dom checks. Each framework adapter supplies its own
+   * (e.g. Next.js passes `{ dependencyVersions: { next: { version: '>=15.0.0' } } }`).
+   */
+  readonly additionalDependencyChecks?: CheckDependenciesArgs
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   /**
@@ -73,6 +80,8 @@ type RootLayoutProps = {
 }
 
 export const RootLayout = (props: RootLayoutProps) => {
+  checkDependencies(props.additionalDependencyChecks)
+
   const content = <RootLayoutContent {...props} />
 
   if (process.env.PAYLOAD_CACHE_COMPONENTS_ENABLED === 'true') {
