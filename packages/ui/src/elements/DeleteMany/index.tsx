@@ -22,7 +22,6 @@ import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 import { Translation } from '../Translation/index.js'
-import './index.css'
 
 export type Props = {
   collection: ClientCollectionConfig
@@ -458,15 +457,13 @@ export function DeleteMany_v4({
               )}
             </p>
             {trash && hasTrashPermission && hasDeletePermission && viewType !== 'trash' && (
-              <div className="delete-documents__checkbox">
-                <CheckboxInput
-                  checked={deletePermanently}
-                  id="delete-forever"
-                  label={t('general:deletePermanently')}
-                  name="delete-forever"
-                  onToggle={(e) => setDeletePermanently(e.target.checked)}
-                />
-              </div>
+              <CheckboxInput
+                checked={deletePermanently}
+                id="delete-forever"
+                label={t('general:deletePermanently')}
+                name="delete-forever"
+                onToggle={(e) => setDeletePermanently(e.target.checked)}
+              />
             )}
           </React.Fragment>
         }
