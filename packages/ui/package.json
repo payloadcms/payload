@@ -201,6 +201,11 @@
         "types": "./dist/exports/shared/index.d.ts",
         "default": "./dist/exports/shared/index.js"
       },
+      "./layouts": {
+        "import": "./dist/exports/layouts.js",
+        "types": "./dist/exports/layouts.d.ts",
+        "default": "./dist/exports/layouts.js"
+      },
       "./css": {
         "import": "./dist/styles.css",
         "default": "./dist/styles.css"
