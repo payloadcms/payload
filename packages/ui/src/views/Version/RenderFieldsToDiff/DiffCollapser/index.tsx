@@ -8,7 +8,7 @@ import { FieldDiffLabel } from '../../../../elements/FieldDiffLabel/index.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 import { countChangedFields, countChangedFieldsInRows } from '../utilities/countChangedFields.js'
 
 const baseClass = 'diff-collapser'

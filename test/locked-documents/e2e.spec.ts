@@ -767,9 +767,9 @@ describe('Locked Documents', () => {
       // Click read-only button to view doc in read-only mode
       await page.locator('#document-locked-view-read-only').click()
 
-      // save buttons should be readOnly / disabled
-      await expect(page.locator('#action-save-draft')).toBeDisabled()
-      await expect(page.locator('#action-save')).toBeDisabled()
+      // save buttons should be hidden in read-only mode
+      await expect(page.locator('#action-save-draft')).toBeHidden()
+      await expect(page.locator('#action-save')).toBeHidden()
       await expect(page.locator('.doc-controls__popup')).toBeHidden()
 
       // fields should be readOnly / disabled
@@ -1214,9 +1214,9 @@ describe('Locked Documents', () => {
       // Click read-only button to view doc in read-only mode
       await page.locator('#document-take-over-view-read-only').click()
 
-      // save buttons should be readOnly / disabled
-      await expect(page.locator('#action-save-draft')).toBeDisabled()
-      await expect(page.locator('#action-save')).toBeDisabled()
+      // save buttons should be hidden in read-only mode
+      await expect(page.locator('#action-save-draft')).toBeHidden()
+      await expect(page.locator('#action-save')).toBeHidden()
 
       // fields should be readOnly / disabled
       await expect(page.locator('#field-text')).toBeDisabled()

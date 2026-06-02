@@ -9,7 +9,7 @@ import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import React from 'react'
 
 import { FieldDiffContainer } from '../../../../../elements/FieldDiffContainer/index.js'
-import './index.scss'
+import './index.css'
 import { getHTMLDiffComponents } from '../../../../../elements/HTMLDiff/index.js'
 import { generateLabelFromValue } from './generateLabelFromValue.js'
 

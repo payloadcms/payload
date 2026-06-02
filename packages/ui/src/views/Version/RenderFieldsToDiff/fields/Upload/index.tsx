@@ -11,7 +11,7 @@ import React from 'react'
 
 import { FieldDiffContainer } from '../../../../../elements/FieldDiffContainer/index.js'
 import { getHTMLDiffComponents } from '../../../../../elements/HTMLDiff/index.js'
-import './index.scss'
+import './index.css'
 import { File } from '../../../../../graphics/File/index.js'
 
 const baseClass = 'upload-diff'

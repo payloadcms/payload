@@ -80,6 +80,22 @@ export const hyTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Եթե Դուք չեք ուղարկել հարցումը, խնդրում ենք անտեսել այս էլ. նամակը, և Ձեր գաղտնաբառը կմնա անփոփոխ։',
   },
+  commandPalette: {
+    actions: 'Գործողություններ',
+    createNew: 'Ստեղծել Նոր',
+    favorites: 'Ընտրյալներ',
+    hintActions: 'Գործողություններ',
+    hintClose: 'Փակել',
+    hintCreate: 'Ստեղծել Նոր',
+    hintNavigate: 'Նավարկել',
+    hintSelect: 'Բացել',
+    noResults: 'Արդյունքներ չեն հայտնաբերվել',
+    pinToFavorites: 'Ավելացնել ընտրյալներին',
+    placeholder: 'Մուտքագրեք հրահանգ կամ որոնման հարց…',
+    recentlyVisited: 'Վերջին այցերը',
+    removeFromFavorites: 'Հեռացնել ընտրյալներից',
+    title: 'Հրամանների վահանակ',
+  },
   dashboard: {
     addButton: 'Ավելացնել +',
     addWidget: 'Ավելացնել վիճակագրություն',
@@ -237,6 +253,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     cancel: 'Չեղարկել',
     changesNotSaved:
       'Ձեր փոփոխությունները չեն պահպանվել։ Եթե հիմա հեռանաք, կկորցնեք չպահպանված փոփոխությունները։',
+    checked: 'Ստուգված',
     clear:
       'Հիմնական տեքստի իմաստը պետք է պահպանվի Payload կոնտեքստի մեջ: Այս այս այստեղ են հաճախակի',
     clearAll: 'Մաքրել բոլորը',
@@ -280,6 +297,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     decrement: 'Նվազեցնել',
     delete: 'Ջնջել',
     deleted: 'Ջնջված',
+    deletedAgo: 'Ջնջվել է {{distance}} առաջ',
     deletedAt: 'Ջնջված է',
     deletedCountSuccessfully: '{{count}} {{label}} հաջողությամբ ջնջված է։',
     deletedSuccessfully: 'Հաջողությամբ ջնջված է։',
@@ -454,6 +472,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} տեղափոխվել է աղբարկղում։',
     true: 'Ճիշտ',
     unauthorized: 'Չթույլատրված',
+    unchecked: 'Չնշված',
     unlock: 'Բացարձակել',
     unsavedChanges:
       'Դուք ունեք չպահպանված փոփոխություններ։ Պահպանեք կամ հեռացեք նախքան շարունակելը։',
@@ -461,6 +480,7 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Դուք ունեք չպահպանված փոփոխություններ։ Ցանկանու՞մ եք շարունակել կրկնօրինակումը։',
     untitled: 'Անվերնագիր',
     upcomingEvents: 'Սպասվող իրադարձություններ',
+    updatedAgo: 'Թարմացվել է {{distance}} առաջ',
     updatedAt: 'Թարմացված է',
     updatedCountSuccessfully: '{{count}} {{label}} հաջողությամբ թարմացվել է։',
     updatedLabelSuccessfully: '',

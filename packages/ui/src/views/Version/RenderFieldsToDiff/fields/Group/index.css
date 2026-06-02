@@ -1,0 +1,5 @@
+@layer payload-default {
+  .group-diff__locale-label--no-label {
+    color: var(--color-text-secondary);
+  }
+}

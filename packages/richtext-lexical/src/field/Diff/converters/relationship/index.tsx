@@ -4,8 +4,6 @@ import { getTranslation, type I18nClient } from '@payloadcms/translations'
 
 import './index.css'
 
-import { formatAdminURL } from 'payload/shared'
-
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedRelationshipNode } from '../../../../types/nodeTypes.js'
 
@@ -45,36 +43,18 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
           data-id={id}
           data-slug={node.relationTo}
         >
-          <div className={`${baseClass}__card`}>
-            <div className={`${baseClass}__collectionLabel`}>
-              {i18n.t('fields:labelRelationship', {
-                label: relatedCollection?.labels?.singular
-                  ? getTranslation(relatedCollection?.labels?.singular, i18n)
-                  : relatedCollection?.slug,
-              })}
-            </div>
+          {relatedCollection?.labels?.singular && (
+            <span className={`${baseClass}__pill`} data-enable-match="false">
+              {getTranslation(relatedCollection.labels.singular, i18n)}
+            </span>
+          )}
+          <strong className={`${baseClass}__info`} data-enable-match="false">
             {data &&
             relatedCollection?.admin?.useAsTitle &&
-            data[relatedCollection.admin.useAsTitle] ? (
-              <strong className={`${baseClass}__title`} data-enable-match="false">
-                <a
-                  className={`${baseClass}__link`}
-                  data-enable-match="false"
-                  href={formatAdminURL({
-                    adminRoute: req.payload.config.routes.admin,
-                    path: `/collections/${relatedCollection?.slug}/${data.id}`,
-                    serverURL: req.payload.config.serverURL,
-                  })}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {data[relatedCollection.admin.useAsTitle]}
-                </a>
-              </strong>
-            ) : (
-              <strong>{id as string}</strong>
-            )}
-          </div>
+            data[relatedCollection.admin.useAsTitle]
+              ? data[relatedCollection.admin.useAsTitle]
+              : (id as string)}
+          </strong>
         </div>
       )
 

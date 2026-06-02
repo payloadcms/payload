@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'

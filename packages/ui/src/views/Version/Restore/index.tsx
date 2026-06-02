@@ -16,7 +16,7 @@ import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { requests } from '../../../utilities/api.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'restore-version'
 const modalSlug = 'restore-version'

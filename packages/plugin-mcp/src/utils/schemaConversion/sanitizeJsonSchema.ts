@@ -1,4 +1,4 @@
-import type { JSONSchema4 } from 'json-schema'
+import type { JsonSchemaType } from '../../types.js'
 
 /**
  * Removes internal Payload properties (id, createdAt, updatedAt) from a
@@ -10,7 +10,7 @@ import type { JSONSchema4 } from 'json-schema'
  * emits a Zod union which the MCP SDK serialises back as `anyOf`, stripping
  * the concrete `type` from the output and breaking schema introspection.
  */
-export function sanitizeJsonSchema(schema: JSONSchema4): JSONSchema4 {
+export function sanitizeJsonSchema(schema: JsonSchemaType): JsonSchemaType {
   delete schema?.properties?.id
   delete schema?.properties?.createdAt
   delete schema?.properties?.updatedAt
@@ -24,7 +24,7 @@ export function sanitizeJsonSchema(schema: JSONSchema4): JSONSchema4 {
 
   if (schema.properties && typeof schema.properties === 'object') {
     for (const key of Object.keys(schema.properties)) {
-      const prop = schema.properties[key] as JSONSchema4
+      const prop = schema.properties[key] as JsonSchemaType
       if (!prop || typeof prop !== 'object') {
         continue
       }
@@ -51,7 +51,7 @@ export function sanitizeJsonSchema(schema: JSONSchema4): JSONSchema4 {
  * to emit `anyOf: [{ type: 'array', items: ... }, { type: 'null' }]`, which
  * has no top-level `type` property and breaks schema introspection by clients.
  */
-function normalizeNullableType(schema: JSONSchema4): void {
+function normalizeNullableType(schema: JsonSchemaType): void {
   if (!Array.isArray(schema.type)) {
     return
   }

@@ -12,7 +12,7 @@ import {
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { formatDate } from '../../../../../utilities/formatDocTitle/formatDateTitle.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'date-diff'
 

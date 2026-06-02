@@ -132,7 +132,7 @@
   .table-grid-popup__tooltip {
     position: absolute;
     background: var(--color-bg-menu);
-    color: var(--color-white-800);
+    color: var(--ramp-white-800);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);

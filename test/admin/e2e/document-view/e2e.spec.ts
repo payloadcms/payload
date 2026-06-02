@@ -542,7 +542,7 @@ describe('Document View', () => {
   describe('collection — custom document controls', () => {
     test('should render status component', async () => {
       await navigateToDoc(page, postsUrl)
-      const statusComponent = page.locator('.doc-controls__status > .status')
+      const statusComponent = page.locator('.doc-controls__status')
       await expect(statusComponent).toBeVisible()
       await expect(statusComponent).toContainText('Draft')
     })

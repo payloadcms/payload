@@ -11,7 +11,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'

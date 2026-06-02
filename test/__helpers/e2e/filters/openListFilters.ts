@@ -18,16 +18,23 @@ export const openListFilters = async (
 ): Promise<{
   filterContainer: Locator
 }> => {
-  await expect(page.locator(togglerSelector)).toBeVisible()
-  const filterContainer = page.locator(filterContainerSelector).first()
+  const toggler = page.locator(togglerSelector).first()
+  await expect(toggler).toBeVisible()
 
-  const isAlreadyOpen = await filterContainer.isVisible()
+  // Drive the drawer open off the toggler's `aria-expanded` state (the source of truth)
+  // rather than a point-in-time visibility check of the container. The container flickers
+  // visible mid-animation, and a preceding re-render (e.g. a group-by/sort change) can drop
+  // the open click before it updates React state. Retrying the toggle until `aria-expanded`
+  // reports open makes this idempotent and resilient to that race.
+  await expect(async () => {
+    if ((await toggler.getAttribute('aria-expanded')) !== 'true') {
+      await toggler.click()
+    }
 
-  if (!isAlreadyOpen) {
-    await page.locator(togglerSelector).first().click()
-  }
+    await expect(toggler).toHaveAttribute('aria-expanded', 'true')
+  }).toPass()
 
   await expect(page.locator(`${filterContainerSelector}.rah-static--height-auto`)).toBeVisible()
 
-  return { filterContainer }
+  return { filterContainer: page.locator(filterContainerSelector).first() }
 }
