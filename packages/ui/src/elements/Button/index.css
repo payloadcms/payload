@@ -186,6 +186,12 @@
     position: relative;
   }
 
+  .btn--icon {
+    .btn__content {
+      gap: var(--stroke-width-medium);
+    }
+  }
+
   .btn--icon-position-left {
     .btn__content {
       flex-direction: row-reverse;
@@ -225,7 +231,10 @@
   }
 
   .btn--icon-only {
-    padding-inline: var(--spacer-1);
+    aspect-ratio: 1;
+    padding: 0;
+    border-width: 0;
+    justify-content: center;
   }
 
   /* Round (square icon button) */
@@ -308,13 +317,13 @@
       justify-content: center;
 
       html:not([dir='RTL']) & {
-        border-left: 1px solid var(--separator-color);
+        border-left: var(--stroke-width-small) solid var(--separator-color);
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
       }
 
       html[dir='RTL'] & {
-        border-right: 1px solid var(--separator-color);
+        border-right: var(--stroke-width-small) solid var(--separator-color);
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
       }

@@ -41,6 +41,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     hasCreatePermission: hasCreatePermissionFromProps,
     hierarchyData,
     HierarchyIcon,
+    HierarchySmallIcon,
     viewType,
   } = props
 
@@ -384,7 +385,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               collections={collections}
               collectionSlug={collectionSlug}
               hasCreatePermission={hasCreatePermission}
-              HierarchyIcon={HierarchyIcon}
+              HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
               hierarchyLabel={collectionLabel}
               key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
                 hierarchyData?.relatedDocumentsByCollection || {},
