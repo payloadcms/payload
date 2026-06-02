@@ -27,13 +27,13 @@
     padding: 0 var(--spacer-1);
     border: var(--stroke-width-small) solid var(--special-border-translucent);
     border-left: none;
-    border-radius: 0 var(--radius-medium) var(--radius-medium) 0;
+    border-radius: 0 var(--button-radius) var(--button-radius) 0;
     background: var(--color-bg);
     cursor: pointer;
   }
 
   .filter-trigger__clear:focus-visible {
-    border-radius: 0 var(--radius-medium) var(--radius-medium) 0;
+    border-radius: 0 var(--button-radius) var(--button-radius) 0;
   }
 
   .filter-trigger__clear:hover {

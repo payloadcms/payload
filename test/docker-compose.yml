@@ -84,7 +84,7 @@ services:
   # Connection: mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0
   mongodb:
     profiles: [all, mongodb]
-    image: mongodb/mongodb-community-server:8.2-ubi9
+    image: ghcr.io/payloadcms/mongodb-community-server:8.2.9-ubi9
     container_name: mongodb-payload-test
     ports:
       - '27018:27017'
@@ -117,7 +117,7 @@ services:
   # mongot - MongoDB Community Search for $search and $vectorSearch
   mongot:
     profiles: [all, mongodb]
-    image: mongodb/mongodb-community-search:latest
+    image: ghcr.io/payloadcms/mongodb-community-search:1.67.1
     container_name: mongot-payload-test
     depends_on:
       mongodb:
@@ -146,7 +146,7 @@ services:
   # Connection: mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local
   mongodb-atlas:
     profiles: [all, mongodb-atlas]
-    image: mongodb/mongodb-atlas-local:latest
+    image: ghcr.io/payloadcms/mongodb-atlas-local:8.2.4
     container_name: mongodb-atlas-payload-test
     hostname: mongodb-atlas-local
     ports:
@@ -168,7 +168,7 @@ services:
   # ── LocalStack (S3 emulator) ────────────────────────────────
   localstack:
     profiles: [all, storage]
-    image: localstack/localstack:4.14.0
+    image: ghcr.io/payloadcms/localstack:4.14.0
     container_name: localstack_demo
     ports:
       - '4563-4599:4563-4599'
@@ -199,7 +199,7 @@ services:
   # ── Google Cloud Storage (fake-gcs-server) ──────────────────
   google-cloud-storage:
     profiles: [all, storage]
-    image: fsouza/fake-gcs-server
+    image: ghcr.io/payloadcms/fake-gcs-server:1.54.0
     restart: always
     command:
       [
@@ -237,7 +237,7 @@ services:
   # Connection: redis://localhost:6379
   redis:
     profiles: [all, redis]
-    image: redis:7-alpine
+    image: ghcr.io/payloadcms/redis:7.4.9-alpine
     container_name: redis-payload-test
     ports:
       - '6379:6379'

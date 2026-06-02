@@ -8,9 +8,9 @@ import type { UserWithToken } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
 import {
+  Button,
   Form,
   FormSubmit,
-  Link,
   PasswordField,
   useAuth,
   useConfig,
@@ -89,6 +89,7 @@ export const LoginForm: React.FC<{
       action={formatAdminURL({
         apiRoute,
         path: `/${userSlug}/login`,
+        serverURL,
       })}
       className={baseClass}
       disableSuccessStatus
@@ -110,18 +111,18 @@ export const LoginForm: React.FC<{
         />
       </div>
       <div className={`${baseClass}__actions`}>
-        <FormSubmit size="large">{t('authentication:login')}</FormSubmit>
-        <div className={`${baseClass}__forgotPassword`}>
-          <Link
-            href={formatAdminURL({
-              adminRoute,
-              path: forgotRoute,
-            })}
-            prefetch={false}
-          >
-            {t('authentication:forgotPasswordQuestion')}
-          </Link>
-        </div>
+        <FormSubmit>{t('authentication:login')}</FormSubmit>
+        <Button
+          buttonStyle="ghost"
+          className={`${baseClass}__forgotPassword`}
+          el="link"
+          url={formatAdminURL({
+            adminRoute,
+            path: forgotRoute,
+          })}
+        >
+          {t('authentication:forgotPasswordQuestion')}
+        </Button>
       </div>
     </Form>
   )

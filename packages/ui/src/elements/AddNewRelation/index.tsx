@@ -145,15 +145,13 @@ export const AddNewRelation: React.FC<Props> = ({
       {relatedCollections.length === 1 && (
         <Fragment>
           <DocumentDrawerToggler
+            buttonStyle="pill"
             className={[
               `${baseClass}__add-button`,
               unstyled && `${baseClass}__add-button--unstyled`,
             ]
               .filter(Boolean)
               .join(' ')}
-            onClick={() => {
-              setShowTooltip(false)
-            }}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           >
@@ -174,21 +172,8 @@ export const AddNewRelation: React.FC<Props> = ({
       {relatedCollections.length > 1 && (
         <Fragment>
           <Popup
-            button={
-              ButtonFromProps ? (
-                ButtonFromProps
-              ) : (
-                <Button
-                  buttonStyle="ghost"
-                  className={`${baseClass}__add-button`}
-                  tooltip={popupOpen ? undefined : t('fields:addNew')}
-                >
-                  <PlusIcon />
-                </Button>
-              )
-            }
             buttonType="custom"
-            horizontalAlign="center"
+            horizontalAlign="right"
             onToggleOpen={onPopupToggle}
             render={({ close: closePopup }) => (
               <PopupList.ButtonGroup>
@@ -212,7 +197,16 @@ export const AddNewRelation: React.FC<Props> = ({
                 })}
               </PopupList.ButtonGroup>
             )}
-            size="medium"
+            renderButton={({ active, ...buttonProps }) => (
+              <Button
+                className={`${baseClass}__add-button`}
+                {...buttonProps}
+                buttonStyle="pill"
+                selected={active}
+              >
+                <PlusIcon />
+              </Button>
+            )}
           />
           {collectionConfig && permissions.collections[collectionConfig?.slug]?.create && (
             <DocumentDrawer onSave={onSave} />

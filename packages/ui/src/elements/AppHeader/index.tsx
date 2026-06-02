@@ -3,9 +3,12 @@ import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { Account } from '../../graphics/Account/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { LanguageIcon } from '../../icons/Language/index.js'
 import { SidebarIcon } from '../../icons/Sidebar/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Link } from '../Link/index.js'
@@ -23,6 +26,7 @@ type Props = {
 }
 export function AppHeader({ CustomAvatar }: Props) {
   const { t } = useTranslation()
+  const locale = useLocale()
 
   const { Actions } = useActions()
 
@@ -96,7 +100,28 @@ export function AppHeader({ CustomAvatar }: Props) {
               </div>
               {isScrollable && <div className={`${baseClass}__gradient-placeholder`} />}
             </div>
-            {localization && <Localizer className={`${baseClass}__localizer`} />}
+            {localization && (
+              <Localizer
+                className={`${baseClass}__localizer`}
+                renderButton={({ active, onClick, onKeyDown, ...ariaProps }) => (
+                  <Button
+                    aria-label={t('general:locale')}
+                    buttonStyle="secondary"
+                    extraButtonProps={{ onKeyDown, style: { padding: '0 var(--spacer-1) 0 0' } }}
+                    icon={<LanguageIcon size={24} />}
+                    iconPosition="left"
+                    onClick={onClick}
+                    selected={active}
+                    {...ariaProps}
+                  >
+                    <div className="localizer__button-content">
+                      {locale.code}
+                      <ChevronIcon direction={active ? 'up' : 'down'} size={16} />
+                    </div>
+                  </Button>
+                )}
+              />
+            )}
             <Link
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
