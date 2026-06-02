@@ -2,7 +2,6 @@
   .reset-password__wrap {
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-5);
     width: 100%;
   }
 
