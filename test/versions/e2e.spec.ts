@@ -1361,6 +1361,11 @@ describe('Versions', () => {
   })
 
   describe('Scheduled publish', () => {
+    // Required so test.use applies to the fixture page used in 'correctly sets a UTC date' test
+    test.use({
+      timezoneId: londonTimezone,
+    })
+
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
@@ -1447,6 +1452,70 @@ describe('Versions', () => {
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
+    })
+
+    test('correctly sets a UTC date for the chosen timezone', async ({ page: localPage }) => {
+      const post = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'new post',
+          description: 'new description',
+        },
+      })
+
+      await localPage.goto(
+        formatAdminURL({
+          adminRoute,
+          path: `/collections/${draftCollectionSlug}/${post.id}`,
+          serverURL,
+        }),
+      )
+
+      await localPage.locator('#schedule-publish-button').click()
+
+      const drawerContent = localPage.locator('.schedule-publish__scheduler')
+
+      const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
+      const timezoneOptionSelector = drawerContent.locator(
+        `.timezone-picker .rs__menu .rs__option:has-text("Paris")`,
+      )
+      await dropdownControlSelector.click()
+      await timezoneOptionSelector.click()
+
+      const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
+      // Create a date for 2049-01-01 18:00:00 UTC, so it is timezone-invariant across CI environments
+      const date = new Date(Date.UTC(2049, 0, 1, 18, 0))
+
+      await dateInput.fill(date.toISOString())
+      await localPage.keyboard.press('Enter') // formats the date to the correct format
+
+      const saveButton = drawerContent.locator('.schedule-publish__actions button')
+
+      await saveButton.click()
+
+      const upcomingContent = localPage.locator('.schedule-publish__upcoming')
+      const createdDate = await upcomingContent.locator('.row-1 .cell-waitUntil').textContent()
+
+      await expect(() => {
+        expect(createdDate).toContain('6:00:00 PM')
+      }).toPass({ timeout: 10000, intervals: [100] })
+
+      const {
+        docs: [createdJob],
+      } = await payload.find({
+        collection: 'payload-jobs',
+        where: {
+          'input.doc.value': {
+            equals: String(post.id),
+          },
+        },
+      })
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(createdJob).toBeTruthy()
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(createdJob?.waitUntil).toEqual('2049-01-01T17:00:00.000Z')
     })
   })
 
@@ -2912,76 +2981,6 @@ describe('Versions', () => {
 
       // Cleanup
       await payload.delete({ collection: diffCollectionSlug, id: doc.id })
-    })
-  })
-
-  describe('Scheduled publish', () => {
-    test.use({
-      timezoneId: londonTimezone,
-    })
-
-    test('correctly sets a UTC date for the chosen timezone', async () => {
-      const post = await payload.create({
-        collection: draftCollectionSlug,
-        data: {
-          title: 'new post',
-          description: 'new description',
-        },
-      })
-
-      await page.goto(
-        formatAdminURL({
-          adminRoute,
-          path: `/collections/${draftCollectionSlug}/${post.id}`,
-          serverURL,
-        }),
-      )
-
-      await page.locator('#schedule-publish-button').click()
-
-      const drawerContent = page.locator('.schedule-publish__scheduler')
-
-      const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
-      const timezoneOptionSelector = drawerContent.locator(
-        `.timezone-picker .rs__menu .rs__option:has-text("Paris")`,
-      )
-      await dropdownControlSelector.click()
-      await timezoneOptionSelector.click()
-
-      const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
-      // Create a date for 2049-01-01 18:00:00
-      const date = new Date(2049, 0, 1, 18, 0)
-
-      await dateInput.fill(date.toISOString())
-      await page.keyboard.press('Enter') // formats the date to the correct format
-
-      const saveButton = drawerContent.locator('.schedule-publish__actions button')
-
-      await saveButton.click()
-
-      const upcomingContent = page.locator('.schedule-publish__upcoming')
-      const createdDate = await upcomingContent.locator('.row-1 .cell-waitUntil').textContent()
-
-      await expect(() => {
-        expect(createdDate).toContain('6:00:00 PM')
-      }).toPass({ timeout: 10000, intervals: [100] })
-
-      const {
-        docs: [createdJob],
-      } = await payload.find({
-        collection: 'payload-jobs',
-        where: {
-          'input.doc.value': {
-            equals: String(post.id),
-          },
-        },
-      })
-
-      // eslint-disable-next-line payload/no-flaky-assertions
-      expect(createdJob).toBeTruthy()
-
-      // eslint-disable-next-line payload/no-flaky-assertions
-      expect(createdJob?.waitUntil).toEqual('2049-01-01T17:00:00.000Z')
     })
   })
 })
