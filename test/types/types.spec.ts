@@ -944,6 +944,7 @@ describe('Types testing', () => {
         | 'pages-categories'
         | 'payload-kv'
         | 'payload-locked-documents'
+        | 'payload-mcp-api-keys'
         | 'payload-migrations'
         | 'payload-preferences'
         | 'posts'
@@ -960,6 +961,7 @@ describe('Types testing', () => {
         | 'pages-categories'
         | 'payload-kv'
         | 'payload-locked-documents'
+        | 'payload-mcp-api-keys'
         | 'payload-migrations'
         | 'payload-preferences'
         | 'posts'
@@ -1257,20 +1259,21 @@ describe('Types testing', () => {
 
       test('update with draft:true on draft-enabled collection should work', () => {
         expect(
-          payload.update({ collection: 'draft-posts', id: 1, data: { title: 'Test' }, draft: true }),
+          payload.update({
+            collection: 'draft-posts',
+            id: 1,
+            data: { title: 'Test' },
+            draft: true,
+          }),
         ).type.not.toRaiseError()
       })
 
       test('duplicate with draft:true on non-draft collection should error', () => {
-        expect(
-          payload.duplicate({ collection: 'pages', id: 1, draft: true }),
-        ).type.toRaiseError()
+        expect(payload.duplicate({ collection: 'pages', id: 1, draft: true })).type.toRaiseError()
       })
 
       test('duplicate with draft:false on non-draft collection should error', () => {
-        expect(
-          payload.duplicate({ collection: 'pages', id: 1, draft: false }),
-        ).type.toRaiseError()
+        expect(payload.duplicate({ collection: 'pages', id: 1, draft: false })).type.toRaiseError()
       })
 
       test('duplicate with draft:true on draft-enabled collection should work', () => {
@@ -1292,15 +1295,11 @@ describe('Types testing', () => {
       })
 
       test('global update with draft:true on non-draft global should error', () => {
-        expect(
-          payload.updateGlobal({ slug: 'menu', data: {}, draft: true }),
-        ).type.toRaiseError()
+        expect(payload.updateGlobal({ slug: 'menu', data: {}, draft: true })).type.toRaiseError()
       })
 
       test('global update with draft:false on non-draft global should error', () => {
-        expect(
-          payload.updateGlobal({ slug: 'menu', data: {}, draft: false }),
-        ).type.toRaiseError()
+        expect(payload.updateGlobal({ slug: 'menu', data: {}, draft: false })).type.toRaiseError()
       })
 
       test('global update with draft:true on draft-enabled global should work', () => {
@@ -1309,6 +1308,5 @@ describe('Types testing', () => {
         ).type.not.toRaiseError()
       })
     })
-
   })
 })
