@@ -125,8 +125,8 @@
 
   .query-inspector__toggle-fullscreen-button {
     position: absolute;
-    right: var(--spacer-2);
-    top: var(--spacer-2);
+    right: var(--spacer-3);
+    top: var(--spacer-3);
     background-color: var(--color-bg);
     cursor: pointer;
     margin: 0;
