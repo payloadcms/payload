@@ -1,26 +1,21 @@
 'use server'
 
 import type {
+  AdminViewAdapterMap,
   AdminViewClientProps,
   AdminViewServerPropsOnly,
   CollectionPreferences,
   createLocalReq,
-  CustomComponent,
-  DocumentSubViewTypes,
   ImportMap,
   InitReqResult,
-  PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-  ViewTypes,
 } from 'payload'
 
 import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
-
-import type { ViewFromConfig } from './getCustomViewByRoute.js'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { PageConfigProvider } from '../../providers/Config/index.js'
@@ -33,33 +28,7 @@ import { handleAuthRedirect } from '../../utilities/handleAuthRedirect.js'
 import { isCustomAdminView } from '../../utilities/isCustomAdminView.js'
 import { isPublicAdminRoute } from '../../utilities/isPublicAdminRoute.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
-
-type RouteDataResult = {
-  DefaultView: ViewFromConfig
-  documentSubViewType?: DocumentSubViewTypes
-  routeParams: {
-    collection?: string
-    global?: string
-    id?: number | string
-    token?: string
-    versionID?: number | string
-  }
-  templateClassName: string
-  templateType: 'default' | 'minimal'
-  viewActions?: CustomComponent[]
-  viewType?: ViewTypes
-}
-
-type RouteDataGetter = (args: {
-  adminRoute: string
-  collectionConfig?: SanitizedCollectionConfig
-  collectionPreferences?: CollectionPreferences
-  currentRoute: string
-  globalConfig?: SanitizedGlobalConfig
-  payload: PayloadRequest['payload']
-  searchParams: { [key: string]: string | string[] }
-  segments: string[]
-}) => RouteDataResult
+import { getRouteData } from './getRouteData.js'
 
 type InitReqFn = (args: {
   canSetHeaders?: boolean
@@ -70,6 +39,7 @@ type InitReqFn = (args: {
 }) => Promise<InitReqResult>
 
 export type RenderRootArgs = {
+  adminViews: AdminViewAdapterMap
   config: Promise<SanitizedConfig>
   importMap: ImportMap
   initReq: InitReqFn
@@ -78,18 +48,17 @@ export type RenderRootArgs = {
   params: Promise<{ segments: string[] }>
   /** Framework redirect implementation (e.g. next/navigation redirect). Called before req is available. */
   redirect: (url: string) => never
-  routeDataGetter: RouteDataGetter
   searchParams: Promise<{ [key: string]: string | string[] }>
 }
 
 export const renderRoot = async ({
+  adminViews,
   config: configPromise,
   importMap,
   initReq,
   notFound,
   params: paramsPromise,
   redirect,
-  routeDataGetter,
   searchParams: searchParamsPromise,
 }: RenderRootArgs) => {
   const config = await configPromise
@@ -222,8 +191,9 @@ export const renderRoot = async ({
     templateType,
     viewActions,
     viewType,
-  } = routeDataGetter({
+  } = getRouteData({
     adminRoute,
+    adminViews,
     collectionConfig,
     collectionPreferences,
     currentRoute,

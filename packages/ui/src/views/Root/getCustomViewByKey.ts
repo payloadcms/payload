@@ -1,6 +1,6 @@
 import type { AdminViewServerProps, PayloadComponent, SanitizedConfig } from 'payload'
 
-import type { ViewFromConfig } from './getRouteData.js'
+import type { ViewFromConfig } from './getCustomViewByRoute.js'
 
 export const getCustomViewByKey = ({
   config,

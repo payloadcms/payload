@@ -5,9 +5,9 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import type { ViewFromConfig } from './getRouteData.js'
+import type { ViewFromConfig } from './getCustomViewByRoute.js'
 
-import { isPathMatchingRoute } from './isPathMatchingRoute.js'
+import { isPathMatchingRoute } from '../../utilities/isPathMatchingRoute.js'
 
 export const getCustomGlobalViewByRoute = ({
   adminRoute,

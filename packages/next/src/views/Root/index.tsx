@@ -6,7 +6,7 @@ import { renderRoot } from '@payloadcms/ui/views/Root'
 import { notFound, redirect } from 'next/navigation.js'
 
 import { initReq } from '../../utilities/initReq.js'
-import { getRouteData } from './getRouteData.js'
+import { adminViews } from '../adapter.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -31,12 +31,12 @@ export const RootPage = ({
   }>
 }) =>
   renderRoot({
+    adminViews,
     config,
     importMap,
     initReq: initReq as Parameters<typeof renderRoot>[0]['initReq'],
     notFound,
     params,
     redirect,
-    routeDataGetter: getRouteData as Parameters<typeof renderRoot>[0]['routeDataGetter'],
     searchParams,
   })
