@@ -1,11 +1,10 @@
 import { RootLayout as UIRootLayout } from '@payloadcms/ui/layouts'
-// @ts-ignore - TS6 NodeNext rejects deep imports into `next` (no `exports` field), but Next.js compiler requires this exact specifier
 import { Inter, Roboto_Mono } from 'next/font/google'
 import React from 'react'
 
-import { NextRouterAdapter } from '../../adapters/router.js'
-import { nextServerAdapter } from '../../adapters/server.js'
-import { checkDependencies } from './checkDependencies.js'
+import { checkDependencies } from '../utilities/checkDependencies.js'
+import { NextRouterAdapter } from './router.js'
+import { nextServerAdapter } from './server.js'
 
 const inter = Inter({
   subsets: ['latin'],
