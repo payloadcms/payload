@@ -141,6 +141,11 @@
       "types": "./src/utilities/schedulePublishHandler.ts",
       "default": "./src/utilities/schedulePublishHandler.ts"
     },
+    "./utilities/slugify": {
+      "import": "./src/utilities/slugify.ts",
+      "types": "./src/utilities/slugify.ts",
+      "default": "./src/utilities/slugify.ts"
+    },
     "./utilities/getClientConfig": {
       "import": "./src/utilities/getClientConfig.ts",
       "types": "./src/utilities/getClientConfig.ts",

@@ -16,8 +16,9 @@ import { renderDocumentHandler } from '@payloadcms/ui/views/Document/handleServe
 import { renderDocumentSlotsHandler } from '@payloadcms/ui/views/Document/renderDocumentSlots'
 import { renderListHandler } from '@payloadcms/ui/views/List/handleServerFunction'
 
+import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
+
 import { initReq } from './initReq.js'
-import { slugifyHandler } from './slugify.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
