@@ -3,6 +3,7 @@
 import {
   Button,
   CheckboxField,
+  CodeEditorLazy,
   ExternalLinkIcon,
   Form,
   MinimizeMaximizeIcon,
@@ -23,7 +24,6 @@ import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
 import * as React from 'react'
 
 import { LocaleSelector } from './LocaleSelector/index.js'
-import { RenderJSON } from './RenderJSON/index.js'
 
 const baseClass = 'query-inspector'
 
@@ -73,6 +73,17 @@ export const APIViewClient: React.FC = () => {
   const [authenticated, setAuthenticated] = React.useState<boolean>(true)
   const [fullscreen, setFullscreen] = React.useState<boolean>(false)
   const [origin, setOrigin] = React.useState<string>(serverURL || '')
+
+  const jsonString = React.useMemo(
+    () => (data === undefined ? '' : JSON.stringify(data, null, 2)),
+    [data],
+  )
+
+  // readOnly editors never fire onChange, so bump a counter to re-fit height on data change
+  const [recalculatedHeightAt, setRecalculatedHeightAt] = React.useState(0)
+  React.useEffect(() => {
+    setRecalculatedHeightAt((count) => count + 1)
+  }, [jsonString])
 
   // Set the origin to the window.location.origin in useEffect to avoid hydration errors
   React.useEffect(() => {
@@ -240,7 +251,13 @@ export const APIViewClient: React.FC = () => {
             </button>
           </div>
           <div className={`${baseClass}__results`}>
-            <RenderJSON object={data} />
+            <CodeEditorLazy
+              defaultLanguage="json"
+              options={{ folding: true, lineNumbers: 'on', wordWrap: 'off' }}
+              readOnly
+              recalculatedHeightAt={recalculatedHeightAt}
+              value={jsonString}
+            />
           </div>
         </div>
       </div>

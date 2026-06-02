@@ -5,8 +5,6 @@
 
   .query-inspector {
     --header-offset: 110px;
-    --string-color: var(--color-text-success);
-    --number-color: var(--color-text-warning);
     flex: 1;
     min-height: 0;
     display: flex;
@@ -105,7 +103,7 @@
     font-family: var(--font-family-mono);
     min-width: 0;
     max-height: calc(100dvh - var(--header-offset));
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: auto;
     background-color: var(--color-bg-secondary);
     border-inline-start: var(--stroke-width-small) solid var(--color-border);
