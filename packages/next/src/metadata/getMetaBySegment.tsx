@@ -172,5 +172,5 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     }
   }
 
-  return adminViews.notFound.generateMetadata({ config, i18n })
+  return adminViews.notFound.generateMetadata({ config, i18n }) as unknown as Promise<Metadata>
 }

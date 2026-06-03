@@ -4,6 +4,7 @@ import type {
   AdminViewAdapterEntry,
   AdminViewServerProps,
   ImportMap,
+  MetaConfig,
   SanitizedConfig,
 } from 'payload'
 import type React from 'react'
@@ -50,9 +51,7 @@ const LogoutInactivityView: React.FC<AdminViewServerProps> = (props) => (
   <LogoutView inactivity {...props} />
 )
 
-// MetaConfig uses DeepClone<Metadata> which strips method signatures, so a direct type assignment
-// is not possible — cast through unknown at the boundary.
-export const adminViews = {
+export const adminViews: Record<string, AdminViewAdapterEntry<AdminViewServerProps, MetaConfig>> = {
   account: { Component: AccountView, generateMetadata: generateAccountMetadata },
   createFirstUser: {
     Component: CreateFirstUserView,
@@ -71,7 +70,7 @@ export const adminViews = {
     generateMetadata: generateUnauthorizedMetadata,
   },
   verify: { Component: VerifyView, generateMetadata: generateVerifyMetadata },
-} as unknown as Record<string, AdminViewAdapterEntry<AdminViewServerProps, Metadata>>
+}
 
 type PageProps = {
   readonly config: Promise<SanitizedConfig>
