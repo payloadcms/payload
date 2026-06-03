@@ -154,7 +154,7 @@ async function runBinScript({
 
   if (script === 'build') {
     await build({ config })
-    return {} // build() owns process exit (spawns next build, propagates its code)
+    return {} // build() awaits next build and owns process exit, propagating its code
   }
 
   if (script === 'jobs:run') {

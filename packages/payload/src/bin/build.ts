@@ -34,13 +34,21 @@ export async function build({ config }: { config: SanitizedConfig }): Promise<vo
   const nextBin = resolveNextBin()
   const forwardedArgs = getForwardedArgs()
 
-  const child = spawn(process.execPath, [nextBin, 'build', ...forwardedArgs], {
-    stdio: 'inherit',
+  const exitCode = await new Promise<number>((resolve) => {
+    const child = spawn(process.execPath, [nextBin, 'build', ...forwardedArgs], {
+      stdio: 'inherit',
+    })
+    child.on('error', (err) => {
+      console.error('Failed to run next build:')
+      console.error(err)
+      resolve(1)
+    })
+    child.on('exit', (code) => {
+      resolve(code ?? 0)
+    })
   })
 
-  child.on('exit', (code) => {
-    process.exit(code ?? 0)
-  })
+  process.exit(exitCode)
 }
 
 /**

@@ -1,6 +1,16 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 
-const spawnMock = vi.fn(() => ({ on: vi.fn() }))
+// Default fake child auto-fires `exit(0)` synchronously so ordering/generation
+// tests resolve. Specific tests override via `mockReturnValueOnce` to drive the
+// exit/error handlers manually.
+const spawnMock = vi.fn(() => ({
+  on(event: string, cb: (arg?: never) => void) {
+    if (event === 'exit') {
+      cb(0 as never)
+    }
+    return this
+  },
+}))
 const generateImportMapMock = vi.fn(async () => {})
 const generateTypesMock = vi.fn(async () => {})
 
@@ -88,12 +98,20 @@ describe('build', () => {
 
   it('spawns next build with forwarded args and propagates the child exit code', async () => {
     process.argv = ['node', 'payload', 'build', '--turbopack']
-    const onMock = vi.fn()
-    spawnMock.mockReturnValueOnce({ on: onMock })
+    let exitCb: ((code: number | null) => void) | undefined
+    spawnMock.mockReturnValueOnce({
+      on(event: string, cb: (code: number | null) => void) {
+        if (event === 'exit') {
+          exitCb = cb
+        }
+        return this
+      },
+    })
 
-    await build({ config: fakeConfig })
+    const buildPromise = build({ config: fakeConfig })
 
-    expect(spawnMock).toHaveBeenCalledTimes(1)
+    // generation awaits before spawn; let those microtasks settle
+    await vi.waitFor(() => expect(spawnMock).toHaveBeenCalledTimes(1))
     const [execPath, spawnArgs, opts] = spawnMock.mock.calls[0]
     expect(execPath).toBe(process.execPath)
     expect(spawnArgs[1]).toBe('build')
@@ -101,8 +119,40 @@ describe('build', () => {
     expect(opts).toEqual({ stdio: 'inherit' })
 
     // Simulate the child exiting with a non-zero code
-    const exitHandler = onMock.mock.calls.find(([event]) => event === 'exit')?.[1]
-    exitHandler(2)
+    exitCb?.(2)
+    await buildPromise
     expect(exitMock).toHaveBeenCalledWith(2)
+  })
+
+  it('does not exit until the spawned child exits, then propagates its code', async () => {
+    let exitCb: ((code: number | null) => void) | undefined
+    spawnMock.mockReturnValueOnce({
+      on(event: string, cb: (code: number | null) => void) {
+        if (event === 'exit') {
+          exitCb = cb
+        }
+        return this
+      },
+    })
+
+    let resolved = false
+    const buildPromise = build({ config: fakeConfig }).then(() => {
+      resolved = true
+    })
+
+    // Wait for generation to settle and the child to be spawned. build() must
+    // still be pending because the child has not exited yet.
+    await vi.waitFor(() => expect(exitCb).toBeDefined())
+    // Flush all pending microtasks; the OLD (buggy) build() resolved here
+    // without awaiting the child, so this assertion catches the race.
+    await new Promise((r) => setTimeout(r, 0))
+    expect(resolved).toBe(false)
+    expect(exitMock).not.toHaveBeenCalled()
+
+    // Child exits non-zero -> build() must exit with that exact code
+    exitCb?.(3)
+    await buildPromise
+    expect(resolved).toBe(true)
+    expect(exitMock).toHaveBeenCalledWith(3)
   })
 })
