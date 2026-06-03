@@ -150,6 +150,7 @@ export interface PayloadMcpApiKeyAuthOperations {
  */
 export interface Post {
   id: string;
+  title?: string | null;
   array?:
     | {
         title?: string | null;

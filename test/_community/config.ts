@@ -54,6 +54,7 @@ export default buildConfigWithDefaults({
       await payload.create({
         collection: postsSlug,
         data: {
+          title: 'example post',
           array: [{ title: 'example post' }],
         },
       })
