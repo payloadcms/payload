@@ -75,20 +75,16 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_2201AD62".
+ * via the `definition` "LexicalNodes_99AE542E".
  */
-export type LexicalNodes_2201AD62 =
+export type LexicalNodes_99AE542E =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_2201AD62>
+  | SerializedParagraphNode<LexicalNodes_99AE542E>
   | SerializedHorizontalRuleNode
-  | {
-      type: 'upload';
-      version: number;
-      [k: string]: unknown;
-    }
-  | SerializedQuoteNode<LexicalNodes_2201AD62>
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_99AE542E>
   | SerializedRelationshipNode<
       | 'posts'
       | 'pages'
@@ -101,11 +97,11 @@ export type LexicalNodes_2201AD62 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_2201AD62, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_2201AD62, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_2201AD62>
-  | SerializedListItemNode<LexicalNodes_2201AD62>
-  | SerializedHeadingNode<LexicalNodes_2201AD62>;
+  | SerializedAutoLinkNode<LexicalNodes_99AE542E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_99AE542E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_99AE542E>
+  | SerializedListItemNode<LexicalNodes_99AE542E>
+  | SerializedHeadingNode<LexicalNodes_99AE542E>;
 
 export interface Config {
   auth: {
@@ -118,6 +114,7 @@ export interface Config {
     pages: Page;
     'pages-categories': PagesCategory;
     'draft-posts': DraftPost;
+    media: Media;
     users: User;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
@@ -135,6 +132,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'pages-categories': PagesCategoriesSelect<false> | PagesCategoriesSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -208,7 +206,7 @@ export interface PayloadMcpApiKeyAuthOperations {
 export interface Post {
   id: string;
   text?: string | null;
-  richText: LexicalRichText<LexicalNodes_2201AD62>;
+  richText: LexicalRichText<LexicalNodes_99AE542E>;
   title?: string | null;
   selectField: MySelectOptions;
   insideUnnamedGroup?: string | null;
@@ -261,6 +259,25 @@ export interface DraftPost {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -369,6 +386,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'draft-posts';
         value: string | DraftPost;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
@@ -480,6 +501,24 @@ export interface DraftPostsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

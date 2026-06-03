@@ -47,13 +47,11 @@ import type {
   SerializedListItemNode as GenLI,
   SerializedLinkNode as GenLink,
   SerializedListNode as GenList,
-  LexicalNodes_2201AD62 as GenNodeUnion,
+  LexicalNodes_99AE542E as GenNodeUnion,
   SerializedParagraphNode as GenParagraph,
   SerializedQuoteNode as GenQuote,
-  SerializedRelationshipNode as GenRelationship,
   SerializedTabNode as GenTab,
   SerializedTextNode as GenText,
-  SerializedUploadNode as GenUpload,
   Config as LocalConfig,
   Menu,
   MyRadioOptions,
@@ -1037,14 +1035,16 @@ describe('Types testing', () => {
       })
 
       test('SerializedRelationshipNode: generated <-> runtime', () => {
-        type Slugs = keyof LocalConfig['collections']
-        expect<GenRelationship<Slugs>>().type.toBeAssignableWith<SerializedRelationshipNode>()
-        expect<SerializedRelationshipNode>().type.toBeAssignableWith<GenRelationship<Slugs>>()
+        // The relationship node excludes upload collections, so compare against the
+        // relationship member as it actually appears in the generated union.
+        type GenRelationshipInUnion = Extract<GenNodeUnion, { type: 'relationship' }>
+        expect<GenRelationshipInUnion>().type.toBeAssignableWith<SerializedRelationshipNode>()
+        expect<SerializedRelationshipNode>().type.toBeAssignableWith<GenRelationshipInUnion>()
       })
 
       test('SerializedUploadNode: generated <-> runtime', () => {
-        // No upload collections in this config — the generated node falls back
-        // to `{ type: 'upload', version: number, [k]: unknown }`.
+        // `media` is the upload-enabled collection, so both sides resolve to
+        // `SerializedUploadNode<'media'>`.
         type GenUploadInUnion = Extract<GenNodeUnion, { type: 'upload' }>
         expect<GenUploadInUnion>().type.toBeAssignableWith<SerializedUploadNode>()
         expect<SerializedUploadNode>().type.toBeAssignableWith<GenUploadInUnion>()
@@ -1068,6 +1068,7 @@ describe('Types testing', () => {
       const _sdk = new PayloadSDK({ baseURL: '' })
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'media'
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
@@ -1085,6 +1086,7 @@ describe('Types testing', () => {
       // ensure collection property of sdk.create has posts in the union type
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'media'
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'

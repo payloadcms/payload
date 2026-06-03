@@ -137,6 +137,16 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'media',
+      upload: true,
+      fields: [
+        {
+          type: 'text',
+          name: 'alt',
+        },
+      ],
+    },
   ],
   admin: {
     importMap: {
