@@ -1,55 +1,54 @@
 'use client'
 import type { FC } from 'react'
+import type React from 'react'
 
 import { useForm, useTranslation } from '@payloadcms/ui'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 /**
  * Shared logic for drawers that render their submit button in the drawer header.
  *
  * The header's `onClick` is defined outside the `Form` provider, so it cannot call
  * `useForm().submit()` directly. This hook owns a ref to the form's `submit` function,
- * which is wired up from inside the form via `<SubmitHandler registerSubmit={registerSubmit} />`.
+ * which is populated from inside the form via `<RegisterFormSubmit submitRef={submitRef} />`.
  *
- * Returns the `headerActions` array to spread onto a `Drawer` and the `registerSubmit`
- * callback to pass to `SubmitHandler`.
+ * Returns the `headerActions` array to spread onto a `Drawer` and the `submitRef`
+ * to pass to `RegisterFormSubmit`.
  */
 export const useDrawerSubmit = () => {
   const { t } = useTranslation()
-  const submitFormRef = useRef<(() => void) | null>(null)
-
-  const registerSubmit = useCallback((submit: () => void) => {
-    submitFormRef.current = submit
-  }, [])
+  const submitRef = useRef<(() => void) | null>(null)
 
   const headerActions = useMemo(
     () => [
       {
         label: t('fields:saveChanges'),
-        onClick: () => submitFormRef.current?.(),
+        onClick: () => submitRef.current?.(),
         style: 'primary' as const,
       },
     ],
     [t],
   )
 
-  return { headerActions, registerSubmit }
+  return { headerActions, submitRef }
 }
 
 /**
- * Registers the form's submit handler with a parent (via `useDrawerSubmit`) so a drawer
- * header action, rendered outside the form's React tree, can trigger submission.
+ * Mounts inside a `<Form>` to populate `submitRef` (from `useDrawerSubmit`) with the form's
+ * `submit` function, allowing drawer header actions rendered outside the form's React tree
+ * to trigger submission.
  */
-export const SubmitHandler: FC<{
-  registerSubmit: (submit: () => void) => void
-}> = ({ registerSubmit }) => {
+export const RegisterFormSubmit: FC<{
+  submitRef: React.RefObject<(() => void) | null>
+}> = ({ submitRef }) => {
   const { submit } = useForm()
 
   useEffect(() => {
-    registerSubmit(() => {
-      void submit()
-    })
-  }, [submit, registerSubmit])
+    submitRef.current = () => void submit()
+    return () => {
+      submitRef.current = null
+    }
+  }, [submit, submitRef])
 
   return null
 }

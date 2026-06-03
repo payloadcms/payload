@@ -38,7 +38,7 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
   schemaPathSuffix,
 }) => {
   const { closeModal } = useModal()
-  const { headerActions, registerSubmit } = useDrawerSubmit()
+  const { headerActions, submitRef } = useDrawerSubmit()
 
   // The Drawer only renders its children (and itself) if it's open. Thus, by extracting the main content
   // to DrawerContent, this should be faster
@@ -67,10 +67,10 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
               handleDrawerSubmit(args, args2)
             }, 1)
           }}
-          registerSubmit={registerSubmit}
           schemaFieldsPathOverride={schemaFieldsPathOverride}
           schemaPath={schemaPath}
           schemaPathSuffix={schemaPathSuffix}
+          submitRef={submitRef}
         />
       </Drawer>
     </EditDepthProvider>

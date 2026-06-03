@@ -45,7 +45,7 @@ import './index.css'
 import '../../../../utilities/fieldsDrawer/index.css'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import {
-  SubmitHandler,
+  RegisterFormSubmit,
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
@@ -703,7 +703,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const blockID = formData?.id
 
-  const { headerActions, registerSubmit } = useDrawerSubmit()
+  const { headerActions, submitRef } = useDrawerSubmit()
 
   const BlockDrawer = useMemo(
     () => () => (
@@ -727,7 +727,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                 permissions={true}
                 readOnly={!isEditable}
               />
-              <SubmitHandler registerSubmit={registerSubmit} />
+              <RegisterFormSubmit submitRef={submitRef} />
             </div>
           ) : null}
         </Drawer>
@@ -743,7 +743,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       clientBlock?.fields,
       schemaFieldsPath,
       headerActions,
-      registerSubmit,
+      submitRef,
       // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
     ],
   )

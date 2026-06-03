@@ -36,7 +36,7 @@ import type { BlockComponentProps } from '../component/index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import {
-  SubmitHandler,
+  RegisterFormSubmit,
   useDrawerSubmit,
 } from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
@@ -416,7 +416,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     [editor, nodeKey, formData],
   )
 
-  const { headerActions, registerSubmit } = useDrawerSubmit()
+  const { headerActions, submitRef } = useDrawerSubmit()
 
   const RemoveButton = useMemo(
     () => () => (
@@ -547,7 +547,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
                 permissions={true}
                 readOnly={!isEditable}
               />
-              <SubmitHandler registerSubmit={registerSubmit} />
+              <RegisterFormSubmit submitRef={submitRef} />
             </div>
           ) : null}
         </Drawer>

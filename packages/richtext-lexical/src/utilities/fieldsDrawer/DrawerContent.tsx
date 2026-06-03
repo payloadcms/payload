@@ -17,22 +17,22 @@ import { v4 as uuid } from 'uuid'
 import type { FieldsDrawerProps } from './Drawer.js'
 
 import { useEditorConfigContext } from '../../lexical/config/client/EditorConfigProvider.js'
-import { SubmitHandler } from './useDrawerSubmit.js'
+import { RegisterFormSubmit } from './useDrawerSubmit.js'
 import './index.css'
 
 export const DrawerContent: React.FC<
   {
-    registerSubmit: (submit: () => void) => void
+    submitRef: React.RefObject<(() => void) | null>
   } & Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>
 > = ({
   data,
   featureKey,
   fieldMapOverride,
   handleDrawerSubmit,
-  registerSubmit,
   schemaFieldsPathOverride,
   schemaPath,
   schemaPathSuffix,
+  submitRef,
 }) => {
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
   const { fields: parentDocumentFields } = useDocumentForm()
@@ -173,7 +173,7 @@ export const DrawerContent: React.FC<
         permissions={true}
         readOnly={!isEditable}
       />
-      <SubmitHandler registerSubmit={registerSubmit} />
+      <RegisterFormSubmit submitRef={submitRef} />
     </Form>
   )
 }
