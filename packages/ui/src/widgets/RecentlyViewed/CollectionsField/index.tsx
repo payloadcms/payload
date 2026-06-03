@@ -55,12 +55,13 @@ export const RecentlyViewedCollectionsField: SelectFieldClientComponent = ({
       <ul className={`${baseClass}__list`}>
         {options.map((option) => {
           const isIncluded = !excludedSlugs.has(option.value)
+          const resolvedLabel = getTranslation(option.label, i18n)
 
           return (
             <li className={`${baseClass}__option`} key={option.value}>
               <CheckboxInput
                 checked={isIncluded}
-                label={getTranslation(option.label, i18n)}
+                label={typeof resolvedLabel === 'string' ? resolvedLabel : option.value}
                 name={`${path}__${option.value}`}
                 onToggle={(event) => toggleCollection(option.value, event.target.checked)}
                 readOnly={readOnly}
