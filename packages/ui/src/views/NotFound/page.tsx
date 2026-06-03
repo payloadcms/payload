@@ -2,13 +2,15 @@
 
 import type { createLocalReq, ImportMap, InitReqResult, SanitizedConfig } from 'payload'
 
-import { formatAdminURL } from 'payload/shared'
+import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { NotFoundClient } from '../../exports/client/index.js'
+/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
+import { NotFoundClient, PageConfigProvider } from '../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
 import { DefaultTemplate } from '../../templates/Default/index.js'
+import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 
 type InitReqFn = (args: {
@@ -69,19 +71,30 @@ export const renderNotFoundPage = async ({
   const params = await paramsPromise
   const visibleEntities = getVisibleEntities({ req })
 
+  const clientConfig = getClientConfig({
+    config,
+    i18n: req.i18n,
+    importMap,
+    user: req.user,
+  })
+
+  await applyLocaleFiltering({ clientConfig, config, req })
+
   return (
-    <DefaultTemplate
-      i18n={req.i18n}
-      locale={locale}
-      params={params}
-      payload={payload}
-      permissions={permissions}
-      req={req}
-      searchParams={searchParams}
-      user={req.user}
-      visibleEntities={visibleEntities}
-    >
-      <NotFoundClient />
-    </DefaultTemplate>
+    <PageConfigProvider config={clientConfig}>
+      <DefaultTemplate
+        i18n={req.i18n}
+        locale={locale}
+        params={params}
+        payload={payload}
+        permissions={permissions}
+        req={req}
+        searchParams={searchParams}
+        user={req.user}
+        visibleEntities={visibleEntities}
+      >
+        <NotFoundClient />
+      </DefaultTemplate>
+    </PageConfigProvider>
   )
 }
