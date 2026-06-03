@@ -112,11 +112,13 @@ export const tabNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions }) => {
     additionalProperties: false,
     properties: {
       type: { type: 'string', const: 'tab' },
-      detail: { type: 'integer' },
+      // A tab node is fully fixed: Lexical marks it unmergeable (`detail` = IS_UNMERGEABLE = 2) and
+      // its text is a single tab. Any other `detail` makes `TabNode.setDetail` throw on load.
+      detail: { const: 2, description: 'Always 2 (Lexical IS_UNMERGEABLE); other values throw.' },
       format: textFormatSchema,
       mode: textModeSchema,
       style: { type: 'string' },
-      text: { type: 'string' },
+      text: { const: '\t', description: 'Always a single tab character.' },
       version: versionSchema,
     },
     required: ['detail', 'format', 'mode', 'style', 'text', 'type', 'version'],
