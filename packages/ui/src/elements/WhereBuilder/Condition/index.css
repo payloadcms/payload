@@ -102,6 +102,11 @@
       grid-area: value;
     }
 
+    .condition__inputs > div {
+      flex-basis: auto;
+      width: 100%;
+    }
+
     .condition__actions {
       grid-area: actions;
       align-self: center;

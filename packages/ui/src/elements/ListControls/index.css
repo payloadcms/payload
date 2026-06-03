@@ -60,5 +60,10 @@
         justify-content: space-between;
       }
     }
+
+    .list-controls__toggle-sort,
+    .list-controls__toggle-group-by {
+      flex: 1;
+    }
   }
 }
