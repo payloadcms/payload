@@ -562,7 +562,7 @@ When two **different** blocks resolve to the same auto-derived name (same slug, 
 
 `richText` fields backed by `lexicalEditor` used to emit a permissive `{ [k: string]: unknown }` per field. They now emit a discriminated union of strict per-node interfaces (`SerializedTextNode`, `SerializedParagraphNode`, `SerializedHeadingNode`, `SerializedBlockNode`, etc.) under a hash-named alias like `LexicalNodes_AB12CD34`.
 
-Block nodes always come through as `SerializedBlockNode<TFields>` / `SerializedInlineBlockNode<TFields>` referencing the per-block interface (see the `block.interfaceName` change above). Their auto-added `id`/`blockName` tighten from `id?: string | null` / `blockName?: string | null` to `id: string` / `blockName: string | null` to match what's actually stored.
+Block nodes come through as `SerializedBlockNode<TFields>` / `SerializedInlineBlockNode<TFields>` referencing the per-block interface (see the `block.interfaceName` change above). The auto-added `id` is now required (`id: string`), since a stored lexical block always has one.
 
 Code that imported field types from `payload-types.ts` and cast through `unknown` may now type-check tighter and surface real bugs.
 
