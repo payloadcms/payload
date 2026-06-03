@@ -25,6 +25,7 @@ type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
+  draft?: boolean
   isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
@@ -68,6 +69,7 @@ const shouldReupload = (
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
+  draft,
   isDuplicating,
   operation,
   originalDoc,
@@ -422,6 +424,7 @@ export const generateFileData = async <T>({
   newData = {
     ...newData,
     ...fileData,
+    ...(draft ? { _status: 'draft' } : {}),
   }
 
   return {
