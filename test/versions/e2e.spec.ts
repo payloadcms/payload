@@ -1229,8 +1229,9 @@ describe('Versions', () => {
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(publishedDoc.id)
 
       await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+      await waitForFormReady(page)
 
-      const duplicatedDocID = page.url().split('/').pop()
+      const duplicatedDocID = new URL(page.url()).pathname.split('/').pop()
 
       await expect(async () => {
         const { docs: draftDocs } = await payload.find({
@@ -1240,11 +1241,11 @@ describe('Versions', () => {
         })
         expect(draftDocs[0]!._status).toStrictEqual('draft')
 
-        const { docs: publishedDocs } = await payload.find({
+        const { docs: mainDocs } = await payload.find({
           collection: draftWithUploadCollectionSlug,
           where: { id: { equals: duplicatedDocID } },
         })
-        expect(publishedDocs).toHaveLength(0)
+        expect(mainDocs[0]!._status).toStrictEqual('draft')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
