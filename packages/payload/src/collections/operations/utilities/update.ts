@@ -169,14 +169,23 @@ export const updateDocument = async <
   // Delete any associated files
   // /////////////////////////////////////
 
-  await deleteAssociatedFiles({
-    collectionConfig,
-    config,
-    doc: docWithLocales,
-    files: filesToUpload,
-    overrideDelete: false,
-    req,
-  })
+  // When saving a draft on a document whose latest version is published, the file
+  // referenced by docWithLocales is still actively used by the published main document.
+  // Deleting it here would break the published document's file even though no publish
+  // is happening. Only skip deletion in this case; when the latest version is already a
+  // draft, it is safe to delete the old draft file as it is being replaced.
+  const isDraftOverPublished = isSavingDraft && docWithLocales._status === 'published'
+
+  if (!isDraftOverPublished) {
+    await deleteAssociatedFiles({
+      collectionConfig,
+      config,
+      doc: docWithLocales,
+      files: filesToUpload,
+      overrideDelete: false,
+      req,
+    })
+  }
 
   // /////////////////////////////////////
   // beforeValidate - Fields

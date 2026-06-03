@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -85,10 +86,12 @@ export interface Config {
     'custom-ids': CustomId;
     diff: Diff;
     text: Text;
+    'draft-with-upload': DraftWithUpload;
     media: Media;
     media2: Media2;
-    'payload-kv': PayloadKv;
     users: User;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
+    'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -114,10 +117,12 @@ export interface Config {
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     diff: DiffSelect<false> | DiffSelect<true>;
     text: TextSelect<false> | TextSelect<true>;
+    'draft-with-upload': DraftWithUploadSelect<false> | DraftWithUploadSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     media2: Media2Select<false> | Media2Select<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -153,7 +158,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -166,6 +171,24 @@ export interface Config {
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -215,21 +238,11 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+  richText?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+      }[]
+    | null;
   json?:
     | {
         [k: string]: unknown;
@@ -574,36 +587,16 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+  richtext?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  richtextWithCustomDiff?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+      }[]
+    | null;
+  richtextWithCustomDiff?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+      }[]
+    | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -678,6 +671,26 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload".
+ */
+export interface DraftWithUpload {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media2".
  */
 export interface Media2 {
@@ -693,6 +706,49 @@ export interface Media2 {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
+  /**
+   * Access for this API key — uncheck to revoke individual tools.
+   */
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -883,6 +939,10 @@ export interface PayloadLockedDocument {
         value: string | Text;
       } | null)
     | ({
+        relationTo: 'draft-with-upload';
+        value: string | DraftWithUpload;
+      } | null)
+    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -893,12 +953,21 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -908,10 +977,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -1290,6 +1364,25 @@ export interface TextSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload_select".
+ */
+export interface DraftWithUploadSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -1324,14 +1417,6 @@ export interface Media2Select<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1351,6 +1436,30 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  overrideAccess?: T;
+  access?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
