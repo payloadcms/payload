@@ -18,7 +18,8 @@ import * as qs from 'qs-esm'
 import React from 'react'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { PageConfigProvider } from '../../providers/Config/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { PageConfigProvider } from '../../exports/client/index.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
