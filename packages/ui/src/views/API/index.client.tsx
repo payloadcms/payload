@@ -4,21 +4,24 @@ import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
 import * as React from 'react'
 import { toast } from 'sonner'
 
-import { CopyToClipboard } from '../../elements/CopyToClipboard/index.js'
-import { Gutter } from '../../elements/Gutter/index.js'
+import { Button } from '../../elements/Button/index.js'
+import { CodeEditor as CodeEditorLazy } from '../../elements/CodeEditor/index.js'
+import { ExternalLinkIcon } from '../../icons/ExternalLink/index.js'
+import { MinimizeMaximizeIcon } from '../../icons/MinimizeMaximize/index.js'
+import { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'
 import { CheckboxField } from '../../fields/Checkbox/index.js'
 import { NumberField } from '../../fields/Number/index.js'
+import { TextInput } from '../../fields/Text/Input.js'
 import { Form } from '../../forms/Form/index.js'
-import { MinimizeMaximizeIcon } from '../../icons/MinimizeMaximize/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useSearchParams } from '../../providers/RouterAdapter/index.js'
-import './index.css'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { SetDocumentStepNav } from '../Edit/SetDocumentStepNav/index.js'
+
+import './index.css'
+
 import { LocaleSelector } from './LocaleSelector/index.js'
-import { RenderJSON } from './RenderJSON/index.js'
 
 const baseClass = 'query-inspector'
 
@@ -68,6 +71,17 @@ export const APIViewClient: React.FC = () => {
   const [authenticated, setAuthenticated] = React.useState<boolean>(true)
   const [fullscreen, setFullscreen] = React.useState<boolean>(false)
   const [origin, setOrigin] = React.useState<string>(serverURL || '')
+
+  const jsonString = React.useMemo(
+    () => (data === undefined ? '' : JSON.stringify(data, null, 2)),
+    [data],
+  )
+
+  // readOnly editors never fire onChange, so bump a counter to re-fit height on data change
+  const [recalculatedHeightAt, setRecalculatedHeightAt] = React.useState(0)
+  React.useEffect(() => {
+    setRecalculatedHeightAt((count) => count + 1)
+  }, [jsonString])
 
   // Set the origin to the window.location.origin in useEffect to avoid hydration errors
   React.useEffect(() => {
@@ -119,9 +133,8 @@ export const APIViewClient: React.FC = () => {
   }, [i18n.language, fetchURL, authenticated])
 
   return (
-    <Gutter
+    <div
       className={[baseClass, fullscreen && `${baseClass}--fullscreen`].filter(Boolean).join(' ')}
-      right={false}
     >
       <SetDocumentStepNav
         collectionSlug={collectionSlug}
@@ -133,41 +146,49 @@ export const APIViewClient: React.FC = () => {
         useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
         view="API"
       />
-      <div className={`${baseClass}__configuration`}>
-        <div className={`${baseClass}__api-url`}>
-          <span className={`${baseClass}__label`}>
-            API URL <CopyToClipboard value={fetchURL} />
-          </span>
-          <a href={fetchURL} rel="noopener noreferrer" target="_blank">
-            {fetchURL}
-          </a>
-        </div>
-        <Form
-          initialState={{
-            authenticated: {
-              initialValue: authenticated || false,
-              valid: true,
-              value: authenticated || false,
-            },
-            depth: {
-              initialValue: Number(depth || 0),
-              valid: true,
-              value: Number(depth || 0),
-            },
-            draft: {
-              initialValue: draft || false,
-              valid: true,
-              value: draft || false,
-            },
-            locale: {
-              initialValue: locale,
-              valid: true,
-              value: locale,
-            },
-          }}
-        >
-          <div className={`${baseClass}__form-fields`}>
-            <div className={`${baseClass}__filter-query-checkboxes`}>
+      <div className={`${baseClass}__content`}>
+        <div className={`${baseClass}__configuration`}>
+          <Form
+            initialState={{
+              authenticated: {
+                initialValue: authenticated || false,
+                valid: true,
+                value: authenticated || false,
+              },
+              depth: {
+                initialValue: Number(depth || 0),
+                valid: true,
+                value: Number(depth || 0),
+              },
+              draft: {
+                initialValue: draft || false,
+                valid: true,
+                value: draft || false,
+              },
+              locale: {
+                initialValue: locale,
+                valid: true,
+                value: locale,
+              },
+            }}
+          >
+            <div className={`${baseClass}__form-fields`}>
+              {localeOptions && (
+                <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />
+              )}
+              <NumberField
+                field={{
+                  name: 'depth',
+                  admin: {
+                    step: 1,
+                  },
+                  label: t('general:depth'),
+                  max: 10,
+                  min: 0,
+                }}
+                onChange={(value) => setDepth(value?.toString())}
+                path="depth"
+              />
               {draftsEnabled && (
                 <CheckboxField
                   field={{
@@ -187,38 +208,63 @@ export const APIViewClient: React.FC = () => {
                 path="authenticated"
               />
             </div>
-            {localeOptions && <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />}
-            <NumberField
-              field={{
-                name: 'depth',
-                admin: {
-                  step: 1,
-                },
-                label: t('general:depth'),
-                max: 10,
-                min: 0,
+          </Form>
+        </div>
+        <div className={`${baseClass}__results-wrapper`}>
+          <div className={`${baseClass}__results-bar`}>
+            <div className={`${baseClass}__api-url-field`}>
+              <TextInput
+                className={`${baseClass}__api-url-input`}
+                htmlAttributes={{
+                  'aria-label': 'API URL',
+                  readOnly: true,
+                }}
+                path="api-url"
+                readOnly={false}
+                value={fetchURL}
+              />
+            </div>
+            <div className={`${baseClass}__results-bar-actions`}>
+              <Button
+                aria-label={t('general:openInNewWindow')}
+                buttonStyle="secondary"
+                className={`${baseClass}__api-url-open-button`}
+                el="anchor"
+                icon={<ExternalLinkIcon size={16} />}
+                margin={false}
+                newTab
+                size="large"
+                url={fetchURL}
+              />
+              <Button
+                aria-label="toggle fullscreen"
+                buttonStyle="secondary"
+                className={`${baseClass}__toggle-fullscreen-button`}
+                icon={<MinimizeMaximizeIcon isMinimized={!fullscreen} />}
+                margin={false}
+                onClick={() => setFullscreen(!fullscreen)}
+                size="large"
+              />
+            </div>
+          </div>
+          <div className={`${baseClass}__results`}>
+            <CodeEditorLazy
+              defaultLanguage="json"
+              height="100%"
+              options={{
+                fixedOverflowWidgets: true,
+                folding: true,
+                lineNumbers: 'on',
+                stickyScroll: { enabled: false },
+                wordWrap: 'off',
               }}
-              onChange={(value) => setDepth(value?.toString())}
-              path="depth"
+              readOnly
+              recalculatedHeightAt={recalculatedHeightAt}
+              value={jsonString}
             />
           </div>
-        </Form>
-      </div>
-      <div className={`${baseClass}__results-wrapper`}>
-        <div className={`${baseClass}__toggle-fullscreen-button-container`}>
-          <button
-            aria-label="toggle fullscreen"
-            className={`${baseClass}__toggle-fullscreen-button`}
-            onClick={() => setFullscreen(!fullscreen)}
-            type="button"
-          >
-            <MinimizeMaximizeIcon isMinimized={!fullscreen} />
-          </button>
-        </div>
-        <div className={`${baseClass}__results`}>
-          <RenderJSON object={data} />
         </div>
       </div>
-    </Gutter>
+    </div>
   )
 }
