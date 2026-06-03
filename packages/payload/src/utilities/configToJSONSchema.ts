@@ -995,6 +995,72 @@ export function entityToJSONSchema(
   return jsonSchema
 }
 
+/**
+ * Like {@link entityToJSONSchema}, but returns a standalone schema for one collection or global:
+ * the entity plus only the `definitions` it actually uses, so it resolves on its own rather than
+ * as part of the whole config schema.
+ *
+ * Relationship/upload `$ref`s to other collections are left in place - the caller handles those.
+ */
+export function entityToStandaloneJSONSchema({
+  config,
+  defaultIDType,
+  entity,
+  i18n,
+}: {
+  config: SanitizedConfig
+  defaultIDType: 'number' | 'text'
+  entity: SanitizedCollectionConfig | SanitizedGlobalConfig
+  i18n?: I18n
+}): JSONSchema4 {
+  const definitions = new Map<string, JSONSchema4>()
+
+  // entityToJSONSchema fills `definitions` with everything the fields reference (node unions, blocks).
+  const schema = entityToJSONSchema(
+    config,
+    entity,
+    definitions,
+    defaultIDType,
+    new Set(),
+    undefined,
+    i18n,
+    true, // forceInlineBlocks
+  )
+
+  // Timezone fields `$ref` supportedTimezones, which lives on the root config schema, so add it here.
+  const supportedTimezones = config.admin?.timezones?.supportedTimezones
+  if (
+    supportedTimezones?.length &&
+    schemaHasRef([schema, ...definitions.values()], '#/definitions/supportedTimezones')
+  ) {
+    definitions.set('supportedTimezones', timezonesToJSONSchema(supportedTimezones))
+  }
+
+  return {
+    $schema: 'http://json-schema.org/draft-07/schema#',
+    ...schema,
+    definitions: Object.fromEntries(definitions),
+  }
+}
+
+/**
+ * Recursive function that returns true if
+ * `node` has a `$ref` to `ref` somewhere inside it.
+ * */
+function schemaHasRef(node: unknown, ref: string): boolean {
+  if (Array.isArray(node)) {
+    return node.some((child) => schemaHasRef(child, ref))
+  }
+  if (node && typeof node === 'object') {
+    const obj = node as Record<string, unknown>
+    if (obj.$ref === ref) {
+      return true
+    }
+    return Object.values(obj).some((value) => schemaHasRef(value, ref))
+  }
+  return false
+}
+
 export function fieldsToSelectJSONSchema({
   config,
   fields,
@@ -1456,6 +1522,7 @@ export function configToJSONSchema(
   }
 
   let jsonSchema: JSONSchema4 = {
+    // draft-07 so consumers resolve `#/definitions/...` refs (the default assumes 2020-12 / `$defs`)
     $schema: 'http://json-schema.org/draft-07/schema#',
     additionalProperties: false,
     definitions: {

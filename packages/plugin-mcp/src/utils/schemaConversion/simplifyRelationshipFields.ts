@@ -66,5 +66,16 @@ export function simplifyRelationshipFields(schema: JsonSchemaType): JsonSchemaTy
     processed.items = simplifyRelationshipFields(processed.items)
   }
 
+  // Also walk `definitions`: lexical node unions and blocks live there, and their relationship
+  // fields point at collections that aren't bundled. Simplifying them drops those refs to IDs.
+  if (processed.definitions && typeof processed.definitions === 'object') {
+    processed.definitions = Object.fromEntries(
+      Object.entries(processed.definitions).map(([key, value]) => [
+        key,
+        typeof value === 'object' ? simplifyRelationshipFields(value) : value,
+      ]),
+    )
+  }
+
   return processed
 }

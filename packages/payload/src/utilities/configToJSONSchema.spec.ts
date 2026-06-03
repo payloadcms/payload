@@ -4,7 +4,7 @@ import { describe, it, expect } from 'vitest'
 import type { Config } from '../config/types.js'
 
 import { sanitizeConfig } from '../config/sanitize.js'
-import { configToJSONSchema } from './configToJSONSchema.js'
+import { configToJSONSchema, entityToStandaloneJSONSchema } from './configToJSONSchema.js'
 import type { Block, BlocksField, RichTextField } from '../fields/config/types.js'
 
 describe('configToJSONSchema', () => {
@@ -542,5 +542,67 @@ describe('configToJSONSchema', () => {
     ).oneOf![0]
     expect(grpBlocksInline).not.toHaveProperty('$ref')
     expect(grpBlocksInline.properties?.blockType).toStrictEqual({ const: 'myBlock' })
+  })
+
+  it('entityToStandaloneJSONSchema bundles only the definitions an entity references', async () => {
+    const sharedBlock: Block = {
+      slug: 'sharedBlock',
+      interfaceName: 'SharedBlock',
+      fields: [{ name: 'title', type: 'text' }],
+    }
+
+    // @ts-expect-error partial config
+    const config: Config = {
+      admin: {
+        timezones: {
+          supportedTimezones: [
+            { label: 'UTC', value: 'UTC' },
+            { label: 'New York', value: 'America/New_York' },
+          ],
+        },
+      },
+      blocks: [sharedBlock],
+      collections: [
+        {
+          slug: 'with-refs',
+          fields: [
+            { name: 'layout', type: 'blocks', blockReferences: ['sharedBlock'], blocks: [] },
+            { name: 'when', type: 'date', timezone: true },
+          ],
+          timestamps: false,
+        },
+        {
+          slug: 'other',
+          fields: [{ name: 'title', type: 'text' }],
+          timestamps: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const entity = sanitizedConfig.collections.find(
+      (collection) => collection.slug === 'with-refs',
+    )!
+
+    const schema = entityToStandaloneJSONSchema({
+      config: sanitizedConfig,
+      defaultIDType: 'text',
+      entity,
+    })
+
+    // Has its own $schema, so it resolves on its own.
+    expect(schema.$schema).toBe('http://json-schema.org/draft-07/schema#')
+
+    // The block reference is resolved inline, so it can't dangle.
+    const layoutItems = (schema.properties?.layout as JSONSchema4)?.items as JSONSchema4
+    const inlinedBlock = (layoutItems?.oneOf?.[0] ?? {}) as JSONSchema4
+    expect(inlinedBlock.properties?.blockType).toStrictEqual({ const: 'sharedBlock' })
+    expect(inlinedBlock.properties?.title).toBeDefined()
+
+    // A timezone field pulls in supportedTimezones from the root config.
+    expect(schema.definitions?.supportedTimezones).toBeDefined()
+
+    // Doesn't pull in unrelated collections.
+    expect(schema.definitions?.other).toBeUndefined()
   })
 })

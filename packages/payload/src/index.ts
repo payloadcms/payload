@@ -1842,6 +1842,7 @@ export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
   entityToJSONSchema,
+  entityToStandaloneJSONSchema,
   fieldsToJSONSchema,
   type FieldsToJSONSchemaArgs,
   registerBlockInterface,
