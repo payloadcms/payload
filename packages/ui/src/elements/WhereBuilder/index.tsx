@@ -37,7 +37,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const {
     collectionSlug,
     fields: fieldsProp,
-    isWhereOpen,
     onChange,
     onClose,
     renderedFilters = undefined,
@@ -56,7 +55,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     [isFormMode, collectionSlug, getEntityConfig],
   )
   const fields = isFormMode ? collectionConfig?.fields : fieldsProp
-  const fieldsSafe = fields ?? []
 
   const fieldPermissions = permissions?.collections?.[collectionSlug]?.fields
 
@@ -64,10 +62,15 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     () =>
       reduceFieldsToOptions({
         fieldPermissions,
-        fields: fieldsSafe,
+        fields: fields ?? [],
         i18n,
       }),
-    [fieldPermissions, fieldsSafe, i18n],
+    [fieldPermissions, fields, i18n],
+  )
+
+  const firstField = useMemo(
+    () => reducedFields.find((f) => !isFieldDisabled(f.field, 'filter')),
+    [reducedFields],
   )
 
   const conditions = useMemo(() => {
@@ -91,11 +94,15 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     return []
   }, [isFormMode, valueProp, listQuery.query?.where])
 
-  const handleWhereChange = isFormMode
-    ? (where: { or: typeof conditions }) => {
-        onChange?.(where)
-      }
-    : listQuery.handleWhereChange
+  const handleWhereChange = useMemo(
+    () =>
+      isFormMode
+        ? (where: { or: typeof conditions }) => {
+            onChange?.(where)
+          }
+        : listQuery.handleWhereChange,
+    [isFormMode, onChange, listQuery.handleWhereChange],
+  )
 
   const addCondition: AddCondition = React.useCallback(
     async ({ andIndex, field, orIndex, relation }) => {
@@ -128,6 +135,18 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
   const updateCondition: UpdateCondition = React.useCallback(
     async ({ andIndex, field, operator: incomingOperator, orIndex, value }) => {
+      // Virtual first row: conditions not yet committed, build from scratch
+      if (conditions.length === 0) {
+        const { validOperator } = getValidFieldOperators({
+          field: field.field,
+          operator: incomingOperator,
+        })
+        await handleWhereChange({
+          or: [{ and: [{ [String(field.fieldPath)]: { [validOperator]: value } }] }],
+        })
+        return
+      }
+
       const existingCondition = conditions[orIndex].and[andIndex]
 
       if (typeof existingCondition === 'object' && field?.fieldPath) {
@@ -161,6 +180,12 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
   const removeCondition: RemoveCondition = React.useCallback(
     async ({ andIndex, orIndex }) => {
+      // Virtual first row: removing it just closes the panel
+      if (conditions.length === 0) {
+        onClose?.()
+        return
+      }
+
       const newConditions = [...conditions]
       newConditions[orIndex].and.splice(andIndex, 1)
 
@@ -211,79 +236,70 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   )
 
   const addFirstFilter = React.useCallback(async () => {
-    const field = reducedFields.find((field) => !isFieldDisabled(field.field, 'filter'))
-
-    if (field) {
+    if (firstField) {
       await addCondition({
         andIndex: 0,
-        field,
+        field: firstField,
         orIndex: conditions.length,
         relation: 'or',
       })
     }
-  }, [addCondition, conditions.length, reducedFields])
+  }, [addCondition, conditions.length, firstField])
 
-  // When the filters panel is opened with no conditions, automatically add a first row.
-  const wasWhereOpen = React.useRef(isWhereOpen)
-
-  React.useEffect(() => {
-    if (isWhereOpen && !wasWhereOpen.current && conditions.length === 0) {
-      void addFirstFilter()
-    }
-
-    wasWhereOpen.current = isWhereOpen
-  }, [isWhereOpen, conditions.length, addFirstFilter])
+  // When conditions is empty in list mode, show a virtual first row immediately
+  // (derived from the first available field) so the panel never opens blank.
+  const displayConditions =
+    !isFormMode && conditions.length === 0 && firstField
+      ? ([
+          { and: [{ [firstField.fieldPath]: { [firstField.operators[0].value]: undefined } }] },
+        ] as typeof conditions)
+      : conditions
 
   return (
     <div className={baseClass}>
-      {conditions.length > 0 && (
-        <React.Fragment>
-          <ul className={`${baseClass}__or-filters`}>
-            {conditions.map((or, orIndex) => {
-              const compoundOrKey = `${orIndex}_${Array.isArray(or?.and) ? or.and.length : ''}`
+      <div className={`${baseClass}__or-filters`}>
+        {displayConditions.map((or, orIndex) => {
+          const compoundOrKey = `${orIndex}_${Array.isArray(or?.and) ? or.and.length : ''}`
 
-              return (
-                <li key={compoundOrKey}>
-                  <ul className={`${baseClass}__and-filters`}>
-                    {Array.isArray(or?.and) &&
-                      or.and.map((_, andIndex) => {
-                        const condition = conditions[orIndex].and[andIndex]
-                        const fieldPath = Object.keys(condition)[0]
+          return (
+            <div className={`${baseClass}__and-filters`} key={compoundOrKey}>
+              {Array.isArray(or?.and) &&
+                or.and.map((_, andIndex) => {
+                  const condition = displayConditions[orIndex].and[andIndex]
+                  const fieldPath = Object.keys(condition)[0]
 
-                        const operator =
-                          (Object.keys(condition?.[fieldPath] || {})?.[0] as Operator) || undefined
+                  const operator =
+                    (Object.keys(condition?.[fieldPath] || {})?.[0] as Operator) || undefined
 
-                        const value = condition?.[fieldPath]?.[operator] || undefined
+                  const value = condition?.[fieldPath]?.[operator] || undefined
 
-                        const isFirstCondition = orIndex === 0 && andIndex === 0
-                        const join: 'and' | 'or' = andIndex === 0 ? 'or' : 'and'
+                  const isFirstCondition = orIndex === 0 && andIndex === 0
+                  const join: 'and' | 'or' = andIndex === 0 ? 'or' : 'and'
 
-                        return (
-                          <li key={andIndex}>
-                            <Condition
-                              addCondition={addCondition}
-                              andIndex={andIndex}
-                              fieldPath={fieldPath}
-                              filterOptions={resolvedFilterOptions?.get(fieldPath)}
-                              isFirstCondition={isFirstCondition}
-                              join={join}
-                              operator={operator}
-                              orIndex={orIndex}
-                              reducedFields={reducedFields}
-                              removeCondition={removeCondition}
-                              RenderedFilter={renderedFilters?.get(fieldPath)}
-                              updateCondition={updateCondition}
-                              updateJoin={updateJoin}
-                              value={value}
-                            />
-                          </li>
-                        )
-                      })}
-                  </ul>
-                </li>
-              )
-            })}
-          </ul>
+                  return (
+                    <Condition
+                      addCondition={addCondition}
+                      andIndex={andIndex}
+                      fieldPath={fieldPath}
+                      filterOptions={resolvedFilterOptions?.get(fieldPath)}
+                      isFirstCondition={isFirstCondition}
+                      join={join}
+                      key={andIndex}
+                      operator={operator}
+                      orIndex={orIndex}
+                      reducedFields={reducedFields}
+                      removeCondition={removeCondition}
+                      RenderedFilter={renderedFilters?.get(fieldPath)}
+                      updateCondition={updateCondition}
+                      updateJoin={updateJoin}
+                      value={value}
+                    />
+                  )
+                })}
+            </div>
+          )
+        })}
+        <div className={`${baseClass}__add-or-row`}>
           <Button
             buttonStyle="ghost"
             className={`${baseClass}__add-or`}
@@ -293,8 +309,8 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           >
             {t('general:addFilter')}
           </Button>
-        </React.Fragment>
-      )}
+        </div>
+      </div>
     </div>
   )
 }

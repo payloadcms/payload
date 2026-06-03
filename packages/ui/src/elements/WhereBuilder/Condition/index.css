@@ -1,20 +1,18 @@
 @layer payload-default {
   .condition {
+    display: contents;
+
     .btn {
       vertical-align: middle;
       margin: 0;
     }
   }
 
-  .condition__wrap {
-    display: flex;
-    align-items: center;
-    gap: var(--spacer-2);
-  }
-
-  .condition__join {
-    flex-shrink: 0;
-    width: calc(var(--spacer-4) * 2);
+  /* Flatten wrap and inputs — all 5 cells (__join, __field, __operator, __value, __actions)
+     become direct items of the parent or-filters grid, no subgrid needed. */
+  .condition__wrap,
+  .condition__inputs {
+    display: contents;
   }
 
   .condition__join-label {
@@ -47,15 +45,9 @@
     align-items: center;
   }
 
-  .condition__inputs {
-    display: flex;
-    flex-grow: 1;
-    align-items: center;
-    gap: var(--spacer-2);
-  }
-
+  /* display:contents makes the three input divs participate directly in the parent grid */
   .condition__inputs > div {
-    flex-basis: 100%;
+    min-width: 0;
   }
 
   .condition__field .field-label {
@@ -63,31 +55,56 @@
   }
 
   .condition__actions {
-    flex-shrink: 0;
     display: flex;
     gap: var(--spacer-2);
   }
 
-  @media (max-width: 1024px) {
-    .condition__wrap {
-      align-items: initial;
-      gap: var(--spacer-2);
+  @media (max-width: 768px) {
+    .condition {
+      display: block;
     }
 
-    .condition__join {
-      width: 100%;
+    .condition__wrap {
+      margin-top: var(--spacer-3);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        'join actions'
+        'field field'
+        'operator operator'
+        'value value';
+      gap: var(--spacer-2);
+      align-items: start;
     }
 
     .condition__inputs {
-      flex-direction: column;
-      gap: var(--spacer-2);
-      align-items: stretch;
+      display: contents;
+    }
+
+    .condition__join {
+      grid-area: join;
+    }
+
+    .condition__join .rs__control {
+      min-width: calc(var(--spacer-4) * 3);
+      width: fit-content;
+    }
+
+    .condition__field {
+      grid-area: field;
+    }
+
+    .condition__operator {
+      grid-area: operator;
+    }
+
+    .condition__value {
+      grid-area: value;
     }
 
     .condition__actions {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      grid-area: actions;
+      align-self: center;
     }
   }
 }

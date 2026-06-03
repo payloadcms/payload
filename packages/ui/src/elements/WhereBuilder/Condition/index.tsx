@@ -219,6 +219,7 @@ export const Condition: React.FC<Props> = (props) => {
               })
             }
             round
+            size="large"
           />
         </div>
       </div>

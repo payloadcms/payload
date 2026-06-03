@@ -48,7 +48,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     getOptionValue,
     isClearable = true,
     isCreatable,
-    isLoading,
+    isLoading: isLoadingProp,
     isSearchable = true,
     noOptionsMessage = () => t('general:noOptions'),
     numberOnly = false,
@@ -90,9 +90,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     }),
   }
 
-  if (!hasMounted) {
-    return <ShimmerEffect height="calc(var(--base) * 2 + 2px)" />
-  }
+  const isLoading = isLoadingProp || !hasMounted
 
   if (!isCreatable) {
     return (

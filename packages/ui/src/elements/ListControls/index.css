@@ -10,21 +10,6 @@
     .group-by-builder {
       margin-top: var(--spacer-2);
     }
-
-    .where-builder {
-      margin-top: var(--spacer-2-5);
-    }
-
-    .search-bar {
-      min-width: 180px;
-      width: 180px;
-    }
-  }
-
-  /* Full-bleed the filter panel so its top border spans the full width.
-     Applied to the animating wrapper so the breakout isn't clipped mid-animation. */
-  .list-controls__where {
-    margin-inline: calc(var(--gutter-h) * -1);
   }
 
   .list-controls__search-row {
@@ -74,12 +59,6 @@
         padding: var(--spacer-1) var(--spacer-1) var(--spacer-1) var(--spacer-2);
         justify-content: space-between;
       }
-    }
-
-    .list-controls__toggle-where,
-    .list-controls__toggle-sort,
-    .list-controls__toggle-group-by {
-      flex: 1;
     }
   }
 }

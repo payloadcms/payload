@@ -173,6 +173,22 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
+        hasActiveFilters: (query?.where?.or ?? []).some((orGroup) =>
+          (orGroup.and ?? []).some((andGroup) => {
+            const field = Object.keys(andGroup)[0]
+            if (!field) {
+              return false
+            }
+            const operatorObj = andGroup[field]
+            if (!operatorObj || typeof operatorObj !== 'object') {
+              return false
+            }
+            const operator = Object.keys(operatorObj)[0]
+            return (
+              Boolean(operator) && (operatorObj as Record<string, unknown>)[operator] !== undefined
+            )
+          }),
+        ),
         isGroupingBy: Boolean(collectionConfig?.admin?.groupBy && query?.groupBy),
         orderableFieldName,
         query,
