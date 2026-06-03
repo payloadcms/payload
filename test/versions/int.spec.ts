@@ -2170,6 +2170,37 @@ describe('Versions', () => {
       expect(republishedDoc.filename).toBe(draftDoc.filename)
       expect(republishedDoc.alt).toBe('Draft version')
     })
+
+    it('should create a draft when duplicating a published upload document with draft: true', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'duplicate-source.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original published',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+      expect(publishedDoc._status).toBe('published')
+
+      const duplicatedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          alt: 'Duplicated draft',
+        },
+        draft: true,
+        duplicateFromID: publishedDoc.id,
+      })
+
+      uploadedFilenames.push(duplicatedDoc.filename)
+
+      expect(duplicatedDoc._status).toBe('draft')
+    })
   })
 
   describe('Querying', () => {
