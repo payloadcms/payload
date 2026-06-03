@@ -4,7 +4,8 @@ import React from 'react'
 
 import type { WidgetInstanceClient } from './index.client.js'
 
-import { ModularDashboardClient } from './index.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir to keep the `'use client'` boundary on `ModularDashboardClient` (relative imports collapse the boundary in @vitejs/plugin-rsc, causing "Invalid hook call" during RSC render).
+import { ModularDashboardClient } from '../../../../exports/client/index.js'
 import './index.css'
 
 export type ModularDashboardProps = {

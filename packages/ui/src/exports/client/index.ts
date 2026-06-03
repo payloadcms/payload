@@ -40,6 +40,15 @@ export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/Colu
 export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
 export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/GroupByField/index.js'
 
+// views - client-only components that server views render through the
+// `'use client'` boundary
+export { ModularDashboardClient } from '../../views/Dashboard/Default/ModularDashboard/index.client.js'
+export type {
+  DropTargetWidget,
+  WidgetInstanceClient,
+  WidgetItem,
+} from '../../views/Dashboard/Default/ModularDashboard/index.client.js'
+
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
 export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
