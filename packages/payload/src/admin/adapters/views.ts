@@ -38,11 +38,11 @@ export type GenerateMetadataDescriptor = (args: {
 }) => Promise<MetadataDescriptor>
 
 /**
- * One entry in a framework's `ViewAdapter`. Pairs a React component with
+ * One entry in a framework's `AdminViewAdapter`. Pairs a React component with
  * a metadata generator. `TComponentProps` and `TMetadata` are framework-specific
  * (Next narrows `TMetadata` to `next`'s `Metadata` type).
  */
-export type View<TComponentProps = any, TMetadata = unknown> = {
+export type AdminView<TComponentProps = any, TMetadata = unknown> = {
   Component: React.ComponentType<TComponentProps>
   generateMetadata: (args: Parameters<GenerateMetadataDescriptor>[0]) => Promise<TMetadata>
 }
@@ -51,7 +51,7 @@ export type View<TComponentProps = any, TMetadata = unknown> = {
  * The canonical set of admin view keys that every framework adapter must implement.
  * Adding a new admin view requires adding its key here so all adapters stay in sync.
  */
-export type ViewKey =
+export type AdminViewKey =
   | 'account'
   | 'createFirstUser'
   | 'dashboard'
@@ -66,11 +66,11 @@ export type ViewKey =
   | 'verify'
 
 /**
- * Keyed map of `View` — exactly one entry per `ViewKey`.
+ * Keyed map of `AdminView` — exactly one entry per `AdminViewKey`.
  * Framework adapters export an instance of this; missing or misspelled keys are
  * a type error.
  */
-export type ViewAdapter<TComponentProps = any, TMetadata = unknown> = Record<
-  ViewKey,
-  View<TComponentProps, TMetadata>
+export type AdminViewAdapter<TComponentProps = any, TMetadata = unknown> = Record<
+  AdminViewKey,
+  AdminView<TComponentProps, TMetadata>
 >

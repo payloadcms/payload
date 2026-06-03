@@ -1,7 +1,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type {
-  ViewAdapter,
+  AdminViewAdapter,
   AdminViewServerProps,
   ImportMap,
   MetaConfig,
@@ -51,7 +51,7 @@ const LogoutInactivityView: React.FC<AdminViewServerProps> = (props) => (
   <LogoutView inactivity {...props} />
 )
 
-export const adminViews: ViewAdapter<AdminViewServerProps, MetaConfig> = {
+export const adminViews: AdminViewAdapter<AdminViewServerProps, MetaConfig> = {
   account: { Component: AccountView, generateMetadata: generateAccountMetadata },
   createFirstUser: {
     Component: CreateFirstUserView,
