@@ -3,8 +3,8 @@ import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { renderNotFoundPage } from '@payloadcms/ui/views/NotFound/page'
 
-import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { initReq } from '../../utilities/initReq.js'
+import { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
+import { initReq } from '../utilities/initReq.js'
 
 export const generateNotFoundViewMetadata = async ({
   config: configPromise,

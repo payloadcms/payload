@@ -3,9 +3,9 @@ import type { SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
-import type { GenerateViewMetadata } from '../Root/index.js'
+import type { GenerateViewMetadata } from '../pages/Root.js'
 
-import { formatNextMetadata } from '../../utilities/meta.js'
+import { formatNextMetadata } from '../utilities/meta.js'
 
 export const generateListViewMetadata = async (
   args: {

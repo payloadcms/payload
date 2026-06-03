@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload'
 
-import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { adminViews } from '../adapter.js'
-import { generateCollectionTrashMetadata } from '../Document/generateCollectionTrashMetadata.js'
-import { generateListViewMetadata } from '../Document/generateListViewMetadata.js'
-import { generateDocumentViewMetadata } from '../Document/metadata.js'
 import { getCustomViewByRoute } from '@payloadcms/ui/views/Root/getCustomViewByRoute'
 
+import { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
+import { adminViews } from '../adapters/views.js'
 import { generateCustomViewMetadata } from './generateCustomViewMetadata.js'
+import { generateCollectionTrashMetadata } from './generateCollectionTrashMetadata.js'
+import { generateDocumentViewMetadata } from './generateDocumentViewMetadata.js'
+import { generateListViewMetadata } from './generateListViewMetadata.js'
 
 const oneSegmentMeta = {
   'create-first-user': adminViews.createFirstUser.generateMetadata,

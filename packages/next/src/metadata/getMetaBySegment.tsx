@@ -3,10 +3,10 @@ import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } fro
 
 import { getDocumentView } from '@payloadcms/ui/views/Document'
 
-import type { GenerateViewMetadata } from '../Root/index.js'
+import type { GenerateViewMetadata } from '../pages/Root.js'
 
-import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { adminViews } from '../adapter.js'
+import { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
+import { adminViews } from '../adapters/views.js'
 import { generateAPIViewMetadata } from './generateAPIViewMetadata.js'
 import { generateEditViewMetadata } from './generateEditViewMetadata.js'
 import { generateVersionsViewMetadata } from './generateVersionsViewMetadata.js'

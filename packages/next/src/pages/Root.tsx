@@ -5,8 +5,8 @@ import type { ImportMap, SanitizedConfig } from 'payload'
 import { renderRoot } from '@payloadcms/ui/views/Root'
 import { notFound, redirect } from 'next/navigation.js'
 
-import { initReq } from '../../utilities/initReq.js'
-import { adminViews } from '../adapter.js'
+import { initReq } from '../utilities/initReq.js'
+import { adminViews } from '../adapters/views.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
