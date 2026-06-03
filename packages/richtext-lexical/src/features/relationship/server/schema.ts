@@ -1,5 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
-import type { CollectionSlug, DataFromCollectionSlug } from 'payload'
+import type { CollectionSlug, DataFromCollectionSlug, UploadCollectionSlug } from 'payload'
 
 import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
@@ -15,7 +15,16 @@ export type RelationshipData = {
   }
 }[CollectionSlug]
 
-export type SerializedRelationshipNode<TSlugs extends CollectionSlug = CollectionSlug> = {
+/**
+ * Exclude upload collection slugs. This matches runtime behavior, as well as the json schema.
+ */
+export type NonUploadCollectionSlug = [Exclude<CollectionSlug, UploadCollectionSlug>] extends [
+  never,
+]
+  ? CollectionSlug
+  : Exclude<CollectionSlug, UploadCollectionSlug>
+
+export type SerializedRelationshipNode<TSlugs extends CollectionSlug = NonUploadCollectionSlug> = {
   [TSlug in TSlugs]: {
     relationTo: TSlug
     value: DataFromCollectionSlug<TSlug> | number | string

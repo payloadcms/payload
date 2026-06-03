@@ -1333,7 +1333,7 @@ export interface Config {
   };
   blocks: {
     nestedBlock: NestedBlock;
-    blockWithBlockRef: BlockWithBlockRef;
+    blockWithBlockRef: BlockWithBlockRef_338FAE2E;
   };
   collections: {
     'lexical-benchmark': LexicalBenchmark;
@@ -1479,10 +1479,12 @@ export interface NestedBlock {
   blockType: 'nestedBlock';
 }
 /**
+ * Multiple blocks resolve to the `BlockWithBlockRef` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BlockWithBlockRef".
+ * via the `definition` "BlockWithBlockRef_338FAE2E".
  */
-export interface BlockWithBlockRef {
+export interface BlockWithBlockRef_338FAE2E {
   nestedBlocks?: NestedBlock[] | null;
   id?: string | null;
   blockName?: string | null;
@@ -1776,15 +1778,17 @@ export interface RichTextField {
    * This select field is rendered here to ensure its options dropdown renders above the rich text toolbar.
    */
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
-  blocks?: TextBlock[] | null;
+  blocks?: TextBlock_9A4C1CB0[] | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * Multiple blocks resolve to the `TextBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TextBlock".
+ * via the `definition` "TextBlock_9A4C1CB0".
  */
-export interface TextBlock {
+export interface TextBlock_9A4C1CB0 {
   text?: string | null;
   id?: string | null;
   blockName?: string | null;
@@ -3308,6 +3312,16 @@ export interface LinkBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock".
+ */
+export interface TextBlock {
+  id: string;
+  blockType: 'textBlock';
+  blockTitle?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalLinkFields_26E8B07E".
  */
 export interface LexicalLinkFields_26E8B07E {
@@ -3479,13 +3493,25 @@ export interface TextArea {
   blockType: 'textArea';
 }
 /**
+ * Multiple blocks resolve to the `Select` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Select_FE424990".
+ */
+export interface Select_FE424990 {
+  select?: ('option1' | 'option2' | 'option3' | 'option4' | 'option5') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'select';
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "SubBlockLexical".
  */
 export interface SubBlockLexical {
   id: string;
   blockType: 'subBlockLexical';
-  subBlocksLexical?: (ContentBlock | TextArea | Select)[] | null;
+  subBlocksLexical?: (ContentBlock | TextArea | Select_FE424990)[] | null;
   blockName?: string | null;
 }
 /**
@@ -3785,6 +3811,16 @@ export interface BlockWithRichText {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithBlockRef".
+ */
+export interface BlockWithBlockRef {
+  id: string;
+  blockType: 'blockWithBlockRef';
+  nestedBlocks?: NestedBlock[] | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalLinkFields_D654DD6A".
  */
 export interface LexicalLinkFields_D654DD6A {
@@ -4003,6 +4039,6 @@ export interface SerializedTableCellNode<TChildren> extends SerializedLexicalEle
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
