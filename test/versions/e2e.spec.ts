@@ -1213,6 +1213,44 @@ describe('Versions', () => {
         expect(mainDocs[0]!.filename).toStrictEqual(publishedDoc.filename)
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
+
+    test('should create a draft when duplicating a published upload document', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        filePath: path.resolve(dirname, './image.jpg'),
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+
+      await openDocControls(page)
+      await page.locator('#action-duplicate').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(publishedDoc.id)
+
+      await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+
+      const duplicatedDocID = page.url().split('/').pop()
+
+      await expect(async () => {
+        const { docs: draftDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          draft: true,
+          where: { id: { equals: duplicatedDocID } },
+        })
+        expect(draftDocs[0]!._status).toStrictEqual('draft')
+
+        const { docs: publishedDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          where: { id: { equals: duplicatedDocID } },
+        })
+        expect(publishedDocs).toHaveLength(0)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
   })
 
   describe('draft globals', () => {
