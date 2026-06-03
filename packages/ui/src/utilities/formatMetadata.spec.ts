@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatNextMetadata } from './meta.js'
+import { formatMetadata } from './formatMetadata.js'
 
-describe('formatNextMetadata', () => {
+describe('formatMetadata', () => {
   it('should handle a string title with titleSuffix', async () => {
-    const result = await formatNextMetadata({
+    const result = await formatMetadata({
       serverURL: 'http://localhost:3000',
       title: 'Dashboard',
       titleSuffix: '- My CMS',
@@ -14,7 +14,7 @@ describe('formatNextMetadata', () => {
   })
 
   it('should apply titleSuffix to default and template fields of a TemplateString title object', async () => {
-    const result = await formatNextMetadata({
+    const result = await formatMetadata({
       serverURL: 'http://localhost:3000',
       title: { default: 'Dashboard', template: '%s | Dashboard' },
       titleSuffix: '- My CMS',
@@ -30,7 +30,7 @@ describe('formatNextMetadata', () => {
   })
 
   it('should use the TemplateString default for ogTitle when title is a TemplateString object', async () => {
-    const result = await formatNextMetadata({
+    const result = await formatMetadata({
       serverURL: 'http://localhost:3000',
       title: { default: 'My CMS', template: '%s | My CMS' },
       titleSuffix: '- Payload',
@@ -41,7 +41,7 @@ describe('formatNextMetadata', () => {
   })
 
   it('should use the TemplateString absolute for ogTitle when title has absolute property', async () => {
-    const result = await formatNextMetadata({
+    const result = await formatMetadata({
       serverURL: 'http://localhost:3000',
       title: { absolute: 'My CMS Absolute' },
       titleSuffix: '- Payload',
@@ -51,7 +51,7 @@ describe('formatNextMetadata', () => {
   })
 
   it('should apply titleSuffix to the absolute field of a TemplateString title object', async () => {
-    const result = await formatNextMetadata({
+    const result = await formatMetadata({
       serverURL: 'http://localhost:3000',
       title: { absolute: 'My CMS Absolute' },
       titleSuffix: '- Payload',
@@ -62,7 +62,7 @@ describe('formatNextMetadata', () => {
   })
 
   it('should use openGraph.title string over incomingMetadata.title for ogTitle', async () => {
-    const result = await formatNextMetadata({
+    const result = await formatMetadata({
       serverURL: 'http://localhost:3000',
       title: 'My CMS',
       titleSuffix: '- Payload',
@@ -73,7 +73,7 @@ describe('formatNextMetadata', () => {
   })
 
   it('should return undefined for metaTitle when no title and no titleSuffix are set', async () => {
-    const result = await formatNextMetadata({
+    const result = await formatMetadata({
       serverURL: 'http://localhost:3000',
     })
 
@@ -81,7 +81,7 @@ describe('formatNextMetadata', () => {
   })
 
   it('should return just the title when no titleSuffix is set', async () => {
-    const result = await formatNextMetadata({
+    const result = await formatMetadata({
       serverURL: 'http://localhost:3000',
       title: 'My CMS',
     })

@@ -1,14 +1,22 @@
-import type { Metadata } from 'next'
-import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
 import type { MetaConfig } from 'payload'
 
-import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
 import * as qs from 'qs-esm'
 
+import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '../assets/index.js'
+
+// Replicates the Icon type structure from next/dist/lib/metadata/types/metadata-types
+type Icon = {
+  media?: string
+  rel?: string
+  sizes?: string
+  type?: string
+  url: string
+}
+
 const appendTitleSuffix = (
-  title: Metadata['title'],
+  title: MetaConfig['title'],
   suffix: string | undefined,
-): Metadata['title'] => {
+): MetaConfig['title'] => {
   if (!suffix || !title) {
     return title ?? undefined
   }
@@ -30,7 +38,7 @@ const appendTitleSuffix = (
   return { absolute: `${title.absolute} ${suffix}` }
 }
 
-const getTitleString = (title: Metadata['title']): string | undefined => {
+const getTitleString = (title: MetaConfig['title']): string | undefined => {
   if (!title) {
     return undefined
   }
@@ -43,16 +51,16 @@ const getTitleString = (title: Metadata['title']): string | undefined => {
   return title.default
 }
 
-const defaultOpenGraph: Metadata['openGraph'] = {
+const defaultOpenGraph: MetaConfig['openGraph'] = {
   description:
     'Payload is a headless CMS and application framework built with TypeScript, Node.js, and React.',
   siteName: 'Payload App',
   title: 'Payload App',
 }
 
-export const formatNextMetadata = async (
+export const formatMetadata = async (
   args: { serverURL?: string } & MetaConfig,
-): Promise<Metadata> => {
+): Promise<MetaConfig> => {
   const { defaultOGImageType, serverURL, titleSuffix, ...rest } = args
 
   /**
@@ -60,28 +68,31 @@ export const formatNextMetadata = async (
    * It is a result of needing to `DeepCopy` the `MetaConfig` type from Payload.
    * This is required for the `DeepRequired` from `Config` to `SanitizedConfig`.
    */
-  const incomingMetadata = rest as Metadata
+  const incomingMetadata = rest as MetaConfig
 
-  const icons: Metadata['icons'] =
+  const faviconDark = payloadFaviconDark as { src: string } | string
+  const faviconLight = payloadFaviconLight as { src: string } | string
+  const ogImage = staticOGImage as { src: string } | string
+
+  const icons: MetaConfig['icons'] =
     incomingMetadata.icons ||
     ([
       {
         type: 'image/png',
         rel: 'icon',
         sizes: '32x32',
-        url: typeof payloadFaviconDark === 'object' ? payloadFaviconDark?.src : payloadFaviconDark,
+        url: typeof faviconDark === 'object' ? faviconDark.src : faviconDark,
       },
       {
         type: 'image/png',
         media: '(prefers-color-scheme: dark)',
         rel: 'icon',
         sizes: '32x32',
-        url:
-          typeof payloadFaviconLight === 'object' ? payloadFaviconLight?.src : payloadFaviconLight,
+        url: typeof faviconLight === 'object' ? faviconLight.src : faviconLight,
       },
     ] satisfies Array<Icon>)
 
-  const metaTitle: Metadata['title'] = appendTitleSuffix(incomingMetadata.title, titleSuffix)
+  const metaTitle: MetaConfig['title'] = appendTitleSuffix(incomingMetadata.title, titleSuffix)
 
   const titleStringForOg: string | undefined =
     typeof incomingMetadata.openGraph?.title === 'string'
@@ -90,7 +101,7 @@ export const formatNextMetadata = async (
 
   const ogTitle = [titleStringForOg, titleSuffix].filter(Boolean).join(' ')
 
-  const mergedOpenGraph: Metadata['openGraph'] = {
+  const mergedOpenGraph: MetaConfig['openGraph'] = {
     ...(defaultOpenGraph || {}),
     ...(defaultOGImageType === 'dynamic'
       ? {
@@ -119,7 +130,7 @@ export const formatNextMetadata = async (
             {
               alt: ogTitle,
               height: 480,
-              url: typeof staticOGImage === 'object' ? staticOGImage?.src : staticOGImage,
+              url: typeof ogImage === 'object' ? ogImage.src : ogImage,
               width: 640,
             },
           ],
