@@ -1,16 +1,17 @@
+import type { GenerateEditViewMetadata as UiGenerateEditViewMetadata } from '@payloadcms/ui/views/API/generateAPIViewMetadata'
 import type { Metadata } from 'next'
 import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
+import { generateAPIViewMetadata } from '@payloadcms/ui/views/API/generateAPIViewMetadata'
 import { getDocumentView } from '@payloadcms/ui/views/Document'
+import { generateEditViewMetadata } from '@payloadcms/ui/views/Document/generateEditViewMetadata'
+import { generateVersionViewMetadata } from '@payloadcms/ui/views/Version/generateVersionViewMetadata'
+import { generateVersionsViewMetadata } from '@payloadcms/ui/views/Versions/generateVersionsViewMetadata'
 
 import type { GenerateViewMetadata } from '../pages/Root.js'
 
-import { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
 import { adminViews } from '../adapters/views.js'
-import { generateAPIViewMetadata } from './generateAPIViewMetadata.js'
-import { generateEditViewMetadata } from './generateEditViewMetadata.js'
-import { generateVersionsViewMetadata } from './generateVersionsViewMetadata.js'
-import { generateVersionViewMetadata } from './generateVersionViewMetadata.js'
+import { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
 
 export type GenerateEditViewMetadata = (
   args: {
@@ -29,7 +30,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
 }) => {
   const { segments } = params
 
-  let fn: GenerateEditViewMetadata | null = null
+  let fn: null | UiGenerateEditViewMetadata = null
 
   const [segmentOne] = segments
   const isCollection = segmentOne === 'collections'
@@ -136,7 +137,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       globalConfig,
       i18n,
       isEditing,
-    })
+    }) as unknown as Promise<Metadata>
   } else {
     const { viewKey } = getDocumentView({
       collectionConfig,
@@ -166,7 +167,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
           i18n,
           isEditing,
           view: viewKey as keyof EditConfig,
-        })
+        }) as unknown as Promise<Metadata>
       }
     }
   }

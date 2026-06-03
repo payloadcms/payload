@@ -1,9 +1,5 @@
 import type { Metadata } from 'next'
-import type {
-  AdminViewAdapterEntry,
-  AdminViewServerProps,
-  GenerateMetadataDescriptor,
-} from 'payload'
+import type { AdminViewAdapterEntry, AdminViewServerProps } from 'payload'
 import type React from 'react'
 
 import { AccountView } from '@payloadcms/ui/views/Account'
@@ -27,99 +23,29 @@ import { generateUnauthorizedMetadata } from '@payloadcms/ui/views/Unauthorized/
 import { Verify as VerifyView } from '@payloadcms/ui/views/Verify'
 import { generateVerifyMetadata } from '@payloadcms/ui/views/Verify/metadata'
 
-import { formatNextMetadata } from '../utilities/meta.js'
-
 const LogoutInactivityView: React.FC<AdminViewServerProps> = (props) => (
   <LogoutView inactivity {...props} />
 )
 
-const formatAccountMetadata = async (
-  args: Parameters<GenerateMetadataDescriptor>[0],
-): Promise<Metadata> => formatNextMetadata(await generateAccountMetadata(args))
-
-const formatDashboardMetadata = async (
-  args: Parameters<GenerateMetadataDescriptor>[0],
-): Promise<Metadata> => formatNextMetadata(await generateDashboardMetadata(args))
-
-const formatCreateFirstUserMetadata = async (
-  args: Parameters<GenerateMetadataDescriptor>[0],
-): Promise<Metadata> => formatNextMetadata(await generateCreateFirstUserMetadata(args))
-
-const formatLoginMetadata = async (
-  args: Parameters<GenerateMetadataDescriptor>[0],
-): Promise<Metadata> => formatNextMetadata(await generateLoginMetadata(args))
-
-const formatForgotPasswordMetadata = async (
-  args: Parameters<GenerateMetadataDescriptor>[0],
-): Promise<Metadata> => formatNextMetadata(await generateForgotPasswordMetadata(args))
-
-const formatLogoutMetadata = async (
-  args: Parameters<GenerateMetadataDescriptor>[0],
-): Promise<Metadata> => formatNextMetadata(await generateLogoutMetadata(args))
-
-const formatResetPasswordMetadata = async (
-  args: Parameters<GenerateMetadataDescriptor>[0],
-): Promise<Metadata> => formatNextMetadata(await generateResetPasswordMetadata(args))
-
-const formatUnauthorizedMetadata = async (
-  args: Parameters<GenerateMetadataDescriptor>[0],
-): Promise<Metadata> => formatNextMetadata(await generateUnauthorizedMetadata(args))
-
-const formatNotFoundMetadata = async (
-  args: Parameters<GenerateMetadataDescriptor>[0],
-): Promise<Metadata> => formatNextMetadata(await generateNotFoundMetadata(args))
-
-const formatVerifyMetadata = async (
-  args: Parameters<GenerateMetadataDescriptor>[0],
-): Promise<Metadata> => formatNextMetadata(await generateVerifyMetadata(args))
-
-export const adminViews: Record<string, AdminViewAdapterEntry<AdminViewServerProps, Metadata>> = {
-  account: {
-    Component: AccountView,
-    generateMetadata: formatAccountMetadata,
-  },
+// MetaConfig uses DeepClone<Metadata> which strips method signatures, so a direct type assignment
+// is not possible — cast through unknown at the boundary.
+export const adminViews = {
+  account: { Component: AccountView, generateMetadata: generateAccountMetadata },
   createFirstUser: {
     Component: CreateFirstUserView,
-    generateMetadata: formatCreateFirstUserMetadata,
+    generateMetadata: generateCreateFirstUserMetadata,
   },
-  dashboard: {
-    Component: DashboardView,
-    generateMetadata: formatDashboardMetadata,
-  },
-  forgot: {
-    Component: ForgotPasswordView,
-    generateMetadata: formatForgotPasswordMetadata,
-  },
-  login: {
-    Component: LoginView,
-    generateMetadata: formatLoginMetadata,
-  },
-  logout: {
-    Component: LogoutView,
-    generateMetadata: formatLogoutMetadata,
-  },
-  logoutInactivity: {
-    Component: LogoutInactivityView,
-    generateMetadata: formatLogoutMetadata,
-  },
-  notFound: {
-    Component: NotFoundView,
-    generateMetadata: formatNotFoundMetadata,
-  },
-  reset: {
-    Component: ResetPasswordView,
-    generateMetadata: formatResetPasswordMetadata,
-  },
-  unauthorized: {
-    Component: UnauthorizedView,
-    generateMetadata: formatUnauthorizedMetadata,
-  },
+  dashboard: { Component: DashboardView, generateMetadata: generateDashboardMetadata },
+  forgot: { Component: ForgotPasswordView, generateMetadata: generateForgotPasswordMetadata },
+  login: { Component: LoginView, generateMetadata: generateLoginMetadata },
+  logout: { Component: LogoutView, generateMetadata: generateLogoutMetadata },
+  logoutInactivity: { Component: LogoutInactivityView, generateMetadata: generateLogoutMetadata },
+  notFound: { Component: NotFoundView, generateMetadata: generateNotFoundMetadata },
+  reset: { Component: ResetPasswordView, generateMetadata: generateResetPasswordMetadata },
+  unauthorized: { Component: UnauthorizedView, generateMetadata: generateUnauthorizedMetadata },
   unauthorizedWithGutter: {
     Component: UnauthorizedViewWithGutter,
-    generateMetadata: formatUnauthorizedMetadata,
+    generateMetadata: generateUnauthorizedMetadata,
   },
-  verify: {
-    Component: VerifyView,
-    generateMetadata: formatVerifyMetadata,
-  },
-}
+  verify: { Component: VerifyView, generateMetadata: generateVerifyMetadata },
+} as unknown as Record<string, AdminViewAdapterEntry<AdminViewServerProps, Metadata>>

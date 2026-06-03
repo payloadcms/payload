@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload'
 
+import { generateCollectionTrashMetadata } from '@payloadcms/ui/views/CollectionTrash/generateCollectionTrashMetadata'
+import { generateListViewMetadata } from '@payloadcms/ui/views/List/generateListViewMetadata'
+import { generateCustomViewMetadata } from '@payloadcms/ui/views/Root/generateCustomViewMetadata'
 import { getCustomViewByRoute } from '@payloadcms/ui/views/Root/getCustomViewByRoute'
 
-import { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
 import { adminViews } from '../adapters/views.js'
-import { generateCustomViewMetadata } from './generateCustomViewMetadata.js'
-import { generateCollectionTrashMetadata } from './generateCollectionTrashMetadata.js'
+import { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
 import { generateDocumentViewMetadata } from './generateDocumentViewMetadata.js'
-import { generateListViewMetadata } from './generateListViewMetadata.js'
 
 const oneSegmentMeta = {
   'create-first-user': adminViews.createFirstUser.generateMetadata,
@@ -48,7 +48,10 @@ export const generatePageMetadata = async ({
     config,
   })
 
-  let meta: Metadata
+  // MetaConfig (returned by ui generators) uses DeepClone<Metadata> which is structurally
+  // incompatible at the type level — cast through unknown at the final return.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let meta: any
 
   // TODO: handle custom routes
 
@@ -158,5 +161,5 @@ export const generatePageMetadata = async ({
     }
   }
 
-  return meta
+  return meta as Metadata
 }
