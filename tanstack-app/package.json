@@ -17,6 +17,7 @@
     "@payloadcms/plugin-ecommerce": "workspace:*",
     "@payloadcms/plugin-form-builder": "workspace:*",
     "@payloadcms/plugin-import-export": "workspace:*",
+    "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/plugin-search": "workspace:*",
     "@payloadcms/plugin-sentry": "workspace:*",

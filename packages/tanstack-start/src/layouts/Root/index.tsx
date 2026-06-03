@@ -33,15 +33,9 @@ export type RootLayoutProps = {
   readonly children: React.ReactNode
   readonly data: RootLayoutData
   readonly serverFunction: ServerFunctionClient
-  readonly switchLanguageServerAction: (lang: string) => Promise<void>
 }
 
-export function RootLayout({
-  children,
-  data,
-  serverFunction,
-  switchLanguageServerAction,
-}: RootLayoutProps) {
+export function RootLayout({ children, data, serverFunction }: RootLayoutProps) {
   const dir = (rtlLanguages as unknown as string[]).includes(data.languageCode) ? 'RTL' : 'LTR'
 
   return (
@@ -62,7 +56,6 @@ export function RootLayout({
           permissions={(data.user ? data.permissions : null) as unknown as SanitizedPermissions}
           RouterAdapter={TanStackRouterAdapter}
           serverFunction={serverFunction}
-          switchLanguageServerAction={switchLanguageServerAction}
           theme={data.theme}
           translations={data.translations}
           user={data.user}
