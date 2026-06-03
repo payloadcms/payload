@@ -4,6 +4,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
+import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
 import '../../elements/Card/index.css'
 import './index.css'
 import { getPreferences } from '../../utilities/upsertPreferences.js'
@@ -37,7 +38,7 @@ export async function RecentlyViewedWidget({
   const title = i18n.t('dashboard:widgetRecentlyViewedTitle')
 
   const enrichedItems = user ? await getEnrichedItems({ req, widgetData }) : []
-  const dateTimeFormat = getDateTimeFormat(i18n.language)
+  const relativeTimeFormat = getRelativeTimeFormat(i18n.language)
 
   return (
     <div className="card recently-viewed-widget">
@@ -63,7 +64,7 @@ export async function RecentlyViewedWidget({
                 </span>
                 <span className="recently-viewed-widget__row-meta">
                   <time dateTime={item.viewedAt}>
-                    {formatDateTime({ dateTimeFormat, value: item.viewedAt })}
+                    {formatRelativeDate({ relativeTimeFormat, value: item.viewedAt })}
                   </time>
                 </span>
               </a>
@@ -188,36 +189,4 @@ function getValueByPath({ object, path }: { object: Record<string, unknown>; pat
 
     return (value as Record<string, unknown>)[segment]
   }, object)
-}
-
-function getDateTimeFormat(language: string) {
-  const options: Intl.DateTimeFormatOptions = {
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  }
-
-  try {
-    return new Intl.DateTimeFormat(language, options)
-  } catch {
-    return new Intl.DateTimeFormat('en', options)
-  }
-}
-
-function formatDateTime({
-  dateTimeFormat,
-  value,
-}: {
-  dateTimeFormat: Intl.DateTimeFormat
-  value: string
-}) {
-  const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) {
-    return value
-  }
-
-  return dateTimeFormat.format(date)
 }

@@ -7,6 +7,7 @@ import React from 'react'
 
 import type { CollectionFieldPaths } from './getCollectionFieldPaths.js'
 
+import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
 import '../../elements/Card/index.css'
 import './index.css'
 import { getCollectionFieldPaths } from './getCollectionFieldPaths.js'
@@ -407,50 +408,6 @@ function getValueByPath({ object, path }: { object: Record<string, unknown>; pat
 
     return (value as Record<string, unknown>)[segment]
   }, object)
-}
-
-function getRelativeTimeFormat(language: string) {
-  try {
-    return new Intl.RelativeTimeFormat(language, { numeric: 'auto', style: 'narrow' })
-  } catch {
-    return new Intl.RelativeTimeFormat('en', { numeric: 'auto', style: 'narrow' })
-  }
-}
-
-const relativeTimeDivisions: { amount: number; unit: Intl.RelativeTimeFormatUnit }[] = [
-  { amount: 60, unit: 'seconds' },
-  { amount: 60, unit: 'minutes' },
-  { amount: 24, unit: 'hours' },
-  { amount: 7, unit: 'days' },
-  { amount: 4.34524, unit: 'weeks' },
-  { amount: 12, unit: 'months' },
-  { amount: Number.POSITIVE_INFINITY, unit: 'years' },
-]
-
-function formatRelativeDate({
-  relativeTimeFormat,
-  value,
-}: {
-  relativeTimeFormat: Intl.RelativeTimeFormat
-  value: string
-}) {
-  const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) {
-    return value
-  }
-
-  let duration = (date.getTime() - Date.now()) / 1000
-
-  for (const division of relativeTimeDivisions) {
-    if (Math.abs(duration) < division.amount) {
-      return relativeTimeFormat.format(Math.round(duration), division.unit)
-    }
-
-    duration /= division.amount
-  }
-
-  return relativeTimeFormat.format(Math.round(duration), 'years')
 }
 
 function isDateString(value: string) {
