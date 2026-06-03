@@ -85,9 +85,13 @@ export const tableCellNodeJSONSchema: JSONSchemaFn = ({
     nodeType: 'tablecell',
     properties: {
       backgroundColor: { oneOf: [{ type: 'string' }, { type: 'null' }] },
-      colSpan: { type: 'integer' },
-      headerState: { type: 'integer' },
-      rowSpan: { type: 'integer' },
+      colSpan: { type: 'integer', description: 'How many columns this cell spans (default 1).' },
+      headerState: {
+        type: 'integer',
+        description:
+          'Header bitmask: 0 = normal cell, 1 = row header, 2 = column header, 3 = both.',
+      },
+      rowSpan: { type: 'integer', description: 'How many rows this cell spans (default 1).' },
       verticalAlign: { type: 'string' },
       width: { type: 'integer' },
     },

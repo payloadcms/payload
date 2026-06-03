@@ -3,6 +3,7 @@ import type { JSONSchema4 } from 'json-schema'
 /** `format` property shared by every element node (Lexical `ElementFormatType`). */
 export const formatSchema: JSONSchema4 = {
   type: 'string',
+  description: 'How this element is aligned. Empty string means no explicit alignment.',
   enum: ['left', 'start', 'center', 'right', 'end', 'justify', ''],
   tsType: 'LexicalElementFormat',
 }
@@ -11,6 +12,12 @@ export const formatSchema: JSONSchema4 = {
 export const directionSchema: JSONSchema4 = {
   oneOf: [{ type: 'string', enum: ['ltr', 'rtl'] }, { type: 'null' }],
   tsType: 'LexicalElementDirection',
+}
+
+/** `version` property shared by every Lexical node. */
+export const versionSchema: JSONSchema4 = {
+  type: 'integer',
+  description: "Lexical's internal serialization version for this node type.",
 }
 
 type ElementNodeSchemaOptions = {
@@ -41,7 +48,7 @@ export const elementNodeSchema = ({
     direction: directionSchema,
     format: formatSchema,
     indent: { type: 'integer' },
-    version: { type: 'integer' },
+    version: versionSchema,
     ...properties,
   },
   required: ['children', 'direction', 'format', 'indent', 'type', 'version', ...required],

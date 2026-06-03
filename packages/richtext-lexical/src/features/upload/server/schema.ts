@@ -12,7 +12,7 @@ import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
 import type { UploadFeatureProps } from './index.js'
 
-import { formatSchema } from '../../../types/jsonSchemaHelpers.js'
+import { formatSchema, versionSchema } from '../../../types/jsonSchemaHelpers.js'
 import { filterEnabledRelationshipCollections } from '../../relationship/shared/filterEnabledRelationshipCollections.js'
 
 export type UploadData<TFields extends JsonObject = JsonObject> = {
@@ -121,9 +121,11 @@ export const createUploadNodeJSONSchema =
           format: formatSchema,
           relationTo: { type: 'string', const: slug },
           value: {
+            description:
+              'The uploaded file by ID (string or number). Populated to the full upload document when read at depth > 0.',
             oneOf: [{ type: idType }, { $ref: `#/definitions/${slug}` }],
           },
-          version: { type: 'integer' },
+          version: versionSchema,
         },
         required: ['fields', 'format', 'id', 'relationTo', 'type', 'value', 'version'],
       }
@@ -137,7 +139,7 @@ export const createUploadNodeJSONSchema =
         additionalProperties: true,
         properties: {
           type: { type: 'string', const: 'upload' },
-          version: { type: 'integer' },
+          version: versionSchema,
         },
         required: ['type', 'version'],
       }

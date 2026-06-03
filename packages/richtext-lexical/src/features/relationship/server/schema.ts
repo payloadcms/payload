@@ -5,7 +5,7 @@ import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
 import type { RelationshipFeatureProps } from './index.js'
 
-import { formatSchema } from '../../../types/jsonSchemaHelpers.js'
+import { formatSchema, versionSchema } from '../../../types/jsonSchemaHelpers.js'
 import { filterEnabledRelationshipCollections } from '../shared/filterEnabledRelationshipCollections.js'
 
 export type RelationshipData = {
@@ -70,9 +70,11 @@ export const createRelationshipNodeJSONSchema =
           format: formatSchema,
           relationTo: { type: 'string', const: slug },
           value: {
+            description:
+              'The related document by ID (string or number). Populated to the full document when read at depth > 0.',
             oneOf: [{ type: idType }, { $ref: `#/definitions/${slug}` }],
           },
-          version: { type: 'integer' },
+          version: versionSchema,
         },
         required: ['format', 'relationTo', 'type', 'value', 'version'],
       }
@@ -85,7 +87,7 @@ export const createRelationshipNodeJSONSchema =
         additionalProperties: true,
         properties: {
           type: { type: 'string', const: 'relationship' },
-          version: { type: 'integer' },
+          version: versionSchema,
         },
         required: ['type', 'version'],
       }

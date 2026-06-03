@@ -47,7 +47,7 @@ import type {
   SerializedListItemNode as GenLI,
   SerializedLinkNode as GenLink,
   SerializedListNode as GenList,
-  LexicalNodes_99AE542E as GenNodeUnion,
+  LexicalNodes_F6A92CF8 as GenNodeUnion,
   SerializedParagraphNode as GenParagraph,
   SerializedQuoteNode as GenQuote,
   SerializedTabNode as GenTab,

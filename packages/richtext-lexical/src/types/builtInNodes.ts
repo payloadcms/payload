@@ -4,6 +4,8 @@ import { withNullableJSONSchemaType } from 'payload'
 
 import type { JSONSchemaFn } from '../features/typesServer.js'
 
+import { versionSchema } from './jsonSchemaHelpers.js'
+
 /**
  * Cross-cutting Lexical types shared by every element node. Inlined into
  * `payload-types.ts`. Must stay byte-for-byte in sync with the runtime twins
@@ -75,6 +77,13 @@ const textModeSchema: JSONSchema4 = {
   tsType: 'LexicalTextMode',
 }
 
+/** Text-node `format` bitmask (Lexical text-format flags). */
+const textFormatSchema: JSONSchema4 = {
+  type: 'integer',
+  description:
+    'Active text formats as a bitmask, OR-ed together (0 = none): bold=1, italic=2, strikethrough=4, underline=8, code=16, subscript=32, superscript=64, highlight=128, lowercase=256, uppercase=512. e.g. bold + italic = 3.',
+}
+
 export const textNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions }) => {
   typeStringDefinitions.add(LEXICAL_TEXT_MODE_TS)
   typeStringDefinitions.add(SERIALIZED_TEXT_NODE_TS)
@@ -84,11 +93,11 @@ export const textNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions }) => {
     properties: {
       type: { type: 'string', const: 'text' },
       detail: { type: 'integer' },
-      format: { type: 'integer' },
+      format: textFormatSchema,
       mode: textModeSchema,
       style: { type: 'string' },
       text: { type: 'string' },
-      version: { type: 'integer' },
+      version: versionSchema,
     },
     required: ['detail', 'format', 'mode', 'style', 'text', 'type', 'version'],
     tsType: 'SerializedTextNode',
@@ -104,11 +113,11 @@ export const tabNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions }) => {
     properties: {
       type: { type: 'string', const: 'tab' },
       detail: { type: 'integer' },
-      format: { type: 'integer' },
+      format: textFormatSchema,
       mode: textModeSchema,
       style: { type: 'string' },
       text: { type: 'string' },
-      version: { type: 'integer' },
+      version: versionSchema,
     },
     required: ['detail', 'format', 'mode', 'style', 'text', 'type', 'version'],
     tsType: 'SerializedTabNode',
@@ -122,7 +131,7 @@ export const lineBreakNodeJSONSchema: JSONSchemaFn = ({ typeStringDefinitions })
     additionalProperties: false,
     properties: {
       type: { type: 'string', const: 'linebreak' },
-      version: { type: 'integer' },
+      version: versionSchema,
     },
     required: ['type', 'version'],
     tsType: 'SerializedLineBreakNode',
