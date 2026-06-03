@@ -5,6 +5,7 @@
     position: relative;
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--spacer-2-5);
   }
@@ -19,7 +20,7 @@
   }
 
   .doc-header__after-header {
-    padding-top: var(--spacer-3);
+    width: 100%;
   }
 
   @media (max-width: 768px) {
@@ -31,10 +32,6 @@
 
     .doc-header__title {
       width: 100%;
-    }
-
-    .doc-header__after-header {
-      padding-top: var(--spacer-1);
     }
   }
 }
