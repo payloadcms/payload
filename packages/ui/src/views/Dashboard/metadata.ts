@@ -1,11 +1,8 @@
-import type { GenerateMetadataDescriptor } from 'payload'
+import type { GenerateViewMetadata } from 'payload'
 
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
-export const generateDashboardMetadata: GenerateMetadataDescriptor = async ({
-  config,
-  i18n: { t },
-}) =>
+export const generateDashboardMetadata: GenerateViewMetadata = async ({ config, i18n: { t } }) =>
   formatMetadata({
     openGraph: {
       title: t('general:dashboard'),

@@ -1,11 +1,8 @@
-import type { GenerateMetadataDescriptor } from 'payload'
+import type { GenerateViewMetadata } from 'payload'
 
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
-export const generateUnauthorizedMetadata: GenerateMetadataDescriptor = async ({
-  config,
-  i18n: { t },
-}) =>
+export const generateUnauthorizedMetadata: GenerateViewMetadata = async ({ config, i18n: { t } }) =>
   formatMetadata({
     description: t('error:unauthorized'),
     keywords: t('error:unauthorized'),

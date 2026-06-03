@@ -1,8 +1,8 @@
-import type { GenerateMetadataDescriptor } from 'payload'
+import type { GenerateViewMetadata } from 'payload'
 
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
-export const generateResetPasswordMetadata: GenerateMetadataDescriptor = async ({
+export const generateResetPasswordMetadata: GenerateViewMetadata = async ({
   config,
   i18n: { t },
 }) =>

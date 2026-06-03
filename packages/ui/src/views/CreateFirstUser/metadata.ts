@@ -1,8 +1,8 @@
-import type { GenerateMetadataDescriptor } from 'payload'
+import type { GenerateViewMetadata } from 'payload'
 
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
-export const generateCreateFirstUserMetadata: GenerateMetadataDescriptor = async ({
+export const generateCreateFirstUserMetadata: GenerateViewMetadata = async ({
   config,
   i18n: { t },
 }) =>

@@ -1,8 +1,8 @@
-import type { GenerateMetadataDescriptor } from 'payload'
+import type { GenerateViewMetadata } from 'payload'
 
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
-export const generateVerifyMetadata: GenerateMetadataDescriptor = async ({ config, i18n: { t } }) =>
+export const generateVerifyMetadata: GenerateViewMetadata = async ({ config, i18n: { t } }) =>
   formatMetadata({
     description: t('authentication:verifyUser'),
     keywords: t('authentication:verify'),

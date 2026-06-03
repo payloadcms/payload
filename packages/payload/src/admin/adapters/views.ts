@@ -7,7 +7,7 @@ import type { MetaConfig, SanitizedConfig } from '../../config/types.js'
  * Signature for ui-side view metadata generators. Returns a framework-agnostic
  * `MetaConfig` that adapter-side code formats into framework metadata.
  */
-export type GenerateMetadataDescriptor = (args: {
+export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
   i18n: I18nClient
   isEditing?: boolean
@@ -21,7 +21,7 @@ export type GenerateMetadataDescriptor = (args: {
  */
 export type AdminView<TComponentProps = any, TMetadata = unknown> = {
   Component: React.ComponentType<TComponentProps>
-  generateMetadata: (args: Parameters<GenerateMetadataDescriptor>[0]) => Promise<TMetadata>
+  generateMetadata: (args: Parameters<GenerateViewMetadata>[0]) => Promise<TMetadata>
 }
 
 /**
