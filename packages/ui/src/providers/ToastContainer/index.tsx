@@ -4,7 +4,6 @@ import type { ClientConfig } from 'payload'
 import React from 'react'
 import { Toaster } from 'sonner'
 
-import { ErrorIcon } from '../../icons/Error/index.js'
 import { InfoIcon } from '../../icons/Info/index.js'
 import { SuccessIcon } from '../../icons/Success/index.js'
 import { WarningIcon } from '../../icons/Warning/index.js'
@@ -24,7 +23,7 @@ export const ToastContainer: React.FC<{
       expand={expand ?? false}
       gap={8}
       icons={{
-        error: <ErrorIcon />,
+        error: <WarningIcon />,
         info: <InfoIcon />,
         success: <SuccessIcon />,
         warning: <WarningIcon />,

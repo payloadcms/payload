@@ -69,6 +69,16 @@
       &.toast-error {
         color: var(--color-text-ondanger);
         background: var(--color-bg-danger);
+
+        .icon--warning {
+          .icon__circle {
+            fill: var(--color-text-ondanger);
+          }
+
+          .icon__symbol {
+            stroke: var(--color-bg-danger);
+          }
+        }
       }
     }
   }
