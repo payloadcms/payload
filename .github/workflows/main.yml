@@ -37,6 +37,8 @@ jobs:
           filters: |
             needs_build:
               - '.github/workflows/main.yml'
+              - '.github/actions/start-services/**'
+              - '.github/actions/setup/**'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
