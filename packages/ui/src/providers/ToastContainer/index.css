@@ -10,7 +10,8 @@
       color: var(--color-text-oninverse);
       font-family: var(--text-body-medium-strong-font-family);
       font-size: var(--text-body-medium-strong-font-size);
-      font-weight: var(--font-weight-strong);
+      font-weight: var(--text-body-medium-strong-font-weight);
+      letter-spacing: var(--text-body-medium-strong-letter-spacing);
       line-height: var(--text-body-medium-strong-line-height);
     }
 
@@ -69,17 +70,23 @@
       &.toast-error {
         color: var(--color-text-ondanger);
         background: var(--color-bg-danger);
-
         .icon--warning {
-          .icon__circle {
-            fill: var(--color-text-ondanger);
-          }
+          color: var(--color-text-oninverse);
+        }
+      }
 
-          .icon__symbol {
-            stroke: var(--color-bg-danger);
-          }
+      &.toast-warning {
+        .icon--warning {
+          color: var(--color-text-oninverse);
         }
       }
     }
   }
+}
+
+/* Sonner injects [data-title] styles outside any @layer, which beats layered rules regardless of
+   specificity. This unlayered block wins over Sonner's :where() (0,0,0) via class specificity. */
+.payload-toast-container .toast-title {
+  font-weight: var(--text-body-medium-strong-font-weight);
+  line-height: var(--text-body-medium-strong-line-height);
 }
