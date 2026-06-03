@@ -251,13 +251,17 @@ type RichTextAdapterBase<
    * payload-types.ts)
    */
   jsonSchema?: (
-    args: Pick<
-      FieldsToJSONSchemaArgs,
-      'collectionIDFieldTypes' | 'config' | 'i18n' | 'interfaceNameDefinitions' | 'typeStringDefinitions'
-    > & {
+    args: {
       field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
       isRequired: boolean
-    },
+    } & Pick<
+      FieldsToJSONSchemaArgs,
+      | 'collectionIDFieldTypes'
+      | 'config'
+      | 'i18n'
+      | 'interfaceNameDefinitions'
+      | 'typeStringDefinitions'
+    >,
   ) => JSONSchema4
   /**
    * Provide validation function for the richText field. This function is run the same way
