@@ -6,11 +6,11 @@ import React from 'react'
 import {
   ListQueryProvider,
   SetDocumentStepNav,
+  VersionDrawerCreatedAtCell,
   VersionsViewClient,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { buildVersionColumns } from './buildColumns.js'
-import { VersionDrawerCreatedAtCell } from './cells/VersionDrawerCreatedAtCell/index.js'
 import { fetchLatestVersion, fetchVersions } from './fetchVersions.js'
 import './index.css'
 

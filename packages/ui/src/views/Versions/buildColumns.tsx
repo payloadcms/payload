@@ -10,10 +10,16 @@ import type {
 import { hasDraftsEnabled } from 'payload/shared'
 import React from 'react'
 
-import { SortColumn } from '../../elements/SortColumn/index.js'
-import { AutosaveCell } from './cells/AutosaveCell/index.js'
-import { CreatedAtCell, type CreatedAtCellProps } from './cells/CreatedAt/index.js'
-import { IDCell } from './cells/ID/index.js'
+import type { CreatedAtCellProps } from './cells/CreatedAt/index.js'
+
+/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
+import {
+  VersionsAutosaveCell as AutosaveCell,
+  VersionsCreatedAtCell as CreatedAtCell,
+  VersionsIDCell as IDCell,
+  SortColumn,
+} from '../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
 
 export const buildVersionColumns = ({
   collectionConfig,
