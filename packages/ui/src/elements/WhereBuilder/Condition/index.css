@@ -68,13 +68,6 @@
     gap: var(--spacer-2);
   }
 
-  /* Per the design: white background with a visible border for the condition inputs. */
-  .condition .rs__control,
-  .condition .form-input {
-    background: var(--color-bg);
-    border-color: var(--color-border);
-  }
-
   @media (max-width: 1024px) {
     .condition__wrap {
       align-items: initial;
