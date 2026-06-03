@@ -102,4 +102,7 @@ runs:
       shell: bash
       run: |
         supabase init
-        supabase start
+        # Tests connect directly to Postgres on 54322 (see test/dbAdapters.ts), so exclude every
+        # other service. This kills the flaky edge-runtime container whose Deno-dependency boot
+        # fails health checks with a 502 on CI, and slashes startup time/RAM.
+        supabase start -x edge-runtime,studio,postgres-meta,logflare,vector,imgproxy,storage-api,gotrue,realtime,postgrest,kong,mailpit,supavisor
