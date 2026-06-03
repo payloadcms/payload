@@ -48,7 +48,29 @@ export type AdminViewAdapterEntry<TComponentProps = any, TMetadata = unknown> = 
 }
 
 /**
- * Keyed map of `AdminViewAdapterEntry` — one entry per admin view (logout,
- * dashboard, account, etc.). Framework adapters export an instance of this.
+ * The canonical set of admin view keys that every framework adapter must implement.
+ * Adding a new admin view requires adding its key here so all adapters stay in sync.
  */
-export type AdminViewAdapterMap = Record<string, AdminViewAdapterEntry>
+export type AdminViewKey =
+  | 'account'
+  | 'createFirstUser'
+  | 'dashboard'
+  | 'forgot'
+  | 'login'
+  | 'logout'
+  | 'logoutInactivity'
+  | 'notFound'
+  | 'reset'
+  | 'unauthorized'
+  | 'unauthorizedWithGutter'
+  | 'verify'
+
+/**
+ * Keyed map of `AdminViewAdapterEntry` — exactly one entry per `AdminViewKey`.
+ * Framework adapters export an instance of this; missing or misspelled keys are
+ * a type error.
+ */
+export type AdminViewAdapterMap<TComponentProps = any, TMetadata = unknown> = Record<
+  AdminViewKey,
+  AdminViewAdapterEntry<TComponentProps, TMetadata>
+>
