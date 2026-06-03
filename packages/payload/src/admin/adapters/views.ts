@@ -38,11 +38,11 @@ export type GenerateMetadataDescriptor = (args: {
 }) => Promise<MetadataDescriptor>
 
 /**
- * One entry in a framework's `ViewsAdapter`. Pairs a React component with
+ * One entry in a framework's `ViewAdapter`. Pairs a React component with
  * a metadata generator. `TComponentProps` and `TMetadata` are framework-specific
  * (Next narrows `TMetadata` to `next`'s `Metadata` type).
  */
-export type ViewAdapter<TComponentProps = any, TMetadata = unknown> = {
+export type View<TComponentProps = any, TMetadata = unknown> = {
   Component: React.ComponentType<TComponentProps>
   generateMetadata: (args: Parameters<GenerateMetadataDescriptor>[0]) => Promise<TMetadata>
 }
@@ -66,11 +66,11 @@ export type ViewKey =
   | 'verify'
 
 /**
- * Keyed map of `ViewAdapter` — exactly one entry per `ViewKey`.
+ * Keyed map of `View` — exactly one entry per `ViewKey`.
  * Framework adapters export an instance of this; missing or misspelled keys are
  * a type error.
  */
-export type ViewsAdapter<TComponentProps = any, TMetadata = unknown> = Record<
+export type ViewAdapter<TComponentProps = any, TMetadata = unknown> = Record<
   ViewKey,
-  ViewAdapter<TComponentProps, TMetadata>
+  View<TComponentProps, TMetadata>
 >
