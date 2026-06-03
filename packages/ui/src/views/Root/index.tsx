@@ -1,7 +1,7 @@
 'use server'
 
 import type {
-  AdminViewAdapterMap,
+  AdminViewsAdapter,
   AdminViewClientProps,
   AdminViewServerPropsOnly,
   CollectionPreferences,
@@ -39,7 +39,7 @@ type InitReqFn = (args: {
 }) => Promise<InitReqResult>
 
 export type RenderRootArgs = {
-  adminViews: AdminViewAdapterMap
+  adminViews: AdminViewsAdapter
   config: Promise<SanitizedConfig>
   importMap: ImportMap
   initReq: InitReqFn

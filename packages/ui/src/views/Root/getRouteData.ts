@@ -1,5 +1,5 @@
 import type {
-  AdminViewAdapterMap,
+  AdminViewsAdapter,
   AdminViewServerProps,
   CollectionPreferences,
   CustomComponent,
@@ -66,7 +66,7 @@ export type GetRouteDataResult = {
 
 export type GetRouteDataArgs = {
   adminRoute: string
-  adminViews: AdminViewAdapterMap
+  adminViews: AdminViewsAdapter
   collectionConfig?: SanitizedCollectionConfig
   /**
    * User preferences for a collection.
