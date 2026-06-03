@@ -232,7 +232,7 @@
     "swc-plugin-transform-remove-imports": "8.3.0",
     "tempy": "1.0.1",
     "tstyche": "7.2.1",
-    "tsx": "4.21.0",
+    "tsx": "4.22.4",
     "turbo": "^2.5.4",
     "typescript": "6.0.3",
     "vitest": "4.1.6",

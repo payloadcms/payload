@@ -45,7 +45,7 @@ To add a transform:
 
 1. Create `src/transforms/<name>/` with `index.ts` exporting a `Transform`.
 2. Add fixtures as `<case>.input.ts` and `<case>.output.ts` siblings of `index.ts`.
-3. Add `index.test.ts` verifying both the fixture pair and idempotency (running the transform on the output produces the output unchanged).
+3. Add `index.spec.ts` verifying both the fixture pair and idempotency (running the transform on the output produces the output unchanged).
 4. Register in `src/registry.ts`.
 5. Update the transform list in this README.
 
