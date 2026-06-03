@@ -63,10 +63,6 @@ import type {
   User,
 } from './payload-types.js'
 
-const asType = <T>() => {
-  return '' as T
-}
-
 describe('Types testing', () => {
   test('payload.find', () => {
     expect(payload.find({ collection: 'users' })).type.toBe<Promise<PaginatedDocs<User>>>()
@@ -162,11 +158,11 @@ describe('Types testing', () => {
 
   describe('joins', () => {
     test('join query for pages should have type never as pages does not define any joins', () => {
-      expect(asType<JoinQuery<'pages'>>()).type.toBe<never>()
+      expect<JoinQuery<'pages'>>().type.toBe<never>()
     })
 
     test('join query for pages-categories should be defined with the relatedPages key', () => {
-      expect(asType<JoinQuery<'pages-categories'>>()).type.toBeAssignableWith<{
+      expect<JoinQuery<'pages-categories'>>().type.toBeAssignableWith<{
         relatedPages?: {
           limit?: number
           sort?: string
@@ -189,8 +185,7 @@ describe('Types testing', () => {
 
     test('payload operations return users with collection property', async () => {
       const user = await payload.findByID({ id: 'id', collection: 'users' })
-      expect<typeof user>().type.toHaveProperty('collection')
-      expect<(typeof user)['collection']>().type.toBe<'users'>()
+      expect(user.collection).type.toBe<'users'>()
     })
 
     test('collection property is not required in update data for auth collections', () => {
@@ -208,11 +203,11 @@ describe('Types testing', () => {
     })
 
     test('has global generated options interface based on select field', () => {
-      expect(asType<Post['selectField']>()).type.toBe<MySelectOptions>()
+      expect<Post['selectField']>().type.toBe<MySelectOptions>()
     })
 
     test('has global generated options interface based on radio field', () => {
-      expect(asType<Post['radioField']>()).type.toBe<MyRadioOptions>()
+      expect<Post['radioField']>().type.toBe<MyRadioOptions>()
     })
 
     test('resolves external schema file references', () => {
@@ -479,8 +474,7 @@ describe('Types testing', () => {
 
       if (headingNode.type === 'heading') {
         // Children should accept all node types from the union
-        type ChildrenType = NonNullable<(typeof headingNode)['children']>[number]['type']
-        expect<ChildrenType>().type.toBe<_Hardcoded_DefaultNodeTypes>()
+        expect(headingNode.children[0]!.type).type.toBe<_Hardcoded_DefaultNodeTypes>()
       }
     })
 
@@ -767,21 +761,19 @@ describe('Types testing', () => {
       })
 
       test('buildEditorState return type includes correct node types in children', () => {
-        const _result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
-        type NodeType = (typeof _result)['root']['children'][number]['type']
-        expect<NodeType>().type.toBe<_Hardcoded_DefaultNodeTypes>()
+        const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
+        expect(result.root.children[0]!.type).type.toBe<_Hardcoded_DefaultNodeTypes>()
       })
 
       test('buildEditorState with explicit generic includes custom node types in children', () => {
-        const _result = buildEditorState<DefaultNodeTypes | SerializedBlockNode>({ text: 'hello' })
-        type NodeType = (typeof _result)['root']['children'][number]['type']
-        expect<NodeType>().type.toBe<'block' | _Hardcoded_DefaultNodeTypes>()
+        const result = buildEditorState<DefaultNodeTypes | SerializedBlockNode>({ text: 'hello' })
+        expect(result.root.children[0]!.type).type.toBe<'block' | _Hardcoded_DefaultNodeTypes>()
       })
 
       test('buildEditorState result can be assigned to Post richText field', () => {
-        const _result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
+        const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
         type GeneratedRichTextType = Post['richText']
-        expect<GeneratedRichTextType>().type.toBeAssignableWith<typeof _result>()
+        expect(result).type.toBeAssignableTo<GeneratedRichTextType>()
       })
 
       test('buildEditorState allows pushing typed nodes to children', () => {
@@ -881,7 +873,7 @@ describe('Types testing', () => {
       })
 
       test('buildEditorState returns DefaultTypedEditorState even with incomplete nodes (though nodes cause errors)', () => {
-        const _result = buildEditorState<DefaultNodeTypes>({
+        const result = buildEditorState<DefaultNodeTypes>({
           nodes: [
             {
               type: 'text',
@@ -890,8 +882,7 @@ describe('Types testing', () => {
             } as any, // Using 'as any' to bypass the error for testing purposes
           ],
         })
-        type ResultType = typeof _result
-        expect<ResultType>().type.toBe<DefaultTypedEditorState>()
+        expect(result).type.toBe<DefaultTypedEditorState>()
       })
 
       test('accepts complete heading node with DefaultNodeTypes', () => {
@@ -1099,6 +1090,7 @@ describe('Types testing', () => {
         | 'pages-categories'
         | 'payload-kv'
         | 'payload-locked-documents'
+        | 'payload-mcp-api-keys'
         | 'payload-migrations'
         | 'payload-preferences'
         | 'posts'
@@ -1116,6 +1108,7 @@ describe('Types testing', () => {
         | 'pages-categories'
         | 'payload-kv'
         | 'payload-locked-documents'
+        | 'payload-mcp-api-keys'
         | 'payload-migrations'
         | 'payload-preferences'
         | 'posts'
