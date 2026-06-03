@@ -502,17 +502,17 @@ Inserted at position 5 (between `defaultIDType` and `collectionIDFieldTypes`). T
   )
 ```
 
-### Lexical: `modifyOutputSchema` is gone
+### Lexical: `modifyJSONSchema` is gone
 
-`generatedTypes.modifyOutputSchema` on lexical features (and `modifyOutputSchemas`) is removed. Features now contribute per-node JSON Schemas via `createNode({ jsonSchema, node })` instead of mutating a whole-field schema after the fact. The editor composes per-node schemas into the field's union automatically.
+`generatedTypes.modifyJSONSchema` on lexical features (and the sanitized `modifyJSONSchemas` array) is removed. Features now contribute per-node JSON Schemas via `createNode({ jsonSchema, node })` instead of mutating a whole-field schema after the fact. The editor composes per-node schemas into the field's union automatically.
 
-If you wrote a custom feature that overrode `modifyOutputSchema`, move per-node generation into `createNode({ jsonSchema: ... })`:
+If you wrote a custom feature that overrode `modifyJSONSchema`, move per-node generation into `createNode({ jsonSchema: ... })`:
 
 ```diff
   export const MyFeature = createServerFeature({
     feature: () => ({
 -     generatedTypes: {
--       modifyOutputSchema: ({ currentSchema, interfaceNameDefinitions }) => {
+-       modifyJSONSchema: ({ currentSchema, interfaceNameDefinitions }) => {
 -         // ... mutate currentSchema or interfaceNameDefinitions ...
 -         return currentSchema
 -       },
@@ -565,6 +565,27 @@ When two **different** blocks resolve to the same auto-derived name (same slug, 
 Block nodes come through as `SerializedBlockNode<TFields>` / `SerializedInlineBlockNode<TFields>` referencing the per-block interface (see the `block.interfaceName` change above). The auto-added `id` is now required (`id: string`), since a stored lexical block always has one.
 
 Code that imported field types from `payload-types.ts` and cast through `unknown` may now type-check tighter and surface real bugs.
+
+The hand-written `TypedEditorState` / `DefaultTypedEditorState` helpers (used to type rich text in converters, custom renderers, and so on) got stricter to match. `TypedEditorState` dropped the `{ [k: string]: unknown }` at the editor-state root, and a node's `children` are now the real node union at any depth — they used to fall back to the loose `SerializedLexicalNode`. Runtime data is unchanged, but narrow by `node.type` where you read nested nodes loosely.
+
+Element nodes are now generic over their `children`, and you pass the node union into them yourself (previously `TypedEditorState` did this for you via an internal `RecursiveNodes` helper):
+
+```diff
+  import type {
+    SerializedParagraphNode,
+    SerializedTextNode,
+    TypedEditorState,
+  } from '@payloadcms/richtext-lexical'
+
+- type MyNodes = SerializedParagraphNode | SerializedTextNode
++ type MyNodes = SerializedParagraphNode<MyNodes> | SerializedTextNode
+
+  function renderRichText(state: TypedEditorState<MyNodes>) {
+    // ...
+  }
+```
+
+`SerializedTextNode` is a leaf, so it stays bare. For the built-in nodes plus a few of your own, `DefaultNodeTypesOf` threads the union for you (`type MyNodes = DefaultNodeTypesOf<MyNodes> | SerializedBlockNode<MyBlockData>`), and `DefaultTypedEditorState` with only built-in nodes needs no change.
 
 ### Jobs: `jobs.depth` and `jobs.runHooks` have been removed ([#16414](https://github.com/payloadcms/payload/pull/16414))
 
