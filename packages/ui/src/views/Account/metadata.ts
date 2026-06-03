@@ -2,10 +2,10 @@ import type { GenerateMetadataDescriptor } from 'payload'
 
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
-export const generateAccountMetadata = ({
+export const generateAccountMetadata: GenerateMetadataDescriptor = async ({
   config,
   i18n: { t },
-}: Parameters<GenerateMetadataDescriptor>[0]) =>
+}) =>
   formatMetadata({
     description: t('authentication:accountOfCurrentUser'),
     keywords: t('authentication:account'),

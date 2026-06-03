@@ -1,16 +1,14 @@
-import type { I18nClient } from '@payloadcms/translations'
-import type { MetaConfig, SanitizedCollectionConfig, SanitizedConfig } from 'payload'
+import type { GenerateMetadataDescriptor, MetaConfig, SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
 import { formatMetadata } from '../../utilities/formatMetadata.js'
 
-export const generateListViewMetadata = async (args: {
-  collectionConfig: SanitizedCollectionConfig
-  config: SanitizedConfig
-  i18n: I18nClient
-  params?: { [key: string]: string | string[] }
-}): Promise<MetaConfig> => {
+export const generateListViewMetadata = async (
+  args: {
+    collectionConfig: SanitizedCollectionConfig
+  } & Parameters<GenerateMetadataDescriptor>[0],
+): Promise<MetaConfig> => {
   const { collectionConfig, config, i18n } = args
 
   let title: string = ''
