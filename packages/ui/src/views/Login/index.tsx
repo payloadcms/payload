@@ -5,7 +5,8 @@ import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { LoginForm } from './LoginForm/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { LoginForm } from '../../exports/client/index.js'
 import './index.css'
 
 export const loginBaseClass = 'login'

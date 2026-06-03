@@ -15,11 +15,14 @@ import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/sh
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
-import { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
-import { EditDepthProvider } from '../../providers/EditDepth/index.js'
-import { LivePreviewProvider } from '../../providers/LivePreview/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import {
+  DocumentInfoProvider,
+  EditDepthProvider,
+  HydrateAuthProvider,
+  LivePreviewProvider,
+} from '../../exports/client/index.js'
 import { buildFormState } from '../../utilities/buildFormState.js'
 import { getDocPreferences } from '../../utilities/getDocPreferences.js'
 import { getDocumentData } from '../../utilities/getDocumentData.js'

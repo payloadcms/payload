@@ -2,12 +2,15 @@ import { type DocumentViewServerProps, type PaginatedDocs, type Where } from 'pa
 import { formatAdminURL, hasDraftsEnabled, isNumber } from 'payload/shared'
 import React from 'react'
 
-import { ListQueryProvider } from '../../providers/ListQuery/index.js'
-import { SetDocumentStepNav } from '../Edit/SetDocumentStepNav/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import {
+  ListQueryProvider,
+  SetDocumentStepNav,
+  VersionsViewClient,
+} from '../../exports/client/index.js'
 import { buildVersionColumns } from './buildColumns.js'
 import { VersionDrawerCreatedAtCell } from './cells/VersionDrawerCreatedAtCell/index.js'
 import { fetchLatestVersion, fetchVersions } from './fetchVersions.js'
-import { VersionsViewClient } from './index.client.js'
 import './index.css'
 
 const baseClass = 'versions'
@@ -149,7 +152,8 @@ export async function VersionsView(props: DocumentViewServerProps) {
   })
 
   const resolvedCreatedAtCellOverride =
-    CreatedAtCellOverride ?? (useVersionDrawerCreatedAtCell ? VersionDrawerCreatedAtCell : undefined)
+    CreatedAtCellOverride ??
+    (useVersionDrawerCreatedAtCell ? VersionDrawerCreatedAtCell : undefined)
 
   const columns = buildVersionColumns({
     collectionConfig,

@@ -4,18 +4,21 @@ import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
-import { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
-import { EditDepthProvider } from '../../providers/EditDepth/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import {
+  AccountClient,
+  DefaultEditView,
+  DocumentInfoProvider,
+  EditDepthProvider,
+  HydrateAuthProvider,
+} from '../../exports/client/index.js'
 import { buildFormState } from '../../utilities/buildFormState.js'
 import { getDocPreferences } from '../../utilities/getDocPreferences.js'
 import { getDocumentData } from '../../utilities/getDocumentData.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
 import { getIsLocked } from '../../utilities/getIsLocked.js'
 import { getVersions } from '../../utilities/getVersions.js'
-import { DefaultEditView } from '../Edit/index.js'
-import { AccountClient } from './index.client.js'
 import { Settings } from './Settings/index.js'
 
 export async function AccountView({ initPageResult, params, searchParams }: AdminViewServerProps) {

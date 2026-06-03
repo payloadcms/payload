@@ -11,7 +11,8 @@ import type React from 'react'
 
 import type { ViewToRender } from './index.js'
 
-import { DefaultEditView } from '../../views/Edit/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { DefaultEditView } from '../../exports/client/index.js'
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'

@@ -15,10 +15,10 @@ import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getClientSchemaMap } from '../../utilities/getClientSchemaMap.js'
 import { getSchemaMap } from '../../utilities/getSchemaMap.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { DefaultVersionView, VersionPillLabel } from '../../exports/client/index.js'
 import { fetchLatestVersion, fetchVersion, fetchVersions } from '../Versions/fetchVersions.js'
 import { getVersionLabel } from '../Versions/VersionPillLabel/getVersionLabel.js'
-import { VersionPillLabel } from '../Versions/VersionPillLabel/VersionPillLabel.js'
-import { DefaultVersionView } from './Default/index.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'
 
 export async function VersionView(props: DocumentViewServerProps) {

@@ -25,19 +25,22 @@ import {
 } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import { HydrateHierarchyProvider } from '../../elements/Hierarchy/HydrateProvider/index.js'
-import { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { ListQueryProvider } from '../../providers/ListQuery/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import {
+  DefaultListView,
+  HierarchyListView,
+  HydrateAuthProvider,
+  HydrateHierarchyProvider,
+  ListQueryProvider,
+} from '../../exports/client/index.js'
 import { getColumns } from '../../utilities/getColumns.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
 import { upsertPreferences } from '../../utilities/upsertPreferences.js'
-import { HierarchyListView } from '../HierarchyList/index.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
 import { handleHierarchy } from './handleHierarchy.js'
-import { DefaultListView } from './index.client.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'

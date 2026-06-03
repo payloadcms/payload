@@ -4,8 +4,9 @@ import React from 'react'
 
 import type { groupNavItems } from '../../../utilities/groupNavItems.js'
 
-import { Gutter } from '../../../elements/Gutter/index.js'
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { Gutter } from '../../../exports/client/index.js'
 import { ModularDashboard } from './ModularDashboard/index.js'
 
 const baseClass = 'dashboard'

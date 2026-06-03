@@ -4,7 +4,8 @@ import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import { ToastAndRedirect } from './index.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { ToastAndRedirect } from '../../exports/client/index.js'
 import './index.scss'
 
 export const verifyBaseClass = 'verify'

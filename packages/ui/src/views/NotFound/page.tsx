@@ -6,9 +6,10 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { NotFoundClient } from '../../exports/client/index.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
-import { NotFoundClient } from './index.client.js'
 
 type InitReqFn = (args: {
   canSetHeaders?: boolean
