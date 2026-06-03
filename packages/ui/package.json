@@ -191,6 +191,11 @@
       "types": "./src/utilities/getSchemaMap.ts",
       "default": "./src/utilities/getSchemaMap.ts"
     },
+    "./utilities/handleServerFunctions": {
+      "import": "./src/utilities/handleServerFunctions.ts",
+      "types": "./src/utilities/handleServerFunctions.ts",
+      "default": "./src/utilities/handleServerFunctions.ts"
+    },
     "./utilities/schedulePublishHandler": {
       "import": "./src/utilities/schedulePublishHandler.ts",
       "types": "./src/utilities/schedulePublishHandler.ts",
