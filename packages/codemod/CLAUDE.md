@@ -10,6 +10,7 @@ Package-scoped rules. See `README.md` for usage and the mechanical authoring rec
 - Every transform must be safe on non-matching code. If the expected AST shape isn't there, return `{ filesChanged: [] }`. Do not throw for "didn't find what I expected".
 - `filesChanged` must list exactly the files whose text changed. A transform that mutates a file but forgets to list it will silently under-report in the CLI summary.
 - Use `notes` for surfacing information the user should see (e.g., spots that need manual review). Do not log via `console` from within a transform.
+- Transforms may also receive `packageJsons` (an array of `{ path, data }`). Mutate `data` in place to edit a project's `package.json`; the CLI owns reading and writing the file. Do not read or write the filesystem directly from a transform.
 
 ## Testing discipline
 
@@ -25,5 +26,5 @@ Package-scoped rules. See `README.md` for usage and the mechanical authoring rec
 
 ## Scope
 
-- This package is v3 → v4 only. Do not add version metadata, `--since` flags, or back-catalog transforms for earlier versions.
+- This package targets v3 → v4 migrations and v4-adoption transforms (e.g. opting projects into `payload build`). Do not add version metadata, `--since` flags, or back-catalog transforms for earlier versions.
 - Future major versions (v4 → v5 and beyond) are a separate decision, not an extension to this package.
