@@ -1,3 +1,3 @@
-export { NotFoundPage } from '../pages/NotFound.js'
-export { type GenerateViewMetadata, RootPage } from '../pages/Root.js'
+export { NotFoundPage } from '../adapters/views.js'
+export { type GenerateViewMetadata, RootPage } from '../adapters/views.js'
 export { generatePageMetadata } from '../metadata/generatePageMetadata.js'

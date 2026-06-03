@@ -8,7 +8,7 @@ import { generateEditViewMetadata } from '@payloadcms/ui/views/Document/generate
 import { generateVersionViewMetadata } from '@payloadcms/ui/views/Version/generateVersionViewMetadata'
 import { generateVersionsViewMetadata } from '@payloadcms/ui/views/Versions/generateVersionsViewMetadata'
 
-import type { GenerateViewMetadata } from '../pages/Root.js'
+import type { GenerateViewMetadata } from '../adapters/views.js'
 
 import { adminViews } from '../adapters/views.js'
 import { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
