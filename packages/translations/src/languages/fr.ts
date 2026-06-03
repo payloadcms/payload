@@ -112,6 +112,23 @@ export const frTranslations: DefaultTranslationsObject = {
       'Il n\'y a pas de widgets sur votre tableau de bord. Vous pouvez les ajouter depuis le menu "Tableau de bord" situé dans la barre supérieure.',
     resetLayout: 'Réinitialiser la mise en page',
     searchWidgets: 'Rechercher des widgets...',
+    widgetCollectionRequired: 'La Collection est requise.',
+    widgetConfigurationError: 'Erreur de configuration du widget',
+    widgetInvalidCollection: 'La Collection « {{collection}} » n’existe pas.',
+    widgetInvalidFilterField:
+      'Le champ de filtrage « {{field}} » n’existe pas dans la Collection « {{collection}} ».',
+    widgetInvalidSortField:
+      'Le champ de tri "{{field}}" n’existe pas dans la Collection "{{collection}}".',
+    widgetLimitLabel: 'Limiter',
+    widgetNonSortableSortField:
+      'Le champ de tri "{{field}}" n\'est pas triable dans la Collection "{{collection}}".',
+    widgetQueryError: 'Impossible de charger les documents pour ce widget.',
+    widgetSelectCollectionFirst: 'Sélectionnez une Collection avant de choisir le tri',
+    widgetSelectSortField: 'Sélectionnez un champ pour trier',
+    widgetSortDirectionLabel: 'Sens de tri',
+    widgetSortFieldLabel: 'Champ de tri',
+    widgetTitleFallback: 'Requête de Collection',
+    widgetTitleLabel: 'Titre',
   },
   error: {
     accountAlreadyActivated: 'Ce compte a déjà été activé.',

@@ -109,6 +109,22 @@ export const daTranslations: DefaultTranslationsObject = {
       'Der er ingen widgets på dit kontrolpanel. Du kan tilføje dem fra "Kontrolpanel" menuen placeret i toppen.',
     resetLayout: 'Nulstil Layout',
     searchWidgets: 'Søg widgets...',
+    widgetCollectionRequired: 'Collection er påkrævet.',
+    widgetConfigurationError: 'Konfigurationsfejl for widget',
+    widgetInvalidCollection: 'Collection "{{collection}}" eksisterer ikke.',
+    widgetInvalidFilterField: 'Filterfeltet "{{field}}" findes ikke i Collection "{{collection}}".',
+    widgetInvalidSortField:
+      'Sorteringsfeltet "{{field}}" findes ikke i Collection "{{collection}}".',
+    widgetLimitLabel: 'Begrænsning',
+    widgetNonSortableSortField:
+      'Sorteringsfeltet "{{field}}" kan ikke sorteres i Collection "{{collection}}".',
+    widgetQueryError: 'Kunne ikke indlæse dokumenter til denne widget.',
+    widgetSelectCollectionFirst: 'Vælg en Collection, før du vælger sortering',
+    widgetSelectSortField: 'Vælg et field, der skal sorteres efter',
+    widgetSortDirectionLabel: 'Sorteringsretning',
+    widgetSortFieldLabel: 'Sortér felt',
+    widgetTitleFallback: 'Collectionsforespørgsel',
+    widgetTitleLabel: 'Titel',
   },
   error: {
     accountAlreadyActivated: 'Denne konto er allerede blevet aktiveret.',

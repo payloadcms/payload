@@ -112,6 +112,24 @@ export const deTranslations: DefaultTranslationsObject = {
       'Auf deinem Dashboard befinden sich keine Widgets. Du kannst diese über das "Dashboard"-Menü in der oberen Leiste hinzufügen.',
     resetLayout: 'Layout zurücksetzen',
     searchWidgets: 'Suche Widgets...',
+    widgetCollectionRequired: 'Collection ist erforderlich.',
+    widgetConfigurationError: 'Widget-Konfigurationsfehler',
+    widgetInvalidCollection: 'Collection „{{collection}}“ existiert nicht.',
+    widgetInvalidFilterField:
+      'Das Filter-Feld "{{field}}" existiert nicht in der Collection "{{collection}}".',
+    widgetInvalidSortField:
+      'Sortierfeld „{{field}}“ existiert nicht in der Collection „{{collection}}“.',
+    widgetLimitLabel: 'Begrenzung',
+    widgetNonSortableSortField:
+      'Das Sortierfeld "{{field}}" ist in der Collection "{{collection}}" nicht sortierbar.',
+    widgetQueryError: 'Dokumente für dieses Widget konnten nicht geladen werden.',
+    widgetSelectCollectionFirst:
+      'Wählen Sie eine Collection aus, bevor Sie eine Sortierung auswählen',
+    widgetSelectSortField: 'Wählen Sie ein Feld zum Sortieren aus',
+    widgetSortDirectionLabel: 'Sortierrichtung',
+    widgetSortFieldLabel: 'Sortierfeld',
+    widgetTitleFallback: 'Sammlungsabfrage',
+    widgetTitleLabel: 'Titel',
   },
   error: {
     accountAlreadyActivated: 'Dieses Benutzerkonto wurde bereits aktiviert',

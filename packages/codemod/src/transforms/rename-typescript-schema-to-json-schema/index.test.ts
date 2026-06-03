@@ -14,7 +14,10 @@ describe('rename-typescript-schema-to-json-schema', () => {
     const input = await fixture('basic.input.ts')
     const output = await fixture('basic.output.ts')
 
-    const result = await runTransform({ source: input, transform: renameTypescriptSchemaToJsonSchema })
+    const result = await runTransform({
+      source: input,
+      transform: renameTypescriptSchemaToJsonSchema,
+    })
 
     expect(result).toBe(output)
   })
@@ -22,7 +25,10 @@ describe('rename-typescript-schema-to-json-schema', () => {
   it('is idempotent', async () => {
     const output = await fixture('basic.output.ts')
 
-    const result = await runTransform({ source: output, transform: renameTypescriptSchemaToJsonSchema })
+    const result = await runTransform({
+      source: output,
+      transform: renameTypescriptSchemaToJsonSchema,
+    })
 
     expect(result).toBe(output)
   })
@@ -30,7 +36,10 @@ describe('rename-typescript-schema-to-json-schema', () => {
   it('no-ops on code without `typescriptSchema`', async () => {
     const input = await fixture('non-matching.input.ts')
 
-    const result = await runTransform({ source: input, transform: renameTypescriptSchemaToJsonSchema })
+    const result = await runTransform({
+      source: input,
+      transform: renameTypescriptSchemaToJsonSchema,
+    })
 
     expect(result).toBe(input)
   })
@@ -38,7 +47,10 @@ describe('rename-typescript-schema-to-json-schema', () => {
   it('does not clobber an existing `jsonSchema` sibling', async () => {
     const input = await fixture('sibling.input.ts')
 
-    const result = await runTransform({ source: input, transform: renameTypescriptSchemaToJsonSchema })
+    const result = await runTransform({
+      source: input,
+      transform: renameTypescriptSchemaToJsonSchema,
+    })
 
     expect(result).toBe(input)
   })

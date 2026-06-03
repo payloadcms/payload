@@ -111,6 +111,23 @@ export const ltTranslations: DefaultTranslationsObject = {
       'Jūsų prietaisų skydelyje nėra valdiklių. Juos galite pridėti iš „Skydelio“ meniu, esančio viršutinėje juostoje.',
     resetLayout: 'Atstatyti išdėstymą',
     searchWidgets: 'Ieškokite valdiklių...',
+    widgetCollectionRequired: 'Collection yra privaloma.',
+    widgetConfigurationError: 'Valdiklio konfigūracijos klaida',
+    widgetInvalidCollection: 'Kolekcija "{{collection}}" neegzistuoja.',
+    widgetInvalidFilterField:
+      'Filtravimo laukas „{{field}}“ neegzistuoja kolekcijoje „{{collection}}“.',
+    widgetInvalidSortField:
+      'Rikiavimo laukas „{{field}}“ neegzistuoja kolekcijoje „{{collection}}“.',
+    widgetLimitLabel: 'Ribojimas',
+    widgetNonSortableSortField:
+      'Rūšiavimo laukas "{{field}}" negali būti rūšiuojamas kolekcijoje "{{collection}}".',
+    widgetQueryError: 'Nepavyko įkelti dokumentų šiam valdikliui.',
+    widgetSelectCollectionFirst: 'Pasirinkite Collection prieš pasirinkdami rūšiavimą',
+    widgetSelectSortField: 'Pasirinkite lauką rūšiavimui',
+    widgetSortDirectionLabel: 'Rikiavimo kryptis',
+    widgetSortFieldLabel: 'Rikiuoti lauką',
+    widgetTitleFallback: 'Kolekcijos užklausa',
+    widgetTitleLabel: 'Pavadinimas',
   },
   error: {
     accountAlreadyActivated: 'Ši paskyra jau aktyvuota.',

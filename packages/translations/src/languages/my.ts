@@ -110,6 +110,23 @@ export const myTranslations: DefaultTranslationsObject = {
       'Anda tidak mempunyai widget pada papan pemuka anda. Anda boleh menambahkannya dari menu "Dashboard" yang terletak di bar atas.',
     resetLayout: 'Tetapkan semula Layout',
     searchWidgets: 'Cari widget...',
+    widgetCollectionRequired: 'Collection သည် မဖြစ်မနေလိုအပ်ပါသည်။',
+    widgetConfigurationError: 'Widget အတည်ပြုခြင်းအမှား',
+    widgetInvalidCollection: 'Collection "{{collection}}" မရှိပါ။',
+    widgetInvalidFilterField:
+      'Filter field "{{field}}" သည် collection "{{collection}}" တွင် မရှိပါ။',
+    widgetInvalidSortField:
+      'မည်သည့် Sort field "{{field}}" မဟုတ်ပါ collection "{{collection}}" တွင် မတည်ရှိပါ။',
+    widgetLimitLabel: 'ကန့်သတ်ချက်',
+    widgetNonSortableSortField:
+      'အမျိုးအစား "{{collection}}" တွင် Sort field "{{field}}" ကို စီခန့်နိုင်မှုမရှိပါ။',
+    widgetQueryError: 'ဤ widget အတွက် Document များကို မဖော်ပြနိုင်ခဲ့ပါ။',
+    widgetSelectCollectionFirst: 'စီညွှန်းမှုရွေးချယ်မည်မီ Collection တစ်ခုအား ရွေးချယ်ပါ။',
+    widgetSelectSortField: 'စီအစဉ်ရန် field တစ်ခုရွေးပါ',
+    widgetSortDirectionLabel: 'စီခြင်းဦးတည်ရာ',
+    widgetSortFieldLabel: 'Field တူညီခြင်း အလိုက် စီစဉ်ရန်',
+    widgetTitleFallback: 'Collection query (မေးခွန်း)',
+    widgetTitleLabel: 'ခေါင်းစဉ်',
   },
   error: {
     accountAlreadyActivated: 'ဤအကောင့်ကို အသက်သွင်းပြီးဖြစ်သည်။',
