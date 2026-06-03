@@ -96,7 +96,6 @@ export const azTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Widgetləri axtarın...',
     widgetCollectionRequired: 'Collection tələb olunur.',
     widgetConfigurationError: 'Vidjet konfiqurasiyası xətası',
-    widgetExcludedCollectionsLabel: 'İstisna edilmiş Collections',
     widgetInvalidCollection: 'Collection "{{collection}}" mövcud deyil.',
     widgetInvalidFilterField:
       'Filter sahəsi "{{field}}" "{{collection}}" kolleksiyasında mövcud deyil.',

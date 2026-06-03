@@ -96,7 +96,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     searchWidgets: 'উইজেটগুলি অনুসন্ধান করুন...',
     widgetCollectionRequired: 'Collection প্রয়োজনীয়।',
     widgetConfigurationError: 'উইজেট কনফিগারেশন ত্রুটি',
-    widgetExcludedCollectionsLabel: 'বহির্ভূত Collectionগুলি',
     widgetInvalidCollection: 'Collection "{{collection}}" বিদ্যমান নেই।',
     widgetInvalidFilterField:
       'ফিল্টার Field "{{field}}" সংশ্লিষ্ট Collection "{{collection}}" -এ বিদ্যমান নয়।',

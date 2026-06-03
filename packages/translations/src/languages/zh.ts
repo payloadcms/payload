@@ -92,7 +92,6 @@ export const zhTranslations: DefaultTranslationsObject = {
     searchWidgets: '搜索小工具...',
     widgetCollectionRequired: 'Collection为必填项。',
     widgetConfigurationError: '小部件配置错误',
-    widgetExcludedCollectionsLabel: '已排除的Collection',
     widgetInvalidCollection: 'Collection "{{collection}}" 不存在。',
     widgetInvalidFilterField: '筛选字段“{{field}}”在集合“{{collection}}”中不存在。',
     widgetInvalidSortField: '集合“{{collection}}”中不存在排序字段“{{field}}”。',

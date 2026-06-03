@@ -176,8 +176,15 @@ const addDefaultDashboardWidgets = async ({
     {
       name: 'excludedCollections',
       type: 'select',
+      admin: {
+        components: {
+          // Presents an inclusion filter (all collections checked by default) while persisting the
+          // inverse as an exclusion list, so collections added later stay visible by default.
+          Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
+        },
+      },
       hasMany: true,
-      label: ({ t }) => t('dashboard:widgetExcludedCollectionsLabel'),
+      label: ({ t }) => t('general:collections'),
       // Exclusion list, so an empty value shows every collection and newly added collections are
       // included by default. Hidden collections are never offered as options.
       options: (config.collections ?? [])

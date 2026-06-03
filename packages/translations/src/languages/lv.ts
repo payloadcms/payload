@@ -96,7 +96,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Meklēt logrīkus...',
     widgetCollectionRequired: 'Kolekcija ir obligāta.',
     widgetConfigurationError: 'Sīkrīka konfigurācijas kļūda',
-    widgetExcludedCollectionsLabel: 'Izslēgtās kolekcijas',
     widgetInvalidCollection: 'Collection "{{collection}}" neeksistē.',
     widgetInvalidFilterField: 'Filtra lauks "{{field}}" neeksistē kolekcijā "{{collection}}".',
     widgetInvalidSortField: 'Kārtošanas lauks "{{field}}" neeksistē kolekcijā "{{collection}}".',

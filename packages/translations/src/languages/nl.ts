@@ -97,7 +97,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Zoek widgets...',
     widgetCollectionRequired: 'Collectie is vereist.',
     widgetConfigurationError: 'Fout in de configuratie van de widget',
-    widgetExcludedCollectionsLabel: 'Uitgesloten collecties',
     widgetInvalidCollection: 'Collectie "{{collection}}" bestaat niet.',
     widgetInvalidFilterField: 'Filterveld "{{field}}" bestaat niet in collectie "{{collection}}".',
     widgetInvalidSortField: 'Sorteerveld "{{field}}" bestaat niet in collectie "{{collection}}".',

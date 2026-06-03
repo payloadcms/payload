@@ -97,7 +97,6 @@ export const skTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Hľadať doplnky...',
     widgetCollectionRequired: 'Collection je povinná.',
     widgetConfigurationError: 'Chyba v konfigurácii widgetu',
-    widgetExcludedCollectionsLabel: 'Vylúčené kolekcie',
     widgetInvalidCollection: 'Kolekcia „{{collection}}“ neexistuje.',
     widgetInvalidFilterField: 'Filtrované pole "{{field}}" neexistuje v kolekcii "{{collection}}".',
     widgetInvalidSortField: 'Triediace pole "{{field}}" neexistuje v kolekcii "{{collection}}".',

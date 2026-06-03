@@ -97,7 +97,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Пошук віджетів...',
     widgetCollectionRequired: 'Collection є обов’язковим.',
     widgetConfigurationError: 'Помилка конфігурації віджета',
-    widgetExcludedCollectionsLabel: 'Виключені Collections',
     widgetInvalidCollection: 'Collection "{{collection}}" не існує.',
     widgetInvalidFilterField: 'Поле фільтрації "{{field}}" не існує у колекції "{{collection}}".',
     widgetInvalidSortField: 'Поле сортування "{{field}}" не існує у Collection "{{collection}}".',

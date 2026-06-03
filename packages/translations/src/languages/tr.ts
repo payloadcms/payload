@@ -97,7 +97,6 @@ export const trTranslations: DefaultTranslationsObject = {
     searchWidgets: "Arama widget'ları...",
     widgetCollectionRequired: 'Collection gereklidir.',
     widgetConfigurationError: 'Widget yapılandırma hatası',
-    widgetExcludedCollectionsLabel: 'Hariç tutulan Collections',
     widgetInvalidCollection: 'Collection "{{collection}}" mevcut değil.',
     widgetInvalidFilterField:
       'Filtre alanı "{{field}}", "{{collection}}" koleksiyonunda mevcut değil.',

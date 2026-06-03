@@ -98,7 +98,6 @@ export const huTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Keresés widgetek...',
     widgetCollectionRequired: 'A Collection megadása kötelező.',
     widgetConfigurationError: 'Widget konfigurációs hiba',
-    widgetExcludedCollectionsLabel: 'Kizárt gyűjtemények',
     widgetInvalidCollection: 'A(z) "{{collection}}" Collection nem létezik.',
     widgetInvalidFilterField:
       'A(z) „{{field}}” szűrőmező nem létezik a(z) „{{collection}}” Collection-ben.',

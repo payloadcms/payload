@@ -287,6 +287,67 @@ describe('Dashboard', () => {
     await expect(rowTitles.nth(1)).toHaveText(firstDoc.title)
   })
 
+  test('activity widget collections filter shows inclusion checkboxes and excludes unchecked', async ({
+    page,
+  }) => {
+    const ticketsUrl = new AdminUrlUtil(serverURL, 'tickets')
+    const eventsUrl = new AdminUrlUtil(serverURL, 'events')
+
+    const ticket = (await (await page.request.get(`${serverURL}/api/tickets?limit=1`)).json())
+      .docs[0]
+    const event = (await (await page.request.get(`${serverURL}/api/events?limit=1`)).json()).docs[0]
+
+    // Record both documents as recently viewed.
+    await page.goto(ticketsUrl.edit(ticket.id))
+    await expect(page.locator('#field-title')).toHaveValue(ticket.title)
+    await page.goto(eventsUrl.edit(event.id))
+    await expect(page.locator('#field-title')).toHaveValue(event.title)
+
+    await page.goto(url.admin)
+
+    const d = new DashboardHelper(page)
+    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
+    await expect(activityCard.locator('.recently-viewed-widget__row-title')).toHaveCount(2)
+
+    // Open the activity widget configuration.
+    await d.setEditing()
+    const widget = d.widgetByPos(15)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    const collectionsField = drawer.locator('.recently-viewed-collections-field')
+    await expect(collectionsField).toBeVisible()
+
+    // Every collection is included (checked) by default - the stored exclusion list is empty.
+    const checkboxes = collectionsField.locator('.checkbox-input')
+    const checkboxCount = await checkboxes.count()
+    expect(checkboxCount).toBeGreaterThanOrEqual(3)
+    await expect(collectionsField.locator('.checkbox-input--checked')).toHaveCount(checkboxCount)
+
+    // Unchecking "Tickets" adds it to the stored exclusion list.
+    const ticketsOption = collectionsField.locator('.recently-viewed-collections-field__option', {
+      hasText: 'Tickets',
+    })
+    await expect(ticketsOption.locator('input[type="checkbox"]')).toBeEnabled()
+    await ticketsOption.locator('label').click()
+    await expect(ticketsOption.locator('.checkbox-input')).not.toHaveClass(
+      /checkbox-input--checked/,
+    )
+
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+
+    await d.saveChangesAndValidate()
+
+    // The excluded collection's document drops out; the remaining document still renders.
+    const rowTitles = activityCard.locator('.recently-viewed-widget__row-title')
+    await expect(rowTitles).toHaveCount(1)
+    await expect(rowTitles.nth(0)).toHaveText(event.title)
+  })
+
   test('respects min and max width', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()

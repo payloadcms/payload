@@ -94,7 +94,6 @@ export const thTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ค้นหาวิดเจ็ต...',
     widgetCollectionRequired: 'Collection เป็นข้อมูลที่จำเป็น',
     widgetConfigurationError: 'เกิดข้อผิดพลาดในการกำหนดค่าของวิดเจ็ต',
-    widgetExcludedCollectionsLabel: 'คอลเลกชันที่ถูกยกเว้น',
     widgetInvalidCollection: 'Collection "{{collection}}" ไม่มีอยู่ในระบบ',
     widgetInvalidFilterField: 'ฟิลด์ตัวกรอง "{{field}}" ไม่มีอยู่ใน Collection "{{collection}}"',
     widgetInvalidSortField:

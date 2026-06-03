@@ -96,7 +96,6 @@ export const myTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Cari widget...',
     widgetCollectionRequired: 'Collection သည် မဖြစ်မနေလိုအပ်ပါသည်။',
     widgetConfigurationError: 'Widget အတည်ပြုခြင်းအမှား',
-    widgetExcludedCollectionsLabel: 'ချန်ထားရန် Collections',
     widgetInvalidCollection: 'Collection "{{collection}}" မရှိပါ။',
     widgetInvalidFilterField:
       'Filter field "{{field}}" သည် collection "{{collection}}" တွင် မရှိပါ။',

@@ -96,7 +96,6 @@ export const caTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Cerca de ginys...',
     widgetCollectionRequired: 'Cal especificar una Collection.',
     widgetConfigurationError: 'Error de configuració del widget',
-    widgetExcludedCollectionsLabel: 'Col·leccions excloses',
     widgetInvalidCollection: 'La Collection "{{collection}}" no existeix.',
     widgetInvalidFilterField:
       'El camp de filtre "{{field}}" no existeix a la Collection "{{collection}}".',

@@ -97,7 +97,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Ieškokite valdiklių...',
     widgetCollectionRequired: 'Collection yra privaloma.',
     widgetConfigurationError: 'Valdiklio konfigūracijos klaida',
-    widgetExcludedCollectionsLabel: 'Išskirtos kolekcijos',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" neegzistuoja.',
     widgetInvalidFilterField:
       'Filtravimo laukas „{{field}}“ neegzistuoja kolekcijoje „{{collection}}“.',

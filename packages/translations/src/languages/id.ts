@@ -97,7 +97,6 @@ export const idTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Cari widget...',
     widgetCollectionRequired: 'Collection wajib diisi.',
     widgetConfigurationError: 'Kesalahan konfigurasi widget',
-    widgetExcludedCollectionsLabel: 'Koleksi yang dikecualikan',
     widgetInvalidCollection: 'Collection "{{collection}}" tidak ada.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" tidak ada pada Collection "{{collection}}".',

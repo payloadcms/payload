@@ -95,7 +95,6 @@ export const koTranslations: DefaultTranslationsObject = {
     searchWidgets: '위젯 검색...',
     widgetCollectionRequired: 'Collection이 필요합니다.',
     widgetConfigurationError: '위젯 구성 오류',
-    widgetExcludedCollectionsLabel: '제외된 Collection',
     widgetInvalidCollection: 'Collection "{{collection}}"이(가) 존재하지 않습니다.',
     widgetInvalidFilterField:
       '컬렉션 "{{collection}}"에 필터 필드 "{{field}}"가 존재하지 않습니다.',

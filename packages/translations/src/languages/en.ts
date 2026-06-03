@@ -97,7 +97,6 @@ export const enTranslations = {
     searchWidgets: 'Search widgets...',
     widgetCollectionRequired: 'Collection is required.',
     widgetConfigurationError: 'Widget configuration error',
-    widgetExcludedCollectionsLabel: 'Excluded collections',
     widgetInvalidCollection: 'Collection "{{collection}}" does not exist.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" does not exist on collection "{{collection}}".',

@@ -96,7 +96,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Søk widgets...',
     widgetCollectionRequired: 'Collectie er påkrevd.',
     widgetConfigurationError: 'Feil i widget-konfigurasjon',
-    widgetExcludedCollectionsLabel: 'Ekskluderte Collecties',
     widgetInvalidCollection: 'Collection "{{collection}}" finnes ikke.',
     widgetInvalidFilterField:
       'Filter-feltet "{{field}}" finnes ikke i kolleksjonen "{{collection}}".',

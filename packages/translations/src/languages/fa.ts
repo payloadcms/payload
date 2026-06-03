@@ -95,7 +95,6 @@ export const faTranslations: DefaultTranslationsObject = {
     searchWidgets: 'جستجوی ابزارک‌ها...',
     widgetCollectionRequired: 'Collection الزامی است.',
     widgetConfigurationError: 'خطای پیکربندی ابزارک',
-    widgetExcludedCollectionsLabel: 'مجموعه‌های مستثنی شده',
     widgetInvalidCollection: 'Collection "{{collection}}" وجود ندارد.',
     widgetInvalidFilterField: 'فیلد فیلتر "{{field}}" در Collection "{{collection}}" وجود ندارد.',
     widgetInvalidSortField: 'فیلد مرتب‌سازی "{{field}}" در Collection "{{collection}}" وجود ندارد.',

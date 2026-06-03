@@ -97,7 +97,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Pretraži dodatke...',
     widgetCollectionRequired: 'Kolekcija je obavezna.',
     widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
-    widgetExcludedCollectionsLabel: 'Isključene kolekcije',
     widgetInvalidCollection: 'Kolekcija "{{collection}}" ne postoji.',
     widgetInvalidFilterField:
       'Polje za filtriranje "{{field}}" ne postoji u kolekciji "{{collection}}".',

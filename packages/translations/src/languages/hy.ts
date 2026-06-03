@@ -94,7 +94,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Որոնել վիջեթներ...',
     widgetCollectionRequired: 'Collection-ը պարտադիր է։',
     widgetConfigurationError: 'Վիջեթի կազմաձևման սխալ',
-    widgetExcludedCollectionsLabel: 'Բացառված Collection-ները',
     widgetInvalidCollection: 'Collection "{{collection}}" չի գոյություն ունի։',
     widgetInvalidFilterField:
       'Զտիչ դաշտը "{{field}}" գոյություն չունի Collection "{{collection}}"-ում։',

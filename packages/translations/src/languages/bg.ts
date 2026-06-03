@@ -96,7 +96,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Търсене на джаджи...',
     widgetCollectionRequired: 'Collection е задължително.',
     widgetConfigurationError: 'Грешка при конфигуриране на уиджета',
-    widgetExcludedCollectionsLabel: 'Изключени колекции',
     widgetInvalidCollection: 'Collection "{{collection}}" не съществува.',
     widgetInvalidFilterField:
       'Филтър полето "{{field}}" не съществува в колекцията "{{collection}}".',

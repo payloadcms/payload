@@ -91,7 +91,6 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     searchWidgets: '搜索小工具...',
     widgetCollectionRequired: 'Collection 為必填項目。',
     widgetConfigurationError: '元件組態錯誤',
-    widgetExcludedCollectionsLabel: '已排除的 Collection',
     widgetInvalidCollection: 'Collection「{{collection}}」不存在。',
     widgetInvalidFilterField: '篩選欄位「{{field}}」不存在於 Collection「{{collection}}」中。',
     widgetInvalidSortField: '排序欄位「{{field}}」在集合「{{collection}}」中不存在。',

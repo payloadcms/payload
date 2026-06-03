@@ -76,7 +76,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'dashboard:noItems',
   'dashboard:widgetCollectionRequired',
   'dashboard:widgetConfigurationError',
-  'dashboard:widgetExcludedCollectionsLabel',
   'dashboard:widgetInvalidCollection',
   'dashboard:widgetInvalidFilterField',
   'dashboard:widgetInvalidSortField',

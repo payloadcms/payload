@@ -97,7 +97,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ウィジェットを検索...',
     widgetCollectionRequired: 'Collectionは必須です。',
     widgetConfigurationError: 'ウィジェット設定エラー',
-    widgetExcludedCollectionsLabel: '除外されたCollection',
     widgetInvalidCollection: 'Collection「{{collection}}」は存在しません。',
     widgetInvalidFilterField:
       'コレクション「{{collection}}」にフィルターField「{{field}}」は存在しません。',

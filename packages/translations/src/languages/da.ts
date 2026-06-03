@@ -95,7 +95,6 @@ export const daTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Søg widgets...',
     widgetCollectionRequired: 'Collection er påkrævet.',
     widgetConfigurationError: 'Konfigurationsfejl for widget',
-    widgetExcludedCollectionsLabel: 'Ekskluderede Collections',
     widgetInvalidCollection: 'Collection "{{collection}}" eksisterer ikke.',
     widgetInvalidFilterField: 'Filterfeltet "{{field}}" findes ikke i Collection "{{collection}}".',
     widgetInvalidSortField:

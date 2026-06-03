@@ -98,7 +98,6 @@ export const deTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Suche Widgets...',
     widgetCollectionRequired: 'Collection ist erforderlich.',
     widgetConfigurationError: 'Widget-Konfigurationsfehler',
-    widgetExcludedCollectionsLabel: 'Ausgeschlossene Collections',
     widgetInvalidCollection: 'Collection „{{collection}}“ existiert nicht.',
     widgetInvalidFilterField:
       'Das Filter-Feld "{{field}}" existiert nicht in der Collection "{{collection}}".',

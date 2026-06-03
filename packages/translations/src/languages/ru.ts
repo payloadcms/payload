@@ -97,7 +97,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Поиск виджетов...',
     widgetCollectionRequired: 'Collection является обязательным.',
     widgetConfigurationError: 'Ошибка конфигурации виджета',
-    widgetExcludedCollectionsLabel: 'Исключенные коллекции',
     widgetInvalidCollection: 'Коллекция "{{collection}}" не существует.',
     widgetInvalidFilterField:
       'Поле фильтра «{{field}}» не существует в коллекции «{{collection}}».',

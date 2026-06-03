@@ -95,7 +95,6 @@ export const taTranslations: DefaultTranslationsObject = {
     searchWidgets: 'தேடல் கருவிகள்...',
     widgetCollectionRequired: 'Collection அவசியமாக 필요.',
     widgetConfigurationError: 'விட்ஜெட் உள்ளமைவு பிழை',
-    widgetExcludedCollectionsLabel: 'குறிக்கப்பட்டுள்ள இல்லாத Collections',
     widgetInvalidCollection: 'Collection "{{collection}}" இல்லை.',
     widgetInvalidFilterField:
       'Filter field "{{field}}" குறிப்பாக Collection "{{collection}}" இல் இருப்பதில்லை.',

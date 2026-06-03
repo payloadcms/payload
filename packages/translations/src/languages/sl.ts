@@ -96,7 +96,6 @@ export const slTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Išči gradnike...',
     widgetCollectionRequired: 'Zbirka je obvezna.',
     widgetConfigurationError: 'Napaka pri konfiguraciji gradnika',
-    widgetExcludedCollectionsLabel: 'Izključene zbirke',
     widgetInvalidCollection: 'Zbirka "{{collection}}" ne obstaja.',
     widgetInvalidFilterField: 'Filter polje "{{field}}" ne obstaja v zbirki "{{collection}}".',
     widgetInvalidSortField: 'Početno polje "{{field}}" ne obstaja v zbirki "{{collection}}".',

@@ -96,7 +96,6 @@ export const viTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Tìm kiếm các widget...',
     widgetCollectionRequired: 'Collection là bắt buộc.',
     widgetConfigurationError: 'Lỗi cấu hình Widget',
-    widgetExcludedCollectionsLabel: 'Các Collection bị loại trừ',
     widgetInvalidCollection: 'Collection "{{collection}}" không tồn tại.',
     widgetInvalidFilterField:
       'Trường lọc "{{field}}" không tồn tại trong Collection "{{collection}}".',

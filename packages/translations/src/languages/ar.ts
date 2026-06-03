@@ -96,7 +96,6 @@ export const arTranslations: DefaultTranslationsObject = {
     searchWidgets: 'ابحث عن الأدوات...',
     widgetCollectionRequired: 'المجموعة مطلوبة.',
     widgetConfigurationError: 'خطأ في تكوين الودجة',
-    widgetExcludedCollectionsLabel: 'المجموعات المستبعدة',
     widgetInvalidCollection: 'مجموعة "{{collection}}" غير موجودة.',
     widgetInvalidFilterField: 'حقل التصفية "{{field}}" غير موجود في المجموعة "{{collection}}".',
     widgetInvalidSortField: 'حقل الفرز "{{field}}" غير موجود في Collection "{{collection}}".',

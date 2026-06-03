@@ -95,7 +95,6 @@ export const etTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Otsi vidinaid...',
     widgetCollectionRequired: 'Kogu on nõutav.',
     widgetConfigurationError: 'Vidina konfiguratsiooni viga',
-    widgetExcludedCollectionsLabel: 'Välistatud kollektsioonid',
     widgetInvalidCollection: 'Kogumikku "{{collection}}" ei eksisteeri.',
     widgetInvalidFilterField: 'Filtri väli "{{field}}" ei eksisteeri kogumikus "{{collection}}".',
     widgetInvalidSortField:

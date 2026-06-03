@@ -96,7 +96,6 @@ export const plTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Szukaj widgetów...',
     widgetCollectionRequired: 'Collection jest wymagana.',
     widgetConfigurationError: 'Błąd konfiguracji widgetu',
-    widgetExcludedCollectionsLabel: 'Wykluczone kolekcje',
     widgetInvalidCollection: 'Kolekcja "{{collection}}" nie istnieje.',
     widgetInvalidFilterField:
       'Pole filtrujące „{{field}}” nie istnieje w kolekcji „{{collection}}”.',

@@ -96,7 +96,6 @@ export const svTranslations: DefaultTranslationsObject = {
     searchWidgets: 'Sök efter widget...',
     widgetCollectionRequired: 'Collection är obligatorisk.',
     widgetConfigurationError: 'Fel i widgetkonfiguration',
-    widgetExcludedCollectionsLabel: 'Exkluderade Collectioner',
     widgetInvalidCollection: 'Collection "{{collection}}" finns inte.',
     widgetInvalidFilterField: 'Filterfältet "{{field}}" finns inte i Collection "{{collection}}".',
     widgetInvalidSortField:
