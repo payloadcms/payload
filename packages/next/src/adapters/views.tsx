@@ -23,9 +23,9 @@ import { LogoutView } from '@payloadcms/ui/views/Logout'
 import { generateLogoutMetadata } from '@payloadcms/ui/views/Logout/metadata'
 import { NotFoundView } from '@payloadcms/ui/views/NotFound'
 import { generateNotFoundMetadata } from '@payloadcms/ui/views/NotFound/metadata'
-import { renderNotFoundPage } from '@payloadcms/ui/views/NotFound/page'
 import { ResetPassword as ResetPasswordView } from '@payloadcms/ui/views/ResetPassword'
 import { generateResetPasswordMetadata } from '@payloadcms/ui/views/ResetPassword/metadata'
+import { renderNotFoundPage } from '@payloadcms/ui/views/NotFound/page'
 import { renderRoot } from '@payloadcms/ui/views/Root'
 import { UnauthorizedView, UnauthorizedViewWithGutter } from '@payloadcms/ui/views/Unauthorized'
 import { generateUnauthorizedMetadata } from '@payloadcms/ui/views/Unauthorized/metadata'
@@ -34,6 +34,10 @@ import { generateVerifyMetadata } from '@payloadcms/ui/views/Verify/metadata'
 import { notFound, redirect } from 'next/navigation.js'
 
 import { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
+import { nextServerAdapter } from './server.js'
+
+const boundInitReq: Parameters<typeof renderRoot>[0]['initReq'] = (args) =>
+  initReq({ ...args, serverAdapter: nextServerAdapter })
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -81,19 +85,10 @@ type PageProps = {
 }
 
 export const RootPage = (props: PageProps) =>
-  renderRoot({
-    ...props,
-    adminViews,
-    initReq: initReq as Parameters<typeof renderRoot>[0]['initReq'],
-    notFound,
-    redirect,
-  })
+  renderRoot({ ...props, adminViews, initReq: boundInitReq, notFound, redirect })
 
 export const NotFoundPage = (props: PageProps) =>
-  renderNotFoundPage({
-    ...props,
-    initReq: initReq as Parameters<typeof renderNotFoundPage>[0]['initReq'],
-  })
+  renderNotFoundPage({ ...props, initReq: boundInitReq })
 
 export const generateNotFoundViewMetadata = async ({
   config: configPromise,
