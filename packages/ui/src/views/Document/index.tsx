@@ -16,13 +16,14 @@ import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
 import {
   DocumentInfoProvider,
   EditDepthProvider,
   HydrateAuthProvider,
   LivePreviewProvider,
 } from '../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
 import { buildFormState } from '../../utilities/buildFormState.js'
 import { getDocPreferences } from '../../utilities/getDocPreferences.js'
 import { getDocumentData } from '../../utilities/getDocumentData.js'

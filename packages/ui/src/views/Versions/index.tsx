@@ -2,12 +2,13 @@ import { type DocumentViewServerProps, type PaginatedDocs, type Where } from 'pa
 import { formatAdminURL, hasDraftsEnabled, isNumber } from 'payload/shared'
 import React from 'react'
 
-// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
 import {
   ListQueryProvider,
   SetDocumentStepNav,
   VersionsViewClient,
 } from '../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
 import { buildVersionColumns } from './buildColumns.js'
 import { VersionDrawerCreatedAtCell } from './cells/VersionDrawerCreatedAtCell/index.js'
 import { fetchLatestVersion, fetchVersions } from './fetchVersions.js'

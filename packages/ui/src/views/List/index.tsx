@@ -26,7 +26,7 @@ import {
 import React, { Fragment } from 'react'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
 import {
   DefaultListView,
   HierarchyListView,
@@ -34,6 +34,7 @@ import {
   HydrateHierarchyProvider,
   ListQueryProvider,
 } from '../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
 import { getColumns } from '../../utilities/getColumns.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
