@@ -7,6 +7,7 @@ import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { ForgotPasswordForm } from './ForgotPasswordForm/index.js'
+import './index.css'
 
 export const forgotPasswordBaseClass = 'forgot-password'
 
@@ -61,15 +62,17 @@ export function ForgotPasswordView({ initPageResult }: AdminViewServerProps) {
   return (
     <Fragment>
       <ForgotPasswordForm />
-      <Link
-        href={formatAdminURL({
-          adminRoute,
-          path: loginRoute,
-        })}
-        prefetch={false}
-      >
-        {i18n.t('authentication:backToLogin')}
-      </Link>
+      <div className={`${forgotPasswordBaseClass}__back`}>
+        <Link
+          href={formatAdminURL({
+            adminRoute,
+            path: loginRoute,
+          })}
+          prefetch={false}
+        >
+          {i18n.t('authentication:backToLogin')}
+        </Link>
+      </div>
     </Fragment>
   )
 }

@@ -7,7 +7,7 @@ import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { ResetPasswordForm } from './ResetPasswordForm/index.js'
-import './index.scss'
+import './index.css'
 
 export const resetPasswordBaseClass = 'reset-password'
 
@@ -65,17 +65,18 @@ export function ResetPassword({ initPageResult, params }: AdminViewServerProps) 
 
   return (
     <div className={`${resetPasswordBaseClass}__wrap`}>
-      <FormHeader heading={i18n.t('authentication:resetPassword')} />
       <ResetPasswordForm token={token} />
-      <Link
-        href={formatAdminURL({
-          adminRoute,
-          path: loginRoute,
-        })}
-        prefetch={false}
-      >
-        {i18n.t('authentication:backToLogin')}
-      </Link>
+      <div className={`${resetPasswordBaseClass}__back`}>
+        <Link
+          href={formatAdminURL({
+            adminRoute,
+            path: loginRoute,
+          })}
+          prefetch={false}
+        >
+          {i18n.t('authentication:backToLogin')}
+        </Link>
+      </div>
     </div>
   )
 }
