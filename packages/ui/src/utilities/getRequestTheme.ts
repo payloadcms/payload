@@ -1,26 +1,21 @@
-import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
 import type { SanitizedConfig } from 'payload'
 
-import { defaultTheme, type Theme } from '@payloadcms/ui'
+import { defaultTheme, type Theme } from '../providers/Theme/index.js'
 
-type GetRequestLanguageArgs = {
+type GetRequestThemeArgs = {
   config: SanitizedConfig
-  cookies: Map<string, string> | ReadonlyRequestCookies
+  cookies: Map<string, string>
   headers: Request['headers']
 }
 
 const acceptedThemes: Theme[] = ['dark', 'light']
 
-export const getRequestTheme = ({ config, cookies, headers }: GetRequestLanguageArgs): Theme => {
+export const getRequestTheme = ({ config, cookies, headers }: GetRequestThemeArgs): Theme => {
   if (config.admin.theme !== 'all' && acceptedThemes.includes(config.admin.theme)) {
     return config.admin.theme
   }
 
-  const themeCookie = cookies.get(`${config.cookiePrefix || 'payload'}-theme`)
-
-  const themeFromCookie: Theme = (
-    typeof themeCookie === 'string' ? themeCookie : themeCookie?.value
-  ) as Theme
+  const themeFromCookie = cookies.get(`${config.cookiePrefix || 'payload'}-theme`) as Theme
 
   if (themeFromCookie && acceptedThemes.includes(themeFromCookie)) {
     return themeFromCookie

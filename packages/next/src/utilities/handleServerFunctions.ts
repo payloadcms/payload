@@ -7,15 +7,17 @@ import {
 } from '@payloadcms/ui/rsc'
 import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
+import { initReq } from '@payloadcms/ui/utilities/initReq'
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 
+import { nextServerAdapter } from '../adapters/server.js'
 import { getDefaultLayoutHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
 import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
-import { initReq } from './initReq.js'
 import { slugifyHandler } from './slugify.js'
+import { switchLanguageHandler } from './switchLanguageHandler.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
@@ -29,6 +31,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'render-widget': renderWidgetHandler,
   'schedule-publish': schedulePublishHandler,
   slugify: slugifyHandler,
+  'switch-language': switchLanguageHandler,
   'table-state': buildTableStateHandler,
 }
 
@@ -45,6 +48,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     configPromise,
     importMap,
     key: 'RootLayout',
+    serverAdapter: nextServerAdapter,
   })
 
   const augmentedArgs: DefaultServerFunctionArgs = {

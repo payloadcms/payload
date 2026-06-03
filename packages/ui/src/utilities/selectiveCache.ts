@@ -20,7 +20,6 @@ const globalCacheContainer: Record<
  * @returns A function that manages cached values within the specified namespace
  */
 export function selectiveCache<TValue extends object = CachedValue>(namespace: string) {
-  // Create a stable namespace container if it doesn't exist
   if (!globalCacheContainer[namespace]) {
     globalCacheContainer[namespace] = cache((...args) => ({
       value: null,

@@ -16,6 +16,7 @@ import { enUS } from 'date-fns/locale/en-US'
 import React, { createContext, use, useEffect, useState } from 'react'
 
 import { useRouter } from '../RouterAdapter/index.js'
+import { useServerFunctions } from '../ServerFunctions/index.js'
 
 type ContextType<
   TAdditionalTranslations = {},
@@ -52,7 +53,6 @@ type Props = {
   fallbackLang: I18nOptions['fallbackLanguage']
   language: string
   languageOptions: LanguageOptions
-  switchLanguageServerAction: (lang: string) => Promise<void>
   translations: I18nClient['translations']
 }
 
@@ -62,10 +62,10 @@ export const TranslationProvider: React.FC<Props> = ({
   fallbackLang,
   language,
   languageOptions,
-  switchLanguageServerAction,
   translations,
 }) => {
   const router = useRouter()
+  const { switchLanguage: switchLanguageServerFn } = useServerFunctions()
   const [dateFNS, setDateFNS] = useState<Locale>()
 
   const nextT: ContextType['t'] = React.useCallback(
@@ -81,14 +81,14 @@ export const TranslationProvider: React.FC<Props> = ({
   const switchLanguage = React.useCallback(
     async (lang: string) => {
       try {
-        await switchLanguageServerAction(lang)
+        await switchLanguageServerFn(lang)
         router.refresh()
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(`Error loading language: "${lang}"`, error)
       }
     },
-    [switchLanguageServerAction, router],
+    [switchLanguageServerFn, router],
   )
 
   useEffect(() => {
