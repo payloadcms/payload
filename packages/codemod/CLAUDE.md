@@ -4,8 +4,8 @@ Package-scoped rules. See `README.md` for usage and the mechanical authoring rec
 
 ## Transform contract
 
-- Transforms receive `{ project }` only. The `TransformContext` does not expose `dry`, `print`, or any other flag. Never branch on options; the CLI controls persistence.
-- Mutate only the `Project` you were handed. Do not read or write the filesystem directly, spawn processes, or touch state outside ts-morph.
+- Transforms receive `{ project, packageJsons }`. The `TransformContext` does not expose `dry`, `print`, or any other flag. Never branch on options; the CLI controls persistence.
+- Mutate only the `Project` and `packageJsons` you were handed. Do not read or write the filesystem directly, spawn processes, or touch state outside the provided context.
 - Every transform must be idempotent. Running twice produces the same result as running once.
 - Every transform must be safe on non-matching code. If the expected AST shape isn't there, return `{ filesChanged: [] }`. Do not throw for "didn't find what I expected".
 - `filesChanged` must list exactly the files whose text changed. A transform that mutates a file but forgets to list it will silently under-report in the CLI summary.
@@ -14,7 +14,7 @@ Package-scoped rules. See `README.md` for usage and the mechanical authoring rec
 
 ## Testing discipline
 
-- Every transform ships with a fixture-pair test: at least one `<case>.input.ts` / `<case>.output.ts` pair covering a real matching case.
+- Every transform ships with a fixture-pair test: at least one `<case>.input.<ext>` / `<case>.output.<ext>` pair covering a real matching case (`.ts` for source transforms, `.json` for `package.json` transforms).
 - Every transform ships with an idempotency test: running the transform on the fixture's output must produce the output unchanged.
 - Every transform ships with at least one non-matching case proving the transform no-ops on unrelated code.
 - Fixtures live as siblings of `index.ts`. Do not introduce `__fixtures__` subfolders.
