@@ -1,9 +1,11 @@
 'use client'
 import type { CheckboxFieldDiffClientComponent } from 'payload'
 
-import { CheckIcon, FieldDiffContainer, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
+import { FieldDiffContainer } from '../../../../../elements/FieldDiffContainer/index.js'
+import { CheckIcon } from '../../../../../icons/Check/index.js'
+import { useTranslation } from '../../../../../providers/Translation/index.js'
 import './index.css'
 
 const baseClass = 'checkbox-diff'

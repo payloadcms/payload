@@ -9,6 +9,7 @@ import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
 import { initReq } from '@payloadcms/ui/utilities/initReq'
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
+import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
 import {
   getDefaultLayoutHandler,
   renderWidgetHandler,
@@ -16,8 +17,6 @@ import {
 import { renderDocumentHandler } from '@payloadcms/ui/views/Document/handleServerFunction'
 import { renderDocumentSlotsHandler } from '@payloadcms/ui/views/Document/renderDocumentSlots'
 import { renderListHandler } from '@payloadcms/ui/views/List/handleServerFunction'
-
-import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
 
 import { nextServerAdapter } from '../adapters/server.js'
 import { switchLanguageHandler } from './switchLanguageHandler.js'

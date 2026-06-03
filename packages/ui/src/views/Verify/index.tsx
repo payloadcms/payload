@@ -1,9 +1,9 @@
 import type { AdminViewServerProps } from 'payload'
 
-import { Logo } from '@payloadcms/ui/rsc'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import { Logo } from '../../elements/Logo/index.js'
 import { ToastAndRedirect } from './index.client.js'
 import './index.scss'
 
