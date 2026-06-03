@@ -32,7 +32,7 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
   .inputValidator((data: LoadInput): LoadInput => data ?? {})
   .handler(async ({ data }) => {
     const { renderAdminPage } = await import('@payloadcms/ui/views/Root/renderAdminPage')
-    const { initReq } = await import('@payloadcms/tanstack-start/server')
+    const { initReq, toSerializable } = await import('@payloadcms/tanstack-start/server')
     const config = await (await import('@payload-config')).default
     const { importMap } = await import('../importMap.js')
 
@@ -62,12 +62,20 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
 
       const rscPayload = await renderServerComponent(node as React.ReactElement)
 
-      // Cast through `unknown` because TanStack's `createServerFn` strictly
-      // checks that the return type is seroval-serializable. `clientConfig`
-      // contains function references (`typescriptSchema`, etc.) that seroval
-      // strips at runtime via `toSerializable` / RSC rules, but the type
-      // system doesn't know that.
-      return { metadata, rscPayload } as unknown as LoadResult
+      // `metadata.clientConfig` is populated by `renderAdminPage` and can
+      // include compiled custom React elements (e.g. `clientConfig.admin.
+      // components.*` returned by `RenderServerComponent`). Those carry
+      // `$$typeof: Symbol(react.transitional.element)` which seroval refuses
+      // to serialize ("The value [object Symbol] of type 'symbol' cannot be
+      // parsed/serialized."). Strip them — and any function / RegExp /
+      // Symbol references — before crossing the wire. `rscPayload` is the
+      // renderable RSC stub from `renderServerComponent`; TanStack Start's
+      // `$RSC` serialization adapter handles that one separately so we keep
+      // it untouched.
+      return {
+        metadata: toSerializable(metadata),
+        rscPayload,
+      } as unknown as LoadResult
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       if (message === 'not-found') {
