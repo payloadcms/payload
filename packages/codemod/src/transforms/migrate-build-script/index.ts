@@ -1,9 +1,5 @@
 import type { Transform } from '../../types.js'
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
-
 export const migrateBuildScript: Transform = {
   name: 'migrate-build-script',
   apply: ({ packageJsons }) => {
@@ -15,8 +11,9 @@ export const migrateBuildScript: Transform = {
         continue
       }
 
-      // Match the `next build` invocation but not `next build-storybook` etc.
-      const next = scripts.build.replace(/\bnext build(?=\s|$)/, 'payload build')
+      // Match the `next build` invocation (preceded by start/whitespace, followed
+      // by whitespace/end) but not `next build-storybook` or `my-next build`.
+      const next = scripts.build.replace(/(?<=^|\s)next build(?=\s|$)/, 'payload build')
       if (next !== scripts.build) {
         scripts.build = next
         filesChanged.push(pkg.path)
@@ -27,4 +24,8 @@ export const migrateBuildScript: Transform = {
   },
   description:
     'Rewrites the `build` npm script from `next build` to `payload build`, so the Import Map (and types) are generated before the Next.js build.',
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }

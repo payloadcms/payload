@@ -37,6 +37,23 @@ describe('migrate-build-script', () => {
     expect(result).toBe(output)
   })
 
+  it('preserves forwarded flags like --turbopack', async () => {
+    const input = await fixture('turbopack.input.json')
+    const output = await fixture('turbopack.output.json')
+
+    const result = await runTransformOnPackageJson({ source: input, transform: migrateBuildScript })
+
+    expect(result).toBe(output)
+  })
+
+  it('does not rewrite next build inside another word like my-next build', async () => {
+    const input = '{\n  "scripts": {\n    "build": "my-next build"\n  }\n}\n'
+
+    const result = await runTransformOnPackageJson({ source: input, transform: migrateBuildScript })
+
+    expect(result).toBe(input)
+  })
+
   it('is idempotent', async () => {
     const output = await fixture('basic.output.json')
 
