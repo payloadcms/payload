@@ -85,4 +85,24 @@ describe('build', () => {
     expect(exitMock).toHaveBeenCalledWith(1)
     expect(spawnMock).not.toHaveBeenCalled()
   })
+
+  it('spawns next build with forwarded args and propagates the child exit code', async () => {
+    process.argv = ['node', 'payload', 'build', '--turbopack']
+    const onMock = vi.fn()
+    spawnMock.mockReturnValueOnce({ on: onMock })
+
+    await build({ config: fakeConfig })
+
+    expect(spawnMock).toHaveBeenCalledTimes(1)
+    const [execPath, spawnArgs, opts] = spawnMock.mock.calls[0]
+    expect(execPath).toBe(process.execPath)
+    expect(spawnArgs[1]).toBe('build')
+    expect(spawnArgs).toContain('--turbopack')
+    expect(opts).toEqual({ stdio: 'inherit' })
+
+    // Simulate the child exiting with a non-zero code
+    const exitHandler = onMock.mock.calls.find(([event]) => event === 'exit')?.[1]
+    exitHandler(2)
+    expect(exitMock).toHaveBeenCalledWith(2)
+  })
 })

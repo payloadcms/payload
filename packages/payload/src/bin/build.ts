@@ -28,8 +28,7 @@ export async function build({ config }: { config: SanitizedConfig }): Promise<vo
   } catch (err) {
     console.error('Pre-build generation failed:')
     console.error(err)
-    process.exit(1)
-    return
+    return process.exit(1)
   }
 
   const nextBin = resolveNextBin()
