@@ -70,24 +70,37 @@
 
   @media (max-width: 1024px) {
     .condition__wrap {
-      align-items: initial;
+      flex-wrap: wrap;
+      align-items: center;
       gap: var(--spacer-2);
     }
 
     .condition__join {
+      flex-basis: 100%;
+      width: 100%;
+      order: -1;
+    }
+
+    .condition__join .rs__control {
       width: 100%;
     }
 
     .condition__inputs {
+      flex-basis: 100%;
       flex-direction: column;
       gap: var(--spacer-2);
       align-items: stretch;
     }
 
+    .condition__inputs > div {
+      flex-basis: auto;
+      width: 100%;
+    }
+
     .condition__actions {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      margin-left: auto;
+      flex-direction: row;
+      justify-content: flex-end;
     }
   }
 }
