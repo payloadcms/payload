@@ -6,6 +6,7 @@ import path from 'path'
 
 import { findConfig } from '../config/find.js'
 import { getPayload, type Payload } from '../index.js'
+import { build } from './build.js'
 import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { info } from './info.js'
@@ -14,6 +15,7 @@ import { migrate, availableCommands as migrateCommands } from './migrate.js'
 
 // Note: this does not account for any user bin scripts
 const availableScripts = [
+  'build',
   'generate:db-schema',
   'generate:importmap',
   'generate:types',
@@ -148,6 +150,11 @@ async function runBinScript({
   if (script === 'generate:importmap') {
     await generateImportMap(config)
     return {}
+  }
+
+  if (script === 'build') {
+    await build({ config })
+    return {} // build() owns process exit (spawns next build, propagates its code)
   }
 
   if (script === 'jobs:run') {
