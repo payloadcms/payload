@@ -11,9 +11,10 @@ import React, { Fragment } from 'react'
 
 import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'
 
-import { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
-import { SetStepNav } from '../../elements/StepNav/SetStepNav.js'
+/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
+import { HydrateAuthProvider, SetStepNav } from '../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
 import { getGlobalData } from '../../utilities/getGlobalData.js'
 import { getNavGroups } from '../../utilities/getNavGroups.js'
 import { DefaultDashboard } from './Default/index.js'
