@@ -2,17 +2,20 @@ import type {
   SerializedEditorState,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { PaginatedDocs, Payload } from 'payload'
+import type { Config, PaginatedDocs, Payload } from 'payload'
 
 import {
+  BlocksFeature,
   buildEditorState,
   type DefaultNodeTypes,
+  lexicalEditor,
   type SerializedBlockNode,
   type SerializedLinkNode,
   type SerializedRelationshipNode,
   type SerializedUploadNode,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
+import { configToJSONSchema, sanitizeConfig } from 'payload'
 import { sanitizeUrl } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { beforeAll, beforeEach, describe, expect, it as vitestIt } from 'vitest'
@@ -1266,4 +1269,53 @@ describe('Lexical', () => {
       expect(result).toContain('data-fields-hash=')
     })
   })
+})
+
+describe('Lexical block interface generation', () => {
+  // A lexical block's interface is named after its slug (PascalCase) or its `interfaceName`.
+  // When two differently-shaped blocks resolve to the same name, each must get its own
+  // interface — the first keeps the clean name, the second gets a content-hash suffix — so
+  // neither is silently mistyped. This mirrors payload core's `registerBlockInterface`.
+  vitestIt(
+    'content-hashes a colliding lexical block instead of silently overwriting it',
+    async () => {
+      const heroEditor = (fieldName: string, fieldType: 'number' | 'text') =>
+        lexicalEditor({
+          features: [
+            BlocksFeature({
+              blocks: [{ slug: 'hero', fields: [{ name: fieldName, type: fieldType }] }],
+            }),
+          ],
+        })
+
+      // Two richText fields each define a `hero` block with DIFFERENT fields, so both
+      // resolve to the `Hero` interface name.
+      const config = {
+        collections: [
+          {
+            slug: 'collisionTest',
+            fields: [
+              { name: 'rt1', type: 'richText', editor: heroEditor('title', 'text') },
+              { name: 'rt2', type: 'richText', editor: heroEditor('subtitle', 'number') },
+            ],
+          },
+        ],
+      } as unknown as Config
+
+      const sanitizedConfig = await sanitizeConfig(config)
+      const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+      const defs = jsonSchema.definitions!
+
+      // Each differently-shaped `hero` gets its own interface (one clean, one hashed).
+      const heroNames = Object.keys(defs).filter((k) => /^Hero(_[0-9A-F]{8})?$/.test(k))
+      expect(heroNames).toHaveLength(2)
+
+      // ...and they carry distinct field shapes (not a silent overwrite).
+      const shapeOf = (name: string): string =>
+        Object.keys((defs[name] as { properties: Record<string, unknown> }).properties)
+          .sort()
+          .join(',')
+      expect(shapeOf(heroNames[0]!)).not.toBe(shapeOf(heroNames[1]!))
+    },
+  )
 })

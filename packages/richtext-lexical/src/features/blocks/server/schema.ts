@@ -1,7 +1,7 @@
 import type { JSONSchema4 } from 'json-schema'
 import type { Block, JsonObject } from 'payload'
 
-import { fieldsToJSONSchema, flattenAllFields, toWords } from 'payload'
+import { fieldsToJSONSchema, flattenAllFields, registerBlockInterface } from 'payload'
 
 import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaArgs, JSONSchemaFn } from '../../typesServer.js'
@@ -27,7 +27,7 @@ export type InlineBlockFields<TFields extends JsonObject = JsonObject> = {
 } & TFields
 
 export type SerializedBlockNode<TFields extends { blockType: string } = { blockType: string }> = {
-  fields: { blockName?: string | null; id: string } & Omit<TFields, 'blockName' | 'id'>
+  fields: { blockName?: null | string; id: string } & Omit<TFields, 'blockName' | 'id'>
   format: LexicalElementFormat
   type: 'block'
   version: number
@@ -57,20 +57,18 @@ export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
   fields: { id: string } & Omit<TFields, 'id'>;
 };`
 
-/** Block `interfaceName` if set, otherwise a PascalCase form of the slug. */
-const blockFieldsInterfaceName = (block: Block) => block.interfaceName ?? toWords(block.slug, true)
-
 /**
  * JSON Schema for one block's `fields:` payload. Strips Payload's auto-added
  * `id`/`blockName` and re-adds them with strict runtime types: required
  * non-null `id`, optional `blockName?: string | null` (omitted for inline
- * blocks). Always registers as a top-level `$ref`.
+ * blocks). Registers the interface through `registerBlockInterface` (shared with
+ * payload core) and returns its collision-safe name.
  */
 const buildBlockFieldsSchema = (
   block: Block,
   args: JSONSchemaArgs,
   { isInlineBlock }: { isInlineBlock: boolean },
-): JSONSchema4 => {
+): string => {
   const flattened = flattenAllFields({ fields: block.fields })
   const userFieldsSchema = args.config
     ? fieldsToJSONSchema({
@@ -110,29 +108,27 @@ const buildBlockFieldsSchema = (
     required,
   }
 
-  const definitionName = blockFieldsInterfaceName(block)
-  args.interfaceNameDefinitions.set(definitionName, fieldsSchema)
-  return { $ref: `#/definitions/${definitionName}` }
+  return registerBlockInterface(block, fieldsSchema, args.interfaceNameDefinitions)
 }
 
 export const createBlockNodeJSONSchema =
   (blockConfigs: Block[]): JSONSchemaFn =>
   (args) => {
     args.typeStringDefinitions.add(BLOCK_NODES_TS)
-    const blockFieldsSchemas = blockConfigs.map((block) =>
+    const definitionNames = blockConfigs.map((block) =>
       buildBlockFieldsSchema(block, args, { isInlineBlock: false }),
     )
 
     const fieldsSchema: JSONSchema4 =
-      blockFieldsSchemas.length === 0
+      definitionNames.length === 0
         ? { type: 'object', additionalProperties: true }
-        : blockFieldsSchemas.length === 1
-          ? blockFieldsSchemas[0]!
-          : { oneOf: blockFieldsSchemas }
+        : definitionNames.length === 1
+          ? { $ref: `#/definitions/${definitionNames[0]!}` }
+          : { oneOf: definitionNames.map((name) => ({ $ref: `#/definitions/${name}` })) }
 
     const tsType =
-      blockConfigs.length > 0
-        ? `SerializedBlockNode<${blockConfigs.map((b) => blockFieldsInterfaceName(b)).join(' | ')}>`
+      definitionNames.length > 0
+        ? `SerializedBlockNode<${definitionNames.join(' | ')}>`
         : `SerializedBlockNode<{ blockType: string }>`
 
     return {
@@ -153,20 +149,20 @@ export const createInlineBlockNodeJSONSchema =
   (inlineBlockConfigs: Block[]): JSONSchemaFn =>
   (args) => {
     args.typeStringDefinitions.add(BLOCK_NODES_TS)
-    const blockFieldsSchemas = inlineBlockConfigs.map((block) =>
+    const definitionNames = inlineBlockConfigs.map((block) =>
       buildBlockFieldsSchema(block, args, { isInlineBlock: true }),
     )
 
     const fieldsSchema: JSONSchema4 =
-      blockFieldsSchemas.length === 0
+      definitionNames.length === 0
         ? { type: 'object', additionalProperties: true }
-        : blockFieldsSchemas.length === 1
-          ? blockFieldsSchemas[0]!
-          : { oneOf: blockFieldsSchemas }
+        : definitionNames.length === 1
+          ? { $ref: `#/definitions/${definitionNames[0]!}` }
+          : { oneOf: definitionNames.map((name) => ({ $ref: `#/definitions/${name}` })) }
 
     const tsType =
-      inlineBlockConfigs.length > 0
-        ? `SerializedInlineBlockNode<${inlineBlockConfigs.map((b) => blockFieldsInterfaceName(b)).join(' | ')}>`
+      definitionNames.length > 0
+        ? `SerializedInlineBlockNode<${definitionNames.join(' | ')}>`
         : `SerializedInlineBlockNode<{ blockType: string }>`
 
     return {

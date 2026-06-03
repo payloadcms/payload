@@ -1284,7 +1284,7 @@ const hashBlockSchema = (schema: JSONSchema4): string =>
  * block already uses that name, this one gets a content-hash suffix (`Hero_3F2A1B0C`) so the
  * two don't overwrite each other. Registering the same block shape again reuses its name.
  */
-function registerBlockInterface(
+export function registerBlockInterface(
   block: { interfaceName?: string; slug: string },
   blockSchema: JSONSchema4,
   interfaceNameDefinitions: Map<string, JSONSchema4>,

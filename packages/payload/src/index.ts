@@ -1844,6 +1844,7 @@ export {
   entityToJSONSchema,
   type FieldsToJSONSchemaArgs,
   fieldsToJSONSchema,
+  registerBlockInterface,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'

@@ -431,22 +431,22 @@ export type LexicalNodes_652244A4 =
   | SerializedListItemNode<LexicalNodes_652244A4>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_4E96E670".
+ * via the `definition` "LexicalNodes_62661AA4".
  */
-export type LexicalNodes_4E96E670 =
+export type LexicalNodes_62661AA4 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_4E96E670>
-  | SerializedBlockNode<MyBlock>
+  | SerializedParagraphNode<LexicalNodes_62661AA4>
+  | SerializedBlockNode<MyBlock_89EF3EA7>
   | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_4E96E670>
+  | SerializedHeadingNode<LexicalNodes_62661AA4>
   | SerializedUploadNode<'uploads' | 'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_4E96E670>
-  | SerializedListNode<LexicalNodes_4E96E670>
-  | SerializedListItemNode<LexicalNodes_4E96E670>
-  | SerializedAutoLinkNode<LexicalNodes_4E96E670, LexicalLinkFields_4E96E670>
-  | SerializedLinkNode<LexicalNodes_4E96E670, LexicalLinkFields_4E96E670>
+  | SerializedQuoteNode<LexicalNodes_62661AA4>
+  | SerializedListNode<LexicalNodes_62661AA4>
+  | SerializedListItemNode<LexicalNodes_62661AA4>
+  | SerializedAutoLinkNode<LexicalNodes_62661AA4, LexicalLinkFields_62661AA4>
+  | SerializedLinkNode<LexicalNodes_62661AA4, LexicalLinkFields_62661AA4>
   | SerializedRelationshipNode<
       | 'lexical-benchmark'
       | 'lexical-fully-featured'
@@ -578,16 +578,16 @@ export type LexicalNodes_5BC162BC =
   | SerializedInlineBlockNode<{blockType: string}>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_2792F11B".
+ * via the `definition` "LexicalNodes_ACA183EB".
  */
-export type LexicalNodes_2792F11B =
+export type LexicalNodes_ACA183EB =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_2792F11B>
-  | SerializedTableNode<LexicalNodes_2792F11B>
-  | SerializedTableCellNode<LexicalNodes_2792F11B>
-  | SerializedTableRowNode<LexicalNodes_2792F11B>
+  | SerializedParagraphNode<LexicalNodes_ACA183EB>
+  | SerializedTableNode<LexicalNodes_ACA183EB>
+  | SerializedTableCellNode<LexicalNodes_ACA183EB>
+  | SerializedTableRowNode<LexicalNodes_ACA183EB>
   | SerializedBlockNode<
       | ValidationBlock
       | FilterOptionsBlock
@@ -602,9 +602,9 @@ export type LexicalNodes_2792F11B =
       | LexicalBlocksRadioButtonsBlock
       | ConditionalLayout
       | TabBlock
-      | Code
+      | Code_5DA82017
       | NoBlockName
-      | MyBlock
+      | MyBlock_0B02E2CC
       | MyBlockWithLabel
       | MyBlockWithBlock
       | BlockRSC
@@ -612,16 +612,16 @@ export type LexicalNodes_2792F11B =
     >
   | SerializedInlineBlockNode<
       | AvatarGroupBlock
-      | MyInlineBlock
+      | MyInlineBlock_FAB42262
       | MyInlineBlockWithLabel
       | MyInlineBlockWithBlock
       | MyInlineBlockWithBlockAndLabel
     >
   | SerializedUploadNode<'uploads' | 'uploads2'>
-  | SerializedAutoLinkNode<LexicalNodes_2792F11B, LexicalLinkFields_2792F11B>
-  | SerializedLinkNode<LexicalNodes_2792F11B, LexicalLinkFields_2792F11B>
+  | SerializedAutoLinkNode<LexicalNodes_ACA183EB, LexicalLinkFields_ACA183EB>
+  | SerializedLinkNode<LexicalNodes_ACA183EB, LexicalLinkFields_ACA183EB>
   | SerializedHorizontalRuleNode
-  | SerializedQuoteNode<LexicalNodes_2792F11B>
+  | SerializedQuoteNode<LexicalNodes_ACA183EB>
   | SerializedRelationshipNode<
       | 'lexical-benchmark'
       | 'lexical-fully-featured'
@@ -658,9 +658,9 @@ export type LexicalNodes_2792F11B =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedListNode<LexicalNodes_2792F11B>
-  | SerializedListItemNode<LexicalNodes_2792F11B>
-  | SerializedHeadingNode<LexicalNodes_2792F11B>;
+  | SerializedListNode<LexicalNodes_ACA183EB>
+  | SerializedListItemNode<LexicalNodes_ACA183EB>
+  | SerializedHeadingNode<LexicalNodes_ACA183EB>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_423CFDD8".
@@ -1270,25 +1270,25 @@ export type LexicalNodes_D654DD6A =
   | SerializedHeadingNode<LexicalNodes_D654DD6A>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_A0A0A55E".
+ * via the `definition` "LexicalNodes_2A841A08".
  */
-export type LexicalNodes_A0A0A55E =
+export type LexicalNodes_2A841A08 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_A0A0A55E>
-  | SerializedTableNode<LexicalNodes_A0A0A55E>
-  | SerializedTableCellNode<LexicalNodes_A0A0A55E>
-  | SerializedTableRowNode<LexicalNodes_A0A0A55E>
-  | SerializedBlockNode<MyBlock>
+  | SerializedParagraphNode<LexicalNodes_2A841A08>
+  | SerializedTableNode<LexicalNodes_2A841A08>
+  | SerializedTableCellNode<LexicalNodes_2A841A08>
+  | SerializedTableRowNode<LexicalNodes_2A841A08>
+  | SerializedBlockNode<MyBlock_89EF3EA7>
   | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_A0A0A55E>
+  | SerializedHeadingNode<LexicalNodes_2A841A08>
   | SerializedUploadNode<'uploads' | 'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_A0A0A55E>
-  | SerializedListNode<LexicalNodes_A0A0A55E>
-  | SerializedListItemNode<LexicalNodes_A0A0A55E>
-  | SerializedAutoLinkNode<LexicalNodes_A0A0A55E, LexicalLinkFields_A0A0A55E>
-  | SerializedLinkNode<LexicalNodes_A0A0A55E, LexicalLinkFields_A0A0A55E>
+  | SerializedQuoteNode<LexicalNodes_2A841A08>
+  | SerializedListNode<LexicalNodes_2A841A08>
+  | SerializedListItemNode<LexicalNodes_2A841A08>
+  | SerializedAutoLinkNode<LexicalNodes_2A841A08, LexicalLinkFields_2A841A08>
+  | SerializedLinkNode<LexicalNodes_2A841A08, LexicalLinkFields_2A841A08>
   | SerializedRelationshipNode<
       | 'lexical-benchmark'
       | 'lexical-fully-featured'
@@ -1574,7 +1574,7 @@ export interface LexicalJsxConverter {
 export interface LexicalField {
   id: string;
   title: string;
-  lexicalRootEditor?: LexicalRichText<LexicalNodes_4E96E670> | null;
+  lexicalRootEditor?: LexicalRichText<LexicalNodes_62661AA4> | null;
   /**
    * A simple lexical field
    */
@@ -1582,7 +1582,7 @@ export interface LexicalField {
   /**
    * Should not be rendered
    */
-  lexicalWithBlocks: LexicalRichText<LexicalNodes_2792F11B>;
+  lexicalWithBlocks: LexicalRichText<LexicalNodes_ACA183EB>;
   lexicalWithBlocks_markdown?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1678,7 +1678,7 @@ export interface LexicalLocalizedField {
  */
 export interface LexicalObjectReferenceBug {
   id: string;
-  lexicalDefault?: LexicalRichText<LexicalNodes_4E96E670> | null;
+  lexicalDefault?: LexicalRichText<LexicalNodes_62661AA4> | null;
   lexicalEditor?: LexicalRichText<LexicalNodes_8D432583> | null;
   updatedAt: string;
   createdAt: string;
@@ -2021,7 +2021,7 @@ export interface OnDemandOutsideForm {
     | number
     | boolean
     | null;
-  hiddenAnchor?: LexicalRichText<LexicalNodes_A0A0A55E> | null;
+  hiddenAnchor?: LexicalRichText<LexicalNodes_2A841A08> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3246,7 +3246,93 @@ export interface BenchBlock30 {
  */
 export interface Code {
   id: string;
-  blockType: 'code';
+  blockType: 'Code';
+  language?:
+    | (
+        | 'abap'
+        | 'apex'
+        | 'azcli'
+        | 'bat'
+        | 'bicep'
+        | 'cameligo'
+        | 'clojure'
+        | 'coffee'
+        | 'cpp'
+        | 'csharp'
+        | 'csp'
+        | 'css'
+        | 'cypher'
+        | 'dart'
+        | 'dockerfile'
+        | 'ecl'
+        | 'elixir'
+        | 'flow9'
+        | 'freemarker2'
+        | 'fsharp'
+        | 'go'
+        | 'graphql'
+        | 'handlebars'
+        | 'hcl'
+        | 'html'
+        | 'ini'
+        | 'java'
+        | 'javascript'
+        | 'julia'
+        | 'kotlin'
+        | 'less'
+        | 'lexon'
+        | 'liquid'
+        | 'lua'
+        | 'm3'
+        | 'markdown'
+        | 'mdx'
+        | 'mips'
+        | 'msdax'
+        | 'mysql'
+        | 'objective-c'
+        | 'pascal'
+        | 'pascaligo'
+        | 'perl'
+        | 'pgsql'
+        | 'php'
+        | 'pla'
+        | 'plaintext'
+        | 'postiats'
+        | 'powerquery'
+        | 'powershell'
+        | 'protobuf'
+        | 'pug'
+        | 'python'
+        | 'qsharp'
+        | 'r'
+        | 'razor'
+        | 'redis'
+        | 'redshift'
+        | 'restructuredtext'
+        | 'ruby'
+        | 'rust'
+        | 'sb'
+        | 'scala'
+        | 'scheme'
+        | 'scss'
+        | 'shell'
+        | 'solidity'
+        | 'sophia'
+        | 'sparql'
+        | 'sql'
+        | 'st'
+        | 'swift'
+        | 'systemverilog'
+        | 'tcl'
+        | 'twig'
+        | 'typescript'
+        | 'typespec'
+        | 'vb'
+        | 'wgsl'
+        | 'xml'
+        | 'yaml'
+      )
+    | null;
   code?: string | null;
   blockName?: string | null;
 }
@@ -3269,8 +3355,6 @@ export interface MyBlock {
   id: string;
   blockType: 'myBlock';
   someText?: string | null;
-  someTextRequired: string;
-  radios?: ('option1' | 'option2' | 'option3') | null;
   blockName?: string | null;
 }
 /**
@@ -3280,7 +3364,7 @@ export interface MyBlock {
 export interface MyInlineBlock {
   id: string;
   blockType: 'myInlineBlock';
-  key?: ('value1' | 'value2' | 'value3') | null;
+  someText?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3371,10 +3455,24 @@ export interface Block {
   blockType: 'block';
 }
 /**
+ * Multiple blocks resolve to the `MyBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_4E96E670".
+ * via the `definition` "MyBlock_89EF3EA7".
  */
-export interface LexicalLinkFields_4E96E670 {
+export interface MyBlock_89EF3EA7 {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_62661AA4".
+ */
+export interface LexicalLinkFields_62661AA4 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -3596,6 +3694,18 @@ export interface TabBlock {
   blockName?: string | null;
 }
 /**
+ * Multiple blocks resolve to the `Code` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Code_5DA82017".
+ */
+export interface Code_5DA82017 {
+  id: string;
+  blockType: 'code';
+  code?: string | null;
+  blockName?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "NoBlockName".
  */
@@ -3603,6 +3713,18 @@ export interface NoBlockName {
   id: string;
   blockType: 'noBlockName';
   text?: string | null;
+  blockName?: string | null;
+}
+/**
+ * Multiple blocks resolve to the `MyBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock_0B02E2CC".
+ */
+export interface MyBlock_0B02E2CC {
+  id: string;
+  blockType: 'myBlock';
+  key?: ('value1' | 'value2' | 'value3') | null;
   blockName?: string | null;
 }
 /**
@@ -3660,6 +3782,17 @@ export interface AvatarGroupBlock {
     | null;
 }
 /**
+ * Multiple blocks resolve to the `MyInlineBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyInlineBlock_FAB42262".
+ */
+export interface MyInlineBlock_FAB42262 {
+  id: string;
+  blockType: 'myInlineBlock';
+  key?: ('value1' | 'value2' | 'value3') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyInlineBlockWithLabel".
  */
@@ -3688,9 +3821,9 @@ export interface MyInlineBlockWithBlockAndLabel {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_2792F11B".
+ * via the `definition` "LexicalLinkFields_ACA183EB".
  */
-export interface LexicalLinkFields_2792F11B {
+export interface LexicalLinkFields_ACA183EB {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -3844,9 +3977,9 @@ export interface LexicalLinkFields_D654DD6A {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_A0A0A55E".
+ * via the `definition` "LexicalLinkFields_2A841A08".
  */
-export interface LexicalLinkFields_A0A0A55E {
+export interface LexicalLinkFields_2A841A08 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
