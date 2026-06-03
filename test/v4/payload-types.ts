@@ -339,21 +339,11 @@ export interface Talk {
    * One-paragraph teaser shown in listings.
    */
   shortDescription?: string | null;
-  abstract?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+  abstract?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+      }[]
+    | null;
   track?: ('frontend' | 'backend' | 'devops' | 'design' | 'ai-ml' | 'workshop') | null;
   /**
    * Total runtime in minutes.
@@ -613,6 +603,12 @@ export interface ArrayField {
    * Add items to this array field.
    */
   arrayWithDescription?:
+    | {
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  localizedArray?:
     | {
         name?: string | null;
         id?: string | null;
@@ -1204,81 +1200,31 @@ export interface TextField {
  */
 export interface RichTextField {
   id: string;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+  content?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  table?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+      }[]
+    | null;
+  table?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  code?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+      }[]
+    | null;
+  code?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  typography?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+      }[]
+    | null;
+  typography?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  lists?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+      }[]
+    | null;
+  lists?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1416,21 +1362,11 @@ export interface SlugField {
 export interface TabsField {
   id: string;
   title?: string | null;
-  postContent?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
+  postContent?:
+    | {
         [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+      }[]
+    | null;
   featuredImage: string;
   metaTitle?: string | null;
   metaDescription?: string | null;
@@ -2297,6 +2233,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         id?: T;
       };
   arrayWithDescription?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  localizedArray?:
     | T
     | {
         name?: T;

@@ -10,7 +10,7 @@ import {
   useFormInitializing,
   useFormProcessing,
 } from '../Form/context.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'form-submit'
 
