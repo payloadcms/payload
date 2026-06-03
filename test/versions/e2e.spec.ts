@@ -74,6 +74,7 @@ import {
   draftWithChangeHookCollectionSlug,
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
+  draftWithUploadCollectionSlug,
   draftWithValidateCollectionSlug,
   errorOnUnpublishSlug,
   localizedCollectionSlug,
@@ -1122,6 +1123,128 @@ describe('Versions', () => {
         await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeHidden()
       })
+    })
+  })
+
+  describe('draft upload collections', () => {
+    let uploadURL: AdminUrlUtil
+
+    beforeAll(() => {
+      uploadURL = new AdminUrlUtil(serverURL, draftWithUploadCollectionSlug)
+    })
+
+    test('should keep published status after reuploading a file and saving as draft', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        filePath: path.resolve(dirname, './image.jpg'),
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('.doc-controls__status .status__value')).toContainText('Published')
+
+      // The file input is only rendered once the existing file is removed.
+      // Click the remove button on the current file to reveal the file input.
+      await page.locator('.file-details__remove').click()
+      await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'), {
+        force: true,
+      })
+
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(page.locator('.doc-controls__status .status__value')).toContainText('Changed')
+
+      await expect(async () => {
+        const { docs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          where: { id: { equals: publishedDoc.id } },
+        })
+        expect(docs[0]!._status).toStrictEqual('published')
+        expect(docs[0]!.filename).toStrictEqual(publishedDoc.filename)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+
+    test('should create a draft version with the new file without altering the published doc', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        filePath: path.resolve(dirname, './image.jpg'),
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+
+      // The file input is only rendered once the existing file is removed.
+      // Click the remove button on the current file to reveal the file input.
+      await page.locator('.file-details__remove').click()
+      await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'), {
+        force: true,
+      })
+
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(async () => {
+        const { docs: draftDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          draft: true,
+          where: { id: { equals: publishedDoc.id } },
+        })
+        expect(draftDocs[0]!._status).toStrictEqual('draft')
+        expect(draftDocs[0]!.filename).not.toStrictEqual(publishedDoc.filename)
+
+        const { docs: mainDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          where: { id: { equals: publishedDoc.id } },
+        })
+        expect(mainDocs[0]!.filename).toStrictEqual(publishedDoc.filename)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+
+    test('should create a draft when duplicating a published upload document', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        filePath: path.resolve(dirname, './image.jpg'),
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+
+      await openDocControls(page)
+      await page.locator('#action-duplicate').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(publishedDoc.id)
+
+      await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+      await waitForFormReady(page)
+
+      const duplicatedDocID = new URL(page.url()).pathname.split('/').pop()
+
+      await expect(async () => {
+        const { docs: draftDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          draft: true,
+          where: { id: { equals: duplicatedDocID } },
+        })
+        expect(draftDocs[0]!._status).toStrictEqual('draft')
+
+        const { docs: mainDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          where: { id: { equals: duplicatedDocID } },
+        })
+        expect(mainDocs[0]!._status).toStrictEqual('draft')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
 
