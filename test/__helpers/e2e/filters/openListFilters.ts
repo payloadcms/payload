@@ -18,21 +18,26 @@ export const openListFilters = async (
 ): Promise<{
   filterContainer: Locator
 }> => {
-  await expect(page.locator(togglerSelector)).toBeVisible()
-  const filterContainer = page.locator(filterContainerSelector).first()
+  const toggler = page.locator(togglerSelector).first()
+  await expect(toggler).toBeVisible()
 
-  // Use the "open" class rather than visibility, since the container remains
-  // visible during the close animation. Keying off visibility could cause us to
-  // skip the toggle click while the panel is mid-close, leaving it closed.
-  const isAlreadyOpen = await page
-    .locator(`${filterContainerSelector}.rah-static--height-auto`)
-    .isVisible()
+  const openContainer = page.locator(`${filterContainerSelector}.rah-static--height-auto`)
 
-  if (!isAlreadyOpen) {
-    await page.locator(togglerSelector).first().click()
-  }
+  // Drive the drawer open off the toggler's `aria-expanded` state (the source of truth)
+  // rather than a point-in-time visibility check of the container. The container's "open"
+  // class lingers during the close animation and flickers visible mid-open, so keying the
+  // toggle decision off container visibility could either skip the click while the panel is
+  // mid-close or drop the open click before React updates state (e.g. after a group-by/sort
+  // re-render). We click only when `aria-expanded` reports closed, then retry until the
+  // container is actually open. This makes the helper idempotent and resilient to that race.
+  await expect(async () => {
+    if ((await toggler.getAttribute('aria-expanded')) !== 'true') {
+      await toggler.click()
+    }
 
-  await expect(page.locator(`${filterContainerSelector}.rah-static--height-auto`)).toBeVisible()
+    await expect(toggler).toHaveAttribute('aria-expanded', 'true')
+    await expect(openContainer).toBeVisible()
+  }).toPass()
 
-  return { filterContainer }
+  return { filterContainer: page.locator(filterContainerSelector).first() }
 }

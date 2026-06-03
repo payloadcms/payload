@@ -54,7 +54,6 @@ type Props = {
   readonly permissions: SanitizedPermissions
   readonly RouterAdapter: RouterAdapterComponent
   readonly serverFunction: ServerFunctionClient
-  readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
   readonly translations: I18nClient['translations']
   readonly user: null | TypedUser
@@ -73,7 +72,6 @@ export const RootProvider: React.FC<Props> = ({
   permissions,
   RouterAdapter,
   serverFunction,
-  switchLanguageServerAction,
   theme,
   translations,
   user,
@@ -95,7 +93,6 @@ export const RootProvider: React.FC<Props> = ({
                     fallbackLang={fallbackLang}
                     language={languageCode}
                     languageOptions={languageOptions}
-                    switchLanguageServerAction={switchLanguageServerAction}
                     translations={translations}
                   >
                     <WindowInfoProvider

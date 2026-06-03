@@ -65,7 +65,7 @@
   }
 
   .nav__log-out {
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
   }
 
   .nav__log-out:hover g {
@@ -92,7 +92,7 @@
   }
 
   a.nav__link {
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
 
     &:hover {
       background: var(--color-bg-secondary);
@@ -102,7 +102,7 @@
 
   .nav__link--selected {
     font-weight: 600;
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     background: var(--color-bg-selected);
   }
 

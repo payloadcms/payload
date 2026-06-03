@@ -14,7 +14,7 @@ import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.
 import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
-import { SearchBar } from '../../elements/SearchBar/index.js'
+import { ListSearchFilter } from '../../elements/Search/ListSearchFilter/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -41,6 +41,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     hasCreatePermission: hasCreatePermissionFromProps,
     hierarchyData,
     HierarchyIcon,
+    HierarchySmallIcon,
     viewType,
   } = props
 
@@ -87,7 +88,7 @@ export function HierarchyListView(props: ListViewClientProps) {
   // Get search from URL params
   const searchFromURL = searchParams.get('search') || ''
 
-  // Update URL when search changes (debouncing is handled by SearchFilter)
+  // Update URL when search changes (debouncing is handled by ListSearchFilter)
   // This triggers a server refetch via Next.js router
   const handleSearchChange = useCallback(
     (value: string) => {
@@ -353,7 +354,7 @@ export function HierarchyListView(props: ListViewClientProps) {
 
             <ListControlsBar className={`${baseClass}__controls`}>
               <div className={`${baseClass}__controls-left`}>
-                <SearchBar
+                <ListSearchFilter
                   label={t('general:searchBy', {
                     label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
                   })}
@@ -384,7 +385,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               collections={collections}
               collectionSlug={collectionSlug}
               hasCreatePermission={hasCreatePermission}
-              HierarchyIcon={HierarchyIcon}
+              HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
               hierarchyLabel={collectionLabel}
               key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
                 hierarchyData?.relatedDocumentsByCollection || {},

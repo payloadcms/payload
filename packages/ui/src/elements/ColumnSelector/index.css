@@ -62,7 +62,7 @@
     height: var(--spacer-4);
     padding-inline-end: var(--spacer-2);
     background: var(--color-bg-secondary);
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
   }
 
   .column-selector__search-bar svg {

@@ -286,8 +286,8 @@
   .LexicalEditorTheme__listItemChecked,
   .LexicalEditorTheme__listItemUnchecked {
     position: relative;
-    padding-right: var(--spacer-4);
-    margin-right: var(--spacer-3);
+    padding-left: var(--spacer-4);
+    margin-left: var(--spacer-3);
     list-style-type: none;
     outline: none;
   }

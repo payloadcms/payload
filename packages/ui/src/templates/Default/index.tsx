@@ -16,6 +16,7 @@ import {
   ActionsProvider,
   AppHeader,
   BulkUploadProvider,
+  CommandPalette,
   EntityVisibilityProvider,
   DefaultTemplateWrapper as Wrapper,
 } from '../../exports/client/index.js'
@@ -118,6 +119,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
+      <CommandPalette />
       <BulkUploadProvider drawerSlugPrefix={collectionSlug}>
         <ActionsProvider Actions={Actions}>
           {RenderServerComponent({

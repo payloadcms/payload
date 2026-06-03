@@ -6,10 +6,10 @@ import { type CollectionConfig, type Config } from 'payload'
 import { resetDB } from '../__helpers/shared/clearAndSeed/reset.js'
 import { devUser } from '../credentials.js'
 import { blocksSeedData } from './seed/blocksSeedData.js'
-import { seedVersionsDiff } from './seed/versionsDiffData.js'
 import {
   blocksFieldsSlug,
   collectionSlugs,
+  docControlsSlug,
   draftVersionsSlug,
   folderItemsSlug,
   foldersSlug,
@@ -20,6 +20,7 @@ import {
   richTextFieldsSlug,
   tagItemsSlug,
   tagsSlug,
+  talksSlug,
   textFieldsSlug,
   uploadsSlug,
 } from './slugs.js'
@@ -45,6 +46,7 @@ import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
 import DateFields from './collections/Date/index.js'
+import DocControls from './collections/DocControls/index.js'
 import DraftVersions from './collections/DraftVersions/index.js'
 import EmailFields from './collections/Email/index.js'
 import FolderItems from './collections/FolderItems/index.js'
@@ -67,110 +69,99 @@ import SlugFields from './collections/Slug/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import TagItems from './collections/TagItems/index.js'
 import Tags from './collections/Tags/index.js'
+import Talks from './collections/Talks/index.js'
 import TextFields from './collections/Text/index.js'
 import TextareaFields from './collections/Textarea/index.js'
 import Rubbish from './collections/Trash/index.js'
+import RubbishWithDrafts from './collections/TrashWithDrafts/index.js'
 import Unauthorized from './collections/Unauthorized/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
+import Users from './collections/Users/index.js'
 import { VersionsDiff } from './collections/VersionsDiff/index.js'
 import {
   codeContent,
   getRichTextContent,
   getTypographyContent,
-  getUpdatedRichTextContent,
-  getUpdatedTypographyContent,
   listsContent,
   tableContent,
-  updatedCodeContent,
-  updatedListsContent,
 } from './seed/richTextData.js'
 
-export const collections: CollectionConfig[] = [
-  {
-    slug: 'users',
-    admin: {
-      useAsTitle: 'email',
-    },
-    auth: true,
-    access: {
-      admin: ({ req: { user } }) => {
-        return Boolean(user?.roles?.includes('admin'))
-      },
-    },
-    fields: [
-      {
-        name: 'roles',
-        type: 'select',
-        hasMany: true,
-        defaultValue: ['user'],
-        options: [
-          { label: 'Admin', value: 'admin' },
-          { label: 'User', value: 'user' },
-        ],
-      },
-    ],
+const withGroup = (collection: CollectionConfig, group: string): CollectionConfig => ({
+  ...collection,
+  admin: {
+    ...collection.admin,
+    group,
   },
-  ArrayFields,
-  BlocksFields,
-  CheckboxFields,
-  CodeFields,
-  CollapsibleFields,
-  DateFields,
-  EmailFields,
-  FolderItems,
-  Folders,
-  GroupFields,
-  JoinFields,
-  JoinPosts,
-  JSONFields,
-  NumberFields,
-  Orderable,
-  PasswordFields,
-  PointFields,
-  RadioFields,
-  RelationshipFields,
-  RichTextFields,
-  RowFields,
-  SearchBarTest,
-  SelectFields,
-  SlugFields,
-  TabsFields,
-  TagItems,
-  Tags,
-  TextFields,
-  TextareaFields,
-  Uploads,
-  UploadFields,
-  DraftVersions,
-  Autosave,
-  Rubbish,
-  Unauthorized,
-  VersionsDiff,
+})
+
+export const collections: CollectionConfig[] = [
+  // Auth
+  withGroup(Users, 'Auth'),
+  // Elements
+  withGroup(DocControls, 'Elements'),
+  withGroup(Orderable, 'Elements'),
+  withGroup(SearchBarTest, 'Elements'),
+  withGroup(Talks, 'Elements'),
+  withGroup(Unauthorized, 'Elements'),
+  // Fields
+  withGroup(ArrayFields, 'Fields'),
+  withGroup(BlocksFields, 'Fields'),
+  withGroup(CheckboxFields, 'Fields'),
+  withGroup(CodeFields, 'Fields'),
+  withGroup(CollapsibleFields, 'Fields'),
+  withGroup(DateFields, 'Fields'),
+  withGroup(EmailFields, 'Fields'),
+  withGroup(GroupFields, 'Fields'),
+  withGroup(JoinFields, 'Fields'),
+  withGroup(JoinPosts, 'Fields'),
+  withGroup(JSONFields, 'Fields'),
+  withGroup(NumberFields, 'Fields'),
+  withGroup(PasswordFields, 'Fields'),
+  withGroup(PointFields, 'Fields'),
+  withGroup(RadioFields, 'Fields'),
+  withGroup(RelationshipFields, 'Fields'),
+  withGroup(RichTextFields, 'Fields'),
+  withGroup(RowFields, 'Fields'),
+  withGroup(SelectFields, 'Fields'),
+  withGroup(SlugFields, 'Fields'),
+  withGroup(TabsFields, 'Fields'),
+  withGroup(TextFields, 'Fields'),
+  withGroup(TextareaFields, 'Fields'),
+  // Hierarchy
+  withGroup(Folders, 'Hierarchy'),
+  withGroup(FolderItems, 'Hierarchy'),
+  withGroup(Tags, 'Hierarchy'),
+  withGroup(TagItems, 'Hierarchy'),
+  // Trash
+  withGroup(Rubbish, 'Trash'),
+  withGroup(RubbishWithDrafts, 'Trash With Drafts'),
+  // Uploads
+  withGroup(Uploads, 'Uploads'),
+  withGroup(UploadFields, 'Uploads'),
+  // Versions
+  withGroup(Autosave, 'Versions'),
+  withGroup(VersionsDiff, 'Versions'),
+  withGroup(DraftVersions, 'Versions'),
 ]
 
 export const baseConfig: Partial<Config> = {
-  collections,
-  localization: {
-    defaultLocale: 'en',
-    fallback: true,
-    locales: ['en', 'es', 'de'],
-  },
   admin: {
     autoLogin: {
       email: devUser.email,
       password: devUser.password,
       prefillOnly: true,
     },
-    importMap: {
-      baseDir: path.resolve(dirname),
+    livePreview: {
+      collections: [docControlsSlug],
+      url: 'http://localhost:3000',
     },
     components: {
       actions: [
         './components/HeaderAction.tsx#HeaderAction',
         './components/HeaderAction.tsx#HeaderAction2',
       ],
-      afterNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
+      beforeNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
       views: {
         components: {
           Component: './views/Components/index.js#ComponentsView',
@@ -178,6 +169,15 @@ export const baseConfig: Partial<Config> = {
         },
       },
     },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
+  collections,
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: ['en', 'es', 'de'],
   },
   onInit: async (payload) => {
     // Clear existing data before seeding
@@ -249,8 +249,8 @@ export const baseConfig: Partial<Config> = {
 
       const devUserDoc = await payload.find({
         collection: 'users',
-        where: { email: { equals: devUser.email } },
         limit: 1,
+        where: { email: { equals: devUser.email } },
       })
       const userId = devUserDoc.docs[0]?.id
       const formattedUserID =
@@ -262,27 +262,15 @@ export const baseConfig: Partial<Config> = {
 
       const richTextContent = getRichTextContent(formattedUploadID, formattedUserID)
 
-      const richTextDoc = await payload.create({
+      await payload.create({
         collection: richTextFieldsSlug,
         data: {
-          title: 'Data harvest \u2013 how AI and sensors are revolutionizing farming',
+          code: codeContent,
           content: richTextContent,
           lists: listsContent,
-          typography: getTypographyContent(formattedUserID),
           table: tableContent,
-          code: codeContent,
-        },
-      })
-
-      // Create a second version with updated content for diff testing
-      await payload.update({
-        id: richTextDoc.id,
-        collection: richTextFieldsSlug,
-        data: {
-          content: getUpdatedRichTextContent(formattedUploadID, formattedUserID),
-          lists: updatedListsContent,
-          typography: getUpdatedTypographyContent(formattedUserID),
-          code: updatedCodeContent,
+          title: 'Data harvest \u2013 how AI and sensors are revolutionizing farming',
+          typography: getTypographyContent(formattedUserID),
         },
       })
     }
@@ -322,9 +310,9 @@ export const baseConfig: Partial<Config> = {
       await payload.create({
         collection: joinPostsSlug,
         data: {
-          title: `Post ${i}`,
           _status: i % 2 === 0 ? 'published' : 'draft',
           category: joinCategory.id,
+          title: `Post ${i}`,
         },
       })
     }
@@ -445,22 +433,22 @@ export const baseConfig: Partial<Config> = {
       await payload.create({
         collection: 'search-bar-test',
         data: {
-          title: `Document ${index}`,
-          description: `Description for document ${index}`,
           category: categories[i % categories.length],
-          status: statuses[i % statuses.length],
+          description: `Description for document ${index}`,
           priority: i,
+          status: statuses[i % statuses.length],
+          title: `Document ${index}`,
         },
       })
     }
 
     // Seed orderable collection for testing drag-and-drop ordering
     const orderableItems = [
-      { title: 'First Task', priority: 'high' },
-      { title: 'Second Task', priority: 'medium' },
-      { title: 'Third Task', priority: 'low' },
-      { title: 'Fourth Task', priority: 'high' },
-      { title: 'Fifth Task', priority: 'medium' },
+      { priority: 'high', title: 'First Task' },
+      { priority: 'medium', title: 'Second Task' },
+      { priority: 'low', title: 'Third Task' },
+      { priority: 'high', title: 'Fourth Task' },
+      { priority: 'medium', title: 'Fifth Task' },
     ]
 
     for (const item of orderableItems) {
@@ -472,18 +460,18 @@ export const baseConfig: Partial<Config> = {
 
     // Seed query presets for search-bar-test collection
     const presetAccessEveryone = {
+      delete: { constraint: 'everyone' },
       read: { constraint: 'everyone' },
       update: { constraint: 'everyone' },
-      delete: { constraint: 'everyone' },
     }
 
     await payload.create({
       collection: 'payload-query-presets',
       data: {
-        title: 'Published Only',
-        relatedCollection: 'search-bar-test',
-        isShared: true,
         access: presetAccessEveryone,
+        isShared: true,
+        relatedCollection: 'search-bar-test',
+        title: 'Published Only',
         where: {
           status: { equals: 'published' },
         },
@@ -493,10 +481,10 @@ export const baseConfig: Partial<Config> = {
     await payload.create({
       collection: 'payload-query-presets',
       data: {
-        title: 'News Articles',
-        relatedCollection: 'search-bar-test',
-        isShared: true,
         access: presetAccessEveryone,
+        isShared: true,
+        relatedCollection: 'search-bar-test',
+        title: 'News Articles',
         where: {
           category: { equals: 'news' },
         },
@@ -506,25 +494,22 @@ export const baseConfig: Partial<Config> = {
     await payload.create({
       collection: 'payload-query-presets',
       data: {
-        title: 'Drafts',
-        relatedCollection: 'search-bar-test',
-        isShared: true,
         access: presetAccessEveryone,
+        isShared: true,
+        relatedCollection: 'search-bar-test',
+        title: 'Drafts',
         where: {
           status: { equals: 'draft' },
         },
       },
     })
 
-    // Seed versions-diff collection with two versions for diff testing
-    await seedVersionsDiff(payload)
-
     // Seed draft-versions collection with many versions for pagination testing
     const { id: draftVersionsDocID } = await payload.create({
       collection: draftVersionsSlug,
       data: {
-        title: 'Document With Many Versions',
         content: 'Initial content',
+        title: 'Document With Many Versions',
       },
       draft: true,
     })
@@ -534,11 +519,197 @@ export const baseConfig: Partial<Config> = {
         id: draftVersionsDocID,
         collection: draftVersionsSlug,
         data: {
-          title: `Document With Many Versions - v${i + 2}`,
           content: `Updated content version ${i + 2}`,
+          title: `Document With Many Versions - v${i + 2}`,
         },
       })
     }
+
+    // Seed talks showcase collection
+    const existingUpload = await payload.find({
+      collection: uploadsSlug,
+      limit: 1,
+    })
+    const heroUploadID = existingUpload.docs[0]?.id
+
+    const buildAbstract = (text: string) => ({
+      root: {
+        type: 'root',
+        children: [
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text,
+                version: 1,
+              },
+            ],
+            direction: 'ltr' as const,
+            format: '' as const,
+            indent: 0,
+            textFormat: 0,
+            version: 1,
+          },
+        ],
+        direction: 'ltr' as const,
+        format: '' as const,
+        indent: 0,
+        version: 1,
+      },
+    })
+
+    const reactTalk = await payload.create({
+      collection: talksSlug,
+      data: {
+        slug: 'server-components-in-production',
+        _status: 'published',
+        abstract: buildAbstract(
+          'React Server Components reshape how we think about data fetching, bundling, and the boundary between server and client. This talk walks through a real-world migration of a 400-route admin panel.',
+        ),
+        attendeeCount: 412,
+        capacity: 800,
+        contactEmail: 'organizers@example.com',
+        customCss: '.talk-hero { background: linear-gradient(135deg, #6366f1, #ec4899); }',
+        customSchema: {
+          name: 'Server Components in Production',
+          '@context': 'https://schema.org',
+          '@type': 'Event',
+        },
+        difficultyLevel: 'intermediate',
+        durationMinutes: 45,
+        endTime: '2026-09-15T15:45:00.000Z',
+        gallery: heroUploadID
+          ? [
+              { caption: 'Speaker on the main stage', image: heroUploadID },
+              { caption: 'Audience Q&A', image: heroUploadID },
+            ]
+          : [],
+        heroImage: heroUploadID,
+        internalNotes: {
+          flagged: false,
+          reviewerNotes: 'Strong technical talk, confirmed slot.',
+        },
+        isFeatured: true,
+        isVirtual: false,
+        keywords: ['react', 'rsc', 'next.js', 'performance'],
+        languages: ['en'],
+        metaDescription:
+          'How we migrated a 400-route admin panel to React Server Components, with real benchmarks and trade-offs.',
+        metaTitle: 'Server Components in Production — A Migration Retrospective',
+        ogImage: heroUploadID,
+        organizer: devUserDoc.id,
+        priority: 9,
+        recordingUrl: 'https://example.com/watch/rsc-prod',
+        registrationDeadline: '2026-09-10T00:00:00.000Z',
+        registrationUrl: 'https://example.com/register',
+        resources: [
+          { type: 'slides', label: 'Slide deck (PDF)', url: 'https://example.com/slides.pdf' },
+          { type: 'code', label: 'Source code', url: 'https://github.com/example/rsc-demo' },
+          { type: 'docs', label: 'Migration guide', url: 'https://example.com/guide' },
+        ],
+        room: 'Main Stage',
+        sections: [
+          {
+            blockType: 'talk-hero',
+            eyebrow: 'Keynote',
+            heading: 'Server Components in Production',
+            subheading: 'A 12-month migration retrospective.',
+          },
+          {
+            attribution: 'Jordan Smith',
+            blockType: 'talk-quote',
+            quote:
+              'We cut our largest route bundle by 67% — but the architectural shift mattered more than the bytes.',
+            role: 'Staff Engineer',
+          },
+          {
+            blockType: 'talk-cta',
+            label: 'Read the full case study',
+            style: 'primary',
+            url: 'https://example.com/case-study',
+          },
+        ],
+        shortDescription:
+          'Lessons learned migrating a large admin app to React Server Components — what worked, what hurt, and what we would do again.',
+        slidesUrl: 'https://example.com/slides/rsc-prod',
+        startTime: '2026-09-15T15:00:00.000Z',
+        status: 'confirmed',
+        title: 'Server Components in Production',
+        track: 'frontend',
+        venueLocation: [-122.4194, 37.7749],
+      },
+    })
+
+    const aiTalk = await payload.create({
+      collection: talksSlug,
+      data: {
+        slug: 'llm-agents-without-the-hype',
+        _status: 'published',
+        abstract: buildAbstract(
+          'Most "agent" demos collapse outside the happy path. This session shares the evaluation framework we use to ship agent features into a regulated product.',
+        ),
+        attendeeCount: 78,
+        capacity: 120,
+        contactEmail: 'ai-track@example.com',
+        difficultyLevel: 'advanced',
+        durationMinutes: 30,
+        endTime: '2026-09-16T19:00:00.000Z',
+        isFeatured: false,
+        isVirtual: true,
+        keywords: ['llm', 'agents', 'evals'],
+        languages: ['en', 'es'],
+        organizer: devUserDoc.id,
+        priority: 6,
+        registrationUrl: 'https://example.com/register/ai',
+        relatedTalks: [reactTalk.id],
+        resources: [
+          { type: 'code', label: 'Eval harness repo', url: 'https://github.com/example/evals' },
+        ],
+        room: 'Workshop Room B',
+        sections: [
+          {
+            blockType: 'talk-hero',
+            heading: 'LLM Agents Without the Hype',
+            subheading: 'Building evals before features.',
+          },
+        ],
+        shortDescription:
+          'A pragmatic look at when LLM agents help, when they make things worse, and the eval harness we built to tell the difference.',
+        startTime: '2026-09-16T18:30:00.000Z',
+        status: 'accepted',
+        title: 'LLM Agents Without the Hype',
+        track: 'ai-ml',
+      },
+    })
+
+    await payload.create({
+      collection: talksSlug,
+      data: {
+        slug: 'designing-indexes-for-search',
+        _status: 'draft',
+        attendeeCount: 0,
+        difficultyLevel: 'intermediate',
+        durationMinutes: 25,
+        isFeatured: false,
+        isVirtual: false,
+        keywords: ['postgres', 'indexes', 'search'],
+        languages: ['en'],
+        organizer: devUserDoc.id,
+        priority: 4,
+        relatedTalks: [reactTalk.id, aiTalk.id],
+        shortDescription:
+          'A proposal walkthrough — we have not been accepted yet, but here is the outline.',
+        status: 'proposed',
+        title: 'Designing Database Indexes for Search',
+        track: 'backend',
+      },
+      draft: true,
+    })
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

@@ -28,7 +28,7 @@
     font-size: var(--text-body-medium-strong-font-size);
     font-weight: var(--text-body-medium-strong-font-weight);
     line-height: var(--text-body-medium-strong-line-height);
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
 
     &:hover,
     &:focus-visible {
@@ -61,8 +61,8 @@
   }
 
   .nav-group--collapsed .collapsible__toggle {
-    border-bottom-right-radius: var(--radius-medium);
-    border-bottom-left-radius: var(--radius-medium);
+    border-bottom-right-radius: var(--button-radius);
+    border-bottom-left-radius: var(--button-radius);
   }
 
   .nav-group--collapsed .nav-group__content {

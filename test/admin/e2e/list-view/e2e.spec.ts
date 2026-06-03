@@ -274,7 +274,7 @@ describe('List View', () => {
       await page.goto(`${postsUrl.list}?search=dennis`)
 
       // input should be filled out, list should filter
-      await expect(page.locator('.search-filter__input')).toHaveValue('dennis')
+      await expect(page.locator('#search-filter-input')).toHaveValue('dennis')
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 
@@ -300,10 +300,10 @@ describe('List View', () => {
         title: 'find me',
       })
 
-      await page.locator('.search-filter__input').fill('find me')
+      await page.locator('#search-filter-input').fill('find me')
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
 
-      await page.locator('.search-filter__input').fill('this is fun')
+      await page.locator('#search-filter-input').fill('this is fun')
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 

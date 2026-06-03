@@ -1,8 +1,6 @@
 @layer payload-default {
   .multi-value-remove {
     cursor: pointer;
-    min-width: 1.125rem;
-    min-height: 1.125rem;
     display: flex;
     align-items: center;
     justify-content: center;

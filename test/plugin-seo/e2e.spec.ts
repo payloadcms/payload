@@ -13,6 +13,7 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   switchTab,
+  waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -84,6 +85,7 @@ describe('SEO Plugin', () => {
 
     test('Should auto-generate meta title when button is clicked in tabs', async () => {
       await page.goto(url.edit(id))
+      await waitForFormReady(page)
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
       const metaTitleClass = '#field-meta__title'
 
@@ -111,6 +113,7 @@ describe('SEO Plugin', () => {
 
     test('Indicator should be orangered and characters counted', async () => {
       await page.goto(url.edit(id))
+      await waitForFormReady(page)
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
 
       await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
@@ -132,6 +135,7 @@ describe('SEO Plugin', () => {
 
     test('Should generate a search result preview based on content', async () => {
       await page.goto(url.edit(id))
+      await waitForFormReady(page)
       const metaDescriptionClass = '#field-meta__description'
       const previewClass = '#field-meta > div > div.render-fields > div:nth-child(5)'
 
@@ -150,6 +154,7 @@ describe('SEO Plugin', () => {
   describe('i18n', () => {
     test('support for another language', async () => {
       await page.goto(url.edit(id))
+      await waitForFormReady(page)
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
       const seoTabSelector = '.tabs-field__tab-button:has-text("SEO")'
 
@@ -174,6 +179,7 @@ describe('SEO Plugin', () => {
 
       // Navigate back to the page
       await page.goto(url.edit(id))
+      await waitForFormReady(page)
 
       await switchTab(page, seoTabSelector)
 

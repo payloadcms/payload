@@ -822,32 +822,36 @@
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     width: 100%;
-    min-height: var(--spacer-5);
-    border: var(--stroke-width-small) solid transparent;
-    border-radius: var(--radius-medium);
-    background: var(--color-bg-secondary);
+    min-height: var(--field-min-height);
+    border: var(--stroke-width-small) solid var(--field-color-border);
+    border-radius: var(--field-border-radius);
+    background: var(--field-color-bg);
     color: var(--color-text);
     padding-block: calc(var(--spacer-1));
-    padding-inline: var(--spacer-2) var(--spacer-5); /* space for calendar icon */
+    padding-inline: var(--field-padding-inline) var(--spacer-5); /* space for calendar icon */
 
     &::placeholder {
-      color: var(--color-text-tertiary);
+      color: var(--field-color-placeholder);
       font-weight: var(--text-body-medium-font-weight);
     }
 
-    &:hover:not(:focus) {
-      border-color: var(--color-border);
+    &:hover:not(:focus):not(:read-only) {
+      border-color: var(--field-color-border-hover);
     }
 
     &:focus {
-      border-color: var(--color-border-selected);
+      border-color: var(--field-color-border-focus);
       outline: none;
     }
 
+    &:read-only:focus {
+      border-color: var(--field-color-border-hover);
+    }
+
     &:disabled {
-      background: none;
+      background: var(--field-color-bg-disabled);
       /* color: var(--color-text-disabled); */
-      border-color: var(--color-border-disabled);
+      border-color: var(--field-color-border-disabled);
     }
   }
 
@@ -858,7 +862,7 @@
 
   /* ——— Error state ——— */
   .date-time-picker--has-error .react-datepicker__input-container input {
-    border-color: var(--color-border-danger-strong);
+    border-color: var(--field-color-border-error);
     border-width: 2px;
     padding: calc(var(--spacer-1) - 1px) calc(var(--spacer-2-5) - 1px);
     padding-right: calc(2.25rem - 1px);

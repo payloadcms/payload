@@ -57,12 +57,12 @@
       border: none;
       height: var(--stroke-width-small);
       margin: var(--spacer-2) calc(var(--spacer-2) * -1);
-      background-color: var(--color-white-200);
+      background-color: var(--ramp-white-200);
     }
 
     .item {
       padding: var(--spacer-2);
-      color: var(--color-white-800);
+      color: var(--ramp-white-800);
       background: transparent;
       cursor: pointer;
       font-family: var(--text-body-medium-font-family);
@@ -79,12 +79,12 @@
 
       &:hover {
         background: var(--color-bg-brand);
-        color: var(--color-white-1000);
+        color: var(--ramp-white-1000);
       }
 
       &:active {
         background: var(--color-bg-brand-pressed);
-        color: var(--color-white-1000);
+        color: var(--ramp-white-1000);
       }
     }
   }

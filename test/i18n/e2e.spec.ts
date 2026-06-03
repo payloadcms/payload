@@ -224,7 +224,7 @@ describe('i18n', () => {
       await expect(
         page.locator('#heading-i18nFieldLabel .sort-column__label', { hasText: 'es-label' }),
       ).toBeVisible()
-      await expect(page.locator('.search-filter input')).toHaveAttribute('placeholder', 'Buscar')
+      await expect(page.locator('#search-filter-input')).toHaveAttribute('placeholder', 'Buscar')
     })
 
     test('should display translated collections and globals config options', async () => {

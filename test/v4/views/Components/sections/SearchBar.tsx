@@ -1,34 +1,37 @@
 'use client'
 
-import { SearchBar } from '@payloadcms/ui/elements/SearchBar'
-import React from 'react'
+import { SearchInput } from '@payloadcms/ui'
+import React, { useState } from 'react'
 
 import { Section, Variant } from '../shared.js'
 
 export const SearchBarSection: React.FC<{ selectedComponent: string }> = ({
   selectedComponent,
 }) => {
+  const [value, setValue] = useState('')
+
   return (
-    <Section id="search-bar" selectedComponent={selectedComponent} title="Search Bar">
-      <Variant label="Default with placeholder">
-        <SearchBar label="Search..." onSearchChange={() => {}} />
+    <Section id="search-bar" selectedComponent={selectedComponent} title="Search">
+      <Variant label="SearchInput: default">
+        <SearchInput onChange={setValue} placeholder="Search..." value={value} />
       </Variant>
-      <Variant label="With value">
-        <SearchBar label="Search..." onSearchChange={() => {}} searchQueryParam="Example value" />
-      </Variant>
-      <Variant label="Disabled">
-        <SearchBar
-          disabled
-          label="Search..."
-          onSearchChange={() => {}}
-          searchQueryParam="Disabled value"
+      <Variant label="SearchInput: with value and clear">
+        <SearchInput
+          onChange={setValue}
+          onClear={() => setValue('')}
+          placeholder="Search..."
+          value={value || 'Example value'}
         />
       </Variant>
-      <Variant label="Focused">
-        <SearchBar
+      <Variant label="SearchInput: disabled">
+        <SearchInput disabled onChange={setValue} placeholder="Search..." value="Disabled value" />
+      </Variant>
+      <Variant label="SearchInput: focused">
+        <SearchInput
           className="search-bar--force-focus"
-          label="Search..."
-          onSearchChange={() => {}}
+          onChange={setValue}
+          placeholder="Search..."
+          value={value}
         />
         <style>{`.search-bar--force-focus { outline-color: var(--color-border-selected) !important; }`}</style>
       </Variant>
