@@ -28,7 +28,8 @@
       .rs__menu {
         overflow: hidden;
         border-radius: var(--radius-large);
-        background: var(--color-bg-menu);
+        background: var(--popup-bg-dark, var(--color-bg-menu));
+        color: var(--popup-item-color-dark, var(--color-text-ontooltip));
         padding: var(--spacer-2);
         min-width: 280px;
         max-height: 280px;
@@ -41,7 +42,7 @@
 
       .rs__option {
         padding: var(--spacer-1) var(--spacer-2);
-        border-radius: var(--radius-medium);
+        border-radius: var(--button-radius);
         cursor: pointer;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -67,7 +68,7 @@
         min-height: auto !important;
         position: relative;
         box-shadow: unset;
-        border-radius: var(--radius-medium);
+        border-radius: var(--button-radius);
         gap: 0;
         flex-wrap: nowrap;
 
@@ -136,7 +137,7 @@
         background: none;
         border: none;
         cursor: pointer;
-        border-radius: var(--radius-medium);
+        border-radius: var(--button-radius);
         color: var(--color-text-secondary);
 
         &:focus-visible {
@@ -154,7 +155,7 @@
         margin-left: calc(var(--spacer-1) / 2);
         height: var(--spacer-3);
         overflow: visible;
-        border-radius: var(--radius-medium);
+        border-radius: var(--button-radius);
 
         &:focus-visible {
           outline: var(--stroke-width-small) solid var(--accessibility-focus-color);

@@ -22,7 +22,6 @@ import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 import { Translation } from '../Translation/index.js'
-import './index.css'
 
 const baseClass = 'delete-document'
 
@@ -188,15 +187,13 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                 }}
               />
               {collectionConfig.trash && hasTrashPermission && hasDeletePermission && (
-                <div className={`${baseClass}__checkbox`}>
-                  <CheckboxInput
-                    checked={deletePermanently}
-                    id="delete-forever"
-                    label={t('general:deletePermanently')}
-                    name="delete-forever"
-                    onToggle={(e) => setDeletePermanently(e.target.checked)}
-                  />
-                </div>
+                <CheckboxInput
+                  checked={deletePermanently}
+                  id="delete-forever"
+                  label={t('general:deletePermanently')}
+                  name="delete-forever"
+                  onToggle={(e) => setDeletePermanently(e.target.checked)}
+                />
               )}
             </Fragment>
           }

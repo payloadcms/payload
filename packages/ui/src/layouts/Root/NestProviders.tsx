@@ -1,8 +1,8 @@
 import type { Config, ImportMap, ServerProps } from 'payload'
 
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import '@payloadcms/ui/scss/app.scss'
 import React from 'react'
+
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 type Args = {
   readonly children: React.ReactNode

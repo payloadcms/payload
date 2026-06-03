@@ -32,6 +32,11 @@
       "types": "./src/exports/shared/index.ts",
       "default": "./src/exports/shared/index.ts"
     },
+    "./layouts": {
+      "import": "./src/exports/layouts.ts",
+      "types": "./src/exports/layouts.ts",
+      "default": "./src/exports/layouts.ts"
+    },
     "./scss": {
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
@@ -181,6 +186,11 @@
       "types": "./src/utilities/getPreferences.ts",
       "default": "./src/utilities/getPreferences.ts"
     },
+    "./utilities/initReq": {
+      "import": "./src/utilities/initReq.ts",
+      "types": "./src/utilities/initReq.ts",
+      "default": "./src/utilities/initReq.ts"
+    },
     "./views/Root/getCustomViewByRoute": {
       "import": "./src/views/Root/getCustomViewByRoute.ts",
       "types": "./src/views/Root/getCustomViewByRoute.ts",
@@ -297,6 +307,11 @@
         "import": "./dist/exports/shared/index.js",
         "types": "./dist/exports/shared/index.d.ts",
         "default": "./dist/exports/shared/index.js"
+      },
+      "./layouts": {
+        "import": "./dist/exports/layouts.js",
+        "types": "./dist/exports/layouts.d.ts",
+        "default": "./dist/exports/layouts.js"
       },
       "./css": {
         "import": "./dist/styles.css",

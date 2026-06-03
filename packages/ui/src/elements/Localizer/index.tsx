@@ -18,8 +18,15 @@ const baseClass = 'localizer'
 
 export const Localizer: React.FC<{
   className?: string
+  renderButton?: (props: {
+    active: boolean
+    'aria-expanded': boolean
+    'aria-haspopup': true
+    onClick: React.MouseEventHandler
+    onKeyDown: React.KeyboardEventHandler
+  }) => React.ReactNode
 }> = (props) => {
-  const { className } = props
+  const { className, renderButton } = props
   const {
     config: { localization },
   } = useConfig()
@@ -93,22 +100,25 @@ export const Localizer: React.FC<{
               })}
             </PopupList.ButtonGroup>
           )}
-          renderButton={({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
-            <Button
-              aria-label={t('general:locale')}
-              buttonStyle="secondary"
-              extraButtonProps={{ onKeyDown }}
-              icon={<LanguageIcon size={24} />}
-              iconPosition="left"
-              onClick={onClick}
-              {...ariaProps}
-            >
-              <div className={`${baseClass}__button-content`}>
-                {locale.code}
-                <ChevronIcon size={16} />
-              </div>
-            </Button>
-          )}
+          renderButton={
+            renderButton ??
+            (({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
+              <Button
+                aria-label={t('general:locale')}
+                buttonStyle="secondary"
+                extraButtonProps={{ onKeyDown }}
+                icon={<LanguageIcon size={24} />}
+                iconPosition="left"
+                onClick={onClick}
+                {...ariaProps}
+              >
+                <div className={`${baseClass}__button-content`}>
+                  {locale.code}
+                  <ChevronIcon size={16} />
+                </div>
+              </Button>
+            ))
+          }
           showScrollbar
           size="large"
         />

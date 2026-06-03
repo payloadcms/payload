@@ -1,8 +1,8 @@
 import type { Locale, PayloadRequest } from 'payload'
 
-import { upsertPreferences } from '@payloadcms/ui/rsc'
-import { findLocaleFromCode } from '@payloadcms/ui/shared'
-import { getPreferences } from '@payloadcms/ui/utilities/getPreferences'
+import { findLocaleFromCode } from './findLocaleFromCode.js'
+import { getPreferences } from './getPreferences.js'
+import { upsertPreferences } from './upsertPreferences.js'
 
 type GetRequestLocalesArgs = {
   req: PayloadRequest

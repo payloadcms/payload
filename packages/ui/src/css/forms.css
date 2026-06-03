@@ -1,16 +1,16 @@
 @layer payload-default {
   .form-input {
     width: 100%;
-    min-height: var(--spacer-5);
-    background: var(--color-bg-secondary);
-    border: var(--stroke-width-small) solid transparent;
-    border-radius: var(--radius-medium);
-    color: var(--color-text);
+    min-height: var(--field-min-height);
+    background: var(--field-color-bg);
+    border: var(--stroke-width-small) solid var(--field-color-border);
+    border-radius: var(--field-border-radius);
+    color: var(--field-color-text);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    padding: 0 var(--spacer-2);
+    padding: 0 var(--field-padding-inline);
     appearance: none;
     -webkit-appearance: none;
     transition-property: box-shadow, background-color;
@@ -23,18 +23,22 @@
     }
 
     &::placeholder {
-      color: var(--color-text-tertiary);
+      color: var(--field-color-placeholder);
       font-weight: var(--text-body-medium-font-weight);
       font-size: var(--text-body-medium-font-size);
     }
 
-    &:where(:hover:not(:focus):not(:disabled)) {
-      border-color: var(--color-border);
+    &:where(:hover:not(:focus):not(:disabled):not(:read-only)) {
+      border-color: var(--field-color-border-hover);
     }
 
     &:focus {
-      border-color: var(--color-border-selected);
-      border-radius: var(--radius-medium);
+      border-color: var(--field-color-border-focus);
+      border-radius: var(--field-border-radius);
+    }
+
+    &:read-only:focus {
+      border-color: var(--field-color-border-hover);
     }
 
     &:focus-visible {
@@ -42,49 +46,52 @@
     }
 
     &:disabled {
-      color: var(--color-text-disabled);
-      border-color: var(--color-border);
-      background: none;
+      color: var(--field-color-text-disabled);
+      border-color: var(--field-color-border-disabled);
+      background: var(--field-color-bg-disabled);
     }
   }
 
   .form-input-error {
-    border-color: var(--color-border-danger-strong);
+    border-color: var(--field-color-border-error);
 
     &:focus {
-      border-color: var(--color-border-selected);
+      border-color: var(--field-color-border-focus);
     }
   }
 
   .form-input-group {
     display: flex;
+    width: 100%;
+    min-width: 0;
     position: relative;
     align-items: stretch;
-    background: var(--color-bg-secondary);
-    border: var(--stroke-width-small) solid transparent;
-    border-radius: var(--radius-medium);
-    min-height: var(--spacer-5);
+    background: var(--field-color-bg);
+    border: var(--stroke-width-small) solid var(--field-color-border);
+    border-radius: var(--field-border-radius);
+    min-height: var(--field-min-height);
     transition-property: box-shadow, background-color;
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
-    &:where(:hover:not(:focus-within):not(:has(input:disabled))) {
-      border-color: var(--color-border);
+    &:where(:hover:not(:focus-within):not(:has(input:disabled)):not(:has(input:read-only))) {
+      border-color: var(--field-color-border-hover);
     }
 
     &:focus-within {
       outline: none;
-      border-color: var(--color-border-selected);
+      border-color: var(--field-color-border-focus);
     }
 
     &:has(input:disabled) {
-      background: transparent;
-      border-color: var(--color-border-disabled);
-      color: var(--color-text-disabled);
+      background: var(--field-color-bg-disabled);
+      border-color: var(--field-color-border-disabled);
+      color: var(--field-color-text-disabled);
     }
 
     input.form-input {
-      flex: 1;
+      flex: 1 1 0%;
+      width: 0;
       min-width: 0;
       background: transparent;
       border: none;
@@ -99,10 +106,10 @@
   }
 
   .form-input-group-error {
-    border-color: var(--color-border-danger-strong);
+    border-color: var(--field-color-border-error);
 
     &:focus-within {
-      border-color: var(--color-border-selected);
+      border-color: var(--field-color-border-focus);
     }
   }
 }

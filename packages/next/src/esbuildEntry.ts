@@ -1,2 +1,2 @@
-export { RootLayout } from './layouts/Root/index.js'
+export { RootLayout } from './adapters/layout.js'
 export { RootPage } from './pages/Root.js'

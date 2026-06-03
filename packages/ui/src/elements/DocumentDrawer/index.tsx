@@ -133,11 +133,11 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
   const MemoizedDrawer = useMemo<React.FC<DocumentDrawerProps>>(() => {
     return (props) => (
       <DocumentDrawer
+        key={drawerSlug}
         {...props}
         collectionSlug={collectionSlug}
         drawerSlug={drawerSlug}
         id={id}
-        key={drawerSlug}
         overrideEntityVisibility={overrideEntityVisibility}
       />
     )

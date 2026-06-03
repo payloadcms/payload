@@ -1,8 +1,13 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
-import type { ImportMap, InitReqResult, PayloadRequest, SanitizedConfig } from 'payload'
+import type {
+  ImportMap,
+  InitReqResult,
+  PayloadRequest,
+  SanitizedConfig,
+  ServerAdapter,
+} from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
-import { headers as getHeaders } from 'next/headers.js'
 import {
   createLocalReq,
   executeAuthStrategies,
@@ -12,7 +17,6 @@ import {
   parseCookies,
 } from 'payload'
 
-import { nextServerAdapter } from '../adapters/server.js'
 import { getRequestLocale } from './getRequestLocale.js'
 import { selectiveCache } from './selectiveCache.js'
 
@@ -21,13 +25,13 @@ type PartialResult = {
 } & Pick<InitReqResult, 'languageCode'> &
   Pick<PayloadRequest, 'payload' | 'responseHeaders' | 'user'>
 
-// Create cache instances for different parts of our application
 const partialReqCache = selectiveCache<PartialResult>('partialReq')
 const reqCache = selectiveCache<InitReqResult>('req')
 
 /**
  * Initializes a full request object, including the `req` object and access control.
- * As access control and getting the request locale is dependent on the current URL and
+ * Reads headers/cookies through the supplied `serverAdapter` so the function is
+ * framework-agnostic; the consuming framework wires its own adapter.
  */
 export const initReq = async function ({
   canSetHeaders,
@@ -35,14 +39,16 @@ export const initReq = async function ({
   importMap,
   key,
   overrides,
+  serverAdapter,
 }: {
   canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
   overrides?: Parameters<typeof createLocalReq>[0]
+  serverAdapter: ServerAdapter
 }): Promise<InitReqResult> {
-  const headers = await getHeaders()
+  const headers = await serverAdapter.getHeaders()
   const cookies = parseCookies(headers)
 
   const partialResult = await partialReqCache.get(async () => {
@@ -88,7 +94,7 @@ export const initReq = async function ({
             host: headers.get('host'),
             i18n: i18n as I18n,
             responseHeaders,
-            server: nextServerAdapter,
+            server: serverAdapter,
             user,
             ...(reqOverrides || {}),
           },
@@ -117,7 +123,7 @@ export const initReq = async function ({
       }
     }, key)
     .then((result) => {
-      // CRITICAL: Create a shallow copy of req before returning to prevent
+      // Shallow-copy req before returning to prevent
       // mutations from propagating to the cached req object.
       // This ensures parallel operations using the same cache key don't affect each other.
       return {

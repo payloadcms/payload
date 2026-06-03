@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -71,6 +72,7 @@ export interface Config {
     'doc-controls': DocControl;
     orderable: Orderable;
     'search-bar-test': SearchBarTest;
+    talks: Talk;
     'unauthorized-test': UnauthorizedTest;
     'array-fields': ArrayField;
     'blocks-fields': BlocksField;
@@ -100,11 +102,13 @@ export interface Config {
     tags: Tag;
     'tag-items': TagItem;
     rubbish: Rubbish;
+    'rubbish-with-drafts': RubbishWithDraft;
     uploads: Upload;
     'upload-fields': UploadField;
     autosave: Autosave;
-    'draft-versions': DraftVersion;
     'versions-diff': VersionsDiff;
+    'draft-versions': DraftVersion;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -113,6 +117,9 @@ export interface Config {
     'payload-query-presets': PayloadQueryPreset;
   };
   collectionsJoins: {
+    talks: {
+      referencedBy: 'talks';
+    };
     'join-fields': {
       relatedPosts: 'join-posts';
       postsWithColumns: 'join-posts';
@@ -130,6 +137,7 @@ export interface Config {
     'doc-controls': DocControlsSelect<false> | DocControlsSelect<true>;
     orderable: OrderableSelect<false> | OrderableSelect<true>;
     'search-bar-test': SearchBarTestSelect<false> | SearchBarTestSelect<true>;
+    talks: TalksSelect<false> | TalksSelect<true>;
     'unauthorized-test': UnauthorizedTestSelect<false> | UnauthorizedTestSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
@@ -159,10 +167,13 @@ export interface Config {
     tags: TagsSelect<false> | TagsSelect<true>;
     'tag-items': TagItemsSelect<false> | TagItemsSelect<true>;
     rubbish: RubbishSelect<false> | RubbishSelect<true>;
+    'rubbish-with-drafts': RubbishWithDraftsSelect<false> | RubbishWithDraftsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     'upload-fields': UploadFieldsSelect<false> | UploadFieldsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
+    'versions-diff': VersionsDiffSelect<false> | VersionsDiffSelect<true>;
     'draft-versions': DraftVersionsSelect<false> | DraftVersionsSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -180,7 +191,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -210,6 +221,24 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface PayloadMcpApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -219,6 +248,9 @@ export interface User {
   roles?: ('admin' | 'user')[] | null;
   updatedAt: string;
   createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -288,6 +320,242 @@ export interface SearchBarTest {
   priority?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "talks".
+ */
+export interface Talk {
+  id: string;
+  /**
+   * Public-facing title of the talk.
+   */
+  title: string;
+  /**
+   * URL slug — leave blank to auto-generate.
+   */
+  slug?: string | null;
+  /**
+   * One-paragraph teaser shown in listings.
+   */
+  shortDescription?: string | null;
+  abstract?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  track?: ('frontend' | 'backend' | 'devops' | 'design' | 'ai-ml' | 'workshop') | null;
+  /**
+   * Total runtime in minutes.
+   */
+  durationMinutes?: number | null;
+  difficultyLevel?: ('beginner' | 'intermediate' | 'advanced') | null;
+  languages?: ('en' | 'es' | 'de' | 'fr' | 'ja' | 'pt')[] | null;
+  /**
+   * Keywords for search and discoverability.
+   */
+  keywords?: string[] | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  /**
+   * Room or stage name.
+   */
+  room?: string | null;
+  /**
+   * Maximum seats.
+   */
+  capacity?: number | null;
+  /**
+   * Geographic coordinates of the venue.
+   *
+   * @minItems 2
+   * @maxItems 2
+   */
+  venueLocation?: [number, number] | null;
+  registrationDeadline?: string | null;
+  registrationUrl?: string | null;
+  contactEmail?: string | null;
+  /**
+   * Wide image used on the talk landing page.
+   */
+  heroImage?: (string | null) | Upload;
+  slidesUrl?: string | null;
+  recordingUrl?: string | null;
+  /**
+   * Photos and graphics for the talk.
+   */
+  gallery?:
+    | {
+        image: string | Upload;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  sections?:
+    | (
+        | {
+            eyebrow?: string | null;
+            heading: string;
+            subheading?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-hero';
+          }
+        | {
+            quote: string;
+            attribution?: string | null;
+            role?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-quote';
+          }
+        | {
+            label: string;
+            url: string;
+            style?: ('primary' | 'secondary' | 'ghost') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-cta';
+          }
+        | {
+            image: string | Upload;
+            caption?: string | null;
+            align?: ('left' | 'center' | 'right') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-image';
+          }
+        | {
+            heading?: string | null;
+            items?:
+              | {
+                  question: string;
+                  answer: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-qa';
+          }
+      )[]
+    | null;
+  /**
+   * Links to slides, recording, docs, code.
+   */
+  resources?:
+    | {
+        label: string;
+        url: string;
+        type?: ('slides' | 'recording' | 'docs' | 'code' | 'other') | null;
+        id?: string | null;
+      }[]
+    | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: (string | null) | Upload;
+  customCss?: string | null;
+  /**
+   * JSON-LD schema injected into the page head.
+   */
+  customSchema?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Notes visible only to organizers.
+   */
+  internalNotes?: {
+    reviewerNotes?: string | null;
+    flagged?: boolean | null;
+  };
+  /**
+   * Other talks attendees might enjoy.
+   */
+  relatedTalks?: (string | Talk)[] | null;
+  /**
+   * Talks that list this one as related.
+   */
+  referencedBy?: {
+    docs?: (string | Talk)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Workflow status (separate from publish state).
+   */
+  status?: ('proposed' | 'accepted' | 'confirmed' | 'cancelled') | null;
+  /**
+   * Primary owner of this talk.
+   */
+  organizer?: (string | null) | User;
+  coOrganizers?: (string | User)[] | null;
+  /**
+   * Hierarchical tags.
+   */
+  _h_tags?: (string | Tag)[] | null;
+  isFeatured?: boolean | null;
+  isVirtual?: boolean | null;
+  /**
+   * Current registered attendees.
+   */
+  attendeeCount?: number | null;
+  /**
+   * Sort priority (1–10).
+   */
+  priority?: number | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads".
+ */
+export interface Upload {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: string;
+  _h_tags?: (string | null) | Tag;
+  name: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+  allowedCollections?: ('talks' | 'text-fields' | 'tag-items')[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -932,50 +1200,85 @@ export interface TextField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tags".
- */
-export interface Tag {
-  id: string;
-  _h_tags?: (string | null) | Tag;
-  name: string;
-  description?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
-  allowedCollections?: ('text-fields' | 'tag-items')[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rich-text-fields".
  */
 export interface RichTextField {
   id: string;
-  content?:
-    | {
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
         [k: string]: unknown;
-      }[]
-    | null;
-  table?:
-    | {
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  table?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
         [k: string]: unknown;
-      }[]
-    | null;
-  code?:
-    | {
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  code?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
         [k: string]: unknown;
-      }[]
-    | null;
-  typography?:
-    | {
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  typography?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
         [k: string]: unknown;
-      }[]
-    | null;
-  lists?:
-    | {
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  lists?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
         [k: string]: unknown;
-      }[]
-    | null;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1113,11 +1416,21 @@ export interface SlugField {
 export interface TabsField {
   id: string;
   title?: string | null;
-  postContent?:
-    | {
+  postContent?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
         [k: string]: unknown;
-      }[]
-    | null;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   featuredImage: string;
   metaTitle?: string | null;
   metaDescription?: string | null;
@@ -1206,22 +1519,15 @@ export interface Rubbish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads".
+ * via the `definition` "rubbish-with-drafts".
  */
-export interface Upload {
+export interface RubbishWithDraft {
   id: string;
-  alt?: string | null;
+  title: string;
   updatedAt: string;
   createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1250,6 +1556,79 @@ export interface Autosave {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions-diff".
+ */
+export interface VersionsDiff {
+  id: string;
+  title: string;
+  array?:
+    | {
+        arrayText?: string | null;
+        nestedArray?:
+          | {
+              nestedText?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | (
+        | {
+            blockText?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textBlock';
+          }
+        | {
+            blockNumber?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'numberBlock';
+          }
+      )[]
+    | null;
+  checkbox?: boolean | null;
+  code?: string | null;
+  date?: string | null;
+  description?: string | null;
+  email?: string | null;
+  group?: {
+    nestedText?: string | null;
+    nestedNumber?: number | null;
+  };
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  number?: number | null;
+  numberMany?: number[] | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  radio?: ('small' | 'medium' | 'large') | null;
+  relationship?: (string | null) | Tag;
+  relationshipMany?: (string | Tag)[] | null;
+  select?: ('option-1' | 'option-2' | 'option-3') | null;
+  selectMany?: ('option-1' | 'option-2' | 'option-3')[] | null;
+  tabText?: string | null;
+  tabNumber?: number | null;
+  upload?: (string | null) | Upload;
+  uploadMany?: (string | Upload)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-versions".
  */
 export interface DraftVersion {
@@ -1260,6 +1639,49 @@ export interface DraftVersion {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
+  /**
+   * Access for this API key — uncheck to revoke individual tools.
+   */
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1394,6 +1816,10 @@ export interface PayloadLockedDocument {
         value: string | SearchBarTest;
       } | null)
     | ({
+        relationTo: 'talks';
+        value: string | Talk;
+      } | null)
+    | ({
         relationTo: 'unauthorized-test';
         value: string | UnauthorizedTest;
       } | null)
@@ -1510,6 +1936,10 @@ export interface PayloadLockedDocument {
         value: string | Rubbish;
       } | null)
     | ({
+        relationTo: 'rubbish-with-drafts';
+        value: string | RubbishWithDraft;
+      } | null)
+    | ({
         relationTo: 'uploads';
         value: string | Upload;
       } | null)
@@ -1522,14 +1952,27 @@ export interface PayloadLockedDocument {
         value: string | Autosave;
       } | null)
     | ({
+        relationTo: 'versions-diff';
+        value: string | VersionsDiff;
+      } | null)
+    | ({
         relationTo: 'draft-versions';
         value: string | DraftVersion;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1539,10 +1982,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -1624,6 +2072,9 @@ export interface UsersSelect<T extends boolean = true> {
   roles?: T;
   updatedAt?: T;
   createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
@@ -1675,6 +2126,125 @@ export interface SearchBarTestSelect<T extends boolean = true> {
   priority?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "talks_select".
+ */
+export interface TalksSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  shortDescription?: T;
+  abstract?: T;
+  track?: T;
+  durationMinutes?: T;
+  difficultyLevel?: T;
+  languages?: T;
+  keywords?: T;
+  startTime?: T;
+  endTime?: T;
+  room?: T;
+  capacity?: T;
+  venueLocation?: T;
+  registrationDeadline?: T;
+  registrationUrl?: T;
+  contactEmail?: T;
+  heroImage?: T;
+  slidesUrl?: T;
+  recordingUrl?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  sections?:
+    | T
+    | {
+        'talk-hero'?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              subheading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'talk-quote'?:
+          | T
+          | {
+              quote?: T;
+              attribution?: T;
+              role?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'talk-cta'?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              style?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'talk-image'?:
+          | T
+          | {
+              image?: T;
+              caption?: T;
+              align?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'talk-qa'?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  resources?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        type?: T;
+        id?: T;
+      };
+  metaTitle?: T;
+  metaDescription?: T;
+  ogImage?: T;
+  customCss?: T;
+  customSchema?: T;
+  internalNotes?:
+    | T
+    | {
+        reviewerNotes?: T;
+        flagged?: T;
+      };
+  relatedTalks?: T;
+  referencedBy?: T;
+  status?: T;
+  organizer?: T;
+  coOrganizers?: T;
+  _h_tags?: T;
+  isFeatured?: T;
+  isVirtual?: T;
+  attendeeCount?: T;
+  priority?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2292,6 +2862,17 @@ export interface RubbishSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish-with-drafts_select".
+ */
+export interface RubbishWithDraftsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "uploads_select".
  */
 export interface UploadsSelect<T extends boolean = true> {
@@ -2333,6 +2914,70 @@ export interface AutosaveSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions-diff_select".
+ */
+export interface VersionsDiffSelect<T extends boolean = true> {
+  title?: T;
+  array?:
+    | T
+    | {
+        arrayText?: T;
+        nestedArray?:
+          | T
+          | {
+              nestedText?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              blockText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        numberBlock?:
+          | T
+          | {
+              blockNumber?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  checkbox?: T;
+  code?: T;
+  date?: T;
+  description?: T;
+  email?: T;
+  group?:
+    | T
+    | {
+        nestedText?: T;
+        nestedNumber?: T;
+      };
+  json?: T;
+  number?: T;
+  numberMany?: T;
+  point?: T;
+  radio?: T;
+  relationship?: T;
+  relationshipMany?: T;
+  select?: T;
+  selectMany?: T;
+  tabText?: T;
+  tabNumber?: T;
+  upload?: T;
+  uploadMany?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-versions_select".
  */
 export interface DraftVersionsSelect<T extends boolean = true> {
@@ -2342,6 +2987,22 @@ export interface DraftVersionsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  overrideAccess?: T;
+  access?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2488,6 +3149,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

@@ -7,6 +7,7 @@ import {
 } from '@payloadcms/ui/rsc'
 import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
+import { initReq } from '@payloadcms/ui/utilities/initReq'
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import {
   getDefaultLayoutHandler,
@@ -18,7 +19,8 @@ import { renderListHandler } from '@payloadcms/ui/views/List/handleServerFunctio
 
 import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
 
-import { initReq } from './initReq.js'
+import { nextServerAdapter } from '../adapters/server.js'
+import { switchLanguageHandler } from './switchLanguageHandler.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
@@ -32,6 +34,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'render-widget': renderWidgetHandler,
   'schedule-publish': schedulePublishHandler,
   slugify: slugifyHandler,
+  'switch-language': switchLanguageHandler,
   'table-state': buildTableStateHandler,
 }
 
@@ -48,6 +51,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     configPromise,
     importMap,
     key: 'RootLayout',
+    serverAdapter: nextServerAdapter,
   })
 
   const augmentedArgs: DefaultServerFunctionArgs = {
