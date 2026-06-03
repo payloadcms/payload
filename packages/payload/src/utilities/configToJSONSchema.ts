@@ -1456,6 +1456,7 @@ export function configToJSONSchema(
   }
 
   let jsonSchema: JSONSchema4 = {
+    $schema: 'http://json-schema.org/draft-07/schema#',
     additionalProperties: false,
     definitions: {
       supportedTimezones: timezoneDefinitions,
