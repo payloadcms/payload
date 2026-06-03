@@ -3,6 +3,7 @@ import { type FormState } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import { FormHeader } from '../../../elements/FormHeader/index.js'
 import { ConfirmPasswordField } from '../../../fields/ConfirmPassword/index.js'
 import { HiddenField } from '../../../fields/Hidden/index.js'
 import { PasswordField } from '../../../fields/Password/index.js'
@@ -12,6 +13,9 @@ import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import './index.css'
+
+const baseClass = 'reset-password__form'
 
 type Args = {
   readonly token: string
@@ -26,7 +30,6 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
         user: userSlug,
       },
       routes: { admin: adminRoute, api: apiRoute },
-      serverURL,
     },
   } = useConfig()
 
@@ -71,11 +74,13 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
         apiRoute,
         path: `/${userSlug}/reset-password`,
       })}
+      className={baseClass}
       initialState={initialState}
       method="POST"
       onSuccess={onSuccess}
     >
-      <div className="inputWrap">
+      <FormHeader heading={i18n.t('authentication:resetPassword')} />
+      <div className={`${baseClass}__inputWrap`}>
         <PasswordField
           field={{
             name: 'password',
@@ -88,7 +93,9 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
         <ConfirmPasswordField />
         <HiddenField path="token" schemaPath={`${userSlug}.token`} value={token} />
       </div>
-      <FormSubmit size="large">{i18n.t('authentication:resetPassword')}</FormSubmit>
+      <div className={`${baseClass}__actions`}>
+        <FormSubmit size="large">{i18n.t('authentication:resetPassword')}</FormSubmit>
+      </div>
     </Form>
   )
 }

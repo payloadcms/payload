@@ -1,0 +1,36 @@
+@layer payload-default {
+  .reset-password__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-5);
+    width: 100%;
+  }
+
+  .reset-password__form .form-header {
+    margin-bottom: 0;
+  }
+
+  .reset-password__form__inputWrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-3);
+  }
+
+  .reset-password__form__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    align-items: center;
+    width: 100%;
+  }
+
+  .reset-password__form__actions .form-submit {
+    width: 100%;
+  }
+
+  .reset-password__form__actions .form-submit .btn {
+    width: 100%;
+    height: var(--spacer-4);
+    justify-content: center;
+  }
+}
