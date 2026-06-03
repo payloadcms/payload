@@ -103,6 +103,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Դասակարգման դաշտը "{{field}}" հնարավոր չէ դասակարգել հավաքածուում "{{collection}}":',
     widgetQueryError: 'Չհաջողվեց բեռնել փաստաթղթերը այս վիդջեթի համար:',
+    widgetRecentlyViewedEmpty: 'Դուք դեռևս չեք դիտել որևէ փաստաթուղթ:',
+    widgetRecentlyViewedTitle: 'Վերջերս դիտած',
     widgetSelectCollectionFirst: 'Նախ ընտրեք Collection, ապա ընտրեք դասավորումը',
     widgetSelectSortField: 'Ընտրեք դաշտը՝ դասավորելու համար',
     widgetSortDirectionLabel: 'Տեսակավորման ուղղություն',

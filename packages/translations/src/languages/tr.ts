@@ -106,6 +106,8 @@ export const trTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       '"{{field}}" sıralama alanı, "{{collection}}" koleksiyonu üzerinde sıralanabilir değildir.',
     widgetQueryError: 'Bu widget için belgeler yüklenemedi.',
+    widgetRecentlyViewedEmpty: 'Henüz hiçbir belge görüntülemediniz.',
+    widgetRecentlyViewedTitle: 'Son Görüntüledikleriniz',
     widgetSelectCollectionFirst: 'Sıralama seçmeden önce bir Collection seçin',
     widgetSelectSortField: 'Sıralama yapmak için bir Field seçin',
     widgetSortDirectionLabel: 'Sıralama Yönü',

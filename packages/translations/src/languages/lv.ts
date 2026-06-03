@@ -103,6 +103,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Kārtot lauku "{{field}}" kolekcijā "{{collection}}" nav iespējams.',
     widgetQueryError: 'Neizdevās ielādēt dokumentus šim logrīkam.',
+    widgetRecentlyViewedEmpty: 'Jūs vēl neesat apskatījis nevienu dokumentu.',
+    widgetRecentlyViewedTitle: 'Jūs nesen skatījāt',
     widgetSelectCollectionFirst: 'Izvēlieties Collection pirms kārtošanas izvēles',
     widgetSelectSortField: 'Izvēlieties Field, pēc kura kārtot',
     widgetSortDirectionLabel: 'Kārtošanas virziens',

@@ -105,6 +105,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'সংগ্রহ "{{collection}}"-এ শ্রেণীবিন্যাস ক্ষেত্র "{{field}}" শ্রেণীবিন্যাসযোগ্য নয়।',
     widgetQueryError: 'এই উইজেটের জন্য ডকুমেন্ট লোড করতে ব্যর্থ হয়েছে।',
+    widgetRecentlyViewedEmpty: 'আপনি এখনও কোনো Document দেখেননি।',
+    widgetRecentlyViewedTitle: 'আপনি সম্প্রতি দেখেছেন',
     widgetSelectCollectionFirst: 'সর্ট নির্বাচন করার আগে একটি Collection নির্বাচন করুন',
     widgetSelectSortField: 'সাজানোর জন্য একটি ক্ষেত্র নির্বাচন করুন',
     widgetSortDirectionLabel: 'সাজানোর দিক',

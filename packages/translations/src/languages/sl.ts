@@ -103,6 +103,8 @@ export const slTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Polje za razvrščanje "{{field}}" ni mogoče razvrstiti v zbirki "{{collection}}".',
     widgetQueryError: 'Dokumentov za to komponento ni bilo mogoče naložiti.',
+    widgetRecentlyViewedEmpty: 'Še niste pregledali nobenega dokumenta.',
+    widgetRecentlyViewedTitle: 'Nedavno ste si ogledali',
     widgetSelectCollectionFirst: 'Najprej izberite zbirko, preden izberete način razvrščanja.',
     widgetSelectSortField: 'Izberite polje za razvrščanje',
     widgetSortDirectionLabel: 'Smer razvrščanja',

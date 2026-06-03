@@ -101,6 +101,8 @@ export const heTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'שדה המיון "{{field}}" אינו ניתן למיון ב-Collection "{{collection}}".',
     widgetQueryError: "לא ניתן היה לטעון מסמכים עבור ווידג'ט זה.",
+    widgetRecentlyViewedEmpty: 'לא צפית במסמכים כלשהם עדיין.',
+    widgetRecentlyViewedTitle: 'צפית לאחרונה',
     widgetSelectCollectionFirst: 'בחר אוסף לפני בחירת סדר',
     widgetSelectSortField: 'בחר שדה למיון',
     widgetSortDirectionLabel: 'כיוון מיון',

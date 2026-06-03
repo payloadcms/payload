@@ -40,6 +40,7 @@ export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/Colu
 export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
 export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/GroupByField/index.js'
 export { CollectionQuerySortField } from '../../widgets/CollectionQuery/SortField/index.js'
+export { RecentlyViewedCollectionsField } from '../../widgets/RecentlyViewed/CollectionsField/index.js'
 
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'

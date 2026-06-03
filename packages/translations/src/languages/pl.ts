@@ -104,6 +104,8 @@ export const plTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Pole sortujące "{{field}}" nie jest sortowalne w kolekcji "{{collection}}".',
     widgetQueryError: 'Nie można załadować dokumentów dla tego widżetu.',
+    widgetRecentlyViewedEmpty: 'Nie wyświetlono jeszcze żadnych dokumentów.',
+    widgetRecentlyViewedTitle: 'Ostatnio oglądane',
     widgetSelectCollectionFirst: 'Wybierz kolekcję przed wybraniem sortowania',
     widgetSelectSortField: 'Wybierz pole, według którego chcesz sortować',
     widgetSortDirectionLabel: 'Kierunek sortowania',

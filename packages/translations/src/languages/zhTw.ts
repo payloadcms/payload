@@ -97,6 +97,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: '限制',
     widgetNonSortableSortField: '排序欄位「{{field}}」在 Collection「{{collection}}」上不可排序。',
     widgetQueryError: '無法載入此元件的小文件。',
+    widgetRecentlyViewedEmpty: '您尚未瀏覽任何文件。',
+    widgetRecentlyViewedTitle: '您最近檢視',
     widgetSelectCollectionFirst: '請先選擇一個 Collection 再選擇排序方式',
     widgetSelectSortField: '選擇要排序的欄位',
     widgetSortDirectionLabel: '排序方向',

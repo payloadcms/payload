@@ -102,6 +102,8 @@ export const faTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'فیلد مرتب‌سازی "{{field}}" در Collection "{{collection}}" قابل مرتب‌سازی نیست.',
     widgetQueryError: 'امکان بارگذاری اسناد برای این ویجت وجود ندارد.',
+    widgetRecentlyViewedEmpty: 'شما هنوز هیچ سندی را مشاهده نکرده‌اید.',
+    widgetRecentlyViewedTitle: 'شما اخیراً مشاهده کرده‌اید',
     widgetSelectCollectionFirst: 'ابتدا یک Collection را انتخاب کنید، سپس ترتیب را مشخص نمایید.',
     widgetSelectSortField: 'یک Field را برای مرتب‌سازی انتخاب کنید',
     widgetSortDirectionLabel: 'جهت مرتب‌سازی',

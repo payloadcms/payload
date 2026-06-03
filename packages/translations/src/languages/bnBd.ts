@@ -105,6 +105,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Collection "{{collection}}"-এ "{{field}}" fieldটি সাজানো (sortable) নয়।',
     widgetQueryError: 'এই উইজেটের জন্য ডকুমেন্টসমূহ লোড করা যায়নি।',
+    widgetRecentlyViewedEmpty: 'আপনি এখনও কোনো Document দেখেননি।',
+    widgetRecentlyViewedTitle: 'আপনি সম্প্রতি দেখেছেন',
     widgetSelectCollectionFirst: 'সাজানোর পদ্ধতি নির্বাচন করার আগে একটি Collection নির্বাচন করুন।',
     widgetSelectSortField: 'ক্রম অনুযায়ী বাছাই করার জন্য একটি field নির্বাচন করুন',
     widgetSortDirectionLabel: 'সর্ট করার দিক নির্দেশনা',

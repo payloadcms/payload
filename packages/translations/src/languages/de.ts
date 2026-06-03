@@ -107,6 +107,8 @@ export const deTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Das Sortierfeld "{{field}}" ist in der Collection "{{collection}}" nicht sortierbar.',
     widgetQueryError: 'Dokumente für dieses Widget konnten nicht geladen werden.',
+    widgetRecentlyViewedEmpty: 'Sie haben noch keine Dokumente angesehen.',
+    widgetRecentlyViewedTitle: 'Sie haben kürzlich angesehen',
     widgetSelectCollectionFirst:
       'Wählen Sie eine Collection aus, bevor Sie eine Sortierung auswählen',
     widgetSelectSortField: 'Wählen Sie ein Feld zum Sortieren aus',

@@ -1790,6 +1790,8 @@ export type {
   InsideFieldsPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
+  RecentlyViewedItem,
+  RecentlyViewedPreferences,
   TabsPreferences,
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'

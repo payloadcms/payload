@@ -98,6 +98,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: '限制',
     widgetNonSortableSortField: '集合“{{collection}}”中的排序字段“{{field}}”不可排序。',
     widgetQueryError: '无法为此小部件加载文档。',
+    widgetRecentlyViewedEmpty: '您尚未查看任何文档。',
+    widgetRecentlyViewedTitle: '您最近查看了',
     widgetSelectCollectionFirst: '请选择一个Collection后再选择排序',
     widgetSelectSortField: '请选择一个字段进行排序',
     widgetSortDirectionLabel: '排序方向',

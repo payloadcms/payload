@@ -103,6 +103,8 @@ export const arTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'حقل الفرز "{{field}}" غير قابل للفرز في Collection "{{collection}}".',
     widgetQueryError: 'تعذّر تحميل المستندات لهذا المكون.',
+    widgetRecentlyViewedEmpty: 'لم تقم بعرض أي مستندات بعد.',
+    widgetRecentlyViewedTitle: 'لقد قمت بعرض',
     widgetSelectCollectionFirst: 'يرجى تحديد Collection قبل اختيار ترتيب الفرز',
     widgetSelectSortField: 'اختر حقلًا للفرز حسبه',
     widgetSortDirectionLabel: 'اتجاه الفرز',

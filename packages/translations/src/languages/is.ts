@@ -104,6 +104,8 @@ export const isTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Sortureiturinn "{{field}}" er ekki raðhæfur á Collection "{{collection}}".',
     widgetQueryError: 'Ekki tókst að hlaða skjölum fyrir þessa fjölvísir.',
+    widgetRecentlyViewedEmpty: 'Þú hefur ekki skoðað nein skjöl enn.',
+    widgetRecentlyViewedTitle: 'Þú skoðaðir nýlega',
     widgetSelectCollectionFirst: 'Veldu safn áður en röðun er valin',
     widgetSelectSortField: 'Veldu reit til að raða eftir',
     widgetSortDirectionLabel: 'Raðstefna',
