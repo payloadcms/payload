@@ -111,6 +111,16 @@
       "types": "./src/views/Versions/fetchVersions.ts",
       "default": "./src/views/Versions/fetchVersions.ts"
     },
+    "./views/NotFound/page": {
+      "import": "./src/views/NotFound/page.tsx",
+      "types": "./src/views/NotFound/page.tsx",
+      "default": "./src/views/NotFound/page.tsx"
+    },
+    "./views/Root/getCustomViewByRoute": {
+      "import": "./src/views/Root/getCustomViewByRoute.ts",
+      "types": "./src/views/Root/getCustomViewByRoute.ts",
+      "default": "./src/views/Root/getCustomViewByRoute.ts"
+    },
     "./views/*/metadata": {
       "import": "./src/views/*/metadata.ts",
       "types": "./src/views/*/metadata.ts",
@@ -230,16 +240,6 @@
       "import": "./src/utilities/initReq.ts",
       "types": "./src/utilities/initReq.ts",
       "default": "./src/utilities/initReq.ts"
-    },
-    "./views/Root/getCustomViewByRoute": {
-      "import": "./src/views/Root/getCustomViewByRoute.ts",
-      "types": "./src/views/Root/getCustomViewByRoute.ts",
-      "default": "./src/views/Root/getCustomViewByRoute.ts"
-    },
-    "./views/NotFound/page": {
-      "import": "./src/views/NotFound/page.tsx",
-      "types": "./src/views/NotFound/page.tsx",
-      "default": "./src/views/NotFound/page.tsx"
     },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
@@ -482,6 +482,16 @@
         "import": "./dist/views/Versions/fetchVersions.js",
         "types": "./dist/views/Versions/fetchVersions.d.ts",
         "default": "./dist/views/Versions/fetchVersions.js"
+      },
+      "./views/NotFound/page": {
+        "import": "./dist/views/NotFound/page.js",
+        "types": "./dist/views/NotFound/page.d.ts",
+        "default": "./dist/views/NotFound/page.js"
+      },
+      "./views/Root/getCustomViewByRoute": {
+        "import": "./dist/views/Root/getCustomViewByRoute.js",
+        "types": "./dist/views/Root/getCustomViewByRoute.d.ts",
+        "default": "./dist/views/Root/getCustomViewByRoute.js"
       },
       "./views/*/metadata": {
         "import": "./dist/views/*/metadata.js",
