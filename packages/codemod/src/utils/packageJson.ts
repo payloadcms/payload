@@ -17,16 +17,21 @@ const EXCLUDED_DIRS = new Set(['.next', 'build', 'dist', 'node_modules'])
 export function loadPackageJsons(rootPath: string): LoadedPackageJson[] {
   const matches = globSync('**/package.json', {
     cwd: rootPath,
+    // `exclude` prunes traversal into these dirs (avoids walking node_modules).
     exclude: (entry) => entry.split(/[\\/]/).some((seg) => EXCLUDED_DIRS.has(seg)),
   })
 
-  return matches
-    .filter((rel) => !rel.split(sep).some((seg) => EXCLUDED_DIRS.has(seg)))
-    .map((rel) => {
-      const path = resolve(rootPath, rel)
-      const originalText = readFileSync(path, 'utf8')
-      return { data: JSON.parse(originalText), originalText, path }
-    })
+  return (
+    matches
+      // Authoritative, version-independent guard in case a Node version applies
+      // `exclude` differently than expected.
+      .filter((rel) => !rel.split(sep).some((seg) => EXCLUDED_DIRS.has(seg)))
+      .map((rel) => {
+        const path = resolve(rootPath, rel)
+        const originalText = readFileSync(path, 'utf8')
+        return { data: JSON.parse(originalText), originalText, path }
+      })
+  )
 }
 
 /**

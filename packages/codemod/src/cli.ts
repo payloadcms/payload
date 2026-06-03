@@ -32,6 +32,8 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
   const packageJsons = loadPackageJsons(resolve(flags.path))
 
   const { failed, results } = await runTransforms({
+    // Shares the same `data` reference, so transform mutations are visible
+    // below for change detection (do not clone here).
     packageJsons: packageJsons.map(({ data, path }) => ({ data, path })),
     project,
     transforms: selected,
