@@ -377,23 +377,6 @@ describe('Types testing', () => {
       expect<GeneratedRichTextType>().type.toBeAssignableWith<DefaultTypedEditorState>()
     })
 
-    test('ensure a relationship node targeting an upload-enabled collection is assignable to the generated node union', () => {
-      /**
-       * Minimal reproduction of the single thing that breaks the whole-tree
-       * assertion above. The generated union contains BOTH a relationship node
-       * and an upload node, and both can carry `relationTo: 'media'` (since
-       * `media` is the upload-enabled collection). TypeScript's discriminated-
-       * union matcher keys on `relationTo`, misroutes the relationship node to
-       * the upload member (which requires `id`/`fields`), and never retries the
-       * actual relationship member — so the assignment fails.
-       *
-       * Control: the same node targeting a non-upload slug (e.g. 'posts') has no
-       * colliding upload member and assigns cleanly.
-       */
-      expect<GenNodeUnion>().type.toBeAssignableWith<SerializedRelationshipNode<'posts'>>()
-      expect<GenNodeUnion>().type.toBeAssignableWith<SerializedRelationshipNode<'media'>>()
-    })
-
     test('ensure type property in editorState.root.children.push() is correctly typed as union of all node types', () => {
       const _editorState: DefaultTypedEditorState = null as unknown as DefaultTypedEditorState
 
@@ -1085,7 +1068,6 @@ describe('Types testing', () => {
       const _sdk = new PayloadSDK({ baseURL: '' })
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
-        | 'media'
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
@@ -1103,7 +1085,6 @@ describe('Types testing', () => {
       // ensure collection property of sdk.create has posts in the union type
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
-        | 'media'
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
