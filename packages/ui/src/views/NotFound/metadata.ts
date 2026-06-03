@@ -1,7 +1,12 @@
 import type { GenerateMetadataDescriptor } from 'payload'
 
-export const generateNotFoundMetadata: GenerateMetadataDescriptor = ({ config, i18n: { t } }) =>
-  Promise.resolve({
+import { formatMetadata } from '../../utilities/formatMetadata.js'
+
+export const generateNotFoundMetadata = ({
+  config,
+  i18n: { t },
+}: Parameters<GenerateMetadataDescriptor>[0]) =>
+  formatMetadata({
     description: t('general:pageNotFound'),
     keywords: `404 ${t('general:notFound')}`,
     serverURL: config.serverURL,

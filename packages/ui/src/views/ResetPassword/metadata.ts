@@ -1,10 +1,12 @@
 import type { GenerateMetadataDescriptor } from 'payload'
 
-export const generateResetPasswordMetadata: GenerateMetadataDescriptor = ({
+import { formatMetadata } from '../../utilities/formatMetadata.js'
+
+export const generateResetPasswordMetadata = ({
   config,
   i18n: { t },
-}) =>
-  Promise.resolve({
+}: Parameters<GenerateMetadataDescriptor>[0]) =>
+  formatMetadata({
     description: t('authentication:resetPassword'),
     keywords: t('authentication:resetPassword'),
     serverURL: config.serverURL,

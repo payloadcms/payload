@@ -1,7 +1,12 @@
 import type { GenerateMetadataDescriptor } from 'payload'
 
-export const generateLoginMetadata: GenerateMetadataDescriptor = ({ config, i18n: { t } }) =>
-  Promise.resolve({
+import { formatMetadata } from '../../utilities/formatMetadata.js'
+
+export const generateLoginMetadata = ({
+  config,
+  i18n: { t },
+}: Parameters<GenerateMetadataDescriptor>[0]) =>
+  formatMetadata({
     description: t('authentication:login'),
     keywords: t('authentication:login'),
     serverURL: config.serverURL,

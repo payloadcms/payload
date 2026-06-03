@@ -1,7 +1,12 @@
 import type { GenerateMetadataDescriptor } from 'payload'
 
-export const generateLogoutMetadata: GenerateMetadataDescriptor = ({ config, i18n: { t } }) =>
-  Promise.resolve({
+import { formatMetadata } from '../../utilities/formatMetadata.js'
+
+export const generateLogoutMetadata = ({
+  config,
+  i18n: { t },
+}: Parameters<GenerateMetadataDescriptor>[0]) =>
+  formatMetadata({
     description: `${t('authentication:logoutUser')}`,
     keywords: `${t('authentication:logout')}`,
     serverURL: config.serverURL,

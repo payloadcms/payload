@@ -1,7 +1,12 @@
 import type { GenerateMetadataDescriptor } from 'payload'
 
-export const generateUnauthorizedMetadata: GenerateMetadataDescriptor = ({ config, i18n: { t } }) =>
-  Promise.resolve({
+import { formatMetadata } from '../../utilities/formatMetadata.js'
+
+export const generateUnauthorizedMetadata = ({
+  config,
+  i18n: { t },
+}: Parameters<GenerateMetadataDescriptor>[0]) =>
+  formatMetadata({
     description: t('error:unauthorized'),
     keywords: t('error:unauthorized'),
     serverURL: config.serverURL,
