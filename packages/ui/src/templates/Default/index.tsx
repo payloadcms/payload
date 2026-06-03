@@ -4,6 +4,7 @@ import React from 'react'
 
 import { AppHeader } from '../../elements/AppHeader/index.js'
 import { BulkUploadProvider } from '../../elements/BulkUpload/index.js'
+import { CommandPalette } from '../../elements/CommandPalette/index.js'
 import { NavToggler } from '../../elements/Nav/NavToggler/index.js'
 import { ActionsProvider } from '../../providers/Actions/index.js'
 import { EntityVisibilityProvider } from '../../providers/EntityVisibility/index.js'
@@ -38,6 +39,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 }) => {
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
+      <CommandPalette />
       <BulkUploadProvider drawerSlugPrefix={collectionSlug}>
         <ActionsProvider Actions={Actions}>
           {CustomHeader}

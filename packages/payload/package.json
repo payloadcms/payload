@@ -128,7 +128,7 @@
     "range-parser": "1.2.1",
     "sanitize-filename": "1.6.4",
     "ts-essentials": "10.0.3",
-    "tsx": "4.21.0",
+    "tsx": "4.22.4",
     "undici": "7.25.0",
     "uuid": "14.0.0",
     "ws": "^8.16.0"

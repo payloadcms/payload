@@ -81,6 +81,22 @@ export const nlTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Als u dit niet heeft aangevraagd, negeer dan deze e-mail en uw wachtwoord zal ongewijzigd blijven.',
   },
+  commandPalette: {
+    actions: 'Acties',
+    createNew: 'Nieuw aanmaken',
+    favorites: 'Favorieten',
+    hintActions: 'Acties',
+    hintClose: 'Sluiten',
+    hintCreate: 'Nieuw aanmaken',
+    hintNavigate: 'Navigeren',
+    hintSelect: 'Open',
+    noResults: 'Geen resultaten gevonden',
+    pinToFavorites: 'Aan favorieten vastmaken',
+    placeholder: 'Typ een opdracht of zoekopdracht…',
+    recentlyVisited: 'Recent Bezocht',
+    removeFromFavorites: 'Uit favorieten verwijderen',
+    title: 'Commandopalet',
+  },
   dashboard: {
     addButton: 'Voeg toe +',
     addWidget: 'Widget toevoegen',

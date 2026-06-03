@@ -37,6 +37,11 @@
       "types": "./src/exports/server.ts",
       "default": "./src/exports/server.ts"
     },
+    "./layouts": {
+      "import": "./src/exports/layouts.ts",
+      "types": "./src/exports/layouts.ts",
+      "default": "./src/exports/layouts.ts"
+    },
     "./scss": {
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
@@ -860,6 +865,11 @@
       "types": "./src/utilities/getClientConfig.ts",
       "default": "./src/utilities/getClientConfig.ts"
     },
+    "./utilities/initReq": {
+      "import": "./src/utilities/initReq.ts",
+      "types": "./src/utilities/initReq.ts",
+      "default": "./src/utilities/initReq.ts"
+    },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
@@ -1006,6 +1016,11 @@
         "import": "./dist/exports/server.js",
         "types": "./dist/exports/server.d.ts",
         "default": "./dist/exports/server.js"
+      },
+      "./layouts": {
+        "import": "./dist/exports/layouts.js",
+        "types": "./dist/exports/layouts.d.ts",
+        "default": "./dist/exports/layouts.js"
       },
       "./css": {
         "import": "./dist/styles.css",

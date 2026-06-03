@@ -79,6 +79,22 @@ export const daTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Hvis du ikke har anmodet om dette, skal du blot ignorere denne e-mail, og din adgangskode vil forblive uændret',
   },
+  commandPalette: {
+    actions: 'Handlinger',
+    createNew: 'Opret ny',
+    favorites: 'Favoritter',
+    hintActions: 'Handlinger',
+    hintClose: 'Luk',
+    hintCreate: 'Opret ny',
+    hintNavigate: 'Naviger',
+    hintSelect: 'Åbn',
+    noResults: 'Ingen resultater fundet',
+    pinToFavorites: 'Føj til favoritter',
+    placeholder: 'Indtast en kommando eller søg…',
+    recentlyVisited: 'Senest besøgte',
+    removeFromFavorites: 'Fjern fra favoritter',
+    title: 'Kommandooversigt',
+  },
   dashboard: {
     addButton: 'Tilføj +',
     addWidget: 'Tilføj Widget',

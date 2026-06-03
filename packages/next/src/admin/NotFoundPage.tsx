@@ -2,12 +2,13 @@ import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { DefaultTemplate } from '@payloadcms/ui/rsc'
 import { getVisibleEntities } from '@payloadcms/ui/shared'
+import { initReq } from '@payloadcms/ui/utilities/initReq'
 import { NotFoundClient } from '@payloadcms/ui/views/NotFound/index.client'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { initReq } from '../utilities/initReq.js'
+import { nextServerAdapter } from '../adapters/server.js'
 
 /**
  * Next.js NotFoundPage — server-rendered 404 with admin chrome when the
@@ -49,6 +50,7 @@ export const NotFoundPage = async ({
       },
       urlSuffix: `${formatAdminURL({ adminRoute, path: '/not-found' })}${searchParams ? queryString : ''}`,
     },
+    serverAdapter: nextServerAdapter,
   })
 
   if (!req.user || !permissions.canAccessAdmin) {

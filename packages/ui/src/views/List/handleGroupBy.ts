@@ -14,6 +14,7 @@ import type {
 } from 'payload'
 import type React from 'react'
 
+import { getTranslation } from '@payloadcms/translations'
 import { flattenAllFields } from 'payload'
 
 import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
@@ -190,6 +191,15 @@ export const handleGroupBy = async ({
         }
         if (valueOrRelationshipID === false) {
           heading = req.i18n.t('general:false')
+        }
+      } else if (groupByField?.type === 'select' || groupByField?.type === 'radio') {
+        const option = groupByField.options?.find(
+          (opt) => (typeof opt === 'string' ? opt : opt.value) === valueOrRelationshipID,
+        )
+        if (option && typeof option !== 'string' && typeof option.label === 'string') {
+          heading = getTranslation(option.label, req.i18n)
+        } else {
+          heading = String(valueOrRelationshipID)
         }
       } else {
         heading = String(valueOrRelationshipID)

@@ -16,7 +16,7 @@ import { Button } from '../Button/index.js'
 import { ColumnsButton } from '../ColumnsButton/index.js'
 import { GroupByControl } from '../GroupByControl/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
-import { SearchBar } from '../SearchBar/index.js'
+import { ListSearchFilter } from '../Search/ListSearchFilter/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import './index.css'
 
@@ -75,7 +75,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     <div className={baseClass}>
       <div className={`${baseClass}__search-row`}>
         <div className={`${baseClass}__left`}>
-          <SearchBar
+          <ListSearchFilter
             key={collectionSlug}
             label={searchLabelTranslated}
             onSearchChange={handleSearchChange}

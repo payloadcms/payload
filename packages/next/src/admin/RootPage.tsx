@@ -1,11 +1,12 @@
 import type { ImportMap, SanitizedConfig } from 'payload'
 
-import { renderAdminPage } from '@payloadcms/ui/views/Root/renderAdminPage'
+import { initReq } from '@payloadcms/ui/utilities/initReq'
+import { type AdminPageMetadata, renderAdminPage } from '@payloadcms/ui/views/Root/renderAdminPage'
 import { notFound, redirect } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 
-import { initReq } from '../utilities/initReq.js'
+import { nextServerAdapter } from '../adapters/server.js'
 
 export type { GenerateViewMetadata } from './generatePageMetadata.js'
 
@@ -65,13 +66,17 @@ export const RootPage = async ({
       },
       urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
     },
+    serverAdapter: nextServerAdapter,
   })
+
+  const metadata: AdminPageMetadata = {}
 
   try {
     return await renderAdminPage({
       config,
       importMap,
       initResult,
+      metadata,
       params,
       searchParams,
     })

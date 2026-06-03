@@ -80,6 +80,22 @@ export const azTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Əgər siz bunu tələb etməmisinizsə, lütfən, bu e-poçtu nəzərə almayın və şifrəniz dəyişilməz qalacaq.',
   },
+  commandPalette: {
+    actions: 'Əməliyyatlar',
+    createNew: 'Yeni Yaradın',
+    favorites: 'Seçilmişlər',
+    hintActions: 'Fəaliyyətlər',
+    hintClose: 'Bağla',
+    hintCreate: 'Yeni Yarat',
+    hintNavigate: 'Naviqasiya et',
+    hintSelect: 'Açıq',
+    noResults: 'Nəticə tapılmadı',
+    pinToFavorites: 'Favoritlərə əlavə et',
+    placeholder: 'Əmr daxil edin və ya axtarış aparın…',
+    recentlyVisited: 'Son Ziyarət Edilənlər',
+    removeFromFavorites: 'Favorilərdən sil',
+    title: 'Əmr Palitrası',
+  },
   dashboard: {
     addButton: 'Əlavə et +',
     addWidget: 'Vidjet əlavə et',

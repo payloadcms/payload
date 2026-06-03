@@ -1,2 +1,2 @@
-export { metadata, RootLayout } from '../layouts/Root/index.js'
+export { metadata, RootLayout } from '../adapters/layout.js'
 export { handleServerFunctions } from '../utilities/handleServerFunctions.js'

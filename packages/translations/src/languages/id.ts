@@ -81,6 +81,22 @@ export const idTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jika Anda tidak meminta ini, harap abaikan email ini dan kata sandi Anda akan tetap tidak berubah.',
   },
+  commandPalette: {
+    actions: 'Tindakan',
+    createNew: 'Buat Baru',
+    favorites: 'Favorit',
+    hintActions: 'Tindakan',
+    hintClose: 'Tutup',
+    hintCreate: 'Buat Baru',
+    hintNavigate: 'Navigasi',
+    hintSelect: 'Buka',
+    noResults: 'Tidak ada hasil yang ditemukan',
+    pinToFavorites: 'Sematkan ke Favorit',
+    placeholder: 'Ketik perintah atau cari...',
+    recentlyVisited: 'Baru-baru Ini Dikunjungi',
+    removeFromFavorites: 'Hapus dari Favorit',
+    title: 'Palet Perintah',
+  },
   dashboard: {
     addButton: 'Tambah +',
     addWidget: 'Tambah Widget',

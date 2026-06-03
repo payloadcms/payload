@@ -32,7 +32,9 @@ export const joinFieldsSlug = 'join-fields'
 export const joinPostsSlug = 'join-posts'
 export const orderableSlug = 'orderable'
 export const rubbishSlug = 'rubbish'
+export const rubbishWithDraftsSlug = 'rubbish-with-drafts'
 export const searchBarTestSlug = 'search-bar-test'
+export const talksSlug = 'talks'
 export const unauthorizedSlug = 'unauthorized-test'
 export const docControlsSlug = 'doc-controls'
 export const versionsDiffSlug = 'versions-diff'
@@ -73,6 +75,7 @@ export const collectionSlugs = [
   orderableSlug,
   rubbishSlug,
   searchBarTestSlug,
+  talksSlug,
   unauthorizedSlug,
   docControlsSlug,
   versionsDiffSlug,

@@ -3,13 +3,15 @@ import type { DefaultServerFunctionArgs, ServerFunction, ServerFunctionHandler }
 import { renderTabHandler } from '@payloadcms/ui/elements/Nav/SidebarTabs/renderTabServerFn'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { _internal_renderFieldHandler } from '@payloadcms/ui/rsc'
+import { initReq } from '@payloadcms/ui/utilities/initReq'
 import { sharedServerFunctions } from '@payloadcms/ui/utilities/serverFunctionRegistry'
 import { getDefaultLayoutHandler } from '@payloadcms/ui/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn'
 import { renderWidgetHandler } from '@payloadcms/ui/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn'
 import { renderDocumentSlotsHandler } from '@payloadcms/ui/views/Document/renderDocumentSlots'
 
-import { initReq } from './initReq.js'
+import { nextServerAdapter } from '../adapters/server.js'
 import { slugifyHandler } from './slugify.js'
+import { switchLanguageHandler } from './switchLanguageHandler.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   ...sharedServerFunctions,
@@ -19,6 +21,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'render-tab': renderTabHandler,
   'render-widget': renderWidgetHandler,
   slugify: slugifyHandler,
+  'switch-language': switchLanguageHandler,
 }
 
 export const handleServerFunctions: ServerFunctionHandler = async (args) => {
@@ -34,6 +37,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     configPromise,
     importMap,
     key: 'RootLayout',
+    serverAdapter: nextServerAdapter,
   })
 
   const augmentedArgs: DefaultServerFunctionArgs = {

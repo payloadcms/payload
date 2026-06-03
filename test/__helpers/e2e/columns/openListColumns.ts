@@ -23,7 +23,14 @@ export const openListColumns = async (
 
   await expect(async () => {
     if (!(await columnContainer.isVisible())) {
-      await page.locator(togglerSelector).first().click()
+      // Scroll toggler to top of viewport before opening so the popup renders
+      // below the button and not off the top of the page
+      const toggler = page.locator(togglerSelector).first()
+      await toggler.evaluate((el) => {
+        const rect = el.getBoundingClientRect()
+        window.scrollBy({ top: rect.top - 100, behavior: 'instant' })
+      })
+      await toggler.click()
     }
     await expect(columnContainer).toBeVisible({ timeout: 1500 })
   }).toPass({ timeout: 18000 })

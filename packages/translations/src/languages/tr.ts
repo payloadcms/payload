@@ -81,6 +81,22 @@ export const trTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Eğer bu işlemi siz gerçekleştirmediyseniz bu e-postayı görmezden gelebilirsiniz.',
   },
+  commandPalette: {
+    actions: 'Eylemler',
+    createNew: 'Yeni Oluştur',
+    favorites: 'Favoriler',
+    hintActions: 'Eylemler',
+    hintClose: 'Kapat',
+    hintCreate: 'Yeni Oluştur',
+    hintNavigate: 'Gezin',
+    hintSelect: 'Açık',
+    noResults: 'Sonuç bulunamadı',
+    pinToFavorites: 'Favorilere Sabitle',
+    placeholder: 'Bir komut yazın veya arayın…',
+    recentlyVisited: 'Son Ziyaret Edilenler',
+    removeFromFavorites: 'Favorilerden Kaldır',
+    title: 'Komut Paleti',
+  },
   dashboard: {
     addButton: 'Ekle +',
     addWidget: 'Widget Ekle',

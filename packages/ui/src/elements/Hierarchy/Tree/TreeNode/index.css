@@ -2,7 +2,7 @@
 
 @layer payload-default {
   .tree-node {
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
 
     .tree-node {
       margin-left: 0;
@@ -35,7 +35,7 @@
     width: var(--tree-chevron-width);
     height: var(--tree-chevron-width);
     flex-shrink: 0;
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
 
     &:hover {
       color: var(--color-icon);

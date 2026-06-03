@@ -12,6 +12,7 @@
 
   .drawer-action-header__title {
     margin: 0;
+    color: var(--color-text);
   }
 
   .drawer-action-header__actions {

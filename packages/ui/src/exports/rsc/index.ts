@@ -29,6 +29,7 @@ export {
 export { MinimalTemplate, type MinimalTemplateProps } from '../../templates/Minimal/index.js'
 export { copyDataFromLocaleHandler } from '../../utilities/copyDataFromLocale.js'
 export { getColumns } from '../../utilities/getColumns.js'
+export { getPreferences } from '../../utilities/getPreferences.js'
 export { handleLivePreview } from '../../utilities/handleLivePreview.js'
 export { handlePreview } from '../../utilities/handlePreview.js'
 export { renderFilters, renderTable } from '../../utilities/renderTable.js'
