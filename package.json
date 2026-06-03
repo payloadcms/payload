@@ -231,7 +231,7 @@
     "stylelint": "^16.12.0",
     "swc-plugin-transform-remove-imports": "8.3.0",
     "tempy": "1.0.1",
-    "tstyche": "3.5.0",
+    "tstyche": "7.2.1",
     "tsx": "4.21.0",
     "turbo": "^2.5.4",
     "typescript": "6.0.3",
