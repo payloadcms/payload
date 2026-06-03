@@ -1,6 +1,4 @@
 import { expect, test } from '@playwright/test'
-import { addListFilter } from '../__helpers/e2e/filters/index.js'
-import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
 import { mapAsync, type RequiredDataFromCollectionSlug } from 'payload'
 import { wait } from 'payload/shared'
@@ -9,13 +7,14 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
+import { addListFilter } from '../__helpers/e2e/filters/index.js'
 import {
   changeLocale,
-  closeAllToasts,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { pagesSlug } from './collections/Pages/index.js'
@@ -779,7 +778,6 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
-        await closeAllToasts(page)
 
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
@@ -831,7 +829,6 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
-        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
@@ -888,7 +885,6 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
-        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
@@ -945,7 +941,6 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
-        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
@@ -996,7 +991,6 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
-        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
@@ -1217,7 +1211,6 @@ describe('Trash', () => {
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       'Post "Draft with Localized Field" moved to trash.',
     )
-    await closeAllToasts(page)
 
     await page.goto(postsUrl.trashEdit(draftPost.id))
     await page.waitForURL(/\/posts\/trash\//)
@@ -1288,7 +1281,6 @@ describe('Trash', () => {
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       '1 Post moved to trash.',
     )
-    await closeAllToasts(page)
 
     await page.locator('#trash-view-pill').click()
     await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)

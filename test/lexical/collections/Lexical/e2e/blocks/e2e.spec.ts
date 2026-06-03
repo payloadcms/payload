@@ -392,7 +392,7 @@ describe('lexicalBlocks', () => {
 
       await topLevelDocTextField.fill('invalid')
 
-      await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
+      await saveDocAndAssert(page, '#action-save', 'error')
 
       await assertToastErrors({
         page,
@@ -418,7 +418,7 @@ describe('lexicalBlocks', () => {
 
       await blockGroupTextField.fill('invalid')
 
-      await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
+      await saveDocAndAssert(page, '#action-save', 'error')
       await assertToastErrors({
         page,
         errors: [
@@ -445,7 +445,7 @@ describe('lexicalBlocks', () => {
 
       await blockTextField.fill('invalid')
 
-      await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
+      await saveDocAndAssert(page, '#action-save', 'error')
       await assertToastErrors({
         page,
         errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Block Data'],
@@ -1102,7 +1102,7 @@ describe('lexicalBlocks', () => {
         .locator('.array-field__draggable-rows > div:nth-child(2) .field-type.text input')
         .fill('second input')
 
-      await saveDocAndAssert(page, '#action-save', 'success', { disableDismissAllToasts: true })
+      await saveDocAndAssert(page, '#action-save', 'success')
 
       await expect(page.locator('.payload-toast-container')).not.toContainText(
         'Please correct invalid fields.',

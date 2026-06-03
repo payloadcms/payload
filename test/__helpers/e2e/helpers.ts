@@ -206,8 +206,8 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
   } else {
     await page.keyboard.up('Control')
   }
-  await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-  await closeAllToasts(page)
+  // Check front toast only to prevent interference from past toasts
+  await expect(page.locator(`.payload-toast-item[data-front='true']`)).toContainText('successfully')
 }
 
 export async function saveDocAndAssert(
@@ -219,12 +219,6 @@ export async function saveDocAndAssert(
     | '#publish-locale'
     | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
-  options?: {
-    /**
-     * If true, the all toasts will not be dismissed after the save operation.
-     */
-    disableDismissAllToasts?: boolean
-  },
 ): Promise<void> {
   await wait(500) // TODO: Fix this
   if (selector === '#publish-locale') {
@@ -234,31 +228,14 @@ export async function saveDocAndAssert(
   }
   await page.click(selector, { delay: 100 })
 
+  // Check front toast only to prevent interference from past toasts
+  const frontToast = page.locator(`.payload-toast-item[data-front='true']`)
+
   if (expectation === 'success') {
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(frontToast).toContainText('successfully')
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
   } else {
-    await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
-  }
-
-  // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
-  // 1. saveDocAndAssert
-  // 2. some operation
-  // 3. second saveDocAndAssert
-  // 4. the first toast is still visible => the second saveDocAndAssert will pass even though the save is not finished yet (or even not successful!)
-  if (!options?.disableDismissAllToasts) {
-    await closeAllToasts(page)
-  }
-}
-
-export async function closeAllToasts(page: Locator | Page): Promise<void> {
-  const toastCloseSelector = '.payload-toast-container button.payload-toast-close-button'
-  let count = await page.locator(toastCloseSelector).count()
-
-  while (count > 0) {
-    await page.locator(toastCloseSelector).first().click()
-    await expect(page.locator(toastCloseSelector)).toHaveCount(count - 1)
-    count--
+    await expect(frontToast).toHaveClass(/toast-error/)
   }
 }
 

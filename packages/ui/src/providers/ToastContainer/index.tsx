@@ -8,6 +8,7 @@ import { ErrorIcon } from '../../icons/Error/index.js'
 import { InfoIcon } from '../../icons/Info/index.js'
 import { SuccessIcon } from '../../icons/Success/index.js'
 import { WarningIcon } from '../../icons/Warning/index.js'
+import './index.css'
 
 export const ToastContainer: React.FC<{
   config: ClientConfig
@@ -17,7 +18,6 @@ export const ToastContainer: React.FC<{
   return (
     <Toaster
       className="payload-toast-container"
-      closeButton
       // @ts-expect-error
       dir="undefined"
       duration={duration ?? 4000}
@@ -30,10 +30,9 @@ export const ToastContainer: React.FC<{
         warning: <WarningIcon />,
       }}
       offset="calc(var(--gutter-h) / 2)"
-      position={position ?? 'bottom-right'}
+      position={position ?? 'bottom-center'}
       toastOptions={{
         classNames: {
-          closeButton: 'payload-toast-close-button',
           content: 'toast-content',
           error: 'toast-error',
           icon: 'toast-icon',
