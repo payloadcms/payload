@@ -10,7 +10,7 @@ Package-scoped rules. See `README.md` for usage and the mechanical authoring rec
 - Every transform must be safe on non-matching code. If the expected AST shape isn't there, return `{ filesChanged: [] }`. Do not throw for "didn't find what I expected".
 - `filesChanged` must list exactly the files whose text changed. A transform that mutates a file but forgets to list it will silently under-report in the CLI summary.
 - Use `notes` for surfacing information the user should see (e.g., spots that need manual review). Do not log via `console` from within a transform.
-- Transforms may also receive `packageJsons` (an array of `{ path, data }`). Mutate `data` in place to edit a project's `package.json`; the CLI owns reading and writing the file. Do not read or write the filesystem directly from a transform.
+- To edit a project's `package.json`, mutate the `data` of the relevant `packageJsons` entry (`{ path, data }`) in place; the CLI owns reading and writing the file.
 
 ## Testing discipline
 
