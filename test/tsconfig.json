@@ -27,8 +27,11 @@
         "name": "@payloadcms/typescript-plugin"
       }
     ],
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
-      "@payload-config": ["./tags/config.ts"]
+      "@payload-config": ["./tags/config.ts"],
+      "__helpers/*": ["./__helpers/*"]
     }
   },
   "exclude": [
