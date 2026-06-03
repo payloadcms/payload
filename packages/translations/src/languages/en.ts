@@ -81,6 +81,22 @@ export const enTranslations = {
     youDidNotRequestPassword:
       'If you did not request this, please ignore this email and your password will remain unchanged.',
   },
+  commandPalette: {
+    actions: 'Actions',
+    createNew: 'Create New',
+    favorites: 'Favorites',
+    hintActions: 'Actions',
+    hintClose: 'Close',
+    hintCreate: 'Create New',
+    hintNavigate: 'Navigate',
+    hintSelect: 'Open',
+    noResults: 'No results found',
+    pinToFavorites: 'Pin to Favorites',
+    placeholder: 'Type a command or search…',
+    recentlyVisited: 'Recently Visited',
+    removeFromFavorites: 'Remove from Favorites',
+    title: 'Command Palette',
+  },
   dashboard: {
     addButton: 'Add +',
     addWidget: 'Add Widget',

@@ -20,13 +20,11 @@
 
   .list-controls__search-row {
     display: flex;
-    align-items: center;
     gap: var(--spacer-2);
   }
 
   .list-controls__left {
     display: flex;
-    align-items: center;
     gap: var(--spacer-2);
     flex-shrink: 0;
   }

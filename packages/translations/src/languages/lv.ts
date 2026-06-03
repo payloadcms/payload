@@ -80,6 +80,22 @@ export const lvTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ja neesat pieprasījis paroles atiestatīšanu, lūdzu, ignorējiet šo e-pastu, un parole paliks nemainīta.',
   },
+  commandPalette: {
+    actions: 'Darbības',
+    createNew: 'Izveidot jaunu',
+    favorites: 'Izlases',
+    hintActions: 'Darbības',
+    hintClose: 'Aizvērt',
+    hintCreate: 'Izveidot jaunu',
+    hintNavigate: 'Navigēt',
+    hintSelect: 'Atvērt',
+    noResults: 'Rezultāti nav atrasti',
+    pinToFavorites: 'Piespraust pie izlases',
+    placeholder: 'Ierakstiet komandu vai meklējiet…',
+    recentlyVisited: 'Nesen apmeklēts',
+    removeFromFavorites: 'Noņemt no Izlases',
+    title: 'Komandu palete',
+  },
   dashboard: {
     addButton: 'Pievienot +',
     addWidget: 'Pievienot logrīku',

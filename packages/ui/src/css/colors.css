@@ -34,6 +34,55 @@
 
     /* Modal */
     --color-modalbackdrop: rgba(0, 0, 0, 0.5);
+
+    /* Field — override these to theme all form fields at once */
+    --field-color-bg: var(--color-bg);
+    --field-color-border: var(--special-border-translucent);
+    --field-color-text: var(--color-text);
+    --field-color-placeholder: var(--color-text-tertiary);
+
+    /* Field hover */
+    --field-color-border-hover: var(--special-border-translucent-strong);
+
+    /* Field focus */
+    --field-color-border-focus: var(--accessibility-focus-color);
+
+    /* Field disabled */
+    --field-color-bg-disabled: transparent;
+    --field-color-border-disabled: var(--color-border);
+    --field-color-text-disabled: var(--color-text-disabled);
+
+    /* Field read-only */
+    --field-color-bg-readonly: var(--color-bg);
+    --field-color-border-readonly: var(--color-border);
+    --field-color-text-readonly: var(--color-text-secondary);
+
+    /* Field error */
+    --field-color-border-error: var(--color-border-danger-strong);
+
+    /* Field label */
+    --field-color-label: var(--color-text);
+    --field-color-label-required: var(--color-text-danger);
+
+    /* Field description */
+    --field-color-description: var(--color-text-secondary);
+
+    /* Field error message */
+    --field-color-error-bg: var(--color-bg-danger);
+    --field-color-error-text: var(--color-text-ondanger);
+
+    /* Field toggle controls (checkbox, radio) */
+    --field-color-toggle-border: var(--color-border-strong);
+    --field-color-toggle-border-hover: var(--color-border-selected-strong);
+    --field-color-toggle-bg-checked: var(--color-bg-brand);
+    --field-color-toggle-border-checked: var(--color-border-selected);
+    --field-color-toggle-icon: var(--color-icon-onbrand);
+    --field-color-toggle-bg-disabled: var(--color-bg-disabled);
+    --field-color-toggle-border-disabled: var(--color-border-disabled);
+
+    /* Field upload card */
+    --field-color-upload-bg: var(--color-bg-secondary);
+    --field-color-upload-border: var(--color-border);
   }
 
   /* ——————————————————————————————————————————————
@@ -236,6 +285,7 @@
     --special-bg-transparent: rgba(255, 255, 255, 0.6);
     --special-bg-transparent-secondary-hover: var(--ramp-black-200);
     --special-border-translucent: var(--ramp-black-200);
+    --special-border-translucent-strong: var(--ramp-black-300);
 
     /* Multiplayer */
     --multiplayer-blue: var(--special-multiplayer-blue);
@@ -382,5 +432,6 @@
     --special-bg-transparent: rgba(0, 0, 0, 0.6);
     --special-bg-transparent-secondary-hover: var(--ramp-white-200);
     --special-border-translucent: var(--ramp-white-200);
+    --special-border-translucent-strong: var(--ramp-white-300);
   }
 }

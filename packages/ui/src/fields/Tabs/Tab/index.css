@@ -65,12 +65,12 @@
     color: var(--color-text-danger);
 
     &:after {
-      background: var(--color-border-danger-strong);
+      background: var(--field-color-border-error);
       opacity: 1;
     }
 
     &:hover:after {
-      background: var(--color-border-danger-strong);
+      background: var(--field-color-border-error);
     }
   }
 
