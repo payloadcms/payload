@@ -38,7 +38,9 @@ export async function copyPasteField({
   await actionBtn.click()
 
   if (isCopy) {
-    const copySuccessToast = page.locator('.payload-toast-item.toast-success')
+    const copySuccessToast = page
+      .locator('.payload-toast-item.toast-success')
+      .filter({ hasText: 'Copied' })
     await expect(copySuccessToast).toBeVisible()
   }
 }
