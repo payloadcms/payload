@@ -23,6 +23,7 @@
   "type": "module",
   "exports": {
     "./css": {
+      "types": "./src/exports/css.ts",
       "import": "./src/dummy.css",
       "default": "./src/dummy.css"
     },
@@ -138,6 +139,7 @@
   "publishConfig": {
     "exports": {
       "./css": {
+        "types": "./dist/exports/css.d.ts",
         "import": "./dist/prod/styles.css",
         "default": "./dist/prod/styles.css"
       },

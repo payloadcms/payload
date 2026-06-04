@@ -160,7 +160,7 @@ describe('Types testing', () => {
     })
 
     test('join query for pages-categories should be defined with the relatedPages key', () => {
-      expect<JoinQuery<'pages-categories'>>().type.toBeAssignableWith<{
+      expect<JoinQuery<'pages-categories'>>().type.toBeAssignableFrom<{
         relatedPages?: {
           limit?: number
           sort?: string
@@ -221,16 +221,16 @@ describe('Types testing', () => {
       T extends PayloadTypesShape,
       S extends CollectionSlug<T>,
     > = TypedCollectionSelect<T>[S]
-    expect<Select<GeneratedTypes, 'users'>>().type.not.toBeNever()
+    expect<Select<GeneratedTypes, 'users'>>().type.not.toBe<never>()
   })
 
   test('TypedCollectionSelect resolves correctly with concrete types', () => {
     type SelectUsers = TypedCollectionSelect<GeneratedTypes>['users']
-    expect<SelectUsers>().type.not.toBeNever()
+    expect<SelectUsers>().type.not.toBe<never>()
 
     // Test with Config - should also work
     type SelectPosts = TypedCollectionSelect<LocalConfig>['posts']
-    expect<SelectPosts>().type.not.toBeNever()
+    expect<SelectPosts>().type.not.toBe<never>()
   })
 
   describe('fields', () => {
@@ -248,11 +248,11 @@ describe('Types testing', () => {
 
   describe('views', () => {
     test('default view config', () => {
-      expect<DefaultDocumentViewConfig>().type.not.toBeAssignableWith<{
+      expect<DefaultDocumentViewConfig>().type.not.toBeAssignableFrom<{
         path: `/${string}`
       }>()
 
-      expect<CustomDocumentViewConfig>().type.toBeAssignableWith<{
+      expect<CustomDocumentViewConfig>().type.toBeAssignableFrom<{
         Component: string
         path: `/${string}`
       }>()
@@ -358,7 +358,7 @@ describe('Types testing', () => {
       // This ensures that data can be passed directly form the payload local API to a function that expects DefaultTypedEditorState
       type GeneratedRichTextType = Post['richText']
 
-      expect<DefaultTypedEditorState>().type.toBeAssignableWith<GeneratedRichTextType>()
+      expect<DefaultTypedEditorState>().type.toBeAssignableFrom<GeneratedRichTextType>()
     })
 
     test('ensure DefaultTypedEditorState type can be assigned to GeneratedRichTextType type', () => {
@@ -372,7 +372,7 @@ describe('Types testing', () => {
        */
       type GeneratedRichTextType = Post['richText']
 
-      expect<GeneratedRichTextType>().type.toBeAssignableWith<DefaultTypedEditorState>()
+      expect<GeneratedRichTextType>().type.toBeAssignableFrom<DefaultTypedEditorState>()
     })
 
     test('ensure type property in editorState.root.children.push() is correctly typed as union of all node types', () => {

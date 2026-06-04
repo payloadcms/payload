@@ -12,17 +12,17 @@ import type {
 
 import { PageConfigProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { DefaultTemplate, MinimalTemplate } from '@payloadcms/ui/rsc'
+import { DefaultTemplate, getPreferences, MinimalTemplate } from '@payloadcms/ui/rsc'
 import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
+import { initReq } from '@payloadcms/ui/utilities/initReq'
 import { notFound, redirect } from 'next/navigation.js'
 import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { getPreferences } from '../../utilities/getPreferences.js'
+import { nextServerAdapter } from '../../adapters/server.js'
 import { handleAuthRedirect } from '../../utilities/handleAuthRedirect.js'
-import { initReq } from '../../utilities/initReq.js'
 import { isCustomAdminView } from '../../utilities/isCustomAdminView.js'
 import { isPublicAdminRoute } from '../../utilities/isPublicAdminRoute.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
@@ -140,6 +140,7 @@ export const RootPage = async ({
       // intentionally omit `serverURL` to keep URL relative
       urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
     },
+    serverAdapter: nextServerAdapter,
   })
 
   if (

@@ -3,12 +3,13 @@ import type { AdminViewServerProps, ImportMap, SanitizedConfig } from 'payload'
 
 import { DefaultTemplate } from '@payloadcms/ui/rsc'
 import { getVisibleEntities } from '@payloadcms/ui/shared'
+import { initReq } from '@payloadcms/ui/utilities/initReq'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
+import { nextServerAdapter } from '../../adapters/server.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { initReq } from '../../utilities/initReq.js'
 import { NotFoundClient } from './index.client.js'
 
 export const generateNotFoundViewMetadata = async ({
@@ -69,6 +70,7 @@ export const NotFoundPage = async ({
       // intentionally omit `serverURL` to keep URL relative
       urlSuffix: `${formatAdminURL({ adminRoute, path: '/not-found' })}${searchParams ? queryString : ''}`,
     },
+    serverAdapter: nextServerAdapter,
   })
 
   if (!req.user || !permissions.canAccessAdmin) {

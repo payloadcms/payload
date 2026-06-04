@@ -1,8 +1,9 @@
 import type { JsonObject, Payload } from 'payload'
 
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
+import fs from 'fs'
 import path from 'path'
-import { createLocalReq, saveVersion, ValidationError } from 'payload'
+import { createLocalReq, getFileByPath, saveVersion, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
@@ -26,6 +27,7 @@ import {
   draftCollectionSlug,
   draftGlobalSlug,
   draftUnlimitedGlobalSlug,
+  draftWithUploadCollectionSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   versionCollectionSlug,
@@ -1362,6 +1364,7 @@ describe('Versions', () => {
           payload,
         })
       })
+
     })
 
     describe('Update Many', () => {
@@ -1986,6 +1989,217 @@ describe('Versions', () => {
           payload,
         })
       })
+    })
+  })
+
+  describe('Upload Collections with Drafts', () => {
+    const uploadedFilenames: string[] = []
+    const uploadStaticDir = path.resolve(dirname, './collections/uploads-draft')
+
+    afterEach(async () => {
+      await cleanupDocuments({
+        collectionSlugs: [draftWithUploadCollectionSlug],
+        payload,
+      })
+
+      for (const filename of uploadedFilenames) {
+        const filePath = path.resolve(uploadStaticDir, filename)
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath)
+        }
+      }
+      uploadedFilenames.length = 0
+    })
+
+    it('should not modify the published document when saving a draft with a new file', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'original-published.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+      expect(publishedDoc._status).toBe('published')
+
+      const draftImageFile = await getFileByPath(path.resolve(dirname, './image.png'))
+
+      draftImageFile.name = 'new-draft-file.png'
+
+      await payload.update({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'draft',
+          alt: 'Updated in draft',
+        },
+        draft: true,
+        file: draftImageFile,
+      })
+
+      const mainDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+      })
+
+      const draftDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        draft: true,
+      })
+
+      uploadedFilenames.push(draftDoc.filename)
+
+      expect(mainDoc._status).toBe('published')
+      expect(mainDoc.filename).toBe(publishedDoc.filename)
+      expect(mainDoc.alt).toBe('Original image')
+
+      expect(draftDoc._status).toBe('draft')
+      expect(draftDoc.alt).toBe('Updated in draft')
+      expect(draftDoc.filename).not.toBe(publishedDoc.filename)
+    })
+
+    it('should not delete the published file from disk when saving a draft with a new file', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'published-file-disk-check.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Published image',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+
+      const publishedFilePath = path.resolve(uploadStaticDir, publishedDoc.filename)
+
+      expect(fs.existsSync(publishedFilePath)).toBe(true)
+
+      const draftImageFile = await getFileByPath(path.resolve(dirname, './image.png'))
+
+      draftImageFile.name = 'replacement-draft-file.png'
+
+      await payload.update({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'draft',
+          alt: 'Draft with new file',
+        },
+        draft: true,
+        file: draftImageFile,
+      })
+
+      const draftDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        draft: true,
+      })
+
+      uploadedFilenames.push(draftDoc.filename)
+
+      expect(fs.existsSync(publishedFilePath)).toBe(true)
+    })
+
+    it('should correctly publish a draft with a new file using the PublishMany pattern', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'publish-many-original.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+
+      const draftImageFile = await getFileByPath(path.resolve(dirname, './image.png'))
+
+      draftImageFile.name = 'publish-many-draft.png'
+
+      await payload.update({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'draft',
+          alt: 'Draft version',
+        },
+        draft: true,
+        file: draftImageFile,
+      })
+
+      const draftDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        draft: true,
+      })
+
+      uploadedFilenames.push(draftDoc.filename)
+
+      await payload.update({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+        },
+        draft: true,
+        where: {
+          id: { equals: publishedDoc.id },
+        },
+      })
+
+      const republishedDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+      })
+
+      expect(republishedDoc._status).toBe('published')
+      expect(republishedDoc.filename).toBe(draftDoc.filename)
+      expect(republishedDoc.alt).toBe('Draft version')
+    })
+
+    it('should create a draft when duplicating a published upload document with draft: true', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'duplicate-source.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original published',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+      expect(publishedDoc._status).toBe('published')
+
+      const duplicatedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          alt: 'Duplicated draft',
+        },
+        draft: true,
+        duplicateFromID: publishedDoc.id,
+      })
+
+      uploadedFilenames.push(duplicatedDoc.filename)
+
+      expect(duplicatedDoc._status).toBe('draft')
     })
   })
 
