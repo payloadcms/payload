@@ -45,8 +45,7 @@ export function simplifyRelationshipFields(schema: JsonSchemaType): JsonSchemaTy
         processed.anyOf = nonRefOptions
       }
     } else {
-      processed.anyOf = processed.oneOf.map(recurse)
-      delete processed.oneOf
+      processed.oneOf = processed.oneOf.map(recurse)
     }
   }
 
