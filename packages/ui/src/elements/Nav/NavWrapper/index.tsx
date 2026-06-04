@@ -2,7 +2,7 @@
 import React from 'react'
 
 import { useNav } from '../context.js'
-import './index.scss'
+import './index.css'
 
 /**
  * @internal
