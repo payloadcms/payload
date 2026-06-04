@@ -1,21 +1,11 @@
 import type { JsonSchemaType } from '../../types.js'
 
 /**
- * Recursively processes JSON schema properties to simplify relationship fields
- * and convert `oneOf` constructs into MCP-friendly schemas.
+ * Recursively simplifies relationship fields for MCP create/update input. We only need to accept
+ * IDs (string/number), not populated objects, so `$ref` options pointing at full entity definitions
+ * are dropped from `oneOf` unions. A lone remaining option is unwrapped; multiple become `anyOf`.
  *
- * For create/update validation we only need to accept IDs (string/number),
- * not populated objects. `$ref` options pointing to full entity definitions
- * are removed entirely from `oneOf` unions. When a single option remains the
- * `oneOf` is unwrapped; otherwise it is converted to `anyOf`.
- *
- * This matters because `json-schema-to-zod` converts `oneOf` into a strict
- * `z.any().superRefine(...)` validator whose base type is `z.any()`, causing
- * `zodToJsonSchema` to emit `{}` and losing all type information in the MCP
- * tool input schema. `anyOf` instead produces a clean `z.union([...])`.
- *
- * NOTE: This function must operate on a cloned schema to avoid mutating
- * the original JSON schema used for tool listing.
+ * NOTE: operates on a clone per level so the original schema (reused for tool listing) isn't mutated.
  */
 export function simplifyRelationshipFields(schema: JsonSchemaType): JsonSchemaType {
   if (!schema || typeof schema !== 'object') {
@@ -39,9 +29,16 @@ export function simplifyRelationshipFields(schema: JsonSchemaType): JsonSchemaTy
 
       if (nonRefOptions.length === 1) {
         const single = nonRefOptions[0]!
+        // A single-target relationship collapses to a bare ID; note the target collection(s) in a description.
+        const refSlugs = processed.oneOf
+          .filter((option) => option && typeof option === 'object' && '$ref' in option)
+          .map((option) => String((option as { $ref: string }).$ref).replace('#/definitions/', ''))
         delete processed.oneOf
         if (typeof single === 'object') {
           Object.assign(processed, single)
+        }
+        if (refSlugs.length > 0 && !processed.description) {
+          processed.description = `The ID of the related "${refSlugs.join('" or "')}" document.`
         }
       } else if (nonRefOptions.length > 1) {
         delete processed.oneOf
