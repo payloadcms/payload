@@ -6,6 +6,7 @@ import type {
   UploadCollectionSlug,
 } from 'payload'
 
+import { createHash } from 'crypto'
 import { fieldsToJSONSchema, flattenAllFields } from 'payload'
 
 import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
@@ -50,13 +51,16 @@ export type UploadDataImproved<TFields extends JsonObject = JsonObject> = {
   }
 }[UploadCollectionSlug]
 
-export type SerializedUploadNode<TSlugs extends UploadCollectionSlug = UploadCollectionSlug> = {
+export type SerializedUploadNode<
+  TSlugs extends UploadCollectionSlug = UploadCollectionSlug,
+  TFields = { [k: string]: unknown },
+> = {
   [TSlug in TSlugs]: {
     relationTo: TSlug
     value: DataFromCollectionSlug<TSlug> | number | string
   }
 }[TSlugs] & {
-  fields: { [k: string]: unknown }
+  fields: TFields
   format: LexicalElementFormat
   id: string
   type: 'upload'
@@ -64,18 +68,21 @@ export type SerializedUploadNode<TSlugs extends UploadCollectionSlug = UploadCol
 }
 
 /** MUST stay byte-for-byte in sync with the runtime `SerializedUploadNode` declared above. */
-const SERIALIZED_UPLOAD_NODE_TS = `export type SerializedUploadNode<TSlugs extends keyof Config['collections']> = {
+const SERIALIZED_UPLOAD_NODE_TS = `export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
   version: number;
-  fields: { [k: string]: unknown };
+  fields: TFields;
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
     value: number | string | Config['collections'][TSlug];
   };
 }[TSlugs];`
+
+const hashUploadFields = (schema: JSONSchema4): string =>
+  createHash('sha256').update(JSON.stringify(schema)).digest('hex').slice(0, 8).toUpperCase()
 
 export const createUploadNodeJSONSchema =
   (props: undefined | UploadFeatureProps): JSONSchemaFn =>
@@ -89,6 +96,10 @@ export const createUploadNodeJSONSchema =
         })
       : []
 
+    // Configured extra fields are registered as their own interface and referenced here, so the
+    // generated TypeScript keeps them - the node-level `tsType` would otherwise erase `fields` to
+    // `{ [k: string]: unknown }`. Mirrors how LinkFeature handles custom link fields.
+    const fieldsTypeNames = new Set<string>()
     const collectionVariants: JSONSchema4[] = enabledCollections.map((collection) => {
       const slug = collection.slug
       const idType: 'number' | 'string' = collectionIDFieldTypes[slug] ?? 'string'
@@ -106,18 +117,26 @@ export const createUploadNodeJSONSchema =
             })
           : { properties: {}, required: [] }
 
+      let fieldsSchema: JSONSchema4 = {
+        type: 'object',
+        additionalProperties: false,
+        properties: extraFieldsSchema.properties,
+        required: extraFieldsSchema.required,
+      }
+      if (flattenedExtra.length > 0) {
+        const fieldsTypeName = `LexicalUploadFields_${hashUploadFields(fieldsSchema)}`
+        interfaceNameDefinitions.set(fieldsTypeName, fieldsSchema)
+        fieldsTypeNames.add(fieldsTypeName)
+        fieldsSchema = { $ref: `#/$defs/${fieldsTypeName}` }
+      }
+
       return {
         type: 'object',
         additionalProperties: false,
         properties: {
           id: { type: 'string' },
           type: { type: 'string', const: 'upload' },
-          fields: {
-            type: 'object',
-            additionalProperties: false,
-            properties: extraFieldsSchema.properties,
-            required: extraFieldsSchema.required,
-          },
+          fields: fieldsSchema,
           format: formatSchema,
           relationTo: { type: 'string', const: slug },
           value: {
@@ -147,7 +166,8 @@ export const createUploadNodeJSONSchema =
       const slugUnion = enabledCollections.map((c) => `'${c.slug}'`).join(' | ')
       const baseSchema: JSONSchema4 =
         collectionVariants.length === 1 ? collectionVariants[0]! : { oneOf: collectionVariants }
-      schema = { ...baseSchema, tsType: `SerializedUploadNode<${slugUnion}>` }
+      const fieldsType = fieldsTypeNames.size > 0 ? `, ${[...fieldsTypeNames].join(' | ')}` : ''
+      schema = { ...baseSchema, tsType: `SerializedUploadNode<${slugUnion}${fieldsType}>` }
     }
 
     return schema

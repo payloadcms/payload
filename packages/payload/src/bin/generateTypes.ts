@@ -12,8 +12,8 @@ import { getLogger } from '../utilities/logger.js'
 
 export async function generateTypes(
   config: SanitizedConfig,
-  options?: { log: boolean },
-): Promise<void> {
+  options?: { log?: boolean; returnString?: boolean },
+): Promise<string | void> {
   const logger = getLogger('payload', 'sync')
   const outputFile = process.env.PAYLOAD_TS_OUTPUT_PATH || config.typescript.outputFile
 
@@ -71,6 +71,11 @@ export async function generateTypes(
     } else {
       compiled += `\n\n${declare}`
     }
+  }
+
+  // Return the generated types instead of writing them to disk.
+  if (options?.returnString) {
+    return compiled
   }
 
   // Diff the compiled types against the existing types file

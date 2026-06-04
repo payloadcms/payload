@@ -14,9 +14,11 @@ import {
   type SerializedLinkNode,
   type SerializedRelationshipNode,
   type SerializedUploadNode,
+  UploadFeature,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { configToJSONSchema, sanitizeConfig } from 'payload'
+import { generateTypes } from 'payload/node'
 import { sanitizeUrl } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { beforeAll, beforeEach, describe, expect, it as vitestIt } from 'vitest'
@@ -1367,4 +1369,44 @@ describe('Lexical link fields interface generation', () => {
       expect(propsOf(linkFieldsNames[0]!)).not.toEqual(propsOf(linkFieldsNames[1]!))
     },
   )
+})
+
+describe('Lexical upload node type generation', () => {
+  // The upload node's JSON Schema validates configured extra fields strictly, so the generated
+  // TypeScript must expose them too - not erase them to `{ [k: string]: unknown }`.
+  vitestIt('reflects UploadFeature extra fields in the generated upload node type', async () => {
+    const config = {
+      collections: [
+        { slug: 'media', fields: [], upload: true },
+        {
+          slug: 'articles',
+          fields: [
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: [
+                  UploadFeature({
+                    collections: { media: { fields: [{ name: 'caption', type: 'text' }] } },
+                  }),
+                ],
+              }),
+            },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
+    ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
+      defaultIDType: 'text',
+    }
+
+    const generatedTypes = await generateTypes(sanitizedConfig, { log: false, returnString: true })
+
+    // The configured `caption` upload field must survive into the generated upload node type,
+    // not be erased to `{ [k: string]: unknown }`.
+    expect(generatedTypes).toContain('caption')
+  })
 })

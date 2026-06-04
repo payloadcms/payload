@@ -710,12 +710,12 @@ export interface SerializedHorizontalRuleNode {
   version: number;
 }
 
-export type SerializedUploadNode<TSlugs extends keyof Config['collections']> = {
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
   type: 'upload';
   format: LexicalElementFormat;
   id: string;
   version: number;
-  fields: { [k: string]: unknown };
+  fields: TFields;
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
