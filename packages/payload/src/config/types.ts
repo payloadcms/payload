@@ -1406,6 +1406,12 @@ export type Config = {
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
   /**
+   * Functions called after the Payload instance is reloaded in development (on HMR config change),
+   * once `payload.config` reflects the new config. Mainly for plugins that hold live state derived
+   * from the config and need to refresh it without a server restart.
+   */
+  onReload?: Array<(payload: Payload) => Promise<void> | void>
+  /**
    * An array of Payload plugins.
    *
    * @see https://payloadcms.com/docs/plugins/overview

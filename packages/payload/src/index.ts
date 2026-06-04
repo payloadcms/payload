@@ -1108,6 +1108,14 @@ export const reload = async (
   ;(global as any)._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
   ;(global as any)._payload_doNotCacheSchemaMap = true
   ;(global as any)._payload_doNotCacheClientSchemaMap = true
+
+  for (const onReload of config.onReload ?? []) {
+    try {
+      await onReload(payload)
+    } catch (error) {
+      payload.logger.error({ err: error }, 'Error running onReload function')
+    }
+  }
 }
 
 let _cached: Map<
