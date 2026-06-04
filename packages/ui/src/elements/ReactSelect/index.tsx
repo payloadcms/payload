@@ -12,6 +12,7 @@ export type { Option } from './types.js'
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
+import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
@@ -89,7 +90,9 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     }),
   }
 
-  const isDisabled = disabled || !hasMounted
+  if (!hasMounted) {
+    return <ShimmerEffect height="var(--field-min-height)" />
+  }
 
   if (!isCreatable) {
     return (
@@ -119,7 +122,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         getOptionValue={getOptionValue}
         instanceId={uuid}
         isClearable={isClearable}
-        isDisabled={isDisabled}
+        isDisabled={disabled}
         isSearchable={isSearchable}
         loadingMessage={loadingMessage}
         menuPlacement="auto"
@@ -201,7 +204,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       inputValue={inputValue}
       instanceId={uuid}
       isClearable={isClearable}
-      isDisabled={isDisabled}
+      isDisabled={disabled}
       isSearchable={isSearchable}
       loadingMessage={loadingMessage}
       menuPlacement="auto"
