@@ -354,9 +354,7 @@ describe('List View', () => {
 
       await page.locator('.condition__actions .btn.condition__actions-remove').click()
 
-      await expect(
-        page.locator('.list-controls__where.rah-static.rah-static--height-auto'),
-      ).toBeHidden()
+      await expect(page.locator('.where-builder')).toBeHidden()
     })
 
     test('should respect base list filters', async () => {
@@ -700,7 +698,7 @@ describe('List View', () => {
       })
 
       await whereBuilder.locator('.where-builder__add-or').click()
-      const secondLi = whereBuilder.locator('.where-builder__or-filters > li:nth-child(2)')
+      const secondLi = whereBuilder.locator('.where-builder__and-filters').nth(1)
       await expect(secondLi).toBeVisible()
 
       await expect(secondLi.locator('.condition__operator >> input')).toHaveValue('')
@@ -772,7 +770,7 @@ describe('List View', () => {
 
       // The newly added filter is its own OR group by default. Fill it in, then
       // switch its join dropdown to "And" to move it into the first group.
-      const secondLi = whereBuilder.locator('.where-builder__or-filters > li:nth-child(2)')
+      const secondLi = whereBuilder.locator('.where-builder__and-filters').nth(1)
       await expect(secondLi).toBeVisible()
       const secondConditionField = secondLi.locator('.condition__field')
       const secondOperatorField = secondLi.locator('.condition__operator')
@@ -797,16 +795,16 @@ describe('List View', () => {
       await joinDropdown.locator('.rs__option', { hasText: exactText('And') }).click()
 
       // Both conditions are now part of a single AND group.
-      await expect(whereBuilder.locator('.where-builder__and-filters > li')).toHaveCount(2)
+      await expect(whereBuilder.locator('.condition')).toHaveCount(2)
 
-      const firstLi = whereBuilder.locator('.where-builder__and-filters > li:nth-child(1)')
+      const firstLi = whereBuilder.locator('.condition').nth(0)
       const removeButton = firstLi.locator('.condition__actions-remove')
 
       await wait(500)
 
       // remove first filter
       await removeButton.click()
-      const filterListItems = whereBuilder.locator('.where-builder__and-filters > li')
+      const filterListItems = whereBuilder.locator('.condition')
       await expect(filterListItems).toHaveCount(1)
       const firstValueField = whereBuilder.locator('.condition__value >> input')
       await expect(firstValueField).toHaveValue('Test 2')
@@ -1827,7 +1825,7 @@ describe('List View', () => {
         )}`,
       )
 
-      const conditionValueSelects = page.locator('#list-controls-where .condition__value')
+      const conditionValueSelects = page.locator('.where-builder .condition__value')
       await expect(conditionValueSelects.nth(0)).toHaveText('Select a value')
       await expect(conditionValueSelects.nth(1)).toHaveText('Custom placeholder')
       await expect(conditionValueSelects.nth(2)).toHaveText('Select a value')

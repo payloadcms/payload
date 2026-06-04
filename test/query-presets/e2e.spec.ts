@@ -498,7 +498,7 @@ describe('Query Presets', () => {
 
     const whereBuilder = page.locator('.where-builder')
 
-    const condition = whereBuilder.locator('.where-builder__or-filters > li').first()
+    const condition = whereBuilder.locator('.condition').first()
 
     // Select field
     await condition.locator('.condition__field .rs__control').click()

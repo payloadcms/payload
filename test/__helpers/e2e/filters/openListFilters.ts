@@ -10,7 +10,7 @@ export const openListFilters = async (
   page: Page,
   {
     togglerSelector = '#toggle-list-filters',
-    filterContainerSelector = '#list-controls-where',
+    filterContainerSelector = '.where-builder',
   }: {
     filterContainerSelector?: string
     togglerSelector?: string
@@ -21,23 +21,19 @@ export const openListFilters = async (
   const toggler = page.locator(togglerSelector).first()
   await expect(toggler).toBeVisible()
 
-  const openContainer = page.locator(`${filterContainerSelector}.rah-static--height-auto`)
+  const openContainer = page.locator(filterContainerSelector).first()
 
-  // Drive the drawer open off the toggler's `aria-expanded` state (the source of truth)
-  // rather than a point-in-time visibility check of the container. The container's "open"
-  // class lingers during the close animation and flickers visible mid-open, so keying the
-  // toggle decision off container visibility could either skip the click while the panel is
-  // mid-close or drop the open click before React updates state (e.g. after a group-by/sort
-  // re-render). We click only when `aria-expanded` reports closed, then retry until the
-  // container is actually open. This makes the helper idempotent and resilient to that race.
+  // The filter drawer is now rendered conditionally (only present in the DOM when open),
+  // so its visibility is the source of truth for the open/closed state. Click the toggler
+  // only when the container isn't already visible, then retry until it is. This makes the
+  // helper idempotent and resilient to re-render races (e.g. after a group-by/sort change).
   await expect(async () => {
-    if ((await toggler.getAttribute('aria-expanded')) !== 'true') {
+    if (!(await openContainer.isVisible())) {
       await toggler.click()
     }
 
-    await expect(toggler).toHaveAttribute('aria-expanded', 'true')
     await expect(openContainer).toBeVisible()
   }).toPass()
 
-  return { filterContainer: page.locator(filterContainerSelector).first() }
+  return { filterContainer: openContainer }
 }

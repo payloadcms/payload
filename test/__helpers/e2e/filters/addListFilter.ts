@@ -31,15 +31,13 @@ export const addListFilter = async ({
   // Detect whether the filters panel was already open before this call. Opening
   // the panel auto-adds an empty first condition, so a freshly opened panel
   // should reuse that condition instead of adding a new one.
-  const wasAlreadyOpen = await page
-    .locator('#list-controls-where.rah-static--height-auto')
-    .isVisible()
+  const wasAlreadyOpen = await page.locator('.where-builder').isVisible()
 
   await openListFilters(page, {})
 
   const whereBuilder = page.locator('.where-builder')
 
-  const filters = whereBuilder.locator('.where-builder__or-filters > li')
+  const filters = whereBuilder.locator('.condition')
 
   if (wasAlreadyOpen) {
     // The panel already had condition(s), so add another and manipulate _that_
