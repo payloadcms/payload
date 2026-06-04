@@ -47,7 +47,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     getOptionValue,
     isClearable = true,
     isCreatable,
-    isLoading: isLoadingProp,
+    isLoading,
     isSearchable = true,
     noOptionsMessage = () => t('general:noOptions'),
     numberOnly = false,
@@ -89,7 +89,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     }),
   }
 
-  const isLoading = isLoadingProp || !hasMounted
+  const isDisabled = disabled || !hasMounted
 
   if (!isCreatable) {
     return (
@@ -119,7 +119,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         getOptionValue={getOptionValue}
         instanceId={uuid}
         isClearable={isClearable}
-        isDisabled={disabled}
+        isDisabled={isDisabled}
         isSearchable={isSearchable}
         loadingMessage={loadingMessage}
         menuPlacement="auto"
@@ -201,7 +201,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       inputValue={inputValue}
       instanceId={uuid}
       isClearable={isClearable}
-      isDisabled={disabled}
+      isDisabled={isDisabled}
       isSearchable={isSearchable}
       loadingMessage={loadingMessage}
       menuPlacement="auto"
