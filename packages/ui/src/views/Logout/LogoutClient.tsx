@@ -9,7 +9,7 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'logout'
 
@@ -67,7 +67,7 @@ export const LogoutClient: React.FC<{
   useEffect(() => {
     if (isLoggedIn && !inactivity) {
       void handleLogOut()
-    } else if (!navigatingToLoginRef.current) {
+    } else if (!inactivity && !navigatingToLoginRef.current) {
       navigatingToLoginRef.current = true
       startRouteTransition(() => router.push(loginRoute))
     }
@@ -77,7 +77,7 @@ export const LogoutClient: React.FC<{
     return (
       <div className={`${baseClass}__wrap`}>
         <h2>{t('authentication:loggedOutInactivity')}</h2>
-        <Button buttonStyle="secondary" el="link" size="large" url={loginRoute}>
+        <Button buttonStyle="primary" el="link" size="large" url={loginRoute}>
           {t('authentication:logBackIn')}
         </Button>
       </div>
