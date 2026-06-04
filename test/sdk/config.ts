@@ -23,7 +23,8 @@ export default buildConfigWithDefaults({
       access: { create: () => true, read: () => true, update: () => true },
       slug: 'media',
       upload: { staticDir: path.resolve(dirname, './media') },
-      fields: []
+      fields: [],
+      versions: false,
     },
   ],
   globals: [
