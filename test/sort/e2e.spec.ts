@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
+import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
@@ -127,13 +128,18 @@ describe('Sort functionality', () => {
 
   test('Orderable join fields', async () => {
     const url = new AdminUrlUtil(serverURL, orderableJoinSlug)
-    await page.goto(url.list)
 
-    await page.getByText('Join A').click()
+    // Navigate via the row's href + hard `page.goto` instead of a soft Next.js
+    // navigation. Under `--prod`, the edit route compiles lazily on first hit and
+    // the soft navigation's URL only updates after the RSC payload arrives, which
+    // can stall past the test timeout on a cold CI server.
+    await goToListDoc({
+      page,
+      cellClass: '.cell-title',
+      textToMatch: 'Join A',
+      urlUtil: url,
+    })
 
-    // The first hit to the edit route compiles lazily under `--prod`, which can
-    // exceed the default navigation timeout on a cold CI server.
-    await page.waitForURL(new RegExp(`${orderableJoinSlug}/`), { timeout: TEST_TIMEOUT_LONG })
     await scrollEntirePage(page)
 
     await expect(page.locator('button.sort-header')).toHaveCount(3)
