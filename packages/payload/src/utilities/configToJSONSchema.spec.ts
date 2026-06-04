@@ -459,6 +459,74 @@ describe('configToJSONSchema', () => {
     expect(schema?.$defs?.SharedBlock).toStrictEqual(expectedBlockSchema)
   })
 
+  it('content-hashes a colliding explicit interfaceName instead of overwriting it', async () => {
+    // Two different blocks both set `interfaceName: 'Hero'` - each must keep its own definition.
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              name: 'blocksField',
+              type: 'blocks',
+              blocks: [
+                { slug: 'blockA', fields: [{ name: 'title', type: 'text' }], interfaceName: 'Hero' },
+                {
+                  slug: 'blockB',
+                  fields: [{ name: 'subtitle', type: 'number' }],
+                  interfaceName: 'Hero',
+                },
+              ],
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+    const defs = jsonSchema.$defs!
+
+    // Each differently-shaped block keeps its own interface (one clean, one hash-suffixed).
+    const heroNames = Object.keys(defs).filter((k) => /^Hero(_[0-9A-F]{8})?$/.test(k))
+    expect(heroNames).toHaveLength(2)
+
+    // ...and they carry distinct field shapes (not a silent overwrite).
+    const shapeOf = (name: string): string =>
+      Object.keys((defs[name] as { properties: Record<string, unknown> }).properties)
+        .sort()
+        .join(',')
+    expect(shapeOf(heroNames[0]!)).not.toBe(shapeOf(heroNames[1]!))
+  })
+
+  it('reuses one definition when the same block is registered more than once', async () => {
+    // Reusing one block across fields registers an identical schema each time, so it dedupes.
+    const heroBlock = {
+      slug: 'hero',
+      fields: [{ name: 'title', type: 'text' }],
+      interfaceName: 'Hero',
+    }
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            { name: 'a', type: 'blocks', blocks: [heroBlock] },
+            { name: 'b', type: 'blocks', blocks: [heroBlock] },
+          ],
+          timestamps: false,
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+
+    const heroNames = Object.keys(jsonSchema.$defs!).filter((k) => /^Hero(_[0-9A-F]{8})?$/.test(k))
+    expect(heroNames).toEqual(['Hero'])
+  })
+
   it('should allow overriding required to false', async () => {
     // @ts-expect-error
     const config: Config = {

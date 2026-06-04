@@ -1346,9 +1346,10 @@ const hashBlockSchema = (schema: JSONSchema4): string =>
 /**
  * Registers a block's schema as a top-level definition and returns its name.
  *
- * The name is the block's `interfaceName`, or a PascalCase form of its slug. If a different
- * block already uses that name, this one gets a content-hash suffix (`Hero_3F2A1B0C`) so the
- * two don't overwrite each other. Registering the same block shape again reuses its name.
+ * The name is the block's `interfaceName`, or a PascalCase form of its slug. If a different block
+ * already uses that name - whether it was auto-generated or an explicit `interfaceName` - this one
+ * gets a content-hash suffix (`Hero_3F2A1B0C`) so the two don't overwrite each other. Registering
+ * the same block shape again reuses its name.
  */
 export function registerBlockInterface(
   block: { interfaceName?: string; slug: string },
@@ -1358,8 +1359,8 @@ export function registerBlockInterface(
   const baseName = block.interfaceName ?? toWords(block.slug, true)
   const existing = interfaceNameDefinitions.get(baseName)
 
-  // Use the clean name if it is free, or if the block sets an explicit interfaceName.
-  if (!existing || block.interfaceName) {
+  // The name is free - claim it.
+  if (!existing) {
     interfaceNameDefinitions.set(baseName, blockSchema)
     return baseName
   }
@@ -1371,7 +1372,7 @@ export function registerBlockInterface(
     return baseName
   }
 
-  // A different block already owns the clean name. Disambiguate this one with its hash.
+  // A different block already owns the name. Disambiguate this one with its hash.
   blockSchema.description = `Multiple blocks resolve to the \`${baseName}\` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique \`interfaceName\` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions`
 
   const uniqueName = `${baseName}_${hash}`
