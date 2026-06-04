@@ -123,8 +123,8 @@ export const createBlockNodeJSONSchema =
       definitionNames.length === 0
         ? { type: 'object', additionalProperties: true }
         : definitionNames.length === 1
-          ? { $ref: `#/definitions/${definitionNames[0]!}` }
-          : { oneOf: definitionNames.map((name) => ({ $ref: `#/definitions/${name}` })) }
+          ? { $ref: `#/$defs/${definitionNames[0]!}` }
+          : { oneOf: definitionNames.map((name) => ({ $ref: `#/$defs/${name}` })) }
 
     const tsType =
       definitionNames.length > 0
@@ -157,8 +157,8 @@ export const createInlineBlockNodeJSONSchema =
       definitionNames.length === 0
         ? { type: 'object', additionalProperties: true }
         : definitionNames.length === 1
-          ? { $ref: `#/definitions/${definitionNames[0]!}` }
-          : { oneOf: definitionNames.map((name) => ({ $ref: `#/definitions/${name}` })) }
+          ? { $ref: `#/$defs/${definitionNames[0]!}` }
+          : { oneOf: definitionNames.map((name) => ({ $ref: `#/$defs/${name}` })) }
 
     const tsType =
       definitionNames.length > 0

@@ -997,7 +997,7 @@ export function entityToJSONSchema(
 
 /**
  * Like {@link entityToJSONSchema}, but returns a standalone schema for one collection or global:
- * the entity plus only the `definitions` it actually uses, so it resolves on its own rather than
+ * the entity plus only the `$defs` it actually uses, so it resolves on its own rather than
  * as part of the whole config schema.
  *
  * Relationship/upload `$ref`s to other collections are left in place - the caller handles those.
@@ -1031,15 +1031,15 @@ export function entityToStandaloneJSONSchema({
   const supportedTimezones = config.admin?.timezones?.supportedTimezones
   if (
     supportedTimezones?.length &&
-    schemaHasRef([schema, ...definitions.values()], '#/definitions/supportedTimezones')
+    schemaHasRef([schema, ...definitions.values()], '#/$defs/supportedTimezones')
   ) {
     definitions.set('supportedTimezones', timezonesToJSONSchema(supportedTimezones))
   }
 
   return {
-    $schema: 'http://json-schema.org/draft-07/schema#',
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
     ...schema,
-    definitions: Object.fromEntries(definitions),
+    $defs: Object.fromEntries(definitions),
   }
 }
 

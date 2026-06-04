@@ -148,7 +148,7 @@ const resolveLinkFieldsRef = (
   const editorHash = args.nodeUnionName.replace(/^LexicalNodes_/, '')
   const fieldsTypeName = `LexicalLinkFields_${editorHash}`
   args.interfaceNameDefinitions.set(fieldsTypeName, fieldsSchema)
-  return { fieldsRef: { $ref: `#/definitions/${fieldsTypeName}` }, fieldsTypeName }
+  return { fieldsRef: { $ref: `#/$defs/${fieldsTypeName}` }, fieldsTypeName }
 }
 
 export const createLinkNodeJSONSchema =

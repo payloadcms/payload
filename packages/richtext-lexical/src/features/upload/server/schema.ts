@@ -123,7 +123,7 @@ export const createUploadNodeJSONSchema =
           value: {
             description:
               'The uploaded file by ID (string or number). Populated to the full upload document when read at depth > 0.',
-            oneOf: [{ type: idType }, { $ref: `#/definitions/${slug}` }],
+            oneOf: [{ type: idType }, { $ref: `#/$defs/${slug}` }],
           },
           version: versionSchema,
         },

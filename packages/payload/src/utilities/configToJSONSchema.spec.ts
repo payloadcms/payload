@@ -591,7 +591,7 @@ describe('configToJSONSchema', () => {
     })
 
     // Has its own $schema, so it resolves on its own.
-    expect(schema.$schema).toBe('http://json-schema.org/draft-07/schema#')
+    expect(schema.$schema).toBe('https://json-schema.org/draft/2020-12/schema')
 
     // The block reference is resolved inline, so it can't dangle.
     const layoutItems = (schema.properties?.layout as JSONSchema4)?.items as JSONSchema4
@@ -600,9 +600,9 @@ describe('configToJSONSchema', () => {
     expect(inlinedBlock.properties?.title).toBeDefined()
 
     // A timezone field pulls in supportedTimezones from the root config.
-    expect(schema.definitions?.supportedTimezones).toBeDefined()
+    expect(schema.$defs?.supportedTimezones).toBeDefined()
 
     // Doesn't pull in unrelated collections.
-    expect(schema.definitions?.other).toBeUndefined()
+    expect(schema.$defs?.other).toBeUndefined()
   })
 })

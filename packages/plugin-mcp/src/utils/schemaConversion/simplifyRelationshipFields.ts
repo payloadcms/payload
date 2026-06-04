@@ -32,7 +32,7 @@ export function simplifyRelationshipFields(schema: JsonSchemaType): JsonSchemaTy
         // A single-target relationship collapses to a bare ID; note the target collection(s) in a description.
         const refSlugs = processed.oneOf
           .filter((option) => option && typeof option === 'object' && '$ref' in option)
-          .map((option) => String((option as { $ref: string }).$ref).replace('#/definitions/', ''))
+          .map((option) => String((option as { $ref: string }).$ref).replace('#/$defs/', ''))
         delete processed.oneOf
         if (typeof single === 'object') {
           Object.assign(processed, single)
@@ -63,11 +63,11 @@ export function simplifyRelationshipFields(schema: JsonSchemaType): JsonSchemaTy
     processed.items = simplifyRelationshipFields(processed.items)
   }
 
-  // Also walk `definitions`: lexical node unions and blocks live there, and their relationship
+  // Also walk `$defs`: lexical node unions and blocks live there, and their relationship
   // fields point at collections that aren't bundled. Simplifying them drops those refs to IDs.
-  if (processed.definitions && typeof processed.definitions === 'object') {
-    processed.definitions = Object.fromEntries(
-      Object.entries(processed.definitions).map(([key, value]) => [
+  if (processed.$defs && typeof processed.$defs === 'object') {
+    processed.$defs = Object.fromEntries(
+      Object.entries(processed.$defs).map(([key, value]) => [
         key,
         typeof value === 'object' ? simplifyRelationshipFields(value) : value,
       ]),

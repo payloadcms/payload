@@ -72,7 +72,7 @@ export const createRelationshipNodeJSONSchema =
           value: {
             description:
               'The related document by ID (string or number). Populated to the full document when read at depth > 0.',
-            oneOf: [{ type: idType }, { $ref: `#/definitions/${slug}` }],
+            oneOf: [{ type: idType }, { $ref: `#/$defs/${slug}` }],
           },
           version: versionSchema,
         },
