@@ -8,4 +8,5 @@ export const generateLoginMetadata: GenerateViewMetadata = async ({ config, i18n
     keywords: t('authentication:login'),
     serverURL: config.serverURL,
     title: t('authentication:login'),
+    ...(config.admin.meta || {}),
   })

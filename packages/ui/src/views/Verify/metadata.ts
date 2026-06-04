@@ -8,4 +8,5 @@ export const generateVerifyMetadata: GenerateViewMetadata = async ({ config, i18
     keywords: t('authentication:verify'),
     serverURL: config.serverURL,
     title: t('authentication:verify'),
+    ...(config.admin.meta || {}),
   })

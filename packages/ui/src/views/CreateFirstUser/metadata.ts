@@ -11,4 +11,5 @@ export const generateCreateFirstUserMetadata: GenerateViewMetadata = async ({
     keywords: t('general:create'),
     serverURL: config.serverURL,
     title: t('authentication:createFirstUser'),
+    ...(config.admin.meta || {}),
   })

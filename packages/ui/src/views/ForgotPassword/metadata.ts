@@ -11,4 +11,5 @@ export const generateForgotPasswordMetadata: GenerateViewMetadata = async ({
     keywords: t('authentication:forgotPassword'),
     serverURL: config.serverURL,
     title: t('authentication:forgotPassword'),
+    ...(config.admin.meta || {}),
   })

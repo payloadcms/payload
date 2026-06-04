@@ -8,4 +8,5 @@ export const generateUnauthorizedMetadata: GenerateViewMetadata = async ({ confi
     keywords: t('error:unauthorized'),
     serverURL: config.serverURL,
     title: t('error:unauthorized'),
+    ...(config.admin.meta || {}),
   })
