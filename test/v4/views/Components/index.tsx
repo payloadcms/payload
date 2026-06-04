@@ -27,6 +27,7 @@ import { PopupSection } from './sections/Popup.js'
 import { ProgressBarSection } from './sections/ProgressBar.js'
 import { RenderTitleSection } from './sections/RenderTitle.js'
 import { SearchBarSection } from './sections/SearchBar.js'
+import { ShimmerSection } from './sections/Shimmer.js'
 import { SpinnerSection } from './sections/Spinner.js'
 import { StatusSection } from './sections/Status.js'
 import { StatusCellSection } from './sections/StatusCell.js'
@@ -311,6 +312,7 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('no-list-results', 'patterns') && (
           <NoListResultsSection selectedComponent="no-list-results" />
         )}
+        {shouldShow('shimmer', 'patterns') && <ShimmerSection selectedComponent="shimmer" />}
         {shouldShow('progress-bar', 'patterns') && (
           <ProgressBarSection selectedComponent="progress-bar" />
         )}
