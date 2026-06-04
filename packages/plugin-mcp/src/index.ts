@@ -3,8 +3,8 @@ import { defaultUserCollection, definePlugin } from 'payload'
 import type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig } from './types.js'
 
 import { getAPIKeysCollection } from './collection/index.js'
-import { mcpEndpoint } from './endpoint/index.js'
 import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
+import { mcpEndpoint } from './transports/http/index.js'
 
 declare module 'payload' {
   export interface PayloadRequest {

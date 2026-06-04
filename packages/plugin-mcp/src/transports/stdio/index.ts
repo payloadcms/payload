@@ -6,12 +6,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createLocalReq, getPayload } from 'payload'
 import { findConfig } from 'payload/node'
 
-import type { AuthorizedMCP, SanitizedMCPPluginConfig } from './types.js'
+import type { AuthorizedMCP, SanitizedMCPPluginConfig } from '../../types.js'
 
-import { buildMcpServer } from './mcp/buildMcpServer.js'
-import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
-import { getPluginConfig } from './utils/getPluginConfig.js'
-import { resolveProjectRoot } from './utils/resolveProjectRoot.js'
+import { buildMcpServer } from '../../mcp/buildMcpServer.js'
+import { sanitizeMCPConfig } from '../../mcp/sanitizeMCPConfig.js'
+import { getPluginConfig } from '../../utils/getPluginConfig.js'
+import { resolveProjectRoot } from '../../utils/resolveProjectRoot.js'
 
 /**
  * Stdio adapter for the Payload MCP server.

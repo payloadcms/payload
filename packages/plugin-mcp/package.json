@@ -37,9 +37,9 @@
       "default": "./src/exports/client.ts"
     },
     "./stdio": {
-      "import": "./src/stdio.ts",
-      "types": "./src/stdio.ts",
-      "default": "./src/stdio.ts"
+      "import": "./src/transports/stdio/index.ts",
+      "types": "./src/transports/stdio/index.ts",
+      "default": "./src/transports/stdio/index.ts"
     }
   },
   "main": "./src/index.ts",
@@ -94,9 +94,9 @@
         "default": "./dist/exports/client.js"
       },
       "./stdio": {
-        "import": "./dist/stdio.js",
-        "types": "./dist/stdio.d.ts",
-        "default": "./dist/stdio.js"
+        "import": "./dist/transports/stdio/index.js",
+        "types": "./dist/transports/stdio/index.d.ts",
+        "default": "./dist/transports/stdio/index.js"
       }
     },
     "main": "./dist/index.js",

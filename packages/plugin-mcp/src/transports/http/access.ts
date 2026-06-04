@@ -3,10 +3,10 @@ import type { DefaultDocumentIDType, PayloadRequest, TypedUser } from 'payload'
 import crypto from 'crypto'
 import { UnauthorizedError } from 'payload'
 
-import type { AuthorizedMCP, MCPAPIKeysDoc } from '../types.js'
+import type { AuthorizedMCP, MCPAPIKeysDoc } from '../../types.js'
 
-import { getLogger } from '../utils/getLogger.js'
-import { getPluginConfig } from '../utils/getPluginConfig.js'
+import { getLogger } from '../../utils/getLogger.js'
+import { getPluginConfig } from '../../utils/getPluginConfig.js'
 
 /**
  * Resolves the API key (or dev-mode session) and returns the items the caller

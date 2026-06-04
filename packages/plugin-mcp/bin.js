@@ -22,13 +22,13 @@ const baseURL = pathToFileURL(dirname).toString() + '/'
 const start = async () => {
   if (disableTranspile) {
     process.argv = process.argv.filter((arg) => arg !== '--disable-transpile')
-    const { runMcpStdio } = await import('./dist/stdio.js')
+    const { runMcpStdio } = await import('./dist/transports/stdio/index.js')
     await runMcpStdio()
     return
   }
 
   const { tsImport } = await import('tsx/esm/api')
-  const { runMcpStdio } = await tsImport('./dist/stdio.js', baseURL)
+  const { runMcpStdio } = await tsImport('./dist/transports/stdio/index.js', baseURL)
   await runMcpStdio()
 }
 
