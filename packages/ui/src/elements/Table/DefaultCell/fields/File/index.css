@@ -15,11 +15,11 @@
     align-self: center;
 
     [dir='ltr'] & {
-      margin-left: var(--spacer-4);
+      margin-left: calc(var(--spacer-4) - var(--spacer-1));
     }
 
     [dir='rtl'] & {
-      margin-right: var(--spacer-4);
+      margin-right: calc(var(--spacer-4) - var(--spacer-1));
     }
   }
 }

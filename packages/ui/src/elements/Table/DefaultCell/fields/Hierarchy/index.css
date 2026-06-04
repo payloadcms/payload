@@ -11,7 +11,7 @@
     gap: var(--spacer-2);
 
     &:hover {
-      opacity: 0.8;
+      background-color: var(--color-bg-hover);
     }
   }
 }
