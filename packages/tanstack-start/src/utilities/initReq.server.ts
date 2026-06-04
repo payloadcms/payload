@@ -14,6 +14,7 @@ import {
 import * as qs from 'qs-esm'
 
 import { getRequestLocale } from './getRequestLocale.js'
+import { tanstackServerAdapter } from './serverAdapter.server.js'
 
 /**
  * Initializes a Payload request object from the current TanStack Start server context.
@@ -80,6 +81,11 @@ export async function initReq({
         i18n: i18n as I18n,
         query: queryFromUrl,
         responseHeaders,
+        // Expose the TanStack `ServerAdapter` so framework-agnostic server
+        // functions can set cookies / redirect via `req.server` (mirrors the
+        // Next.js adapter, which passes `nextServerAdapter`). Required by
+        // handlers like `switch-language`.
+        server: tanstackServerAdapter,
         url: webRequest.url,
         user,
         ...(reqOverrides || {}),

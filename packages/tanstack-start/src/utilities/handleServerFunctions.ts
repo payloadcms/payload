@@ -10,6 +10,7 @@ import { renderDocumentSlotsHandler } from '@payloadcms/ui/views/Document/render
 import { RenderRSCComponent } from '../rsc/renderPayloadRSC.js'
 import { initReq } from './initReq.server.js'
 import { serializeForRsc } from './serializeForRsc.js'
+import { switchLanguageHandler } from './serverFunctionHandlers.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   ...sharedServerFunctions,
@@ -18,6 +19,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'render-field': _internal_renderFieldHandler,
   'render-tab': renderTabHandler,
   'render-widget': renderWidgetHandler,
+  'switch-language': switchLanguageHandler,
 }
 
 /**
