@@ -24,12 +24,8 @@
   .condition__join .rs__control {
     min-height: var(--spacer-4);
     padding-block: 0;
-    padding-inline: calc(var(--spacer-1) * 1.5) var(--spacer-1);
+    padding-inline: calc(var(--spacer-1) * 1.5) var(--spacer-4);
     text-transform: lowercase;
-  }
-
-  .condition__join .rs__indicator {
-    padding: 0;
   }
 
   .condition__join .rs__menu {
@@ -87,7 +83,7 @@
 
     .condition__join .rs__control {
       min-width: calc(var(--spacer-4) * 3);
-      width: fit-content;
+      /* width: fit-content; */
     }
 
     .condition__field {

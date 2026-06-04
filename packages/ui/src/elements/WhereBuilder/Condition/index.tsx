@@ -218,8 +218,6 @@ export const Condition: React.FC<Props> = (props) => {
                 orIndex,
               })
             }
-            round
-            size="large"
           />
         </div>
       </div>
