@@ -1,0 +1,47 @@
+@layer payload-default {
+  .collection-edit__main-wrapper {
+    width: 100%;
+    display: flex;
+  }
+
+  .collection-edit__main {
+    width: 100%;
+    container-type: inline-size;
+  }
+
+  .collection-edit__main--popup-open {
+    width: 100%;
+  }
+
+  .collection-edit__main--is-live-previewing {
+    width: 40%;
+    position: relative;
+
+    &::after {
+      content: ' ';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: var(--spacer-6);
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+  }
+
+  .collection-edit__form {
+    height: 100%;
+    width: 100%;
+  }
+
+  .collection-edit__auth {
+    border-radius: var(--radius-small);
+  }
+
+  @media (max-width: 768px) {
+    .collection-edit__auth {
+      margin-top: 0;
+      margin-bottom: var(--spacer-3);
+    }
+  }
+}
