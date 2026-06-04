@@ -123,4 +123,16 @@ export const optimizeDepsIncludeDefaults: string[] = [
   'payload > deepmerge',
   'payload > pluralize',
   'scheduler',
+  // Transitive deps that Vite otherwise discovers *after* the initial crawl
+  // (react-select pulls in @floating-ui at runtime; react-is is reached via
+  // react-transition-group/prop-types; the default date-fns locale is loaded
+  // through a dynamic `date-fns/locale/${key}` import). A late discovery forces
+  // a full dep re-optimization mid-session, which 404s every in-flight
+  // `.vite/deps/*` chunk ("Pre-transform error: file does not exist in the
+  // optimize deps directory") and breaks the admin UI in CI cold starts.
+  // Pre-bundling them keeps the first optimization pass complete.
+  '@payloadcms/ui > react-select > @floating-ui/dom',
+  '@payloadcms/ui > react-select > @floating-ui/dom > @floating-ui/core',
+  '@payloadcms/ui > react-select > prop-types > react-is',
+  '@payloadcms/ui > date-fns/locale/en-US',
 ]
