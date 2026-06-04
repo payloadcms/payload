@@ -51,8 +51,13 @@ async function main() {
   const initialPackageJsonObj = JSON.parse(initialPackageJson)
 
   // Update the package.json dependencies to use any specific version instead of `workspace:*`, so that
-  // the next pnpm add command can install the local packages correctly.
-  updatePackageJSONDependencies({ latestVersion: '3.42.0', packageJson: initialPackageJsonObj })
+  // the next pnpm add command can install the local packages correctly. Whitelisted packages are
+  // overridden by the local .tgz files below; this version is the npm fallback for any @payloadcms
+  // dependency not packed locally, so it must resolve to a published release on the current major.
+  updatePackageJSONDependencies({
+    latestVersion: '4.0.0-canary.0',
+    packageJson: initialPackageJsonObj,
+  })
 
   await fs.writeFile(packageJsonPath, JSON.stringify(initialPackageJsonObj, null, 2))
 

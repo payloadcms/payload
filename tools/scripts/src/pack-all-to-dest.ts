@@ -37,6 +37,7 @@ async function main() {
     ? undefined
     : [
         'payload',
+        'admin-bar',
         'db-mongodb',
         'db-postgres',
         'db-d1-sqlite',
@@ -54,6 +55,7 @@ async function main() {
         'plugin-search',
         'plugin-seo',
         'richtext-lexical',
+        'storage-vercel-blob',
         'translations',
         'ui',
       ]
