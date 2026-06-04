@@ -421,14 +421,15 @@ export {
 export { ListQueryProvider, useListQuery } from '../../providers/ListQuery/index.js'
 export { LocaleProvider, useLocale } from '../../providers/Locale/index.js'
 export { OperationProvider, useOperation } from '../../providers/Operation/index.js'
-export { ParamsProvider, useParams } from '../../providers/Params/index.js'
 export { PreferencesProvider, usePreferences } from '../../providers/Preferences/index.js'
 export { RootProvider } from '../../providers/Root/index.js'
 export {
   PayloadLink,
   RouterAdapterContext,
+  useParams,
   usePathname,
   useRouter,
+  useSearchParams,
 } from '../../providers/RouterAdapter/index.js'
 export type { RouterAdapterContextValue } from '../../providers/RouterAdapter/index.js'
 export {
@@ -436,7 +437,6 @@ export {
   useRouteCache,
 } from '../../providers/RouteCache/index.js'
 export { ScrollInfoProvider, useScrollInfo } from '../../providers/ScrollInfo/index.js'
-export { SearchParamsProvider, useSearchParams } from '../../providers/SearchParams/index.js'
 export { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
 export {
   DocumentSelectionProvider,
