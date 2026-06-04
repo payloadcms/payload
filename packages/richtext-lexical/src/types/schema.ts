@@ -77,7 +77,20 @@ export const getFieldToJSONSchema: (args: {
     // See JSDocs for `NODE_UNION_NAME_PLACEHOLDER` for why we use a placeholder and hashing.
     const nodeUnionJson = JSON.stringify({ oneOf: nodeSchemas })
 
-    const hash = createHash('sha256').update(nodeUnionJson).digest('hex').slice(0, 8).toUpperCase()
+    // Features can register per-editor definitions during node-schema build (e.g. a link node's
+    // custom `LexicalLinkFields_<hash>`), keyed by the not-yet-resolved hash placeholder. The node
+    // union only `$ref`s them, so their content isn't in `nodeUnionJson` - two editors with the same
+    // nodes but different feature config (e.g. different custom link fields) would otherwise hash
+    // identically and overwrite each other's definition. To avoid that, include that content into the hash too.
+    const pendingDefinitions = [...interfaceNameDefinitions.entries()]
+      .filter(([key]) => key.includes(NODE_UNION_HASH_PLACEHOLDER))
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+
+    const hashInput = pendingDefinitions.length
+      ? JSON.stringify({ definitions: pendingDefinitions, oneOf: nodeSchemas })
+      : nodeUnionJson
+
+    const hash = createHash('sha256').update(hashInput).digest('hex').slice(0, 8).toUpperCase()
     const nodeUnionName = `LexicalNodes_${hash}`
 
     // Replacing the hash resolves the union name and any feature-derived

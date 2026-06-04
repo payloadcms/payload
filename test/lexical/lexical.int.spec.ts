@@ -9,6 +9,7 @@ import {
   buildEditorState,
   type DefaultNodeTypes,
   lexicalEditor,
+  LinkFeature,
   type SerializedBlockNode,
   type SerializedLinkNode,
   type SerializedRelationshipNode,
@@ -1316,6 +1317,54 @@ describe('Lexical block interface generation', () => {
           .sort()
           .join(',')
       expect(shapeOf(heroNames[0]!)).not.toBe(shapeOf(heroNames[1]!))
+    },
+  )
+})
+
+describe('Lexical link fields interface generation', () => {
+  // The node-union name is a content hash of the editor's nodes. A link node only carries a `$ref`
+  // to its `LexicalLinkFields_<hash>` interface, whose *content* lives separately — so two editors
+  // with identical nodes but different custom LinkFeature fields must not hash the same, or one
+  // `LexicalLinkFields_<hash>` would overwrite the other and mistype a field.
+  vitestIt(
+    'gives editors with identical nodes but different custom link fields distinct interfaces',
+    async () => {
+      const linkEditor = (fieldName: string) =>
+        lexicalEditor({
+          features: [
+            LinkFeature({
+              fields: ({ defaultFields }) => [...defaultFields, { name: fieldName, type: 'text' }],
+            }),
+          ],
+        })
+
+      // Two richText fields with the same nodes, differing only in their custom link field.
+      const config = {
+        collections: [
+          {
+            slug: 'linkCollisionTest',
+            fields: [
+              { name: 'rt1', type: 'richText', editor: linkEditor('label') },
+              { name: 'rt2', type: 'richText', editor: linkEditor('trackingId') },
+            ],
+          },
+        ],
+      } as unknown as Config
+
+      const sanitizedConfig = await sanitizeConfig(config)
+      const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+      const defs = jsonSchema.$defs!
+
+      // Each editor gets its own custom-link-fields interface (not a single shared, overwritten one).
+      const linkFieldsNames = Object.keys(defs).filter((k) =>
+        /^LexicalLinkFields_[0-9A-F]{8}$/.test(k),
+      )
+      expect(linkFieldsNames).toHaveLength(2)
+
+      // ...and each carries its own custom field (`label` vs `trackingId`), not a silent overwrite.
+      const propsOf = (name: string): string[] =>
+        Object.keys((defs[name] as { properties: Record<string, unknown> }).properties).sort()
+      expect(propsOf(linkFieldsNames[0]!)).not.toEqual(propsOf(linkFieldsNames[1]!))
     },
   )
 })
