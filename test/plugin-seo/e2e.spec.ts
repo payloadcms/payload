@@ -168,6 +168,7 @@ describe('SEO Plugin', () => {
       await page.goto(url.account)
 
       const languageField = page.locator('.payload-settings__language .react-select')
+      await expect(languageField).toBeVisible()
       const options = page.locator('.rs__option')
 
       // Change language to Spanish
