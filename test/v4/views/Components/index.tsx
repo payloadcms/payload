@@ -26,6 +26,7 @@ import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
 import { RenderTitleSection } from './sections/RenderTitle.js'
 import { SearchBarSection } from './sections/SearchBar.js'
+import { ShimmerSection } from './sections/Shimmer.js'
 import { SpinnerSection } from './sections/Spinner.js'
 import { StatusSection } from './sections/Status.js'
 import { StatusCellSection } from './sections/StatusCell.js'
@@ -308,6 +309,7 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('no-list-results', 'patterns') && (
           <NoListResultsSection selectedComponent="no-list-results" />
         )}
+        {shouldShow('shimmer', 'patterns') && <ShimmerSection selectedComponent="shimmer" />}
         {shouldShow('status', 'patterns') && <StatusSection selectedComponent="status" />}
         {shouldShow('status-cell', 'patterns') && (
           <StatusCellSection selectedComponent="status-cell" />
