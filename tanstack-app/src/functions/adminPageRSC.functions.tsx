@@ -35,9 +35,17 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
     const { initReq, toSerializable } = await import('@payloadcms/tanstack-start/server')
     const config = await (await import('@payload-config')).default
     const { importMap } = await import('../importMap.js')
+    const qs = await import('qs-esm')
 
     const segments = data._splat ? data._splat.split('/').filter(Boolean) : []
     const searchParams = data.search ?? {}
+
+    // The forwarded `searchParams` arrive as flat bracket-notation keys (e.g.
+    // `{ 'where[or][0][and][0][x][equals]': 'y' }`). Re-nest them via the same
+    // `qs.stringify` → `qs.parse` round-trip the Next.js adapter uses, so
+    // `req.query.where` is the structured object Payload's operations expect.
+    const queryString = qs.stringify(searchParams, { addQueryPrefix: true })
+    const query = qs.parse(queryString, { depth: 10, ignoreQueryPrefix: true })
 
     try {
       const initResult = await initReq({
@@ -45,7 +53,7 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
         importMap,
         overrides: {
           fallbackLocale: false,
-          req: { query: searchParams as Record<string, unknown> },
+          req: { query },
         },
       })
 

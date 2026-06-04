@@ -1,4 +1,5 @@
-import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
+import { createFileRoute, notFound, redirect, useLocation } from '@tanstack/react-router'
+import { Fragment } from 'react'
 
 import { loadAdminPageRSC } from '../../functions/adminPageRSC.functions.js'
 import { getAdminMeta } from '@payloadcms/tanstack-start'
@@ -45,7 +46,16 @@ export const Route = createFileRoute('/_payload/admin/$')({
 
 function AdminPage() {
   const data = Route.useLoaderData() as any
+  const pathname = useLocation({ select: (location) => location.pathname })
 
   // RSC Flight payload — render directly, no client-side data reconstruction.
-  return <>{data?.rscPayload}</>
+  //
+  // Key the subtree by pathname so navigating to a different admin page (e.g.
+  // the create → edit redirect after a successful save) remounts the view,
+  // mirroring Next.js route-segment semantics. Without this the `$` splat route
+  // reconciles in place and mount-only effects never re-run — most visibly the
+  // "successfully created" toast that the Edit view replays from sessionStorage
+  // on mount. Same-pathname navigations (e.g. list-view filtering via search
+  // params) keep the same key and reconcile in place.
+  return <Fragment key={pathname}>{data?.rscPayload}</Fragment>
 }

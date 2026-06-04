@@ -100,7 +100,11 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
     [back, push, refresh, replace],
   )
 
-  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search])
+  // `location.searchStr` is the serialized query string; `location.search` is
+  // the parsed object (a nested structure once the router uses `qs` for search
+  // serialization), which `URLSearchParams` cannot consume. Build from the
+  // string so Payload's `parseSearchParams` re-parses the bracket notation.
+  const searchParams = useMemo(() => new URLSearchParams(location.searchStr), [location.searchStr])
 
   const value: RouterAdapterContextValue = useMemo(
     () => ({
