@@ -52,7 +52,7 @@ function generateEntitySchemas(
   const properties = [...entities].reduce(
     (acc, { slug }) => {
       acc[slug] = {
-        $ref: `#/definitions/${slug}`,
+        $ref: `#/$defs/${slug}`,
       }
 
       return acc
@@ -74,7 +74,7 @@ function generateEntitySelectSchemas(
   const properties = [...entities].reduce(
     (acc, { slug }) => {
       acc[slug] = {
-        $ref: `#/definitions/${slug}_select`,
+        $ref: `#/$defs/${slug}_select`,
       }
 
       return acc
@@ -221,7 +221,7 @@ function generateWidgetSchemas({
     }
 
     properties[widget.slug] = {
-      $ref: `#/definitions/${definition}`,
+      $ref: `#/$defs/${definition}`,
     }
   }
 
@@ -283,7 +283,7 @@ function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONS
   const properties: JSONSchema4[] = [...entities]
     .filter(({ auth }) => Boolean(auth))
     .map(({ slug }) => {
-      return { $ref: `#/definitions/${slug}` }
+      return { $ref: `#/$defs/${slug}` }
     }, {})
 
   return {
@@ -434,7 +434,7 @@ export function fieldsToJSONSchema({
               interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
 
               fieldSchema = {
-                $ref: `#/definitions/${field.interfaceName}`,
+                $ref: `#/$defs/${field.interfaceName}`,
               }
             }
             break
@@ -487,7 +487,7 @@ export function fieldsToJSONSchema({
                       return forceInlineBlocks
                         ? blockSchema
                         : {
-                            $ref: `#/definitions/${registerBlockInterface(block, blockSchema, interfaceNameDefinitions)}`,
+                            $ref: `#/$defs/${registerBlockInterface(block, blockSchema, interfaceNameDefinitions)}`,
                           }
                     }),
                   }
@@ -533,7 +533,7 @@ export function fieldsToJSONSchema({
               if (field.interfaceName) {
                 interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
 
-                fieldSchema = { $ref: `#/definitions/${field.interfaceName}` }
+                fieldSchema = { $ref: `#/$defs/${field.interfaceName}` }
               }
             }
             break
@@ -557,7 +557,7 @@ export function fieldsToJSONSchema({
                           type: collectionIDFieldTypes[collection],
                         },
                         {
-                          $ref: `#/definitions/${collection}`,
+                          $ref: `#/$defs/${collection}`,
                         },
                       ],
                     },
@@ -572,7 +572,7 @@ export function fieldsToJSONSchema({
                     type: collectionIDFieldTypes[field.collection],
                   },
                   {
-                    $ref: `#/definitions/${field.collection}`,
+                    $ref: `#/$defs/${field.collection}`,
                   },
                 ],
               }
@@ -647,7 +647,7 @@ export function fieldsToJSONSchema({
               interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
 
               fieldSchema = {
-                $ref: `#/definitions/${field.interfaceName}`,
+                $ref: `#/$defs/${field.interfaceName}`,
               }
             }
 
@@ -675,7 +675,7 @@ export function fieldsToJSONSchema({
                                 type: collectionIDFieldTypes[relation],
                               },
                               {
-                                $ref: `#/definitions/${relation}`,
+                                $ref: `#/$defs/${relation}`,
                               },
                             ],
                           },
@@ -702,7 +702,7 @@ export function fieldsToJSONSchema({
                               type: collectionIDFieldTypes[relation],
                             },
                             {
-                              $ref: `#/definitions/${relation}`,
+                              $ref: `#/$defs/${relation}`,
                             },
                           ],
                         },
@@ -722,7 +722,7 @@ export function fieldsToJSONSchema({
                       type: collectionIDFieldTypes[field.relationTo],
                     },
                     {
-                      $ref: `#/definitions/${field.relationTo}`,
+                      $ref: `#/$defs/${field.relationTo}`,
                     },
                   ],
                 },
@@ -737,7 +737,7 @@ export function fieldsToJSONSchema({
                       isRequired,
                     ),
                   },
-                  { $ref: `#/definitions/${field.relationTo}` },
+                  { $ref: `#/$defs/${field.relationTo}` },
                 ],
               }
             }
@@ -796,7 +796,7 @@ export function fieldsToJSONSchema({
             // only if the field's options match the global config
             if (isTimezoneField && hasMatchingGlobalTimezones) {
               fieldSchema = {
-                $ref: `#/definitions/supportedTimezones`,
+                $ref: `#/$defs/supportedTimezones`,
               }
             } else {
               if (field.hasMany) {
@@ -824,7 +824,7 @@ export function fieldsToJSONSchema({
                 interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
 
                 fieldSchema = {
-                  $ref: `#/definitions/${field.interfaceName}`,
+                  $ref: `#/$defs/${field.interfaceName}`,
                 }
               }
               break
@@ -851,7 +851,7 @@ export function fieldsToJSONSchema({
             if (field.interfaceName) {
               interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
 
-              fieldSchema = { $ref: `#/definitions/${field.interfaceName}` }
+              fieldSchema = { $ref: `#/$defs/${field.interfaceName}` }
             }
             break
           }
@@ -1092,7 +1092,7 @@ export function fieldsToSelectJSONSchema({
           interfaceNameDefinitions.set(definition, fieldSchema)
 
           fieldSchema = {
-            $ref: `#/definitions/${definition}`,
+            $ref: `#/$defs/${definition}`,
           }
         }
 
@@ -1130,7 +1130,7 @@ export function fieldsToSelectJSONSchema({
             const definition = `${block.interfaceName}_select`
             interfaceNameDefinitions.set(definition, blockSchema)
             blockSchema = {
-              $ref: `#/definitions/${definition}`,
+              $ref: `#/$defs/${definition}`,
             }
           }
 
@@ -1324,7 +1324,7 @@ function generateAuthOperationSchemas(collections: SanitizedCollectionConfig[]):
     (acc, collection) => {
       if (collection.auth) {
         acc[collection.slug] = {
-          $ref: `#/definitions/auth/${collection.slug}`,
+          $ref: `#/$defs/auth/${collection.slug}`,
         }
       }
       return acc
@@ -1515,23 +1515,21 @@ export function configToJSONSchema(
       }
 
       blocksDefinition.properties![block.slug] = {
-        $ref: `#/definitions/${registerBlockInterface(block, blockSchema, interfaceNameDefinitions)}`,
+        $ref: `#/$defs/${registerBlockInterface(block, blockSchema, interfaceNameDefinitions)}`,
       }
       ;(blocksDefinition.required as string[]).push(block.slug)
     }
   }
 
   let jsonSchema: JSONSchema4 = {
-    // draft-07 so consumers resolve `#/definitions/...` refs (the default assumes 2020-12 / `$defs`)
-    $schema: 'http://json-schema.org/draft-07/schema#',
-    additionalProperties: false,
-    definitions: {
+    $defs: {
       supportedTimezones: timezoneDefinitions,
       ...entityDefinitions,
       ...widgetSchemas.definitions,
       ...Object.fromEntries(interfaceNameDefinitions),
       ...authOperationDefinitions,
     },
+    additionalProperties: false,
     // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
     type: 'object',
     properties: {
@@ -1577,7 +1575,7 @@ export function configToJSONSchema(
 
   if (jobsSchemas.definitions?.size) {
     for (const [key, value] of jobsSchemas.definitions) {
-      jsonSchema.definitions![key] = value
+      jsonSchema.$defs![key] = value
     }
   }
   if (jobsSchemas.properties) {

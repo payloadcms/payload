@@ -95,8 +95,8 @@ export function generateJobsJSONSchemas(
 
             const toReturn: JSONSchema4 = {
               $ref: task.interfaceName
-                ? `#/definitions/${task.interfaceName}`
-                : `#/definitions/Task${normalizedTaskSlug}`,
+                ? `#/$defs/${task.interfaceName}`
+                : `#/$defs/Task${normalizedTaskSlug}`,
             }
 
             return [task.slug, toReturn]
@@ -163,8 +163,8 @@ export function generateJobsJSONSchemas(
 
             const toReturn: JSONSchema4 = {
               $ref: workflow.interfaceName
-                ? `#/definitions/${workflow.interfaceName}`
-                : `#/definitions/Workflow${normalizedWorkflowSlug}`,
+                ? `#/$defs/${workflow.interfaceName}`
+                : `#/$defs/Workflow${normalizedWorkflowSlug}`,
             }
 
             return [workflow.slug, toReturn]
