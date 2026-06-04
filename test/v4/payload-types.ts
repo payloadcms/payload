@@ -391,7 +391,55 @@ export interface Talk {
         id?: string | null;
       }[]
     | null;
-  sections?: (TalkHero | TalkQuote | TalkCta | TalkImage | TalkQa)[] | null;
+  sections?:
+    | (
+        | {
+            eyebrow?: string | null;
+            heading: string;
+            subheading?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-hero';
+          }
+        | {
+            quote: string;
+            attribution?: string | null;
+            role?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-quote';
+          }
+        | {
+            label: string;
+            url: string;
+            style?: ('primary' | 'secondary' | 'ghost') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-cta';
+          }
+        | {
+            image: string | Upload;
+            caption?: string | null;
+            align?: ('left' | 'center' | 'right') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-image';
+          }
+        | {
+            heading?: string | null;
+            items?:
+              | {
+                  question: string;
+                  answer: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'talk-qa';
+          }
+      )[]
+    | null;
   /**
    * Links to slides, recording, docs, code.
    */
@@ -483,71 +531,6 @@ export interface Upload {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TalkHero".
- */
-export interface TalkHero {
-  eyebrow?: string | null;
-  heading: string;
-  subheading?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'talk-hero';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TalkQuote".
- */
-export interface TalkQuote {
-  quote: string;
-  attribution?: string | null;
-  role?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'talk-quote';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TalkCta".
- */
-export interface TalkCta {
-  label: string;
-  url: string;
-  style?: ('primary' | 'secondary' | 'ghost') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'talk-cta';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TalkImage".
- */
-export interface TalkImage {
-  image: string | Upload;
-  caption?: string | null;
-  align?: ('left' | 'center' | 'right') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'talk-image';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TalkQa".
- */
-export interface TalkQa {
-  heading?: string | null;
-  items?:
-    | {
-        question: string;
-        answer: string;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'talk-qa';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -644,126 +627,112 @@ export interface BlocksField {
    * A block field with multiple block types.
    */
   multipleBlockTypes?:
-    | (TestBlock | HeroBlock | CallToActionBlock | ImageBlock | QuoteBlock | ContentBlock | FormBlock)[]
+    | (
+        | {
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'test-block';
+          }
+        | {
+            heading: string;
+            subheading?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero-block';
+          }
+        | {
+            label: string;
+            url?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'call-to-action-block';
+          }
+        | {
+            caption?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'image-block';
+          }
+        | {
+            quote: string;
+            author?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'quote-block';
+          }
+        | {
+            heading?: string | null;
+            body?: string | null;
+            link?: string | null;
+            footnote?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content-block';
+          }
+        | {
+            title?: string | null;
+            firstName?: string | null;
+            lastName?: string | null;
+            email?: string | null;
+            message?: string | null;
+            terms?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'form-block';
+          }
+      )[]
     | null;
-  blocksWithRequiredField?: TestBlockRequired[] | null;
-  blocksWithMinRows?: TestBlock[] | null;
-  readOnlyBlocks?: TestBlock[] | null;
-  nestedBlocksField?: OuterBlock[] | null;
+  blocksWithRequiredField?:
+    | {
+        text: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'test-block-required';
+      }[]
+    | null;
+  blocksWithMinRows?:
+    | {
+        text: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'test-block';
+      }[]
+    | null;
+  readOnlyBlocks?:
+    | {
+        text: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'test-block';
+      }[]
+    | null;
+  nestedBlocksField?:
+    | {
+        outerText?: string | null;
+        nestedBlocks?:
+          | (
+              | {
+                  innerText?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'inner-block';
+                }
+              | {
+                  text: string;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'test-block';
+                }
+            )[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'outer-block';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TestBlock".
- */
-export interface TestBlock {
-  text: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'test-block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroBlock".
- */
-export interface HeroBlock {
-  heading: string;
-  subheading?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'hero-block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CallToActionBlock".
- */
-export interface CallToActionBlock {
-  label: string;
-  url?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'call-to-action-block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ImageBlock".
- */
-export interface ImageBlock {
-  caption?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'image-block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "QuoteBlock".
- */
-export interface QuoteBlock {
-  quote: string;
-  author?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'quote-block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock".
- */
-export interface ContentBlock {
-  heading?: string | null;
-  body?: string | null;
-  link?: string | null;
-  footnote?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'content-block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock".
- */
-export interface FormBlock {
-  title?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  email?: string | null;
-  message?: string | null;
-  terms?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'form-block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TestBlockRequired".
- */
-export interface TestBlockRequired {
-  text: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'test-block-required';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "OuterBlock".
- */
-export interface OuterBlock {
-  outerText?: string | null;
-  nestedBlocks?: (InnerBlock | TestBlock)[] | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'outer-block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "InnerBlock".
- */
-export interface InnerBlock {
-  innerText?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'inner-block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1540,7 +1509,22 @@ export interface VersionsDiff {
         id?: string | null;
       }[]
     | null;
-  blocks?: (TextBlock | NumberBlock)[] | null;
+  blocks?:
+    | (
+        | {
+            blockText?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textBlock';
+          }
+        | {
+            blockNumber?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'numberBlock';
+          }
+      )[]
+    | null;
   checkbox?: boolean | null;
   code?: string | null;
   date?: string | null;
@@ -1578,26 +1562,6 @@ export interface VersionsDiff {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TextBlock".
- */
-export interface TextBlock {
-  blockText?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'textBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "NumberBlock".
- */
-export interface NumberBlock {
-  blockNumber?: number | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'numberBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3116,171 +3080,6 @@ export interface TaskSchedulePublish {
     user?: (string | null) | User;
   };
   output?: unknown;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Callout".
- */
-export interface Callout {
-  style?: ('info' | 'warning' | 'success' | 'error') | null;
-  body: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'callout';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Kbd".
- */
-export interface Kbd {
-  keys: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'kbd';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MyBlock".
- */
-export interface MyBlock {
-  someText?: string | null;
-  someTextRequired: string;
-  radios?: ('option1' | 'option2' | 'option3') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'myBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Banner".
- */
-export interface Banner {
-  style?: ('info' | 'warning' | 'error' | 'success') | null;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'banner';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Highlight".
- */
-export interface Highlight {
-  text?: string | null;
-  color?: ('yellow' | 'green' | 'blue' | 'pink') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'highlight';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Code".
- */
-export interface Code {
-  language?:
-    | (
-        | 'abap'
-        | 'apex'
-        | 'azcli'
-        | 'bat'
-        | 'bicep'
-        | 'cameligo'
-        | 'clojure'
-        | 'coffee'
-        | 'cpp'
-        | 'csharp'
-        | 'csp'
-        | 'css'
-        | 'cypher'
-        | 'dart'
-        | 'dockerfile'
-        | 'ecl'
-        | 'elixir'
-        | 'flow9'
-        | 'freemarker2'
-        | 'fsharp'
-        | 'go'
-        | 'graphql'
-        | 'handlebars'
-        | 'hcl'
-        | 'html'
-        | 'ini'
-        | 'java'
-        | 'javascript'
-        | 'julia'
-        | 'kotlin'
-        | 'less'
-        | 'lexon'
-        | 'liquid'
-        | 'lua'
-        | 'm3'
-        | 'markdown'
-        | 'mdx'
-        | 'mips'
-        | 'msdax'
-        | 'mysql'
-        | 'objective-c'
-        | 'pascal'
-        | 'pascaligo'
-        | 'perl'
-        | 'pgsql'
-        | 'php'
-        | 'pla'
-        | 'plaintext'
-        | 'postiats'
-        | 'powerquery'
-        | 'powershell'
-        | 'protobuf'
-        | 'pug'
-        | 'python'
-        | 'qsharp'
-        | 'r'
-        | 'razor'
-        | 'redis'
-        | 'redshift'
-        | 'restructuredtext'
-        | 'ruby'
-        | 'rust'
-        | 'sb'
-        | 'scala'
-        | 'scheme'
-        | 'scss'
-        | 'shell'
-        | 'solidity'
-        | 'sophia'
-        | 'sparql'
-        | 'sql'
-        | 'st'
-        | 'swift'
-        | 'systemverilog'
-        | 'tcl'
-        | 'twig'
-        | 'typescript'
-        | 'typespec'
-        | 'vb'
-        | 'wgsl'
-        | 'xml'
-        | 'yaml'
-      )
-    | null;
-  code?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'Code';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

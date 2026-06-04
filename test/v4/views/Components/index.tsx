@@ -24,6 +24,7 @@ import { ModalSection } from './sections/ModalSection.js'
 import { NoListResultsSection } from './sections/NoListResults.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
+import { ProgressBarSection } from './sections/ProgressBar.js'
 import { RenderTitleSection } from './sections/RenderTitle.js'
 import { SearchBarSection } from './sections/SearchBar.js'
 import { SpinnerSection } from './sections/Spinner.js'
@@ -83,6 +84,7 @@ type ComponentId =
   | 'point-field'
   // Fields
   | 'popup'
+  | 'progress-bar'
   | 'radio'
   | 'radiogroup-field'
   | 'render-title'
@@ -139,6 +141,7 @@ const componentOptions: ComponentOption[] = [
   { category: 'patterns', label: 'Loading Overlay', value: 'loading-overlay' },
   { category: 'patterns', label: 'Modal', value: 'modal' },
   { category: 'patterns', label: 'No List Results', value: 'no-list-results' },
+  { category: 'patterns', label: 'Progress Bar', value: 'progress-bar' },
   { category: 'patterns', label: 'Shimmer / Loading', value: 'shimmer' },
   { category: 'patterns', label: 'Status', value: 'status' },
   { category: 'patterns', label: 'Status Cell', value: 'status-cell' },
@@ -307,6 +310,9 @@ export const ComponentsView: React.FC = () => {
         {shouldShow('toast', 'patterns') && <ToastSection selectedComponent="toast" />}
         {shouldShow('no-list-results', 'patterns') && (
           <NoListResultsSection selectedComponent="no-list-results" />
+        )}
+        {shouldShow('progress-bar', 'patterns') && (
+          <ProgressBarSection selectedComponent="progress-bar" />
         )}
         {shouldShow('status', 'patterns') && <StatusSection selectedComponent="status" />}
         {shouldShow('status-cell', 'patterns') && (
