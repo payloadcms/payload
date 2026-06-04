@@ -24,7 +24,7 @@
       right: 0;
       width: fit-content;
       margin-inline: auto;
-      padding: var(--spacer-2);
+      padding-inline: var(--spacer-2);
       color: var(--color-text-oninverse);
       font-style: normal;
       font-weight: var(--font-weight-strong);
@@ -35,6 +35,7 @@
       .toast-content {
         width: 100%;
         transition: opacity 100ms cubic-bezier(0.55, 0.055, 0.675, 0.19);
+        padding-block: var(--spacer-2);
       }
 
       &[data-front='false'] {
@@ -53,14 +54,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: var(--spacer-3);
-        height: var(--spacer-3);
         margin: 0;
-
-        & > svg {
-          width: var(--spacer-4);
-          height: var(--spacer-4);
-        }
+        flex-shrink: 0;
       }
 
       .toast-icon + .toast-content .toast-title {
