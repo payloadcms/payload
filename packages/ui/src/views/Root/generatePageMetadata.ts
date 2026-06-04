@@ -2,9 +2,9 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { AdminViewAdapter, AdminViewKey, MetaConfig, SanitizedConfig } from 'payload'
 
 import { generateCollectionTrashMetadata } from '../CollectionTrash/generateCollectionTrashMetadata.js'
+import { getMetaBySegment } from '../Document/getMetaBySegment.js'
 import { generateListViewMetadata } from '../List/generateListViewMetadata.js'
 import { generateCustomViewMetadata } from './generateCustomViewMetadata.js'
-import { generateDocumentViewMetadata } from './generateDocumentViewMetadata.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 export type GeneratePageMetadataArgs = {
@@ -75,7 +75,7 @@ export const generatePageMetadata = async ({
       } else if (isCollection && collectionConfig) {
         meta = await generateListViewMetadata({ collectionConfig, config, i18n })
       } else if (isGlobal && globalConfig) {
-        meta = await generateDocumentViewMetadata({
+        meta = await getMetaBySegment({
           adminViews,
           config,
           globalConfig,
@@ -97,7 +97,7 @@ export const generatePageMetadata = async ({
             params,
           })
         } else {
-          meta = await generateDocumentViewMetadata({
+          meta = await getMetaBySegment({
             adminViews,
             collectionConfig,
             config,
@@ -106,7 +106,7 @@ export const generatePageMetadata = async ({
           })
         }
       } else if (isGlobal && globalConfig) {
-        meta = await generateDocumentViewMetadata({
+        meta = await getMetaBySegment({
           adminViews,
           config,
           globalConfig,

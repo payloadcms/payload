@@ -131,10 +131,10 @@
       "types": "./src/views/Root/generatePageMetadata.ts",
       "default": "./src/views/Root/generatePageMetadata.ts"
     },
-    "./views/Root/generateDocumentViewMetadata": {
-      "import": "./src/views/Root/generateDocumentViewMetadata.ts",
-      "types": "./src/views/Root/generateDocumentViewMetadata.ts",
-      "default": "./src/views/Root/generateDocumentViewMetadata.ts"
+    "./views/Document/getMetaBySegment": {
+      "import": "./src/views/Document/getMetaBySegment.ts",
+      "types": "./src/views/Document/getMetaBySegment.ts",
+      "default": "./src/views/Document/getMetaBySegment.ts"
     },
     "./views/*/metadata": {
       "import": "./src/views/*/metadata.ts",
@@ -523,10 +523,10 @@
         "types": "./dist/views/Root/generatePageMetadata.d.ts",
         "default": "./dist/views/Root/generatePageMetadata.js"
       },
-      "./views/Root/generateDocumentViewMetadata": {
-        "import": "./dist/views/Root/generateDocumentViewMetadata.js",
-        "types": "./dist/views/Root/generateDocumentViewMetadata.d.ts",
-        "default": "./dist/views/Root/generateDocumentViewMetadata.js"
+      "./views/Document/getMetaBySegment": {
+        "import": "./dist/views/Document/getMetaBySegment.js",
+        "types": "./dist/views/Document/getMetaBySegment.d.ts",
+        "default": "./dist/views/Document/getMetaBySegment.js"
       },
       "./views/*/metadata": {
         "import": "./dist/views/*/metadata.js",

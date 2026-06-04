@@ -11,12 +11,12 @@ import type {
 import type { GenerateEditViewMetadata } from '../API/generateAPIViewMetadata.js'
 
 import { generateAPIViewMetadata } from '../API/generateAPIViewMetadata.js'
-import { generateEditViewMetadata } from '../Document/generateEditViewMetadata.js'
-import { getDocumentView } from '../Document/index.js'
 import { generateVersionViewMetadata } from '../Version/generateVersionViewMetadata.js'
 import { generateVersionsViewMetadata } from '../Versions/generateVersionsViewMetadata.js'
+import { generateEditViewMetadata } from './generateEditViewMetadata.js'
+import { getDocumentView } from './index.js'
 
-export type GenerateDocumentViewMetadataArgs = {
+export type GetMetaBySegmentArgs = {
   adminViews: AdminViewAdapter<unknown, MetaConfig>
   collectionConfig?: null | SanitizedCollectionConfig
   config: SanitizedConfig
@@ -30,14 +30,14 @@ export type GenerateDocumentViewMetadataArgs = {
  * its `MetaConfig`. Shared by all framework adapters — segment-routing logic
  * lives here so adapters do not duplicate it.
  */
-export const generateDocumentViewMetadata = async ({
+export const getMetaBySegment = async ({
   adminViews,
   collectionConfig,
   config,
   globalConfig,
   i18n,
   params,
-}: GenerateDocumentViewMetadataArgs): Promise<MetaConfig> => {
+}: GetMetaBySegmentArgs): Promise<MetaConfig> => {
   const rawSegments = params.segments
   const segments = Array.isArray(rawSegments) ? rawSegments : []
 
