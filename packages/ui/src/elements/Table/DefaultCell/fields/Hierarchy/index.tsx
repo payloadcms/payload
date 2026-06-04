@@ -15,7 +15,7 @@ import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js
 import { Button } from '../../../../Button/index.js'
 import { useHierarchyDrawer } from '../../../../Hierarchy/Drawer/useHierarchyDrawer.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
-import './index.scss'
+import './index.css'
 
 type Value = { relationTo: string; value: number | string }
 const baseClass = 'hierarchy-cell'
