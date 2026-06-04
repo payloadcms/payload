@@ -4,7 +4,7 @@ import type { DefaultCellComponentProps, JSONFieldClient } from 'payload'
 import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 import { stringifyTruncated } from '../../../../../utilities/stringifyTruncated.js'
 
 export const JSONCell: React.FC<DefaultCellComponentProps<JSONFieldClient>> = ({ cellData }) => {
