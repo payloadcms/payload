@@ -10,4 +10,5 @@ export const MediaContainer: CollectionConfig = {
       hasMany: true,
     },
   ],
+  versions: false,
 }

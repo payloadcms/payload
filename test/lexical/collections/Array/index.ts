@@ -262,7 +262,7 @@ const ArrayFields: CollectionConfig = {
     },
   ],
   slug: arrayFieldsSlug,
-  versions: true,
+  versions: false,
 }
 
 export default ArrayFields

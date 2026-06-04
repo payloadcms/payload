@@ -5,7 +5,6 @@ import { getCustomLabel } from './CustomLabel/getCustomLabel.js'
 
 const CollapsibleFields: CollectionConfig = {
   slug: collapsibleFieldsSlug,
-  versions: true,
   fields: [
     {
       label: 'Collapsible Field',
@@ -156,6 +155,7 @@ const CollapsibleFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default CollapsibleFields

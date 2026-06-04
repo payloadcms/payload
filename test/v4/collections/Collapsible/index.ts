@@ -79,6 +79,7 @@ const CollapsibleFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default CollapsibleFields

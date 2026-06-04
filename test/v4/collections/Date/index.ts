@@ -99,6 +99,7 @@ const DateFields: CollectionConfig = {
       defaultValue: '2026-01-15T12:00:00.000Z',
     },
   ],
+  versions: false,
 }
 
 export default DateFields

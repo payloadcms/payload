@@ -39,6 +39,7 @@ export const getConfig: () => Partial<Config> = () => ({
     {
       slug: 'noTimeStamps',
       timestamps: false,
+      versions: false,
       fields: [
         {
           type: 'text',

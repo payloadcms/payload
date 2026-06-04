@@ -24,5 +24,5 @@ export const CustomViews1: CollectionConfig = {
       type: 'text',
     },
   ],
-  versions: true,
+  versions: false,
 }

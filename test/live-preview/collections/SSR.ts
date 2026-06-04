@@ -87,4 +87,5 @@ export const SSR: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

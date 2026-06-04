@@ -37,5 +37,5 @@ export const ReorderTabs: CollectionConfig = {
       type: 'text',
     },
   ],
-  versions: true,
+  versions: false,
 }

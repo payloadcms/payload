@@ -61,5 +61,5 @@ export const CustomGlobalViews2: GlobalConfig = {
       type: 'text',
     },
   ],
-  versions: true,
+  versions: false,
 }

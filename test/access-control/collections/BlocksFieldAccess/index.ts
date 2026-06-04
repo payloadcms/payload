@@ -130,4 +130,5 @@ export const BlocksFieldAccess: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

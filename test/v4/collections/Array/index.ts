@@ -87,6 +87,7 @@ const ArrayFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default ArrayFields

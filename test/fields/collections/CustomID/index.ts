@@ -4,7 +4,6 @@ import { customIDSlug } from '../../slugs.js'
 
 export const CustomID: CollectionConfig = {
   slug: customIDSlug,
-  versions: true,
   admin: {
     useAsTitle: 'id',
   },
@@ -18,4 +17,5 @@ export const CustomID: CollectionConfig = {
     plural: 'Custom IDs',
     singular: 'Custom ID',
   },
+  versions: false,
 }
