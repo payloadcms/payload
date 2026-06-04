@@ -1,3 +1,4 @@
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type {
   BulkOperationResult,
   CollectionSlug,
@@ -35,6 +36,7 @@ import {
   type SerializedUploadNode,
   type TypedEditorState,
 } from '@payloadcms/richtext-lexical'
+import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext'
 import { PayloadSDK } from '@payloadcms/sdk'
 import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
@@ -373,6 +375,19 @@ describe('Types testing', () => {
       type GeneratedRichTextType = Post['richText']
 
       expect<GeneratedRichTextType>().type.toBeAssignableFrom<DefaultTypedEditorState>()
+    })
+
+    test('ensure generated richText types can be assigned to SerializedEditorState (what converters consume)', () => {
+      // Every lexical converter (convertLexicalToHTML, convertLexicalToPlaintext, ...) accepts
+      // `data: SerializedEditorState`, so data straight from the local API must be assignable to it.
+      type GeneratedRichTextType = Post['richText']
+
+      expect<SerializedEditorState>().type.toBeAssignableFrom<GeneratedRichTextType>()
+
+      // ...and the converter must accept the generated type directly, with no cast.
+      expect(convertLexicalToPlaintext).type.toBeCallableWith({
+        data: null as unknown as GeneratedRichTextType,
+      })
     })
 
     test('ensure type property in editorState.root.children.push() is correctly typed as union of all node types', () => {
