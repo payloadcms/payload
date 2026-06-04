@@ -12,6 +12,8 @@ import { migrateImportExportHooks } from './transforms/migrate-import-export-hoo
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
 import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
+import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
+import { removeVersionsTrue } from './transforms/remove-versions-true/index.js'
 import { renameStorageAdaptersToStorage } from './transforms/rename-storage-adapters-to-storage/index.js'
 import { renameTypescriptSchemaToJsonSchema } from './transforms/rename-typescript-schema-to-json-schema/index.js'
 
@@ -29,5 +31,7 @@ export const transforms: Transform[] = [
   migrateImportExportHooks,
   migrateDbTypesSubpath,
   migrateNextSubpathExports,
+  migrateVersionsDefault,
+  removeVersionsTrue,
   renameTypescriptSchemaToJsonSchema,
 ]
