@@ -960,76 +960,76 @@ describe('Types testing', () => {
       // assertions above fail.
 
       test('SerializedTextNode: generated <-> runtime', () => {
-        expect<GenText>().type.toBeAssignableWith<SerializedTextNode>()
-        expect<SerializedTextNode>().type.toBeAssignableWith<GenText>()
+        expect<GenText>().type.toBeAssignableFrom<SerializedTextNode>()
+        expect<SerializedTextNode>().type.toBeAssignableFrom<GenText>()
       })
 
       test('SerializedTabNode: generated <-> runtime', () => {
-        expect<GenTab>().type.toBeAssignableWith<SerializedTabNode>()
-        expect<SerializedTabNode>().type.toBeAssignableWith<GenTab>()
+        expect<GenTab>().type.toBeAssignableFrom<SerializedTabNode>()
+        expect<SerializedTabNode>().type.toBeAssignableFrom<GenTab>()
       })
 
       test('SerializedLineBreakNode: generated <-> runtime', () => {
-        expect<GenLB>().type.toBeAssignableWith<SerializedLineBreakNode>()
-        expect<SerializedLineBreakNode>().type.toBeAssignableWith<GenLB>()
+        expect<GenLB>().type.toBeAssignableFrom<SerializedLineBreakNode>()
+        expect<SerializedLineBreakNode>().type.toBeAssignableFrom<GenLB>()
       })
 
       test('SerializedHorizontalRuleNode: generated <-> runtime', () => {
-        expect<GenHR>().type.toBeAssignableWith<SerializedHorizontalRuleNode>()
-        expect<SerializedHorizontalRuleNode>().type.toBeAssignableWith<GenHR>()
+        expect<GenHR>().type.toBeAssignableFrom<SerializedHorizontalRuleNode>()
+        expect<SerializedHorizontalRuleNode>().type.toBeAssignableFrom<GenHR>()
       })
 
       test('SerializedParagraphNode<T>: generated <-> runtime', () => {
-        expect<GenParagraph<GenNodeUnion>>().type.toBeAssignableWith<
+        expect<GenParagraph<GenNodeUnion>>().type.toBeAssignableFrom<
           SerializedParagraphNode<GenNodeUnion>
         >()
-        expect<SerializedParagraphNode<GenNodeUnion>>().type.toBeAssignableWith<
+        expect<SerializedParagraphNode<GenNodeUnion>>().type.toBeAssignableFrom<
           GenParagraph<GenNodeUnion>
         >()
       })
 
       test('SerializedHeadingNode<T>: generated <-> runtime', () => {
-        expect<GenHeading<GenNodeUnion>>().type.toBeAssignableWith<
+        expect<GenHeading<GenNodeUnion>>().type.toBeAssignableFrom<
           SerializedHeadingNode<GenNodeUnion>
         >()
-        expect<SerializedHeadingNode<GenNodeUnion>>().type.toBeAssignableWith<
+        expect<SerializedHeadingNode<GenNodeUnion>>().type.toBeAssignableFrom<
           GenHeading<GenNodeUnion>
         >()
       })
 
       test('SerializedQuoteNode<T>: generated <-> runtime', () => {
-        expect<GenQuote<GenNodeUnion>>().type.toBeAssignableWith<
+        expect<GenQuote<GenNodeUnion>>().type.toBeAssignableFrom<
           SerializedQuoteNode<GenNodeUnion>
         >()
-        expect<SerializedQuoteNode<GenNodeUnion>>().type.toBeAssignableWith<
+        expect<SerializedQuoteNode<GenNodeUnion>>().type.toBeAssignableFrom<
           GenQuote<GenNodeUnion>
         >()
       })
 
       test('SerializedListNode<T>: generated <-> runtime', () => {
-        expect<GenList<GenNodeUnion>>().type.toBeAssignableWith<SerializedListNode<GenNodeUnion>>()
-        expect<SerializedListNode<GenNodeUnion>>().type.toBeAssignableWith<GenList<GenNodeUnion>>()
+        expect<GenList<GenNodeUnion>>().type.toBeAssignableFrom<SerializedListNode<GenNodeUnion>>()
+        expect<SerializedListNode<GenNodeUnion>>().type.toBeAssignableFrom<GenList<GenNodeUnion>>()
       })
 
       test('SerializedListItemNode<T>: generated <-> runtime', () => {
-        expect<GenLI<GenNodeUnion>>().type.toBeAssignableWith<
+        expect<GenLI<GenNodeUnion>>().type.toBeAssignableFrom<
           SerializedListItemNode<GenNodeUnion>
         >()
-        expect<SerializedListItemNode<GenNodeUnion>>().type.toBeAssignableWith<
+        expect<SerializedListItemNode<GenNodeUnion>>().type.toBeAssignableFrom<
           GenLI<GenNodeUnion>
         >()
       })
 
       test('SerializedLinkNode<T>: generated <-> runtime', () => {
-        expect<GenLink<GenNodeUnion>>().type.toBeAssignableWith<SerializedLinkNode<GenNodeUnion>>()
-        expect<SerializedLinkNode<GenNodeUnion>>().type.toBeAssignableWith<GenLink<GenNodeUnion>>()
+        expect<GenLink<GenNodeUnion>>().type.toBeAssignableFrom<SerializedLinkNode<GenNodeUnion>>()
+        expect<SerializedLinkNode<GenNodeUnion>>().type.toBeAssignableFrom<GenLink<GenNodeUnion>>()
       })
 
       test('SerializedAutoLinkNode<T>: generated <-> runtime', () => {
-        expect<GenAutoLink<GenNodeUnion>>().type.toBeAssignableWith<
+        expect<GenAutoLink<GenNodeUnion>>().type.toBeAssignableFrom<
           SerializedAutoLinkNode<GenNodeUnion>
         >()
-        expect<SerializedAutoLinkNode<GenNodeUnion>>().type.toBeAssignableWith<
+        expect<SerializedAutoLinkNode<GenNodeUnion>>().type.toBeAssignableFrom<
           GenAutoLink<GenNodeUnion>
         >()
       })
@@ -1038,23 +1038,23 @@ describe('Types testing', () => {
         // The relationship node excludes upload collections, so compare against the
         // relationship member as it actually appears in the generated union.
         type GenRelationshipInUnion = Extract<GenNodeUnion, { type: 'relationship' }>
-        expect<GenRelationshipInUnion>().type.toBeAssignableWith<SerializedRelationshipNode>()
-        expect<SerializedRelationshipNode>().type.toBeAssignableWith<GenRelationshipInUnion>()
+        expect<GenRelationshipInUnion>().type.toBeAssignableFrom<SerializedRelationshipNode>()
+        expect<SerializedRelationshipNode>().type.toBeAssignableFrom<GenRelationshipInUnion>()
       })
 
       test('SerializedUploadNode: generated <-> runtime', () => {
         // `media` is the upload-enabled collection, so both sides resolve to
         // `SerializedUploadNode<'media'>`.
         type GenUploadInUnion = Extract<GenNodeUnion, { type: 'upload' }>
-        expect<GenUploadInUnion>().type.toBeAssignableWith<SerializedUploadNode>()
-        expect<SerializedUploadNode>().type.toBeAssignableWith<GenUploadInUnion>()
+        expect<GenUploadInUnion>().type.toBeAssignableFrom<SerializedUploadNode>()
+        expect<SerializedUploadNode>().type.toBeAssignableFrom<GenUploadInUnion>()
       })
 
       test('LexicalRichText<T>.root: generated <-> runtime', () => {
         type Gen = Post['richText']['root']
         type Run = DefaultTypedEditorState['root']
-        expect<Gen>().type.toBeAssignableWith<Run>()
-        expect<Run>().type.toBeAssignableWith<Gen>()
+        expect<Gen>().type.toBeAssignableFrom<Run>()
+        expect<Run>().type.toBeAssignableFrom<Gen>()
       })
     })
   })
