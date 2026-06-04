@@ -75,16 +75,16 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_F6A92CF8".
+ * via the `definition` "LexicalNodes_BFE38E95".
  */
-export type LexicalNodes_F6A92CF8 =
+export type LexicalNodes_BFE38E95 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_F6A92CF8>
+  | SerializedParagraphNode<LexicalNodes_BFE38E95>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_F6A92CF8>
+  | SerializedQuoteNode<LexicalNodes_BFE38E95>
   | SerializedRelationshipNode<
       | 'posts'
       | 'pages'
@@ -97,11 +97,11 @@ export type LexicalNodes_F6A92CF8 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_F6A92CF8, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_F6A92CF8, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_F6A92CF8>
-  | SerializedListItemNode<LexicalNodes_F6A92CF8>
-  | SerializedHeadingNode<LexicalNodes_F6A92CF8>;
+  | SerializedAutoLinkNode<LexicalNodes_BFE38E95, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_BFE38E95, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_BFE38E95>
+  | SerializedListItemNode<LexicalNodes_BFE38E95>
+  | SerializedHeadingNode<LexicalNodes_BFE38E95>;
 
 export interface Config {
   auth: {
@@ -206,7 +206,7 @@ export interface PayloadMcpApiKeyAuthOperations {
 export interface Post {
   id: string;
   text?: string | null;
-  richText: LexicalRichText<LexicalNodes_F6A92CF8>;
+  richText: LexicalRichText<LexicalNodes_BFE38E95>;
   title?: string | null;
   selectField: MySelectOptions;
   insideUnnamedGroup?: string | null;

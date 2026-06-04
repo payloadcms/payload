@@ -77,10 +77,7 @@ export const getFieldToJSONSchema: (args: {
     // See JSDocs for `NODE_UNION_NAME_PLACEHOLDER` for why we use a placeholder and hashing.
     const nodeUnionJson = JSON.stringify({ oneOf: nodeSchemas })
 
-    // Hash a ref-style-agnostic form so switching draft-07 `definitions` → 2020-12 `$defs` doesn't
-    // shift every `LexicalNodes_<hash>` (the hash only disambiguates editors, not ref syntax).
-    const hashInput = nodeUnionJson.replaceAll('#/$defs/', '#/definitions/')
-    const hash = createHash('sha256').update(hashInput).digest('hex').slice(0, 8).toUpperCase()
+    const hash = createHash('sha256').update(nodeUnionJson).digest('hex').slice(0, 8).toUpperCase()
     const nodeUnionName = `LexicalNodes_${hash}`
 
     // Replacing the hash resolves the union name and any feature-derived
