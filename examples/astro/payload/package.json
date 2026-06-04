@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "build": "next build",
+    "build": "payload build",
     "dev": "next dev --turbo",
     "devsafe": "rm -rf .next && next dev",
     "generate:importmap": "payload generate:importmap",
