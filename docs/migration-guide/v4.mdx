@@ -533,7 +533,7 @@ If you wrote a custom feature that overrode `modifyJSONSchema`, move per-node ge
   })
 ```
 
-Nodes without a `jsonSchema` function fall back to `{ [k: string]: unknown }`, so omitting it is safe — just looser.
+Nodes without a `jsonSchema` function are omitted from the generated node union entirely — they're filtered out, with no fallback shape. Define `jsonSchema` for every custom node you want reflected in the types; otherwise that node won't appear in the field's generated type, and editor state containing it won't be assignable to it.
 
 ### Lexical: duplicate node registration throws
 
