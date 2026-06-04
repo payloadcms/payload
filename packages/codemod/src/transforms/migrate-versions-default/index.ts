@@ -9,8 +9,10 @@ const VERSIONED_CONFIG_TYPE_NAMES = new Set([
   'SanitizedGlobalConfig',
 ])
 
-const isVersionedConfigTypeName = (typeText: string): boolean =>
-  VERSIONED_CONFIG_TYPE_NAMES.has(typeText)
+const isVersionedConfigTypeName = (typeText: string): boolean => {
+  const baseName = typeText.replace(/<.*>$/, '').trim()
+  return VERSIONED_CONFIG_TYPE_NAMES.has(baseName)
+}
 
 /**
  * Finds object literals typed as CollectionConfig or GlobalConfig and adds
