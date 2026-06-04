@@ -79,7 +79,7 @@ export const buildMcpServer = ({
           const name = wireName(item.key, item.collectionSlug)
           let inputSchema = tool.input
           if (typeof inputSchema === 'function') {
-            const raw = configSchema.definitions?.[item.collectionSlug]
+            const raw = configSchema.$defs?.[item.collectionSlug]
             if (!raw) {
               throw new APIError(
                 `Collection schema not found for slug: ${item.collectionSlug}`,
@@ -118,7 +118,7 @@ export const buildMcpServer = ({
           const name = wireName(item.key, item.globalSlug)
           let inputSchema = tool.input
           if (typeof inputSchema === 'function') {
-            const raw = configSchema.definitions?.[item.globalSlug]
+            const raw = configSchema.$defs?.[item.globalSlug]
             if (!raw) {
               throw new APIError(`Global schema not found for slug: ${item.globalSlug}`, 500)
             }

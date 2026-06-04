@@ -73,7 +73,7 @@ Payload generates your types based on a JSON schema. You can extend that JSON sc
     schema: [
       ({ jsonSchema }) => {
         // Modify the JSON schema here
-        jsonSchema.definitions.Test = {
+        jsonSchema.$defs.Test = {
           type: 'object',
           properties: {
             title: { type: 'string' },
@@ -108,7 +108,7 @@ You can use `$ref` to reference external JSON schema files in your custom schema
   typescript: {
     schema: [
       ({ jsonSchema }) => {
-        jsonSchema.definitions.MyType = {
+        jsonSchema.$defs.MyType = {
           $ref: './schemas/my-type.json',
         }
         return jsonSchema
