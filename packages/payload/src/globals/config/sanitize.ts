@@ -121,13 +121,9 @@ export const sanitizeGlobal = async (
 
       if (config.localization && hasLocalizedFields) {
         if (global.versions.drafts.localizeStatus === undefined) {
-          global.versions.drafts.localizeStatus = false
+          global.versions.drafts.localizeStatus = true
         }
       }
-
-      global.versions.drafts.localizeStatus = config.experimental?.localizeStatus
-        ? global.versions.drafts.localizeStatus
-        : false
 
       if (global.versions.drafts.autosave === true) {
         global.versions.drafts.autosave = {

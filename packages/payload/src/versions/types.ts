@@ -41,10 +41,10 @@ export type IncomingDrafts = {
   /**
    * Localizes the status field.
    *
-   * Only effective if the experimental `experimental.localizeStatus` is enabled.
+   * When enabled, each locale tracks its own draft/published status independently.
+   * Requires `localization` to be enabled in Payload config.
    *
-   * @experimental
-   * @default false
+   * @default true
    */
   localizeStatus?: boolean
   /**
@@ -68,10 +68,10 @@ export type SanitizedDrafts = {
   /**
    * Localizes the status field.
    *
-   * Only effective if the experimental `experimental.localizeStatus` is enabled.
+   * When enabled, each locale tracks its own draft/published status independently.
+   * Requires `localization` to be enabled in Payload config.
    *
-   * @experimental
-   * @default false
+   * @default true
    */
   localizeStatus?: boolean
   /**

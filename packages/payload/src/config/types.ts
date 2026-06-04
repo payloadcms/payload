@@ -1250,21 +1250,9 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
-   * Experimental features may be unstable or change in future versions.
+   * Enable experimental features. These features may change or be removed in future releases.
    */
-  experimental?: {
-    /**
-     * Enable per-locale status for documents.
-     *
-     * Requires:
-     * - `localization` enabled
-     * - `versions.drafts` enabled
-     * - `versions.drafts.localizeStatus` set at collection or global level
-     *
-     * @experimental
-     */
-    localizeStatus?: boolean
-  }
+  experimental?: Record<string, never>
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
