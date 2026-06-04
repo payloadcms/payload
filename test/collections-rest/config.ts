@@ -166,6 +166,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: pointSlug,
@@ -176,6 +177,7 @@ export default buildConfigWithDefaults({
           type: 'point',
         },
       ],
+      versions: false,
     },
     collectionWithName(relationSlug),
     {
@@ -194,6 +196,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
     {
       slug: customIdSlug,
@@ -213,6 +216,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: customIdNumberSlug,
@@ -227,6 +231,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: errorOnHookSlug,
@@ -261,6 +266,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+      versions: false,
     },
     {
       slug: endpointsSlug,
@@ -270,6 +276,7 @@ export default buildConfigWithDefaults({
         handler: () => new Response(`${method} response`),
         path: `/${method}-test`,
       })),
+      versions: false,
     },
     {
       slug: 'disabled-bulk-edit-docs',
@@ -280,6 +287,7 @@ export default buildConfigWithDefaults({
         },
       ],
       disableBulkEdit: true,
+      versions: false,
     },
     LargeDocuments,
   ],

@@ -34,10 +34,12 @@ export const getConfig: () => Partial<Config> = () => ({
       upload: {
         staticDir: path.resolve(dirname, 'media'),
       },
+      versions: false,
     },
     {
       slug: 'rels',
       fields: [{ type: 'text', name: 'text' }],
+      versions: false,
     },
     {
       slug: 'relationships-blocks',
@@ -65,6 +67,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
     CustomID,
     UsersCollection,
@@ -82,6 +85,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'number',
         },
       ],
+      versions: false,
     },
     {
       slug: 'force-select-global',

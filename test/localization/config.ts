@@ -93,6 +93,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'users',
+      versions: false,
     },
     {
       slug: localizedPostsSlug,
@@ -145,6 +146,7 @@ export default buildConfigWithDefaults({
           unique: true,
         },
       ],
+      versions: false,
     },
     NoLocalizedFieldsCollection,
     ArrayCollection,
@@ -273,6 +275,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: withRequiredLocalizedFields,
+      versions: false,
     },
     {
       access: openAccess,
@@ -305,6 +308,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: withLocalizedRelSlug,
+      versions: false,
     },
     {
       fields: [
@@ -350,6 +354,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: relationshipLocalizedSlug,
+      versions: false,
     },
     {
       access: {
@@ -363,6 +368,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: cannotCreateDefaultLocale,
+      versions: false,
     },
     {
       access: {
@@ -377,6 +383,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: localeRestrictedSlug,
+      versions: false,
     },
     NestedToArrayAndBlock,
     Group,
@@ -397,6 +404,7 @@ export default buildConfigWithDefaults({
           localized: true,
         },
       ],
+      versions: false,
     },
     {
       slug: blocksWithLocalizedSameName,
@@ -428,6 +436,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     LocalizedWithinLocalized,
     ArrayWithFallbackCollection,
@@ -448,6 +457,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'global-array',
+      versions: false,
     },
     {
       fields: [
@@ -458,6 +468,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'global-text',
+      versions: false,
     },
     {
       fields: [
