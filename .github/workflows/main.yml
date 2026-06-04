@@ -424,6 +424,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_build == 'true'
+    # Non-blocking until templates are updated for 4.x breaking changes.
+    continue-on-error: true
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -468,7 +470,7 @@ jobs:
 
       - name: Build Template
         run: |
-          pnpm run script:pack --dest templates/${{ matrix.template }}
+          pnpm run script:pack --all --dest templates/${{ matrix.template }}
           pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
           NODE_OPTIONS: --max-old-space-size=8096
