@@ -29,7 +29,7 @@ export const ColumnsButton: React.FC<ColumnsButtonProps> = ({ collectionSlug }) 
           {...props}
           buttonStyle="secondary"
           className={`${baseClass}__button`}
-          icon={<ChevronIcon direction="down" size={16} />}
+          icon={<ChevronIcon direction={active ? 'up' : 'down'} size={16} />}
           selected={active}
           size="medium"
         >

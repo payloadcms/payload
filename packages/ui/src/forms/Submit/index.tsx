@@ -15,20 +15,12 @@ import './index.css'
 const baseClass = 'form-submit'
 
 export const FormSubmit: React.FC<Props> = (props) => {
-  const {
-    type = 'submit',
-    buttonId: id,
-    children,
-    disabled: disabledFromProps,
-    onClick,
-    programmaticSubmit,
-    ref,
-  } = props
+  const { type = 'submit', buttonId: id, children, disabled: disabledFromProps, onClick } = props
 
   const processing = useFormProcessing()
   const backgroundProcessing = useFormBackgroundProcessing()
   const initializing = useFormInitializing()
-  const { disabled, submit } = useForm()
+  const { disabled } = useForm()
 
   const canSave = !(
     disabledFromProps ||
@@ -38,22 +30,13 @@ export const FormSubmit: React.FC<Props> = (props) => {
     disabled
   )
 
-  const handleClick =
-    onClick ??
-    (programmaticSubmit
-      ? () => {
-          void submit()
-        }
-      : undefined)
-
   return (
     <div className={baseClass}>
       <Button
-        ref={ref}
         {...props}
         disabled={canSave ? undefined : true}
         id={id}
-        onClick={handleClick}
+        onClick={onClick}
         type={type}
       >
         {children}
