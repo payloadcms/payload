@@ -121,6 +121,21 @@
       "types": "./src/views/Root/getCustomViewByRoute.ts",
       "default": "./src/views/Root/getCustomViewByRoute.ts"
     },
+    "./views/Root/adminViews": {
+      "import": "./src/views/Root/adminViews.tsx",
+      "types": "./src/views/Root/adminViews.tsx",
+      "default": "./src/views/Root/adminViews.tsx"
+    },
+    "./views/Root/generatePageMetadata": {
+      "import": "./src/views/Root/generatePageMetadata.ts",
+      "types": "./src/views/Root/generatePageMetadata.ts",
+      "default": "./src/views/Root/generatePageMetadata.ts"
+    },
+    "./views/Root/generateDocumentViewMetadata": {
+      "import": "./src/views/Root/generateDocumentViewMetadata.ts",
+      "types": "./src/views/Root/generateDocumentViewMetadata.ts",
+      "default": "./src/views/Root/generateDocumentViewMetadata.ts"
+    },
     "./views/*/metadata": {
       "import": "./src/views/*/metadata.ts",
       "types": "./src/views/*/metadata.ts",
@@ -497,6 +512,21 @@
         "import": "./dist/views/Root/getCustomViewByRoute.js",
         "types": "./dist/views/Root/getCustomViewByRoute.d.ts",
         "default": "./dist/views/Root/getCustomViewByRoute.js"
+      },
+      "./views/Root/adminViews": {
+        "import": "./dist/views/Root/adminViews.js",
+        "types": "./dist/views/Root/adminViews.d.ts",
+        "default": "./dist/views/Root/adminViews.js"
+      },
+      "./views/Root/generatePageMetadata": {
+        "import": "./dist/views/Root/generatePageMetadata.js",
+        "types": "./dist/views/Root/generatePageMetadata.d.ts",
+        "default": "./dist/views/Root/generatePageMetadata.js"
+      },
+      "./views/Root/generateDocumentViewMetadata": {
+        "import": "./dist/views/Root/generateDocumentViewMetadata.js",
+        "types": "./dist/views/Root/generateDocumentViewMetadata.d.ts",
+        "default": "./dist/views/Root/generateDocumentViewMetadata.js"
       },
       "./views/*/metadata": {
         "import": "./dist/views/*/metadata.js",
