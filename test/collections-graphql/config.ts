@@ -32,6 +32,7 @@ const collectionWithName = (
         type: 'text',
       },
     ],
+    versions: false,
     ...extra,
   }
 }

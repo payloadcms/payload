@@ -114,6 +114,7 @@ export const getConfig: () => Partial<Config> = () => ({
 
         return select
       },
+      versions: false,
     } satisfies GlobalConfig<'force-select-global'>,
   ],
   admin: {

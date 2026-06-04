@@ -49,6 +49,7 @@ export const baseConfig: Partial<Config> = {
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: foldersSlug,
@@ -65,6 +66,7 @@ export const baseConfig: Partial<Config> = {
           required: true,
         },
       ],
+      versions: false,
     },
   ],
   admin: {

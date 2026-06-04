@@ -419,8 +419,7 @@ const TabsFields: CollectionConfig = {
         },
       ],
     },
-  ],
-  versions: false,
+  ]
 }
 
 export default TabsFields

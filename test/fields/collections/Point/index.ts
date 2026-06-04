@@ -35,8 +35,7 @@ const PointFields: CollectionConfig = {
         },
       ],
     },
-  ],
-  versions: false,
+  ]
 }
 
 export default PointFields

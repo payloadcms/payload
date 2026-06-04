@@ -32,6 +32,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
         type: 'text',
       },
     ],
+    versions: false,
   }
 }
 

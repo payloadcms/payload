@@ -16,6 +16,5 @@ export const CustomID: CollectionConfig = {
   labels: {
     plural: 'Custom IDs',
     singular: 'Custom ID',
-  },
-  versions: false,
+  }
 }

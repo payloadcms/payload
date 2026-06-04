@@ -48,6 +48,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
         },
       },
     ],
+    versions: false,
   }
 }
 
