@@ -184,7 +184,7 @@ services:
   # ── Azure Storage (Azurite emulator) ────────────────────────
   azure-storage:
     profiles: [all, storage]
-    image: mcr.microsoft.com/azure-storage/azurite:latest
+    image: ghcr.io/payloadcms/azurite:3.35.0
     platform: linux/amd64
     restart: always
     command: 'azurite --loose --blobHost 0.0.0.0 --tableHost 0.0.0.0 --queueHost 0.0.0.0 --skipApiVersionCheck'
