@@ -772,6 +772,33 @@ describe('Types testing', () => {
         expect(result).type.toBeAssignableTo<GeneratedRichTextType>()
       })
 
+      test('buildEditorState accepts a generated field type directly and returns exactly it', () => {
+        // The ergonomic path for users with generated types: pass the field type, no node extraction.
+        const result = buildEditorState<Post['richText']>({ text: 'hello' })
+        expect(result).type.toBe<Post['richText']>()
+      })
+
+      test('buildEditorState with a generated field type directly narrows `nodes` to the field — a registered node type is accepted', () => {
+        // `horizontalrule` is part of this editor, so calling with it is valid.
+        expect(buildEditorState<Post['richText']>).type.toBeCallableWith({
+          nodes: [{ type: 'horizontalrule', version: 1 }],
+        })
+      })
+
+      test('buildEditorState with a generated field type directly narrows `nodes` to the field — an unregistered node type errors', () => {
+        // `block` is not enabled on this editor, so calling with it is rejected.
+        expect(buildEditorState<Post['richText']>).type.not.toBeCallableWith({
+          nodes: [
+            {
+              type: 'block',
+              fields: { id: 'x', blockName: '', blockType: 'whatever' },
+              format: '',
+              version: 1,
+            },
+          ],
+        })
+      })
+
       test('buildEditorState allows pushing typed nodes to children', () => {
         const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
         result.root.children.push({

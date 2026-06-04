@@ -104,6 +104,15 @@ export type TypedEditorState<TNode extends SerializedLexicalNode = SerializedLex
   LexicalRichText<TNode>
 
 /**
+ * The node union of a generated `richText` field. Pass the field type — e.g.
+ * `RichTextNodes<Post['richText']>` — to type an individual node you build for that editor (for
+ * example a single block, or a `.map()` of nodes). To build a whole editor state, prefer passing
+ * the field type straight to {@link buildEditorState}.
+ */
+export type RichTextNodes<TRichText> =
+  NonNullable<TRichText> extends LexicalRichText<infer TNode> ? TNode : never
+
+/**
  * All node types included by default in a lexical editor. Self-recursive —
  * each element node's `children` is `DefaultNodeTypes` again, no depth limit.
  * To compose your own union including the defaults, see {@link DefaultNodeTypesOf}.
