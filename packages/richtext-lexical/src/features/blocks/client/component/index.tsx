@@ -11,7 +11,6 @@ import {
   ErrorPill,
   Form,
   formatDrawerSlug,
-  FormSubmit,
   MoreIcon,
   Pill,
   Popup,
@@ -43,7 +42,12 @@ import type { ViewMapBlockComponentProps } from '../../../../types/index.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
 import './index.css'
+import '../../../../utilities/fieldsDrawer/index.css'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
+import {
+  RegisterFormSubmit,
+  useDrawerSubmit,
+} from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import {
@@ -699,18 +703,21 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const blockID = formData?.id
 
+  const { headerActions, submitRef } = useDrawerSubmit()
+
   const BlockDrawer = useMemo(
     () => () => (
       <EditDepthProvider>
         <Drawer
           className={''}
+          headerActions={headerActions}
           slug={drawerSlug}
           title={t(`lexical:blocks:inlineBlocks:${blockID ? 'edit' : 'create'}`, {
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
           })}
         >
           {initialState ? (
-            <>
+            <div className="fields-drawer">
               <RenderFields
                 fields={clientBlock?.fields ?? []}
                 forceRender
@@ -720,8 +727,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                 permissions={true}
                 readOnly={!isEditable}
               />
-              <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
-            </>
+              <RegisterFormSubmit submitRef={submitRef} />
+            </div>
           ) : null}
         </Drawer>
       </EditDepthProvider>
@@ -735,6 +742,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       isEditable,
       clientBlock?.fields,
       schemaFieldsPath,
+      headerActions,
+      submitRef,
       // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
     ],
   )

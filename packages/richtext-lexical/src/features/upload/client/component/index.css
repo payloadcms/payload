@@ -89,7 +89,7 @@
     background: var(--color-bg-menu);
     border-radius: var(--radius-large);
     color: var(--color-text);
-    /* opacity: 0; */
+    opacity: 0;
     pointer-events: none;
     white-space: nowrap;
     z-index: 1;
@@ -151,7 +151,7 @@
   .LexicalEditorTheme__upload__divider {
     width: var(--stroke-width-small);
     height: var(--spacer-6);
-    background: var(--ramp-grey-700);
+    background: var(--color-border);
     flex-shrink: 0;
   }
 

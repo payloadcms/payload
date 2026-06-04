@@ -16,6 +16,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FormProps } from '../../forms/Form/index.js'
 import type { OnFieldSelect } from '../FieldSelect/index.js'
 import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
+import type { EditManyProps } from './index.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
@@ -33,9 +34,9 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
+import { baseClass } from './index.js'
 import './index.scss'
 import '../../forms/RenderFields/index.css'
-import { baseClass, type EditManyProps } from './index.js'
 
 const Submit: React.FC<{
   readonly action: string
