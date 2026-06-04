@@ -120,7 +120,9 @@ const buildLinkFieldsJSONSchema = (
       newTab: { type: 'boolean' },
       url: { type: 'string' },
     },
-    required: ['linkType', 'newTab', ...userFieldsSchema.required],
+    // `linkType`/`newTab` are already in `userFieldsSchema.required`; use Set to dedupe,
+    // so `required` stays unique (draft 2020-12 enforces `uniqueItems`).
+    required: [...new Set(['linkType', 'newTab', ...userFieldsSchema.required])],
   }
 }
 
