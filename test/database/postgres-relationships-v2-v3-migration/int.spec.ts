@@ -30,6 +30,7 @@ describeToUse('Postgres relationships v2-v3 migration', () => {
           slug: 'users',
           auth: true,
           fields: [],
+          versions: false,
         },
       ],
     })
