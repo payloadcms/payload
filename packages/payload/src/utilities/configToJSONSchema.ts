@@ -1530,6 +1530,7 @@ export function configToJSONSchema(
       ...Object.fromEntries(interfaceNameDefinitions),
       ...authOperationDefinitions,
     },
+    $schema: 'https://json-schema.org/draft/2020-12/schema',
     additionalProperties: false,
     // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
     type: 'object',
