@@ -1,7 +1,7 @@
 import type { BrowserContext, CDPSession, Page, Request, Route } from '@playwright/test'
 import type { FormState } from 'payload'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import * as path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -26,7 +26,7 @@ import {
   throttleTest,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
-import { currentFramework } from '../__helpers/e2e/playwright.js'
+import { currentFramework, test } from '../__helpers/e2e/playwright.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -69,10 +69,27 @@ test.describe('Form State', () => {
     // })
   })
 
-  test('should disable fields during initialization', async () => {
+  // Next.js renders the create view then runs an initial client-side form-state
+  // fetch during which fields are disabled. TanStack Start serves the form
+  // already-initialized in the RSC payload, so there is no disabled phase — the
+  // tanstack-start variant below asserts the form is immediately editable instead.
+  test('should disable fields during initialization', { framework: 'next' }, async () => {
     await page.goto(postsUrl.create, { waitUntil: 'commit' })
     await expect(page.locator('#field-title')).toBeDisabled()
   })
+
+  test(
+    'should render the create form ready to edit',
+    { framework: 'tanstack-start' },
+    async () => {
+      await page.goto(postsUrl.create)
+      // No client-init disabled phase: the RSC payload arrives with form state
+      // already initialized, so the field is immediately enabled and editable.
+      await expect(page.locator('#field-title')).toBeEnabled()
+      await page.locator('#field-title').fill(title)
+      await expect(page.locator('#field-title')).toHaveValue(title)
+    },
+  )
 
   test('should disable fields while processing', async () => {
     const doc = await createPost()
@@ -177,7 +194,13 @@ test.describe('Form State', () => {
     )
   })
 
-  test('should send `lastRenderedPath` only when necessary', async () => {
+  // Asserts the `lastRenderedPath` form-state optimization by inspecting the form
+  // state embedded in Next.js's RSC form-state request body. TanStack Start
+  // dispatches form state through the `createServerFn` RPC with a seroval-encoded
+  // body, so this Next-transport-specific assertion does not apply. The underlying
+  // optimization is framework-agnostic shared form logic exercised by the other
+  // form-state tests on both adapters.
+  test('should send `lastRenderedPath` only when necessary', { framework: 'next' }, async () => {
     await page.goto(postsUrl.create)
     await waitForFormReady(page)
 
