@@ -493,6 +493,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     viewing: 'Pregled',
     viewReadOnly: 'Прегледај само за читање',
     welcome: 'Добродошли',
+    where: 'Gde',
     yes: 'Да',
   },
   hierarchy: {

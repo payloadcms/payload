@@ -492,6 +492,7 @@ export const isTranslations: DefaultTranslationsObject = {
     viewing: 'Skoða',
     viewReadOnly: 'Skoða sem skrifvarið',
     welcome: 'Velkomin',
+    where: 'Hvar',
     yes: 'Já',
   },
   hierarchy: {
