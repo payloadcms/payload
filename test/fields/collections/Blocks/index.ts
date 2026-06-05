@@ -629,4 +629,5 @@ export const BlockFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

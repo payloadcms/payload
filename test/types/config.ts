@@ -1,4 +1,4 @@
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { lexicalEditor, UploadFeature } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -103,6 +103,7 @@ export default buildConfigWithDefaults({
           name: 'category',
         },
       ],
+      versions: false,
     },
     {
       slug: 'pages-categories',
@@ -118,6 +119,7 @@ export default buildConfigWithDefaults({
           on: 'category',
         },
       ],
+      versions: false,
     },
     {
       slug: 'draft-posts',
@@ -137,13 +139,47 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'media',
+      upload: true,
+      fields: [
+        {
+          type: 'text',
+          name: 'alt',
+        },
+      ],
+    },
+    {
+      slug: 'gallery',
+      upload: true,
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+      ],
+    },
   ],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  editor: lexicalEditor({}),
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures.filter((f) => f.key !== 'upload'),
+      UploadFeature({
+        collections: {
+          media: {
+            fields: [{ name: 'caption', type: 'text' }],
+          },
+          gallery: {
+            fields: [{ name: 'altText', type: 'text', required: true }],
+          },
+        },
+      }),
+    ],
+  }),
   globals: [
     {
       slug: 'menu',
@@ -152,6 +188,10 @@ export default buildConfigWithDefaults({
         {
           type: 'text',
           name: 'text',
+        },
+        {
+          type: 'richText',
+          name: 'richText',
         },
       ],
     },

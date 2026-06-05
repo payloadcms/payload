@@ -194,4 +194,5 @@ export const Relationship: CollectionConfig = {
     },
   ],
   slug,
+  versions: false,
 }

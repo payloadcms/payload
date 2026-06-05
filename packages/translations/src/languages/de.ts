@@ -504,6 +504,7 @@ export const deTranslations: DefaultTranslationsObject = {
     viewing: 'Ansehen',
     viewReadOnly: 'Nur-Lese-Ansicht',
     welcome: 'Willkommen',
+    where: 'Wo',
     yes: 'Ja',
   },
   hierarchy: {

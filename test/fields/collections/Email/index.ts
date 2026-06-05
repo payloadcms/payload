@@ -110,6 +110,7 @@ const EmailFields: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }
 
 export default EmailFields

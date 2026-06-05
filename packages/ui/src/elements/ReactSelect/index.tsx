@@ -91,7 +91,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   }
 
   if (!hasMounted) {
-    return <ShimmerEffect height="calc(var(--base) * 2 + 2px)" />
+    return <ShimmerEffect height="var(--field-min-height)" />
   }
 
   if (!isCreatable) {

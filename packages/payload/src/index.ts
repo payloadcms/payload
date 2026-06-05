@@ -1850,7 +1850,10 @@ export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
   entityToJSONSchema,
+  entityToStandaloneJSONSchema,
   fieldsToJSONSchema,
+  type FieldsToJSONSchemaArgs,
+  registerBlockInterface,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'

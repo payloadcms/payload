@@ -74,6 +74,7 @@ const RelationshipFields: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }
 
 export default RelationshipFields

@@ -20,6 +20,7 @@ export const LoginWithUsernameConfig = buildConfigWithDefaults({
         },
       },
       fields: [],
+      versions: false,
     },
     {
       slug: 'login-with-either',
@@ -31,6 +32,7 @@ export const LoginWithUsernameConfig = buildConfigWithDefaults({
         },
       },
       fields: [],
+      versions: false,
     },
     {
       slug: 'require-email',
@@ -44,6 +46,7 @@ export const LoginWithUsernameConfig = buildConfigWithDefaults({
       admin: {
         useAsTitle: 'email',
       },
+      versions: false,
     },
   ],
 })

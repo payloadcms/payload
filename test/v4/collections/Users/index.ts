@@ -25,6 +25,7 @@ const Users: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default Users
