@@ -77,7 +77,7 @@ export const LogoutClient: React.FC<{
     return (
       <div className={`${baseClass}__wrap`}>
         <h2>{t('authentication:loggedOutInactivity')}</h2>
-        <Button buttonStyle="primary" el="link" size="large" url={loginRoute}>
+        <Button buttonStyle="primary" el="link" size="medium" url={loginRoute}>
           {t('authentication:logBackIn')}
         </Button>
       </div>
