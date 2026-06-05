@@ -26,6 +26,5 @@ export const CustomGlobalViews1: GlobalConfig = {
       name: 'title',
       type: 'text',
     },
-  ],
-  versions: true,
+  ]
 }

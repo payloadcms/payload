@@ -28,6 +28,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -115,6 +116,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -172,6 +174,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
         {
           slug: 'posts',
@@ -184,6 +187,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -272,6 +276,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -347,6 +352,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -403,6 +409,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -480,6 +487,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -516,6 +524,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }

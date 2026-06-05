@@ -167,6 +167,7 @@ const RichTextFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default RichTextFields

@@ -15,4 +15,5 @@ export const PagesCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

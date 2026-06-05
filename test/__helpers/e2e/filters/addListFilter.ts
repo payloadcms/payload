@@ -28,26 +28,27 @@ export const addListFilter = async ({
    */
   whereBuilder: Locator
 }> => {
+  // Detect whether the filters panel was already open before this call. Opening
+  // the panel auto-adds an empty first condition, so a freshly opened panel
+  // should reuse that condition instead of adding a new one.
+  const wasAlreadyOpen = await page.locator('.where-builder').isVisible()
+
   await openListFilters(page, {})
 
   const whereBuilder = page.locator('.where-builder')
 
-  const addFirst = whereBuilder.locator('.where-builder__add-first-filter')
-  const initializedEmpty = await addFirst.isVisible()
+  const filters = whereBuilder.locator('.condition')
 
-  if (initializedEmpty) {
-    await addFirst.click()
-  }
-
-  const filters = whereBuilder.locator('.where-builder__or-filters > li')
-  expect(await filters.count()).toBeGreaterThan(0)
-
-  // If there were already filter(s), need to add another and manipulate _that_ instead of the existing one
-  if (!initializedEmpty) {
+  if (wasAlreadyOpen) {
+    // The panel already had condition(s), so add another and manipulate _that_
+    // instead of an existing condition.
+    const countBefore = await filters.count()
     const addFilterButtons = whereBuilder.locator('.where-builder__add-or')
     await addFilterButtons.last().click()
-    await expect(filters).toHaveCount(2)
+    await expect(filters).toHaveCount(countBefore + 1)
   }
+
+  expect(await filters.count()).toBeGreaterThan(0)
 
   const condition = filters.last()
 

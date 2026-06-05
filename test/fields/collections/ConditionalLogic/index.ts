@@ -327,6 +327,7 @@ const ConditionalLogic: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default ConditionalLogic

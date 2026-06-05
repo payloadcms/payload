@@ -106,6 +106,5 @@ export const CustomViews2: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
-  ],
-  versions: true,
+  ]
 }

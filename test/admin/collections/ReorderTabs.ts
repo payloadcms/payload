@@ -42,6 +42,5 @@ export const ReorderTabs: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
-  ],
-  versions: true,
+  ]
 }

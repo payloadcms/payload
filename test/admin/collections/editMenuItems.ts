@@ -30,4 +30,5 @@ export const EditMenuItems: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

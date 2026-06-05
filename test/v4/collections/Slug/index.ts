@@ -137,6 +137,7 @@ const SlugFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default SlugFields

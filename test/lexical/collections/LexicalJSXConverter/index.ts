@@ -15,4 +15,5 @@ export const LexicalJSXConverter: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

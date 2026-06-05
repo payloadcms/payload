@@ -495,6 +495,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     viewing: 'Peržiūrėti',
     viewReadOnly: 'Peržiūrėti tik skaitymui',
     welcome: 'Sveiki',
+    where: 'Kur',
     yes: 'Taip',
   },
   hierarchy: {

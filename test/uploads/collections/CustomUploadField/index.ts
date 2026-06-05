@@ -32,4 +32,5 @@ export const CustomUploadFieldCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

@@ -492,6 +492,7 @@ export const plTranslations: DefaultTranslationsObject = {
     viewing: 'Podgląd',
     viewReadOnly: 'Widok tylko do odczytu',
     welcome: 'Witaj',
+    where: 'Gdzie',
     yes: 'Tak',
   },
   hierarchy: {

@@ -33,4 +33,5 @@ export const ListDrawer: CollectionConfig = {
       type: 'number',
     },
   ],
+  versions: false,
 }

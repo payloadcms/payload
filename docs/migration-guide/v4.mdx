@@ -22,6 +22,40 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Versions are now enabled by default for all collections and globals
+
+Collections and globals now have `versions: true` by default (`maxPerDoc`/`max: 100`, drafts disabled). In previous versions you had to opt in; you now opt out.
+
+**What changes:**
+
+- Any collection or global without an explicit `versions` property will automatically get a `_<slug>_versions` table or collection in the database. You will need to run a database migration to add these new tables for existing projects.
+- Auth collections such as Users do **not** get versions by default — the built-in user collection already ships with `versions: false`, and you should do the same for any custom auth collection.
+- The bare `versions: true` you may have added previously is now redundant and can be removed.
+
+**To opt out for an existing collection or global:**
+
+```diff
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [],
++ versions: false,
+}
+```
+
+**Two codemods are available** to automate this migration:
+
+```bash
+# 1. Preserve existing behaviour: add versions: false everywhere versions is not set
+npx @payloadcms/codemod --transform migrate-versions-default
+
+# 2. Remove now-redundant versions: true (bare boolean) from your configs
+npx @payloadcms/codemod --transform remove-versions-true
+```
+
+Run `migrate-versions-default` if you want zero schema changes — it adds `versions: false` to every `CollectionConfig` and `GlobalConfig` that does not already set `versions`. If you want to selectively keep versions on some configs, run the codemod and then delete `versions: false` from the ones you want to enable. Each config you opt into requires a database migration.
+
+Run `remove-versions-true` to clean up any bare `versions: true` that is now the default.
+
 ### List View Select API is now the default
 
 The `admin.enableListViewSelectAPI` Collection Config property has been removed. The List View now always uses the [Select API](../queries/select) to query only the active columns, which was previously opt-in.

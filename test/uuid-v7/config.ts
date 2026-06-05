@@ -22,10 +22,12 @@ export default await buildConfig({
     {
       slug: 'posts',
       fields: [{ name: 'title', type: 'text' }],
+      versions: false,
     },
     {
       slug: 'categories',
       fields: [{ name: 'name', type: 'text' }],
+      versions: false,
     },
     {
       slug: 'articles',
@@ -37,6 +39,7 @@ export default await buildConfig({
           relationTo: 'categories',
         },
       ],
+      versions: false,
     },
   ],
 })

@@ -14,6 +14,7 @@ export default buildConfig({
           type: 'text',
         },
       ],
+      versions: false,
     },
   ],
 })
