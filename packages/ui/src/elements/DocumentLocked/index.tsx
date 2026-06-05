@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogModal,
 } from '../Dialog/index.js'
+import './index.css'
 
 const modalSlug = 'document-locked'
 
@@ -65,7 +66,7 @@ export const DocumentLocked: React.FC<{
           </strong>{' '}
           {t('general:currentlyEditing')}
         </p>
-        <p>
+        <p className="document-locked__updated-at">
           {t('general:editedSince')} <strong>{formatDate(updatedAt)}</strong>
         </p>
       </DialogBody>
