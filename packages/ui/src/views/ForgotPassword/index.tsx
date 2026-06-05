@@ -54,7 +54,15 @@ export function ForgotPasswordView({ initPageResult }: AdminViewServerProps) {
           }
           heading={i18n.t('authentication:alreadyLoggedIn')}
         />
-        <Button buttonStyle="secondary" el="link" size="large" to={adminRoute}>
+        <Button
+          buttonStyle="ghost"
+          className={`${forgotPasswordBaseClass}__back`}
+          el="link"
+          url={formatAdminURL({
+            adminRoute,
+            path: loginRoute,
+          })}
+        >
           {i18n.t('general:backToDashboard')}
         </Button>
       </Fragment>
@@ -64,17 +72,17 @@ export function ForgotPasswordView({ initPageResult }: AdminViewServerProps) {
   return (
     <Fragment>
       <ForgotPasswordForm />
-      <div className={`${forgotPasswordBaseClass}__back`}>
-        <Link
-          href={formatAdminURL({
-            adminRoute,
-            path: loginRoute,
-          })}
-          prefetch={false}
-        >
-          {i18n.t('authentication:backToLogin')}
-        </Link>
-      </div>
+      <Button
+        buttonStyle="ghost"
+        className={`${forgotPasswordBaseClass}__back`}
+        el="link"
+        url={formatAdminURL({
+          adminRoute,
+          path: loginRoute,
+        })}
+      >
+        {i18n.t('authentication:backToLogin')}
+      </Button>
     </Fragment>
   )
 }
