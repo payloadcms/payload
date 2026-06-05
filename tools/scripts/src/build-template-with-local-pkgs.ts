@@ -31,55 +31,59 @@ async function main() {
     stdio: 'inherit' as const,
   }
 
+  // Map every packed .tgz (produced by `script:pack --all`) to its package name and a local
+  // `file:` spec, e.g. `@payloadcms/translations` -> `file:./payloadcms-translations-4.0.0.tgz`.
   const allFiles = await fs.readdir(templatePath, { withFileTypes: true })
-  const allTgzs = allFiles
-    .filter((file) => file.isFile())
-    .map((file) => file.name)
-    .filter((file) => file.endsWith('.tgz'))
+  const fileSpecByPackageName = Object.fromEntries(
+    allFiles
+      .filter(
+        (file) =>
+          file.isFile() &&
+          file.name.endsWith('.tgz') &&
+          (file.name.startsWith('payload-') || file.name.startsWith('payloadcms-')),
+      )
+      .map((file) => [tgzToPackageName(file.name), `file:./${file.name}`]),
+  )
 
-  console.log({
-    allTgzs,
-  })
-
-  // remove node_modules
-  await fs.rm(path.join(templatePath, 'node_modules'), { recursive: true, force: true })
-  // replace workspace:* from package.json with a real version so that it can be installed with pnpm
-  // without this step, even though the packages are built locally as tars
-  // it will error as it cannot contain workspace dependencies when installing with --ignore-workspace
-  const packageJsonPath = path.join(templatePath, 'package.json')
-  const initialPackageJson = await fs.readFile(packageJsonPath, 'utf-8')
-  const initialPackageJsonObj = JSON.parse(initialPackageJson)
-
-  // Update the package.json dependencies to use any specific version instead of `workspace:*`, so that
-  // the next pnpm add command can install the local packages correctly.
-  updatePackageJSONDependencies({ latestVersion: '3.42.0', packageJson: initialPackageJsonObj })
-
-  await fs.writeFile(packageJsonPath, JSON.stringify(initialPackageJsonObj, null, 2))
-
-  execSync('pnpm add ./*.tgz --ignore-workspace', execOpts)
-  execSync('pnpm install --ignore-workspace', execOpts)
-
-  const packageJson = await fs.readFile(packageJsonPath, 'utf-8')
-  const packageJsonObj = JSON.parse(packageJson) as {
-    dependencies: Record<string, string>
-    pnpm?: { overrides: Record<string, string> }
+  if (Object.keys(fileSpecByPackageName).length === 0) {
+    throw new Error(
+      `No packed .tgz files found in ${templatePath}. Run \`pnpm run script:pack --all --dest ${templatePath}\` first.`,
+    )
   }
 
-  // Get key/value pairs for any package that starts with '@payloadcms'
-  const payloadValues =
-    packageJsonObj.dependencies &&
-    Object.entries(packageJsonObj.dependencies).filter(
-      ([key, value]) => key.startsWith('@payloadcms') || key === 'payload',
-    )
+  console.log({ fileSpecByPackageName })
 
-  // Add each package to the overrides
-  const overrides = packageJsonObj.pnpm?.overrides || {}
-  payloadValues.forEach(([key, value]) => {
-    overrides[key] = value
-  })
+  await fs.rm(path.join(templatePath, 'node_modules'), { recursive: true, force: true })
 
-  // Write package.json back to disk
-  packageJsonObj.pnpm = { overrides }
+  const packageJsonPath = path.join(templatePath, 'package.json')
+  const packageJsonObj = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8')) as {
+    dependencies?: Record<string, string>
+    devDependencies?: Record<string, string>
+    pnpm?: { overrides?: Record<string, string> }
+  }
+
+  // Point every workspace dependency the template declares at its local tarball. This also
+  // replaces `workspace:*` specs, which pnpm cannot install with --ignore-workspace.
+  for (const depKey of ['dependencies', 'devDependencies'] as const) {
+    const deps = packageJsonObj[depKey]
+    if (!deps) {
+      continue
+    }
+    for (const name of Object.keys(deps)) {
+      if (fileSpecByPackageName[name]) {
+        deps[name] = fileSpecByPackageName[name]
+      }
+    }
+  }
+
+  // Force the local tarballs across the entire dependency tree via overrides. Without this, the
+  // packed tarballs request their sibling @payloadcms packages at the in-repo version (e.g. a beta
+  // that is not published to npm), and the install fails with ERR_PNPM_NO_MATCHING_VERSION.
+  packageJsonObj.pnpm = {
+    ...packageJsonObj.pnpm,
+    overrides: { ...packageJsonObj.pnpm?.overrides, ...fileSpecByPackageName },
+  }
+
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
 
   execSync('pnpm install --no-frozen-lockfile --ignore-workspace', execOpts)
@@ -162,26 +166,14 @@ async function runBuildWithWarningsCheck(args: {
 }
 
 /**
- * Recursively updates a JSON object to replace all instances of `workspace:` with the latest version pinned.
- *
- * Does not return and instead modifies the `packageJson` object in place.
+ * Derives a package name from a `pnpm pack` tarball filename, e.g.
+ * `payload-4.0.0.tgz` -> `payload` and `payloadcms-db-mongodb-4.0.0.tgz` -> `@payloadcms/db-mongodb`.
+ * pnpm names scoped tarballs `<scope>-<name>-<version>.tgz`, so the version is the first
+ * hyphen-delimited segment that starts with a digit.
  */
-export function updatePackageJSONDependencies(args: {
-  latestVersion: string
-  packageJson: Record<string, unknown>
-}): void {
-  const { latestVersion, packageJson } = args
-
-  const updatedDependencies = Object.entries(packageJson.dependencies || {}).reduce(
-    (acc, [key, value]) => {
-      if (typeof value === 'string' && value.startsWith('workspace:')) {
-        acc[key] = `${latestVersion}`
-      } else {
-        acc[key] = value
-      }
-      return acc
-    },
-    {} as Record<string, string>,
-  )
-  packageJson.dependencies = updatedDependencies
+export function tgzToPackageName(tgzFileName: string): string {
+  const nameWithoutVersion = tgzFileName.replace(/-\d.*\.tgz$/, '')
+  return nameWithoutVersion === 'payload'
+    ? 'payload'
+    : `@payloadcms/${nameWithoutVersion.replace(/^payloadcms-/, '')}`
 }

@@ -474,6 +474,38 @@ If you authored a custom lexical feature that hooks into type generation, rename
 
 Rename `typescriptSchema` → `jsonSchema` wherever you set it on a field config.
 
+### Generated JSON Schema uses `$defs` instead of `definitions`
+
+Payload builds a JSON Schema from your config to generate `payload-types.ts`. That schema now stores its reusable types under the modern `$defs` key instead of the older `definitions` key, and every internal reference points at `#/$defs/...` instead of `#/definitions/...`. This follows the current JSON Schema spec.
+
+**Your generated `payload-types.ts` does not change.** You are only affected if you read or write that schema yourself — most commonly through `typescript.schema` on your config, a custom rich text adapter, or a custom Lexical feature.
+
+Update any code that adds to the schema:
+
+```diff
+// payload.config.ts
+{
+  typescript: {
+    schema: [
+      ({ jsonSchema }) => {
+-       jsonSchema.definitions.MyType = { type: 'object', properties: { /* ... */ } }
++       jsonSchema.$defs.MyType = { type: 'object', properties: { /* ... */ } }
+        return jsonSchema
+      },
+    ],
+  },
+}
+```
+
+And update any `$ref` pointers you wrote by hand to point at `$defs`:
+
+```diff
+- { $ref: '#/definitions/posts' }
++ { $ref: '#/$defs/posts' }
+```
+
+Do not keep your additions on `definitions` while new ones land on `$defs`.
+
 ### Jobs: `jobs.depth` and `jobs.runHooks` have been removed ([#16414](https://github.com/payloadcms/payload/pull/16414))
 
 The deprecated `jobs.depth` and `jobs.runHooks` config options have been removed. Job operations now always use direct database calls with depth `0`.
