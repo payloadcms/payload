@@ -498,6 +498,7 @@ export const idTranslations: DefaultTranslationsObject = {
     viewing: 'Melihat',
     viewReadOnly: 'Lihat hanya-baca',
     welcome: 'Selamat Datang',
+    where: 'Di mana',
     yes: 'Ya',
   },
   hierarchy: {

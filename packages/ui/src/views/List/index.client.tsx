@@ -4,7 +4,7 @@ import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, formatFilesize } from 'payload/shared'
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment, useEffect, useRef, useState } from 'react'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -18,6 +18,7 @@ import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { WhereBuilder } from '../../elements/WhereBuilder/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
@@ -81,7 +82,19 @@ export function DefaultListView(props: ListViewClientProps) {
   } = useConfig()
   const router = useRouter()
 
-  const { data, isGroupingBy } = useListQuery()
+  const { data, hasActiveFilters, isGroupingBy, query } = useListQuery()
+
+  const hasWhereParam = useRef(Boolean(query?.where))
+  const [isWhereOpen, setIsWhereOpen] = useState(hasActiveFilters)
+
+  useEffect(() => {
+    if (hasWhereParam.current && !query?.where) {
+      hasWhereParam.current = false
+      setIsWhereOpen(false)
+    } else if (query?.where) {
+      hasWhereParam.current = true
+    }
+  }, [query?.where])
 
   const { openModal } = useModal()
   const { drawerSlug: bulkUploadDrawerSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
@@ -228,13 +241,25 @@ export function DefaultListView(props: ListViewClientProps) {
                 collectionConfig?.enableQueryPresets !== true || disableQueryPresets
               }
               hasCreatePermission={hasCreatePermission && viewType !== 'trash'}
+              isWhereOpen={isWhereOpen}
               listMenuItems={listMenuItems}
               newDocumentURL={newDocumentURL}
+              onWhereToggle={() => setIsWhereOpen((prev) => !prev)}
               queryPreset={queryPreset}
               queryPresetPermissions={queryPresetPermissions}
               renderedFilters={renderedFilters}
               resolvedFilterOptions={resolvedFilterOptions}
             />
+            {isWhereOpen && (
+              <WhereBuilder
+                collectionPluralLabel={collectionConfig?.labels?.plural}
+                collectionSlug={collectionSlug}
+                fields={collectionConfig?.fields}
+                onClose={() => setIsWhereOpen(false)}
+                renderedFilters={renderedFilters}
+                resolvedFilterOptions={resolvedFilterOptions}
+              />
+            )}
             {BeforeListTable}
             {hierarchyData ? (
               <DocumentSelectionProvider

@@ -33,6 +33,7 @@ export default buildConfigWithDefaults({
           saveToJWT: true,
         },
       ],
+      versions: false,
     },
   ],
   debug: true,

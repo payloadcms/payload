@@ -496,6 +496,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     viewing: 'Դիտում',
     viewReadOnly: '«Միայն կարդալու» ռեժիմ',
     welcome: 'Բարի գալուստ',
+    where: 'Որտեղ',
     yes: 'Այո',
   },
   hierarchy: {

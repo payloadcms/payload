@@ -228,9 +228,8 @@ describe('JSON', () => {
       await openListFilters(page, {})
 
       const whereBuilder = page.locator('.where-builder')
-      await whereBuilder.locator('.where-builder__add-first-filter').click()
 
-      const condition = whereBuilder.locator('.where-builder__or-filters > li').first()
+      const condition = whereBuilder.locator('.condition').first()
 
       // Select the 'json' field
       await condition.locator('.condition__field .rs__control').click()

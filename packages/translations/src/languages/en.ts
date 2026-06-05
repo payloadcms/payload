@@ -494,6 +494,7 @@ export const enTranslations = {
     viewing: 'Viewing',
     viewReadOnly: 'View read-only',
     welcome: 'Welcome',
+    where: 'Where',
     yes: 'Yes',
   },
   hierarchy: {

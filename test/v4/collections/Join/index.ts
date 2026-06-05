@@ -95,6 +95,7 @@ const JoinFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default JoinFields

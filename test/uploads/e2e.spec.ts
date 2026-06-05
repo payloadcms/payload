@@ -2309,7 +2309,6 @@ describe('Uploads', () => {
     await openListFilters(page, {})
 
     const whereBuilder = page.locator('.where-builder')
-    await whereBuilder.locator('.where-builder__add-first-filter').click()
 
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
@@ -2338,7 +2337,6 @@ describe('Uploads', () => {
     await openListFilters(page, {})
 
     const whereBuilder = page.locator('.where-builder')
-    await whereBuilder.locator('.where-builder__add-first-filter').click()
 
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()

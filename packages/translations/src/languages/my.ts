@@ -501,6 +501,7 @@ export const myTranslations: DefaultTranslationsObject = {
     viewing: 'Melihat',
     viewReadOnly: 'ဖတ်ရှုရန်သာကြည့်ပါ',
     welcome: 'ကြိုဆိုပါတယ်။',
+    where: 'မှာ',
     yes: 'ဟုတ်ကဲ့',
   },
   hierarchy: {

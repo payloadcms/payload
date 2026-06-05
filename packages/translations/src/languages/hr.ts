@@ -493,6 +493,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     viewing: 'Pregledavanje',
     viewReadOnly: 'Pogledaj samo za čitanje',
     welcome: 'Dobrodošli',
+    where: 'Gdje',
     yes: 'Da',
   },
   hierarchy: {

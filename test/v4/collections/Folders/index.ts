@@ -17,4 +17,5 @@ export const Folders: CollectionConfig = {
   folders: {
     parentFieldName: 'parent',
   },
+  versions: false,
 }
