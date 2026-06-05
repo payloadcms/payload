@@ -75,16 +75,17 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_BFE38E95".
+ * via the `definition` "LexicalNodes_4CE595A9".
  */
-export type LexicalNodes_BFE38E95 =
+export type LexicalNodes_4CE595A9 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_BFE38E95>
+  | SerializedParagraphNode<LexicalNodes_4CE595A9>
+  | SerializedUploadNode<'media', LexicalUploadFields_7C90EEAC>
+  | SerializedUploadNode<'gallery', LexicalUploadFields_9521FA4A>
   | SerializedHorizontalRuleNode
-  | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_BFE38E95>
+  | SerializedQuoteNode<LexicalNodes_4CE595A9>
   | SerializedRelationshipNode<
       | 'posts'
       | 'pages'
@@ -97,11 +98,11 @@ export type LexicalNodes_BFE38E95 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_BFE38E95, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_BFE38E95, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_BFE38E95>
-  | SerializedListItemNode<LexicalNodes_BFE38E95>
-  | SerializedHeadingNode<LexicalNodes_BFE38E95>;
+  | SerializedAutoLinkNode<LexicalNodes_4CE595A9, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_4CE595A9, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_4CE595A9>
+  | SerializedListItemNode<LexicalNodes_4CE595A9>
+  | SerializedHeadingNode<LexicalNodes_4CE595A9>;
 
 export interface Config {
   auth: {
@@ -115,6 +116,7 @@ export interface Config {
     'pages-categories': PagesCategory;
     'draft-posts': DraftPost;
     media: Media;
+    gallery: Gallery;
     users: User;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
@@ -133,6 +135,7 @@ export interface Config {
     'pages-categories': PagesCategoriesSelect<false> | PagesCategoriesSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    gallery: GallerySelect<false> | GallerySelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -206,7 +209,7 @@ export interface PayloadMcpApiKeyAuthOperations {
 export interface Post {
   id: string;
   text?: string | null;
-  richText: LexicalRichText<LexicalNodes_BFE38E95>;
+  richText: LexicalRichText<LexicalNodes_4CE595A9>;
   title?: string | null;
   selectField: MySelectOptions;
   insideUnnamedGroup?: string | null;
@@ -267,6 +270,25 @@ export interface DraftPost {
 export interface Media {
   id: string;
   alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery".
+ */
+export interface Gallery {
+  id: string;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -390,6 +412,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'gallery';
+        value: string | Gallery;
       } | null)
     | ({
         relationTo: 'users';
@@ -522,6 +548,24 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery_select".
+ */
+export interface GallerySelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -605,6 +649,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface Menu {
   id: string;
   text?: string | null;
+  richText?: LexicalRichText<LexicalNodes_4CE595A9> | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -625,6 +670,7 @@ export interface Setting {
  */
 export interface MenuSelect<T extends boolean = true> {
   text?: T;
+  richText?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -649,6 +695,20 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_7C90EEAC".
+ */
+export interface LexicalUploadFields_7C90EEAC {
+  caption?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_9521FA4A".
+ */
+export interface LexicalUploadFields_9521FA4A {
+  altText: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -705,11 +765,6 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export interface SerializedHorizontalRuleNode {
-  type: 'horizontalrule';
-  version: number;
-}
-
 export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
   type: 'upload';
   format: LexicalElementFormat;
@@ -722,6 +777,11 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
     value: number | string | Config['collections'][TSlug];
   };
 }[TSlugs];
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
 
 export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
   type: 'quote';

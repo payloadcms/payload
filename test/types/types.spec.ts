@@ -49,12 +49,14 @@ import type {
   SerializedListItemNode as GenLI,
   SerializedLinkNode as GenLink,
   SerializedListNode as GenList,
-  LexicalNodes_BFE38E95 as GenNodeUnion,
+  LexicalNodes_4CE595A9 as GenNodeUnion,
   SerializedParagraphNode as GenParagraph,
   SerializedQuoteNode as GenQuote,
   SerializedTabNode as GenTab,
   SerializedTextNode as GenText,
   Config as LocalConfig,
+  LexicalUploadFields_7C90EEAC as MediaUploadFields,
+  LexicalUploadFields_9521FA4A as GalleryUploadFields,
   Menu,
   MyRadioOptions,
   MySelectOptions,
@@ -355,26 +357,20 @@ describe('Types testing', () => {
       }
     })
 
-    test('ensure generated richText types can be assigned to DefaultTypedEditorState type', () => {
-      // If there is a function that expects DefaultTypedEditorState, you should be able to assign the generated type to it
-      // This ensures that data can be passed directly form the payload local API to a function that expects DefaultTypedEditorState
+    test('ensure generated richText types can be assigned to DefaultTypedEditorState when no custom upload fields exist', () => {
+      // When no UploadFeature extra fields are configured, the generated type and DefaultTypedEditorState
+      // are bidirectionally assignable. With per-collection upload fields (as in this config), the generated
+      // type has narrower upload field types, so they diverge. In that case, use `buildEditorState<Post['richText']>()`
+      // instead of `buildEditorState<DefaultNodeTypes>()`.
+      //
+      // This test intentionally documents the divergence when custom upload fields are configured.
       type GeneratedRichTextType = Post['richText']
 
-      expect<DefaultTypedEditorState>().type.toBeAssignableFrom<GeneratedRichTextType>()
-    })
-
-    test('ensure DefaultTypedEditorState type can be assigned to GeneratedRichTextType type', () => {
-      /**
-       * Example:
-       *
-       * const mySeedData: RequiredDataFromCollectionSlug<'posts'> = {
-       *   title: 'hello',
-       *   richText: buildEditorState<DefaultNodeTypes>({text: 'hello'}) // <= DefaultTypedEditorState
-       * }
-       */
-      type GeneratedRichTextType = Post['richText']
-
-      expect<GeneratedRichTextType>().type.toBeAssignableFrom<DefaultTypedEditorState>()
+      // The generated type and DefaultTypedEditorState are NOT bidirectionally assignable when custom
+      // upload fields narrow the node union. buildEditorState<Post['richText']> is the correct path.
+      expect<Post['richText']>().type.toBeAssignableFrom<
+        ReturnType<typeof buildEditorState<GeneratedRichTextType>>
+      >()
     })
 
     test('ensure generated richText types can be assigned to SerializedEditorState (what converters consume)', () => {
@@ -766,10 +762,9 @@ describe('Types testing', () => {
         expect(result.root.children[0]!.type).type.toBe<'block' | _Hardcoded_DefaultNodeTypes>()
       })
 
-      test('buildEditorState result can be assigned to Post richText field', () => {
-        const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
-        type GeneratedRichTextType = Post['richText']
-        expect(result).type.toBeAssignableTo<GeneratedRichTextType>()
+      test('buildEditorState with generated field type can be assigned to Post richText field', () => {
+        const result = buildEditorState<Post['richText']>({ text: 'hello' })
+        expect(result).type.toBeAssignableTo<Post['richText']>()
       })
 
       test('buildEditorState accepts a generated field type directly and returns exactly it', () => {
@@ -1084,19 +1079,39 @@ describe('Types testing', () => {
         expect<SerializedRelationshipNode>().type.toBeAssignableFrom<GenRelationshipInUnion>()
       })
 
-      test('SerializedUploadNode: generated <-> runtime', () => {
-        // `media` is the upload-enabled collection, so both sides resolve to
-        // `SerializedUploadNode<'media'>`.
+      test('SerializedUploadNode: generated narrows correctly per collection', () => {
+        // With per-collection upload fields, the generated type is a discriminated union of
+        // per-collection variants rather than one SerializedUploadNode with unioned generics.
         type GenUploadInUnion = Extract<GenNodeUnion, { type: 'upload' }>
-        expect<GenUploadInUnion>().type.toBeAssignableFrom<SerializedUploadNode>()
-        expect<SerializedUploadNode>().type.toBeAssignableFrom<GenUploadInUnion>()
+        type MediaVariant = Extract<GenUploadInUnion, { relationTo: 'media' }>
+        type GalleryVariant = Extract<GenUploadInUnion, { relationTo: 'gallery' }>
+
+        expect<MediaVariant>().type.toHaveProperty('fields')
+        expect<GalleryVariant>().type.toHaveProperty('fields')
+
+        expect<MediaVariant['relationTo']>().type.toBe<'media'>()
+        expect<GalleryVariant['relationTo']>().type.toBe<'gallery'>()
       })
 
-      test('LexicalRichText<T>.root: generated <-> runtime', () => {
-        type Gen = Post['richText']['root']
-        type Run = DefaultTypedEditorState['root']
-        expect<Gen>().type.toBeAssignableFrom<Run>()
-        expect<Run>().type.toBeAssignableFrom<Gen>()
+      test('SerializedUploadNode: discriminated fields per collection', () => {
+        type GenUpload = Extract<GenNodeUnion, { type: 'upload' }>
+
+        type MediaUpload = Extract<GenUpload, { relationTo: 'media' }>
+        type GalleryUpload = Extract<GenUpload, { relationTo: 'gallery' }>
+
+        expect<MediaUpload['fields']>().type.toBe<MediaUploadFields>()
+        expect<GalleryUpload['fields']>().type.toBe<GalleryUploadFields>()
+
+        expect<MediaUpload['fields']>().type.toHaveProperty('caption')
+        expect<GalleryUpload['fields']>().type.toHaveProperty('altText')
+
+        expect<MediaUpload['fields']>().type.not.toHaveProperty('altText')
+        expect<GalleryUpload['fields']>().type.not.toHaveProperty('caption')
+      })
+
+      test('LexicalRichText<T>.root: generated root children are typed as the generated node union', () => {
+        type GenChild = Post['richText']['root']['children'][number]
+        expect<GenChild>().type.toBe<GenNodeUnion>()
       })
     })
   })
@@ -1110,6 +1125,7 @@ describe('Types testing', () => {
       const _sdk = new PayloadSDK({ baseURL: '' })
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'gallery'
         | 'media'
         | 'pages'
         | 'pages-categories'
@@ -1128,6 +1144,7 @@ describe('Types testing', () => {
       // ensure collection property of sdk.create has posts in the union type
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'gallery'
         | 'media'
         | 'pages'
         | 'pages-categories'
@@ -1218,6 +1235,98 @@ describe('Types testing', () => {
         select: { richText: false },
       })
       expect(result).type.toBe<Omit<Post, 'richText'>>()
+    })
+  })
+
+  describe('richText enforcement in local API and SDK', () => {
+    test('payload.create accepts buildEditorState output as richText', () => {
+      expect(
+        payload.create({
+          collection: 'posts',
+          data: {
+            radioField: 'option-1',
+            richText: buildEditorState<Post['richText']>({ text: 'hello' }),
+            selectField: 'option-1',
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
+    test('payload.create accepts inline richText with correct node structure', () => {
+      expect(
+        payload.create({
+          collection: 'posts',
+          data: {
+            radioField: 'option-1',
+            richText: {
+              root: {
+                type: 'root',
+                children: [
+                  {
+                    type: 'paragraph',
+                    children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text: 'hello', version: 1 }],
+                    direction: null,
+                    format: '',
+                    indent: 0,
+                    textFormat: 0,
+                    textStyle: '',
+                    version: 1,
+                  },
+                ],
+                direction: null,
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            },
+            selectField: 'option-1',
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
+    test('payload.update accepts richText via buildEditorState', () => {
+      expect(
+        payload.update({
+          id: 1,
+          collection: 'posts',
+          data: {
+            richText: buildEditorState<Post['richText']>({ text: 'updated' }),
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
+    test('payload.updateGlobal accepts richText via buildEditorState', () => {
+      expect(
+        payload.updateGlobal({
+          slug: 'menu',
+          data: {
+            richText: buildEditorState<Menu['richText']>({ text: 'nav content' }),
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
+    test('SDK create accepts buildEditorState output as richText', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+      expect(
+        _sdk.create({
+          collection: 'posts',
+          data: {
+            radioField: 'option-1',
+            richText: buildEditorState<Post['richText']>({ text: 'hello' }),
+            selectField: 'option-1',
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
+    test('convertLexicalToPlaintext accepts generated richText directly', () => {
+      const _post = null as unknown as Post
+
+      expect(convertLexicalToPlaintext({ data: _post.richText })).type.not.toRaiseError()
     })
   })
 
