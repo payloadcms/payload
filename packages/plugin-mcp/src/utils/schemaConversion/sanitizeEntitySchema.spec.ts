@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 
 import type { JsonSchemaType } from '../../types.js'
 
-import { prepareCollectionSchema } from './prepareCollectionSchema.js'
+import { sanitizeEntitySchema } from './sanitizeEntitySchema.js'
 
-describe('prepareCollectionSchema', () => {
+describe('sanitizeEntitySchema', () => {
   it('keeps a Lexical node union strict (oneOf) while simplifying relationship values to IDs', () => {
     // Shaped like the schema the MCP server prepares for a collection with a Lexical richText field:
     // a `$defs` node union (a `oneOf` of node shapes) where a relationship node's `value` is either
@@ -53,11 +53,12 @@ describe('prepareCollectionSchema', () => {
       },
     }
 
-    expect(prepareCollectionSchema(standalone)).toStrictEqual({
+    expect(sanitizeEntitySchema(standalone)).toStrictEqual({
       type: 'object',
       $defs: {
-        // The node union stays a strict discriminated `oneOf` - not loosened to `anyOf`...
-        LexicalNodes_ABCDEF12: {
+        // The node union is renamed to a short, readable `node`, and stays a strict discriminated
+        // `oneOf` - not loosened to `anyOf`...
+        node: {
           oneOf: [
             {
               type: 'object',
@@ -91,7 +92,7 @@ describe('prepareCollectionSchema', () => {
             root: {
               type: 'object',
               properties: {
-                children: { type: 'array', items: { $ref: '#/$defs/LexicalNodes_ABCDEF12' } },
+                children: { type: 'array', items: { $ref: '#/$defs/node' } },
               },
             },
           },
