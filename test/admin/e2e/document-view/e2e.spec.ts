@@ -467,7 +467,9 @@ describe('Document View', () => {
       await documentLink.click()
       await wait(200)
 
-      const leavePageModal = page.locator('[data-dialog-action="confirm"]').last()
+      const leavePageModal = page.locator(
+        '#leave-without-saving-doc-drawer [data-dialog-action="confirm"]',
+      )
       await expect(leavePageModal).toBeVisible()
 
       await leavePageModal.click()
