@@ -102,6 +102,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'kv',
   'queryPresets',
   'storage',
+  'onReload',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
