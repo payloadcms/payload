@@ -917,7 +917,7 @@ test.describe('Group By', () => {
 
       const firstGroupID = await firstTable.getAttribute('data-group-id')
 
-      const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
+      const modalId = `dialog[id^="${firstGroupID}-confirm-delete-many-docs"]`
       await expect(page.locator(modalId)).toBeVisible()
 
       // Confirm trash (skip permanent delete)
