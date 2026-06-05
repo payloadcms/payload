@@ -455,47 +455,9 @@ The deprecated `HTMLConverterFeature`, `lexicalHTML`, and the per-node `converte
 
 Custom nodes that define `converters.html` should export their converters instead.
 
-### Every block now auto-generates a top-level TypeScript interface
-
-Before, a block's fields only became a top-level interface in `payload-types.ts` if you set `interfaceName` on the block. Without it, the fields were inlined wherever the block appeared in your types.
-
-Now **every block always emits a top-level interface**. The name comes from the slug, converted to PascalCase (`'content-block'` → `ContentBlock`, `'richTextBlock'` → `RichTextBlock`). `interfaceName` still works, but it's now an _override_ for that default name rather than the switch that enables generation.
-
-When two **different** blocks resolve to the same auto-derived name (same slug, different fields — e.g. a shared block overridden in one collection), the first keeps the clean name and any later block with a different shape gets a stable content-hash suffix (`Hero_3F2A1B0C`), so the types stay correct and don't silently overwrite one another. Set an explicit `interfaceName` on the block to choose a clean, stable name instead. See [Block interface name collisions](/docs/typescript/generating-types#block-interface-name-collisions).
-
-### RichText adapter `outputSchema` renamed to `jsonSchema`
-
-The optional `outputSchema` function on rich-text editor adapters (`RichTextAdapter`) has been renamed to `jsonSchema` — it returns JSON Schema, not TypeScript, so the old name was misleading. Same arguments, same `JSONSchema4` return value.
-
-```diff
-  myAdapter: RichTextAdapter = {
--   outputSchema: ({ collectionIDFieldTypes, config, field, i18n, interfaceNameDefinitions, isRequired }) => {
-+   jsonSchema: ({ collectionIDFieldTypes, config, field, i18n, interfaceNameDefinitions, isRequired }) => {
-      // return JSONSchema4
-    },
-  }
-```
-
-`@payloadcms/richtext-lexical` is updated. Only custom third-party adapters need attention.
-
-### Lexical: feature `generatedTypes.modifyOutputSchema` renamed to `modifyJSONSchema`
-
-If you authored a custom lexical feature that hooks into type generation, rename `generatedTypes.modifyOutputSchema` to `modifyJSONSchema` (and its sanitized counterpart `modifyOutputSchemas` to `modifyJSONSchemas`) — it operates on JSON Schema, matching the adapter rename above.
-
-```diff
-  createServerFeature({
-    feature: () => ({
-      generatedTypes: {
--       modifyOutputSchema: ({ currentSchema, interfaceNameDefinitions }) => currentSchema,
-+       modifyJSONSchema: ({ currentSchema, interfaceNameDefinitions }) => currentSchema,
-      },
-    }),
-  })
-```
-
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
-`typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of `({ jsonSchema }) => JSONSchema4` transforms.
+`typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of transforms. The underlying schema is now also consumed by the MCP plugin for runtime validation, not just type generation.
 
 ```diff
   {
@@ -506,7 +468,158 @@ If you authored a custom lexical feature that hooks into type generation, rename
   }
 ```
 
-Rename `typescriptSchema` → `jsonSchema` wherever you set it on a field config.
+### RichText adapter `outputSchema` renamed to `jsonSchema`
+
+Same story on the editor side. The arguments object also gains `typeStringDefinitions: Set<string>` — a sink for raw TS source appended to `payload-types.ts`.
+
+```diff
+  myAdapter: RichTextAdapter = {
+-   outputSchema: ({ collectionIDFieldTypes, config, field, i18n, interfaceNameDefinitions, isRequired }) => {
++   jsonSchema: ({ collectionIDFieldTypes, config, field, i18n, interfaceNameDefinitions, isRequired, typeStringDefinitions }) => {
+      // return JSONSchema4
+    },
+  }
+```
+
+`@payloadcms/richtext-lexical` is updated. Only third-party adapters need attention.
+
+### `configToJSONSchema` returns `{ jsonSchema, typeStringDefinitions }`
+
+`configToJSONSchema` (from `payload`) used to return a `JSONSchema4` directly. It now returns an object with the schema plus the TS-source sink. Destructure to pull the schema out.
+
+```diff
+- const schema = configToJSONSchema(sanitizedConfig, 'text')
++ const { jsonSchema: schema, typeStringDefinitions } = configToJSONSchema(sanitizedConfig, 'text')
+```
+
+If you run your own type generation, append `[...typeStringDefinitions].join('\n\n')` to the compiled output. Otherwise ignore it.
+
+### `fieldsToJSONSchema` switched to object arguments
+
+`fieldsToJSONSchema` used to take 6 positional arguments. It now takes one object. The new shape also requires `typeStringDefinitions`, and `forceInlineBlocks` is a top-level sibling instead of nested under `opts`.
+
+```diff
+- fieldsToJSONSchema(
+-   collectionIDFieldTypes,
+-   fields,
+-   interfaceNameDefinitions,
+-   config,
+-   i18n,
+-   { forceInlineBlocks: true },
+- )
++ fieldsToJSONSchema({
++   collectionIDFieldTypes,
++   config,
++   fields,
++   forceInlineBlocks: true,
++   i18n,
++   interfaceNameDefinitions,
++   typeStringDefinitions,
++ })
+```
+
+### `entityToJSONSchema` gained a required `typeStringDefinitions` argument
+
+Inserted at position 5 (between `defaultIDType` and `collectionIDFieldTypes`). The old `opts: ConfigToJSONSchemaOptions` is replaced by an optional positional `forceInlineBlocks?: boolean` at the end.
+
+```diff
+  entityToJSONSchema(
+    config,
+    entity,
+    interfaceNameDefinitions,
+    defaultIDType,
++   typeStringDefinitions,
+    collectionIDFieldTypes,
+    i18n,
+-   { forceInlineBlocks: true },
++   true,
+  )
+```
+
+### Lexical: `modifyJSONSchema` is gone
+
+`generatedTypes.modifyJSONSchema` on lexical features (and the sanitized `modifyJSONSchemas` array) is removed. Features now contribute per-node JSON Schemas via `createNode({ jsonSchema, node })` instead of mutating a whole-field schema after the fact. The editor composes per-node schemas into the field's union automatically.
+
+If you wrote a custom feature that overrode `modifyJSONSchema`, move per-node generation into `createNode({ jsonSchema: ... })`:
+
+```diff
+  export const MyFeature = createServerFeature({
+    feature: () => ({
+-     generatedTypes: {
+-       modifyJSONSchema: ({ currentSchema, interfaceNameDefinitions }) => {
+-         // ... mutate currentSchema or interfaceNameDefinitions ...
+-         return currentSchema
+-       },
+-     },
+      nodes: [
+        createNode({
+          node: MyNode,
++         jsonSchema: ({ elementNodeSchema, nodeUnionName, typeStringDefinitions }) => {
++           typeStringDefinitions.add(`export interface SerializedMyNode<TChildren> { type: 'my'; /* ... */ }`)
++           return elementNodeSchema({
++             nodeType: 'my',
++             tsType: `SerializedMyNode<${nodeUnionName}>`,
++           })
++         },
+        }),
+      ],
+    }),
+  })
+```
+
+Nodes without a `jsonSchema` function are omitted from the generated node union entirely — they're filtered out, with no fallback shape. Define `jsonSchema` for every custom node you want reflected in the types; otherwise that node won't appear in the field's generated type, and editor state containing it won't be assignable to it.
+
+### Lexical: duplicate node registration throws
+
+`sanitizeServerFeatures` now rejects features that register a node type already present in the editor (matched on `getType()`, or on the replacement target for `LexicalNodeReplacement`). The old behaviour silently let the last write win.
+
+The built-in lists features coordinate registration through `shouldRegisterListBaseNodes`, so the default editor is unaffected. Custom features that re-registered an existing node to swap in a subclass should use lexical's `LexicalNodeReplacement` shape:
+
+```diff
+  createNode({
+-   node: MyExtendedHeadingNode,
++   node: { replace: HeadingNode, with: (node) => new MyExtendedHeadingNode(node.__tag) },
+  })
+```
+
+### Every block now auto-generates a top-level TypeScript interface
+
+Before, a block's fields only became a top-level interface in `payload-types.ts` if you set `interfaceName` on the block. Without it, the fields were inlined wherever the block appeared in your types.
+
+Now **every block always emits a top-level interface**. The name comes from the slug, converted to PascalCase (`'content-block'` → `ContentBlock`, `'richTextBlock'` → `RichTextBlock`). `interfaceName` still works, but it's now an _override_ for that default name rather than the switch that enables generation.
+
+The same rule applies to lexical block nodes — they now emit as `SerializedBlockNode<…>` / `SerializedInlineBlockNode<…>` referencing the per-block interface, instead of inlining a `{ [k: string]: unknown }` shape.
+
+When two **different** blocks resolve to the same auto-derived name (same slug, different fields — e.g. a shared block overridden in one collection), the first keeps the clean name and any later block with a different shape gets a stable content-hash suffix (`Hero_3F2A1B0C`), so neither is silently mistyped. To choose the name yourself — or to resolve a collision with another type in your generated file (a collection, an array's `interfaceName`, etc.) — set an explicit `interfaceName` on the block. See [Block interface name collisions](/docs/typescript/generating-types#block-interface-name-collisions).
+
+### Lexical: generated `payload-types.ts` shape changed
+
+`richText` fields backed by `lexicalEditor` used to emit a permissive `{ [k: string]: unknown }` per field. They now emit a discriminated union of strict per-node interfaces (`SerializedTextNode`, `SerializedParagraphNode`, `SerializedHeadingNode`, `SerializedBlockNode`, etc.) under a hash-named alias like `LexicalNodes_AB12CD34`.
+
+Block nodes come through as `SerializedBlockNode<TFields>` / `SerializedInlineBlockNode<TFields>` referencing the per-block interface (see the `block.interfaceName` change above). The auto-added `id` is now required (`id: string`), since a stored lexical block always has one.
+
+Code that imported field types from `payload-types.ts` and cast through `unknown` may now type-check tighter and surface real bugs.
+
+The hand-written `TypedEditorState` / `DefaultTypedEditorState` helpers (used to type rich text in converters, custom renderers, and so on) got stricter to match. `TypedEditorState` dropped the `{ [k: string]: unknown }` at the editor-state root, and a node's `children` are now the real node union at any depth — they used to fall back to the loose `SerializedLexicalNode`. Runtime data is unchanged, but narrow by `node.type` where you read nested nodes loosely.
+
+Element nodes are now generic over their `children`, and you pass the node union into them yourself (previously `TypedEditorState` did this for you via an internal `RecursiveNodes` helper):
+
+```diff
+  import type {
+    SerializedParagraphNode,
+    SerializedTextNode,
+    TypedEditorState,
+  } from '@payloadcms/richtext-lexical'
+
+- type MyNodes = SerializedParagraphNode | SerializedTextNode
++ type MyNodes = SerializedParagraphNode<MyNodes> | SerializedTextNode
+
+  function renderRichText(state: TypedEditorState<MyNodes>) {
+    // ...
+  }
+```
+
+`SerializedTextNode` is a leaf, so it stays bare. For the built-in nodes plus a few of your own, `DefaultNodeTypesOf` threads the union for you (`type MyNodes = DefaultNodeTypesOf<MyNodes> | SerializedBlockNode<MyBlockData>`), and `DefaultTypedEditorState` with only built-in nodes needs no change.
 
 ### Generated JSON Schema uses `$defs` instead of `definitions`
 

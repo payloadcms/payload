@@ -4,6 +4,50 @@ import { afterEach, describe, expect } from 'vitest'
 import { getToolDoc, getToolText } from './helpers/mcpClient.js'
 import { getApiKey, it, payload, restClient, userId } from './helpers/mcpFixtures.js'
 
+/**
+ * Reports JSON Schema draft 2020-12 violations in a tool's `input_schema
+ */
+function draft2020Violations(schema: unknown, rootPath: string): string[] {
+  const errors: string[] = []
+  const walk = (node: any, jsonPath: string): void => {
+    if (Array.isArray(node)) {
+      node.forEach((child, index) => walk(child, `${jsonPath}/${index}`))
+      return
+    }
+    if (!node || typeof node !== 'object') {
+      return
+    }
+    if (typeof node.$schema === 'string' && !node.$schema.includes('2020-12')) {
+      errors.push(`${jsonPath}: non-2020-12 $schema "${node.$schema}"`)
+    }
+    if ('definitions' in node) {
+      errors.push(`${jsonPath}: draft-07 "definitions" (2020-12 uses "$defs")`)
+    }
+    if (typeof node.$ref === 'string' && node.$ref.startsWith('#/definitions/')) {
+      errors.push(`${jsonPath}: $ref into draft-07 "definitions"`)
+    }
+    if (Array.isArray(node.required) && new Set(node.required).size !== node.required.length) {
+      errors.push(`${jsonPath}: duplicate "required" entries [${node.required.join(', ')}]`)
+    }
+    if (
+      Array.isArray(node.type) &&
+      (node.type.length === 0 || new Set(node.type).size !== node.type.length)
+    ) {
+      errors.push(`${jsonPath}: invalid "type" array [${node.type.join(', ')}]`)
+    }
+    for (const keyword of ['allOf', 'anyOf', 'oneOf']) {
+      if (keyword in node && (!Array.isArray(node[keyword]) || node[keyword].length === 0)) {
+        errors.push(`${jsonPath}: empty "${keyword}"`)
+      }
+    }
+    for (const [key, value] of Object.entries(node)) {
+      walk(value, `${jsonPath}/${key}`)
+    }
+  }
+  walk(schema, rootPath)
+  return errors
+}
+
 describe('@payloadcms/plugin-mcp', () => {
   it('should ping', async ({ mcp }) => {
     const apiKey = await getApiKey()
@@ -185,6 +229,22 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(diceRoll.inputSchema.properties.sides).toBeDefined()
       expect(diceRoll.inputSchema.properties.sides.minimum).toBe(2)
       expect(diceRoll.inputSchema.properties.sides.maximum).toBe(1000)
+    })
+
+    it('should expose only tool input schemas that are valid JSON Schema draft 2020-12', async ({
+      mcp,
+    }) => {
+      const apiKey = await getApiKey()
+      const toolsResponse = await mcp.listTools({ apiKey })
+      const tools = toolsResponse.result.tools as Array<{ inputSchema?: object; name: string }>
+
+      // MCP clients validate each input_schema against the strict 2020-12 meta-schema. The SDK's own validator is
+      // lenient (it only compiles), so lint for what the meta-schema enforces.
+      const invalid = tools.flatMap((tool) =>
+        tool.inputSchema ? draft2020Violations(tool.inputSchema, tool.name) : [],
+      )
+
+      expect(invalid).toEqual([])
     })
 
     it('should list tools injected by other plugins via slug and options', async ({ mcp }) => {
@@ -1516,9 +1576,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
         // Children of collapsible appear at the top level, not under a `collapsible` key
         expect(inputProps.collapsibleText).toBeDefined()
-        // Nullable text fields render as anyOf: [string, null]
-        expect(inputProps.collapsibleText.anyOf).toBeDefined()
-        expect(inputProps.collapsibleText.anyOf.some((t: any) => t.type === 'string')).toBe(true)
+        // Nullable text fields render as a type array: ['string', 'null']
+        expect(inputProps.collapsibleText.type).toContain('string')
+        expect(inputProps.collapsibleText.type).toContain('null')
       })
 
       it('should include row children as top-level fields in create tool schema', async ({
@@ -1533,8 +1593,8 @@ describe('@payloadcms/plugin-mcp', () => {
 
         // Children of row appear at the top level, not under a `row` key
         expect(inputProps.rowText).toBeDefined()
-        expect(inputProps.rowText.anyOf).toBeDefined()
-        expect(inputProps.rowText.anyOf.some((t: any) => t.type === 'string')).toBe(true)
+        expect(inputProps.rowText.type).toContain('string')
+        expect(inputProps.rowText.type).toContain('null')
       })
 
       it('should include named tab as nested object and unnamed tab children at top level in create tool schema', async ({
@@ -1555,8 +1615,8 @@ describe('@payloadcms/plugin-mcp', () => {
 
         // Unnamed tab children appear at the top level
         expect(inputProps.unnamedTabText).toBeDefined()
-        expect(inputProps.unnamedTabText.anyOf).toBeDefined()
-        expect(inputProps.unnamedTabText.anyOf.some((t: any) => t.type === 'string')).toBe(true)
+        expect(inputProps.unnamedTabText.type).toContain('string')
+        expect(inputProps.unnamedTabText.type).toContain('null')
       })
 
       it('should include select field with enum values in create tool schema', async ({ mcp }) => {
