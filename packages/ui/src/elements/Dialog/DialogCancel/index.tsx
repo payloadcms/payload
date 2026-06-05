@@ -27,6 +27,7 @@ export const DialogCancel: React.FC<DialogCancelProps> = ({ label, onClick }) =>
   return (
     <Button
       buttonStyle="secondary"
+      data-dialog-action="cancel"
       disabled={isConfirming}
       id={`${slug}-cancel`}
       margin={false}

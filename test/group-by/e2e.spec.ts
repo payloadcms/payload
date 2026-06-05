@@ -710,7 +710,7 @@ test.describe('Group By', () => {
     const modal = page.locator('[id$="-confirm-delete-many-docs"]').first()
 
     await expect(modal).toBeVisible()
-    await modal.locator('#confirm-action').click()
+    await modal.locator('[data-dialog-action="confirm"]').click()
 
     await expect(
       firstTableRows.locator('td.cell-title', { hasText: exactText('Find me') }),
@@ -921,7 +921,7 @@ test.describe('Group By', () => {
       await expect(page.locator(modalId)).toBeVisible()
 
       // Confirm trash (skip permanent delete)
-      await page.locator(`${modalId} #confirm-action`).click()
+      await page.locator(`${modalId} [data-dialog-action="confirm"]`).click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         '1 Post moved to trash.',
       )

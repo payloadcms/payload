@@ -153,7 +153,7 @@ describe('Trash', () => {
         // Check the checkbox to delete permanently
         await page.locator('#delete-forever').check()
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Permanently deleted 1 Post successfully.',
@@ -167,7 +167,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -215,7 +215,7 @@ describe('Trash', () => {
         // Check the checkbox to delete permanently
         await page.locator('#delete-forever').check()
 
-        await page.locator('.delete-document #confirm-action').click()
+        await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Post "Post 1" successfully deleted.',
@@ -231,7 +231,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('.delete-document #confirm-action').click()
+        await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Post "Post 2" moved to trash.',
@@ -264,7 +264,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -337,7 +337,7 @@ describe('Trash', () => {
           'You are about to permanently delete 3 Posts from the trash. Are you sure?',
         )
 
-        await page.locator('#confirm-empty-trash #confirm-action').click()
+        await page.locator('#confirm-empty-trash [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Permanently deleted 3 Posts successfully.',
@@ -367,7 +367,7 @@ describe('Trash', () => {
           'You are about to restore 2 Posts as draft',
         )
 
-        await page.locator('#confirm-restore-many-docs #confirm-action').click()
+        await page.locator('#confirm-restore-many-docs [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Restored 2 Posts successfully.',
@@ -442,7 +442,7 @@ describe('Trash', () => {
 
         await page.locator('#restore-as-published-many').check()
 
-        await page.locator('#confirm-restore-many-docs #confirm-action').click()
+        await page.locator('#confirm-restore-many-docs [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Restored 2 Posts successfully.',
@@ -517,7 +517,7 @@ describe('Trash', () => {
           'You are about to permanently delete 2 Posts from the trash. Are you sure?',
         )
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Permanently deleted 2 Posts successfully.',
@@ -676,7 +676,9 @@ describe('Trash', () => {
           page.locator(`#perma-delete-${trashedPostDocOne.id} .dialog__body`),
         ).toContainText('You are about to permanently delete the Post')
 
-        await page.locator(`#perma-delete-${trashedPostDocOne.id} #confirm-action`).click()
+        await page
+          .locator(`#perma-delete-${trashedPostDocOne.id} [data-dialog-action="confirm"]`)
+          .click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Post "Trashed Post" successfully deleted.',
@@ -721,7 +723,9 @@ describe('Trash', () => {
           'You are about to restore the Post Trashed Post as a draft. Are you sure?',
         )
 
-        await page.locator(`#restore-${trashedPostDocOne.id} #confirm-action`).click()
+        await page
+          .locator(`#restore-${trashedPostDocOne.id} [data-dialog-action="confirm"]`)
+          .click()
 
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           'Post "Trashed Post" successfully restored.',
@@ -775,7 +779,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -827,7 +831,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -884,7 +888,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -941,7 +945,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -992,7 +996,7 @@ describe('Trash', () => {
 
         // Skip the checkbox to delete permanently and default to trashing
 
-        await page.locator('#confirm-delete-many-docs #confirm-action').click()
+        await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
@@ -1089,7 +1093,7 @@ describe('Trash', () => {
       await page.locator('.list-selection__button[aria-label="Delete"]').click()
 
       // Skip the checkbox to delete permanently and default to trashing
-      await page.locator('#confirm-delete-many-docs #confirm-action').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         '1 User moved to trash.',
       )
@@ -1155,12 +1159,14 @@ describe('Trash', () => {
 
       await page.locator('.doc-controls__controls #action-restore').click()
 
-      await expect(page.locator(`#restore-${devUserID} #confirm-action`)).toBeVisible()
+      await expect(
+        page.locator(`#restore-${devUserID} [data-dialog-action="confirm"]`),
+      ).toBeVisible()
       await expect(page.locator(`#restore-${devUserID} .dialog__body`)).toContainText(
         'You are about to restore the User',
       )
 
-      await page.locator(`#restore-${devUserID} #confirm-action`).click()
+      await page.locator(`#restore-${devUserID} [data-dialog-action="confirm"]`).click()
 
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'User "Dev" successfully restored.',
@@ -1212,7 +1218,7 @@ describe('Trash', () => {
 
     await page.locator('.popup__content #action-delete').click()
 
-    await page.locator('.delete-document #confirm-action').click()
+    await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       'Post "Draft with Localized Field" moved to trash.',
@@ -1284,7 +1290,7 @@ describe('Trash', () => {
     await postRow.locator('.cell-_select input').check()
     await page.locator('.list-selection__button[aria-label="Delete"]').click()
 
-    await page.locator('#confirm-delete-many-docs #confirm-action').click()
+    await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       '1 Post moved to trash.',
     )

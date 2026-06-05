@@ -194,7 +194,7 @@ describe('Query Presets', () => {
 
     await openDeletePreset({ page })
 
-    await page.locator('[id="delete-preset-confirmation"] #confirm-action').click()
+    await page.locator('[id="delete-preset-confirmation"] [data-dialog-action="confirm"]').click()
 
     // columns can either be omitted or an empty string after being cleared
     const regex = /columns=(?:\[\]|$)/

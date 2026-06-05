@@ -1364,7 +1364,9 @@ describe('List View', () => {
     test('should delete many', async () => {
       await page.goto(postsUrl.list)
       // delete should not appear without selection
-      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(0)
+      await expect(
+        page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]'),
+      ).toHaveCount(0)
       // select one row
       await page.locator('.row-1 .cell-_select input').check()
 
@@ -1374,7 +1376,7 @@ describe('List View', () => {
       await page.locator('.row-2 .cell-_select input').check()
 
       await deleteBtn.click()
-      await page.locator('#confirm-delete-many-docs #confirm-action').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
 

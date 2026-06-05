@@ -228,7 +228,7 @@ describe('Locked Documents', () => {
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete-many-docs #confirm-action').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
 
@@ -246,7 +246,7 @@ describe('Locked Documents', () => {
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.list-selection__button[aria-label="Publish"]').click()
-      await page.locator('#publish-posts #confirm-action').click()
+      await page.locator('#publish-posts [data-dialog-action="confirm"]').click()
       await expect(page.locator('#publish-posts')).toBeHidden()
 
       await goToNextPage(page)
@@ -266,7 +266,7 @@ describe('Locked Documents', () => {
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
-      await page.locator('#unpublish-posts #confirm-action').click()
+      await page.locator('#unpublish-posts [data-dialog-action="confirm"]').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Updated 10 Posts successfully.',
       )
@@ -510,7 +510,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
+      await page.locator('#leave-without-saving .dialog__footer .btn--style-primary').click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
@@ -561,7 +561,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
+      await page.locator('#leave-without-saving .dialog__footer .btn--style-primary').click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
