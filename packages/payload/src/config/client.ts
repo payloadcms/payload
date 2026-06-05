@@ -35,6 +35,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'kv'
   | 'logger'
   | 'onInit'
+  | 'onReload'
   | 'plugins'
   | 'queryPresets'
   | 'secret'
