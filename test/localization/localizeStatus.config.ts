@@ -12,6 +12,7 @@ export default buildConfigWithDefaults({
       slug: 'users',
       auth: true,
       fields: [],
+      versions: false,
     },
     {
       slug: 'testMigrationPosts',
@@ -50,7 +51,8 @@ export default buildConfigWithDefaults({
           localized: true,
         },
       ],
-      // NO versions config - migration should skip this collection
+      // Explicitly disabled — migration should skip collections without versions
+      versions: false,
     },
   ],
   localization: {
