@@ -6,15 +6,9 @@
     border-bottom: var(--stroke-width-small) solid var(--color-border);
 
     .pill-selector,
-    .where-builder,
     .sort-complex,
     .group-by-builder {
       margin-top: var(--spacer-2);
-    }
-
-    .search-bar {
-      min-width: 180px;
-      width: 180px;
     }
   }
 
@@ -67,7 +61,6 @@
       }
     }
 
-    .list-controls__toggle-where,
     .list-controls__toggle-sort,
     .list-controls__toggle-group-by {
       flex: 1;

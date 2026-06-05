@@ -1085,7 +1085,6 @@ describe('Access Control', () => {
       test('should hide top-level field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1105,7 +1104,6 @@ describe('Access Control', () => {
       test('should hide nested field with read: false inside group in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1123,7 +1121,6 @@ describe('Access Control', () => {
       test('should hide field with read: false inside row in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1143,7 +1140,6 @@ describe('Access Control', () => {
       test('should hide field with read: false inside collapsible in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1163,7 +1159,6 @@ describe('Access Control', () => {
       test('should hide deeply nested field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1183,7 +1178,6 @@ describe('Access Control', () => {
       test('should hide field with read: false inside unnamed tab in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1203,7 +1197,6 @@ describe('Access Control', () => {
       test('should hide field with read: false inside named tab in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1223,7 +1216,6 @@ describe('Access Control', () => {
       test('should hide field with read: false inside row within group in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1243,7 +1235,6 @@ describe('Access Control', () => {
       test('should hide field with read: false inside group within collapsible in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1442,7 +1433,6 @@ describe('Access Control', () => {
       test('should show virtual field in filter dropdown when collection has field with access control', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1483,7 +1473,6 @@ describe('Access Control', () => {
       test('should show nested fields within virtual group field in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1534,7 +1523,6 @@ describe('Access Control', () => {
       test('should show virtual field nested inside group in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1575,7 +1563,6 @@ describe('Access Control', () => {
       test('should hide top-level virtual field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
@@ -1616,7 +1603,6 @@ describe('Access Control', () => {
       test('should hide nested virtual field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()

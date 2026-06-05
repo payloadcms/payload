@@ -184,4 +184,5 @@ export const Posts: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

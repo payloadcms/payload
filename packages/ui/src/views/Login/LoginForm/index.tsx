@@ -8,12 +8,12 @@ import React from 'react'
 import type { UserWithToken } from '../../../providers/Auth/index.js'
 import type { LoginFieldProps } from '../LoginField/index.js'
 
+import { Button } from '../../../elements/Button/index.js'
 import { PasswordField } from '../../../fields/Password/index.js'
 import { Form } from '../../../forms/Form/index.js'
 import { FormSubmit } from '../../../forms/Submit/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
-import { PayloadLink } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { LoginField } from '../LoginField/index.js'
 import './index.css'
@@ -106,18 +106,18 @@ export const LoginForm: React.FC<{
         />
       </div>
       <div className={`${baseClass}__actions`}>
-        <FormSubmit size="large">{t('authentication:login')}</FormSubmit>
-        <div className={`${baseClass}__forgotPassword`}>
-          <PayloadLink
-            href={formatAdminURL({
-              adminRoute,
-              path: forgotRoute,
-            })}
-            prefetch={false}
-          >
-            {t('authentication:forgotPasswordQuestion')}
-          </PayloadLink>
-        </div>
+        <FormSubmit>{t('authentication:login')}</FormSubmit>
+        <Button
+          buttonStyle="ghost"
+          className={`${baseClass}__forgotPassword`}
+          el="link"
+          url={formatAdminURL({
+            adminRoute,
+            path: forgotRoute,
+          })}
+        >
+          {t('authentication:forgotPasswordQuestion')}
+        </Button>
       </div>
     </Form>
   )

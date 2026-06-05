@@ -37,6 +37,7 @@ export const Categories: CollectionConfig = {
     },
     parentFieldName: 'parent',
   },
+  versions: false,
 }
 
 // Pages collection with dedicated slug field (tests slugField config option)
@@ -68,6 +69,7 @@ export const Pages: CollectionConfig = {
     parentFieldName: 'parent',
     slugField: 'slug', // Use dedicated slug field for _h_slugPath
   },
+  versions: false,
 }
 
 // Regions collection with explicit group (should appear in BOTH nav and as sidebar tab)
@@ -95,6 +97,7 @@ export const Regions: CollectionConfig = {
     },
     parentFieldName: 'parent',
   },
+  versions: false,
 }
 
 // Departments collection with custom field names
@@ -123,6 +126,7 @@ export const Departments: CollectionConfig = {
     slugPathFieldName: '_breadcrumbSlug',
     titlePathFieldName: '_breadcrumbTitle',
   },
+  versions: false,
 }
 
 // Organizations collection with hierarchy (main test collection)
@@ -184,6 +188,7 @@ export const Folders: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }
 
 // Products collection with localized title field

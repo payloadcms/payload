@@ -103,6 +103,7 @@ export default buildConfigWithDefaults({
           name: 'category',
         },
       ],
+      versions: false,
     },
     {
       slug: 'pages-categories',
@@ -118,6 +119,7 @@ export default buildConfigWithDefaults({
           on: 'category',
         },
       ],
+      versions: false,
     },
     {
       slug: 'draft-posts',

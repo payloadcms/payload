@@ -32,4 +32,5 @@ export const LexicalListsFeature: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

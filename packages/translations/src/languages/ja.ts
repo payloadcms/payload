@@ -494,6 +494,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     viewing: '閲覧',
     viewReadOnly: '読み取り専用で表示',
     welcome: 'ようこそ',
+    where: 'どこ',
     yes: 'はい',
   },
   hierarchy: {

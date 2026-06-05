@@ -97,6 +97,8 @@ export const sanitizeGlobal = async (
     }
   }
 
+  global.versions = global.versions ?? true
+
   if (global.versions) {
     if (global.versions === true) {
       global.versions = {

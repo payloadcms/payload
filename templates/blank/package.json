@@ -20,6 +20,7 @@
   "dependencies": {
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/next": "workspace:*",
+    "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "cross-env": "10.1.0",

@@ -53,4 +53,5 @@ export const LexicalNestedBlocks: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

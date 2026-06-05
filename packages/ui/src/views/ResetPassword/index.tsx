@@ -58,7 +58,15 @@ export function ResetPassword({ initPageResult, params }: AdminViewServerProps) 
           }
           heading={i18n.t('authentication:alreadyLoggedIn')}
         />
-        <Button buttonStyle="secondary" el="link" size="large" to={adminRoute}>
+        <Button
+          buttonStyle="ghost"
+          className={`${resetPasswordBaseClass}__back`}
+          el="link"
+          url={formatAdminURL({
+            adminRoute,
+            path: loginRoute,
+          })}
+        >
           {i18n.t('general:backToDashboard')}
         </Button>
       </div>
@@ -68,17 +76,17 @@ export function ResetPassword({ initPageResult, params }: AdminViewServerProps) 
   return (
     <div className={`${resetPasswordBaseClass}__wrap`}>
       <ResetPasswordForm token={token} />
-      <div className={`${resetPasswordBaseClass}__back`}>
-        <Link
-          href={formatAdminURL({
-            adminRoute,
-            path: loginRoute,
-          })}
-          prefetch={false}
-        >
-          {i18n.t('authentication:backToLogin')}
-        </Link>
-      </div>
+      <Button
+        buttonStyle="ghost"
+        className={`${resetPasswordBaseClass}__back`}
+        el="link"
+        url={formatAdminURL({
+          adminRoute,
+          path: loginRoute,
+        })}
+      >
+        {i18n.t('authentication:backToLogin')}
+      </Button>
     </div>
   )
 }

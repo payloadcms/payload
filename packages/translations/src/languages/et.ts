@@ -490,6 +490,7 @@ export const etTranslations: DefaultTranslationsObject = {
     viewing: 'Vaade',
     viewReadOnly: 'Vaata ainult lugemiseks',
     welcome: 'Tere tulemast',
+    where: 'Kus',
     yes: 'Jah',
   },
   hierarchy: {

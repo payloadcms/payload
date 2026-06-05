@@ -130,6 +130,7 @@ export default buildConfigWithDefaults({
               return collection
             },
           },
+          versions: false,
         },
         {
           slug: 'posts',
@@ -155,6 +156,7 @@ export default buildConfigWithDefaults({
               return collection
             },
           },
+          versions: false,
         },
         {
           slug: 'posts-exports-only',
@@ -162,6 +164,7 @@ export default buildConfigWithDefaults({
           export: {
             format: 'csv',
           },
+          versions: false,
         },
         {
           slug: 'posts-imports-only',
@@ -170,6 +173,7 @@ export default buildConfigWithDefaults({
             defaultVersionStatus: 'draft',
             disableJobsQueue: true,
           },
+          versions: false,
         },
         {
           slug: 'posts-no-jobs-queue',
@@ -189,6 +193,7 @@ export default buildConfigWithDefaults({
               return collection
             },
           },
+          versions: false,
         },
         {
           slug: postsWithS3Slug,
@@ -210,6 +215,7 @@ export default buildConfigWithDefaults({
               return collection
             },
           },
+          versions: false,
         },
         {
           slug: 'posts-with-limits',
@@ -236,12 +242,15 @@ export default buildConfigWithDefaults({
               return collection
             },
           },
+          versions: false,
         },
         {
           slug: 'media',
+          versions: false,
         },
         {
           slug: customIdPagesSlug,
+          versions: false,
         },
         {
           slug: postsWithHooksSlug,
@@ -271,6 +280,7 @@ export default buildConfigWithDefaults({
               return collection
             },
           },
+          versions: false,
         },
         {
           slug: postsWithFieldHooksSlug,
@@ -290,6 +300,7 @@ export default buildConfigWithDefaults({
               return collection
             },
           },
+          versions: false,
         },
         {
           slug: postsWithColumnMapSlug,
@@ -334,6 +345,7 @@ export default buildConfigWithDefaults({
               return collection
             },
           },
+          versions: false,
         },
       ],
     }),

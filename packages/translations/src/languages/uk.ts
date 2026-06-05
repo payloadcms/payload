@@ -491,6 +491,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     viewing: 'Перегляд',
     viewReadOnly: 'Перегляд тільки для читання',
     welcome: 'Вітаю',
+    where: 'Де',
     yes: 'Так',
   },
   hierarchy: {
