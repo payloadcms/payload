@@ -98,7 +98,7 @@ describe('Hooks', () => {
       const deleteBtn = page.locator('.list-selection__button.delete-documents__toggle')
       await deleteBtn.click()
 
-      await page.locator('button[data-dialog-action="confirm"]:visible').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
 
       await expect(page.locator('.payload-toast-container')).toContainText(
         `Test error: cannot delete document with ID ${doc.id}`,
@@ -139,7 +139,7 @@ describe('Hooks', () => {
       await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await page.locator('#action-delete').click()
 
-      await page.locator('button[data-dialog-action="confirm"]:visible').click()
+      await page.locator(`#delete-${doc.id} [data-dialog-action="confirm"]`).click()
 
       await expect(page.locator('.payload-toast-container')).toContainText(
         `Test error: cannot delete document with ID ${doc.id}`,
@@ -184,7 +184,7 @@ describe('Hooks', () => {
       const deleteBtn = page.locator('.list-selection__button.delete-documents__toggle')
       await deleteBtn.click()
 
-      await page.locator('button[data-dialog-action="confirm"]:visible').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
 
       await expect(page.locator('.payload-toast-container')).toContainText('Something went wrong.')
       await expect(page.locator('.payload-toast-container')).not.toContainText(
@@ -210,7 +210,7 @@ describe('Hooks', () => {
       await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await page.locator('#action-delete').click()
 
-      await page.locator('button[data-dialog-action="confirm"]:visible').click()
+      await page.locator(`#delete-${doc.id} [data-dialog-action="confirm"]`).click()
 
       await expect(page.locator('.payload-toast-container')).toContainText('Something went wrong.')
       await expect(page.locator('.payload-toast-container')).not.toContainText(

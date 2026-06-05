@@ -4,6 +4,7 @@ import type { ComponentProps } from 'react'
 import { Modal } from '@faceless-ui/modal'
 import React, { useEffect, useState } from 'react'
 
+import { drawerZBase, useDrawerDepth } from '../../Drawer/index.js'
 import { DialogContext } from '../context.js'
 import '../index.css'
 
@@ -33,6 +34,7 @@ export const DialogModal: React.FC<DialogModalProps> = ({
   size = 'medium',
 }) => {
   const [isConfirming, setConfirming] = useState(false)
+  const drawerDepth = useDrawerDepth()
 
   useEffect(() => {
     if (closeOnEsc) {
@@ -53,7 +55,12 @@ export const DialogModal: React.FC<DialogModalProps> = ({
 
   return (
     <DialogContext value={{ slug, isConfirming, setConfirming }}>
-      <Modal closeOnBlur={closeOnBlur} focusTrapOptions={focusTrapOptions} slug={slug}>
+      <Modal
+        closeOnBlur={closeOnBlur}
+        focusTrapOptions={focusTrapOptions}
+        slug={slug}
+        style={{ zIndex: drawerZBase + drawerDepth + 1 }}
+      >
         <div
           className={[baseClass, `${baseClass}--${size}`, className].filter(Boolean).join(' ')}
           role="document"
