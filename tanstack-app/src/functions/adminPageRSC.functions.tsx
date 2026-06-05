@@ -59,7 +59,14 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
     const config = await (await import('@payload-config')).default
     const { importMap } = await import('../importMap.js')
 
-    const segments = data._splat ? data._splat.split('/').filter(Boolean) : []
+    const splatSegments = data._splat ? data._splat.split('/').filter(Boolean) : []
+    // Match Next's optional-catch-all behavior: the admin root (`/admin`) has no
+    // segments. Passing an empty array makes the shared `renderRoot` build
+    // `currentRoute` as `/admin/` (trailing slash), which no longer equals
+    // `adminRoute` and causes `handleAuthRedirect` to append `?redirect=/admin/`.
+    // Passing `undefined` yields `currentRoute = /admin`, so the unauthenticated
+    // redirect lands on a clean `/admin/login`.
+    const segments = splatSegments.length > 0 ? splatSegments : undefined
     const searchParams = data.search ?? {}
 
     // `renderRoot` calls `initReq` itself with its own overrides (query
@@ -88,7 +95,7 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
         importMap,
         initReq: boundInitReq,
         notFound,
-        params: Promise.resolve({ segments }),
+        params: Promise.resolve({ segments: segments as string[] }),
         redirect,
         searchParams: Promise.resolve(searchParams),
       })
