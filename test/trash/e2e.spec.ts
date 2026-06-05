@@ -1,6 +1,4 @@
 import { expect, test } from '@playwright/test'
-import { addListFilter } from '../__helpers/e2e/filters/index.js'
-import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
 import { mapAsync, type RequiredDataFromCollectionSlug } from 'payload'
 import { wait } from 'payload/shared'
@@ -9,6 +7,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
+import { addListFilter } from '../__helpers/e2e/filters/index.js'
 import {
   changeLocale,
   closeAllToasts,
@@ -16,6 +15,7 @@ import {
   initPageConsoleErrorCatch,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { pagesSlug } from './collections/Pages/index.js'
@@ -333,7 +333,7 @@ describe('Trash', () => {
         await page.locator('#empty-trash-button').click()
 
         await expect(page.locator('#confirm-empty-trash')).toBeVisible()
-        await expect(page.locator('#confirm-empty-trash .alert-modal__content')).toContainText(
+        await expect(page.locator('#confirm-empty-trash .dialog__body')).toContainText(
           'You are about to permanently delete 3 Posts from the trash. Are you sure?',
         )
 
@@ -363,9 +363,9 @@ describe('Trash', () => {
 
         await expect(page.locator('#confirm-restore-many-docs')).toBeVisible()
 
-        await expect(
-          page.locator('#confirm-restore-many-docs .alert-modal__content'),
-        ).toContainText('You are about to restore 2 Posts as draft')
+        await expect(page.locator('#confirm-restore-many-docs .dialog__body')).toContainText(
+          'You are about to restore 2 Posts as draft',
+        )
 
         await page.locator('#confirm-restore-many-docs #confirm-action').click()
 
@@ -436,9 +436,9 @@ describe('Trash', () => {
 
         await expect(page.locator('#confirm-restore-many-docs')).toBeVisible()
 
-        await expect(
-          page.locator('#confirm-restore-many-docs .alert-modal__content'),
-        ).toContainText('You are about to restore 2 Posts as draft')
+        await expect(page.locator('#confirm-restore-many-docs .dialog__body')).toContainText(
+          'You are about to restore 2 Posts as draft',
+        )
 
         await page.locator('#restore-as-published-many').check()
 
@@ -513,7 +513,7 @@ describe('Trash', () => {
 
         await expect(page.locator('#confirm-delete-many-docs')).toBeVisible()
 
-        await expect(page.locator('#confirm-delete-many-docs .alert-modal__content')).toContainText(
+        await expect(page.locator('#confirm-delete-many-docs .dialog__body')).toContainText(
           'You are about to permanently delete 2 Posts from the trash. Are you sure?',
         )
 
@@ -673,7 +673,7 @@ describe('Trash', () => {
 
         await expect(page.locator(`#perma-delete-${trashedPostDocOne.id}`)).toBeVisible()
         await expect(
-          page.locator(`#perma-delete-${trashedPostDocOne.id} .alert-modal__content`),
+          page.locator(`#perma-delete-${trashedPostDocOne.id} .dialog__body`),
         ).toContainText('You are about to permanently delete the Post')
 
         await page.locator(`#perma-delete-${trashedPostDocOne.id} #confirm-action`).click()
@@ -717,9 +717,9 @@ describe('Trash', () => {
         await restoreButton.click()
 
         await expect(page.locator(`#restore-${trashedPostDocOne.id}`)).toBeVisible()
-        await expect(
-          page.locator(`#restore-${trashedPostDocOne.id} .alert-modal__content`),
-        ).toContainText('You are about to restore the Post Trashed Post as a draft. Are you sure?')
+        await expect(page.locator(`#restore-${trashedPostDocOne.id} .dialog__body`)).toContainText(
+          'You are about to restore the Post Trashed Post as a draft. Are you sure?',
+        )
 
         await page.locator(`#restore-${trashedPostDocOne.id} #confirm-action`).click()
 
@@ -1156,7 +1156,7 @@ describe('Trash', () => {
       await page.locator('.doc-controls__controls #action-restore').click()
 
       await expect(page.locator(`#restore-${devUserID} #confirm-action`)).toBeVisible()
-      await expect(page.locator(`#restore-${devUserID} .alert-modal__content`)).toContainText(
+      await expect(page.locator(`#restore-${devUserID} .dialog__body`)).toContainText(
         'You are about to restore the User',
       )
 

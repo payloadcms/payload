@@ -1,7 +1,5 @@
 @layer payload-default {
-  dialog.alert-modal {
-    --alert-modal-width: 480px;
-
+  dialog:has(> .dialog) {
     position: fixed;
     inset: 0;
     display: flex;
@@ -10,16 +8,14 @@
     background: var(--color-modalbackdrop);
   }
 
-  dialog.alert-modal--compact {
-    --alert-modal-width: 320px;
-  }
+  .dialog {
+    --dialog-max-height: calc(100dvh - var(--spacer-5));
 
-  .alert-modal__wrapper {
-    z-index: 1;
     position: relative;
     display: flex;
     flex-direction: column;
-    width: var(--alert-modal-width);
+    max-height: var(--dialog-max-height);
+    width: var(--dialog-width);
     max-width: calc(100vw - var(--spacer-5));
     background: var(--color-bg);
     border-radius: var(--radius-large);
@@ -30,27 +26,36 @@
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
     color: var(--color-text);
+    box-shadow: var(--elevation-500-modal-window);
   }
 
-  .alert-modal__header {
+  .dialog--small {
+    --dialog-width: 280px;
+  }
+
+  .dialog--medium {
+    --dialog-width: 480px;
+  }
+
+  .dialog--large {
+    --dialog-width: 640px;
+  }
+
+  .dialog__header {
     display: flex;
     align-items: center;
     gap: var(--spacer-2);
     min-height: var(--spacer-6);
-    border-bottom: var(--stroke-width-small) solid var(--color-border);
     padding: var(--spacer-2) var(--spacer-3);
-
-    .btn {
-      padding: 0;
-      border: 0;
-    }
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    flex-shrink: 0;
   }
 
-  .alert-modal__header--with-actions {
-    padding-right: var(--spacer-2);
+  .dialog__header--has-close {
+    padding-inline-end: var(--spacer-2);
   }
 
-  .alert-modal__title {
+  .dialog__title {
     flex: 1 0 0;
     min-width: 0;
     margin: 0;
@@ -58,25 +63,34 @@
     letter-spacing: var(--text-body-medium-letter-spacing);
   }
 
-  .alert-modal__content {
+  .dialog__header-extras {
     display: flex;
-    flex-direction: column;
-    gap: var(--spacer-2-5);
-    padding: var(--spacer-2) var(--spacer-3);
-
-    > * {
-      margin: 0;
-    }
+    align-items: center;
+    gap: var(--spacer-1);
   }
 
-  .alert-modal__controls {
+  .dialog__body {
+    flex: 1 1 auto;
+    padding: var(--spacer-3);
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .dialog:has(.dialog__header) .dialog__body {
+    padding-top: var(--spacer-2);
+  }
+
+  .dialog:has(.dialog__footer) .dialog__body {
+    padding-bottom: var(--spacer-2);
+  }
+
+  .dialog__footer {
     display: flex;
     justify-content: flex-end;
     gap: var(--spacer-2);
-    padding: var(--spacer-2);
-
-    .btn {
-      margin: 0;
-    }
+    padding-block: var(--spacer-2);
+    padding-inline-start: var(--spacer-3);
+    padding-inline-end: var(--spacer-2);
+    flex-shrink: 0;
   }
 }
