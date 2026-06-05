@@ -31,8 +31,8 @@ export const DialogConfirm: React.FC<DialogConfirmProps> = ({ label, loadingLabe
 
   return (
     <Button
-      data-dialog-action="confirm"
       disabled={isConfirming}
+      extraButtonProps={{ 'data-dialog-action': 'confirm' }}
       id={`${slug}-confirm`}
       margin={false}
       onClick={handleClick}
