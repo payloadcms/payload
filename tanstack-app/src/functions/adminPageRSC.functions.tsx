@@ -39,13 +39,13 @@ const resolveTitle = (title: MetaConfig['title']): string | undefined => {
  */
 const toAdminPageMetadata = (meta: MetaConfig): AdminPageMetadata => {
   const og = meta.openGraph as
-    | undefined
     | {
         description?: unknown
         images?: unknown
         siteName?: unknown
         title?: unknown
       }
+    | undefined
 
   const rawImages = og?.images
   const imagesArray = rawImages ? (Array.isArray(rawImages) ? rawImages : [rawImages]) : []
@@ -71,10 +71,10 @@ const toAdminPageMetadata = (meta: MetaConfig): AdminPageMetadata => {
         ? { rel: 'icon', url: icon }
         : icon?.url
           ? {
+              type: icon.type,
               media: icon.media,
               rel: icon.rel ?? 'icon',
               sizes: icon.sizes,
-              type: icon.type,
               url: String(icon.url),
             }
           : undefined,
@@ -169,6 +169,31 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
       throw new Error(`redirect:${url}`)
     }
 
+    // Renders Payload's NotFound view (`.not-found`) with a 404 status, matching
+    // the Next adapter which serves `renderNotFoundPage` for
+    // `req.server.notFound()`. Used for notFound thrown both during `renderRoot`
+    // orchestration (unknown route) and deep inside a streamed view component
+    // (access denied) — TanStack's generic `notFound()` would render its own
+    // component instead of Payload's.
+    const renderNotFound = async (): Promise<LoadResult> => {
+      const { setResponseStatus } = await import('@tanstack/react-start/server')
+      setResponseStatus(404)
+      const { renderNotFoundPage } = await import('@payloadcms/ui/views/NotFound/page')
+      const notFoundNode = await renderNotFoundPage({
+        config: Promise.resolve(config),
+        importMap,
+        initReq: boundInitReq,
+        params: Promise.resolve({ segments }),
+        searchParams: Promise.resolve(searchParams),
+      })
+      const notFoundPayload = await renderServerComponent(notFoundNode as React.ReactElement)
+
+      return {
+        metadata: { title: 'Not Found' },
+        rscPayload: notFoundPayload,
+      } as unknown as LoadResult
+    }
+
     try {
       const node = await renderRoot({
         adminViews: defaultAdminViews,
@@ -191,23 +216,7 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
         return { _redirect: nav.url } as LoadResult
       }
       if (nav.type === 'notFound') {
-        // Render Payload's NotFound view (`.not-found`) rather than signalling
-        // TanStack's generic `notFound()`, matching the Next adapter which
-        // serves `renderNotFoundPage` for `req.server.notFound()`.
-        const { renderNotFoundPage } = await import('@payloadcms/ui/views/NotFound/page')
-        const notFoundNode = await renderNotFoundPage({
-          config: Promise.resolve(config),
-          importMap,
-          initReq: boundInitReq,
-          params: Promise.resolve({ segments }),
-          searchParams: Promise.resolve(searchParams),
-        })
-        const notFoundPayload = await renderServerComponent(notFoundNode as React.ReactElement)
-
-        return {
-          metadata: { title: 'Not Found' },
-          rscPayload: notFoundPayload,
-        } as unknown as LoadResult
+        return await renderNotFound()
       }
 
       // Resolve metadata through the same shared generator Next.js uses. Only
@@ -228,7 +237,7 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       if (nav.type === 'notFound' || message === 'not-found') {
-        return { _notFound: true } as LoadResult
+        return await renderNotFound()
       }
       if (nav.type === 'redirect' || message.startsWith('redirect:')) {
         return { _redirect: nav.url ?? message.slice('redirect:'.length) } as LoadResult
