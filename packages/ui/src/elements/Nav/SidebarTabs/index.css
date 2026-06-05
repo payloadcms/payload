@@ -38,6 +38,12 @@
     &:hover {
       color: var(--color-icon);
     }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+      border-radius: var(--button-radius);
+    }
   }
 
   .sidebar-tabs__tab--active {
