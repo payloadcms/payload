@@ -207,4 +207,5 @@ export const FieldTypes: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

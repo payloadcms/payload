@@ -422,14 +422,15 @@ export {
 export { ListQueryProvider, useListQuery } from '../../providers/ListQuery/index.js'
 export { LocaleProvider, useLocale } from '../../providers/Locale/index.js'
 export { OperationProvider, useOperation } from '../../providers/Operation/index.js'
-export { ParamsProvider, useParams } from '../../providers/Params/index.js'
 export { PreferencesProvider, usePreferences } from '../../providers/Preferences/index.js'
 export { RootProvider } from '../../providers/Root/index.js'
 export {
   PayloadLink,
   RouterAdapterContext,
+  useParams,
   usePathname,
   useRouter,
+  useSearchParams,
 } from '../../providers/RouterAdapter/index.js'
 export type { RouterAdapterContextValue } from '../../providers/RouterAdapter/index.js'
 export {
@@ -437,7 +438,6 @@ export {
   useRouteCache,
 } from '../../providers/RouteCache/index.js'
 export { ScrollInfoProvider, useScrollInfo } from '../../providers/ScrollInfo/index.js'
-export { SearchParamsProvider, useSearchParams } from '../../providers/SearchParams/index.js'
 export { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
 export {
   DocumentSelectionProvider,
@@ -473,8 +473,39 @@ export { SelectAll } from '../../elements/SelectAll/index.js'
 export { SelectRow } from '../../elements/SelectRow/index.js'
 export { SelectMany } from '../../elements/SelectMany/index.js'
 
-export { DefaultListView } from '../../views/List/index.js'
+export { DefaultListView } from '../../views/List/index.client.js'
 export { HierarchyListView } from '../../views/HierarchyList/index.js'
+export { AccountClient } from '../../views/Account/index.client.js'
+export { ResetPreferences as AccountResetPreferences } from '../../views/Account/ResetPreferences/index.js'
+export { LanguageSelector as AccountLanguageSelector } from '../../views/Account/Settings/LanguageSelector.js'
+export { ToggleHighContrast as AccountToggleHighContrast } from '../../views/Account/ToggleHighContrast/index.js'
+export { ToggleTheme as AccountToggleTheme } from '../../views/Account/ToggleTheme/index.js'
+export { APIViewClient } from '../../views/API/index.client.js'
+export { CreateFirstUserClient } from '../../views/CreateFirstUser/index.client.js'
+export { ModularDashboardClient } from '../../views/Dashboard/Default/ModularDashboard/index.client.js'
+export { ForgotPasswordForm } from '../../views/ForgotPassword/ForgotPasswordForm/index.js'
+export { LoginForm } from '../../views/Login/LoginForm/index.js'
+export { LogoutClient } from '../../views/Logout/LogoutClient.js'
+export { NotFoundClient } from '../../views/NotFound/index.client.js'
+export { ResetPasswordForm } from '../../views/ResetPassword/ResetPasswordForm/index.js'
+export { ToastAndRedirect } from '../../views/Verify/index.client.js'
+export { DefaultVersionView } from '../../views/Version/Default/index.js'
+export { VersionsViewClient } from '../../views/Versions/index.client.js'
+export { VersionPillLabel } from '../../views/Versions/VersionPillLabel/VersionPillLabel.js'
+export { RenderVersionFieldsToDiff } from '../../views/Version/RenderFieldsToDiff/RenderVersionFieldsToDiff.js'
+export { Checkbox as VersionFieldDiffCheckbox } from '../../views/Version/RenderFieldsToDiff/fields/Checkbox/index.js'
+export { Collapsible as VersionFieldDiffCollapsible } from '../../views/Version/RenderFieldsToDiff/fields/Collapsible/index.js'
+export { DateDiffComponent as VersionFieldDiffDate } from '../../views/Version/RenderFieldsToDiff/fields/Date/index.js'
+export { Group as VersionFieldDiffGroup } from '../../views/Version/RenderFieldsToDiff/fields/Group/index.js'
+export { Iterable as VersionFieldDiffIterable } from '../../views/Version/RenderFieldsToDiff/fields/Iterable/index.js'
+export { Row as VersionFieldDiffRow } from '../../views/Version/RenderFieldsToDiff/fields/Row/index.js'
+export { Select as VersionFieldDiffSelect } from '../../views/Version/RenderFieldsToDiff/fields/Select/index.js'
+export { Tabs as VersionFieldDiffTabs } from '../../views/Version/RenderFieldsToDiff/fields/Tabs/index.js'
+export { Text as VersionFieldDiffText } from '../../views/Version/RenderFieldsToDiff/fields/Text/index.js'
+export { AutosaveCell as VersionsAutosaveCell } from '../../views/Versions/cells/AutosaveCell/index.js'
+export { CreatedAtCell as VersionsCreatedAtCell } from '../../views/Versions/cells/CreatedAt/index.js'
+export { IDCell as VersionsIDCell } from '../../views/Versions/cells/ID/index.js'
+export { VersionDrawerCreatedAtCell } from '../../views/Versions/cells/VersionDrawerCreatedAtCell/index.js'
 
 export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 

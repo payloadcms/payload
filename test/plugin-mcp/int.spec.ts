@@ -229,7 +229,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(promptsResponse.result.prompts).toHaveLength(1)
       expect(promptsResponse.result.prompts[0].name).toBe('echo')
       expect(promptsResponse.result.prompts[0].title).toBe('Echo Prompt')
-      expect(promptsResponse.result.prompts[0].description).toBe('Creates a prompt to process a message')
+      expect(promptsResponse.result.prompts[0].description).toBe(
+        'Creates a prompt to process a message',
+      )
       expect(promptsResponse.result.prompts[0].arguments).toBeDefined()
       expect(promptsResponse.result.prompts[0].arguments).toHaveLength(1)
       expect(promptsResponse.result.prompts[0].arguments[0].name).toBe('message')
@@ -245,7 +247,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(toolsResponse.result.tools).toBeDefined()
 
       // The global's description (from plugin config) overrides the built-in tool description
-      const findGlobalTool = toolsResponse.result.tools.find((t: any) => t.name === 'findSiteSettings')
+      const findGlobalTool = toolsResponse.result.tools.find(
+        (t: any) => t.name === 'findSiteSettings',
+      )
       expect(findGlobalTool).toBeDefined()
       expect(findGlobalTool.description).toContain('Site-wide configuration settings.')
       expect(findGlobalTool.inputSchema.properties.select).toBeDefined()
@@ -254,7 +258,9 @@ describe('@payloadcms/plugin-mcp', () => {
         "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
       )
 
-      const updateGlobalTool = toolsResponse.result.tools.find((t: any) => t.name === 'updateSiteSettings')
+      const updateGlobalTool = toolsResponse.result.tools.find(
+        (t: any) => t.name === 'updateSiteSettings',
+      )
       expect(updateGlobalTool).toBeDefined()
       expect(updateGlobalTool.description).toContain('Site-wide configuration settings.')
       expect(updateGlobalTool.inputSchema.properties.select).toBeDefined()
@@ -264,7 +270,9 @@ describe('@payloadcms/plugin-mcp', () => {
       )
     })
 
-    it('should list updatePosts when API key permits update and include select schema', async ({ mcp }) => {
+    it('should list updatePosts when API key permits update and include select schema', async ({
+      mcp,
+    }) => {
       const apiKey = await getApiKey({ enableUpdate: true })
       const toolsResponse = await mcp.listTools({ apiKey })
 
@@ -296,7 +304,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(promptResponse.result).toBeDefined()
       expect(promptResponse.result.messages).toHaveLength(2)
       expect(promptResponse.result.messages[0].content.type).toBe('text')
-      expect(promptResponse.result.messages[0].content.text).toContain('This prompt was sent: Hello, world!')
+      expect(promptResponse.result.messages[0].content.text).toContain(
+        'This prompt was sent: Hello, world!',
+      )
       expect(promptResponse.result.messages[1].content.type).toBe('text')
       expect(promptResponse.result.messages[1].content.text).toContain(
         `This prompt was sent by userId: ${userId}`,
@@ -335,7 +345,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(resourceResponse.result.contents).toHaveLength(2)
       expect(resourceResponse.result.contents[0].uri).toBe('data://app')
       expect(resourceResponse.result.contents[0].text).toContain('My special data.')
-      expect(resourceResponse.result.contents[1].text).toContain(`This was requested by user: ${userId}`)
+      expect(resourceResponse.result.contents[1].text).toContain(
+        `This was requested by user: ${userId}`,
+      )
 
       const { docs } = await payload.find({
         collection: 'returned-resources',
@@ -368,7 +380,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(resourceResponse.result.contents).toHaveLength(2)
       expect(resourceResponse.result.contents[0].uri).toBe('data://app/1')
       expect(resourceResponse.result.contents[0].text).toContain('My special data for ID: 1')
-      expect(resourceResponse.result.contents[1].text).toContain(`This was requested by user: ${userId}`)
+      expect(resourceResponse.result.contents[1].text).toContain(
+        `This was requested by user: ${userId}`,
+      )
 
       const { docs } = await payload.find({
         collection: 'returned-resources',
@@ -718,7 +732,9 @@ describe('@payloadcms/plugin-mcp', () => {
       )
       expect(callResponse.result.content[0].text).toContain('Deleted document:')
       expect(callResponse.result.content[0].text).toContain('```json')
-      expect(callResponse.result.content[0].text).toContain('"content":"Content for test post to delete."')
+      expect(callResponse.result.content[0].text).toContain(
+        '"content":"Content for test post to delete."',
+      )
     })
 
     it('should handle point fields with object format in createPosts', async ({ mcp }) => {
@@ -1095,7 +1111,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(callResponse.result).toBeDefined()
       expect(callResponse.result.content).toBeDefined()
       expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain('Global "site-settings" updated successfully')
+      expect(callResponse.result.content[0].text).toContain(
+        'Global "site-settings" updated successfully',
+      )
     })
 
     it('should update site-settings global with select', async ({ mcp }) => {
@@ -1135,7 +1153,9 @@ describe('@payloadcms/plugin-mcp', () => {
       createdIDs.length = 0
     })
 
-    it('should return minified JSON without newlines or indentation in resource responses', async ({ mcp }) => {
+    it('should return minified JSON without newlines or indentation in resource responses', async ({
+      mcp,
+    }) => {
       const doc = await payload.create({
         collection: 'posts',
         data: {
@@ -1268,7 +1288,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(callResponse.result).toBeDefined()
       expect(callResponse.result.content[0].text).toContain('Document created successfully')
       expect(callResponse.result.content[0].text).toContain('"title":"Hello World"')
-      expect(callResponse.result.content[0].text).toContain('"content":"This is my first post in English"')
+      expect(callResponse.result.content[0].text).toContain(
+        '"content":"This is my first post in English"',
+      )
     })
 
     it('should update post to add translation', async ({ mcp }) => {
@@ -1458,7 +1480,9 @@ describe('@payloadcms/plugin-mcp', () => {
         const toolsResponse = await mcp.listTools({ apiKey })
 
         expect(toolsResponse.result.tools).toBeDefined()
-        const createTool = toolsResponse.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
         expect(createTool).toBeDefined()
 
         const inputProps = createTool.inputSchema.properties.data.properties
@@ -1468,7 +1492,9 @@ describe('@payloadcms/plugin-mcp', () => {
       it('should include group field as nested object in create tool schema', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey()
         const toolsResponse = await mcp.listTools({ apiKey })
-        const createTool = toolsResponse.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
         const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.groupField).toBeDefined()
@@ -1478,10 +1504,14 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(inputProps.groupField.properties.groupNumber).toBeDefined()
       })
 
-      it('should include collapsible children as top-level fields in create tool schema', async ({ mcp }) => {
+      it('should include collapsible children as top-level fields in create tool schema', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey()
         const toolsResponse = await mcp.listTools({ apiKey })
-        const createTool = toolsResponse.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
         const inputProps = createTool.inputSchema.properties.data.properties
 
         // Children of collapsible appear at the top level, not under a `collapsible` key
@@ -1491,10 +1521,14 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(inputProps.collapsibleText.anyOf.some((t: any) => t.type === 'string')).toBe(true)
       })
 
-      it('should include row children as top-level fields in create tool schema', async ({ mcp }) => {
+      it('should include row children as top-level fields in create tool schema', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey()
         const toolsResponse = await mcp.listTools({ apiKey })
-        const createTool = toolsResponse.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
         const inputProps = createTool.inputSchema.properties.data.properties
 
         // Children of row appear at the top level, not under a `row` key
@@ -1503,10 +1537,14 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(inputProps.rowText.anyOf.some((t: any) => t.type === 'string')).toBe(true)
       })
 
-      it('should include named tab as nested object and unnamed tab children at top level in create tool schema', async ({ mcp }) => {
+      it('should include named tab as nested object and unnamed tab children at top level in create tool schema', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey()
         const toolsResponse = await mcp.listTools({ apiKey })
-        const createTool = toolsResponse.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
         const inputProps = createTool.inputSchema.properties.data.properties
 
         // Named tab appears as a nested object
@@ -1524,7 +1562,9 @@ describe('@payloadcms/plugin-mcp', () => {
       it('should include select field with enum values in create tool schema', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey()
         const toolsResponse = await mcp.listTools({ apiKey })
-        const createTool = toolsResponse.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
         const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.selectField).toBeDefined()
@@ -1537,7 +1577,9 @@ describe('@payloadcms/plugin-mcp', () => {
       it('should include radio field with enum values in create tool schema', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey()
         const toolsResponse = await mcp.listTools({ apiKey })
-        const createTool = toolsResponse.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
         const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.radioField).toBeDefined()
@@ -1550,7 +1592,9 @@ describe('@payloadcms/plugin-mcp', () => {
       it('should include array field with item schema in create tool schema', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey()
         const toolsResponse = await mcp.listTools({ apiKey })
-        const createTool = toolsResponse.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
         const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.arrayField).toBeDefined()
@@ -1563,7 +1607,9 @@ describe('@payloadcms/plugin-mcp', () => {
     })
 
     describe('Create + round-trip', () => {
-      it('should create and find document with atomic data fields (text, textarea, number, email, checkbox)', async ({ mcp }) => {
+      it('should create and find document with atomic data fields (text, textarea, number, email, checkbox)', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
         const callResponse = await mcp.callTool({
           apiKey,
@@ -1747,7 +1793,9 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should create document with tabs fields (named tab as object, unnamed tab children at top level)', async ({ mcp }) => {
+      it('should create document with tabs fields (named tab as object, unnamed tab children at top level)', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
         const callResponse = await mcp.callTool({
           apiKey,
@@ -1870,7 +1918,9 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(doc.groupField.groupNumber).toBe(100)
       })
 
-      it('should update document with collapsible field (children at top level)', async ({ mcp }) => {
+      it('should update document with collapsible field (children at top level)', async ({
+        mcp,
+      }) => {
         const created = await (payload as any).create({
           collection: 'field-types',
           data: {
@@ -1938,7 +1988,9 @@ describe('@payloadcms/plugin-mcp', () => {
     })
 
     describe('Display field safety', () => {
-      it('should create document with ui field present without errors and ui field absent from response', async ({ mcp }) => {
+      it('should create document with ui field present without errors and ui field absent from response', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
 
         // Create a doc without passing any `uiField` value (it has no stored data)
@@ -1964,7 +2016,9 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should create and find document with all structural layout fields populated', async ({ mcp }) => {
+      it('should create and find document with all structural layout fields populated', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
         const callResponse = await mcp.callTool({
           apiKey,

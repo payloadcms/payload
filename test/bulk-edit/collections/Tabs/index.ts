@@ -65,4 +65,5 @@ export const TabsCollection: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

@@ -28,6 +28,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -35,7 +36,7 @@ describe('configToJSONSchema', () => {
     const sanitizedConfig = await sanitizeConfig(config)
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
-    expect(schema?.definitions?.test).toStrictEqual({
+    expect(schema?.$defs?.test).toStrictEqual({
       type: 'object',
       additionalProperties: false,
       properties: {
@@ -115,6 +116,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -122,7 +124,7 @@ describe('configToJSONSchema', () => {
     const sanitizedConfig = await sanitizeConfig(config)
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
-    expect(schema?.definitions?.test).toStrictEqual({
+    expect(schema?.$defs?.test).toStrictEqual({
       type: 'object',
       additionalProperties: false,
       properties: {
@@ -140,13 +142,13 @@ describe('configToJSONSchema', () => {
         blockFieldWithFields: {
           type: ['array', 'null'],
           items: {
-            oneOf: [{ $ref: '#/definitions/Test' }],
+            oneOf: [{ $ref: '#/$defs/Test' }],
           },
         },
         blockFieldWithFieldsRequired: {
           type: ['array', 'null'],
           items: {
-            oneOf: [{ $ref: '#/definitions/TestRequired' }],
+            oneOf: [{ $ref: '#/$defs/TestRequired' }],
           },
         },
       },
@@ -172,6 +174,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
         {
           slug: 'posts',
@@ -184,13 +187,14 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
 
     const sanitizedConfig = await sanitizeConfig(config)
     const schema = configToJSONSchema(sanitizedConfig, 'text')
-    const defs = schema.definitions!
+    const defs = schema.$defs!
 
     // The first `hero` keeps the clean name; the unique block is unaffected.
     expect(defs.Hero).toBeDefined()
@@ -211,14 +215,14 @@ describe('configToJSONSchema', () => {
       (
         defs[slug] as { properties: { layout: { items: { oneOf: Array<{ $ref: string }> } } } }
       ).properties.layout.items.oneOf.map((r) => r.$ref)
-    expect(refsOf('pages')).toContain('#/definitions/Hero')
-    expect(refsOf('pages')).toContain('#/definitions/Cta')
-    expect(refsOf('posts')).toStrictEqual([`#/definitions/${hashedHeroNames[0]}`])
+    expect(refsOf('pages')).toContain('#/$defs/Hero')
+    expect(refsOf('pages')).toContain('#/$defs/Cta')
+    expect(refsOf('posts')).toStrictEqual([`#/$defs/${hashedHeroNames[0]}`])
 
     // Hashing is deterministic: regenerating yields identical names.
     const schema2 = configToJSONSchema(sanitizedConfig, 'text')
     expect(
-      Object.keys(schema2.definitions!)
+      Object.keys(schema2.$defs!)
         .filter((k) => /^Hero/.test(k))
         .sort(),
     ).toStrictEqual(
@@ -272,6 +276,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -279,7 +284,7 @@ describe('configToJSONSchema', () => {
     const sanitizedConfig = await sanitizeConfig(config)
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
-    expect(schema?.definitions?.test).toStrictEqual({
+    expect(schema?.$defs?.test).toStrictEqual({
       type: 'object',
       additionalProperties: false,
       properties: {
@@ -347,6 +352,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -354,7 +360,7 @@ describe('configToJSONSchema', () => {
     const sanitizedConfig = await sanitizeConfig(config as Config)
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
-    expect(schema?.definitions?.test).toStrictEqual({
+    expect(schema?.$defs?.test).toStrictEqual({
       type: 'object',
       additionalProperties: false,
       properties: {
@@ -403,6 +409,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -433,7 +440,7 @@ describe('configToJSONSchema', () => {
       required: ['blockType'],
     }
 
-    expect(schema?.definitions?.test).toStrictEqual({
+    expect(schema?.$defs?.test).toStrictEqual({
       type: 'object',
       additionalProperties: false,
       title: 'Test',
@@ -446,7 +453,7 @@ describe('configToJSONSchema', () => {
           items: {
             oneOf: [
               {
-                $ref: '#/definitions/SharedBlock',
+                $ref: '#/$defs/SharedBlock',
               },
             ],
           },
@@ -456,7 +463,7 @@ describe('configToJSONSchema', () => {
     })
 
     // The definition should still be registered for TypeScript type generation
-    expect(schema?.definitions?.SharedBlock).toStrictEqual(expectedBlockSchema)
+    expect(schema?.$defs?.SharedBlock).toStrictEqual(expectedBlockSchema)
   })
 
   it('should allow overriding required to false', async () => {
@@ -480,6 +487,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -488,7 +496,7 @@ describe('configToJSONSchema', () => {
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
     // @ts-expect-error
-    expect(schema.definitions.test.properties.title.required).toStrictEqual(false)
+    expect(schema.$defs.test.properties.title.required).toStrictEqual(false)
   })
 
   it('should propagate forceInlineBlocks to nested fields (array, group, tab)', async () => {
@@ -516,6 +524,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     }
@@ -524,21 +533,21 @@ describe('configToJSONSchema', () => {
 
     // Without forceInlineBlocks: blocks field uses $ref
     const schemaDefault = configToJSONSchema(sanitizedConfig, 'text')
-    const arrItemsDefault = schemaDefault.definitions!.test.properties!.arr.items as JSONSchema4
+    const arrItemsDefault = schemaDefault.$defs!.test.properties!.arr.items as JSONSchema4
     const arrBlocksDefault = (arrItemsDefault.properties!.blocks.items as JSONSchema4).oneOf![0]
-    expect(arrBlocksDefault).toStrictEqual({ $ref: '#/definitions/MyBlock' })
+    expect(arrBlocksDefault).toStrictEqual({ $ref: '#/$defs/MyBlock' })
 
     // With forceInlineBlocks: blocks field is inlined, no $ref
     const schemaInline = configToJSONSchema(sanitizedConfig, 'text', undefined, {
       forceInlineBlocks: true,
     })
-    const arrItemsInline = schemaInline.definitions!.test.properties!.arr.items as JSONSchema4
+    const arrItemsInline = schemaInline.$defs!.test.properties!.arr.items as JSONSchema4
     const arrBlocksInline = (arrItemsInline.properties!.blocks.items as JSONSchema4).oneOf![0]
     expect(arrBlocksInline).not.toHaveProperty('$ref')
     expect(arrBlocksInline.properties?.blockType).toStrictEqual({ const: 'myBlock' })
 
     const grpBlocksInline = (
-      schemaInline.definitions!.test.properties!.grp.properties!.blocks.items as JSONSchema4
+      schemaInline.$defs!.test.properties!.grp.properties!.blocks.items as JSONSchema4
     ).oneOf![0]
     expect(grpBlocksInline).not.toHaveProperty('$ref')
     expect(grpBlocksInline.properties?.blockType).toStrictEqual({ const: 'myBlock' })

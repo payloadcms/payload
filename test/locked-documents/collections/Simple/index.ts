@@ -17,4 +17,5 @@ export const SimpleCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

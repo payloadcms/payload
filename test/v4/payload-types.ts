@@ -608,6 +608,12 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  localizedArray?:
+    | {
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2227,6 +2233,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         id?: T;
       };
   arrayWithDescription?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  localizedArray?:
     | T
     | {
         name?: T;
