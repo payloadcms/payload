@@ -5,7 +5,9 @@ import { localizedDraftsSlug } from '../../shared.js'
 export const LocalizedDrafts: CollectionConfig = {
   slug: localizedDraftsSlug,
   versions: {
-    drafts: true,
+    drafts: {
+      localizeStatus: false,
+    },
   },
   fields: [
     {
