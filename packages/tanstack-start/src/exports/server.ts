@@ -11,7 +11,8 @@ export { initReq } from '../utilities/initReq.server.js'
 export { type AdminPageMetadata, getAdminMeta } from '../utilities/meta.js'
 export { serializeForRsc } from '../utilities/serializeForRsc.js'
 export {
-  errorContractServerAdapter,
+  createPageRenderServerAdapter,
+  type PageNavIntent,
   tanstackServerAdapter,
 } from '../utilities/serverAdapter.server.js'
 export { toSerializable } from '../utilities/toSerializable.js'

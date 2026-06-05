@@ -543,6 +543,11 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       !msg.text().includes('Error loading language') &&
       !msg.text().includes('Error: NEXT_NOT_FOUND') &&
       !msg.text().includes('Error: NEXT_REDIRECT') &&
+      // TanStack Start adapter nav control-flow contract (analogous to the
+      // NEXT_NOT_FOUND / NEXT_REDIRECT signals above). `req.server.notFound()` /
+      // `redirect()` thrown deep inside a streamed RSC view surface as these.
+      !msg.text().includes('Error: not-found') &&
+      !msg.text().includes('Error: redirect:') &&
       !msg.text().includes('Error getting document data') &&
       !msg.text().includes('Failed trying to load default language strings') &&
       !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted

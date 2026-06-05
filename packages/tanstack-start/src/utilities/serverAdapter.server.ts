@@ -105,26 +105,48 @@ export const tanstackServerAdapter: ServerAdapter = {
 }
 
 /**
- * `ServerAdapter` for the admin page render (`renderRoot`). Identical to
- * `tanstackServerAdapter` for cookies/headers, but navigation throws the
- * framework-agnostic string error-contract (`Error('not-found')` /
- * `Error('redirect:<url>')`) instead of TanStack's native `notFound`/`redirect`.
- *
- * `renderRoot` navigates via `req.server.*` while rendering, deep inside a
- * `createServerFn` handler — a spot where TanStack's native `redirect`/`notFound`
- * cannot be thrown reliably (they must surface at the loader boundary). The
- * admin-page server function catches this contract and returns a sentinel; the
- * route loader then re-throws the native TanStack nav.
+ * Navigation requested during an admin page render, recorded by
+ * `createPageRenderServerAdapter`. The admin-page server function reads this
+ * after `renderServerComponent` resolves.
  */
-export const errorContractServerAdapter: ServerAdapter = {
+export type PageNavIntent = {
+  type?: 'notFound' | 'redirect'
+  url?: string
+}
+
+/**
+ * Builds the `ServerAdapter` for the admin page render (`renderRoot`). Like
+ * `tanstackServerAdapter` for cookies/headers, but navigation **records the
+ * intent on `nav` and throws** the framework-agnostic string error-contract
+ * (`Error('not-found')` / `Error('redirect:<url>')`) instead of TanStack's
+ * native `notFound`/`redirect`.
+ *
+ * `renderRoot` navigates via `req.server.*` in two places:
+ * - during orchestration (e.g. the unauthenticated login redirect) — the throw
+ *   propagates out of `renderRoot` and is caught by the loader's try/catch;
+ * - deep inside streamed view components (e.g. `DocumentView` access checks,
+ *   `LoginView` already-authenticated) — here the throw happens during
+ *   `renderServerComponent` and is swallowed into the RSC stream, so it never
+ *   rejects the render promise.
+ *
+ * Recording the intent on `nav` lets the loader honor the second case by
+ * inspecting `nav` after the render resolves, then re-throwing native TanStack
+ * nav at the loader boundary.
+ */
+export const createPageRenderServerAdapter = (nav: PageNavIntent): ServerAdapter => ({
   ...tanstackServerAdapter,
   notFound: () => {
+    nav.type = 'notFound'
     throw new Error('not-found')
   },
   permanentRedirect: (path: string) => {
+    nav.type = 'redirect'
+    nav.url = path
     throw new Error(`redirect:${path}`)
   },
   redirect: (path: string) => {
+    nav.type = 'redirect'
+    nav.url = path
     throw new Error(`redirect:${path}`)
   },
-}
+})
