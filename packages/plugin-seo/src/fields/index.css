@@ -1,5 +1,7 @@
 @layer payload-default {
   .plugin-seo__field {
+    margin-bottom: var(--spacer-1);
+
     .field-label {
       display: inline !important;
     }
