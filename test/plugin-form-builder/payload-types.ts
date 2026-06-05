@@ -62,16 +62,17 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_2AAF05BF".
+ * via the `definition` "LexicalNodes_47A9529B".
  */
-export type LexicalNodes_2AAF05BF =
+export type LexicalNodes_47A9529B =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_2AAF05BF>
+  | SerializedParagraphNode<LexicalNodes_47A9529B>
   | SerializedHorizontalRuleNode
-  | SerializedUploadNode<'media' | 'documents'>
-  | SerializedQuoteNode<LexicalNodes_2AAF05BF>
+  | SerializedUploadNode<'media'>
+  | SerializedUploadNode<'documents'>
+  | SerializedQuoteNode<LexicalNodes_47A9529B>
   | SerializedRelationshipNode<
       | 'pages'
       | 'users'
@@ -81,11 +82,11 @@ export type LexicalNodes_2AAF05BF =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_2AAF05BF, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_2AAF05BF, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_2AAF05BF>
-  | SerializedListItemNode<LexicalNodes_2AAF05BF>
-  | SerializedHeadingNode<LexicalNodes_2AAF05BF>;
+  | SerializedAutoLinkNode<LexicalNodes_47A9529B, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_47A9529B, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_47A9529B>
+  | SerializedListItemNode<LexicalNodes_47A9529B>
+  | SerializedHeadingNode<LexicalNodes_47A9529B>;
 
 export interface Config {
   auth: {
@@ -213,7 +214,7 @@ export interface Form {
    * Choose whether to display an on-page message or redirect to a different page after they submit the form.
    */
   confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: LexicalRichText<LexicalNodes_2AAF05BF>;
+  confirmationMessage?: LexicalRichText<LexicalNodes_47A9529B>;
   redirect?: {
     type?: ('reference' | 'custom') | null;
     reference?: {
@@ -236,7 +237,7 @@ export interface Form {
         /**
          * Enter the message that should be sent in this email.
          */
-        message?: LexicalRichText<LexicalNodes_2AAF05BF> | null;
+        message?: LexicalRichText<LexicalNodes_47A9529B> | null;
         id?: string | null;
       }[]
     | null;
@@ -289,7 +290,7 @@ export interface Email {
  * via the `definition` "Message".
  */
 export interface Message {
-  message?: LexicalRichText<LexicalNodes_2AAF05BF> | null;
+  message?: LexicalRichText<LexicalNodes_47A9529B> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'message';

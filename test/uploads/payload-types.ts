@@ -62,76 +62,73 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_C5C3B369".
+ * via the `definition` "LexicalNodes_ED428AB9".
  */
-export type LexicalNodes_C5C3B369 =
+export type LexicalNodes_ED428AB9 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_C5C3B369>
+  | SerializedParagraphNode<LexicalNodes_ED428AB9>
   | SerializedBlockNode<MyBlock>
   | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_C5C3B369>
-  | SerializedUploadNode<
-      | 'gif-resize'
-      | 'filename-compound-index'
-      | 'no-image-sizes'
-      | 'object-fit'
-      | 'with-meta-data'
-      | 'without-meta-data'
-      | 'with-only-jpeg-meta-data'
-      | 'crop-only'
-      | 'focal-only'
-      | 'image-sizes-only'
-      | 'focal-no-sizes'
-      | 'media'
-      | 'allow-list-media'
-      | 'skip-safe-fetch-media'
-      | 'skip-safe-fetch-header-filter'
-      | 'skip-allow-list-safe-fetch-media'
-      | 'restrict-file-types'
-      | 'no-restrict-file-types'
-      | 'no-restrict-file-mime-types'
-      | 'pdf-only'
-      | 'restricted-mime-types'
-      | 'animated-type-media'
-      | 'enlarge'
-      | 'without-enlarge'
-      | 'reduce'
-      | 'media-trim'
-      | 'custom-file-name-media'
-      | 'unstored-media'
-      | 'externally-served-media'
-      | 'uploads-1'
-      | 'admin-thumbnail-function'
-      | 'admin-thumbnail-with-search-queries'
-      | 'admin-thumbnail-size'
-      | 'admin-upload-control'
-      | 'no-files-required'
-      | 'optional-file'
-      | 'required-file'
-      | 'versions'
-      | 'custom-upload-field'
-      | 'media-with-relation-preview'
-      | 'media-without-cache-tags'
-      | 'media-without-relation-preview'
-      | 'hide-file-input-on-create'
-      | 'three-dimensional'
-      | 'constructor-options'
-      | 'bulk-uploads'
-      | 'bulk-uploads-hook-error'
-      | 'file-mime-type'
-      | 'svg-only'
-      | 'media-without-delete-access'
-      | 'media-with-image-size-admin-props'
-      | 'prefix-media',
-      LexicalUploadFields_1AB4670B
-    >
-  | SerializedQuoteNode<LexicalNodes_C5C3B369>
-  | SerializedListNode<LexicalNodes_C5C3B369>
-  | SerializedListItemNode<LexicalNodes_C5C3B369>
-  | SerializedAutoLinkNode<LexicalNodes_C5C3B369, LexicalLinkFields_C5C3B369>
-  | SerializedLinkNode<LexicalNodes_C5C3B369, LexicalLinkFields_C5C3B369>
+  | SerializedHeadingNode<LexicalNodes_ED428AB9>
+  | SerializedUploadNode<'gif-resize'>
+  | SerializedUploadNode<'filename-compound-index'>
+  | SerializedUploadNode<'no-image-sizes'>
+  | SerializedUploadNode<'object-fit'>
+  | SerializedUploadNode<'with-meta-data'>
+  | SerializedUploadNode<'without-meta-data'>
+  | SerializedUploadNode<'with-only-jpeg-meta-data'>
+  | SerializedUploadNode<'crop-only'>
+  | SerializedUploadNode<'focal-only'>
+  | SerializedUploadNode<'image-sizes-only'>
+  | SerializedUploadNode<'focal-no-sizes'>
+  | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
+  | SerializedUploadNode<'allow-list-media'>
+  | SerializedUploadNode<'skip-safe-fetch-media'>
+  | SerializedUploadNode<'skip-safe-fetch-header-filter'>
+  | SerializedUploadNode<'skip-allow-list-safe-fetch-media'>
+  | SerializedUploadNode<'restrict-file-types'>
+  | SerializedUploadNode<'no-restrict-file-types'>
+  | SerializedUploadNode<'no-restrict-file-mime-types'>
+  | SerializedUploadNode<'pdf-only'>
+  | SerializedUploadNode<'restricted-mime-types'>
+  | SerializedUploadNode<'animated-type-media'>
+  | SerializedUploadNode<'enlarge'>
+  | SerializedUploadNode<'without-enlarge'>
+  | SerializedUploadNode<'reduce'>
+  | SerializedUploadNode<'media-trim'>
+  | SerializedUploadNode<'custom-file-name-media'>
+  | SerializedUploadNode<'unstored-media'>
+  | SerializedUploadNode<'externally-served-media'>
+  | SerializedUploadNode<'uploads-1'>
+  | SerializedUploadNode<'admin-thumbnail-function'>
+  | SerializedUploadNode<'admin-thumbnail-with-search-queries'>
+  | SerializedUploadNode<'admin-thumbnail-size'>
+  | SerializedUploadNode<'admin-upload-control'>
+  | SerializedUploadNode<'no-files-required'>
+  | SerializedUploadNode<'optional-file'>
+  | SerializedUploadNode<'required-file'>
+  | SerializedUploadNode<'versions'>
+  | SerializedUploadNode<'custom-upload-field'>
+  | SerializedUploadNode<'media-with-relation-preview'>
+  | SerializedUploadNode<'media-without-cache-tags'>
+  | SerializedUploadNode<'media-without-relation-preview'>
+  | SerializedUploadNode<'hide-file-input-on-create'>
+  | SerializedUploadNode<'three-dimensional'>
+  | SerializedUploadNode<'constructor-options'>
+  | SerializedUploadNode<'bulk-uploads'>
+  | SerializedUploadNode<'bulk-uploads-hook-error'>
+  | SerializedUploadNode<'file-mime-type'>
+  | SerializedUploadNode<'svg-only'>
+  | SerializedUploadNode<'media-without-delete-access'>
+  | SerializedUploadNode<'media-with-image-size-admin-props'>
+  | SerializedUploadNode<'prefix-media'>
+  | SerializedQuoteNode<LexicalNodes_ED428AB9>
+  | SerializedListNode<LexicalNodes_ED428AB9>
+  | SerializedListItemNode<LexicalNodes_ED428AB9>
+  | SerializedAutoLinkNode<LexicalNodes_ED428AB9, LexicalLinkFields_ED428AB9>
+  | SerializedLinkNode<LexicalNodes_ED428AB9, LexicalLinkFields_ED428AB9>
   | SerializedRelationshipNode<
       | 'relation'
       | 'audio'
@@ -1412,7 +1409,7 @@ export interface Uploads1 {
   singleUpload?: (string | null) | Uploads2;
   hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
   singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
-  richText?: LexicalRichText<LexicalNodes_C5C3B369> | null;
+  richText?: LexicalRichText<LexicalNodes_ED428AB9> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -4141,9 +4138,9 @@ export interface LexicalUploadFields_1AB4670B {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_C5C3B369".
+ * via the `definition` "LexicalLinkFields_ED428AB9".
  */
-export interface LexicalLinkFields_C5C3B369 {
+export interface LexicalLinkFields_ED428AB9 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {

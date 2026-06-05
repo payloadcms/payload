@@ -64,22 +64,23 @@ export type SupportedTimezones =
   | 'UTC';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_E99B774E".
+ * via the `definition` "LexicalNodes_E074AD98".
  */
-export type LexicalNodes_E99B774E =
+export type LexicalNodes_E074AD98 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_E99B774E>
+  | SerializedParagraphNode<LexicalNodes_E074AD98>
   | SerializedBlockNode<MyBlock>
   | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_E99B774E>
-  | SerializedUploadNode<'uploads' | 'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_E99B774E>
-  | SerializedListNode<LexicalNodes_E99B774E>
-  | SerializedListItemNode<LexicalNodes_E99B774E>
-  | SerializedAutoLinkNode<LexicalNodes_E99B774E, LexicalLinkFields_E99B774E>
-  | SerializedLinkNode<LexicalNodes_E99B774E, LexicalLinkFields_E99B774E>
+  | SerializedHeadingNode<LexicalNodes_E074AD98>
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_E074AD98>
+  | SerializedListNode<LexicalNodes_E074AD98>
+  | SerializedListItemNode<LexicalNodes_E074AD98>
+  | SerializedAutoLinkNode<LexicalNodes_E074AD98, LexicalLinkFields_E074AD98>
+  | SerializedLinkNode<LexicalNodes_E074AD98, LexicalLinkFields_E074AD98>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -122,16 +123,17 @@ export type LexicalNodes_E99B774E =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_A9A5E3FC".
+ * via the `definition` "LexicalNodes_313DC238".
  */
-export type LexicalNodes_A9A5E3FC =
+export type LexicalNodes_313DC238 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_A9A5E3FC>
+  | SerializedParagraphNode<LexicalNodes_313DC238>
   | SerializedHorizontalRuleNode
-  | SerializedUploadNode<'uploads' | 'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_A9A5E3FC>
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_313DC238>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -172,11 +174,11 @@ export type LexicalNodes_A9A5E3FC =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_A9A5E3FC, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_A9A5E3FC, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_A9A5E3FC>
-  | SerializedListItemNode<LexicalNodes_A9A5E3FC>
-  | SerializedHeadingNode<LexicalNodes_A9A5E3FC>;
+  | SerializedAutoLinkNode<LexicalNodes_313DC238, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_313DC238, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_313DC238>
+  | SerializedListItemNode<LexicalNodes_313DC238>
+  | SerializedHeadingNode<LexicalNodes_313DC238>;
 
 export interface Config {
   auth: {
@@ -422,7 +424,7 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
-    richTextField?: LexicalRichText<LexicalNodes_E99B774E> | null;
+    richTextField?: LexicalRichText<LexicalNodes_E074AD98> | null;
     subArray?:
       | {
           text?: string | null;
@@ -589,7 +591,7 @@ export interface BlockField {
  */
 export interface ContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_A9A5E3FC> | null;
+  richText?: LexicalRichText<LexicalNodes_313DC238> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -661,7 +663,7 @@ export interface TabsBlock {
  */
 export interface LocalizedContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_A9A5E3FC> | null;
+  richText?: LexicalRichText<LexicalNodes_313DC238> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
@@ -1075,7 +1077,7 @@ export interface ConditionalLogic {
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
   customServerFieldWithCondition?: string | null;
-  conditionalRichText?: LexicalRichText<LexicalNodes_E99B774E> | null;
+  conditionalRichText?: LexicalRichText<LexicalNodes_E074AD98> | null;
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
@@ -3996,9 +3998,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_E99B774E".
+ * via the `definition` "LexicalLinkFields_E074AD98".
  */
-export interface LexicalLinkFields_E99B774E {
+export interface LexicalLinkFields_E074AD98 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -4170,6 +4172,6 @@ export interface SerializedHorizontalRuleNode {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
