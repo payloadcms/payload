@@ -106,7 +106,7 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
         importMap,
         initReq: boundInitReq,
         notFound,
-        params: Promise.resolve({ segments: segments as string[] }),
+        params: Promise.resolve({ segments }),
         redirect,
         searchParams: Promise.resolve(searchParams),
       })
@@ -129,7 +129,7 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
           config: Promise.resolve(config),
           importMap,
           initReq: boundInitReq,
-          params: Promise.resolve({ segments: segments as string[] }),
+          params: Promise.resolve({ segments }),
           searchParams: Promise.resolve(searchParams),
         })
         const notFoundPayload = await renderServerComponent(notFoundNode as React.ReactElement)

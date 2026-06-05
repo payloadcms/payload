@@ -1,11 +1,11 @@
 import type { ServerFunction } from 'payload'
 
+import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
+import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
 import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
 import { schedulePublishHandler } from './schedulePublishHandler.js'
-import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
-import { renderListHandler } from '../views/List/handleServerFunction.js'
 
 /**
  * Framework-agnostic server function handlers shared across all adapters.
