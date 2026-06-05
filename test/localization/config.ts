@@ -15,6 +15,7 @@ import { BlocksCollection } from './collections/Blocks/index.js'
 import { Group } from './collections/Group/index.js'
 import { LocalizedDateFields } from './collections/LocalizedDateFields/index.js'
 import { LocalizedDrafts } from './collections/LocalizedDrafts/index.js'
+import { LocalizedDraftsNoLocaleStatus } from './collections/LocalizedDraftsNoLocaleStatus/index.js'
 import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
 import { NestedArray } from './collections/NestedArray/index.js'
 import { NestedFields } from './collections/NestedFields/index.js'
@@ -64,15 +65,13 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  experimental: {
-    localizeStatus: true,
-  },
   collections: [
     RichTextCollection,
     BlocksCollection,
     NestedArray,
     NestedFields,
     LocalizedDrafts,
+    LocalizedDraftsNoLocaleStatus,
     LocalizedDateFields,
     AllFieldsLocalized,
     {

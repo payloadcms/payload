@@ -46,6 +46,7 @@ import {
   hungarianLocale,
   localeRestrictedSlug,
   localizedDraftsSlug,
+  localizedDraftsNoLocaleStatusSlug,
   localizedPostsSlug,
   relationshipLocalizedSlug,
   spanishLocale,
@@ -70,6 +71,7 @@ let urlWithRequiredLocalizedFields: AdminUrlUtil
 let urlRelationshipLocalized: AdminUrlUtil
 let urlCannotCreateDefaultLocale: AdminUrlUtil
 let urlPostsWithDrafts: AdminUrlUtil
+let urlPostsWithDraftsNoLocaleStatus: AdminUrlUtil
 let urlArray: AdminUrlUtil
 let arrayWithFallbackURL: AdminUrlUtil
 let noLocalizedFieldsURL: AdminUrlUtil
@@ -100,6 +102,7 @@ describe('Localization', () => {
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
     urlCannotCreateDefaultLocale = new AdminUrlUtil(serverURL, 'cannot-create-default-locale')
     urlPostsWithDrafts = new AdminUrlUtil(serverURL, localizedDraftsSlug)
+    urlPostsWithDraftsNoLocaleStatus = new AdminUrlUtil(serverURL, localizedDraftsNoLocaleStatusSlug)
     urlArray = new AdminUrlUtil(serverURL, arrayCollectionSlug)
     arrayWithFallbackURL = new AdminUrlUtil(serverURL, arrayWithFallbackCollectionSlug)
     noLocalizedFieldsURL = new AdminUrlUtil(serverURL, noLocalizedFieldsCollectionSlug)
@@ -846,7 +849,7 @@ describe('Localization', () => {
       })
 
       test('should not show unpublish in specific locale when localizeStatus is not enabled', async () => {
-        await page.goto(urlPostsWithDrafts.create)
+        await page.goto(urlPostsWithDraftsNoLocaleStatus.create)
         await page.locator('#field-title').fill('EN Published')
         await saveDocAndAssert(page, '#publish-locale')
         await openDocControls(page)
