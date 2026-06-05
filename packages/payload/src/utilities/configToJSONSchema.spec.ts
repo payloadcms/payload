@@ -477,7 +477,11 @@ describe('configToJSONSchema', () => {
               name: 'blocksField',
               type: 'blocks',
               blocks: [
-                { slug: 'blockA', fields: [{ name: 'title', type: 'text' }], interfaceName: 'Hero' },
+                {
+                  slug: 'blockA',
+                  fields: [{ name: 'title', type: 'text' }],
+                  interfaceName: 'Hero',
+                },
                 {
                   slug: 'blockB',
                   fields: [{ name: 'subtitle', type: 'number' }],
@@ -487,6 +491,7 @@ describe('configToJSONSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     } as unknown as Config
@@ -523,6 +528,7 @@ describe('configToJSONSchema', () => {
             { name: 'b', type: 'blocks', blocks: [heroBlock] },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
     } as unknown as Config
@@ -647,11 +653,13 @@ describe('configToJSONSchema', () => {
             { name: 'when', type: 'date', timezone: true },
           ],
           timestamps: false,
+          versions: false,
         },
         {
           slug: 'other',
           fields: [{ name: 'title', type: 'text' }],
           timestamps: false,
+          versions: false,
         },
       ],
     }
