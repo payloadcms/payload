@@ -31,6 +31,76 @@ const resolveTitle = (title: MetaConfig['title']): string | undefined => {
 }
 
 /**
+ * Flattens the framework-agnostic `MetaConfig` (Next.js `Metadata` shape) into
+ * the plain, serializable `AdminPageMetadata` the route loader ships to the
+ * client. The full `MetaConfig` carries a `URL` `metadataBase`, functions and
+ * other non-serializable values that seroval cannot cross the wire, so only the
+ * fields `getAdminMeta` renders are extracted.
+ */
+const toAdminPageMetadata = (meta: MetaConfig): AdminPageMetadata => {
+  const og = meta.openGraph as
+    | undefined
+    | {
+        description?: unknown
+        images?: unknown
+        siteName?: unknown
+        title?: unknown
+      }
+
+  const rawImages = og?.images
+  const imagesArray = rawImages ? (Array.isArray(rawImages) ? rawImages : [rawImages]) : []
+  const images = imagesArray
+    .map((image: any) =>
+      typeof image === 'string'
+        ? { url: image }
+        : image?.url
+          ? { alt: image.alt, height: image.height, url: String(image.url), width: image.width }
+          : undefined,
+    )
+    .filter(Boolean) as AdminPageMetadata['openGraph']['images']
+
+  const rawIcons = meta.icons as any
+  const iconList = Array.isArray(rawIcons)
+    ? rawIcons
+    : rawIcons && typeof rawIcons === 'object' && Array.isArray(rawIcons.icon)
+      ? rawIcons.icon
+      : []
+  const icons = iconList
+    .map((icon: any) =>
+      typeof icon === 'string'
+        ? { rel: 'icon', url: icon }
+        : icon?.url
+          ? {
+              media: icon.media,
+              rel: icon.rel ?? 'icon',
+              sizes: icon.sizes,
+              type: icon.type,
+              url: String(icon.url),
+            }
+          : undefined,
+    )
+    .filter(Boolean) as AdminPageMetadata['icons']
+
+  const keywords = meta.keywords
+
+  return {
+    description: typeof meta.description === 'string' ? meta.description : undefined,
+    icons: icons?.length ? icons : undefined,
+    keywords: typeof keywords === 'string' ? keywords : Array.isArray(keywords) ? keywords.join(', ') : undefined,
+    openGraph: og
+      ? {
+          description: typeof og.description === 'string' ? og.description : undefined,
+          images: images?.length ? images : undefined,
+          siteName: typeof og.siteName === 'string' ? og.siteName : undefined,
+          title: typeof og.title === 'string' ? og.title : undefined,
+        }
+      : undefined,
+    robots: typeof meta.robots === 'string' ? meta.robots : undefined,
+    title: resolveTitle(meta.title),
+  }
+}
+
+/**
  * Admin-page server function for TanStack Start.
  *
  *   1. Initializes the Payload request via the shared `renderRoot` orchestrator
@@ -151,13 +221,8 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
         params: { segments },
       })
 
-      const metadata: AdminPageMetadata = {
-        description: meta.description,
-        title: resolveTitle(meta.title),
-      }
-
       return {
-        metadata,
+        metadata: toAdminPageMetadata(meta),
         rscPayload,
       } as unknown as LoadResult
     } catch (err) {
