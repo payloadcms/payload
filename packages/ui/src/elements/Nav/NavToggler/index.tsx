@@ -24,8 +24,9 @@ export const NavToggler: React.FC<{
 
   const { navOpen, setNavOpen } = useNav()
 
-  const windowInfo = useWindowInfo()
-  const largeBreak = windowInfo?.breakpoints?.l
+  const {
+    breakpoints: { l: largeBreak },
+  } = useWindowInfo()
 
   return (
     <button

@@ -49,8 +49,9 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
 
   const { t } = useTranslation()
 
-  const windowInfo = useWindowInfo()
-  const smallBreak = windowInfo?.breakpoints?.s
+  const {
+    breakpoints: { s: smallBreak },
+  } = useWindowInfo()
 
   // Simplified placeholder - just "Search" instead of "Search by X, Y, Z"
   const searchLabelTranslated = t('general:searchBy', { label: '' }).split(' ')[0]

@@ -1,12 +1,11 @@
-import type {
-  CollectionConfig,
-  GlobalConfig,
-  Operation,
-  PayloadRequest,
-  SanitizedConfig,
+import {
+  type CollectionConfig,
+  extractJWT,
+  type GlobalConfig,
+  type Operation,
+  type PayloadRequest,
+  type SanitizedConfig,
 } from 'payload'
-
-import { extractJWT } from 'payload/shared'
 
 /**
  * Multi-level check to determine whether live preview is enabled on a collection or global.

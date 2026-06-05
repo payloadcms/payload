@@ -58,25 +58,26 @@ export const DefaultNavClient: React.FC<{
               const linkClass = `${baseClass}__link${isActive ? ` ${baseClass}__link--selected` : ''}`
 
               const Label = (
-                <>
-                  {isActive && <div className={`${baseClass}__link-indicator`} />}
-                  <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
-                </>
+                <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
               )
 
               // If the URL matches the link exactly
               if (pathname === href) {
                 return (
-                  <div className={linkClass} id={id} key={i}>
-                    {Label}
+                  <div className={`${baseClass}__link-wrapper`} key={i}>
+                    <div className={linkClass} id={id}>
+                      {Label}
+                    </div>
                   </div>
                 )
               }
 
               return (
-                <Link className={linkClass} href={href} id={id} key={i} prefetch={false}>
-                  {Label}
-                </Link>
+                <div className={`${baseClass}__link-wrapper`} key={i}>
+                  <Link className={linkClass} href={href} id={id} prefetch={false}>
+                    {Label}
+                  </Link>
+                </div>
               )
             })}
           </NavGroup>

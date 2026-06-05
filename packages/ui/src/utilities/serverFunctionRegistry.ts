@@ -4,8 +4,8 @@ import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
 import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
 import { schedulePublishHandler } from './schedulePublishHandler.js'
-import { renderDocumentHandler } from './sharedHandlers/renderDocument.js'
-import { renderListHandler } from './sharedHandlers/renderList.js'
+import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
+import { renderListHandler } from '../views/List/handleServerFunction.js'
 
 /**
  * Framework-agnostic server function handlers shared across all adapters.

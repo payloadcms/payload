@@ -7,7 +7,8 @@ import { Button } from '../../elements/Button/index.js'
 import { FormHeader } from '../../elements/FormHeader/index.js'
 import { Link } from '../../elements/Link/index.js'
 import { Translation } from '../../elements/Translation/index.js'
-import { ForgotPasswordForm } from './ForgotPasswordForm/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { ForgotPasswordForm } from '../../exports/client/index.js'
 import './index.css'
 
 export const forgotPasswordBaseClass = 'forgot-password'

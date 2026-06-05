@@ -1,23 +1,27 @@
-import type { ComponentRenderer, PayloadComponent } from 'payload'
+import type { ImportMap, PayloadComponent } from 'payload'
 
 import { getFromImportMap, isPlainObject, isReactServerComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
 import { removeUndefined } from '../../utilities/removeUndefined.js'
 
+type RenderServerComponentFn = (args: {
+  readonly clientProps?: object
+  readonly Component?:
+    | PayloadComponent
+    | PayloadComponent[]
+    | React.ComponentType
+    | React.ComponentType[]
+  readonly Fallback?: React.ComponentType
+  readonly importMap: ImportMap
+  readonly key?: string
+  readonly serverProps?: object
+}) => React.ReactNode
+
 /**
- * RSC-aware component renderer shared by every framework adapter.
- *
- * Uses `isReactServerComponentOrFunction` to detect server components and
- * passes `serverProps` to them. Client components only receive `clientProps`.
- *
- * Works under any framework whose runtime supports rendering React Server
- * Components (Next.js's app router, TanStack Start with the Vite RSC plugin,
- * etc.). The rendered output is a normal React tree that can either be
- * embedded inline (Next.js RSC route) or streamed via
- * `@tanstack/react-start/rsc`'s `renderServerComponent` / `renderToReadableStream`.
+ * Can be used to render both MappedComponents and React Components.
  */
-export const RenderServerComponent: ComponentRenderer = ({
+export const RenderServerComponent: RenderServerComponentFn = ({
   clientProps = {},
   Component,
   Fallback,
@@ -31,7 +35,7 @@ export const RenderServerComponent: ComponentRenderer = ({
         clientProps,
         Component: c,
         importMap,
-        key: String(index),
+        key: index,
         serverProps,
       }),
     )
@@ -40,7 +44,7 @@ export const RenderServerComponent: ComponentRenderer = ({
   if (typeof Component === 'function') {
     const isRSC = isReactServerComponentOrFunction(Component)
 
-    // prevent $undefined from being passed through RSC requests
+    // prevent $undefined from being passed through the rsc requests
     const sanitizedProps = removeUndefined({
       ...clientProps,
       ...(isRSC ? serverProps : {}),
@@ -52,14 +56,14 @@ export const RenderServerComponent: ComponentRenderer = ({
   if (typeof Component === 'string' || isPlainObject(Component)) {
     const ResolvedComponent = getFromImportMap<React.ComponentType>({
       importMap,
-      PayloadComponent: Component as PayloadComponent,
+      PayloadComponent: Component,
       schemaPath: '',
     })
 
     if (ResolvedComponent) {
       const isRSC = isReactServerComponentOrFunction(ResolvedComponent)
 
-      // prevent $undefined from being passed through RSC requests
+      // prevent $undefined from being passed through rsc requests
       const sanitizedProps = removeUndefined({
         ...clientProps,
         ...(isRSC ? serverProps : {}),
@@ -82,13 +86,4 @@ export const RenderServerComponent: ComponentRenderer = ({
         serverProps,
       })
     : null
-}
-
-/**
- * Returns the RSC-aware component renderer that passes `serverProps`
- * to server components. Kept for adapter back-compat — prefer importing
- * `RenderServerComponent` directly.
- */
-export function getRSCComponentRenderer(): ComponentRenderer {
-  return RenderServerComponent
 }

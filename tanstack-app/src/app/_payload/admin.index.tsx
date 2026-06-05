@@ -32,12 +32,7 @@ export const Route = createFileRoute('/_payload/admin/')({
     return data
   },
   head: ({ loaderData }) => ({
-    meta: getAdminMeta({
-      clientConfig: (loaderData as any)?.metadata?.clientConfig,
-      collectionLabel: (loaderData as any)?.metadata?.collectionLabel,
-      globalLabel: (loaderData as any)?.metadata?.globalLabel,
-      viewType: (loaderData as any)?.metadata?.viewType,
-    }),
+    meta: getAdminMeta((loaderData as any)?.metadata),
   }),
   component: AdminPage,
 })

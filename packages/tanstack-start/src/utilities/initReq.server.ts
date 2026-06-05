@@ -1,5 +1,5 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
-import type { ImportMap, InitReqResult, SanitizedConfig } from 'payload'
+import type { ImportMap, InitReqResult, SanitizedConfig, ServerAdapter } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
 import { getRequest } from '@tanstack/react-start/server'
@@ -24,10 +24,18 @@ export async function initReq({
   configPromise,
   importMap,
   overrides,
+  serverAdapter = tanstackServerAdapter,
 }: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   overrides?: Parameters<typeof createLocalReq>[0]
+  /**
+   * `ServerAdapter` attached to `req.server`. Defaults to the native
+   * `tanstackServerAdapter` (throws TanStack `redirect`/`notFound`). The admin
+   * page render passes an error-contract adapter so navigation thrown mid-render
+   * is caught at the loader boundary and re-thrown as native TanStack nav.
+   */
+  serverAdapter?: ServerAdapter
 }): Promise<InitReqResult> {
   const webRequest = getRequest()
   const headers = new Headers(webRequest.headers)
@@ -81,11 +89,12 @@ export async function initReq({
         i18n: i18n as I18n,
         query: queryFromUrl,
         responseHeaders,
-        // Expose the TanStack `ServerAdapter` so framework-agnostic server
-        // functions can set cookies / redirect via `req.server` (mirrors the
-        // Next.js adapter, which passes `nextServerAdapter`). Required by
-        // handlers like `switch-language`.
-        server: tanstackServerAdapter,
+        // Expose the `ServerAdapter` so framework-agnostic server functions can
+        // set cookies / redirect via `req.server` (mirrors the Next.js adapter,
+        // which passes `nextServerAdapter`). Required by handlers like
+        // `switch-language`. Defaults to the native adapter; the page render
+        // overrides it with the error-contract adapter.
+        server: serverAdapter,
         url: webRequest.url,
         user,
         ...(reqOverrides || {}),

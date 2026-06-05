@@ -1,5 +1,4 @@
 import type {
-  ComponentRenderer,
   PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
@@ -24,34 +23,22 @@ export const DocumentHeader: React.FC<{
   globalConfig?: SanitizedGlobalConfig
   hideTabs?: boolean
   permissions: SanitizedPermissions
-  renderComponent?: ComponentRenderer
   req: PayloadRequest
 }> = (props) => {
-  const {
-    AfterHeader,
-    collectionConfig,
-    globalConfig,
-    hideTabs,
-    permissions,
-    renderComponent,
-    req,
-  } = props
+  const { AfterHeader, collectionConfig, globalConfig, hideTabs, permissions, req } = props
 
   return (
-    <Gutter className={baseClass}>
-      <div className={`${baseClass}__header`}>
-        <RenderTitle className={`${baseClass}__title`} />
-        {!hideTabs && (
-          <DocumentTabs
-            collectionConfig={collectionConfig}
-            globalConfig={globalConfig}
-            permissions={permissions}
-            renderComponent={renderComponent}
-            req={req}
-          />
-        )}
-      </div>
+    <div className={baseClass}>
+      <RenderTitle className={`${baseClass}__title`} />
+      {!hideTabs && (
+        <DocumentTabs
+          collectionConfig={collectionConfig}
+          globalConfig={globalConfig}
+          permissions={permissions}
+          req={req}
+        />
+      )}
       {AfterHeader ? <div className={`${baseClass}__after-header`}>{AfterHeader}</div> : null}
-    </Gutter>
+    </div>
   )
 }

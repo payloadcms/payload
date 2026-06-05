@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -9,8 +10,8 @@ import { useDocumentInfo } from '../../../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../../../providers/EditDepth/index.js'
 import { useSearchParams } from '../../../../providers/RouterAdapter/index.js'
 import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'
-import './index.scss'
 import { useTranslation } from '../../../../providers/Translation/index.js'
+import './index.scss'
 
 export const baseClass = 'version-drawer'
 export const formatVersionDrawerSlug = ({
@@ -78,7 +79,6 @@ export const VersionDrawerContent: React.FC<{
         } catch (error) {
           toast.error(error?.message || t('error:unspecific'))
           closeModal(drawerSlug)
-          // toast.error(data?.errors?.[0].message || t('error:unspecific'))
         }
       }
 
@@ -110,6 +110,7 @@ export const VersionDrawerContent: React.FC<{
 
   return DocumentView
 }
+
 export const VersionDrawer: React.FC<{
   collectionSlug?: string
   docID?: number | string

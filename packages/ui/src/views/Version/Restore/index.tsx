@@ -10,13 +10,13 @@ import { toast } from 'sonner'
 import { Button } from '../../../elements/Button/index.js'
 import { ConfirmationModal } from '../../../elements/ConfirmationModal/index.js'
 import { useModal } from '../../../elements/Modal/index.js'
-import { PopupList } from '../../../elements/Popup/index.js'
+import * as PopupList from '../../../elements/Popup/PopupButtonList/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import './index.css'
 import { requests } from '../../../utilities/api.js'
+import './index.css'
 
 const baseClass = 'restore-version'
 const modalSlug = 'restore-version'
@@ -118,12 +118,11 @@ export const Restore: React.FC<Props> = ({
     <Fragment>
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
         <Button
-          buttonStyle="ghost"
+          buttonStyle="primary"
           className={[canRestoreAsDraft && `${baseClass}__restore-as-draft-button`]
             .filter(Boolean)
             .join(' ')}
           onClick={() => toggleModal(modalSlug)}
-          popupIconSize={16}
           size="medium"
           SubMenuPopupContent={
             canRestoreAsDraft
@@ -137,7 +136,7 @@ export const Restore: React.FC<Props> = ({
               : null
           }
         >
-          {t('general:restore')}
+          {t('version:restoreThisVersion')}
         </Button>
       </div>
       <ConfirmationModal

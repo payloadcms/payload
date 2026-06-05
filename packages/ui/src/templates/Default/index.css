@@ -1,7 +1,7 @@
 @layer payload-default {
   .template-default {
-    background-color: var(--theme-bg);
-    color: var(--theme-text);
+    background-color: var(--color-bg);
+    color: var(--color-text);
   }
 
   .template-default__wrap {
@@ -9,7 +9,9 @@
     width: 100%;
     flex-grow: 1;
     position: relative;
-    background-color: var(--theme-bg);
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg);
 
   }
 

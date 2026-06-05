@@ -2,7 +2,6 @@ import type {
   BuildFormStateArgs,
   ClientConfig,
   ClientUser,
-  ComponentRenderer,
   ErrorResult,
   FormState,
   ServerFunction,
@@ -11,7 +10,6 @@ import type {
 import { canAccessAdmin, formatErrors, UnauthorizedError } from 'payload'
 import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
-import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
 import { getClientConfig } from './getClientConfig.js'
@@ -63,11 +61,11 @@ export const buildFormStateHandler: ServerFunction<
   BuildFormStateArgs,
   Promise<BuildFormStateResult>
 > = async (args) => {
-  const { renderComponent, req } = args
+  const { req } = args
 
   try {
     await canAccessAdmin({ req })
-    const res = await buildFormState(args, renderComponent || RenderServerComponent)
+    const res = await buildFormState(args)
 
     return res
   } catch (err) {
@@ -89,7 +87,6 @@ export const buildFormStateHandler: ServerFunction<
 
 export const buildFormState = async (
   args: BuildFormStateArgs,
-  renderComponent?: ComponentRenderer,
 ): Promise<BuildFormStateSuccessResult> => {
   const {
     id: idFromArgs,
@@ -226,7 +223,6 @@ export const buildFormState = async (
     previousFormState: formState,
     readOnly,
     renderAllFields,
-    renderComponent: renderComponent || RenderServerComponent,
     renderFieldFn: renderField,
     req,
     schemaPath,

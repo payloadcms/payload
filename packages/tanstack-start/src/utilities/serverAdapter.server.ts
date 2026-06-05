@@ -103,3 +103,28 @@ export const tanstackServerAdapter: ServerAdapter = {
     setResponseHeader('Set-Cookie', serializeCookie(name, value, options))
   },
 }
+
+/**
+ * `ServerAdapter` for the admin page render (`renderRoot`). Identical to
+ * `tanstackServerAdapter` for cookies/headers, but navigation throws the
+ * framework-agnostic string error-contract (`Error('not-found')` /
+ * `Error('redirect:<url>')`) instead of TanStack's native `notFound`/`redirect`.
+ *
+ * `renderRoot` navigates via `req.server.*` while rendering, deep inside a
+ * `createServerFn` handler — a spot where TanStack's native `redirect`/`notFound`
+ * cannot be thrown reliably (they must surface at the loader boundary). The
+ * admin-page server function catches this contract and returns a sentinel; the
+ * route loader then re-throws the native TanStack nav.
+ */
+export const errorContractServerAdapter: ServerAdapter = {
+  ...tanstackServerAdapter,
+  notFound: () => {
+    throw new Error('not-found')
+  },
+  permanentRedirect: (path: string) => {
+    throw new Error(`redirect:${path}`)
+  },
+  redirect: (path: string) => {
+    throw new Error(`redirect:${path}`)
+  },
+}

@@ -1,16 +1,7 @@
 'use client'
-import type {
-  ClientBlock,
-  ClientField,
-  ImportMap,
-  Labels,
-  PayloadComponent,
-  Row,
-  SanitizedFieldPermissions,
-} from 'payload'
+import type { ClientBlock, ClientField, Labels, Row, SanitizedFieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getFromImportMap } from 'payload/shared'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
@@ -34,13 +25,11 @@ type BlocksFieldProps = {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ClientBlock
   blocks: (ClientBlock | string)[] | ClientBlock[]
-  clientRowLabelPath?: PayloadComponent
   copyRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   fields: ClientField[]
   hasMaxRows?: boolean
-  importMap?: ImportMap | null
   isLoading?: boolean
   isSortable?: boolean
   Label?: React.ReactNode
@@ -64,13 +53,11 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   attributes,
   block,
   blocks,
-  clientRowLabelPath,
   copyRow,
   duplicateRow,
   errorCount,
   fields,
   hasMaxRows,
-  importMap,
   isDragging,
   isLoading: isLoadingFromProps,
   isSortable,
@@ -195,37 +182,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
           ) : (
             <div className={`${baseClass}__block-header`}>
               <RowLabel
-                CustomComponent={
-                  Label ||
-                  (importMap && clientRowLabelPath
-                    ? (() => {
-                        const Comp = getFromImportMap<React.ComponentType<any>>({
-                          importMap,
-                          PayloadComponent: clientRowLabelPath,
-                          schemaPath: '',
-                          silent: true,
-                        })
-                        if (!Comp) {
-                          return undefined
-                        }
-                        const extraProps =
-                          typeof clientRowLabelPath === 'object' &&
-                          clientRowLabelPath &&
-                          'clientProps' in clientRowLabelPath
-                            ? clientRowLabelPath.clientProps
-                            : undefined
-                        return (
-                          <Comp
-                            blockType={row.blockType}
-                            path={path}
-                            rowLabel={`${getTranslation(block.labels.singular, i18n)} ${String(rowIndex + 1).padStart(2, '0')}`}
-                            rowNumber={rowIndex}
-                            {...(extraProps as any)}
-                          />
-                        )
-                      })()
-                    : undefined)
-                }
+                CustomComponent={Label}
                 label={
                   <>
                     <span className={`${baseClass}__block-number`}>

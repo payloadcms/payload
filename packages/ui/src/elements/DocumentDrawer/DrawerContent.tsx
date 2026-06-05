@@ -24,20 +24,17 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   onSave: onSaveFromProps,
   overrideEntityVisibility = true,
   redirectAfterCreate,
-  redirectAfterDelete: redirectAfterDeleteProp,
-  redirectAfterDuplicate: redirectAfterDuplicateProp,
-  redirectAfterRestore: redirectAfterRestoreProp,
+  redirectAfterDelete,
+  redirectAfterDuplicate,
+  redirectAfterRestore,
 }) => {
-  const redirectAfterDelete = redirectAfterDeleteProp ?? false
-  const redirectAfterDuplicate = redirectAfterDuplicateProp ?? false
-  const redirectAfterRestore = redirectAfterRestoreProp ?? false
   const { getEntityConfig } = useConfig()
 
   const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug }))
 
   const abortGetDocumentViewRef = React.useRef<AbortController>(null)
 
-  const { closeModal, isModalOpen } = useModal()
+  const { closeModal } = useModal()
   const { t } = useTranslation()
 
   const { renderDocument } = useServerFunctions()
@@ -65,9 +62,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
             initialData,
             overrideEntityVisibility,
             redirectAfterCreate,
-            redirectAfterDelete,
-            redirectAfterDuplicate,
-            redirectAfterRestore,
+            redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
+            redirectAfterDuplicate:
+              redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,
+            redirectAfterRestore: redirectAfterRestore !== undefined ? redirectAfterRestore : false,
             signal: controller.signal,
           })
 
@@ -102,19 +100,19 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   )
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
-    async (args) => {
+    (args) => {
+      if (args.operation === 'create') {
+        getDocumentView(args.doc.id)
+      }
+
       if (typeof onSaveFromProps === 'function') {
-        await onSaveFromProps({
+        void onSaveFromProps({
           ...args,
           collectionConfig,
         })
       }
-
-      if (args.operation === 'create' && isModalOpen(drawerSlug)) {
-        getDocumentView(args.doc.id)
-      }
     },
-    [onSaveFromProps, collectionConfig, drawerSlug, getDocumentView, isModalOpen],
+    [onSaveFromProps, collectionConfig, getDocumentView],
   )
 
   const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(

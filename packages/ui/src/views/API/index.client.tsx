@@ -5,6 +5,7 @@ import * as React from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '../../elements/Button/index.js'
+import { CodeEditor as CodeEditorLazy } from '../../elements/CodeEditor/index.js'
 import { CheckboxField } from '../../fields/Checkbox/index.js'
 import { NumberField } from '../../fields/Number/index.js'
 import { TextInput } from '../../fields/Text/Input.js'
@@ -16,10 +17,9 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { SetDocumentStepNav } from '../Edit/SetDocumentStepNav/index.js'
-import { LocaleSelector } from './LocaleSelector/index.js'
-import { RenderJSON } from './RenderJSON/index.js'
+import { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'
 import './index.css'
+import { LocaleSelector } from './LocaleSelector/index.js'
 
 const baseClass = 'query-inspector'
 
@@ -70,6 +70,18 @@ export const APIViewClient: React.FC = () => {
   const [fullscreen, setFullscreen] = React.useState<boolean>(false)
   const [origin, setOrigin] = React.useState<string>(serverURL || '')
 
+  const jsonString = React.useMemo(
+    () => (data === undefined ? '' : JSON.stringify(data, null, 2)),
+    [data],
+  )
+
+  // readOnly editors never fire onChange, so bump a counter to re-fit height on data change
+  const [recalculatedHeightAt, setRecalculatedHeightAt] = React.useState(0)
+  React.useEffect(() => {
+    setRecalculatedHeightAt((count) => count + 1)
+  }, [jsonString])
+
+  // Set the origin to the window.location.origin in useEffect to avoid hydration errors
   React.useEffect(() => {
     if (!serverURL) {
       setOrigin(window.location.origin)
@@ -134,31 +146,6 @@ export const APIViewClient: React.FC = () => {
       />
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__configuration`}>
-          <div className={`${baseClass}__api-url`}>
-            <span className={`${baseClass}__label`}>API URL</span>
-            <Button
-              aria-label={t('general:openInNewWindow')}
-              buttonStyle="ghost"
-              className={`${baseClass}__api-url-open-button`}
-              el="anchor"
-              icon={<ExternalLinkIcon size={16} />}
-              margin={false}
-              newTab
-              url={fetchURL}
-            />
-          </div>
-          <div className={`${baseClass}__api-url-field`}>
-            <TextInput
-              className={`${baseClass}__api-url-input`}
-              htmlAttributes={{
-                'aria-label': 'API URL',
-                readOnly: true,
-              }}
-              path="api-url"
-              readOnly={false}
-              value={fetchURL}
-            />
-          </div>
           <Form
             initialState={{
               authenticated: {
@@ -184,26 +171,6 @@ export const APIViewClient: React.FC = () => {
             }}
           >
             <div className={`${baseClass}__form-fields`}>
-              <div className={`${baseClass}__filter-query-checkboxes`}>
-                {draftsEnabled && (
-                  <CheckboxField
-                    field={{
-                      name: 'draft',
-                      label: t('version:draft'),
-                    }}
-                    onChange={() => setDraft(!draft)}
-                    path="draft"
-                  />
-                )}
-                <CheckboxField
-                  field={{
-                    name: 'authenticated',
-                    label: t('authentication:authenticated'),
-                  }}
-                  onChange={() => setAuthenticated(!authenticated)}
-                  path="authenticated"
-                />
-              </div>
               {localeOptions && (
                 <LocaleSelector localeOptions={localeOptions} onChange={setLocale} />
               )}
@@ -220,22 +187,79 @@ export const APIViewClient: React.FC = () => {
                 onChange={(value) => setDepth(value?.toString())}
                 path="depth"
               />
+              {draftsEnabled && (
+                <CheckboxField
+                  field={{
+                    name: 'draft',
+                    label: t('version:draft'),
+                  }}
+                  onChange={() => setDraft(!draft)}
+                  path="draft"
+                />
+              )}
+              <CheckboxField
+                field={{
+                  name: 'authenticated',
+                  label: t('authentication:authenticated'),
+                }}
+                onChange={() => setAuthenticated(!authenticated)}
+                path="authenticated"
+              />
             </div>
           </Form>
         </div>
         <div className={`${baseClass}__results-wrapper`}>
-          <div className={`${baseClass}__toggle-fullscreen-button-container`}>
-            <button
-              aria-label="toggle fullscreen"
-              className={`${baseClass}__toggle-fullscreen-button`}
-              onClick={() => setFullscreen(!fullscreen)}
-              type="button"
-            >
-              <MinimizeMaximizeIcon isMinimized={!fullscreen} />
-            </button>
+          <div className={`${baseClass}__results-bar`}>
+            <div className={`${baseClass}__api-url-field`}>
+              <TextInput
+                className={`${baseClass}__api-url-input`}
+                htmlAttributes={{
+                  'aria-label': 'API URL',
+                  readOnly: true,
+                }}
+                path="api-url"
+                readOnly={false}
+                value={fetchURL}
+              />
+            </div>
+            <div className={`${baseClass}__results-bar-actions`}>
+              <Button
+                aria-label={t('general:openInNewWindow')}
+                buttonStyle="secondary"
+                className={`${baseClass}__api-url-open-button`}
+                el="anchor"
+                icon={<ExternalLinkIcon size={16} />}
+                margin={false}
+                newTab
+                size="large"
+                url={fetchURL}
+              />
+              <Button
+                aria-label="toggle fullscreen"
+                buttonStyle="secondary"
+                className={`${baseClass}__toggle-fullscreen-button`}
+                icon={<MinimizeMaximizeIcon isMinimized={!fullscreen} />}
+                margin={false}
+                onClick={() => setFullscreen(!fullscreen)}
+                size="large"
+              />
+            </div>
           </div>
           <div className={`${baseClass}__results`}>
-            <RenderJSON object={data} />
+            <CodeEditorLazy
+              defaultLanguage="json"
+              height="100%"
+              options={{
+                fixedOverflowWidgets: true,
+                folding: true,
+                lineNumbers: 'on',
+                stickyScroll: { enabled: false },
+                wordWrap: 'off',
+              }}
+              readOnly
+              recalculatedHeightAt={recalculatedHeightAt}
+              value={jsonString}
+            />
           </div>
         </div>
       </div>

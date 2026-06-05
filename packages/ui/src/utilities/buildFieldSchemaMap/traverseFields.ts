@@ -1,7 +1,8 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Field, FieldSchemaMap, SanitizedConfig, TabAsField } from 'payload'
 
-import { fieldAffectsData, getFieldPaths, MissingEditorProp, tabHasName } from 'payload/shared'
+import { MissingEditorProp } from 'payload'
+import { fieldAffectsData, getFieldPaths, tabHasName } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig

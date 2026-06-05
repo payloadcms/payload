@@ -1,5 +1,4 @@
 import type {
-  ComponentRenderer,
   DashboardConfig,
   PayloadRequest,
   ServerFunction,
@@ -9,7 +8,7 @@ import type {
 
 import type { WidgetInstanceClient, WidgetItem } from '../index.client.js'
 
-import { RenderClientComponent } from '../../../../../elements/RenderServerComponent/clientOnly.js'
+import { RenderServerComponent } from '../../../../../elements/RenderServerComponent/index.js'
 
 export type GetDefaultLayoutServerFnArgs = Record<string, never>
 
@@ -24,7 +23,7 @@ export type GetDefaultLayoutServerFnReturnType = {
 export const getDefaultLayoutHandler: ServerFunction<
   GetDefaultLayoutServerFnArgs,
   Promise<GetDefaultLayoutServerFnReturnType>
-> = async ({ cookies, locale, permissions, renderComponent, req }) => {
+> = async ({ cookies, locale, permissions, req }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -34,18 +33,16 @@ export const getDefaultLayoutHandler: ServerFunction<
 
   const layoutItems = await getItemsFromConfig(defaultLayout, req, widgets)
 
-  const render: ComponentRenderer = renderComponent || RenderClientComponent
   const layout: WidgetInstanceClient[] = layoutItems.map((layoutItem) => {
     const widgetSlug = layoutItem.id.slice(0, layoutItem.id.lastIndexOf('-'))
     return {
-      component: render({
+      component: RenderServerComponent({
         Component: widgets.find((widget) => widget.slug === widgetSlug)?.Component,
         importMap,
         serverProps: {
           cookies,
           locale,
           permissions,
-          renderComponent: render,
           req,
           widgetData: layoutItem.data || {},
           widgetSlug,

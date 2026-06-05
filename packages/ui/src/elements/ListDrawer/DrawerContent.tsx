@@ -3,7 +3,7 @@ import type { CollectionSlug, ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { hoistQueryParamsToAnd } from 'payload/shared'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { ListDrawerContextProps, ListDrawerContextType } from '../ListDrawer/Provider.js'
 import type {
@@ -49,26 +49,16 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     return collectionSlugs.includes(slug)
   })
 
-  const getCollectionOption = useCallback(
-    (collectionSlug?: CollectionSlug) => {
-      if (!collectionSlug) {
-        return undefined
-      }
-
-      const found = getEntityConfig({ collectionSlug })
-
-      return {
-        label: found?.labels || collectionSlug,
-        value: collectionSlug,
-      }
-    },
-    [getEntityConfig],
-  )
-
   const [selectedOption, setSelectedOption] = useState<Option<string>>(() => {
-    const initialSelection =
-      collectionSlugFromProps || enabledCollections[0]?.slug || collectionSlugs[0]
-    return getCollectionOption(initialSelection)
+    const initialSelection = collectionSlugFromProps || enabledCollections[0]?.slug
+    const found = getEntityConfig({ collectionSlug: initialSelection })
+
+    return found
+      ? {
+          label: found.labels,
+          value: found.slug,
+        }
+      : undefined
   })
 
   const [DocumentDrawer, DocumentDrawerToggler, { drawerSlug: documentDrawerSlug }] =
@@ -78,7 +68,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const updateSelectedOption = useEffectEvent((collectionSlug: CollectionSlug) => {
     if (collectionSlug && collectionSlug !== selectedOption?.value) {
-      setSelectedOption(getCollectionOption(collectionSlug))
+      setSelectedOption({
+        label: getEntityConfig({ collectionSlug })?.labels,
+        value: collectionSlug,
+      })
     }
   })
 
@@ -86,12 +79,13 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     updateSelectedOption(collectionSlugFromProps)
   }, [collectionSlugFromProps])
 
-  const hasLoadedRef = useRef(false)
-
+  /**
+   * This performs a full server round trip to get the list view for the selected collection.
+   * On the server, the data is freshly queried for the list view and all components are fully rendered.
+   * This work includes building column state, rendering custom components, etc.
+   */
   const refresh = useCallback(
     async ({ slug, query }: { query?: ListQuery; slug: string }) => {
-      const isInitialLoad = !hasLoadedRef.current
-
       try {
         const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
 
@@ -102,7 +96,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         }
 
         if (slug) {
-          const result = (await serverFunction({
+          const result: RenderListServerFnReturnType = (await serverFunction({
             name: 'render-list',
             args: {
               collectionSlug: slug,
@@ -116,24 +110,15 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             } satisfies RenderListServerFnArgs,
           })) as RenderListServerFnReturnType
 
-          if (result?.List) {
-            setListView(result.List)
-            hasLoadedRef.current = true
-          } else if (isInitialLoad) {
-            setListView(null)
-          }
-        } else if (isInitialLoad) {
+          setListView(result?.List || null)
+        } else {
           setListView(null)
         }
         setIsLoading(false)
       } catch (_err) {
         console.error('Error rendering List View: ', _err) // eslint-disable-line no-console
 
-        // Closing the drawer on a refresh error nukes the user's open list
-        // view (and any nested document drawers) and is too destructive past
-        // the initial load. Only force-close when the drawer has never
-        // successfully rendered a list view.
-        if (isOpen && isInitialLoad) {
+        if (isOpen) {
           closeModal(drawerSlug)
         }
       }
@@ -190,12 +175,15 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const refreshSelf: ListDrawerContextType['refresh'] = useCallback(
     async (incomingCollectionSlug) => {
       if (incomingCollectionSlug) {
-        setSelectedOption(getCollectionOption(incomingCollectionSlug))
+        setSelectedOption({
+          label: getEntityConfig({ collectionSlug: incomingCollectionSlug })?.labels,
+          value: incomingCollectionSlug,
+        })
       }
 
       await refresh({ slug: selectedOption.value || incomingCollectionSlug })
     },
-    [getCollectionOption, refresh, selectedOption.value],
+    [getEntityConfig, refresh, selectedOption.value],
   )
 
   if (isLoading) {

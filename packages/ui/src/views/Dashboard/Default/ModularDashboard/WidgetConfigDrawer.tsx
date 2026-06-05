@@ -6,7 +6,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import { Drawer } from '../../../../elements/Drawer/index.js'
-import { DrawerContentContainer } from '../../../../elements/DrawerContentContainer/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'
 import { ShimmerEffect } from '../../../../elements/ShimmerEffect/index.js'
 import { Form } from '../../../../forms/Form/index.js'
@@ -129,31 +128,29 @@ export function WidgetConfigDrawer({
       {initialState === false ? (
         <ShimmerEffect height="250px" />
       ) : (
-        <DrawerContentContainer className="widget-config-drawer__content">
-          <OperationProvider operation="update">
-            <Form
+        <OperationProvider operation="update">
+          <Form
+            fields={fields}
+            initialState={initialState}
+            onChange={[onChange]}
+            onSubmit={(_, data) => {
+              onSave(mergeLocaleData(widgetData ?? {}, data, localeCode, fields))
+              closeModal(drawerSlug)
+            }}
+            uuid={formUUID}
+          >
+            <RenderFields
               fields={fields}
-              initialState={initialState}
-              onChange={[onChange]}
-              onSubmit={(_, data) => {
-                onSave(mergeLocaleData(widgetData ?? {}, data, localeCode, fields))
-                closeModal(drawerSlug)
-              }}
-              uuid={formUUID}
-            >
-              <RenderFields
-                fields={fields}
-                forceRender
-                parentIndexPath=""
-                parentPath=""
-                parentSchemaPath={widget.slug}
-                permissions={true}
-                readOnly={false}
-              />
-              <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
-            </Form>
-          </OperationProvider>
-        </DrawerContentContainer>
+              forceRender
+              parentIndexPath=""
+              parentPath=""
+              parentSchemaPath={widget.slug}
+              permissions={true}
+              readOnly={false}
+            />
+            <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+          </Form>
+        </OperationProvider>
       )}
     </Drawer>
   )

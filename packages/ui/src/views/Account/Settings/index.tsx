@@ -3,11 +3,15 @@ import type { BasePayload, Config, LanguageOptions, TypedUser } from 'payload'
 
 import React from 'react'
 
-import { FieldLabel } from '../../../fields/FieldLabel/index.js'
-import { ResetPreferences } from '../ResetPreferences/index.js'
-import { ToggleHighContrast } from '../ToggleHighContrast/index.js'
-import { ToggleTheme } from '../ToggleTheme/index.js'
-import { LanguageSelector } from './LanguageSelector.js'
+/* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds */
+import {
+  FieldLabel,
+  AccountLanguageSelector as LanguageSelector,
+  AccountResetPreferences as ResetPreferences,
+  AccountToggleHighContrast as ToggleHighContrast,
+  AccountToggleTheme as ToggleTheme,
+} from '../../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
 import './index.css'
 
 const baseClass = 'payload-settings'

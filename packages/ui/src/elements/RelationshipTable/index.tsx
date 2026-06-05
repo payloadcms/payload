@@ -146,7 +146,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           ? !field.admin.disableRowTypes
           : Array.isArray(relationTo)
 
-      const result = await getTableState({
+      const {
+        data: newData,
+        state: newColumnState,
+        Table: NewTable,
+      } = await getTableState({
         collectionSlug: relationTo,
         columns: transformColumnsToPreferences(query?.columns) || defaultColumns,
         data,
@@ -161,14 +165,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         tableAppearance: 'condensed',
       })
 
-      if (!result) {
-        setIsLoadingTable(false)
-        return
-      }
-
-      setData(result.data)
-      setTable(result.Table)
-      setColumnState(result.state)
+      setData(newData)
+      setTable(NewTable)
+      setColumnState(newColumnState)
       setIsLoadingTable(false)
     },
     [

@@ -6,8 +6,10 @@ import { useEffect, useId } from 'react'
 import { Button } from '../../../../elements/Button/index.js'
 import { DrawerToggler } from '../../../../elements/Drawer/index.js'
 import { ItemsDrawer } from '../../../../elements/ItemsDrawer/index.js'
-import { type Option, ReactSelect } from '../../../../elements/ReactSelect/index.js'
+import { Popup } from '../../../../elements/Popup/index.js'
+import * as PopupList from '../../../../elements/Popup/PopupButtonList/index.js'
 import { useStepNav } from '../../../../elements/StepNav/index.js'
+import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 
 export function DashboardStepNav({
@@ -82,7 +84,7 @@ export function DashboardBreadcrumbDropdown(props: {
         <span>{t('dashboard:editingDashboard')}</span>
         <div className="dashboard-breadcrumb-dropdown__actions">
           <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
-            <Button buttonStyle="pill" el="span" size="medium">
+            <Button buttonStyle="primary" el="span" size="medium">
               {t('dashboard:addButton')}
             </Button>
           </DrawerToggler>
@@ -97,32 +99,45 @@ export function DashboardBreadcrumbDropdown(props: {
     )
   }
 
-  const options = [
-    { label: t('dashboard:editDashboard'), value: 'edit' },
-    { label: t('dashboard:resetLayout'), value: 'reset' },
-  ]
-
-  const handleChange = (selectedOption: Option | Option[]) => {
-    // Since isMulti is false, we expect a single Option
-    const option = Array.isArray(selectedOption) ? selectedOption[0] : selectedOption
-
-    if (option?.value === 'edit') {
-      onEditClick()
-    } else if (option?.value === 'reset') {
-      onResetLayout()
-    }
-  }
-
   return (
-    <ReactSelect
-      className="dashboard-breadcrumb-select"
-      isClearable={false}
-      isSearchable={false}
-      menuIsOpen={undefined} // Let ReactSelect handle open/close
-      onChange={handleChange}
-      options={options}
-      placeholder={t('general:dashboard')}
-      value={{ label: t('general:dashboard'), value: 'dashboard' }}
+    <Popup
+      className="dashboard-breadcrumb-dropdown"
+      horizontalAlign="left"
+      render={({ close }) => (
+        <PopupList.ButtonGroup>
+          <PopupList.Button
+            onClick={() => {
+              close()
+              onEditClick()
+            }}
+          >
+            {t('dashboard:editDashboard')}
+          </PopupList.Button>
+          <PopupList.Button
+            onClick={() => {
+              close()
+              onResetLayout()
+            }}
+          >
+            {t('dashboard:resetLayout')}
+          </PopupList.Button>
+        </PopupList.ButtonGroup>
+      )}
+      renderButton={({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
+        <Button
+          aria-label={t('general:dashboard')}
+          buttonStyle="ghost"
+          extraButtonProps={{ onKeyDown }}
+          onClick={onClick}
+          {...ariaProps}
+        >
+          <span className="dashboard-breadcrumb-dropdown__label">
+            {t('general:dashboard')}
+            <ChevronIcon direction="down" size={16} />
+          </span>
+        </Button>
+      )}
+      size="large"
     />
   )
 }

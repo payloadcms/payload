@@ -10,6 +10,7 @@ import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
+import type { Metadata } from 'next'
 import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
@@ -262,43 +263,11 @@ export type OGImageConfig = {
 }
 
 /**
- * Framework-agnostic admin page metadata.
- * Framework adapters map this to their own metadata format
- * (e.g., Next.js `Metadata` type).
+ * @todo find a way to remove the deep clone here.
+ * It can probably be removed after the `DeepRequired` from `Config` to `SanitizedConfig` is removed.
+ * Same with `CollectionConfig` to `SanitizedCollectionConfig`.
  */
-export type AdminMeta = {
-  description?: string
-  icons?: {
-    apple?: Array<{ sizes?: string; url: string }> | string
-    icon?: Array<{ sizes?: string; type?: string; url: string }> | string
-    shortcut?: string
-  } | null
-  keywords?: string | string[]
-  openGraph?: {
-    description?: string
-    images?: Array<{ alt?: string; height?: number; url: string; width?: number }> | string
-    siteName?: string
-    title?: string
-    type?: string
-    url?: string
-  } | null
-  robots?: string
-  title?:
-    | {
-        absolute?: string
-        default?: string
-        template?: string
-      }
-    | null
-    | string
-  twitter?: {
-    card?: 'app' | 'player' | 'summary' | 'summary_large_image'
-    description?: string
-    images?: Array<{ alt?: string; url: string }> | string
-    site?: string
-    title?: string
-  } | null
-}
+type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
 
 export type MetaConfig = {
   /**
@@ -313,7 +282,7 @@ export type MetaConfig = {
    * @example `" - Custom CMS"`
    */
   titleSuffix?: string
-} & AdminMeta
+} & DeepClone<Metadata>
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<RootLivePreviewConfig, 'url'>
 

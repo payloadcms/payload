@@ -14,9 +14,6 @@ import { Form } from '../../../forms/Form/index.js'
 import { FormSubmit } from '../../../forms/Submit/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import './index.css'
-
-const baseClass = 'forgot-password__form'
 
 export const ForgotPasswordForm: React.FC = () => {
   const { config, getEntityConfig } = useConfig()
@@ -78,7 +75,6 @@ export const ForgotPasswordForm: React.FC = () => {
         apiRoute,
         path: `/${userSlug}/forgot-password`,
       })}
-      className={baseClass}
       handleResponse={handleResponse}
       initialState={initialState}
       method="POST"
@@ -92,66 +88,62 @@ export const ForgotPasswordForm: React.FC = () => {
         heading={t('authentication:forgotPassword')}
       />
 
-      <div className={`${baseClass}__inputWrap`}>
-        {loginWithUsername ? (
-          <TextField
-            field={{
+      {loginWithUsername ? (
+        <TextField
+          field={{
+            name: 'username',
+            label: t('authentication:username'),
+            required: true,
+          }}
+          path="username"
+          validate={(value) =>
+            text(value, {
               name: 'username',
-              label: t('authentication:username'),
+              type: 'text',
+              blockData: {},
+              data: {},
+              event: 'onChange',
+              path: ['username'],
+              preferences: { fields: {} },
+              req: {
+                payload: {
+                  config,
+                },
+                t,
+              } as unknown as PayloadRequest,
               required: true,
-            }}
-            path="username"
-            validate={(value) =>
-              text(value, {
-                name: 'username',
-                type: 'text',
-                blockData: {},
-                data: {},
-                event: 'onChange',
-                path: ['username'],
-                preferences: { fields: {} },
-                req: {
-                  payload: {
-                    config,
-                  },
-                  t,
-                } as unknown as PayloadRequest,
-                required: true,
-                siblingData: {},
-              })
-            }
-          />
-        ) : (
-          <EmailField
-            field={{
+              siblingData: {},
+            })
+          }
+        />
+      ) : (
+        <EmailField
+          field={{
+            name: 'email',
+            admin: {
+              autoComplete: 'email',
+            },
+            label: t('general:email'),
+            required: true,
+          }}
+          path="email"
+          validate={(value) =>
+            email(value, {
               name: 'email',
-              admin: {
-                autoComplete: 'email',
-              },
-              label: t('general:email'),
+              type: 'email',
+              blockData: {},
+              data: {},
+              event: 'onChange',
+              path: ['email'],
+              preferences: { fields: {} },
+              req: { payload: { config }, t } as unknown as PayloadRequest,
               required: true,
-            }}
-            path="email"
-            validate={(value) =>
-              email(value, {
-                name: 'email',
-                type: 'email',
-                blockData: {},
-                data: {},
-                event: 'onChange',
-                path: ['email'],
-                preferences: { fields: {} },
-                req: { payload: { config }, t } as unknown as PayloadRequest,
-                required: true,
-                siblingData: {},
-              })
-            }
-          />
-        )}
-      </div>
-      <div className={`${baseClass}__actions`}>
-        <FormSubmit size="large">{t('general:submit')}</FormSubmit>
-      </div>
+              siblingData: {},
+            })
+          }
+        />
+      )}
+      <FormSubmit size="large">{t('general:submit')}</FormSubmit>
     </Form>
   )
 }

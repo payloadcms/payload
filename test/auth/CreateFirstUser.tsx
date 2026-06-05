@@ -1,5 +1,6 @@
 import type { AdminViewServerProps } from 'payload'
 
+import { CreateFirstUserView } from '@payloadcms/ui/views/CreateFirstUser'
 import React from 'react'
 
 const CustomMarker = () => (
@@ -13,7 +14,6 @@ const CustomMarker = () => (
  * and receives AdminViewServerProps.
  */
 async function NextCreateFirstUser(props: AdminViewServerProps) {
-  const { CreateFirstUserView } = await import('@payloadcms/next/views')
   const builtInView = await CreateFirstUserView(props)
 
   return (

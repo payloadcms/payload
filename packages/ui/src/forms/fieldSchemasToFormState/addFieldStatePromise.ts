@@ -1,7 +1,6 @@
 import type {
   BuildFormStateArgs,
   ClientFieldSchemaMap,
-  ComponentRenderer,
   Data,
   DocumentPreferences,
   Field,
@@ -87,7 +86,6 @@ export type AddFieldStatePromiseArgs = {
   previousFormState: FormState
   readOnly?: boolean
   renderAllFields: boolean
-  renderComponent: ComponentRenderer
   renderFieldFn: RenderFieldMethod
   /**
    * Req is used for validation and defaultValue calculation. If you don't need validation,
@@ -140,7 +138,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     previousFormState,
     readOnly,
     renderAllFields,
-    renderComponent,
     renderFieldFn,
     req,
     schemaPath,
@@ -349,7 +346,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 previousFormState,
                 readOnly,
                 renderAllFields,
-                renderComponent,
                 renderFieldFn,
                 req,
                 select: typeof arraySelect === 'object' ? arraySelect : undefined,
@@ -578,7 +574,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   previousFormState,
                   readOnly,
                   renderAllFields,
-                  renderComponent,
                   renderFieldFn,
                   req,
                   select: typeof blockSelect === 'object' ? blockSelect : undefined,
@@ -686,7 +681,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           previousFormState,
           readOnly,
           renderAllFields,
-          renderComponent,
           renderFieldFn,
           req,
           select: typeof groupSelect === 'object' ? groupSelect : undefined,
@@ -861,7 +855,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       previousFormState,
       readOnly,
       renderAllFields,
-      renderComponent,
       renderFieldFn,
       req,
       skipConditionChecks,
@@ -946,7 +939,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       previousFormState,
       readOnly,
       renderAllFields,
-      renderComponent,
       renderFieldFn,
       req,
       select: tabSelect,
@@ -986,7 +978,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       preferences,
       previousFormState,
       renderAllFields,
-      renderComponent,
       renderFieldFn,
       req,
       select,
@@ -1044,7 +1035,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       previousFieldState: previousFormState?.[path],
       readOnly,
       renderAllFields,
-      renderComponent,
       req,
       schemaPath,
       siblingData: data,

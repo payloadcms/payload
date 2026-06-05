@@ -7,10 +7,16 @@ import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/co
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import React, { useMemo, useState } from 'react'
 
-import { Popup, PopupList } from '../../../../elements/Popup/index.js'
+import { Popup } from '../../../../elements/Popup/index.js'
+import * as PopupList from '../../../../elements/Popup/PopupButtonList/index.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { XIcon } from '../../../../icons/X/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
+import { DashboardStepNav } from './DashboardStepNav.js'
+import { useDashboardLayout } from './useDashboardLayout.js'
+import { closestInXAxis } from './utils/collisionDetection.js'
+import { useDashboardSensors } from './utils/sensors.js'
+import { WidgetEditControl } from './WidgetEditControl.js'
 
 /**
  * Custom modifier that only applies snapCenterToCursor for pointer events.
@@ -27,12 +33,6 @@ const snapCenterToCursorOnlyForPointer: Modifier = (args) => {
 
   return snapCenterToCursor(args)
 }
-
-import { DashboardStepNav } from './DashboardStepNav.js'
-import { useDashboardLayout } from './useDashboardLayout.js'
-import { closestInXAxis } from './utils/collisionDetection.js'
-import { useDashboardSensors } from './utils/sensors.js'
-import { WidgetEditControl } from './WidgetEditControl.js'
 
 export type WidgetItem = {
   data?: Record<string, unknown>
@@ -157,7 +157,6 @@ export function ModularDashboardClient({
                 id={widget.item.id}
                 style={{
                   width: `${WIDTH_TO_PERCENTAGE[widget.item.width]}%`,
-                  padding: '6px',
                 }}
                 width={widget.item.width}
               >
@@ -373,7 +372,7 @@ function DroppableItem({ id, position }: { id: string; position: 'after' | 'befo
         bottom: 0,
         borderRadius: '1000px',
         width: '4px',
-        backgroundColor: isOver ? 'var(--theme-success-400)' : 'transparent',
+        backgroundColor: isOver ? 'var(--color-bg-success)' : 'transparent',
         marginBottom: '10px',
         marginTop: '10px',
         pointerEvents: 'none',

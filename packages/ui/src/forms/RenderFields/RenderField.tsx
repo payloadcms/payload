@@ -7,7 +7,6 @@ import type {
   SanitizedFieldPermissions,
 } from 'payload'
 
-import { getFromImportMap } from 'payload/shared'
 import React from 'react'
 
 import { ArrayField } from '../../fields/Array/index.js'
@@ -34,8 +33,6 @@ import { TextareaField } from '../../fields/Textarea/index.js'
 import { UIField } from '../../fields/UI/index.js'
 import { UploadField } from '../../fields/Upload/index.js'
 import { useFormFields } from '../../forms/Form/index.js'
-import { WatchCondition } from '../../forms/withCondition/WatchCondition.js'
-import { useImportMap } from '../../providers/ImportMap/index.js'
 
 type RenderFieldProps = {
   clientFieldConfig: ClientField
@@ -56,18 +53,6 @@ export function RenderField({
 }: RenderFieldProps) {
   const CustomField = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
 
-  // Stable primitive selector — avoids new object references on every call which would cause
-  // use-context-selector to perpetually dispatch re-renders (infinite loop with Lexical).
-  const clientFieldComponentPathValue = useFormFields(
-    ([fields]) => fields?.[path]?.clientFieldComponentPath,
-  )
-
-  const clientFieldComponentProps = useFormFields(
-    ([fields]) => fields?.[path]?.clientFieldComponentProps,
-  )
-
-  const importMap = useImportMap()
-
   const baseFieldProps: Pick<
     ClientComponentProps,
     'forceRender' | 'permissions' | 'readOnly' | 'schemaPath'
@@ -82,53 +67,8 @@ export function RenderField({
     return <HiddenField {...baseFieldProps} path={path} />
   }
 
-  // For richText fields with a clientFieldComponentPath, skip the CustomField check so the
-  // import-map resolution in the switch/case below can provide the required extra props
-  // (features, featureClientSchemaMap, etc.). Only do this when the import map is available
-  // (non-RSC adapters like TanStack that mount ImportMapProvider). In Next.js the import map
-  // context is null, so the RSC-rendered CustomField must be used instead.
-  if (
-    CustomField !== undefined &&
-    !(clientFieldConfig.type === 'richText' && clientFieldComponentPathValue && importMap)
-  ) {
+  if (CustomField !== undefined) {
     return CustomField || null
-  }
-
-  // For non-RSC adapters (e.g. TanStack Start): resolve custom Field component from the
-  // client import map when `customComponents.Field` was stripped during serialization.
-  // Skip richText fields — they have their own import-map resolution path in the switch below
-  // that also passes `clientFieldComponentProps` (features, featureClientSchemaMap, etc.).
-  if (clientFieldComponentPathValue && importMap && clientFieldConfig.type !== 'richText') {
-    const componentPathStr =
-      typeof clientFieldComponentPathValue === 'string'
-        ? clientFieldComponentPathValue
-        : (clientFieldComponentPathValue as { path: string }).path
-    const clientProps =
-      typeof clientFieldComponentPathValue === 'object' &&
-      clientFieldComponentPathValue &&
-      'clientProps' in clientFieldComponentPathValue
-        ? (clientFieldComponentPathValue as { clientProps?: Record<string, unknown> }).clientProps
-        : undefined
-    const ResolvedCustomField = getFromImportMap<React.ComponentType<any>>({
-      importMap,
-      PayloadComponent: componentPathStr,
-      schemaPath: '',
-      silent: true,
-    })
-
-    if (ResolvedCustomField) {
-      return (
-        <WatchCondition path={path}>
-          <ResolvedCustomField
-            {...baseFieldProps}
-            {...clientProps}
-            clientField={clientFieldConfig}
-            field={clientFieldConfig}
-            path={path}
-          />
-        </WatchCondition>
-      )
-    }
   }
 
   const iterableFieldProps = {
@@ -181,30 +121,8 @@ export function RenderField({
     case 'relationship':
       return <RelationshipField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
-    case 'richText': {
-      if (importMap && clientFieldComponentPathValue) {
-        const ResolvedComponent = getFromImportMap<React.FC<any>>({
-          importMap,
-          PayloadComponent: clientFieldComponentPathValue,
-          silent: true,
-        })
-
-        if (ResolvedComponent) {
-          return (
-            <ResolvedComponent
-              {...baseFieldProps}
-              {...clientFieldComponentProps}
-              field={clientFieldConfig}
-              importMap={importMap}
-              path={path}
-              schemaPath={schemaPath}
-            />
-          )
-        }
-      }
-
+    case 'richText':
       return <RichTextField {...baseFieldProps} field={clientFieldConfig} path={path} />
-    }
 
     case 'row':
       return <RowField {...iterableFieldProps} field={clientFieldConfig} />

@@ -41,6 +41,8 @@
       "@payloadcms/ui/shared": ["./packages/ui/src/exports/shared/index.ts"],
       "@payloadcms/ui/rsc": ["./packages/ui/src/exports/rsc/index.ts"],
       "@payloadcms/ui/server": ["./packages/ui/src/exports/server.ts"],
+      "@payloadcms/ui/views/*/metadata": ["./packages/ui/src/views/*/metadata.ts"],
+      "@payloadcms/ui/views/*": ["./packages/ui/src/views/*/index.tsx"],
       "@payloadcms/ui/scss": ["./packages/ui/src/scss.scss"],
       "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
       "@payloadcms/next/*": ["./packages/next/src/exports/*.ts"],

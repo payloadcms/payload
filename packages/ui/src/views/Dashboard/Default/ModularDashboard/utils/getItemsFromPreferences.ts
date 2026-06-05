@@ -1,9 +1,10 @@
 import type { BasePayload, TypedUser } from 'payload'
 
-import { getPreferences } from '@payloadcms/ui/rsc'
 import { PREFERENCE_KEYS } from 'payload/shared'
 
 import type { WidgetItem } from '../index.client.js'
+
+import { getPreferences } from '../../../../../utilities/upsertPreferences.js'
 
 export async function getItemsFromPreferences(
   payload: BasePayload,

@@ -22,6 +22,8 @@ declare module '*.json' {
   export default content
 }
 
+// Side-effect CSS/SCSS imports — required so `tsc --emitDeclarationOnly`
+// (NodeNext) does not raise TS2882 for the view styles that now live in `@payloadcms/ui`.
 declare module '*.css'
 
 declare module '*.scss'

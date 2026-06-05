@@ -29,8 +29,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     env.PAYLOAD_CACHE_COMPONENTS_ENABLED = 'true'
   }
 
-  env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'true'
-
   const consoleWarn = console.warn
 
   const sassWarningTexts = [

@@ -1,33 +1,71 @@
+import type { AdminViewServerProps } from 'payload'
+
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import { ToastAndRedirect } from './index.client.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { ToastAndRedirect } from '../../exports/client/index.js'
 import './index.scss'
 
 export const verifyBaseClass = 'verify'
 
-export type VerifyViewProps = {
-  adminRoute: string
-  isVerified: boolean
-  logo?: React.ReactNode
-  textToRender: string
-  verifiedMessage: string
-}
+export async function Verify({ initPageResult, params, searchParams }: AdminViewServerProps) {
+  // /:collectionSlug/verify/:token
 
-export function Verify({
-  adminRoute,
-  isVerified,
-  logo,
-  textToRender,
-  verifiedMessage,
-}: VerifyViewProps) {
+  const [collectionSlug, verify, token] = params.segments
+  const { locale, permissions, req } = initPageResult
+
+  const {
+    i18n,
+    payload: { config },
+    payload,
+    user,
+  } = req
+
+  const {
+    routes: { admin: adminRoute },
+    serverURL,
+  } = config
+
+  let textToRender
+  let isVerified = false
+
+  try {
+    await req.payload.verifyEmail({
+      collection: collectionSlug,
+      token,
+    })
+
+    isVerified = true
+    textToRender = req.t('authentication:emailVerified')
+  } catch (e) {
+    textToRender = req.t('authentication:unableToVerify')
+  }
+
   if (isVerified) {
-    return <ToastAndRedirect message={verifiedMessage} redirectTo={`${adminRoute}/login`} />
+    return (
+      <ToastAndRedirect
+        message={req.t('authentication:emailVerified')}
+        redirectTo={formatAdminURL({ adminRoute, path: '/login' })}
+      />
+    )
   }
 
   return (
     <React.Fragment>
-      <div className={`${verifyBaseClass}__brand`}>{logo ?? <Logo />}</div>
+      <div className={`${verifyBaseClass}__brand`}>
+        <Logo
+          i18n={i18n}
+          locale={locale}
+          params={params}
+          payload={payload}
+          permissions={permissions}
+          searchParams={searchParams}
+          server={req.server}
+          user={user}
+        />
+      </div>
       <h2>{textToRender}</h2>
     </React.Fragment>
   )

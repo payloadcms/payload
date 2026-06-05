@@ -23,7 +23,7 @@ export const DateDiffComponent: DateFieldDiffClientComponent = ({
   nestingLevel,
   versionValue: valueTo,
 }) => {
-  const { i18n, t } = useTranslation()
+  const { i18n } = useTranslation()
   const {
     config: {
       admin: { dateFormat },
@@ -46,37 +46,33 @@ export const DateDiffComponent: DateFieldDiffClientComponent = ({
       })
     : ''
 
-  const NoValue = <div className="diff-no-value">{t('general:noValue')}</div>
-
   const escapedFromDate = escapeDiffHTML(formattedFromDate)
   const escapedToDate = escapeDiffHTML(formattedToDate)
 
   const { From, To } = getHTMLDiffComponents({
-    fromHTML: formattedFromDate
-      ? `<div class="${baseClass}" data-enable-match="true" data-date="${escapedFromDate}"><p>` +
-        escapedFromDate +
-        '</p></div>'
-      : '<p></p>',
+    fromHTML:
+      `<div class="${baseClass}" data-enable-match="true" data-date="${escapedFromDate}"><p>` +
+      escapedFromDate +
+      '</p></div>',
     postProcess: unescapeDiffHTML,
-    toHTML: formattedToDate
-      ? `<div class="${baseClass}" data-enable-match="true" data-date="${escapedToDate}"><p>` +
-        escapedToDate +
-        '</p></div>'
-      : '<p></p>',
+    toHTML:
+      `<div class="${baseClass}" data-enable-match="true" data-date="${escapedToDate}"><p>` +
+      escapedToDate +
+      '</p></div>',
     tokenizeByCharacter: false,
   })
 
   return (
     <FieldDiffContainer
       className={baseClass}
-      From={formattedFromDate ? From : NoValue}
+      From={From}
       i18n={i18n}
       label={{
         label: field.label,
         locale,
       }}
       nestingLevel={nestingLevel}
-      To={formattedToDate ? To : NoValue}
+      To={To}
     />
   )
 }

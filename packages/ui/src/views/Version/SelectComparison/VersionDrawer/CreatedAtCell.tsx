@@ -1,5 +1,8 @@
 'use client'
-import type { CreatedAtCellProps } from '../../../../views/Versions/cells/CreatedAt/index.js'
+
+import React from 'react'
+
+import type { CreatedAtCellProps } from '../../../Versions/cells/CreatedAt/index.js'
 
 import { useModal } from '../../../../elements/Modal/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'

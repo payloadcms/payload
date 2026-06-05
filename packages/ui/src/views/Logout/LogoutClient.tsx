@@ -6,7 +6,6 @@ import { toast } from 'sonner'
 import { Button } from '../../elements/Button/index.js'
 import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useConfig } from '../../providers/Config/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -32,7 +31,6 @@ export const LogoutClient: React.FC<{
   const { adminRoute, inactivity, redirect } = props
 
   const { logOut, user } = useAuth()
-  const { config } = useConfig()
 
   const { startRouteTransition } = useRouteTransition()
 

@@ -1,32 +1,31 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type {
-  BaseVersionField,
-  ClientField,
-  ClientFieldSchemaMap,
-  ComponentRenderer,
-  Field,
-  FieldDiffClientProps,
-  FieldDiffServerProps,
-  FieldTypes,
-  FlattenedBlock,
-  PayloadComponent,
-  PayloadRequest,
-  SanitizedFieldPermissions,
-  SanitizedFieldsPermissions,
-  VersionField,
-} from 'payload'
 
 import { dequal } from 'dequal/lite'
+import {
+  type BaseVersionField,
+  type ClientField,
+  type ClientFieldSchemaMap,
+  type Field,
+  type FieldDiffClientProps,
+  type FieldDiffServerProps,
+  type FieldTypes,
+  type FlattenedBlock,
+  MissingEditorProp,
+  type PayloadComponent,
+  type PayloadRequest,
+  type SanitizedFieldPermissions,
+  type SanitizedFieldsPermissions,
+  type VersionField,
+} from 'payload'
 import {
   fieldIsID,
   fieldShouldBeLocalized,
   getFieldPaths,
   getUniqueListBy,
-  MissingEditorProp,
   tabHasName,
 } from 'payload/shared'
 
-import { RenderClientComponent } from '../../../elements/RenderServerComponent/clientOnly.js'
+import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import { diffComponents } from './fields/index.js'
 
 export type BuildVersionFieldsArgs = {
@@ -44,7 +43,6 @@ export type BuildVersionFieldsArgs = {
   parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
-  renderComponent?: ComponentRenderer
   req: PayloadRequest
   selectedLocales: string[]
   versionFromSiblingData: object
@@ -71,7 +69,6 @@ export const buildVersionFields = ({
   parentIsLocalized,
   parentPath,
   parentSchemaPath,
-  renderComponent,
   req,
   selectedLocales,
   versionFromSiblingData,
@@ -140,7 +137,6 @@ export const buildVersionFields = ({
           parentPath,
           parentSchemaPath,
           path,
-          renderComponent,
           req,
           schemaPath,
           selectedLocales,
@@ -167,7 +163,6 @@ export const buildVersionFields = ({
         parentPath,
         parentSchemaPath,
         path,
-        renderComponent,
         req,
         schemaPath,
         selectedLocales,
@@ -209,7 +204,6 @@ const buildVersionField = ({
   parentPath,
   parentSchemaPath,
   path,
-  renderComponent,
   req,
   schemaPath,
   selectedLocales,
@@ -347,7 +341,6 @@ const buildVersionField = ({
           parentIsLocalized: parentIsLocalized || tab.localized,
           parentPath: isNamedTab ? tabPath : 'name' in field ? path : parentPath,
           parentSchemaPath: tabSchemaPath,
-          renderComponent,
           req,
           selectedLocales,
           versionFromSiblingData: 'name' in tab ? valueFrom?.[tab.name] : valueFrom,
@@ -400,7 +393,6 @@ const buildVersionField = ({
           parentIsLocalized: parentIsLocalized || field.localized,
           parentPath: ('name' in field ? path : parentPath) + '.' + i,
           parentSchemaPath: schemaPath,
-          renderComponent,
           req,
           selectedLocales,
           versionFromSiblingData: fromRow,
@@ -429,7 +421,6 @@ const buildVersionField = ({
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: 'name' in field ? path : parentPath,
         parentSchemaPath: schemaPath,
-        renderComponent,
         req,
         selectedLocales,
         versionFromSiblingData: valueFrom as object,
@@ -508,7 +499,6 @@ const buildVersionField = ({
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: ('name' in field ? path : parentPath) + '.' + i,
         parentSchemaPath: schemaPath + '.' + toBlock.slug,
-        renderComponent,
         req,
         selectedLocales,
         versionFromSiblingData: fromRow,
@@ -562,8 +552,7 @@ const buildVersionField = ({
     selectedLocales,
   }
 
-  const render: ComponentRenderer = renderComponent || RenderClientComponent
-  baseVersionField.CustomComponent = render({
+  baseVersionField.CustomComponent = RenderServerComponent({
     clientProps: clientDiffProps,
     Component: CustomComponent,
     Fallback: DefaultComponent,

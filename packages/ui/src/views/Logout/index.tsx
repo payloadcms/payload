@@ -2,7 +2,8 @@ import type { AdminViewServerProps } from 'payload'
 
 import React from 'react'
 
-import { LogoutClient } from './LogoutClient.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
+import { LogoutClient } from '../../exports/client/index.js'
 import './index.scss'
 
 const baseClass = 'logout'
@@ -31,8 +32,4 @@ export const LogoutView: React.FC<
       />
     </div>
   )
-}
-
-export function LogoutInactivity(props: AdminViewServerProps) {
-  return <LogoutView inactivity {...props} />
 }

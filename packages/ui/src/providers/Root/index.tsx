@@ -23,29 +23,26 @@ import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
+import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
 import { HierarchyProvider } from '../Hierarchy/index.js'
 import { LocaleProvider } from '../Locale/index.js'
-import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
 import { RouteTransitionProvider } from '../RouteTransition/index.js'
-import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
 import { UploadHandlersProvider } from '../UploadHandlers/index.js'
-import { WindowInfoProvider } from '../WindowInfo/index.js'
 
 type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
-  readonly enableRouterCacheRefresh?: boolean
   readonly fallbackLang: I18nOptions['fallbackLanguage']
   readonly highContrastMode: boolean
   readonly isNavOpen?: boolean
@@ -64,7 +61,6 @@ export const RootProvider: React.FC<Props> = ({
   children,
   config,
   dateFNSKey,
-  enableRouterCacheRefresh = false,
   fallbackLang,
   highContrastMode,
   isNavOpen,
@@ -85,7 +81,9 @@ export const RootProvider: React.FC<Props> = ({
       <RouterAdapter>
         <ServerFunctionsProvider serverFunction={serverFunction}>
           <RouteTransitionProvider>
-            <RouteCache cachingEnabled={enableRouterCacheRefresh}>
+            <RouteCache
+              cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
+            >
               <ConfigProvider config={config}>
                 <ClientFunctionProvider>
                   <TranslationProvider
@@ -104,46 +102,38 @@ export const RootProvider: React.FC<Props> = ({
                       }}
                     >
                       <ScrollInfoProvider>
-                        <SearchParamsProvider>
-                          <ModalProvider
-                            classPrefix="payload"
-                            transTime={0}
-                            zIndex="var(--z-modal)"
-                          >
-                            <CloseModalOnRouteChange />
-                            <AuthProvider permissions={permissions} user={user}>
-                              <PreferencesProvider>
-                                <HierarchyProvider>
-                                  <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
-                                    <ParamsProvider>
-                                      <LocaleProvider locale={locale}>
-                                        <StepNavProvider>
-                                          <LoadingOverlayProvider>
-                                            <DocumentEventsProvider>
-                                              <NavProvider initialIsOpen={isNavOpen}>
-                                                <UploadHandlersProvider>
-                                                  <DndContext
-                                                    collisionDetection={pointerWithin}
-                                                    // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                    id={dndContextID}
-                                                  >
-                                                    {children}
-                                                  </DndContext>
-                                                </UploadHandlersProvider>
-                                              </NavProvider>
-                                            </DocumentEventsProvider>
-                                          </LoadingOverlayProvider>
-                                        </StepNavProvider>
-                                      </LocaleProvider>
-                                    </ParamsProvider>
-                                  </ThemeProvider>
-                                </HierarchyProvider>
-                              </PreferencesProvider>
-                              <ModalContainer />
-                              <StayLoggedInModal />
-                            </AuthProvider>
-                          </ModalProvider>
-                        </SearchParamsProvider>
+                        <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
+                          <CloseModalOnRouteChange />
+                          <AuthProvider permissions={permissions} user={user}>
+                            <PreferencesProvider>
+                              <HierarchyProvider>
+                                <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
+                                  <LocaleProvider locale={locale}>
+                                    <StepNavProvider>
+                                      <LoadingOverlayProvider>
+                                        <DocumentEventsProvider>
+                                          <NavProvider initialIsOpen={isNavOpen}>
+                                            <UploadHandlersProvider>
+                                              <DndContext
+                                                collisionDetection={pointerWithin}
+                                                // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                id={dndContextID}
+                                              >
+                                                {children}
+                                              </DndContext>
+                                            </UploadHandlersProvider>
+                                          </NavProvider>
+                                        </DocumentEventsProvider>
+                                      </LoadingOverlayProvider>
+                                    </StepNavProvider>
+                                  </LocaleProvider>
+                                </ThemeProvider>
+                              </HierarchyProvider>
+                            </PreferencesProvider>
+                            <ModalContainer />
+                            <StayLoggedInModal />
+                          </AuthProvider>
+                        </ModalProvider>
                       </ScrollInfoProvider>
                     </WindowInfoProvider>
                   </TranslationProvider>

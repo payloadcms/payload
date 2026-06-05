@@ -2,7 +2,7 @@
 
 import React, { useCallback } from 'react'
 
-import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
+import { CheckboxInput } from '../../../fields/Checkbox/index.js'
 import { useTheme } from '../../../providers/Theme/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 

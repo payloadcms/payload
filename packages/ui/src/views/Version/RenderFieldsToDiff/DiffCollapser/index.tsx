@@ -14,7 +14,6 @@ import { countChangedFields, countChangedFieldsInRows } from '../utilities/count
 const baseClass = 'diff-collapser'
 
 type Props = {
-  changeCountOverride?: number
   hideGutter?: boolean
   initCollapsed?: boolean
   Label: React.ReactNode
@@ -41,7 +40,6 @@ type Props = {
 )
 
 export const DiffCollapser: React.FC<Props> = ({
-  changeCountOverride,
   children,
   field,
   fields,
@@ -58,9 +56,9 @@ export const DiffCollapser: React.FC<Props> = ({
   const [isCollapsed, setIsCollapsed] = useState(initCollapsed)
   const { config } = useConfig()
 
-  let changeCount = changeCountOverride ?? 0
+  let changeCount = 0
 
-  if (changeCountOverride === undefined && isIterable) {
+  if (isIterable) {
     if (!fieldIsArrayType(field) && !fieldIsBlockType(field)) {
       throw new Error(
         'DiffCollapser: field must be an array or blocks field when isIterable is true',
@@ -70,7 +68,9 @@ export const DiffCollapser: React.FC<Props> = ({
     const valueToRows = valueTo ?? []
 
     if (!Array.isArray(valueFromRows) || !Array.isArray(valueToRows)) {
-      throw new Error('DiffCollapser: valueFrom and valueTo must be arrays when isIterable is true')
+      throw new Error(
+        'DiffCollapser: valueFrom and valueTro must be arrays when isIterable is true',
+      )
     }
 
     changeCount = countChangedFieldsInRows({
@@ -81,7 +81,7 @@ export const DiffCollapser: React.FC<Props> = ({
       valueFromRows,
       valueToRows,
     })
-  } else if (changeCountOverride === undefined) {
+  } else {
     changeCount = countChangedFields({
       config,
       fields,
@@ -104,7 +104,7 @@ export const DiffCollapser: React.FC<Props> = ({
     <div className={baseClass}>
       <FieldDiffLabel>
         <button
-          aria-label={isCollapsed ? t('general:expand') : t('general:collapse')}
+          aria-label={isCollapsed ? 'Expand' : 'Collapse'}
           className={`${baseClass}__toggle-button`}
           onClick={() => setIsCollapsed(!isCollapsed)}
           type="button"

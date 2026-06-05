@@ -2,7 +2,6 @@ import type {
   ClientCollectionConfig,
   ClientConfig,
   Column,
-  ComponentRenderer,
   ListQuery,
   PaginatedDocs,
   PayloadRequest,
@@ -12,9 +11,7 @@ import type {
   ViewTypes,
   Where,
 } from 'payload'
-import type React from 'react'
 
-import { getTranslation } from '@payloadcms/translations'
 import { flattenAllFields } from 'payload'
 
 import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
@@ -22,17 +19,6 @@ import { renderTable } from '../../utilities/renderTable.js'
 import { createSerializableValue } from './createSerializableValue.js'
 import { extractRelationshipDisplayValue } from './extractRelationshipDisplayValue.js'
 import { extractValueOrRelationshipID } from './extractValueOrRelationshipID.js'
-
-export type HandleGroupByResult = {
-  columnState: Column[]
-  data: PaginatedDocs
-  groupedData: {
-    data: PaginatedDocs
-    groupByValue: string
-    heading: string
-  }[]
-  Table: null | React.ReactNode | React.ReactNode[]
-}
 
 export const handleGroupBy = async ({
   clientCollectionConfig,
@@ -45,7 +31,6 @@ export const handleGroupBy = async ({
   enableRowSelections,
   fieldPermissions,
   query,
-  renderComponent,
   req,
   select,
   trash = false,
@@ -63,7 +48,6 @@ export const handleGroupBy = async ({
   enableRowSelections?: boolean
   fieldPermissions?: SanitizedFieldsPermissions
   query?: ListQuery
-  renderComponent: ComponentRenderer
   req: PayloadRequest
   select?: SelectType
   trash?: boolean
@@ -73,16 +57,10 @@ export const handleGroupBy = async ({
 }): Promise<{
   columnState: Column[]
   data: PaginatedDocs
-  groupedData: {
-    data: PaginatedDocs
-    groupByValue: string
-    heading: string
-  }[]
   Table: null | React.ReactNode | React.ReactNode[]
 }> => {
   let Table: React.ReactNode | React.ReactNode[] = null
   let columnState: Column[]
-  const groupedData: HandleGroupByResult['groupedData'] = []
 
   const dataByGroup: Record<string, PaginatedDocs> = {}
 
@@ -192,15 +170,6 @@ export const handleGroupBy = async ({
         if (valueOrRelationshipID === false) {
           heading = req.i18n.t('general:false')
         }
-      } else if (groupByField?.type === 'select' || groupByField?.type === 'radio') {
-        const option = groupByField.options?.find(
-          (opt) => (typeof opt === 'string' ? opt : opt.value) === valueOrRelationshipID,
-        )
-        if (option && typeof option !== 'string' && typeof option.label === 'string') {
-          heading = getTranslation(option.label, req.i18n)
-        } else {
-          heading = String(valueOrRelationshipID)
-        }
       } else {
         heading = String(valueOrRelationshipID)
       }
@@ -226,7 +195,6 @@ export const handleGroupBy = async ({
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
-          renderComponent,
           useAsTitle: collectionConfig.admin.useAsTitle,
           viewType,
         })
@@ -242,11 +210,6 @@ export const handleGroupBy = async ({
         }
 
         dataByGroup[serializableValue] = groupData
-        groupedData[i] = {
-          data: groupData,
-          groupByValue: serializableValue,
-          heading: heading || req.i18n.t('general:noValue'),
-        }
         ;(Table as Array<React.ReactNode>)[i] = NewTable
       }
     }),
@@ -255,7 +218,6 @@ export const handleGroupBy = async ({
   return {
     columnState,
     data,
-    groupedData,
     Table,
   }
 }

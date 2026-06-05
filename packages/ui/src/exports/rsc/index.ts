@@ -11,7 +11,7 @@ export {
   getHTMLDiffComponents,
   unescapeDiffHTML,
 } from '../../elements/HTMLDiff/index.js'
-export { Logo } from '../../elements/LogoServer/index.js'
+export { Logo } from '../../elements/Logo/index.js'
 export { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 export { DefaultNav, type NavProps } from '../../elements/Nav/index.js'
 export { renderTabHandler } from '../../elements/Nav/SidebarTabs/renderTabServerFn.js'
@@ -22,10 +22,7 @@ export type {
 export { _internal_renderFieldHandler } from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
 export { File } from '../../graphics/File/index.js'
 export { CheckIcon } from '../../icons/Check/index.js'
-export {
-  DefaultTemplateServer as DefaultTemplate,
-  type DefaultTemplateServerProps as DefaultTemplateProps,
-} from '../../templates/Default/Server.js'
+export { DefaultTemplate, type DefaultTemplateProps } from '../../templates/Default/index.js'
 export { MinimalTemplate, type MinimalTemplateProps } from '../../templates/Minimal/index.js'
 export { copyDataFromLocaleHandler } from '../../utilities/copyDataFromLocale.js'
 export { getColumns } from '../../utilities/getColumns.js'

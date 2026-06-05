@@ -18,7 +18,6 @@ import { RefreshIcon } from '../../../icons/Refresh/index.js'
 import { TrashIcon } from '../../../icons/Trash/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/context.js'
-import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
@@ -42,7 +41,6 @@ export const QueryPresetBar: React.FC<{
 }> = ({ activePreset, collectionSlug, queryPresetPermissions }) => {
   const { modified, query, refineListData, setModified: setQueryModified } = useListQuery()
   const { openModal } = useModal()
-  const router = useRouter()
   const [presets, setPresets] = useState<QueryPreset[]>([])
 
   const { i18n, t } = useTranslation()
@@ -122,10 +120,7 @@ export const QueryPresetBar: React.FC<{
     async (preset: QueryPreset) => {
       await refineListData(
         {
-          // Materialize empty preset columns in the URL so subsequent edits
-          // (for example clearing groupBy on a preset that only stores groupBy)
-          // do not fall back to the preset's original server-side value.
-          columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : [],
+          columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : undefined,
           groupBy: preset.groupBy || '',
           preset: preset.id,
           where: preset.where,
@@ -444,11 +439,6 @@ export const QueryPresetBar: React.FC<{
         onSave={async ({ doc }) => {
           await handlePresetChange(doc as QueryPreset)
           void fetchPresets()
-          // The active preset's metadata (title, etc.) is rendered from
-          // server-supplied props. handlePresetChange only adjusts URL params,
-          // so when only non-URL fields change (e.g. title) we need to force
-          // an RSC refetch to pick up the updated values.
-          router.refresh()
         }}
       />
       <ListDrawer

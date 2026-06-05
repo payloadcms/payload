@@ -1,15 +1,19 @@
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldTypes } from 'payload'
 
-import { Checkbox } from './Checkbox/index.js'
-import { Collapsible } from './Collapsible/index.js'
-import { DateDiffComponent } from './Date/index.js'
-import { Group } from './Group/index.js'
-import { Iterable } from './Iterable/index.js'
+/* eslint-disable payload/no-imports-from-exports-dir -- Server-side map of diff components must reference exports/client bundle so RSC client refs resolve to the bundled providers */
+import {
+  VersionFieldDiffCheckbox as Checkbox,
+  VersionFieldDiffCollapsible as Collapsible,
+  VersionFieldDiffDate as DateDiffComponent,
+  VersionFieldDiffGroup as Group,
+  VersionFieldDiffIterable as Iterable,
+  VersionFieldDiffRow as Row,
+  VersionFieldDiffSelect as Select,
+  VersionFieldDiffTabs as Tabs,
+  VersionFieldDiffText as Text,
+} from '../../../../exports/client/index.js'
+/* eslint-enable payload/no-imports-from-exports-dir */
 import { Relationship } from './Relationship/index.js'
-import { Row } from './Row/index.js'
-import { Select } from './Select/index.js'
-import { Tabs } from './Tabs/index.js'
-import { Text } from './Text/index.js'
 import { Upload } from './Upload/index.js'
 
 export const diffComponents: Record<

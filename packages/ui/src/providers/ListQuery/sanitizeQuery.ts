@@ -7,16 +7,13 @@ import type { ListQuery, Where } from 'payload'
  */
 export const sanitizeQuery = (toSanitize: ListQuery): ListQuery => {
   const sanitized = { ...toSanitize }
-  const hasActivePreset = Boolean(toSanitize.preset)
 
   Object.entries(sanitized).forEach(([key, value]) => {
     if (
       key === 'columns' &&
       (value === '[]' || (Array.isArray(sanitized[key]) && sanitized[key].length === 0))
     ) {
-      if (!hasActivePreset) {
-        delete sanitized[key]
-      }
+      delete sanitized[key]
     }
 
     if (
@@ -25,9 +22,7 @@ export const sanitizeQuery = (toSanitize: ListQuery): ListQuery => {
       value !== null &&
       !Object.keys(value as Where).length
     ) {
-      if (!hasActivePreset) {
-        delete sanitized[key]
-      }
+      delete sanitized[key]
     }
 
     if ((key === 'limit' || key === 'page') && typeof value === 'string') {
@@ -39,7 +34,7 @@ export const sanitizeQuery = (toSanitize: ListQuery): ListQuery => {
       delete sanitized[key]
     }
 
-    if (value === '' && !(hasActivePreset && key === 'groupBy')) {
+    if (value === '') {
       delete sanitized[key]
     }
   })

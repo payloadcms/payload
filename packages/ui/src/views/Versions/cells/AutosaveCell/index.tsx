@@ -5,7 +5,7 @@ import React from 'react'
 
 import { Pill } from '../../../../elements/Pill/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import { VersionPillLabel } from '../../../Version/VersionPillLabel/VersionPillLabel.js'
+import { VersionPillLabel } from '../../VersionPillLabel/VersionPillLabel.js'
 import './index.css'
 
 const baseClass = 'autosave-cell'

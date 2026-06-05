@@ -1,5 +1,4 @@
 import type {
-  ComponentRenderer,
   DocumentTabConfig,
   DocumentTabServerPropsOnly,
   PayloadRequest,
@@ -13,7 +12,7 @@ import { Fragment } from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
 import { DocumentTabLink } from '../../../../exports/client/index.js'
-import { RenderClientComponent } from '../../../RenderServerComponent/clientOnly.js'
+import { RenderServerComponent } from '../../../RenderServerComponent/index.js'
 import './index.css'
 
 export const baseClass = 'doc-tab'
@@ -24,7 +23,6 @@ export const DefaultDocumentTab: React.FC<{
   globalConfig?: SanitizedGlobalConfig
   path?: string
   permissions?: SanitizedPermissions
-  renderComponent?: ComponentRenderer
   req: PayloadRequest
   tabConfig: { readonly Pill_Component?: React.FC } & DocumentTabConfig
 }> = (props) => {
@@ -33,7 +31,6 @@ export const DefaultDocumentTab: React.FC<{
     collectionConfig,
     globalConfig,
     permissions,
-    renderComponent: renderComponentProp,
     req,
     tabConfig: { href: tabHref, isActive: tabIsActive, label, newTab, Pill, Pill_Component },
   } = props
@@ -77,7 +74,7 @@ export const DefaultDocumentTab: React.FC<{
         {Pill || Pill_Component ? (
           <Fragment>
             &nbsp;
-            {(renderComponentProp || RenderClientComponent)({
+            {RenderServerComponent({
               Component: Pill,
               Fallback: Pill_Component,
               importMap: req.payload.importMap,
@@ -85,7 +82,6 @@ export const DefaultDocumentTab: React.FC<{
                 i18n: req.i18n,
                 payload: req.payload,
                 permissions,
-                renderComponent: renderComponentProp || RenderClientComponent,
                 req,
                 server: req.server,
                 user: req.user,

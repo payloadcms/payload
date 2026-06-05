@@ -86,8 +86,10 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
                 <div className={`${baseClass}__row`} key={i}>
                   <DiffCollapser
                     fields={fields}
+                    hideGutter={true}
                     Label={
                       <div className={`${baseClass}-label-container`}>
+                        <div className={`${baseClass}-label-prefix`}></div>
                         <span className={`${baseClass}__label`}>{rowLabel}</span>
                       </div>
                     }

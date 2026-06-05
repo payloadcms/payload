@@ -1,25 +1,24 @@
 'use client'
 
-import React from 'react'
-
-const baseClass = 'login__form'
-
 import type { FormState } from 'payload'
 
 import { formatAdminURL, getLoginOptions, getSafeRedirect } from 'payload/shared'
+import React from 'react'
 
 import type { UserWithToken } from '../../../providers/Auth/index.js'
 import type { LoginFieldProps } from '../LoginField/index.js'
 
-import { Link } from '../../../elements/Link/index.js'
 import { PasswordField } from '../../../fields/Password/index.js'
 import { Form } from '../../../forms/Form/index.js'
 import { FormSubmit } from '../../../forms/Submit/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { PayloadLink } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { LoginField } from '../LoginField/index.js'
 import './index.css'
+
+const baseClass = 'login__form'
 
 export const LoginForm: React.FC<{
   prefillEmail?: string
@@ -35,7 +34,6 @@ export const LoginForm: React.FC<{
       user: userSlug,
     },
     routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
   } = config
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
@@ -110,7 +108,7 @@ export const LoginForm: React.FC<{
       <div className={`${baseClass}__actions`}>
         <FormSubmit size="large">{t('authentication:login')}</FormSubmit>
         <div className={`${baseClass}__forgotPassword`}>
-          <Link
+          <PayloadLink
             href={formatAdminURL({
               adminRoute,
               path: forgotRoute,
@@ -118,7 +116,7 @@ export const LoginForm: React.FC<{
             prefetch={false}
           >
             {t('authentication:forgotPasswordQuestion')}
-          </Link>
+          </PayloadLink>
         </div>
       </div>
     </Form>

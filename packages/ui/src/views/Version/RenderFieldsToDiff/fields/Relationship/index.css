@@ -4,10 +4,6 @@
     background: unset;
   }
 
-  .relationship-diff-container .diff-no-value {
-    padding: 0;
-  }
-
   .relationship-diff-container--hasOne .relationship-diff {
     min-width: 100%;
     max-width: fit-content;

@@ -2,7 +2,7 @@
 import type { ClientUser } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
+import { EntityType, formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type { CollectionCardsData } from './getCollectionCardsData.js'
@@ -12,7 +12,6 @@ import { Button } from '../../elements/Button/index.js'
 import { Card } from '../../elements/Card/index.js'
 import { Locked } from '../../elements/Locked/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { EntityType } from '../../utilities/groupNavItems.js'
 
 const baseClass = 'collections'
 
