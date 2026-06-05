@@ -468,7 +468,7 @@ describe('Document View', () => {
       await wait(200)
 
       const leavePageModal = page.locator(
-        '#leave-without-saving-doc-drawer [data-dialog-action="confirm"]',
+        '#leave-without-saving [data-dialog-action="confirm"]:visible',
       )
       await expect(leavePageModal).toBeVisible()
 
