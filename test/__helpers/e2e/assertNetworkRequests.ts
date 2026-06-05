@@ -53,13 +53,19 @@ export const assertNetworkRequests = async (
   // begin tracking network requests
   page.on('request', async (request) => {
     const requestUrl = request.url()
-    // TanStack Start dispatches Payload server functions through its
-    // `createServerFn` RPC at `/_serverFn/<base64-fn-id>` instead of a hand-
-    // rolled `/api/server-function` route, so accept either URL pattern when
-    // running against the tanstack-start adapter.
+    // TanStack Start dispatches Payload server functions (form state, etc.)
+    // through its `createServerFn` RPC at `/_serverFn/<base64-fn-id>` instead of
+    // the document/admin URL that Next.js posts RSC form-state requests to. So
+    // when a test asserts an *admin* URL (where Next routes form state), accept
+    // the `/_serverFn` URL on tanstack too. REST `/api/...` endpoints (e.g.
+    // `/api/<collection>/access/<id>`) are framework-agnostic and must NOT be
+    // conflated with server-function calls, otherwise unrelated form-state RPCs
+    // would be counted against them.
+    const isFrameworkAgnosticApiUrl = url.includes('/api/')
     const matches =
       requestUrl.includes(url) ||
       (isTanStack &&
+        !isFrameworkAgnosticApiUrl &&
         (requestUrl.includes('/_serverFn/') || requestUrl.includes('/api/server-function')))
 
     if (matches && (requestFilter ? await requestFilter(request) : true)) {
