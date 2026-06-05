@@ -113,10 +113,35 @@ export const usePreventLeave = ({
       return element as HTMLAnchorElement
     }
 
+    function findClosestButton(element: HTMLElement | null): HTMLButtonElement | null {
+      while (element && element.tagName.toLowerCase() !== 'button') {
+        element = element.parentElement
+      }
+      return element as HTMLButtonElement
+    }
+
+    function isDrawerCloseButton(button: HTMLButtonElement): boolean {
+      // Check for drawer close button classes or IDs
+      const className = button.className || ''
+      const id = button.id || ''
+
+      // Only intercept document drawer close buttons, not all modal close buttons
+      return (
+        className.includes('drawer__close') ||
+        className.includes('drawer__header__close') ||
+        className.includes('doc-drawer__header-close') ||
+        id.startsWith('close-drawer__')
+      )
+    }
+
     function handleClick(event: MouseEvent) {
       try {
         const target = event.target as HTMLElement
         const anchor = findClosestAnchor(target)
+        const button = findClosestButton(target)
+
+        let shouldPrevent = false
+
         if (anchor) {
           const currentUrl = window.location.href
           const newUrl = anchor.href
@@ -126,17 +151,22 @@ export const usePreventLeave = ({
 
           const isPageLeaving = !(newUrl === currentUrl || isAnchor || isDownloadLink || isNewTab)
 
-          if (isPageLeaving && prevent && (!onPrevent ? !window.confirm(message) : true)) {
-            // Keep a reference of the href
+          if (isPageLeaving) {
+            shouldPrevent = true
             cancelledURL.current = newUrl
+          }
+        } else if (button && isDrawerCloseButton(button)) {
+          // Handle drawer close buttons
+          shouldPrevent = true
+        }
 
-            // Cancel the route change
-            event.preventDefault()
-            event.stopPropagation()
+        if (shouldPrevent && prevent && (!onPrevent ? !window.confirm(message) : true)) {
+          // Cancel the action
+          event.preventDefault()
+          event.stopPropagation()
 
-            if (typeof onPrevent === 'function') {
-              onPrevent()
-            }
+          if (typeof onPrevent === 'function') {
+            onPrevent()
           }
         }
       } catch (err) {
