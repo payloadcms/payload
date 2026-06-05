@@ -71,6 +71,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       })
 
       if (modifySearchParams) {
+        // `columns`/`queryByGroup` are JSON-encoded here and decoded back in
+        // `sanitizeQuery` on read — keep the two in sync (see #16659).
         const search = `?${qs.stringify({
           ...newQuery,
           columns: JSON.stringify(newQuery.columns),
@@ -141,6 +143,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const syncPropsToURL = useEffectEvent(() => {
     const newQuery = sanitizeQuery({ ...(query || {}), ...(queryFromProps || {}) })
 
+    // `columns`/`queryByGroup` are JSON-encoded here and decoded back in
+    // `sanitizeQuery` on read — keep the two in sync (see #16659).
     const search = `?${qs.stringify({
       ...newQuery,
       columns: JSON.stringify(newQuery.columns),
