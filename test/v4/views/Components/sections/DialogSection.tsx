@@ -18,8 +18,6 @@ import React, { useState } from 'react'
 import { Section, Variant } from '../shared.js'
 
 const DIALOG_SLUG_BASIC = 'demo-dialog-basic'
-const DIALOG_SLUG_SMALL = 'demo-dialog-small'
-const DIALOG_SLUG_LARGE = 'demo-dialog-large'
 const DIALOG_SLUG_NO_HEADER = 'demo-dialog-no-header'
 const DIALOG_SLUG_HEADER_EXTRAS = 'demo-dialog-header-extras'
 const DIALOG_SLUG_CONFIRM = 'demo-dialog-confirm'
@@ -36,7 +34,7 @@ export const DialogSection: React.FC<{ selectedComponent: string }> = ({ selecte
         <Button buttonStyle="secondary" onClick={() => openModal(DIALOG_SLUG_BASIC)}>
           Open Dialog
         </Button>
-        <DialogModal slug={DIALOG_SLUG_BASIC}>
+        <DialogModal size="medium" slug={DIALOG_SLUG_BASIC}>
           <DialogHeader showClose title="Dialog Title" />
           <DialogBody>
             <p>This is the dialog body. Put any content here.</p>
@@ -48,41 +46,11 @@ export const DialogSection: React.FC<{ selectedComponent: string }> = ({ selecte
         </DialogModal>
       </Variant>
 
-      <Variant label="Small">
-        <Button buttonStyle="secondary" onClick={() => openModal(DIALOG_SLUG_SMALL)}>
-          Open Small Dialog
-        </Button>
-        <DialogModal size="small" slug={DIALOG_SLUG_SMALL}>
-          <DialogHeader showClose title="Small Dialog" />
-          <DialogBody>
-            <p>This dialog uses the small size (320px).</p>
-          </DialogBody>
-          <DialogFooter>
-            <DialogConfirm label="OK" onClick={async () => {}} />
-          </DialogFooter>
-        </DialogModal>
-      </Variant>
-
-      <Variant label="Large">
-        <Button buttonStyle="secondary" onClick={() => openModal(DIALOG_SLUG_LARGE)}>
-          Open Large Dialog
-        </Button>
-        <DialogModal size="large" slug={DIALOG_SLUG_LARGE}>
-          <DialogHeader showClose title="Large Dialog" />
-          <DialogBody>
-            <p>This dialog uses the large size (640px).</p>
-          </DialogBody>
-          <DialogFooter>
-            <DialogConfirm label="OK" onClick={async () => {}} />
-          </DialogFooter>
-        </DialogModal>
-      </Variant>
-
       <Variant label="No Header">
         <Button buttonStyle="secondary" onClick={() => openModal(DIALOG_SLUG_NO_HEADER)}>
           Open Dialog
         </Button>
-        <DialogModal slug={DIALOG_SLUG_NO_HEADER}>
+        <DialogModal size="medium" slug={DIALOG_SLUG_NO_HEADER}>
           <DialogBody>
             <p>
               This dialog has no header. Omit <code>DialogHeader</code> when no title or close
@@ -100,7 +68,7 @@ export const DialogSection: React.FC<{ selectedComponent: string }> = ({ selecte
         <Button buttonStyle="secondary" onClick={() => openModal(DIALOG_SLUG_HEADER_EXTRAS)}>
           Open Dialog
         </Button>
-        <DialogModal slug={DIALOG_SLUG_HEADER_EXTRAS}>
+        <DialogModal size="medium" slug={DIALOG_SLUG_HEADER_EXTRAS}>
           <DialogHeader showClose title="With Header Extras">
             <Button buttonStyle="pill">Extra Action</Button>
           </DialogHeader>

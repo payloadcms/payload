@@ -12,7 +12,7 @@ type FocusTrapOptions = ComponentProps<typeof Modal>['focusTrapOptions']
 
 const baseClass = 'dialog'
 
-export type DialogSize = 'large' | 'medium' | 'small'
+export type DialogSize = 'medium' | 'small'
 
 export type DialogModalProps = {
   readonly children?: React.ReactNode
@@ -31,7 +31,7 @@ export const DialogModal: React.FC<DialogModalProps> = ({
   closeOnBlur = false,
   closeOnEsc = true,
   focusTrapOptions,
-  size = 'medium',
+  size = 'small',
 }) => {
   const [isConfirming, setConfirming] = useState(false)
   const drawerDepth = useDrawerDepth()

@@ -38,7 +38,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
   } = props
 
   return (
-    <DialogModal className={className} size="small" slug={modalSlug}>
+    <DialogModal className={className} slug={modalSlug}>
       <DialogHeader showClose title={heading} />
       <DialogBody>{typeof body === 'string' ? <p>{body}</p> : body}</DialogBody>
       <DialogFooter>

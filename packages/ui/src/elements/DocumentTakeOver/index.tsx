@@ -35,7 +35,7 @@ export const DocumentTakeOver: React.FC<{
   }, [isActive, openModal, closeModal])
 
   return (
-    <DialogModal closeOnEsc={false} size="small" slug={modalSlug}>
+    <DialogModal closeOnEsc={false} slug={modalSlug}>
       <DialogHeader title={t('general:editingTakenOver')} />
       <DialogBody>
         <p>{t('general:anotherUserTakenOver')}</p>
