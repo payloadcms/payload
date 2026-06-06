@@ -18,8 +18,8 @@ import React, { useState } from 'react'
 import { Section, Variant } from '../shared.js'
 
 const DIALOG_SLUG_BASIC = 'demo-dialog-basic'
+const DIALOG_SLUG_MEDIUM = 'demo-dialog-medium'
 const DIALOG_SLUG_NO_HEADER = 'demo-dialog-no-header'
-const DIALOG_SLUG_HEADER_EXTRAS = 'demo-dialog-header-extras'
 const DIALOG_SLUG_CONFIRM = 'demo-dialog-confirm'
 const DIALOG_SLUG_CONFIRM_LOADING = 'demo-dialog-confirm-loading'
 
@@ -30,14 +30,30 @@ export const DialogSection: React.FC<{ selectedComponent: string }> = ({ selecte
 
   return (
     <Section id="dialog" selectedComponent={selectedComponent} title="Dialog">
-      <Variant label="Basic (medium)">
+      <Variant label="Small (size default)">
         <Button buttonStyle="secondary" onClick={() => openModal(DIALOG_SLUG_BASIC)}>
           Open Dialog
         </Button>
-        <DialogModal size="medium" slug={DIALOG_SLUG_BASIC}>
-          <DialogHeader showClose title="Dialog Title" />
+        <DialogModal slug={DIALOG_SLUG_BASIC}>
+          <DialogHeader showClose title="Small Dialog" />
           <DialogBody>
-            <p>This is the dialog body. Put any content here.</p>
+            <p>This dialog uses the default small size (320px).</p>
+          </DialogBody>
+          <DialogFooter>
+            <DialogCancel label="Cancel" />
+            <DialogConfirm label="Confirm" onClick={async () => {}} />
+          </DialogFooter>
+        </DialogModal>
+      </Variant>
+
+      <Variant label="Medium">
+        <Button buttonStyle="secondary" onClick={() => openModal(DIALOG_SLUG_MEDIUM)}>
+          Open Dialog
+        </Button>
+        <DialogModal size="medium" slug={DIALOG_SLUG_MEDIUM}>
+          <DialogHeader showClose title="Medium Dialog" />
+          <DialogBody>
+            <p>This dialog uses the medium size (480px).</p>
           </DialogBody>
           <DialogFooter>
             <DialogCancel label="Cancel" />
@@ -60,26 +76,6 @@ export const DialogSection: React.FC<{ selectedComponent: string }> = ({ selecte
           <DialogFooter>
             <DialogCancel label="Cancel" />
             <DialogConfirm label="OK" onClick={async () => {}} />
-          </DialogFooter>
-        </DialogModal>
-      </Variant>
-
-      <Variant label="Header Extras Slot">
-        <Button buttonStyle="secondary" onClick={() => openModal(DIALOG_SLUG_HEADER_EXTRAS)}>
-          Open Dialog
-        </Button>
-        <DialogModal size="medium" slug={DIALOG_SLUG_HEADER_EXTRAS}>
-          <DialogHeader showClose title="With Header Extras">
-            <Button buttonStyle="pill">Extra Action</Button>
-          </DialogHeader>
-          <DialogBody>
-            <p>
-              The <code>DialogHeader</code> children slot renders beside the title, before the close
-              button.
-            </p>
-          </DialogBody>
-          <DialogFooter>
-            <DialogConfirm label="Done" onClick={async () => {}} />
           </DialogFooter>
         </DialogModal>
       </Variant>
@@ -124,7 +120,7 @@ export const DialogSection: React.FC<{ selectedComponent: string }> = ({ selecte
         />
       </Variant>
 
-      <Variant label="Document Take Over">
+      <Variant label="Document Taken Over">
         <Button buttonStyle="secondary" onClick={() => setDocTakeOverActive(true)}>
           Open Document Take Over
         </Button>
