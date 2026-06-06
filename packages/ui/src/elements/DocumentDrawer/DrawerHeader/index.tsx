@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 
 import { useModal } from '../../../elements/Modal/index.js'
 import { RenderTitle } from '../../../elements/RenderTitle/index.js'
@@ -22,7 +22,7 @@ export const DocumentDrawerHeader: React.FC<{
   drawerSlug: string
   showDocumentID?: boolean
 }> = ({ AfterHeader, drawerSlug, showDocumentID = true }) => {
-  const { closeModal, openModal } = useModal()
+  const { closeModal, isModalOpen, openModal } = useModal()
   const { t } = useTranslation()
   const isModified = useFormModified()
 
@@ -33,6 +33,42 @@ export const DocumentDrawerHeader: React.FC<{
       closeModal(drawerSlug)
     }
   }, [isModified, openModal, closeModal, drawerSlug])
+
+  useEffect(() => {
+    if (!isModified) {
+      return
+    }
+
+    const drawerCloseButton = document.getElementById(`close-drawer__${drawerSlug}`)
+
+    const handleDrawerCloseClick = (event: MouseEvent) => {
+      if (isModalOpen(leaveWithoutSavingModalSlug)) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      handleOnClose()
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || isModalOpen(leaveWithoutSavingModalSlug)) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      handleOnClose()
+    }
+
+    drawerCloseButton?.addEventListener('click', handleDrawerCloseClick, true)
+    document.addEventListener('keydown', handleKeyDown, true)
+
+    return () => {
+      drawerCloseButton?.removeEventListener('click', handleDrawerCloseClick, true)
+      document.removeEventListener('keydown', handleKeyDown, true)
+    }
+  }, [drawerSlug, handleOnClose, isModalOpen, isModified])
 
   return (
     <div className={`${documentDrawerBaseClass}__header`}>

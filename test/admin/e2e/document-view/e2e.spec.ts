@@ -902,7 +902,16 @@ describe('Document View', () => {
       await expect(leaveModal).toBeVisible()
       await leaveModal.locator('#confirm-cancel').click()
       await expect(editModal).toBeVisible()
-      await closeButton.click()
+
+      const gutterCloseButton = page.locator('.drawer--is-open > .drawer__close')
+      await gutterCloseButton.click()
+      await expect(leaveModal).toBeVisible()
+      await leaveModal.locator('#confirm-cancel').click()
+      await expect(editModal).toBeVisible()
+
+      await page.keyboard.press('Escape')
+      await expect(leaveModal).toBeVisible()
+
       await leaveModal.locator('#confirm-action').click()
       await expect(editModal).toBeHidden()
     })
