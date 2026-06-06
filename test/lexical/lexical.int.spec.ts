@@ -1410,3 +1410,43 @@ describe('Lexical upload node type generation', () => {
     expect(generatedTypes).toContain('caption')
   })
 })
+
+describe('Lexical inline block node type generation', () => {
+  // A `BlocksFeature` with `blocks` but no `inlineBlocks` should not make the generated node union
+  // claim the field can contain inline-block nodes - the editor can never produce one.
+  vitestIt('omits the inline-block node type when no inline blocks are configured', async () => {
+    const config = {
+      collections: [
+        {
+          slug: 'articles',
+          fields: [
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: [
+                  BlocksFeature({
+                    blocks: [{ slug: 'myBlock', fields: [{ name: 'title', type: 'text' }] }],
+                  }),
+                ],
+              }),
+            },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
+    ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
+      defaultIDType: 'text',
+    }
+
+    const generatedTypes = await generateTypes(sanitizedConfig, { log: false, returnString: true })
+
+    // The configured block is part of the node union...
+    expect(generatedTypes).toContain('myBlock')
+    // ...but no inline-block node type should appear, since none are configured.
+    expect(generatedTypes).not.toContain('SerializedInlineBlockNode<{blockType: string}>')
+  })
+})
