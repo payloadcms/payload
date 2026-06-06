@@ -504,7 +504,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Na korak ste da premestite <1>{{count}} {{label}}</1> u korenu. Jeste li sigurni?',
     moveToRoot: 'Premesti se na koren',
     noParent: 'Bez roditelja',
-    noResults: 'No results for "{{query}}"',
+    noResults: 'Nema rezultata za „{{query}}"',
     searchLabel: 'Pretraga {{label}}',
   },
   localization: {

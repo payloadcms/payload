@@ -511,7 +511,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
       'আপনি চলে যাচ্ছেন <1>{{count}} {{label}}</1> রুটে। আপনি কি নিশ্চিত?',
     moveToRoot: 'রুটে যান',
     noParent: 'কোন অভিভাবক নেই',
-    noResults: 'No results for "{{query}}"',
+    noResults: '"{{query}}" এর জন্য কোনো ফলাফল নেই',
     searchLabel: 'অনুসন্ধান করুন {{label}}',
   },
   localization: {
