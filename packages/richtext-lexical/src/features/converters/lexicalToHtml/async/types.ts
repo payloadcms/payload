@@ -89,6 +89,6 @@ export type HTMLConvertersAsync<
 export type HTMLConvertersFunctionAsync<
   T extends { [key: string]: any; type?: string } =
     | DefaultNodeTypes
-    | SerializedBlockNode<{ blockName?: null | string }>
+    | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
 > = (args: { defaultConverters: HTMLConvertersAsync<DefaultNodeTypes> }) => HTMLConvertersAsync<T>

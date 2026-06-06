@@ -32,7 +32,6 @@
     "sharp": "0.34.2"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.2.0",
     "@playwright/test": "1.59.1",
     "@testing-library/react": "16.3.0",
     "@types/node": "24.12.3",

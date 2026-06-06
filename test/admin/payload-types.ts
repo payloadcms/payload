@@ -60,6 +60,54 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_7DB35FFD".
+ */
+export type LexicalNodes_7DB35FFD =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_7DB35FFD>
+  | SerializedRelationshipNode<
+      | 'posts'
+      | 'users'
+      | 'hidden-collection'
+      | 'not-in-view-collection'
+      | 'collection-no-api-view'
+      | 'custom-document-controls'
+      | 'custom-views-one'
+      | 'custom-views-two'
+      | 'custom-collection-view'
+      | 'reorder-tabs'
+      | 'custom-fields'
+      | 'group-one-collection-ones'
+      | 'group-one-collection-twos'
+      | 'group-two-collection-ones'
+      | 'group-two-collection-twos'
+      | 'geo'
+      | 'array'
+      | 'disable-duplicate'
+      | 'disable-copy-to-locale'
+      | 'edit-menu-items'
+      | 'format-doc-url'
+      | 'base-list-filters'
+      | 'with300documents'
+      | 'with-list-drawer'
+      | 'placeholder'
+      | 'use-as-title-group-field'
+      | 'disable-bulk-edit'
+      | 'custom-list-drawer'
+      | 'list-view-select-api'
+      | 'virtuals'
+      | 'no-timestamps'
+      | 'localized'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
@@ -283,21 +331,7 @@ export interface Post {
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_7DB35FFD> | null;
   someTextField?: string | null;
   namedGroup?: {
     someTextField?: string | null;
@@ -1699,6 +1733,76 @@ export interface CollectionsWidget {
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

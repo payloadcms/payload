@@ -60,6 +60,406 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_E6CA934E".
+ */
+export type LexicalNodes_E6CA934E =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_E6CA934E>
+  | SerializedBlockNode<Callout>
+  | SerializedInlineBlockNode<Kbd>
+  | SerializedUploadNode<'uploads', LexicalUploadFields_7C90EEAC>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_E6CA934E>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_E6CA934E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_E6CA934E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_E6CA934E>
+  | SerializedListItemNode<LexicalNodes_E6CA934E>
+  | SerializedHeadingNode<LexicalNodes_E6CA934E>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_AA0E78C0".
+ */
+export type LexicalNodes_AA0E78C0 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_AA0E78C0>
+  | SerializedBlockNode<MyBlock>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHeadingNode<LexicalNodes_AA0E78C0>
+  | SerializedUploadNode<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_AA0E78C0>
+  | SerializedListNode<LexicalNodes_AA0E78C0>
+  | SerializedListItemNode<LexicalNodes_AA0E78C0>
+  | SerializedAutoLinkNode<LexicalNodes_AA0E78C0, LexicalLinkFields_AA0E78C0>
+  | SerializedLinkNode<LexicalNodes_AA0E78C0, LexicalLinkFields_AA0E78C0>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_D5ECE514".
+ */
+export type LexicalNodes_D5ECE514 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_D5ECE514>
+  | SerializedBlockNode<Banner>
+  | SerializedInlineBlockNode<Highlight>
+  | SerializedUploadNode<'uploads', LexicalUploadFields_76339D00>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_D5ECE514>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_D5ECE514, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D5ECE514, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_D5ECE514>
+  | SerializedListItemNode<LexicalNodes_D5ECE514>
+  | SerializedHeadingNode<LexicalNodes_D5ECE514>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_B722CE44".
+ */
+export type LexicalNodes_B722CE44 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_B722CE44>
+  | SerializedTableNode<LexicalNodes_B722CE44>
+  | SerializedTableCellNode<LexicalNodes_B722CE44>
+  | SerializedTableRowNode<LexicalNodes_B722CE44>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_B722CE44>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_B722CE44, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_B722CE44, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_B722CE44>
+  | SerializedListItemNode<LexicalNodes_B722CE44>
+  | SerializedHeadingNode<LexicalNodes_B722CE44>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_5D52C4F6".
+ */
+export type LexicalNodes_5D52C4F6 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_5D52C4F6>
+  | SerializedBlockNode<Code>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_5D52C4F6>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_5D52C4F6, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_5D52C4F6, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_5D52C4F6>
+  | SerializedListItemNode<LexicalNodes_5D52C4F6>
+  | SerializedHeadingNode<LexicalNodes_5D52C4F6>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_B87BCF4E".
+ */
+export type LexicalNodes_B87BCF4E =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_B87BCF4E>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_B87BCF4E>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_B87BCF4E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_B87BCF4E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_B87BCF4E>
+  | SerializedListItemNode<LexicalNodes_B87BCF4E>
+  | SerializedHeadingNode<LexicalNodes_B87BCF4E>;
 
 export interface Config {
   auth: {
@@ -339,21 +739,7 @@ export interface Talk {
    * One-paragraph teaser shown in listings.
    */
   shortDescription?: string | null;
-  abstract?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  abstract?: LexicalRichText<LexicalNodes_E6CA934E> | null;
   track?: ('frontend' | 'backend' | 'devops' | 'design' | 'ai-ml' | 'workshop') | null;
   /**
    * Total runtime in minutes.
@@ -1241,81 +1627,11 @@ export interface TextField {
  */
 export interface RichTextField {
   id: string;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  table?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  code?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  typography?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  lists?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  content?: LexicalRichText<LexicalNodes_D5ECE514> | null;
+  table?: LexicalRichText<LexicalNodes_B722CE44> | null;
+  code?: LexicalRichText<LexicalNodes_5D52C4F6> | null;
+  typography?: LexicalRichText<LexicalNodes_B87BCF4E> | null;
+  lists?: LexicalRichText<LexicalNodes_B87BCF4E> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1453,21 +1769,7 @@ export interface SlugField {
 export interface TabsField {
   id: string;
   title?: string | null;
-  postContent?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  postContent?: LexicalRichText<LexicalNodes_B87BCF4E> | null;
   featuredImage: string;
   metaTitle?: string | null;
   metaDescription?: string | null;
@@ -3192,75 +3494,96 @@ export interface TaskSchedulePublish {
  * via the `definition` "Callout".
  */
 export interface Callout {
+  id: string;
+  blockType: 'callout';
   style?: ('info' | 'warning' | 'success' | 'error') | null;
   body: string;
-  id?: string | null;
   blockName?: string | null;
-  blockType: 'callout';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "Kbd".
  */
 export interface Kbd {
-  keys: string;
-  id?: string | null;
-  blockName?: string | null;
+  id: string;
   blockType: 'kbd';
+  keys: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_7C90EEAC".
+ */
+export interface LexicalUploadFields_7C90EEAC {
+  caption?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyBlock".
  */
 export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
   someText?: string | null;
   someTextRequired: string;
   radios?: ('option1' | 'option2' | 'option3') | null;
-  id?: string | null;
   blockName?: string | null;
-  blockType: 'myBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_AA0E78C0".
+ */
+export interface LexicalLinkFields_AA0E78C0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "Banner".
  */
 export interface Banner {
-  style?: ('info' | 'warning' | 'error' | 'success') | null;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  id?: string | null;
-  blockName?: string | null;
+  id: string;
   blockType: 'banner';
+  style?: ('info' | 'warning' | 'error' | 'success') | null;
+  content?: LexicalRichText<LexicalNodes_AA0E78C0> | null;
+  blockName?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "Highlight".
  */
 export interface Highlight {
+  id: string;
+  blockType: 'highlight';
   text?: string | null;
   color?: ('yellow' | 'green' | 'blue' | 'pink') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'highlight';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_76339D00".
+ */
+export interface LexicalUploadFields_76339D00 {
+  caption?: LexicalRichText<LexicalNodes_AA0E78C0> | null;
+  altText?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "Code".
  */
 export interface Code {
+  id: string;
+  blockType: 'Code';
   language?:
     | (
         | 'abap'
@@ -3348,9 +3671,7 @@ export interface Code {
       )
     | null;
   code?: string | null;
-  id?: string | null;
   blockName?: string | null;
-  blockType: 'Code';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3358,6 +3679,173 @@ export interface Code {
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+};
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+};
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
+export interface SerializedTableNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'table';
+  colWidths?: number[];
+  frozenColumnCount?: number;
+  frozenRowCount?: number;
+  rowStriping?: boolean;
+}
+export interface SerializedTableRowNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablerow';
+  height?: number;
+}
+export interface SerializedTableCellNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablecell';
+  backgroundColor?: string | null;
+  colSpan?: number;
+  headerState: number;
+  rowSpan?: number;
+  verticalAlign?: string;
+  width?: number;
 }
 
 

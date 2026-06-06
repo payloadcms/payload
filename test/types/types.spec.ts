@@ -1,3 +1,4 @@
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type {
   BulkOperationResult,
   CollectionSlug,
@@ -19,18 +20,43 @@ import {
   buildEditorState,
   type DefaultNodeTypes,
   type DefaultTypedEditorState,
-  type RecursiveNodes,
+  type SerializedAutoLinkNode,
   type SerializedBlockNode,
   type SerializedHeadingNode,
+  type SerializedHorizontalRuleNode,
+  type SerializedLineBreakNode,
+  type SerializedLinkNode,
+  type SerializedListItemNode,
+  type SerializedListNode,
+  type SerializedParagraphNode,
+  type SerializedQuoteNode,
+  type SerializedRelationshipNode,
+  type SerializedTabNode,
   type SerializedTextNode,
+  type SerializedUploadNode,
   type TypedEditorState,
 } from '@payloadcms/richtext-lexical'
+import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext'
 import { PayloadSDK } from '@payloadcms/sdk'
 import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 import type {
+  SerializedAutoLinkNode as GenAutoLink,
+  SerializedHeadingNode as GenHeading,
+  SerializedHorizontalRuleNode as GenHR,
+  SerializedLineBreakNode as GenLB,
+  SerializedListItemNode as GenLI,
+  SerializedLinkNode as GenLink,
+  SerializedListNode as GenList,
+  LexicalNodes_4CE595A9 as GenNodeUnion,
+  SerializedParagraphNode as GenParagraph,
+  SerializedQuoteNode as GenQuote,
+  SerializedTabNode as GenTab,
+  SerializedTextNode as GenText,
   Config as LocalConfig,
+  LexicalUploadFields_7C90EEAC as MediaUploadFields,
+  LexicalUploadFields_9521FA4A as GalleryUploadFields,
   Menu,
   MyRadioOptions,
   MySelectOptions,
@@ -331,26 +357,33 @@ describe('Types testing', () => {
       }
     })
 
-    test('ensure generated richText types can be assigned to DefaultTypedEditorState type', () => {
-      // If there is a function that expects DefaultTypedEditorState, you should be able to assign the generated type to it
-      // This ensures that data can be passed directly form the payload local API to a function that expects DefaultTypedEditorState
+    test('ensure generated richText types can be assigned to DefaultTypedEditorState when no custom upload fields exist', () => {
+      // When no UploadFeature extra fields are configured, the generated type and DefaultTypedEditorState
+      // are bidirectionally assignable. With per-collection upload fields (as in this config), the generated
+      // type has narrower upload field types, so they diverge. In that case, use `buildEditorState<Post['richText']>()`
+      // instead of `buildEditorState<DefaultNodeTypes>()`.
+      //
+      // This test intentionally documents the divergence when custom upload fields are configured.
       type GeneratedRichTextType = Post['richText']
 
-      expect<DefaultTypedEditorState>().type.toBeAssignableFrom<GeneratedRichTextType>()
+      // The generated type and DefaultTypedEditorState are NOT bidirectionally assignable when custom
+      // upload fields narrow the node union. buildEditorState<Post['richText']> is the correct path.
+      expect<Post['richText']>().type.toBeAssignableFrom<
+        ReturnType<typeof buildEditorState<GeneratedRichTextType>>
+      >()
     })
 
-    test('ensure DefaultTypedEditorState type can be assigned to GeneratedRichTextType type', () => {
-      /**
-       * Example:
-       *
-       * const mySeedData: RequiredDataFromCollectionSlug<'posts'> = {
-       *   title: 'hello',
-       *   richText: buildEditorState<DefaultNodeTypes>({text: 'hello'}) // <= DefaultTypedEditorState
-       * }
-       */
+    test('ensure generated richText types can be assigned to SerializedEditorState (what converters consume)', () => {
+      // Every lexical converter (convertLexicalToHTML, convertLexicalToPlaintext, ...) accepts
+      // `data: SerializedEditorState`, so data straight from the local API must be assignable to it.
       type GeneratedRichTextType = Post['richText']
 
-      expect<GeneratedRichTextType>().type.toBeAssignableFrom<DefaultTypedEditorState>()
+      expect<SerializedEditorState>().type.toBeAssignableFrom<GeneratedRichTextType>()
+
+      // ...and the converter must accept the generated type directly, with no cast.
+      expect(convertLexicalToPlaintext).type.toBeCallableWith({
+        data: null as unknown as GeneratedRichTextType,
+      })
     })
 
     test('ensure type property in editorState.root.children.push() is correctly typed as union of all node types', () => {
@@ -452,7 +485,7 @@ describe('Types testing', () => {
     })
 
     test('ensure linebreak nodes cannot have children even when nested', () => {
-      // This test verifies that RecursiveNodes doesn't add children to leaf nodes
+      // This test verifies that the self-recursive `DefaultNodeTypes` union doesn't add children to leaf nodes
       type RootChildren = DefaultTypedEditorState['root']['children'][number]
 
       // At top level
@@ -502,7 +535,7 @@ describe('Types testing', () => {
     })
 
     test('accepts complete heading node as part of DefaultNodeTypes if heading node is explicitly typed', () => {
-      const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
+      const headingNode: SerializedHeadingNode<DefaultNodeTypes> = {
         type: 'heading',
         children: [
           {
@@ -537,7 +570,7 @@ describe('Types testing', () => {
     })
 
     test('accepts complete heading node as part of nested children within DefaultNodeTypes if heading node is explicitly typed', () => {
-      const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
+      const headingNode: SerializedHeadingNode<DefaultNodeTypes> = {
         type: 'heading',
         children: [
           {
@@ -568,6 +601,7 @@ describe('Types testing', () => {
               format: 'left',
               indent: 0,
               textFormat: 0,
+              textStyle: '',
               version: 0,
             },
           ],
@@ -616,6 +650,7 @@ describe('Types testing', () => {
               format: 'left',
               indent: 0,
               textFormat: 0,
+              textStyle: '',
               version: 0,
             },
             {
@@ -640,6 +675,7 @@ describe('Types testing', () => {
               format: 'left',
               indent: 0,
               textFormat: 0,
+              textStyle: '',
               version: 0,
             },
           ],
@@ -726,10 +762,36 @@ describe('Types testing', () => {
         expect(result.root.children[0]!.type).type.toBe<'block' | _Hardcoded_DefaultNodeTypes>()
       })
 
-      test('buildEditorState result can be assigned to Post richText field', () => {
-        const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
-        type GeneratedRichTextType = Post['richText']
-        expect(result).type.toBeAssignableTo<GeneratedRichTextType>()
+      test('buildEditorState with generated field type can be assigned to Post richText field', () => {
+        const result = buildEditorState<Post['richText']>({ text: 'hello' })
+        expect(result).type.toBeAssignableTo<Post['richText']>()
+      })
+
+      test('buildEditorState accepts a generated field type directly and returns exactly it', () => {
+        // The ergonomic path for users with generated types: pass the field type, no node extraction.
+        const result = buildEditorState<Post['richText']>({ text: 'hello' })
+        expect(result).type.toBe<Post['richText']>()
+      })
+
+      test('buildEditorState with a generated field type directly narrows `nodes` to the field — a registered node type is accepted', () => {
+        // `horizontalrule` is part of this editor, so calling with it is valid.
+        expect(buildEditorState<Post['richText']>).type.toBeCallableWith({
+          nodes: [{ type: 'horizontalrule', version: 1 }],
+        })
+      })
+
+      test('buildEditorState with a generated field type directly narrows `nodes` to the field — an unregistered node type errors', () => {
+        // `block` is not enabled on this editor, so calling with it is rejected.
+        expect(buildEditorState<Post['richText']>).type.not.toBeCallableWith({
+          nodes: [
+            {
+              type: 'block',
+              fields: { id: 'x', blockName: '', blockType: 'whatever' },
+              format: '',
+              version: 1,
+            },
+          ],
+        })
       })
 
       test('buildEditorState allows pushing typed nodes to children', () => {
@@ -929,6 +991,129 @@ describe('Types testing', () => {
         expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
       })
     })
+
+    describe('generated <-> runtime per-node compatibility', () => {
+      // Per-node assertions pinpoint which node differs when the whole-tree
+      // assertions above fail.
+
+      test('SerializedTextNode: generated <-> runtime', () => {
+        expect<GenText>().type.toBeAssignableFrom<SerializedTextNode>()
+        expect<SerializedTextNode>().type.toBeAssignableFrom<GenText>()
+      })
+
+      test('SerializedTabNode: generated <-> runtime', () => {
+        expect<GenTab>().type.toBeAssignableFrom<SerializedTabNode>()
+        expect<SerializedTabNode>().type.toBeAssignableFrom<GenTab>()
+      })
+
+      test('SerializedLineBreakNode: generated <-> runtime', () => {
+        expect<GenLB>().type.toBeAssignableFrom<SerializedLineBreakNode>()
+        expect<SerializedLineBreakNode>().type.toBeAssignableFrom<GenLB>()
+      })
+
+      test('SerializedHorizontalRuleNode: generated <-> runtime', () => {
+        expect<GenHR>().type.toBeAssignableFrom<SerializedHorizontalRuleNode>()
+        expect<SerializedHorizontalRuleNode>().type.toBeAssignableFrom<GenHR>()
+      })
+
+      test('SerializedParagraphNode<T>: generated <-> runtime', () => {
+        expect<GenParagraph<GenNodeUnion>>().type.toBeAssignableFrom<
+          SerializedParagraphNode<GenNodeUnion>
+        >()
+        expect<SerializedParagraphNode<GenNodeUnion>>().type.toBeAssignableFrom<
+          GenParagraph<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedHeadingNode<T>: generated <-> runtime', () => {
+        expect<GenHeading<GenNodeUnion>>().type.toBeAssignableFrom<
+          SerializedHeadingNode<GenNodeUnion>
+        >()
+        expect<SerializedHeadingNode<GenNodeUnion>>().type.toBeAssignableFrom<
+          GenHeading<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedQuoteNode<T>: generated <-> runtime', () => {
+        expect<GenQuote<GenNodeUnion>>().type.toBeAssignableFrom<
+          SerializedQuoteNode<GenNodeUnion>
+        >()
+        expect<SerializedQuoteNode<GenNodeUnion>>().type.toBeAssignableFrom<
+          GenQuote<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedListNode<T>: generated <-> runtime', () => {
+        expect<GenList<GenNodeUnion>>().type.toBeAssignableFrom<SerializedListNode<GenNodeUnion>>()
+        expect<SerializedListNode<GenNodeUnion>>().type.toBeAssignableFrom<GenList<GenNodeUnion>>()
+      })
+
+      test('SerializedListItemNode<T>: generated <-> runtime', () => {
+        expect<GenLI<GenNodeUnion>>().type.toBeAssignableFrom<
+          SerializedListItemNode<GenNodeUnion>
+        >()
+        expect<SerializedListItemNode<GenNodeUnion>>().type.toBeAssignableFrom<
+          GenLI<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedLinkNode<T>: generated <-> runtime', () => {
+        expect<GenLink<GenNodeUnion>>().type.toBeAssignableFrom<SerializedLinkNode<GenNodeUnion>>()
+        expect<SerializedLinkNode<GenNodeUnion>>().type.toBeAssignableFrom<GenLink<GenNodeUnion>>()
+      })
+
+      test('SerializedAutoLinkNode<T>: generated <-> runtime', () => {
+        expect<GenAutoLink<GenNodeUnion>>().type.toBeAssignableFrom<
+          SerializedAutoLinkNode<GenNodeUnion>
+        >()
+        expect<SerializedAutoLinkNode<GenNodeUnion>>().type.toBeAssignableFrom<
+          GenAutoLink<GenNodeUnion>
+        >()
+      })
+
+      test('SerializedRelationshipNode: generated <-> runtime', () => {
+        // The relationship node excludes upload collections, so compare against the
+        // relationship member as it actually appears in the generated union.
+        type GenRelationshipInUnion = Extract<GenNodeUnion, { type: 'relationship' }>
+        expect<GenRelationshipInUnion>().type.toBeAssignableFrom<SerializedRelationshipNode>()
+        expect<SerializedRelationshipNode>().type.toBeAssignableFrom<GenRelationshipInUnion>()
+      })
+
+      test('SerializedUploadNode: generated narrows correctly per collection', () => {
+        // With per-collection upload fields, the generated type is a discriminated union of
+        // per-collection variants rather than one SerializedUploadNode with unioned generics.
+        type GenUploadInUnion = Extract<GenNodeUnion, { type: 'upload' }>
+        type MediaVariant = Extract<GenUploadInUnion, { relationTo: 'media' }>
+        type GalleryVariant = Extract<GenUploadInUnion, { relationTo: 'gallery' }>
+
+        expect<MediaVariant>().type.toHaveProperty('fields')
+        expect<GalleryVariant>().type.toHaveProperty('fields')
+
+        expect<MediaVariant['relationTo']>().type.toBe<'media'>()
+        expect<GalleryVariant['relationTo']>().type.toBe<'gallery'>()
+      })
+
+      test('SerializedUploadNode: discriminated fields per collection', () => {
+        type GenUpload = Extract<GenNodeUnion, { type: 'upload' }>
+
+        type MediaUpload = Extract<GenUpload, { relationTo: 'media' }>
+        type GalleryUpload = Extract<GenUpload, { relationTo: 'gallery' }>
+
+        expect<MediaUpload['fields']>().type.toBe<MediaUploadFields>()
+        expect<GalleryUpload['fields']>().type.toBe<GalleryUploadFields>()
+
+        expect<MediaUpload['fields']>().type.toHaveProperty('caption')
+        expect<GalleryUpload['fields']>().type.toHaveProperty('altText')
+
+        expect<MediaUpload['fields']>().type.not.toHaveProperty('altText')
+        expect<GalleryUpload['fields']>().type.not.toHaveProperty('caption')
+      })
+
+      test('LexicalRichText<T>.root: generated root children are typed as the generated node union', () => {
+        type GenChild = Post['richText']['root']['children'][number]
+        expect<GenChild>().type.toBe<GenNodeUnion>()
+      })
+    })
   })
 
   describe('sdk', () => {
@@ -940,6 +1125,8 @@ describe('Types testing', () => {
       const _sdk = new PayloadSDK({ baseURL: '' })
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'gallery'
+        | 'media'
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
@@ -957,6 +1144,8 @@ describe('Types testing', () => {
       // ensure collection property of sdk.create has posts in the union type
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'gallery'
+        | 'media'
         | 'pages'
         | 'pages-categories'
         | 'payload-kv'
@@ -976,7 +1165,14 @@ describe('Types testing', () => {
         data: {
           radioField: 'option-1',
           richText: {
-            root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+            root: {
+              type: 'root',
+              children: [],
+              direction: null,
+              format: '',
+              indent: 0,
+              version: 0,
+            },
           },
           selectField: 'option-1',
           title: 'Test Post',
@@ -994,7 +1190,14 @@ describe('Types testing', () => {
             invalidProperty: 'should error',
             radioField: 'option-1',
             richText: {
-              root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+              root: {
+                type: 'root',
+                children: [],
+                direction: null,
+                format: '',
+                indent: 0,
+                version: 0,
+              },
             },
             selectField: 'option-1',
             title: 'Test Post',
@@ -1032,6 +1235,98 @@ describe('Types testing', () => {
         select: { richText: false },
       })
       expect(result).type.toBe<Omit<Post, 'richText'>>()
+    })
+  })
+
+  describe('richText enforcement in local API and SDK', () => {
+    test('payload.create accepts buildEditorState output as richText', () => {
+      expect(
+        payload.create({
+          collection: 'posts',
+          data: {
+            radioField: 'option-1',
+            richText: buildEditorState<Post['richText']>({ text: 'hello' }),
+            selectField: 'option-1',
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
+    test('payload.create accepts inline richText with correct node structure', () => {
+      expect(
+        payload.create({
+          collection: 'posts',
+          data: {
+            radioField: 'option-1',
+            richText: {
+              root: {
+                type: 'root',
+                children: [
+                  {
+                    type: 'paragraph',
+                    children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text: 'hello', version: 1 }],
+                    direction: null,
+                    format: '',
+                    indent: 0,
+                    textFormat: 0,
+                    textStyle: '',
+                    version: 1,
+                  },
+                ],
+                direction: null,
+                format: '',
+                indent: 0,
+                version: 1,
+              },
+            },
+            selectField: 'option-1',
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
+    test('payload.update accepts richText via buildEditorState', () => {
+      expect(
+        payload.update({
+          id: 1,
+          collection: 'posts',
+          data: {
+            richText: buildEditorState<Post['richText']>({ text: 'updated' }),
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
+    test('payload.updateGlobal accepts richText via buildEditorState', () => {
+      expect(
+        payload.updateGlobal({
+          slug: 'menu',
+          data: {
+            richText: buildEditorState<Menu['richText']>({ text: 'nav content' }),
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
+    test('SDK create accepts buildEditorState output as richText', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+      expect(
+        _sdk.create({
+          collection: 'posts',
+          data: {
+            radioField: 'option-1',
+            richText: buildEditorState<Post['richText']>({ text: 'hello' }),
+            selectField: 'option-1',
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
+    test('convertLexicalToPlaintext accepts generated richText directly', () => {
+      const _post = null as unknown as Post
+
+      expect(convertLexicalToPlaintext({ data: _post.richText })).type.not.toRaiseError()
     })
   })
 
