@@ -21,13 +21,18 @@ export function getIncomingFiles({
 
   let files: File[] = []
 
-  if (file && data.filename && data.mimeType) {
+  // A create request using `?select` can project `filename`/`mimeType` out of
+  // `data`; fall back to the uploaded file's own values so the upload is not skipped.
+  const filename = data.filename ?? file?.name
+  const mimeType = data.mimeType ?? file?.mimetype
+
+  if (file && filename && mimeType) {
     const mainFile: File = {
       buffer: file.data,
       clientUploadContext: file.clientUploadContext,
-      filename: data.filename,
+      filename,
       filesize: file.size,
-      mimeType: data.mimeType,
+      mimeType,
       tempFilePath: file.tempFilePath,
     }
 
