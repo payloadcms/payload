@@ -619,7 +619,7 @@ Element nodes are now generic over their `children`, and you pass the node union
   }
 ```
 
-`SerializedTextNode` is a leaf, so it stays bare. For the built-in nodes plus a few of your own, `DefaultNodeTypesOf` threads the union for you (`type MyNodes = DefaultNodeTypesOf<MyNodes> | SerializedBlockNode<MyBlockData>`), and `DefaultTypedEditorState` with only built-in nodes needs no change.
+`SerializedTextNode` is a leaf, so it stays bare. For the built-in nodes plus a few of your own, `WithDefaultNodes` threads the union for you - pass your custom node(s) as the generic (`type MyNodes = WithDefaultNodes<SerializedBlockNode<MyBlockData>>`), and they're usable anywhere a node can appear, not just at the top level. `DefaultTypedEditorState` with only built-in nodes needs no change.
 
 ### Generated JSON Schema uses `$defs` instead of `definitions`
 
