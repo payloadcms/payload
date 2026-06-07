@@ -128,7 +128,7 @@ export const createBlockNodeJSONSchema =
 
     const tsType =
       definitionNames.length > 0
-        ? `SerializedBlockNode<${definitionNames.join(' | ')}>`
+        ? definitionNames.map((name) => `SerializedBlockNode<${name}>`).join(' | ')
         : `SerializedBlockNode<{ blockType: string }>`
 
     return {
@@ -162,7 +162,7 @@ export const createInlineBlockNodeJSONSchema =
 
     const tsType =
       definitionNames.length > 0
-        ? `SerializedInlineBlockNode<${definitionNames.join(' | ')}>`
+        ? definitionNames.map((name) => `SerializedInlineBlockNode<${name}>`).join(' | ')
         : `SerializedInlineBlockNode<{ blockType: string }>`
 
     return {

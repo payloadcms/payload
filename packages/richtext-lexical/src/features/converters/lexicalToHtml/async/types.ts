@@ -56,31 +56,13 @@ export type HTMLConvertersAsync<
   >
 } & {
   blocks?: {
-    [K in Extract<
-      Extract<T, { type: 'block' }> extends SerializedBlockNode<infer B>
-        ? B extends { blockType: string }
-          ? B['blockType']
-          : never
-        : never,
-      string
-    >]?: HTMLConverterAsync<
-      Extract<T, { type: 'block' }> extends SerializedBlockNode<infer B>
-        ? SerializedBlockNode<Extract<B, { blockType: K }>>
-        : SerializedBlockNode
+    [K in Extract<T, { type: 'block' }>['fields']['blockType']]?: HTMLConverterAsync<
+      Extract<T, { fields: { blockType: K }; type: 'block' }>
     >
   }
   inlineBlocks?: {
-    [K in Extract<
-      Extract<T, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
-        ? B extends { blockType: string }
-          ? B['blockType']
-          : never
-        : never,
-      string
-    >]?: HTMLConverterAsync<
-      Extract<T, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
-        ? SerializedInlineBlockNode<Extract<B, { blockType: K }>>
-        : SerializedInlineBlockNode
+    [K in Extract<T, { type: 'inlineBlock' }>['fields']['blockType']]?: HTMLConverterAsync<
+      Extract<T, { fields: { blockType: K }; type: 'inlineBlock' }>
     >
   }
   unknown?: HTMLConverterAsync<SerializedLexicalNode>
@@ -91,4 +73,4 @@ export type HTMLConvertersFunctionAsync<
     | DefaultNodeTypes
     | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
-> = (args: { defaultConverters: HTMLConvertersAsync<DefaultNodeTypes> }) => HTMLConvertersAsync<T>
+> = (args: { defaultConverters: HTMLConvertersAsync<T> }) => HTMLConvertersAsync<T>
