@@ -35,6 +35,10 @@ async function run() {
 
     setTestEnvPaths(testDir)
     await generateTypes(config)
+
+    // Generation is done; Configs that leave handles open (e.g. storage-r2's undisposed
+    // Cloudflare workerd runtime) shouldn't keep the process alive.
+    process.exit(0)
   } else {
     // Search through every folder in dirname, and if it has a config.ts file, generate types for it
     const foundDirs: string[] = []
