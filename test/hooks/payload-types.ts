@@ -62,17 +62,16 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_6C4CCB8D".
+ * via the `definition` "LexicalNodes_093007C1".
  */
-export type LexicalNodes_6C4CCB8D =
+export type LexicalNodes_093007C1 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_6C4CCB8D>
-  | SerializedAutoLinkNode<LexicalNodes_6C4CCB8D, LexicalLinkFields_6C4CCB8D>
-  | SerializedLinkNode<LexicalNodes_6C4CCB8D, LexicalLinkFields_6C4CCB8D>
+  | SerializedParagraphNode<LexicalNodes_093007C1>
+  | SerializedAutoLinkNode<LexicalNodes_093007C1, LexicalLinkFields_093007C1>
+  | SerializedLinkNode<LexicalNodes_093007C1, LexicalLinkFields_093007C1>
   | SerializedBlockNode<NestedBlock>
-  | SerializedInlineBlockNode<{blockType: string}>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -82,7 +81,7 @@ export type LexicalNodes_6C4CCB8D =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_6C4CCB8D>
+  | SerializedQuoteNode<LexicalNodes_093007C1>
   | SerializedRelationshipNode<
       | 'beforeOperation'
       | 'before-change-hooks'
@@ -108,9 +107,9 @@ export type LexicalNodes_6C4CCB8D =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedListNode<LexicalNodes_6C4CCB8D>
-  | SerializedListItemNode<LexicalNodes_6C4CCB8D>
-  | SerializedHeadingNode<LexicalNodes_6C4CCB8D>;
+  | SerializedListNode<LexicalNodes_093007C1>
+  | SerializedListItemNode<LexicalNodes_093007C1>
+  | SerializedHeadingNode<LexicalNodes_093007C1>;
 
 export interface Config {
   auth: {
@@ -363,7 +362,7 @@ export interface NestedAfterChangeHook {
         }[]
       | null;
   };
-  lexical?: LexicalRichText<LexicalNodes_6C4CCB8D> | null;
+  lexical?: LexicalRichText<LexicalNodes_093007C1> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1016,9 +1015,9 @@ export interface NestedBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_6C4CCB8D".
+ * via the `definition` "LexicalLinkFields_093007C1".
  */
-export interface LexicalLinkFields_6C4CCB8D {
+export interface LexicalLinkFields_093007C1 {
   linkBlocks?: NestedLinkBlock[] | null;
   doc?: {
     relationTo: string;
@@ -1109,17 +1108,17 @@ export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> 
   fields: TFields;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = {
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};
+} : never;
 
 export interface SerializedHorizontalRuleNode {
   type: 'horizontalrule';

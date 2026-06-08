@@ -62,24 +62,23 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_CD4D3FCC".
+ * via the `definition` "LexicalNodes_E4081DB3".
  */
-export type LexicalNodes_CD4D3FCC =
+export type LexicalNodes_E4081DB3 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_CD4D3FCC>
+  | SerializedParagraphNode<LexicalNodes_E4081DB3>
   | SerializedBlockNode<MyBlock>
-  | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_CD4D3FCC>
+  | SerializedHeadingNode<LexicalNodes_E4081DB3>
   | SerializedUploadNode<'draft-with-upload'>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'media2'>
-  | SerializedQuoteNode<LexicalNodes_CD4D3FCC>
-  | SerializedListNode<LexicalNodes_CD4D3FCC>
-  | SerializedListItemNode<LexicalNodes_CD4D3FCC>
-  | SerializedAutoLinkNode<LexicalNodes_CD4D3FCC, LexicalLinkFields_CD4D3FCC>
-  | SerializedLinkNode<LexicalNodes_CD4D3FCC, LexicalLinkFields_CD4D3FCC>
+  | SerializedQuoteNode<LexicalNodes_E4081DB3>
+  | SerializedListNode<LexicalNodes_E4081DB3>
+  | SerializedListItemNode<LexicalNodes_E4081DB3>
+  | SerializedAutoLinkNode<LexicalNodes_E4081DB3, LexicalLinkFields_E4081DB3>
+  | SerializedLinkNode<LexicalNodes_E4081DB3, LexicalLinkFields_E4081DB3>
   | SerializedRelationshipNode<
       | 'disable-publish'
       | 'posts'
@@ -285,7 +284,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: LexicalRichText<LexicalNodes_CD4D3FCC> | null;
+  richText?: LexicalRichText<LexicalNodes_E4081DB3> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -583,8 +582,8 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?: LexicalRichText<LexicalNodes_CD4D3FCC> | null;
-  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_CD4D3FCC> | null;
+  richtext?: LexicalRichText<LexicalNodes_E4081DB3> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_E4081DB3> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -1835,9 +1834,9 @@ export interface LexicalUploadFields_1AB4670B {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_CD4D3FCC".
+ * via the `definition` "LexicalLinkFields_E4081DB3".
  */
-export interface LexicalLinkFields_CD4D3FCC {
+export interface LexicalLinkFields_E4081DB3 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -1908,17 +1907,17 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = {
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};
+} : never;
 
 export interface SerializedHeadingNode<
   TChildren,

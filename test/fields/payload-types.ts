@@ -64,23 +64,22 @@ export type SupportedTimezones =
   | 'UTC';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_E074AD98".
+ * via the `definition` "LexicalNodes_6BEE583A".
  */
-export type LexicalNodes_E074AD98 =
+export type LexicalNodes_6BEE583A =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_E074AD98>
+  | SerializedParagraphNode<LexicalNodes_6BEE583A>
   | SerializedBlockNode<MyBlock>
-  | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_E074AD98>
+  | SerializedHeadingNode<LexicalNodes_6BEE583A>
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_E074AD98>
-  | SerializedListNode<LexicalNodes_E074AD98>
-  | SerializedListItemNode<LexicalNodes_E074AD98>
-  | SerializedAutoLinkNode<LexicalNodes_E074AD98, LexicalLinkFields_E074AD98>
-  | SerializedLinkNode<LexicalNodes_E074AD98, LexicalLinkFields_E074AD98>
+  | SerializedQuoteNode<LexicalNodes_6BEE583A>
+  | SerializedListNode<LexicalNodes_6BEE583A>
+  | SerializedListItemNode<LexicalNodes_6BEE583A>
+  | SerializedAutoLinkNode<LexicalNodes_6BEE583A, LexicalLinkFields_6BEE583A>
+  | SerializedLinkNode<LexicalNodes_6BEE583A, LexicalLinkFields_6BEE583A>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -424,7 +423,7 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
-    richTextField?: LexicalRichText<LexicalNodes_E074AD98> | null;
+    richTextField?: LexicalRichText<LexicalNodes_6BEE583A> | null;
     subArray?:
       | {
           text?: string | null;
@@ -1077,7 +1076,7 @@ export interface ConditionalLogic {
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
   customServerFieldWithCondition?: string | null;
-  conditionalRichText?: LexicalRichText<LexicalNodes_E074AD98> | null;
+  conditionalRichText?: LexicalRichText<LexicalNodes_6BEE583A> | null;
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
@@ -3998,9 +3997,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_E074AD98".
+ * via the `definition` "LexicalLinkFields_6BEE583A".
  */
-export interface LexicalLinkFields_E074AD98 {
+export interface LexicalLinkFields_6BEE583A {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -4071,17 +4070,17 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = {
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};
+} : never;
 
 export interface SerializedHeadingNode<
   TChildren,

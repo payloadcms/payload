@@ -62,22 +62,21 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_11A876F6".
+ * via the `definition` "LexicalNodes_FCC0BA59".
  */
-export type LexicalNodes_11A876F6 =
+export type LexicalNodes_FCC0BA59 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_11A876F6>
+  | SerializedParagraphNode<LexicalNodes_FCC0BA59>
   | SerializedBlockNode<MyBlock>
-  | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_11A876F6>
+  | SerializedHeadingNode<LexicalNodes_FCC0BA59>
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_11A876F6>
-  | SerializedListNode<LexicalNodes_11A876F6>
-  | SerializedListItemNode<LexicalNodes_11A876F6>
-  | SerializedAutoLinkNode<LexicalNodes_11A876F6, LexicalLinkFields_11A876F6>
-  | SerializedLinkNode<LexicalNodes_11A876F6, LexicalLinkFields_11A876F6>
+  | SerializedQuoteNode<LexicalNodes_FCC0BA59>
+  | SerializedListNode<LexicalNodes_FCC0BA59>
+  | SerializedListItemNode<LexicalNodes_FCC0BA59>
+  | SerializedAutoLinkNode<LexicalNodes_FCC0BA59, LexicalLinkFields_FCC0BA59>
+  | SerializedLinkNode<LexicalNodes_FCC0BA59, LexicalLinkFields_FCC0BA59>
   | SerializedRelationshipNode<
       | 'error-fields'
       | 'validate-drafts-on'
@@ -232,7 +231,7 @@ export interface ErrorField {
           point: [number, number];
           radio: 'mint' | 'dark_gray';
           relationship: string | User;
-          richtext: LexicalRichText<LexicalNodes_11A876F6>;
+          richtext: LexicalRichText<LexicalNodes_FCC0BA59>;
           select: 'mint' | 'dark_gray';
           upload: string | Upload;
           text: string;
@@ -271,7 +270,7 @@ export interface ErrorField {
         point: [number, number];
         radio: 'mint' | 'dark_gray';
         relationship: string | User;
-        richtext: LexicalRichText<LexicalNodes_11A876F6>;
+        richtext: LexicalRichText<LexicalNodes_FCC0BA59>;
         select: 'mint' | 'dark_gray';
         upload: string | Upload;
         text: string;
@@ -329,7 +328,7 @@ export interface Upload {
   id: string;
   text?: string | null;
   media?: (string | null) | Upload;
-  richText?: LexicalRichText<LexicalNodes_11A876F6> | null;
+  richText?: LexicalRichText<LexicalNodes_FCC0BA59> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -377,7 +376,7 @@ export interface Block1 {
         point: [number, number];
         radio: 'mint' | 'dark_gray';
         relationship: string | User;
-        richtext: LexicalRichText<LexicalNodes_11A876F6>;
+        richtext: LexicalRichText<LexicalNodes_FCC0BA59>;
         select: 'mint' | 'dark_gray';
         upload: string | Upload;
         text: string;
@@ -965,9 +964,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_11A876F6".
+ * via the `definition` "LexicalLinkFields_FCC0BA59".
  */
-export interface LexicalLinkFields_11A876F6 {
+export interface LexicalLinkFields_FCC0BA59 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -1038,17 +1037,17 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = {
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};
+} : never;
 
 export interface SerializedHeadingNode<
   TChildren,
