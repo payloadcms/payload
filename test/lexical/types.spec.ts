@@ -139,3 +139,37 @@ describe('generated block node exposes per-block fields by blockType', () => {
     expect(read).type.toBeCallableWith({} as BlockNode)
   })
 })
+
+describe('constructing a block node literal narrows by blockType', () => {
+  type Nodes = RichTextNodes<LexicalFullyFeatured['richText']>
+  // Stands in for assigning a constructed node where the field's node union is expected.
+  const accept = (node: Nodes): Nodes => node
+
+  test('a valid field for the block is accepted', () => {
+    expect(accept).type.toBeCallableWith({
+      fields: { blockType: 'Code', code: 'console.log()', id: '1' },
+      format: '',
+      type: 'block',
+      version: 0,
+    })
+  })
+
+  test('a property that does not exist on the block is rejected', () => {
+    expect(accept).type.not.toBeCallableWith({
+      fields: { blockType: 'Code', bogus: 'x', id: '1' },
+      format: '',
+      type: 'block',
+      version: 0,
+    })
+  })
+
+  test('a field from another block is rejected', () => {
+    expect(accept).type.not.toBeCallableWith({
+      // `someText` belongs to the myBlock block, not Code.
+      fields: { blockType: 'Code', id: '1', someText: 'x' },
+      format: '',
+      type: 'block',
+      version: 0,
+    })
+  })
+})
