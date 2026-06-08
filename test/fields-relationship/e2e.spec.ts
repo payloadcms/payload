@@ -535,7 +535,7 @@ describe('Relationship Field', () => {
       // select relationshipMany field that relies on siblingData field above
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
 
-      const options = getSelectMenu({ page: page })
+      const options = getSelectMenu({ page })
       await expect(options).toContainText(include)
       await expect(options).not.toContainText(exclude)
     })
@@ -556,7 +556,7 @@ describe('Relationship Field', () => {
       // select relationshipMany field that relies on siblingData field above
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
 
-      const options = getSelectMenu({ page: page })
+      const options = getSelectMenu({ page })
       await expect(options).not.toContainText('exclude')
     })
 
@@ -574,7 +574,7 @@ describe('Relationship Field', () => {
       // select relationshipMany field that relies on siblingData field above
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
 
-      const options = getSelectMenu({ page: page })
+      const options = getSelectMenu({ page })
       await expect(options).toContainText('Relation With Titles')
       await expect(options).not.toContainText('whatever')
     })
@@ -596,7 +596,7 @@ describe('Relationship Field', () => {
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
       await relationFilterOptionsReq
 
-      const options = getSelectMenu({ page: page })
+      const options = getSelectMenu({ page })
       await expect(options).toContainText('truth')
     })
   })
@@ -801,7 +801,7 @@ describe('Relationship Field', () => {
       await wait(300)
       const input = page.locator('#field-relationshipWithTitle input')
       await input.fill('title')
-      const options = (getSelectMenu({ page: page })).locator('.rs__option')
+      const options = (getSelectMenu({ page })).locator('.rs__option')
       await expect(options).toHaveCount(1)
 
       await input.fill('non-occurring-string')
@@ -813,7 +813,7 @@ describe('Relationship Field', () => {
       await wait(300)
       const input = page.locator('#field-relationshipWithTitle input')
       await input.fill('word search')
-      const options = (getSelectMenu({ page: page })).locator('.rs__option')
+      const options = (getSelectMenu({ page })).locator('.rs__option')
       await expect(options).toHaveCount(1)
     })
 
