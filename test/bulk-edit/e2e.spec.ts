@@ -719,6 +719,7 @@ test.describe('Bulk Edit', () => {
     await expect(bulkEditForm).toBeVisible()
 
     await selectInput({
+      page,
       selectLocator: bulkEditForm.locator('.react-select'),
       options: ['Title'],
       multiSelect: true,
@@ -778,6 +779,7 @@ test.describe('Bulk Edit', () => {
     await expect(bulkEditForm).toBeVisible()
 
     await selectInput({
+      page,
       selectLocator: bulkEditForm.locator('.react-select'),
       options: ['Tab Text'],
       multiSelect: true,
@@ -854,6 +856,7 @@ test.describe('Bulk Edit', () => {
 
     // Select multiple fields with beforeInput components
     await selectInput({
+      page,
       selectLocator: modal.locator('.field-select'),
       options: [
         'Field With Before Input A1',

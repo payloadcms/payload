@@ -512,6 +512,7 @@ test.describe('Multi Tenant', () => {
       await expect(editManyDrawer).toBeVisible()
 
       await selectInput({
+        page,
         multiSelect: true,
         options: ['Site'],
         selectLocator: editManyDrawer.locator('.edit-many-bulk-uploads__form .react-select'),
@@ -524,6 +525,7 @@ test.describe('Multi Tenant', () => {
       await expect(inlineTenantField).toBeVisible()
 
       await selectInput({
+        page,
         multiSelect: false,
         option: 'Blue Dog',
         selectLocator: inlineTenantField,
@@ -1316,6 +1318,7 @@ test.describe('Multi Tenant', () => {
 async function getTenantOptions({ page }: { page: Page }): Promise<string[]> {
   await openNav(page)
   return await getSelectInputOptions({
+    page,
     selectLocator: page.locator('.tenant-selector'),
   })
 }
@@ -1362,6 +1365,7 @@ async function selectDocumentTenant({
   await closeNav(page)
   await openAssignTenantModal({ page, payload })
   await selectInput({
+    page,
     multiSelect: false,
     option: tenant,
     selectLocator: page.locator('.tenantField'),
@@ -1416,6 +1420,7 @@ async function setTenantFilter({
 
   await openNav(page)
   await selectInput({
+    page,
     multiSelect: false,
     option: tenant,
     selectLocator: page.locator('.tenant-selector'),
@@ -1431,6 +1436,7 @@ async function switchGlobalDocTenant({
 }): Promise<void> {
   await openNav(page)
   await selectInput({
+    page,
     multiSelect: false,
     option: tenant,
     selectLocator: page.locator('.tenant-selector'),

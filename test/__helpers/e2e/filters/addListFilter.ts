@@ -53,12 +53,14 @@ export const addListFilter = async ({
   const condition = filters.last()
 
   await selectInput({
+    page,
     selectLocator: condition.locator('.condition__field'),
     multiSelect: false,
     option: fieldLabel,
   })
 
   await selectInput({
+    page,
     selectLocator: condition.locator('.condition__operator'),
     multiSelect: false,
     option: operatorLabel,
@@ -78,6 +80,7 @@ export const addListFilter = async ({
       if (Array.isArray(value)) {
         // For multi-select with array values
         await selectInput({
+          page,
           selectLocator: valueLocator,
           multiSelect: true,
           options: value,
@@ -93,6 +96,7 @@ export const addListFilter = async ({
           await createValue.click()
         } else {
           await selectInput({
+            page,
             selectLocator: valueLocator,
             multiSelect: multiSelect ? undefined : false,
             option: value,

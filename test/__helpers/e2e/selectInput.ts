@@ -50,6 +50,7 @@ export function getSelectMenu({ page }: { page: Page }): Locator {
 }
 
 export async function selectInput({
+  page,
   selectLocator,
   options,
   option,
@@ -57,9 +58,9 @@ export async function selectInput({
   clear = true,
   filter,
   selectType = 'select',
-}: SelectReactOptionsParams) {
+}: SelectReactOptionsParams & { page: Page }) {
   if (filter) {
-    await openSelectMenu({ selectLocator })
+    await openSelectMenu({ page, selectLocator })
     const inputLocator = selectLocator.locator('.rs__input[type="text"]')
     await inputLocator.fill(filter)
   }
@@ -75,7 +76,7 @@ export async function selectInput({
         .count()
 
       if (alreadySelected === 0) {
-        await selectOption({ selectLocator, optionText })
+        await selectOption({ page, selectLocator, optionText })
       }
     }
   } else if (option) {
@@ -84,13 +85,13 @@ export async function selectInput({
       .count()
 
     if (alreadySelected === 0) {
-      await selectOption({ selectLocator, optionText: option })
+      await selectOption({ page, selectLocator, optionText: option })
     }
   }
 }
 
-export async function openSelectMenu({ selectLocator }: { selectLocator: Locator }): Promise<void> {
-  const menu = getSelectMenu({ page: selectLocator.page() })
+export async function openSelectMenu({ page, selectLocator }: { page: Page; selectLocator: Locator }): Promise<void> {
+  const menu = getSelectMenu({ page })
   if (await menu.isHidden()) {
     await selectLocator.locator('button.dropdown-indicator').click()
   }
@@ -98,14 +99,16 @@ export async function openSelectMenu({ selectLocator }: { selectLocator: Locator
 }
 
 async function selectOption({
+  page,
   selectLocator,
   optionText,
 }: {
   optionText: string
+  page: Page
   selectLocator: Locator
 }) {
-  await openSelectMenu({ selectLocator })
-  const menu = getSelectMenu({ page: selectLocator.page() })
+  await openSelectMenu({ page, selectLocator })
+  const menu = getSelectMenu({ page })
   await menu.locator('.rs__option', { hasText: exactText(optionText) }).click()
 }
 
@@ -140,12 +143,14 @@ export const getSelectInputValue: GetSelectInputValueFunction = async ({
 }
 
 export const getSelectInputOptions = async ({
+  page,
   selectLocator,
 }: {
+  page: Page
   selectLocator: Locator
 }): Promise<string[]> => {
-  await openSelectMenu({ selectLocator })
-  const menu = getSelectMenu({ page: selectLocator.page() })
+  await openSelectMenu({ page, selectLocator })
+  const menu = getSelectMenu({ page })
   const options = await menu.locator('.rs__option').allTextContents()
   return options.map((option) => option.trim()).filter(Boolean)
 }

@@ -799,6 +799,7 @@ describe('relationship', () => {
 
     // Select relationship field
     await selectInput({
+      page,
       selectLocator: condition.locator('.condition__field'),
       multiSelect: false,
       option: 'Relationship',
@@ -806,6 +807,7 @@ describe('relationship', () => {
 
     // Select equals operator (default)
     await selectInput({
+      page,
       selectLocator: condition.locator('.condition__operator'),
       multiSelect: false,
       option: 'equals',
@@ -814,6 +816,7 @@ describe('relationship', () => {
     // Select a value
     const valueLocator = condition.locator('.condition__value')
     await selectInput({
+      page,
       selectLocator: valueLocator,
       multiSelect: false,
       option: 'Seeded text document',
@@ -822,6 +825,7 @@ describe('relationship', () => {
 
     // Switch to "is not equal to" operator
     await selectInput({
+      page,
       selectLocator: condition.locator('.condition__operator'),
       multiSelect: false,
       option: 'is not equal to',
@@ -831,7 +835,7 @@ describe('relationship', () => {
     await wait(500)
 
     // Get all options in the value dropdown
-    const options = await getSelectInputOptions({ selectLocator: valueLocator })
+    const options = await getSelectInputOptions({ page, selectLocator: valueLocator })
 
     // Verify no duplicates - each option should appear only once
     const uniqueOptions = [...new Set(options)]

@@ -882,6 +882,7 @@ describe('Document View', () => {
       await page.goto(postsUrl.create)
       await page.locator('#field-title').fill('heros')
       await selectInput({
+        page,
         multiSelect: false,
         option: 'sean',
         filter: 'sean',
