@@ -89,12 +89,12 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
     return { ...configurationResult, isSrcDir, success: false }
   }
 
-  const { success: installSuccess } = await installDeps(
-    projectDir,
-    packageManager,
+  const { success: installSuccess } = await installDeps({
     dbType,
-    args['--tag'],
-  )
+    packageManager,
+    projectDir,
+    tag: args['--tag'],
+  })
   if (!installSuccess) {
     installSpinner.stop('Failed to install dependencies', 1)
     return {
@@ -226,12 +226,13 @@ async function installAndConfigurePayload(
   }
 }
 
-async function installDeps(
-  projectDir: string,
-  packageManager: PackageManager,
-  dbType: DbType,
-  tag?: string,
-) {
+async function installDeps(args: {
+  dbType: DbType
+  packageManager: PackageManager
+  projectDir: string
+  tag?: string
+}) {
+  const { dbType, packageManager, projectDir, tag } = args
   const { getDbPackageName } = await import('./ast/adapter-config.js')
 
   const distTag = tag ?? 'latest'
