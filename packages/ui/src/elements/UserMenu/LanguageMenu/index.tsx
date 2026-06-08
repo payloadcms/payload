@@ -30,7 +30,7 @@ export const LanguageMenu: React.FC = () => {
           </span>
           <span className="popup-button-list__label">{t('general:language')}</span>
           <span className="popup-button-list__chevron">
-            <ChevronIcon direction="left" size={16} />
+            <ChevronIcon direction="right" size={24} />
           </span>
         </button>
       )}
