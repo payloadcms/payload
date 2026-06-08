@@ -134,24 +134,19 @@ export const ThemeProvider: React.FC<{
         outerContext.setTheme(themeToSet, options)
         return
       }
-      if (themeToSet === 'light' || themeToSet === 'dark') {
-        setThemeState(themeToSet)
-        setAutoMode(false)
-        if (!isScoped) {
-          setCookie(themeCookieKey, themeToSet, 365)
-          document.documentElement.setAttribute('data-theme', themeToSet)
-        }
-      } else if (themeToSet === 'auto') {
-        if (!isScoped) {
-          setCookie(themeCookieKey, themeToSet, -1)
-          const themeFromOS =
-            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-              ? 'dark'
-              : 'light'
-          document.documentElement.setAttribute('data-theme', themeFromOS)
-          setAutoMode(true)
-          setThemeState(themeFromOS)
-        }
+      const resolvedTheme: Theme =
+        themeToSet === 'auto'
+          ? window.matchMedia?.('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light'
+          : themeToSet
+
+      setThemeState(resolvedTheme)
+      setAutoMode(themeToSet === 'auto')
+
+      if (!isScoped) {
+        setCookie(themeCookieKey, themeToSet, themeToSet === 'auto' ? -1 : 365)
+        document.documentElement.setAttribute('data-theme', resolvedTheme)
       }
     },
     [isScoped, outerContext, themeCookieKey],
