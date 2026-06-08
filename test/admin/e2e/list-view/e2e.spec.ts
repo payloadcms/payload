@@ -414,7 +414,7 @@ describe('List View', () => {
       await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
-        (getSelectMenu({ page })).locator('div', {
+        (getSelectMenu({ page })).locator('.rs__option', {
           hasText: exactText('Title'),
         }),
       ).toBeVisible()

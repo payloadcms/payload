@@ -594,7 +594,7 @@ describe('relationship', () => {
       await page.locator('#field-relationship .rs__control').click()
 
       await expect(
-        page.locator('#field-relationship .rs__option', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText(originalValue),
         }),
       ).toBeVisible()
@@ -624,13 +624,13 @@ describe('relationship', () => {
       await wait(500)
 
       await expect(
-        page.locator('#field-relationship .rs__option', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText(originalValue),
         }),
       ).toBeHidden()
 
       await expect(
-        page.locator('#field-relationship .rs__option', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText(`Untitled - ${originalID}`),
         }),
       ).toBeHidden()
