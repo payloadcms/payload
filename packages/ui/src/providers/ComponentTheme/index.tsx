@@ -1,21 +1,21 @@
 'use client'
 import React, { createContext, use } from 'react'
 
-import type { Theme } from '../Theme/index.js'
+import type { Theme, ThemeContext } from '../Theme/index.js'
 
 import { useTheme } from '../Theme/index.js'
 
-export type ComponentThemeContext = {
+type ScopedTheme = {
   highContrastMode: boolean
   theme: Theme
 }
 
-const Context = createContext<ComponentThemeContext | undefined>(undefined)
+const Context = createContext<ScopedTheme | undefined>(undefined)
 
 /**
- * Read-only scoped theme provider for UI components like Popup and Dialog.
- * Accepts an explicit `theme` prop and inherits `highContrastMode` from the
- * nearest global ThemeProvider. Has no setters — use `useTheme` for that.
+ * Read-only scoped theme override for UI components like Popup and Dialog.
+ * Takes a `theme` prop and inherits `highContrastMode` from the nearest global
+ * ThemeProvider. Has no  mutations always go to the global ThemeProvider.setters 
  */
 export const ComponentThemeProvider: React.FC<{
   children: React.ReactNode
@@ -26,11 +26,15 @@ export const ComponentThemeProvider: React.FC<{
 }
 
 /**
- * Returns the nearest scoped ComponentThemeContext if one exists, otherwise
- * falls back to the global ThemeProvider context.
+ * Returns the full ThemeContext, with `theme` and `highContrastMode` overridden
+ * by the nearest ComponentThemeProvider if one exists. Setters always target
+ * the global ThemeProvider regardless of nesting.
  */
-export const useComponentTheme = (): ComponentThemeContext => {
+export const useComponentTheme = (): ThemeContext => {
   const scoped = use(Context)
   const global = useTheme()
-  return scoped ?? global
+  if (!scoped) {
+    return global
+  }
+  return { ...global, highContrastMode: scoped.highContrastMode, theme: scoped.theme }
 }
