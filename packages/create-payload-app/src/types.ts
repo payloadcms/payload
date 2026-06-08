@@ -22,6 +22,7 @@ export interface Args extends arg.Spec {
   '--no-deps': BooleanConstructor
   '--no-git': BooleanConstructor
   '--secret': StringConstructor
+  '--tag': StringConstructor
   '--template': StringConstructor
   '--use-bun': BooleanConstructor
   '--use-npm': BooleanConstructor

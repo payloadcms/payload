@@ -47,6 +47,7 @@ export class Main {
         '--local-template': String,
         '--name': String,
         '--secret': String,
+        '--tag': String, // Install Payload deps from this npm dist-tag (default: latest)
         '--template': String,
         '--version': String, // Allows overriding the installed Payload version instead of installing the latest
 
@@ -95,6 +96,7 @@ export class Main {
       const LATEST_VERSION = await getLatestPackageVersion({
         debug: debugFlag,
         packageName: 'payload',
+        tag: this.args['--tag'],
       })
 
       if (this.args['--help']) {
@@ -135,7 +137,10 @@ export class Main {
         })
 
         if (!p.isCancel(shouldUpdate) && shouldUpdate) {
-          const { message, success: updateSuccess } = await updatePayloadInProject(nextAppDetails)
+          const { message, success: updateSuccess } = await updatePayloadInProject(
+            nextAppDetails,
+            this.args['--tag'],
+          )
           if (updateSuccess) {
             info(message)
           } else {

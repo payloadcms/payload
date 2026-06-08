@@ -146,7 +146,10 @@ export async function createProject(
 
     spinner.stop(`Using provided version of Payload ${payloadVersion}`)
   } else {
-    payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
+    payloadVersion = await getLatestPackageVersion({
+      packageName: 'payload',
+      tag: cliArgs['--tag'],
+    })
 
     spinner.stop(`Found latest version of Payload ${payloadVersion}`)
   }

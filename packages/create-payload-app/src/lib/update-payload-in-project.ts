@@ -15,6 +15,7 @@ import { installPackages } from './install-packages.js'
 
 export async function updatePayloadInProject(
   appDetails: NextAppDetails,
+  tag?: string,
 ): Promise<{ message: string; success: boolean }> {
   if (!appDetails.nextConfigPath) {
     return { message: 'No Next.js config found', success: false }
@@ -37,7 +38,7 @@ export async function updatePayloadInProject(
   const packageManager = await getPackageManager({ projectDir })
 
   // Fetch latest Payload version
-  const latestPayloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
+  const latestPayloadVersion = await getLatestPackageVersion({ packageName: 'payload', tag })
 
   if (payloadVersion === latestPayloadVersion) {
     return { message: `Payload v${payloadVersion} is already up to date.`, success: true }
