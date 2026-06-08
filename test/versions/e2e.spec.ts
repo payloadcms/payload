@@ -50,6 +50,7 @@ import {
 import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -1470,7 +1471,10 @@ describe('Versions', () => {
       await expect(fromSelect).toBeVisible()
       await fromSelect.click()
 
-      const moreVersions = compareFromContainer.locator('.rs__option:has-text("More versions...")')
+      const versionSelectMenu = await getSelectMenu({
+        selectLocator: compareFromContainer.locator('.react-select'),
+      })
+      const moreVersions = versionSelectMenu.locator('.rs__option:has-text("More versions...")')
       await expect(moreVersions).toBeVisible()
       await moreVersions.click()
 

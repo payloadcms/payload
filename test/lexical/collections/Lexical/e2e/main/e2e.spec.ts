@@ -23,6 +23,7 @@ import {
   waitForFormReady,
 } from '../../../../../__helpers/e2e/helpers.js'
 import { goToFirstCell } from '../../../../../__helpers/e2e/navigateToDoc.js'
+import { getSelectMenu } from '../../../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -1172,7 +1173,9 @@ describe('lexicalMain', () => {
     await internalLinkSelect.click()
     await wait(200)
 
-    const richTextOption = linkDrawer
+    const richTextOption = (
+      await getSelectMenu({ selectLocator: linkDrawer.locator('#field-doc').first() })
+    )
       .locator('.rs__option')
       .filter({ hasText: 'Rich Text' })
       .first()

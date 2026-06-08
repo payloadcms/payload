@@ -56,6 +56,7 @@ import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellV
 import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
+import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { expectPerPageLimits, setPerPageLimit } from '../../../__helpers/e2e/setPerPageLimit.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
@@ -499,7 +500,8 @@ describe('List View', () => {
       await filterField.click()
 
       // select new filter field of Number
-      const dropdownFieldOption = filterField.locator('.rs__option', {
+      const filterFieldMenu = await getSelectMenu({ selectLocator: filterField })
+      const dropdownFieldOption = filterFieldMenu.locator('.rs__option', {
         hasText: exactText('Status'),
       })
 
@@ -543,7 +545,8 @@ describe('List View', () => {
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
 
-      await conditionField
+      const conditionFieldMenu = await getSelectMenu({ selectLocator: conditionField })
+      await conditionFieldMenu
         .locator('.rs__option', {
           hasText: exactText('Users'),
         })
@@ -553,7 +556,8 @@ describe('List View', () => {
 
       const operatorInput = whereBuilder.locator('.condition__operator')
       await operatorInput.click()
-      const operatorOptions = operatorInput.locator('.rs__option')
+      const operatorInputMenu = await getSelectMenu({ selectLocator: operatorInput })
+      const operatorOptions = operatorInputMenu.locator('.rs__option')
       await operatorOptions.locator(`text=equals`).click()
 
       await whereBuilder.locator('.condition__value').click()
@@ -781,11 +785,13 @@ describe('List View', () => {
       const secondValueField = secondLi.locator('.condition__value >> input')
       await secondConditionField.click()
 
-      await secondConditionField.locator('.rs__option', { hasText: exactText('Title') }).click()
+      const secondConditionMenu = await getSelectMenu({ selectLocator: secondConditionField })
+      await secondConditionMenu.locator('.rs__option', { hasText: exactText('Title') }).click()
 
       await expect(secondConditionField.locator('.rs__single-value')).toContainText('Title')
       await secondOperatorField.click()
-      await secondOperatorField.locator('.rs__option').locator('text=equals').click()
+      const secondOperatorMenu = await getSelectMenu({ selectLocator: secondOperatorField })
+      await secondOperatorMenu.locator('.rs__option').locator('text=equals').click()
       await secondValueField.fill('Test 2')
       await expect(secondValueField).toHaveValue('Test 2')
 
@@ -796,7 +802,8 @@ describe('List View', () => {
       // Change the join from "Or" to "And" so both conditions live in the same group.
       const joinDropdown = secondLi.locator('.condition__join')
       await joinDropdown.click()
-      await joinDropdown.locator('.rs__option', { hasText: exactText('And') }).click()
+      const joinMenu = await getSelectMenu({ selectLocator: joinDropdown })
+      await joinMenu.locator('.rs__option', { hasText: exactText('And') }).click()
 
       // Both conditions are now part of a single AND group.
       await expect(whereBuilder.locator('.condition')).toHaveCount(2)

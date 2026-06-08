@@ -21,7 +21,11 @@ import {
 import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
 import { openDocControls } from '../../../__helpers/e2e/openDocControls.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
-import { getSelectInputOptions, selectInput } from '../../../__helpers/e2e/selectInput.js'
+import {
+  getSelectInputOptions,
+  getSelectMenu,
+  selectInput,
+} from '../../../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
@@ -897,7 +901,8 @@ describe('relationship', () => {
     await expect(relationToSelector).toBeVisible()
 
     await relationToSelector.locator('.rs__control').click()
-    const option = relationToSelector.locator('.rs__option').nth(1)
+    const relationToMenu = await getSelectMenu({ selectLocator: relationToSelector })
+    const option = relationToMenu.locator('.rs__option').nth(1)
     await option.click()
     const firstRow = listDrawerContent.locator('table tbody tr').first()
     const button = firstRow.locator('button')
@@ -1018,7 +1023,7 @@ describe('relationship', () => {
 
     await wait(400)
     await relationToSelector.locator('.rs__control').click()
-    const option = relationToSelector.locator('.rs__option').nth(1)
+    const option = page.locator('.rs__menu .rs__option').nth(1)
     await wait(400)
     await option.click()
     const rows = listDrawerContent.locator('table tbody tr')

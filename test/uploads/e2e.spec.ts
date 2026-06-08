@@ -23,6 +23,7 @@ import {
   saveDocAndAssert,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
@@ -1138,10 +1139,12 @@ describe('Uploads', () => {
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
-      await editManyBulkUploadModal
-        .locator('.edit-many-bulk-uploads__form .react-select')
-        .click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const editFieldSelector = editManyBulkUploadModal.locator(
+        '.edit-many-bulk-uploads__form .react-select',
+      )
+      await editFieldSelector.click({ delay: 100 })
+      const editFieldMenu = await getSelectMenu({ selectLocator: editFieldSelector })
+      const options = editFieldMenu.locator('.rs__option')
 
       await options.locator('text=Prefix').click()
 
@@ -1204,7 +1207,8 @@ describe('Uploads', () => {
         '.edit-many-bulk-uploads__form .react-select',
       )
       await fieldSelector.click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const fieldSelectorMenu = await getSelectMenu({ selectLocator: fieldSelector })
+      const options = fieldSelectorMenu.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
 
@@ -1257,7 +1261,8 @@ describe('Uploads', () => {
         '.edit-many-bulk-uploads__form .react-select',
       )
       await fieldSelector.click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const fieldSelectorMenu2 = await getSelectMenu({ selectLocator: fieldSelector })
+      const options = fieldSelectorMenu2.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
 

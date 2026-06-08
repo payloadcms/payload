@@ -30,6 +30,7 @@ import {
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
@@ -370,7 +371,8 @@ describe('Relationship Field', () => {
 
     let filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
-    let filteredOptions = filteredField.locator('.rs__option')
+    let filteredMenu = await getSelectMenu({ selectLocator: filteredField })
+    let filteredOptions = filteredMenu.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(1) // one doc
     await wait(200)
 
@@ -395,7 +397,8 @@ describe('Relationship Field', () => {
 
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
-    filteredOptions = filteredField.locator('.rs__option')
+    filteredMenu = await getSelectMenu({ selectLocator: filteredField })
+    filteredOptions = filteredMenu.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(2) // two options because the currently selected option is still there
     await wait(200)
 
@@ -428,7 +431,8 @@ describe('Relationship Field', () => {
       await wait(300)
       const field = page.locator('#field-relationshipFilteredByField')
       await field.click({ delay: 100 })
-      const options = field.locator('.rs__option')
+      const fieldMenu = await getSelectMenu({ selectLocator: field })
+      const options = fieldMenu.locator('.rs__option')
       await expect(options).toHaveCount(1)
       await expect(options).toContainText(idToInclude)
 
@@ -464,7 +468,8 @@ describe('Relationship Field', () => {
 
       const fieldInCollapsible = page.locator('#field-filteredByFieldInCollapsible')
       await fieldInCollapsible.click({ delay: 100 })
-      const optionsInCollapsible = fieldInCollapsible.locator('.rs__option')
+      const fieldInCollapsibleMenu = await getSelectMenu({ selectLocator: fieldInCollapsible })
+      const optionsInCollapsible = fieldInCollapsibleMenu.locator('.rs__option')
       await expect(optionsInCollapsible).toHaveCount(1)
       await expect(optionsInCollapsible).toContainText(idToInclude)
 
@@ -472,7 +477,8 @@ describe('Relationship Field', () => {
 
       const fieldInArray = page.locator('#field-array__0__filteredByFieldInArray')
       await fieldInArray.click({ delay: 100 })
-      const optionsInArray = fieldInArray.locator('.rs__option')
+      const fieldInArrayMenu = await getSelectMenu({ selectLocator: fieldInArray })
+      const optionsInArray = fieldInArrayMenu.locator('.rs__option')
       await expect(optionsInArray).toHaveCount(1)
       await expect(optionsInArray).toContainText(idToInclude)
 
@@ -821,7 +827,8 @@ describe('Relationship Field', () => {
       await expect(value).toHaveText(relationWithTitle.name)
 
       await field.click({ delay: 100 })
-      const options = field.locator('.rs__option')
+      const fieldMenu = await getSelectMenu({ selectLocator: field })
+      const options = fieldMenu.locator('.rs__option')
 
       await expect(options).toHaveCount(2)
     })

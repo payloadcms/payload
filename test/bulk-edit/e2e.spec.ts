@@ -19,7 +19,7 @@ import {
   selectTableRow,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
-import { selectInput } from '../__helpers/e2e/selectInput.js'
+import { getSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { toggleBlockOrArrayRow } from '../__helpers/e2e/toggleCollapsible.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -660,7 +660,8 @@ test.describe('Bulk Edit', () => {
     await expect(fieldSelectControl).toBeVisible()
     await fieldSelectControl.click()
 
-    const titleOption = fieldSelect.locator('.rs__option:has-text("Title")').first()
+    const fieldSelectMenu = await getSelectMenu({ selectLocator: fieldSelect })
+    const titleOption = fieldSelectMenu.locator('.rs__option:has-text("Title")').first()
     await titleOption.click()
 
     await editDrawer.locator('input#field-title').fill(bulkEditValue)

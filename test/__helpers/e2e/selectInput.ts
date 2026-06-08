@@ -32,6 +32,29 @@ const selectors = {
   },
 }
 
+/**
+ * Returns a Locator for the portaled menu belonging to a specific ReactSelect
+ * container. ReactSelect menus are rendered at document.body via a React portal,
+ * so they are not DOM descendants of the select container. This helper uses the
+ * `aria-controls` attribute on the hidden input — which react-select sets to the
+ * listbox ID — to scope the menu lookup to the correct instance.
+ *
+ * Falls back to `page.locator('.rs__menu')` when the attribute is not yet present
+ * (e.g. before the menu has been opened for the first time).
+ */
+export async function getSelectMenu({
+  selectLocator,
+}: {
+  selectLocator: Locator
+}): Promise<Locator> {
+  const page = selectLocator.page()
+  const menuId = await selectLocator.locator('.rs__input').getAttribute('aria-controls')
+  if (menuId) {
+    return page.locator(`#${menuId}`)
+  }
+  return page.locator('.rs__menu')
+}
+
 export async function selectInput({
   selectLocator,
   options,
@@ -42,61 +65,41 @@ export async function selectInput({
   selectType = 'select',
 }: SelectReactOptionsParams) {
   if (filter) {
-    // Open the select menu to access the input field
     await openSelectMenu({ selectLocator })
-
-    // Type the filter text into the input field
     const inputLocator = selectLocator.locator('.rs__input[type="text"]')
     await inputLocator.fill(filter)
   }
 
   if (multiSelect && options) {
     if (clear) {
-      await clearSelectInput({
-        selectLocator,
-      })
+      await clearSelectInput({ selectLocator })
     }
 
     for (const optionText of options) {
-      // Check if the option is already selected
       const alreadySelected = await selectLocator
-        .locator(selectors.hasMany[selectType], {
-          hasText: optionText,
-        })
+        .locator(selectors.hasMany[selectType], { hasText: optionText })
         .count()
 
       if (alreadySelected === 0) {
-        await selectOption({
-          selectLocator,
-          optionText,
-        })
+        await selectOption({ selectLocator, optionText })
       }
     }
   } else if (option) {
-    // For single selection, ensure only one option is selected
     const alreadySelected = await selectLocator
-      .locator(selectors.hasOne[selectType], {
-        hasText: option,
-      })
+      .locator(selectors.hasOne[selectType], { hasText: option })
       .count()
 
     if (alreadySelected === 0) {
-      await selectOption({
-        selectLocator,
-        optionText: option,
-      })
+      await selectOption({ selectLocator, optionText: option })
     }
   }
 }
 
 export async function openSelectMenu({ selectLocator }: { selectLocator: Locator }): Promise<void> {
-  if (await selectLocator.page().locator('.rs__menu').isHidden()) {
-    // Open the react-select dropdown
+  const menu = await getSelectMenu({ selectLocator })
+  if (await menu.isHidden()) {
     await selectLocator.locator('button.dropdown-indicator').click()
   }
-
-  // Wait for the dropdown menu to appear
-  const menu = selectLocator.page().locator('.rs__menu')
   await menu.waitFor({ state: 'visible', timeout: 2000 })
 }
 
@@ -108,18 +111,8 @@ async function selectOption({
   selectLocator: Locator
 }) {
   await openSelectMenu({ selectLocator })
-
-  // Find and click the desired option by visible text
-  const optionLocator = selectLocator
-    .page()
-    .locator('.rs__menu')
-    .locator('.rs__option', {
-      hasText: exactText(optionText),
-    })
-
-  if (optionLocator) {
-    await optionLocator.click()
-  }
+  const menu = await getSelectMenu({ selectLocator })
+  await menu.locator('.rs__option', { hasText: exactText(optionText) }).click()
 }
 
 type GetSelectInputValueFunction = <TMultiSelect = true>(args: {
@@ -135,7 +128,6 @@ export const getSelectInputValue: GetSelectInputValueFunction = async ({
   selectType = 'select',
 }) => {
   if (multiSelect) {
-    // For multi-select, get all selected options
     const selectedOptions = await selectLocator
       .locator(selectors.hasMany[selectType])
       .allTextContents()
@@ -144,7 +136,6 @@ export const getSelectInputValue: GetSelectInputValueFunction = async ({
 
   await expect(selectLocator).toBeVisible()
 
-  // For single-select, get the selected value
   const valueLocator = selectLocator.locator(selectors.hasOne[selectType])
   const count = await valueLocator.count()
   if (count === 0) {
@@ -160,12 +151,12 @@ export const getSelectInputOptions = async ({
   selectLocator: Locator
 }): Promise<string[]> => {
   await openSelectMenu({ selectLocator })
-  const options = await selectLocator.page().locator('.rs__option').allTextContents()
+  const menu = await getSelectMenu({ selectLocator })
+  const options = await menu.locator('.rs__option').allTextContents()
   return options.map((option) => option.trim()).filter(Boolean)
 }
 
 export async function clearSelectInput({ selectLocator }: { selectLocator: Locator }) {
-  // Clear the selection if clear is true
   const clearButton = selectLocator.locator('.clear-indicator')
   if (await clearButton.isVisible()) {
     const clearButtonCount = await clearButton.count()
