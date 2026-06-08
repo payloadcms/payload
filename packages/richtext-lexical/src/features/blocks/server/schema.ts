@@ -26,36 +26,45 @@ export type InlineBlockFields<TFields extends JsonObject = JsonObject> = {
   id: string
 } & TFields
 
-export type SerializedBlockNode<TFields extends { blockType: string } = { blockType: string }> = {
-  fields: { blockName?: null | string; id: string } & Omit<TFields, 'blockName' | 'id'>
-  format: LexicalElementFormat
-  type: 'block'
-  version: number
-}
+// Distributive (`TFields extends unknown ?`) so `SerializedBlockNode<A | B>` expands to
+// `SerializedBlockNode<A> | SerializedBlockNode<B>` - i.e. a discriminated union where each block
+// keeps its own fields. Without this, `Omit<A | B, ...>` collapses to the blocks' common keys and
+// every block-specific field is lost. Lets users write either form interchangeably.
+export type SerializedBlockNode<TFields extends { blockType: string } = { blockType: string }> =
+  TFields extends unknown
+    ? {
+        fields: { blockName?: null | string; id: string } & Omit<TFields, 'blockName' | 'id'>
+        format: LexicalElementFormat
+        type: 'block'
+        version: number
+      }
+    : never
 
 export type SerializedInlineBlockNode<
   TFields extends { blockType: string } = { blockType: string },
-> = {
-  fields: { id: string } & Omit<TFields, 'id'>
-  type: 'inlineBlock'
-  version: number
-}
+> = TFields extends unknown
+  ? {
+      fields: { id: string } & Omit<TFields, 'id'>
+      type: 'inlineBlock'
+      version: number
+    }
+  : never
 
 /**
  * MUST stay byte-for-byte in sync with the runtime `SerializedBlockNode` and
  * `SerializedInlineBlockNode` declared above.
  */
-const BLOCK_NODES_TS = `export type SerializedBlockNode<TFields extends { blockType: string }> = {
+const BLOCK_NODES_TS = `export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};`
+} : never;`
 
 /**
  * JSON Schema for one block's `fields:` payload. Strips Payload's auto-added
@@ -128,7 +137,7 @@ export const createBlockNodeJSONSchema =
 
     const tsType =
       definitionNames.length > 0
-        ? definitionNames.map((name) => `SerializedBlockNode<${name}>`).join(' | ')
+        ? `SerializedBlockNode<${definitionNames.join(' | ')}>`
         : `SerializedBlockNode<{ blockType: string }>`
 
     return {
@@ -162,7 +171,7 @@ export const createInlineBlockNodeJSONSchema =
 
     const tsType =
       definitionNames.length > 0
-        ? definitionNames.map((name) => `SerializedInlineBlockNode<${name}>`).join(' | ')
+        ? `SerializedInlineBlockNode<${definitionNames.join(' | ')}>`
         : `SerializedInlineBlockNode<{ blockType: string }>`
 
     return {

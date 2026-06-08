@@ -71,15 +71,29 @@ describe('strongly-typed block converters', () => {
     expect(RichText).type.toBeCallableWith({ converters, data })
   })
 
-  // Multiple blocks as separate nodes (`SerializedBlockNode<A> | SerializedBlockNode<B>`) - the
-  // discriminated form type generation emits. Each converter sees only its own block's node,
-  // discriminated by `blockType`: `banner.title` and `myBlock.someText`.
+  // `SerializedBlockNode` is distributive, so multiple blocks can be written either way and behave
+  // identically. Both must give each converter only its own block's node (`banner.title`,
+  // `myBlock.someText`):
+  //   - separate:  SerializedBlockNode<A> | SerializedBlockNode<B>
+  //   - combined:  SerializedBlockNode<A | B>   (what type generation emits, and our docs show)
   type SeparateBlockNodes = WithDefaultNodes<
     SerializedBlockNode<BannerBlock> | SerializedBlockNode<MyBlock>
   >
+  type CombinedBlockNodes = WithDefaultNodes<SerializedBlockNode<BannerBlock | MyBlock>>
 
   test('RichText accepts converters for separate SerializedBlockNode<A> | SerializedBlockNode<B>', () => {
     const converters: JSXConvertersFunction<SeparateBlockNodes> = () => ({
+      blocks: {
+        banner: ({ node }) => node.fields.title,
+        myBlock: ({ node }) => node.fields.someText ?? '',
+      },
+    })
+
+    expect(RichText).type.toBeCallableWith({ converters, data })
+  })
+
+  test('RichText accepts converters for combined SerializedBlockNode<A | B>', () => {
+    const converters: JSXConvertersFunction<CombinedBlockNodes> = () => ({
       blocks: {
         banner: ({ node }) => node.fields.title,
         myBlock: ({ node }) => node.fields.someText ?? '',
@@ -106,9 +120,10 @@ describe('strongly-typed block converters', () => {
 })
 
 // Converter-independent: this guards the *generated* types directly. `LexicalFullyFeatured.richText`
-// has three blocks (Code, PayloadCode, myBlock), emitted as a discriminated union - one node per block,
-// `SerializedBlockNode<Code> | SerializedBlockNode<PayloadCode> | SerializedBlockNode<MyBlock>`. So a
-// block-specific field (myBlock's `someText`) has to be readable after narrowing by `blockType`.
+// has three blocks, emitted combined as `SerializedBlockNode<Code | PayloadCode | MyBlock>`. Because
+// `SerializedBlockNode` is distributive, that expands to a discriminated union, so a block-specific
+// field (myBlock's `someText`) is readable after narrowing by `blockType` - which it wouldn't be if
+// the combined node's `Omit` collapsed the fields to the blocks' common keys.
 describe('generated block node exposes per-block fields by blockType', () => {
   type FullyFeaturedNodes = RichTextNodes<LexicalFullyFeatured['richText']>
   type BlockNode = Extract<FullyFeaturedNodes, { type: 'block' }>
