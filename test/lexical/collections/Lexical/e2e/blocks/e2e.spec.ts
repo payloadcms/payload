@@ -110,9 +110,7 @@ describe('lexicalBlocks', () => {
 
     await editDrawer.locator('.rs__control .value-container').first().click()
     await wait(500)
-    const editDrawerSelectMenu = await getSelectMenu({
-      selectLocator: editDrawer.locator('.react-select').first(),
-    })
+    const editDrawerSelectMenu = await getSelectMenu({ page })
     await expect(editDrawerSelectMenu.locator('.rs__option').nth(1)).toBeVisible()
     await expect(editDrawerSelectMenu.locator('.rs__option').nth(1)).toContainText('value2')
     await assertNetworkRequests(
