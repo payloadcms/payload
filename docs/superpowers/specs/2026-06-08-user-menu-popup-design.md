@@ -20,14 +20,15 @@ New element directory:
 packages/ui/src/elements/UserMenu/
 ├── index.tsx               # Main popup (client component)
 ├── index.css
-├── MenuSeparator/
-│   └── index.tsx           # Horizontal separator for menu groups
 ├── ThemeMenu/
 │   └── index.tsx           # Light / Dark / Auto sub-popup
 ├── LanguageMenu/
 │   └── index.tsx           # Admin UI language sub-popup
 └── SettingsMenu/
     └── index.tsx           # Plugin-extensible settings sub-popup
+
+packages/ui/src/elements/MenuSeparator/
+└── index.tsx               # Generic horizontal separator for menu groups
 ```
 
 `AppHeader` drops its Account `<Link>` and renders `<UserMenu>` in its place. The `CustomAvatar` prop moves from `AppHeader` to `UserMenu`.
@@ -110,12 +111,7 @@ Content structure (top to bottom):
 
 ### `MenuSeparator`
 
-A simple horizontal rule component styled for menu context. Provides consistent vertical padding (not a full-bleed `<hr>`). Reusable in any future menu-style popup.
-
-```tsx
-// Usage
-<MenuSeparator />
-```
+A standalone generic element at `packages/ui/src/elements/MenuSeparator/`. A horizontal rule styled for menu context: consistent vertical padding, not a full-bleed `<hr>`. Reusable in any popup or menu-style surface.
 
 ### `ThemeMenu`
 
@@ -172,9 +168,9 @@ The `/account` Settings panel currently renders `ToggleTheme`, `LanguageSelector
 
 | File | Purpose |
 |------|---------|
+| `packages/ui/src/elements/MenuSeparator/index.tsx` | Generic menu group separator |
 | `packages/ui/src/elements/UserMenu/index.tsx` | Main popup |
 | `packages/ui/src/elements/UserMenu/index.css` | Styles |
-| `packages/ui/src/elements/UserMenu/MenuSeparator/index.tsx` | Menu group separator |
 | `packages/ui/src/elements/UserMenu/ThemeMenu/index.tsx` | Theme sub-popup |
 | `packages/ui/src/elements/UserMenu/LanguageMenu/index.tsx` | Language sub-popup |
 | `packages/ui/src/elements/UserMenu/SettingsMenu/index.tsx` | Plugin settings sub-popup |
