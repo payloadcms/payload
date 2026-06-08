@@ -45,6 +45,12 @@ const selectors = {
  *
  * Using this helper instead of raw `.locator('.rs__menu')` keeps the CSS class
  * name in one place, so a future attribute change only requires updating here.
+ *
+ * If per-instance scoping via `{ page }` is ever needed without a container
+ * locator, wire a `data-select-id` (or similar) attribute onto the ReactSelect
+ * component and surface it on the portaled `.rs__menu` div via `ThemedMenuPortal`.
+ * This helper can then accept `{ page, selectId }` and use `page.locator(
+ * '.rs__menu[data-select-id="..."]')` to disambiguate.
  */
 export async function getSelectMenu(
   args: { selectLocator: Locator } | { page: Page },
