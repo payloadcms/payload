@@ -172,11 +172,8 @@ export function UnpublishButton({
       return false
     }
 
-    const isLocalizeStatusEnabled = drafts && drafts.localizeStatus === true
-    const isExperimentalEnabled = config.experimental?.localizeStatus === true
-
-    return isLocalizeStatusEnabled && isExperimentalEnabled
-  }, [canUnpublish, hasLocalizedFields, drafts, config.experimental?.localizeStatus])
+    return drafts !== null && drafts !== undefined && drafts.localizeStatus === true
+  }, [canUnpublish, hasLocalizedFields, drafts])
 
   const label = getTranslation(localeLabel, i18n)
 
