@@ -14,6 +14,7 @@ import type {
   ProjectTemplate,
 } from '../types.js'
 
+import { getLatestPackageVersion } from '../utils/getLatestPackageVersion.js'
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
@@ -276,48 +277,6 @@ export function updatePackageJSONDependencies(args: {
     {} as Record<string, string>,
   )
   packageJson.dependencies = updatedDependencies
-}
-
-/**
- * Fetches the latest version of a package from the NPM registry.
- *
- * Used in determining the latest version of Payload to use in the generated templates.
- */
-async function getLatestPackageVersion({
-  packageName = 'payload',
-}: {
-  /**
-   * Package name to fetch the latest version for based on the NPM registry URL
-   *
-   * Eg. for `'payload'`, it will fetch the version from `https://registry.npmjs.org/payload`
-   *
-   * @default 'payload'
-   */
-  packageName?: string
-}): Promise<string> {
-  try {
-    const response = await fetch(`https://registry.npmjs.org/-/package/${packageName}/dist-tags`)
-    const data = await response.json()
-
-    // Monster chaining for type safety just checking for data.latest
-    const latestVersion =
-      data &&
-      typeof data === 'object' &&
-      'latest' in data &&
-      data.latest &&
-      typeof data.latest === 'string'
-        ? data.latest
-        : null
-
-    if (!latestVersion) {
-      throw new Error(`No latest version found for package: ${packageName}`)
-    }
-
-    return latestVersion
-  } catch (error) {
-    console.error('Error fetching Payload version:', error)
-    throw error
-  }
 }
 
 /**
