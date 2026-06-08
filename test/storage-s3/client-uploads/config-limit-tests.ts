@@ -59,8 +59,7 @@ export default buildConfigWithDefaults({
   ],
   upload: {
     limits: {
-      // Default dev config: no signer-side cap. Size-limit tests use config-limit-tests.ts instead.
-      fileSize: Infinity,
+      fileSize: 10 * 1024 * 1024, // 10 MB — used by int.spec.ts size-limit tests only
     },
   },
   typescript: {

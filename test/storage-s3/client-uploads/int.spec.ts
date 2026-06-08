@@ -41,7 +41,12 @@ const signedURLBody = (
 
 describe('@payloadcms/storage-s3 clientUploads', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(
+      dirname,
+      undefined,
+      true,
+      'config-limit-tests.ts',
+    ))
 
     await createTestBucket()
     await clearTestBucket()
@@ -216,6 +221,25 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
       expect(response.status).toBe(400)
       const { errors } = (await response.json()) as any
       expect(errors[0].message).toContain('valid filesize is required to initiate multipart upload')
+    })
+
+    it('should reject multipart initiate when file exceeds upload.limits.fileSize', async () => {
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: JSON.stringify({
+          action: 'initiateMultipart',
+          collectionSlug: 'media',
+          filename: 'large-multipart.png',
+          filesize: MB(11),
+          mimeType: 'image/png',
+        }),
+      })
+
+      expect(response.status).toBe(400)
+      const { errors } = (await response.json()) as any
+      expect(errors).toBeDefined()
+      expect(errors[0].message).toContain('initiateMultipart: Exceeded file size limit')
+      expect(errors[0].message).toMatch(/Limit: 10\.0\dMB/)
+      expect(errors[0].message).toMatch(/got: 11\.0\dMB/)
     })
 
     it('should reject multipart part signing for invalid part number', async () => {

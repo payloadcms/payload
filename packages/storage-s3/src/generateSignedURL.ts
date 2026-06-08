@@ -115,15 +115,19 @@ const ensureValidFilesize = ({
 }
 
 const enforceFilesizeLimit = ({
+  action,
   filesize,
   filesizeLimit,
 }: {
+  action?: string
   filesize: number
   filesizeLimit: number | undefined
 }) => {
   if (filesizeLimit && filesize > filesizeLimit) {
+    const prefix = action ? `${action}: ` : ''
+
     throw new APIError(
-      `Exceeded file size limit. Limit: ${bytesToMB(filesizeLimit).toFixed(2)}MB, got: ${bytesToMB(filesize).toFixed(2)}MB`,
+      `${prefix}Exceeded file size limit. Limit: ${bytesToMB(filesizeLimit).toFixed(2)}MB, got: ${bytesToMB(filesize).toFixed(2)}MB`,
       400,
     )
   }
@@ -174,7 +178,7 @@ const buildSignableHeaders = ({
   const signableHeaders = new Set<string>()
 
   if (filesizeLimit) {
-    enforceFilesizeLimit({ filesize, filesizeLimit })
+    enforceFilesizeLimit({ action: 'generateSignedURL', filesize, filesizeLimit })
     signableHeaders.add('content-length')
   }
 
@@ -202,7 +206,7 @@ const initiateMultipartUpload = async ({
     filesize: body.filesize,
     message: 'A valid filesize is required to initiate multipart upload.',
   })
-  enforceFilesizeLimit({ filesize, filesizeLimit })
+  enforceFilesizeLimit({ action: 'initiateMultipart', filesize, filesizeLimit })
 
   const requestedPartSize = Number.isFinite(body.partSize)
     ? Math.trunc(body.partSize as number)
@@ -447,7 +451,7 @@ const generateSinglePartSignedURL = async ({
     filesize: body.filesize,
     message: 'A valid filesize is required for signed URL generation.',
   })
-  enforceFilesizeLimit({ filesize, filesizeLimit })
+  enforceFilesizeLimit({ action: 'generateSignedURL', filesize, filesizeLimit })
 
   if (filesize > FIVE_GIB_BYTES) {
     throw new APIError('Single-request S3 upload is limited to 5 GiB. Use multipart upload.', 400)
