@@ -7,8 +7,8 @@ import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
 import type { ClientFeature } from '../../typesClient.js'
-import type { LinkFields } from '../nodes/types.js'
 import type { ExclusiveLinkCollectionsProps } from '../server/index.js'
+import type { LinkFields } from '../server/schema.js'
 
 import { LinkIcon } from '../../../lexical/ui/icons/Link/index.js'
 import { getSelectedNode } from '../../../lexical/utils/getSelectedNode.js'

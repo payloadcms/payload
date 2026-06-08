@@ -7,6 +7,15 @@ import type {
 } from '../types/nodeTypes.js'
 
 /**
+ * The node union to build with. Accepts either a node union directly (e.g. `DefaultNodeTypes`) or a
+ * generated `richText` field type (e.g. `Post['richText']`), whose nodes are extracted automatically.
+ */
+type BuildNodes<T> =
+  NonNullable<T> extends TypedEditorState<infer TNode extends SerializedLexicalNode>
+    ? TNode
+    : Extract<NonNullable<T>, SerializedLexicalNode>
+
+/**
  * Helper to build lexical editor state JSON from text and/or nodes.
  *
  * @param nodes - The nodes to include in the editor state. If you pass the `text` argument, this will append your nodes after the first paragraph node.
@@ -42,14 +51,25 @@ import type {
  *   ],
  * })
  * ```
+ *
+ * @example
+ *
+ * passing a generated `richText` field type — the result is exactly that field's type:
+ *
+ * ```ts
+ * post.richText = buildEditorState<Post['richText']>({ text: 'Hello world' })
+ * ```
  */
-export function buildEditorState<T extends SerializedLexicalNode>({
+export function buildEditorState<
+  T extends null | SerializedLexicalNode | TypedEditorState<SerializedLexicalNode> | undefined =
+    DefaultNodeTypes,
+>({
   nodes,
   text,
 }: {
-  nodes?: TypedEditorState<T>['root']['children']
+  nodes?: TypedEditorState<BuildNodes<T>>['root']['children']
   text?: string
-}): TypedEditorState<T> {
+}): TypedEditorState<BuildNodes<T>> {
   const editorJSON: DefaultTypedEditorState = {
     root: {
       type: 'root',
@@ -103,7 +123,7 @@ export function buildEditorState<T extends SerializedLexicalNode>({
     })
   }
 
-  return editorJSON as TypedEditorState<T>
+  return editorJSON as TypedEditorState<BuildNodes<T>>
 }
 
 /**

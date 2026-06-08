@@ -114,7 +114,7 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToDelete2)
 
     await page.locator('.delete-documents__toggle').click()
-    await page.locator('#confirm-delete-many-docs #confirm-action').click()
+    await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Deleted 2 Posts successfully.',
@@ -146,7 +146,7 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToPublish2)
 
     await page.locator('.list-selection__button[aria-label="Publish"]').click()
-    await page.locator('#publish-posts #confirm-action').click()
+    await page.locator('#publish-posts [data-dialog-action="confirm"]').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 2 Posts successfully.',
@@ -182,7 +182,7 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToUnpublish2)
 
     await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
-    await page.locator('#unpublish-posts #confirm-action').click()
+    await page.locator('#unpublish-posts [data-dialog-action="confirm"]').click()
 
     await expect(await findTableCell(page, '_status', titleOfPostToUnpublish1)).toContainText(
       'Draft',
@@ -338,7 +338,7 @@ test.describe('Bulk Edit', () => {
 
     await page.locator('input#select-all').check()
     await page.locator('.list-selection__button[aria-label="Delete"]').click()
-    await page.locator('#confirm-delete-many-docs #confirm-action').click()
+    await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       'Deleted 3 Posts successfully.',
@@ -368,7 +368,7 @@ test.describe('Bulk Edit', () => {
     await page.locator('input#select-all').check()
     await page.locator('button#select-all-across-pages').click()
     await page.locator('.list-selection__button[aria-label="Delete"]').click()
-    await page.locator('#confirm-delete-many-docs #confirm-action').click()
+    await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       'Deleted 6 Posts successfully.',
@@ -586,7 +586,7 @@ test.describe('Bulk Edit', () => {
     await page.locator('input#select-all').check()
 
     await page.locator('.list-selection__button[aria-label="Publish"]').click()
-    await page.locator('#publish-posts #confirm-action').click()
+    await page.locator('#publish-posts [data-dialog-action="confirm"]').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       `Updated ${postCount} Posts successfully.`,
@@ -617,7 +617,7 @@ test.describe('Bulk Edit', () => {
     await page.locator('input#select-all').check()
 
     await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
-    await page.locator('#unpublish-posts #confirm-action').click()
+    await page.locator('#unpublish-posts [data-dialog-action="confirm"]').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       `Updated ${postCount} Posts successfully.`,

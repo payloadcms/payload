@@ -43,6 +43,7 @@ const JSONFields: CollectionConfig = {
       defaultValue: { example: 'disabled' },
     },
   ],
+  versions: false,
 }
 
 export default JSONFields

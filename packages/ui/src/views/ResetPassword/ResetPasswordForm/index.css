@@ -16,21 +16,9 @@
     gap: var(--spacer-3);
   }
 
-  .reset-password__form__actions {
+  .reset-password__form__submit {
     display: flex;
-    flex-direction: column;
-    gap: var(--spacer-2);
     align-items: center;
-    width: 100%;
-  }
-
-  .reset-password__form__actions .form-submit {
-    width: 100%;
-  }
-
-  .reset-password__form__actions .form-submit .btn {
-    width: 100%;
-    height: var(--spacer-4);
     justify-content: center;
   }
 }

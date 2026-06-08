@@ -31,7 +31,7 @@ import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'r
 import { v4 as uuid } from 'uuid'
 
 import type { ViewMapInlineBlockComponentProps } from '../../../../types/index.js'
-import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
+import type { InlineBlockFields } from '../../server/schema.js'
 import type { BlockComponentProps } from '../component/index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'

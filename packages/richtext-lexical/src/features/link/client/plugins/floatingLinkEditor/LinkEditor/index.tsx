@@ -30,7 +30,7 @@ import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../../nodes/LinkNode.js'
-import type { LinkFields } from '../../../../nodes/types.js'
+import type { LinkFields } from '../../../../server/schema.js'
 import type { LinkPayload } from '../types.js'
 
 import { useEditorConfigContext } from '../../../../../../lexical/config/client/EditorConfigProvider.js'

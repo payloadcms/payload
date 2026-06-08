@@ -72,6 +72,7 @@ export default buildConfigWithDefaults({
       slug: 'users',
       auth: true,
       fields: [],
+      versions: false,
     },
   ],
   plugins: [
@@ -87,6 +88,7 @@ export default buildConfigWithDefaults({
               type: 'text',
             },
           ],
+          versions: false,
         },
       ],
     }),

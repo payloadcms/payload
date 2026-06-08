@@ -499,6 +499,7 @@ export const esTranslations: DefaultTranslationsObject = {
     viewing: 'Visualización',
     viewReadOnly: 'Ver solo lectura',
     welcome: 'Te damos la bienvenida',
+    where: 'Dónde',
     yes: 'Sí',
   },
   hierarchy: {

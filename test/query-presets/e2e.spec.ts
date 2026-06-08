@@ -120,11 +120,10 @@ describe('Query Presets', () => {
     const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(editModal).toBeVisible()
 
-    // Verify the Where field is visible (empty state: "Add Filter" or "No filters set")
+    // Verify the Where field is visible (empty state renders an empty where-builder)
     const whereField = editModal.locator('.query-preset-where-field')
     await expect(whereField).toBeVisible()
     await expect(whereField.locator('.where-builder')).toBeVisible()
-    await expect(whereField.locator('.where-builder__no-filters')).toBeVisible()
 
     // Verify the Columns field is visible and has 4 selected pills (same as default columns in list view)
     const columnsField = editModal.locator('.query-preset-columns-field')
@@ -194,7 +193,7 @@ describe('Query Presets', () => {
 
     await openDeletePreset({ page })
 
-    await page.locator('[id="delete-preset-confirmation"] #confirm-action').click()
+    await page.locator('[id="delete-preset-confirmation"] [data-dialog-action="confirm"]').click()
 
     // columns can either be omitted or an empty string after being cleared
     const regex = /columns=(?:\[\]|$)/
@@ -498,11 +497,8 @@ describe('Query Presets', () => {
     await openListFilters(page, {})
 
     const whereBuilder = page.locator('.where-builder')
-    const addFirst = whereBuilder.locator('.where-builder__add-first-filter')
 
-    await addFirst.click()
-
-    const condition = whereBuilder.locator('.where-builder__or-filters > li').first()
+    const condition = whereBuilder.locator('.condition').first()
 
     // Select field
     await condition.locator('.condition__field .rs__control').click()

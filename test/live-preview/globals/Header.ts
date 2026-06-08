@@ -16,4 +16,5 @@ export const Header: GlobalConfig = {
       fields: [link()],
     },
   ],
+  versions: false,
 }

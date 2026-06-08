@@ -26,11 +26,14 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   hooksSlug,
+  publicUserEmail,
+  publicUsersSlug,
   relyOnRequestHeadersSlug,
   restrictedVersionsSlug,
   secondArrayText,
   siblingDataSlug,
   slug,
+  unrestrictedSlug,
 } from './shared.js'
 
 let payload: Payload
@@ -861,6 +864,49 @@ describe('Access Control', () => {
         read: { permission: true },
         update: { permission: true },
       } satisfies CollectionPermission)
+    })
+  })
+
+  describe('Default access - admin auth collection scoping', () => {
+    let adminUser: Record<string, unknown>
+    let publicUser: Record<string, unknown>
+
+    beforeAll(async () => {
+      const { docs: adminDocs } = await payload.find({
+        collection: 'users',
+        limit: 1,
+        where: { email: { equals: 'dev@payloadcms.com' } },
+      })
+      adminUser = { ...adminDocs[0], collection: 'users' }
+
+      const { docs: publicDocs } = await payload.find({
+        collection: publicUsersSlug,
+        limit: 1,
+        where: { email: { equals: publicUserEmail } },
+      })
+      publicUser = { ...publicDocs[0], collection: publicUsersSlug }
+    })
+
+    it('should grant default access to a user from the admin auth collection', async () => {
+      const doc = await payload.create({
+        collection: unrestrictedSlug,
+        data: { name: 'created by admin user' },
+        overrideAccess: false,
+        user: adminUser as any,
+      })
+
+      expect(doc.id).toBeDefined()
+    })
+
+    it('should deny default access to a user from a non-admin auth collection', async () => {
+      await expect(
+        payload.create({
+          collection: unrestrictedSlug,
+          data: { name: 'created by public user' },
+          overrideAccess: false,
+          user: publicUser as any,
+        }),
+      ).rejects.toThrow(Forbidden)
     })
   })
 })

@@ -62,6 +62,492 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_5AC12460".
+ */
+export type LexicalNodes_5AC12460 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_5AC12460>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_5AC12460>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_5AC12460, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_5AC12460, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_5AC12460>
+  | SerializedListItemNode<LexicalNodes_5AC12460>
+  | SerializedHeadingNode<LexicalNodes_5AC12460>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_51C70DFC".
+ */
+export type LexicalNodes_51C70DFC =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_51C70DFC>
+  | SerializedBlockNode<
+      | BenchBlock1
+      | BenchBlock2
+      | BenchBlock3
+      | BenchBlock4
+      | BenchBlock5
+      | BenchBlock6
+      | BenchBlock7
+      | BenchBlock8
+      | BenchBlock9
+      | BenchBlock10
+      | BenchBlock11
+      | BenchBlock12
+      | BenchBlock13
+      | BenchBlock14
+      | BenchBlock15
+      | BenchBlock16
+      | BenchBlock17
+      | BenchBlock18
+      | BenchBlock19
+      | BenchBlock20
+      | BenchBlock21
+      | BenchBlock22
+      | BenchBlock23
+      | BenchBlock24
+      | BenchBlock25
+      | BenchBlock26
+      | BenchBlock27
+      | BenchBlock28
+      | BenchBlock29
+      | BenchBlock30
+    >
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_51C70DFC>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_51C70DFC, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_51C70DFC, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_51C70DFC>
+  | SerializedListItemNode<LexicalNodes_51C70DFC>
+  | SerializedHeadingNode<LexicalNodes_51C70DFC>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_4189F979".
+ */
+export type LexicalNodes_4189F979 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_4189F979>
+  | SerializedBlockNode<Code | PayloadCode | MyBlock>
+  | SerializedInlineBlockNode<MyInlineBlock | InlineBlockWithSelect | InlineBlockWithRelationship>
+  | SerializedTableNode<LexicalNodes_4189F979>
+  | SerializedTableCellNode<LexicalNodes_4189F979>
+  | SerializedTableRowNode<LexicalNodes_4189F979>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_4189F979>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_4189F979, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_4189F979, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_4189F979>
+  | SerializedListItemNode<LexicalNodes_4189F979>
+  | SerializedHeadingNode<LexicalNodes_4189F979>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_D1C84E9E".
+ */
+export type LexicalNodes_D1C84E9E =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_D1C84E9E>
+  | SerializedAutoLinkNode<LexicalNodes_D1C84E9E, LexicalLinkFields_D1C84E9E>
+  | SerializedLinkNode<LexicalNodes_D1C84E9E, LexicalLinkFields_D1C84E9E>
+  | SerializedBlockNode<TextBlock>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_D1C84E9E>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedListNode<LexicalNodes_D1C84E9E>
+  | SerializedListItemNode<LexicalNodes_D1C84E9E>
+  | SerializedHeadingNode<LexicalNodes_D1C84E9E>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_C4CC3409".
+ */
+export type LexicalNodes_C4CC3409 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_C4CC3409>
+  | SerializedAutoLinkNode<LexicalNodes_C4CC3409, LexicalLinkFields_C4CC3409>
+  | SerializedLinkNode<LexicalNodes_C4CC3409, LexicalLinkFields_C4CC3409>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_C4CC3409>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedListNode<LexicalNodes_C4CC3409>
+  | SerializedListItemNode<LexicalNodes_C4CC3409>
+  | SerializedHeadingNode<LexicalNodes_C4CC3409>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_2C2D92D6".
+ */
+export type LexicalNodes_2C2D92D6 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_2C2D92D6>
+  | SerializedListNode<LexicalNodes_2C2D92D6>
+  | SerializedListItemNode<LexicalNodes_2C2D92D6>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_02CE3078".
+ */
+export type LexicalNodes_02CE3078 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_02CE3078>
+  | SerializedHeadingNode<LexicalNodes_02CE3078, 'h2' | 'h4'>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_02CE3078>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_02CE3078, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_02CE3078, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_02CE3078>
+  | SerializedListItemNode<LexicalNodes_02CE3078>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_27C59130".
+ */
+export type LexicalNodes_27C59130 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_27C59130>
+  | SerializedBlockNode<MyBlock_89EF3EA7>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHeadingNode<LexicalNodes_27C59130>
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_27C59130>
+  | SerializedListNode<LexicalNodes_27C59130>
+  | SerializedListItemNode<LexicalNodes_27C59130>
+  | SerializedAutoLinkNode<LexicalNodes_27C59130, LexicalLinkFields_27C59130>
+  | SerializedLinkNode<LexicalNodes_27C59130, LexicalLinkFields_27C59130>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_903D3919".
+ */
+export type LexicalNodes_903D3919 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_903D3919>
+  | SerializedBlockNode<LexicalAndUploadBlock>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_903D3919>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_903D3919, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_903D3919, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_903D3919>
+  | SerializedListItemNode<LexicalNodes_903D3919>
+  | SerializedHeadingNode<LexicalNodes_903D3919>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BlockColumns".
  */
 export type BlockColumns =
@@ -76,14 +562,852 @@ export type BlockColumns =
       id?: string | null;
     }[]
   | null;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_2EF528CD".
+ */
+export type LexicalNodes_2EF528CD =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_2EF528CD>
+  | SerializedHeadingNode<LexicalNodes_2EF528CD, 'h2' | 'h4'>
+  | SerializedBlockNode<
+      | RichTextBlock
+      | TextRequired
+      | UploadAndRichText
+      | Select
+      | RelationshipBlock
+      | RelationshipHasManyBlock
+      | SubBlockLexical
+      | LexicalBlocksRadioButtonsBlock
+      | ConditionalLayout
+    >
+  | SerializedInlineBlockNode<{blockType: string}>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_80D343B4".
+ */
+export type LexicalNodes_80D343B4 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_80D343B4>
+  | SerializedTableNode<LexicalNodes_80D343B4>
+  | SerializedTableCellNode<LexicalNodes_80D343B4>
+  | SerializedTableRowNode<LexicalNodes_80D343B4>
+  | SerializedBlockNode<
+      | ValidationBlock
+      | FilterOptionsBlock
+      | AsyncHooksBlock
+      | RichTextBlock
+      | TextRequired
+      | UploadAndRichText
+      | Select
+      | RelationshipBlock
+      | RelationshipHasManyBlock
+      | SubBlockLexical
+      | LexicalBlocksRadioButtonsBlock
+      | ConditionalLayout
+      | TabBlock
+      | Code_5DA82017
+      | NoBlockName
+      | MyBlock_0B02E2CC
+      | MyBlockWithLabel
+      | MyBlockWithBlock
+      | BlockRSC
+      | MyBlockWithBlockAndLabel
+    >
+  | SerializedInlineBlockNode<
+      | AvatarGroupBlock
+      | MyInlineBlock_FAB42262
+      | MyInlineBlockWithLabel
+      | MyInlineBlockWithBlock
+      | MyInlineBlockWithBlockAndLabel
+    >
+  | SerializedUploadNode<'uploads', LexicalUploadFields_224D209A>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedAutoLinkNode<LexicalNodes_80D343B4, LexicalLinkFields_80D343B4>
+  | SerializedLinkNode<LexicalNodes_80D343B4, LexicalLinkFields_80D343B4>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_80D343B4>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedListNode<LexicalNodes_80D343B4>
+  | SerializedListItemNode<LexicalNodes_80D343B4>
+  | SerializedHeadingNode<LexicalNodes_80D343B4>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_6A840C50".
+ */
+export type LexicalNodes_6A840C50 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_6A840C50>
+  | SerializedBlockNode<ViewsTestBlock>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_6A840C50>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_6A840C50, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_6A840C50, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_6A840C50>
+  | SerializedListItemNode<LexicalNodes_6A840C50>
+  | SerializedHeadingNode<LexicalNodes_6A840C50>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_93C8E7A2".
+ */
+export type LexicalNodes_93C8E7A2 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_93C8E7A2>
+  | SerializedBlockNode<BannerBlock>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_93C8E7A2>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_93C8E7A2, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_93C8E7A2, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_93C8E7A2>
+  | SerializedListItemNode<LexicalNodes_93C8E7A2>
+  | SerializedHeadingNode<LexicalNodes_93C8E7A2>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_BD5C150F".
+ */
+export type LexicalNodes_BD5C150F =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_BD5C150F>
+  | SerializedBlockNode<ContentBlock_8653F325 | ProviderBannerBlock>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_BD5C150F>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_BD5C150F, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_BD5C150F, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_BD5C150F>
+  | SerializedListItemNode<LexicalNodes_BD5C150F>
+  | SerializedHeadingNode<LexicalNodes_BD5C150F>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_192D873F".
+ */
+export type LexicalNodes_192D873F =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_192D873F>
+  | SerializedBlockNode<NestedContentBlock>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_192D873F>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_192D873F, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_192D873F, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_192D873F>
+  | SerializedListItemNode<LexicalNodes_192D873F>
+  | SerializedHeadingNode<LexicalNodes_192D873F>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_D31F0167".
+ */
+export type LexicalNodes_D31F0167 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_D31F0167>
+  | SerializedBlockNode<BlockLexicalLocalized>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_D31F0167>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_D31F0167, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D31F0167, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_D31F0167>
+  | SerializedListItemNode<LexicalNodes_D31F0167>
+  | SerializedHeadingNode<LexicalNodes_D31F0167>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_E46FF336".
+ */
+export type LexicalNodes_E46FF336 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_E46FF336>
+  | SerializedBlockNode<BlockLexicalLocalized2>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_E46FF336>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_E46FF336, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_E46FF336, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_E46FF336>
+  | SerializedListItemNode<LexicalNodes_E46FF336>
+  | SerializedHeadingNode<LexicalNodes_E46FF336>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_2A14730B".
+ */
+export type LexicalNodes_2A14730B =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_2A14730B>
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_245E32E8".
+ */
+export type LexicalNodes_245E32E8 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_245E32E8>
+  | SerializedBlockNode<BlockInLexical>
+  | SerializedInlineBlockNode<{blockType: string}>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_C91787A6".
+ */
+export type LexicalNodes_C91787A6 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_C91787A6>
+  | SerializedBlockNode<{blockType: string}>
+  | SerializedInlineBlockNode<InlineBlockInLexical>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_703DA597".
+ */
+export type LexicalNodes_703DA597 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_703DA597>
+  | SerializedBlockNode<BlockWithRichText>
+  | SerializedInlineBlockNode<{blockType: string}>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_AFD89559".
+ */
+export type LexicalNodes_AFD89559 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_AFD89559>
+  | SerializedAutoLinkNode<LexicalNodes_AFD89559, LexicalLinkFields_AFD89559>
+  | SerializedLinkNode<LexicalNodes_AFD89559, LexicalLinkFields_AFD89559>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_AFD89559>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedListNode<LexicalNodes_AFD89559>
+  | SerializedListItemNode<LexicalNodes_AFD89559>
+  | SerializedHeadingNode<LexicalNodes_AFD89559>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_86068B65".
+ */
+export type LexicalNodes_86068B65 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_86068B65>
+  | SerializedUploadNode<'uploads'>
+  | SerializedRelationshipNode<'array-fields'>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_86068B65>
+  | SerializedAutoLinkNode<LexicalNodes_86068B65, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_86068B65, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_86068B65>
+  | SerializedListItemNode<LexicalNodes_86068B65>
+  | SerializedHeadingNode<LexicalNodes_86068B65>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_419CE8C9".
+ */
+export type LexicalNodes_419CE8C9 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_419CE8C9>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_419CE8C9>
+  | SerializedAutoLinkNode<LexicalNodes_419CE8C9, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_419CE8C9, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_419CE8C9>
+  | SerializedListItemNode<LexicalNodes_419CE8C9>
+  | SerializedHeadingNode<LexicalNodes_419CE8C9>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_54186730".
+ */
+export type LexicalNodes_54186730 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_54186730>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_54186730>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_54186730, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_54186730, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_54186730>
+  | SerializedListItemNode<LexicalNodes_54186730>
+  | SerializedHeadingNode<LexicalNodes_54186730>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_806A786F".
+ */
+export type LexicalNodes_806A786F =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_806A786F>
+  | SerializedBlockNode<BlockWithBlockRef>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_806A786F>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_806A786F, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_806A786F, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_806A786F>
+  | SerializedListItemNode<LexicalNodes_806A786F>
+  | SerializedHeadingNode<LexicalNodes_806A786F>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_5F0B8784".
+ */
+export type LexicalNodes_5F0B8784 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_5F0B8784>
+  | SerializedBlockNode<TextRequired | UploadAndRichText | Select | RelationshipBlock>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedUploadNode<'uploads', LexicalUploadFields_224D209A>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedAutoLinkNode<LexicalNodes_5F0B8784, LexicalLinkFields_5F0B8784>
+  | SerializedLinkNode<LexicalNodes_5F0B8784, LexicalLinkFields_5F0B8784>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_5F0B8784>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedListNode<LexicalNodes_5F0B8784>
+  | SerializedListItemNode<LexicalNodes_5F0B8784>
+  | SerializedHeadingNode<LexicalNodes_5F0B8784>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_FFF6D80A".
+ */
+export type LexicalNodes_FFF6D80A =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_FFF6D80A>
+  | SerializedTableNode<LexicalNodes_FFF6D80A>
+  | SerializedTableCellNode<LexicalNodes_FFF6D80A>
+  | SerializedTableRowNode<LexicalNodes_FFF6D80A>
+  | SerializedBlockNode<MyBlock_89EF3EA7>
+  | SerializedInlineBlockNode<{blockType: string}>
+  | SerializedHeadingNode<LexicalNodes_FFF6D80A>
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_FFF6D80A>
+  | SerializedListNode<LexicalNodes_FFF6D80A>
+  | SerializedListItemNode<LexicalNodes_FFF6D80A>
+  | SerializedAutoLinkNode<LexicalNodes_FFF6D80A, LexicalLinkFields_FFF6D80A>
+  | SerializedLinkNode<LexicalNodes_FFF6D80A, LexicalLinkFields_FFF6D80A>
+  | SerializedRelationshipNode<
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {
     nestedBlock: NestedBlock;
-    blockWithBlockRef: BlockWithBlockRef;
+    blockWithBlockRef: BlockWithBlockRef_DBAB1AB1;
   };
   collections: {
     'lexical-benchmark': LexicalBenchmark;
@@ -116,8 +1440,9 @@ export interface Config {
     OnDemandForm: OnDemandForm;
     OnDemandOutsideForm: OnDemandOutsideForm;
     'lexical-custom-cell': LexicalCustomCell;
-    'payload-kv': PayloadKv;
     users: User;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -154,8 +1479,9 @@ export interface Config {
     OnDemandForm: OnDemandFormSelect<false> | OnDemandFormSelect<true>;
     OnDemandOutsideForm: OnDemandOutsideFormSelect<false> | OnDemandOutsideFormSelect<true>;
     'lexical-custom-cell': LexicalCustomCellSelect<false> | LexicalCustomCellSelect<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -174,7 +1500,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -198,9 +1524,27 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface PayloadMcpApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nestedBlock".
+ * via the `definition` "NestedBlock".
  */
 export interface NestedBlock {
   text?: string | null;
@@ -209,10 +1553,12 @@ export interface NestedBlock {
   blockType: 'nestedBlock';
 }
 /**
+ * Multiple blocks resolve to the `BlockWithBlockRef` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blockWithBlockRef".
+ * via the `definition` "BlockWithBlockRef_DBAB1AB1".
  */
-export interface BlockWithBlockRef {
+export interface BlockWithBlockRef_DBAB1AB1 {
   nestedBlocks?: NestedBlock[] | null;
   id?: string | null;
   blockName?: string | null;
@@ -224,21 +1570,7 @@ export interface BlockWithBlockRef {
  */
 export interface LexicalBenchmark {
   id: string;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_51C70DFC> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -248,21 +1580,7 @@ export interface LexicalBenchmark {
  */
 export interface LexicalFullyFeatured {
   id: string;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_4189F979> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -275,21 +1593,7 @@ export interface LexicalAutosave {
   title?: string | null;
   cta?:
     | {
-        richText?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
+        richText?: LexicalRichText<LexicalNodes_D1C84E9E> | null;
         id?: string | null;
       }[]
     | null;
@@ -303,21 +1607,7 @@ export interface LexicalAutosave {
  */
 export interface LexicalLinkFeature {
   id: string;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_C4CC3409> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -327,21 +1617,7 @@ export interface LexicalLinkFeature {
  */
 export interface LexicalListsFeature {
   id: string;
-  onlyOrderedList?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  onlyOrderedList?: LexicalRichText<LexicalNodes_2C2D92D6> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -351,21 +1627,7 @@ export interface LexicalListsFeature {
  */
 export interface LexicalHeadingFeature {
   id: string;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_02CE3078> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -375,21 +1637,7 @@ export interface LexicalHeadingFeature {
  */
 export interface LexicalJsxConverter {
   id: string;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_5AC12460> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -400,57 +1648,15 @@ export interface LexicalJsxConverter {
 export interface LexicalField {
   id: string;
   title: string;
-  lexicalRootEditor?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  lexicalRootEditor?: LexicalRichText<LexicalNodes_27C59130> | null;
   /**
    * A simple lexical field
    */
-  lexicalSimple?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  lexicalSimple?: LexicalRichText<LexicalNodes_2EF528CD> | null;
   /**
    * Should not be rendered
    */
-  lexicalWithBlocks: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
+  lexicalWithBlocks: LexicalRichText<LexicalNodes_80D343B4>;
   lexicalWithBlocks_markdown?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -461,36 +1667,8 @@ export interface LexicalField {
  */
 export interface LexicalView {
   id: string;
-  customDefaultView?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  vanillaView?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  customDefaultView?: LexicalRichText<LexicalNodes_6A840C50> | null;
+  vanillaView?: LexicalRichText<LexicalNodes_6A840C50> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -500,21 +1678,7 @@ export interface LexicalView {
  */
 export interface LexicalViewsFrontend {
   id: string;
-  customFrontendViews?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  customFrontendViews?: LexicalRichText<LexicalNodes_93C8E7A2> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -525,21 +1689,7 @@ export interface LexicalViewsFrontend {
 export interface LexicalViewsProvider {
   id: string;
   viewProviderWrapper?: {
-    richTextField?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richTextField?: LexicalRichText<LexicalNodes_BD5C150F> | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -551,21 +1701,7 @@ export interface LexicalViewsProvider {
 export interface LexicalViewsProviderDefault {
   id: string;
   defaultViewWrapper?: {
-    richTextField?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richTextField?: LexicalRichText<LexicalNodes_5AC12460> | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -577,21 +1713,7 @@ export interface LexicalViewsProviderDefault {
 export interface LexicalViewsProviderFallback {
   id: string;
   fallbackViewWrapper?: {
-    richTextField?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richTextField?: LexicalRichText<LexicalNodes_5AC12460> | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -602,21 +1724,7 @@ export interface LexicalViewsProviderFallback {
  */
 export interface LexicalViewsNested {
   id: string;
-  parentRichText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  parentRichText?: LexicalRichText<LexicalNodes_192D873F> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -630,39 +1738,11 @@ export interface LexicalLocalizedField {
   /**
    * Non-localized field with localized block subfields
    */
-  lexicalBlocksSubLocalized?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  lexicalBlocksSubLocalized?: LexicalRichText<LexicalNodes_D31F0167> | null;
   /**
    * Localized field with localized block subfields
    */
-  lexicalBlocksLocalized?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  lexicalBlocksLocalized?: LexicalRichText<LexicalNodes_E46FF336> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -672,36 +1752,8 @@ export interface LexicalLocalizedField {
  */
 export interface LexicalObjectReferenceBug {
   id: string;
-  lexicalDefault?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  lexicalEditor?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  lexicalDefault?: LexicalRichText<LexicalNodes_27C59130> | null;
+  lexicalEditor?: LexicalRichText<LexicalNodes_2A14730B> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -711,45 +1763,20 @@ export interface LexicalObjectReferenceBug {
  */
 export interface LexicalInBlock {
   id: string;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  blocks?:
-    | {
-        lexical?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'lexicalInBlock2';
-      }[]
-    | null;
+  content?: LexicalRichText<LexicalNodes_245E32E8> | null;
+  blocks?: LexicalInBlock2[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalInBlock2".
+ */
+export interface LexicalInBlock2 {
+  lexical?: LexicalRichText<LexicalNodes_C91787A6> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'lexicalInBlock2';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -757,21 +1784,7 @@ export interface LexicalInBlock {
  */
 export interface LexicalAutosaveBlock {
   id: string;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  content?: LexicalRichText<LexicalNodes_703DA597> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -783,21 +1796,7 @@ export interface LexicalAutosaveBlock {
 export interface LexicalAccessControl {
   id: string;
   title?: string | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_AFD89559> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -807,66 +1806,10 @@ export interface LexicalAccessControl {
  */
 export interface LexicalRelationshipField {
   id: string;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  richText2?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  richText3?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  richTextLocalized?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_86068B65> | null;
+  richText2?: LexicalRichText<LexicalNodes_419CE8C9> | null;
+  richText3?: LexicalRichText<LexicalNodes_54186730> | null;
+  richTextLocalized?: LexicalRichText<LexicalNodes_86068B65> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -877,21 +1820,7 @@ export interface LexicalRelationshipField {
  */
 export interface Collision {
   id: string;
-  collision?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  collision?: LexicalRichText<LexicalNodes_5AC12460> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -902,21 +1831,7 @@ export interface Collision {
 export interface LexicalNestedBlock {
   id: string;
   title: string;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_806A786F> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -927,54 +1842,31 @@ export interface LexicalNestedBlock {
 export interface RichTextField {
   id: string;
   title: string;
-  lexicalCustomFields: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
+  lexicalCustomFields: LexicalRichText<LexicalNodes_5F0B8784>;
   lexicalCustomFields_html?: string | null;
   /**
    * This rich text field uses the lexical editor.
    */
-  lexical?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  lexical?: LexicalRichText<LexicalNodes_5AC12460> | null;
   /**
    * This select field is rendered here to ensure its options dropdown renders above the rich text toolbar.
    */
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
-  blocks?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlock';
-      }[]
-    | null;
+  blocks?: TextBlock_9A4C1CB0[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Multiple blocks resolve to the `TextBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock_9A4C1CB0".
+ */
+export interface TextBlock_9A4C1CB0 {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1017,16 +1909,19 @@ export interface TextField {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        texts?: string[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockWithText';
-      }[]
-    | null;
+  blocks?: BlockWithText[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithText".
+ */
+export interface BlockWithText {
+  texts?: string[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithText';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1200,21 +2095,7 @@ export interface OnDemandOutsideForm {
     | number
     | boolean
     | null;
-  hiddenAnchor?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  hiddenAnchor?: LexicalRichText<LexicalNodes_FFF6D80A> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1225,40 +2106,9 @@ export interface OnDemandOutsideForm {
 export interface LexicalCustomCell {
   id: string;
   title: string;
-  richTextField?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richTextField?: LexicalRichText<LexicalNodes_5AC12460> | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1284,6 +2134,66 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
+  /**
+   * Access for this API key — uncheck to revoke individual tools.
+   */
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1415,12 +2325,21 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1430,10 +2349,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -1940,14 +2864,6 @@ export interface LexicalCustomCellSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1967,6 +2883,30 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  overrideAccess?: T;
+  access?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2007,38 +2947,10 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface TabsWithRichText {
   id: string;
   tab1?: {
-    rt1?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    rt1?: LexicalRichText<LexicalNodes_5AC12460> | null;
   };
   tab2?: {
-    rt2?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    rt2?: LexicalRichText<LexicalNodes_5AC12460> | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -2074,150 +2986,1127 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock1".
+ */
+export interface BenchBlock1 {
+  id: string;
+  blockType: 'benchBlock1';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock2".
+ */
+export interface BenchBlock2 {
+  id: string;
+  blockType: 'benchBlock2';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock3".
+ */
+export interface BenchBlock3 {
+  id: string;
+  blockType: 'benchBlock3';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock4".
+ */
+export interface BenchBlock4 {
+  id: string;
+  blockType: 'benchBlock4';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock5".
+ */
+export interface BenchBlock5 {
+  id: string;
+  blockType: 'benchBlock5';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock6".
+ */
+export interface BenchBlock6 {
+  id: string;
+  blockType: 'benchBlock6';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock7".
+ */
+export interface BenchBlock7 {
+  id: string;
+  blockType: 'benchBlock7';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock8".
+ */
+export interface BenchBlock8 {
+  id: string;
+  blockType: 'benchBlock8';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock9".
+ */
+export interface BenchBlock9 {
+  id: string;
+  blockType: 'benchBlock9';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock10".
+ */
+export interface BenchBlock10 {
+  id: string;
+  blockType: 'benchBlock10';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock11".
+ */
+export interface BenchBlock11 {
+  id: string;
+  blockType: 'benchBlock11';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock12".
+ */
+export interface BenchBlock12 {
+  id: string;
+  blockType: 'benchBlock12';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock13".
+ */
+export interface BenchBlock13 {
+  id: string;
+  blockType: 'benchBlock13';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock14".
+ */
+export interface BenchBlock14 {
+  id: string;
+  blockType: 'benchBlock14';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock15".
+ */
+export interface BenchBlock15 {
+  id: string;
+  blockType: 'benchBlock15';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock16".
+ */
+export interface BenchBlock16 {
+  id: string;
+  blockType: 'benchBlock16';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock17".
+ */
+export interface BenchBlock17 {
+  id: string;
+  blockType: 'benchBlock17';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock18".
+ */
+export interface BenchBlock18 {
+  id: string;
+  blockType: 'benchBlock18';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock19".
+ */
+export interface BenchBlock19 {
+  id: string;
+  blockType: 'benchBlock19';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock20".
+ */
+export interface BenchBlock20 {
+  id: string;
+  blockType: 'benchBlock20';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock21".
+ */
+export interface BenchBlock21 {
+  id: string;
+  blockType: 'benchBlock21';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock22".
+ */
+export interface BenchBlock22 {
+  id: string;
+  blockType: 'benchBlock22';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock23".
+ */
+export interface BenchBlock23 {
+  id: string;
+  blockType: 'benchBlock23';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock24".
+ */
+export interface BenchBlock24 {
+  id: string;
+  blockType: 'benchBlock24';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock25".
+ */
+export interface BenchBlock25 {
+  id: string;
+  blockType: 'benchBlock25';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock26".
+ */
+export interface BenchBlock26 {
+  id: string;
+  blockType: 'benchBlock26';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock27".
+ */
+export interface BenchBlock27 {
+  id: string;
+  blockType: 'benchBlock27';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock28".
+ */
+export interface BenchBlock28 {
+  id: string;
+  blockType: 'benchBlock28';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock29".
+ */
+export interface BenchBlock29 {
+  id: string;
+  blockType: 'benchBlock29';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BenchBlock30".
+ */
+export interface BenchBlock30 {
+  id: string;
+  blockType: 'benchBlock30';
+  title?: string | null;
+  content?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Code".
+ */
+export interface Code {
+  id: string;
+  blockType: 'Code';
+  language?:
+    | (
+        | 'abap'
+        | 'apex'
+        | 'azcli'
+        | 'bat'
+        | 'bicep'
+        | 'cameligo'
+        | 'clojure'
+        | 'coffee'
+        | 'cpp'
+        | 'csharp'
+        | 'csp'
+        | 'css'
+        | 'cypher'
+        | 'dart'
+        | 'dockerfile'
+        | 'ecl'
+        | 'elixir'
+        | 'flow9'
+        | 'freemarker2'
+        | 'fsharp'
+        | 'go'
+        | 'graphql'
+        | 'handlebars'
+        | 'hcl'
+        | 'html'
+        | 'ini'
+        | 'java'
+        | 'javascript'
+        | 'julia'
+        | 'kotlin'
+        | 'less'
+        | 'lexon'
+        | 'liquid'
+        | 'lua'
+        | 'm3'
+        | 'markdown'
+        | 'mdx'
+        | 'mips'
+        | 'msdax'
+        | 'mysql'
+        | 'objective-c'
+        | 'pascal'
+        | 'pascaligo'
+        | 'perl'
+        | 'pgsql'
+        | 'php'
+        | 'pla'
+        | 'plaintext'
+        | 'postiats'
+        | 'powerquery'
+        | 'powershell'
+        | 'protobuf'
+        | 'pug'
+        | 'python'
+        | 'qsharp'
+        | 'r'
+        | 'razor'
+        | 'redis'
+        | 'redshift'
+        | 'restructuredtext'
+        | 'ruby'
+        | 'rust'
+        | 'sb'
+        | 'scala'
+        | 'scheme'
+        | 'scss'
+        | 'shell'
+        | 'solidity'
+        | 'sophia'
+        | 'sparql'
+        | 'sql'
+        | 'st'
+        | 'swift'
+        | 'systemverilog'
+        | 'tcl'
+        | 'twig'
+        | 'typescript'
+        | 'typespec'
+        | 'vb'
+        | 'wgsl'
+        | 'xml'
+        | 'yaml'
+      )
+    | null;
+  code?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PayloadCode".
+ */
+export interface PayloadCode {
+  id: string;
+  blockType: 'PayloadCode';
+  language?: ('js' | 'ts' | 'json' | 'plaintext') | null;
+  code?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyInlineBlock".
+ */
+export interface MyInlineBlock {
+  id: string;
+  blockType: 'myInlineBlock';
+  someText?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "InlineBlockWithSelect".
  */
 export interface InlineBlockWithSelect {
-  styles?: ('opt1' | 'opt2')[] | null;
-  id?: string | null;
-  blockName?: string | null;
+  id: string;
   blockType: 'inlineBlockWithSelect';
+  styles?: ('opt1' | 'opt2')[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalBlocksRadioButtonsBlock".
+ * via the `definition` "InlineBlockWithRelationship".
  */
-export interface LexicalBlocksRadioButtonsBlock {
-  radioButtons?: ('option1' | 'option2' | 'option3') | null;
+export interface InlineBlockWithRelationship {
+  id: string;
+  blockType: 'inlineBlockWithRelationship';
+  relationship?: (string | null) | TextField;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LinkBlock".
+ */
+export interface LinkBlock {
+  relationshipInLink?: (string | null) | TextField;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'radioButtons';
+  blockType: 'linkBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "AvatarGroupBlock".
+ * via the `definition` "TextBlock".
  */
-export interface AvatarGroupBlock {
-  avatars?:
-    | {
-        image?: (string | null) | Upload;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
+export interface TextBlock {
+  id: string;
+  blockType: 'textBlock';
+  blockTitle?: string | null;
   blockName?: string | null;
-  blockType: 'AvatarGroup';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ViewsTestBlock".
+ * via the `definition` "LexicalLinkFields_D1C84E9E".
  */
-export interface ViewsTestBlock {
-  text?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'viewsTestBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BannerBlock".
- */
-export interface BannerBlock {
-  type: 'normal' | 'important';
-  title: string;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
+export interface LexicalLinkFields_D1C84E9E {
+  linkBlocks?: LinkBlock[] | null;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
   } | null;
-  id?: string | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_C4CC3409".
+ */
+export interface LexicalLinkFields_C4CC3409 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  someText?: string | null;
+}
+/**
+ * Multiple blocks resolve to the `MyBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock_89EF3EA7".
+ */
+export interface MyBlock_89EF3EA7 {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
   blockName?: string | null;
-  blockType: 'banner';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_27C59130".
+ */
+export interface LexicalLinkFields_27C59130 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalAndUploadBlock".
+ */
+export interface LexicalAndUploadBlock {
+  id: string;
+  blockType: 'lexicalAndUploadBlock';
+  subRichTextField?: LexicalRichText<LexicalNodes_5AC12460> | null;
+  subUploadField?: (string | null) | Upload;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RichTextBlock".
+ */
+export interface RichTextBlock {
+  id: string;
+  blockType: 'richTextBlock';
+  richTextField?: LexicalRichText<LexicalNodes_903D3919> | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextRequired".
+ */
+export interface TextRequired {
+  id: string;
+  blockType: 'textRequired';
+  text: string;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UploadAndRichText".
+ */
+export interface UploadAndRichText {
+  id: string;
+  blockType: 'uploadAndRichText';
+  upload: string | Upload;
+  richText?: LexicalRichText<LexicalNodes_5AC12460> | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Select".
+ */
+export interface Select {
+  id: string;
+  blockType: 'select';
+  select?: ('option1' | 'option2' | 'option3' | 'option4' | 'option5') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelationshipBlock".
+ */
+export interface RelationshipBlock {
+  id: string;
+  blockType: 'relationshipBlock';
+  rel: string | Upload;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelationshipHasManyBlock".
+ */
+export interface RelationshipHasManyBlock {
+  id: string;
+  blockType: 'relationshipHasManyBlock';
+  rel: (
+    | {
+        relationTo: 'text-fields';
+        value: string | TextField;
+      }
+    | {
+        relationTo: 'uploads';
+        value: string | Upload;
+      }
+  )[];
+  blockName?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ContentBlock".
  */
 export interface ContentBlock {
-  title: string;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText: LexicalRichText<LexicalNodes_5AC12460>;
   id?: string | null;
   blockName?: string | null;
+  blockType: 'contentBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextArea".
+ */
+export interface TextArea {
+  content: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textArea';
+}
+/**
+ * Multiple blocks resolve to the `Select` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Select_FE424990".
+ */
+export interface Select_FE424990 {
+  select?: ('option1' | 'option2' | 'option3' | 'option4' | 'option5') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'select';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SubBlockLexical".
+ */
+export interface SubBlockLexical {
+  id: string;
+  blockType: 'subBlockLexical';
+  subBlocksLexical?: (ContentBlock | TextArea | Select_FE424990)[] | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalBlocksRadioButtonsBlock".
+ */
+export interface LexicalBlocksRadioButtonsBlock {
+  id: string;
+  blockType: 'radioButtons';
+  radioButtons?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ConditionalLayout".
+ */
+export interface ConditionalLayout {
+  id: string;
+  blockType: 'conditionalLayout';
+  layout: '1' | '2' | '3';
+  columns?: BlockColumns;
+  columns2?: BlockColumns;
+  columns3?: BlockColumns;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ValidationBlock".
+ */
+export interface ValidationBlock {
+  id: string;
+  blockType: 'validationBlock';
+  text?: string | null;
+  group?: {
+    groupText?: string | null;
+    textDependsOnDocData?: string | null;
+    textDependsOnSiblingData?: string | null;
+    textDependsOnBlockData?: string | null;
+  };
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FilterOptionsBlock".
+ */
+export interface FilterOptionsBlock {
+  id: string;
+  blockType: 'filterOptionsBlock';
+  text?: string | null;
+  group?: {
+    groupText?: string | null;
+    dependsOnDocData?: (string | null) | TextField;
+    dependsOnSiblingData?: (string | null) | TextField;
+    dependsOnBlockData?: (string | null) | TextField;
+  };
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AsyncHooksBlock".
+ */
+export interface AsyncHooksBlock {
+  id: string;
+  blockType: 'asyncHooksBlock';
+  test1?: string | null;
+  test2?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TabBlock".
+ */
+export interface TabBlock {
+  id: string;
+  blockType: 'tabBlock';
+  tab1?: {
+    text1?: string | null;
+  };
+  tab2?: {
+    text2?: string | null;
+  };
+  blockName?: string | null;
+}
+/**
+ * Multiple blocks resolve to the `Code` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Code_5DA82017".
+ */
+export interface Code_5DA82017 {
+  id: string;
+  blockType: 'code';
+  code?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NoBlockName".
+ */
+export interface NoBlockName {
+  id: string;
+  blockType: 'noBlockName';
+  text?: string | null;
+  blockName?: string | null;
+}
+/**
+ * Multiple blocks resolve to the `MyBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock_0B02E2CC".
+ */
+export interface MyBlock_0B02E2CC {
+  id: string;
+  blockType: 'myBlock';
+  key?: ('value1' | 'value2' | 'value3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlockWithLabel".
+ */
+export interface MyBlockWithLabel {
+  id: string;
+  blockType: 'myBlockWithLabel';
+  key?: ('value1' | 'value2' | 'value3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlockWithBlock".
+ */
+export interface MyBlockWithBlock {
+  id: string;
+  blockType: 'myBlockWithBlock';
+  key?: ('value1' | 'value2' | 'value3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockRSC".
+ */
+export interface BlockRSC {
+  id: string;
+  blockType: 'BlockRSC';
+  key?: ('value1' | 'value2' | 'value3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlockWithBlockAndLabel".
+ */
+export interface MyBlockWithBlockAndLabel {
+  id: string;
+  blockType: 'myBlockWithBlockAndLabel';
+  key?: ('value1' | 'value2' | 'value3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AvatarGroupBlock".
+ */
+export interface AvatarGroupBlock {
+  id: string;
+  blockType: 'AvatarGroup';
+  avatars?:
+    | {
+        image?: (string | null) | Upload;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * Multiple blocks resolve to the `MyInlineBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyInlineBlock_FAB42262".
+ */
+export interface MyInlineBlock_FAB42262 {
+  id: string;
+  blockType: 'myInlineBlock';
+  key?: ('value1' | 'value2' | 'value3') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyInlineBlockWithLabel".
+ */
+export interface MyInlineBlockWithLabel {
+  id: string;
+  blockType: 'myInlineBlockWithLabel';
+  key?: ('value1' | 'value2' | 'value3') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyInlineBlockWithBlock".
+ */
+export interface MyInlineBlockWithBlock {
+  id: string;
+  blockType: 'myInlineBlockWithBlock';
+  key?: ('value1' | 'value2' | 'value3') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyInlineBlockWithBlockAndLabel".
+ */
+export interface MyInlineBlockWithBlockAndLabel {
+  id: string;
+  blockType: 'myInlineBlockWithBlockAndLabel';
+  key?: ('value1' | 'value2' | 'value3') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_224D209A".
+ */
+export interface LexicalUploadFields_224D209A {
+  caption?: LexicalRichText<LexicalNodes_5AC12460> | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_80D343B4".
+ */
+export interface LexicalLinkFields_80D343B4 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  /**
+   * The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.
+   */
+  rel?: ('noopener' | 'noreferrer' | 'nofollow')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ViewsTestBlock".
+ */
+export interface ViewsTestBlock {
+  id: string;
+  blockType: 'viewsTestBlock';
+  text?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BannerBlock".
+ */
+export interface BannerBlock {
+  id: string;
+  blockType: 'banner';
+  type: 'normal' | 'important';
+  title: string;
+  content?: LexicalRichText<LexicalNodes_5AC12460> | null;
+  blockName?: string | null;
+}
+/**
+ * Multiple blocks resolve to the `ContentBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock_8653F325".
+ */
+export interface ContentBlock_8653F325 {
+  id: string;
   blockType: 'content-block';
+  title: string;
+  richText?: LexicalRichText<LexicalNodes_5AC12460> | null;
+  blockName?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ProviderBannerBlock".
  */
 export interface ProviderBannerBlock {
+  id: string;
+  blockType: 'banner';
   type: 'normal' | 'important';
   title: string;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  id?: string | null;
+  content?: LexicalRichText<LexicalNodes_5AC12460> | null;
   blockName?: string | null;
-  blockType: 'banner';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "NestedContentBlock".
  */
 export interface NestedContentBlock {
+  id: string;
+  blockType: 'nested-content';
   label: string;
-  nestedRichText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  nestedRichText?: LexicalRichText<LexicalNodes_5AC12460> | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockLexicalLocalized".
+ */
+export interface BlockLexicalLocalized {
+  id: string;
+  blockType: 'blockLexicalLocalized';
+  textLocalized?: string | null;
+  counter?: number | null;
+  rel?: (string | null) | LexicalLocalizedField;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockLexicalLocalized2".
+ */
+export interface BlockLexicalLocalized2 {
+  id: string;
+  blockType: 'blockLexicalLocalized2';
+  textLocalized?: string | null;
+  rel?: (string | null) | LexicalLocalizedField;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockInLexical".
+ */
+export interface BlockInLexical {
+  id: string;
+  blockType: 'blockInLexical';
+  /**
+   * Some Description
+   */
+  lexicalInBlock: LexicalRichText<LexicalNodes_5AC12460>;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InlineBlockInLexical".
+ */
+export interface InlineBlockInLexical {
+  id: string;
+  blockType: 'inlineBlockInLexical';
+  text?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithRichText".
+ */
+export interface BlockWithRichText {
+  id: string;
+  blockType: 'blockWithRichText';
+  nestedRichText?: LexicalRichText<LexicalNodes_5AC12460> | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  text?: string | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'nested-content';
+  blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_AFD89559".
+ */
+export interface LexicalLinkFields_AFD89559 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  blocks?: Block[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithBlockRef".
+ */
+export interface BlockWithBlockRef {
+  id: string;
+  blockType: 'blockWithBlockRef';
+  nestedBlocks?: NestedBlock[] | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_5F0B8784".
+ */
+export interface LexicalLinkFields_5F0B8784 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  /**
+   * The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.
+   */
+  rel?: ('noopener' | 'noreferrer' | 'nofollow')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_FFF6D80A".
+ */
+export interface LexicalLinkFields_FFF6D80A {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2225,6 +4114,173 @@ export interface NestedContentBlock {
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+};
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+};
+
+export interface SerializedTableNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'table';
+  colWidths?: number[];
+  frozenColumnCount?: number;
+  frozenRowCount?: number;
+  rowStriping?: boolean;
+}
+export interface SerializedTableRowNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablerow';
+  height?: number;
+}
+export interface SerializedTableCellNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablecell';
+  backgroundColor?: string | null;
+  colSpan?: number;
+  headerState: number;
+  rowSpan?: number;
+  verticalAlign?: string;
+  width?: number;
 }
 
 

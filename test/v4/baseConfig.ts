@@ -202,6 +202,15 @@ export const baseConfig: Partial<Config> = {
       },
     })
 
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: 'dev2@payloadcms.com',
+        password: devUser.password,
+        roles: ['admin'],
+      },
+    })
+
     const authors = [
       { email: 'alice@example.com', password: 'password123' },
       { email: 'bob@example.com', password: 'password123' },
