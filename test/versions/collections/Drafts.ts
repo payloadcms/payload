@@ -130,6 +130,7 @@ const DraftPosts: CollectionConfig = {
   ],
   versions: {
     drafts: {
+      localizeStatus: false,
       schedulePublish: {
         timeFormat: 'HH:mm',
       },

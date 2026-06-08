@@ -18,6 +18,7 @@ const AutosavePosts: CollectionConfig = {
       autosave: {
         interval: 100,
       },
+      localizeStatus: false,
       schedulePublish: true,
     },
   },

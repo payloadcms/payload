@@ -19,6 +19,7 @@ const AutosaveWithDraftButtonGlobal: GlobalConfig = {
         showSaveDraftButton: true,
         interval: 1000,
       },
+      localizeStatus: false,
     },
   },
 }

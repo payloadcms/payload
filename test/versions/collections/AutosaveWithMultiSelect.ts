@@ -9,6 +9,7 @@ const AutosaveWithMultiSelectPosts: CollectionConfig = {
       autosave: {
         interval: 2000,
       },
+      localizeStatus: false,
     },
   },
   fields: [

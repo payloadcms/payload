@@ -21,7 +21,9 @@ const DraftWithMaxGlobal: GlobalConfig = {
   },
   versions: {
     max: 1,
-    drafts: true,
+    drafts: {
+      localizeStatus: false,
+    },
   },
   access: {
     read: ({ req: { user } }) => {

@@ -37,6 +37,7 @@ const DraftWithChangeHookPosts: CollectionConfig = {
   ],
   versions: {
     drafts: {
+      localizeStatus: false,
       schedulePublish: {
         timeFormat: 'HH:mm',
       },

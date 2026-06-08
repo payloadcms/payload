@@ -38,6 +38,7 @@ const AutosaveGlobal: GlobalConfig = {
   versions: {
     drafts: {
       autosave: true,
+      localizeStatus: false,
     },
     max: 20,
   },

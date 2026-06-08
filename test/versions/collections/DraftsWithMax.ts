@@ -113,7 +113,9 @@ const DraftWithMaxPosts: CollectionConfig = {
     },
   ],
   versions: {
-    drafts: true,
+    drafts: {
+      localizeStatus: false,
+    },
     maxPerDoc: 1,
   },
 }

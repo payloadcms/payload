@@ -23,6 +23,7 @@ const DraftGlobal: GlobalConfig = {
   versions: {
     max: 20,
     drafts: {
+      localizeStatus: false,
       schedulePublish: true,
     },
   },
