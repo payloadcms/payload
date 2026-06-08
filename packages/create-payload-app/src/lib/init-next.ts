@@ -14,6 +14,7 @@ import type { CliArgs, DbType, NextAppDetails, NextConfigType, PackageManager } 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { debug as origDebug, warning } from '../utils/log.js'
 import { moveMessage } from '../utils/messages.js'
+import { resolvePackageVersion } from '../utils/resolvePackageVersion.js'
 import { installPackages } from './install-packages.js'
 import { wrapNextConfig } from './wrap-next-config.js'
 
@@ -29,7 +30,7 @@ type InitNextArgs = {
   packageManager: PackageManager
   projectDir: string
   useDistFiles?: boolean
-} & Pick<CliArgs, '--debug' | '--tag'>
+} & Pick<CliArgs, '--debug' | '--version'>
 
 type InitNextResult =
   | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
@@ -93,7 +94,7 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
     dbType,
     packageManager,
     projectDir,
-    tag: args['--tag'],
+    versionOrTag: args['--version'],
   })
   if (!installSuccess) {
     installSpinner.stop('Failed to install dependencies', 1)
@@ -230,18 +231,18 @@ async function installDeps(args: {
   dbType: DbType
   packageManager: PackageManager
   projectDir: string
-  tag?: string
+  versionOrTag?: string
 }) {
-  const { dbType, packageManager, projectDir, tag } = args
+  const { dbType, packageManager, projectDir, versionOrTag } = args
   const { getDbPackageName } = await import('./ast/adapter-config.js')
 
-  const distTag = tag ?? 'latest'
+  const version = await resolvePackageVersion({ packageName: 'payload', versionOrTag })
 
   const packagesToInstall = ['payload', '@payloadcms/next', '@payloadcms/richtext-lexical'].map(
-    (pkg) => `${pkg}@${distTag}`,
+    (pkg) => `${pkg}@${version}`,
   )
 
-  packagesToInstall.push(`${getDbPackageName(dbType)}@${distTag}`)
+  packagesToInstall.push(`${getDbPackageName(dbType)}@${version}`)
 
   // Match graphql version of @payloadcms/next
   packagesToInstall.push('graphql@^16.8.1')

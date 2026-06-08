@@ -14,9 +14,9 @@ import type {
   ProjectTemplate,
 } from '../types.js'
 
-import { getLatestPackageVersion } from '../utils/getLatestPackageVersion.js'
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
+import { resolvePackageVersion } from '../utils/resolvePackageVersion.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 import { configurePluginProject } from './configure-plugin-project.js'
 import { downloadExample } from './download-example.js'
@@ -131,30 +131,17 @@ export async function createProject(
     })
   }
 
-  const tag = cliArgs['--tag'] ?? 'latest'
+  const versionOrTag = cliArgs['--version'] ?? 'latest'
 
   const spinner = p.spinner()
-  spinner.start(`Checking ${tag} Payload version...`)
+  spinner.start(`Resolving Payload version (${versionOrTag})...`)
 
-  // Allows overriding the installed Payload version instead of installing the latest
-  const versionFromCli = cliArgs['--version']
+  const payloadVersion = await resolvePackageVersion({
+    packageName: 'payload',
+    versionOrTag: cliArgs['--version'],
+  })
 
-  let payloadVersion: string
-
-  if (versionFromCli) {
-    await verifyVersionForPackage({ version: versionFromCli })
-
-    payloadVersion = versionFromCli
-
-    spinner.stop(`Using provided version of Payload ${payloadVersion}`)
-  } else {
-    payloadVersion = await getLatestPackageVersion({
-      packageName: 'payload',
-      tag: cliArgs['--tag'],
-    })
-
-    spinner.stop(`Found ${tag} version of Payload ${payloadVersion}`)
-  }
+  spinner.stop(`Using Payload version ${payloadVersion}`)
 
   await updatePackageJSON({ latestVersion: payloadVersion, projectDir, projectName })
 
@@ -282,35 +269,4 @@ export function updatePackageJSONDependencies(args: {
     {} as Record<string, string>,
   )
   packageJson.dependencies = updatedDependencies
-}
-
-/**
- * Verifies that the specified version of a package exists on the NPM registry.
- *
- * Throws an error if the version does not exist.
- */
-async function verifyVersionForPackage({
-  packageName = 'payload',
-  version,
-}: {
-  /**
-   * Package name to fetch the latest version for based on the NPM registry URL
-   *
-   * Eg. for `'payload'`, it will fetch the version from `https://registry.npmjs.org/payload`
-   *
-   * @default 'payload'
-   */
-  packageName?: string
-  version: string
-}): Promise<void> {
-  try {
-    const response = await fetch(`https://registry.npmjs.org/${packageName}/${version}`)
-
-    if (response.status !== 200) {
-      throw new Error(`No ${version} version found for package: ${packageName}`)
-    }
-  } catch (error) {
-    console.error('Error verifying Payload version:', error)
-    throw error
-  }
 }
