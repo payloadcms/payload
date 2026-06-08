@@ -139,15 +139,13 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: calc(var(--spacer-3) + var(--spacer-1));
-    padding: var(--spacer-1) 0 var(--spacer-1) var(--spacer-1);
+    padding-inline-start: var(--spacer-1);
   }
 
   .popup-button-list__chevron {
     display: flex;
     align-items: center;
     margin-left: auto;
-    padding: 0 var(--spacer-2) 0 var(--spacer-1);
     opacity: 0.5;
   }
 

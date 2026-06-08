@@ -36,7 +36,7 @@ export const ThemeMenu: React.FC = () => {
           type="button"
         >
           <span className="popup-button-list__submenu-icon">
-            <VariableColorIcon size={16} />
+            <VariableColorIcon size={24} />
           </span>
           <span className="popup-button-list__label">{t('general:theme')}</span>
           <span className="popup-button-list__chevron">

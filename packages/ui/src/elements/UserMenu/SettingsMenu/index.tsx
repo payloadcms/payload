@@ -30,7 +30,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ items }) => {
           type="button"
         >
           <span className="popup-button-list__submenu-icon">
-            <InteractionEnterIcon size={16} />
+            <InteractionEnterIcon size={24} />
           </span>
           <span className="popup-button-list__label">{t('general:settings')}</span>
           <span className="popup-button-list__chevron">
