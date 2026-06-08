@@ -660,7 +660,7 @@ test.describe('Bulk Edit', () => {
     await expect(fieldSelectControl).toBeVisible()
     await fieldSelectControl.click()
 
-    const fieldSelectMenu = getSelectMenu({ page: fieldSelect.page() })
+    const fieldSelectMenu = getSelectMenu({ page })
     const titleOption = fieldSelectMenu.locator('.rs__option:has-text("Title")').first()
     await titleOption.click()
 

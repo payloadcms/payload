@@ -317,7 +317,7 @@ describe('Relationship Field', () => {
 
     await field.click({ delay: 100 })
 
-    const menu = getSelectMenu({ page: field.page() })
+    const menu = getSelectMenu({ page })
     await expect(menu).toBeVisible()
     await wait(300)
 
@@ -371,7 +371,7 @@ describe('Relationship Field', () => {
 
     let filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
-    let filteredMenu = getSelectMenu({ page: filteredField.page() })
+    let filteredMenu = getSelectMenu({ page })
     let filteredOptions = filteredMenu.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(1) // one doc
     await wait(200)
@@ -397,7 +397,7 @@ describe('Relationship Field', () => {
 
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
-    filteredMenu = getSelectMenu({ page: filteredField.page() })
+    filteredMenu = getSelectMenu({ page })
     filteredOptions = filteredMenu.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(2) // two options because the currently selected option is still there
     await wait(200)
@@ -431,7 +431,7 @@ describe('Relationship Field', () => {
       await wait(300)
       const field = page.locator('#field-relationshipFilteredByField')
       await field.click({ delay: 100 })
-      const fieldMenu = getSelectMenu({ page: field.page() })
+      const fieldMenu = getSelectMenu({ page })
       const options = fieldMenu.locator('.rs__option')
       await expect(options).toHaveCount(1)
       await expect(options).toContainText(idToInclude)
@@ -468,7 +468,7 @@ describe('Relationship Field', () => {
 
       const fieldInCollapsible = page.locator('#field-filteredByFieldInCollapsible')
       await fieldInCollapsible.click({ delay: 100 })
-      const fieldInCollapsibleMenu = getSelectMenu({ page: fieldInCollapsible.page() })
+      const fieldInCollapsibleMenu = getSelectMenu({ page })
       const optionsInCollapsible = fieldInCollapsibleMenu.locator('.rs__option')
       await expect(optionsInCollapsible).toHaveCount(1)
       await expect(optionsInCollapsible).toContainText(idToInclude)
@@ -477,7 +477,7 @@ describe('Relationship Field', () => {
 
       const fieldInArray = page.locator('#field-array__0__filteredByFieldInArray')
       await fieldInArray.click({ delay: 100 })
-      const fieldInArrayMenu = getSelectMenu({ page: fieldInArray.page() })
+      const fieldInArrayMenu = getSelectMenu({ page })
       const optionsInArray = fieldInArrayMenu.locator('.rs__option')
       await expect(optionsInArray).toHaveCount(1)
       await expect(optionsInArray).toContainText(idToInclude)
@@ -827,7 +827,7 @@ describe('Relationship Field', () => {
       await expect(value).toHaveText(relationWithTitle.name)
 
       await field.click({ delay: 100 })
-      const fieldMenu = getSelectMenu({ page: field.page() })
+      const fieldMenu = getSelectMenu({ page })
       const options = fieldMenu.locator('.rs__option')
 
       await expect(options).toHaveCount(2)

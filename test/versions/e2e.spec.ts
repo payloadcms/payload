@@ -1471,7 +1471,7 @@ describe('Versions', () => {
       await expect(fromSelect).toBeVisible()
       await fromSelect.click()
 
-      const versionSelectMenu = getSelectMenu({ page: compareFromContainer.locator('.react-select'),.page() })
+      const versionSelectMenu = getSelectMenu({ page })
       const moreVersions = versionSelectMenu.locator('.rs__option:has-text("More versions...")')
       await expect(moreVersions).toBeVisible()
       await moreVersions.click()

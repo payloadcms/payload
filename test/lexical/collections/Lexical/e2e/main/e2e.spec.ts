@@ -1174,7 +1174,7 @@ describe('lexicalMain', () => {
     await wait(200)
 
     const richTextOption = (
-      getSelectMenu({ page: linkDrawer.locator('#field-doc').first().page() })
+      getSelectMenu({ page })
     )
       .locator('.rs__option')
       .filter({ hasText: 'Rich Text' })

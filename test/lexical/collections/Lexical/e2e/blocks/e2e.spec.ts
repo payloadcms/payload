@@ -1073,7 +1073,7 @@ describe('lexicalBlocks', () => {
       const selectField = conditionalArrayBlock.locator('.react-select').first()
       await selectField.click()
 
-      const selectFieldMenu = getSelectMenu({ page: selectField.page() })
+      const selectFieldMenu = getSelectMenu({ page })
       await selectFieldMenu.locator('.rs__option').nth(1).click() // Select "2" (2 columns / array fields)
 
       // Make sure the OTHER arrays aren't visible, as their conditions are not fulfilled. Catches a bug where they might not be hidden fully
@@ -1362,7 +1362,7 @@ describe('lexicalBlocks', () => {
       // Click on react select in drawer, select 'value1'
       await inlineBlockDrawer.locator('.rs__control .value-container').first().click()
       await wait(500)
-      const inlineBlockSelectMenu = getSelectMenu({ page: inlineBlockDrawer.locator('.react-select').first(),.page() })
+      const inlineBlockSelectMenu = getSelectMenu({ page })
       await expect(inlineBlockSelectMenu.locator('.rs__option').first()).toBeVisible()
       await expect(inlineBlockSelectMenu.locator('.rs__option').first()).toContainText('value1')
       await inlineBlockSelectMenu.locator('.rs__option').first().click()

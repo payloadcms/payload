@@ -901,7 +901,7 @@ describe('relationship', () => {
     await expect(relationToSelector).toBeVisible()
 
     await relationToSelector.locator('.rs__control').click()
-    const relationToMenu = getSelectMenu({ page: relationToSelector.page() })
+    const relationToMenu = getSelectMenu({ page })
     const option = relationToMenu.locator('.rs__option').nth(1)
     await option.click()
     const firstRow = listDrawerContent.locator('table tbody tr').first()

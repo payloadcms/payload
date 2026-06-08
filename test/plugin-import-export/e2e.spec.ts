@@ -518,7 +518,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        const menu = getSelectMenu({ page: collectionField.page() })
+        const menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
@@ -578,7 +578,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        const menu = getSelectMenu({ page: collectionField.page() })
+        const menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
@@ -595,7 +595,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        let menu = getSelectMenu({ page: collectionField.page() })
+        let menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         let optionsBefore = 0
@@ -609,7 +609,7 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.collection-edit')).toBeVisible()
 
         await collectionField.locator('.rs__control').click()
-        menu = getSelectMenu({ page: collectionField.page() })
+        menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(async () => {

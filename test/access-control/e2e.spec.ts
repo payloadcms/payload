@@ -1089,7 +1089,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = menu.locator('.rs__option', {
@@ -1107,7 +1107,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = menu.locator('.rs__option', {
@@ -1125,7 +1125,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = menu.locator('.rs__option', {
@@ -1143,7 +1143,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = menu.locator('.rs__option', {
@@ -1163,7 +1163,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = menu.locator('.rs__option', {
@@ -1181,7 +1181,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = menu.locator('.rs__option', {
@@ -1199,7 +1199,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = menu.locator('.rs__option', {
@@ -1219,7 +1219,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = menu.locator('.rs__option', {
@@ -1239,7 +1239,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = menu.locator('.rs__option', {
@@ -1438,7 +1438,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
         const visibleOption = menu.locator('.rs__option', {
@@ -1479,7 +1479,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
         const visibleOption = menu.locator('.rs__option', {
@@ -1530,7 +1530,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
         const visibleOption = menu.locator('.rs__option', {
@@ -1571,7 +1571,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
         const visibleOption = menu.locator('.rs__option', {
@@ -1612,7 +1612,7 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
-        const menu = getSelectMenu({ page: initialField.page() })
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
         const visibleOption = menu.locator('.rs__option', {

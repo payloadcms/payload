@@ -414,7 +414,7 @@ describe('List View', () => {
       await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
-        (getSelectMenu({ page: conditionField.page() })).locator('div', {
+        (getSelectMenu({ page })).locator('div', {
           hasText: exactText('Title'),
         }),
       ).toBeVisible()
@@ -430,7 +430,7 @@ describe('List View', () => {
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
 
-      const menuList = getSelectMenu({ page: conditionField.page() })
+      const menuList = getSelectMenu({ page })
 
       // ensure the virtual field is not present
       await expect(menuList.locator('div', { hasText: exactText('Virtual Text') })).toHaveCount(0)
@@ -497,7 +497,7 @@ describe('List View', () => {
       await filterField.click()
 
       // select new filter field of Number
-      const filterFieldMenu = getSelectMenu({ page: filterField.page() })
+      const filterFieldMenu = getSelectMenu({ page })
       const dropdownFieldOption = filterFieldMenu.locator('.rs__option', {
         hasText: exactText('Status'),
       })
@@ -542,7 +542,7 @@ describe('List View', () => {
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
 
-      const conditionFieldMenu = getSelectMenu({ page: conditionField.page() })
+      const conditionFieldMenu = getSelectMenu({ page })
       await conditionFieldMenu
         .locator('.rs__option', {
           hasText: exactText('Users'),
@@ -553,7 +553,7 @@ describe('List View', () => {
 
       const operatorInput = whereBuilder.locator('.condition__operator')
       await operatorInput.click()
-      const operatorInputMenu = getSelectMenu({ page: operatorInput.page() })
+      const operatorInputMenu = getSelectMenu({ page })
       const operatorOptions = operatorInputMenu.locator('.rs__option')
       await operatorOptions.locator(`text=equals`).click()
 
@@ -781,12 +781,12 @@ describe('List View', () => {
       const secondValueField = secondLi.locator('.condition__value >> input')
       await secondConditionField.click()
 
-      const secondConditionMenu = getSelectMenu({ page: secondConditionField.page() })
+      const secondConditionMenu = getSelectMenu({ page })
       await secondConditionMenu.locator('.rs__option', { hasText: exactText('Title') }).click()
 
       await expect(secondConditionField.locator('.rs__single-value')).toContainText('Title')
       await secondOperatorField.click()
-      const secondOperatorMenu = getSelectMenu({ page: secondOperatorField.page() })
+      const secondOperatorMenu = getSelectMenu({ page })
       await secondOperatorMenu.locator('.rs__option').locator('text=equals').click()
       await secondValueField.fill('Test 2')
       await expect(secondValueField).toHaveValue('Test 2')
@@ -798,7 +798,7 @@ describe('List View', () => {
       // Change the join from "Or" to "And" so both conditions live in the same group.
       const joinDropdown = secondLi.locator('.condition__join')
       await joinDropdown.click()
-      const joinMenu = getSelectMenu({ page: joinDropdown.page() })
+      const joinMenu = getSelectMenu({ page })
       await joinMenu.locator('.rs__option', { hasText: exactText('And') }).click()
 
       // Both conditions are now part of a single AND group.
@@ -862,7 +862,7 @@ describe('List View', () => {
       const condition2 = page.locator('.condition__field').nth(1)
       await condition2.click()
       await expect(
-        (getSelectMenu({ page: condition2.page() })).filter({
+        (getSelectMenu({ page })).filter({
           hasText: 'Disable List Filter Text',
         }),
       ).toBeHidden()
