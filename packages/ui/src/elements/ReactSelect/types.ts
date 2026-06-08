@@ -101,6 +101,8 @@ export type ReactSelectAdapterProps = {
   isSearchable?: boolean
   isSortable?: boolean
   menuIsOpen?: boolean
+  menuPortalTarget?: HTMLElement | null
+  menuPosition?: 'absolute' | 'fixed'
   noOptionsMessage?: (obj: { inputValue: string }) => string
   numberOnly?: boolean
   onChange?: (value: Option | Option[]) => void
