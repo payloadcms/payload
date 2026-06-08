@@ -1445,8 +1445,8 @@ describe('Lexical inline block node type generation', () => {
     const generatedTypes = await generateTypes(sanitizedConfig, { log: false, returnString: true })
 
     // The configured block is part of the node union...
-    expect(generatedTypes).toContain('myBlock')
-    // ...but no inline-block node type should appear, since none are configured.
-    expect(generatedTypes).not.toContain('SerializedInlineBlockNode<{blockType: string}>')
+    expect(generatedTypes).toContain('SerializedBlockNode<MyBlock>')
+    // ...but the union must not include an inline-block node
+    expect(generatedTypes).not.toMatch(/SerializedInlineBlockNode<\s*\{\s*blockType:/)
   })
 })
