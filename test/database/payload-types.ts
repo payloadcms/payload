@@ -62,16 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_9E6341C8".
+ * via the `definition` "LexicalNodes_680F881F".
  */
-export type LexicalNodes_9E6341C8 =
+export type LexicalNodes_680F881F =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_9E6341C8>
+  | SerializedParagraphNode<LexicalNodes_680F881F>
   | SerializedBlockNode<MyBlock>
-  | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_9E6341C8>
+  | SerializedHeadingNode<LexicalNodes_680F881F>
   | {
       type: 'upload';
       /**
@@ -80,11 +79,11 @@ export type LexicalNodes_9E6341C8 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_9E6341C8>
-  | SerializedListNode<LexicalNodes_9E6341C8>
-  | SerializedListItemNode<LexicalNodes_9E6341C8>
-  | SerializedAutoLinkNode<LexicalNodes_9E6341C8, LexicalLinkFields_9E6341C8>
-  | SerializedLinkNode<LexicalNodes_9E6341C8, LexicalLinkFields_9E6341C8>
+  | SerializedQuoteNode<LexicalNodes_680F881F>
+  | SerializedListNode<LexicalNodes_680F881F>
+  | SerializedListItemNode<LexicalNodes_680F881F>
+  | SerializedAutoLinkNode<LexicalNodes_680F881F, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_680F881F, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'noTimeStamps'
       | 'categories'
@@ -508,7 +507,7 @@ export interface DefaultValue {
 export interface RelationA {
   id: string;
   title?: string | null;
-  richText?: LexicalRichText<LexicalNodes_9E6341C8> | null;
+  richText?: LexicalRichText<LexicalNodes_680F881F> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -520,7 +519,7 @@ export interface RelationB {
   id: string;
   title?: string | null;
   relationship?: (string | null) | RelationA;
-  richText?: LexicalRichText<LexicalNodes_9E6341C8> | null;
+  richText?: LexicalRichText<LexicalNodes_680F881F> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1843,9 +1842,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_9E6341C8".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_9E6341C8 {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -1916,17 +1915,17 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = {
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};
+} : never;
 
 export interface SerializedHeadingNode<
   TChildren,

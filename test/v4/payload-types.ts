@@ -129,22 +129,21 @@ export type LexicalNodes_E6CA934E =
   | SerializedHeadingNode<LexicalNodes_E6CA934E>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_AA0E78C0".
+ * via the `definition` "LexicalNodes_D1ECD3DF".
  */
-export type LexicalNodes_AA0E78C0 =
+export type LexicalNodes_D1ECD3DF =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_AA0E78C0>
+  | SerializedParagraphNode<LexicalNodes_D1ECD3DF>
   | SerializedBlockNode<MyBlock>
-  | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_AA0E78C0>
+  | SerializedHeadingNode<LexicalNodes_D1ECD3DF>
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_AA0E78C0>
-  | SerializedListNode<LexicalNodes_AA0E78C0>
-  | SerializedListItemNode<LexicalNodes_AA0E78C0>
-  | SerializedAutoLinkNode<LexicalNodes_AA0E78C0, LexicalLinkFields_AA0E78C0>
-  | SerializedLinkNode<LexicalNodes_AA0E78C0, LexicalLinkFields_AA0E78C0>
+  | SerializedQuoteNode<LexicalNodes_D1ECD3DF>
+  | SerializedListNode<LexicalNodes_D1ECD3DF>
+  | SerializedListItemNode<LexicalNodes_D1ECD3DF>
+  | SerializedAutoLinkNode<LexicalNodes_D1ECD3DF, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_D1ECD3DF, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
@@ -195,18 +194,18 @@ export type LexicalNodes_AA0E78C0 =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D5ECE514".
+ * via the `definition` "LexicalNodes_55C19C74".
  */
-export type LexicalNodes_D5ECE514 =
+export type LexicalNodes_55C19C74 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D5ECE514>
+  | SerializedParagraphNode<LexicalNodes_55C19C74>
   | SerializedBlockNode<Banner>
   | SerializedInlineBlockNode<Highlight>
-  | SerializedUploadNode<'uploads', LexicalUploadFields_76339D00>
+  | SerializedUploadNode<'uploads', LexicalUploadFields_8D4D0346>
   | SerializedHorizontalRuleNode
-  | SerializedQuoteNode<LexicalNodes_D5ECE514>
+  | SerializedQuoteNode<LexicalNodes_55C19C74>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
@@ -255,11 +254,11 @@ export type LexicalNodes_D5ECE514 =
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_D5ECE514, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D5ECE514, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D5ECE514>
-  | SerializedListItemNode<LexicalNodes_D5ECE514>
-  | SerializedHeadingNode<LexicalNodes_D5ECE514>;
+  | SerializedAutoLinkNode<LexicalNodes_55C19C74, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_55C19C74, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_55C19C74>
+  | SerializedListItemNode<LexicalNodes_55C19C74>
+  | SerializedHeadingNode<LexicalNodes_55C19C74>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_B722CE44".
@@ -330,18 +329,17 @@ export type LexicalNodes_B722CE44 =
   | SerializedHeadingNode<LexicalNodes_B722CE44>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_5D52C4F6".
+ * via the `definition` "LexicalNodes_3354610F".
  */
-export type LexicalNodes_5D52C4F6 =
+export type LexicalNodes_3354610F =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_5D52C4F6>
+  | SerializedParagraphNode<LexicalNodes_3354610F>
   | SerializedBlockNode<Code>
-  | SerializedInlineBlockNode<{blockType: string}>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_5D52C4F6>
+  | SerializedQuoteNode<LexicalNodes_3354610F>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
@@ -390,11 +388,11 @@ export type LexicalNodes_5D52C4F6 =
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_5D52C4F6, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_5D52C4F6, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_5D52C4F6>
-  | SerializedListItemNode<LexicalNodes_5D52C4F6>
-  | SerializedHeadingNode<LexicalNodes_5D52C4F6>;
+  | SerializedAutoLinkNode<LexicalNodes_3354610F, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_3354610F, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_3354610F>
+  | SerializedListItemNode<LexicalNodes_3354610F>
+  | SerializedHeadingNode<LexicalNodes_3354610F>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_B87BCF4E".
@@ -1627,9 +1625,9 @@ export interface TextField {
  */
 export interface RichTextField {
   id: string;
-  content?: LexicalRichText<LexicalNodes_D5ECE514> | null;
+  content?: LexicalRichText<LexicalNodes_55C19C74> | null;
   table?: LexicalRichText<LexicalNodes_B722CE44> | null;
-  code?: LexicalRichText<LexicalNodes_5D52C4F6> | null;
+  code?: LexicalRichText<LexicalNodes_3354610F> | null;
   typography?: LexicalRichText<LexicalNodes_B87BCF4E> | null;
   lists?: LexicalRichText<LexicalNodes_B87BCF4E> | null;
   updatedAt: string;
@@ -3530,9 +3528,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_AA0E78C0".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_AA0E78C0 {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -3556,7 +3554,7 @@ export interface Banner {
   id: string;
   blockType: 'banner';
   style?: ('info' | 'warning' | 'error' | 'success') | null;
-  content?: LexicalRichText<LexicalNodes_AA0E78C0> | null;
+  content?: LexicalRichText<LexicalNodes_D1ECD3DF> | null;
   blockName?: string | null;
 }
 /**
@@ -3571,10 +3569,10 @@ export interface Highlight {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalUploadFields_76339D00".
+ * via the `definition` "LexicalUploadFields_8D4D0346".
  */
-export interface LexicalUploadFields_76339D00 {
-  caption?: LexicalRichText<LexicalNodes_AA0E78C0> | null;
+export interface LexicalUploadFields_8D4D0346 {
+  caption?: LexicalRichText<LexicalNodes_D1ECD3DF> | null;
   altText?: string | null;
 }
 /**
@@ -3728,17 +3726,17 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = {
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};
+} : never;
 
 export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
   type: 'upload';

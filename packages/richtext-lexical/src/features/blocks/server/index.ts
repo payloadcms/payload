@@ -169,7 +169,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
       nodes: [
         createNode({
-          jsonSchema: createBlockNodeJSONSchema(blockConfigs),
+          jsonSchema: blockConfigs.length ? createBlockNodeJSONSchema(blockConfigs) : undefined,
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
@@ -197,7 +197,9 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           validations: [blockValidationHOC(blockConfigs)],
         }),
         createNode({
-          jsonSchema: createInlineBlockNodeJSONSchema(inlineBlockConfigs),
+          jsonSchema: inlineBlockConfigs.length
+            ? createInlineBlockNodeJSONSchema(inlineBlockConfigs)
+            : undefined,
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {

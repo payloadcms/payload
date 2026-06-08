@@ -16,7 +16,7 @@ export type JSXConvertersFunction<
     | DefaultNodeTypes
     | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
-> = (args: { defaultConverters: JSXConverters<DefaultNodeTypes> }) => JSXConverters<T>
+> = (args: { defaultConverters: JSXConverters<T> }) => JSXConverters<T>
 
 type RichTextProps<TNodes extends SerializedNodeBase = SerializedNodeBase> = {
   /**
@@ -26,7 +26,7 @@ type RichTextProps<TNodes extends SerializedNodeBase = SerializedNodeBase> = {
   /**
    * Custom converters to transform your nodes to JSX. Can be an object or a function that receives the default converters.
    */
-  converters?: JSXConverters | JSXConvertersFunction
+  converters?: JSXConverters<TNodes> | JSXConvertersFunction<TNodes>
 
   /**
    * If true, removes the container div wrapper.
@@ -47,12 +47,14 @@ export function RichText<TNodes extends SerializedNodeBase = SerializedNodeBase>
     return null
   }
 
+  const baseConverters = converters as JSXConverters | JSXConvertersFunction | undefined
+
   let finalConverters: JSXConverters = {}
-  if (converters) {
-    if (typeof converters === 'function') {
-      finalConverters = converters({ defaultConverters: defaultJSXConverters })
+  if (baseConverters) {
+    if (typeof baseConverters === 'function') {
+      finalConverters = baseConverters({ defaultConverters: defaultJSXConverters })
     } else {
-      finalConverters = converters
+      finalConverters = baseConverters
     }
   } else {
     finalConverters = defaultJSXConverters

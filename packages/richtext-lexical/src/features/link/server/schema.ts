@@ -2,6 +2,7 @@ import type { JSONSchema4 } from 'json-schema'
 import type { SerializedLexicalNode } from 'lexical'
 import type { DefaultDocumentIDType, Field } from 'payload'
 
+import { createHash } from 'crypto'
 import { fieldsToJSONSchema, flattenAllFields } from 'payload'
 
 import type { SerializedLexicalElementBase } from '../../../types/nodeTypes.js'
@@ -129,10 +130,13 @@ const buildLinkFieldsJSONSchema = (
 /** Fields auto-attached by `LinkFeature` (see `transformExtraFields`). */
 const STANDARD_LINK_FIELD_NAMES = new Set(['doc', 'linkType', 'newTab', 'url'])
 
+const hashLinkFields = (schema: JSONSchema4): string =>
+  createHash('sha256').update(JSON.stringify(schema)).digest('hex').slice(0, 8).toUpperCase()
+
 /**
- * With custom link fields, emit a per-editor `LexicalLinkFields_<hash>`
- * interface so the link node picks up their real shape. Without any,
- * reuse the default `LexicalLinkFields` for cross-alias assignability.
+ * With custom link fields, emit a `LexicalLinkFields_<hash>` interface (hashed by its own content)
+ * so the link node picks up their real shape. Without any, reuse the default `LexicalLinkFields` for
+ * cross-alias assignability.
  */
 const resolveLinkFieldsRef = (
   sanitizedFieldsWithoutText: Field[],
@@ -145,8 +149,7 @@ const resolveLinkFieldsRef = (
   if (!hasUserExtras) {
     return { fieldsRef: fieldsSchema, fieldsTypeName: 'LexicalLinkFields' }
   }
-  const editorHash = args.nodeUnionName.replace(/^LexicalNodes_/, '')
-  const fieldsTypeName = `LexicalLinkFields_${editorHash}`
+  const fieldsTypeName = `LexicalLinkFields_${hashLinkFields(fieldsSchema)}`
   args.interfaceNameDefinitions.set(fieldsTypeName, fieldsSchema)
   return { fieldsRef: { $ref: `#/$defs/${fieldsTypeName}` }, fieldsTypeName }
 }

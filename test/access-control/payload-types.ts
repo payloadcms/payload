@@ -62,16 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_0219D497".
+ * via the `definition` "LexicalNodes_74BE97BC".
  */
-export type LexicalNodes_0219D497 =
+export type LexicalNodes_74BE97BC =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_0219D497>
+  | SerializedParagraphNode<LexicalNodes_74BE97BC>
   | SerializedBlockNode<MyBlock>
-  | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_0219D497>
+  | SerializedHeadingNode<LexicalNodes_74BE97BC>
   | {
       type: 'upload';
       /**
@@ -80,11 +79,11 @@ export type LexicalNodes_0219D497 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_0219D497>
-  | SerializedListNode<LexicalNodes_0219D497>
-  | SerializedListItemNode<LexicalNodes_0219D497>
-  | SerializedAutoLinkNode<LexicalNodes_0219D497, LexicalLinkFields_0219D497>
-  | SerializedLinkNode<LexicalNodes_0219D497, LexicalLinkFields_0219D497>
+  | SerializedQuoteNode<LexicalNodes_74BE97BC>
+  | SerializedListNode<LexicalNodes_74BE97BC>
+  | SerializedListItemNode<LexicalNodes_74BE97BC>
+  | SerializedAutoLinkNode<LexicalNodes_74BE97BC, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_74BE97BC, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'public-users'
@@ -724,7 +723,7 @@ export interface RichText {
  * via the `definition` "RichText".
  */
 export interface RichText1 {
-  richText?: LexicalRichText<LexicalNodes_0219D497> | null;
+  richText?: LexicalRichText<LexicalNodes_74BE97BC> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'richText';
@@ -2031,9 +2030,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_0219D497".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_0219D497 {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -2104,17 +2103,17 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = {
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};
+} : never;
 
 export interface SerializedHeadingNode<
   TChildren,

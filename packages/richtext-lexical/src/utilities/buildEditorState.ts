@@ -61,8 +61,11 @@ type BuildNodes<T> =
  * ```
  */
 export function buildEditorState<
-  T extends null | SerializedLexicalNode | TypedEditorState<SerializedLexicalNode> | undefined =
-    DefaultNodeTypes,
+  T extends
+    | null
+    | SerializedLexicalNode
+    | TypedEditorState<SerializedLexicalNode>
+    | undefined = DefaultNodeTypes,
 >({
   nodes,
   text,

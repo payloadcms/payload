@@ -115,7 +115,7 @@ export type RichTextNodes<TRichText> =
 /**
  * All node types included by default in a lexical editor. Self-recursive —
  * each element node's `children` is `DefaultNodeTypes` again, no depth limit.
- * To compose your own union including the defaults, see {@link DefaultNodeTypesOf}.
+ * To compose your own union including the defaults, see {@link WithDefaultNodes}.
  */
 export type DefaultNodeTypes =
   | SerializedAutoLinkNode<DefaultNodeTypes>
@@ -134,35 +134,58 @@ export type DefaultNodeTypes =
   | SerializedUploadNode
 
 /**
- * Default node types, parameterised by the union to use for element children.
- * Use to mix custom nodes with the defaults:
+ * The built-in lexical nodes, plus your own - with your nodes threaded into every container's
+ * `children`, not just the top level. Pass your custom node(s) as the generic:
  *
  * ```ts
- * type MyNodes = DefaultNodeTypesOf<MyNodes> | SerializedBlockNode<MyNodes>
+ * type MyNodes = WithDefaultNodes<SerializedBlockNode<MyBlockData>>
  * ```
+ *
+ * Built by flattening {@link DefaultNodeRegistry} (`Registry[keyof Registry]`); see that interface
+ * for why the node set lives in a registry instead of being written as a plain union type.
  */
-export type DefaultNodeTypesOf<TNodes extends SerializedLexicalNode> =
-  | SerializedAutoLinkNode<TNodes>
-  | SerializedHeadingNode<TNodes>
-  | SerializedHorizontalRuleNode
-  | SerializedLineBreakNode
-  | SerializedLinkNode<TNodes>
-  | SerializedListItemNode<TNodes>
-  | SerializedListNode<TNodes>
-  | SerializedParagraphNode<TNodes>
-  | SerializedQuoteNode<TNodes>
-  | SerializedRelationshipNode
-  | SerializedTabNode
-  | SerializedTextNode
-  | SerializedUploadNode
+export type WithDefaultNodes<TCustom extends SerializedLexicalNode = never> =
+  DefaultNodeRegistry<TCustom>[keyof DefaultNodeRegistry<TCustom>]
+
+/** @internal Re-types an element node's `children` to the recursive node union. */
+type WithRecursiveChildren<TNode, TCustom extends SerializedLexicalNode> = {
+  children: WithDefaultNodes<TCustom>[]
+} & Omit<TNode, 'children'>
 
 /**
- * Like `TypedEditorState` but includes all default node types. Pass extra
- * node types as a generic to union them at the top level; for nodes that
- * should also nest inside default containers, use {@link DefaultNodeTypesOf}.
+ * @internal The set of default nodes, generic over the user's custom node(s). {@link WithDefaultNodes}
+ * flattens it into the node union with `Registry[keyof Registry]`.
+ *
+ * Why a registry interface instead of writing the union directly? The union has to be self-referential:
+ * every element node's `children` is the same node union (so custom nodes nest inside containers too).
+ * A generic *type alias* can't reference itself that way - `type N<T> = SerializedParagraphNode<N<T>> | ...`
+ * is a `TS2456` circular reference, because instantiating a type alias resolves its type argument
+ * eagerly. An *interface* resolves its members lazily, so the self-reference inside `children: ...[]`
+ * is allowed - the recursion is legal precisely because it lives inside this interface. Reusing the
+ * real node interfaces (re-typing only `children`) keeps each entry in sync with its node's real shape.
+ */
+interface DefaultNodeRegistry<TCustom extends SerializedLexicalNode> {
+  autolink: WithRecursiveChildren<SerializedAutoLinkNode<SerializedLexicalNode>, TCustom>
+  custom: TCustom
+  heading: WithRecursiveChildren<SerializedHeadingNode<SerializedLexicalNode>, TCustom>
+  horizontalrule: SerializedHorizontalRuleNode
+  linebreak: SerializedLineBreakNode
+  link: WithRecursiveChildren<SerializedLinkNode<SerializedLexicalNode>, TCustom>
+  list: WithRecursiveChildren<SerializedListNode<SerializedLexicalNode>, TCustom>
+  listitem: WithRecursiveChildren<SerializedListItemNode<SerializedLexicalNode>, TCustom>
+  paragraph: WithRecursiveChildren<SerializedParagraphNode<SerializedLexicalNode>, TCustom>
+  quote: WithRecursiveChildren<SerializedQuoteNode<SerializedLexicalNode>, TCustom>
+  relationship: SerializedRelationshipNode
+  tab: SerializedTabNode
+  text: SerializedTextNode
+  upload: SerializedUploadNode
+}
+
+/**
+ * Like `TypedEditorState`, but pre-filled with every default node type. Pass extra node types as a
+ * generic to add your own; they're threaded into every container's `children` (via
+ * {@link WithDefaultNodes}), not just allowed at the top level.
  */
 export type DefaultTypedEditorState<
   TAdditionalNodeTypes extends null | SerializedLexicalNode = null,
-> = [TAdditionalNodeTypes] extends null
-  ? TypedEditorState<DefaultNodeTypes>
-  : TypedEditorState<DefaultNodeTypes | NonNullable<TAdditionalNodeTypes>>
+> = TypedEditorState<WithDefaultNodes<NonNullable<TAdditionalNodeTypes>>>

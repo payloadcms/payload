@@ -62,18 +62,17 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_177EA583".
+ * via the `definition` "LexicalNodes_68925DC9".
  */
-export type LexicalNodes_177EA583 =
+export type LexicalNodes_68925DC9 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_177EA583>
+  | SerializedParagraphNode<LexicalNodes_68925DC9>
   | SerializedBlockNode<BlockWithRelationship>
-  | SerializedInlineBlockNode<{blockType: string}>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_177EA583>
+  | SerializedQuoteNode<LexicalNodes_68925DC9>
   | SerializedRelationshipNode<
       | 'tenants'
       | 'users'
@@ -90,11 +89,11 @@ export type LexicalNodes_177EA583 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_177EA583, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_177EA583, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_177EA583>
-  | SerializedListItemNode<LexicalNodes_177EA583>
-  | SerializedHeadingNode<LexicalNodes_177EA583>;
+  | SerializedAutoLinkNode<LexicalNodes_68925DC9, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_68925DC9, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_68925DC9>
+  | SerializedListItemNode<LexicalNodes_68925DC9>
+  | SerializedHeadingNode<LexicalNodes_68925DC9>;
 
 export interface Config {
   auth: {
@@ -253,7 +252,7 @@ export interface FoodItem {
   tenant?: (string | null) | Tenant;
   name: string;
   localizedName?: string | null;
-  content?: LexicalRichText<LexicalNodes_177EA583> | null;
+  content?: LexicalRichText<LexicalNodes_68925DC9> | null;
   polymorphicRelationship?:
     | ({
         relationTo: 'relationships';
@@ -818,17 +817,17 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = {
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};
+} : never;
 
 export interface SerializedHorizontalRuleNode {
   type: 'horizontalrule';

@@ -62,16 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_8518094C".
+ * via the `definition` "LexicalNodes_AAE6FCC0".
  */
-export type LexicalNodes_8518094C =
+export type LexicalNodes_AAE6FCC0 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_8518094C>
+  | SerializedParagraphNode<LexicalNodes_AAE6FCC0>
   | SerializedBlockNode<MyBlock>
-  | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_8518094C>
+  | SerializedHeadingNode<LexicalNodes_AAE6FCC0>
   | {
       type: 'upload';
       /**
@@ -80,11 +79,11 @@ export type LexicalNodes_8518094C =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_8518094C>
-  | SerializedListNode<LexicalNodes_8518094C>
-  | SerializedListItemNode<LexicalNodes_8518094C>
-  | SerializedAutoLinkNode<LexicalNodes_8518094C, LexicalLinkFields_8518094C>
-  | SerializedLinkNode<LexicalNodes_8518094C, LexicalLinkFields_8518094C>
+  | SerializedQuoteNode<LexicalNodes_AAE6FCC0>
+  | SerializedListNode<LexicalNodes_AAE6FCC0>
+  | SerializedListItemNode<LexicalNodes_AAE6FCC0>
+  | SerializedAutoLinkNode<LexicalNodes_AAE6FCC0, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_AAE6FCC0, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'partial-disable-local-strategies'
@@ -304,7 +303,7 @@ export interface User {
       }[]
     | null;
   namedSaveToJWT?: string | null;
-  richText?: LexicalRichText<LexicalNodes_8518094C> | null;
+  richText?: LexicalRichText<LexicalNodes_AAE6FCC0> | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -864,9 +863,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_8518094C".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_8518094C {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -937,17 +936,17 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = {
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};
+} : never;
 
 export interface SerializedHeadingNode<
   TChildren,
