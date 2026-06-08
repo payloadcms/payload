@@ -25,7 +25,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ items }) => {
         </button>
       )}
       side="left"
-      size="fit-content"
+      size="large"
       theme="auto"
     >
       {items.map((item, i) => (

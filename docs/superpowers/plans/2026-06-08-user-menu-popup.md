@@ -13,29 +13,32 @@
 ## File Map
 
 ### New files (create)
-| File | Responsibility |
-|------|---------------|
-| `packages/ui/src/elements/MenuSeparator/index.tsx` | Generic horizontal divider for menu groups |
-| `packages/ui/src/elements/UserMenu/index.tsx` | Main user menu popup |
-| `packages/ui/src/elements/UserMenu/index.css` | UserMenu styles |
-| `packages/ui/src/elements/UserMenu/ThemeMenu/index.tsx` | Light/Dark/Auto theme sub-popup |
-| `packages/ui/src/elements/UserMenu/LanguageMenu/index.tsx` | Admin language sub-popup |
-| `packages/ui/src/elements/UserMenu/SettingsMenu/index.tsx` | Plugin settings sub-popup |
+
+| File                                                       | Responsibility                             |
+| ---------------------------------------------------------- | ------------------------------------------ |
+| `packages/ui/src/elements/MenuSeparator/index.tsx`         | Generic horizontal divider for menu groups |
+| `packages/ui/src/elements/UserMenu/index.tsx`              | Main user menu popup                       |
+| `packages/ui/src/elements/UserMenu/index.css`              | UserMenu styles                            |
+| `packages/ui/src/elements/UserMenu/ThemeMenu/index.tsx`    | Light/Dark/Auto theme sub-popup            |
+| `packages/ui/src/elements/UserMenu/LanguageMenu/index.tsx` | Admin language sub-popup                   |
+| `packages/ui/src/elements/UserMenu/SettingsMenu/index.tsx` | Plugin settings sub-popup                  |
 
 ### Modified files
-| File | Change |
-|------|--------|
-| `packages/payload/src/config/types.ts` | Add `userMenuSettingsItems?: CustomComponent[]` to `admin.components` |
-| `packages/payload/src/bin/generateImportMap/iterateConfig.ts` | Call `addToImportMap` on the new `userMenuSettingsItems` field |
-| `packages/ui/src/elements/AppHeader/index.tsx` | Remove Account `<Link>`; add `settingsItems` prop; render `<UserMenu>` |
-| `packages/ui/src/templates/Default/index.tsx` | Render `userMenuSettingsItems` server-side; pass `settingsItems` to `AppHeader` |
-| `packages/ui/src/exports/client/index.ts` | Export `UserMenu` and `MenuSeparator` |
+
+| File                                                          | Change                                                                          |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `packages/payload/src/config/types.ts`                        | Add `userMenuSettingsItems?: CustomComponent[]` to `admin.components`           |
+| `packages/payload/src/bin/generateImportMap/iterateConfig.ts` | Call `addToImportMap` on the new `userMenuSettingsItems` field                  |
+| `packages/ui/src/elements/AppHeader/index.tsx`                | Remove Account `<Link>`; add `settingsItems` prop; render `<UserMenu>`          |
+| `packages/ui/src/templates/Default/index.tsx`                 | Render `userMenuSettingsItems` server-side; pass `settingsItems` to `AppHeader` |
+| `packages/ui/src/exports/client/index.ts`                     | Export `UserMenu` and `MenuSeparator`                                           |
 
 ---
 
 ## Task 1: Add `userMenuSettingsItems` to Config types
 
 **Files:**
+
 - Modify: `packages/payload/src/config/types.ts` (around line 1013 — `settingsMenu` exists nearby)
 - Modify: `packages/payload/src/bin/generateImportMap/iterateConfig.ts` (around line 60)
 
@@ -60,6 +63,7 @@ Context: The `admin.components` object in `Config` already has `settingsMenu?: C
   ```
 
   That is, insert after line 1013:
+
   ```
       /**
        * Add custom items to the user menu popup in the admin panel header.
@@ -72,10 +76,13 @@ Context: The `admin.components` object in `Config` already has `settingsMenu?: C
 - [ ] **Step 2: Register in import map generation**
 
   Open `packages/payload/src/bin/generateImportMap/iterateConfig.ts`. Find line ~60 where `settingsMenu` is handled:
+
   ```ts
   addToImportMap(config.admin?.components?.settingsMenu)
   ```
+
   Add the line below it:
+
   ```ts
   addToImportMap(config.admin?.components?.userMenuSettingsItems)
   ```
@@ -83,9 +90,11 @@ Context: The `admin.components` object in `Config` already has `settingsMenu?: C
 - [ ] **Step 3: Type-check**
 
   Run from repo root:
+
   ```bash
   pnpm run build:payload 2>&1 | tail -20
   ```
+
   Expected: no type errors. (Build output may have warnings about other things; focus on payload package errors.)
 
 - [ ] **Step 4: Commit**
@@ -100,6 +109,7 @@ Context: The `admin.components` object in `Config` already has `settingsMenu?: C
 ## Task 2: Create `MenuSeparator` element
 
 **Files:**
+
 - Create: `packages/ui/src/elements/MenuSeparator/index.tsx`
 
 Context: A standalone, generic horizontal rule for use in popup/menu contexts. Styled via the existing `popup-divider` CSS class that already exists in `packages/ui/src/elements/Popup/PopupDivider/index.css`. We just re-use that styling by importing the CSS from there. Alternatively, `PopupDivider` already exports `PopupListDivider` — but `MenuSeparator` should be an independent element, not a re-export, to keep it generic (no Popup dependency).
@@ -130,6 +140,7 @@ Context: A standalone, generic horizontal rule for use in popup/menu contexts. S
 ## Task 3: Create `ThemeMenu` sub-popup
 
 **Files:**
+
 - Create: `packages/ui/src/elements/UserMenu/ThemeMenu/index.tsx`
 
 Context: A nested `Popup` rendered from the Theme row in `UserMenu`. Shows Light / Dark / Auto options. Uses `useTheme()` for reading/writing theme state. The `autoMode` field from `useTheme()` tells us whether "Auto" is active. `theme` tells the current resolved theme (`'light'|'dark'`). When `autoMode` is `true`, the Auto option is checked regardless of `theme`. Only rendered when `config.admin.theme === 'all'`.
@@ -203,6 +214,7 @@ Context: A nested `Popup` rendered from the Theme row in `UserMenu`. Shows Light
 ## Task 4: Create `LanguageMenu` sub-popup
 
 **Files:**
+
 - Create: `packages/ui/src/elements/UserMenu/LanguageMenu/index.tsx`
 
 Context: A nested `Popup` rendered from the Language row in `UserMenu`. Renders all entries from `languageOptions` (from `useTranslation()`). Active language gets a checkmark. Calls `switchLanguage(code)` on selection. Only rendered when there is more than one language option. The `LanguageSelector` on the Account page (`packages/ui/src/views/Account/Settings/LanguageSelector.tsx`) uses the same data — use it as a reference for extracting the current language from `i18n.language`.
@@ -270,6 +282,7 @@ Context: A nested `Popup` rendered from the Language row in `UserMenu`. Renders 
 ## Task 5: Create `SettingsMenu` sub-popup
 
 **Files:**
+
 - Create: `packages/ui/src/elements/UserMenu/SettingsMenu/index.tsx`
 
 Context: A nested `Popup` rendered from the Settings row in `UserMenu`. Renders server-rendered plugin items passed in as `React.ReactNode[]`. The sub-trigger is only shown when `items` is non-empty (this conditional is handled by `UserMenu`, not here). `SettingsMenu` simply renders what it's given.
@@ -327,12 +340,14 @@ Context: A nested `Popup` rendered from the Settings row in `UserMenu`. Renders 
 ## Task 6: Create main `UserMenu` component
 
 **Files:**
+
 - Create: `packages/ui/src/elements/UserMenu/index.tsx`
 - Create: `packages/ui/src/elements/UserMenu/index.css`
 
 Context: The main popup trigger replacing the Account `<Link>` in `AppHeader`. Uses `renderButton` prop of `Popup` (not `button`) so we can render the avatar as the custom trigger. Uses `useAuth()` for user data, `useConfig()` for `admin.theme` and route config, `useTranslation()` for language options count, `useTheme()` for theme config. The `RenderCustomComponent` utility is used to render the `CustomAvatar` prop with `<Account>` as fallback — matches the existing pattern in `AppHeader`.
 
 The popup content from top to bottom:
+
 1. Profile header block (avatar + name + email/username)
 2. Theme sub-trigger (only if `config.admin.theme === 'all'`)
 3. Language sub-trigger (only if `languageOptions.length > 1`)
@@ -341,8 +356,16 @@ The popup content from top to bottom:
 6. Log out link (Link to `routes.admin + admin.routes.logout`)
 
 The logout route is obtained from `useConfig()`. See `packages/ui/src/elements/Logout/index.tsx` for the exact pattern:
+
 ```ts
-const { config: { admin: { routes: { logout: logoutRoute } }, routes: { admin: adminRoute } } } = useConfig()
+const {
+  config: {
+    admin: {
+      routes: { logout: logoutRoute },
+    },
+    routes: { admin: adminRoute },
+  },
+} = useConfig()
 const href = formatAdminURL({ adminRoute, path: logoutRoute })
 ```
 
@@ -374,7 +397,10 @@ const href = formatAdminURL({ adminRoute, path: logoutRoute })
     settingsItems?: React.ReactNode[]
   }
 
-  export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems = [] }) => {
+  export const UserMenu: React.FC<UserMenuProps> = ({
+    CustomAvatar,
+    settingsItems = [],
+  }) => {
     const { user } = useAuth()
     const { t, languageOptions } = useTranslation()
     const { autoMode, theme } = useTheme()
@@ -389,7 +415,8 @@ const href = formatAdminURL({ adminRoute, path: logoutRoute })
     } = useConfig()
 
     const identifier = user?.username ?? user?.email ?? ''
-    const hasMultipleLanguages = Array.isArray(languageOptions) && languageOptions.length > 1
+    const hasMultipleLanguages =
+      Array.isArray(languageOptions) && languageOptions.length > 1
     const showThemeMenu = adminTheme === 'all'
     const hasSettingsItems = settingsItems.length > 0
     const showPreferencesGroup = showThemeMenu || hasMultipleLanguages
@@ -405,12 +432,18 @@ const href = formatAdminURL({ adminRoute, path: logoutRoute })
           <button
             {...ariaProps}
             aria-label={t('authentication:account')}
-            className={[`${baseClass}__trigger`, active && `${baseClass}__trigger--active`]
+            className={[
+              `${baseClass}__trigger`,
+              active && `${baseClass}__trigger--active`,
+            ]
               .filter(Boolean)
               .join(' ')}
             type="button"
           >
-            <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
+            <RenderCustomComponent
+              CustomComponent={CustomAvatar}
+              Fallback={<Account />}
+            />
           </button>
         )}
         size="fit-content"
@@ -420,10 +453,15 @@ const href = formatAdminURL({ adminRoute, path: logoutRoute })
         {/* Profile header */}
         <div className={`${baseClass}__profile`}>
           <div className={`${baseClass}__avatar`}>
-            <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
+            <RenderCustomComponent
+              CustomComponent={CustomAvatar}
+              Fallback={<Account />}
+            />
           </div>
           {user?.name && <p className={`${baseClass}__name`}>{user.name}</p>}
-          {identifier && <p className={`${baseClass}__identifier`}>{identifier}</p>}
+          {identifier && (
+            <p className={`${baseClass}__identifier`}>{identifier}</p>
+          )}
         </div>
 
         {/* Preferences group: Theme + Language */}
@@ -458,7 +496,9 @@ const href = formatAdminURL({ adminRoute, path: logoutRoute })
 
         {/* Account actions */}
         <PopupList.ButtonGroup>
-          <PopupList.Button href={logoutHref}>{t('authentication:logOut')}</PopupList.Button>
+          <PopupList.Button href={logoutHref}>
+            {t('authentication:logOut')}
+          </PopupList.Button>
         </PopupList.ButtonGroup>
       </Popup>
     )
@@ -529,6 +569,7 @@ const href = formatAdminURL({ adminRoute, path: logoutRoute })
 ## Task 7: Update `AppHeader`
 
 **Files:**
+
 - Modify: `packages/ui/src/elements/AppHeader/index.tsx`
 
 Context: Currently renders an Account `<Link>` in lines 125–133. We replace that with `<UserMenu>`. The `CustomAvatar` prop stays on `AppHeader` (forwarded to `UserMenu`). We add a new `settingsItems?: React.ReactNode[]` prop.
@@ -536,6 +577,7 @@ Context: Currently renders an Account `<Link>` in lines 125–133. We replace th
 - [ ] **Step 1: Update `Props` type and import in `AppHeader/index.tsx`**
 
   Change the `Props` type (around line 24):
+
   ```tsx
   // BEFORE:
   type Props = {
@@ -550,11 +592,13 @@ Context: Currently renders an Account `<Link>` in lines 125–133. We replace th
   ```
 
   Add import for `UserMenu` (add near other imports at top of file):
+
   ```tsx
   import { UserMenu } from '../UserMenu/index.js'
   ```
 
   Remove the import for `Link` only if it's no longer used (check: `Link` is not used elsewhere in this file, so remove it):
+
   ```tsx
   // Remove this import if Link is only used for the Account link:
   // import { Link } from '../Link/index.js'
@@ -565,6 +609,7 @@ Context: Currently renders an Account `<Link>` in lines 125–133. We replace th
 - [ ] **Step 2: Update function signature and JSX in `AppHeader/index.tsx`**
 
   Change the function signature:
+
   ```tsx
   // BEFORE:
   export function AppHeader({ CustomAvatar }: Props) {
@@ -574,6 +619,7 @@ Context: Currently renders an Account `<Link>` in lines 125–133. We replace th
   ```
 
   Replace lines 125–133 (the Account Link block):
+
   ```tsx
   // BEFORE:
   <Link
@@ -591,6 +637,7 @@ Context: Currently renders an Account `<Link>` in lines 125–133. We replace th
   ```
 
   Since `accountRoute` and `formatAdminURL` are only used for the Account link (check the rest of the file), remove their usage if no longer needed. Specifically:
+
   - `accountRoute` is destructured from `useConfig()` — remove it from the destructure if unused
   - `formatAdminURL` import — remove if unused
   - `Account` import from `../../graphics/Account/index.js` — remove if unused (now inside `UserMenu`)
@@ -601,6 +648,7 @@ Context: Currently renders an Account `<Link>` in lines 125–133. We replace th
   ```bash
   pnpm run build:ui 2>&1 | tail -30
   ```
+
   Expected: no errors. Any error about unused imports should already be cleaned up.
 
 - [ ] **Step 4: Commit**
@@ -615,9 +663,11 @@ Context: Currently renders an Account `<Link>` in lines 125–133. We replace th
 ## Task 8: Update `DefaultTemplate`
 
 **Files:**
+
 - Modify: `packages/ui/src/templates/Default/index.tsx`
 
 Context: `DefaultTemplate` is a server component. It already server-renders `CustomAvatar` and passes it to `AppHeader`. We need to:
+
 1. Also server-render `userMenuSettingsItems` from `payload.config.admin.components` using the same `RenderServerComponent` loop pattern as `viewActions`.
 2. Pass the resulting `React.ReactNode[]` to `AppHeader` as `settingsItems`.
 
@@ -627,7 +677,8 @@ Context: `DefaultTemplate` is a server component. It already server-renders `Cus
 
   ```tsx
   const settingsItems: React.ReactNode[] =
-    components?.userMenuSettingsItems && Array.isArray(components.userMenuSettingsItems)
+    components?.userMenuSettingsItems &&
+    Array.isArray(components.userMenuSettingsItems)
       ? components.userMenuSettingsItems.map((item, index) =>
           RenderServerComponent({
             clientProps,
@@ -643,6 +694,7 @@ Context: `DefaultTemplate` is a server component. It already server-renders `Cus
   This requires accessing `components` (which is already destructured: `const { ..., components, ... } = payload.config || {}`).
 
   Check the existing destructure at lines 62–70. Currently it reads:
+
   ```tsx
   const {
     admin: {
@@ -655,11 +707,13 @@ Context: `DefaultTemplate` is a server component. It already server-renders `Cus
     } = {},
   } = payload.config || {}
   ```
+
   The `components` variable is already available.
 
 - [ ] **Step 2: Pass `settingsItems` to `<AppHeader>`**
 
   Update the `<AppHeader>` JSX (around lines 135–145):
+
   ```tsx
   // BEFORE:
   <AppHeader
@@ -694,6 +748,7 @@ Context: `DefaultTemplate` is a server component. It already server-renders `Cus
   ```bash
   pnpm run build:ui 2>&1 | tail -30
   ```
+
   Expected: no errors.
 
 - [ ] **Step 4: Commit**
@@ -708,6 +763,7 @@ Context: `DefaultTemplate` is a server component. It already server-renders `Cus
 ## Task 9: Add missing translation keys
 
 **Files:**
+
 - Modify: `packages/translations/src/languages/en.ts` (and equivalent files for other languages if present, or run `pnpm run translateNewKeys` after English)
 
 Context: The sub-popups use translation keys that may not yet exist. Check and add any missing ones.
@@ -715,6 +771,7 @@ Context: The sub-popups use translation keys that may not yet exist. Check and a
 - [ ] **Step 1: Identify missing keys**
 
   Run:
+
   ```bash
   grep -n "general:auto\|general:light\|general:dark\|general:theme\|general:language\|general:settings" packages/translations/src/languages/en.ts
   ```
@@ -724,6 +781,7 @@ Context: The sub-popups use translation keys that may not yet exist. Check and a
 - [ ] **Step 2: Add missing keys to English translations**
 
   Open `packages/translations/src/languages/en.ts`. Find the `general` section and add any missing keys. Typical structure:
+
   ```ts
   general: {
     // ... existing keys ...
@@ -754,6 +812,7 @@ Context: The sub-popups use translation keys that may not yet exist. Check and a
 ## Task 10: Export `UserMenu` and `MenuSeparator` from client exports
 
 **Files:**
+
 - Modify: `packages/ui/src/exports/client/index.ts`
 
 Context: Components used in server/client code should be exported from the client bundle. The pattern is explicit named exports (no barrel `export *`). `AppHeader` is already exported at line 84.
@@ -761,16 +820,19 @@ Context: Components used in server/client code should be exported from the clien
 - [ ] **Step 1: Add exports to `packages/ui/src/exports/client/index.ts`**
 
   Find the `AppHeader` export (around line 84):
+
   ```ts
   export { AppHeader } from '../../elements/AppHeader/index.js'
   ```
 
   Add after it:
+
   ```ts
   export { MenuSeparator } from '../../elements/MenuSeparator/index.js'
   ```
 
   Find the `Logout` export (around line 186) and add `UserMenu` nearby (alphabetically between `U` entries):
+
   ```ts
   export { UserMenu } from '../../elements/UserMenu/index.js'
   ```
@@ -780,6 +842,7 @@ Context: Components used in server/client code should be exported from the clien
   ```bash
   pnpm run build:ui 2>&1 | tail -30
   ```
+
   Expected: no errors.
 
 - [ ] **Step 3: Commit**
@@ -798,6 +861,7 @@ Context: Components used in server/client code should be exported from the clien
   ```bash
   pnpm run build:core 2>&1 | tail -40
   ```
+
   Expected: clean build, no type errors.
 
 - [ ] **Step 2: Start dev server**
@@ -805,6 +869,7 @@ Context: Components used in server/client code should be exported from the clien
   ```bash
   pnpm run dev
   ```
+
   Open `http://localhost:3000/admin` in a browser (auto-login enabled with `dev@payloadcms.com` / `test`).
 
 - [ ] **Step 3: Manual smoke test**

@@ -21,7 +21,7 @@ export const LanguageMenu: React.FC = () => {
         </button>
       )}
       side="left"
-      size="fit-content"
+      size="large"
       theme="auto"
     >
       <PopupList.RadioGroup>

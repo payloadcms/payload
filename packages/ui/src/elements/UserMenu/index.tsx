@@ -3,6 +3,7 @@ import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { Account } from '../../graphics/Account/index.js'
+import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -59,7 +60,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
           <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
         </button>
       )}
-      size="fit-content"
+      size="large"
       theme="dark"
       verticalAlign="bottom"
     >
@@ -93,9 +94,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
       )}
 
       {/* Account actions */}
-      <PopupList.ButtonGroup>
-        <PopupList.Button href={logoutHref}>{t('authentication:logOut')}</PopupList.Button>
-      </PopupList.ButtonGroup>
+      <PopupList.MenuItem size="small">
+        <PopupList.Button href={logoutHref} icon={<LogOutIcon size={16} />}>
+          {t('authentication:logOut')}
+        </PopupList.Button>
+      </PopupList.MenuItem>
     </Popup>
   )
 }

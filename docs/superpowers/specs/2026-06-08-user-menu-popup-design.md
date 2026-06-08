@@ -1,7 +1,7 @@
 # User Menu Popup Design Spec
 
-**Date:** 2026-06-08  
-**Status:** Approved  
+**Date:** 2026-06-08
+**Status:** Approved
 **Figma:** [node 7733-77615](https://staging.figma.com/design/6B2gypRIR35KTc60F1ZQjn/-Payload--Component-Library--WIP-?node-id=7733-77615)
 
 ---
@@ -56,20 +56,20 @@ An array of `CustomComponent` entries (same type as `viewActions`). Each item is
 
 ```ts
 type UserMenuProps = {
-  CustomAvatar?: React.ReactNode   // Server-rendered custom avatar (passed from DefaultTemplate)
+  CustomAvatar?: React.ReactNode // Server-rendered custom avatar (passed from DefaultTemplate)
   settingsItems?: React.ReactNode[] // Server-rendered plugin settings rows
 }
 ```
 
 ### Data Sources (hooks)
 
-| Data | Hook | Fields used |
-|------|------|-------------|
-| User identity | `useAuth()` | `user.name`, `user.email`, `user.username` |
-| Theme | `useTheme()` | `theme`, `autoMode`, `setTheme` |
-| Language | `useTranslation()` | `i18n.language`, `languageOptions`, `switchLanguage` |
-| Config | `useConfig()` | `admin.theme`, `admin.routes`, `routes.admin`, `localization` |
-| Translations | `useTranslation()` | `t()` |
+| Data          | Hook               | Fields used                                                   |
+| ------------- | ------------------ | ------------------------------------------------------------- |
+| User identity | `useAuth()`        | `user.name`, `user.email`, `user.username`                    |
+| Theme         | `useTheme()`       | `theme`, `autoMode`, `setTheme`                               |
+| Language      | `useTranslation()` | `i18n.language`, `languageOptions`, `switchLanguage`          |
+| Config        | `useConfig()`      | `admin.theme`, `admin.routes`, `routes.admin`, `localization` |
+| Translations  | `useTranslation()` | `t()`                                                         |
 
 ### User Display Logic
 
@@ -80,6 +80,7 @@ type UserMenuProps = {
 ### Popup Structure
 
 The main `Popup` is configured with:
+
 - `horizontalAlign="right"`
 - `verticalAlign="bottom"`
 - `theme="auto"` (inherits current light/dark theme)
@@ -89,17 +90,20 @@ The main `Popup` is configured with:
 Content structure (top to bottom):
 
 1. **Profile header block**
+
    - Avatar (40px circle) — `RenderCustomComponent` with `<Account>` fallback
    - Name (if present)
    - Email or username (muted)
 
 2. **Group 1: Preferences**
+
    - Theme sub-trigger → opens `ThemeMenu` sub-popup (only if `config.admin.theme === 'all'`)
    - Language sub-trigger → opens `LanguageMenu` sub-popup (only if `languageOptions` has >1 option)
 
 3. **`<MenuSeparator />`**
 
 4. **Settings sub-trigger** (only if `settingsItems` is non-empty) → opens `SettingsMenu` sub-popup
+
    - `<MenuSeparator />` after Settings trigger
 
 5. **Group: Account actions**
@@ -117,11 +121,11 @@ A standalone generic element at `packages/ui/src/elements/MenuSeparator/`. A hor
 
 Nested `Popup` rendered from the Theme sub-trigger row. Contains three items:
 
-| Label | Value | Active indicator |
-|-------|-------|-----------------|
-| Auto (System) | `'auto'` | checkmark when `autoMode === true` |
-| Light | `'light'` | checkmark when `!autoMode && theme === 'light'` |
-| Dark | `'dark'` | checkmark when `!autoMode && theme === 'dark'` |
+| Label         | Value     | Active indicator                                |
+| ------------- | --------- | ----------------------------------------------- |
+| Auto (System) | `'auto'`  | checkmark when `autoMode === true`              |
+| Light         | `'light'` | checkmark when `!autoMode && theme === 'light'` |
+| Dark          | `'dark'`  | checkmark when `!autoMode && theme === 'dark'`  |
 
 Calls `setTheme(value)` on selection. Only rendered if `config.admin.theme === 'all'`.
 
@@ -166,23 +170,23 @@ The `/account` Settings panel currently renders `ToggleTheme`, `LanguageSelector
 
 ## Files to Create
 
-| File | Purpose |
-|------|---------|
-| `packages/ui/src/elements/MenuSeparator/index.tsx` | Generic menu group separator |
-| `packages/ui/src/elements/UserMenu/index.tsx` | Main popup |
-| `packages/ui/src/elements/UserMenu/index.css` | Styles |
-| `packages/ui/src/elements/UserMenu/ThemeMenu/index.tsx` | Theme sub-popup |
-| `packages/ui/src/elements/UserMenu/LanguageMenu/index.tsx` | Language sub-popup |
-| `packages/ui/src/elements/UserMenu/SettingsMenu/index.tsx` | Plugin settings sub-popup |
+| File                                                       | Purpose                      |
+| ---------------------------------------------------------- | ---------------------------- |
+| `packages/ui/src/elements/MenuSeparator/index.tsx`         | Generic menu group separator |
+| `packages/ui/src/elements/UserMenu/index.tsx`              | Main popup                   |
+| `packages/ui/src/elements/UserMenu/index.css`              | Styles                       |
+| `packages/ui/src/elements/UserMenu/ThemeMenu/index.tsx`    | Theme sub-popup              |
+| `packages/ui/src/elements/UserMenu/LanguageMenu/index.tsx` | Language sub-popup           |
+| `packages/ui/src/elements/UserMenu/SettingsMenu/index.tsx` | Plugin settings sub-popup    |
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
-| `packages/ui/src/elements/AppHeader/index.tsx` | Remove Account link; render `UserMenu` |
-| `packages/ui/src/templates/Default/index.tsx` | Pass `settingsItems` to `UserMenu`; update `CustomAvatar` destination |
-| `packages/payload/src/types/Config.ts` (or equivalent) | Add `admin.components.userMenuSettingsItems` |
-| `packages/ui/src/exports/client/index.ts` | Export `UserMenu` and sub-components |
+| File                                                   | Change                                                                |
+| ------------------------------------------------------ | --------------------------------------------------------------------- |
+| `packages/ui/src/elements/AppHeader/index.tsx`         | Remove Account link; render `UserMenu`                                |
+| `packages/ui/src/templates/Default/index.tsx`          | Pass `settingsItems` to `UserMenu`; update `CustomAvatar` destination |
+| `packages/payload/src/types/Config.ts` (or equivalent) | Add `admin.components.userMenuSettingsItems`                          |
+| `packages/ui/src/exports/client/index.ts`              | Export `UserMenu` and sub-components                                  |
 
 ---
 

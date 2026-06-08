@@ -31,7 +31,7 @@ export const ThemeMenu: React.FC = () => {
         </button>
       )}
       side="left"
-      size="fit-content"
+      size="large"
       theme="dark"
     >
       <PopupList.RadioGroup>
