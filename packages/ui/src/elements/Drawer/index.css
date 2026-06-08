@@ -23,11 +23,13 @@
     opacity: 0;
     position: relative;
     z-index: 2;
-    width: 600px;
+    width: clamp(600px, 40vw, 1080px);
+    max-width: 100vw;
     overflow: hidden;
     transition: all 200ms linear;
     background-color: var(--color-bg);
     box-shadow: var(--elevation-400-menu-panel);
+    container: drawer / inline-size;
   }
 
   .drawer__content-children {
