@@ -1,0 +1,134 @@
+import type { CollectionPreferences, ServerFunction, VisibleEntities } from 'payload'
+
+import { canAccessAdmin, isEntityHidden, UnauthorizedError } from 'payload'
+import { applyLocaleFiltering } from 'payload/shared'
+
+import type {
+  RenderListServerFnArgs,
+  RenderListServerFnReturnType,
+} from '../../elements/ListDrawer/types.js'
+
+import { getClientConfig } from '../../utilities/getClientConfig.js'
+import { renderListView } from './index.js'
+
+export const renderListHandler: ServerFunction<
+  RenderListServerFnArgs,
+  Promise<RenderListServerFnReturnType>
+> = async (args) => {
+  const {
+    collectionSlug,
+    cookies,
+    disableActions,
+    disableBulkDelete,
+    disableBulkEdit,
+    disableQueryPresets,
+    drawerSlug,
+    enableRowSelections,
+    locale,
+    overrideEntityVisibility,
+    permissions,
+    query,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
+    req,
+    req: {
+      i18n,
+      payload,
+      payload: { config },
+      user,
+    },
+  } = args
+
+  if (!req.user) {
+    throw new UnauthorizedError()
+  }
+
+  await canAccessAdmin({ req })
+
+  const clientConfig = getClientConfig({
+    config,
+    i18n,
+    importMap: payload.importMap,
+    user,
+  })
+  await applyLocaleFiltering({ clientConfig, config, req })
+
+  const preferencesKey = `collection-${collectionSlug}`
+
+  const preferences = await payload
+    .find({
+      collection: 'payload-preferences',
+      depth: 0,
+      limit: 1,
+      where: {
+        and: [
+          {
+            key: {
+              equals: preferencesKey,
+            },
+          },
+          {
+            'user.relationTo': {
+              equals: user.collection,
+            },
+          },
+          {
+            'user.value': {
+              equals: user.id,
+            },
+          },
+        ],
+      },
+    })
+    .then((res) => res.docs[0]?.value as CollectionPreferences)
+
+  const visibleEntities: VisibleEntities = {
+    collections: payload.config.collections
+      .map(({ slug, admin: { hidden } }) => (!isEntityHidden({ hidden, user }) ? slug : null))
+      .filter(Boolean),
+    globals: payload.config.globals
+      .map(({ slug, admin: { hidden } }) => (!isEntityHidden({ hidden, user }) ? slug : null))
+      .filter(Boolean),
+  }
+
+  const { List } = await renderListView({
+    clientConfig,
+    disableActions,
+    disableBulkDelete,
+    disableBulkEdit,
+    disableQueryPresets,
+    drawerSlug,
+    enableRowSelections,
+    i18n,
+    importMap: payload.importMap,
+    initPageResult: {
+      collectionConfig: payload?.collections?.[collectionSlug]?.config,
+      cookies,
+      globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),
+      languageOptions: undefined, // TODO
+      locale,
+      permissions,
+      req,
+      translations: undefined, // TODO
+      visibleEntities,
+    },
+    locale,
+    overrideEntityVisibility,
+    params: {
+      segments: ['collections', collectionSlug],
+    },
+    payload,
+    permissions,
+    query,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
+    searchParams: {},
+    server: req.server,
+    viewType: 'list',
+  })
+
+  return {
+    List,
+    preferences,
+  }
+}

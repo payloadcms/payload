@@ -188,16 +188,15 @@ export type {
 export {
   $createServerBlockNode,
   $isServerBlockNode,
-  type BlockFields,
   ServerBlockNode,
 } from './features/blocks/server/nodes/BlocksNode.js'
-
 export {
   $createServerInlineBlockNode,
   $isServerInlineBlockNode,
-  type InlineBlockFields,
   ServerInlineBlockNode,
 } from './features/blocks/server/nodes/InlineBlocksNode.js'
+
+export type { BlockFields, InlineBlockFields } from './features/blocks/server/schema.js'
 
 export { convertHTMLToLexical } from './features/converters/htmlToLexical/index.js'
 
@@ -231,8 +230,8 @@ export {
 } from './features/link/nodes/AutoLinkNode.js'
 export { $createLinkNode, $isLinkNode, LinkNode } from './features/link/nodes/LinkNode.js'
 
-export type { LinkFields } from './features/link/nodes/types.js'
 export { LinkFeature, type LinkFeatureServerProps } from './features/link/server/index.js'
+export type { LinkFields } from './features/link/server/schema.js'
 
 export { ChecklistFeature } from './features/lists/checklist/server/index.js'
 export { OrderedListFeature } from './features/lists/orderedList/server/index.js'
@@ -246,10 +245,8 @@ export {
   type RelationshipFeatureProps,
 } from './features/relationship/server/index.js'
 
-export {
-  type RelationshipData,
-  RelationshipServerNode,
-} from './features/relationship/server/nodes/RelationshipNode.js'
+export { RelationshipServerNode } from './features/relationship/server/nodes/RelationshipNode.js'
+export type { RelationshipData } from './features/relationship/server/schema.js'
 export { defaultColors } from './features/textState/defaultColors.js'
 export { TextStateFeature } from './features/textState/feature.server.js'
 
@@ -298,7 +295,8 @@ export { createNode } from './features/typeUtilities.js' // Only useful in featu
 export { UploadFeature } from './features/upload/server/index.js'
 export type { UploadFeatureProps } from './features/upload/server/index.js'
 
-export { type UploadData, UploadServerNode } from './features/upload/server/nodes/UploadNode.js'
+export { UploadServerNode } from './features/upload/server/nodes/UploadNode.js'
+export type { UploadData } from './features/upload/server/schema.js'
 export type { EditorConfigContextType } from './lexical/config/client/EditorConfigProvider.js'
 
 export {

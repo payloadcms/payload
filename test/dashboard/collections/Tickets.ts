@@ -66,4 +66,5 @@ export const Tickets: CollectionConfig = {
       relationTo: 'users',
     },
   ],
+  versions: false,
 }

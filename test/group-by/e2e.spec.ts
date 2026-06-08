@@ -23,6 +23,7 @@ import {
   saveDocAndAssert,
   selectTableRow,
 } from '../__helpers/e2e/helpers.js'
+import { navigateToListView } from '../__helpers/e2e/navigateToListView.js'
 import { deletePreferences } from '../__helpers/e2e/preferences.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -709,7 +710,7 @@ test.describe('Group By', () => {
     const modal = page.locator('[id$="-confirm-delete-many-docs"]').first()
 
     await expect(modal).toBeVisible()
-    await modal.locator('#confirm-action').click()
+    await modal.locator('[data-dialog-action="confirm"]').click()
 
     await expect(
       firstTableRows.locator('td.cell-title', { hasText: exactText('Find me') }),
@@ -916,11 +917,11 @@ test.describe('Group By', () => {
 
       const firstGroupID = await firstTable.getAttribute('data-group-id')
 
-      const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
+      const modalId = `dialog[id^="${firstGroupID}-confirm-delete-many-docs"]`
       await expect(page.locator(modalId)).toBeVisible()
 
       // Confirm trash (skip permanent delete)
-      await page.locator(`${modalId} #confirm-action`).click()
+      await page.locator(`${modalId} [data-dialog-action="confirm"]`).click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         '1 Post moved to trash.',
       )
@@ -1016,8 +1017,6 @@ test.describe('Group By', () => {
     })
 
     test('should display virtual field label in preset list cell', async () => {
-      await page.goto(url.list)
-
       await payload.create({
         collection: 'payload-query-presets',
         data: {
@@ -1034,6 +1033,8 @@ test.describe('Group By', () => {
         },
         user,
       })
+
+      await navigateToListView({ page, url: url.list })
 
       // Open the preset drawer
       await openManagePresets({ page })
@@ -1073,7 +1074,7 @@ test.describe('Group By', () => {
       })
 
       // Navigate after preset is created so it shows in the popup
-      await page.goto(url.list)
+      await navigateToListView({ page, url: url.list })
 
       // Select the preset to make it active
       await selectPreset({ page, presetTitle })

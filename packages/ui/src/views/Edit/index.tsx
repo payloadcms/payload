@@ -41,7 +41,7 @@ import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'collection-edit'
 const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
@@ -690,7 +690,11 @@ export function DefaultEditView({
             <DocumentStaleData isActive={showStaleDataModal} onReload={handleStaleDataReload} />
           )}
           {preventLeaveWithoutSaving && (
-            <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
+            <LeaveWithoutSaving
+              modalSlug={drawerSlug ? `leave-without-saving-${drawerSlug}` : undefined}
+              onConfirm={handleLeaveConfirm}
+              onPrevent={handlePrevent}
+            />
           )}
           {!isInDrawer && (
             <SetDocumentStepNav

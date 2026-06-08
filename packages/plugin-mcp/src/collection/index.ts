@@ -55,6 +55,7 @@ export const getAPIKeysCollection = ({
       plural: 'API Keys',
       singular: 'API Key',
     },
+    versions: false,
   }
 
   return pluginConfig.overrideApiKeyCollection

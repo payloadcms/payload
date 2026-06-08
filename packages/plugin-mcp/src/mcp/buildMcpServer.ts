@@ -1,5 +1,5 @@
 import { McpServer, type ServerContext } from '@modelcontextprotocol/server'
-import { APIError, configToJSONSchema, type PayloadRequest } from 'payload'
+import { APIError, entityToStandaloneJSONSchema, type PayloadRequest } from 'payload'
 
 import type {
   AuthorizedMCP,
@@ -64,13 +64,6 @@ export const buildMcpServer = ({
     return rest
   }
 
-  const configSchema = configToJSONSchema(
-    req.payload.config,
-    req.payload.db.defaultIDType,
-    req.i18n,
-    { forceInlineBlocks: true },
-  ) as JsonSchemaType
-
   try {
     for (const item of authorizedMCP.items) {
       switch (item.type) {
@@ -79,15 +72,20 @@ export const buildMcpServer = ({
           const name = wireName(item.key, item.collectionSlug)
           let inputSchema = tool.input
           if (typeof inputSchema === 'function') {
-            const raw = configSchema.definitions?.[item.collectionSlug]
-            if (!raw) {
+            const collection = req.payload.collections[item.collectionSlug]?.config
+            if (!collection) {
               throw new APIError(
                 `Collection schema not found for slug: ${item.collectionSlug}`,
                 500,
               )
             }
             const collectionSchema = removeVirtualFieldsFromSchema(
-              JSON.parse(JSON.stringify(raw)) as JsonSchemaType,
+              entityToStandaloneJSONSchema({
+                config: req.payload.config,
+                defaultIDType: req.payload.db.defaultIDType,
+                entity: collection,
+                i18n: req.i18n,
+              }) as unknown as JsonSchemaType,
               getCollectionVirtualFieldNames(req.payload.config, item.collectionSlug),
             )
             inputSchema = inputSchema({ collectionSchema })
@@ -118,12 +116,19 @@ export const buildMcpServer = ({
           const name = wireName(item.key, item.globalSlug)
           let inputSchema = tool.input
           if (typeof inputSchema === 'function') {
-            const raw = configSchema.definitions?.[item.globalSlug]
-            if (!raw) {
+            const globalEntity = req.payload.config.globals.find(
+              (globalConfig) => globalConfig.slug === item.globalSlug,
+            )
+            if (!globalEntity) {
               throw new APIError(`Global schema not found for slug: ${item.globalSlug}`, 500)
             }
             const globalSchema = removeVirtualFieldsFromSchema(
-              JSON.parse(JSON.stringify(raw)) as JsonSchemaType,
+              entityToStandaloneJSONSchema({
+                config: req.payload.config,
+                defaultIDType: req.payload.db.defaultIDType,
+                entity: globalEntity,
+                i18n: req.i18n,
+              }) as unknown as JsonSchemaType,
               getGlobalVirtualFieldNames(req.payload.config, item.globalSlug),
             )
 

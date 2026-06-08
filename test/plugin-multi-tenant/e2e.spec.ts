@@ -591,7 +591,7 @@ test.describe('Multi Tenant', () => {
         ),
       ).toBeVisible()
 
-      await confirmationModal.locator('#confirm-action').click()
+      await confirmationModal.locator('[data-dialog-action="confirm"]').click()
       await expect(page.locator('#confirm-leave-without-saving')).toBeHidden()
       await page.goto(menuItemsURL.list)
       await expect

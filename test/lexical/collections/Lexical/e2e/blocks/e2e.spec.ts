@@ -629,7 +629,7 @@ describe('lexicalBlocks', () => {
       await wait(1000)
       await urlField.fill('https://www.payloadcms.com')
       await expect(urlField).toHaveValue('https://www.payloadcms.com')
-      await drawerContent.locator('.form-submit button').click({ delay: 100 })
+      await drawerContent.locator('button').getByText('Save changes').click({ delay: 100 })
       await expect(drawerContent).toBeHidden()
 
       /**
@@ -1514,7 +1514,12 @@ describe('lexicalBlocks', () => {
       await inlineBlockElement.click()
 
       await page.locator('.drawer--is-open #field-text').fill('value1')
-      await page.locator('.drawer--is-open button[type="submit"]').first().click()
+      await page
+        .locator('.drawer--is-open')
+        .locator('button')
+        .getByText('Save changes')
+        .first()
+        .click()
 
       // remove inline block using the X (remove) button
       const removeButton = inlineBlockElement

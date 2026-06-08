@@ -24,6 +24,7 @@ const Orderable: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default Orderable

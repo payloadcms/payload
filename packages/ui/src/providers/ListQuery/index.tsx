@@ -1,5 +1,6 @@
 'use client'
 import { type ListQuery, type Where } from 'payload'
+import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -162,6 +163,33 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   }, [modifySearchParams, queryFromProps])
 
+  const hasActiveFilters = useMemo(() => {
+    if (!query?.where) {
+      return false
+    }
+
+    // Normalize flat/invalid where queries (e.g. `{ title: { equals } }`) into the
+    // `or/and` structure so they are detected the same way the WhereBuilder reads them.
+    const normalizedWhere = validateWhereQuery(query.where)
+      ? query.where
+      : transformWhereQuery(query.where)
+
+    return (normalizedWhere.or ?? []).some((orGroup) =>
+      (orGroup.and ?? []).some((andGroup) => {
+        const field = Object.keys(andGroup)[0]
+        if (!field) {
+          return false
+        }
+        const operatorObj = andGroup[field]
+        if (!operatorObj || typeof operatorObj !== 'object') {
+          return false
+        }
+        const operator = Object.keys(operatorObj)[0]
+        return Boolean(operator) && (operatorObj as Record<string, unknown>)[operator] !== undefined
+      }),
+    )
+  }, [query?.where])
+
   return (
     <ListQueryContext
       value={{
@@ -173,6 +201,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSearchChange,
         handleSortChange,
         handleWhereChange,
+        hasActiveFilters,
         isGroupingBy: Boolean(collectionConfig?.admin?.groupBy && query?.groupBy),
         orderableFieldName,
         query,

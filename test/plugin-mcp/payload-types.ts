@@ -318,17 +318,7 @@ export interface ReturnedResource {
 export interface Page {
   id: string;
   title: string;
-  layout?:
-    | (
-        | HeroBlock
-        | {
-            body?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textContent';
-          }
-      )[]
-    | null;
+  layout?: (HeroBlock | TextContent)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -342,6 +332,16 @@ export interface HeroBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextContent".
+ */
+export interface TextContent {
+  body?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textContent';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

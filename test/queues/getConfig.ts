@@ -87,6 +87,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'simple',
@@ -100,6 +101,7 @@ export const getConfig: () => Partial<Config> = () => ({
           required: true,
         },
       ],
+      versions: false,
     },
   ],
   admin: {

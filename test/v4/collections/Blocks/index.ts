@@ -204,6 +204,7 @@ const BlocksFields: CollectionConfig = {
       blocks: [outerBlock],
     },
   ],
+  versions: false,
 }
 
 export default BlocksFields

@@ -164,6 +164,7 @@ export const createOperation = async <
       collection,
       config,
       data,
+      draft: isSavingDraft,
       isDuplicating: Boolean(duplicateFromID),
       operation: 'create',
       originalDoc: duplicatedFromDoc,
