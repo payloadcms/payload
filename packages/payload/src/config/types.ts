@@ -1011,6 +1011,12 @@ export type Config = {
        * These components will be rendered in a popup menu above the logout button.
        */
       settingsMenu?: CustomComponent[]
+      /**
+       * Add custom items to the user menu popup in the admin panel header.
+       * These components will be rendered in the Settings sub-popup of the user menu.
+       * When empty or absent, the Settings sub-trigger is not shown.
+       */
+      userMenuSettingsItems?: CustomComponent[]
       /** Sidebar configuration */
       sidebar?: {
         /** Extensible tab system */
