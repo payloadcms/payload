@@ -243,6 +243,7 @@ export const thTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'ผู้ใช้อื่นเข้าครอบครองการแก้ไขเอกสารนี้แล้ว',
     applyChanges: 'ใช้การเปลี่ยนแปลง',
     ascending: 'น้อยไปมาก',
+    auto: 'Auto',
     automatic: 'อัตโนมัติ',
     backToDashboard: 'กลับไปหน้าแดชบอร์ด',
     by: 'โดย',
@@ -437,6 +438,7 @@ export const thTranslations: DefaultTranslationsObject = {
     selectedCount: 'เลือก {{count}} {{label}} แล้ว',
     selectLabel: 'เลือก {{label}}',
     selectValue: 'เลือกค่า',
+    settings: 'Settings',
     showAllLabel: 'แสดง {{label}} ทั้งหมด',
     shownInTable: 'แสดงในตาราง',
     showSidebar: 'แสดงแถบด้านข้าง',
@@ -453,6 +455,7 @@ export const thTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'ทำการรีอินเด็กซ์เอกสารจำนวน {{count}} จาก {{total}} เอกสารจาก {{collections}} สำเร็จ และข้ามร่างเอกสาร {{skips}} รายการ',
     takeOver: 'เข้ายึด',
+    theme: 'Theme',
     thisLanguage: 'ไทย',
     time: 'เวลา',
     timezone: 'เขตเวลา',

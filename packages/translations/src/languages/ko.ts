@@ -248,6 +248,7 @@ export const koTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: '다른 사용자가 이 문서의 편집을 인수했습니다.',
     applyChanges: '변경 사항 적용',
     ascending: '오름차순',
+    auto: 'Auto',
     automatic: '자동 설정',
     backToDashboard: '대시보드로 돌아가기',
     by: '작성자',
@@ -443,6 +444,7 @@ export const koTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}}개의 {{label}} 선택됨',
     selectLabel: '{{label}}을 선택하십시오.',
     selectValue: '값 선택',
+    settings: 'Settings',
     showAllLabel: '{{label}} 모두 표시',
     shownInTable: '표에 표시됨',
     showSidebar: '사이드바 표시',
@@ -459,6 +461,7 @@ export const koTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} 의 문서 총 **{{total}}**건 중 **{{count}}**건이 성공적으로 재인덱싱되었으며, **{{skips}}**건의 초안이 건너뛰어졌습니다.',
     takeOver: '인수하기',
+    theme: 'Theme',
     thisLanguage: '한국어',
     time: '시간',
     timezone: '시간대',

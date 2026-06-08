@@ -249,6 +249,7 @@ export const isTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Annar notandi hefur tekið yfir skráningu þessarar færslu.',
     applyChanges: 'Virkja breytingar',
     ascending: 'Hækkandi',
+    auto: 'Auto',
     automatic: 'Sjálfvirkt',
     backToDashboard: 'Aftur í stjórnborð',
     by: 'Eftir',
@@ -442,6 +443,7 @@ export const isTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} valið',
     selectLabel: 'Velja {{label}}',
     selectValue: 'Veldu gildi',
+    settings: 'Settings',
     showAllLabel: 'Sýna allar {{label}}',
     shownInTable: 'Sýnt í töflu',
     showSidebar: 'Sýna hliðarstiku',
@@ -458,6 +460,7 @@ export const isTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Tókst að endurvísa {{count}} af {{total}} skjölum úr {{collections}} og {{skips}} drög voru sleppt.',
     takeOver: 'Taka yfir',
+    theme: 'Theme',
     thisLanguage: 'Íslenska',
     time: 'Tími',
     timezone: 'Tímabelti',

@@ -252,6 +252,7 @@ export const myTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'တစ်ခြားအသုံးပြုသူသည်ဤစာရွက်စာတမ်းကိုပြင်ဆင်မှုကိုရယူလိုက်သည်။',
     applyChanges: 'ပြောင်းလဲမှုများ အသုံးပြုပါ',
     ascending: 'တက်နေသည်',
+    auto: 'Auto',
     automatic: 'အော်တို',
     backToDashboard: 'ပင်မစာမျက်နှာသို့ ပြန်သွားမည်။',
     by: 'ဖြင့်',
@@ -450,6 +451,7 @@ export const myTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} ကို ရွေးထားသည်။',
     selectLabel: 'Pilih {{label}}',
     selectValue: 'တစ်ခုခုကို ရွေးချယ်ပါ။',
+    settings: 'Settings',
     showAllLabel: 'Tunjukkan semua {{label}}',
     shownInTable: 'ဇယားတွင် ပြသထားသည်။',
     showSidebar: 'ဘေးဘက်လမ်းညွှန်ပြရန်',
@@ -466,6 +468,7 @@ export const myTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} မှ စုစုပေါင်း {{total}} စာတမ်းထဲမှ {{count}} စာတမ်းကိုအောင်မြင်စွာပြန်လည်ညွှန်းကောက်ခဲ့ပြီး {{skips}} အကြမ်းဖျဉ်ချုပ်ကိုလွဲချခဲ့သည်။',
     takeOver: 'တာဝန်ယူပါ',
+    theme: 'Theme',
     thisLanguage: 'မြန်မာစာ',
     time: 'Masa',
     timezone: 'Masa Wilayah',

@@ -256,6 +256,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Een andere gebruiker heeft de bewerking van dit document overgenomen.',
     applyChanges: 'Breng wijzigingen aan',
     ascending: 'Oplopend',
+    auto: 'Auto',
     automatic: 'Automatisch',
     backToDashboard: 'Terug naar dashboard',
     by: 'Door',
@@ -453,6 +454,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} geselecteerd',
     selectLabel: 'Selecteer {{label}}',
     selectValue: 'Selecteer een waarde',
+    settings: 'Settings',
     showAllLabel: 'Toon alle {{label}}',
     shownInTable: 'Weergegeven in tabel',
     showSidebar: 'Zijbalk weergeven',
@@ -469,6 +471,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Succesvol {{count}} van {{total}} documenten uit {{collections}} opnieuw geïndexeerd, en {{skips}} concepten werden overgeslagen.',
     takeOver: 'Overnemen',
+    theme: 'Theme',
     thisLanguage: 'Nederlands',
     time: 'Tijd',
     timezone: 'Tijdzone',

@@ -34,6 +34,7 @@
     border-radius: var(--popup-item-radius);
     display: flex;
     align-items: stretch;
+    flex: 1;
     color: var(--popup-item-color, var(--color-text));
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);

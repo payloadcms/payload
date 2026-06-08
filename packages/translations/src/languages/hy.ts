@@ -247,6 +247,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Այլ օգտատեր ստանձել է այս փաստաթղթի խմբագրումը։',
     applyChanges: 'Կիրառել փոփոխությունները',
     ascending: 'Աճող',
+    auto: 'Auto',
     automatic: 'Ավտոմատ',
     backToDashboard: 'Վերադառնալ վահանակ',
     by: 'Միջոցով',
@@ -445,6 +446,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} ընտրված է',
     selectLabel: 'ընտրել {{label}}',
     selectValue: 'Ընտրեք արժեք',
+    settings: 'Settings',
     showAllLabel: 'Ցուցադրել բոլոր {{label}}-ները',
     shownInTable: 'Արտացոլված է աղյուսակում',
     showSidebar: 'Ցուցադրել կողային վահանակը',
@@ -461,6 +463,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}}-ից {{total}} փաստաթղթից {{count}}-ը հաջողությամբ վերաինդեքսավորվեց, և {{skips}} նախագիծ թռիչք դարձան։',
     takeOver: 'Վերցնել վերահսկողությունը',
+    theme: 'Theme',
     thisLanguage: 'Հայերեն',
     time: 'Ժամ',
     timezone: 'Ժամային գոտի',

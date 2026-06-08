@@ -1,0 +1,47 @@
+.user-menu {
+  display: inline-flex;
+  align-items: center;
+}
+
+.user-menu__trigger {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.user-menu__trigger--active {
+  opacity: 0.8;
+}
+
+.user-menu__profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacer-2) var(--spacer-2) var(--spacer-1);
+  gap: var(--spacer-s);
+}
+
+.user-menu__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.user-menu__name {
+  font-size: var(--font-size-s);
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+.user-menu__identifier {
+  font-size: var(--font-size-xs);
+  color: var(--theme-text-muted);
+  margin: 0;
+  text-align: center;
+}

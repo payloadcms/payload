@@ -238,6 +238,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: '另一位用户接管了此文档的编辑。',
     applyChanges: '应用更改',
     ascending: '升序',
+    auto: 'Auto',
     automatic: '自动',
     backToDashboard: '返回到仪表板',
     by: '由',
@@ -425,6 +426,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     selectedCount: '已选择 {{count}} 个 {{label}}',
     selectLabel: '选择 {{label}}',
     selectValue: '选择一个值',
+    settings: 'Settings',
     showAllLabel: '显示所有 {{label}}',
     shownInTable: '在表格中显示',
     showSidebar: '显示侧边栏',
@@ -441,6 +443,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '已成功重新索引 {{count}} 个来自 {{collections}} 的 {{total}} 个文档，并跳过了 {{skips}} 个草稿。',
     takeOver: '接管',
+    theme: 'Theme',
     thisLanguage: '中文 (简体)',
     time: '时间',
     timezone: '时区',

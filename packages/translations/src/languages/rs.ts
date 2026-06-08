@@ -251,6 +251,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Други корисник је преузео уређивање овог документа.',
     applyChanges: 'Примени промене',
     ascending: 'Узлазно',
+    auto: 'Auto',
     automatic: 'Аутоматско',
     backToDashboard: 'Назад на контролни панел',
     by: 'Od strane',
@@ -444,6 +445,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} одабрано',
     selectLabel: 'Izaberite {{label}}',
     selectValue: 'Одабери вредност',
+    settings: 'Settings',
     showAllLabel: 'Прикажи све {{label}}',
     shownInTable: 'Prikazano u tabeli',
     showSidebar: 'Prikaži bočnu traku',
@@ -460,6 +462,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Успешно је реиндексирано {{count}} од укупно {{total}} докумената из {{collections}}, и {{skips}} нацрта је прескочено.',
     takeOver: 'Превузети',
+    theme: 'Theme',
     thisLanguage: 'Српски (ћирилица)',
     time: 'Vreme',
     timezone: 'Vremenska zona',

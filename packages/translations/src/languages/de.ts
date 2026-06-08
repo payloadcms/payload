@@ -257,6 +257,7 @@ export const deTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Ein anderer Benutzer hat die Bearbeitung dieses Dokuments übernommen.',
     applyChanges: 'Änderungen anwenden',
     ascending: 'Aufsteigend',
+    auto: 'Auto',
     automatic: 'Automatisch',
     backToDashboard: 'Zurück zur Übersicht',
     by: 'Von',
@@ -452,6 +453,7 @@ export const deTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} ausgewählt',
     selectLabel: '{{label}} auswählen',
     selectValue: 'Wert auswählen',
+    settings: 'Settings',
     showAllLabel: 'Alle {{label}} anzeigen',
     shownInTable: 'In Tabelle angezeigt',
     showSidebar: 'Seitenleiste anzeigen',
@@ -469,6 +471,7 @@ export const deTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{count}} von insgesamt {{total}} Dokumenten aus {{collections}} wurden erfolgreich neu indexiert, {{skips}} Entwürfe wurden übersprungen.',
     takeOver: 'Übernehmen',
+    theme: 'Theme',
     thisLanguage: 'Deutsch',
     time: 'Zeit',
     timezone: 'Zeitzone',

@@ -250,6 +250,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Cits lietotājs ir pārņēmis šī dokumenta rediģēšanu.',
     applyChanges: 'Pielietot izmaiņas',
     ascending: 'Augošā secībā',
+    auto: 'Auto',
     automatic: 'Automātiski',
     backToDashboard: 'Atpakaļ uz paneli',
     by: 'Autors',
@@ -445,6 +446,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     selectedCount: 'Atlasīti {{count}} {{label}}',
     selectLabel: 'Atlasīt {{label}}',
     selectValue: 'Atlasīt vērtību',
+    settings: 'Settings',
     showAllLabel: 'Rādīt visus {{label}}',
     shownInTable: 'Parādīts tabulā',
     showSidebar: 'Rādīt sānu joslu',
@@ -461,6 +463,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Veiksmīgi pārindeksēti {{count}} no {{total}} dokumentiem no {{collections}}, izlaisti {{skips}} melnraksti.',
     takeOver: 'Pārņemt',
+    theme: 'Theme',
     thisLanguage: 'Latviešu',
     time: 'Laiks',
     timezone: 'Laika zona',

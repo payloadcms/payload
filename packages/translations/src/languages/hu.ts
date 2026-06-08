@@ -253,6 +253,7 @@ export const huTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Egy másik felhasználó átvette ennek a dokumentumnak a szerkesztését.',
     applyChanges: 'Változtatások alkalmazása',
     ascending: 'Növekvő',
+    auto: 'Auto',
     automatic: 'Automatikus',
     backToDashboard: 'Vissza az irányítópultra',
     by: 'Által',
@@ -449,6 +450,7 @@ export const huTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} kiválasztva',
     selectLabel: 'Válassza ki a(z) {{label}} opciót',
     selectValue: 'Válasszon ki egy értéket',
+    settings: 'Settings',
     showAllLabel: 'Mutasd az összes {{címke}}',
     shownInTable: 'Táblázatban megjelenítve',
     showSidebar: 'Oldalsáv megjelenítése',
@@ -465,6 +467,7 @@ export const huTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Sikeresen újraindexelésre került {{count}} a {{total}} dokumentumból a {{collections}} gyűjteményből, és {{skips}} vázlat kerül átugrásra.',
     takeOver: 'Átvétel',
+    theme: 'Theme',
     thisLanguage: 'Magyar',
     time: 'Idő',
     timezone: 'Időzóna',

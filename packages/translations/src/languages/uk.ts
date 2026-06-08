@@ -250,6 +250,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Інший користувач взяв на себе редагування цього документа.',
     applyChanges: 'Застосувати зміни',
     ascending: 'В порядку зростання',
+    auto: 'Auto',
     automatic: 'Автоматично',
     backToDashboard: 'Повернутись до головної сторінки',
     by: 'Від',
@@ -442,6 +443,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     selectedCount: 'Обрано {{count}} {{label}}',
     selectLabel: 'Виберіть {{label}}',
     selectValue: 'Обрати значення',
+    settings: 'Settings',
     showAllLabel: 'Показати всі {{label}}',
     shownInTable: 'Показано у таблиці',
     showSidebar: 'Показати бічну панель',
@@ -458,6 +460,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Успішно переіндексовано {{count}} із {{total}} документів із {{collections}}, пропущено {{skips}} чернеток.',
     takeOver: 'Перехопити',
+    theme: 'Theme',
     thisLanguage: 'Українська',
     time: 'Час',
     timezone: 'Часовий пояс',

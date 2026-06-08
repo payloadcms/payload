@@ -244,6 +244,7 @@ export const faTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'کاربر دیگری ویرایش این صفحه را در دست گرفته است.',
     applyChanges: 'اعمال تغییرات',
     ascending: 'صعودی',
+    auto: 'Auto',
     automatic: 'خودکار',
     backToDashboard: 'بازگشت به داشبورد',
     by: 'توسط',
@@ -437,6 +438,7 @@ export const faTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} انتخاب شد',
     selectLabel: 'انتخاب {{label}}',
     selectValue: 'یک مقدار انتخاب کنید',
+    settings: 'Settings',
     showAllLabel: 'نمایش همه {{label}}',
     shownInTable: 'نمایش داده شده در جدول',
     showSidebar: 'نمایش نوار کناری',
@@ -453,6 +455,7 @@ export const faTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'با موفقیت {{count}} از {{total}} سند از {{collections}} بازشاخص‌گذاری شد و {{skips}} پیش‌نویس رد شد.',
     takeOver: 'ادامه ویرایش',
+    theme: 'Theme',
     thisLanguage: 'فارسی',
     time: 'زمان',
     timezone: 'منطقه زمانی',

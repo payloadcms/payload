@@ -252,6 +252,7 @@ export const skTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Iný používateľ prevzal úpravy tohto dokumentu.',
     applyChanges: 'Použiť zmeny',
     ascending: 'Vzostupne',
+    auto: 'Auto',
     automatic: 'Automatický',
     backToDashboard: 'Späť na nástenku',
     by: 'Autor',
@@ -443,6 +444,7 @@ export const skTranslations: DefaultTranslationsObject = {
     selectedCount: 'Vybrané {{count}} {{label}}',
     selectLabel: 'Vyberte {{label}}',
     selectValue: 'Vybrať hodnotu',
+    settings: 'Settings',
     showAllLabel: 'Zobraziť všetky {{label}}',
     shownInTable: 'Zobrazené v tabuľke',
     showSidebar: 'Zobraziť bočný panel',
@@ -459,6 +461,7 @@ export const skTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Úspešne bolo preindexovaných {{count}} z {{total}} dokumentov z kolekcie {{collections}}, a {{skips}} konceptov bolo preskočených.',
     takeOver: 'Prevziať',
+    theme: 'Theme',
     thisLanguage: 'Slovenčina',
     time: 'Čas',
     timezone: 'Časové pásmo',

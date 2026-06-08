@@ -250,6 +250,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'En annen bruker har tatt over redigeringen av dette dokumentet.',
     applyChanges: 'Bruk endringer',
     ascending: 'Stigende',
+    auto: 'Auto',
     automatic: 'Automatisk',
     backToDashboard: 'Tilbake til kontrollpanel',
     by: 'Av',
@@ -447,6 +448,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} valgt',
     selectLabel: 'Velg {{label}}',
     selectValue: 'Velg en verdi',
+    settings: 'Settings',
     showAllLabel: 'Vis alle {{label}}',
     shownInTable: 'Vist i tabell',
     showSidebar: 'Vis sidepanel',
@@ -463,6 +465,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Vellykket reindeksering av {{count}} av totalt {{total}} dokumenter fra {{collections}}, og {{skips}} utkast ble hoppet over.',
     takeOver: 'Ta over',
+    theme: 'Theme',
     thisLanguage: 'Norsk',
     time: 'Tid',
     timezone: 'Tidssone',

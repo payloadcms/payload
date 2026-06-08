@@ -82,6 +82,7 @@ export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
 export { ViewDescription } from '../../elements/ViewDescription/index.js'
 export { AppHeader } from '../../elements/AppHeader/index.js'
+export { MenuSeparator } from '../../elements/MenuSeparator/index.js'
 export { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 export {
   BulkUploadDrawer,
@@ -246,6 +247,7 @@ import { toast } from 'sonner'
 export { toast }
 export { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 export { Upload } from '../../elements/Upload/index.js'
+export { UserMenu } from '../../elements/UserMenu/index.js'
 export { ListSearchFilter } from '../../elements/Search/ListSearchFilter/index.js'
 export { SearchInput } from '../../elements/Search/SearchInput/index.js'
 export { FilterTrigger } from '../../elements/FilterTrigger/index.js'

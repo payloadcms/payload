@@ -252,6 +252,7 @@ export const trTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Başka bir kullanıcı bu belgenin düzenlemesini devraldı.',
     applyChanges: 'Değişiklikleri Uygula',
     ascending: 'artan',
+    auto: 'Auto',
     automatic: 'Otomatik',
     backToDashboard: 'Anasayfaya geri dön',
     by: 'Tarafından',
@@ -449,6 +450,7 @@ export const trTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} seçildi',
     selectLabel: '{{label}} seçin',
     selectValue: 'Bir değer seçin',
+    settings: 'Settings',
     showAllLabel: 'Tüm {{label}} göster',
     shownInTable: 'Tablo olarak gösterildi',
     showSidebar: 'Kenar çubuğunu göster',
@@ -465,6 +467,7 @@ export const trTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}}’den toplam {{total}} belge arasından {{count}} belge başarıyla yeniden indekslendi ve {{skips}} taslak atlandı.',
     takeOver: 'Devralmak',
+    theme: 'Theme',
     thisLanguage: 'Türkçe',
     time: 'Zaman',
     timezone: 'Saat dilimi',

@@ -248,6 +248,7 @@ export const plTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Inny użytkownik przejął edycję tego dokumentu.',
     applyChanges: 'Zastosuj zmiany',
     ascending: 'Rosnąco',
+    auto: 'Auto',
     automatic: 'Automatyczny',
     backToDashboard: 'Powrót do panelu',
     by: 'Przez',
@@ -443,6 +444,7 @@ export const plTranslations: DefaultTranslationsObject = {
     selectedCount: 'Wybrano {{count}} {{label}}',
     selectLabel: 'Wybierz {{label}}',
     selectValue: 'Wybierz wartość',
+    settings: 'Settings',
     showAllLabel: 'Pokaż wszystkie {{label}}',
     shownInTable: 'Wyświetlane w tabeli',
     showSidebar: 'Pokaż pasek boczny',
@@ -459,6 +461,7 @@ export const plTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Pomyślnie ponownie zindeksowano {{count}} z {{total}} dokumentów z {{collections}}, pomijając {{skips}} szkice.',
     takeOver: 'Przejąć',
+    theme: 'Theme',
     thisLanguage: 'Polski',
     time: 'Czas',
     timezone: 'Strefa czasowa',

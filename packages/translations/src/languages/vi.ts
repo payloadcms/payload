@@ -250,6 +250,7 @@ export const viTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Người dùng khác đã tiếp quản việc chỉnh sửa tài liệu này.',
     applyChanges: 'Áp dụng thay đổi',
     ascending: 'Tăng dần',
+    auto: 'Auto',
     automatic: 'Tự động',
     backToDashboard: 'Quay lại bảng điều khiển',
     by: 'Bởi',
@@ -444,6 +445,7 @@ export const viTranslations: DefaultTranslationsObject = {
     selectedCount: 'Đã chọn {{count}} {{label}}',
     selectLabel: 'Chọn {{label}}',
     selectValue: 'Chọn một giá trị',
+    settings: 'Settings',
     showAllLabel: 'Hiển thị tất cả {{label}}',
     shownInTable: 'Hiển thị trong bảng',
     showSidebar: 'Hiển thị thanh bên',
@@ -460,6 +462,7 @@ export const viTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Đã lập chỉ mục lại thành công {{count}} trên tổng số {{total}} tài liệu từ {{collections}}, và bỏ qua {{skips}} bản nháp.',
     takeOver: 'Tiếp quản',
+    theme: 'Theme',
     thisLanguage: 'Vietnamese (Tiếng Việt)',
     time: 'Thời gian',
     timezone: 'Múi giờ',

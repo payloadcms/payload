@@ -249,6 +249,7 @@ export const daTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'En anden bruger har overtaget denne ressource.',
     applyChanges: 'Tilføj ændringer',
     ascending: 'Stigende',
+    auto: 'Auto',
     automatic: 'Automatisk',
     backToDashboard: 'Tilbage til dashboard',
     by: 'Af',
@@ -445,6 +446,7 @@ export const daTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} valgt',
     selectLabel: 'Vælg {{label}}',
     selectValue: 'Vælg en værdi',
+    settings: 'Settings',
     showAllLabel: 'Vis alle {{label}}',
     shownInTable: 'Vises i tabel',
     showSidebar: 'Vis sidepanel',
@@ -461,6 +463,7 @@ export const daTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{count}} ud af {{total}} dokumenter fra {{collections}} blev succesfuldt genindekseret, og {{skips}} kladder blev sprunget over.',
     takeOver: 'Overtag',
+    theme: 'Theme',
     thisLanguage: 'Dansk',
     time: 'Tid',
     timezone: 'Tidszone',

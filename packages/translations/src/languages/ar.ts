@@ -243,6 +243,7 @@ export const arTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'قام مستخدم آخر بالاستيلاء على تحرير هذا المستند.',
     applyChanges: 'طبق التغييرات',
     ascending: 'تصاعدي',
+    auto: 'Auto',
     automatic: 'تلقائي',
     backToDashboard: 'العودة للوحة التّحكّم',
     by: 'بواسطة',
@@ -435,6 +436,7 @@ export const arTranslations: DefaultTranslationsObject = {
     selectedCount: 'تم تحديد {{count}} {{label}}',
     selectLabel: 'حدد {{label}}',
     selectValue: 'اختيار قيمة',
+    settings: 'Settings',
     showAllLabel: 'عرض كل {{label}}',
     shownInTable: 'معروض في جدول',
     showSidebar: 'إظهار الشريط الجانبي',
@@ -451,6 +453,7 @@ export const arTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'تمت إعادة فهرسة {{count}} من أصل {{total}} مستند من {{collections}} وتخطي {{skips}} مسودة.',
     takeOver: 'تولي',
+    theme: 'Theme',
     thisLanguage: 'العربية',
     time: 'الوقت',
     timezone: 'المنطقة الزمنية',

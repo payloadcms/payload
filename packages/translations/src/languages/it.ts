@@ -254,6 +254,7 @@ export const itTranslations: DefaultTranslationsObject = {
       'Un altro utente ha preso il controllo della modifica di questo documento.',
     applyChanges: 'Applica modifiche',
     ascending: 'Ascendente',
+    auto: 'Auto',
     automatic: 'Automatico',
     backToDashboard: 'Torna alla Dashboard',
     by: 'Da',
@@ -449,6 +450,7 @@ export const itTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} selezionato',
     selectLabel: 'Seleziona {{label}}',
     selectValue: 'Seleziona un valore',
+    settings: 'Settings',
     showAllLabel: 'Mostra tutti {{label}}',
     shownInTable: 'Visualizzato in tabella',
     showSidebar: 'Mostra barra laterale',
@@ -465,6 +467,7 @@ export const itTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Sono stati reindicizzati con successo {{count}} dei {{total}} documenti da {{collections}}, e {{skips}} bozze sono state saltate.',
     takeOver: 'Prendi il controllo',
+    theme: 'Theme',
     thisLanguage: 'Italiano',
     time: 'Tempo',
     timezone: 'Fuso orario',

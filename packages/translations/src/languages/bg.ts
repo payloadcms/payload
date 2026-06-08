@@ -249,6 +249,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Друг потребител пое редактирането на този документ.',
     applyChanges: 'Приложи промените',
     ascending: 'Възходящ',
+    auto: 'Auto',
     automatic: 'Автоматична',
     backToDashboard: 'Обратно към таблото',
     by: 'От',
@@ -444,6 +445,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} избрани',
     selectLabel: 'Изберете {{label}}',
     selectValue: 'Избери стойност',
+    settings: 'Settings',
     showAllLabel: 'Покажи всички {{label}}',
     shownInTable: 'Показано в таблица',
     showSidebar: 'Показване на страничната лента',
@@ -460,6 +462,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Успешно преиндексирани {{count}} от общо {{total}} документа от {{collections}} и пропуснати {{skips}} чернови.',
     takeOver: 'Поемане',
+    theme: 'Theme',
     thisLanguage: 'Български',
     time: 'Време',
     timezone: 'Часова зона',

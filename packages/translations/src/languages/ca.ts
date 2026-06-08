@@ -251,6 +251,7 @@ export const caTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: "Un altre usuari ha pres la edició d'aquest document.",
     applyChanges: 'Apica els canvis',
     ascending: 'Ascendent',
+    auto: 'Auto',
     automatic: 'Automàtic',
     backToDashboard: 'Torna al tauler',
     by: 'Per',
@@ -447,6 +448,7 @@ export const caTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} seleccionats',
     selectLabel: 'Selecciona {{label}}',
     selectValue: 'Selecciona un valor',
+    settings: 'Settings',
     showAllLabel: 'Mostra totes {{label}}',
     shownInTable: 'Mostrat en taula',
     showSidebar: 'Mostra la barra lateral',
@@ -463,6 +465,7 @@ export const caTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       "S'han reindexat correctament {{count}} de {{total}} documents de {{collections}} i s'han omès {{skips}} esborranys.",
     takeOver: 'Prendre el control',
+    theme: 'Theme',
     thisLanguage: 'Catala',
     time: 'Temps',
     timezone: 'Fus horari',
