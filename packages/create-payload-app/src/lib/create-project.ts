@@ -131,8 +131,10 @@ export async function createProject(
     })
   }
 
+  const tag = cliArgs['--tag'] ?? 'latest'
+
   const spinner = p.spinner()
-  spinner.start('Checking latest Payload version...')
+  spinner.start(`Checking ${tag} Payload version...`)
 
   // Allows overriding the installed Payload version instead of installing the latest
   const versionFromCli = cliArgs['--version']
@@ -151,7 +153,7 @@ export async function createProject(
       tag: cliArgs['--tag'],
     })
 
-    spinner.stop(`Found latest version of Payload ${payloadVersion}`)
+    spinner.stop(`Found ${tag} version of Payload ${payloadVersion}`)
   }
 
   await updatePackageJSON({ latestVersion: payloadVersion, projectDir, projectName })
