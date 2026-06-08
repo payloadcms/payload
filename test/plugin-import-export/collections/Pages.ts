@@ -233,6 +233,25 @@ export const Pages: CollectionConfig = {
             },
           ],
         },
+        {
+          slug: 'faqSection',
+          fields: [
+            {
+              name: 'faqs',
+              type: 'array',
+              fields: [
+                {
+                  name: 'question',
+                  type: 'text',
+                },
+                {
+                  name: 'answer',
+                  type: 'richText',
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
