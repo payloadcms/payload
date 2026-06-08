@@ -51,7 +51,10 @@ import { findGlobalVersions } from './findGlobalVersions.js'
 import { findOne } from './findOne.js'
 import { findVersions } from './findVersions.js'
 import { init } from './init.js'
+import { migrateFieldDelocalized } from './migrateFieldDelocalized.js'
+import { migrateFieldLocalized } from './migrateFieldLocalized.js'
 import { migrateFresh } from './migrateFresh.js'
+import { migrateVersionsEnabled } from './migrateVersionsEnabled.js'
 import { queryDrafts } from './queryDrafts.js'
 import { beginTransaction } from './transactions/beginTransaction.js'
 import { commitTransaction } from './transactions/commitTransaction.js'
@@ -323,7 +326,10 @@ export function mongooseAdapter({
       findOne,
       findVersions,
       init,
+      migrateFieldDelocalized,
+      migrateFieldLocalized,
       migrateFresh,
+      migrateVersionsEnabled,
       migrationDir,
       packageName: '@payloadcms/db-mongodb',
       payload,

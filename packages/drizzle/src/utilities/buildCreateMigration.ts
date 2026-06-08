@@ -3,7 +3,16 @@ import type { CreateMigration, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
-import { getPredefinedMigration, writeMigrationIndex } from 'payload'
+import {
+  bootstrapConfigState,
+  diffConfig,
+  generateDataMigrationCode,
+  getPredefinedMigration,
+  readConfigState,
+  resolvePrompts,
+  serializeConfig,
+  writeMigrationIndex,
+} from 'payload'
 import prompts from 'prompts'
 
 import type { DrizzleAdapter } from '../types.js'
@@ -74,6 +83,30 @@ export const buildCreateMigration = ({
       }
     }
 
+    // Config-diff: compute data migrations before DDL to inform empty-migration check
+    const prevSnapshot = await readConfigState(dir)
+    const nextSnapshot = serializeConfig(payload.config)
+    let dataUpCode = ''
+    let dataDownCode = ''
+
+    if (prevSnapshot !== null) {
+      const changes = diffConfig(prevSnapshot, nextSnapshot)
+      if (changes.length > 0) {
+        const { shouldAbort } = await resolvePrompts(changes)
+        if (shouldAbort) {
+          process.exit(1)
+        }
+        const localization = payload.config.localization || null
+        const { downCode, upCode } = generateDataMigrationCode(changes, {
+          defaultLocale: localization?.defaultLocale,
+        })
+        dataUpCode = upCode
+        dataDownCode = downCode
+      }
+    } else {
+      await bootstrapConfigState(payload, dir)
+    }
+
     let drizzleJsonBefore = this.defaultDrizzleSnapshot as DrizzleSnapshotJSON
 
     if (this.schemaName) {
@@ -115,7 +148,7 @@ export const buildCreateMigration = ({
         downSQL = sanitizeStatements({ sqlExecute, statements: sqlStatementsDown })
       }
 
-      if (!upSQL?.length && !downSQL?.length && !forceAcceptWarning) {
+      if (!upSQL?.length && !downSQL?.length && !dataUpCode && !forceAcceptWarning) {
         if (skipEmpty) {
           process.exit(0)
         }
@@ -141,6 +174,13 @@ export const buildCreateMigration = ({
 
       // write schema
       fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
+    }
+
+    if (dataUpCode) {
+      upSQL = upSQL ? `${upSQL}\n${dataUpCode}` : dataUpCode
+    }
+    if (dataDownCode) {
+      downSQL = downSQL ? `${downSQL}\n${dataDownCode}` : dataDownCode
     }
 
     const data = getMigrationTemplate({

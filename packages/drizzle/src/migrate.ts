@@ -6,6 +6,8 @@ import {
   initTransaction,
   killTransaction,
   readMigrationFiles,
+  serializeConfig,
+  writeConfigState,
 } from 'payload'
 import prompts from 'prompts'
 
@@ -85,6 +87,9 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
 
     await runMigrationFile(payload, migration, newBatch)
   }
+
+  // Update config snapshot after all migrations succeed
+  await writeConfigState(payload.db.migrationDir, serializeConfig(payload.config))
 }
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {

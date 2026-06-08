@@ -4,6 +4,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { serializeConfig, writeConfigState } from './config/index.js'
 import { getMigrations } from './getMigrations.js'
 import { readMigrationFiles } from './readMigrationFiles.js'
 
@@ -53,4 +54,7 @@ export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
       throw err
     }
   }
+
+  // Update config snapshot after all migrations succeed
+  await writeConfigState(payload.db.migrationDir, serializeConfig(payload.config))
 }

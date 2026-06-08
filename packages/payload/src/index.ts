@@ -1419,6 +1419,15 @@ export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
 export { flattenWhereToOperators } from './database/flattenWhereToOperators.js'
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
+export {
+  bootstrapConfigState,
+  diffConfig,
+  generateDataMigrationCode,
+  readConfigState,
+  resolvePrompts,
+  serializeConfig,
+  writeConfigState,
+} from './database/migrations/config/index.js'
 export { createMigration } from './database/migrations/createMigration.js'
 export { findMigrationDir } from './database/migrations/findMigrationDir.js'
 export { getMigrations } from './database/migrations/getMigrations.js'

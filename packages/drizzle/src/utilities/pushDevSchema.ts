@@ -1,4 +1,5 @@
 import { dequal } from 'dequal'
+import { diffConfig, readConfigState, serializeConfig } from 'payload'
 import prompts from 'prompts'
 
 import type { BasePostgresAdapter } from '../postgres/types.js'
@@ -86,6 +87,25 @@ export const pushDevSchema = async (adapter: DrizzleAdapter) => {
   }
 
   await apply()
+
+  // Warn if config changes require a data migration that dev push cannot handle
+  const prevSnapshot = await readConfigState(adapter.migrationDir)
+  if (prevSnapshot !== null) {
+    const changes = diffConfig(prevSnapshot, serializeConfig(adapter.payload.config))
+    const dataChanges = changes.filter(
+      (c) => !['autosave_enabled', 'locale_added', 'versions_enabled'].includes(c.type),
+    )
+    if (dataChanges.length > 0) {
+      adapter.payload.logger.warn(
+        `[payload] Config changes detected that require a data migration:\n` +
+          dataChanges
+            .map((c) => `  • ${c.type} on "${(c as any).slug ?? (c as any).locale}"`)
+            .join('\n') +
+          `\nRun "payload migrate:create" and "payload migrate" to apply.`,
+      )
+    }
+  }
+
   const migrationsTable = adapter.schemaName
     ? `"${adapter.schemaName}"."payload_migrations"`
     : '"payload_migrations"'

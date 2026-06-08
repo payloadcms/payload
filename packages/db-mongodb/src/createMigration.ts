@@ -2,7 +2,16 @@ import type { CreateMigration, MigrationTemplateArgs } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
-import { getPredefinedMigration, writeMigrationIndex } from 'payload'
+import {
+  bootstrapConfigState,
+  diffConfig,
+  generateDataMigrationCode,
+  getPredefinedMigration,
+  readConfigState,
+  resolvePrompts,
+  serializeConfig,
+  writeMigrationIndex,
+} from 'payload'
 import { fileURLToPath } from 'url'
 
 const migrationTemplate = ({ downSQL, imports, upSQL }: MigrationTemplateArgs): string => `import {
@@ -39,7 +48,47 @@ export const createMigration: CreateMigration = async function createMigration({
     payload,
   })
 
-  const migrationFileContent = migrationTemplate(predefinedMigration)
+  // Config-diff: compute data migrations to append
+  const prevSnapshot = await readConfigState(dir)
+  const nextSnapshot = serializeConfig(payload.config)
+  let dataUpCode = ''
+  let dataDownCode = ''
+
+  if (prevSnapshot !== null) {
+    const changes = diffConfig(prevSnapshot, nextSnapshot)
+    if (changes.length > 0) {
+      const { shouldAbort } = await resolvePrompts(changes)
+      if (shouldAbort) {
+        process.exit(1)
+      }
+      const localization = payload.config.localization || null
+      const { downCode, upCode } = generateDataMigrationCode(changes, {
+        defaultLocale: localization?.defaultLocale,
+      })
+      dataUpCode = upCode
+      dataDownCode = downCode
+    }
+  } else {
+    await bootstrapConfigState(payload, dir)
+  }
+
+  const hasContent = predefinedMigration.upSQL || predefinedMigration.downSQL || dataUpCode
+
+  if (skipEmpty && !hasContent) {
+    writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
+    return
+  }
+
+  const mergedUpSQL =
+    [predefinedMigration.upSQL, dataUpCode].filter(Boolean).join('\n') || undefined
+  const mergedDownSQL =
+    [predefinedMigration.downSQL, dataDownCode].filter(Boolean).join('\n') || undefined
+
+  const migrationFileContent = migrationTemplate({
+    ...predefinedMigration,
+    downSQL: mergedDownSQL,
+    upSQL: mergedUpSQL,
+  })
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
 
@@ -52,9 +101,7 @@ export const createMigration: CreateMigration = async function createMigration({
   const fileName = migrationName ? `${timestamp}_${formattedName}.ts` : `${timestamp}_migration.ts`
   const filePath = `${dir}/${fileName}`
 
-  if (!skipEmpty) {
-    fs.writeFileSync(filePath, migrationFileContent)
-  }
+  fs.writeFileSync(filePath, migrationFileContent)
 
   writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
 

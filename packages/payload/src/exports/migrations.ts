@@ -16,4 +16,5 @@
  * ```
  */
 
+export { batchTransform } from '../database/migrations/config/batchTransform.js'
 export { localizeStatus } from '../versions/migrations/localizeStatus/index.js'
