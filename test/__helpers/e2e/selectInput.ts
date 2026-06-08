@@ -1,4 +1,4 @@
-import { expect, type Locator } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
 import { exactText } from './helpers.js'
 
@@ -33,22 +33,27 @@ const selectors = {
 }
 
 /**
- * Returns a Locator for the portaled menu belonging to a specific ReactSelect
- * container. ReactSelect menus are rendered at document.body via a React portal,
- * so they are not DOM descendants of the select container. This helper uses the
- * `aria-controls` attribute on the hidden input — which react-select sets to the
- * listbox ID — to scope the menu lookup to the correct instance.
+ * Returns a Locator for the portaled ReactSelect menu.
  *
- * Falls back to `page.locator('.rs__menu')` when the attribute is not yet present
- * (e.g. before the menu has been opened for the first time).
+ * Pass `{ selectLocator }` to scope the lookup to a specific select instance —
+ * the helper reads the `aria-controls` attribute that react-select sets on its
+ * hidden input to locate the unique listbox element, even after it has been
+ * portaled to `document.body`.
+ *
+ * Pass `{ page }` as a simpler fallback when only one menu is open at a time and
+ * you don't need per-instance scoping.
+ *
+ * Using this helper instead of raw `.locator('.rs__menu')` keeps the CSS class
+ * name in one place, so a future attribute change only requires updating here.
  */
-export async function getSelectMenu({
-  selectLocator,
-}: {
-  selectLocator: Locator
-}): Promise<Locator> {
-  const page = selectLocator.page()
-  const menuId = await selectLocator.locator('.rs__input').getAttribute('aria-controls')
+export async function getSelectMenu(
+  args: { selectLocator: Locator } | { page: Page },
+): Promise<Locator> {
+  if ('page' in args) {
+    return args.page.locator('.rs__menu')
+  }
+  const page = args.selectLocator.page()
+  const menuId = await args.selectLocator.locator('.rs__input').getAttribute('aria-controls')
   if (menuId) {
     return page.locator(`#${menuId}`)
   }

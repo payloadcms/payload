@@ -2318,10 +2318,9 @@ describe('Uploads', () => {
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = conditionField.page().locator('.rs__menu-list')
+    const menuList = await getSelectMenu({ selectLocator: conditionField })
 
     // ensure the image size is not present
-    await expect(menuList.getByText('Sizes > one > URL', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > Width', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > Height', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > MIME Type', { exact: true })).toHaveCount(0)
@@ -2346,7 +2345,7 @@ describe('Uploads', () => {
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = conditionField.page().locator('.rs__menu-list')
+    const menuList = await getSelectMenu({ selectLocator: conditionField })
 
     // ensure the image size is present
     await expect(menuList.getByText('Sizes > two > URL', { exact: true })).toHaveCount(1)

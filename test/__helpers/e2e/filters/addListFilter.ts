@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { selectInput } from '../selectInput.js'
+import { getSelectMenu, selectInput } from '../selectInput.js'
 import { openListFilters } from './openListFilters.js'
 
 export const addListFilter = async ({
@@ -87,8 +87,8 @@ export const addListFilter = async ({
         const valueInput = valueLocator.locator('input')
         await valueInput.fill(value)
 
-        const valueOptions = page.locator('.rs__menu .rs__option')
-        const createValue = valueOptions.locator(`text=Create "${value}"`)
+        const menu = await getSelectMenu({ page })
+        const createValue = menu.locator('.rs__option', { hasText: `Create "${value}"` })
         if ((await createValue.count()) > 0) {
           await createValue.click()
         } else {

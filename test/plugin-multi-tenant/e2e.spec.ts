@@ -22,6 +22,7 @@ import {
   clearSelectInput,
   getSelectInputOptions,
   getSelectInputValue,
+  getSelectMenu,
   selectInput,
 } from '../__helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
@@ -472,7 +473,7 @@ test.describe('Multi Tenant', () => {
       await expect(page.getByText('Blue Dog Menu')).toBeVisible()
       await expect(page.getByText('Steel Cat Menu')).toBeHidden()
       await expect(page.getByText('Anchor Bar Menu')).toBeHidden()
-      await expect(page.locator('.rs__menu')).toHaveCount(1)
+      await expect(await getSelectMenu({ page })).toHaveCount(1)
     })
   })
 

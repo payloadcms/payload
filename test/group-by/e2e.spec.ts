@@ -25,6 +25,7 @@ import {
 } from '../__helpers/e2e/helpers.js'
 import { navigateToListView } from '../__helpers/e2e/navigateToListView.js'
 import { deletePreferences } from '../__helpers/e2e/preferences.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -668,10 +669,7 @@ test.describe('Group By', () => {
     await expect(modal).toBeVisible()
 
     await modal.locator('.field-select .rs__control').click()
-    await modal
-      .page()
-      .locator('.rs__menu .rs__option', { hasText: exactText('Title') })
-      .click()
+    await (await getSelectMenu({ page })).locator('.rs__option', { hasText: exactText('Title') }).click()
 
     const field = modal.locator(`#field-title`)
     await expect(field).toBeVisible()
@@ -759,10 +757,7 @@ test.describe('Group By', () => {
     await modal.locator('.field-select .rs__control').click()
     await wait(500)
 
-    await modal
-      .page()
-      .locator('.rs__menu .rs__option', { hasText: exactText('Title') })
-      .click()
+    await (await getSelectMenu({ page })).locator('.rs__option', { hasText: exactText('Title') }).click()
     await wait(500)
 
     const field = modal.locator(`#field-title`)

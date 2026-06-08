@@ -490,7 +490,7 @@ describe('lexicalMain', () => {
     const reactSelect = newSelectBlock.locator('.rs__control').first()
     await reactSelect.click()
 
-    const popover = page.locator('.rs__menu').first()
+    const popover = await getSelectMenu({ page })
     const popoverOption3 = popover.locator('.rs__option').nth(2)
 
     await expect(async () => {
@@ -793,8 +793,8 @@ describe('lexicalMain', () => {
       // Should have collection selector since all collections are available
       await expect(page.locator('.rs__input')).toBeVisible()
       await page.locator('.rs__input').first().click()
-      await expect(page.locator('.rs__menu').getByText('Uploads')).toHaveCount(1)
-      await expect(page.locator('.rs__menu').getByText('Uploads2')).toHaveCount(1)
+      await expect((await getSelectMenu({ page })).getByText('Uploads')).toHaveCount(1)
+      await expect((await getSelectMenu({ page })).getByText('Uploads2')).toHaveCount(1)
     })
 
     test('disabledCollections should work with UploadFeature', async () => {
@@ -877,7 +877,7 @@ describe('lexicalMain', () => {
     await wait(500)
 
     await relationshipListDrawer.locator('.rs__input').first().click()
-    await relationshipListDrawer.page().locator('.rs__menu').getByText('Lexical Field').click()
+    await (await getSelectMenu({ page })).getByText('Lexical Field').click()
 
     await relationshipListDrawer.locator('button').getByText('Rich Text').first().click()
     await expect(relationshipListDrawer).toBeHidden()

@@ -414,12 +414,9 @@ describe('List View', () => {
       await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
-        conditionField
-          .page()
-          .locator('.rs__menu-list')
-          .locator('div', {
-            hasText: exactText('Title'),
-          }),
+        (await getSelectMenu({ selectLocator: conditionField })).locator('div', {
+          hasText: exactText('Title'),
+        }),
       ).toBeVisible()
     })
 
@@ -433,7 +430,7 @@ describe('List View', () => {
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
 
-      const menuList = conditionField.page().locator('.rs__menu-list')
+      const menuList = await getSelectMenu({ selectLocator: conditionField })
 
       // ensure the virtual field is not present
       await expect(menuList.locator('div', { hasText: exactText('Virtual Text') })).toHaveCount(0)
@@ -562,9 +559,8 @@ describe('List View', () => {
 
       await whereBuilder.locator('.condition__value').click()
 
-      const valueOptions = await whereBuilder
-        .page()
-        .locator('.rs__menu .rs__option')
+      const valueOptions = await (await getSelectMenu({ page }))
+        .locator('.rs__option')
         .evaluateAll((options) => options.map((option) => option.textContent))
 
       expect(valueOptions).not.toContain('post1')
@@ -866,7 +862,9 @@ describe('List View', () => {
       const condition2 = page.locator('.condition__field').nth(1)
       await condition2.click()
       await expect(
-        condition2?.page().locator('.rs__menu-list:has-text("Disable List Filter Text")'),
+        (await getSelectMenu({ selectLocator: condition2 })).filter({
+          hasText: 'Disable List Filter Text',
+        }),
       ).toBeHidden()
     })
 
@@ -883,7 +881,7 @@ describe('List View', () => {
       await valueField.click()
       await page.keyboard.type('4')
 
-      const options = whereBuilder.page().locator('.rs__menu .rs__option')
+      const options = (await getSelectMenu({ page })).locator('.rs__option')
 
       await expect(options).toHaveCount(10)
 
