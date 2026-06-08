@@ -4,12 +4,17 @@ import type {
   SerializedParagraphNode,
   WithDefaultNodes,
 } from '@payloadcms/richtext-lexical'
+import type * as Runtime from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { JSXConverters, JSXConvertersFunction } from '@payloadcms/richtext-lexical/react'
 
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { describe, expect, test } from 'tstyche'
 
+// Every lexical node type is written twice: as a runtime type, and as a hardcoded string emitted into
+// the generated payload-types.ts. `Runtime.*` are the real types; `Generated.*` are the emitted
+// strings materialized. The `stay in sync` block at the bottom compares them.
+import type * as Generated from './payload-types.js'
 import type {
   BannerBlock,
   LexicalFullyFeatured,
@@ -147,18 +152,18 @@ describe('constructing a block node literal narrows by blockType', () => {
 
   test('a valid field for the block is accepted', () => {
     expect(accept).type.toBeCallableWith({
-      fields: { blockType: 'Code', code: 'console.log()', id: '1' },
-      format: '',
       type: 'block',
+      fields: { id: '1', blockType: 'Code', code: 'console.log()' },
+      format: '',
       version: 0,
     })
   })
 
   test('a property that does not exist on the block is rejected', () => {
     expect(accept).type.not.toBeCallableWith({
-      fields: { blockType: 'Code', bogus: 'x', id: '1' },
-      format: '',
       type: 'block',
+      fields: { id: '1', blockType: 'Code', bogus: 'x' },
+      format: '',
       version: 0,
     })
   })
@@ -166,10 +171,137 @@ describe('constructing a block node literal narrows by blockType', () => {
   test('a field from another block is rejected', () => {
     expect(accept).type.not.toBeCallableWith({
       // `someText` belongs to the myBlock block, not Code.
-      fields: { blockType: 'Code', id: '1', someText: 'x' },
-      format: '',
       type: 'block',
+      fields: { id: '1', blockType: 'Code', someText: 'x' },
+      format: '',
       version: 0,
     })
+  })
+})
+
+// Each lexical node type is declared twice in the source: as the real runtime type, and as a
+// hardcoded `*_TS` string copied verbatim into every generated payload-types.ts (each tagged "MUST
+// stay byte-for-byte in sync"). Nothing enforces that, so these assertions compare the runtime type
+// (`Runtime.*`) against the same type materialized from the emitted string (`Generated.*`) - one per
+// node - and fail if a runtime type and its emitted string ever drift apart.
+describe('emitted node strings stay in sync with the runtime types', () => {
+  // A sample children element and a sample block/link fields object - passed identically to both
+  // sides, so each assertion isolates the node's own shape rather than its generic argument.
+  interface Child {
+    type: 'sample'
+    version: number
+  }
+  interface Fields {
+    blockName?: null | string
+    blockType: 'sample'
+    id: string
+    value: number
+  }
+
+  // No type parameters
+  test('LexicalTextMode', () => {
+    expect<Runtime.LexicalTextMode>().type.toBe<Generated.LexicalTextMode>()
+  })
+  test('LexicalElementFormat', () => {
+    expect<Runtime.LexicalElementFormat>().type.toBe<Generated.LexicalElementFormat>()
+  })
+  test('LexicalElementDirection', () => {
+    expect<Runtime.LexicalElementDirection>().type.toBe<Generated.LexicalElementDirection>()
+  })
+  test('SerializedTextNode', () => {
+    expect<Runtime.SerializedTextNode>().type.toBe<Generated.SerializedTextNode>()
+  })
+  test('SerializedTabNode', () => {
+    expect<Runtime.SerializedTabNode>().type.toBe<Generated.SerializedTabNode>()
+  })
+  test('SerializedLineBreakNode', () => {
+    expect<Runtime.SerializedLineBreakNode>().type.toBe<Generated.SerializedLineBreakNode>()
+  })
+  test('SerializedHorizontalRuleNode', () => {
+    expect<Runtime.SerializedHorizontalRuleNode>().type.toBe<Generated.SerializedHorizontalRuleNode>()
+  })
+  test('LinkFields / LexicalLinkFields', () => {
+    expect<Runtime.LinkFields>().type.toBe<Generated.LexicalLinkFields>()
+  })
+
+  // Generic over children
+  test('SerializedLexicalElementBase', () => {
+    expect<Runtime.SerializedLexicalElementBase<Child>>().type.toBe<
+      Generated.SerializedLexicalElementBase<Child>
+    >()
+  })
+  test('SerializedParagraphNode', () => {
+    expect<Runtime.SerializedParagraphNode<Child>>().type.toBe<
+      Generated.SerializedParagraphNode<Child>
+    >()
+  })
+  test('SerializedQuoteNode', () => {
+    expect<Runtime.SerializedQuoteNode<Child>>().type.toBe<Generated.SerializedQuoteNode<Child>>()
+  })
+  test('SerializedListNode', () => {
+    expect<Runtime.SerializedListNode<Child>>().type.toBe<Generated.SerializedListNode<Child>>()
+  })
+  test('SerializedListItemNode', () => {
+    expect<Runtime.SerializedListItemNode<Child>>().type.toBe<
+      Generated.SerializedListItemNode<Child>
+    >()
+  })
+  test('SerializedTableNode', () => {
+    expect<Runtime.SerializedTableNode<Child>>().type.toBe<Generated.SerializedTableNode<Child>>()
+  })
+  test('SerializedTableCellNode', () => {
+    expect<Runtime.SerializedTableCellNode<Child>>().type.toBe<
+      Generated.SerializedTableCellNode<Child>
+    >()
+  })
+  test('SerializedTableRowNode', () => {
+    expect<Runtime.SerializedTableRowNode<Child>>().type.toBe<
+      Generated.SerializedTableRowNode<Child>
+    >()
+  })
+
+  // Children plus an extra parameter
+  test('SerializedHeadingNode', () => {
+    expect<Runtime.SerializedHeadingNode<Child, 'h1'>>().type.toBe<
+      Generated.SerializedHeadingNode<Child, 'h1'>
+    >()
+  })
+  test('SerializedLinkNode', () => {
+    expect<Runtime.SerializedLinkNode<Child, Fields>>().type.toBe<
+      Generated.SerializedLinkNode<Child, Fields>
+    >()
+  })
+  test('SerializedAutoLinkNode', () => {
+    expect<Runtime.SerializedAutoLinkNode<Child, Fields>>().type.toBe<
+      Generated.SerializedAutoLinkNode<Child, Fields>
+    >()
+  })
+
+  // Block fields
+  test('SerializedBlockNode', () => {
+    expect<Runtime.SerializedBlockNode<Fields>>().type.toBe<Generated.SerializedBlockNode<Fields>>()
+  })
+  test('SerializedInlineBlockNode', () => {
+    expect<Runtime.SerializedInlineBlockNode<Fields>>().type.toBe<
+      Generated.SerializedInlineBlockNode<Fields>
+    >()
+  })
+
+  // Relationship / upload resolve their `value` against the editor's collections, so compare with a
+  // concrete slug ('uploads' is an upload collection; 'lexical-fully-featured' is a regular one).
+  test('SerializedRelationshipNode', () => {
+    expect<Runtime.SerializedRelationshipNode<'lexical-fully-featured'>>().type.toBe<
+      Generated.SerializedRelationshipNode<'lexical-fully-featured'>
+    >()
+  })
+  test('SerializedUploadNode', () => {
+    expect<Runtime.SerializedUploadNode<'uploads'>>().type.toBe<
+      Generated.SerializedUploadNode<'uploads'>
+    >()
+  })
+
+  // The root `richText` field wrapper (ROOT_NODE_TS).
+  test('LexicalRichText', () => {
+    expect<Runtime.LexicalRichText<Child>>().type.toBe<Generated.LexicalRichText<Child>>()
   })
 })
