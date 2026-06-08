@@ -458,19 +458,19 @@ const buildVersionField = ({
           ) as FlattenedBlock | undefined)
 
         if (fromBlock && fromBlockSlugToMatch !== toBlock.slug) {
-          // Truly different block types: keep toBlock's full field structure (including unnamed
-          // layout fields) at correct positions, then append any uniquely-named fields from
-          // fromBlock. getUniqueListBy cannot be used here — all unnamed fields (groups, rows)
-          // have name=undefined, so Map collapses them to one entry at position 0, breaking
-          // schema path index calculation for fields inside those containers.
+          // For truly different block types:
+          // Keep toBlock's full field structure at correct positions (including unnamed fields), then append any uniquely-named fields from fromBlock.
+          // `getUniqueListBy` cannot be used here — all unnamed fields will collapse to a single entry, causing incorrect index paths.
           const toNamedFieldNames = new Set(
             toBlock.fields
               .filter((f) => 'name' in f)
               .map((f) => (f as { name: string } & Field).name),
           )
+
           const uniqueFromNamedFields = fromBlock.fields.filter(
             (f) => 'name' in f && !toNamedFieldNames.has((f as { name: string } & Field).name),
           )
+
           fields = [...toBlock.fields, ...uniqueFromNamedFields]
         } else {
           fields = toBlock.fields
