@@ -29,7 +29,7 @@ type InitNextArgs = {
   packageManager: PackageManager
   projectDir: string
   useDistFiles?: boolean
-} & Pick<CliArgs, '--debug'>
+} & Pick<CliArgs, '--debug' | '--tag'>
 
 type InitNextResult =
   | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
@@ -89,7 +89,12 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
     return { ...configurationResult, isSrcDir, success: false }
   }
 
-  const { success: installSuccess } = await installDeps(projectDir, packageManager, dbType)
+  const { success: installSuccess } = await installDeps(
+    projectDir,
+    packageManager,
+    dbType,
+    args['--tag'],
+  )
   if (!installSuccess) {
     installSpinner.stop('Failed to install dependencies', 1)
     return {
@@ -221,14 +226,21 @@ async function installAndConfigurePayload(
   }
 }
 
-async function installDeps(projectDir: string, packageManager: PackageManager, dbType: DbType) {
+async function installDeps(
+  projectDir: string,
+  packageManager: PackageManager,
+  dbType: DbType,
+  tag?: string,
+) {
   const { getDbPackageName } = await import('./ast/adapter-config.js')
 
+  const distTag = tag ?? 'latest'
+
   const packagesToInstall = ['payload', '@payloadcms/next', '@payloadcms/richtext-lexical'].map(
-    (pkg) => `${pkg}@latest`,
+    (pkg) => `${pkg}@${distTag}`,
   )
 
-  packagesToInstall.push(`${getDbPackageName(dbType)}@latest`)
+  packagesToInstall.push(`${getDbPackageName(dbType)}@${distTag}`)
 
   // Match graphql version of @payloadcms/next
   packagesToInstall.push('graphql@^16.8.1')
