@@ -37,6 +37,10 @@
     --dialog-width: 480px;
   }
 
+  .dialog--large {
+    --dialog-width: 640px;
+  }
+
   .dialog__header {
     display: flex;
     align-items: center;
