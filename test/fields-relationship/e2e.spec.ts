@@ -443,7 +443,7 @@ describe('Relationship Field', () => {
 
       const valueInput = page.locator('.condition__value input')
       await valueInput.click()
-      const valueOptions = whereBuilder.locator('.condition__value .rs__option')
+      const valueOptions = whereBuilder.page().locator('.rs__menu .rs__option')
 
       await expect(valueOptions).toHaveCount(2)
       await expect(valueOptions.locator(`text=None`)).toBeVisible()
@@ -488,7 +488,7 @@ describe('Relationship Field', () => {
 
       const valueInput = condition1.locator('.condition__value input')
       await valueInput.click()
-      const valueOptions = condition1.locator('.condition__value .rs__option')
+      const valueOptions = condition1.page().locator('.rs__menu .rs__option')
 
       await expect(valueOptions).toHaveCount(2)
       await expect(valueOptions.locator(`text=None`)).toBeVisible()
@@ -502,7 +502,7 @@ describe('Relationship Field', () => {
 
       const valueInput2 = condition2.locator('.condition__value input')
       await valueInput2.click()
-      const valueOptions2 = condition2.locator('.condition__value .rs__option')
+      const valueOptions2 = condition2.page().locator('.rs__menu .rs__option')
 
       await expect(valueOptions2).toHaveCount(2)
       await expect(valueOptions2.locator(`text=None`)).toBeVisible()

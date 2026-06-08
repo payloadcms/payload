@@ -90,13 +90,13 @@ export async function selectInput({
 }
 
 export async function openSelectMenu({ selectLocator }: { selectLocator: Locator }): Promise<void> {
-  if (await selectLocator.locator('.rs__menu').isHidden()) {
+  if (await selectLocator.page().locator('.rs__menu').isHidden()) {
     // Open the react-select dropdown
     await selectLocator.locator('button.dropdown-indicator').click()
   }
 
   // Wait for the dropdown menu to appear
-  const menu = selectLocator.locator('.rs__menu')
+  const menu = selectLocator.page().locator('.rs__menu')
   await menu.waitFor({ state: 'visible', timeout: 2000 })
 }
 
@@ -110,9 +110,12 @@ async function selectOption({
   await openSelectMenu({ selectLocator })
 
   // Find and click the desired option by visible text
-  const optionLocator = selectLocator.locator('.rs__option', {
-    hasText: exactText(optionText),
-  })
+  const optionLocator = selectLocator
+    .page()
+    .locator('.rs__menu')
+    .locator('.rs__option', {
+      hasText: exactText(optionText),
+    })
 
   if (optionLocator) {
     await optionLocator.click()
@@ -157,7 +160,7 @@ export const getSelectInputOptions = async ({
   selectLocator: Locator
 }): Promise<string[]> => {
   await openSelectMenu({ selectLocator })
-  const options = await selectLocator.locator('.rs__option').allTextContents()
+  const options = await selectLocator.page().locator('.rs__option').allTextContents()
   return options.map((option) => option.trim()).filter(Boolean)
 }
 

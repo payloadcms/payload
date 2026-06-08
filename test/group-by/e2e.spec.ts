@@ -668,7 +668,10 @@ test.describe('Group By', () => {
     await expect(modal).toBeVisible()
 
     await modal.locator('.field-select .rs__control').click()
-    await modal.locator('.field-select .rs__option', { hasText: exactText('Title') }).click()
+    await modal
+      .page()
+      .locator('.rs__menu .rs__option', { hasText: exactText('Title') })
+      .click()
 
     const field = modal.locator(`#field-title`)
     await expect(field).toBeVisible()
@@ -756,7 +759,10 @@ test.describe('Group By', () => {
     await modal.locator('.field-select .rs__control').click()
     await wait(500)
 
-    await modal.locator('.field-select .rs__option', { hasText: exactText('Title') }).click()
+    await modal
+      .page()
+      .locator('.rs__menu .rs__option', { hasText: exactText('Title') })
+      .click()
     await wait(500)
 
     const field = modal.locator(`#field-title`)

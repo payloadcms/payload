@@ -413,9 +413,12 @@ describe('List View', () => {
       await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
-        conditionField.locator('.rs__menu-list').locator('div', {
-          hasText: exactText('Title'),
-        }),
+        conditionField
+          .page()
+          .locator('.rs__menu-list')
+          .locator('div', {
+            hasText: exactText('Title'),
+          }),
       ).toBeVisible()
     })
 
@@ -429,7 +432,7 @@ describe('List View', () => {
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
 
-      const menuList = conditionField.locator('.rs__menu-list')
+      const menuList = conditionField.page().locator('.rs__menu-list')
 
       // ensure the virtual field is not present
       await expect(menuList.locator('div', { hasText: exactText('Virtual Text') })).toHaveCount(0)
@@ -556,7 +559,8 @@ describe('List View', () => {
       await whereBuilder.locator('.condition__value').click()
 
       const valueOptions = await whereBuilder
-        .locator('.condition__value .rs__option')
+        .page()
+        .locator('.rs__menu .rs__option')
         .evaluateAll((options) => options.map((option) => option.textContent))
 
       expect(valueOptions).not.toContain('post1')
@@ -818,7 +822,7 @@ describe('List View', () => {
       await initialField.click()
 
       await expect(
-        initialField.locator(`.rs__option :has-text("Disable List Filter Text")`),
+        initialField.page().locator(`.rs__option :has-text("Disable List Filter Text")`),
       ).toBeHidden()
     })
 
@@ -855,7 +859,7 @@ describe('List View', () => {
       const condition2 = page.locator('.condition__field').nth(1)
       await condition2.click()
       await expect(
-        condition2?.locator('.rs__menu-list:has-text("Disable List Filter Text")'),
+        condition2?.page().locator('.rs__menu-list:has-text("Disable List Filter Text")'),
       ).toBeHidden()
     })
 
@@ -872,7 +876,7 @@ describe('List View', () => {
       await valueField.click()
       await page.keyboard.type('4')
 
-      const options = whereBuilder.locator('.condition__value .rs__option')
+      const options = whereBuilder.page().locator('.rs__menu .rs__option')
 
       await expect(options).toHaveCount(10)
 
@@ -945,7 +949,7 @@ describe('List View', () => {
       await initialField.click()
 
       await expect(
-        initialField.locator(`.rs__menu-list:has-text("Disable List Column Text")`),
+        initialField.page().locator(`.rs__menu-list:has-text("Disable List Column Text")`),
       ).toBeVisible()
     })
 
@@ -1248,7 +1252,7 @@ describe('List View', () => {
       await collectionSelector.click()
 
       await page
-        .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
+        .locator('.rs__option', {
           hasText: exactText('Post'),
         })
         .click()

@@ -2313,7 +2313,7 @@ describe('Uploads', () => {
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = conditionField.locator('.rs__menu-list')
+    const menuList = conditionField.page().locator('.rs__menu-list')
 
     // ensure the image size is not present
     await expect(menuList.getByText('Sizes > one > URL', { exact: true })).toHaveCount(0)
@@ -2341,7 +2341,7 @@ describe('Uploads', () => {
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = conditionField.locator('.rs__menu-list')
+    const menuList = conditionField.page().locator('.rs__menu-list')
 
     // ensure the image size is present
     await expect(menuList.getByText('Sizes > two > URL', { exact: true })).toHaveCount(1)

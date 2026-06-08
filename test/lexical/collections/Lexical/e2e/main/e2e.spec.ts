@@ -876,7 +876,7 @@ describe('lexicalMain', () => {
     await wait(500)
 
     await relationshipListDrawer.locator('.rs__input').first().click()
-    await relationshipListDrawer.locator('.rs__menu').getByText('Lexical Field').click()
+    await relationshipListDrawer.page().locator('.rs__menu').getByText('Lexical Field').click()
 
     await relationshipListDrawer.locator('button').getByText('Rich Text').first().click()
     await expect(relationshipListDrawer).toBeHidden()

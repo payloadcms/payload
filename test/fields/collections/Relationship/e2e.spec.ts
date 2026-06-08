@@ -134,11 +134,7 @@ describe('relationship', () => {
 
     // Fill first modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click()
-    await page
-      .locator(
-        '[id^=doc-drawer_relationship-fields_1_] .rs__option:has-text("Seeded text document")',
-      )
-      .click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
 
     const secondModalButton = page.locator(
       '[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button',
@@ -147,11 +143,7 @@ describe('relationship', () => {
 
     // Fill second modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_2_] #field-relationship').click()
-    await page
-      .locator(
-        '[id^=doc-drawer_relationship-fields_2_] .rs__option:has-text("Seeded text document")',
-      )
-      .click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
 
     // Save then close the second modal
     await page.locator('[id^=doc-drawer_relationship-fields_2_] #action-save').click()
@@ -667,9 +659,7 @@ describe('relationship', () => {
 
     await page.locator('#field-relationshipWithMinRows .value-container').click()
 
-    await page
-      .locator('#field-relationshipWithMinRows .rs__option:has-text("Seeded text document")')
-      .click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
 
     await page.click('#action-save', { delay: 100 })
     await assertToastErrors({
@@ -686,7 +676,7 @@ describe('relationship', () => {
     await wait(400)
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
-    const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
+    const firstTextDocOption = textDocsGroup.page().locator('.rs__menu .rs__option').first()
     const firstOptionLabel = await firstTextDocOption.textContent()
     expect(firstOptionLabel?.trim()).toBe('Another text document')
   })
@@ -704,7 +694,7 @@ describe('relationship', () => {
     await arrayFieldPromise
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
-    const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
+    const firstTextDocOption = textDocsGroup.page().locator('.rs__menu .rs__option').first()
     const firstOptionLabel = firstTextDocOption
     await expect(firstOptionLabel).toHaveText('Seeded text document')
   })

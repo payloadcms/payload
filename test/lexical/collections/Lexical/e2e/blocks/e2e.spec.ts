@@ -227,17 +227,17 @@ describe('lexicalBlocks', () => {
       } = await setupFilterOptionsTests()
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await expect(newBlock.page().locator('.rs__menu')).toHaveText('No options')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Another text document')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Another text document')
       await dependsOnBlockData.locator('.rs__control').click()
 
       // Fill and wait for form state to come back
@@ -257,17 +257,17 @@ describe('lexicalBlocks', () => {
       )
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('invalid')
+      await expect(newBlock.page().locator('.rs__menu')).toHaveText('invalid')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Another text document')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Another text document')
       await dependsOnBlockData.locator('.rs__control').click()
 
       await saveDocAndAssert(page)
@@ -294,16 +294,16 @@ describe('lexicalBlocks', () => {
       )
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await expect(newBlock.page().locator('.rs__menu')).toHaveText('No options')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('invalid')
+      await expect(newBlock.page().locator('.rs__menu')).toHaveText('invalid')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Another text document')
       await dependsOnBlockData.locator('.rs__control').click()
 
       await saveDocAndAssert(page)
@@ -330,16 +330,16 @@ describe('lexicalBlocks', () => {
       )
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await expect(newBlock.page().locator('.rs__menu')).toHaveText('No options')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.page().locator('.rs__menu')).toContainText('Another text document')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('invalid')
+      await expect(newBlock.page().locator('.rs__menu')).toHaveText('invalid')
       await dependsOnBlockData.locator('.rs__control').click()
 
       await saveDocAndAssert(page)
@@ -1071,7 +1071,7 @@ describe('lexicalBlocks', () => {
       const selectField = conditionalArrayBlock.locator('.react-select').first()
       await selectField.click()
 
-      const selectFieldMenu = selectField.locator('.rs__menu').first()
+      const selectFieldMenu = selectField.page().locator('.rs__menu').first()
       await selectFieldMenu.locator('.rs__option').nth(1).click() // Select "2" (2 columns / array fields)
 
       // Make sure the OTHER arrays aren't visible, as their conditions are not fulfilled. Catches a bug where they might not be hidden fully
