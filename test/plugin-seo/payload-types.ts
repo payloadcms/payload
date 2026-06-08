@@ -62,21 +62,21 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_F0C19EA3".
+ * via the `definition` "LexicalNodes_FFFC944E".
  */
-export type LexicalNodes_F0C19EA3 =
+export type LexicalNodes_FFFC944E =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_F0C19EA3>
+  | SerializedParagraphNode<LexicalNodes_FFFC944E>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_F0C19EA3>
+  | SerializedHeadingNode<LexicalNodes_FFFC944E>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
-  | SerializedQuoteNode<LexicalNodes_F0C19EA3>
-  | SerializedListNode<LexicalNodes_F0C19EA3>
-  | SerializedListItemNode<LexicalNodes_F0C19EA3>
-  | SerializedAutoLinkNode<LexicalNodes_F0C19EA3, LexicalLinkFields_F0C19EA3>
-  | SerializedLinkNode<LexicalNodes_F0C19EA3, LexicalLinkFields_F0C19EA3>
+  | SerializedQuoteNode<LexicalNodes_FFFC944E>
+  | SerializedListNode<LexicalNodes_FFFC944E>
+  | SerializedListItemNode<LexicalNodes_FFFC944E>
+  | SerializedAutoLinkNode<LexicalNodes_FFFC944E, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_FFFC944E, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -224,7 +224,7 @@ export interface Page {
 export interface Media {
   id: string;
   media?: (string | null) | Media;
-  richText?: LexicalRichText<LexicalNodes_F0C19EA3> | null;
+  richText?: LexicalRichText<LexicalNodes_FFFC944E> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -577,9 +577,9 @@ export interface LexicalUploadFields_1AB4670B {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_F0C19EA3".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_F0C19EA3 {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {

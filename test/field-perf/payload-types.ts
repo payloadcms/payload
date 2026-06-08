@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D2FB7518".
+ * via the `definition` "LexicalNodes_F8A02B48".
  */
-export type LexicalNodes_D2FB7518 =
+export type LexicalNodes_F8A02B48 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D2FB7518>
+  | SerializedParagraphNode<LexicalNodes_F8A02B48>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_D2FB7518>
+  | SerializedHeadingNode<LexicalNodes_F8A02B48>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_D2FB7518 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_D2FB7518>
-  | SerializedListNode<LexicalNodes_D2FB7518>
-  | SerializedListItemNode<LexicalNodes_D2FB7518>
-  | SerializedAutoLinkNode<LexicalNodes_D2FB7518, LexicalLinkFields_D2FB7518>
-  | SerializedLinkNode<LexicalNodes_D2FB7518, LexicalLinkFields_D2FB7518>
+  | SerializedQuoteNode<LexicalNodes_F8A02B48>
+  | SerializedListNode<LexicalNodes_F8A02B48>
+  | SerializedListItemNode<LexicalNodes_F8A02B48>
+  | SerializedAutoLinkNode<LexicalNodes_F8A02B48, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_F8A02B48, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'blocks-collection'
       | 'users'
@@ -186,7 +186,7 @@ export interface BlocksCollection {
  * via the `definition` "Content".
  */
 export interface Content {
-  richText?: LexicalRichText<LexicalNodes_D2FB7518> | null;
+  richText?: LexicalRichText<LexicalNodes_F8A02B48> | null;
   field1?: string | null;
   field2?: string | null;
   field3?: string | null;
@@ -486,9 +486,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_D2FB7518".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_D2FB7518 {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {

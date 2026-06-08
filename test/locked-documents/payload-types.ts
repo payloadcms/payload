@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_0926A8F8".
+ * via the `definition` "LexicalNodes_58262B91".
  */
-export type LexicalNodes_0926A8F8 =
+export type LexicalNodes_58262B91 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_0926A8F8>
+  | SerializedParagraphNode<LexicalNodes_58262B91>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_0926A8F8>
+  | SerializedHeadingNode<LexicalNodes_58262B91>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_0926A8F8 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_0926A8F8>
-  | SerializedListNode<LexicalNodes_0926A8F8>
-  | SerializedListItemNode<LexicalNodes_0926A8F8>
-  | SerializedAutoLinkNode<LexicalNodes_0926A8F8, LexicalLinkFields_0926A8F8>
-  | SerializedLinkNode<LexicalNodes_0926A8F8, LexicalLinkFields_0926A8F8>
+  | SerializedQuoteNode<LexicalNodes_58262B91>
+  | SerializedListNode<LexicalNodes_58262B91>
+  | SerializedListItemNode<LexicalNodes_58262B91>
+  | SerializedAutoLinkNode<LexicalNodes_58262B91, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_58262B91, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'autosave'
       | 'pages'
@@ -229,7 +229,7 @@ export interface Page {
 export interface Post {
   id: string;
   text?: string | null;
-  richText?: LexicalRichText<LexicalNodes_0926A8F8> | null;
+  richText?: LexicalRichText<LexicalNodes_58262B91> | null;
   documentLoaded?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -242,7 +242,7 @@ export interface Post {
 export interface ServerComponent {
   id: string;
   customTextServer?: string | null;
-  richText?: LexicalRichText<LexicalNodes_0926A8F8> | null;
+  richText?: LexicalRichText<LexicalNodes_58262B91> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -720,9 +720,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_0926A8F8".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_0926A8F8 {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {

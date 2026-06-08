@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_22647176".
+ * via the `definition` "LexicalNodes_7A11A510".
  */
-export type LexicalNodes_22647176 =
+export type LexicalNodes_7A11A510 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_22647176>
+  | SerializedParagraphNode<LexicalNodes_7A11A510>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_22647176>
+  | SerializedHeadingNode<LexicalNodes_7A11A510>
   | SerializedUploadNode<'gif-resize'>
   | SerializedUploadNode<'filename-compound-index'>
   | SerializedUploadNode<'no-image-sizes'>
@@ -123,11 +123,11 @@ export type LexicalNodes_22647176 =
   | SerializedUploadNode<'media-without-delete-access'>
   | SerializedUploadNode<'media-with-image-size-admin-props'>
   | SerializedUploadNode<'prefix-media'>
-  | SerializedQuoteNode<LexicalNodes_22647176>
-  | SerializedListNode<LexicalNodes_22647176>
-  | SerializedListItemNode<LexicalNodes_22647176>
-  | SerializedAutoLinkNode<LexicalNodes_22647176, LexicalLinkFields_22647176>
-  | SerializedLinkNode<LexicalNodes_22647176, LexicalLinkFields_22647176>
+  | SerializedQuoteNode<LexicalNodes_7A11A510>
+  | SerializedListNode<LexicalNodes_7A11A510>
+  | SerializedListItemNode<LexicalNodes_7A11A510>
+  | SerializedAutoLinkNode<LexicalNodes_7A11A510, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_7A11A510, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'relation'
       | 'audio'
@@ -1408,7 +1408,7 @@ export interface Uploads1 {
   singleUpload?: (string | null) | Uploads2;
   hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
   singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
-  richText?: LexicalRichText<LexicalNodes_22647176> | null;
+  richText?: LexicalRichText<LexicalNodes_7A11A510> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -4137,9 +4137,9 @@ export interface LexicalUploadFields_1AB4670B {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_22647176".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_22647176 {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {

@@ -133,21 +133,21 @@ export type LexicalNodes_850D1707 =
   | SerializedHeadingNode<LexicalNodes_850D1707>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_E00882AC".
+ * via the `definition` "LexicalNodes_1A3BAFDD".
  */
-export type LexicalNodes_E00882AC =
+export type LexicalNodes_1A3BAFDD =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_E00882AC>
+  | SerializedParagraphNode<LexicalNodes_1A3BAFDD>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_E00882AC>
+  | SerializedHeadingNode<LexicalNodes_1A3BAFDD>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
-  | SerializedQuoteNode<LexicalNodes_E00882AC>
-  | SerializedListNode<LexicalNodes_E00882AC>
-  | SerializedListItemNode<LexicalNodes_E00882AC>
-  | SerializedAutoLinkNode<LexicalNodes_E00882AC, LexicalLinkFields_E00882AC>
-  | SerializedLinkNode<LexicalNodes_E00882AC, LexicalLinkFields_E00882AC>
+  | SerializedQuoteNode<LexicalNodes_1A3BAFDD>
+  | SerializedListNode<LexicalNodes_1A3BAFDD>
+  | SerializedListItemNode<LexicalNodes_1A3BAFDD>
+  | SerializedAutoLinkNode<LexicalNodes_1A3BAFDD, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_1A3BAFDD, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -369,7 +369,7 @@ export interface Page {
   arrayOfRelationships?:
     | {
         uploadInArray?: (string | null) | Media;
-        richTextInArray?: LexicalRichText<LexicalNodes_E00882AC> | null;
+        richTextInArray?: LexicalRichText<LexicalNodes_1A3BAFDD> | null;
         relationshipInArrayMonoHasOne?: (string | null) | Post;
         relationshipInArrayMonoHasMany?: (string | Post)[] | null;
         relationshipInArrayPolyHasOne?: {
@@ -1658,9 +1658,9 @@ export interface LexicalUploadFields_1AB4670B {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_E00882AC".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_E00882AC {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {

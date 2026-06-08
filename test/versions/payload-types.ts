@@ -62,23 +62,23 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_E4081DB3".
+ * via the `definition` "LexicalNodes_3937C7CB".
  */
-export type LexicalNodes_E4081DB3 =
+export type LexicalNodes_3937C7CB =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_E4081DB3>
+  | SerializedParagraphNode<LexicalNodes_3937C7CB>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_E4081DB3>
+  | SerializedHeadingNode<LexicalNodes_3937C7CB>
   | SerializedUploadNode<'draft-with-upload'>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'media2'>
-  | SerializedQuoteNode<LexicalNodes_E4081DB3>
-  | SerializedListNode<LexicalNodes_E4081DB3>
-  | SerializedListItemNode<LexicalNodes_E4081DB3>
-  | SerializedAutoLinkNode<LexicalNodes_E4081DB3, LexicalLinkFields_E4081DB3>
-  | SerializedLinkNode<LexicalNodes_E4081DB3, LexicalLinkFields_E4081DB3>
+  | SerializedQuoteNode<LexicalNodes_3937C7CB>
+  | SerializedListNode<LexicalNodes_3937C7CB>
+  | SerializedListItemNode<LexicalNodes_3937C7CB>
+  | SerializedAutoLinkNode<LexicalNodes_3937C7CB, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_3937C7CB, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'disable-publish'
       | 'posts'
@@ -284,7 +284,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: LexicalRichText<LexicalNodes_E4081DB3> | null;
+  richText?: LexicalRichText<LexicalNodes_3937C7CB> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -582,8 +582,8 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?: LexicalRichText<LexicalNodes_E4081DB3> | null;
-  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_E4081DB3> | null;
+  richtext?: LexicalRichText<LexicalNodes_3937C7CB> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_3937C7CB> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -1834,9 +1834,9 @@ export interface LexicalUploadFields_1AB4670B {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_E4081DB3".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_E4081DB3 {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {

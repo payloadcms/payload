@@ -62,21 +62,21 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_FCC0BA59".
+ * via the `definition` "LexicalNodes_9326F794".
  */
-export type LexicalNodes_FCC0BA59 =
+export type LexicalNodes_9326F794 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_FCC0BA59>
+  | SerializedParagraphNode<LexicalNodes_9326F794>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_FCC0BA59>
+  | SerializedHeadingNode<LexicalNodes_9326F794>
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_FCC0BA59>
-  | SerializedListNode<LexicalNodes_FCC0BA59>
-  | SerializedListItemNode<LexicalNodes_FCC0BA59>
-  | SerializedAutoLinkNode<LexicalNodes_FCC0BA59, LexicalLinkFields_FCC0BA59>
-  | SerializedLinkNode<LexicalNodes_FCC0BA59, LexicalLinkFields_FCC0BA59>
+  | SerializedQuoteNode<LexicalNodes_9326F794>
+  | SerializedListNode<LexicalNodes_9326F794>
+  | SerializedListItemNode<LexicalNodes_9326F794>
+  | SerializedAutoLinkNode<LexicalNodes_9326F794, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_9326F794, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'error-fields'
       | 'validate-drafts-on'
@@ -231,7 +231,7 @@ export interface ErrorField {
           point: [number, number];
           radio: 'mint' | 'dark_gray';
           relationship: string | User;
-          richtext: LexicalRichText<LexicalNodes_FCC0BA59>;
+          richtext: LexicalRichText<LexicalNodes_9326F794>;
           select: 'mint' | 'dark_gray';
           upload: string | Upload;
           text: string;
@@ -270,7 +270,7 @@ export interface ErrorField {
         point: [number, number];
         radio: 'mint' | 'dark_gray';
         relationship: string | User;
-        richtext: LexicalRichText<LexicalNodes_FCC0BA59>;
+        richtext: LexicalRichText<LexicalNodes_9326F794>;
         select: 'mint' | 'dark_gray';
         upload: string | Upload;
         text: string;
@@ -328,7 +328,7 @@ export interface Upload {
   id: string;
   text?: string | null;
   media?: (string | null) | Upload;
-  richText?: LexicalRichText<LexicalNodes_FCC0BA59> | null;
+  richText?: LexicalRichText<LexicalNodes_9326F794> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -376,7 +376,7 @@ export interface Block1 {
         point: [number, number];
         radio: 'mint' | 'dark_gray';
         relationship: string | User;
-        richtext: LexicalRichText<LexicalNodes_FCC0BA59>;
+        richtext: LexicalRichText<LexicalNodes_9326F794>;
         select: 'mint' | 'dark_gray';
         upload: string | Upload;
         text: string;
@@ -964,9 +964,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_FCC0BA59".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_FCC0BA59 {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {

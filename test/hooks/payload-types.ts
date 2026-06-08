@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_093007C1".
+ * via the `definition` "LexicalNodes_3CBD56AD".
  */
-export type LexicalNodes_093007C1 =
+export type LexicalNodes_3CBD56AD =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_093007C1>
-  | SerializedAutoLinkNode<LexicalNodes_093007C1, LexicalLinkFields_093007C1>
-  | SerializedLinkNode<LexicalNodes_093007C1, LexicalLinkFields_093007C1>
+  | SerializedParagraphNode<LexicalNodes_3CBD56AD>
+  | SerializedAutoLinkNode<LexicalNodes_3CBD56AD, LexicalLinkFields_11D2ED94>
+  | SerializedLinkNode<LexicalNodes_3CBD56AD, LexicalLinkFields_11D2ED94>
   | SerializedBlockNode<NestedBlock>
   | SerializedHorizontalRuleNode
   | {
@@ -81,7 +81,7 @@ export type LexicalNodes_093007C1 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_093007C1>
+  | SerializedQuoteNode<LexicalNodes_3CBD56AD>
   | SerializedRelationshipNode<
       | 'beforeOperation'
       | 'before-change-hooks'
@@ -107,9 +107,9 @@ export type LexicalNodes_093007C1 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedListNode<LexicalNodes_093007C1>
-  | SerializedListItemNode<LexicalNodes_093007C1>
-  | SerializedHeadingNode<LexicalNodes_093007C1>;
+  | SerializedListNode<LexicalNodes_3CBD56AD>
+  | SerializedListItemNode<LexicalNodes_3CBD56AD>
+  | SerializedHeadingNode<LexicalNodes_3CBD56AD>;
 
 export interface Config {
   auth: {
@@ -362,7 +362,7 @@ export interface NestedAfterChangeHook {
         }[]
       | null;
   };
-  lexical?: LexicalRichText<LexicalNodes_093007C1> | null;
+  lexical?: LexicalRichText<LexicalNodes_3CBD56AD> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1005,19 +1005,9 @@ export interface NestedLinkBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "NestedBlock".
+ * via the `definition` "LexicalLinkFields_11D2ED94".
  */
-export interface NestedBlock {
-  id: string;
-  blockType: 'nestedBlock';
-  nestedAfterChange?: string | null;
-  blockName?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_093007C1".
- */
-export interface LexicalLinkFields_093007C1 {
+export interface LexicalLinkFields_11D2ED94 {
   linkBlocks?: NestedLinkBlock[] | null;
   doc?: {
     relationTo: string;
@@ -1032,6 +1022,16 @@ export interface LexicalLinkFields_093007C1 {
   linkType: 'custom' | 'internal';
   newTab: boolean;
   url?: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NestedBlock".
+ */
+export interface NestedBlock {
+  id: string;
+  blockType: 'nestedBlock';
+  nestedAfterChange?: string | null;
+  blockName?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

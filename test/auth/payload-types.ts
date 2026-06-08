@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_837E0C5F".
+ * via the `definition` "LexicalNodes_AAE6FCC0".
  */
-export type LexicalNodes_837E0C5F =
+export type LexicalNodes_AAE6FCC0 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_837E0C5F>
+  | SerializedParagraphNode<LexicalNodes_AAE6FCC0>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_837E0C5F>
+  | SerializedHeadingNode<LexicalNodes_AAE6FCC0>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_837E0C5F =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_837E0C5F>
-  | SerializedListNode<LexicalNodes_837E0C5F>
-  | SerializedListItemNode<LexicalNodes_837E0C5F>
-  | SerializedAutoLinkNode<LexicalNodes_837E0C5F, LexicalLinkFields_837E0C5F>
-  | SerializedLinkNode<LexicalNodes_837E0C5F, LexicalLinkFields_837E0C5F>
+  | SerializedQuoteNode<LexicalNodes_AAE6FCC0>
+  | SerializedListNode<LexicalNodes_AAE6FCC0>
+  | SerializedListItemNode<LexicalNodes_AAE6FCC0>
+  | SerializedAutoLinkNode<LexicalNodes_AAE6FCC0, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_AAE6FCC0, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'partial-disable-local-strategies'
@@ -303,7 +303,7 @@ export interface User {
       }[]
     | null;
   namedSaveToJWT?: string | null;
-  richText?: LexicalRichText<LexicalNodes_837E0C5F> | null;
+  richText?: LexicalRichText<LexicalNodes_AAE6FCC0> | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -863,9 +863,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_837E0C5F".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_837E0C5F {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {

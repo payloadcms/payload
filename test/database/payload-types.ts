@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_5693F8AA".
+ * via the `definition` "LexicalNodes_680F881F".
  */
-export type LexicalNodes_5693F8AA =
+export type LexicalNodes_680F881F =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_5693F8AA>
+  | SerializedParagraphNode<LexicalNodes_680F881F>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_5693F8AA>
+  | SerializedHeadingNode<LexicalNodes_680F881F>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_5693F8AA =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_5693F8AA>
-  | SerializedListNode<LexicalNodes_5693F8AA>
-  | SerializedListItemNode<LexicalNodes_5693F8AA>
-  | SerializedAutoLinkNode<LexicalNodes_5693F8AA, LexicalLinkFields_5693F8AA>
-  | SerializedLinkNode<LexicalNodes_5693F8AA, LexicalLinkFields_5693F8AA>
+  | SerializedQuoteNode<LexicalNodes_680F881F>
+  | SerializedListNode<LexicalNodes_680F881F>
+  | SerializedListItemNode<LexicalNodes_680F881F>
+  | SerializedAutoLinkNode<LexicalNodes_680F881F, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_680F881F, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'noTimeStamps'
       | 'categories'
@@ -507,7 +507,7 @@ export interface DefaultValue {
 export interface RelationA {
   id: string;
   title?: string | null;
-  richText?: LexicalRichText<LexicalNodes_5693F8AA> | null;
+  richText?: LexicalRichText<LexicalNodes_680F881F> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -519,7 +519,7 @@ export interface RelationB {
   id: string;
   title?: string | null;
   relationship?: (string | null) | RelationA;
-  richText?: LexicalRichText<LexicalNodes_5693F8AA> | null;
+  richText?: LexicalRichText<LexicalNodes_680F881F> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1842,9 +1842,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_5693F8AA".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_5693F8AA {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {

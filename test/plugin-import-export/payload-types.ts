@@ -63,15 +63,15 @@ export type SupportedTimezones =
   | 'UTC';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_9A05627D".
+ * via the `definition` "LexicalNodes_47963D26".
  */
-export type LexicalNodes_9A05627D =
+export type LexicalNodes_47963D26 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_9A05627D>
+  | SerializedParagraphNode<LexicalNodes_47963D26>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_9A05627D>
+  | SerializedHeadingNode<LexicalNodes_47963D26>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'exports'>
   | SerializedUploadNode<'posts-export'>
@@ -88,11 +88,11 @@ export type LexicalNodes_9A05627D =
   | SerializedUploadNode<'posts-with-hooks-import'>
   | SerializedUploadNode<'posts-with-field-hooks-import'>
   | SerializedUploadNode<'posts-with-column-map-import'>
-  | SerializedQuoteNode<LexicalNodes_9A05627D>
-  | SerializedListNode<LexicalNodes_9A05627D>
-  | SerializedListItemNode<LexicalNodes_9A05627D>
-  | SerializedAutoLinkNode<LexicalNodes_9A05627D, LexicalLinkFields_9A05627D>
-  | SerializedLinkNode<LexicalNodes_9A05627D, LexicalLinkFields_9A05627D>
+  | SerializedQuoteNode<LexicalNodes_47963D26>
+  | SerializedListNode<LexicalNodes_47963D26>
+  | SerializedListItemNode<LexicalNodes_47963D26>
+  | SerializedAutoLinkNode<LexicalNodes_47963D26, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_47963D26, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -336,7 +336,7 @@ export interface Page {
     | number
     | boolean
     | null;
-  richTextField?: LexicalRichText<LexicalNodes_9A05627D> | null;
+  richTextField?: LexicalRichText<LexicalNodes_47963D26> | null;
   relationship?: (string | null) | User;
   excerpt?: string | null;
   /**
@@ -404,7 +404,7 @@ export interface Hero {
  * via the `definition` "Content".
  */
 export interface Content {
-  richText?: LexicalRichText<LexicalNodes_9A05627D> | null;
+  richText?: LexicalRichText<LexicalNodes_47963D26> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -416,7 +416,7 @@ export interface Content {
 export interface Post {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_9A05627D> | null;
+  content?: LexicalRichText<LexicalNodes_47963D26> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -447,7 +447,7 @@ export interface Media {
 export interface PostsExportsOnly {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_9A05627D> | null;
+  content?: LexicalRichText<LexicalNodes_47963D26> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -459,7 +459,7 @@ export interface PostsExportsOnly {
 export interface PostsImportsOnly {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_9A05627D> | null;
+  content?: LexicalRichText<LexicalNodes_47963D26> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -471,7 +471,7 @@ export interface PostsImportsOnly {
 export interface PostsNoJobsQueue {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_9A05627D> | null;
+  content?: LexicalRichText<LexicalNodes_47963D26> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2320,9 +2320,9 @@ export interface LexicalUploadFields_1AB4670B {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_9A05627D".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_9A05627D {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
