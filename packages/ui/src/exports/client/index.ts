@@ -468,10 +468,6 @@ export type { AllowedCollection } from '../../providers/Hierarchy/types.js'
 export { UploadHandlersProvider, useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
 export {
-  ComponentThemeProvider,
-  useComponentTheme,
-} from '../../providers/ComponentTheme/index.js'
-export {
   defaultTheme,
   type Theme,
   type ThemeContext,

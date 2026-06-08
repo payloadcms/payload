@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { ComponentThemeProvider } from '../../providers/ComponentTheme/index.js'
+import { ThemeProvider } from '../../providers/Theme/index.js'
 import './index.css'
 import { PopupTrigger } from './PopupTrigger/index.js'
 
@@ -523,10 +523,10 @@ export const Popup: React.FC<PopupProps> = (props) => {
                     {children}
                   </>
                 ) : (
-                  <ComponentThemeProvider theme={theme}>
+                  <ThemeProvider theme={theme}>
                     {render?.({ close: () => setActive(false) })}
                     {children}
-                  </ComponentThemeProvider>
+                  </ThemeProvider>
                 )}
               </div>
               {caret && <div className={`${baseClass}__caret`} />}

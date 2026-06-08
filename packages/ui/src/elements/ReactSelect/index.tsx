@@ -11,7 +11,7 @@ import CreatableSelect from 'react-select/creatable'
 import type { Option, ReactSelectAdapterProps } from './types.js'
 export type { Option } from './types.js'
 
-import { useComponentTheme } from '../../providers/ComponentTheme/index.js'
+import { useTheme } from '../../providers/Theme/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
@@ -31,13 +31,13 @@ const createOption = (label: string) => ({
   value: label,
 })
 
-// Propagates the nearest scoped theme (via ComponentThemeProvider) into the
-// portal div, falling back to the global theme. Ensures dropdown menus
-// portaled to document.body inherit the correct theme (e.g. dark Popup).
+// Propagates the nearest scoped theme (via ThemeProvider) into the portal div,
+// falling back to the global theme. Ensures dropdown menus portaled to
+// document.body inherit the correct theme (e.g. dark Popup).
 function ThemedMenuPortal<Opt, IsMulti extends boolean, Group extends GroupBase<Opt>>(
   props: React.ComponentProps<typeof rsComponents.MenuPortal<Opt, IsMulti, Group>>,
 ) {
-  const { theme } = useComponentTheme()
+  const { theme } = useTheme()
   return (
     <rsComponents.MenuPortal
       {...props}
@@ -234,7 +234,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         Control,
         DropdownIndicator,
         Input,
-          MenuPortal: ThemedMenuPortal,
+        MenuPortal: ThemedMenuPortal,
         MultiValue,
         MultiValueLabel,
         MultiValueRemove,

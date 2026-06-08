@@ -6,7 +6,7 @@ import React, { useState } from 'react'
 
 import type { Props } from './types.js'
 
-import { useComponentTheme } from '../../providers/ComponentTheme/index.js'
+import { useTheme } from '../../providers/Theme/index.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { defaultGlobalEditorOptions, defaultOptions } from './constants.js'
 import './index.css'
@@ -76,7 +76,7 @@ const CodeEditor: React.FC<Props> = (props) => {
     : 0
 
   const [dynamicHeight, setDynamicHeight] = useState(minHeight)
-  const { theme } = useComponentTheme()
+  const { theme } = useTheme()
 
   const classes = [
     baseClass,
