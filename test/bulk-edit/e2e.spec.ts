@@ -527,11 +527,11 @@ test.describe('Bulk Edit', () => {
     const { modal } = await selectAllAndEditMany(page)
 
     await expect(
-      (await getSelectMenu({ page })).locator('.rs__option', { hasText: exactText('No Read') }),
+      (getSelectMenu({ page })).locator('.rs__option', { hasText: exactText('No Read') }),
     ).toBeHidden()
 
     await expect(
-      (await getSelectMenu({ page })).locator('.rs__option', { hasText: exactText('No Update') }),
+      (getSelectMenu({ page })).locator('.rs__option', { hasText: exactText('No Update') }),
     ).toBeHidden()
   })
 
@@ -660,7 +660,7 @@ test.describe('Bulk Edit', () => {
     await expect(fieldSelectControl).toBeVisible()
     await fieldSelectControl.click()
 
-    const fieldSelectMenu = await getSelectMenu({ selectLocator: fieldSelect })
+    const fieldSelectMenu = getSelectMenu({ page: fieldSelect.page() })
     const titleOption = fieldSelectMenu.locator('.rs__option:has-text("Title")').first()
     await titleOption.click()
 
@@ -834,7 +834,7 @@ test.describe('Bulk Edit', () => {
     await bulkEditForm.locator('.field-select .rs__control').click()
 
     // The option must match exactly — no spurious "> >" prefix
-    const option = (await getSelectMenu({ page })).locator('.rs__option', {
+    const option = (getSelectMenu({ page })).locator('.rs__option', {
       hasText: exactText('Row Text'),
     })
     await expect(option).toBeVisible()
@@ -899,7 +899,7 @@ async function selectFieldToEdit(
   await expect(modal).toBeVisible()
 
   await modal.locator('.field-select .rs__control').click()
-  await (await getSelectMenu({ page })).locator('.rs__option', { hasText: exactText(fieldLabel) }).click()
+  await (getSelectMenu({ page })).locator('.rs__option', { hasText: exactText(fieldLabel) }).click()
 
   const field = modal.locator(`#field-${fieldID}`)
   await expect(field).toBeVisible()

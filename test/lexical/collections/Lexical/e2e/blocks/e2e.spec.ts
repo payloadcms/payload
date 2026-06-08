@@ -110,7 +110,7 @@ describe('lexicalBlocks', () => {
 
     await editDrawer.locator('.rs__control .value-container').first().click()
     await wait(500)
-    const editDrawerSelectMenu = await getSelectMenu({ page })
+    const editDrawerSelectMenu = getSelectMenu({ page })
     await expect(editDrawerSelectMenu.locator('.rs__option').nth(1)).toBeVisible()
     await expect(editDrawerSelectMenu.locator('.rs__option').nth(1)).toContainText('value2')
     await assertNetworkRequests(
@@ -229,17 +229,17 @@ describe('lexicalBlocks', () => {
       } = await setupFilterOptionsTests()
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toHaveText('No options')
+      await expect(getSelectMenu({ page })).toHaveText('No options')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toContainText('Seeded text document')
-      await expect(await getSelectMenu({ page })).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toContainText('Seeded text document')
-      await expect(await getSelectMenu({ page })).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnBlockData.locator('.rs__control').click()
 
       // Fill and wait for form state to come back
@@ -259,17 +259,17 @@ describe('lexicalBlocks', () => {
       )
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toHaveText('invalid')
+      await expect(getSelectMenu({ page })).toHaveText('invalid')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toContainText('Seeded text document')
-      await expect(await getSelectMenu({ page })).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toContainText('Seeded text document')
-      await expect(await getSelectMenu({ page })).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnBlockData.locator('.rs__control').click()
 
       await saveDocAndAssert(page)
@@ -296,16 +296,16 @@ describe('lexicalBlocks', () => {
       )
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toHaveText('No options')
+      await expect(getSelectMenu({ page })).toHaveText('No options')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toHaveText('invalid')
+      await expect(getSelectMenu({ page })).toHaveText('invalid')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toContainText('Seeded text document')
-      await expect(await getSelectMenu({ page })).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnBlockData.locator('.rs__control').click()
 
       await saveDocAndAssert(page)
@@ -332,16 +332,16 @@ describe('lexicalBlocks', () => {
       )
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toHaveText('No options')
+      await expect(getSelectMenu({ page })).toHaveText('No options')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toContainText('Seeded text document')
-      await expect(await getSelectMenu({ page })).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(await getSelectMenu({ page })).toHaveText('invalid')
+      await expect(getSelectMenu({ page })).toHaveText('invalid')
       await dependsOnBlockData.locator('.rs__control').click()
 
       await saveDocAndAssert(page)
@@ -1073,7 +1073,7 @@ describe('lexicalBlocks', () => {
       const selectField = conditionalArrayBlock.locator('.react-select').first()
       await selectField.click()
 
-      const selectFieldMenu = await getSelectMenu({ selectLocator: selectField })
+      const selectFieldMenu = getSelectMenu({ page: selectField.page() })
       await selectFieldMenu.locator('.rs__option').nth(1).click() // Select "2" (2 columns / array fields)
 
       // Make sure the OTHER arrays aren't visible, as their conditions are not fulfilled. Catches a bug where they might not be hidden fully
@@ -1362,9 +1362,7 @@ describe('lexicalBlocks', () => {
       // Click on react select in drawer, select 'value1'
       await inlineBlockDrawer.locator('.rs__control .value-container').first().click()
       await wait(500)
-      const inlineBlockSelectMenu = await getSelectMenu({
-        selectLocator: inlineBlockDrawer.locator('.react-select').first(),
-      })
+      const inlineBlockSelectMenu = getSelectMenu({ page: inlineBlockDrawer.locator('.react-select').first(),.page() })
       await expect(inlineBlockSelectMenu.locator('.rs__option').first()).toBeVisible()
       await expect(inlineBlockSelectMenu.locator('.rs__option').first()).toContainText('value1')
       await inlineBlockSelectMenu.locator('.rs__option').first().click()

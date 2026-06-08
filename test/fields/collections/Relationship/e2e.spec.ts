@@ -680,7 +680,7 @@ describe('relationship', () => {
     await wait(400)
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
-    const firstTextDocOption = (await getSelectMenu({ page })).locator('.rs__option').first()
+    const firstTextDocOption = (getSelectMenu({ page })).locator('.rs__option').first()
     const firstOptionLabel = await firstTextDocOption.textContent()
     expect(firstOptionLabel?.trim()).toBe('Another text document')
   })
@@ -698,7 +698,7 @@ describe('relationship', () => {
     await arrayFieldPromise
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
-    const firstTextDocOption = (await getSelectMenu({ page })).locator('.rs__option').first()
+    const firstTextDocOption = (getSelectMenu({ page })).locator('.rs__option').first()
     const firstOptionLabel = firstTextDocOption
     await expect(firstOptionLabel).toHaveText('Seeded text document')
   })
@@ -901,7 +901,7 @@ describe('relationship', () => {
     await expect(relationToSelector).toBeVisible()
 
     await relationToSelector.locator('.rs__control').click()
-    const relationToMenu = await getSelectMenu({ selectLocator: relationToSelector })
+    const relationToMenu = getSelectMenu({ page: relationToSelector.page() })
     const option = relationToMenu.locator('.rs__option').nth(1)
     await option.click()
     const firstRow = listDrawerContent.locator('table tbody tr').first()
@@ -1023,7 +1023,7 @@ describe('relationship', () => {
 
     await wait(400)
     await relationToSelector.locator('.rs__control').click()
-    const option = (await getSelectMenu({ page })).locator('.rs__option').nth(1)
+    const option = (getSelectMenu({ page })).locator('.rs__option').nth(1)
     await wait(400)
     await option.click()
     const rows = listDrawerContent.locator('table tbody tr')

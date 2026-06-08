@@ -1143,7 +1143,7 @@ describe('Uploads', () => {
         '.edit-many-bulk-uploads__form .react-select',
       )
       await editFieldSelector.click({ delay: 100 })
-      const editFieldMenu = await getSelectMenu({ selectLocator: editFieldSelector })
+      const editFieldMenu = getSelectMenu({ page: editFieldSelector.page() })
       const options = editFieldMenu.locator('.rs__option')
 
       await options.locator('text=Prefix').click()
@@ -1207,7 +1207,7 @@ describe('Uploads', () => {
         '.edit-many-bulk-uploads__form .react-select',
       )
       await fieldSelector.click({ delay: 100 })
-      const fieldSelectorMenu = await getSelectMenu({ selectLocator: fieldSelector })
+      const fieldSelectorMenu = getSelectMenu({ page: fieldSelector.page() })
       const options = fieldSelectorMenu.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
@@ -1261,7 +1261,7 @@ describe('Uploads', () => {
         '.edit-many-bulk-uploads__form .react-select',
       )
       await fieldSelector.click({ delay: 100 })
-      const fieldSelectorMenu2 = await getSelectMenu({ selectLocator: fieldSelector })
+      const fieldSelectorMenu2 = getSelectMenu({ page: fieldSelector.page() })
       const options = fieldSelectorMenu2.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
@@ -2318,7 +2318,7 @@ describe('Uploads', () => {
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = await getSelectMenu({ selectLocator: conditionField })
+    const menuList = getSelectMenu({ page: conditionField.page() })
 
     // ensure the image size is not present
     await expect(menuList.getByText('Sizes > one > Width', { exact: true })).toHaveCount(0)
@@ -2345,7 +2345,7 @@ describe('Uploads', () => {
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = await getSelectMenu({ selectLocator: conditionField })
+    const menuList = getSelectMenu({ page: conditionField.page() })
 
     // ensure the image size is present
     await expect(menuList.getByText('Sizes > two > URL', { exact: true })).toHaveCount(1)

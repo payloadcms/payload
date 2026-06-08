@@ -89,7 +89,7 @@ describe('Upload polymorphic with hasMany', () => {
     await expect(collectionSelector).toBeVisible()
     const fieldSelector = collectionSelector.locator('.react-select')
     await fieldSelector.click({ delay: 100 })
-    const fieldSelectorMenu = await getSelectMenu({ selectLocator: fieldSelector })
+    const fieldSelectorMenu = getSelectMenu({ page: fieldSelector.page() })
     const options = fieldSelectorMenu.locator('.rs__option')
     // Select an option
     await options.locator('text=Upload 2').click()
@@ -143,7 +143,7 @@ describe('Upload polymorphic with hasMany', () => {
     await expect(collectionSelector).toBeVisible()
     const fieldSelector = collectionSelector.locator('.react-select')
     await fieldSelector.click({ delay: 100 })
-    const fieldSelectorMenu = await getSelectMenu({ selectLocator: fieldSelector })
+    const fieldSelectorMenu = getSelectMenu({ page: fieldSelector.page() })
     const options = fieldSelectorMenu.locator('.rs__option')
     // Select an option
     await options.locator('text=Upload 2').click()

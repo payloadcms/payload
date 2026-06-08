@@ -473,7 +473,7 @@ test.describe('Multi Tenant', () => {
       await expect(page.getByText('Blue Dog Menu')).toBeVisible()
       await expect(page.getByText('Steel Cat Menu')).toBeHidden()
       await expect(page.getByText('Anchor Bar Menu')).toBeHidden()
-      await expect(await getSelectMenu({ page })).toHaveCount(1)
+      await expect(getSelectMenu({ page })).toHaveCount(1)
     })
   })
 

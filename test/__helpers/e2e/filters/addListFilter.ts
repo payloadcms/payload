@@ -87,7 +87,7 @@ export const addListFilter = async ({
         const valueInput = valueLocator.locator('input')
         await valueInput.fill(value)
 
-        const menu = await getSelectMenu({ page })
+        const menu = getSelectMenu({ page })
         const createValue = menu.locator('.rs__option', { hasText: `Create "${value}"` })
         if ((await createValue.count()) > 0) {
           await createValue.click()

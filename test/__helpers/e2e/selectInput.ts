@@ -35,34 +35,17 @@ const selectors = {
 /**
  * Returns a Locator for the portaled ReactSelect menu.
  *
- * Pass `{ selectLocator }` to scope the lookup to a specific select instance —
- * the helper reads the `aria-controls` attribute that react-select sets on its
- * hidden input to locate the unique listbox element, even after it has been
- * portaled to `document.body`.
+ * Since react-select closes any open menu before opening another, at most one
+ * `.rs__menu` exists in the DOM at a time — so a page-level locator is always
+ * unambiguous.
  *
- * Pass `{ page }` as a simpler fallback when only one menu is open at a time and
- * you don't need per-instance scoping.
- *
- * Using this helper instead of raw `.locator('.rs__menu')` keeps the CSS class
- * name in one place, so a future attribute change only requires updating here.
- *
- * If per-instance scoping via `{ page }` is ever needed without a container
- * locator, wire a `data-select-id` (or similar) attribute onto the ReactSelect
- * component and surface it on the portaled `.rs__menu` div via `ThemedMenuPortal`.
- * This helper can then accept `{ page, selectId }` and use `page.locator(
- * '.rs__menu[data-select-id="..."]')` to disambiguate.
+ * Using this helper instead of raw `.locator('.rs__menu')` keeps the selector
+ * in one place. If per-instance scoping is ever needed in the future, wire a
+ * `data-select-id` attribute onto the ReactSelect component and surface it on
+ * the portaled `.rs__menu` div via `ThemedMenuPortal`, then extend this helper
+ * to accept `{ page, selectId }`.
  */
-export async function getSelectMenu(
-  args: { selectLocator: Locator } | { page: Page },
-): Promise<Locator> {
-  if ('page' in args) {
-    return args.page.locator('.rs__menu')
-  }
-  const page = args.selectLocator.page()
-  const menuId = await args.selectLocator.locator('.rs__input').getAttribute('aria-controls')
-  if (menuId) {
-    return page.locator(`#${menuId}`)
-  }
+export function getSelectMenu({ page }: { page: Page }): Locator {
   return page.locator('.rs__menu')
 }
 
@@ -107,7 +90,7 @@ export async function selectInput({
 }
 
 export async function openSelectMenu({ selectLocator }: { selectLocator: Locator }): Promise<void> {
-  const menu = await getSelectMenu({ selectLocator })
+  const menu = getSelectMenu({ page: selectLocator.page() })
   if (await menu.isHidden()) {
     await selectLocator.locator('button.dropdown-indicator').click()
   }
@@ -122,7 +105,7 @@ async function selectOption({
   selectLocator: Locator
 }) {
   await openSelectMenu({ selectLocator })
-  const menu = await getSelectMenu({ selectLocator })
+  const menu = getSelectMenu({ page: selectLocator.page() })
   await menu.locator('.rs__option', { hasText: exactText(optionText) }).click()
 }
 
@@ -162,7 +145,7 @@ export const getSelectInputOptions = async ({
   selectLocator: Locator
 }): Promise<string[]> => {
   await openSelectMenu({ selectLocator })
-  const menu = await getSelectMenu({ selectLocator })
+  const menu = getSelectMenu({ page: selectLocator.page() })
   const options = await menu.locator('.rs__option').allTextContents()
   return options.map((option) => option.trim()).filter(Boolean)
 }
