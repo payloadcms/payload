@@ -1873,6 +1873,88 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       })
 
+      it('should roundtrip a block containing a nested array with richText through CSV export/import', async () => {
+        const testPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'FAQ Block Roundtrip Test',
+            blocks: [
+              {
+                blockType: 'faqSection',
+                faqs: [
+                  { question: 'What is Payload?', answer: richTextData },
+                  { question: 'Is it open source?', answer: richTextData },
+                ],
+              },
+            ],
+          },
+        })
+
+        let exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            where: { id: { equals: testPage.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        exportDoc = await payload.findByID({ collection: 'exports', id: exportDoc.id })
+
+        const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
+
+        await payload.delete({ collection: 'pages', id: testPage.id })
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: { collectionSlug: 'pages', importMode: 'create' },
+          file: {
+            data: fs.readFileSync(csvPath),
+            mimetype: 'text/csv',
+            name: 'faq-roundtrip.csv',
+            size: fs.statSync(csvPath).size,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { equals: 'FAQ Block Roundtrip Test' } },
+        })
+
+        expect(importedPages.docs).toHaveLength(1)
+        const imported = importedPages.docs[0]
+
+        expect(imported?.blocks).toHaveLength(1)
+        const faqBlock = imported?.blocks?.[0]
+        expect(faqBlock?.blockType).toBe('faqSection')
+
+        const faqs = (faqBlock as any)?.faqs
+        expect(Array.isArray(faqs)).toBe(true)
+        expect(faqs).toHaveLength(2)
+
+        expect(faqs[0]?.question).toBe('What is Payload?')
+        expect(typeof faqs[0]?.answer).not.toBe('string')
+        expect(faqs[0]?.answer?.root?.type).toBe('root')
+
+        expect(faqs[1]?.question).toBe('Is it open source?')
+        expect(typeof faqs[1]?.answer).not.toBe('string')
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { equals: 'FAQ Block Roundtrip Test' } },
+        })
+      })
+
       it('should handle json fields in deeply nested array structures', async () => {
         const jsonData = { level: 'nested', data: [1, 2, 3] }
 
