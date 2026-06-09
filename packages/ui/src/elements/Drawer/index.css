@@ -10,6 +10,12 @@
     --gutter-v: var(--spacer-4);
   }
 
+  @media (max-width: 768px) {
+    .drawer {
+      --gutter-h: var(--spacer-3);
+    }
+  }
+
   /* Keep nested drawers visible so they peek out to the left. Out-specifies the
      modal library's single-class hide rule, avoiding !important. */
   .drawer.drawer--is-open {
