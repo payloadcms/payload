@@ -537,6 +537,32 @@ describe('localizeStatus migration', () => {
         expect(v6.find((r) => r._locale === 'es')._status).toBe('published')
         expect(v6.find((r) => r._locale === 'de')._status).toBe('published')
       })
+
+      it('should return last version when calling with draft=true', async () => {
+        const doc = await payload.create({
+          collection: 'testLocalizedStatusPosts',
+          data: { title: 'Test' },
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: 'testLocalizedStatusPosts',
+          data: { title: 'Test Updated', _status: 'published' },
+          draft: false,
+        })
+
+        const version = await payload.findByID({
+          id: doc.id,
+          collection: 'testLocalizedStatusPosts',
+          draft: true,
+          // draft: true,
+          // limit: 1,
+          // sort: '-updatedAt',
+        })
+
+        expect(version.id).toBe(doc.id)
+        expect(version.title).toBe('Test Updated')
+      })
     })
 
     describe('Scenario 5: Skip collections without versions', () => {
