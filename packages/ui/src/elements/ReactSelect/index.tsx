@@ -58,6 +58,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
 
   const {
     className,
+    classNames: externalClassNames,
     components,
     customProps,
     disabled = false,
@@ -142,7 +143,12 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         className={classes}
         classNamePrefix="rs"
         classNames={{
-          menu: (state) => (state.placement ? `rs__menu--placement-${state.placement}` : ''),
+          ...externalClassNames,
+          menu: (state) => {
+            const placement = state.placement ? `rs__menu--placement-${state.placement}` : ''
+            const external = externalClassNames?.menu?.(state) ?? ''
+            return [placement, external].filter(Boolean).join(' ')
+          },
         }}
         components={{
           ClearIndicator,
@@ -227,7 +233,12 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       className={classes}
       classNamePrefix="rs"
       classNames={{
-        menu: (state) => (state.placement ? `rs__menu--placement-${state.placement}` : ''),
+        ...externalClassNames,
+        menu: (state) => {
+          const placement = state.placement ? `rs__menu--placement-${state.placement}` : ''
+          const external = externalClassNames?.menu?.(state) ?? ''
+          return [placement, external].filter(Boolean).join(' ')
+        },
       }}
       components={{
         ClearIndicator,
