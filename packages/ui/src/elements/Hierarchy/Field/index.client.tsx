@@ -19,7 +19,7 @@ import { Button } from '../../Button/index.js'
 import { RenderCustomComponent } from '../../RenderCustomComponent/index.js'
 import { useHierarchyDrawer } from '../Drawer/useHierarchyDrawer.js'
 import { SelectedHierarchies } from './SelectedHierarchies.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-field'
 
