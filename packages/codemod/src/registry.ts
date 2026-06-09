@@ -14,6 +14,7 @@ import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-
 import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
 import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
+import { removeGroupByTrue } from './transforms/remove-group-by-true/index.js'
 import { removeVersionsTrue } from './transforms/remove-versions-true/index.js'
 import { renameStorageAdaptersToStorage } from './transforms/rename-storage-adapters-to-storage/index.js'
 import { renameTypescriptSchemaToJsonSchema } from './transforms/rename-typescript-schema-to-json-schema/index.js'
@@ -34,6 +35,7 @@ export const transforms: Transform[] = [
   migrateDbTypesSubpath,
   migrateNextSubpathExports,
   migrateVersionsDefault,
+  removeGroupByTrue,
   removeVersionsTrue,
   renameTypescriptSchemaToJsonSchema,
 ]

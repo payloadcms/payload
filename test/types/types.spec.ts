@@ -35,6 +35,7 @@ import {
   type SerializedTextNode,
   type SerializedUploadNode,
   type TypedEditorState,
+  type WithDefaultNodes,
 } from '@payloadcms/richtext-lexical'
 import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext'
 import { PayloadSDK } from '@payloadcms/sdk'
@@ -42,6 +43,7 @@ import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 import type {
+  LexicalUploadFields_9521FA4A as GalleryUploadFields,
   SerializedAutoLinkNode as GenAutoLink,
   SerializedHeadingNode as GenHeading,
   SerializedHorizontalRuleNode as GenHR,
@@ -56,7 +58,6 @@ import type {
   SerializedTextNode as GenText,
   Config as LocalConfig,
   LexicalUploadFields_7C90EEAC as MediaUploadFields,
-  LexicalUploadFields_9521FA4A as GalleryUploadFields,
   Menu,
   MyRadioOptions,
   MySelectOptions,
@@ -1114,6 +1115,25 @@ describe('Types testing', () => {
         expect<GenChild>().type.toBe<GenNodeUnion>()
       })
     })
+
+    describe('node union composition (WithDefaultNodes)', () => {
+      type MyBlock = SerializedBlockNode<{ blockType: 'myBlock'; foo: string }>
+
+      // Previously impossible: `DefaultNodeTypesOf<Self>` was a circular reference (TS2456), and
+      // `DefaultNodeTypes | Block` only adds the block at the top level. WithDefaultNodes threads it.
+      test('WithDefaultNodes<Block> threads the block into container children', () => {
+        type Nodes = WithDefaultNodes<MyBlock>
+        type ParagraphChild = Extract<Nodes, { type: 'paragraph' }>['children'][number]
+        expect<Extract<ParagraphChild, { type: 'block' }>>().type.toBe<MyBlock>()
+      })
+
+      // Same assertion for DefaultTypedEditorState - does its `TAdditional` thread into children too?
+      test('DefaultTypedEditorState<Block> threads the block into container children', () => {
+        type Nodes = DefaultTypedEditorState<MyBlock>['root']['children'][number]
+        type ParagraphChild = Extract<Nodes, { type: 'paragraph' }>['children'][number]
+        expect<Extract<ParagraphChild, { type: 'block' }>>().type.toBe<MyBlock>()
+      })
+    })
   })
 
   describe('sdk', () => {
@@ -1264,7 +1284,17 @@ describe('Types testing', () => {
                 children: [
                   {
                     type: 'paragraph',
-                    children: [{ type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text: 'hello', version: 1 }],
+                    children: [
+                      {
+                        type: 'text',
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'hello',
+                        version: 1,
+                      },
+                    ],
                     direction: null,
                     format: '',
                     indent: 0,

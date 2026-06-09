@@ -62,16 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_ED428AB9".
+ * via the `definition` "LexicalNodes_7A11A510".
  */
-export type LexicalNodes_ED428AB9 =
+export type LexicalNodes_7A11A510 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_ED428AB9>
+  | SerializedParagraphNode<LexicalNodes_7A11A510>
   | SerializedBlockNode<MyBlock>
-  | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_ED428AB9>
+  | SerializedHeadingNode<LexicalNodes_7A11A510>
   | SerializedUploadNode<'gif-resize'>
   | SerializedUploadNode<'filename-compound-index'>
   | SerializedUploadNode<'no-image-sizes'>
@@ -124,11 +123,11 @@ export type LexicalNodes_ED428AB9 =
   | SerializedUploadNode<'media-without-delete-access'>
   | SerializedUploadNode<'media-with-image-size-admin-props'>
   | SerializedUploadNode<'prefix-media'>
-  | SerializedQuoteNode<LexicalNodes_ED428AB9>
-  | SerializedListNode<LexicalNodes_ED428AB9>
-  | SerializedListItemNode<LexicalNodes_ED428AB9>
-  | SerializedAutoLinkNode<LexicalNodes_ED428AB9, LexicalLinkFields_ED428AB9>
-  | SerializedLinkNode<LexicalNodes_ED428AB9, LexicalLinkFields_ED428AB9>
+  | SerializedQuoteNode<LexicalNodes_7A11A510>
+  | SerializedListNode<LexicalNodes_7A11A510>
+  | SerializedListItemNode<LexicalNodes_7A11A510>
+  | SerializedAutoLinkNode<LexicalNodes_7A11A510, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_7A11A510, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'relation'
       | 'audio'
@@ -1409,7 +1408,7 @@ export interface Uploads1 {
   singleUpload?: (string | null) | Uploads2;
   hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
   singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
-  richText?: LexicalRichText<LexicalNodes_ED428AB9> | null;
+  richText?: LexicalRichText<LexicalNodes_7A11A510> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -4138,9 +4137,9 @@ export interface LexicalUploadFields_1AB4670B {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_ED428AB9".
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
  */
-export interface LexicalLinkFields_ED428AB9 {
+export interface LexicalLinkFields_0A7E9EC0 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -4211,17 +4210,17 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = {
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};
+} : never;
 
 export interface SerializedHeadingNode<
   TChildren,

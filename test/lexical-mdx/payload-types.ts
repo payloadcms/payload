@@ -62,18 +62,17 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D0137BA6".
+ * via the `definition` "LexicalNodes_AE29B1B0".
  */
-export type LexicalNodes_D0137BA6 =
+export type LexicalNodes_AE29B1B0 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D0137BA6>
-  | SerializedBlockNode<{blockType: string}>
+  | SerializedParagraphNode<LexicalNodes_AE29B1B0>
   | SerializedInlineBlockNode<InlineCode>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_D0137BA6>
+  | SerializedQuoteNode<LexicalNodes_AE29B1B0>
   | SerializedRelationshipNode<
       | 'posts'
       | 'simple'
@@ -84,11 +83,11 @@ export type LexicalNodes_D0137BA6 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_D0137BA6, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D0137BA6, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D0137BA6>
-  | SerializedListItemNode<LexicalNodes_D0137BA6>
-  | SerializedHeadingNode<LexicalNodes_D0137BA6>;
+  | SerializedAutoLinkNode<LexicalNodes_AE29B1B0, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_AE29B1B0, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_AE29B1B0>
+  | SerializedListItemNode<LexicalNodes_AE29B1B0>
+  | SerializedHeadingNode<LexicalNodes_AE29B1B0>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_E1F445FF".
@@ -625,7 +624,7 @@ export interface Banner {
   id: string;
   blockType: 'Banner';
   type?: ('success' | 'info' | 'warning') | null;
-  content?: LexicalRichText<LexicalNodes_D0137BA6> | null;
+  content?: LexicalRichText<LexicalNodes_AE29B1B0> | null;
   blockName?: string | null;
 }
 /**
@@ -777,17 +776,17 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export type SerializedBlockNode<TFields extends { blockType: string }> = {
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'block';
   format: LexicalElementFormat;
   version: number;
   fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-};
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = {
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
   type: 'inlineBlock';
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
-};
+} : never;
 
 export interface SerializedHorizontalRuleNode {
   type: 'horizontalrule';
