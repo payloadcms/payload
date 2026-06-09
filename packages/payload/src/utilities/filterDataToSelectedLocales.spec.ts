@@ -141,6 +141,84 @@ describe('filterDataToSelectedLocales', () => {
     })
   })
 
+  describe('localized blocks', () => {
+    it('should filter localized blocks field to selected locales', () => {
+      const fields: Field[] = [
+        {
+          name: 'layout',
+          type: 'blocks',
+          localized: true,
+          blockReferences: ['textBlock'],
+        },
+      ]
+
+      const docWithLocales = {
+        layout: {
+          en: [{ blockType: 'textBlock', id: 'block1', text: 'English text' }],
+          de: [{ blockType: 'textBlock', id: 'block2', text: 'German text' }],
+        },
+      }
+
+      const result = filterDataToSelectedLocales({
+        configBlockReferences: [
+          {
+            slug: 'textBlock',
+            flattenedFields: [],
+            fields: [{ name: 'text', type: 'text' }],
+          },
+        ],
+        docWithLocales,
+        fields,
+        selectedLocales: ['en'],
+      })
+
+      expect(result.layout).toEqual({
+        en: [{ blockType: 'textBlock', id: 'block1', text: 'English text' }],
+      })
+    })
+
+    it('should handle localized blocks with localized child fields', () => {
+      const fields: Field[] = [
+        {
+          name: 'layout',
+          type: 'blocks',
+          localized: true,
+          blockReferences: ['contentBlock'],
+        },
+      ]
+
+      const docWithLocales = {
+        layout: {
+          en: [
+            { blockType: 'contentBlock', id: 'block1', title: { en: 'English Title', es: 'Spanish Title' } },
+          ],
+          de: [
+            { blockType: 'contentBlock', id: 'block2', title: { de: 'German Title' } },
+          ],
+        },
+      }
+
+      const result = filterDataToSelectedLocales({
+        configBlockReferences: [
+          {
+            slug: 'contentBlock',
+            flattenedFields: [],
+            fields: [{ name: 'title', type: 'text', localized: true }],
+          },
+        ],
+        docWithLocales,
+        fields,
+        selectedLocales: ['en'],
+      })
+
+      expect(result.layout).toEqual({
+        en: [
+          { blockType: 'contentBlock', id: 'block1', title: { en: 'English Title' } },
+        ],
+      })
+    })
+  })
+
   describe('localized arrays', () => {
     it('should filter localized array to selected locales and recurse into rows', () => {
       const fields: Field[] = [

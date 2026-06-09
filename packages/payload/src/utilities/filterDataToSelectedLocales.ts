@@ -109,16 +109,23 @@ export function filterDataToSelectedLocales({
 
             return rows.map((blockData: JsonObject) => {
               let block: Block | FlattenedBlock | undefined
-              if (configBlockReferences && field.blockReferences) {
-                for (const blockOrReference of field.blockReferences) {
+
+              const blockCollection = field.blockReferences ?? field.blocks
+              if (blockCollection) {
+                const matchedReference = blockCollection.find((blockOrReference) => {
                   if (typeof blockOrReference === 'string') {
-                    block = configBlockReferences.find((b) => b.slug === blockData.blockType)
+                    return blockOrReference === blockData.blockType
+                  }
+                  return blockOrReference.slug === blockData.blockType
+                })
+
+                if (matchedReference) {
+                  if (typeof matchedReference === 'string') {
+                    block = configBlockReferences?.find((b) => b.slug === matchedReference)
                   } else {
-                    block = blockOrReference
+                    block = matchedReference
                   }
                 }
-              } else if (field.blocks) {
-                block = field.blocks.find((b) => b.slug === blockData.blockType)
               }
 
               if (block) {
