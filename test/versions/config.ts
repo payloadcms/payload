@@ -15,10 +15,10 @@ import DraftsNoReadVersions from './collections/DraftsNoReadVersions.js'
 import DraftWithChangeHook from './collections/DraftsWithChangeHook.js'
 import DraftsWithCustomUnpublish from './collections/DraftsWithCustomUnpublish.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
+import { DraftsWithUpload } from './collections/DraftsWithUpload.js'
 import DraftsWithValidate from './collections/DraftsWithValidate.js'
 import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
 import LocalizedPosts from './collections/Localized.js'
-import { DraftsWithUpload } from './collections/DraftsWithUpload.js'
 import { Media } from './collections/Media.js'
 import { Media2 } from './collections/Media2.js'
 import Posts from './collections/Posts.js'
@@ -37,6 +37,9 @@ import { seed } from './seed.js'
 import { BASE_PATH } from './shared.js'
 process.env.NEXT_BASE_PATH = BASE_PATH
 export default buildConfigWithDefaults({
+  experimental: {
+    localizeStatus: true,
+  },
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),

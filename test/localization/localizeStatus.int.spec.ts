@@ -630,34 +630,45 @@ describe('localizeStatus migration', () => {
       })
 
       it('should handle publishedLocale when migrating', async () => {
-        // Step 1: Create an article
-        const article = await payload.create({
-          collection: 'testMigrationArticles',
-          data: { title: 'Article' },
-          locale: 'en',
+        // This test simulates OLD data that was created before localizeStatus existed.
+        // Old data has _status as a string and publishedLocale to indicate which locale was published.
+        // We insert raw version documents to replicate what old Payload code would have written.
+        const connection = (payload.db as any).connection
+        const versionsCollection = '_testmigrationarticles_versions'
+        const mainCollection = 'testmigrationarticles'
+
+        // Step 1: Insert a main collection doc (old format)
+        const { insertedId: articleId } = await connection.collection(mainCollection).insertOne({
+          title: { en: 'Published Article' },
+          _status: 'published',
+          createdAt: new Date(),
+          updatedAt: new Date(),
         })
 
-        // Step 2: Publish only English locale
-        await payload.update({
-          id: article.id,
-          collection: 'testMigrationArticles',
-          data: { _status: 'published', title: 'Published Article' },
-          publishSpecificLocale: 'en',
+        // Step 2: Insert an old-format version with publishedLocale: 'en'
+        // This simulates what the old Payload code would write when publishing a single locale.
+        await connection.collection(versionsCollection).insertOne({
+          parent: articleId,
+          publishedLocale: 'en',
+          latest: true,
+          version: {
+            title: { en: 'Published Article' },
+            _status: 'published',
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
         })
 
         // Step 3: Run the migration
-        const connection = (payload.db as any).connection
-        const versionsCollection = '_testmigrationarticles_versions'
         await localizeStatus.up({
           collectionSlug: 'testMigrationArticles',
           payload,
         })
 
         // Step 4: Verify the latest version has correct per-locale statuses
-        // MongoDB stores parent as ObjectId, not string
         const versions = await connection
           .collection(versionsCollection)
-          .find({ parent: new Types.ObjectId(article.id) })
+          .find({ parent: articleId })
           .sort({ createdAt: -1 })
           .limit(1)
           .toArray()

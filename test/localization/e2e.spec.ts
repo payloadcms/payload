@@ -792,7 +792,7 @@ describe('Localization', () => {
   })
 
   describe('publish specific locale', () => {
-    test('should create post in correct locale with publishSpecificLocale', async () => {
+    test('should create post in correct locale when publishing a specific locale', async () => {
       await page.goto(urlPostsWithDrafts.create)
       await changeLocale(page, 'es')
       await fillValues({ title: 'Created In Spanish' })

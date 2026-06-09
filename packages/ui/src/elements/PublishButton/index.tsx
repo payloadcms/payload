@@ -186,7 +186,7 @@ export function PublishButton({
     setMostRecentVersionIsAutosaved,
   ])
 
-  const publishSpecificLocale = useCallback(
+  const publishLocale = useCallback(
     async (locale) => {
       if (uploadStatus === 'uploading') {
         return
@@ -196,7 +196,6 @@ export function PublishButton({
         {
           depth: 0,
           locale,
-          publishSpecificLocale: locale,
         },
         { addQueryPrefix: true },
       )
@@ -257,7 +256,7 @@ export function PublishButton({
       <FormSubmit
         buttonId="action-save"
         disabled={!canPublish}
-        onClick={isDefaultPublishAll ? publish : () => publishSpecificLocale(activeLocale.code)}
+        onClick={isDefaultPublishAll ? publish : () => publishLocale(activeLocale.code)}
         size="medium"
         SubMenuPopupContent={
           isSpecificLocalePublishEnabled
@@ -269,9 +268,7 @@ export function PublishButton({
                         <PopupList.Button
                           id="publish-locale"
                           onClick={
-                            isDefaultPublishAll
-                              ? () => publishSpecificLocale(activeLocale.code)
-                              : publish
+                            isDefaultPublishAll ? () => publishLocale(activeLocale.code) : publish
                           }
                         >
                           {isDefaultPublishAll

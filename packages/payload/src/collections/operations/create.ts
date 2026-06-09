@@ -55,7 +55,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overwriteExistingFiles?: boolean
   populate?: PopulateType
   publishAllLocales?: boolean
-  publishSpecificLocale?: string
   req: PayloadRequest
   selectedLocales?: string[]
   showHiddenFields?: boolean
@@ -91,10 +90,6 @@ export const createOperation = async <
       overrideAccess: args.overrideAccess!,
     })
 
-    if (args.publishSpecificLocale) {
-      args.req.locale = args.publishSpecificLocale
-    }
-
     const {
       autosave = false,
       collection: { config: collectionConfig },
@@ -107,7 +102,6 @@ export const createOperation = async <
       overwriteExistingFiles = false,
       populate,
       publishAllLocales: publishAllLocalesArg,
-      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -340,7 +334,6 @@ export const createOperation = async <
         docWithLocales: resultWithLocales,
         operation: 'create',
         payload,
-        publishSpecificLocale,
         req,
         returning: false,
       })

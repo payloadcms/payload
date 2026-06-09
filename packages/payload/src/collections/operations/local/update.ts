@@ -105,12 +105,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   publishAllLocales?: boolean
   /**
-   * Publish the document / documents with a specific locale.
-   *
-   * @default undefined
-   */
-  publishSpecificLocale?: string
-  /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
@@ -238,7 +232,6 @@ async function updateLocal<
     overwriteExistingFiles = false,
     populate,
     publishAllLocales,
-    publishSpecificLocale,
     select,
     showHiddenFields,
     sort,
@@ -273,7 +266,6 @@ async function updateLocal<
     payload,
     populate,
     publishAllLocales,
-    publishSpecificLocale,
     req,
     select,
     showHiddenFields,

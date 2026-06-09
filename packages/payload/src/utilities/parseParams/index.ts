@@ -23,7 +23,6 @@ type RawParams = {
   pagination?: string
   populate?: unknown
   publishAllLocales?: string
-  publishSpecificLocale?: string
   select?: unknown
   selectedLocales?: string
   sort?: string | string[]
@@ -46,7 +45,6 @@ type ParsedParams = {
   pagination?: boolean
   populate?: PopulateType
   publishAllLocales?: boolean
-  publishSpecificLocale?: string
   select?: SelectType
   selectedLocales?: string[]
   sort?: string[]
