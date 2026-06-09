@@ -69,6 +69,8 @@ export const thTranslations: DefaultTranslationsObject = {
     unableToVerify: 'ไม่สามารถยืนยันบัญชีได้',
     username: 'ชื่อผู้ใช้',
     usernameNotValid: 'ชื่อผู้ใช้ที่ให้มาไม่ถูกต้อง',
+    verificationFailedRequestNew:
+      'เราไม่สามารถยืนยันบัญชีของคุณได้ กรุณาขออีเมลยืนยันใหม่และลองอีกครั้ง',
     verified: 'ยืนยันบััญชีแล้ว',
     verifiedSuccessfully: 'ยืนยันบัญชีสำเร็จ',
     verify: 'ยืนยันบัญชี',

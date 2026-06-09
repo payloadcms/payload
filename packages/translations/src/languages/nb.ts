@@ -70,6 +70,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Kunne ikke bekrefte',
     username: 'Brukernavn',
     usernameNotValid: 'Brukernavnet som er oppgitt er ikke gyldig.',
+    verificationFailedRequestNew:
+      'Vi kunne ikke verifisere kontoen din. Be om en ny verifiserings-e-post og prøv igjen.',
     verified: 'Bekreftet',
     verifiedSuccessfully: 'Bekreftet',
     verify: 'Bekreft',

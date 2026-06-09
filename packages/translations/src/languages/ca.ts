@@ -71,6 +71,8 @@ export const caTranslations: DefaultTranslationsObject = {
     unableToVerify: "No s'ha pogut verificar",
     username: "Nom d'usuari",
     usernameNotValid: "El nom d'usuari proporcionat no és vàlid",
+    verificationFailedRequestNew:
+      'No hem pogut verificar el vostre compte. Sol·liciteu un nou correu electrònic de verificació i torneu-ho a intentar.',
     verified: 'Verificat',
     verifiedSuccessfully: 'Verificat amb èxit',
     verify: 'Verificar',

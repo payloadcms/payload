@@ -71,6 +71,8 @@ export const plTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Nie można zweryfikować',
     username: 'Nazwa użytkownika',
     usernameNotValid: 'Podana nazwa użytkownika nie jest prawidłowa.',
+    verificationFailedRequestNew:
+      'Nie udało się zweryfikować Twojego konta. Poproś o nowy e-mail weryfikacyjny i spróbuj ponownie.',
     verified: 'Zweryfikowano',
     verifiedSuccessfully: 'Pomyślnie zweryfikowany',
     verify: 'Zweryfikuj',

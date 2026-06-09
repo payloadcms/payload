@@ -69,6 +69,8 @@ export const daTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Kan ikke verificere',
     username: 'Brugernavn',
     usernameNotValid: 'Brugernavnet er ugyldigt.',
+    verificationFailedRequestNew:
+      'Vi kunne ikke bekræfte din konto. Anmod om en ny bekræftelsesmail og prøv igen.',
     verified: 'Bekræftet',
     verifiedSuccessfully: 'Bekræftet succesfuldt',
     verify: 'Bekræft',

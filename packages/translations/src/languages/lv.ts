@@ -70,6 +70,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Neizdevās verificēt',
     username: 'Lietotājvārds',
     usernameNotValid: 'Norādītais lietotājvārds nav derīgs',
+    verificationFailedRequestNew:
+      'Nevarējām apstiprināt jūsu kontu. Lūdzu, pieprasiet jaunu verifikācijas e-pastu un mēģiniet vēlreiz.',
     verified: 'Verificēts',
     verifiedSuccessfully: 'Veiksmīgi verificēts',
     verify: 'Verificēt',

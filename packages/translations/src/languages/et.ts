@@ -69,6 +69,8 @@ export const etTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Ei saa kinnitada',
     username: 'Kasutajanimi',
     usernameNotValid: 'Sisestatud kasutajanimi ei ole kehtiv',
+    verificationFailedRequestNew:
+      'Teie kontot ei õnnestunud kinnitada. Palun taotlege uut kinnituskirja ja proovige uuesti.',
     verified: 'Kinnitatud',
     verifiedSuccessfully: 'Edukalt kinnitatud',
     verify: 'Kinnita',

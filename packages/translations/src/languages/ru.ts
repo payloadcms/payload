@@ -72,6 +72,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Невозможно подтвердить',
     username: 'Имя пользователя',
     usernameNotValid: 'Предоставленное имя пользователя недействительно.',
+    verificationFailedRequestNew:
+      'Не удалось подтвердить вашу учетную запись. Запросите новое письмо для подтверждения и попробуйте снова.',
     verified: 'Подтверждено',
     verifiedSuccessfully: 'Успешно подтверждено',
     verify: 'Подтвердить',

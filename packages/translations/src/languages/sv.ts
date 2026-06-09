@@ -70,6 +70,8 @@ export const svTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Det går inte att verifiera',
     username: 'Användarnamn',
     usernameNotValid: 'Det angivna användarnamnet är inte giltigt',
+    verificationFailedRequestNew:
+      'Vi kunde inte verifiera ditt konto. Begär ett nytt verifieringsmejl och försök igen.',
     verified: 'Verifierad',
     verifiedSuccessfully: 'Verifierad',
     verify: 'Verifiera',

@@ -70,6 +70,8 @@ export const csTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Nepodařilo se ověřit',
     username: 'Uživatelské jméno',
     usernameNotValid: 'Poskytnuté uživatelské jméno není platné.',
+    verificationFailedRequestNew:
+      'Nepodařilo se nám ověřit váš účet. Požádejte o nový ověřovací e-mail a zkuste to znovu.',
     verified: 'Ověřeno',
     verifiedSuccessfully: 'Úspěšně ověřeno',
     verify: 'Ověřit',

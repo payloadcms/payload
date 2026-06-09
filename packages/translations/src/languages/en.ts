@@ -69,9 +69,10 @@ export const enTranslations = {
     successfullyRegisteredFirstUser: 'Successfully registered first user.',
     successfullyUnlocked: 'Successfully unlocked',
     tokenRefreshSuccessful: 'Token refresh successful.',
-    unableToVerify:
-      'We couldn’t verify your account. Request a new verification email and try again.',
+    unableToVerify: 'Unable to Verify',
     username: 'Username',
+    verificationFailedRequestNew:
+      'We couldn’t verify your account. Request a new verification email and try again.',
     verified: 'Verified',
     verifiedSuccessfully: 'Verified Successfully',
     verify: 'Verify',

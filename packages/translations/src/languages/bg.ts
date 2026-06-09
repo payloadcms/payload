@@ -70,6 +70,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Неуспешно потвърждение',
     username: 'Потребителско име',
     usernameNotValid: 'Предоставеното потребителско име не е валидно.',
+    verificationFailedRequestNew:
+      'Не успяхме да потвърдим вашия акаунт. Заявете нов имейл за потвърждение и опитайте отново.',
     verified: 'Потвърден',
     verifiedSuccessfully: 'Потвърден успешно',
     verify: 'Потвърди',

@@ -70,6 +70,8 @@ export const azTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Doğrulamaq mümkün deyil',
     username: 'İstifadəçi adı',
     usernameNotValid: 'Təqdim edilən istifadəçi adı düzgün deyil',
+    verificationFailedRequestNew:
+      'Hesabınızı yoxlaya bilmədik. Yeni təsdiq e-poçtu göndərməyi xahiş edin və yenidən cəhd edin.',
     verified: 'Doğrulanmış',
     verifiedSuccessfully: 'Uğurla doğrulandı',
     verify: 'Doğrula',

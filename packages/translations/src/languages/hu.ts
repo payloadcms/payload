@@ -73,6 +73,8 @@ export const huTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Sikertelen megerősítés',
     username: 'Felhasználónév',
     usernameNotValid: 'A megadott felhasználónév nem érvényes.',
+    verificationFailedRequestNew:
+      'Nem sikerült ellenőrizni a fiókját. Kérjen új ellenőrző e-mailt, és próbálja meg ismét.',
     verified: 'Megerősítve',
     verifiedSuccessfully: 'Sikeresen megerősítve',
     verify: 'Megerősítés',

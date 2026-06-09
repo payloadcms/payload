@@ -71,6 +71,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Nije moguće potvrditi',
     username: 'Korisničko ime',
     usernameNotValid: 'Uneseno korisničko ime nije validno.',
+    verificationFailedRequestNew:
+      'Nismo mogli da verifikujemo vaš nalog. Zatražite novi verifikacioni e-mail i pokušajte ponovo.',
     verified: 'Potvrđeno',
     verifiedSuccessfully: 'Uspešno potvrđeno',
     verify: 'Potvrdi',

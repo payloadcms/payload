@@ -70,6 +70,7 @@ export const heTranslations: DefaultTranslationsObject = {
     unableToVerify: 'לא ניתן לאמת',
     username: 'שם משתמש',
     usernameNotValid: 'שם המשתמש שסופק אינו חוקי',
+    verificationFailedRequestNew: 'לא הצלחנו לאמת את החשבון שלך. בקש מייל אימות חדש ונסה שוב.',
     verified: 'אומת',
     verifiedSuccessfully: 'אומת בהצלחה',
     verify: 'אמת',

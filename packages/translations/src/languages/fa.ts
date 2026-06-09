@@ -69,6 +69,8 @@ export const faTranslations: DefaultTranslationsObject = {
     unableToVerify: 'تأیید حساب امکان‌پذیر نیست.',
     username: 'نام کاربری',
     usernameNotValid: 'نام کاربری وارد شده معتبر نیست.',
+    verificationFailedRequestNew:
+      'ما نتوانستیم حساب کاربری شما را تأیید کنیم. لطفاً یک ایمیل تأیید جدید درخواست داده و مجدداً تلاش کنید.',
     verified: 'تأیید شده',
     verifiedSuccessfully: 'با موفقیت تأیید شد.',
     verify: 'تأیید',

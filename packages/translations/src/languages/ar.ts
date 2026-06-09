@@ -71,6 +71,8 @@ export const arTranslations: DefaultTranslationsObject = {
     unableToVerify: 'غير قادر على التحقق من',
     username: 'اسم المستخدم',
     usernameNotValid: 'اسم المستخدم المقدم غير صالح',
+    verificationFailedRequestNew:
+      'تعذر علينا التحقق من حسابك. يرجى طلب رسالة تحقق جديدة والمحاولة مرة أخرى.',
     verified: 'تمّ التحقّق',
     verifiedSuccessfully: 'تمّ التحقّق بنجاح',
     verify: 'قم بالتّحقّق',

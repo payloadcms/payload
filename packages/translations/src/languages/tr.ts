@@ -72,6 +72,8 @@ export const trTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Doğrulama başarısız',
     username: 'Kullanıcı Adı',
     usernameNotValid: 'Sağlanan kullanıcı adı geçerli değil.',
+    verificationFailedRequestNew:
+      'Hesabınızı doğrulayamadık. Lütfen yeni bir doğrulama e-postası talep edin ve tekrar deneyin.',
     verified: 'Doğrulandı',
     verifiedSuccessfully: 'Hesap başarıyla doğrulandı',
     verify: 'Doğrula',

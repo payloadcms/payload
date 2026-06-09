@@ -72,6 +72,8 @@ export const isTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Staðfesting tókst ekki',
     username: 'Notandanafn',
     usernameNotValid: 'Notandanafnið sem þú skráðir er ekki gilt',
+    verificationFailedRequestNew:
+      'Við gátum ekki staðfest aðganginn þinn. Óskaðu eftir nýju staðfestingarpósti og reyndu aftur.',
     verified: 'Staðfest',
     verifiedSuccessfully: 'Staðfest',
     verify: 'Staðfesta',

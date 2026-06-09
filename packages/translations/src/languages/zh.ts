@@ -69,6 +69,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     unableToVerify: '无法验证',
     username: '用户名',
     usernameNotValid: '提供的用户名无效',
+    verificationFailedRequestNew: '我们无法验证您的账户。请请求新的验证邮件并重试。',
     verified: '已验证',
     verifiedSuccessfully: '成功验证',
     verify: '验证',

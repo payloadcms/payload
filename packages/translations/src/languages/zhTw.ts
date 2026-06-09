@@ -68,6 +68,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     unableToVerify: '無法驗證',
     username: '使用者名稱',
     usernameNotValid: '提供的使用者名稱無效',
+    verificationFailedRequestNew: '我們無法驗證您的帳戶。請請求新的驗證電子郵件並重試。',
     verified: '已驗證',
     verifiedSuccessfully: '成功驗證',
     verify: '驗證',

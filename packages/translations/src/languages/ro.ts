@@ -73,6 +73,8 @@ export const roTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Nu se poate verifica',
     username: 'Nume de utilizator',
     usernameNotValid: 'Numele de utilizator furnizat nu este valid.',
+    verificationFailedRequestNew:
+      'Nu am putut verifica contul dumneavoastră. Solicitați un nou e-mail de verificare și încercați din nou.',
     verified: 'Verificat',
     verifiedSuccessfully: 'Verificat cu succes',
     verify: 'Verifică',

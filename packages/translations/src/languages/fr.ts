@@ -72,6 +72,8 @@ export const frTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Vérification échouée',
     username: "Nom d'utilisateur",
     usernameNotValid: "Le nom d'utilisateur fourni n'est pas valide",
+    verificationFailedRequestNew:
+      'Nous n’avons pas pu vérifier votre compte. Demandez un nouvel e-mail de vérification et réessayez.',
     verified: 'Vérifié',
     verifiedSuccessfully: 'Vérifié avec succès',
     verify: 'Vérifier',

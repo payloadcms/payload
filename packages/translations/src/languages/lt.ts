@@ -71,6 +71,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Negalima patikrinti',
     username: 'Vartotojo vardas',
     usernameNotValid: 'Pateiktas vartotojo vardas yra netinkamas',
+    verificationFailedRequestNew:
+      'Nepavyko patvirtinti jūsų paskyros. Paprašykite naujo patvirtinimo el. laiško ir bandykite dar kartą.',
     verified: 'Patvirtinta',
     verifiedSuccessfully: 'Sėkmingai patvirtinta',
     verify: 'Patikrinkite',

@@ -72,6 +72,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Verificatie niet mogelijk',
     username: 'Gebruikersnaam',
     usernameNotValid: 'De opgegeven gebruikersnaam is niet geldig',
+    verificationFailedRequestNew:
+      'We konden uw account niet verifiëren. Vraag een nieuwe verificatie-e-mail aan en probeer het opnieuw.',
     verified: 'Geverifieerd',
     verifiedSuccessfully: 'Succesvol geverifieerd',
     verify: 'Verifiëren',

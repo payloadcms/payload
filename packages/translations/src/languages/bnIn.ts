@@ -71,6 +71,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     unableToVerify: 'যাচাই করতে অক্ষম',
     username: 'ব্যবহারকারীর নাম',
     usernameNotValid: 'প্রদত্ত ব্যবহারকারীর নামটি বৈধ নয়',
+    verificationFailedRequestNew:
+      'আমরা আপনার অ্যাকাউন্ট যাচাই করতে পারিনি। নতুন একটি যাচাইকরণ ইমেইল অনুরোধ করুন এবং পুনরায় চেষ্টা করুন।',
     verified: 'যাচাইকৃত',
     verifiedSuccessfully: 'সফলভাবে যাচাই করা হয়েছে',
     verify: 'যাচাই করুন',

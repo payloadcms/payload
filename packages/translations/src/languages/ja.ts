@@ -71,6 +71,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     unableToVerify: '検証ができません',
     username: 'ユーザー名',
     usernameNotValid: '入力されたユーザー名は無効です',
+    verificationFailedRequestNew:
+      'アカウントの確認ができませんでした。新しい確認メールをリクエストし、再度お試しください。',
     verified: '検証済み',
     verifiedSuccessfully: '検証が成功しました',
     verify: '検証',

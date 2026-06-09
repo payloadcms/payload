@@ -71,6 +71,8 @@ export const skTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Nemožno overiť',
     username: 'Používateľské meno',
     usernameNotValid: 'Zadané užívateľské meno nie je platné.',
+    verificationFailedRequestNew:
+      'Nepodarilo sa nám overiť váš účet. Požiadajte o nový overovací e-mail a skúste to znova.',
     verified: 'Overené',
     verifiedSuccessfully: 'Úspešne overené',
     verify: 'Overiť',

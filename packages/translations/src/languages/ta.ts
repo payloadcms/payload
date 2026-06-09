@@ -70,6 +70,8 @@ export const taTranslations: DefaultTranslationsObject = {
     unableToVerify: 'சரிபார்க்க முடியவில்லை',
     username: 'பயனர் பெயர்',
     usernameNotValid: 'கொடுக்கப்பட்ட பயனர் பெயர் செல்லுபடியானதல்ல',
+    verificationFailedRequestNew:
+      'உங்கள் கணக்கை சரிபார்க்க முடியவில்லை. புதிய சரிபார்ப்பு மின்னஞ்சலைக் கோரி மீண்டும் முயற்சிக்கவும்.',
     verified: 'சரிபார்க்கப்பட்டது',
     verifiedSuccessfully: 'வெற்றிகரமாக சரிபார்க்கப்பட்டது',
     verify: 'சரிபார்க்கவும்',

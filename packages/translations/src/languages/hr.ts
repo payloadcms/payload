@@ -71,6 +71,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Nije moguće potvrditi',
     username: 'Korisničko ime',
     usernameNotValid: 'Uneseno korisničko ime nije valjano.',
+    verificationFailedRequestNew:
+      'Nismo mogli potvrditi vaš račun. Zatražite novi verifikacijski e-mail i pokušajte ponovno.',
     verified: 'Potvrđeno',
     verifiedSuccessfully: 'Uspješno potvrđeno',
     verify: 'Potvrdi',

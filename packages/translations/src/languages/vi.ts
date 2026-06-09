@@ -71,6 +71,8 @@ export const viTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Không thể xác thực',
     username: 'Tên đăng nhập',
     usernameNotValid: 'Tên người dùng được cung cấp không hợp lệ',
+    verificationFailedRequestNew:
+      'Chúng tôi không thể xác minh tài khoản của bạn. Vui lòng yêu cầu một email xác minh mới và thử lại.',
     verified: 'Đã xác thực',
     verifiedSuccessfully: 'Đã xác thực thành công',
     verify: 'Tiến hành xác thực',

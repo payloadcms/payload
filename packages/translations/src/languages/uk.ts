@@ -71,6 +71,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Неможливо підтвердити',
     username: "Ім'я користувача",
     usernameNotValid: "Вказане ім'я користувача недійсне",
+    verificationFailedRequestNew:
+      'Не вдалося підтвердити ваш обліковий запис. Запросіть новий лист для підтвердження та спробуйте ще раз.',
     verified: 'Підтверджено',
     verifiedSuccessfully: 'Успішно підтверджено',
     verify: 'Підтвердити',

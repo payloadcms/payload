@@ -70,6 +70,8 @@ export const slTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Ni mogoče preveriti',
     username: 'Uporabniško ime',
     usernameNotValid: 'Vneseno uporabniško ime ni veljavno',
+    verificationFailedRequestNew:
+      'Vašega računa nismo mogli preveriti. Zahtevajte novo potrditveno e-pošto in poskusite znova.',
     verified: 'Preverjeno',
     verifiedSuccessfully: 'Uspešno preverjeno',
     verify: 'Preveri',

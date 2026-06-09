@@ -73,6 +73,8 @@ export const deTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Konnte nicht verifiziert werden',
     username: 'Benutzername',
     usernameNotValid: 'Der angegebene Benutzername ist nicht gültig.',
+    verificationFailedRequestNew:
+      'Wir konnten Ihr Konto nicht verifizieren. Fordern Sie eine neue Bestätigungs-E-Mail an und versuchen Sie es erneut.',
     verified: 'Verifiziert',
     verifiedSuccessfully: 'Erfolgreich verifiziert',
     verify: 'Verifizieren',

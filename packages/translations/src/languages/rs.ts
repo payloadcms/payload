@@ -71,6 +71,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Није могуће потврдити',
     username: 'Korisničko ime',
     usernameNotValid: 'Korisničko ime koje ste uneli nije važeće.',
+    verificationFailedRequestNew:
+      'Nismo mogli da verifikujemo vaš nalog. Zatražite novi verifikacioni imejl i pokušajte ponovo.',
     verified: 'Потврђено',
     verifiedSuccessfully: 'Успешно потврђено',
     verify: 'Потврди',

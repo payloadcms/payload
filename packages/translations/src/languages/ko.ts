@@ -70,6 +70,8 @@ export const koTranslations: DefaultTranslationsObject = {
     unableToVerify: '확인할 수 없음',
     username: '사용자 이름',
     usernameNotValid: '제공된 사용자 이름이 유효하지 않습니다.',
+    verificationFailedRequestNew:
+      '계정을 인증할 수 없습니다. 새 인증 이메일을 요청하신 후 다시 시도해 주시기 바랍니다.',
     verified: '확인됨',
     verifiedSuccessfully: '성공적으로 확인됨',
     verify: '확인',

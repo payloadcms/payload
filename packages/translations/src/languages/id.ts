@@ -71,6 +71,8 @@ export const idTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Tidak Dapat Memverifikasi',
     username: 'Nama Pengguna',
     usernameNotValid: 'Nama pengguna yang diberikan tidak valid',
+    verificationFailedRequestNew:
+      'Kami tidak dapat memverifikasi akun Anda. Silakan minta email verifikasi baru dan coba lagi.',
     verified: 'Terverifikasi',
     verifiedSuccessfully: 'Berhasil Diverifikasi',
     verify: 'Verifikasi',

@@ -71,6 +71,8 @@ export const myTranslations: DefaultTranslationsObject = {
     unableToVerify: 'စိစစ်၍မရပါ။',
     username: 'Nama pengguna',
     usernameNotValid: 'ပေးထားသော အသုံးပြုသူအမည်မှာ တရားဝင်မှု မရှိပါ။',
+    verificationFailedRequestNew:
+      'သင့်အကောင့်ကိုအတည်ပြု၍မရပါ။ အတည်ပြုရန်အီးမေးလ်အသစ်တောင်းဆိုပြီး ထပ်မံကြိုးစားပါ။',
     verified: 'စိစစ်ပြီး',
     verifiedSuccessfully: 'အတည်ပြုပြီးပါပြီ။',
     verify: 'စိစစ်ခြင်း',

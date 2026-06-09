@@ -59,7 +59,7 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
       {isVerified ? (
         <VerifyClient loginRoute={loginRoute} />
       ) : (
-        <h2>{req.t('authentication:unableToVerify')}</h2>
+        <h2>{req.t('authentication:verificationFailedRequestNew')}</h2>
       )}
     </React.Fragment>
   )

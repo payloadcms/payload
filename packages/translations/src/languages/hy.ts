@@ -71,6 +71,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Հնարավոր չէ հաստատել',
     username: 'Օգտանուն',
     usernameNotValid: 'Տրամադրված օգտանունը վավեր չէ',
+    verificationFailedRequestNew:
+      'Չհաջողվեց հաստատել Ձեր հաշիվը: Խնդրում ենք խնդրեք նոր հաստատման էլեկտրոնային նամակ և փորձեք կրկին:',
     verified: 'Ստուգված',
     verifiedSuccessfully: 'Հաջողությամբ ստուգված',
     verify: 'Ստուգել',
