@@ -99,6 +99,10 @@ export const TimezonePicker: React.FC<Props> = (props) => {
       </span>
       <ReactSelect
         className="timezone-picker"
+        classNames={{
+          menu: () => 'timezone-picker__menu',
+          menuList: () => 'timezone-picker__menu-list',
+        }}
         components={{
           ClearIndicator: SmallClearIndicator,
           DropdownIndicator: SmallDropdownIndicator,

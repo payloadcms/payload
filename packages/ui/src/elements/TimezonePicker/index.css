@@ -25,21 +25,6 @@
       display: inline-flex;
       position: static;
 
-      .rs__menu {
-        overflow: hidden;
-        border-radius: var(--radius-large);
-        background: var(--popup-bg-dark, var(--color-bg-menu));
-        color: var(--popup-item-color-dark, var(--color-text-ontooltip));
-        padding: var(--spacer-2);
-        min-width: 280px;
-        max-height: 280px;
-      }
-
-      .rs__menu-list {
-        max-height: calc(var(--spacer-6) * 5);
-        overflow-y: auto;
-      }
-
       .rs__option {
         padding: var(--spacer-1) var(--spacer-2);
         border-radius: var(--button-radius);
@@ -162,5 +147,20 @@
         }
       }
     }
+  }
+
+  .timezone-picker__menu {
+    overflow: hidden;
+    border-radius: var(--radius-large);
+    background: var(--popup-bg-dark, var(--color-bg-menu));
+    color: var(--popup-item-color-dark, var(--color-text-ontooltip));
+    padding: var(--spacer-2);
+    min-width: 280px;
+    max-height: 280px;
+  }
+
+  .timezone-picker__menu-list {
+    max-height: calc(var(--spacer-6) * 5);
+    overflow-y: auto;
   }
 }
