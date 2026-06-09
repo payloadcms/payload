@@ -17,3 +17,7 @@
  */
 
 export { localizeStatus } from '../versions/migrations/localizeStatus/index.js'
+export {
+  calculateVersionLocaleStatuses,
+  toSnakeCase,
+} from '../versions/migrations/localizeStatus/shared.js'

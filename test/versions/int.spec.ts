@@ -3881,7 +3881,8 @@ describe('Versions', () => {
         // which should not leak any unpublished Spanish content
         // and should retain the English fields that were not explicitly
         // passed in from publishedEN1
-        expect(docWithoutSpanishDraft.text.es).toBeUndefined()
+        // null (SQL: locale row exists but text is NULL) or undefined (MongoDB) both mean no data
+        expect(docWithoutSpanishDraft.text.es ?? null).toBeNull()
         expect(docWithoutSpanishDraft.description.en).toStrictEqual('My English description')
 
         const docWithSpanishDraft1 = await payload.findByID({
@@ -3917,7 +3918,8 @@ describe('Versions', () => {
         // On the second consecutive publish of a specific locale,
         // Make sure we maintain draft data that has never been published
         // even after two + consecutive publish events
-        expect(docWithoutSpanishDraft2.text.es).toBeUndefined()
+        // null (SQL) or undefined (MongoDB) both indicate no published data for this locale
+        expect(docWithoutSpanishDraft2.text.es ?? null).toBeNull()
         expect(docWithoutSpanishDraft2.text.en).toStrictEqual('English published 2')
         expect(docWithoutSpanishDraft2.description.en).toStrictEqual('My English description')
 
@@ -3977,7 +3979,8 @@ describe('Versions', () => {
 
         expect(finalPublishedNoES.text.de).toStrictEqual('German published 1')
         expect(finalPublishedNoES.text.en).toStrictEqual('English published 3')
-        expect(finalPublishedNoES.text.es).toBeUndefined()
+        // null (SQL) or undefined (MongoDB) both indicate no published data for this locale
+        expect(finalPublishedNoES.text.es ?? null).toBeNull()
 
         const finalDraft = await payload.findByID({
           id: draft1.id,
@@ -4036,7 +4039,7 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.es ?? null).toBeNull()
         expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
       })
 
@@ -4066,7 +4069,7 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.es ?? null).toBeNull()
         expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
 
         const published2 = await payload.update({
@@ -4116,8 +4119,8 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyDE.text.es).toBeUndefined()
-        expect(publishedOnlyDE.text.en).toBeUndefined()
+        expect(publishedOnlyDE.text.es ?? null).toBeNull()
+        expect(publishedOnlyDE.text.en ?? null).toBeNull()
         expect(publishedOnlyDE.text.de).toStrictEqual('German publish')
       })
 
@@ -4147,7 +4150,7 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.es ?? null).toBeNull()
         expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
 
         const allVersions = await payload.findVersions({
