@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import type { Field, Option } from '../fields/config/types.js'
+import type { CheckboxField, Field, Option } from '../fields/config/types.js'
 
 export const statuses: Option[] = [
   {
@@ -11,6 +11,18 @@ export const statuses: Option[] = [
     value: 'published',
   },
 ]
+
+// Internal field kept for migration compatibility — the snapshot column must exist in the DB
+// schema until users run the localize-status predefined migration which drops it.
+// This field is NOT exported publicly and is admin-disabled.
+export const versionSnapshotField: CheckboxField = {
+  name: 'snapshot',
+  type: 'checkbox',
+  admin: {
+    disabled: true,
+  },
+  index: true,
+}
 
 export const baseVersionFields = ({ localized }: { localized: boolean }): Field[] => [
   {
