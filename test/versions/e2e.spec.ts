@@ -692,7 +692,7 @@ describe('Versions', () => {
 
       // revert to last published version
       await page.locator('#action-revert-to-published').click()
-      await saveDocAndAssert(page, '[id^=confirm-revert-] #confirm-action')
+      await saveDocAndAssert(page, '[id^=confirm-revert-] [data-dialog-action="confirm"]')
 
       // verify that spanish content is reverted correctly
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
@@ -807,7 +807,7 @@ describe('Versions', () => {
       await page.goto(errorOnUnpublishURL.edit(String(publishedDoc.id)))
       await openDocControls(page)
       await page.locator('#action-unpublish').click()
-      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
+      await page.locator('[id^="confirm-un-publish-"] [data-dialog-action="confirm"]').click()
       await expect(
         page.locator('.payload-toast-item:has-text("Custom error on unpublish")'),
       ).toBeVisible()
@@ -872,7 +872,7 @@ describe('Versions', () => {
 
       await openDocControls(page)
       await page.locator('#action-unpublish').click()
-      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
+      await page.locator('[id^="confirm-un-publish-"] [data-dialog-action="confirm"]').click()
       await expect(page.locator('.payload-toast-item')).toBeVisible()
 
       await expect.poll(() => page.locator(versionsCountSelector).textContent()).toBe(countBefore)
@@ -1224,7 +1224,9 @@ describe('Versions', () => {
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(publishedDoc.id)
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .not.toContain(publishedDoc.id)
 
       await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
       await waitForFormReady(page)
@@ -1412,7 +1414,7 @@ describe('Versions', () => {
 
       await openDocControls(page)
       await page.locator('#action-unpublish').click()
-      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
+      await page.locator('[id^="confirm-un-publish-"] [data-dialog-action="confirm"]').click()
       await expect(page.locator('.payload-toast-item')).toBeVisible()
 
       await expect.poll(() => versionsCountPill.textContent()).toBe(countBefore)

@@ -2,17 +2,23 @@ import type {
   SerializedEditorState,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { PaginatedDocs, Payload } from 'payload'
+import type { Config, PaginatedDocs, Payload } from 'payload'
 
 import {
+  BlocksFeature,
   buildEditorState,
   type DefaultNodeTypes,
+  lexicalEditor,
+  LinkFeature,
   type SerializedBlockNode,
   type SerializedLinkNode,
   type SerializedRelationshipNode,
   type SerializedUploadNode,
+  UploadFeature,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
+import { configToJSONSchema, sanitizeConfig } from 'payload'
+import { generateTypes } from 'payload/node'
 import { sanitizeUrl } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { beforeAll, beforeEach, describe, expect, it as vitestIt } from 'vitest'
@@ -1265,5 +1271,182 @@ describe('Lexical', () => {
       expect(result).toContain('href="https://example.com/page"')
       expect(result).toContain('data-fields-hash=')
     })
+  })
+})
+
+describe('Lexical block interface generation', () => {
+  // A lexical block's interface is named after its slug (PascalCase) or its `interfaceName`.
+  // When two differently-shaped blocks resolve to the same name, each must get its own
+  // interface — the first keeps the clean name, the second gets a content-hash suffix — so
+  // neither is silently mistyped. This mirrors payload core's `registerBlockInterface`.
+  vitestIt(
+    'content-hashes a colliding lexical block instead of silently overwriting it',
+    async () => {
+      const heroEditor = (fieldName: string, fieldType: 'number' | 'text') =>
+        lexicalEditor({
+          features: [
+            BlocksFeature({
+              blocks: [{ slug: 'hero', fields: [{ name: fieldName, type: fieldType }] }],
+            }),
+          ],
+        })
+
+      // Two richText fields each define a `hero` block with DIFFERENT fields, so both
+      // resolve to the `Hero` interface name.
+      const config = {
+        collections: [
+          {
+            slug: 'collisionTest',
+            fields: [
+              { name: 'rt1', type: 'richText', editor: heroEditor('title', 'text') },
+              { name: 'rt2', type: 'richText', editor: heroEditor('subtitle', 'number') },
+            ],
+          },
+        ],
+      } as unknown as Config
+
+      const sanitizedConfig = await sanitizeConfig(config)
+      const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+      const defs = jsonSchema.$defs!
+
+      // Each differently-shaped `hero` gets its own interface (one clean, one hashed).
+      const heroNames = Object.keys(defs).filter((k) => /^Hero(_[0-9A-F]{8})?$/.test(k))
+      expect(heroNames).toHaveLength(2)
+
+      // ...and they carry distinct field shapes (not a silent overwrite).
+      const shapeOf = (name: string): string =>
+        Object.keys((defs[name] as { properties: Record<string, unknown> }).properties)
+          .sort()
+          .join(',')
+      expect(shapeOf(heroNames[0]!)).not.toBe(shapeOf(heroNames[1]!))
+    },
+  )
+})
+
+describe('Lexical link fields interface generation', () => {
+  // The node-union name is a content hash of the editor's nodes. A link node only carries a `$ref`
+  // to its `LexicalLinkFields_<hash>` interface, whose *content* lives separately — so two editors
+  // with identical nodes but different custom LinkFeature fields must not hash the same, or one
+  // `LexicalLinkFields_<hash>` would overwrite the other and mistype a field.
+  vitestIt(
+    'gives editors with identical nodes but different custom link fields distinct interfaces',
+    async () => {
+      const linkEditor = (fieldName: string) =>
+        lexicalEditor({
+          features: [
+            LinkFeature({
+              fields: ({ defaultFields }) => [...defaultFields, { name: fieldName, type: 'text' }],
+            }),
+          ],
+        })
+
+      // Two richText fields with the same nodes, differing only in their custom link field.
+      const config = {
+        collections: [
+          {
+            slug: 'linkCollisionTest',
+            fields: [
+              { name: 'rt1', type: 'richText', editor: linkEditor('label') },
+              { name: 'rt2', type: 'richText', editor: linkEditor('trackingId') },
+            ],
+          },
+        ],
+      } as unknown as Config
+
+      const sanitizedConfig = await sanitizeConfig(config)
+      const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+      const defs = jsonSchema.$defs!
+
+      // Each editor gets its own custom-link-fields interface (not a single shared, overwritten one).
+      const linkFieldsNames = Object.keys(defs).filter((k) =>
+        /^LexicalLinkFields_[0-9A-F]{8}$/.test(k),
+      )
+      expect(linkFieldsNames).toHaveLength(2)
+
+      // ...and each carries its own custom field (`label` vs `trackingId`), not a silent overwrite.
+      const propsOf = (name: string): string[] =>
+        Object.keys((defs[name] as { properties: Record<string, unknown> }).properties).sort()
+      expect(propsOf(linkFieldsNames[0]!)).not.toEqual(propsOf(linkFieldsNames[1]!))
+    },
+  )
+})
+
+describe('Lexical upload node type generation', () => {
+  // The upload node's JSON Schema validates configured extra fields strictly, so the generated
+  // TypeScript must expose them too - not erase them to `{ [k: string]: unknown }`.
+  vitestIt('reflects UploadFeature extra fields in the generated upload node type', async () => {
+    const config = {
+      collections: [
+        { slug: 'media', fields: [], upload: true },
+        {
+          slug: 'articles',
+          fields: [
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: [
+                  UploadFeature({
+                    collections: { media: { fields: [{ name: 'caption', type: 'text' }] } },
+                  }),
+                ],
+              }),
+            },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
+    ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
+      defaultIDType: 'text',
+    }
+
+    const generatedTypes = await generateTypes(sanitizedConfig, { log: false, returnString: true })
+
+    // The configured `caption` upload field must survive into the generated upload node type,
+    // not be erased to `{ [k: string]: unknown }`.
+    expect(generatedTypes).toContain('caption')
+  })
+})
+
+describe('Lexical inline block node type generation', () => {
+  // A `BlocksFeature` with `blocks` but no `inlineBlocks` should not make the generated node union
+  // claim the field can contain inline-block nodes - the editor can never produce one.
+  vitestIt('omits the inline-block node type when no inline blocks are configured', async () => {
+    const config = {
+      collections: [
+        {
+          slug: 'articles',
+          fields: [
+            {
+              name: 'content',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: [
+                  BlocksFeature({
+                    blocks: [{ slug: 'myBlock', fields: [{ name: 'title', type: 'text' }] }],
+                  }),
+                ],
+              }),
+            },
+          ],
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
+    ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
+      defaultIDType: 'text',
+    }
+
+    const generatedTypes = await generateTypes(sanitizedConfig, { log: false, returnString: true })
+
+    // The configured block is part of the node union...
+    expect(generatedTypes).toContain('SerializedBlockNode<MyBlock>')
+    // ...but the union must not include an inline-block node
+    expect(generatedTypes).not.toMatch(/SerializedInlineBlockNode<\s*\{\s*blockType:/)
   })
 })

@@ -43,6 +43,23 @@ export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/Gro
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
 export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
+export {
+  DialogBody,
+  DialogCancel,
+  DialogConfirm,
+  DialogFooter,
+  DialogHeader,
+  DialogModal,
+} from '../../elements/Dialog/index.js'
+export type {
+  DialogBodyProps,
+  DialogCancelProps,
+  DialogConfirmProps,
+  DialogFooterProps,
+  DialogHeaderProps,
+  DialogModalProps,
+  DialogSize,
+} from '../../elements/Dialog/index.js'
 export { Link } from '../../elements/Link/index.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
@@ -112,6 +129,7 @@ export { Drawer, DrawerToggler, formatDrawerSlug } from '../../elements/Drawer/i
 export { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 export { EditMany } from '../../elements/EditMany/index.js'
 export { ErrorPill } from '../../elements/ErrorPill/index.js'
+export { Modal, useModal } from '../../elements/Modal/index.js'
 export { FullscreenModal } from '../../elements/FullscreenModal/index.js'
 export { GenerateConfirmation } from '../../elements/GenerateConfirmation/index.js'
 export { Gutter } from '../../elements/Gutter/index.js'
@@ -166,8 +184,6 @@ export type { SwitchProps } from '../../elements/Switch/index.js'
 export { DelayedSpinner } from '../../elements/DelayedSpinner/index.js'
 export type { DelayedSpinnerProps } from '../../elements/DelayedSpinner/index.js'
 export { Logout } from '../../elements/Logout/index.js'
-export { AlertModal, Modal, useModal } from '../../elements/Modal/index.js'
-export type { AlertModalProps } from '../../elements/Modal/index.js'
 export { NavToggler } from '../../elements/Nav/NavToggler/index.js'
 export { NavSidebarToggle } from '../../elements/Nav/NavSidebarToggle/index.js'
 export { NavWrapper } from '../../elements/Nav/NavWrapper/index.js'

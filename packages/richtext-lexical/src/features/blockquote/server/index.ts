@@ -1,17 +1,12 @@
-import type { SerializedQuoteNode as _SerializedQuoteNode } from '@lexical/rich-text'
-import type { SerializedLexicalNode } from 'lexical'
-
 import { QuoteNode } from '@lexical/rich-text'
-
-import type { StronglyTypedElementNode } from '../../../types/nodeTypes.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
+import { quoteNodeJSONSchema } from './schema.js'
 
-export type SerializedQuoteNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedElementNode<_SerializedQuoteNode, 'quote', T>
+export type { SerializedQuoteNode } from './schema.js'
 
 export const BlockquoteFeature = createServerFeature({
   feature: {
@@ -21,6 +16,7 @@ export const BlockquoteFeature = createServerFeature({
     markdownTransformers: [MarkdownTransformer],
     nodes: [
       createNode({
+        jsonSchema: quoteNodeJSONSchema,
         node: QuoteNode,
       }),
     ],

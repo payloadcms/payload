@@ -4,7 +4,7 @@ import { describe, it, expect } from 'vitest'
 import type { Config } from '../config/types.js'
 
 import { sanitizeConfig } from '../config/sanitize.js'
-import { configToJSONSchema } from './configToJSONSchema.js'
+import { configToJSONSchema, entityToStandaloneJSONSchema } from './configToJSONSchema.js'
 import type { Block, BlocksField, RichTextField } from '../fields/config/types.js'
 
 describe('configToJSONSchema', () => {
@@ -34,7 +34,7 @@ describe('configToJSONSchema', () => {
     }
 
     const sanitizedConfig = await sanitizeConfig(config)
-    const schema = configToJSONSchema(sanitizedConfig, 'text')
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.$defs?.test).toStrictEqual({
       type: 'object',
@@ -122,7 +122,7 @@ describe('configToJSONSchema', () => {
     }
 
     const sanitizedConfig = await sanitizeConfig(config)
-    const schema = configToJSONSchema(sanitizedConfig, 'text')
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.$defs?.test).toStrictEqual({
       type: 'object',
@@ -193,7 +193,7 @@ describe('configToJSONSchema', () => {
     }
 
     const sanitizedConfig = await sanitizeConfig(config)
-    const schema = configToJSONSchema(sanitizedConfig, 'text')
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
     const defs = schema.$defs!
 
     // The first `hero` keeps the clean name; the unique block is unaffected.
@@ -220,7 +220,7 @@ describe('configToJSONSchema', () => {
     expect(refsOf('posts')).toStrictEqual([`#/$defs/${hashedHeroNames[0]}`])
 
     // Hashing is deterministic: regenerating yields identical names.
-    const schema2 = configToJSONSchema(sanitizedConfig, 'text')
+    const { jsonSchema: schema2 } = configToJSONSchema(sanitizedConfig, 'text')
     expect(
       Object.keys(schema2.$defs!)
         .filter((k) => /^Hero/.test(k))
@@ -282,7 +282,7 @@ describe('configToJSONSchema', () => {
     }
 
     const sanitizedConfig = await sanitizeConfig(config)
-    const schema = configToJSONSchema(sanitizedConfig, 'text')
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.$defs?.test).toStrictEqual({
       type: 'object',
@@ -358,7 +358,7 @@ describe('configToJSONSchema', () => {
     }
 
     const sanitizedConfig = await sanitizeConfig(config as Config)
-    const schema = configToJSONSchema(sanitizedConfig, 'text')
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.$defs?.test).toStrictEqual({
       type: 'object',
@@ -426,7 +426,7 @@ describe('configToJSONSchema', () => {
       )?.editor,
     ).toBe('object')
 
-    const schema = configToJSONSchema(sanitizedConfig, 'text')
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     const expectedBlockSchema = {
       type: 'object',
@@ -466,6 +466,80 @@ describe('configToJSONSchema', () => {
     expect(schema?.$defs?.SharedBlock).toStrictEqual(expectedBlockSchema)
   })
 
+  it('content-hashes a colliding explicit interfaceName instead of overwriting it', async () => {
+    // Two different blocks both set `interfaceName: 'Hero'` - each must keep its own definition.
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              name: 'blocksField',
+              type: 'blocks',
+              blocks: [
+                {
+                  slug: 'blockA',
+                  fields: [{ name: 'title', type: 'text' }],
+                  interfaceName: 'Hero',
+                },
+                {
+                  slug: 'blockB',
+                  fields: [{ name: 'subtitle', type: 'number' }],
+                  interfaceName: 'Hero',
+                },
+              ],
+            },
+          ],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+    const defs = jsonSchema.$defs!
+
+    // Each differently-shaped block keeps its own interface (one clean, one hash-suffixed).
+    const heroNames = Object.keys(defs).filter((k) => /^Hero(_[0-9A-F]{8})?$/.test(k))
+    expect(heroNames).toHaveLength(2)
+
+    // ...and they carry distinct field shapes (not a silent overwrite).
+    const shapeOf = (name: string): string =>
+      Object.keys((defs[name] as { properties: Record<string, unknown> }).properties)
+        .sort()
+        .join(',')
+    expect(shapeOf(heroNames[0]!)).not.toBe(shapeOf(heroNames[1]!))
+  })
+
+  it('reuses one definition when the same block is registered more than once', async () => {
+    // Reusing one block across fields registers an identical schema each time, so it dedupes.
+    const heroBlock = {
+      slug: 'hero',
+      fields: [{ name: 'title', type: 'text' }],
+      interfaceName: 'Hero',
+    }
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            { name: 'a', type: 'blocks', blocks: [heroBlock] },
+            { name: 'b', type: 'blocks', blocks: [heroBlock] },
+          ],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    } as unknown as Config
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
+
+    const heroNames = Object.keys(jsonSchema.$defs!).filter((k) => /^Hero(_[0-9A-F]{8})?$/.test(k))
+    expect(heroNames).toEqual(['Hero'])
+  })
+
   it('should allow overriding required to false', async () => {
     // @ts-expect-error
     const config: Config = {
@@ -493,7 +567,7 @@ describe('configToJSONSchema', () => {
     }
 
     const sanitizedConfig = await sanitizeConfig(config)
-    const schema = configToJSONSchema(sanitizedConfig, 'text')
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     // @ts-expect-error
     expect(schema.$defs.test.properties.title.required).toStrictEqual(false)
@@ -532,13 +606,13 @@ describe('configToJSONSchema', () => {
     const sanitizedConfig = await sanitizeConfig(config)
 
     // Without forceInlineBlocks: blocks field uses $ref
-    const schemaDefault = configToJSONSchema(sanitizedConfig, 'text')
+    const { jsonSchema: schemaDefault } = configToJSONSchema(sanitizedConfig, 'text')
     const arrItemsDefault = schemaDefault.$defs!.test.properties!.arr.items as JSONSchema4
     const arrBlocksDefault = (arrItemsDefault.properties!.blocks.items as JSONSchema4).oneOf![0]
     expect(arrBlocksDefault).toStrictEqual({ $ref: '#/$defs/MyBlock' })
 
     // With forceInlineBlocks: blocks field is inlined, no $ref
-    const schemaInline = configToJSONSchema(sanitizedConfig, 'text', undefined, {
+    const { jsonSchema: schemaInline } = configToJSONSchema(sanitizedConfig, 'text', undefined, {
       forceInlineBlocks: true,
     })
     const arrItemsInline = schemaInline.$defs!.test.properties!.arr.items as JSONSchema4
@@ -551,5 +625,69 @@ describe('configToJSONSchema', () => {
     ).oneOf![0]
     expect(grpBlocksInline).not.toHaveProperty('$ref')
     expect(grpBlocksInline.properties?.blockType).toStrictEqual({ const: 'myBlock' })
+  })
+
+  it('entityToStandaloneJSONSchema bundles only the definitions an entity references', async () => {
+    const sharedBlock: Block = {
+      slug: 'sharedBlock',
+      interfaceName: 'SharedBlock',
+      fields: [{ name: 'title', type: 'text' }],
+    }
+
+    // @ts-expect-error partial config
+    const config: Config = {
+      admin: {
+        timezones: {
+          supportedTimezones: [
+            { label: 'UTC', value: 'UTC' },
+            { label: 'New York', value: 'America/New_York' },
+          ],
+        },
+      },
+      blocks: [sharedBlock],
+      collections: [
+        {
+          slug: 'with-refs',
+          fields: [
+            { name: 'layout', type: 'blocks', blockReferences: ['sharedBlock'], blocks: [] },
+            { name: 'when', type: 'date', timezone: true },
+          ],
+          timestamps: false,
+          versions: false,
+        },
+        {
+          slug: 'other',
+          fields: [{ name: 'title', type: 'text' }],
+          timestamps: false,
+          versions: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const entity = sanitizedConfig.collections.find(
+      (collection) => collection.slug === 'with-refs',
+    )!
+
+    const schema = entityToStandaloneJSONSchema({
+      config: sanitizedConfig,
+      defaultIDType: 'text',
+      entity,
+    })
+
+    // Has its own $schema, so it resolves on its own.
+    expect(schema.$schema).toBe('https://json-schema.org/draft/2020-12/schema')
+
+    // The block reference is resolved inline, so it can't dangle.
+    const layoutItems = (schema.properties?.layout as JSONSchema4)?.items as JSONSchema4
+    const inlinedBlock = (layoutItems?.oneOf?.[0] ?? {}) as JSONSchema4
+    expect(inlinedBlock.properties?.blockType).toStrictEqual({ const: 'sharedBlock' })
+    expect(inlinedBlock.properties?.title).toBeDefined()
+
+    // A timezone field pulls in supportedTimezones from the root config.
+    expect(schema.$defs?.supportedTimezones).toBeDefined()
+
+    // Doesn't pull in unrelated collections.
+    expect(schema.$defs?.other).toBeUndefined()
   })
 })

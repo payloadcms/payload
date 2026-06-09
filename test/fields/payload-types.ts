@@ -62,6 +62,122 @@ export type SupportedTimezones =
   | 'Pacific/Fiji'
   | 'America/Monterrey'
   | 'UTC';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_937A3078".
+ */
+export type LexicalNodes_937A3078 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_937A3078>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_937A3078>
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_937A3078>
+  | SerializedListNode<LexicalNodes_937A3078>
+  | SerializedListItemNode<LexicalNodes_937A3078>
+  | SerializedAutoLinkNode<LexicalNodes_937A3078, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_937A3078, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'select-versions-fields'
+      | 'array-fields'
+      | 'block-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'conditional-logic'
+      | 'custom-id'
+      | 'custom-id-nested'
+      | 'custom-tab-id'
+      | 'custom-row-id'
+      | 'date-fields'
+      | 'email-fields'
+      | 'radio-fields'
+      | 'group-fields'
+      | 'row-fields'
+      | 'indexed-fields'
+      | 'json-fields'
+      | 'number-fields'
+      | 'point-fields'
+      | 'relationship-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields-2'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'uploads-multi'
+      | 'uploads-poly'
+      | 'uploads-multi-poly'
+      | 'uploads-restricted'
+      | 'ui-fields'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_313DC238".
+ */
+export type LexicalNodes_313DC238 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_313DC238>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedUploadNode<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_313DC238>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'select-versions-fields'
+      | 'array-fields'
+      | 'block-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'conditional-logic'
+      | 'custom-id'
+      | 'custom-id-nested'
+      | 'custom-tab-id'
+      | 'custom-row-id'
+      | 'date-fields'
+      | 'email-fields'
+      | 'radio-fields'
+      | 'group-fields'
+      | 'row-fields'
+      | 'indexed-fields'
+      | 'json-fields'
+      | 'number-fields'
+      | 'point-fields'
+      | 'relationship-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields-2'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'uploads-multi'
+      | 'uploads-poly'
+      | 'uploads-multi-poly'
+      | 'uploads-restricted'
+      | 'ui-fields'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_313DC238, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_313DC238, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_313DC238>
+  | SerializedListItemNode<LexicalNodes_313DC238>
+  | SerializedHeadingNode<LexicalNodes_313DC238>;
 
 export interface Config {
   auth: {
@@ -224,7 +340,7 @@ export interface ConfigBlockTest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedTextReference".
+ * via the `definition` "LocalizedTextReference".
  */
 export interface LocalizedTextReference {
   text?: string | null;
@@ -234,7 +350,7 @@ export interface LocalizedTextReference {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedTextReference2".
+ * via the `definition` "LocalizedTextReference2".
  */
 export interface LocalizedTextReference2 {
   text?: string | null;
@@ -281,17 +397,20 @@ export interface SelectVersionsField {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        hasManyBlocks?: ('a' | 'b' | 'c')[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocks?: Block[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  hasManyBlocks?: ('a' | 'b' | 'c')[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -304,11 +423,7 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
-    richTextField?:
-      | {
-          [k: string]: unknown;
-        }[]
-      | null;
+    richTextField?: LexicalRichText<LexicalNodes_937A3078> | null;
     subArray?:
       | {
           text?: string | null;
@@ -440,127 +555,17 @@ export interface BlockField {
     | LocalizedSubBlocksBlock
     | LocalizedTabsBlock
   )[];
-  i18nBlocks?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textInI18nBlock';
-      }[]
-    | null;
-  blocksWithLocalizedArray?:
-    | {
-        array?:
-          | {
-              text?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedArray';
-      }[]
-    | null;
-  blocksWithSimilarConfigs?:
-    | (
-        | {
-            items?:
-              | {
-                  title: string;
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block-a';
-          }
-        | {
-            items?:
-              | {
-                  title2: string;
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block-b';
-          }
-        | {
-            group?: {
-              text?: string | null;
-            };
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'group-block';
-          }
-      )[]
-    | null;
+  i18nBlocks?: TextInI18NBlock[] | null;
+  blocksWithLocalizedArray?: LocalizedArray[] | null;
+  blocksWithSimilarConfigs?: (BlockA | BlockB | GroupBlock)[] | null;
   /**
    * The purpose of this field is to test validateExistingBlockIsIdentical works with similar blocks with group fields
    */
-  blocksWithSimilarGroup?:
-    | (
-        | {
-            group?: {
-              text?: string | null;
-            };
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'group-block';
-          }
-        | {
-            items?:
-              | {
-                  title2: string;
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block-b';
-          }
-      )[]
-    | null;
-  blocksWithMinRows?:
-    | {
-        blockTitle?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockWithMinRows';
-      }[]
-    | null;
-  customBlocks?:
-    | (
-        | {
-            block1Title?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block-1';
-          }
-        | {
-            block2Title?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block-2';
-          }
-      )[]
-    | null;
-  relationshipBlocks?:
-    | {
-        relationship?: (string | null) | TextField;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'relationships';
-      }[]
-    | null;
-  blockWithLabels?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'text';
-      }[]
-    | null;
+  blocksWithSimilarGroup?: (GroupBlock | BlockB)[] | null;
+  blocksWithMinRows?: BlockWithMinRows[] | null;
+  customBlocks?: (Block1 | Block2)[] | null;
+  relationshipBlocks?: Relationships[] | null;
+  blockWithLabels?: Text[] | null;
   deduplicatedBlocks?: ConfigBlockTest[] | null;
   deduplicatedBlocks2?: ConfigBlockTest[] | null;
   localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
@@ -568,90 +573,14 @@ export interface BlockField {
   /**
    * The purpose of this field is to test Block groups.
    */
-  groupedBlocks?:
-    | (
-        | {
-            text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'blockWithGroupOne';
-          }
-        | {
-            text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'blockWithGroupTwo';
-          }
-        | {
-            text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'blockWithLocalizedGroup';
-          }
-        | {
-            text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'blockWithoutGroup';
-          }
-      )[]
-    | null;
-  readOnly?:
-    | {
-        title?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'readOnlyBlock';
-      }[]
-    | null;
+  groupedBlocks?: (BlockWithGroupOne | BlockWithGroupTwo | BlockWithLocalizedGroup | BlockWithoutGroup)[] | null;
+  readOnly?: ReadOnlyBlock[] | null;
   /**
    * Change the value of this field to change the enabled blocks of the blocksWithDynamicFilterOptions field. If it's empty, all blocks are enabled.
    */
   enabledBlocks?: string | null;
-  blocksWithDynamicFilterOptions?:
-    | (
-        | {
-            block1Text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'blockOne';
-          }
-        | {
-            block2Text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'blockTwo';
-          }
-        | {
-            block3Text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'blockThree';
-          }
-      )[]
-    | null;
-  blocksWithFilterOptions?:
-    | (
-        | {
-            block1Text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'blockFour';
-          }
-        | {
-            block2Text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'blockFive';
-          }
-        | {
-            block3Text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'blockSix';
-          }
-      )[]
-    | null;
+  blocksWithDynamicFilterOptions?: (BlockOne | BlockTwo | BlockThree)[] | null;
+  blocksWithFilterOptions?: (BlockFour | BlockFive | BlockSix)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -661,11 +590,7 @@ export interface BlockField {
  */
 export interface ContentBlock {
   text: string;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  richText?: LexicalRichText<LexicalNodes_313DC238> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -705,20 +630,20 @@ export interface NumberBlock {
  * via the `definition` "SubBlocksBlock".
  */
 export interface SubBlocksBlock {
-  subBlocks?:
-    | (
-        | {
-            text: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textRequired';
-          }
-        | NumberBlock
-      )[]
-    | null;
+  subBlocks?: (TextRequired | NumberBlock)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'subBlocks';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextRequired".
+ */
+export interface TextRequired {
+  text: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textRequired';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -737,11 +662,7 @@ export interface TabsBlock {
  */
 export interface LocalizedContentBlock {
   text: string;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  richText?: LexicalRichText<LexicalNodes_313DC238> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
@@ -781,17 +702,7 @@ export interface LocalizedNumberBlock {
  * via the `definition` "localizedSubBlocksBlock".
  */
 export interface LocalizedSubBlocksBlock {
-  subBlocks?:
-    | (
-        | {
-            text: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textRequired';
-          }
-        | NumberBlock
-      )[]
-    | null;
+  subBlocks?: (TextRequired | NumberBlock)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedSubBlocks';
@@ -806,6 +717,113 @@ export interface LocalizedTabsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedTabs';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextInI18nBlock".
+ */
+export interface TextInI18NBlock {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textInI18nBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LocalizedArray".
+ */
+export interface LocalizedArray {
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedArray';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockA".
+ */
+export interface BlockA {
+  items?:
+    | {
+        title: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block-a';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockB".
+ */
+export interface BlockB {
+  items?:
+    | {
+        title2: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block-b';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GroupBlock".
+ */
+export interface GroupBlock {
+  group?: {
+    text?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'group-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithMinRows".
+ */
+export interface BlockWithMinRows {
+  blockTitle?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithMinRows';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block1".
+ */
+export interface Block1 {
+  block1Title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block-1';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block2".
+ */
+export interface Block2 {
+  block2Title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block-2';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Relationships".
+ */
+export interface Relationships {
+  relationship?: (string | null) | TextField;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'relationships';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -850,16 +868,139 @@ export interface TextField {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        texts?: string[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockWithText';
-      }[]
-    | null;
+  blocks?: BlockWithText[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithText".
+ */
+export interface BlockWithText {
+  texts?: string[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithText';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Text".
+ */
+export interface Text {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'text';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithGroupOne".
+ */
+export interface BlockWithGroupOne {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithGroupOne';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithGroupTwo".
+ */
+export interface BlockWithGroupTwo {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithGroupTwo';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithLocalizedGroup".
+ */
+export interface BlockWithLocalizedGroup {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithLocalizedGroup';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithoutGroup".
+ */
+export interface BlockWithoutGroup {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithoutGroup';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ReadOnlyBlock".
+ */
+export interface ReadOnlyBlock {
+  title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'readOnlyBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockOne".
+ */
+export interface BlockOne {
+  block1Text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockOne';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockTwo".
+ */
+export interface BlockTwo {
+  block2Text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockTwo';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockThree".
+ */
+export interface BlockThree {
+  block3Text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockThree';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockFour".
+ */
+export interface BlockFour {
+  block1Text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockFour';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockFive".
+ */
+export interface BlockFive {
+  block2Text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockFive';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockSix".
+ */
+export interface BlockSix {
+  block3Text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockSix';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -935,11 +1076,7 @@ export interface ConditionalLogic {
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
   customServerFieldWithCondition?: string | null;
-  conditionalRichText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  conditionalRichText?: LexicalRichText<LexicalNodes_937A3078> | null;
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
@@ -967,24 +1104,8 @@ export interface ConditionalLogic {
         id?: string | null;
       }[]
     | null;
-  blocksWithConditionalField?:
-    | {
-        text?: string | null;
-        textWithCondition?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockWithConditionalField';
-      }[]
-    | null;
-  blocksWithRadioCondition?:
-    | {
-        radioTrigger?: ('show' | 'hide') | null;
-        conditionalTextField?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockWithRadioCondition';
-      }[]
-    | null;
+  blocksWithConditionalField?: BlockWithConditionalField[] | null;
+  blocksWithRadioCondition?: BlockWithRadioCondition[] | null;
   enableTabs?: boolean | null;
   conditionalTabsField1?: string | null;
   conditionalTabsField2?: string | null;
@@ -1008,6 +1129,28 @@ export interface ConditionalLogic {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithConditionalField".
+ */
+export interface BlockWithConditionalField {
+  text?: string | null;
+  textWithCondition?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithConditionalField';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithRadioCondition".
+ */
+export interface BlockWithRadioCondition {
+  radioTrigger?: ('show' | 'hide') | null;
+  conditionalTextField?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithRadioCondition';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1076,15 +1219,7 @@ export interface DateField {
   dayAndTimeWithTimezoneRequired_tz: SupportedTimezones;
   dayAndTimeWithTimezoneReadOnly?: string | null;
   dayAndTimeWithTimezoneReadOnly_tz?: SupportedTimezones;
-  timezoneBlocks?:
-    | {
-        dayAndTime?: string | null;
-        dayAndTime_tz?: SupportedTimezones;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'dateBlock';
-      }[]
-    | null;
+  timezoneBlocks?: DateBlock[] | null;
   timezoneArray?:
     | {
         dayAndTime?: string | null;
@@ -1112,6 +1247,17 @@ export interface DateField {
   dateWithTimezoneWithDisabledColumns_tz?: SupportedTimezones;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DateBlock".
+ */
+export interface DateBlock {
+  dayAndTime?: string | null;
+  dayAndTime_tz?: SupportedTimezones;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'dateBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1281,22 +1427,8 @@ export interface RowField {
   no_set_width_within_row_b?: string | null;
   no_set_width_within_row_c?: string | null;
   field_20_percent_width_within_row_d?: string | null;
-  leftColumn?:
-    | {
-        leftText?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'leftTextBlock';
-      }[]
-    | null;
-  rightColumn?:
-    | {
-        rightText?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'rightTextBlock';
-      }[]
-    | null;
+  leftColumn?: LeftTextBlock[] | null;
+  rightColumn?: RightTextBlock[] | null;
   arrayLeftColumn?:
     | {
         leftArrayChild?: string | null;
@@ -1311,6 +1443,26 @@ export interface RowField {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LeftTextBlock".
+ */
+export interface LeftTextBlock {
+  leftText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'leftTextBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RightTextBlock".
+ */
+export interface RightTextBlock {
+  rightText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'rightTextBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1436,16 +1588,19 @@ export interface NumberField {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        numbers?: number[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockWithNumber';
-      }[]
-    | null;
+  blocks?: BlockWithNumber[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockWithNumber".
+ */
+export interface BlockWithNumber {
+  numbers?: number[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithNumber';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3830,10 +3985,188 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ */
+export interface LexicalLinkFields_0A7E9EC0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
 }
 
 

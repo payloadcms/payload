@@ -1,4 +1,4 @@
-import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
+import type { GenericLanguages, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type {
   Klass,
@@ -10,6 +10,7 @@ import type {
 import type {
   Field,
   FieldSchemaMap,
+  FieldsToJSONSchemaArgs,
   ImportMapGenerators,
   JsonObject,
   PayloadComponent,
@@ -28,6 +29,7 @@ import type {
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { Transformer } from '../packages/@lexical/markdown/index.js'
 import type { LexicalRichTextField } from '../types/index.js'
+import type { ElementNodeSchemaFn } from '../types/jsonSchemaHelpers.js'
 import type { BaseClientFeatureProps } from './typesClient.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = (args: {
@@ -216,6 +218,23 @@ export type BeforeValidateNodeHook<T extends SerializedLexicalNode> = (
   args: BaseNodeHookArgs<T> & BeforeValidateNodeHookArgs<T>,
 ) => Promise<T> | T
 
+/** Arguments passed to each node's `jsonSchema` function. */
+export type JSONSchemaArgs = {
+  elementNodeSchema: ElementNodeSchemaFn
+  field: LexicalRichTextField
+  /** TS name of the node union - use in `tsType` annotations. */
+  nodeUnionName: string
+} & Pick<
+  FieldsToJSONSchemaArgs,
+  | 'collectionIDFieldTypes'
+  | 'config'
+  | 'i18n'
+  | 'interfaceNameDefinitions'
+  | 'typeStringDefinitions'
+>
+
+export type JSONSchemaFn = (args: JSONSchemaArgs) => JSONSchema4
+
 // Define the node with hooks that use the node's exportJSON return type
 export type NodeWithHooks<T extends LexicalNode = any> = {
   /**
@@ -257,6 +276,12 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
     >
   }
   /**
+   * Returns the JSON Schema for this node, plus optional standalone TS
+   * source for helper types its `tsType` annotations reference. Nodes
+   * without this function are omitted from the strictly-typed union.
+   */
+  jsonSchema?: JSONSchemaFn
+  /**
    * The actual lexical node needs to be provided here. This also supports [lexical node replacements](https://lexical.dev/docs/concepts/node-replacement).
    */
   node: Klass<T> | LexicalNodeReplacement
@@ -284,23 +309,6 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
       }
     | ImportMapGenerators[0]
     | PayloadComponent[]
-  generatedTypes?: {
-    modifyJSONSchema: (args: {
-      collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
-      config?: SanitizedConfig
-      /**
-       * Current schema which will be modified by this function.
-       */
-      currentSchema: JSONSchema4
-      field: LexicalRichTextField
-      i18n?: I18n
-      /**
-       * Allows you to define new top-level interfaces that can be re-used in the output schema.
-       */
-      interfaceNameDefinitions: Map<string, JSONSchema4>
-      isRequired: boolean
-    }) => JSONSchema4
-  }
   generateSchemaMap?: (args: {
     config: SanitizedConfig
     field: RichTextField
@@ -356,25 +364,6 @@ export type ServerFeatureProviderMap = Map<string, FeatureProviderServer<any, an
 export type SanitizedServerFeatures = {
   /** The keys of all enabled features */
   enabledFeatures: string[]
-  generatedTypes: {
-    modifyJSONSchemas: Array<
-      (args: {
-        collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
-        config?: SanitizedConfig
-        /**
-         * Current schema which will be modified by this function.
-         */
-        currentSchema: JSONSchema4
-        field: LexicalRichTextField
-        i18n?: I18n
-        /**
-         * Allows you to define new top-level interfaces that can be re-used in the output schema.
-         */
-        interfaceNameDefinitions: Map<string, JSONSchema4>
-        isRequired: boolean
-      }) => JSONSchema4
-    >
-  }
   /**  The node types mapped to their hooks */
 
   getSubFields?: Map<

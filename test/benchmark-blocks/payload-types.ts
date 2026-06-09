@@ -60,10 +60,38 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_9626C4EE".
+ */
+export type LexicalNodes_9626C4EE =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_9626C4EE>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_9626C4EE>
+  | SerializedRelationshipNode<
+      | 'posts'
+      | 'pages'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_9626C4EE, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_9626C4EE, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_9626C4EE>
+  | SerializedListItemNode<LexicalNodes_9626C4EE>
+  | SerializedHeadingNode<LexicalNodes_9626C4EE>;
 
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {
     block_0: Block_0;
@@ -671,8 +699,9 @@ export interface Config {
     posts: Post;
     pages: Page;
     media: Media;
-    'payload-kv': PayloadKv;
     users: User;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -682,8 +711,9 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -695,7 +725,10 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User;
+  widgets: {
+    collections: CollectionsWidget;
+  };
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -719,9 +752,27 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface PayloadMcpApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_0".
+ * via the `definition` "Block_0".
  */
 export interface Block_0 {
   field1?: string | null;
@@ -734,7 +785,7 @@ export interface Block_0 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_1".
+ * via the `definition` "Block_1".
  */
 export interface Block_1 {
   field1?: string | null;
@@ -747,7 +798,7 @@ export interface Block_1 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_2".
+ * via the `definition` "Block_2".
  */
 export interface Block_2 {
   field1?: string | null;
@@ -760,7 +811,7 @@ export interface Block_2 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_3".
+ * via the `definition` "Block_3".
  */
 export interface Block_3 {
   field1?: string | null;
@@ -773,7 +824,7 @@ export interface Block_3 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_4".
+ * via the `definition` "Block_4".
  */
 export interface Block_4 {
   field1?: string | null;
@@ -786,7 +837,7 @@ export interface Block_4 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_5".
+ * via the `definition` "Block_5".
  */
 export interface Block_5 {
   field1?: string | null;
@@ -799,7 +850,7 @@ export interface Block_5 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_6".
+ * via the `definition` "Block_6".
  */
 export interface Block_6 {
   field1?: string | null;
@@ -812,7 +863,7 @@ export interface Block_6 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_7".
+ * via the `definition` "Block_7".
  */
 export interface Block_7 {
   field1?: string | null;
@@ -825,7 +876,7 @@ export interface Block_7 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_8".
+ * via the `definition` "Block_8".
  */
 export interface Block_8 {
   field1?: string | null;
@@ -838,7 +889,7 @@ export interface Block_8 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_9".
+ * via the `definition` "Block_9".
  */
 export interface Block_9 {
   field1?: string | null;
@@ -851,7 +902,7 @@ export interface Block_9 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_10".
+ * via the `definition` "Block_10".
  */
 export interface Block_10 {
   field1?: string | null;
@@ -864,7 +915,7 @@ export interface Block_10 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_11".
+ * via the `definition` "Block_11".
  */
 export interface Block_11 {
   field1?: string | null;
@@ -877,7 +928,7 @@ export interface Block_11 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_12".
+ * via the `definition` "Block_12".
  */
 export interface Block_12 {
   field1?: string | null;
@@ -890,7 +941,7 @@ export interface Block_12 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_13".
+ * via the `definition` "Block_13".
  */
 export interface Block_13 {
   field1?: string | null;
@@ -903,7 +954,7 @@ export interface Block_13 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_14".
+ * via the `definition` "Block_14".
  */
 export interface Block_14 {
   field1?: string | null;
@@ -916,7 +967,7 @@ export interface Block_14 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_15".
+ * via the `definition` "Block_15".
  */
 export interface Block_15 {
   field1?: string | null;
@@ -929,7 +980,7 @@ export interface Block_15 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_16".
+ * via the `definition` "Block_16".
  */
 export interface Block_16 {
   field1?: string | null;
@@ -942,7 +993,7 @@ export interface Block_16 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_17".
+ * via the `definition` "Block_17".
  */
 export interface Block_17 {
   field1?: string | null;
@@ -955,7 +1006,7 @@ export interface Block_17 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_18".
+ * via the `definition` "Block_18".
  */
 export interface Block_18 {
   field1?: string | null;
@@ -968,7 +1019,7 @@ export interface Block_18 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_19".
+ * via the `definition` "Block_19".
  */
 export interface Block_19 {
   field1?: string | null;
@@ -981,7 +1032,7 @@ export interface Block_19 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_20".
+ * via the `definition` "Block_20".
  */
 export interface Block_20 {
   field1?: string | null;
@@ -994,7 +1045,7 @@ export interface Block_20 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_21".
+ * via the `definition` "Block_21".
  */
 export interface Block_21 {
   field1?: string | null;
@@ -1007,7 +1058,7 @@ export interface Block_21 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_22".
+ * via the `definition` "Block_22".
  */
 export interface Block_22 {
   field1?: string | null;
@@ -1020,7 +1071,7 @@ export interface Block_22 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_23".
+ * via the `definition` "Block_23".
  */
 export interface Block_23 {
   field1?: string | null;
@@ -1033,7 +1084,7 @@ export interface Block_23 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_24".
+ * via the `definition` "Block_24".
  */
 export interface Block_24 {
   field1?: string | null;
@@ -1046,7 +1097,7 @@ export interface Block_24 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_25".
+ * via the `definition` "Block_25".
  */
 export interface Block_25 {
   field1?: string | null;
@@ -1059,7 +1110,7 @@ export interface Block_25 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_26".
+ * via the `definition` "Block_26".
  */
 export interface Block_26 {
   field1?: string | null;
@@ -1072,7 +1123,7 @@ export interface Block_26 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_27".
+ * via the `definition` "Block_27".
  */
 export interface Block_27 {
   field1?: string | null;
@@ -1085,7 +1136,7 @@ export interface Block_27 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_28".
+ * via the `definition` "Block_28".
  */
 export interface Block_28 {
   field1?: string | null;
@@ -1098,7 +1149,7 @@ export interface Block_28 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_29".
+ * via the `definition` "Block_29".
  */
 export interface Block_29 {
   field1?: string | null;
@@ -1111,7 +1162,7 @@ export interface Block_29 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_30".
+ * via the `definition` "Block_30".
  */
 export interface Block_30 {
   field1?: string | null;
@@ -1124,7 +1175,7 @@ export interface Block_30 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_31".
+ * via the `definition` "Block_31".
  */
 export interface Block_31 {
   field1?: string | null;
@@ -1137,7 +1188,7 @@ export interface Block_31 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_32".
+ * via the `definition` "Block_32".
  */
 export interface Block_32 {
   field1?: string | null;
@@ -1150,7 +1201,7 @@ export interface Block_32 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_33".
+ * via the `definition` "Block_33".
  */
 export interface Block_33 {
   field1?: string | null;
@@ -1163,7 +1214,7 @@ export interface Block_33 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_34".
+ * via the `definition` "Block_34".
  */
 export interface Block_34 {
   field1?: string | null;
@@ -1176,7 +1227,7 @@ export interface Block_34 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_35".
+ * via the `definition` "Block_35".
  */
 export interface Block_35 {
   field1?: string | null;
@@ -1189,7 +1240,7 @@ export interface Block_35 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_36".
+ * via the `definition` "Block_36".
  */
 export interface Block_36 {
   field1?: string | null;
@@ -1202,7 +1253,7 @@ export interface Block_36 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_37".
+ * via the `definition` "Block_37".
  */
 export interface Block_37 {
   field1?: string | null;
@@ -1215,7 +1266,7 @@ export interface Block_37 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_38".
+ * via the `definition` "Block_38".
  */
 export interface Block_38 {
   field1?: string | null;
@@ -1228,7 +1279,7 @@ export interface Block_38 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_39".
+ * via the `definition` "Block_39".
  */
 export interface Block_39 {
   field1?: string | null;
@@ -1241,7 +1292,7 @@ export interface Block_39 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_40".
+ * via the `definition` "Block_40".
  */
 export interface Block_40 {
   field1?: string | null;
@@ -1254,7 +1305,7 @@ export interface Block_40 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_41".
+ * via the `definition` "Block_41".
  */
 export interface Block_41 {
   field1?: string | null;
@@ -1267,7 +1318,7 @@ export interface Block_41 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_42".
+ * via the `definition` "Block_42".
  */
 export interface Block_42 {
   field1?: string | null;
@@ -1280,7 +1331,7 @@ export interface Block_42 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_43".
+ * via the `definition` "Block_43".
  */
 export interface Block_43 {
   field1?: string | null;
@@ -1293,7 +1344,7 @@ export interface Block_43 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_44".
+ * via the `definition` "Block_44".
  */
 export interface Block_44 {
   field1?: string | null;
@@ -1306,7 +1357,7 @@ export interface Block_44 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_45".
+ * via the `definition` "Block_45".
  */
 export interface Block_45 {
   field1?: string | null;
@@ -1319,7 +1370,7 @@ export interface Block_45 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_46".
+ * via the `definition` "Block_46".
  */
 export interface Block_46 {
   field1?: string | null;
@@ -1332,7 +1383,7 @@ export interface Block_46 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_47".
+ * via the `definition` "Block_47".
  */
 export interface Block_47 {
   field1?: string | null;
@@ -1345,7 +1396,7 @@ export interface Block_47 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_48".
+ * via the `definition` "Block_48".
  */
 export interface Block_48 {
   field1?: string | null;
@@ -1358,7 +1409,7 @@ export interface Block_48 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_49".
+ * via the `definition` "Block_49".
  */
 export interface Block_49 {
   field1?: string | null;
@@ -1371,7 +1422,7 @@ export interface Block_49 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_50".
+ * via the `definition` "Block_50".
  */
 export interface Block_50 {
   field1?: string | null;
@@ -1384,7 +1435,7 @@ export interface Block_50 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_51".
+ * via the `definition` "Block_51".
  */
 export interface Block_51 {
   field1?: string | null;
@@ -1397,7 +1448,7 @@ export interface Block_51 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_52".
+ * via the `definition` "Block_52".
  */
 export interface Block_52 {
   field1?: string | null;
@@ -1410,7 +1461,7 @@ export interface Block_52 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_53".
+ * via the `definition` "Block_53".
  */
 export interface Block_53 {
   field1?: string | null;
@@ -1423,7 +1474,7 @@ export interface Block_53 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_54".
+ * via the `definition` "Block_54".
  */
 export interface Block_54 {
   field1?: string | null;
@@ -1436,7 +1487,7 @@ export interface Block_54 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_55".
+ * via the `definition` "Block_55".
  */
 export interface Block_55 {
   field1?: string | null;
@@ -1449,7 +1500,7 @@ export interface Block_55 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_56".
+ * via the `definition` "Block_56".
  */
 export interface Block_56 {
   field1?: string | null;
@@ -1462,7 +1513,7 @@ export interface Block_56 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_57".
+ * via the `definition` "Block_57".
  */
 export interface Block_57 {
   field1?: string | null;
@@ -1475,7 +1526,7 @@ export interface Block_57 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_58".
+ * via the `definition` "Block_58".
  */
 export interface Block_58 {
   field1?: string | null;
@@ -1488,7 +1539,7 @@ export interface Block_58 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_59".
+ * via the `definition` "Block_59".
  */
 export interface Block_59 {
   field1?: string | null;
@@ -1501,7 +1552,7 @@ export interface Block_59 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_60".
+ * via the `definition` "Block_60".
  */
 export interface Block_60 {
   field1?: string | null;
@@ -1514,7 +1565,7 @@ export interface Block_60 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_61".
+ * via the `definition` "Block_61".
  */
 export interface Block_61 {
   field1?: string | null;
@@ -1527,7 +1578,7 @@ export interface Block_61 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_62".
+ * via the `definition` "Block_62".
  */
 export interface Block_62 {
   field1?: string | null;
@@ -1540,7 +1591,7 @@ export interface Block_62 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_63".
+ * via the `definition` "Block_63".
  */
 export interface Block_63 {
   field1?: string | null;
@@ -1553,7 +1604,7 @@ export interface Block_63 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_64".
+ * via the `definition` "Block_64".
  */
 export interface Block_64 {
   field1?: string | null;
@@ -1566,7 +1617,7 @@ export interface Block_64 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_65".
+ * via the `definition` "Block_65".
  */
 export interface Block_65 {
   field1?: string | null;
@@ -1579,7 +1630,7 @@ export interface Block_65 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_66".
+ * via the `definition` "Block_66".
  */
 export interface Block_66 {
   field1?: string | null;
@@ -1592,7 +1643,7 @@ export interface Block_66 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_67".
+ * via the `definition` "Block_67".
  */
 export interface Block_67 {
   field1?: string | null;
@@ -1605,7 +1656,7 @@ export interface Block_67 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_68".
+ * via the `definition` "Block_68".
  */
 export interface Block_68 {
   field1?: string | null;
@@ -1618,7 +1669,7 @@ export interface Block_68 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_69".
+ * via the `definition` "Block_69".
  */
 export interface Block_69 {
   field1?: string | null;
@@ -1631,7 +1682,7 @@ export interface Block_69 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_70".
+ * via the `definition` "Block_70".
  */
 export interface Block_70 {
   field1?: string | null;
@@ -1644,7 +1695,7 @@ export interface Block_70 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_71".
+ * via the `definition` "Block_71".
  */
 export interface Block_71 {
   field1?: string | null;
@@ -1657,7 +1708,7 @@ export interface Block_71 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_72".
+ * via the `definition` "Block_72".
  */
 export interface Block_72 {
   field1?: string | null;
@@ -1670,7 +1721,7 @@ export interface Block_72 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_73".
+ * via the `definition` "Block_73".
  */
 export interface Block_73 {
   field1?: string | null;
@@ -1683,7 +1734,7 @@ export interface Block_73 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_74".
+ * via the `definition` "Block_74".
  */
 export interface Block_74 {
   field1?: string | null;
@@ -1696,7 +1747,7 @@ export interface Block_74 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_75".
+ * via the `definition` "Block_75".
  */
 export interface Block_75 {
   field1?: string | null;
@@ -1709,7 +1760,7 @@ export interface Block_75 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_76".
+ * via the `definition` "Block_76".
  */
 export interface Block_76 {
   field1?: string | null;
@@ -1722,7 +1773,7 @@ export interface Block_76 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_77".
+ * via the `definition` "Block_77".
  */
 export interface Block_77 {
   field1?: string | null;
@@ -1735,7 +1786,7 @@ export interface Block_77 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_78".
+ * via the `definition` "Block_78".
  */
 export interface Block_78 {
   field1?: string | null;
@@ -1748,7 +1799,7 @@ export interface Block_78 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_79".
+ * via the `definition` "Block_79".
  */
 export interface Block_79 {
   field1?: string | null;
@@ -1761,7 +1812,7 @@ export interface Block_79 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_80".
+ * via the `definition` "Block_80".
  */
 export interface Block_80 {
   field1?: string | null;
@@ -1774,7 +1825,7 @@ export interface Block_80 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_81".
+ * via the `definition` "Block_81".
  */
 export interface Block_81 {
   field1?: string | null;
@@ -1787,7 +1838,7 @@ export interface Block_81 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_82".
+ * via the `definition` "Block_82".
  */
 export interface Block_82 {
   field1?: string | null;
@@ -1800,7 +1851,7 @@ export interface Block_82 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_83".
+ * via the `definition` "Block_83".
  */
 export interface Block_83 {
   field1?: string | null;
@@ -1813,7 +1864,7 @@ export interface Block_83 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_84".
+ * via the `definition` "Block_84".
  */
 export interface Block_84 {
   field1?: string | null;
@@ -1826,7 +1877,7 @@ export interface Block_84 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_85".
+ * via the `definition` "Block_85".
  */
 export interface Block_85 {
   field1?: string | null;
@@ -1839,7 +1890,7 @@ export interface Block_85 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_86".
+ * via the `definition` "Block_86".
  */
 export interface Block_86 {
   field1?: string | null;
@@ -1852,7 +1903,7 @@ export interface Block_86 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_87".
+ * via the `definition` "Block_87".
  */
 export interface Block_87 {
   field1?: string | null;
@@ -1865,7 +1916,7 @@ export interface Block_87 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_88".
+ * via the `definition` "Block_88".
  */
 export interface Block_88 {
   field1?: string | null;
@@ -1878,7 +1929,7 @@ export interface Block_88 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_89".
+ * via the `definition` "Block_89".
  */
 export interface Block_89 {
   field1?: string | null;
@@ -1891,7 +1942,7 @@ export interface Block_89 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_90".
+ * via the `definition` "Block_90".
  */
 export interface Block_90 {
   field1?: string | null;
@@ -1904,7 +1955,7 @@ export interface Block_90 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_91".
+ * via the `definition` "Block_91".
  */
 export interface Block_91 {
   field1?: string | null;
@@ -1917,7 +1968,7 @@ export interface Block_91 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_92".
+ * via the `definition` "Block_92".
  */
 export interface Block_92 {
   field1?: string | null;
@@ -1930,7 +1981,7 @@ export interface Block_92 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_93".
+ * via the `definition` "Block_93".
  */
 export interface Block_93 {
   field1?: string | null;
@@ -1943,7 +1994,7 @@ export interface Block_93 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_94".
+ * via the `definition` "Block_94".
  */
 export interface Block_94 {
   field1?: string | null;
@@ -1956,7 +2007,7 @@ export interface Block_94 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_95".
+ * via the `definition` "Block_95".
  */
 export interface Block_95 {
   field1?: string | null;
@@ -1969,7 +2020,7 @@ export interface Block_95 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_96".
+ * via the `definition` "Block_96".
  */
 export interface Block_96 {
   field1?: string | null;
@@ -1982,7 +2033,7 @@ export interface Block_96 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_97".
+ * via the `definition` "Block_97".
  */
 export interface Block_97 {
   field1?: string | null;
@@ -1995,7 +2046,7 @@ export interface Block_97 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_98".
+ * via the `definition` "Block_98".
  */
 export interface Block_98 {
   field1?: string | null;
@@ -2008,7 +2059,7 @@ export interface Block_98 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_99".
+ * via the `definition` "Block_99".
  */
 export interface Block_99 {
   field1?: string | null;
@@ -2021,7 +2072,7 @@ export interface Block_99 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_100".
+ * via the `definition` "Block_100".
  */
 export interface Block_100 {
   field1?: string | null;
@@ -2034,7 +2085,7 @@ export interface Block_100 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_101".
+ * via the `definition` "Block_101".
  */
 export interface Block_101 {
   field1?: string | null;
@@ -2047,7 +2098,7 @@ export interface Block_101 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_102".
+ * via the `definition` "Block_102".
  */
 export interface Block_102 {
   field1?: string | null;
@@ -2060,7 +2111,7 @@ export interface Block_102 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_103".
+ * via the `definition` "Block_103".
  */
 export interface Block_103 {
   field1?: string | null;
@@ -2073,7 +2124,7 @@ export interface Block_103 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_104".
+ * via the `definition` "Block_104".
  */
 export interface Block_104 {
   field1?: string | null;
@@ -2086,7 +2137,7 @@ export interface Block_104 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_105".
+ * via the `definition` "Block_105".
  */
 export interface Block_105 {
   field1?: string | null;
@@ -2099,7 +2150,7 @@ export interface Block_105 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_106".
+ * via the `definition` "Block_106".
  */
 export interface Block_106 {
   field1?: string | null;
@@ -2112,7 +2163,7 @@ export interface Block_106 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_107".
+ * via the `definition` "Block_107".
  */
 export interface Block_107 {
   field1?: string | null;
@@ -2125,7 +2176,7 @@ export interface Block_107 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_108".
+ * via the `definition` "Block_108".
  */
 export interface Block_108 {
   field1?: string | null;
@@ -2138,7 +2189,7 @@ export interface Block_108 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_109".
+ * via the `definition` "Block_109".
  */
 export interface Block_109 {
   field1?: string | null;
@@ -2151,7 +2202,7 @@ export interface Block_109 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_110".
+ * via the `definition` "Block_110".
  */
 export interface Block_110 {
   field1?: string | null;
@@ -2164,7 +2215,7 @@ export interface Block_110 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_111".
+ * via the `definition` "Block_111".
  */
 export interface Block_111 {
   field1?: string | null;
@@ -2177,7 +2228,7 @@ export interface Block_111 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_112".
+ * via the `definition` "Block_112".
  */
 export interface Block_112 {
   field1?: string | null;
@@ -2190,7 +2241,7 @@ export interface Block_112 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_113".
+ * via the `definition` "Block_113".
  */
 export interface Block_113 {
   field1?: string | null;
@@ -2203,7 +2254,7 @@ export interface Block_113 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_114".
+ * via the `definition` "Block_114".
  */
 export interface Block_114 {
   field1?: string | null;
@@ -2216,7 +2267,7 @@ export interface Block_114 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_115".
+ * via the `definition` "Block_115".
  */
 export interface Block_115 {
   field1?: string | null;
@@ -2229,7 +2280,7 @@ export interface Block_115 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_116".
+ * via the `definition` "Block_116".
  */
 export interface Block_116 {
   field1?: string | null;
@@ -2242,7 +2293,7 @@ export interface Block_116 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_117".
+ * via the `definition` "Block_117".
  */
 export interface Block_117 {
   field1?: string | null;
@@ -2255,7 +2306,7 @@ export interface Block_117 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_118".
+ * via the `definition` "Block_118".
  */
 export interface Block_118 {
   field1?: string | null;
@@ -2268,7 +2319,7 @@ export interface Block_118 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_119".
+ * via the `definition` "Block_119".
  */
 export interface Block_119 {
   field1?: string | null;
@@ -2281,7 +2332,7 @@ export interface Block_119 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_120".
+ * via the `definition` "Block_120".
  */
 export interface Block_120 {
   field1?: string | null;
@@ -2294,7 +2345,7 @@ export interface Block_120 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_121".
+ * via the `definition` "Block_121".
  */
 export interface Block_121 {
   field1?: string | null;
@@ -2307,7 +2358,7 @@ export interface Block_121 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_122".
+ * via the `definition` "Block_122".
  */
 export interface Block_122 {
   field1?: string | null;
@@ -2320,7 +2371,7 @@ export interface Block_122 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_123".
+ * via the `definition` "Block_123".
  */
 export interface Block_123 {
   field1?: string | null;
@@ -2333,7 +2384,7 @@ export interface Block_123 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_124".
+ * via the `definition` "Block_124".
  */
 export interface Block_124 {
   field1?: string | null;
@@ -2346,7 +2397,7 @@ export interface Block_124 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_125".
+ * via the `definition` "Block_125".
  */
 export interface Block_125 {
   field1?: string | null;
@@ -2359,7 +2410,7 @@ export interface Block_125 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_126".
+ * via the `definition` "Block_126".
  */
 export interface Block_126 {
   field1?: string | null;
@@ -2372,7 +2423,7 @@ export interface Block_126 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_127".
+ * via the `definition` "Block_127".
  */
 export interface Block_127 {
   field1?: string | null;
@@ -2385,7 +2436,7 @@ export interface Block_127 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_128".
+ * via the `definition` "Block_128".
  */
 export interface Block_128 {
   field1?: string | null;
@@ -2398,7 +2449,7 @@ export interface Block_128 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_129".
+ * via the `definition` "Block_129".
  */
 export interface Block_129 {
   field1?: string | null;
@@ -2411,7 +2462,7 @@ export interface Block_129 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_130".
+ * via the `definition` "Block_130".
  */
 export interface Block_130 {
   field1?: string | null;
@@ -2424,7 +2475,7 @@ export interface Block_130 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_131".
+ * via the `definition` "Block_131".
  */
 export interface Block_131 {
   field1?: string | null;
@@ -2437,7 +2488,7 @@ export interface Block_131 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_132".
+ * via the `definition` "Block_132".
  */
 export interface Block_132 {
   field1?: string | null;
@@ -2450,7 +2501,7 @@ export interface Block_132 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_133".
+ * via the `definition` "Block_133".
  */
 export interface Block_133 {
   field1?: string | null;
@@ -2463,7 +2514,7 @@ export interface Block_133 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_134".
+ * via the `definition` "Block_134".
  */
 export interface Block_134 {
   field1?: string | null;
@@ -2476,7 +2527,7 @@ export interface Block_134 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_135".
+ * via the `definition` "Block_135".
  */
 export interface Block_135 {
   field1?: string | null;
@@ -2489,7 +2540,7 @@ export interface Block_135 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_136".
+ * via the `definition` "Block_136".
  */
 export interface Block_136 {
   field1?: string | null;
@@ -2502,7 +2553,7 @@ export interface Block_136 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_137".
+ * via the `definition` "Block_137".
  */
 export interface Block_137 {
   field1?: string | null;
@@ -2515,7 +2566,7 @@ export interface Block_137 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_138".
+ * via the `definition` "Block_138".
  */
 export interface Block_138 {
   field1?: string | null;
@@ -2528,7 +2579,7 @@ export interface Block_138 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_139".
+ * via the `definition` "Block_139".
  */
 export interface Block_139 {
   field1?: string | null;
@@ -2541,7 +2592,7 @@ export interface Block_139 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_140".
+ * via the `definition` "Block_140".
  */
 export interface Block_140 {
   field1?: string | null;
@@ -2554,7 +2605,7 @@ export interface Block_140 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_141".
+ * via the `definition` "Block_141".
  */
 export interface Block_141 {
   field1?: string | null;
@@ -2567,7 +2618,7 @@ export interface Block_141 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_142".
+ * via the `definition` "Block_142".
  */
 export interface Block_142 {
   field1?: string | null;
@@ -2580,7 +2631,7 @@ export interface Block_142 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_143".
+ * via the `definition` "Block_143".
  */
 export interface Block_143 {
   field1?: string | null;
@@ -2593,7 +2644,7 @@ export interface Block_143 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_144".
+ * via the `definition` "Block_144".
  */
 export interface Block_144 {
   field1?: string | null;
@@ -2606,7 +2657,7 @@ export interface Block_144 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_145".
+ * via the `definition` "Block_145".
  */
 export interface Block_145 {
   field1?: string | null;
@@ -2619,7 +2670,7 @@ export interface Block_145 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_146".
+ * via the `definition` "Block_146".
  */
 export interface Block_146 {
   field1?: string | null;
@@ -2632,7 +2683,7 @@ export interface Block_146 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_147".
+ * via the `definition` "Block_147".
  */
 export interface Block_147 {
   field1?: string | null;
@@ -2645,7 +2696,7 @@ export interface Block_147 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_148".
+ * via the `definition` "Block_148".
  */
 export interface Block_148 {
   field1?: string | null;
@@ -2658,7 +2709,7 @@ export interface Block_148 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_149".
+ * via the `definition` "Block_149".
  */
 export interface Block_149 {
   field1?: string | null;
@@ -2671,7 +2722,7 @@ export interface Block_149 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_150".
+ * via the `definition` "Block_150".
  */
 export interface Block_150 {
   field1?: string | null;
@@ -2684,7 +2735,7 @@ export interface Block_150 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_151".
+ * via the `definition` "Block_151".
  */
 export interface Block_151 {
   field1?: string | null;
@@ -2697,7 +2748,7 @@ export interface Block_151 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_152".
+ * via the `definition` "Block_152".
  */
 export interface Block_152 {
   field1?: string | null;
@@ -2710,7 +2761,7 @@ export interface Block_152 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_153".
+ * via the `definition` "Block_153".
  */
 export interface Block_153 {
   field1?: string | null;
@@ -2723,7 +2774,7 @@ export interface Block_153 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_154".
+ * via the `definition` "Block_154".
  */
 export interface Block_154 {
   field1?: string | null;
@@ -2736,7 +2787,7 @@ export interface Block_154 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_155".
+ * via the `definition` "Block_155".
  */
 export interface Block_155 {
   field1?: string | null;
@@ -2749,7 +2800,7 @@ export interface Block_155 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_156".
+ * via the `definition` "Block_156".
  */
 export interface Block_156 {
   field1?: string | null;
@@ -2762,7 +2813,7 @@ export interface Block_156 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_157".
+ * via the `definition` "Block_157".
  */
 export interface Block_157 {
   field1?: string | null;
@@ -2775,7 +2826,7 @@ export interface Block_157 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_158".
+ * via the `definition` "Block_158".
  */
 export interface Block_158 {
   field1?: string | null;
@@ -2788,7 +2839,7 @@ export interface Block_158 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_159".
+ * via the `definition` "Block_159".
  */
 export interface Block_159 {
   field1?: string | null;
@@ -2801,7 +2852,7 @@ export interface Block_159 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_160".
+ * via the `definition` "Block_160".
  */
 export interface Block_160 {
   field1?: string | null;
@@ -2814,7 +2865,7 @@ export interface Block_160 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_161".
+ * via the `definition` "Block_161".
  */
 export interface Block_161 {
   field1?: string | null;
@@ -2827,7 +2878,7 @@ export interface Block_161 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_162".
+ * via the `definition` "Block_162".
  */
 export interface Block_162 {
   field1?: string | null;
@@ -2840,7 +2891,7 @@ export interface Block_162 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_163".
+ * via the `definition` "Block_163".
  */
 export interface Block_163 {
   field1?: string | null;
@@ -2853,7 +2904,7 @@ export interface Block_163 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_164".
+ * via the `definition` "Block_164".
  */
 export interface Block_164 {
   field1?: string | null;
@@ -2866,7 +2917,7 @@ export interface Block_164 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_165".
+ * via the `definition` "Block_165".
  */
 export interface Block_165 {
   field1?: string | null;
@@ -2879,7 +2930,7 @@ export interface Block_165 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_166".
+ * via the `definition` "Block_166".
  */
 export interface Block_166 {
   field1?: string | null;
@@ -2892,7 +2943,7 @@ export interface Block_166 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_167".
+ * via the `definition` "Block_167".
  */
 export interface Block_167 {
   field1?: string | null;
@@ -2905,7 +2956,7 @@ export interface Block_167 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_168".
+ * via the `definition` "Block_168".
  */
 export interface Block_168 {
   field1?: string | null;
@@ -2918,7 +2969,7 @@ export interface Block_168 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_169".
+ * via the `definition` "Block_169".
  */
 export interface Block_169 {
   field1?: string | null;
@@ -2931,7 +2982,7 @@ export interface Block_169 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_170".
+ * via the `definition` "Block_170".
  */
 export interface Block_170 {
   field1?: string | null;
@@ -2944,7 +2995,7 @@ export interface Block_170 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_171".
+ * via the `definition` "Block_171".
  */
 export interface Block_171 {
   field1?: string | null;
@@ -2957,7 +3008,7 @@ export interface Block_171 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_172".
+ * via the `definition` "Block_172".
  */
 export interface Block_172 {
   field1?: string | null;
@@ -2970,7 +3021,7 @@ export interface Block_172 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_173".
+ * via the `definition` "Block_173".
  */
 export interface Block_173 {
   field1?: string | null;
@@ -2983,7 +3034,7 @@ export interface Block_173 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_174".
+ * via the `definition` "Block_174".
  */
 export interface Block_174 {
   field1?: string | null;
@@ -2996,7 +3047,7 @@ export interface Block_174 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_175".
+ * via the `definition` "Block_175".
  */
 export interface Block_175 {
   field1?: string | null;
@@ -3009,7 +3060,7 @@ export interface Block_175 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_176".
+ * via the `definition` "Block_176".
  */
 export interface Block_176 {
   field1?: string | null;
@@ -3022,7 +3073,7 @@ export interface Block_176 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_177".
+ * via the `definition` "Block_177".
  */
 export interface Block_177 {
   field1?: string | null;
@@ -3035,7 +3086,7 @@ export interface Block_177 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_178".
+ * via the `definition` "Block_178".
  */
 export interface Block_178 {
   field1?: string | null;
@@ -3048,7 +3099,7 @@ export interface Block_178 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_179".
+ * via the `definition` "Block_179".
  */
 export interface Block_179 {
   field1?: string | null;
@@ -3061,7 +3112,7 @@ export interface Block_179 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_180".
+ * via the `definition` "Block_180".
  */
 export interface Block_180 {
   field1?: string | null;
@@ -3074,7 +3125,7 @@ export interface Block_180 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_181".
+ * via the `definition` "Block_181".
  */
 export interface Block_181 {
   field1?: string | null;
@@ -3087,7 +3138,7 @@ export interface Block_181 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_182".
+ * via the `definition` "Block_182".
  */
 export interface Block_182 {
   field1?: string | null;
@@ -3100,7 +3151,7 @@ export interface Block_182 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_183".
+ * via the `definition` "Block_183".
  */
 export interface Block_183 {
   field1?: string | null;
@@ -3113,7 +3164,7 @@ export interface Block_183 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_184".
+ * via the `definition` "Block_184".
  */
 export interface Block_184 {
   field1?: string | null;
@@ -3126,7 +3177,7 @@ export interface Block_184 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_185".
+ * via the `definition` "Block_185".
  */
 export interface Block_185 {
   field1?: string | null;
@@ -3139,7 +3190,7 @@ export interface Block_185 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_186".
+ * via the `definition` "Block_186".
  */
 export interface Block_186 {
   field1?: string | null;
@@ -3152,7 +3203,7 @@ export interface Block_186 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_187".
+ * via the `definition` "Block_187".
  */
 export interface Block_187 {
   field1?: string | null;
@@ -3165,7 +3216,7 @@ export interface Block_187 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_188".
+ * via the `definition` "Block_188".
  */
 export interface Block_188 {
   field1?: string | null;
@@ -3178,7 +3229,7 @@ export interface Block_188 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_189".
+ * via the `definition` "Block_189".
  */
 export interface Block_189 {
   field1?: string | null;
@@ -3191,7 +3242,7 @@ export interface Block_189 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_190".
+ * via the `definition` "Block_190".
  */
 export interface Block_190 {
   field1?: string | null;
@@ -3204,7 +3255,7 @@ export interface Block_190 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_191".
+ * via the `definition` "Block_191".
  */
 export interface Block_191 {
   field1?: string | null;
@@ -3217,7 +3268,7 @@ export interface Block_191 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_192".
+ * via the `definition` "Block_192".
  */
 export interface Block_192 {
   field1?: string | null;
@@ -3230,7 +3281,7 @@ export interface Block_192 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_193".
+ * via the `definition` "Block_193".
  */
 export interface Block_193 {
   field1?: string | null;
@@ -3243,7 +3294,7 @@ export interface Block_193 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_194".
+ * via the `definition` "Block_194".
  */
 export interface Block_194 {
   field1?: string | null;
@@ -3256,7 +3307,7 @@ export interface Block_194 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_195".
+ * via the `definition` "Block_195".
  */
 export interface Block_195 {
   field1?: string | null;
@@ -3269,7 +3320,7 @@ export interface Block_195 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_196".
+ * via the `definition` "Block_196".
  */
 export interface Block_196 {
   field1?: string | null;
@@ -3282,7 +3333,7 @@ export interface Block_196 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_197".
+ * via the `definition` "Block_197".
  */
 export interface Block_197 {
   field1?: string | null;
@@ -3295,7 +3346,7 @@ export interface Block_197 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_198".
+ * via the `definition` "Block_198".
  */
 export interface Block_198 {
   field1?: string | null;
@@ -3308,7 +3359,7 @@ export interface Block_198 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_199".
+ * via the `definition` "Block_199".
  */
 export interface Block_199 {
   field1?: string | null;
@@ -3321,7 +3372,7 @@ export interface Block_199 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_200".
+ * via the `definition` "Block_200".
  */
 export interface Block_200 {
   field1?: string | null;
@@ -3334,7 +3385,7 @@ export interface Block_200 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_201".
+ * via the `definition` "Block_201".
  */
 export interface Block_201 {
   field1?: string | null;
@@ -3347,7 +3398,7 @@ export interface Block_201 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_202".
+ * via the `definition` "Block_202".
  */
 export interface Block_202 {
   field1?: string | null;
@@ -3360,7 +3411,7 @@ export interface Block_202 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_203".
+ * via the `definition` "Block_203".
  */
 export interface Block_203 {
   field1?: string | null;
@@ -3373,7 +3424,7 @@ export interface Block_203 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_204".
+ * via the `definition` "Block_204".
  */
 export interface Block_204 {
   field1?: string | null;
@@ -3386,7 +3437,7 @@ export interface Block_204 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_205".
+ * via the `definition` "Block_205".
  */
 export interface Block_205 {
   field1?: string | null;
@@ -3399,7 +3450,7 @@ export interface Block_205 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_206".
+ * via the `definition` "Block_206".
  */
 export interface Block_206 {
   field1?: string | null;
@@ -3412,7 +3463,7 @@ export interface Block_206 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_207".
+ * via the `definition` "Block_207".
  */
 export interface Block_207 {
   field1?: string | null;
@@ -3425,7 +3476,7 @@ export interface Block_207 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_208".
+ * via the `definition` "Block_208".
  */
 export interface Block_208 {
   field1?: string | null;
@@ -3438,7 +3489,7 @@ export interface Block_208 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_209".
+ * via the `definition` "Block_209".
  */
 export interface Block_209 {
   field1?: string | null;
@@ -3451,7 +3502,7 @@ export interface Block_209 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_210".
+ * via the `definition` "Block_210".
  */
 export interface Block_210 {
   field1?: string | null;
@@ -3464,7 +3515,7 @@ export interface Block_210 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_211".
+ * via the `definition` "Block_211".
  */
 export interface Block_211 {
   field1?: string | null;
@@ -3477,7 +3528,7 @@ export interface Block_211 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_212".
+ * via the `definition` "Block_212".
  */
 export interface Block_212 {
   field1?: string | null;
@@ -3490,7 +3541,7 @@ export interface Block_212 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_213".
+ * via the `definition` "Block_213".
  */
 export interface Block_213 {
   field1?: string | null;
@@ -3503,7 +3554,7 @@ export interface Block_213 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_214".
+ * via the `definition` "Block_214".
  */
 export interface Block_214 {
   field1?: string | null;
@@ -3516,7 +3567,7 @@ export interface Block_214 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_215".
+ * via the `definition` "Block_215".
  */
 export interface Block_215 {
   field1?: string | null;
@@ -3529,7 +3580,7 @@ export interface Block_215 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_216".
+ * via the `definition` "Block_216".
  */
 export interface Block_216 {
   field1?: string | null;
@@ -3542,7 +3593,7 @@ export interface Block_216 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_217".
+ * via the `definition` "Block_217".
  */
 export interface Block_217 {
   field1?: string | null;
@@ -3555,7 +3606,7 @@ export interface Block_217 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_218".
+ * via the `definition` "Block_218".
  */
 export interface Block_218 {
   field1?: string | null;
@@ -3568,7 +3619,7 @@ export interface Block_218 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_219".
+ * via the `definition` "Block_219".
  */
 export interface Block_219 {
   field1?: string | null;
@@ -3581,7 +3632,7 @@ export interface Block_219 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_220".
+ * via the `definition` "Block_220".
  */
 export interface Block_220 {
   field1?: string | null;
@@ -3594,7 +3645,7 @@ export interface Block_220 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_221".
+ * via the `definition` "Block_221".
  */
 export interface Block_221 {
   field1?: string | null;
@@ -3607,7 +3658,7 @@ export interface Block_221 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_222".
+ * via the `definition` "Block_222".
  */
 export interface Block_222 {
   field1?: string | null;
@@ -3620,7 +3671,7 @@ export interface Block_222 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_223".
+ * via the `definition` "Block_223".
  */
 export interface Block_223 {
   field1?: string | null;
@@ -3633,7 +3684,7 @@ export interface Block_223 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_224".
+ * via the `definition` "Block_224".
  */
 export interface Block_224 {
   field1?: string | null;
@@ -3646,7 +3697,7 @@ export interface Block_224 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_225".
+ * via the `definition` "Block_225".
  */
 export interface Block_225 {
   field1?: string | null;
@@ -3659,7 +3710,7 @@ export interface Block_225 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_226".
+ * via the `definition` "Block_226".
  */
 export interface Block_226 {
   field1?: string | null;
@@ -3672,7 +3723,7 @@ export interface Block_226 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_227".
+ * via the `definition` "Block_227".
  */
 export interface Block_227 {
   field1?: string | null;
@@ -3685,7 +3736,7 @@ export interface Block_227 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_228".
+ * via the `definition` "Block_228".
  */
 export interface Block_228 {
   field1?: string | null;
@@ -3698,7 +3749,7 @@ export interface Block_228 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_229".
+ * via the `definition` "Block_229".
  */
 export interface Block_229 {
   field1?: string | null;
@@ -3711,7 +3762,7 @@ export interface Block_229 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_230".
+ * via the `definition` "Block_230".
  */
 export interface Block_230 {
   field1?: string | null;
@@ -3724,7 +3775,7 @@ export interface Block_230 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_231".
+ * via the `definition` "Block_231".
  */
 export interface Block_231 {
   field1?: string | null;
@@ -3737,7 +3788,7 @@ export interface Block_231 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_232".
+ * via the `definition` "Block_232".
  */
 export interface Block_232 {
   field1?: string | null;
@@ -3750,7 +3801,7 @@ export interface Block_232 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_233".
+ * via the `definition` "Block_233".
  */
 export interface Block_233 {
   field1?: string | null;
@@ -3763,7 +3814,7 @@ export interface Block_233 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_234".
+ * via the `definition` "Block_234".
  */
 export interface Block_234 {
   field1?: string | null;
@@ -3776,7 +3827,7 @@ export interface Block_234 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_235".
+ * via the `definition` "Block_235".
  */
 export interface Block_235 {
   field1?: string | null;
@@ -3789,7 +3840,7 @@ export interface Block_235 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_236".
+ * via the `definition` "Block_236".
  */
 export interface Block_236 {
   field1?: string | null;
@@ -3802,7 +3853,7 @@ export interface Block_236 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_237".
+ * via the `definition` "Block_237".
  */
 export interface Block_237 {
   field1?: string | null;
@@ -3815,7 +3866,7 @@ export interface Block_237 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_238".
+ * via the `definition` "Block_238".
  */
 export interface Block_238 {
   field1?: string | null;
@@ -3828,7 +3879,7 @@ export interface Block_238 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_239".
+ * via the `definition` "Block_239".
  */
 export interface Block_239 {
   field1?: string | null;
@@ -3841,7 +3892,7 @@ export interface Block_239 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_240".
+ * via the `definition` "Block_240".
  */
 export interface Block_240 {
   field1?: string | null;
@@ -3854,7 +3905,7 @@ export interface Block_240 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_241".
+ * via the `definition` "Block_241".
  */
 export interface Block_241 {
   field1?: string | null;
@@ -3867,7 +3918,7 @@ export interface Block_241 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_242".
+ * via the `definition` "Block_242".
  */
 export interface Block_242 {
   field1?: string | null;
@@ -3880,7 +3931,7 @@ export interface Block_242 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_243".
+ * via the `definition` "Block_243".
  */
 export interface Block_243 {
   field1?: string | null;
@@ -3893,7 +3944,7 @@ export interface Block_243 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_244".
+ * via the `definition` "Block_244".
  */
 export interface Block_244 {
   field1?: string | null;
@@ -3906,7 +3957,7 @@ export interface Block_244 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_245".
+ * via the `definition` "Block_245".
  */
 export interface Block_245 {
   field1?: string | null;
@@ -3919,7 +3970,7 @@ export interface Block_245 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_246".
+ * via the `definition` "Block_246".
  */
 export interface Block_246 {
   field1?: string | null;
@@ -3932,7 +3983,7 @@ export interface Block_246 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_247".
+ * via the `definition` "Block_247".
  */
 export interface Block_247 {
   field1?: string | null;
@@ -3945,7 +3996,7 @@ export interface Block_247 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_248".
+ * via the `definition` "Block_248".
  */
 export interface Block_248 {
   field1?: string | null;
@@ -3958,7 +4009,7 @@ export interface Block_248 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_249".
+ * via the `definition` "Block_249".
  */
 export interface Block_249 {
   field1?: string | null;
@@ -3971,7 +4022,7 @@ export interface Block_249 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_250".
+ * via the `definition` "Block_250".
  */
 export interface Block_250 {
   field1?: string | null;
@@ -3984,7 +4035,7 @@ export interface Block_250 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_251".
+ * via the `definition` "Block_251".
  */
 export interface Block_251 {
   field1?: string | null;
@@ -3997,7 +4048,7 @@ export interface Block_251 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_252".
+ * via the `definition` "Block_252".
  */
 export interface Block_252 {
   field1?: string | null;
@@ -4010,7 +4061,7 @@ export interface Block_252 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_253".
+ * via the `definition` "Block_253".
  */
 export interface Block_253 {
   field1?: string | null;
@@ -4023,7 +4074,7 @@ export interface Block_253 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_254".
+ * via the `definition` "Block_254".
  */
 export interface Block_254 {
   field1?: string | null;
@@ -4036,7 +4087,7 @@ export interface Block_254 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_255".
+ * via the `definition` "Block_255".
  */
 export interface Block_255 {
   field1?: string | null;
@@ -4049,7 +4100,7 @@ export interface Block_255 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_256".
+ * via the `definition` "Block_256".
  */
 export interface Block_256 {
   field1?: string | null;
@@ -4062,7 +4113,7 @@ export interface Block_256 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_257".
+ * via the `definition` "Block_257".
  */
 export interface Block_257 {
   field1?: string | null;
@@ -4075,7 +4126,7 @@ export interface Block_257 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_258".
+ * via the `definition` "Block_258".
  */
 export interface Block_258 {
   field1?: string | null;
@@ -4088,7 +4139,7 @@ export interface Block_258 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_259".
+ * via the `definition` "Block_259".
  */
 export interface Block_259 {
   field1?: string | null;
@@ -4101,7 +4152,7 @@ export interface Block_259 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_260".
+ * via the `definition` "Block_260".
  */
 export interface Block_260 {
   field1?: string | null;
@@ -4114,7 +4165,7 @@ export interface Block_260 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_261".
+ * via the `definition` "Block_261".
  */
 export interface Block_261 {
   field1?: string | null;
@@ -4127,7 +4178,7 @@ export interface Block_261 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_262".
+ * via the `definition` "Block_262".
  */
 export interface Block_262 {
   field1?: string | null;
@@ -4140,7 +4191,7 @@ export interface Block_262 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_263".
+ * via the `definition` "Block_263".
  */
 export interface Block_263 {
   field1?: string | null;
@@ -4153,7 +4204,7 @@ export interface Block_263 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_264".
+ * via the `definition` "Block_264".
  */
 export interface Block_264 {
   field1?: string | null;
@@ -4166,7 +4217,7 @@ export interface Block_264 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_265".
+ * via the `definition` "Block_265".
  */
 export interface Block_265 {
   field1?: string | null;
@@ -4179,7 +4230,7 @@ export interface Block_265 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_266".
+ * via the `definition` "Block_266".
  */
 export interface Block_266 {
   field1?: string | null;
@@ -4192,7 +4243,7 @@ export interface Block_266 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_267".
+ * via the `definition` "Block_267".
  */
 export interface Block_267 {
   field1?: string | null;
@@ -4205,7 +4256,7 @@ export interface Block_267 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_268".
+ * via the `definition` "Block_268".
  */
 export interface Block_268 {
   field1?: string | null;
@@ -4218,7 +4269,7 @@ export interface Block_268 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_269".
+ * via the `definition` "Block_269".
  */
 export interface Block_269 {
   field1?: string | null;
@@ -4231,7 +4282,7 @@ export interface Block_269 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_270".
+ * via the `definition` "Block_270".
  */
 export interface Block_270 {
   field1?: string | null;
@@ -4244,7 +4295,7 @@ export interface Block_270 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_271".
+ * via the `definition` "Block_271".
  */
 export interface Block_271 {
   field1?: string | null;
@@ -4257,7 +4308,7 @@ export interface Block_271 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_272".
+ * via the `definition` "Block_272".
  */
 export interface Block_272 {
   field1?: string | null;
@@ -4270,7 +4321,7 @@ export interface Block_272 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_273".
+ * via the `definition` "Block_273".
  */
 export interface Block_273 {
   field1?: string | null;
@@ -4283,7 +4334,7 @@ export interface Block_273 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_274".
+ * via the `definition` "Block_274".
  */
 export interface Block_274 {
   field1?: string | null;
@@ -4296,7 +4347,7 @@ export interface Block_274 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_275".
+ * via the `definition` "Block_275".
  */
 export interface Block_275 {
   field1?: string | null;
@@ -4309,7 +4360,7 @@ export interface Block_275 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_276".
+ * via the `definition` "Block_276".
  */
 export interface Block_276 {
   field1?: string | null;
@@ -4322,7 +4373,7 @@ export interface Block_276 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_277".
+ * via the `definition` "Block_277".
  */
 export interface Block_277 {
   field1?: string | null;
@@ -4335,7 +4386,7 @@ export interface Block_277 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_278".
+ * via the `definition` "Block_278".
  */
 export interface Block_278 {
   field1?: string | null;
@@ -4348,7 +4399,7 @@ export interface Block_278 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_279".
+ * via the `definition` "Block_279".
  */
 export interface Block_279 {
   field1?: string | null;
@@ -4361,7 +4412,7 @@ export interface Block_279 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_280".
+ * via the `definition` "Block_280".
  */
 export interface Block_280 {
   field1?: string | null;
@@ -4374,7 +4425,7 @@ export interface Block_280 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_281".
+ * via the `definition` "Block_281".
  */
 export interface Block_281 {
   field1?: string | null;
@@ -4387,7 +4438,7 @@ export interface Block_281 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_282".
+ * via the `definition` "Block_282".
  */
 export interface Block_282 {
   field1?: string | null;
@@ -4400,7 +4451,7 @@ export interface Block_282 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_283".
+ * via the `definition` "Block_283".
  */
 export interface Block_283 {
   field1?: string | null;
@@ -4413,7 +4464,7 @@ export interface Block_283 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_284".
+ * via the `definition` "Block_284".
  */
 export interface Block_284 {
   field1?: string | null;
@@ -4426,7 +4477,7 @@ export interface Block_284 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_285".
+ * via the `definition` "Block_285".
  */
 export interface Block_285 {
   field1?: string | null;
@@ -4439,7 +4490,7 @@ export interface Block_285 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_286".
+ * via the `definition` "Block_286".
  */
 export interface Block_286 {
   field1?: string | null;
@@ -4452,7 +4503,7 @@ export interface Block_286 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_287".
+ * via the `definition` "Block_287".
  */
 export interface Block_287 {
   field1?: string | null;
@@ -4465,7 +4516,7 @@ export interface Block_287 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_288".
+ * via the `definition` "Block_288".
  */
 export interface Block_288 {
   field1?: string | null;
@@ -4478,7 +4529,7 @@ export interface Block_288 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_289".
+ * via the `definition` "Block_289".
  */
 export interface Block_289 {
   field1?: string | null;
@@ -4491,7 +4542,7 @@ export interface Block_289 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_290".
+ * via the `definition` "Block_290".
  */
 export interface Block_290 {
   field1?: string | null;
@@ -4504,7 +4555,7 @@ export interface Block_290 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_291".
+ * via the `definition` "Block_291".
  */
 export interface Block_291 {
   field1?: string | null;
@@ -4517,7 +4568,7 @@ export interface Block_291 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_292".
+ * via the `definition` "Block_292".
  */
 export interface Block_292 {
   field1?: string | null;
@@ -4530,7 +4581,7 @@ export interface Block_292 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_293".
+ * via the `definition` "Block_293".
  */
 export interface Block_293 {
   field1?: string | null;
@@ -4543,7 +4594,7 @@ export interface Block_293 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_294".
+ * via the `definition` "Block_294".
  */
 export interface Block_294 {
   field1?: string | null;
@@ -4556,7 +4607,7 @@ export interface Block_294 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_295".
+ * via the `definition` "Block_295".
  */
 export interface Block_295 {
   field1?: string | null;
@@ -4569,7 +4620,7 @@ export interface Block_295 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_296".
+ * via the `definition` "Block_296".
  */
 export interface Block_296 {
   field1?: string | null;
@@ -4582,7 +4633,7 @@ export interface Block_296 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_297".
+ * via the `definition` "Block_297".
  */
 export interface Block_297 {
   field1?: string | null;
@@ -4595,7 +4646,7 @@ export interface Block_297 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_298".
+ * via the `definition` "Block_298".
  */
 export interface Block_298 {
   field1?: string | null;
@@ -4608,7 +4659,7 @@ export interface Block_298 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_299".
+ * via the `definition` "Block_299".
  */
 export interface Block_299 {
   field1?: string | null;
@@ -4621,7 +4672,7 @@ export interface Block_299 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_300".
+ * via the `definition` "Block_300".
  */
 export interface Block_300 {
   field1?: string | null;
@@ -4634,7 +4685,7 @@ export interface Block_300 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_301".
+ * via the `definition` "Block_301".
  */
 export interface Block_301 {
   field1?: string | null;
@@ -4647,7 +4698,7 @@ export interface Block_301 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_302".
+ * via the `definition` "Block_302".
  */
 export interface Block_302 {
   field1?: string | null;
@@ -4660,7 +4711,7 @@ export interface Block_302 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_303".
+ * via the `definition` "Block_303".
  */
 export interface Block_303 {
   field1?: string | null;
@@ -4673,7 +4724,7 @@ export interface Block_303 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_304".
+ * via the `definition` "Block_304".
  */
 export interface Block_304 {
   field1?: string | null;
@@ -4686,7 +4737,7 @@ export interface Block_304 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_305".
+ * via the `definition` "Block_305".
  */
 export interface Block_305 {
   field1?: string | null;
@@ -4699,7 +4750,7 @@ export interface Block_305 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_306".
+ * via the `definition` "Block_306".
  */
 export interface Block_306 {
   field1?: string | null;
@@ -4712,7 +4763,7 @@ export interface Block_306 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_307".
+ * via the `definition` "Block_307".
  */
 export interface Block_307 {
   field1?: string | null;
@@ -4725,7 +4776,7 @@ export interface Block_307 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_308".
+ * via the `definition` "Block_308".
  */
 export interface Block_308 {
   field1?: string | null;
@@ -4738,7 +4789,7 @@ export interface Block_308 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_309".
+ * via the `definition` "Block_309".
  */
 export interface Block_309 {
   field1?: string | null;
@@ -4751,7 +4802,7 @@ export interface Block_309 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_310".
+ * via the `definition` "Block_310".
  */
 export interface Block_310 {
   field1?: string | null;
@@ -4764,7 +4815,7 @@ export interface Block_310 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_311".
+ * via the `definition` "Block_311".
  */
 export interface Block_311 {
   field1?: string | null;
@@ -4777,7 +4828,7 @@ export interface Block_311 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_312".
+ * via the `definition` "Block_312".
  */
 export interface Block_312 {
   field1?: string | null;
@@ -4790,7 +4841,7 @@ export interface Block_312 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_313".
+ * via the `definition` "Block_313".
  */
 export interface Block_313 {
   field1?: string | null;
@@ -4803,7 +4854,7 @@ export interface Block_313 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_314".
+ * via the `definition` "Block_314".
  */
 export interface Block_314 {
   field1?: string | null;
@@ -4816,7 +4867,7 @@ export interface Block_314 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_315".
+ * via the `definition` "Block_315".
  */
 export interface Block_315 {
   field1?: string | null;
@@ -4829,7 +4880,7 @@ export interface Block_315 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_316".
+ * via the `definition` "Block_316".
  */
 export interface Block_316 {
   field1?: string | null;
@@ -4842,7 +4893,7 @@ export interface Block_316 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_317".
+ * via the `definition` "Block_317".
  */
 export interface Block_317 {
   field1?: string | null;
@@ -4855,7 +4906,7 @@ export interface Block_317 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_318".
+ * via the `definition` "Block_318".
  */
 export interface Block_318 {
   field1?: string | null;
@@ -4868,7 +4919,7 @@ export interface Block_318 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_319".
+ * via the `definition` "Block_319".
  */
 export interface Block_319 {
   field1?: string | null;
@@ -4881,7 +4932,7 @@ export interface Block_319 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_320".
+ * via the `definition` "Block_320".
  */
 export interface Block_320 {
   field1?: string | null;
@@ -4894,7 +4945,7 @@ export interface Block_320 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_321".
+ * via the `definition` "Block_321".
  */
 export interface Block_321 {
   field1?: string | null;
@@ -4907,7 +4958,7 @@ export interface Block_321 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_322".
+ * via the `definition` "Block_322".
  */
 export interface Block_322 {
   field1?: string | null;
@@ -4920,7 +4971,7 @@ export interface Block_322 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_323".
+ * via the `definition` "Block_323".
  */
 export interface Block_323 {
   field1?: string | null;
@@ -4933,7 +4984,7 @@ export interface Block_323 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_324".
+ * via the `definition` "Block_324".
  */
 export interface Block_324 {
   field1?: string | null;
@@ -4946,7 +4997,7 @@ export interface Block_324 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_325".
+ * via the `definition` "Block_325".
  */
 export interface Block_325 {
   field1?: string | null;
@@ -4959,7 +5010,7 @@ export interface Block_325 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_326".
+ * via the `definition` "Block_326".
  */
 export interface Block_326 {
   field1?: string | null;
@@ -4972,7 +5023,7 @@ export interface Block_326 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_327".
+ * via the `definition` "Block_327".
  */
 export interface Block_327 {
   field1?: string | null;
@@ -4985,7 +5036,7 @@ export interface Block_327 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_328".
+ * via the `definition` "Block_328".
  */
 export interface Block_328 {
   field1?: string | null;
@@ -4998,7 +5049,7 @@ export interface Block_328 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_329".
+ * via the `definition` "Block_329".
  */
 export interface Block_329 {
   field1?: string | null;
@@ -5011,7 +5062,7 @@ export interface Block_329 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_330".
+ * via the `definition` "Block_330".
  */
 export interface Block_330 {
   field1?: string | null;
@@ -5024,7 +5075,7 @@ export interface Block_330 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_331".
+ * via the `definition` "Block_331".
  */
 export interface Block_331 {
   field1?: string | null;
@@ -5037,7 +5088,7 @@ export interface Block_331 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_332".
+ * via the `definition` "Block_332".
  */
 export interface Block_332 {
   field1?: string | null;
@@ -5050,7 +5101,7 @@ export interface Block_332 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_333".
+ * via the `definition` "Block_333".
  */
 export interface Block_333 {
   field1?: string | null;
@@ -5063,7 +5114,7 @@ export interface Block_333 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_334".
+ * via the `definition` "Block_334".
  */
 export interface Block_334 {
   field1?: string | null;
@@ -5076,7 +5127,7 @@ export interface Block_334 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_335".
+ * via the `definition` "Block_335".
  */
 export interface Block_335 {
   field1?: string | null;
@@ -5089,7 +5140,7 @@ export interface Block_335 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_336".
+ * via the `definition` "Block_336".
  */
 export interface Block_336 {
   field1?: string | null;
@@ -5102,7 +5153,7 @@ export interface Block_336 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_337".
+ * via the `definition` "Block_337".
  */
 export interface Block_337 {
   field1?: string | null;
@@ -5115,7 +5166,7 @@ export interface Block_337 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_338".
+ * via the `definition` "Block_338".
  */
 export interface Block_338 {
   field1?: string | null;
@@ -5128,7 +5179,7 @@ export interface Block_338 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_339".
+ * via the `definition` "Block_339".
  */
 export interface Block_339 {
   field1?: string | null;
@@ -5141,7 +5192,7 @@ export interface Block_339 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_340".
+ * via the `definition` "Block_340".
  */
 export interface Block_340 {
   field1?: string | null;
@@ -5154,7 +5205,7 @@ export interface Block_340 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_341".
+ * via the `definition` "Block_341".
  */
 export interface Block_341 {
   field1?: string | null;
@@ -5167,7 +5218,7 @@ export interface Block_341 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_342".
+ * via the `definition` "Block_342".
  */
 export interface Block_342 {
   field1?: string | null;
@@ -5180,7 +5231,7 @@ export interface Block_342 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_343".
+ * via the `definition` "Block_343".
  */
 export interface Block_343 {
   field1?: string | null;
@@ -5193,7 +5244,7 @@ export interface Block_343 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_344".
+ * via the `definition` "Block_344".
  */
 export interface Block_344 {
   field1?: string | null;
@@ -5206,7 +5257,7 @@ export interface Block_344 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_345".
+ * via the `definition` "Block_345".
  */
 export interface Block_345 {
   field1?: string | null;
@@ -5219,7 +5270,7 @@ export interface Block_345 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_346".
+ * via the `definition` "Block_346".
  */
 export interface Block_346 {
   field1?: string | null;
@@ -5232,7 +5283,7 @@ export interface Block_346 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_347".
+ * via the `definition` "Block_347".
  */
 export interface Block_347 {
   field1?: string | null;
@@ -5245,7 +5296,7 @@ export interface Block_347 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_348".
+ * via the `definition` "Block_348".
  */
 export interface Block_348 {
   field1?: string | null;
@@ -5258,7 +5309,7 @@ export interface Block_348 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_349".
+ * via the `definition` "Block_349".
  */
 export interface Block_349 {
   field1?: string | null;
@@ -5271,7 +5322,7 @@ export interface Block_349 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_350".
+ * via the `definition` "Block_350".
  */
 export interface Block_350 {
   field1?: string | null;
@@ -5284,7 +5335,7 @@ export interface Block_350 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_351".
+ * via the `definition` "Block_351".
  */
 export interface Block_351 {
   field1?: string | null;
@@ -5297,7 +5348,7 @@ export interface Block_351 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_352".
+ * via the `definition` "Block_352".
  */
 export interface Block_352 {
   field1?: string | null;
@@ -5310,7 +5361,7 @@ export interface Block_352 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_353".
+ * via the `definition` "Block_353".
  */
 export interface Block_353 {
   field1?: string | null;
@@ -5323,7 +5374,7 @@ export interface Block_353 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_354".
+ * via the `definition` "Block_354".
  */
 export interface Block_354 {
   field1?: string | null;
@@ -5336,7 +5387,7 @@ export interface Block_354 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_355".
+ * via the `definition` "Block_355".
  */
 export interface Block_355 {
   field1?: string | null;
@@ -5349,7 +5400,7 @@ export interface Block_355 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_356".
+ * via the `definition` "Block_356".
  */
 export interface Block_356 {
   field1?: string | null;
@@ -5362,7 +5413,7 @@ export interface Block_356 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_357".
+ * via the `definition` "Block_357".
  */
 export interface Block_357 {
   field1?: string | null;
@@ -5375,7 +5426,7 @@ export interface Block_357 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_358".
+ * via the `definition` "Block_358".
  */
 export interface Block_358 {
   field1?: string | null;
@@ -5388,7 +5439,7 @@ export interface Block_358 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_359".
+ * via the `definition` "Block_359".
  */
 export interface Block_359 {
   field1?: string | null;
@@ -5401,7 +5452,7 @@ export interface Block_359 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_360".
+ * via the `definition` "Block_360".
  */
 export interface Block_360 {
   field1?: string | null;
@@ -5414,7 +5465,7 @@ export interface Block_360 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_361".
+ * via the `definition` "Block_361".
  */
 export interface Block_361 {
   field1?: string | null;
@@ -5427,7 +5478,7 @@ export interface Block_361 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_362".
+ * via the `definition` "Block_362".
  */
 export interface Block_362 {
   field1?: string | null;
@@ -5440,7 +5491,7 @@ export interface Block_362 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_363".
+ * via the `definition` "Block_363".
  */
 export interface Block_363 {
   field1?: string | null;
@@ -5453,7 +5504,7 @@ export interface Block_363 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_364".
+ * via the `definition` "Block_364".
  */
 export interface Block_364 {
   field1?: string | null;
@@ -5466,7 +5517,7 @@ export interface Block_364 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_365".
+ * via the `definition` "Block_365".
  */
 export interface Block_365 {
   field1?: string | null;
@@ -5479,7 +5530,7 @@ export interface Block_365 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_366".
+ * via the `definition` "Block_366".
  */
 export interface Block_366 {
   field1?: string | null;
@@ -5492,7 +5543,7 @@ export interface Block_366 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_367".
+ * via the `definition` "Block_367".
  */
 export interface Block_367 {
   field1?: string | null;
@@ -5505,7 +5556,7 @@ export interface Block_367 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_368".
+ * via the `definition` "Block_368".
  */
 export interface Block_368 {
   field1?: string | null;
@@ -5518,7 +5569,7 @@ export interface Block_368 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_369".
+ * via the `definition` "Block_369".
  */
 export interface Block_369 {
   field1?: string | null;
@@ -5531,7 +5582,7 @@ export interface Block_369 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_370".
+ * via the `definition` "Block_370".
  */
 export interface Block_370 {
   field1?: string | null;
@@ -5544,7 +5595,7 @@ export interface Block_370 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_371".
+ * via the `definition` "Block_371".
  */
 export interface Block_371 {
   field1?: string | null;
@@ -5557,7 +5608,7 @@ export interface Block_371 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_372".
+ * via the `definition` "Block_372".
  */
 export interface Block_372 {
   field1?: string | null;
@@ -5570,7 +5621,7 @@ export interface Block_372 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_373".
+ * via the `definition` "Block_373".
  */
 export interface Block_373 {
   field1?: string | null;
@@ -5583,7 +5634,7 @@ export interface Block_373 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_374".
+ * via the `definition` "Block_374".
  */
 export interface Block_374 {
   field1?: string | null;
@@ -5596,7 +5647,7 @@ export interface Block_374 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_375".
+ * via the `definition` "Block_375".
  */
 export interface Block_375 {
   field1?: string | null;
@@ -5609,7 +5660,7 @@ export interface Block_375 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_376".
+ * via the `definition` "Block_376".
  */
 export interface Block_376 {
   field1?: string | null;
@@ -5622,7 +5673,7 @@ export interface Block_376 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_377".
+ * via the `definition` "Block_377".
  */
 export interface Block_377 {
   field1?: string | null;
@@ -5635,7 +5686,7 @@ export interface Block_377 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_378".
+ * via the `definition` "Block_378".
  */
 export interface Block_378 {
   field1?: string | null;
@@ -5648,7 +5699,7 @@ export interface Block_378 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_379".
+ * via the `definition` "Block_379".
  */
 export interface Block_379 {
   field1?: string | null;
@@ -5661,7 +5712,7 @@ export interface Block_379 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_380".
+ * via the `definition` "Block_380".
  */
 export interface Block_380 {
   field1?: string | null;
@@ -5674,7 +5725,7 @@ export interface Block_380 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_381".
+ * via the `definition` "Block_381".
  */
 export interface Block_381 {
   field1?: string | null;
@@ -5687,7 +5738,7 @@ export interface Block_381 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_382".
+ * via the `definition` "Block_382".
  */
 export interface Block_382 {
   field1?: string | null;
@@ -5700,7 +5751,7 @@ export interface Block_382 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_383".
+ * via the `definition` "Block_383".
  */
 export interface Block_383 {
   field1?: string | null;
@@ -5713,7 +5764,7 @@ export interface Block_383 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_384".
+ * via the `definition` "Block_384".
  */
 export interface Block_384 {
   field1?: string | null;
@@ -5726,7 +5777,7 @@ export interface Block_384 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_385".
+ * via the `definition` "Block_385".
  */
 export interface Block_385 {
   field1?: string | null;
@@ -5739,7 +5790,7 @@ export interface Block_385 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_386".
+ * via the `definition` "Block_386".
  */
 export interface Block_386 {
   field1?: string | null;
@@ -5752,7 +5803,7 @@ export interface Block_386 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_387".
+ * via the `definition` "Block_387".
  */
 export interface Block_387 {
   field1?: string | null;
@@ -5765,7 +5816,7 @@ export interface Block_387 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_388".
+ * via the `definition` "Block_388".
  */
 export interface Block_388 {
   field1?: string | null;
@@ -5778,7 +5829,7 @@ export interface Block_388 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_389".
+ * via the `definition` "Block_389".
  */
 export interface Block_389 {
   field1?: string | null;
@@ -5791,7 +5842,7 @@ export interface Block_389 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_390".
+ * via the `definition` "Block_390".
  */
 export interface Block_390 {
   field1?: string | null;
@@ -5804,7 +5855,7 @@ export interface Block_390 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_391".
+ * via the `definition` "Block_391".
  */
 export interface Block_391 {
   field1?: string | null;
@@ -5817,7 +5868,7 @@ export interface Block_391 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_392".
+ * via the `definition` "Block_392".
  */
 export interface Block_392 {
   field1?: string | null;
@@ -5830,7 +5881,7 @@ export interface Block_392 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_393".
+ * via the `definition` "Block_393".
  */
 export interface Block_393 {
   field1?: string | null;
@@ -5843,7 +5894,7 @@ export interface Block_393 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_394".
+ * via the `definition` "Block_394".
  */
 export interface Block_394 {
   field1?: string | null;
@@ -5856,7 +5907,7 @@ export interface Block_394 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_395".
+ * via the `definition` "Block_395".
  */
 export interface Block_395 {
   field1?: string | null;
@@ -5869,7 +5920,7 @@ export interface Block_395 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_396".
+ * via the `definition` "Block_396".
  */
 export interface Block_396 {
   field1?: string | null;
@@ -5882,7 +5933,7 @@ export interface Block_396 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_397".
+ * via the `definition` "Block_397".
  */
 export interface Block_397 {
   field1?: string | null;
@@ -5895,7 +5946,7 @@ export interface Block_397 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_398".
+ * via the `definition` "Block_398".
  */
 export interface Block_398 {
   field1?: string | null;
@@ -5908,7 +5959,7 @@ export interface Block_398 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_399".
+ * via the `definition` "Block_399".
  */
 export interface Block_399 {
   field1?: string | null;
@@ -5921,7 +5972,7 @@ export interface Block_399 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_400".
+ * via the `definition` "Block_400".
  */
 export interface Block_400 {
   field1?: string | null;
@@ -5934,7 +5985,7 @@ export interface Block_400 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_401".
+ * via the `definition` "Block_401".
  */
 export interface Block_401 {
   field1?: string | null;
@@ -5947,7 +5998,7 @@ export interface Block_401 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_402".
+ * via the `definition` "Block_402".
  */
 export interface Block_402 {
   field1?: string | null;
@@ -5960,7 +6011,7 @@ export interface Block_402 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_403".
+ * via the `definition` "Block_403".
  */
 export interface Block_403 {
   field1?: string | null;
@@ -5973,7 +6024,7 @@ export interface Block_403 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_404".
+ * via the `definition` "Block_404".
  */
 export interface Block_404 {
   field1?: string | null;
@@ -5986,7 +6037,7 @@ export interface Block_404 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_405".
+ * via the `definition` "Block_405".
  */
 export interface Block_405 {
   field1?: string | null;
@@ -5999,7 +6050,7 @@ export interface Block_405 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_406".
+ * via the `definition` "Block_406".
  */
 export interface Block_406 {
   field1?: string | null;
@@ -6012,7 +6063,7 @@ export interface Block_406 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_407".
+ * via the `definition` "Block_407".
  */
 export interface Block_407 {
   field1?: string | null;
@@ -6025,7 +6076,7 @@ export interface Block_407 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_408".
+ * via the `definition` "Block_408".
  */
 export interface Block_408 {
   field1?: string | null;
@@ -6038,7 +6089,7 @@ export interface Block_408 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_409".
+ * via the `definition` "Block_409".
  */
 export interface Block_409 {
   field1?: string | null;
@@ -6051,7 +6102,7 @@ export interface Block_409 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_410".
+ * via the `definition` "Block_410".
  */
 export interface Block_410 {
   field1?: string | null;
@@ -6064,7 +6115,7 @@ export interface Block_410 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_411".
+ * via the `definition` "Block_411".
  */
 export interface Block_411 {
   field1?: string | null;
@@ -6077,7 +6128,7 @@ export interface Block_411 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_412".
+ * via the `definition` "Block_412".
  */
 export interface Block_412 {
   field1?: string | null;
@@ -6090,7 +6141,7 @@ export interface Block_412 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_413".
+ * via the `definition` "Block_413".
  */
 export interface Block_413 {
   field1?: string | null;
@@ -6103,7 +6154,7 @@ export interface Block_413 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_414".
+ * via the `definition` "Block_414".
  */
 export interface Block_414 {
   field1?: string | null;
@@ -6116,7 +6167,7 @@ export interface Block_414 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_415".
+ * via the `definition` "Block_415".
  */
 export interface Block_415 {
   field1?: string | null;
@@ -6129,7 +6180,7 @@ export interface Block_415 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_416".
+ * via the `definition` "Block_416".
  */
 export interface Block_416 {
   field1?: string | null;
@@ -6142,7 +6193,7 @@ export interface Block_416 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_417".
+ * via the `definition` "Block_417".
  */
 export interface Block_417 {
   field1?: string | null;
@@ -6155,7 +6206,7 @@ export interface Block_417 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_418".
+ * via the `definition` "Block_418".
  */
 export interface Block_418 {
   field1?: string | null;
@@ -6168,7 +6219,7 @@ export interface Block_418 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_419".
+ * via the `definition` "Block_419".
  */
 export interface Block_419 {
   field1?: string | null;
@@ -6181,7 +6232,7 @@ export interface Block_419 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_420".
+ * via the `definition` "Block_420".
  */
 export interface Block_420 {
   field1?: string | null;
@@ -6194,7 +6245,7 @@ export interface Block_420 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_421".
+ * via the `definition` "Block_421".
  */
 export interface Block_421 {
   field1?: string | null;
@@ -6207,7 +6258,7 @@ export interface Block_421 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_422".
+ * via the `definition` "Block_422".
  */
 export interface Block_422 {
   field1?: string | null;
@@ -6220,7 +6271,7 @@ export interface Block_422 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_423".
+ * via the `definition` "Block_423".
  */
 export interface Block_423 {
   field1?: string | null;
@@ -6233,7 +6284,7 @@ export interface Block_423 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_424".
+ * via the `definition` "Block_424".
  */
 export interface Block_424 {
   field1?: string | null;
@@ -6246,7 +6297,7 @@ export interface Block_424 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_425".
+ * via the `definition` "Block_425".
  */
 export interface Block_425 {
   field1?: string | null;
@@ -6259,7 +6310,7 @@ export interface Block_425 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_426".
+ * via the `definition` "Block_426".
  */
 export interface Block_426 {
   field1?: string | null;
@@ -6272,7 +6323,7 @@ export interface Block_426 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_427".
+ * via the `definition` "Block_427".
  */
 export interface Block_427 {
   field1?: string | null;
@@ -6285,7 +6336,7 @@ export interface Block_427 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_428".
+ * via the `definition` "Block_428".
  */
 export interface Block_428 {
   field1?: string | null;
@@ -6298,7 +6349,7 @@ export interface Block_428 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_429".
+ * via the `definition` "Block_429".
  */
 export interface Block_429 {
   field1?: string | null;
@@ -6311,7 +6362,7 @@ export interface Block_429 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_430".
+ * via the `definition` "Block_430".
  */
 export interface Block_430 {
   field1?: string | null;
@@ -6324,7 +6375,7 @@ export interface Block_430 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_431".
+ * via the `definition` "Block_431".
  */
 export interface Block_431 {
   field1?: string | null;
@@ -6337,7 +6388,7 @@ export interface Block_431 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_432".
+ * via the `definition` "Block_432".
  */
 export interface Block_432 {
   field1?: string | null;
@@ -6350,7 +6401,7 @@ export interface Block_432 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_433".
+ * via the `definition` "Block_433".
  */
 export interface Block_433 {
   field1?: string | null;
@@ -6363,7 +6414,7 @@ export interface Block_433 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_434".
+ * via the `definition` "Block_434".
  */
 export interface Block_434 {
   field1?: string | null;
@@ -6376,7 +6427,7 @@ export interface Block_434 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_435".
+ * via the `definition` "Block_435".
  */
 export interface Block_435 {
   field1?: string | null;
@@ -6389,7 +6440,7 @@ export interface Block_435 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_436".
+ * via the `definition` "Block_436".
  */
 export interface Block_436 {
   field1?: string | null;
@@ -6402,7 +6453,7 @@ export interface Block_436 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_437".
+ * via the `definition` "Block_437".
  */
 export interface Block_437 {
   field1?: string | null;
@@ -6415,7 +6466,7 @@ export interface Block_437 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_438".
+ * via the `definition` "Block_438".
  */
 export interface Block_438 {
   field1?: string | null;
@@ -6428,7 +6479,7 @@ export interface Block_438 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_439".
+ * via the `definition` "Block_439".
  */
 export interface Block_439 {
   field1?: string | null;
@@ -6441,7 +6492,7 @@ export interface Block_439 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_440".
+ * via the `definition` "Block_440".
  */
 export interface Block_440 {
   field1?: string | null;
@@ -6454,7 +6505,7 @@ export interface Block_440 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_441".
+ * via the `definition` "Block_441".
  */
 export interface Block_441 {
   field1?: string | null;
@@ -6467,7 +6518,7 @@ export interface Block_441 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_442".
+ * via the `definition` "Block_442".
  */
 export interface Block_442 {
   field1?: string | null;
@@ -6480,7 +6531,7 @@ export interface Block_442 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_443".
+ * via the `definition` "Block_443".
  */
 export interface Block_443 {
   field1?: string | null;
@@ -6493,7 +6544,7 @@ export interface Block_443 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_444".
+ * via the `definition` "Block_444".
  */
 export interface Block_444 {
   field1?: string | null;
@@ -6506,7 +6557,7 @@ export interface Block_444 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_445".
+ * via the `definition` "Block_445".
  */
 export interface Block_445 {
   field1?: string | null;
@@ -6519,7 +6570,7 @@ export interface Block_445 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_446".
+ * via the `definition` "Block_446".
  */
 export interface Block_446 {
   field1?: string | null;
@@ -6532,7 +6583,7 @@ export interface Block_446 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_447".
+ * via the `definition` "Block_447".
  */
 export interface Block_447 {
   field1?: string | null;
@@ -6545,7 +6596,7 @@ export interface Block_447 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_448".
+ * via the `definition` "Block_448".
  */
 export interface Block_448 {
   field1?: string | null;
@@ -6558,7 +6609,7 @@ export interface Block_448 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_449".
+ * via the `definition` "Block_449".
  */
 export interface Block_449 {
   field1?: string | null;
@@ -6571,7 +6622,7 @@ export interface Block_449 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_450".
+ * via the `definition` "Block_450".
  */
 export interface Block_450 {
   field1?: string | null;
@@ -6584,7 +6635,7 @@ export interface Block_450 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_451".
+ * via the `definition` "Block_451".
  */
 export interface Block_451 {
   field1?: string | null;
@@ -6597,7 +6648,7 @@ export interface Block_451 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_452".
+ * via the `definition` "Block_452".
  */
 export interface Block_452 {
   field1?: string | null;
@@ -6610,7 +6661,7 @@ export interface Block_452 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_453".
+ * via the `definition` "Block_453".
  */
 export interface Block_453 {
   field1?: string | null;
@@ -6623,7 +6674,7 @@ export interface Block_453 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_454".
+ * via the `definition` "Block_454".
  */
 export interface Block_454 {
   field1?: string | null;
@@ -6636,7 +6687,7 @@ export interface Block_454 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_455".
+ * via the `definition` "Block_455".
  */
 export interface Block_455 {
   field1?: string | null;
@@ -6649,7 +6700,7 @@ export interface Block_455 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_456".
+ * via the `definition` "Block_456".
  */
 export interface Block_456 {
   field1?: string | null;
@@ -6662,7 +6713,7 @@ export interface Block_456 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_457".
+ * via the `definition` "Block_457".
  */
 export interface Block_457 {
   field1?: string | null;
@@ -6675,7 +6726,7 @@ export interface Block_457 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_458".
+ * via the `definition` "Block_458".
  */
 export interface Block_458 {
   field1?: string | null;
@@ -6688,7 +6739,7 @@ export interface Block_458 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_459".
+ * via the `definition` "Block_459".
  */
 export interface Block_459 {
   field1?: string | null;
@@ -6701,7 +6752,7 @@ export interface Block_459 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_460".
+ * via the `definition` "Block_460".
  */
 export interface Block_460 {
   field1?: string | null;
@@ -6714,7 +6765,7 @@ export interface Block_460 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_461".
+ * via the `definition` "Block_461".
  */
 export interface Block_461 {
   field1?: string | null;
@@ -6727,7 +6778,7 @@ export interface Block_461 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_462".
+ * via the `definition` "Block_462".
  */
 export interface Block_462 {
   field1?: string | null;
@@ -6740,7 +6791,7 @@ export interface Block_462 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_463".
+ * via the `definition` "Block_463".
  */
 export interface Block_463 {
   field1?: string | null;
@@ -6753,7 +6804,7 @@ export interface Block_463 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_464".
+ * via the `definition` "Block_464".
  */
 export interface Block_464 {
   field1?: string | null;
@@ -6766,7 +6817,7 @@ export interface Block_464 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_465".
+ * via the `definition` "Block_465".
  */
 export interface Block_465 {
   field1?: string | null;
@@ -6779,7 +6830,7 @@ export interface Block_465 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_466".
+ * via the `definition` "Block_466".
  */
 export interface Block_466 {
   field1?: string | null;
@@ -6792,7 +6843,7 @@ export interface Block_466 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_467".
+ * via the `definition` "Block_467".
  */
 export interface Block_467 {
   field1?: string | null;
@@ -6805,7 +6856,7 @@ export interface Block_467 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_468".
+ * via the `definition` "Block_468".
  */
 export interface Block_468 {
   field1?: string | null;
@@ -6818,7 +6869,7 @@ export interface Block_468 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_469".
+ * via the `definition` "Block_469".
  */
 export interface Block_469 {
   field1?: string | null;
@@ -6831,7 +6882,7 @@ export interface Block_469 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_470".
+ * via the `definition` "Block_470".
  */
 export interface Block_470 {
   field1?: string | null;
@@ -6844,7 +6895,7 @@ export interface Block_470 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_471".
+ * via the `definition` "Block_471".
  */
 export interface Block_471 {
   field1?: string | null;
@@ -6857,7 +6908,7 @@ export interface Block_471 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_472".
+ * via the `definition` "Block_472".
  */
 export interface Block_472 {
   field1?: string | null;
@@ -6870,7 +6921,7 @@ export interface Block_472 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_473".
+ * via the `definition` "Block_473".
  */
 export interface Block_473 {
   field1?: string | null;
@@ -6883,7 +6934,7 @@ export interface Block_473 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_474".
+ * via the `definition` "Block_474".
  */
 export interface Block_474 {
   field1?: string | null;
@@ -6896,7 +6947,7 @@ export interface Block_474 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_475".
+ * via the `definition` "Block_475".
  */
 export interface Block_475 {
   field1?: string | null;
@@ -6909,7 +6960,7 @@ export interface Block_475 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_476".
+ * via the `definition` "Block_476".
  */
 export interface Block_476 {
   field1?: string | null;
@@ -6922,7 +6973,7 @@ export interface Block_476 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_477".
+ * via the `definition` "Block_477".
  */
 export interface Block_477 {
   field1?: string | null;
@@ -6935,7 +6986,7 @@ export interface Block_477 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_478".
+ * via the `definition` "Block_478".
  */
 export interface Block_478 {
   field1?: string | null;
@@ -6948,7 +6999,7 @@ export interface Block_478 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_479".
+ * via the `definition` "Block_479".
  */
 export interface Block_479 {
   field1?: string | null;
@@ -6961,7 +7012,7 @@ export interface Block_479 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_480".
+ * via the `definition` "Block_480".
  */
 export interface Block_480 {
   field1?: string | null;
@@ -6974,7 +7025,7 @@ export interface Block_480 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_481".
+ * via the `definition` "Block_481".
  */
 export interface Block_481 {
   field1?: string | null;
@@ -6987,7 +7038,7 @@ export interface Block_481 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_482".
+ * via the `definition` "Block_482".
  */
 export interface Block_482 {
   field1?: string | null;
@@ -7000,7 +7051,7 @@ export interface Block_482 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_483".
+ * via the `definition` "Block_483".
  */
 export interface Block_483 {
   field1?: string | null;
@@ -7013,7 +7064,7 @@ export interface Block_483 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_484".
+ * via the `definition` "Block_484".
  */
 export interface Block_484 {
   field1?: string | null;
@@ -7026,7 +7077,7 @@ export interface Block_484 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_485".
+ * via the `definition` "Block_485".
  */
 export interface Block_485 {
   field1?: string | null;
@@ -7039,7 +7090,7 @@ export interface Block_485 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_486".
+ * via the `definition` "Block_486".
  */
 export interface Block_486 {
   field1?: string | null;
@@ -7052,7 +7103,7 @@ export interface Block_486 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_487".
+ * via the `definition` "Block_487".
  */
 export interface Block_487 {
   field1?: string | null;
@@ -7065,7 +7116,7 @@ export interface Block_487 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_488".
+ * via the `definition` "Block_488".
  */
 export interface Block_488 {
   field1?: string | null;
@@ -7078,7 +7129,7 @@ export interface Block_488 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_489".
+ * via the `definition` "Block_489".
  */
 export interface Block_489 {
   field1?: string | null;
@@ -7091,7 +7142,7 @@ export interface Block_489 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_490".
+ * via the `definition` "Block_490".
  */
 export interface Block_490 {
   field1?: string | null;
@@ -7104,7 +7155,7 @@ export interface Block_490 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_491".
+ * via the `definition` "Block_491".
  */
 export interface Block_491 {
   field1?: string | null;
@@ -7117,7 +7168,7 @@ export interface Block_491 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_492".
+ * via the `definition` "Block_492".
  */
 export interface Block_492 {
   field1?: string | null;
@@ -7130,7 +7181,7 @@ export interface Block_492 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_493".
+ * via the `definition` "Block_493".
  */
 export interface Block_493 {
   field1?: string | null;
@@ -7143,7 +7194,7 @@ export interface Block_493 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_494".
+ * via the `definition` "Block_494".
  */
 export interface Block_494 {
   field1?: string | null;
@@ -7156,7 +7207,7 @@ export interface Block_494 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_495".
+ * via the `definition` "Block_495".
  */
 export interface Block_495 {
   field1?: string | null;
@@ -7169,7 +7220,7 @@ export interface Block_495 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_496".
+ * via the `definition` "Block_496".
  */
 export interface Block_496 {
   field1?: string | null;
@@ -7182,7 +7233,7 @@ export interface Block_496 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_497".
+ * via the `definition` "Block_497".
  */
 export interface Block_497 {
   field1?: string | null;
@@ -7195,7 +7246,7 @@ export interface Block_497 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_498".
+ * via the `definition` "Block_498".
  */
 export interface Block_498 {
   field1?: string | null;
@@ -7208,7 +7259,7 @@ export interface Block_498 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_499".
+ * via the `definition` "Block_499".
  */
 export interface Block_499 {
   field1?: string | null;
@@ -7221,7 +7272,7 @@ export interface Block_499 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_500".
+ * via the `definition` "Block_500".
  */
 export interface Block_500 {
   field1?: string | null;
@@ -7234,7 +7285,7 @@ export interface Block_500 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_501".
+ * via the `definition` "Block_501".
  */
 export interface Block_501 {
   field1?: string | null;
@@ -7247,7 +7298,7 @@ export interface Block_501 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_502".
+ * via the `definition` "Block_502".
  */
 export interface Block_502 {
   field1?: string | null;
@@ -7260,7 +7311,7 @@ export interface Block_502 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_503".
+ * via the `definition` "Block_503".
  */
 export interface Block_503 {
   field1?: string | null;
@@ -7273,7 +7324,7 @@ export interface Block_503 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_504".
+ * via the `definition` "Block_504".
  */
 export interface Block_504 {
   field1?: string | null;
@@ -7286,7 +7337,7 @@ export interface Block_504 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_505".
+ * via the `definition` "Block_505".
  */
 export interface Block_505 {
   field1?: string | null;
@@ -7299,7 +7350,7 @@ export interface Block_505 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_506".
+ * via the `definition` "Block_506".
  */
 export interface Block_506 {
   field1?: string | null;
@@ -7312,7 +7363,7 @@ export interface Block_506 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_507".
+ * via the `definition` "Block_507".
  */
 export interface Block_507 {
   field1?: string | null;
@@ -7325,7 +7376,7 @@ export interface Block_507 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_508".
+ * via the `definition` "Block_508".
  */
 export interface Block_508 {
   field1?: string | null;
@@ -7338,7 +7389,7 @@ export interface Block_508 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_509".
+ * via the `definition` "Block_509".
  */
 export interface Block_509 {
   field1?: string | null;
@@ -7351,7 +7402,7 @@ export interface Block_509 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_510".
+ * via the `definition` "Block_510".
  */
 export interface Block_510 {
   field1?: string | null;
@@ -7364,7 +7415,7 @@ export interface Block_510 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_511".
+ * via the `definition` "Block_511".
  */
 export interface Block_511 {
   field1?: string | null;
@@ -7377,7 +7428,7 @@ export interface Block_511 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_512".
+ * via the `definition` "Block_512".
  */
 export interface Block_512 {
   field1?: string | null;
@@ -7390,7 +7441,7 @@ export interface Block_512 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_513".
+ * via the `definition` "Block_513".
  */
 export interface Block_513 {
   field1?: string | null;
@@ -7403,7 +7454,7 @@ export interface Block_513 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_514".
+ * via the `definition` "Block_514".
  */
 export interface Block_514 {
   field1?: string | null;
@@ -7416,7 +7467,7 @@ export interface Block_514 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_515".
+ * via the `definition` "Block_515".
  */
 export interface Block_515 {
   field1?: string | null;
@@ -7429,7 +7480,7 @@ export interface Block_515 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_516".
+ * via the `definition` "Block_516".
  */
 export interface Block_516 {
   field1?: string | null;
@@ -7442,7 +7493,7 @@ export interface Block_516 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_517".
+ * via the `definition` "Block_517".
  */
 export interface Block_517 {
   field1?: string | null;
@@ -7455,7 +7506,7 @@ export interface Block_517 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_518".
+ * via the `definition` "Block_518".
  */
 export interface Block_518 {
   field1?: string | null;
@@ -7468,7 +7519,7 @@ export interface Block_518 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_519".
+ * via the `definition` "Block_519".
  */
 export interface Block_519 {
   field1?: string | null;
@@ -7481,7 +7532,7 @@ export interface Block_519 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_520".
+ * via the `definition` "Block_520".
  */
 export interface Block_520 {
   field1?: string | null;
@@ -7494,7 +7545,7 @@ export interface Block_520 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_521".
+ * via the `definition` "Block_521".
  */
 export interface Block_521 {
   field1?: string | null;
@@ -7507,7 +7558,7 @@ export interface Block_521 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_522".
+ * via the `definition` "Block_522".
  */
 export interface Block_522 {
   field1?: string | null;
@@ -7520,7 +7571,7 @@ export interface Block_522 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_523".
+ * via the `definition` "Block_523".
  */
 export interface Block_523 {
   field1?: string | null;
@@ -7533,7 +7584,7 @@ export interface Block_523 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_524".
+ * via the `definition` "Block_524".
  */
 export interface Block_524 {
   field1?: string | null;
@@ -7546,7 +7597,7 @@ export interface Block_524 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_525".
+ * via the `definition` "Block_525".
  */
 export interface Block_525 {
   field1?: string | null;
@@ -7559,7 +7610,7 @@ export interface Block_525 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_526".
+ * via the `definition` "Block_526".
  */
 export interface Block_526 {
   field1?: string | null;
@@ -7572,7 +7623,7 @@ export interface Block_526 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_527".
+ * via the `definition` "Block_527".
  */
 export interface Block_527 {
   field1?: string | null;
@@ -7585,7 +7636,7 @@ export interface Block_527 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_528".
+ * via the `definition` "Block_528".
  */
 export interface Block_528 {
   field1?: string | null;
@@ -7598,7 +7649,7 @@ export interface Block_528 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_529".
+ * via the `definition` "Block_529".
  */
 export interface Block_529 {
   field1?: string | null;
@@ -7611,7 +7662,7 @@ export interface Block_529 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_530".
+ * via the `definition` "Block_530".
  */
 export interface Block_530 {
   field1?: string | null;
@@ -7624,7 +7675,7 @@ export interface Block_530 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_531".
+ * via the `definition` "Block_531".
  */
 export interface Block_531 {
   field1?: string | null;
@@ -7637,7 +7688,7 @@ export interface Block_531 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_532".
+ * via the `definition` "Block_532".
  */
 export interface Block_532 {
   field1?: string | null;
@@ -7650,7 +7701,7 @@ export interface Block_532 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_533".
+ * via the `definition` "Block_533".
  */
 export interface Block_533 {
   field1?: string | null;
@@ -7663,7 +7714,7 @@ export interface Block_533 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_534".
+ * via the `definition` "Block_534".
  */
 export interface Block_534 {
   field1?: string | null;
@@ -7676,7 +7727,7 @@ export interface Block_534 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_535".
+ * via the `definition` "Block_535".
  */
 export interface Block_535 {
   field1?: string | null;
@@ -7689,7 +7740,7 @@ export interface Block_535 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_536".
+ * via the `definition` "Block_536".
  */
 export interface Block_536 {
   field1?: string | null;
@@ -7702,7 +7753,7 @@ export interface Block_536 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_537".
+ * via the `definition` "Block_537".
  */
 export interface Block_537 {
   field1?: string | null;
@@ -7715,7 +7766,7 @@ export interface Block_537 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_538".
+ * via the `definition` "Block_538".
  */
 export interface Block_538 {
   field1?: string | null;
@@ -7728,7 +7779,7 @@ export interface Block_538 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_539".
+ * via the `definition` "Block_539".
  */
 export interface Block_539 {
   field1?: string | null;
@@ -7741,7 +7792,7 @@ export interface Block_539 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_540".
+ * via the `definition` "Block_540".
  */
 export interface Block_540 {
   field1?: string | null;
@@ -7754,7 +7805,7 @@ export interface Block_540 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_541".
+ * via the `definition` "Block_541".
  */
 export interface Block_541 {
   field1?: string | null;
@@ -7767,7 +7818,7 @@ export interface Block_541 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_542".
+ * via the `definition` "Block_542".
  */
 export interface Block_542 {
   field1?: string | null;
@@ -7780,7 +7831,7 @@ export interface Block_542 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_543".
+ * via the `definition` "Block_543".
  */
 export interface Block_543 {
   field1?: string | null;
@@ -7793,7 +7844,7 @@ export interface Block_543 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_544".
+ * via the `definition` "Block_544".
  */
 export interface Block_544 {
   field1?: string | null;
@@ -7806,7 +7857,7 @@ export interface Block_544 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_545".
+ * via the `definition` "Block_545".
  */
 export interface Block_545 {
   field1?: string | null;
@@ -7819,7 +7870,7 @@ export interface Block_545 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_546".
+ * via the `definition` "Block_546".
  */
 export interface Block_546 {
   field1?: string | null;
@@ -7832,7 +7883,7 @@ export interface Block_546 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_547".
+ * via the `definition` "Block_547".
  */
 export interface Block_547 {
   field1?: string | null;
@@ -7845,7 +7896,7 @@ export interface Block_547 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_548".
+ * via the `definition` "Block_548".
  */
 export interface Block_548 {
   field1?: string | null;
@@ -7858,7 +7909,7 @@ export interface Block_548 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_549".
+ * via the `definition` "Block_549".
  */
 export interface Block_549 {
   field1?: string | null;
@@ -7871,7 +7922,7 @@ export interface Block_549 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_550".
+ * via the `definition` "Block_550".
  */
 export interface Block_550 {
   field1?: string | null;
@@ -7884,7 +7935,7 @@ export interface Block_550 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_551".
+ * via the `definition` "Block_551".
  */
 export interface Block_551 {
   field1?: string | null;
@@ -7897,7 +7948,7 @@ export interface Block_551 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_552".
+ * via the `definition` "Block_552".
  */
 export interface Block_552 {
   field1?: string | null;
@@ -7910,7 +7961,7 @@ export interface Block_552 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_553".
+ * via the `definition` "Block_553".
  */
 export interface Block_553 {
   field1?: string | null;
@@ -7923,7 +7974,7 @@ export interface Block_553 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_554".
+ * via the `definition` "Block_554".
  */
 export interface Block_554 {
   field1?: string | null;
@@ -7936,7 +7987,7 @@ export interface Block_554 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_555".
+ * via the `definition` "Block_555".
  */
 export interface Block_555 {
   field1?: string | null;
@@ -7949,7 +8000,7 @@ export interface Block_555 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_556".
+ * via the `definition` "Block_556".
  */
 export interface Block_556 {
   field1?: string | null;
@@ -7962,7 +8013,7 @@ export interface Block_556 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_557".
+ * via the `definition` "Block_557".
  */
 export interface Block_557 {
   field1?: string | null;
@@ -7975,7 +8026,7 @@ export interface Block_557 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_558".
+ * via the `definition` "Block_558".
  */
 export interface Block_558 {
   field1?: string | null;
@@ -7988,7 +8039,7 @@ export interface Block_558 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_559".
+ * via the `definition` "Block_559".
  */
 export interface Block_559 {
   field1?: string | null;
@@ -8001,7 +8052,7 @@ export interface Block_559 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_560".
+ * via the `definition` "Block_560".
  */
 export interface Block_560 {
   field1?: string | null;
@@ -8014,7 +8065,7 @@ export interface Block_560 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_561".
+ * via the `definition` "Block_561".
  */
 export interface Block_561 {
   field1?: string | null;
@@ -8027,7 +8078,7 @@ export interface Block_561 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_562".
+ * via the `definition` "Block_562".
  */
 export interface Block_562 {
   field1?: string | null;
@@ -8040,7 +8091,7 @@ export interface Block_562 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_563".
+ * via the `definition` "Block_563".
  */
 export interface Block_563 {
   field1?: string | null;
@@ -8053,7 +8104,7 @@ export interface Block_563 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_564".
+ * via the `definition` "Block_564".
  */
 export interface Block_564 {
   field1?: string | null;
@@ -8066,7 +8117,7 @@ export interface Block_564 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_565".
+ * via the `definition` "Block_565".
  */
 export interface Block_565 {
   field1?: string | null;
@@ -8079,7 +8130,7 @@ export interface Block_565 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_566".
+ * via the `definition` "Block_566".
  */
 export interface Block_566 {
   field1?: string | null;
@@ -8092,7 +8143,7 @@ export interface Block_566 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_567".
+ * via the `definition` "Block_567".
  */
 export interface Block_567 {
   field1?: string | null;
@@ -8105,7 +8156,7 @@ export interface Block_567 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_568".
+ * via the `definition` "Block_568".
  */
 export interface Block_568 {
   field1?: string | null;
@@ -8118,7 +8169,7 @@ export interface Block_568 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_569".
+ * via the `definition` "Block_569".
  */
 export interface Block_569 {
   field1?: string | null;
@@ -8131,7 +8182,7 @@ export interface Block_569 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_570".
+ * via the `definition` "Block_570".
  */
 export interface Block_570 {
   field1?: string | null;
@@ -8144,7 +8195,7 @@ export interface Block_570 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_571".
+ * via the `definition` "Block_571".
  */
 export interface Block_571 {
   field1?: string | null;
@@ -8157,7 +8208,7 @@ export interface Block_571 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_572".
+ * via the `definition` "Block_572".
  */
 export interface Block_572 {
   field1?: string | null;
@@ -8170,7 +8221,7 @@ export interface Block_572 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_573".
+ * via the `definition` "Block_573".
  */
 export interface Block_573 {
   field1?: string | null;
@@ -8183,7 +8234,7 @@ export interface Block_573 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_574".
+ * via the `definition` "Block_574".
  */
 export interface Block_574 {
   field1?: string | null;
@@ -8196,7 +8247,7 @@ export interface Block_574 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_575".
+ * via the `definition` "Block_575".
  */
 export interface Block_575 {
   field1?: string | null;
@@ -8209,7 +8260,7 @@ export interface Block_575 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_576".
+ * via the `definition` "Block_576".
  */
 export interface Block_576 {
   field1?: string | null;
@@ -8222,7 +8273,7 @@ export interface Block_576 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_577".
+ * via the `definition` "Block_577".
  */
 export interface Block_577 {
   field1?: string | null;
@@ -8235,7 +8286,7 @@ export interface Block_577 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_578".
+ * via the `definition` "Block_578".
  */
 export interface Block_578 {
   field1?: string | null;
@@ -8248,7 +8299,7 @@ export interface Block_578 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_579".
+ * via the `definition` "Block_579".
  */
 export interface Block_579 {
   field1?: string | null;
@@ -8261,7 +8312,7 @@ export interface Block_579 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_580".
+ * via the `definition` "Block_580".
  */
 export interface Block_580 {
   field1?: string | null;
@@ -8274,7 +8325,7 @@ export interface Block_580 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_581".
+ * via the `definition` "Block_581".
  */
 export interface Block_581 {
   field1?: string | null;
@@ -8287,7 +8338,7 @@ export interface Block_581 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_582".
+ * via the `definition` "Block_582".
  */
 export interface Block_582 {
   field1?: string | null;
@@ -8300,7 +8351,7 @@ export interface Block_582 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_583".
+ * via the `definition` "Block_583".
  */
 export interface Block_583 {
   field1?: string | null;
@@ -8313,7 +8364,7 @@ export interface Block_583 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_584".
+ * via the `definition` "Block_584".
  */
 export interface Block_584 {
   field1?: string | null;
@@ -8326,7 +8377,7 @@ export interface Block_584 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_585".
+ * via the `definition` "Block_585".
  */
 export interface Block_585 {
   field1?: string | null;
@@ -8339,7 +8390,7 @@ export interface Block_585 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_586".
+ * via the `definition` "Block_586".
  */
 export interface Block_586 {
   field1?: string | null;
@@ -8352,7 +8403,7 @@ export interface Block_586 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_587".
+ * via the `definition` "Block_587".
  */
 export interface Block_587 {
   field1?: string | null;
@@ -8365,7 +8416,7 @@ export interface Block_587 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_588".
+ * via the `definition` "Block_588".
  */
 export interface Block_588 {
   field1?: string | null;
@@ -8378,7 +8429,7 @@ export interface Block_588 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_589".
+ * via the `definition` "Block_589".
  */
 export interface Block_589 {
   field1?: string | null;
@@ -8391,7 +8442,7 @@ export interface Block_589 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_590".
+ * via the `definition` "Block_590".
  */
 export interface Block_590 {
   field1?: string | null;
@@ -8404,7 +8455,7 @@ export interface Block_590 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_591".
+ * via the `definition` "Block_591".
  */
 export interface Block_591 {
   field1?: string | null;
@@ -8417,7 +8468,7 @@ export interface Block_591 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_592".
+ * via the `definition` "Block_592".
  */
 export interface Block_592 {
   field1?: string | null;
@@ -8430,7 +8481,7 @@ export interface Block_592 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_593".
+ * via the `definition` "Block_593".
  */
 export interface Block_593 {
   field1?: string | null;
@@ -8443,7 +8494,7 @@ export interface Block_593 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_594".
+ * via the `definition` "Block_594".
  */
 export interface Block_594 {
   field1?: string | null;
@@ -8456,7 +8507,7 @@ export interface Block_594 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_595".
+ * via the `definition` "Block_595".
  */
 export interface Block_595 {
   field1?: string | null;
@@ -8469,7 +8520,7 @@ export interface Block_595 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_596".
+ * via the `definition` "Block_596".
  */
 export interface Block_596 {
   field1?: string | null;
@@ -8482,7 +8533,7 @@ export interface Block_596 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_597".
+ * via the `definition` "Block_597".
  */
 export interface Block_597 {
   field1?: string | null;
@@ -8495,7 +8546,7 @@ export interface Block_597 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_598".
+ * via the `definition` "Block_598".
  */
 export interface Block_598 {
   field1?: string | null;
@@ -8508,7 +8559,7 @@ export interface Block_598 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block_599".
+ * via the `definition` "Block_599".
  */
 export interface Block_599 {
   field1?: string | null;
@@ -8526,21 +8577,7 @@ export interface Block_599 {
 export interface Post {
   id: string;
   title?: string | null;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  content?: LexicalRichText<LexicalNodes_9626C4EE> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -35000,23 +35037,6 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -35041,6 +35061,66 @@ export interface User {
   collection: 'users';
 }
 /**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
+  /**
+   * Access for this API key — uncheck to revoke individual tools.
+   */
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
@@ -35062,12 +35142,21 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -35077,10 +35166,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -35777,14 +35871,6 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -35804,6 +35890,30 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  overrideAccess?: T;
+  access?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -35839,10 +35949,154 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 
