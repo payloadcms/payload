@@ -252,6 +252,6 @@
   }
 
   .drawer .document-fields__edit {
-    padding: var(--spacer-2-5);
+    padding: var(--spacer-4);
   }
 }

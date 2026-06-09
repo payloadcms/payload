@@ -6,8 +6,8 @@
     position: fixed;
     inset: 0;
 
-    --gutter-h: var(--spacer-2-5);
-    --gutter-v: var(--spacer-2-5);
+    --gutter-h: var(--spacer-4);
+    --gutter-v: var(--spacer-4);
   }
 
   /* Keep nested drawers visible so they peek out to the left. Out-specifies the
@@ -72,10 +72,10 @@
   .drawer__header {
     display: flex;
     align-items: center;
-    padding: var(--spacer-2-5);
+    padding: var(--spacer-2-5) var(--spacer-3) var(--spacer-2-5) var(--spacer-2);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     background: var(--color-bg);
-    gap: var(--spacer-2);
+    gap: var(--spacer-1);
   }
 
   .drawer__header__title {
@@ -86,11 +86,11 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     color: var(--color-text);
-    font-family: var(--text-body-large-strong-font-family);
-    font-size: var(--text-body-large-strong-font-size);
-    font-weight: var(--text-body-large-strong-font-weight);
-    line-height: var(--text-body-large-strong-line-height);
-    letter-spacing: var(--text-body-large-strong-letter-spacing);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-strong-letter-spacing);
   }
 
   .drawer__header__close {

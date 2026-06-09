@@ -3,20 +3,88 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+  }
+
+  .doc-drawer__header-bar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
     gap: var(--spacer-2);
-    border-bottom: 1px solid var(--color-border);
-    padding: var(--spacer-2-5);
+    width: 100%;
+    padding: var(--spacer-2-5) var(--spacer-3) var(--spacer-2-5) var(--spacer-2);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    background: var(--color-bg);
   }
 
   .doc-drawer__header-content {
     display: flex;
     align-items: center;
-    gap: var(--spacer-2);
-    width: 100%;
+    gap: var(--spacer-1);
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .doc-drawer__header-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
   }
 
   .doc-drawer__header-text {
     margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--color-text);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-strong-letter-spacing);
+  }
+
+  .doc-drawer__title-bar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    padding: var(--spacer-3) var(--gutter-h);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .doc-drawer__title {
+    margin: 0;
+    color: var(--color-text);
+    font-family: var(--text-heading-medium-font-family);
+    font-size: var(--text-heading-medium-font-size);
+    font-weight: var(--text-heading-medium-font-weight);
+    line-height: var(--text-heading-medium-line-height);
+    letter-spacing: var(--text-heading-medium-letter-spacing);
+  }
+
+  .doc-drawer__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacer-2);
+  }
+
+  .doc-drawer__before-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    flex-shrink: 0;
+  }
+
+  .doc-drawer__updated-at {
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
   }
 
   .doc-drawer__header-toggler {
