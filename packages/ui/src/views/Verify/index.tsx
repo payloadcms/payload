@@ -5,8 +5,8 @@ import React from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
-import { ToastAndRedirect } from '../../exports/client/index.js'
-import './index.scss'
+import { VerifyClient } from '../../exports/client/index.js'
+import './index.css'
 
 export const verifyBaseClass = 'verify'
 
@@ -25,10 +25,8 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
 
   const {
     routes: { admin: adminRoute },
-    serverURL,
   } = config
 
-  let textToRender
   let isVerified = false
 
   try {
@@ -38,19 +36,11 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
     })
 
     isVerified = true
-    textToRender = req.t('authentication:emailVerified')
-  } catch (e) {
-    textToRender = req.t('authentication:unableToVerify')
+  } catch {
+    // Verification failed - isVerified stays false
   }
 
-  if (isVerified) {
-    return (
-      <ToastAndRedirect
-        message={req.t('authentication:emailVerified')}
-        redirectTo={formatAdminURL({ adminRoute, path: '/login' })}
-      />
-    )
-  }
+  const loginRoute = formatAdminURL({ adminRoute, path: '/login' })
 
   return (
     <React.Fragment>
@@ -66,7 +56,11 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
           user={user}
         />
       </div>
-      <h2>{textToRender}</h2>
+      {isVerified ? (
+        <VerifyClient loginRoute={loginRoute} />
+      ) : (
+        <h2>{req.t('authentication:unableToVerify')}</h2>
+      )}
     </React.Fragment>
   )
 }
