@@ -181,10 +181,7 @@ describe('Field Error States', () => {
       await page.goto(prevValueRelation.create)
       await waitForFormReady(page)
       await page.locator('#field-previousValueRelation .react-select').click()
-      await page
-        .locator('#field-previousValueRelation .rs__option', { hasText: 'original value 2' })
-        .last()
-        .click()
+      await page.locator('.rs__option', { hasText: 'original value 2' }).last().click()
       await saveDocAndAssert(page)
 
       // go back to doc
