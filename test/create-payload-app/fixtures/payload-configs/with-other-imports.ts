@@ -7,6 +7,7 @@ import { buildConfig } from 'payload'
 const Users: CollectionConfig = {
   slug: 'users',
   fields: [],
+  versions: false,
 }
 
 export default buildConfig({

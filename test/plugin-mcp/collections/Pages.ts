@@ -42,4 +42,5 @@ export const Pages: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

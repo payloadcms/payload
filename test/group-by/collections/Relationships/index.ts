@@ -39,4 +39,5 @@ export const RelationshipsCollection: CollectionConfig = {
       hasMany: true,
     },
   ],
+  versions: false,
 }

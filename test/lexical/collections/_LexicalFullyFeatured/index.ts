@@ -126,4 +126,5 @@ export const LexicalFullyFeatured: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

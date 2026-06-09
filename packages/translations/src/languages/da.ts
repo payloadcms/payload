@@ -494,6 +494,7 @@ export const daTranslations: DefaultTranslationsObject = {
     viewing: 'Visning',
     viewReadOnly: 'Vis kun-læsning',
     welcome: 'Velkommen',
+    where: 'Hvor',
     yes: 'Ja',
   },
   hierarchy: {

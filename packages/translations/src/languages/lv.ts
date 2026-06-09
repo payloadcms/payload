@@ -494,6 +494,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     viewing: 'Skatīšanās',
     viewReadOnly: 'Skatīt tikai lasāmu',
     welcome: 'Laipni lūdzam',
+    where: 'Kur',
     yes: 'Jā',
   },
   hierarchy: {

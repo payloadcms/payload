@@ -130,4 +130,5 @@ export const MenuItems: CollectionConfig = {
       relationTo: foldersSlug,
     }),
   ],
+  versions: false,
 }

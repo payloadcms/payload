@@ -423,6 +423,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:uploading',
   'general:uploadingBulk',
   'general:welcome',
+  'general:where',
 
   'localization:localeToPublish',
   'localization:copyToLocale',

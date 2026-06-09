@@ -20,4 +20,5 @@ export const ConditionsCollection: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }

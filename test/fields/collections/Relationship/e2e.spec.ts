@@ -613,9 +613,7 @@ describe('relationship', () => {
       await openDocControls(drawer1Content, page)
       await page.locator('.popup__content #action-delete').click()
 
-      await page
-        .locator('[id^=delete-].payload__modal-item.alert-modal[open] button#confirm-action')
-        .click()
+      await page.locator('[id^=delete-].payload__modal-item[open] button[id$="-confirm"]').click()
 
       await expect(drawer1Content).toBeHidden()
 
@@ -803,9 +801,7 @@ describe('relationship', () => {
     await openListFilters(page, {})
     const whereBuilder = page.locator('.where-builder')
 
-    // Add first filter
-    await whereBuilder.locator('.where-builder__add-first-filter').click()
-    const condition = whereBuilder.locator('.where-builder__or-filters > li').last()
+    const condition = whereBuilder.locator('.condition').last()
 
     // Select relationship field
     await selectInput({

@@ -474,6 +474,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     viewing: '查看',
     viewReadOnly: '只读查看',
     welcome: '欢迎',
+    where: '在哪里',
     yes: '是的',
   },
   hierarchy: {
