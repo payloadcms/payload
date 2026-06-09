@@ -308,6 +308,9 @@ export const updateOperation = async <
         }
       }
     }
+
+    const dataToUpdate: JsonObject = { ...(localizedPublishData ?? result) }
+
     // /////////////////////////////////////
     // Update
     // /////////////////////////////////////
@@ -322,32 +325,42 @@ export const updateOperation = async <
       }),
     })
 
-    const dataForGlobalDoc = localizedPublishData ?? result
+    let resultWithLocales: JsonObject = result
 
     if (!isSavingDraft) {
       const now = new Date().toISOString()
       // Ensure global has createdAt
-      if (!dataForGlobalDoc.createdAt) {
-        dataForGlobalDoc.createdAt = now
+      if (!dataToUpdate.createdAt) {
+        dataToUpdate.createdAt = now
       }
 
       // Ensure updatedAt date is always updated
-      dataForGlobalDoc.updatedAt = now
-      result.updatedAt = now
+      dataToUpdate.updatedAt = now
 
       if (globalExists) {
-        await payload.db.updateGlobal({
+        resultWithLocales = await payload.db.updateGlobal({
           slug,
-          data: dataForGlobalDoc,
+          data: dataToUpdate,
           req,
           select,
         })
       } else {
-        await payload.db.createGlobal({
+        resultWithLocales = await payload.db.createGlobal({
           slug,
-          data: dataForGlobalDoc,
+          data: dataToUpdate,
           req,
         })
+      }
+
+      resultWithLocales.updatedAt = now
+
+      if (localizedPublishData) {
+        // Keep full locale payload for version writes during single-locale publish.
+        resultWithLocales = {
+          ...result,
+          createdAt: resultWithLocales.createdAt ?? result.createdAt ?? now,
+          updatedAt: now,
+        }
       }
     }
 
@@ -355,10 +368,10 @@ export const updateOperation = async <
     // Create version
     // /////////////////////////////////////
     if (globalConfig.versions) {
-      const { globalType } = result
-      result = await saveVersion({
+      const { globalType } = resultWithLocales
+      resultWithLocales = await saveVersion({
         autosave,
-        docWithLocales: result,
+        docWithLocales: resultWithLocales,
         draft: isSavingDraft,
         global: globalConfig,
         operation: 'update',
@@ -368,8 +381,8 @@ export const updateOperation = async <
         unpublish: unpublishAllLocales,
       })
 
-      result = {
-        ...result,
+      resultWithLocales = {
+        ...resultWithLocales,
         globalType,
       }
     }
@@ -377,13 +390,13 @@ export const updateOperation = async <
     // /////////////////////////////////////
     // Execute globalType field if not selected
     // /////////////////////////////////////
-    if (select && result.globalType) {
+    if (select && resultWithLocales.globalType) {
       const selectMode = getSelectMode(select)
       if (
         (selectMode === 'include' && !select['globalType']) ||
         (selectMode === 'exclude' && select['globalType'] === false)
       ) {
-        delete result['globalType']
+        delete resultWithLocales['globalType']
       }
     }
 
@@ -395,7 +408,7 @@ export const updateOperation = async <
       collection: null,
       context: req.context,
       depth: depth!,
-      doc: result,
+      doc: resultWithLocales,
       draft: draftArg!,
       fallbackLocale: null,
       global: globalConfig,
