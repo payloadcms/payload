@@ -17,7 +17,6 @@
 }
 
 .user-menu__profile {
-  gap: var(--spacer-2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -45,4 +44,24 @@
   color: var(--theme-text-muted);
   margin: 0;
   text-align: center;
+}
+
+.user-menu__submenu-header-wrap {
+  padding: 0 var(--spacer-2);
+}
+
+.user-menu__submenu-header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-1);
+}
+
+.user-menu__submenu-title {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--text-body-medium-font-family);
+  font-size: var(--text-body-medium-font-size);
+  font-weight: var(--text-body-medium-font-weight);
+  line-height: var(--text-body-medium-line-height);
+  letter-spacing: var(--text-letter-spacing);
 }

@@ -8,10 +8,38 @@ import { Popup } from '../../Popup/index.js'
 
 type SettingsMenuProps = {
   items: React.ReactNode[]
+  onMobileOpen?: () => void
 }
 
-export const SettingsMenu: React.FC<SettingsMenuProps> = ({ items }) => {
+export const SettingsMenuContent: React.FC<{ items: React.ReactNode[] }> = ({ items }) => (
+  <>
+    {items.map((item, i) => (
+      <Fragment key={`settings-item-${i}`}>{item}</Fragment>
+    ))}
+  </>
+)
+
+export const SettingsMenu: React.FC<SettingsMenuProps> = ({ items, onMobileOpen }) => {
   const { t } = useTranslation()
+
+  if (onMobileOpen) {
+    return (
+      <button
+        className="popup-button-list__button popup-button-list__button--submenu-trigger"
+        data-popup-prevent-close
+        onClick={onMobileOpen}
+        type="button"
+      >
+        <span className="popup-button-list__submenu-icon">
+          <InteractionEnterIcon size={24} />
+        </span>
+        <span className="popup-button-list__label">{t('general:settings')}</span>
+        <span className="popup-button-list__chevron">
+          <ChevronIcon direction="right" size={24} />
+        </span>
+      </button>
+    )
+  }
 
   return (
     <Popup
@@ -40,11 +68,9 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ items }) => {
       )}
       side="left"
       size="large"
-      theme="auto"
+      theme="dark"
     >
-      {items.map((item, i) => (
-        <Fragment key={`settings-item-${i}`}>{item}</Fragment>
-      ))}
+      <SettingsMenuContent items={items} />
     </Popup>
   )
 }
