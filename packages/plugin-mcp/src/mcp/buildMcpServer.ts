@@ -8,6 +8,9 @@ import type {
   MCPToolResponse,
   SanitizedMCPPluginConfig,
 } from '../types.js'
+import type { RuntimeTool } from './runtimeTools.js'
+
+import { runtimeTools } from './runtimeTools.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
 import { getLogger } from '../utils/getLogger.js'
@@ -18,6 +21,9 @@ import {
 import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
 import { toStandardSchema } from '../utils/toStandardSchema.js'
 
+/** Live MCP registrations keyed by `<item.type>:<name>`, so items can be removed on reconcile. */
+export type ItemRegistry = Map<string, { remove: () => void }>
+
 /** `findPosts`, `updateSiteSettings` — auto-prefixed wire name for collection/global tools. */
 const wireName = (key: string, slug: string): string => {
   const camel = toCamelCase(slug)
@@ -25,14 +31,12 @@ const wireName = (key: string, slug: string): string => {
 }
 
 /**
- * Transport-agnostic core: registers every authorized MCP item onto a fresh
- * `McpServer` and returns it. The caller is responsible for picking a transport
- * (`WebStandardStreamableHTTPServerTransport`, `StdioServerTransport`, …) and
- * calling `server.connect(transport)`.
+ * Transport-agnostic core: builds a fresh `McpServer`, registers every authorized
+ * item, and returns it alongside the registry of registrations. The caller picks a
+ * transport and calls `server.connect(transport)`.
  *
  * `req` is the request context handlers see. For HTTP it's the live
- * `PayloadRequest` derived from the incoming HTTP request; for stdio it's a
- * synthesized one built via `createLocalReq`.
+ * `PayloadRequest` from the incoming request; for stdio it's built via `createLocalReq`.
  */
 export const buildMcpServer = ({
   authorizedMCP,
@@ -42,19 +46,116 @@ export const buildMcpServer = ({
   authorizedMCP: AuthorizedMCP
   pluginConfig: SanitizedMCPPluginConfig
   req: PayloadRequest
-}): McpServer => {
+}): { registry: ItemRegistry; server: McpServer } => {
   const serverOptions = pluginConfig.mcp?.serverOptions || {}
   const server = new McpServer(
     { name: 'Payload MCP Server', version: '1.0.0', ...serverOptions.serverInfo },
     serverOptions.options,
   )
 
+  const registry = registerItems({ authorizedMCP, req, server })
+  return { registry, server }
+}
+
+/**
+ * Run `mutate` while collapsing the per-tool `tools/list_changed` notifications
+ * the SDK emits on every `registerTool`/`remove` into a single notification at
+ * the end.
+ *
+ * Without this, reconciling N tools emits ~2N notifications (one per remove plus
+ * one per re-register). A connected client answers each one with a `tools/list`,
+ * so a full rebuild triggers a flood of re-list requests that overloads the dev
+ * server. Batching makes a rebuild behave like adding a single tool: one
+ * notification, one re-list.
+ */
+const withBatchedToolListChanged = (server: McpServer, mutate: () => void): void => {
+  const emitToolListChanged = server.sendToolListChanged
+  // Suppress the SDK's per-tool emits (incl. the internal ones fired from
+  // registerTool/remove) for the duration of the rebuild...
+  server.sendToolListChanged = () => {}
+  try {
+    mutate()
+  } finally {
+    server.sendToolListChanged = emitToolListChanged
+  }
+  // ...then notify the client exactly once.
+  server.sendToolListChanged()
+}
+
+/**
+ * Rebuild a live server's items after a config change (HMR) and notify the client
+ * to re-list. The rebuild is wrapped so the client receives a single
+ * `tools/list_changed` rather than one per tool — see {@link withBatchedToolListChanged}.
+ */
+export const reconcileItems = ({
+  authorizedMCP,
+  registry,
+  req,
+  server,
+}: {
+  authorizedMCP: AuthorizedMCP
+  registry: ItemRegistry
+  req: PayloadRequest
+  server: McpServer
+}): ItemRegistry => {
+  let next: ItemRegistry = new Map()
+  withBatchedToolListChanged(server, () => {
+    for (const registration of registry.values()) {
+      registration.remove()
+    }
+    registry.clear()
+    next = registerItems({ authorizedMCP, req, server })
+  })
+  return next
+}
+
+/**
+ * Register a single runtime tool on a server. Returns the registration so the
+ * caller can track it in an `ItemRegistry` and remove it later. Used both when
+ * building a server (so new/reconciled servers include runtime tools) and when
+ * adding a tool to already-live sessions.
+ */
+export const registerRuntimeToolOnServer = ({
+  req,
+  server,
+  tool,
+}: {
+  req: PayloadRequest
+  server: McpServer
+  tool: RuntimeTool
+}): { remove: () => void } =>
+  server.registerTool(
+    tool.name,
+    {
+      description: tool.description ?? `Runtime tool "${tool.name}".`,
+      // An empty-object schema gives the `(input, ctx)` callback signature and
+      // advertises a no-argument tool.
+      inputSchema: toStandardSchema({ properties: {}, type: 'object' }),
+      title: tool.title,
+    },
+    async (input: unknown, ctx: ServerContext) => {
+      const response = await tool.handler({
+        input: (input ?? {}) as Record<string, unknown>,
+        req,
+        serverContext: ctx,
+      })
+      const { doc: _doc, ...rest } = response
+      return rest
+    },
+  )
+
+const registerItems = ({
+  authorizedMCP,
+  req,
+  server,
+}: {
+  authorizedMCP: AuthorizedMCP
+  req: PayloadRequest
+  server: McpServer
+}): ItemRegistry => {
+  const registry: ItemRegistry = new Map()
   const logger = getLogger({ payload: req.payload })
 
-  /**
-   * Wrap a tool handler's response with the tool's `overrideResponse`, then
-   * strip the internal `doc` field so it doesn't leak onto the wire.
-   */
   const finalizeToolResponse = (
     response: MCPToolResponse,
     overrideResponse?: MCPResponseOverride,
@@ -90,7 +191,7 @@ export const buildMcpServer = ({
             )
             inputSchema = inputSchema({ collectionSchema })
           }
-          server.registerTool(
+          const registration = server.registerTool(
             name,
             {
               description: tool.description,
@@ -108,6 +209,7 @@ export const buildMcpServer = ({
                 tool.overrideResponse,
               ),
           )
+          registry.set(`collectionTool:${name}`, registration)
           logger.info(`✅ Tool: ${name} Registered.`)
           break
         }
@@ -134,7 +236,7 @@ export const buildMcpServer = ({
 
             inputSchema = inputSchema({ globalSchema })
           }
-          server.registerTool(
+          const registration = server.registerTool(
             name,
             {
               description: tool.description,
@@ -152,12 +254,13 @@ export const buildMcpServer = ({
                 tool.overrideResponse,
               ),
           )
+          registry.set(`globalTool:${name}`, registration)
           logger.info(`✅ Tool: ${name} Registered.`)
           break
         }
         case 'prompt': {
           const prompt = item.prompt
-          server.registerPrompt(
+          const registration = server.registerPrompt(
             item.key,
             {
               argsSchema: prompt.argsSchema ? toStandardSchema(prompt.argsSchema) : undefined,
@@ -171,12 +274,13 @@ export const buildMcpServer = ({
                 serverContext: ctx,
               }),
           )
+          registry.set(`prompt:${item.key}`, registration)
           logger.info(`✅ Prompt: ${prompt.title} Registered.`)
           break
         }
         case 'resource': {
           const resource = item.resource
-          server.registerResource(
+          const registration = server.registerResource(
             item.key,
             // @ts-expect-error - Overload type ambiguity (string OR ResourceTemplate is valid)
             resource.uri,
@@ -194,12 +298,13 @@ export const buildMcpServer = ({
               return resource.handler({ params, req, serverContext: ctx, uri })
             },
           )
+          registry.set(`resource:${item.key}`, registration)
           logger.info(`✅ Resource: ${resource.title} Registered.`)
           break
         }
         case 'tool': {
           const tool = item.tool
-          server.registerTool(
+          const registration = server.registerTool(
             item.key,
             {
               description: tool.description,
@@ -216,14 +321,23 @@ export const buildMcpServer = ({
                 tool.overrideResponse,
               ),
           )
+          registry.set(`tool:${item.key}`, registration)
           logger.info(`✅ Tool: ${item.key} Registered.`)
           break
         }
       }
     }
+
+    // Re-apply runtime tools so every server built afterwards (new sessions and
+    // post-HMR reconciles) includes them, not just the session they were added on.
+    for (const tool of runtimeTools.values()) {
+      const registration = registerRuntimeToolOnServer({ req, server, tool })
+      registry.set(`runtimeTool:${tool.name}`, registration)
+      logger.info(`✅ Runtime tool: ${tool.name} Registered.`)
+    }
   } catch (error) {
     throw new APIError(`Error initializing MCP handler: ${String(error)}`, 500)
   }
 
-  return server
+  return registry
 }

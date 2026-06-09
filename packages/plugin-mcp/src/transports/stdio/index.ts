@@ -12,6 +12,7 @@ import { buildMcpServer } from '../../mcp/buildMcpServer.js'
 import { sanitizeMCPConfig } from '../../mcp/sanitizeMCPConfig.js'
 import { getPluginConfig } from '../../utils/getPluginConfig.js'
 import { resolveProjectRoot } from '../../utils/resolveProjectRoot.js'
+import { watchConfig } from './watchConfig.js'
 
 /**
  * Stdio adapter for the Payload MCP server.
@@ -71,7 +72,7 @@ export const runMcpStdio = async (): Promise<void> => {
   const req = await createLocalReq({}, payload)
   req.payloadAPI = 'MCP' as const
 
-  const server = buildMcpServer({ authorizedMCP, pluginConfig, req })
+  const { server } = buildMcpServer({ authorizedMCP, pluginConfig, req })
 
   const transport = new StdioServerTransport()
   await server.connect(transport)
@@ -95,4 +96,16 @@ export const runMcpStdio = async (): Promise<void> => {
   process.on('SIGINT', () => void shutdown(0))
   process.on('SIGTERM', () => void shutdown(0))
   process.stdin.on('close', () => void shutdown(0))
+
+  // The config is imported once at spawn. On change, exit so the MCP client
+  // re-spawns us with the fresh config (and the new tool set). Dev-only.
+  if (process.env.NODE_ENV !== 'production') {
+    watchConfig({
+      configPath,
+      onChange: () => {
+        console.error('[payload-mcp] config changed, restarting to refresh tools…')
+        void shutdown(0)
+      },
+    })
+  }
 }

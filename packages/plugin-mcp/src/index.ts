@@ -2,9 +2,12 @@ import { defaultUserCollection, definePlugin } from 'payload'
 
 import type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig } from './types.js'
 
+import type { RuntimeTool } from './mcp/runtimeTools.js'
+
 import { getAPIKeysCollection } from './collection/index.js'
 import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
-import { mcpEndpoint } from './transports/http/index.js'
+import { mcpEndpoint, reconcileSessions } from './transports/http/index.js'
+import { addRuntimeTool } from './transports/http/runtimeTools.js'
 
 declare module 'payload' {
   export interface PayloadRequest {
@@ -17,6 +20,9 @@ declare module 'payload' {
 }
 
 export type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig }
+export type { RuntimeTool }
+
+export { addRuntimeTool }
 
 export { defineCollectionTool, defineGlobalTool, definePrompt, defineTool } from './defineTool.js'
 
@@ -55,9 +61,13 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
       ...config,
       endpoints: [
         ...(config.endpoints ?? []),
-        // Payload prefixes /api, so the full path is /api/mcp.
+        // /api/mcp — POST for requests, GET for the notification stream, DELETE to end a session.
         { handler: mcpEndpoint, method: 'post', path: '/mcp' },
+        { handler: mcpEndpoint, method: 'get', path: '/mcp' },
+        { handler: mcpEndpoint, method: 'delete', path: '/mcp' },
       ],
+      // On dev HMR config change, reconcile live sessions' tools and push list_changed.
+      onReload: [...(config.onReload ?? []), reconcileSessions],
     }
   },
 })
