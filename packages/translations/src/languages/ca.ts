@@ -496,6 +496,7 @@ export const caTranslations: DefaultTranslationsObject = {
     viewing: 'Visualització',
     viewReadOnly: 'Veure només de lectura',
     welcome: 'Benvingut',
+    where: 'On',
     yes: 'Sí',
   },
   hierarchy: {

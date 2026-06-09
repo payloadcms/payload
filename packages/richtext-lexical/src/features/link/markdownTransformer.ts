@@ -9,7 +9,7 @@
 import { $createTextNode, $isTextNode } from 'lexical'
 
 import type { TextMatchTransformer } from '../../packages/@lexical/markdown/MarkdownTransformers.js'
-import type { SerializedLinkNode } from './nodes/types.js'
+import type { SerializedLinkNode } from './server/schema.js'
 
 import { sanitizeUrl } from '../../lexical/utils/url.js'
 import { $createLinkNode, $isLinkNode, LinkNode } from './nodes/LinkNode.js'

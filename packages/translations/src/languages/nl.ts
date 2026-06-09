@@ -502,6 +502,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     viewing: 'Bekijken',
     viewReadOnly: 'Alleen-lezen weergave',
     welcome: 'Welkom',
+    where: 'Waar',
     yes: 'Ja',
   },
   hierarchy: {

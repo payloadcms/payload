@@ -15,6 +15,7 @@ const CheckboxFields: CollectionConfig = {
       type: 'checkbox',
     },
   ],
+  versions: false,
 }
 
 export default CheckboxFields

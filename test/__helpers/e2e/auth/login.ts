@@ -99,7 +99,7 @@ export async function loginClientSide(args: LoginArgs): Promise<void> {
     await page.locator('.nav__controls [aria-label="Log out"]').click()
 
     if (await page.locator('dialog#leave-without-saving').isVisible()) {
-      await page.locator('dialog#leave-without-saving #confirm-action').click()
+      await page.locator('dialog#leave-without-saving [data-dialog-action="confirm"]').click()
     }
 
     await page.waitForURL(loginRoute)

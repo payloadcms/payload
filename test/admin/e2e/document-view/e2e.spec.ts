@@ -467,7 +467,9 @@ describe('Document View', () => {
       await documentLink.click()
       await wait(200)
 
-      const leavePageModal = page.locator('#leave-without-saving #confirm-action').last()
+      const leavePageModal = page.locator(
+        '[id^="leave-without-saving-doc-drawer_posts_1_"] [data-dialog-action="confirm"]',
+      )
       await expect(leavePageModal).toBeVisible()
 
       await leavePageModal.click()
@@ -900,10 +902,10 @@ describe('Document View', () => {
 
       const leaveModal = page.locator('#leave-without-saving-doc-drawer')
       await expect(leaveModal).toBeVisible()
-      await leaveModal.locator('#confirm-cancel').click()
+      await leaveModal.locator('[data-dialog-action="cancel"]').click()
       await expect(editModal).toBeVisible()
       await closeButton.click()
-      await leaveModal.locator('#confirm-action').click()
+      await leaveModal.locator('[data-dialog-action="confirm"]').click()
       await expect(editModal).toBeHidden()
     })
   })

@@ -38,6 +38,7 @@ describe(
                   on: 'categories',
                 },
               ],
+              versions: false,
             },
             {
               slug: 'versioned-categories',
@@ -74,6 +75,7 @@ describe(
                   hasMany: true,
                 },
               ],
+              versions: false,
             },
             {
               slug: 'versioned-posts',

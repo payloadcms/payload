@@ -496,6 +496,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     viewing: 'Visualização',
     viewReadOnly: 'Visualizar somente leitura',
     welcome: 'Boas vindas',
+    where: 'Onde',
     yes: 'Sim',
   },
   hierarchy: {

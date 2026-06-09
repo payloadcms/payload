@@ -498,6 +498,7 @@ export const huTranslations: DefaultTranslationsObject = {
     viewing: 'Megtekintés',
     viewReadOnly: 'Csak olvasható nézet',
     welcome: 'Üdvözöljük',
+    where: 'Hol',
     yes: 'Igen',
   },
   hierarchy: {

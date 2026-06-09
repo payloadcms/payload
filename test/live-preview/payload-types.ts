@@ -60,10 +60,117 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_A6D73F5A".
+ */
+export type LexicalNodes_A6D73F5A =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_A6D73F5A>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_A6D73F5A>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'ssr'
+      | 'ssr-autosave'
+      | 'tenants'
+      | 'categories'
+      | 'collection-level-config'
+      | 'static-url'
+      | 'custom-live-preview'
+      | 'conditional-url'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_A6D73F5A, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_A6D73F5A, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_A6D73F5A>
+  | SerializedListItemNode<LexicalNodes_A6D73F5A>
+  | SerializedHeadingNode<LexicalNodes_A6D73F5A>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_850D1707".
+ */
+export type LexicalNodes_850D1707 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_850D1707>
+  | SerializedBlockNode<MediaBlock_1EDC4A89>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_850D1707>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'ssr'
+      | 'ssr-autosave'
+      | 'tenants'
+      | 'categories'
+      | 'collection-level-config'
+      | 'static-url'
+      | 'custom-live-preview'
+      | 'conditional-url'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_850D1707, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_850D1707, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_850D1707>
+  | SerializedListItemNode<LexicalNodes_850D1707>
+  | SerializedHeadingNode<LexicalNodes_850D1707>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_1A3BAFDD".
+ */
+export type LexicalNodes_1A3BAFDD =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_1A3BAFDD>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_1A3BAFDD>
+  | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
+  | SerializedQuoteNode<LexicalNodes_1A3BAFDD>
+  | SerializedListNode<LexicalNodes_1A3BAFDD>
+  | SerializedListItemNode<LexicalNodes_1A3BAFDD>
+  | SerializedAutoLinkNode<LexicalNodes_1A3BAFDD, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_1A3BAFDD, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'ssr'
+      | 'ssr-autosave'
+      | 'tenants'
+      | 'categories'
+      | 'collection-level-config'
+      | 'static-url'
+      | 'custom-live-preview'
+      | 'conditional-url'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {
     mediaBlock: MediaBlock;
@@ -81,6 +188,7 @@ export interface Config {
     'static-url': StaticUrl;
     'custom-live-preview': CustomLivePreview;
     'conditional-url': ConditionalUrl;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -100,6 +208,7 @@ export interface Config {
     'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
     'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
     'conditional-url': ConditionalUrlSelect<false> | ConditionalUrlSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -121,7 +230,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -145,9 +254,27 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface PayloadMcpApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "mediaBlock".
+ * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
   invertBackground?: boolean | null;
@@ -214,206 +341,18 @@ export interface Page {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
     media?: (string | null) | Media;
   };
-  layout?:
-    | (
-        | {
-            invertBackground?: boolean | null;
-            richText?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            links?:
-              | {
-                  link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-        | {
-            invertBackground?: boolean | null;
-            columns?:
-              | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?: {
-                    root: {
-                      type: string;
-                      children: {
-                        type: any;
-                        version: number;
-                        [k: string]: unknown;
-                      }[];
-                      direction: ('ltr' | 'rtl') | null;
-                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                      indent: number;
-                      version: number;
-                    };
-                    [k: string]: unknown;
-                  } | null;
-                  enableLink?: boolean | null;
-                  link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
-          }
-        | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
-          }
-        | {
-            introContent?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
-            selectedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
-          }
-      )[]
-    | null;
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
   /**
    * A number field for visual comparison with toolbar size inputs
    */
   testNumber?: number | null;
   localizedTitle?: string | null;
   relationToLocalized?: (string | null) | Post;
-  richTextLexical?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  richTextLexicalLocalized?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richTextLexical?: LexicalRichText<LexicalNodes_850D1707> | null;
+  richTextLexicalLocalized?: LexicalRichText<LexicalNodes_850D1707> | null;
   relationshipAsUpload?: (string | null) | Media;
   relationshipMonoHasOne?: (string | null) | Post;
   relationshipMonoHasMany?: (string | Post)[] | null;
@@ -430,21 +369,7 @@ export interface Page {
   arrayOfRelationships?:
     | {
         uploadInArray?: (string | null) | Media;
-        richTextInArray?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
+        richTextInArray?: LexicalRichText<LexicalNodes_1A3BAFDD> | null;
         relationshipInArrayMonoHasOne?: (string | null) | Post;
         relationshipInArrayMonoHasMany?: (string | Post)[] | null;
         relationshipInArrayPolyHasOne?: {
@@ -484,6 +409,41 @@ export interface Tenant {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Cta".
+ */
+export interface Cta {
+  invertBackground?: boolean | null;
+  richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+  links?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null);
+          url?: string | null;
+          label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
+          appearance?: ('primary' | 'secondary') | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
@@ -493,170 +453,10 @@ export interface Post {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
     media?: (string | null) | Media;
   };
-  layout?:
-    | (
-        | {
-            invertBackground?: boolean | null;
-            richText?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            links?:
-              | {
-                  link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-        | {
-            invertBackground?: boolean | null;
-            columns?:
-              | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?: {
-                    root: {
-                      type: string;
-                      children: {
-                        type: any;
-                        version: number;
-                        [k: string]: unknown;
-                      }[];
-                      direction: ('ltr' | 'rtl') | null;
-                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                      indent: number;
-                      version: number;
-                    };
-                    [k: string]: unknown;
-                  } | null;
-                  enableLink?: boolean | null;
-                  link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
-          }
-        | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
-          }
-        | {
-            introContent?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
-            selectedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
-          }
-      )[]
-    | null;
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
   relatedPosts?: (string | Post)[] | null;
   localizedTitle?: string | null;
   meta?: {
@@ -667,6 +467,76 @@ export interface Post {
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Content".
+ */
+export interface Content {
+  invertBackground?: boolean | null;
+  columns?:
+    | {
+        size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+        richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+        enableLink?: boolean | null;
+        link?: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null);
+          url?: string | null;
+          label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
+          appearance?: ('default' | 'primary' | 'secondary') | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Archive".
+ */
+export interface Archive {
+  introContent?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+  populateBy?: ('collection' | 'selection') | null;
+  relationTo?: 'posts' | null;
+  categories?: (string | Category)[] | null;
+  limit?: number | null;
+  selectedDocs?:
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }[]
+    | null;
+  /**
+   * This field is auto-populated after-read
+   */
+  populatedDocs?:
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }[]
+    | null;
+  /**
+   * This field is auto-populated after-read
+   */
+  populatedDocsTotal?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'archive';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -691,170 +561,10 @@ export interface Ssr {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
     media?: (string | null) | Media;
   };
-  layout?:
-    | (
-        | {
-            invertBackground?: boolean | null;
-            richText?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            links?:
-              | {
-                  link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-        | {
-            invertBackground?: boolean | null;
-            columns?:
-              | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?: {
-                    root: {
-                      type: string;
-                      children: {
-                        type: any;
-                        version: number;
-                        [k: string]: unknown;
-                      }[];
-                      direction: ('ltr' | 'rtl') | null;
-                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                      indent: number;
-                      version: number;
-                    };
-                    [k: string]: unknown;
-                  } | null;
-                  enableLink?: boolean | null;
-                  link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
-          }
-        | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
-          }
-        | {
-            introContent?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
-            selectedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
-          }
-      )[]
-    | null;
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -876,170 +586,10 @@ export interface SsrAutosave {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
     media?: (string | null) | Media;
   };
-  layout?:
-    | (
-        | {
-            invertBackground?: boolean | null;
-            richText?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            links?:
-              | {
-                  link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-        | {
-            invertBackground?: boolean | null;
-            columns?:
-              | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?: {
-                    root: {
-                      type: string;
-                      children: {
-                        type: any;
-                        version: number;
-                        [k: string]: unknown;
-                      }[];
-                      direction: ('ltr' | 'rtl') | null;
-                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                      indent: number;
-                      version: number;
-                    };
-                    [k: string]: unknown;
-                  } | null;
-                  enableLink?: boolean | null;
-                  link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
-          }
-        | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
-          }
-        | {
-            introContent?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
-            selectedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
-          }
-      )[]
-    | null;
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -1082,170 +632,10 @@ export interface CustomLivePreview {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
     media?: (string | null) | Media;
   };
-  layout?:
-    | (
-        | {
-            invertBackground?: boolean | null;
-            richText?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            links?:
-              | {
-                  link: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-        | {
-            invertBackground?: boolean | null;
-            columns?:
-              | {
-                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-                  richText?: {
-                    root: {
-                      type: string;
-                      children: {
-                        type: any;
-                        version: number;
-                        [k: string]: unknown;
-                      }[];
-                      direction: ('ltr' | 'rtl') | null;
-                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                      indent: number;
-                      version: number;
-                    };
-                    [k: string]: unknown;
-                  } | null;
-                  enableLink?: boolean | null;
-                  link?: {
-                    type?: ('reference' | 'custom') | null;
-                    newTab?: boolean | null;
-                    reference?:
-                      | ({
-                          relationTo: 'posts';
-                          value: string | Post;
-                        } | null)
-                      | ({
-                          relationTo: 'pages';
-                          value: string | Page;
-                        } | null);
-                    url?: string | null;
-                    label: string;
-                    /**
-                     * Choose how the link should be rendered.
-                     */
-                    appearance?: ('default' | 'primary' | 'secondary') | null;
-                  };
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
-          }
-        | {
-            invertBackground?: boolean | null;
-            position?: ('default' | 'fullscreen') | null;
-            media: string | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
-          }
-        | {
-            introContent?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            populateBy?: ('collection' | 'selection') | null;
-            relationTo?: 'posts' | null;
-            categories?: (string | Category)[] | null;
-            limit?: number | null;
-            selectedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocs?:
-              | {
-                  relationTo: 'posts';
-                  value: string | Post;
-                }[]
-              | null;
-            /**
-             * This field is auto-populated after-read
-             */
-            populatedDocsTotal?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'archive';
-          }
-      )[]
-    | null;
+  layout?: (Cta | Content | MediaBlock | Archive)[] | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -1264,6 +654,49 @@ export interface ConditionalUrl {
   enabled?: boolean | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
+  /**
+   * Access for this API key — uncheck to revoke individual tools.
+   */
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1336,12 +769,21 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditional-url';
         value: string | ConditionalUrl;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1351,10 +793,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -1998,6 +1445,22 @@ export interface ConditionalUrlSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  overrideAccess?: T;
+  access?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -2161,12 +1624,211 @@ export interface CollectionsWidget {
   width: 'full';
 }
 /**
+ * Multiple blocks resolve to the `MediaBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaBlock_1EDC4A89".
+ */
+export interface MediaBlock_1EDC4A89 {
+  id: string;
+  blockType: 'mediaBlock';
+  invertBackground?: boolean | null;
+  position?: ('default' | 'fullscreen') | null;
+  media: string | Media;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_1AB4670B".
+ */
+export interface LexicalUploadFields_1AB4670B {
+  alt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ */
+export interface LexicalLinkFields_0A7E9EC0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
 }
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
 
 
 declare module 'payload' {

@@ -39,4 +39,5 @@ export const PostsWithHooks: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }

@@ -216,7 +216,6 @@ describe('i18n', () => {
       await page.goto(collection1URL.list)
 
       await openListFilters(page, {})
-      await page.locator('.where-builder__add-first-filter').click()
       await page.locator('.condition__field .rs__control').click()
 
       await expect(page.locator('.rs__option', { hasText: 'es-label' })).toBeVisible()

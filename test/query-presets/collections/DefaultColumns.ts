@@ -40,4 +40,5 @@ export const DefaultColumns: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }
