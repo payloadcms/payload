@@ -202,7 +202,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleSortChange,
         handleWhereChange,
         hasActiveFilters,
-        isGroupingBy: Boolean(collectionConfig?.admin?.groupBy && query?.groupBy),
+        isGroupingBy: Boolean(query?.groupBy),
         orderableFieldName,
         query,
         refineListData,
