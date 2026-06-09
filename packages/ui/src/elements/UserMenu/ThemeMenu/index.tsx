@@ -48,17 +48,19 @@ export const ThemeMenu: React.FC = () => {
       size="large"
       theme="dark"
     >
-      <PopupList.RadioGroup>
-        {options.map(({ label, value }) => (
-          <PopupList.RadioGroupItem
-            active={activeValue === value}
-            key={value}
-            onClick={() => setTheme(value)}
-          >
-            {label}
-          </PopupList.RadioGroupItem>
-        ))}
-      </PopupList.RadioGroup>
+      <div data-popup-prevent-close>
+        <PopupList.RadioGroup>
+          {options.map(({ label, value }) => (
+            <PopupList.RadioGroupItem
+              active={activeValue === value}
+              key={value}
+              onClick={() => setTheme(value)}
+            >
+              {label}
+            </PopupList.RadioGroupItem>
+          ))}
+        </PopupList.RadioGroup>
+      </div>
     </Popup>
   )
 }

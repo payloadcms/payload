@@ -94,8 +94,8 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
       )}
 
       {/* Account actions */}
-      <PopupList.MenuItem size="small">
-        <PopupList.Button href={logoutHref} icon={<LogOutIcon size={16} />}>
+      <PopupList.MenuItem>
+        <PopupList.Button href={logoutHref} icon={<LogOutIcon />}>
           {t('authentication:logOut')}
         </PopupList.Button>
       </PopupList.MenuItem>

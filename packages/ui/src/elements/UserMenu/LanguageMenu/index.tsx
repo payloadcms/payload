@@ -38,21 +38,23 @@ export const LanguageMenu: React.FC = () => {
       size="large"
       theme="auto"
     >
-      <PopupList.RadioGroup>
-        {languageOptions?.map(({ label, value }) => (
-          <PopupList.RadioGroupItem
-            active={i18n.language === value}
-            key={value}
-            onClick={() => {
-              if (switchLanguage) {
-                void switchLanguage(value)
-              }
-            }}
-          >
-            {label}
-          </PopupList.RadioGroupItem>
-        ))}
-      </PopupList.RadioGroup>
+      <div data-popup-prevent-close>
+        <PopupList.RadioGroup>
+          {languageOptions?.map(({ label, value }) => (
+            <PopupList.RadioGroupItem
+              active={i18n.language === value}
+              key={value}
+              onClick={() => {
+                if (switchLanguage) {
+                  void switchLanguage(value)
+                }
+              }}
+            >
+              {label}
+            </PopupList.RadioGroupItem>
+          ))}
+        </PopupList.RadioGroup>
+      </div>
     </Popup>
   )
 }
