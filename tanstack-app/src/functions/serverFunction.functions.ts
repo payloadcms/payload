@@ -84,7 +84,11 @@ function stripUnserializable(
   }
 
   if (obj instanceof Date) {
-    return obj
+    // Normalize to a plain `Date`. Subclasses (e.g. `@date-fns/tz`'s `TZDate`,
+    // used by the schedule-publish drawer) are `instanceof Date` but have a
+    // different `constructor`, which TanStack Start's seroval serializer
+    // rejects with "The value [object Date] ... cannot be parsed/serialized".
+    return new Date(obj.getTime())
   }
 
   if (obj instanceof RegExp) {
