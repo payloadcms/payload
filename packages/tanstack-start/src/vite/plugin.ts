@@ -16,6 +16,7 @@ import {
 } from './importProtection.js'
 import { clientModuleResolution } from './plugins/clientModuleResolution.js'
 import { payloadDevTransforms } from './plugins/devTransforms.js'
+import { reactDomServerInRsc } from './plugins/reactDomServerInRsc.js'
 import { ssrStripDistStyleImports } from './plugins/stripDistStyleImports.js'
 import { wrapCjsForClient } from './plugins/wrapCjsForClient.js'
 
@@ -93,6 +94,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
       clientModuleResolution(),
       wrapCjsForClient(),
       ssrStripDistStyleImports(),
+      reactDomServerInRsc(),
       payloadDevTransforms(),
       rscPlugin,
       tanstackStart({

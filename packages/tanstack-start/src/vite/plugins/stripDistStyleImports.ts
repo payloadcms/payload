@@ -14,6 +14,14 @@ const STYLE_EXTENSION_RE = /\.(?:s?css|less)$/i
 const STATIC_STYLE_IMPORT_RE = /^[ \t]*import\s+['"][^'"]+\.(?:s?css|less)['"]\s*(?:;[ \t]*)?$/gm
 
 /**
+ * Monorepo Payload package source, e.g. `…/packages/ui/src/…`. In the
+ * core-dev / test setup Payload packages resolve to their workspace `src`
+ * (not a published `dist`), so the `dist/` rule below doesn't cover them and
+ * their `.css` side-effect imports survive into the SSR/RSC graph.
+ */
+const PAYLOAD_PKG_SRC_RE = /\/packages\/[^/]+\/src\//
+
+/**
  * Stops Vite (and the underlying Node ESM loader) from trying to load
  * SCSS/CSS/LESS during SSR/RSC when the importer lives inside a built
  * `dist/` directory or when the specifier is a bare package name.
@@ -49,7 +57,7 @@ export function ssrStripDistStyleImports(): PluginOption {
       if (!STYLE_EXTENSION_RE.test(id)) {
         return
       }
-      if (importer && /\/dist\//.test(importer)) {
+      if (importer && (/\/dist\//.test(importer) || PAYLOAD_PKG_SRC_RE.test(importer))) {
         return '\0ssr-empty-style'
       }
       if (/^@?[a-z]/.test(id) && !id.startsWith('.') && !id.startsWith('/')) {
@@ -61,10 +69,13 @@ export function ssrStripDistStyleImports(): PluginOption {
       if (!isServerEnv) {
         return
       }
-      // Only touch built dependency files (i.e. `node_modules/.../dist/...`).
-      // Don't strip from app source — devs may legitimately want SSR-rendered
-      // <link>s emitted from their own CSS imports during dev.
-      if (!/\/node_modules\//.test(id) || !/\/dist\//.test(id)) {
+      // Only touch Payload dependency files: published `node_modules/.../dist/`
+      // builds, or workspace `…/packages/<pkg>/src/…` sources in the core-dev /
+      // test setup. Don't strip from the consumer's own app source — devs may
+      // legitimately want SSR-rendered <link>s from their own CSS imports.
+      const isPayloadDistFile = /\/node_modules\//.test(id) && /\/dist\//.test(id)
+      const isPayloadSrcFile = PAYLOAD_PKG_SRC_RE.test(id)
+      if (!isPayloadDistFile && !isPayloadSrcFile) {
         return
       }
       if (!/\.[mc]?[jt]sx?$/.test(id)) {
