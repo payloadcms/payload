@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/tanstack-start",
-  "version": "3.81.0",
+  "version": "4.0.0-internal.183b315",
   "description": "TanStack Start framework adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
