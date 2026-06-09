@@ -1,7 +1,10 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
+import { getInitialHtmlAttrsFn } from '../functions/theme.functions'
+
 export const Route = createRootRoute({
+  loader: () => getInitialHtmlAttrsFn(),
   head: () => ({
     links: [
       {
@@ -42,8 +45,10 @@ function HydrationMarker() {
 }
 
 function RootComponent() {
+  const { dir, languageCode, theme } = Route.useLoaderData()
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html data-theme={theme} dir={dir} lang={languageCode} suppressHydrationWarning>
       <head>
         <style>{`@layer payload-default, payload;`}</style>
         <HeadContent />

@@ -5,9 +5,29 @@ import rsc from '@vitejs/plugin-rsc'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { defineConfig, mergeConfig } from 'vite'
+import { createLogger, defineConfig, mergeConfig } from 'vite'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Third-party deps (react-datepicker, @faceless-ui/*) ship sourcemaps whose
+// original source files aren't published, so Vite warns on every one. Silence
+// just those warnings to keep dev startup output readable.
+const logger = createLogger()
+const isMissingSourcemapWarning = (msg: string) => msg.includes('points to missing source files')
+const baseWarn = logger.warn.bind(logger)
+const baseWarnOnce = logger.warnOnce.bind(logger)
+logger.warn = (msg, options) => {
+  if (isMissingSourcemapWarning(msg)) {
+    return
+  }
+  baseWarn(msg, options)
+}
+logger.warnOnce = (msg, options) => {
+  if (isMissingSourcemapWarning(msg)) {
+    return
+  }
+  baseWarnOnce(msg, options)
+}
 
 const databaseAdapterPath = path.resolve(__dirname, '..', 'test', 'databaseAdapter.js')
 if (!fs.existsSync(databaseAdapterPath)) {
@@ -65,6 +85,7 @@ export default defineConfig((env) =>
           },
         },
       },
+      customLogger: logger,
       envDir: path.resolve(__dirname, '..'),
       server: {
         port,

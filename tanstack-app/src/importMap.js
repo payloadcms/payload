@@ -23,7 +23,8 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { CollectionCards as CollectionCards_1c475a2e69b97294aaf64deb8d2cf29b } from '@payloadcms/tanstack-start/rsc'
+import { AccessField as AccessField_210e1789eef737e0b4d9f054258f19bb } from '@payloadcms/plugin-mcp/client'
+import { CollectionCards as CollectionCards_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
@@ -76,6 +77,6 @@ export const importMap = {
     BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   '@payloadcms/richtext-lexical/client#ItalicFeatureClient':
     ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  '@payloadcms/tanstack-start/rsc#CollectionCards':
-    CollectionCards_1c475a2e69b97294aaf64deb8d2cf29b,
+  '@payloadcms/plugin-mcp/client#AccessField': AccessField_210e1789eef737e0b4d9f054258f19bb,
+  '@payloadcms/ui/rsc#CollectionCards': CollectionCards_ab83ff7e88da8d3530831f296ec4756a,
 }
