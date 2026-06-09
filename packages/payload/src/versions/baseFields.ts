@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import type { Option } from '../fields/config/types.js'
+import type { Field, Option } from '../fields/config/types.js'
 
 export const statuses: Option[] = [
   {
