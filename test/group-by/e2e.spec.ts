@@ -37,6 +37,7 @@ import {
   openManagePresets,
   selectPreset,
 } from '../query-presets/helpers/togglePreset.js'
+import { noGroupableSlug } from './collections/NoGroupable/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { beforeEach } = test
@@ -47,6 +48,7 @@ const dirname = path.dirname(filename)
 test.describe('Group By', () => {
   let page: Page
   let url: AdminUrlUtil
+  let noGroupableUrl: AdminUrlUtil
   let serverURL: string
   let payload: PayloadTestSDK<Config>
   let user: any
@@ -55,6 +57,7 @@ test.describe('Group By', () => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     url = new AdminUrlUtil(serverURL, 'posts')
+    noGroupableUrl = new AdminUrlUtil(serverURL, noGroupableSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -85,11 +88,13 @@ test.describe('Group By', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('should display group-by button only when `admin.groupBy` is enabled', async () => {
+  test('should show the group by control for collections with groupable fields', async () => {
     await page.goto(url.list)
     await expect(page.locator('#toggle-group-by')).toBeVisible()
+  })
 
-    await page.goto(new AdminUrlUtil(serverURL, 'users').list)
+  test('should hide the group by control for collections with no groupable fields', async () => {
+    await page.goto(noGroupableUrl.list)
     await expect(page.locator('#toggle-group-by')).toBeHidden()
   })
 

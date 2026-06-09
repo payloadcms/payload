@@ -73,6 +73,7 @@ export interface Config {
     categories: Category;
     media: Media;
     relationships: Relationship;
+    'no-groupable': NoGroupable;
     users: User;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
@@ -88,6 +89,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
+    'no-groupable': NoGroupableSelect<false> | NoGroupableSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -266,6 +268,22 @@ export interface Relationship {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-groupable".
+ */
+export interface NoGroupable {
+  id: string;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -375,6 +393,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationships';
         value: string | Relationship;
+      } | null)
+    | ({
+        relationTo: 'no-groupable';
+        value: string | NoGroupable;
       } | null)
     | ({
         relationTo: 'users';
@@ -584,6 +606,13 @@ export interface RelationshipsSelect<T extends boolean = true> {
   MonoHasManyRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-groupable_select".
+ */
+export interface NoGroupableSelect<T extends boolean = true> {
+  json?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

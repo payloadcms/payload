@@ -9,7 +9,6 @@ export const RelationshipsCollection: CollectionConfig = {
   slug: relationshipsSlug,
   admin: {
     useAsTitle: 'title',
-    groupBy: true,
   },
   fields: [
     {
