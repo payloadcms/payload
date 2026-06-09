@@ -10,7 +10,6 @@ import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
-import { useConfig } from '../Config/index.js'
 import { useRouter, useSearchParams } from '../RouterAdapter/index.js'
 import { ListQueryContext, ListQueryModifiedContext } from './context.js'
 import { mergeQuery } from './mergeQuery.js'
@@ -34,9 +33,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const rawSearchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
   const [modified, setModified] = useState(false)
-  const { getEntityConfig } = useConfig()
-  const collectionConfig = getEntityConfig({ collectionSlug })
-
   const contextRef = useRef({} as IListQueryContext)
   contextRef.current.modified = modified
 
