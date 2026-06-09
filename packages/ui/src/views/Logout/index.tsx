@@ -4,7 +4,7 @@ import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { LogoutClient } from '../../exports/client/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'logout'
 
