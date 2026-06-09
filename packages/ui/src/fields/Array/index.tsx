@@ -14,6 +14,7 @@ import type { ClipboardPasteData } from '../../elements/ClipboardAction/types.js
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
+import { ClearRows } from '../../elements/ClearRows/index.js'
 import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
 import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import {
@@ -186,6 +187,12 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     },
     [removeFieldRow, path],
   )
+
+  const clearRows = useCallback(() => {
+    dispatchFields({ type: 'CLEAR_ROWS', path })
+    setDocFieldPreferences(path, { collapsed: [] })
+    setModified(true)
+  }, [dispatchFields, path, setDocFieldPreferences, setModified])
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
@@ -376,6 +383,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           </div>
           <ul className={`${baseClass}__header-actions`}>
             {rows?.length > 0 && <CollapseAllToggle onClick={toggleCollapseAll} />}
+            {rows?.length > 0 && !readOnly && !disabled && <ClearRows onClick={clearRows} />}
             <li>
               <ClipboardAction
                 allowCopy={rows?.length > 0}

@@ -420,6 +420,50 @@ describe('Block fields', () => {
         ).toHaveValue('REPLACED BLOCK')
       })
     })
+
+    test('should clear all blocks at once', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+      await scrollEntirePage(page)
+
+      // The `blocks` field is seeded with default blocks
+      const rows = page.locator('[id^="blocks-row-"]')
+      expect(await rows.count()).toBeGreaterThan(0)
+
+      await page
+        .locator('#field-blocks .blocks-field__header-actions')
+        .first()
+        .getByRole('button', { name: 'Clear', exact: true })
+        .click()
+
+      await expect(rows).toHaveCount(0)
+    })
+
+    test('should not show the clear button when there are no blocks', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+      await scrollEntirePage(page)
+
+      // customBlocks starts with no rows
+      await expect(
+        page
+          .locator('#field-customBlocks .blocks-field__header-actions')
+          .getByRole('button', { name: 'Clear', exact: true }),
+      ).toHaveCount(0)
+    })
+
+    test('should not show the clear button on a read-only blocks field', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+      await scrollEntirePage(page)
+
+      // readOnly has a default block but is not editable
+      await expect(
+        page
+          .locator('#field-readOnly .blocks-field__header-actions')
+          .getByRole('button', { name: 'Clear', exact: true }),
+      ).toHaveCount(0)
+    })
   })
 
   describe('sortable blocks', () => {
