@@ -161,23 +161,12 @@
     "test:unit": "vitest run --project unit",
     "translateNewKeys": "pnpm --filter @tools/scripts run generateTranslations:core"
   },
-  "lint-staged": {
-    "**/package.json": "sort-package-json",
-    "*.{md,mdx,yml,json}": "prettier --write",
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --flag v10_config_lookup_from_file --cache --fix",
-      "prettier --write"
-    ],
-    "templates/**/pnpm-lock.yaml": "pnpm runts scripts/remove-template-lock-files.ts",
-    "tsconfig.base.json": "node scripts/reset-tsconfig.js",
-    "README.md": "sh -c 'cp ./README.md ./packages/payload/README.md'"
-  },
   "devDependencies": {
     "@ai-sdk/openai": "3.0.30",
     "@axe-core/playwright": "4.11.0",
     "@clack/prompts": "1.2.0",
     "@libsql/client": "0.14.0",
-    "@next/bundle-analyzer": "16.2.6",
+    "@next/bundle-analyzer": "16.2.7",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
@@ -216,7 +205,7 @@
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongoose": "8.22.1",
-    "next": "16.2.6",
+    "next": "16.2.7",
     "node-gyp": "12.3.0",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",

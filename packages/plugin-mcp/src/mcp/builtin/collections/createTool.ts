@@ -9,7 +9,8 @@ import {
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
-import { prepareCollectionSchema } from '../../../utils/schemaConversion/prepareCollectionSchema.js'
+import { buildToolInput } from '../../../utils/schemaConversion/buildToolInput.js'
+import { sanitizeEntitySchema } from '../../../utils/schemaConversion/sanitizeEntitySchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 
 const DEFAULT_DESCRIPTION = 'Create a document in a collection.'
@@ -17,41 +18,40 @@ const DEFAULT_DESCRIPTION = 'Create a document in a collection.'
 export const createCollectionTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
   input: ({ collectionSchema }) =>
-    z.object({
-      data: z
-        .fromJSONSchema(
-          prepareCollectionSchema(collectionSchema) as unknown as z.core.JSONSchema.JSONSchema,
-        )
-        .describe('The document fields to create'),
-      depth: z
-        .number()
-        .int()
-        .min(0)
-        .max(10)
-        .describe('How many levels deep to populate relationships in response')
-        .optional()
-        .default(0),
-      draft: z
-        .boolean()
-        .describe('Whether to create the document as a draft')
-        .optional()
-        .default(false),
-      fallbackLocale: z
-        .string()
-        .describe('Optional: fallback locale code to use when requested locale is not available')
-        .optional(),
-      locale: z
-        .string()
-        .describe(
-          'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
-        )
-        .optional(),
-      select: z
-        .string()
-        .describe(
-          'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
-        )
-        .optional(),
+    buildToolInput({
+      controls: {
+        depth: z
+          .number()
+          .int()
+          .min(0)
+          .max(10)
+          .describe('How many levels deep to populate relationships in response')
+          .optional()
+          .default(0),
+        draft: z
+          .boolean()
+          .describe('Whether to create the document as a draft')
+          .optional()
+          .default(false),
+        fallbackLocale: z
+          .string()
+          .describe('Optional: fallback locale code to use when requested locale is not available')
+          .optional(),
+        locale: z
+          .string()
+          .describe(
+            'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+          )
+          .optional(),
+        select: z
+          .string()
+          .describe(
+            'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
+          )
+          .optional(),
+      },
+      dataDescription: 'The document fields to create',
+      dataSchema: sanitizeEntitySchema(collectionSchema),
     }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
@@ -64,7 +64,7 @@ export const createCollectionTool = defineCollectionTool({
   )
 
   try {
-    let parsedData = transformPointDataToPayload(data as Record<string, unknown>)
+    let parsedData = transformPointDataToPayload(data)
     const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
     parsedData = stripVirtualFields(parsedData, virtualFieldNames)
 

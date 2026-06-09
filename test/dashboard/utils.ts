@@ -207,7 +207,9 @@ export class DashboardHelper {
 
   cancelEditing = async () => {
     await this.stepNavLast.locator('button').nth(2).click()
-    const confirmButton = this.page.locator('#confirm-action')
+    const confirmButton = this.page.locator(
+      '#cancel-dashboard-changes [data-dialog-action="confirm"]',
+    )
     await confirmButton.click()
     await this.assertIsEditing(false)
     // Wait for any layout changes/transitions to settle

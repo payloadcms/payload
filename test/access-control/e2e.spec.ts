@@ -1908,7 +1908,7 @@ describe('Access Control', () => {
 
           await page.locator('.popup__content #action-delete').click()
           await page.locator('#delete-forever').check()
-          await page.locator('.delete-document #confirm-action').click()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
             `Differentiated Trash "Test Doc For Perma Delete" successfully deleted.`,
@@ -1941,7 +1941,7 @@ describe('Access Control', () => {
           // Click permanently delete and confirm
           await permanentlyDeleteButton.click()
           await expect(page.locator(`#perma-delete-${doc.id}`)).toBeVisible()
-          await page.locator(`#perma-delete-${doc.id} #confirm-action`).click()
+          await page.locator(`#perma-delete-${doc.id} [data-dialog-action="confirm"]`).click()
 
           // Verify success toast
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
@@ -2019,7 +2019,7 @@ describe('Access Control', () => {
           await threeDotMenu.click()
 
           await page.locator('.popup__content #action-delete').click()
-          await page.locator('.delete-document #confirm-action').click()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
             `Differentiated Trash "Test Doc For Trash" moved to trash.`,
@@ -2052,7 +2052,7 @@ describe('Access Control', () => {
           // Click restore and confirm
           await restoreButton.click()
           await expect(page.locator(`#restore-${doc.id}`)).toBeVisible()
-          await page.locator(`#restore-${doc.id} #confirm-action`).click()
+          await page.locator(`#restore-${doc.id} [data-dialog-action="confirm"]`).click()
 
           // Verify success toast
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
@@ -2131,7 +2131,7 @@ describe('Access Control', () => {
           await threeDotMenu.click()
 
           await page.locator('.popup__content #action-delete').click()
-          await page.locator('.delete-document #confirm-action').click()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
             `Restricted Trash "Test Doc For Trash" moved to trash.`,
@@ -2153,7 +2153,7 @@ describe('Access Control', () => {
 
           await page.locator('.popup__content #action-delete').click()
           await page.locator('#delete-forever').check()
-          await page.locator('.delete-document #confirm-action').click()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
 
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
             `Restricted Trash "Test Doc For Perma Delete" successfully deleted.`,

@@ -9,7 +9,8 @@ import {
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
-import { prepareCollectionSchema } from '../../../utils/schemaConversion/prepareCollectionSchema.js'
+import { buildToolInput } from '../../../utils/schemaConversion/buildToolInput.js'
+import { sanitizeEntitySchema } from '../../../utils/schemaConversion/sanitizeEntitySchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 
 const DEFAULT_DESCRIPTION = 'Update documents in a collection by ID or where clause.'
@@ -17,7 +18,7 @@ const DEFAULT_DESCRIPTION = 'Update documents in a collection by ID or where cla
 export const updateCollectionTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
   input: ({ collectionSchema }) => {
-    const partialSchema = prepareCollectionSchema(collectionSchema)
+    const partialSchema = sanitizeEntitySchema(collectionSchema)
 
     // Collection updates do not require all required fields to be passed => delete .required.
     //
@@ -25,52 +26,56 @@ export const updateCollectionTool = defineCollectionTool({
     // data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
     delete partialSchema.required
 
-    return z.object({
-      id: z.union([z.string(), z.number()]).describe('The ID of the document to update').optional(),
-      data: z
-        .fromJSONSchema(partialSchema as unknown as z.core.JSONSchema.JSONSchema)
-        .describe('The fields to update'),
-      depth: z
-        .number()
-        .describe('How many levels deep to populate relationships')
-        .optional()
-        .default(0),
-      draft: z
-        .boolean()
-        .describe('Whether to update the document as a draft')
-        .optional()
-        .default(false),
-      fallbackLocale: z
-        .string()
-        .describe('Optional: fallback locale code to use when requested locale is not available')
-        .optional(),
-      filePath: z.string().describe('File path for file uploads').optional(),
-      locale: z
-        .string()
-        .describe(
-          'Optional: locale code to update the document in (e.g., "en", "es"). Defaults to the default locale',
-        )
-        .optional(),
-      overrideLock: z
-        .boolean()
-        .describe('Whether to override document locks')
-        .optional()
-        .default(true),
-      overwriteExistingFiles: z
-        .boolean()
-        .describe('Whether to overwrite existing files')
-        .optional()
-        .default(false),
-      select: z
-        .string()
-        .describe(
-          'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"title": "My Post"}\'',
-        )
-        .optional(),
-      where: z
-        .string()
-        .describe('JSON string for where clause to update multiple documents')
-        .optional(),
+    return buildToolInput({
+      controls: {
+        id: z
+          .union([z.string(), z.number()])
+          .describe('The ID of the document to update')
+          .optional(),
+        depth: z
+          .number()
+          .describe('How many levels deep to populate relationships')
+          .optional()
+          .default(0),
+        draft: z
+          .boolean()
+          .describe('Whether to update the document as a draft')
+          .optional()
+          .default(false),
+        fallbackLocale: z
+          .string()
+          .describe('Optional: fallback locale code to use when requested locale is not available')
+          .optional(),
+        filePath: z.string().describe('File path for file uploads').optional(),
+        locale: z
+          .string()
+          .describe(
+            'Optional: locale code to update the document in (e.g., "en", "es"). Defaults to the default locale',
+          )
+          .optional(),
+        overrideLock: z
+          .boolean()
+          .describe('Whether to override document locks')
+          .optional()
+          .default(true),
+        overwriteExistingFiles: z
+          .boolean()
+          .describe('Whether to overwrite existing files')
+          .optional()
+          .default(false),
+        select: z
+          .string()
+          .describe(
+            'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"title": "My Post"}\'',
+          )
+          .optional(),
+        where: z
+          .string()
+          .describe('JSON string for where clause to update multiple documents')
+          .optional(),
+      },
+      dataDescription: 'The fields to update',
+      dataSchema: partialSchema,
     })
   },
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
@@ -102,7 +107,7 @@ export const updateCollectionTool = defineCollectionTool({
       }
     }
 
-    let parsedData = transformPointDataToPayload(data as Record<string, unknown>)
+    let parsedData = transformPointDataToPayload(data)
     const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
     parsedData = stripVirtualFields(parsedData, virtualFieldNames)
 

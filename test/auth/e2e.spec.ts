@@ -377,9 +377,7 @@ describe('Auth', () => {
         await expect(modalContainer).toBeVisible()
 
         // Click the "Leave anyway" button
-        await page
-          .locator('#leave-without-saving .alert-modal__controls .btn--style-primary')
-          .click()
+        await page.locator('#leave-without-saving .dialog__footer .btn--style-primary').click()
 
         await expect(page.locator('.login')).toBeVisible()
 

@@ -613,9 +613,7 @@ describe('relationship', () => {
       await openDocControls(drawer1Content, page)
       await page.locator('.popup__content #action-delete').click()
 
-      await page
-        .locator('[id^=delete-].payload__modal-item.alert-modal[open] button#confirm-action')
-        .click()
+      await page.locator('[id^=delete-].payload__modal-item[open] button[id$="-confirm"]').click()
 
       await expect(drawer1Content).toBeHidden()
 

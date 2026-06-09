@@ -60,12 +60,139 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_74BE97BC".
+ */
+export type LexicalNodes_74BE97BC =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_74BE97BC>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_74BE97BC>
+  | {
+      type: 'upload';
+      /**
+       * Lexical's internal serialization version for this node type.
+       */
+      version: number;
+      [k: string]: unknown;
+    }
+  | SerializedQuoteNode<LexicalNodes_74BE97BC>
+  | SerializedListNode<LexicalNodes_74BE97BC>
+  | SerializedListItemNode<LexicalNodes_74BE97BC>
+  | SerializedAutoLinkNode<LexicalNodes_74BE97BC, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_74BE97BC, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'public-users'
+      | 'posts'
+      | 'unrestricted'
+      | 'relation-restricted'
+      | 'fully-restricted'
+      | 'read-only-collection'
+      | 'user-restricted-collection'
+      | 'can-create-not-update-collection'
+      | 'restricted-versions'
+      | 'restricted-versions-admin-panel'
+      | 'sibling-data'
+      | 'rely-on-request-headers'
+      | 'doc-level-access'
+      | 'hidden-fields'
+      | 'hidden-access'
+      | 'hidden-access-count'
+      | 'fields-and-top-access'
+      | 'blocks-field-access'
+      | 'disabled'
+      | 'rich-text'
+      | 'regression1'
+      | 'regression2'
+      | 'hooks'
+      | 'auth-collection'
+      | 'read-restricted'
+      | 'differentiated-trash'
+      | 'restricted-trash'
+      | 'field-restricted-update-based-on-data'
+      | 'where-cache-same'
+      | 'where-cache-unique'
+      | 'async-parent'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_3CC4B7D0".
+ */
+export type LexicalNodes_3CC4B7D0 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_3CC4B7D0>
+  | SerializedHorizontalRuleNode
+  | {
+      type: 'upload';
+      /**
+       * Lexical's internal serialization version for this node type.
+       */
+      version: number;
+      [k: string]: unknown;
+    }
+  | SerializedQuoteNode<LexicalNodes_3CC4B7D0>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'public-users'
+      | 'posts'
+      | 'unrestricted'
+      | 'relation-restricted'
+      | 'fully-restricted'
+      | 'read-only-collection'
+      | 'user-restricted-collection'
+      | 'can-create-not-update-collection'
+      | 'restricted-versions'
+      | 'restricted-versions-admin-panel'
+      | 'sibling-data'
+      | 'rely-on-request-headers'
+      | 'doc-level-access'
+      | 'hidden-fields'
+      | 'hidden-access'
+      | 'hidden-access-count'
+      | 'fields-and-top-access'
+      | 'blocks-field-access'
+      | 'disabled'
+      | 'rich-text'
+      | 'regression1'
+      | 'regression2'
+      | 'hooks'
+      | 'auth-collection'
+      | 'read-restricted'
+      | 'differentiated-trash'
+      | 'restricted-trash'
+      | 'field-restricted-update-based-on-data'
+      | 'where-cache-same'
+      | 'where-cache-unique'
+      | 'async-parent'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_3CC4B7D0, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_3CC4B7D0, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_3CC4B7D0>
+  | SerializedListItemNode<LexicalNodes_3CC4B7D0>
+  | SerializedHeadingNode<LexicalNodes_3CC4B7D0>;
 
 export interface Config {
   auth: {
     users: UserAuthOperations;
     'public-users': PublicUserAuthOperations;
     'auth-collection': AuthCollectionAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {
     titleblock: Titleblock;
@@ -103,6 +230,7 @@ export interface Config {
     'where-cache-same': WhereCacheSame;
     'where-cache-unique': WhereCacheUnique;
     'async-parent': AsyncParent;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -142,6 +270,7 @@ export interface Config {
     'where-cache-same': WhereCacheSameSelect<false> | WhereCacheSameSelect<true>;
     'where-cache-unique': WhereCacheUniqueSelect<false> | WhereCacheUniqueSelect<true>;
     'async-parent': AsyncParentSelect<false> | AsyncParentSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -166,8 +295,10 @@ export interface Config {
     'read-not-update-global': ReadNotUpdateGlobalSelect<false> | ReadNotUpdateGlobalSelect<true>;
   };
   locale: null;
-  widgets: {};
-  user: User | PublicUser | AuthCollection;
+  widgets: {
+    collections: CollectionsWidget;
+  };
+  user: User | PublicUser | AuthCollection | PayloadMcpApiKey;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -227,9 +358,27 @@ export interface AuthCollectionAuthOperations {
     password: string;
   };
 }
+export interface PayloadMcpApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "titleblock".
+ * via the `definition` "Titleblock".
  */
 export interface Titleblock {
   title?: string | null;
@@ -493,40 +642,49 @@ export interface FieldsAndTopAccess {
 export interface BlocksFieldAccess {
   id: string;
   title: string;
-  editableBlocks?:
-    | {
-        title?: string | null;
-        content?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'testBlock';
-      }[]
-    | null;
-  readOnlyBlocks?:
-    | {
-        title?: string | null;
-        content?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'testBlock2';
-      }[]
-    | null;
+  editableBlocks?: TestBlock[] | null;
+  readOnlyBlocks?: TestBlock2[] | null;
   editableBlockRefs?: Titleblock[] | null;
   readOnlyBlockRefs?: Titleblock[] | null;
   tabReadOnlyTest?: {
-    tabReadOnlyBlocks?:
-      | {
-          title?: string | null;
-          content?: string | null;
-          id?: string | null;
-          blockName?: string | null;
-          blockType: 'testBlock3';
-        }[]
-      | null;
+    tabReadOnlyBlocks?: TestBlock3[] | null;
     tabReadOnlyBlockRefs?: Titleblock[] | null;
   };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestBlock".
+ */
+export interface TestBlock {
+  title?: string | null;
+  content?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestBlock2".
+ */
+export interface TestBlock2 {
+  title?: string | null;
+  content?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testBlock2';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestBlock3".
+ */
+export interface TestBlock3 {
+  title?: string | null;
+  content?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testBlock3';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -556,30 +714,19 @@ export interface Disabled {
  */
 export interface RichText {
   id: string;
-  blocks?:
-    | {
-        richText?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'richText';
-      }[]
-    | null;
+  blocks?: RichText1[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RichText".
+ */
+export interface RichText1 {
+  richText?: LexicalRichText<LexicalNodes_74BE97BC> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'richText';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -588,163 +735,62 @@ export interface RichText {
 export interface Regression1 {
   id: string;
   group1?: {
-    richText1?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText1?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
     text?: string | null;
   };
   tab1?: {
-    richText2?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    blocks2?:
-      | {
-          richText3?: {
-            root: {
-              type: string;
-              children: {
-                type: any;
-                version: number;
-                [k: string]: unknown;
-              }[];
-              direction: ('ltr' | 'rtl') | null;
-              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-              indent: number;
-              version: number;
-            };
-            [k: string]: unknown;
-          } | null;
-          id?: string | null;
-          blockName?: string | null;
-          blockType: 'myBlock';
-        }[]
-      | null;
+    richText2?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+    blocks2?: MyBlock_C0B6048C[] | null;
   };
-  richText4?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  blocks3?:
-    | {
-        richText5?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'myBlock2';
-      }[]
-    | null;
+  richText4?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+  blocks3?: MyBlock2[] | null;
   array?:
     | {
-        art?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
+        art?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
         id?: string | null;
       }[]
     | null;
   arrayWithAccessFalse?:
     | {
-        richText6?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
+        richText6?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        richText7?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'myBlock3';
-      }[]
-    | null;
+  blocks?: MyBlock3[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Multiple blocks resolve to the `MyBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock_C0B6048C".
+ */
+export interface MyBlock_C0B6048C {
+  richText3?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'myBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock2".
+ */
+export interface MyBlock2 {
+  richText5?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'myBlock2';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock3".
+ */
+export interface MyBlock3 {
+  richText7?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'myBlock3';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -753,40 +799,12 @@ export interface Regression1 {
 export interface Regression2 {
   id: string;
   group?: {
-    richText1?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText1?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
     text?: string | null;
   };
   array?:
     | {
-        richText2?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
+        richText2?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
         id?: string | null;
       }[]
     | null;
@@ -970,6 +988,49 @@ export interface AsyncParent {
   createdAt: string;
 }
 /**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
+  /**
+   * Access for this API key — uncheck to revoke individual tools.
+   */
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1120,6 +1181,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'async-parent';
         value: string | AsyncParent;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1134,6 +1199,10 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'auth-collection';
         value: string | AuthCollection;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       };
   updatedAt: string;
   createdAt: string;
@@ -1156,6 +1225,10 @@ export interface PayloadPreference {
     | {
         relationTo: 'auth-collection';
         value: string | AuthCollection;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       };
   key?: string | null;
   value?:
@@ -1781,6 +1854,22 @@ export interface AsyncParentSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  overrideAccess?: T;
+  access?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1919,10 +2008,198 @@ export interface ReadNotUpdateGlobalSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ */
+export interface LexicalLinkFields_0A7E9EC0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
 }
 
 
