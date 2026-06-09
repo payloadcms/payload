@@ -1,5 +1,5 @@
 import type { SanitizedConfig } from '../config/types.js'
-import type { FlattenedField } from '../fields/config/types.js'
+import type { FlattenedBlock, FlattenedField } from '../fields/config/types.js'
 
 /**
  * Get the field by its schema path, e.g. group.title, array.group.title
@@ -73,7 +73,11 @@ export const getFieldByPath = ({
 
     if ('blocks' in field && segments.length > 0) {
       const blockSlug = segments[0]
-      const block = field.blocks.find((b) => b.slug === blockSlug)
+      const block =
+        config?.blocks?.find((b) => b.slug === blockSlug) ??
+        field.blocks.find(
+          (b): b is FlattenedBlock => typeof b !== 'string' && b.slug === blockSlug,
+        )
 
       if (block) {
         segments.shift()
