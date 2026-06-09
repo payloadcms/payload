@@ -113,6 +113,10 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({ collectionSlug, 
     [groupByFieldName, listQuery],
   )
 
+  if (filteredFields.length === 0) {
+    return null
+  }
+
   const directionValue =
     !groupByRaw || typeof groupByRaw !== 'string'
       ? 'asc'

@@ -115,12 +115,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               {t('general:filters')}
             </Button>
           )}
-          {collectionConfig.admin.groupBy && (
-            <GroupByControl
-              collectionSlug={collectionConfig.slug}
-              fields={collectionConfig.fields}
-            />
-          )}
+          <GroupByControl collectionSlug={collectionConfig.slug} fields={collectionConfig.fields} />
           {enableColumns && <ColumnsButton collectionSlug={collectionConfig.slug} />}
           {enableSort && (
             <Button
