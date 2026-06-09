@@ -62,21 +62,22 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_E6CA934E".
+ * via the `definition` "LexicalNodes_9FF93200".
  */
-export type LexicalNodes_E6CA934E =
+export type LexicalNodes_9FF93200 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_E6CA934E>
+  | SerializedParagraphNode<LexicalNodes_9FF93200>
   | SerializedBlockNode<Callout>
   | SerializedInlineBlockNode<Kbd>
   | SerializedUploadNode<'uploads', LexicalUploadFields_7C90EEAC>
   | SerializedHorizontalRuleNode
-  | SerializedQuoteNode<LexicalNodes_E6CA934E>
+  | SerializedQuoteNode<LexicalNodes_9FF93200>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
+      | 'nested-drawers'
       | 'orderable'
       | 'search-bar-test'
       | 'talks'
@@ -122,32 +123,33 @@ export type LexicalNodes_E6CA934E =
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_E6CA934E, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_E6CA934E, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_E6CA934E>
-  | SerializedListItemNode<LexicalNodes_E6CA934E>
-  | SerializedHeadingNode<LexicalNodes_E6CA934E>;
+  | SerializedAutoLinkNode<LexicalNodes_9FF93200, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_9FF93200, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_9FF93200>
+  | SerializedListItemNode<LexicalNodes_9FF93200>
+  | SerializedHeadingNode<LexicalNodes_9FF93200>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_AA0E78C0".
+ * via the `definition` "LexicalNodes_119148C1".
  */
-export type LexicalNodes_AA0E78C0 =
+export type LexicalNodes_119148C1 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_AA0E78C0>
+  | SerializedParagraphNode<LexicalNodes_119148C1>
   | SerializedBlockNode<MyBlock>
   | SerializedInlineBlockNode<{blockType: string}>
-  | SerializedHeadingNode<LexicalNodes_AA0E78C0>
+  | SerializedHeadingNode<LexicalNodes_119148C1>
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_AA0E78C0>
-  | SerializedListNode<LexicalNodes_AA0E78C0>
-  | SerializedListItemNode<LexicalNodes_AA0E78C0>
-  | SerializedAutoLinkNode<LexicalNodes_AA0E78C0, LexicalLinkFields_AA0E78C0>
-  | SerializedLinkNode<LexicalNodes_AA0E78C0, LexicalLinkFields_AA0E78C0>
+  | SerializedQuoteNode<LexicalNodes_119148C1>
+  | SerializedListNode<LexicalNodes_119148C1>
+  | SerializedListItemNode<LexicalNodes_119148C1>
+  | SerializedAutoLinkNode<LexicalNodes_119148C1, LexicalLinkFields_119148C1>
+  | SerializedLinkNode<LexicalNodes_119148C1, LexicalLinkFields_119148C1>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
+      | 'nested-drawers'
       | 'orderable'
       | 'search-bar-test'
       | 'talks'
@@ -195,21 +197,22 @@ export type LexicalNodes_AA0E78C0 =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D5ECE514".
+ * via the `definition` "LexicalNodes_AE15BD8A".
  */
-export type LexicalNodes_D5ECE514 =
+export type LexicalNodes_AE15BD8A =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D5ECE514>
+  | SerializedParagraphNode<LexicalNodes_AE15BD8A>
   | SerializedBlockNode<Banner>
   | SerializedInlineBlockNode<Highlight>
-  | SerializedUploadNode<'uploads', LexicalUploadFields_76339D00>
+  | SerializedUploadNode<'uploads', LexicalUploadFields_8B8B04E9>
   | SerializedHorizontalRuleNode
-  | SerializedQuoteNode<LexicalNodes_D5ECE514>
+  | SerializedQuoteNode<LexicalNodes_AE15BD8A>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
+      | 'nested-drawers'
       | 'orderable'
       | 'search-bar-test'
       | 'talks'
@@ -255,29 +258,30 @@ export type LexicalNodes_D5ECE514 =
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_D5ECE514, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D5ECE514, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D5ECE514>
-  | SerializedListItemNode<LexicalNodes_D5ECE514>
-  | SerializedHeadingNode<LexicalNodes_D5ECE514>;
+  | SerializedAutoLinkNode<LexicalNodes_AE15BD8A, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_AE15BD8A, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_AE15BD8A>
+  | SerializedListItemNode<LexicalNodes_AE15BD8A>
+  | SerializedHeadingNode<LexicalNodes_AE15BD8A>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_B722CE44".
+ * via the `definition` "LexicalNodes_4CECD10C".
  */
-export type LexicalNodes_B722CE44 =
+export type LexicalNodes_4CECD10C =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_B722CE44>
-  | SerializedTableNode<LexicalNodes_B722CE44>
-  | SerializedTableCellNode<LexicalNodes_B722CE44>
-  | SerializedTableRowNode<LexicalNodes_B722CE44>
+  | SerializedParagraphNode<LexicalNodes_4CECD10C>
+  | SerializedTableNode<LexicalNodes_4CECD10C>
+  | SerializedTableCellNode<LexicalNodes_4CECD10C>
+  | SerializedTableRowNode<LexicalNodes_4CECD10C>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_B722CE44>
+  | SerializedQuoteNode<LexicalNodes_4CECD10C>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
+      | 'nested-drawers'
       | 'orderable'
       | 'search-bar-test'
       | 'talks'
@@ -323,28 +327,29 @@ export type LexicalNodes_B722CE44 =
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_B722CE44, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_B722CE44, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_B722CE44>
-  | SerializedListItemNode<LexicalNodes_B722CE44>
-  | SerializedHeadingNode<LexicalNodes_B722CE44>;
+  | SerializedAutoLinkNode<LexicalNodes_4CECD10C, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_4CECD10C, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_4CECD10C>
+  | SerializedListItemNode<LexicalNodes_4CECD10C>
+  | SerializedHeadingNode<LexicalNodes_4CECD10C>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_5D52C4F6".
+ * via the `definition` "LexicalNodes_74360060".
  */
-export type LexicalNodes_5D52C4F6 =
+export type LexicalNodes_74360060 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_5D52C4F6>
+  | SerializedParagraphNode<LexicalNodes_74360060>
   | SerializedBlockNode<Code>
   | SerializedInlineBlockNode<{blockType: string}>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_5D52C4F6>
+  | SerializedQuoteNode<LexicalNodes_74360060>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
+      | 'nested-drawers'
       | 'orderable'
       | 'search-bar-test'
       | 'talks'
@@ -390,26 +395,27 @@ export type LexicalNodes_5D52C4F6 =
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_5D52C4F6, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_5D52C4F6, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_5D52C4F6>
-  | SerializedListItemNode<LexicalNodes_5D52C4F6>
-  | SerializedHeadingNode<LexicalNodes_5D52C4F6>;
+  | SerializedAutoLinkNode<LexicalNodes_74360060, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_74360060, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_74360060>
+  | SerializedListItemNode<LexicalNodes_74360060>
+  | SerializedHeadingNode<LexicalNodes_74360060>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_B87BCF4E".
+ * via the `definition` "LexicalNodes_D692782A".
  */
-export type LexicalNodes_B87BCF4E =
+export type LexicalNodes_D692782A =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_B87BCF4E>
+  | SerializedParagraphNode<LexicalNodes_D692782A>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_B87BCF4E>
+  | SerializedQuoteNode<LexicalNodes_D692782A>
   | SerializedRelationshipNode<
       | 'users'
       | 'doc-controls'
+      | 'nested-drawers'
       | 'orderable'
       | 'search-bar-test'
       | 'talks'
@@ -455,11 +461,11 @@ export type LexicalNodes_B87BCF4E =
       | 'payload-migrations'
       | 'payload-query-presets'
     >
-  | SerializedAutoLinkNode<LexicalNodes_B87BCF4E, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_B87BCF4E, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_B87BCF4E>
-  | SerializedListItemNode<LexicalNodes_B87BCF4E>
-  | SerializedHeadingNode<LexicalNodes_B87BCF4E>;
+  | SerializedAutoLinkNode<LexicalNodes_D692782A, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D692782A, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_D692782A>
+  | SerializedListItemNode<LexicalNodes_D692782A>
+  | SerializedHeadingNode<LexicalNodes_D692782A>;
 
 export interface Config {
   auth: {
@@ -470,6 +476,7 @@ export interface Config {
   collections: {
     users: User;
     'doc-controls': DocControl;
+    'nested-drawers': NestedDrawer;
     orderable: Orderable;
     'search-bar-test': SearchBarTest;
     talks: Talk;
@@ -535,6 +542,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'doc-controls': DocControlsSelect<false> | DocControlsSelect<true>;
+    'nested-drawers': NestedDrawersSelect<false> | NestedDrawersSelect<true>;
     orderable: OrderableSelect<false> | OrderableSelect<true>;
     'search-bar-test': SearchBarTestSelect<false> | SearchBarTestSelect<true>;
     talks: TalksSelect<false> | TalksSelect<true>;
@@ -697,6 +705,124 @@ export interface Folder {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-drawers".
+ */
+export interface NestedDrawer {
+  id: string;
+  title: string;
+  /**
+   * Open or create a related doc to nest another drawer.
+   */
+  child?: (string | null) | NestedDrawer;
+  /**
+   * Opens a text-fields doc — different content in the drawer.
+   */
+  relatedText?: (string | null) | TextField;
+  relatedRelationship?: (string | null) | RelationshipField;
+  status?: ('draft' | 'published') | null;
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text-fields".
+ */
+export interface TextField {
+  id: string;
+  /**
+   * The public-facing title of this post
+   */
+  title: string;
+  /**
+   * List your favorite fruits
+   */
+  favoriteFruit?: string[] | null;
+  /**
+   * This field is disabled
+   */
+  textDisabled?: string | null;
+  /**
+   * This field is read-only
+   */
+  textReadOnly?: string | null;
+  /**
+   * Tags for this post (hierarchy field)
+   */
+  _h_tags?: (string | Tag)[] | null;
+  /**
+   * Documents that reference this post
+   */
+  relatedFrom?: {
+    docs?: (string | RelationshipField)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: string;
+  _h_tags?: (string | null) | Tag;
+  name: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+  allowedCollections?: ('talks' | 'text-fields' | 'tag-items')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationship-fields".
+ */
+export interface RelationshipField {
+  id: string;
+  /**
+   * The author of this post
+   */
+  author?: (string | null) | User;
+  /**
+   * Relationship with drawer appearance
+   */
+  authorWithDrawer?: (string | null) | User;
+  /**
+   * The author of this post
+   */
+  authorRequired: string | User;
+  /**
+   * Select related posts
+   */
+  relatedPosts?: (string | TextField)[] | null;
+  /**
+   * This field is disabled
+   */
+  authorDisabled?: (string | null) | User;
+  /**
+   * This field is read-only
+   */
+  authorReadOnly?: (string | null) | User;
+  /**
+   * Can relate to users or text fields
+   */
+  polymorphic?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'text-fields';
+        value: string | TextField;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orderable".
  */
 export interface Orderable {
@@ -739,7 +865,7 @@ export interface Talk {
    * One-paragraph teaser shown in listings.
    */
   shortDescription?: string | null;
-  abstract?: LexicalRichText<LexicalNodes_E6CA934E> | null;
+  abstract?: LexicalRichText<LexicalNodes_9FF93200> | null;
   track?: ('frontend' | 'backend' | 'devops' | 'design' | 'ai-ml' | 'workshop') | null;
   /**
    * Total runtime in minutes.
@@ -944,21 +1070,6 @@ export interface TalkQa {
   id?: string | null;
   blockName?: string | null;
   blockType: 'talk-qa';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tags".
- */
-export interface Tag {
-  id: string;
-  _h_tags?: (string | null) | Tag;
-  name: string;
-  description?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
-  allowedCollections?: ('talks' | 'text-fields' | 'tag-items')[] | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1541,97 +1652,15 @@ export interface RadioField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationship-fields".
- */
-export interface RelationshipField {
-  id: string;
-  /**
-   * The author of this post
-   */
-  author?: (string | null) | User;
-  /**
-   * Relationship with drawer appearance
-   */
-  authorWithDrawer?: (string | null) | User;
-  /**
-   * The author of this post
-   */
-  authorRequired: string | User;
-  /**
-   * Select related posts
-   */
-  relatedPosts?: (string | TextField)[] | null;
-  /**
-   * This field is disabled
-   */
-  authorDisabled?: (string | null) | User;
-  /**
-   * This field is read-only
-   */
-  authorReadOnly?: (string | null) | User;
-  /**
-   * Can relate to users or text fields
-   */
-  polymorphic?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'text-fields';
-        value: string | TextField;
-      } | null);
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "text-fields".
- */
-export interface TextField {
-  id: string;
-  /**
-   * The public-facing title of this post
-   */
-  title: string;
-  /**
-   * List your favorite fruits
-   */
-  favoriteFruit?: string[] | null;
-  /**
-   * This field is disabled
-   */
-  textDisabled?: string | null;
-  /**
-   * This field is read-only
-   */
-  textReadOnly?: string | null;
-  /**
-   * Tags for this post (hierarchy field)
-   */
-  _h_tags?: (string | Tag)[] | null;
-  /**
-   * Documents that reference this post
-   */
-  relatedFrom?: {
-    docs?: (string | RelationshipField)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rich-text-fields".
  */
 export interface RichTextField {
   id: string;
-  content?: LexicalRichText<LexicalNodes_D5ECE514> | null;
-  table?: LexicalRichText<LexicalNodes_B722CE44> | null;
-  code?: LexicalRichText<LexicalNodes_5D52C4F6> | null;
-  typography?: LexicalRichText<LexicalNodes_B87BCF4E> | null;
-  lists?: LexicalRichText<LexicalNodes_B87BCF4E> | null;
+  content?: LexicalRichText<LexicalNodes_AE15BD8A> | null;
+  table?: LexicalRichText<LexicalNodes_4CECD10C> | null;
+  code?: LexicalRichText<LexicalNodes_74360060> | null;
+  typography?: LexicalRichText<LexicalNodes_D692782A> | null;
+  lists?: LexicalRichText<LexicalNodes_D692782A> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1769,7 +1798,7 @@ export interface SlugField {
 export interface TabsField {
   id: string;
   title?: string | null;
-  postContent?: LexicalRichText<LexicalNodes_B87BCF4E> | null;
+  postContent?: LexicalRichText<LexicalNodes_D692782A> | null;
   featuredImage: string;
   metaTitle?: string | null;
   metaDescription?: string | null;
@@ -2152,6 +2181,10 @@ export interface PayloadLockedDocument {
         value: string | DocControl;
       } | null)
     | ({
+        relationTo: 'nested-drawers';
+        value: string | NestedDrawer;
+      } | null)
+    | ({
         relationTo: 'orderable';
         value: string | Orderable;
       } | null)
@@ -2446,6 +2479,20 @@ export interface DocControlsSelect<T extends boolean = true> {
   createdAt?: T;
   deletedAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-drawers_select".
+ */
+export interface NestedDrawersSelect<T extends boolean = true> {
+  title?: T;
+  child?: T;
+  relatedText?: T;
+  relatedRelationship?: T;
+  status?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3530,9 +3577,9 @@ export interface MyBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_AA0E78C0".
+ * via the `definition` "LexicalLinkFields_119148C1".
  */
-export interface LexicalLinkFields_AA0E78C0 {
+export interface LexicalLinkFields_119148C1 {
   linkType: 'custom' | 'internal';
   url?: string;
   doc?: {
@@ -3556,7 +3603,7 @@ export interface Banner {
   id: string;
   blockType: 'banner';
   style?: ('info' | 'warning' | 'error' | 'success') | null;
-  content?: LexicalRichText<LexicalNodes_AA0E78C0> | null;
+  content?: LexicalRichText<LexicalNodes_119148C1> | null;
   blockName?: string | null;
 }
 /**
@@ -3571,10 +3618,10 @@ export interface Highlight {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalUploadFields_76339D00".
+ * via the `definition` "LexicalUploadFields_8B8B04E9".
  */
-export interface LexicalUploadFields_76339D00 {
-  caption?: LexicalRichText<LexicalNodes_AA0E78C0> | null;
+export interface LexicalUploadFields_8B8B04E9 {
+  caption?: LexicalRichText<LexicalNodes_119148C1> | null;
   altText?: string | null;
 }
 /**

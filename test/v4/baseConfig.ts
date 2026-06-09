@@ -15,6 +15,7 @@ import {
   foldersSlug,
   joinFieldsSlug,
   joinPostsSlug,
+  nestedDrawersSlug,
   orderableSlug,
   relationshipFieldsSlug,
   richTextFieldsSlug,
@@ -55,6 +56,7 @@ import GroupFields from './collections/Group/index.js'
 import JoinFields from './collections/Join/index.js'
 import JoinPosts from './collections/JoinPosts/index.js'
 import JSONFields from './collections/JSON/index.js'
+import NestedDrawers from './collections/NestedDrawers/index.js'
 import NumberFields from './collections/Number/index.js'
 import Orderable from './collections/Orderable/index.js'
 import PasswordFields from './collections/Password/index.js'
@@ -100,6 +102,7 @@ export const collections: CollectionConfig[] = [
   withGroup(Users, 'Auth'),
   // Elements
   withGroup(DocControls, 'Elements'),
+  withGroup(NestedDrawers, 'Elements'),
   withGroup(Orderable, 'Elements'),
   withGroup(SearchBarTest, 'Elements'),
   withGroup(Talks, 'Elements'),
@@ -285,7 +288,7 @@ export const baseConfig: Partial<Config> = {
     }
 
     // Seed relationship-fields to test join field
-    await payload.create({
+    const createdRelationship = await payload.create({
       collection: relationshipFieldsSlug,
       data: {
         authorRequired: devUserDoc.id,
@@ -719,6 +722,24 @@ export const baseConfig: Partial<Config> = {
       },
       draft: true,
     })
+
+    // Seed nested-drawers collection: a chain of docs linked via the
+    // self-referencing `child` field so drawers can be drilled into.
+    let previousNestedChild: number | string | undefined
+    for (let i = 5; i >= 1; i--) {
+      const created = await payload.create({
+        collection: nestedDrawersSlug,
+        data: {
+          title: `Nested Drawer ${i}`,
+          child: previousNestedChild as string,
+          publishedAt: new Date().toISOString(),
+          relatedRelationship: createdRelationship.id,
+          relatedText: createdPosts[i - 1]?.id as string,
+          status: i % 2 === 0 ? 'published' : 'draft',
+        },
+      })
+      previousNestedChild = created.id
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

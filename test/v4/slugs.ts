@@ -38,6 +38,7 @@ export const talksSlug = 'talks'
 export const unauthorizedSlug = 'unauthorized-test'
 export const docControlsSlug = 'doc-controls'
 export const versionsDiffSlug = 'versions-diff'
+export const nestedDrawersSlug = 'nested-drawers'
 
 export const collectionSlugs = [
   'users',
@@ -79,5 +80,6 @@ export const collectionSlugs = [
   unauthorizedSlug,
   docControlsSlug,
   versionsDiffSlug,
+  nestedDrawersSlug,
   'payload-query-presets',
 ]
