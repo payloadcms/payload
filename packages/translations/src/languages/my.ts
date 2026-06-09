@@ -22,6 +22,8 @@ export const myTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'E-mel atau Nama Pengguna',
     emailSent: 'မေးလ် ပို့ထားပါသည်။',
     emailVerified: 'အီးမေးလ်အတည်ပြုခဲ့ပါပြီ။',
+    emailVerifiedRedirecting:
+      'အီးမေးလ်အောင်မြင်စွာအတည်ပြုလုပ်ဆောင်ပြီးပါပြီ။ သင်အားဝင်ရောက်အသုံးပြုရန် ပြန်လည်ညွှန်ပြနေပါပြီ...',
     enableAPIKey: 'API Key ကိုဖွင့်ရန်',
     failedToUnlock: 'လော့ခ်ဖွင့်၍မရပါ။',
     forceUnlock: 'လော့ခ်ဖွင့်ရန်',
@@ -55,6 +57,7 @@ export const myTranslations: DefaultTranslationsObject = {
       '<a href="{{serverURL}}">{{serverURL}}</a> သို့ဝင်ရောက်ရန် သင့်အီးမေးလ်ကို အတည်ပြုရန်အတွက် အကောင့်အသစ်တစ်ခုကို ယခုလေးတင် ဖန်တီးပြီးပါပြီ။ ကျေးဇူးပြု၍ အောက်ပါလင့်ခ်ကို နှိပ်ပါ သို့မဟုတ် သင့်အီးမေးလ်ကို အတည်ပြုရန် ဖော်ပြပါ လင့်ခ်ကို သင့်ဘရောက်ဆာထဲသို့ ကူးထည့်ပါ- <a href="{{verificationURL}}">{{verificationURL}}</a><br> သင့်အီးမေးလ်ကို အတည်ပြုပြီးနောက်၊ သင်သည် အောင်မြင်စွာ လော့ဂ်အင်ဝင်နိုင်ပါမည်။',
     newAPIKeyGenerated: 'New API Key Generated.',
     newPassword: 'စကားဝှက် အသစ်',
+    notRedirected: 'မအော်တိုမတင်ပြောင်းသေးပါဘူးလား? <0>ဤနေရာတွင် လော့ဂ်အင်ဝင်ပါ</0>',
     passed: 'အတည်ပြုချက် ကျောင်းပြန်',
     passwordResetSuccessfully: 'စကားဝှက် ပြန်လည်စစ်ဆင်မှု အောင်မြင်စွာ ပြီးစီးပါပြီ။',
     resetPassword: 'စကားဝှက် ပြန်လည်သတ်မှတ်',

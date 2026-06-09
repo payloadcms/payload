@@ -22,6 +22,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'Электронная почта или Имя пользователя',
     emailSent: 'Email отправлен',
     emailVerified: 'Электронная почта успешно подтверждена.',
+    emailVerifiedRedirecting:
+      'Электронная почта успешно подтверждена. Перенаправление на страницу входа...',
     enableAPIKey: 'Активировать API ключ',
     failedToUnlock: 'Не удалось разблокировать',
     forceUnlock: 'Принудительная разблокировка',
@@ -56,6 +58,7 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Новый аккаунт был создан для доступа к <a href="{{serverURL}}">{{serverURL}}</a> Пожалуйста, кликните по следующей ссылке или вставьте в адресную строку браузера чтобы подтвердить email: <a href="{{verificationURL}}">{{verificationURL}}</a><br> После подтверждения вашего email, вы сможете успешно войти в систему.',
     newAPIKeyGenerated: 'Новый API ключ сгенерирован.',
     newPassword: 'Новый пароль',
+    notRedirected: 'Не перенаправлены? <0>Войдите здесь</0>',
     passed: 'Аутентификация пройдена',
     passwordResetSuccessfully: 'Сброс пароля успешно выполнен.',
     resetPassword: 'Сброс пароля',

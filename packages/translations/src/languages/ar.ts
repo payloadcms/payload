@@ -22,6 +22,8 @@ export const arTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'البريد الإلكتروني أو اسم المستخدم',
     emailSent: 'تمّ ارسال البريد الإلكتروني',
     emailVerified: 'تم التحقق من البريد الإلكتروني بنجاح.',
+    emailVerifiedRedirecting:
+      'تم التحقق من البريد الإلكتروني بنجاح. سيتم تحويلك إلى صفحة تسجيل الدخول...',
     enableAPIKey: 'تفعيل مفتاح API',
     failedToUnlock: 'فشل فتح القفل',
     forceUnlock: 'إجبار فتح القفل',
@@ -55,6 +57,7 @@ export const arTranslations: DefaultTranslationsObject = {
       'تمّ إنشاء حساب جديد لتتمكّن من الوصول إلى <a href="{{serverURL}}"> {{serverURL}} </a> الرّجاء النّقر فوق الرّابط التّالي أو لصق عنوان URL أدناه في متصفّحّك لتأكيد بريدك الإلكتروني : <a href="{{verificationURL}}"> {{verificationURL}} </a> <br> بعد التّحقّق من بريدك الإلكتروني ، ستتمكّن من تسجيل الدّخول بنجاح.',
     newAPIKeyGenerated: 'تمّ توليد مفتاح API جديد.',
     newPassword: 'كلمة مرور جديدة',
+    notRedirected: 'لم يتم إعادة التوجيه؟ <0>تسجيل الدخول من هنا</0>',
     passed: 'تمت المصادقة',
     passwordResetSuccessfully: 'تمت إعادة تعيين كلمة المرور بنجاح.',
     resetPassword: 'إعادة تعيين كلمة المرور',

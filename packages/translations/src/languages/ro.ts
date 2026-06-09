@@ -22,6 +22,8 @@ export const roTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'Email sau Nume de utilizator',
     emailSent: 'Email trimis',
     emailVerified: 'E-mail verificat cu succes.',
+    emailVerifiedRedirecting:
+      'E-mail verificat cu succes. Veți fi redirecționat către autentificare...',
     enableAPIKey: 'Activați cheia API',
     failedToUnlock: 'Nu s-a reușit deblocarea',
     forceUnlock: 'Forțați deblocarea',
@@ -57,6 +59,7 @@ export const roTranslations: DefaultTranslationsObject = {
       'A fost creat un nou cont pe care îl puteți accesa <a href="{{serverURL}}">{{serverURL}}</a> Vă rugăm să intrați pe următorul link sau să copiați URL-ul de mai jos în browserul dvs. pentru a vă verifica emailul: <a href="{{verificationURL}}">{{verificationURL}}</a><br> După ce vă verificați adresa de email, vă veți putea autentifica cu succes.',
     newAPIKeyGenerated: 'Cheie nouă API generată.',
     newPassword: 'Parolă nouă',
+    notRedirected: 'Nu ați fost redirecționat? <0>Autentificați-vă aici</0>',
     passed: 'Autentificare reușită',
     passwordResetSuccessfully: 'Resetarea parolei a fost realizată cu succes.',
     resetPassword: 'Resetează parola',

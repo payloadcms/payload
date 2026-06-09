@@ -22,6 +22,8 @@ export const taTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'மின்னஞ்சல் அல்லது பயனர் பெயர்',
     emailSent: 'மின்னஞ்சல் அனுப்பப்பட்டது',
     emailVerified: 'மின்னஞ்சல் வெற்றிகரமாக சரிபார்க்கப்பட்டது.',
+    emailVerifiedRedirecting:
+      'மின்னஞ்சல் வெற்றிகரமாக சரிபார்க்கப்பட்டது. உங்களை உள்நுழைவதற்கு மாற்றிவிடுகிறோம்...',
     enableAPIKey: 'API விசையை இயக்கவும்',
     failedToUnlock: 'திறக்க முடியவில்லை',
     forceUnlock: 'கட்டாயமாக திற',
@@ -54,6 +56,7 @@ export const taTranslations: DefaultTranslationsObject = {
       'உங்களுக்கு ஒரு புதிய கணக்கு உருவாக்கப்பட்டுள்ளது <a href="{{serverURL}}">{{serverURL}}</a> அணுக. உங்கள் மின்னஞ்சலை சரிபார்க்க, பின்வரும் இணைப்பைக் கிளிக் செய்யவும் அல்லது உலாவியில் URL ஐ ஒட்டவும்: <a href="{{verificationURL}}">{{verificationURL}}</a><br> மின்னஞ்சல் சரிபார்த்த பின், வெற்றிகரமாக உள்நுழையலாம்.',
     newAPIKeyGenerated: 'புதிய API விசை உருவாக்கப்பட்டது.',
     newPassword: 'புதிய கடவுச்சொல்',
+    notRedirected: 'திருப்பிவிடப்படவில்லைதாங்கள் இங்கு புகுபதிகை செய்யலாம்',
     passed: 'அங்கீகாரம் நிறைவேற்றப்பட்டது',
     passwordResetSuccessfully: 'கடவுச்சொல் வெற்றிகரமாக மீட்டமைக்கப்பட்டது.',
     resetPassword: 'கடவுச்சொல்லை மீட்டமை',

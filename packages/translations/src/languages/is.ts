@@ -22,6 +22,8 @@ export const isTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'Netfang eða notandanafn',
     emailSent: 'Tölvupóstur sendur',
     emailVerified: 'Netfang staðfest.',
+    emailVerifiedRedirecting:
+      'Netfang staðfest með góðum árangri. Þú verður fluttur áfram á innskráningarsíðuna...',
     enableAPIKey: 'Virkja API lykil',
     failedToUnlock: 'Aflæsing tókst ekki',
     forceUnlock: 'Þvinga aflæsingu',
@@ -56,6 +58,7 @@ export const isTranslations: DefaultTranslationsObject = {
       'Nýr reikningur hefur verið búinn til fyrir þig til að fá aðgang að <a href="{{serverURL}}">{{serverURL}}</a> Vinsamlegast smelltu á eftirfarandi hlekk eða límdu vefslóðina hér að neðan í vafrann þinn til að staðfesta netfangið þitt: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Eftir að þú hefur staðfest netfangið þitt muntu geta skráð þig inn.',
     newAPIKeyGenerated: 'Nýr API lykill myndaður.',
     newPassword: 'Nýtt lykilorð',
+    notRedirected: 'Ekki sjálfkrafa vísað áfram? <0>Skráðu þig inn hér</0>',
     passed: 'Auðkenning tókst',
     passwordResetSuccessfully: 'Lykilorð endursett.',
     resetPassword: 'Endursetja lykilorð',

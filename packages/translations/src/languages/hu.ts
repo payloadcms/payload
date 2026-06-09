@@ -22,6 +22,8 @@ export const huTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'E-mail vagy Felhasználónév',
     emailSent: 'E-mail elküldve',
     emailVerified: 'Az email sikeresen megerősítve.',
+    emailVerifiedRedirecting:
+      'Az e-mail címet sikeresen visszaigazoltuk. Átirányítjuk a bejelentkezéshez...',
     enableAPIKey: 'API-kulcs engedélyezése',
     failedToUnlock: 'Nem sikerült feloldani',
     forceUnlock: 'Kényszerített feloldás',
@@ -57,6 +59,7 @@ export const huTranslations: DefaultTranslationsObject = {
       'Létrehoztunk egy új fiókot, amellyel hozzáférhet a következőhöz <a href="{{serverURL}}"> {{serverURL}} </a> Kérjük, kattintson a következő linkre, vagy illessze be az alábbi URL-t a böngészőbe az e-mail-cím ellenőrzéséhez : <a href="{{verificationURL}}"> {{verificationURL}} </a> <br> Az e-mail-cím ellenőrzése után sikeresen be tud majd jelentkezni.',
     newAPIKeyGenerated: 'Új API-kulcs generálva.',
     newPassword: 'Új jelszó',
+    notRedirected: 'Nem történt átirányítás? <0>Jelentkezzen be itt</0>',
     passed: 'Hitelesítés sikeres',
     passwordResetSuccessfully: 'A jelszó sikeresen vissza lett állítva.',
     resetPassword: 'Jelszó visszaállítása',

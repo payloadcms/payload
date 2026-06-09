@@ -22,6 +22,8 @@ export const esTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'Correo electrónico o nombre de usuario',
     emailSent: 'Correo Enviado',
     emailVerified: 'Correo electrónico verificado con éxito.',
+    emailVerifiedRedirecting:
+      'Correo electrónico verificado correctamente. Redirigiéndolo para iniciar sesión...',
     enableAPIKey: 'Habilitar Clave API',
     failedToUnlock: 'Desbloqueo Fallido',
     forceUnlock: 'Forzar Desbloqueo',
@@ -55,6 +57,7 @@ export const esTranslations: DefaultTranslationsObject = {
       'Se ha creado una nueva cuenta para que puedas acceder a <a href="{{serverURL}}">{{serverURL}}</a>. Por favor, haz click o copia el siguiente enlace a tu navegador para verificar tu correo: <a href="{{verificationURL}}">{{verificationURL}}</a>.<br> Una vez hayas verificado tu correo, podrás iniciar sesión.',
     newAPIKeyGenerated: 'Nueva Clave de API Generada.',
     newPassword: 'Nueva Contraseña',
+    notRedirected: '¿No fue redirigido? <0>Inicie sesión aquí</0>',
     passed: 'Autenticación Exitosa',
     passwordResetSuccessfully: 'Contraseña restablecida con éxito.',
     resetPassword: 'Restablecer Contraseña',

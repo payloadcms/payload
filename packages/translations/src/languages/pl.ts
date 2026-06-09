@@ -22,6 +22,8 @@ export const plTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'Email lub Nazwa użytkownika',
     emailSent: 'Wysłano email',
     emailVerified: 'Email zweryfikowany pomyślnie.',
+    emailVerifiedRedirecting:
+      'Adres e-mail został pomyślnie zweryfikowany. Następuje przekierowanie do logowania...',
     enableAPIKey: 'Aktywuj klucz API',
     failedToUnlock: 'Nie udało się odblokować',
     forceUnlock: 'Wymuś odblokowanie',
@@ -55,6 +57,7 @@ export const plTranslations: DefaultTranslationsObject = {
       'Właśnie utworzono nowe konto, w celu uzyskania dostępu do <a href="{{serverURL}}">{{serverURL}}</a>. Kliknij poniższy link lub wklej go do przeglądarki, aby zweryfikować swój adres email: <a href="{{verificationURL}}">{{verificationURL}}</a>.<br> Po zweryfikowaniu adresu email będziesz mógł się pomyślnie zalogować.',
     newAPIKeyGenerated: 'Wygenerowano nowy klucz API.',
     newPassword: 'Nowe hasło',
+    notRedirected: 'Nie zostałeś przekierowany? <0>Zaloguj się tutaj</0>',
     passed: 'Uwierzytelnienie zakończone sukcesem',
     passwordResetSuccessfully: 'Hasło zostało pomyślnie zresetowane.',
     resetPassword: 'Zresetuj hasło',
