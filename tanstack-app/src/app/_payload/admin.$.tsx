@@ -1,4 +1,4 @@
-import { createFileRoute, notFound, redirect, useLocation } from '@tanstack/react-router'
+import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 import { Fragment } from 'react'
 
 import { loadAdminPageRSC } from '../../functions/adminPageRSC.functions.js'
@@ -39,16 +39,23 @@ export const Route = createFileRoute('/_payload/admin/$')({
 
 function AdminPage() {
   const data = Route.useLoaderData() as any
-  const pathname = useLocation({ select: (location) => location.pathname })
 
   // RSC Flight payload — render directly, no client-side data reconstruction.
   //
-  // Key the subtree by pathname so navigating to a different admin page (e.g.
-  // the create → edit redirect after a successful save) remounts the view,
-  // mirroring Next.js route-segment semantics. Without this the `$` splat route
-  // reconciles in place and mount-only effects never re-run — most visibly the
-  // "successfully created" toast that the Edit view replays from sessionStorage
-  // on mount. Same-pathname navigations (e.g. list-view filtering via search
-  // params) keep the same key and reconcile in place.
-  return <Fragment key={pathname}>{data?.rscPayload}</Fragment>
+  // Key the subtree by `routeKey` (the splat, derived server-side from the same
+  // loader result as `rscPayload`) so navigating to a different admin page
+  // (e.g. the create → edit redirect after a save, or duplicate) remounts the
+  // view, mirroring Next.js route-segment semantics. Mount-only effects re-run
+  // and client providers (DocumentInfo, etc.) re-initialize from the new
+  // payload's props.
+  //
+  // We deliberately key by the loader-derived `routeKey` rather than
+  // `location.pathname`: during a navigation transition the pathname updates
+  // before `useLoaderData()`, so a pathname key would remount with the
+  // *previous* payload and then reconcile the fresh payload in place, leaving
+  // providers holding stale `useState` from the prior document (e.g. a
+  // duplicated draft showing the source's "Published" status). `routeKey`
+  // changes in lockstep with `rscPayload`. Search params are excluded so
+  // search-only changes (list-view filtering) reconcile in place.
+  return <Fragment key={data?.routeKey}>{data?.rscPayload}</Fragment>
 }

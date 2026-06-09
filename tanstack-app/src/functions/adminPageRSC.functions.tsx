@@ -14,6 +14,18 @@ type LoadResult =
   | { _redirect: string }
   | {
       metadata: AdminPageMetadata
+      /**
+       * Stable identity for this rendered route (the splat, i.e. the path
+       * after `/admin/`). The client keys the rendered subtree by this so the
+       * view remounts exactly when a new payload arrives. Keying by
+       * `location.pathname` instead races: the pathname updates before
+       * `useLoaderData()` during a transition, so the subtree would remount
+       * with the *previous* payload and then reconcile the fresh payload in
+       * place — leaving client providers (DocumentInfo, etc.) holding stale
+       * `useState` values from the prior document. Search params are excluded
+       * so search-only changes (e.g. list-view filtering) reconcile in place.
+       */
+      routeKey: string
       rscPayload: React.ReactNode
     }
 
@@ -232,6 +244,7 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
 
       return {
         metadata: toAdminPageMetadata(meta),
+        routeKey: data._splat ?? '',
         rscPayload,
       } as unknown as LoadResult
     } catch (err) {
