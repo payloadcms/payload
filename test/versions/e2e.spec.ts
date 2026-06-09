@@ -1602,7 +1602,7 @@ describe('Versions', () => {
       const drawerContent = localPage.locator('.schedule-publish__scheduler')
       const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
       await dropdownControlSelector.click()
-      await (getSelectMenu({ page: localPage })).locator('.rs__option', { hasText: 'Paris' }).click()
+      await getSelectMenu({ page: localPage }).locator('.rs__option', { hasText: 'Paris' }).click()
 
       const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
       // Create a date for 2049-01-01 18:00:00 UTC, so it is timezone-invariant across CI environments

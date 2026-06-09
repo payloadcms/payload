@@ -18,8 +18,8 @@ import {
   runJobsQueue,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
-import { setPerPageLimit } from '../__helpers/e2e/setPerPageLimit.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
+import { setPerPageLimit } from '../__helpers/e2e/setPerPageLimit.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -90,7 +90,7 @@ test.describe('Import Export Plugin', () => {
       const formatField = page.locator('.format-field .rs__control')
       await expect(formatField).toBeVisible()
       await formatField.click()
-      await (getSelectMenu({ page })).locator('.rs__option', { hasText: 'json' }).click()
+      await getSelectMenu({ page }).locator('.rs__option', { hasText: 'json' }).click()
 
       await saveDocAndAssert(page)
 
@@ -944,7 +944,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await (getSelectMenu({ page })).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({
@@ -972,7 +972,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await (getSelectMenu({ page })).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({
@@ -1015,7 +1015,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await (getSelectMenu({ page })).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({

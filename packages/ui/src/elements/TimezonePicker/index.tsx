@@ -107,6 +107,7 @@ export const TimezonePicker: React.FC<Props> = (props) => {
           ClearIndicator: SmallClearIndicator,
           DropdownIndicator: SmallDropdownIndicator,
         }}
+        customProps={{ menuPortalTheme: 'dark' }}
         disabled={readOnly}
         inputId={id}
         isClearable={!required}
@@ -123,18 +124,6 @@ export const TimezonePicker: React.FC<Props> = (props) => {
             control: (base) => ({
               ...base,
               flexWrap: 'nowrap',
-            }),
-            option: (base, state) => ({
-              ...base,
-              backgroundColor: state.isSelected
-                ? 'var(--popup-item-bg-selected-dark, var(--color-bg-selected))'
-                : state.isFocused
-                  ? 'var(--popup-item-bg-hover-dark, var(--color-bg-selected-strong))'
-                  : 'transparent',
-              color:
-                state.isFocused || state.isSelected
-                  ? 'var(--popup-item-color-hover-dark, var(--color-text-onselected-strong))'
-                  : 'var(--popup-item-color-dark, var(--color-text-ontooltip))',
             }),
           } as StylesConfig<OptionType>
         }

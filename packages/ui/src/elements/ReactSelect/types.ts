@@ -1,5 +1,6 @@
 import type { LabelFunction } from 'payload'
 import type {
+  ClassNamesConfig,
   CommonProps,
   GroupBase,
   Props as ReactSelectStateManagerProps,
@@ -18,6 +19,8 @@ type CustomSelectProps = {
     className: string,
     selectProps: ReactSelectStateManagerProps,
   ) => any
+  /** Force the portaled menu to render with a specific theme, independent of the control's ambient theme. */
+  menuPortalTheme?: 'dark' | 'light'
   onDelete?: DocumentDrawerProps['onDelete']
   onDocumentOpen?: (args: {
     collectionSlug: string
@@ -68,6 +71,7 @@ export type ReactSelectAdapterProps = {
   backspaceRemovesValue?: boolean
   blurInputOnSelect?: boolean
   className?: string
+  classNames?: ClassNamesConfig<Option, boolean, GroupBase<Option>>
   components?: {
     [key: string]: React.FC<any>
   }

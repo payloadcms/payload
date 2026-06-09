@@ -25,15 +25,6 @@
       display: inline-flex;
       position: static;
 
-      .rs__option {
-        padding: var(--spacer-1) var(--spacer-2);
-        border-radius: var(--button-radius);
-        cursor: pointer;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
       .rs__option--is-focused,
       .rs__option--is-selected {
         /* Colors handled by inline styles via react-select styles prop */
@@ -150,17 +141,40 @@
   }
 
   .timezone-picker__menu {
-    overflow: hidden;
     border-radius: var(--radius-large);
-    background: var(--popup-bg-dark, var(--color-bg-menu));
-    color: var(--popup-item-color-dark, var(--color-text-ontooltip));
-    padding: var(--spacer-2);
+    background: var(--color-bg-menu);
+    color: var(--color-text);
+    padding-top: var(--spacer-2);
     min-width: 280px;
-    max-height: 280px;
+
+    .rs__option {
+      padding: var(--spacer-1) var(--spacer-2);
+      border-radius: var(--button-radius);
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   .timezone-picker__menu-list {
     max-height: calc(var(--spacer-6) * 5);
-    overflow-y: auto;
+    padding-inline: var(--spacer-2);
+    padding-bottom: var(--spacer-2);
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-text) 40%, transparent) transparent;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--color-text) 40%, transparent);
+      border-radius: 2px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
   }
 }

@@ -1,6 +1,6 @@
 'use client'
 import type { JSX, KeyboardEventHandler } from 'react'
-import type { GroupBase, StylesConfig } from 'react-select'
+import type { GroupBase, MenuProps, StylesConfig } from 'react-select'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
@@ -38,10 +38,11 @@ function ThemedMenuPortal<Opt, IsMulti extends boolean, Group extends GroupBase<
   props: React.ComponentProps<typeof rsComponents.MenuPortal<Opt, IsMulti, Group>>,
 ) {
   const { theme } = useTheme()
+  const menuPortalTheme = (props.selectProps as any)?.customProps?.menuPortalTheme
   return (
     <rsComponents.MenuPortal
       {...props}
-      innerProps={{ 'data-theme': theme } as JSX.IntrinsicElements['div']}
+      innerProps={{ 'data-theme': menuPortalTheme ?? theme } as JSX.IntrinsicElements['div']}
     />
   )
 }
@@ -135,7 +136,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
 
   if (!isCreatable) {
     return (
-      <Select
+      <Select<Option, boolean, GroupBase<Option>>
         captureMenuScroll
         customProps={customProps}
         isLoading={isLoading}
@@ -144,7 +145,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         classNamePrefix="rs"
         classNames={{
           ...externalClassNames,
-          menu: (state) => {
+          menu: (state: MenuProps<Option, boolean, GroupBase<Option>>) => {
             const placement = state.placement ? `rs__menu--placement-${state.placement}` : ''
             const external = externalClassNames?.menu?.(state) ?? ''
             return [placement, external].filter(Boolean).join(' ')
@@ -226,7 +227,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   }
 
   return (
-    <CreatableSelect
+    <CreatableSelect<Option, boolean, GroupBase<Option>>
       captureMenuScroll
       isLoading={isLoading}
       {...props}
@@ -234,7 +235,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       classNamePrefix="rs"
       classNames={{
         ...externalClassNames,
-        menu: (state) => {
+        menu: (state: MenuProps<Option, boolean, GroupBase<Option>>) => {
           const placement = state.placement ? `rs__menu--placement-${state.placement}` : ''
           const external = externalClassNames?.menu?.(state) ?? ''
           return [placement, external].filter(Boolean).join(' ')

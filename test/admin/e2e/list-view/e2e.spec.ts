@@ -414,7 +414,7 @@ describe('List View', () => {
       await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
-        (getSelectMenu({ page })).locator('.rs__option', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText('Title'),
         }),
       ).toBeVisible()
@@ -559,7 +559,7 @@ describe('List View', () => {
 
       await whereBuilder.locator('.condition__value').click()
 
-      const valueOptions = await (getSelectMenu({ page }))
+      const valueOptions = await getSelectMenu({ page })
         .locator('.rs__option')
         .evaluateAll((options) => options.map((option) => option.textContent))
 
@@ -862,7 +862,7 @@ describe('List View', () => {
       const condition2 = page.locator('.condition__field').nth(1)
       await condition2.click()
       await expect(
-        (getSelectMenu({ page })).filter({
+        getSelectMenu({ page }).filter({
           hasText: 'Disable List Filter Text',
         }),
       ).toBeHidden()
@@ -881,7 +881,7 @@ describe('List View', () => {
       await valueField.click()
       await page.keyboard.type('4')
 
-      const options = (getSelectMenu({ page })).locator('.rs__option')
+      const options = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(options).toHaveCount(10)
 

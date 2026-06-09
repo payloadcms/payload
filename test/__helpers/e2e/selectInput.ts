@@ -58,7 +58,7 @@ export async function selectInput({
   clear = true,
   filter,
   selectType = 'select',
-}: SelectReactOptionsParams & { page: Page }) {
+}: { page: Page } & SelectReactOptionsParams) {
   if (filter) {
     await openSelectMenu({ page, selectLocator })
     const inputLocator = selectLocator.locator('.rs__input[type="text"]')
@@ -90,7 +90,13 @@ export async function selectInput({
   }
 }
 
-export async function openSelectMenu({ page, selectLocator }: { page: Page; selectLocator: Locator }): Promise<void> {
+export async function openSelectMenu({
+  page,
+  selectLocator,
+}: {
+  page: Page
+  selectLocator: Locator
+}): Promise<void> {
   const menu = getSelectMenu({ page })
   if (await menu.isHidden()) {
     await selectLocator.locator('button.dropdown-indicator').click()

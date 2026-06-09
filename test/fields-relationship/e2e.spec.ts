@@ -447,7 +447,7 @@ describe('Relationship Field', () => {
 
       const valueInput = page.locator('.condition__value input')
       await valueInput.click()
-      const valueOptions = (getSelectMenu({ page })).locator('.rs__option')
+      const valueOptions = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(valueOptions).toHaveCount(2)
       await expect(valueOptions.locator(`text=None`)).toBeVisible()
@@ -494,7 +494,7 @@ describe('Relationship Field', () => {
 
       const valueInput = condition1.locator('.condition__value input')
       await valueInput.click()
-      const valueOptions = (getSelectMenu({ page })).locator('.rs__option')
+      const valueOptions = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(valueOptions).toHaveCount(2)
       await expect(valueOptions.locator(`text=None`)).toBeVisible()
@@ -508,7 +508,7 @@ describe('Relationship Field', () => {
 
       const valueInput2 = condition2.locator('.condition__value input')
       await valueInput2.click()
-      const valueOptions2 = (getSelectMenu({ page })).locator('.rs__option')
+      const valueOptions2 = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(valueOptions2).toHaveCount(2)
       await expect(valueOptions2.locator(`text=None`)).toBeVisible()
@@ -801,7 +801,7 @@ describe('Relationship Field', () => {
       await wait(300)
       const input = page.locator('#field-relationshipWithTitle input')
       await input.fill('title')
-      const options = (getSelectMenu({ page })).locator('.rs__option')
+      const options = getSelectMenu({ page }).locator('.rs__option')
       await expect(options).toHaveCount(1)
 
       await input.fill('non-occurring-string')
@@ -813,7 +813,7 @@ describe('Relationship Field', () => {
       await wait(300)
       const input = page.locator('#field-relationshipWithTitle input')
       await input.fill('word search')
-      const options = (getSelectMenu({ page })).locator('.rs__option')
+      const options = getSelectMenu({ page }).locator('.rs__option')
       await expect(options).toHaveCount(1)
     })
 
