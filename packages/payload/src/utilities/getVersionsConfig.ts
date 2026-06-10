@@ -1,10 +1,10 @@
-import type { SanitizedCollectionConfig } from '../collections/config/types.js'
-import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { CollectionConfig } from '../collections/config/types.js'
+import type { GlobalConfig } from '../globals/config/types.js'
 import type { Autosave, SanitizedDrafts } from '../versions/types.js'
 
 import { versionDefaults } from '../versions/defaults.js'
 
-type EntityConfig = Pick<SanitizedCollectionConfig | SanitizedGlobalConfig, 'versions'>
+type EntityConfig = Pick<CollectionConfig | GlobalConfig, 'versions'>
 
 /**
  * Check if an entity has drafts enabled
@@ -22,7 +22,7 @@ export const hasLocalizeStatusEnabled = (config: EntityConfig): boolean => {
       typeof config.versions === 'object' &&
       config.versions.drafts &&
       typeof config.versions.drafts === 'object' &&
-      config.versions.drafts.localizeStatus,
+      (config.versions.drafts as SanitizedDrafts).localizeStatus,
   )
 }
 
