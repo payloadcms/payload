@@ -1,5 +1,3 @@
-import { SyntaxKind } from 'ts-morph'
-
 import type { Transform } from '../../types.js'
 
 /**
@@ -16,39 +14,18 @@ export const removeLocalizeStatusConfig: Transform = {
     const filesChanged = new Set<string>()
 
     for (const sourceFile of project.getSourceFiles()) {
-      let mutated = false
+      let text = sourceFile.getFullText()
+      const original = text
 
-      // Find all `localizeStatus: true` property assignments
-      const targets = sourceFile
-        .getDescendantsOfKind(SyntaxKind.PropertyAssignment)
-        .filter((prop) => {
-          if (prop.getName() !== 'localizeStatus') {
-            return false
-          }
-          const initKind = prop.getInitializer()?.getKind()
-          // Only remove `true` — keep `false` (explicit opt-out)
-          return initKind === SyntaxKind.TrueKeyword
-        })
+      // Remove `localizeStatus: true,` lines (with any leading whitespace and trailing newline)
+      text = text.replace(/^[^\S\n]*localizeStatus:\s*true,?\s*\n/gm, '')
 
-      for (const prop of targets) {
-        prop.remove()
-        mutated = true
-      }
+      // Remove now-empty `experimental: {}` blocks (with optional whitespace inside braces)
+      // Handles: `experimental: {\n  },` or `experimental: {\n},` etc.
+      text = text.replace(/^[^\S\n]*experimental:\s*\{\s*\},?\s*\n/gm, '')
 
-      // Also remove the `experimental` block if it becomes empty after removing localizeStatus
-      const experimentalProps = sourceFile
-        .getDescendantsOfKind(SyntaxKind.PropertyAssignment)
-        .filter((prop) => prop.getName() === 'experimental')
-
-      for (const experimentalProp of experimentalProps) {
-        const objLiteral = experimentalProp.getInitializerIfKind(SyntaxKind.ObjectLiteralExpression)
-        if (objLiteral && objLiteral.getProperties().length === 0) {
-          experimentalProp.remove()
-          mutated = true
-        }
-      }
-
-      if (mutated) {
+      if (text !== original) {
+        sourceFile.replaceWithText(text)
         filesChanged.add(sourceFile.getFilePath())
       }
     }

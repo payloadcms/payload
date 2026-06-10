@@ -102,7 +102,8 @@ export const updateDocument = async <
   const password = data?.password
   const publishAllLocales =
     !draftArg &&
-    (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+    (publishAllLocalesArg ??
+      (hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all' ? false : true))
   const unpublishAllLocales =
     typeof unpublishAllLocalesArg === 'string'
       ? unpublishAllLocalesArg === 'true'
@@ -274,6 +275,18 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   let result: JsonObject = await beforeChange(beforeChangeArgs)
+
+  if (
+    config.localization &&
+    hasLocalizeStatusEnabled(collectionConfig) &&
+    typeof result._status === 'string'
+  ) {
+    const statusStr = result._status
+    result._status = {}
+    for (const localeCode of config.localization.localeCodes) {
+      ;(result._status as Record<string, unknown>)[localeCode] = statusStr
+    }
+  }
 
   let localizedPublishData: JsonObject | null = null
 

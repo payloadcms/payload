@@ -102,7 +102,9 @@ export const updateOperation = async <
     let { data } = args
 
     const publishAllLocales =
-      !draftArg && (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(globalConfig) ? false : true))
+      !draftArg &&
+      (publishAllLocalesArg ??
+        (hasLocalizeStatusEnabled(globalConfig) && locale !== 'all' ? false : true))
     const unpublishAllLocales =
       typeof unpublishAllLocalesArg === 'string'
         ? unpublishAllLocalesArg === 'true'
@@ -255,6 +257,18 @@ export const updateOperation = async <
     }
 
     let result: JsonObject = await beforeChange(beforeChangeArgs)
+
+    if (
+      config?.localization &&
+      hasLocalizeStatusEnabled(globalConfig) &&
+      typeof result._status === 'string'
+    ) {
+      const statusStr = result._status
+      result._status = {}
+      for (const localeCode of config.localization.localeCodes) {
+        ;(result._status as Record<string, unknown>)[localeCode] = statusStr
+      }
+    }
 
     // /////////////////////////////////////
     // Handle Localized Data Merging

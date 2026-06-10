@@ -1,6 +1,6 @@
 import { buildConfig } from 'payload'
 
-// After: localizeStatus: true removed (auto-inferred), experimental block removed
+// Before: explicit localizeStatus: true in drafts config and experimental block
 export default buildConfig({
   collections: [
     {
