@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { BlocksFeature, lexicalEditor, LinkFeature } from '@payloadcms/richtext-lexical'
+
 import { drawersSlug, relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
 import { drawerBlocks } from './blocks.js'
 
@@ -43,6 +45,47 @@ const Drawers: CollectionConfig = {
         description: 'Add a block to open the blocks drawer.',
       },
       blocks: drawerBlocks,
+    },
+    {
+      name: 'content',
+      type: 'richText',
+      admin: {
+        description: 'Use the link and inline block toolbar items to open their drawers.',
+      },
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          LinkFeature({
+            fields: ({ defaultFields }) => [
+              ...defaultFields,
+              {
+                name: 'rel',
+                type: 'select',
+                hasMany: true,
+                options: ['noopener', 'noreferrer', 'nofollow'],
+              },
+            ],
+          }),
+          BlocksFeature({
+            inlineBlocks: [
+              {
+                slug: 'inline-cta',
+                fields: [
+                  {
+                    name: 'label',
+                    type: 'text',
+                    required: true,
+                  },
+                  {
+                    name: 'url',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          }),
+        ],
+      }),
     },
     {
       name: 'status',

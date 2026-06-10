@@ -62,6 +62,73 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_3647D6E1".
+ */
+export type LexicalNodes_3647D6E1 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_3647D6E1>
+  | SerializedInlineBlockNode<InlineCta>
+  | SerializedAutoLinkNode<LexicalNodes_3647D6E1, LexicalLinkFields_B540ABDC>
+  | SerializedLinkNode<LexicalNodes_3647D6E1, LexicalLinkFields_B540ABDC>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_3647D6E1>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedListNode<LexicalNodes_3647D6E1>
+  | SerializedListItemNode<LexicalNodes_3647D6E1>
+  | SerializedHeadingNode<LexicalNodes_3647D6E1>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_67B489CE".
  */
 export type LexicalNodes_67B489CE =
@@ -734,6 +801,10 @@ export interface Drawer {
         | TableBlock
       )[]
     | null;
+  /**
+   * Use the link and inline block toolbar items to open their drawers.
+   */
+  content?: LexicalRichText<LexicalNodes_3647D6E1> | null;
   status?: ('draft' | 'published') | null;
   publishedAt?: string | null;
   updatedAt: string;
@@ -2670,6 +2741,7 @@ export interface DrawersSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  content?: T;
   status?: T;
   publishedAt?: T;
   updatedAt?: T;
@@ -3719,6 +3791,36 @@ export interface TaskSchedulePublish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InlineCta".
+ */
+export interface InlineCta {
+  id: string;
+  blockType: 'inline-cta';
+  label: string;
+  url?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_B540ABDC".
+ */
+export interface LexicalLinkFields_B540ABDC {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  rel?: ('noopener' | 'noreferrer' | 'nofollow')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "Callout".
  */
 export interface Callout {
@@ -3968,39 +4070,6 @@ export type SerializedInlineBlockNode<TFields extends { blockType: string }> = T
   fields: { id: string } & Omit<TFields, 'id'>;
 } : never;
 
-export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
-  };
-}[TSlugs];
-
-export interface SerializedHorizontalRuleNode {
-  type: 'horizontalrule';
-  version: number;
-}
-
-export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'quote';
-}
-
-export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
-  };
-}[TSlugs];
-
 export interface LexicalLinkFields {
   [k: string]: unknown;
   doc?: {
@@ -4020,6 +4089,39 @@ export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> 
   type: 'autolink';
   fields: TFields;
 }
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
 
 export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
   type: 'list';
