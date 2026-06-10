@@ -6,7 +6,6 @@ export const PagesCollection: CollectionConfig = {
   slug: pagesSlug,
   admin: {
     useAsTitle: 'title',
-    groupBy: true,
   },
   trash: true,
   fields: [

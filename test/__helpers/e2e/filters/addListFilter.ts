@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { selectInput } from '../selectInput.js'
+import { getSelectMenu, selectInput } from '../selectInput.js'
 import { openListFilters } from './openListFilters.js'
 
 export const addListFilter = async ({
@@ -53,12 +53,14 @@ export const addListFilter = async ({
   const condition = filters.last()
 
   await selectInput({
+    page,
     selectLocator: condition.locator('.condition__field'),
     multiSelect: false,
     option: fieldLabel,
   })
 
   await selectInput({
+    page,
     selectLocator: condition.locator('.condition__operator'),
     multiSelect: false,
     option: operatorLabel,
@@ -84,6 +86,7 @@ export const addListFilter = async ({
       if (Array.isArray(value)) {
         // For multi-select with array values
         await selectInput({
+          page,
           selectLocator: valueLocator,
           multiSelect: true,
           options: value,
@@ -93,12 +96,13 @@ export const addListFilter = async ({
         const valueInput = valueLocator.locator('input')
         await valueInput.fill(value)
 
-        const valueOptions = condition.locator('.condition__value .rs__option')
-        const createValue = valueOptions.locator(`text=Create "${value}"`)
+        const menu = getSelectMenu({ page })
+        const createValue = menu.locator('.rs__option', { hasText: `Create "${value}"` })
         if ((await createValue.count()) > 0) {
           await createValue.click()
         } else {
           await selectInput({
+            page,
             selectLocator: valueLocator,
             multiSelect: multiSelect ? undefined : false,
             option: value,

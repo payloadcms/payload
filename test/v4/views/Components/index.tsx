@@ -25,6 +25,7 @@ import { NoListResultsSection } from './sections/NoListResults.js'
 import { PillSection } from './sections/Pill.js'
 import { PopupSection } from './sections/Popup.js'
 import { ProgressBarSection } from './sections/ProgressBar.js'
+import { ReactSelectSection } from './sections/ReactSelectSection.js'
 import { RenderTitleSection } from './sections/RenderTitle.js'
 import { SearchBarSection } from './sections/SearchBar.js'
 import { ShimmerSection } from './sections/Shimmer.js'
@@ -279,6 +280,7 @@ export const ComponentsView: React.FC = () => {
         )}
         {shouldShow('tooltip', 'primitives') && <TooltipSection selectedComponent="tooltip" />}
         {shouldShow('popup', 'primitives') && <PopupSection selectedComponent="popup" />}
+        {shouldShow('select', 'primitives') && <ReactSelectSection selectedComponent="select" />}
         {shouldShow('card', 'primitives') && <CardSection selectedComponent="card" />}
         {shouldShow('dropzone', 'primitives') && <DropzoneSection selectedComponent="dropzone" />}
         {shouldShow('copy-to-clipboard', 'primitives') && (

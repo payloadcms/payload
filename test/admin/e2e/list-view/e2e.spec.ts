@@ -56,6 +56,7 @@ import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellV
 import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
+import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { expectPerPageLimits, setPerPageLimit } from '../../../__helpers/e2e/setPerPageLimit.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
@@ -413,7 +414,7 @@ describe('List View', () => {
       await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
-        conditionField.locator('.rs__menu-list').locator('div', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText('Title'),
         }),
       ).toBeVisible()
@@ -429,7 +430,7 @@ describe('List View', () => {
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
 
-      const menuList = conditionField.locator('.rs__menu-list')
+      const menuList = getSelectMenu({ page })
 
       // ensure the virtual field is not present
       await expect(menuList.locator('div', { hasText: exactText('Virtual Text') })).toHaveCount(0)
@@ -496,7 +497,8 @@ describe('List View', () => {
       await filterField.click()
 
       // select new filter field of Number
-      const dropdownFieldOption = filterField.locator('.rs__option', {
+      const filterFieldMenu = getSelectMenu({ page })
+      const dropdownFieldOption = filterFieldMenu.locator('.rs__option', {
         hasText: exactText('Status'),
       })
 
@@ -540,7 +542,8 @@ describe('List View', () => {
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
 
-      await conditionField
+      const conditionFieldMenu = getSelectMenu({ page })
+      await conditionFieldMenu
         .locator('.rs__option', {
           hasText: exactText('Users'),
         })
@@ -550,13 +553,14 @@ describe('List View', () => {
 
       const operatorInput = whereBuilder.locator('.condition__operator')
       await operatorInput.click()
-      const operatorOptions = operatorInput.locator('.rs__option')
+      const operatorInputMenu = getSelectMenu({ page })
+      const operatorOptions = operatorInputMenu.locator('.rs__option')
       await operatorOptions.locator(`text=equals`).click()
 
       await whereBuilder.locator('.condition__value').click()
 
-      const valueOptions = await whereBuilder
-        .locator('.condition__value .rs__option')
+      const valueOptions = await getSelectMenu({ page })
+        .locator('.rs__option')
         .evaluateAll((options) => options.map((option) => option.textContent))
 
       expect(valueOptions).not.toContain('post1')
@@ -777,11 +781,13 @@ describe('List View', () => {
       const secondValueField = secondLi.locator('.condition__value >> input')
       await secondConditionField.click()
 
-      await secondConditionField.locator('.rs__option', { hasText: exactText('Title') }).click()
+      const secondConditionMenu = getSelectMenu({ page })
+      await secondConditionMenu.locator('.rs__option', { hasText: exactText('Title') }).click()
 
       await expect(secondConditionField.locator('.rs__single-value')).toContainText('Title')
       await secondOperatorField.click()
-      await secondOperatorField.locator('.rs__option').locator('text=equals').click()
+      const secondOperatorMenu = getSelectMenu({ page })
+      await secondOperatorMenu.locator('.rs__option').locator('text=equals').click()
       await secondValueField.fill('Test 2')
       await expect(secondValueField).toHaveValue('Test 2')
 
@@ -792,7 +798,8 @@ describe('List View', () => {
       // Change the join from "Or" to "And" so both conditions live in the same group.
       const joinDropdown = secondLi.locator('.condition__join')
       await joinDropdown.click()
-      await joinDropdown.locator('.rs__option', { hasText: exactText('And') }).click()
+      const joinMenu = getSelectMenu({ page })
+      await joinMenu.locator('.rs__option', { hasText: exactText('And') }).click()
 
       // Both conditions are now part of a single AND group.
       await expect(whereBuilder.locator('.condition')).toHaveCount(2)
@@ -818,7 +825,7 @@ describe('List View', () => {
       await initialField.click()
 
       await expect(
-        initialField.locator(`.rs__option :has-text("Disable List Filter Text")`),
+        initialField.page().locator(`.rs__option :has-text("Disable List Filter Text")`),
       ).toBeHidden()
     })
 
@@ -855,7 +862,9 @@ describe('List View', () => {
       const condition2 = page.locator('.condition__field').nth(1)
       await condition2.click()
       await expect(
-        condition2?.locator('.rs__menu-list:has-text("Disable List Filter Text")'),
+        getSelectMenu({ page }).filter({
+          hasText: 'Disable List Filter Text',
+        }),
       ).toBeHidden()
     })
 
@@ -872,7 +881,7 @@ describe('List View', () => {
       await valueField.click()
       await page.keyboard.type('4')
 
-      const options = whereBuilder.locator('.condition__value .rs__option')
+      const options = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(options).toHaveCount(10)
 
@@ -945,7 +954,7 @@ describe('List View', () => {
       await initialField.click()
 
       await expect(
-        initialField.locator(`.rs__menu-list:has-text("Disable List Column Text")`),
+        initialField.page().locator(`.rs__menu-list:has-text("Disable List Column Text")`),
       ).toBeVisible()
     })
 
@@ -1248,7 +1257,7 @@ describe('List View', () => {
       await collectionSelector.click()
 
       await page
-        .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
+        .locator('.rs__option', {
           hasText: exactText('Post'),
         })
         .click()

@@ -199,11 +199,9 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     componentMapRenderedBlockPath
   ]?.[0] as BlocksFieldClient | undefined
 
-  const clientBlock: ClientBlock | undefined = blocksField?.blockReferences
-    ? typeof blocksField?.blockReferences?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blockReferences?.[0]]
-      : blocksField?.blockReferences?.[0]
-    : blocksField?.blocks?.[0]
+  const blockOrSlug = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined =
+    typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
 
   const clientBlockFields = clientBlock?.fields ?? []
 
