@@ -19,7 +19,7 @@ import {
   selectTableRow,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
-import { selectInput } from '../__helpers/e2e/selectInput.js'
+import { getSelectMenu, selectInput } from '../__helpers/e2e/selectInput.js'
 import { toggleBlockOrArrayRow } from '../__helpers/e2e/toggleCollapsible.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -527,11 +527,11 @@ test.describe('Bulk Edit', () => {
     const { modal } = await selectAllAndEditMany(page)
 
     await expect(
-      modal.locator('.field-select .rs__option', { hasText: exactText('No Read') }),
+      getSelectMenu({ page }).locator('.rs__option', { hasText: exactText('No Read') }),
     ).toBeHidden()
 
     await expect(
-      modal.locator('.field-select .rs__option', { hasText: exactText('No Update') }),
+      getSelectMenu({ page }).locator('.rs__option', { hasText: exactText('No Update') }),
     ).toBeHidden()
   })
 
@@ -660,7 +660,8 @@ test.describe('Bulk Edit', () => {
     await expect(fieldSelectControl).toBeVisible()
     await fieldSelectControl.click()
 
-    const titleOption = fieldSelect.locator('.rs__option:has-text("Title")').first()
+    const fieldSelectMenu = getSelectMenu({ page })
+    const titleOption = fieldSelectMenu.locator('.rs__option:has-text("Title")').first()
     await titleOption.click()
 
     await editDrawer.locator('input#field-title').fill(bulkEditValue)
@@ -718,6 +719,7 @@ test.describe('Bulk Edit', () => {
     await expect(bulkEditForm).toBeVisible()
 
     await selectInput({
+      page,
       selectLocator: bulkEditForm.locator('.react-select'),
       options: ['Title'],
       multiSelect: true,
@@ -777,6 +779,7 @@ test.describe('Bulk Edit', () => {
     await expect(bulkEditForm).toBeVisible()
 
     await selectInput({
+      page,
       selectLocator: bulkEditForm.locator('.react-select'),
       options: ['Tab Text'],
       multiSelect: true,
@@ -833,7 +836,7 @@ test.describe('Bulk Edit', () => {
     await bulkEditForm.locator('.field-select .rs__control').click()
 
     // The option must match exactly — no spurious "> >" prefix
-    const option = bulkEditForm.locator('.field-select .rs__option', {
+    const option = getSelectMenu({ page }).locator('.rs__option', {
       hasText: exactText('Row Text'),
     })
     await expect(option).toBeVisible()
@@ -853,6 +856,7 @@ test.describe('Bulk Edit', () => {
 
     // Select multiple fields with beforeInput components
     await selectInput({
+      page,
       selectLocator: modal.locator('.field-select'),
       options: [
         'Field With Before Input A1',
@@ -898,7 +902,9 @@ async function selectFieldToEdit(
   await expect(modal).toBeVisible()
 
   await modal.locator('.field-select .rs__control').click()
-  await modal.locator('.field-select .rs__option', { hasText: exactText(fieldLabel) }).click()
+  await getSelectMenu({ page })
+    .locator('.rs__option', { hasText: exactText(fieldLabel) })
+    .click()
 
   const field = modal.locator(`#field-${fieldID}`)
   await expect(field).toBeVisible()

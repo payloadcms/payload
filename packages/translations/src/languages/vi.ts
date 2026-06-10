@@ -22,6 +22,8 @@ export const viTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'Email hoặc Tên tài khoản',
     emailSent: 'Email đã được gửi',
     emailVerified: 'Email đã được xác minh thành công.',
+    emailVerifiedRedirecting:
+      'Xác thực email thành công. Đang chuyển hướng bạn đến trang đăng nhập...',
     enableAPIKey: 'Kích hoạt API Key',
     failedToUnlock: 'Mở khóa thất bại',
     forceUnlock: 'Mở khóa tài khoản',
@@ -55,6 +57,7 @@ export const viTranslations: DefaultTranslationsObject = {
       'Một tài khoản mới đã được tạo cho bạn. Tài khoản này được dùng để truy cập <a href="{{serverURL}}">{{serverURL}}</a> Hãy nhấp chuột hoặc sao chép đường dẫn sau vào trình duyệt của bạn để xác thực email: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Sau khi email được xác thực, bạn sẽ có thể đăng nhập.',
     newAPIKeyGenerated: 'API Key mới đã được tạo',
     newPassword: 'Mật khẩu mới',
+    notRedirected: 'Không được chuyển hướng? <0>Đăng nhập tại đây</0>',
     passed: 'Xác thực thành công',
     passwordResetSuccessfully: 'Đặt lại mật khẩu thành công.',
     resetPassword: 'Tạo lại mật khẩu',
@@ -68,6 +71,8 @@ export const viTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Không thể xác thực',
     username: 'Tên đăng nhập',
     usernameNotValid: 'Tên người dùng được cung cấp không hợp lệ',
+    verificationFailedRequestNew:
+      'Chúng tôi không thể xác minh tài khoản của bạn. Vui lòng yêu cầu một email xác minh mới và thử lại.',
     verified: 'Đã xác thực',
     verifiedSuccessfully: 'Đã xác thực thành công',
     verify: 'Tiến hành xác thực',

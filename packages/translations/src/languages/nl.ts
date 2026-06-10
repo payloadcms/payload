@@ -22,6 +22,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'E-mail of Gebruikersnaam',
     emailSent: 'E-mail verzonden',
     emailVerified: 'E-mail succesvol geverifieerd.',
+    emailVerifiedRedirecting:
+      'E-mail succesvol geverifieerd. U wordt doorgestuurd naar het inloggen...',
     enableAPIKey: 'Activeer API-sleutel',
     failedToUnlock: 'Ontgrendeling mislukt',
     forceUnlock: 'Forceer ontgrendeling',
@@ -56,6 +58,7 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Er is zojuist een nieuw account voor u aangemaakt waarmee u toegang krijgt tot <a href="{{serverURL}}">{{serverURL}}</a>. Klik op de volgende link, of plak onderstaande URL in uw browser om uw e-mailadres te verifiëren: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Na de verificatie van uw e-mail kunt u succesvol inloggen.',
     newAPIKeyGenerated: 'Nieuwe API-sleutel is gegenereerd.',
     newPassword: 'Nieuw wachtwoord',
+    notRedirected: 'Niet omgeleid? <0>Log hier in</0>',
     passed: 'Authenticatie Geslaagd',
     passwordResetSuccessfully: 'Wachtwoord succesvol opnieuw ingesteld.',
     resetPassword: 'Wachtwoord herstellen',
@@ -69,6 +72,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Verificatie niet mogelijk',
     username: 'Gebruikersnaam',
     usernameNotValid: 'De opgegeven gebruikersnaam is niet geldig',
+    verificationFailedRequestNew:
+      'We konden uw account niet verifiëren. Vraag een nieuwe verificatie-e-mail aan en probeer het opnieuw.',
     verified: 'Geverifieerd',
     verifiedSuccessfully: 'Succesvol geverifieerd',
     verify: 'Verifiëren',

@@ -22,6 +22,8 @@ export const itTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'Email o Nome utente',
     emailSent: 'Email Inviata',
     emailVerified: 'Email verificata con successo.',
+    emailVerifiedRedirecting:
+      'Email verificata con successo. Reindirizzamento alla pagina di accesso...',
     enableAPIKey: 'Abilita la Chiave API',
     failedToUnlock: 'Lo sblocco è fallito',
     forceUnlock: 'Forza Sblocco',
@@ -55,6 +57,7 @@ export const itTranslations: DefaultTranslationsObject = {
       'Un nuovo account è appena stato creato per te per accedere a <a href="{{serverURL}}">{{serverURL}}</a> Clicca sul seguente link o incolla l\'URL qui sotto nel browser per verificare la tua email: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Dopo aver verificato la tua email, sarai in grado di effettuare il log in con successo.',
     newAPIKeyGenerated: 'Nuova Chiave API Generata.',
     newPassword: 'Nuova Password',
+    notRedirected: 'Non reindirizzato? <0>Accedi qui</0>',
     passed: 'Autenticazione Superata',
     passwordResetSuccessfully: 'Reset della password eseguito con successo.',
     resetPassword: 'Modifica Password',
@@ -68,6 +71,8 @@ export const itTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Impossibile verificare',
     username: 'Nome utente',
     usernameNotValid: 'Il nome utente fornito non è valido',
+    verificationFailedRequestNew:
+      'Non siamo riusciti a verificare il suo account. Richieda una nuova email di verifica e riprovi.',
     verified: 'Verificato',
     verifiedSuccessfully: 'Verificato con successo',
     verify: 'Verifica',

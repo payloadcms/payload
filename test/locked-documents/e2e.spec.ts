@@ -27,6 +27,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -290,7 +291,7 @@ describe('Locked Documents', () => {
 
       await page.locator('.field-select .rs__control').click()
 
-      const textOption = page.locator('.field-select .rs__option', {
+      const textOption = getSelectMenu({ page }).locator('.rs__option', {
         hasText: exactText('Text'),
       })
 

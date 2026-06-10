@@ -178,7 +178,7 @@ export const renderField: RenderFieldMethod = ({
 
         const blockConfig =
           req.payload.blocks[blockTypeToMatch] ??
-          ((fieldConfig.blockReferences ?? fieldConfig.blocks).find(
+          (fieldConfig.blocks.find(
             (block) => typeof block !== 'string' && block.slug === blockTypeToMatch,
           ) as FlattenedBlock | undefined)
 

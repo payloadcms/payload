@@ -7,6 +7,7 @@ import React, { createContext, use, useCallback, useEffect, useRef, useState } f
 import { createPortal } from 'react-dom'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { ThemeProvider } from '../../providers/Theme/index.js'
 import './index.css'
 import { PopupTrigger } from './PopupTrigger/index.js'
 
@@ -441,6 +442,15 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   useEffect(() => {
     if (!active) {
+      const popup = popupRef.current
+      if (popup) {
+        // Clear inline position styles so the CSS `top: -9999px` rule on
+        // `.popup__hidden-content` takes effect. Without this, the inline
+        // styles set during positioning would win over the CSS rule, keeping
+        // portaled children (e.g. a ReactSelect menu) visually on-screen.
+        popup.style.top = ''
+        popup.style.left = ''
+      }
       return
     }
 
@@ -577,8 +587,17 @@ export const Popup: React.FC<PopupProps> = (props) => {
                 <div
                   className={`${baseClass}__scroll-container${showScrollbar ? ` ${baseClass}__scroll-container--show-scrollbar` : ''}`}
                 >
-                  {render?.({ close: () => setActive(false) })}
-                  {children}
+                  {theme === 'auto' ? (
+                    <>
+                      {render?.({ close: () => setActive(false) })}
+                      {children}
+                    </>
+                  ) : (
+                    <ThemeProvider theme={theme}>
+                      {render?.({ close: () => setActive(false) })}
+                      {children}
+                    </ThemeProvider>
+                  )}
                 </div>
                 {caret && !side && <div className={`${baseClass}__caret`} />}
               </div>

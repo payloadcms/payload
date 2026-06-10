@@ -22,6 +22,8 @@ export const caTranslations: DefaultTranslationsObject = {
     emailOrUsername: "Correu electrònic o nom d'usuari",
     emailSent: 'Correu electrònic enviat',
     emailVerified: 'Correu electrònic verificat amb èxit.',
+    emailVerifiedRedirecting:
+      "Correu electrònic verificat correctament. Redirigint-lo a l'inici de sessió...",
     enableAPIKey: 'Habilitar clau API',
     failedToUnlock: "No s'ha pogut desbloquejar",
     forceUnlock: 'Forçar desbloqueig',
@@ -55,6 +57,7 @@ export const caTranslations: DefaultTranslationsObject = {
       'S\'ha creat un nou compte per a tu per accedir a <a href="{{serverURL}}">{{serverURL}}</a>. Si us plau, fes clic en el següent enllaç o enganxa l\'URL a continuació al teu navegador per verificar el teu correu electrònic: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Després de verificar el teu correu electrònic, podràs iniciar sessió amb èxit.',
     newAPIKeyGenerated: "S'ha generat una nova clau API.",
     newPassword: 'Nova contrasenya',
+    notRedirected: "No s'ha redirigit? <0>Inicieu sessió aquí</0>",
     passed: 'Autenticació superada',
     passwordResetSuccessfully: 'Contrasenya restablerta amb èxit.',
     resetPassword: 'Restablir contrasenya',
@@ -68,6 +71,8 @@ export const caTranslations: DefaultTranslationsObject = {
     unableToVerify: "No s'ha pogut verificar",
     username: "Nom d'usuari",
     usernameNotValid: "El nom d'usuari proporcionat no és vàlid",
+    verificationFailedRequestNew:
+      'No hem pogut verificar el vostre compte. Sol·liciteu un nou correu electrònic de verificació i torneu-ho a intentar.',
     verified: 'Verificat',
     verifiedSuccessfully: 'Verificat amb èxit',
     verify: 'Verificar',
