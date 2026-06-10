@@ -12,6 +12,7 @@ import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { getCollectionInputSchema } from '../../../utils/schemaConversion/getCollectionInputSchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { formatCollectionError } from './formatCollectionError.js'
+import { validateCollectionData } from './validateCollectionData.js'
 
 const DEFAULT_DESCRIPTION =
   'Update documents in any collection by passing the collection slug and data.'
@@ -92,9 +93,20 @@ export const updateDocumentTool = defineCollectionTool({
       }
     }
 
-    let parsedData = transformPointDataToPayload(data)
     const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
-    parsedData = stripVirtualFields(parsedData, virtualFieldNames)
+    const inputData = stripVirtualFields(data, virtualFieldNames)
+    const validationError = validateCollectionData({
+      collectionSlug,
+      data: inputData,
+      partial: true,
+      req,
+    })
+
+    if (validationError) {
+      return validationError
+    }
+
+    const parsedData = transformPointDataToPayload(inputData)
 
     let whereClause: Record<string, unknown> = {}
     if (where) {

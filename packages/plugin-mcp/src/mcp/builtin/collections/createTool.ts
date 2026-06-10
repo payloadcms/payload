@@ -11,6 +11,7 @@ import {
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { formatCollectionError } from './formatCollectionError.js'
+import { validateCollectionData } from './validateCollectionData.js'
 
 const DEFAULT_DESCRIPTION =
   'Create a document in any collection by passing the collection slug and data.'
@@ -60,9 +61,15 @@ export const createDocumentTool = defineCollectionTool({
   )
 
   try {
-    let parsedData = transformPointDataToPayload(data)
     const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
-    parsedData = stripVirtualFields(parsedData, virtualFieldNames)
+    const inputData = stripVirtualFields(data, virtualFieldNames)
+    const validationError = validateCollectionData({ collectionSlug, data: inputData, req })
+
+    if (validationError) {
+      return validationError
+    }
+
+    const parsedData = transformPointDataToPayload(inputData)
 
     let selectClause: SelectType | undefined
     if (select) {

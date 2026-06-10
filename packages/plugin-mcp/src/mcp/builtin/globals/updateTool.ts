@@ -9,6 +9,8 @@ import {
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
+import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
+import { validateGlobalData } from './validateGlobalData.js'
 
 const DEFAULT_DESCRIPTION = 'Update any Payload global by passing the global slug and data.'
 
@@ -55,7 +57,14 @@ export const updateGlobalTool = defineGlobalTool({
 
   try {
     const virtualFieldNames = getGlobalVirtualFieldNames(payload.config, globalSlug)
-    const parsedData = stripVirtualFields(data, virtualFieldNames)
+    const inputData = stripVirtualFields(data, virtualFieldNames)
+    const validationError = validateGlobalData({ data: inputData, globalSlug, req })
+
+    if (validationError) {
+      return validationError
+    }
+
+    const parsedData = transformPointDataToPayload(inputData)
 
     let selectClause: SelectType | undefined
     if (select) {
