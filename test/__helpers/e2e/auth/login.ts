@@ -92,7 +92,7 @@ export async function loginClientSide(args: LoginArgs): Promise<void> {
   })
 
   if ((await page.locator('.app-header__sidebar-toggle').count()) > 0) {
-    // a user is already logged in - log them out via the UserMenu popup
+    // a user is already logged in - open UserMenu and click logout
     await page.locator('.user-menu__trigger').click()
     const logoutAnchor = page.locator('a[href$="/logout"]')
     await expect(logoutAnchor).toBeVisible()
