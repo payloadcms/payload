@@ -136,7 +136,6 @@ const sanitizeCollectionConfig = ({
       type: 'collectionTool',
       collectionSlug: slug,
       configKey: toolKey,
-      entityDescription: collectionPluginConfig?.description,
       label: capitalize(toolKey),
       mcpName,
       tool: {
@@ -162,7 +161,6 @@ const sanitizeCollectionConfig = ({
         type: 'collectionTool',
         collectionSlug: slug,
         configKey: authToolKey,
-        entityDescription: collectionPluginConfig?.description,
         label,
         mcpName,
         tool: {
@@ -193,7 +191,6 @@ const sanitizeCollectionConfig = ({
       type: 'collectionTool',
       collectionSlug: slug,
       configKey,
-      entityDescription: collectionPluginConfig?.description,
       label: configKey,
       mcpName: configKey,
       tool: customTool,
@@ -223,7 +220,6 @@ const sanitizeGlobalConfig = ({
     items.push({
       type: 'globalTool',
       configKey: toolKey,
-      entityDescription: globalPluginConfig?.description,
       globalSlug: slug,
       label: capitalize(toolKey),
       mcpName,
@@ -251,7 +247,6 @@ const sanitizeGlobalConfig = ({
     items.push({
       type: 'globalTool',
       configKey,
-      entityDescription: globalPluginConfig?.description,
       globalSlug: slug,
       label: configKey,
       mcpName: configKey,

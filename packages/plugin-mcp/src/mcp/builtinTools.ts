@@ -40,10 +40,7 @@ export const COLLECTION_BUILTINS = {
  * carries the admin-UI label alongside the tool. Keys are the source of truth
  * for `MCPCollectionAuthToolName`.
  */
-export const COLLECTION_AUTH_BUILTINS: Record<
-  MCPCollectionAuthToolName,
-  { label: string; mcpName: string; tool: CollectionTool }
-> = {
+export const COLLECTION_AUTH_BUILTINS = {
   auth: { label: 'Check Auth Status', mcpName: 'auth', tool: authCollectionTool },
   forgotPassword: {
     label: 'Forgot Password',
@@ -58,7 +55,7 @@ export const COLLECTION_AUTH_BUILTINS: Record<
   },
   unlock: { label: 'Unlock Account', mcpName: 'unlock', tool: unlockCollectionTool },
   verify: { label: 'Email Verification', mcpName: 'verify', tool: verifyCollectionTool },
-}
+} satisfies Record<string, { label: string; mcpName: string; tool: CollectionTool }>
 
 /**
  * The static built-in global tools. Keys are the source of truth for
@@ -70,24 +67,13 @@ export const GLOBAL_BUILTINS = {
   update: { mcpName: 'updateGlobal', tool: updateGlobalTool },
 } satisfies Record<string, { mcpName: string; tool: GlobalTool }>
 
-export type MCPCollectionBuiltinName =
-  | 'create'
-  | 'delete'
-  | 'find'
-  | 'getCollectionSchema'
-  | 'update'
+export type MCPCollectionBuiltinName = keyof typeof COLLECTION_BUILTINS
 
-export type MCPCollectionAuthToolName =
-  | 'auth'
-  | 'forgotPassword'
-  | 'login'
-  | 'resetPassword'
-  | 'unlock'
-  | 'verify'
+export type MCPCollectionAuthToolName = keyof typeof COLLECTION_AUTH_BUILTINS
 
-export type MCPGlobalBuiltinName = 'find' | 'getGlobalSchema' | 'update'
+export type MCPGlobalBuiltinName = keyof typeof GLOBAL_BUILTINS
 
-export type MCPTopLevelBuiltinName = 'getConfigInfo'
+export type MCPTopLevelBuiltinName = keyof typeof TOOL_BUILTINS
 
 /**
  * Pre-typed `Object.entries` for each registry. The cast from `string` to the
@@ -96,17 +82,17 @@ export type MCPTopLevelBuiltinName = 'getConfigInfo'
  * defeats the narrow type lookups on `MCPCollectionToolsMap`.
  */
 export const TOOL_BUILTIN_ENTRIES = Object.entries(TOOL_BUILTINS) as Array<
-  [MCPTopLevelBuiltinName, { label: string; mcpName: string; tool: Tool }]
+  [MCPTopLevelBuiltinName, (typeof TOOL_BUILTINS)[MCPTopLevelBuiltinName]]
 >
 
 export const COLLECTION_BUILTIN_ENTRIES = Object.entries(COLLECTION_BUILTINS) as Array<
-  [MCPCollectionBuiltinName, { mcpName: string; tool: CollectionTool }]
+  [MCPCollectionBuiltinName, (typeof COLLECTION_BUILTINS)[MCPCollectionBuiltinName]]
 >
 
 export const COLLECTION_AUTH_BUILTIN_ENTRIES = Object.entries(COLLECTION_AUTH_BUILTINS) as Array<
-  [MCPCollectionAuthToolName, { label: string; mcpName: string; tool: CollectionTool }]
+  [MCPCollectionAuthToolName, (typeof COLLECTION_AUTH_BUILTINS)[MCPCollectionAuthToolName]]
 >
 
 export const GLOBAL_BUILTIN_ENTRIES = Object.entries(GLOBAL_BUILTINS) as Array<
-  [MCPGlobalBuiltinName, { mcpName: string; tool: GlobalTool }]
+  [MCPGlobalBuiltinName, (typeof GLOBAL_BUILTINS)[MCPGlobalBuiltinName]]
 >

@@ -294,9 +294,6 @@ export type MCPAPIKeysDoc = {
  * - `configKey`: the config/API-key identifier, e.g. `find` or `echo`.
  * - `mcpName`: the MCP wire name, e.g. `findDocuments` or `echo`.
  * - `label`: human-readable admin checkbox text.
- *
- * Collection/global items may also carry entity-level discovery copy for the
- * slug they belong to.
  */
 export type MCPItemBase = {
   configKey: string
@@ -306,13 +303,11 @@ export type MCPItemBase = {
 
 export type CollectionMCPItem = {
   collectionSlug: CollectionSlug
-  entityDescription?: string
   tool: CollectionTool
   type: 'collectionTool'
 } & MCPItemBase
 
 export type GlobalMCPItem = {
-  entityDescription?: string
   globalSlug: GlobalSlug
   tool: GlobalTool
   type: 'globalTool'
