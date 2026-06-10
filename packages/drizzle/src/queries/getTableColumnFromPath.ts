@@ -204,7 +204,7 @@ export const getTableColumnFromPath = ({
           blockTypes.forEach((blockType) => {
             const block =
               adapter.payload.blocks[blockType] ??
-              ((field.blockReferences ?? field.blocks).find(
+              (field.blocks.find(
                 (block) => typeof block !== 'string' && block.slug === blockType,
               ) as FlattenedBlock | undefined)
 
@@ -233,7 +233,7 @@ export const getTableColumnFromPath = ({
           }
         }
 
-        const hasBlockField = (field.blockReferences ?? field.blocks).some((_block) => {
+        const hasBlockField = field.blocks.some((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
 
           newTableName = resolveBlockTableName(
