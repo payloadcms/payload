@@ -33,11 +33,20 @@ export async function getApiKey({
     data: {
       access: {
         collections: {
-          posts: { create: true, delete: enableDelete, find: true, update: enableUpdate },
+          posts: {
+            create: true,
+            delete: enableDelete,
+            find: true,
+            update: enableUpdate,
+          },
           products: { find: true },
         },
         ...(globalFind || globalUpdate
-          ? { globals: { 'site-settings': { find: globalFind, update: globalUpdate } } }
+          ? {
+              globals: {
+                'site-settings': { find: globalFind, update: globalUpdate },
+              },
+            }
           : {}),
       },
       apiKey: randomUUID(),
