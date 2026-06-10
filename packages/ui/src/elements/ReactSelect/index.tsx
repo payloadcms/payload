@@ -92,6 +92,27 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
 
   const menuPosition = menuPositionProp ?? (menuPortalTarget ? 'fixed' : undefined)
 
+  // Debounce the loading state so that fast option fetches (e.g. relationship
+  // fields that resolve almost instantly) don't cause the clear indicator to
+  // flash to react-select's loading indicator and back. The loading indicator
+  // only appears once a load takes longer than the threshold below.
+  const [isLoadingDebounced, setIsLoadingDebounced] = React.useState(false)
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsLoadingDebounced(false)
+      return
+    }
+
+    const timeout = setTimeout(() => {
+      setIsLoadingDebounced(true)
+    }, 250)
+
+    return () => {
+      clearTimeout(timeout)
+    }
+  }, [isLoading])
+
   const loadingMessage = () => t('general:loading') + '...'
 
   const classes = [className, 'react-select', showError && 'react-select--error']
@@ -139,7 +160,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       <Select<Option, boolean, GroupBase<Option>>
         captureMenuScroll
         customProps={customProps}
-        isLoading={isLoading}
         {...props}
         className={classes}
         classNamePrefix="rs"
@@ -169,6 +189,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         instanceId={uuid}
         isClearable={isClearable}
         isDisabled={disabled}
+        isLoading={isLoadingDebounced}
         isSearchable={isSearchable}
         loadingMessage={loadingMessage}
         menuPlacement="auto"
@@ -229,7 +250,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   return (
     <CreatableSelect<Option, boolean, GroupBase<Option>>
       captureMenuScroll
-      isLoading={isLoading}
       {...props}
       className={classes}
       classNamePrefix="rs"
@@ -259,6 +279,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       instanceId={uuid}
       isClearable={isClearable}
       isDisabled={disabled}
+      isLoading={isLoadingDebounced}
       isSearchable={isSearchable}
       loadingMessage={loadingMessage}
       menuPlacement="auto"
