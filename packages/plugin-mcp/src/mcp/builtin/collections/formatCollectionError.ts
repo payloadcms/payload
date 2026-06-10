@@ -2,7 +2,7 @@ import type { CollectionSlug, PayloadRequest } from 'payload'
 
 import type { MCPToolResponse } from '../../../types.js'
 
-import { getCollectionInputSchema } from '../../../utils/schemaConversion/getCollectionInputSchema.js'
+import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 const getValidationErrors = (error: unknown): undefined | unknown[] => {
   if (!error || typeof error !== 'object') {

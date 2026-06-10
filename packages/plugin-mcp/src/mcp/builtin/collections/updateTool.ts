@@ -9,10 +9,10 @@ import {
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
-import { getCollectionInputSchema } from '../../../utils/schemaConversion/getCollectionInputSchema.js'
+import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
+import { validateCollectionData } from '../validateEntityData.js'
 import { formatCollectionError } from './formatCollectionError.js'
-import { validateCollectionData } from './validateCollectionData.js'
 
 const DEFAULT_DESCRIPTION =
   'Update documents in any collection by passing the collection slug and data.'

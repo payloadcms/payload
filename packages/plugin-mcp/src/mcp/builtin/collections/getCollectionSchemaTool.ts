@@ -1,5 +1,5 @@
 import { defineCollectionTool } from '../../../defineTool.js'
-import { getCollectionInputSchema } from '../../../utils/schemaConversion/getCollectionInputSchema.js'
+import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 export const getCollectionSchemaTool = defineCollectionTool({
   description: 'Get the input schema for creating or updating documents in a collection.',

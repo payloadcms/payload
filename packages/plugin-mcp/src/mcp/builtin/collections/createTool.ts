@@ -10,8 +10,8 @@ import {
 } from '../../../utils/getVirtualFieldNames.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
+import { validateCollectionData } from '../validateEntityData.js'
 import { formatCollectionError } from './formatCollectionError.js'
-import { validateCollectionData } from './validateCollectionData.js'
 
 const DEFAULT_DESCRIPTION =
   'Create a document in any collection by passing the collection slug and data.'
