@@ -70,16 +70,9 @@ export const buildMcpServer = ({
 
           const tool = item.tool
           const mcpName = item.mcpName
-          const collectionSlugs = authorizedMCP.items
-            .filter(
-              (candidate): candidate is CollectionMCPItem =>
-                candidate.type === 'collectionTool' && candidate.mcpName === mcpName,
-            )
-            .map((candidate) => candidate.collectionSlug)
           const inputSchema = withSlugInput({
             name: 'collectionSlug',
             input: tool.input,
-            slugs: collectionSlugs,
           })
 
           server.registerTool(
@@ -108,16 +101,9 @@ export const buildMcpServer = ({
 
           const tool = item.tool
           const mcpName = item.mcpName
-          const globalSlugs = authorizedMCP.items
-            .filter(
-              (candidate): candidate is GlobalMCPItem =>
-                candidate.type === 'globalTool' && candidate.mcpName === mcpName,
-            )
-            .map((candidate) => candidate.globalSlug)
           const inputSchema = withSlugInput({
             name: 'globalSlug',
             input: tool.input,
-            slugs: globalSlugs,
           })
 
           server.registerTool(
@@ -214,15 +200,12 @@ export const buildMcpServer = ({
 const withSlugInput = ({
   name,
   input,
-  slugs,
 }: {
   input?: ToolInputSchema
   name: 'collectionSlug' | 'globalSlug'
-  slugs: string[]
 }): ToolInputSchema => {
   const description = name === 'collectionSlug' ? 'The collection slug' : 'The global slug'
-  const enumValues = slugs as [string, ...string[]]
-  const slugSchema = z.enum(enumValues).describe(description)
+  const slugSchema = z.string().describe(description)
 
   if (!input) {
     return z.object({ [name]: slugSchema })
@@ -245,7 +228,6 @@ const withSlugInput = ({
       [name]: {
         type: 'string',
         description,
-        enum: slugs,
       },
     },
     required: Array.from(new Set([name, ...(schema.required ?? [])])),
@@ -275,7 +257,12 @@ const finalizeCollectionToolResponse = async ({
 
   if (!collectionSlug) {
     return {
-      content: [{ type: 'text', text: `Error: "${mcpName}" requires collectionSlug` }],
+      content: [
+        {
+          type: 'text',
+          text: `Error: "${mcpName}" requires collectionSlug. Use getConfigInfo to inspect collection slugs.`,
+        },
+      ],
       isError: true,
     }
   }
@@ -333,7 +320,12 @@ const finalizeGlobalToolResponse = async ({
 
   if (!globalSlug) {
     return {
-      content: [{ type: 'text', text: `Error: "${mcpName}" requires globalSlug` }],
+      content: [
+        {
+          type: 'text',
+          text: `Error: "${mcpName}" requires globalSlug. Use getConfigInfo to inspect global slugs.`,
+        },
+      ],
       isError: true,
     }
   }

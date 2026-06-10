@@ -1,4 +1,4 @@
-import type { CollectionTool, GlobalTool } from '../types.js'
+import type { CollectionTool, GlobalTool, Tool } from '../types.js'
 
 import {
   authCollectionTool,
@@ -13,9 +13,14 @@ import { deleteDocumentsTool } from './builtin/collections/deleteTool.js'
 import { findDocumentsTool } from './builtin/collections/findTool.js'
 import { getCollectionSchemaTool } from './builtin/collections/getCollectionSchemaTool.js'
 import { updateDocumentTool } from './builtin/collections/updateTool.js'
+import { getConfigInfoTool } from './builtin/getConfigInfoTool.js'
 import { findGlobalTool } from './builtin/globals/findTool.js'
 import { getGlobalSchemaTool } from './builtin/globals/getGlobalSchemaTool.js'
 import { updateGlobalTool } from './builtin/globals/updateTool.js'
+
+export const TOOL_BUILTINS = {
+  getConfigInfo: { label: 'Config Info', mcpName: 'getConfigInfo', tool: getConfigInfoTool },
+} satisfies Record<string, { label: string; mcpName: string; tool: Tool }>
 
 /**
  * The static built-in collection CRUD tools. Keys here are the source of truth
@@ -82,12 +87,18 @@ export type MCPCollectionAuthToolName =
 
 export type MCPGlobalBuiltinName = 'find' | 'getGlobalSchema' | 'update'
 
+export type MCPTopLevelBuiltinName = 'getConfigInfo'
+
 /**
  * Pre-typed `Object.entries` for each registry. The cast from `string` to the
  * literal key union lives here once so consumers can iterate without their own
  * cast — TypeScript's `Object.entries` always widens keys to `string`, which
  * defeats the narrow type lookups on `MCPCollectionToolsMap`.
  */
+export const TOOL_BUILTIN_ENTRIES = Object.entries(TOOL_BUILTINS) as Array<
+  [MCPTopLevelBuiltinName, { label: string; mcpName: string; tool: Tool }]
+>
+
 export const COLLECTION_BUILTIN_ENTRIES = Object.entries(COLLECTION_BUILTINS) as Array<
   [MCPCollectionBuiltinName, { mcpName: string; tool: CollectionTool }]
 >

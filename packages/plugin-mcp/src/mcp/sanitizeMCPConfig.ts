@@ -24,6 +24,8 @@ import {
   COLLECTION_BUILTINS,
   GLOBAL_BUILTIN_ENTRIES,
   GLOBAL_BUILTINS,
+  TOOL_BUILTIN_ENTRIES,
+  TOOL_BUILTINS,
 } from './builtinTools.js'
 
 /**
@@ -53,7 +55,20 @@ export const sanitizeMCPConfig = ({
     items.push(...sanitizeGlobalConfig({ global, pluginConfig }))
   }
 
+  for (const [configKey, { label, mcpName, tool }] of TOOL_BUILTIN_ENTRIES) {
+    items.push({
+      type: 'tool',
+      configKey,
+      label,
+      mcpName,
+      tool,
+    })
+  }
+
   for (const [configKey, tool] of Object.entries(pluginConfig.tools ?? {})) {
+    if (configKey in TOOL_BUILTINS) {
+      continue
+    }
     items.push({
       type: 'tool',
       configKey,

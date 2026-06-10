@@ -138,6 +138,10 @@ describe('@payloadcms/plugin-mcp', () => {
         toolsResponse.result.tools.map((t: { name: string }) => [t.name, t]),
       )
 
+      const getConfigInfo = toolsByName['getConfigInfo']
+      expect(getConfigInfo).toBeDefined()
+      expect(getConfigInfo.description).toContain('List the Payload collection and global slugs')
+
       const createDocument = toolsByName['createDocument']
       expect(createDocument).toBeDefined()
       expect(createDocument.description).toContain('Create a document in any collection')
@@ -160,11 +164,10 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(toolsByName.createDocument).toBeDefined()
       expect(toolsByName.getCollectionSchema).toBeDefined()
       expect(toolsByName.createDocument.inputSchema.properties.collectionSlug).toBeDefined()
-      expect(toolsByName.createDocument.inputSchema.properties.collectionSlug.enum).toContain(
-        'posts',
-      )
-      expect(toolsByName.createDocument.inputSchema.properties.collectionSlug.enum).not.toContain(
-        'payload-mcp-api-keys',
+      expect(toolsByName.createDocument.inputSchema.properties.collectionSlug.type).toBe('string')
+      expect(toolsByName.createDocument.inputSchema.properties.collectionSlug.enum).toBeUndefined()
+      expect(toolsByName.createDocument.inputSchema.properties.collectionSlug.description).toBe(
+        'The collection slug',
       )
 
       // Input Schemas — find tool (top-level metadata fields)
@@ -172,7 +175,8 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(findDocuments.inputSchema.type).toBe('object')
       expect(findDocuments.inputSchema.properties).toBeDefined()
       expect(findDocuments.inputSchema.properties.collectionSlug).toBeDefined()
-      expect(findDocuments.inputSchema.properties.collectionSlug.enum).toContain('posts')
+      expect(findDocuments.inputSchema.properties.collectionSlug.type).toBe('string')
+      expect(findDocuments.inputSchema.properties.collectionSlug.enum).toBeUndefined()
       expect(findDocuments.inputSchema.properties.id).toBeDefined()
       expect(findDocuments.inputSchema.properties.id.description).toContain(
         'Optional: specific document ID to retrieve. If not provided, returns all documents',
@@ -229,6 +233,68 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(diceRoll.inputSchema.properties.sides).toBeDefined()
       expect(diceRoll.inputSchema.properties.sides.minimum).toBe(2)
       expect(diceRoll.inputSchema.properties.sides.maximum).toBe(1000)
+    })
+
+    it('should return config info', async ({ mcp }) => {
+      const apiKey = await getApiKey({ globalFind: true, globalUpdate: true })
+      const response = await mcp.callTool({ apiKey, name: 'getConfigInfo' })
+      const text = getToolText(response)
+
+      expect(text).toContain('Collections:')
+      expect(text).toContain('posts')
+      expect(text).toContain('Globals:')
+      expect(text).toContain('site-settings')
+    })
+
+    it('should return readable slugs even when scoped tools are disabled', async ({ mcp }) => {
+      const doc = await payload.create({
+        collection: 'payload-mcp-api-keys',
+        data: {
+          access: {
+            collections: {
+              posts: {
+                create: false,
+                delete: false,
+                find: false,
+                getCollectionSchema: false,
+                publish: false,
+                update: false,
+              },
+            },
+          },
+          apiKey: randomUUID(),
+          enableAPIKey: true,
+          label: 'Readable Slugs',
+          user: userId,
+        },
+      })
+
+      const response = await mcp.callTool({ apiKey: doc.apiKey as string, name: 'getConfigInfo' })
+      const text = getToolText(response)
+
+      expect(text).toContain('posts')
+    })
+
+    it('should hide config info when disabled for an API key', async ({ mcp }) => {
+      const doc = await payload.create({
+        collection: 'payload-mcp-api-keys',
+        data: {
+          access: {
+            tools: {
+              getConfigInfo: false,
+            },
+          },
+          apiKey: randomUUID(),
+          enableAPIKey: true,
+          label: 'No Config Info',
+          user: userId,
+        },
+      })
+
+      const toolsResponse = await mcp.listTools({ apiKey: doc.apiKey as string })
+      const toolNames = toolsResponse.result.tools.map((tool: { name: string }) => tool.name)
+
+      expect(toolNames).not.toContain('getConfigInfo')
     })
 
     it('should expose only tool input schemas that are valid JSON Schema draft 2020-12', async ({
@@ -306,12 +372,12 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(toolsResponse.result).toBeDefined()
       expect(toolsResponse.result.tools).toBeDefined()
 
-      const findGlobalTool = toolsResponse.result.tools.find(
-        (t: any) => t.name === 'findGlobal',
-      )
+      const findGlobalTool = toolsResponse.result.tools.find((t: any) => t.name === 'findGlobal')
       expect(findGlobalTool).toBeDefined()
       expect(findGlobalTool.description).toContain('Find any Payload global')
-      expect(findGlobalTool.inputSchema.properties.globalSlug.enum).toEqual(['site-settings'])
+      expect(findGlobalTool.inputSchema.properties.globalSlug.type).toBe('string')
+      expect(findGlobalTool.inputSchema.properties.globalSlug.enum).toBeUndefined()
+      expect(findGlobalTool.inputSchema.properties.globalSlug.description).toBe('The global slug')
       expect(findGlobalTool.inputSchema.properties.select).toBeDefined()
       expect(findGlobalTool.inputSchema.properties.select.type).toBe('string')
       expect(findGlobalTool.inputSchema.properties.select.description).toContain(
@@ -323,11 +389,13 @@ describe('@payloadcms/plugin-mcp', () => {
       )
       expect(updateGlobalTool).toBeDefined()
       expect(updateGlobalTool.description).toContain('Update any Payload global')
-      expect(updateGlobalTool.inputSchema.properties.globalSlug.enum).toEqual(['site-settings'])
+      expect(updateGlobalTool.inputSchema.properties.globalSlug.type).toBe('string')
+      expect(updateGlobalTool.inputSchema.properties.globalSlug.enum).toBeUndefined()
+      expect(updateGlobalTool.inputSchema.properties.globalSlug.description).toBe('The global slug')
       expect(updateGlobalTool.inputSchema.properties.select).toBeDefined()
       expect(updateGlobalTool.inputSchema.properties.select.type).toBe('string')
       expect(updateGlobalTool.inputSchema.properties.select.description).toContain(
-        'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"siteName": true}\'',
+        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"siteName\": true}'",
       )
     })
 
@@ -337,12 +405,14 @@ describe('@payloadcms/plugin-mcp', () => {
       const apiKey = await getApiKey({ enableUpdate: true })
       const toolsResponse = await mcp.listTools({ apiKey })
 
-      const updateToolSchema = toolsResponse.result.tools.find((t: any) => t.name === 'updateDocument')
+      const updateToolSchema = toolsResponse.result.tools.find(
+        (t: any) => t.name === 'updateDocument',
+      )
       expect(updateToolSchema).toBeDefined()
       expect(updateToolSchema.inputSchema.properties.select).toBeDefined()
       expect(updateToolSchema.inputSchema.properties.select.type).toBe('string')
       expect(updateToolSchema.inputSchema.properties.select.description).toContain(
-        'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"title": true}\'',
+        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
       )
     })
   })
@@ -621,8 +691,11 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const toolsResponse = await mcp.listTools({ apiKey: doc.apiKey as string })
-      const createDocument = toolsResponse.result.tools.find((tool) => tool.name === 'createDocument')
-      expect(createDocument.inputSchema.properties.collectionSlug.enum).not.toContain('posts')
+      const createDocument = toolsResponse.result.tools.find(
+        (tool) => tool.name === 'createDocument',
+      )
+      expect(createDocument.inputSchema.properties.collectionSlug.type).toBe('string')
+      expect(createDocument.inputSchema.properties.collectionSlug.enum).toBeUndefined()
 
       const callResponse = await mcp.callTool({
         apiKey: doc.apiKey as string,
@@ -637,7 +710,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect((callResponse.result as any).isError).toBe(true)
-      expect(callResponse.result.content[0].text).toContain('collectionSlug: Invalid option')
+      expect(callResponse.result.content[0].text).toContain(
+        'MCP access to "createDocument" is not enabled for collection "posts"',
+      )
     })
 
     it('should call findDocuments', async ({ mcp }) => {
@@ -674,7 +749,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(callResponse.result.content[1].text).toContain('Override MCP response for Posts!')
     })
 
-    it('should call findDocuments with select and return only requested fields', async ({ mcp }) => {
+    it('should call findDocuments with select and return only requested fields', async ({
+      mcp,
+    }) => {
       await payload.create({
         collection: 'posts',
         data: {
@@ -1195,7 +1272,11 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should find site-settings global', async ({ mcp }) => {
       const apiKey = await getApiKey({ globalFind: true })
-      const callResponse = await mcp.callTool({ apiKey, args: { globalSlug: 'site-settings' }, name: 'findGlobal' })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: { globalSlug: 'site-settings' },
+        name: 'findGlobal',
+      })
 
       expect(callResponse).toBeDefined()
       expect(callResponse.result).toBeDefined()
@@ -1340,7 +1421,11 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should return minified JSON in global responses', async ({ mcp }) => {
       const apiKey = await getApiKey({ globalFind: true })
-      const callResponse = await mcp.callTool({ apiKey, args: { globalSlug: 'site-settings' }, name: 'findGlobal' })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: { globalSlug: 'site-settings' },
+        name: 'findGlobal',
+      })
 
       const responseText: string = callResponse.result.content[0].text
       const jsonBlocks = responseText.match(/```json\n[\s\S]*?```/g)
@@ -1791,7 +1876,9 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(callResponse.result.isError).toBe(true)
         expect(callResponse.result.content[0].text).toContain('Use this schema for data')
         expect(callResponse.result.content[0].text).toContain('"numberField"')
-        expect((callResponse.result as any).structuredContent.schema.properties.numberField).toBeDefined()
+        expect(
+          (callResponse.result as any).structuredContent.schema.properties.numberField,
+        ).toBeDefined()
       })
 
       it('should create document with date, code, and json fields', async ({ mcp }) => {
@@ -2107,7 +2194,9 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(callResponse.result.isError).toBe(true)
         expect(callResponse.result.content[0].text).toContain('Use this schema for data')
         expect(callResponse.result.content[0].text).toContain('"numberField"')
-        expect((callResponse.result as any).structuredContent.schema.properties.numberField).toBeDefined()
+        expect(
+          (callResponse.result as any).structuredContent.schema.properties.numberField,
+        ).toBeDefined()
       })
 
       it('should update document with collapsible field (children at top level)', async ({

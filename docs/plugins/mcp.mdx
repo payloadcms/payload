@@ -25,7 +25,7 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
 - Two transports out of the box:
   - **HTTP** at `/api/mcp` - for remote clients, protected by per-user API keys
   - **stdio** via the `payload-mcp` bin - for local AI clients spawning a child process
-- Stable CRUD tools for all collections and globals (`getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - opt out per operation with simple keys like `tools: { delete: false }`
+- Stable discovery and CRUD tools for all collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - opt out per operation with simple keys like `tools: { delete: false }`
 - Auth-enabled collections expose opt-in `login`, `auth`, `forgotPassword`, `resetPassword`, `unlock`, `verify` tools
 - Define your own `tools`, `prompts`, and `resources` with full TypeScript inference via `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt`
 - Per-API-key access control through an admin-UI managed collection - toggle any tool, prompt, or resource on/off per key in real time
@@ -64,7 +64,7 @@ export default buildConfig({
 }
 ```
 
-That's it - every collection and global is now available through the generic MCP tools. For example, inspect a collection with `getCollectionSchema`, then create a document with `createDocument`.
+That's it - every collection and global is now available through the generic MCP tools. For example, call `getConfigInfo` to see available slugs, inspect a collection with `getCollectionSchema`, then create a document with `createDocument`.
 
 The `payload-mcp` bin finds your `payload.config.ts` automatically, since it's installed
 inside your project. If your project has an unusual layout (e.g. a monorepo), see
@@ -164,6 +164,8 @@ The `tools` map keys can be:
 
 - A built-in key (`getCollectionSchema`, `find`, `create`, `update`, `delete`, plus auth tool names on auth collections): set to `false` to disable, or to an override object `{ description?, overrideResponse? }`. Auth tools also accept `true` to enable with no overrides.
 - A custom name: a value produced by `defineCollectionTool(...)`.
+
+`getConfigInfo` is always registered as a top-level tool. It returns the collection and global slugs visible to the current MCP client. API keys can disable it like any other top-level tool.
 
 ### Per-global options
 
@@ -446,7 +448,7 @@ mcpPlugin({
 
 ### Collection-scoped tools
 
-A collection tool's wire name is exactly its key. Payload adds the `collectionSlug` enum to the MCP input schema automatically; the handler receives the resolved `collectionSlug`.
+A collection tool's wire name is exactly its key. Payload adds a `collectionSlug` string to the MCP input schema automatically; the handler receives the resolved `collectionSlug`. The field is intentionally not enum-restricted so newly-added collections can be used after HMR even if the MCP client cached the previous tool schema.
 
 ```ts
 import { defineCollectionTool, mcpPlugin } from '@payloadcms/plugin-mcp'
@@ -487,7 +489,7 @@ mcpPlugin({
 
 ### Global-scoped tools
 
-`defineGlobalTool` mirrors `defineCollectionTool`. Payload adds the `globalSlug` enum to the MCP input schema automatically; the handler receives the resolved `globalSlug`.
+`defineGlobalTool` mirrors `defineCollectionTool`. Payload adds a `globalSlug` string to the MCP input schema automatically; the handler receives the resolved `globalSlug`. The field is intentionally not enum-restricted so newly-added globals can be used after HMR even if the MCP client cached the previous tool schema.
 
 ```ts
 import { defineGlobalTool, mcpPlugin } from '@payloadcms/plugin-mcp'
