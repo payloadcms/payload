@@ -171,7 +171,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
         { find: '@payload-config', replacement: path.resolve(payloadConfigPath) },
         ...additionalAliases,
       ],
-      dedupe: ['react', 'react-dom', 'scheduler', '@payloadcms/ui'],
+      dedupe: ['react', 'react-dom', 'scheduler', '@payloadcms/ui', '@payloadcms/richtext-lexical'],
       extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
       tsconfigPaths: true,
     } as any,
