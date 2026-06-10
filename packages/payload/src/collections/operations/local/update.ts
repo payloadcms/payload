@@ -99,7 +99,8 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   populate?: PopulateType
   /**
-   * Publish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   * Publish the document / documents in all locales. Only applies when localization is enabled
+   * and the collection has localized fields.
    *
    * @default undefined
    */
@@ -123,7 +124,8 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   trash?: boolean
   /**
-   * Unpublish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   * Unpublish the document / documents in all locales. Only applies when localization is enabled
+   * and the collection has localized fields.
    */
   unpublishAllLocales?: boolean
   // TODO: Strongly type User as TypedUser (= User in v4.0)

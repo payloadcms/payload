@@ -67,7 +67,8 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   populate?: PopulateType
   /**
-   * Publish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   * Publish the document / documents in all locales. Only applies when localization is enabled
+   * and the global has localized fields.
    *
    * @default undefined
    */
@@ -87,7 +88,8 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   slug: TSlug
   /**
-   * Unpublish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   * Unpublish the document / documents in all locales. Only applies when localization is enabled
+   * and the global has localized fields.
    */
   unpublishAllLocales?: boolean
   // TODO: Strongly type User as TypedUser (= User in v4.0)
