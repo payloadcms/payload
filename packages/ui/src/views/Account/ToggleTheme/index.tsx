@@ -33,7 +33,7 @@ export const ToggleTheme: React.FC = () => {
 
   return (
     <div className="payload-settings__theme">
-      <FieldLabel htmlFor="theme-select" label={t('general:adminTheme')} />
+      <FieldLabel htmlFor="theme-select" label={t('general:theme')} />
       <ReactSelect
         inputId="theme-select"
         isClearable={false}

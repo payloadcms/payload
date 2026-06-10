@@ -1,11 +1,29 @@
 @layer payload-default {
+  .payload-settings::before,
+  .payload-settings::after {
+    /* Section separator */
+    content: '';
+    display: block;
+    height: var(--stroke-width-small);
+    background: var(--color-border);
+    width: calc(100% + calc(var(--gutter-h) * 2));
+    left: calc(var(--gutter-h) * -1);
+    top: 0;
+    position: absolute;
+  }
+
   .payload-settings {
     position: relative;
-    margin: var(--spacer-3) 0;
-    padding: var(--spacer-3) 0;
+    margin-block-start: var(--spacer-6);
+    margin-block-end: var(--spacer-6);
+    padding-block-start: var(--spacer-6);
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-3);
+    gap: var(--spacing-field);
+
+    .payload-reset-preferences {
+      margin-block-start: var(--spacer-2);
+    }
   }
 
   .payload-settings__language,
@@ -21,17 +39,5 @@
     font-weight: var(--text-heading-medium-font-weight);
     line-height: var(--text-heading-medium-line-height);
     letter-spacing: var(--text-heading-medium-letter-spacing);
-  }
-
-  .payload-settings::before,
-  .payload-settings::after {
-    content: '';
-    display: block;
-    height: var(--stroke-width-small);
-    background: var(--color-border);
-    width: calc(100% + calc(var(--gutter-h) * 2));
-    left: calc(var(--gutter-h) * -1);
-    top: 0;
-    position: absolute;
   }
 }
