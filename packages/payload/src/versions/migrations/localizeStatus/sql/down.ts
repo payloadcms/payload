@@ -1,6 +1,5 @@
 import type { Payload } from '../../../../types/index.js'
 
-import { hasLocalizeStatusEnabled } from '../../../../utilities/getVersionsConfig.js'
 import { toSnakeCase } from '../shared.js'
 
 export type LocalizeStatusArgs = {
@@ -41,13 +40,6 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
   if (!entityConfig) {
     throw new Error(
       `${collectionSlug ? 'Collection' : 'Global'} not found: ${collectionSlug || globalSlug}`,
-    )
-  }
-
-  if (hasLocalizeStatusEnabled(entityConfig)) {
-    throw new Error(
-      `${entitySlug} has localizeStatus enabled, cannot run down migration. ` +
-        `Please disable localizeStatus in your config before rolling back this migration.`,
     )
   }
 

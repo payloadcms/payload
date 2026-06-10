@@ -5,9 +5,7 @@ import { localizedCollectionSlug } from '../slugs.js'
 const LocalizedPosts: CollectionConfig = {
   slug: localizedCollectionSlug,
   versions: {
-    drafts: {
-      localizeStatus: true,
-    },
+    drafts: {},
   },
   fields: [
     {

@@ -37,9 +37,6 @@ import { seed } from './seed.js'
 import { BASE_PATH } from './shared.js'
 process.env.NEXT_BASE_PATH = BASE_PATH
 export default buildConfigWithDefaults({
-  experimental: {
-    localizeStatus: true,
-  },
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),

@@ -540,10 +540,16 @@ describe('Versions', () => {
           draft: true,
         })
 
+        const docWithLocales = await payload.findByID({
+          collection,
+          id: post.id,
+          locale: 'all',
+        })
+
         const result = await saveVersion({
           id: post.id,
           collection: collectionConfig,
-          docWithLocales: post,
+          docWithLocales,
           operation: 'create',
           payload,
           returning: false,

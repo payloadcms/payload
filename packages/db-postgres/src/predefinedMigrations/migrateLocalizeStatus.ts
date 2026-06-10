@@ -28,8 +28,18 @@ export async function migrateLocalizeStatus({
     return
   }
 
-  const collections = payload.config.collections.filter((c) => c.versions?.drafts)
-  const globals = payload.config.globals.filter((g) => g.versions?.drafts)
+  const collections = payload.config.collections.filter(
+    (c) =>
+      c.versions?.drafts &&
+      typeof c.versions.drafts === 'object' &&
+      c.versions.drafts.localizeStatus,
+  )
+  const globals = payload.config.globals.filter(
+    (g) =>
+      g.versions?.drafts &&
+      typeof g.versions.drafts === 'object' &&
+      g.versions.drafts.localizeStatus,
+  )
 
   payload.logger.info({
     msg: `Starting localize-status migration for ${collections.length} collection(s) and ${globals.length} global(s)`,

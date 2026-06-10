@@ -29,6 +29,9 @@ describe('localizeStatus migration', () => {
     // Simulate a real user's pre-migration database state: the `snapshot` column existed
     // in the old schema but is no longer part of the Payload schema after this PR.
     // Real users' databases will already have this column; the test DB needs it added manually.
+    //
+    // Also revert testMigrationArticles from post-migration schema (localizeStatus auto-inferred
+    // as true) to pre-migration schema (version__status in main table, not in locales).
     beforeAll(async () => {
       const db = payload.db
       await db.drizzle.execute(
@@ -36,6 +39,22 @@ describe('localizeStatus migration', () => {
       )
       await db.drizzle.execute(
         sql`ALTER TABLE _test_migration_articles_v ADD COLUMN IF NOT EXISTS snapshot BOOLEAN`,
+      )
+
+      // Revert testMigrationArticles to pre-migration state so migration tests work correctly.
+      // With localizeStatus auto-inferred as true (has localized fields + drafts), Payload
+      // creates the post-migration schema at startup. We revert it here for test isolation.
+      await db.drizzle.execute(
+        sql`ALTER TABLE _test_migration_articles_v ADD COLUMN IF NOT EXISTS version__status TEXT DEFAULT 'draft'`,
+      )
+      await db.drizzle.execute(
+        sql`ALTER TABLE _test_migration_articles_v_locales DROP COLUMN IF EXISTS version__status`,
+      )
+      await db.drizzle.execute(
+        sql`ALTER TABLE test_migration_articles ADD COLUMN IF NOT EXISTS _status TEXT DEFAULT 'draft'`,
+      )
+      await db.drizzle.execute(
+        sql`ALTER TABLE test_migration_articles_locales DROP COLUMN IF EXISTS _status`,
       )
     })
 
@@ -169,38 +188,56 @@ describe('localizeStatus migration', () => {
       it('should add _status column to existing locales table', async () => {
         const db = payload.db
 
-        // At this point, Payload has created:
-        // - _test_migration_articles_v table with _status column (because drafts: true)
-        // - _test_migration_articles_v_locales table with 'title' column (because title is localized)
+        // Schema is in pre-migration state (set up in beforeAll):
+        // - _test_migration_articles_v has version__status in main table
+        // - _test_migration_articles_v_locales has version_title but NOT version__status
+        //
+        // We use raw SQL because the Payload runtime has localizeStatus auto-inferred as true,
+        // so using the Payload API would try to write to a schema that's been reverted.
 
-        // Step 1: Create test data with localized content
-        const article = await payload.create({
-          collection: 'testMigrationArticles',
-          data: {
-            title: 'English Title',
-          },
-          locale: 'en',
-        })
+        // Step 1: Create test data via raw SQL
+        const articleResult = await db.drizzle.execute(sql`
+          INSERT INTO test_migration_articles (_status, created_at, updated_at)
+          VALUES ('draft', NOW(), NOW())
+          RETURNING id
+        `)
+        const articleId = articleResult.rows[0].id
 
-        // Add Spanish translation
-        await payload.update({
-          id: article.id,
-          collection: 'testMigrationArticles',
-          data: {
-            title: 'Título Español',
-          },
-          locale: 'es',
-        })
+        await db.drizzle.execute(sql`
+          INSERT INTO test_migration_articles_locales (_locale, _parent_id, title)
+          VALUES
+            ('en', ${articleId}, 'English Title'),
+            ('es', ${articleId}, 'Título Español'),
+            ('de', ${articleId}, 'German Title')
+        `)
 
-        // Publish in English only
-        await payload.update({
-          id: article.id,
-          collection: 'testMigrationArticles',
-          data: {
-            _status: 'published',
-          },
-          locale: 'en',
-        })
+        const draftVersionResult = await db.drizzle.execute(sql`
+          INSERT INTO _test_migration_articles_v (parent_id, version__status, created_at, updated_at)
+          VALUES (${articleId}, 'draft', NOW(), NOW())
+          RETURNING id
+        `)
+        const draftVersionId = draftVersionResult.rows[0].id
+
+        for (const locale of ['en', 'es', 'de']) {
+          await db.drizzle.execute(sql`
+            INSERT INTO _test_migration_articles_v_locales (_locale, _parent_id)
+            VALUES (${locale}, ${draftVersionId})
+          `)
+        }
+
+        const publishedVersionResult = await db.drizzle.execute(sql`
+          INSERT INTO _test_migration_articles_v (parent_id, version__status, created_at, updated_at)
+          VALUES (${articleId}, 'published', NOW() + INTERVAL '1 second', NOW() + INTERVAL '1 second')
+          RETURNING id
+        `)
+        const publishedVersionId = publishedVersionResult.rows[0].id
+
+        for (const locale of ['en', 'es', 'de']) {
+          await db.drizzle.execute(sql`
+            INSERT INTO _test_migration_articles_v_locales (_locale, _parent_id)
+            VALUES (${locale}, ${publishedVersionId})
+          `)
+        }
 
         // Step 2: Run the migration
         await localizeStatus.up({
@@ -227,7 +264,7 @@ describe('localizeStatus migration', () => {
         SELECT l._locale, l.version__status as _status
         FROM _test_migration_articles_v_locales l
         JOIN _test_migration_articles_v v ON l._parent_id = v.id
-        WHERE v.parent_id = ${article.id}
+        WHERE v.parent_id = ${articleId}
         ORDER BY v.created_at DESC, l._locale
       `)
 
@@ -387,25 +424,16 @@ describe('localizeStatus migration', () => {
         await db.drizzle.execute(sql`DELETE FROM _test_migration_articles_v`)
         await db.drizzle.execute(sql`DELETE FROM _test_migration_articles_v_locales`)
 
-        // Create a parent article document
-        const article = await payload.create({
-          collection: 'testMigrationArticles' as any,
-          data: {
-            title: 'Test Article for publishedLocale',
-          },
-        })
+        // Create a parent article document via raw SQL.
+        // After Scenario 2's migration rollback, the schema is pre-migration state and
+        // the Payload API cannot be used (runtime expects post-migration schema for articles).
+        const articleResult = await db.drizzle.execute(sql`
+          INSERT INTO test_migration_articles (_status, created_at, updated_at)
+          VALUES ('draft', NOW(), NOW())
+          RETURNING id
+        `)
 
-        const parentId = article.id
-
-        // Delete the auto-created version so we can insert our own manual test versions
-        await db.drizzle.execute(sql`
-        DELETE FROM _test_migration_articles_v WHERE parent_id = ${parentId}
-      `)
-        await db.drizzle.execute(sql`
-        DELETE FROM _test_migration_articles_v_locales WHERE _parent_id IN (
-          SELECT id FROM _test_migration_articles_v WHERE parent_id = ${parentId}
-        )
-      `)
+        const parentId = articleResult.rows[0].id
 
         // Helper to insert version with locales rows
         const insertVersion = async (

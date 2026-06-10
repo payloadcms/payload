@@ -15,6 +15,7 @@ import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exp
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
 import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
 import { removeGroupByTrue } from './transforms/remove-group-by-true/index.js'
+import { removeLocalizeStatusConfig } from './transforms/remove-localize-status-config/index.js'
 import { removePublishSpecificLocale } from './transforms/remove-publish-specific-locale/index.js'
 import { removeVersionsTrue } from './transforms/remove-versions-true/index.js'
 import { renameStorageAdaptersToStorage } from './transforms/rename-storage-adapters-to-storage/index.js'
@@ -37,6 +38,7 @@ export const transforms: Transform[] = [
   migrateNextSubpathExports,
   migrateVersionsDefault,
   removeGroupByTrue,
+  removeLocalizeStatusConfig,
   removeVersionsTrue,
   removePublishSpecificLocale,
   renameTypescriptSchemaToJsonSchema,

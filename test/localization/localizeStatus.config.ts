@@ -24,9 +24,7 @@ export default buildConfigWithDefaults({
         },
       ],
       versions: {
-        drafts: {
-          localizeStatus: false, // Explicitly use old schema to test migration FROM it
-        },
+        drafts: true,
       },
     },
     {
@@ -39,9 +37,7 @@ export default buildConfigWithDefaults({
         },
       ],
       versions: {
-        drafts: {
-          localizeStatus: false, // Explicitly use old schema to test migration FROM it
-        },
+        drafts: true,
       },
     },
     {

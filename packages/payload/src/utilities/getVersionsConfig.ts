@@ -1,10 +1,10 @@
-import type { CollectionConfig } from '../collections/config/types.js'
-import type { GlobalConfig } from '../globals/config/types.js'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Autosave, SanitizedDrafts } from '../versions/types.js'
 
 import { versionDefaults } from '../versions/defaults.js'
 
-type EntityConfig = Pick<CollectionConfig | GlobalConfig, 'versions'>
+type EntityConfig = Pick<SanitizedCollectionConfig | SanitizedGlobalConfig, 'versions'>
 
 /**
  * Check if an entity has drafts enabled

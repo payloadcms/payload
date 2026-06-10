@@ -64,9 +64,6 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  experimental: {
-    localizeStatus: true,
-  },
   collections: [
     RichTextCollection,
     BlocksCollection,
@@ -480,9 +477,7 @@ export default buildConfigWithDefaults({
       ],
       slug: globalWithDraftsSlug,
       versions: {
-        drafts: {
-          localizeStatus: true,
-        },
+        drafts: {},
       },
     },
   ],
