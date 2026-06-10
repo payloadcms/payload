@@ -22,6 +22,8 @@ export const trTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'E-posta veya Kullanıcı Adı',
     emailSent: 'E-posta gönderildi',
     emailVerified: 'E-posta başarıyla doğrulandı.',
+    emailVerifiedRedirecting:
+      'E-posta başarıyla doğrulandı. Giriş yapmanız için yönlendiriliyorsunuz...',
     enableAPIKey: 'Api anahtarını etkinleştir',
     failedToUnlock: 'Hesabı aktifleştirme başarısız oldu',
     forceUnlock: 'Hesabı Etkinleştir',
@@ -56,6 +58,7 @@ export const trTranslations: DefaultTranslationsObject = {
       '<0>{{serverURL}}</0> sitesinde adınıza yeni bir hesap oluşturuldu. E-postanızı doğrulamak için bağlantıya tıklayabilirsiniz: <1>{{verificationURL}}</1><br> E-postanızı doğruladıktan sonra siteye hesap bilgilerinizle giriş yapabilirsiniz.',
     newAPIKeyGenerated: 'Yeni API anahtarı oluşturuldu.',
     newPassword: 'Yeni Parola',
+    notRedirected: 'Yönlendirilmediniz mi? <0>Buradan giriş yapın</0>',
     passed: 'Doğrulama Başarılı',
     passwordResetSuccessfully: 'Parola başarıyla sıfırlandı.',
     resetPassword: 'Parolayı Sıfırla',
@@ -69,6 +72,8 @@ export const trTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Doğrulama başarısız',
     username: 'Kullanıcı Adı',
     usernameNotValid: 'Sağlanan kullanıcı adı geçerli değil.',
+    verificationFailedRequestNew:
+      'Hesabınızı doğrulayamadık. Lütfen yeni bir doğrulama e-postası talep edin ve tekrar deneyin.',
     verified: 'Doğrulandı',
     verifiedSuccessfully: 'Hesap başarıyla doğrulandı',
     verify: 'Doğrula',
