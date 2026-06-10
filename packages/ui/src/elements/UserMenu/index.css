@@ -22,6 +22,12 @@
   align-items: center;
   padding: var(--spacer-3) var(--spacer-2);
   gap: var(--spacer-2);
+  text-decoration: none;
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+  }
 }
 
 .user-menu__avatar {

@@ -30,7 +30,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
   const {
     config: {
       admin: {
-        routes: { logout: logoutRoute },
+        routes: { account: accountRoute, logout: logoutRoute },
         theme: adminTheme,
         user: userSlug,
       },
@@ -67,6 +67,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
   const showPreferencesGroup = showThemeMenu || hasMultipleLanguages
 
   const logoutHref = formatAdminURL({ adminRoute, path: logoutRoute })
+  const accountHref = formatAdminURL({ adminRoute, path: accountRoute })
 
   return (
     <Popup
@@ -125,13 +126,13 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
         // Normal menu content (desktop always; mobile when no active submenu)
         <>
           {/* Profile header */}
-          <div className={`${baseClass}__profile`}>
+          <a className={`${baseClass}__profile`} href={accountHref}>
             <div className={`${baseClass}__avatar`}>
               <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
             </div>
             {titleString && <p className={`${baseClass}__name`}>{titleString}</p>}
             {identifier && <p className={`${baseClass}__identifier`}>{identifier}</p>}
-          </div>
+          </a>
 
           {/* Preferences group: Theme + Language */}
           {showPreferencesGroup && (
