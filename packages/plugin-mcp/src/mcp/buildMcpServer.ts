@@ -1,5 +1,5 @@
 import { McpServer, type ServerContext } from '@modelcontextprotocol/server'
-import { APIError, type CollectionSlug, type GlobalSlug, type PayloadRequest } from 'payload'
+import { APIError, type PayloadRequest } from 'payload'
 import { z } from 'zod'
 
 import type {
@@ -56,72 +56,94 @@ export const buildMcpServer = ({
     return rest
   }
 
+  /**
+   * Runs a collection/global tool call:
+   * - reads `collectionSlug` / `globalSlug` from the input
+   * - runs access control: errors if `authorizedMCP.items` has no entry for this tool + slug
+   * - runs the tool handler and finalizes its response
+   */
+  const callEntityTool = async ({
+    input,
+    item,
+    serverContext,
+  }: {
+    input: unknown
+    item: CollectionMCPItem | GlobalMCPItem
+    serverContext: ServerContext
+  }): Promise<MCPToolResponse> => {
+    const entity = item.type === 'collectionTool' ? 'collection' : 'global'
+    const slugKey = item.type === 'collectionTool' ? 'collectionSlug' : 'globalSlug'
+    const toolInput = (input ?? {}) as Record<string, unknown>
+    const slug = toolInput[slugKey] as string | undefined
+
+    if (!slug) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error: "${item.mcpName}" requires ${slugKey}. Use getConfigInfo to inspect ${entity} slugs.`,
+          },
+        ],
+        isError: true,
+      }
+    }
+
+    const match = authorizedMCP.items.find(
+      (candidate): candidate is CollectionMCPItem | GlobalMCPItem =>
+        candidate.type === item.type &&
+        candidate.mcpName === item.mcpName &&
+        (candidate.type === 'collectionTool'
+          ? candidate.collectionSlug === slug
+          : candidate.type === 'globalTool' && candidate.globalSlug === slug),
+    )
+
+    if (!match) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error: MCP access to "${item.mcpName}" is not enabled for ${entity} "${slug}"`,
+          },
+        ],
+        isError: true,
+      }
+    }
+
+    const handlerArgs = { authorizedMCP, input: toolInput, req, serverContext }
+    const response = await (match.type === 'collectionTool'
+      ? match.tool.handler({ ...handlerArgs, collectionSlug: slug })
+      : match.tool.handler({ ...handlerArgs, globalSlug: slug }))
+
+    return finalizeToolResponse(response, match.tool.overrideResponse)
+  }
+
   try {
-    const registeredCollectionTools = new Set<string>()
-    const registeredGlobalTools = new Set<string>()
+    const registeredEntityTools = new Set<string>()
 
     for (const item of authorizedMCP.items) {
       switch (item.type) {
-        case 'collectionTool': {
-          if (registeredCollectionTools.has(item.mcpName)) {
-            break
-          }
-          registeredCollectionTools.add(item.mcpName)
-
-          const tool = item.tool
-          const mcpName = item.mcpName
-          const inputSchema = withSlugInput({
-            name: 'collectionSlug',
-            input: tool.input,
-          })
-
-          server.registerTool(
-            mcpName,
-            {
-              description: tool.description,
-              inputSchema: toStandardSchema(inputSchema),
-            },
-            async (input: unknown, ctx: ServerContext) =>
-              finalizeCollectionToolResponse({
-                authorizedMCP,
-                input,
-                item,
-                req,
-                serverContext: ctx,
-              }),
-          )
-          logger.info(`✅ Tool: ${mcpName} Registered.`)
-          break
-        }
+        case 'collectionTool':
         case 'globalTool': {
-          if (registeredGlobalTools.has(item.mcpName)) {
+          if (registeredEntityTools.has(item.mcpName)) {
             break
           }
-          registeredGlobalTools.add(item.mcpName)
+          registeredEntityTools.add(item.mcpName)
 
-          const tool = item.tool
-          const mcpName = item.mcpName
           const inputSchema = withSlugInput({
-            name: 'globalSlug',
-            input: tool.input,
+            name: item.type === 'collectionTool' ? 'collectionSlug' : 'globalSlug',
+            input: item.tool.input,
           })
 
           server.registerTool(
-            mcpName,
+            item.mcpName,
             {
-              description: tool.description,
+              description: item.tool.description,
               inputSchema: toStandardSchema(inputSchema),
             },
             async (input: unknown, ctx: ServerContext) =>
-              finalizeGlobalToolResponse({
-                authorizedMCP,
-                input,
-                item,
-                req,
-                serverContext: ctx,
-              }),
+              callEntityTool({ input, item, serverContext: ctx }),
           )
-          logger.info(`✅ Tool: ${mcpName} Registered.`)
+          logger.info(`✅ Tool: ${item.mcpName} Registered.`)
           break
         }
         case 'prompt': {
@@ -232,134 +254,4 @@ const withSlugInput = ({
     },
     required: Array.from(new Set([name, ...(schema.required ?? [])])),
   }
-}
-
-/**
- * Generic collection tools are registered once. This checks `input.collectionSlug`
- * against the API key's allowed collections before calling the tool handler.
- */
-const finalizeCollectionToolResponse = async ({
-  authorizedMCP,
-  input,
-  item,
-  req,
-  serverContext,
-}: {
-  authorizedMCP: AuthorizedMCP
-  input: unknown
-  item: CollectionMCPItem
-  req: PayloadRequest
-  serverContext: ServerContext
-}): Promise<MCPToolResponse> => {
-  const toolInput = (input ?? {}) as Record<string, unknown>
-  const collectionSlug = toolInput.collectionSlug as CollectionSlug | undefined
-  const mcpName = item.mcpName
-
-  if (!collectionSlug) {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error: "${mcpName}" requires collectionSlug. Use getConfigInfo to inspect collection slugs.`,
-        },
-      ],
-      isError: true,
-    }
-  }
-
-  const itemForCollection = collectionSlug
-    ? authorizedMCP.items.find(
-        (candidate): candidate is CollectionMCPItem =>
-          candidate.type === 'collectionTool' &&
-          candidate.mcpName === mcpName &&
-          candidate.collectionSlug === collectionSlug,
-      )
-    : item
-
-  if (!itemForCollection) {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error: MCP access to "${mcpName}" is not enabled for collection "${collectionSlug}"`,
-        },
-      ],
-      isError: true,
-    }
-  }
-
-  const tool = itemForCollection.tool
-  const response = await tool.handler({
-    authorizedMCP,
-    collectionSlug,
-    input: toolInput,
-    req,
-    serverContext,
-  })
-  const overridden = tool.overrideResponse?.(response, response.doc ?? {}, req) ?? response
-  const { doc: _doc, ...rest } = overridden
-  return rest
-}
-
-const finalizeGlobalToolResponse = async ({
-  authorizedMCP,
-  input,
-  item,
-  req,
-  serverContext,
-}: {
-  authorizedMCP: AuthorizedMCP
-  input: unknown
-  item: GlobalMCPItem
-  req: PayloadRequest
-  serverContext: ServerContext
-}): Promise<MCPToolResponse> => {
-  const toolInput = (input ?? {}) as Record<string, unknown>
-  const globalSlug = toolInput.globalSlug as GlobalSlug | undefined
-  const mcpName = item.mcpName
-
-  if (!globalSlug) {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error: "${mcpName}" requires globalSlug. Use getConfigInfo to inspect global slugs.`,
-        },
-      ],
-      isError: true,
-    }
-  }
-
-  const itemForGlobal = globalSlug
-    ? authorizedMCP.items.find(
-        (candidate): candidate is GlobalMCPItem =>
-          candidate.type === 'globalTool' &&
-          candidate.mcpName === mcpName &&
-          candidate.globalSlug === globalSlug,
-      )
-    : item
-
-  if (!itemForGlobal) {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error: MCP access to "${mcpName}" is not enabled for global "${globalSlug}"`,
-        },
-      ],
-      isError: true,
-    }
-  }
-
-  const tool = itemForGlobal.tool
-  const response = await tool.handler({
-    authorizedMCP,
-    globalSlug,
-    input: toolInput,
-    req,
-    serverContext,
-  })
-  const overridden = tool.overrideResponse?.(response, response.doc ?? {}, req) ?? response
-  const { doc: _doc, ...rest } = overridden
-  return rest
 }
