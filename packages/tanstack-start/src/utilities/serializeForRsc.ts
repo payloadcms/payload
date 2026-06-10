@@ -1,6 +1,7 @@
 import type React from 'react'
 
 import { renderServerComponent } from '@tanstack/react-start/rsc'
+import { createElement, Fragment } from 'react'
 
 /**
  * Recursively walk a server-function return value and prepare it for transit
@@ -98,6 +99,27 @@ async function walk(
   }
 
   if (Array.isArray(obj)) {
+    // An array consisting entirely of React elements (e.g. a field's
+    // `beforeInput` / `afterInput` component list, produced by
+    // `RenderServerComponent`) must be rendered as a SINGLE RSC handle.
+    // Converting each element individually below turns every item into its own
+    // `renderServerComponent` handle, which drops the element's React `key` —
+    // the client then renders `{[handle, handle]}` as unkeyed array children
+    // and React warns "Each child in a list should have a unique key prop".
+    // Payload always renders these component arrays wholesale (`{BeforeInput}`),
+    // so collapsing them into one Fragment-rendered handle is render-equivalent
+    // and keeps the per-element keys intact inside the single Flight payload.
+    const items = obj.filter((item) => item !== null && item !== undefined)
+    const isReactElementArray =
+      items.length > 0 &&
+      items.every(
+        (item) => typeof item === 'object' && typeof (item as { $$typeof?: unknown }).$$typeof === 'symbol',
+      )
+    if (isReactElementArray) {
+      ancestors.delete(obj)
+      return await renderServerComponent(createElement(Fragment, null, ...(obj as React.ReactNode[])))
+    }
+
     const arr: unknown[] = []
     cache.set(obj, arr)
     for (const item of obj) {
