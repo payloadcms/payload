@@ -1,8 +1,11 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
-import { RadioGroupField } from '../../../fields/RadioGroup/index.js'
+import type { Option as ReactSelectOption } from '../../../elements/ReactSelect/index.js'
+
+import { ReactSelect } from '../../../elements/ReactSelect/index.js'
+import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { useTheme } from '../../../providers/Theme/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
@@ -10,37 +13,34 @@ export const ToggleTheme: React.FC = () => {
   const { autoMode, setTheme, theme } = useTheme()
   const { t } = useTranslation()
 
+  const options = useMemo(
+    () => [
+      { label: t('general:automatic'), value: 'auto' },
+      { label: t('general:light'), value: 'light' },
+      { label: t('general:dark'), value: 'dark' },
+    ],
+    [t],
+  )
+
+  const activeValue = autoMode ? 'auto' : theme
+
   const onChange = useCallback(
-    (newTheme) => {
-      setTheme(newTheme)
+    (option: ReactSelectOption) => {
+      setTheme(option.value as 'auto' | 'dark' | 'light')
     },
     [setTheme],
   )
 
   return (
-    <RadioGroupField
-      disableModifyingForm={true}
-      field={{
-        name: 'theme',
-        label: t('general:adminTheme'),
-        options: [
-          {
-            label: t('general:automatic'),
-            value: 'auto',
-          },
-          {
-            label: t('general:light'),
-            value: 'light',
-          },
-          {
-            label: t('general:dark'),
-            value: 'dark',
-          },
-        ],
-      }}
-      onChange={onChange}
-      path="theme"
-      value={autoMode ? 'auto' : theme}
-    />
+    <div className="payload-settings__theme">
+      <FieldLabel htmlFor="theme-select" label={t('general:adminTheme')} />
+      <ReactSelect
+        inputId="theme-select"
+        isClearable={false}
+        onChange={onChange}
+        options={options}
+        value={options.find((o) => o.value === activeValue)}
+      />
+    </div>
   )
 }

@@ -8,7 +8,8 @@
     gap: var(--spacer-3);
   }
 
-  .payload-settings__language {
+  .payload-settings__language,
+  .payload-settings__theme {
     display: flex;
     flex-direction: column;
     gap: var(--spacer-2);
