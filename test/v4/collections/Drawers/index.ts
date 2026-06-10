@@ -1,9 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { nestedDrawersSlug, relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
+import { drawersSlug, relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
+import { drawerBlocks } from './blocks.js'
 
-const NestedDrawers: CollectionConfig = {
-  slug: nestedDrawersSlug,
+const Drawers: CollectionConfig = {
+  slug: drawersSlug,
   admin: {
     useAsTitle: 'title',
   },
@@ -16,7 +17,7 @@ const NestedDrawers: CollectionConfig = {
     {
       name: 'child',
       type: 'relationship',
-      relationTo: nestedDrawersSlug,
+      relationTo: drawersSlug,
       admin: {
         description: 'Open or create a related doc to nest another drawer.',
       },
@@ -36,6 +37,14 @@ const NestedDrawers: CollectionConfig = {
       relationTo: relationshipFieldsSlug,
     },
     {
+      name: 'blocks',
+      type: 'blocks',
+      admin: {
+        description: 'Add a block to open the blocks drawer.',
+      },
+      blocks: drawerBlocks,
+    },
+    {
       name: 'status',
       type: 'select',
       options: ['draft', 'published'],
@@ -53,4 +62,4 @@ const NestedDrawers: CollectionConfig = {
   ],
 }
 
-export default NestedDrawers
+export default Drawers
