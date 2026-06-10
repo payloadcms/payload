@@ -2,6 +2,6 @@
   .confirmation-modal__body {
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-2-5);
+    gap: var(--spacer-2);
   }
 }
