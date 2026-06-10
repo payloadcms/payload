@@ -10,6 +10,10 @@
 
   .payload-settings h3 {
     margin: 0;
+    font-size: var(--text-heading-medium-font-size);
+    font-weight: var(--text-heading-medium-font-weight);
+    line-height: var(--text-heading-medium-line-height);
+    letter-spacing: var(--text-heading-medium-letter-spacing);
   }
 
   .payload-settings::before,
