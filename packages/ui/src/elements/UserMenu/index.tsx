@@ -32,9 +32,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
       admin: {
         routes: { logout: logoutRoute },
         theme: adminTheme,
+        user: userSlug,
       },
       routes: { admin: adminRoute },
     },
+    getEntityConfig,
   } = useConfig()
   const {
     breakpoints: { s: smallBreak },
@@ -51,6 +53,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
       setActiveMobileSubmenu(null)
     }
   }, [isMobile])
+
+  const userCollectionConfig = getEntityConfig({ collectionSlug: userSlug })
+  const useAsTitle = userCollectionConfig?.admin?.useAsTitle ?? 'email'
+  const titleValue =
+    useAsTitle !== 'email' && user ? (user as Record<string, unknown>)[useAsTitle] : undefined
+  const titleString = typeof titleValue === 'string' ? titleValue : undefined
 
   const identifier = user?.username ?? user?.email ?? ''
   const hasMultipleLanguages = Array.isArray(languageOptions) && languageOptions.length > 1
@@ -121,7 +129,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
             <div className={`${baseClass}__avatar`}>
               <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
             </div>
-            {user?.name && <p className={`${baseClass}__name`}>{user.name}</p>}
+            {titleString && <p className={`${baseClass}__name`}>{titleString}</p>}
             {identifier && <p className={`${baseClass}__identifier`}>{identifier}</p>}
           </div>
 
