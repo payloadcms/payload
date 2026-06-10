@@ -240,7 +240,7 @@ export function DefaultListView(props: ListViewClientProps) {
               disableQueryPresets={
                 collectionConfig?.enableQueryPresets !== true || disableQueryPresets
               }
-              hasCreatePermission={hasCreatePermission && viewType !== 'trash'}
+              hasCreatePermission={hasCreatePermission && viewType !== 'trash' && !isInDrawer}
               isWhereOpen={isWhereOpen}
               listMenuItems={listMenuItems}
               newDocumentURL={newDocumentURL}

@@ -16,8 +16,6 @@
     }
   }
 
-  /* Keep nested drawers visible so they peek out to the left. Out-specifies the
-     modal library's single-class hide rule, avoiding !important. */
   .drawer.drawer--is-open {
     visibility: visible;
   }
