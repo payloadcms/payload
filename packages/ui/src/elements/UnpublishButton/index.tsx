@@ -6,7 +6,7 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useForm } from '../../forms/Form/context.js'
@@ -15,7 +15,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 export function UnpublishButton({
@@ -40,7 +39,6 @@ export function UnpublishButton({
   const { reset: resetForm } = useForm()
   const { code: localeCode, label: localeLabel } = useLocale()
   const [unpublishAll, setUnpublishAll] = useState(false)
-  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
   const unPublishModalSlug = `confirm-un-publish-${id}`
 
   const {
@@ -155,11 +153,6 @@ export function UnpublishButton({
     ],
   )
 
-  useEffect(() => {
-    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
-    setHasLocalizedFields(hasLocalizedField)
-  }, [entityConfig?.fields])
-
   const drafts = entityConfig?.versions?.drafts
   const hasDraftsEnabled = typeof drafts === 'object' && drafts !== null
 
@@ -168,12 +161,12 @@ export function UnpublishButton({
   }, [hasPublishPermission, hasPublishedDoc, isTrashed, hasDraftsEnabled])
 
   const canUnpublishCurrentLocale = React.useMemo(() => {
-    if (!canUnpublish || !hasLocalizedFields) {
+    if (!canUnpublish) {
       return false
     }
 
-    return drafts?.localizeStatus === true
-  }, [canUnpublish, hasLocalizedFields, drafts])
+    return Boolean(drafts && typeof drafts === 'object' && drafts.localizeStatus)
+  }, [canUnpublish, drafts])
 
   const label = getTranslation(localeLabel, i18n)
 
