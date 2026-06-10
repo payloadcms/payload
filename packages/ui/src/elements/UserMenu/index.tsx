@@ -130,8 +130,10 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
             <div className={`${baseClass}__avatar`}>
               <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
             </div>
-            {titleString && <p className={`${baseClass}__name`}>{titleString}</p>}
-            {identifier && <p className={`${baseClass}__identifier`}>{identifier}</p>}
+            <div>
+              {titleString && <p className={`${baseClass}__name`}>{titleString}</p>}
+              {identifier && <p className={`${baseClass}__identifier`}>{identifier}</p>}
+            </div>
           </a>
 
           {/* Preferences group: Theme + Language */}
