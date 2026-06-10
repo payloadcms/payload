@@ -71,6 +71,10 @@
     gap: var(--spacer-2);
   }
 
+  .doc-drawer__meta:has(.autosave) .doc-drawer__updated-at {
+    display: none;
+  }
+
   .doc-drawer__before-meta {
     display: flex;
     align-items: center;

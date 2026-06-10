@@ -3,6 +3,7 @@
 import type { ClientUser } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useModal } from '../../../elements/Modal/index.js'
@@ -12,10 +13,13 @@ import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { formatTimeToNow } from '../../../utilities/formatDocTitle/formatDateTitle.js'
+import { formatDate, formatTimeToNow } from '../../../utilities/formatDocTitle/formatDateTitle.js'
+import { Autosave } from '../../Autosave/index.js'
 import { Button } from '../../Button/index.js'
 import { LeaveWithoutSavingModal } from '../../LeaveWithoutSaving/index.js'
 import { Locked } from '../../Locked/index.js'
+import { RenderCustomComponent } from '../../RenderCustomComponent/index.js'
+import { Status } from '../../Status/index.js'
 import { documentDrawerBaseClass } from '../index.js'
 import './index.css'
 
@@ -28,6 +32,7 @@ export const DocumentDrawerHeader: React.FC<{
   drawerSlug: string
   readOnlyForIncomingUser?: boolean
   renderTitleAsLink?: boolean
+  Status?: React.ReactNode
   user?: ClientUser
 }> = ({
   actions,
@@ -36,16 +41,36 @@ export const DocumentDrawerHeader: React.FC<{
   drawerSlug,
   readOnlyForIncomingUser,
   renderTitleAsLink = true,
+  Status: CustomStatus,
   user,
 }) => {
   const { closeModal, openModal } = useModal()
   const { i18n, t } = useTranslation()
-  const { getEntityConfig } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const isModified = useFormModified()
-  const { id, collectionSlug, data, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, data, globalSlug, hasSavePermission, isEditing, isTrashed } =
+    useDocumentInfo()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
   const globalConfig = getEntityConfig({ globalSlug })
+
+  const collectionHasDraftsEnabled = hasDraftsEnabled(collectionConfig)
+  const globalHasDraftsEnabled = hasDraftsEnabled(globalConfig)
+  const autosaveEnabled = hasAutosaveEnabled(collectionConfig) || hasAutosaveEnabled(globalConfig)
+
+  const unsavedDraftWithValidations =
+    !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
+
+  const showStatus =
+    (collectionHasDraftsEnabled || globalHasDraftsEnabled) &&
+    (Boolean(globalConfig) || (Boolean(collectionConfig) && isEditing))
+
+  const showAutosave =
+    (collectionHasDraftsEnabled || globalHasDraftsEnabled) &&
+    hasSavePermission &&
+    autosaveEnabled &&
+    !unsavedDraftWithValidations &&
+    !isTrashed
 
   const singularLabel = getTranslation(
     collectionConfig?.labels?.singular ?? globalConfig?.label ?? t('general:document'),
@@ -57,25 +82,44 @@ export const DocumentDrawerHeader: React.FC<{
     : t('general:creatingNewLabel', { label: singularLabel })
 
   const updatedAt = data?.updatedAt
+  const createdAt = data?.createdAt
+
+  const {
+    admin: { dateFormat },
+  } = config
 
   const [relativeTime, setRelativeTime] = useState<string>('')
+  const [formattedUpdatedAt, setFormattedUpdatedAt] = useState<string>('')
+  const [formattedCreatedAt, setFormattedCreatedAt] = useState<string>('')
 
   const i18nRef = useRef(i18n)
   i18nRef.current = i18n
 
   useEffect(() => {
-    if (!updatedAt) {
+    const date = updatedAt || createdAt
+
+    if (!date) {
       setRelativeTime('')
       return
     }
 
-    const update = () =>
-      setRelativeTime(formatTimeToNow({ date: updatedAt, i18n: i18nRef.current }))
+    const update = () => setRelativeTime(formatTimeToNow({ date, i18n: i18nRef.current }))
 
     update()
     const interval = setInterval(update, 60000)
     return () => clearInterval(interval)
-  }, [updatedAt])
+  }, [updatedAt, createdAt])
+
+  useEffect(() => {
+    if (updatedAt) {
+      setFormattedUpdatedAt(formatDate({ date: updatedAt, i18n, pattern: dateFormat }))
+    }
+    if (createdAt) {
+      setFormattedCreatedAt(formatDate({ date: createdAt, i18n, pattern: dateFormat }))
+    }
+  }, [updatedAt, createdAt, i18n, dateFormat])
+
+  const showUpdatedAt = Boolean(collectionConfig?.timestamps && isEditing && relativeTime)
 
   const handleOnClose = useCallback(() => {
     if (isModified) {
@@ -120,10 +164,26 @@ export const DocumentDrawerHeader: React.FC<{
               {BeforeDocumentMeta}
             </div>
           )}
-          {relativeTime ? (
-            <span className={`${documentDrawerBaseClass}__updated-at`}>
-              {t('general:updatedAgo', { distance: relativeTime })}
+          {showStatus ? (
+            <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
+          ) : null}
+          {showUpdatedAt ? (
+            <span
+              className={`${documentDrawerBaseClass}__updated-at`}
+              title={formattedUpdatedAt || formattedCreatedAt || undefined}
+            >
+              {t(isTrashed ? 'general:deletedAgo' : 'general:updatedAgo', {
+                distance: relativeTime,
+              })}
             </span>
+          ) : null}
+          {showAutosave ? (
+            <Autosave
+              collection={collectionConfig}
+              global={globalConfig}
+              id={id}
+              publishedDocUpdatedAt={data?.createdAt}
+            />
           ) : null}
         </div>
         {AfterHeader ? (

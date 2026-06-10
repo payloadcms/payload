@@ -704,6 +704,7 @@ export function DefaultEditView({
               drawerSlug={drawerSlug}
               readOnlyForIncomingUser={isReadOnlyForIncomingUser}
               renderTitleAsLink={!isFolderCollection}
+              Status={Status}
               user={currentEditor}
             />
           )}
