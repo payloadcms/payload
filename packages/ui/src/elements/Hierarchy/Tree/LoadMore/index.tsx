@@ -4,7 +4,7 @@ import React from 'react'
 
 import { LoadMoreRow } from '../../../LoadMoreRow/index.js'
 import { LoadMoreButton } from './LoadMoreButton.js'
-import './index.scss'
+import './index.css'
 
 type LoadMoreProps = {
   currentCount: number

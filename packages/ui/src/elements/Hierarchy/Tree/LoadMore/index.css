@@ -1,0 +1,35 @@
+/* Tree-specific overrides for the shared LoadMoreRow component */
+
+@layer payload-default {
+  .tree__load-more.load-more-row {
+    padding: var(--tree-node-padding-y) var(--tree-node-padding-x);
+    padding-left: calc(var(--tree-depth, 0) * var(--tree-indent));
+    height: var(--tree-node-content-height);
+    position: relative;
+    margin-bottom: var(--tree-row-gap);
+    padding-top: 0;
+  }
+
+  .tree__load-more.load-more-row .load-more-row__connector {
+    margin-left: var(--stroke-width-medium);
+  }
+
+  .tree__load-more-button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--color-text);
+    font-size: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .tree__load-more-button:hover {
+    color: var(--color-text-secondary);
+  }
+
+  .tree__load-more-button:active {
+    color: var(--color-bg-hover);
+  }
+}

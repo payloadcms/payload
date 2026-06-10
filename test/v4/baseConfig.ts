@@ -423,6 +423,11 @@ export const baseConfig: Partial<Config> = {
       data: { name: 'Subfolder B', parent: rootFolder.id },
     })
 
+    await payload.create({
+      collection: foldersSlug,
+      data: { name: 'Subfolder C', parent: rootFolder.id },
+    })
+
     // Seed folder-items collection with 30 items (no folder assigned) for hierarchy pagination testing
     for (let i = 1; i <= 30; i++) {
       await payload.create({
