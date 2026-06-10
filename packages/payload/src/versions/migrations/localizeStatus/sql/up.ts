@@ -176,14 +176,34 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
       msg: `Found existing locales in table: ${existingLocales.join(', ')}`,
     })
 
+    // Check if the snapshot column exists (only present on DBs that used publishSpecificLocale)
+    const snapshotColumnCheckResult = await db.execute({
+      drizzle: db.drizzle,
+      sql: sql`
+        SELECT EXISTS (
+          SELECT FROM information_schema.columns
+          WHERE table_schema = 'public'
+          AND table_name = ${versionsTable}
+          AND column_name = 'snapshot'
+        ) as exists
+      `,
+    })
+    const hasSnapshotColumn = snapshotColumnCheckResult.rows[0]?.exists === true
+
     // Get all version records grouped by parent document, ordered chronologically
     const versionsResult = await db.execute({
       drizzle: db.drizzle,
-      sql: sql`
-        SELECT id, parent_id as parent, version__status as _status, published_locale, snapshot, created_at
-        FROM ${sql.identifier(versionsTable)}
-        ORDER BY parent_id, created_at ASC
-      `,
+      sql: hasSnapshotColumn
+        ? sql`
+          SELECT id, parent_id as parent, version__status as _status, published_locale, snapshot, created_at
+          FROM ${sql.identifier(versionsTable)}
+          ORDER BY parent_id, created_at ASC
+        `
+        : sql`
+          SELECT id, parent_id as parent, version__status as _status, published_locale, created_at
+          FROM ${sql.identifier(versionsTable)}
+          ORDER BY parent_id, created_at ASC
+        `,
     })
 
     // Use shared function to calculate version locale statuses
