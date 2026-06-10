@@ -166,7 +166,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     parentName,
   }) => {
     const blockTypes: GraphQLObjectType<any, any>[] = (
-      field.blockReferences ?? field.blocks
+      field.blocks
     ).reduce((acc, _block) => {
       const blockSlug = typeof _block === 'string' ? _block : _block.slug
       if (!graphqlResult.types.blockTypes[blockSlug]) {

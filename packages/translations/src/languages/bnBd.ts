@@ -22,6 +22,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'ইমেইল বা ব্যবহারকারীর নাম',
     emailSent: 'ইমেইল পাঠানো হয়েছে',
     emailVerified: 'ইমেইল সফলভাবে যাচাই করা হয়েছে।',
+    emailVerifiedRedirecting:
+      'ইমেইল সফলভাবে যাচাইকরণ হয়েছে। আপনাকে লগইন করার জন্য পুনঃনির্দেশিত করা হচ্ছে...',
     enableAPIKey: 'এপিআই কী সক্ষম করুন',
     failedToUnlock: 'আনলক করতে ব্যর্থ হয়েছে',
     forceUnlock: 'জোরপূর্বক আনলক করুন',
@@ -55,6 +57,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
       'আপনার জন্য একটি নতুন অ্যাকাউন্ট তৈরি করা হয়েছে <a href="{{serverURL}}">{{serverURL}}</a> এ অ্যাক্সেস করতে। আপনার ইমেইল যাচাই করতে নিচের লিঙ্কে ক্লিক করুন বা ব্রাউজারে URL টি পেস্ট করুন: <a href="{{verificationURL}}">{{verificationURL}}</a><br> আপনার ইমেইল যাচাই করার পরে, আপনি সফলভাবে লগইন করতে পারবেন।',
     newAPIKeyGenerated: 'নতুন এপিআই কী জেনারেট করা হয়েছে।',
     newPassword: 'নতুন পাসওয়ার্ড',
+    notRedirected: 'পুনঃনির্দেশিত হননি? <0>এখানে লগ ইন করুন</0>',
     passed: 'প্রমাণীকরণ সফল হয়েছে',
     passwordResetSuccessfully: 'পাসওয়ার্ড সফলভাবে রিসেট করা হয়েছে।',
     resetPassword: 'পাসওয়ার্ড রিসেট করুন',
@@ -68,6 +71,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     unableToVerify: 'যাচাই করতে অক্ষম',
     username: 'ব্যবহারকারীর নাম',
     usernameNotValid: 'প্রদত্ত ব্যবহারকারীর নামটি বৈধ নয়',
+    verificationFailedRequestNew:
+      'আমরা আপনার অ্যাকাউন্ট যাচাই করতে পারিনি। একটি নতুন যাচাইকরণ ইমেইল অনুরোধ করুন এবং আবার চেষ্টা করুন।',
     verified: 'যাচাইকৃত',
     verifiedSuccessfully: 'সফলভাবে যাচাই করা হয়েছে',
     verify: 'যাচাই করুন',

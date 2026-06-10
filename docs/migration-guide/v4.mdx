@@ -592,6 +592,37 @@ The same rule applies to lexical block nodes — they now emit as `SerializedBlo
 
 When two **different** blocks resolve to the same auto-derived name (same slug, different fields — e.g. a shared block overridden in one collection), the first keeps the clean name and any later block with a different shape gets a stable content-hash suffix (`Hero_3F2A1B0C`), so neither is silently mistyped. To choose the name yourself — or to resolve a collision with another type in your generated file (a collection, an array's `interfaceName`, etc.) — set an explicit `interfaceName` on the block. See [Block interface name collisions](/docs/typescript/generating-types#block-interface-name-collisions).
 
+### Blocks field `blockReferences` moved into `blocks`
+
+The `blockReferences` property on blocks fields has been removed. The `blocks` property now accepts both inline block configs and string slugs for blocks defined in the top-level Payload Config `blocks` array.
+
+Run `npx @payloadcms/codemod --transform migrate-block-references-to-blocks` to migrate automatically.
+
+```diff
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'layout',
+      type: 'blocks',
+-     blockReferences: ['hero', 'content'],
+-     blocks: [],
++     blocks: ['hero', 'content'],
+    },
+  ],
+}
+```
+
+Inline blocks continue to work as before:
+
+```ts
+{
+  name: 'layout',
+  type: 'blocks',
+  blocks: [HeroBlock, ContentBlock],
+}
+```
+
 ### Lexical: generated `payload-types.ts` shape changed
 
 `richText` fields backed by `lexicalEditor` used to emit a permissive `{ [k: string]: unknown }` per field. They now emit a discriminated union of strict per-node interfaces (`SerializedTextNode`, `SerializedParagraphNode`, `SerializedHeadingNode`, `SerializedBlockNode`, etc.) under a hash-named alias like `LexicalNodes_AB12CD34`.
