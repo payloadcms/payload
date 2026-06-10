@@ -42,16 +42,42 @@ export const getAccessField = ({
  */
 const sanitizeClientPluginConfig = (
   pluginConfig: SanitizedMCPPluginConfig,
-): ClientMCPPluginConfig => ({
-  items: pluginConfig.items.map((item) => ({
-    ...(item.type === 'collectionTool' ? { collectionSlug: item.collectionSlug } : {}),
-    ...(item.type === 'globalTool' ? { globalSlug: item.globalSlug } : {}),
-    type: item.type,
-    description: itemDescription(item),
-    key: item.key,
-    label: item.label,
-  })),
-})
+): ClientMCPPluginConfig => {
+  const items: ClientMCPPluginConfig['items'] = []
+
+  for (const item of pluginConfig.items) {
+    if (item.type === 'collectionTool') {
+      items.push({
+        type: item.type,
+        collectionSlug: item.collectionSlug,
+        configKey: item.configKey,
+        description: itemDescription(item),
+        label: item.label,
+      })
+      continue
+    }
+
+    if (item.type === 'globalTool') {
+      items.push({
+        type: item.type,
+        configKey: item.configKey,
+        description: itemDescription(item),
+        globalSlug: item.globalSlug,
+        label: item.label,
+      })
+      continue
+    }
+
+    items.push({
+      type: item.type,
+      configKey: item.configKey,
+      description: itemDescription(item),
+      label: item.label,
+    })
+  }
+
+  return { items }
+}
 
 const itemDescription = (item: MCPItem): string => {
   if (item.type === 'prompt') {

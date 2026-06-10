@@ -831,7 +831,7 @@ The sha1 HMAC fallback for API key authentication has been removed. API keys are
 
 The MCP plugin was refactored. The public config API, the built-in tool inputs, and the API key collection schema all changed. Update your plugin config and delete + recreate any existing API keys.
 
-**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default with the standard CRUD tools (find, create, update, delete); turn individual ones off via `tools: { <op>: false }`.
+**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools (`getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, plus `getGlobalSchema`, `findGlobal`, and `updateGlobal` for globals). Turn individual operations off via simple config keys like `tools: { create: false }`.
 
 ```diff
 mcpPlugin({
@@ -871,19 +871,32 @@ mcpPlugin({
 
 Prompts and resources move the same way, into top-level `prompts` and `resources` records.
 
-**Built-in `create` / `update` tool inputs now take a `data` object.** Document fields used to sit at the top level alongside options like `depth`, `draft` and `locale`. They are now nested under `data`. `_status`, `id`, `createdAt` and `updatedAt` are also no longer accepted there; set publish state with a custom tool if you need to.
+For custom collection and global tools, do not add `collectionSlug` / `globalSlug` yourself. Payload adds the enabled slug enum to the MCP input schema automatically, and the handler receives the resolved slug as a top-level argument.
 
 ```ts
-// arguments to a `createPosts` tool call
+defineCollectionTool({
+  description: 'Publish a draft post by ID.',
+  input: z.object({
+    id: z.string(),
+  }),
+}).handler(async ({ collectionSlug, input, req }) => {
+  // collectionSlug is resolved from the tool call
+})
+```
+
+**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocument` / `updateDocument`. Pass the target collection as `collectionSlug`; document fields live under `data` alongside options like `depth`, `draft` and `locale`. `_status`, `id`, `createdAt` and `updatedAt` are no longer accepted inside `data`; set publish state with a custom tool if you need to.
+
+```ts
+// arguments to a `createDocument` tool call
 
 // before
 { title: 'Hello', _status: 'draft', draft: true, depth: 2 }
 
 // after
-{ data: { title: 'Hello' }, draft: true, depth: 2 }
+{ collectionSlug: 'posts', data: { title: 'Hello' }, draft: true, depth: 2 }
 ```
 
-**Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per collection via `tools: { login: true }`, and the wire name becomes `login<Collection>` (e.g. `loginUsers`).
+**Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per collection via `tools: { login: true }`. Auth tool names are generic (`login`, `auth`, etc.); pass the target auth collection as `collectionSlug`.
 
 ```diff
 - mcpPlugin({ experimental: { tools: { auth: { enabled: true } } } })

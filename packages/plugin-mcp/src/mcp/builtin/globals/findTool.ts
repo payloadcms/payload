@@ -6,7 +6,7 @@ import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
-const DEFAULT_DESCRIPTION = 'Find a Payload global singleton configuration.'
+const DEFAULT_DESCRIPTION = 'Find any Payload global by passing the global slug.'
 
 export const findGlobalTool = defineGlobalTool({
   description: DEFAULT_DESCRIPTION,

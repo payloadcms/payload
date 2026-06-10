@@ -46,9 +46,9 @@ export type ToolInputSchema = JsonSchemaType | StandardSchemaWithJSON
 export type ClientMCPPluginConfig = {
   items: Array<{
     collectionSlug?: string
+    configKey: string
     description: string
     globalSlug?: string
-    key: string
     label: string
     type: 'collectionTool' | 'globalTool' | 'prompt' | 'resource' | 'tool'
   }>
@@ -105,22 +105,17 @@ export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema |
   overrideResponse?: MCPResponseOverride
 }
 
-/**
- * `TSchema` is the schema itself (Standard Schema, raw JSON Schema, or undefined).
- * The function-form variant of `input` carries a concrete `{ collectionSchema: JsonSchemaType }`
- * parameter type so callers can write `({ collectionSchema }) => …` without annotating it.
- */
 export type CollectionTool<
   TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
 > = {
   handler: (args: CollectionToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
-  input?: ((args: { collectionSchema: JsonSchemaType }) => TSchema) | TSchema
+  input?: TSchema
 } & Pick<Tool, 'description' | 'overrideResponse'>
 
 export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> =
   {
     handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
-    input?: ((args: { globalSchema: JsonSchemaType }) => TSchema) | TSchema
+    input?: TSchema
   } & Pick<Tool, 'description' | 'overrideResponse'>
 
 /**
@@ -293,34 +288,37 @@ export type MCPAPIKeysDoc = {
 }
 
 /**
- * One MCP primitive — tool, prompt, or resource — paired with the metadata both
- * the endpoint and the API key collection need. Built by `sanitizeMCPConfig`,
- * filtered by `getAuthorizedMCP`, registered by the MCP endpoint.
+ * One MCP primitive plus the metadata needed for access checks, admin UI, and
+ * registration.
  *
- *  - `key`: the config identifier (`find`, `echo`). Used for the API-key deny
- *    lookup and as the admin checkbox field name. For collection/global tools,
- *    the MCP wire name (`findPosts`) is derived from `key + slug` at
- *    registration time.
- *  - `label`: human-readable admin-UI display text for the checkbox.
- *  - `tool` / `prompt` / `resource`: the live primitive (its own
- *    `description` is what both MCP clients and the admin UI surface).
+ * - `configKey`: the config/API-key identifier, e.g. `find` or `echo`.
+ * - `mcpName`: the MCP wire name, e.g. `findDocuments` or `echo`.
+ * - `label`: human-readable admin checkbox text.
+ *
+ * Collection/global items may also carry entity-level discovery copy for the
+ * slug they belong to.
  */
 export type MCPItemBase = {
-  key: string
+  configKey: string
   label: string
+  mcpName: string
 }
 
+export type CollectionMCPItem = {
+  collectionSlug: CollectionSlug
+  entityDescription?: string
+  tool: CollectionTool
+  type: 'collectionTool'
+} & MCPItemBase
+
+export type GlobalMCPItem = {
+  entityDescription?: string
+  globalSlug: GlobalSlug
+  tool: GlobalTool
+  type: 'globalTool'
+} & MCPItemBase
+
 export type MCPItem =
-  | ({
-      collectionSlug: CollectionSlug
-      tool: CollectionTool
-      type: 'collectionTool'
-    } & MCPItemBase)
-  | ({
-      globalSlug: GlobalSlug
-      tool: GlobalTool
-      type: 'globalTool'
-    } & MCPItemBase)
   | ({
       prompt: Prompt
       type: 'prompt'
@@ -333,6 +331,8 @@ export type MCPItem =
       tool: Tool
       type: 'tool'
     } & MCPItemBase)
+  | CollectionMCPItem
+  | GlobalMCPItem
 
 /**
  * The caller's identity + the MCP items they can use for this request. Returned

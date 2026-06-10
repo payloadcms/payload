@@ -9,50 +9,46 @@ import {
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
-import { buildToolInput } from '../../../utils/schemaConversion/buildToolInput.js'
-import { sanitizeEntitySchema } from '../../../utils/schemaConversion/sanitizeEntitySchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
+import { formatCollectionError } from './formatCollectionError.js'
 
-const DEFAULT_DESCRIPTION = 'Create a document in a collection.'
+const DEFAULT_DESCRIPTION =
+  'Create a document in any collection by passing the collection slug and data.'
 
-export const createCollectionTool = defineCollectionTool({
+export const createDocumentTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
-  input: ({ collectionSchema }) =>
-    buildToolInput({
-      controls: {
-        depth: z
-          .number()
-          .int()
-          .min(0)
-          .max(10)
-          .describe('How many levels deep to populate relationships in response')
-          .optional()
-          .default(0),
-        draft: z
-          .boolean()
-          .describe('Whether to create the document as a draft')
-          .optional()
-          .default(false),
-        fallbackLocale: z
-          .string()
-          .describe('Optional: fallback locale code to use when requested locale is not available')
-          .optional(),
-        locale: z
-          .string()
-          .describe(
-            'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
-          )
-          .optional(),
-        select: z
-          .string()
-          .describe(
-            'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
-          )
-          .optional(),
-      },
-      dataDescription: 'The document fields to create',
-      dataSchema: sanitizeEntitySchema(collectionSchema),
-    }),
+  input: z.object({
+    data: z.record(z.string(), z.unknown()).describe('The document fields to create'),
+    depth: z
+      .number()
+      .int()
+      .min(0)
+      .max(10)
+      .describe('How many levels deep to populate relationships in response')
+      .optional()
+      .default(0),
+    draft: z
+      .boolean()
+      .describe('Whether to create the document as a draft')
+      .optional()
+      .default(false),
+    fallbackLocale: z
+      .string()
+      .describe('Optional: fallback locale code to use when requested locale is not available')
+      .optional(),
+    locale: z
+      .string()
+      .describe(
+        'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+      )
+      .optional(),
+    select: z
+      .string()
+      .describe(
+        "Optional: define exactly which fields you'd like to return (JSON), e.g., '{\"title\": true}'",
+      )
+      .optional(),
+  }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
@@ -104,13 +100,6 @@ export const createCollectionTool = defineCollectionTool({
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     logger.error(`Error creating document in ${collectionSlug}: ${errorMessage}`)
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error creating document in collection "${collectionSlug}": ${errorMessage}`,
-        },
-      ],
-    }
+    return formatCollectionError({ action: 'creating', collectionSlug, error, req })
   }
 })

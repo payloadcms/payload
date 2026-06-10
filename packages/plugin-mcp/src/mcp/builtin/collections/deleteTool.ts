@@ -4,9 +4,10 @@ import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
-const DEFAULT_DESCRIPTION = 'Delete documents in a collection by ID or where clause.'
+const DEFAULT_DESCRIPTION =
+  'Delete documents in any collection by passing the collection slug and ID or where clause.'
 
-export const deleteCollectionTool = defineCollectionTool({
+export const deleteDocumentsTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     id: z

@@ -7,9 +7,9 @@ import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
 const DEFAULT_DESCRIPTION =
-  'Find documents in a collection by ID or where clause using Find or FindByID.'
+  'Find documents in any collection by passing the collection slug and optional ID or where clause.'
 
-export const findCollectionTool = defineCollectionTool({
+export const findDocumentsTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     id: z
