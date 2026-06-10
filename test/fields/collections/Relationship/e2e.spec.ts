@@ -21,7 +21,11 @@ import {
 import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
 import { openDocControls } from '../../../__helpers/e2e/openDocControls.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
-import { getSelectInputOptions, selectInput } from '../../../__helpers/e2e/selectInput.js'
+import {
+  getSelectInputOptions,
+  getSelectMenu,
+  selectInput,
+} from '../../../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
@@ -134,11 +138,7 @@ describe('relationship', () => {
 
     // Fill first modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click()
-    await page
-      .locator(
-        '[id^=doc-drawer_relationship-fields_1_] .rs__option:has-text("Seeded text document")',
-      )
-      .click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
 
     const secondModalButton = page.locator(
       '[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button',
@@ -147,11 +147,7 @@ describe('relationship', () => {
 
     // Fill second modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_2_] #field-relationship').click()
-    await page
-      .locator(
-        '[id^=doc-drawer_relationship-fields_2_] .rs__option:has-text("Seeded text document")',
-      )
-      .click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
 
     // Save then close the second modal
     await page.locator('[id^=doc-drawer_relationship-fields_2_] #action-save').click()
@@ -598,7 +594,7 @@ describe('relationship', () => {
       await page.locator('#field-relationship .rs__control').click()
 
       await expect(
-        page.locator('#field-relationship .rs__option', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText(originalValue),
         }),
       ).toBeVisible()
@@ -628,13 +624,13 @@ describe('relationship', () => {
       await wait(500)
 
       await expect(
-        page.locator('#field-relationship .rs__option', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText(originalValue),
         }),
       ).toBeHidden()
 
       await expect(
-        page.locator('#field-relationship .rs__option', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText(`Untitled - ${originalID}`),
         }),
       ).toBeHidden()
@@ -667,9 +663,7 @@ describe('relationship', () => {
 
     await page.locator('#field-relationshipWithMinRows .value-container').click()
 
-    await page
-      .locator('#field-relationshipWithMinRows .rs__option:has-text("Seeded text document")')
-      .click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
 
     await page.click('#action-save', { delay: 100 })
     await assertToastErrors({
@@ -686,7 +680,7 @@ describe('relationship', () => {
     await wait(400)
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
-    const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
+    const firstTextDocOption = getSelectMenu({ page }).locator('.rs__option').first()
     const firstOptionLabel = await firstTextDocOption.textContent()
     expect(firstOptionLabel?.trim()).toBe('Another text document')
   })
@@ -704,7 +698,7 @@ describe('relationship', () => {
     await arrayFieldPromise
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
-    const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
+    const firstTextDocOption = getSelectMenu({ page }).locator('.rs__option').first()
     const firstOptionLabel = firstTextDocOption
     await expect(firstOptionLabel).toHaveText('Seeded text document')
   })
@@ -805,6 +799,7 @@ describe('relationship', () => {
 
     // Select relationship field
     await selectInput({
+      page,
       selectLocator: condition.locator('.condition__field'),
       multiSelect: false,
       option: 'Relationship',
@@ -812,6 +807,7 @@ describe('relationship', () => {
 
     // Select equals operator (default)
     await selectInput({
+      page,
       selectLocator: condition.locator('.condition__operator'),
       multiSelect: false,
       option: 'equals',
@@ -820,6 +816,7 @@ describe('relationship', () => {
     // Select a value
     const valueLocator = condition.locator('.condition__value')
     await selectInput({
+      page,
       selectLocator: valueLocator,
       multiSelect: false,
       option: 'Seeded text document',
@@ -828,6 +825,7 @@ describe('relationship', () => {
 
     // Switch to "is not equal to" operator
     await selectInput({
+      page,
       selectLocator: condition.locator('.condition__operator'),
       multiSelect: false,
       option: 'is not equal to',
@@ -837,7 +835,7 @@ describe('relationship', () => {
     await wait(500)
 
     // Get all options in the value dropdown
-    const options = await getSelectInputOptions({ selectLocator: valueLocator })
+    const options = await getSelectInputOptions({ page, selectLocator: valueLocator })
 
     // Verify no duplicates - each option should appear only once
     const uniqueOptions = [...new Set(options)]
@@ -907,7 +905,8 @@ describe('relationship', () => {
     await expect(relationToSelector).toBeVisible()
 
     await relationToSelector.locator('.rs__control').click()
-    const option = relationToSelector.locator('.rs__option').nth(1)
+    const relationToMenu = getSelectMenu({ page })
+    const option = relationToMenu.locator('.rs__option').nth(1)
     await option.click()
     const firstRow = listDrawerContent.locator('table tbody tr').first()
     const button = firstRow.locator('button')
@@ -1028,7 +1027,7 @@ describe('relationship', () => {
 
     await wait(400)
     await relationToSelector.locator('.rs__control').click()
-    const option = relationToSelector.locator('.rs__option').nth(1)
+    const option = getSelectMenu({ page }).locator('.rs__option').nth(1)
     await wait(400)
     await option.click()
     const rows = listDrawerContent.locator('table tbody tr')

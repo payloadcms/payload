@@ -493,13 +493,6 @@ export type CollectionAdminOptions = {
    */
   group?: false | Record<string, string> | string
   /**
-   * @description Enable grouping by a field in the list view.
-   * Uses `payload.findDistinct` under the hood to populate the group-by options.
-   *
-   * @experimental This option is currently in beta and may change in future releases. Use at your own risk.
-   */
-  groupBy?: boolean
-  /**
    * Exclude the collection from the admin nav and routes
    */
   hidden?: ((args: { user: ClientUser }) => boolean) | boolean
@@ -574,6 +567,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Default field to sort by in collection list view
    */
   defaultSort?: Sort
+  /**
+   * Disable the bulk delete operation for the collection in the admin panel and the API
+   */
+  disableBulkDelete?: boolean
   /**
    * Disable the bulk edit operation for the collection in the admin panel and the API
    */

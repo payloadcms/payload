@@ -308,7 +308,7 @@ export const renderListView = async (
   let hierarchyData: HierarchyViewData | undefined
 
   try {
-    if (collectionConfig.admin.groupBy && query.groupBy) {
+    if (query.groupBy) {
       ;({ columnState, data, Table } = await handleGroupBy({
         clientCollectionConfig,
         clientConfig,
@@ -497,7 +497,7 @@ export const renderListView = async (
       baseFilter: baseFilterConstraint,
       collectionSlug,
       columnState,
-      disableBulkDelete,
+      disableBulkDelete: collectionConfig.disableBulkDelete ?? disableBulkDelete,
       disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
       disableQueryPresets,
       enableRowSelections,

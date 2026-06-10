@@ -28,6 +28,7 @@ import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { upsertPreferences } from '../__helpers/e2e/preferences.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -391,7 +392,7 @@ describe('Localization', () => {
       await changeLocale(page, spanishLocale)
       await navigateToDoc(page, url)
       await page.locator('#field-children .rs__control').click()
-      await expect(page.locator('#field-children .rs__menu')).toContainText('spanish-relation2')
+      await expect(getSelectMenu({ page })).toContainText('spanish-relation2')
     })
 
     test('ensure relationship edit drawers are opened in currently selected locale', async () => {
