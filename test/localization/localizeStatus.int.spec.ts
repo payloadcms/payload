@@ -26,6 +26,19 @@ describe('localizeStatus migration', () => {
   })
 
   describe.skipIf(process.env.PAYLOAD_DATABASE !== 'postgres')('PostgreSQL', () => {
+    // Simulate a real user's pre-migration database state: the `snapshot` column existed
+    // in the old schema but is no longer part of the Payload schema after this PR.
+    // Real users' databases will already have this column; the test DB needs it added manually.
+    beforeAll(async () => {
+      const db = payload.db
+      await db.drizzle.execute(
+        sql`ALTER TABLE _test_migration_posts_v ADD COLUMN IF NOT EXISTS snapshot BOOLEAN`,
+      )
+      await db.drizzle.execute(
+        sql`ALTER TABLE _test_migration_articles_v ADD COLUMN IF NOT EXISTS snapshot BOOLEAN`,
+      )
+    })
+
     describe('Scenario 1: Creating new locales table', () => {
       it('should migrate non-localized _status to localized', async () => {
         const db = payload.db
