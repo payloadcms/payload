@@ -309,16 +309,15 @@ describe('General', () => {
       await page.goto(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
       await page.goto(`${postsUrl.admin}/account`)
-      await expect(page.locator('#field-theme-auto')).toBeChecked()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await expect(themeSelect).toContainText('Auto')
     })
 
     test('should explicitly change to light theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-light"]').click()
-      await expect(page.locator('#field-theme-light')).toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await themeSelect.click()
+      await page.locator('.rs__option', { hasText: 'Light' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 
       // reload the page and ensure theme is retained
@@ -328,9 +327,9 @@ describe('General', () => {
 
     test('should explicitly change to dark theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-dark"]').click()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await themeSelect.click()
+      await page.locator('.rs__option', { hasText: 'Dark' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
       // reload the page and ensure theme is retained
@@ -338,10 +337,8 @@ describe('General', () => {
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
       // reset to light
-      await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-light"]').click()
-      await expect(page.locator('#field-theme-light')).toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      await page.locator('.payload-settings__theme .react-select').click()
+      await page.locator('.rs__option', { hasText: 'Light' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
     })
   })
