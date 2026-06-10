@@ -44,14 +44,12 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
         {
           name: 'lexical_blocks',
           type: 'blocks',
-          blockReferences: _props.blocks ?? [],
-          blocks: [],
+          blocks: _props.blocks ?? [],
         },
         {
           name: 'lexical_inline_blocks',
           type: 'blocks',
-          blockReferences: _props.inlineBlocks ?? [],
-          blocks: [],
+          blocks: _props.inlineBlocks ?? [],
         },
       ],
       parentIsLocalized,
@@ -60,8 +58,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
     })
 
     const blockConfigs: Block[] = []
-    for (const _block of (sanitized[0] as BlocksField).blockReferences ??
-      (sanitized[0] as BlocksField).blocks) {
+    for (const _block of (sanitized[0] as BlocksField).blocks) {
       const block =
         typeof _block === 'string' ? _config?.blocks?.find((b) => b.slug === _block) : _block
       if (!block) {
@@ -77,8 +74,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
     }
 
     const inlineBlockConfigs: Block[] = []
-    for (const _block of (sanitized[1] as BlocksField).blockReferences ??
-      (sanitized[1] as BlocksField).blocks) {
+    for (const _block of (sanitized[1] as BlocksField).blocks) {
       const block =
         typeof _block === 'string' ? _config?.blocks?.find((b) => b.slug === _block) : _block
       if (!block) {

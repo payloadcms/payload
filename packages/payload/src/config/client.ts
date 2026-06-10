@@ -230,7 +230,7 @@ export const createClientConfig = ({
           defaultIDType: config.db.defaultIDType,
           i18n,
           importMap,
-        }).filter((block) => typeof block !== 'string') as ClientBlock[]
+        }).filter((block) => typeof block !== 'string')
 
         clientConfig.blocksMap = {}
         if (clientConfig.blocks?.length) {

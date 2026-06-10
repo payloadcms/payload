@@ -180,6 +180,11 @@
     }
   }
 
+  .date-time-picker__appearance--monthOnly .react-datepicker__navigation {
+    font-size: 18px;
+    font-weight: 300;
+  }
+
   .react-datepicker__navigation-icon {
     display: flex;
     align-items: center;

@@ -152,6 +152,9 @@ export const Condition: React.FC<Props> = (props) => {
             <span className={`${baseClass}__join-label`}>{t('general:where')}</span>
           ) : (
             <ReactSelect
+              classNames={{
+                menu: () => 'condition__join-menu',
+              }}
               isClearable={false}
               onChange={(option: Option<'and' | 'or'>) =>
                 updateJoin({ andIndex, join: option.value, orIndex })
