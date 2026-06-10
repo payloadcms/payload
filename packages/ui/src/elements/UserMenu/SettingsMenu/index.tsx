@@ -2,7 +2,7 @@
 import React, { Fragment } from 'react'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
-import { InteractionEnterIcon } from '../../../icons/InteractionEnter/index.js'
+import { GearIcon } from '../../../icons/Gear/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Popup } from '../../Popup/index.js'
 
@@ -31,7 +31,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ items, onMobileOpen 
         type="button"
       >
         <span className="popup-button-list__submenu-icon">
-          <InteractionEnterIcon size={24} />
+          <GearIcon size={24} />
         </span>
         <span className="popup-button-list__label">{t('general:settings')}</span>
         <span className="popup-button-list__chevron">
@@ -58,7 +58,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ items, onMobileOpen 
           type="button"
         >
           <span className="popup-button-list__submenu-icon">
-            <InteractionEnterIcon size={24} />
+            <GearIcon size={24} />
           </span>
           <span className="popup-button-list__label">{t('general:settings')}</span>
           <span className="popup-button-list__chevron">
