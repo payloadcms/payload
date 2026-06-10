@@ -442,7 +442,7 @@ export const etTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} valitud',
     selectLabel: 'Valige {{label}}',
     selectValue: 'Vali väärtus',
-    settings: 'Settings',
+    settings: 'Seaded',
     showAllLabel: 'Näita kõiki {{label}}',
     shownInTable: 'Kuvatud tabelis',
     showSidebar: 'Kuva külgriba',
@@ -459,7 +459,7 @@ export const etTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Õnnestus ümberindekseerida {{count}} dokumenti {{total}}-st kollektsioonist {{collections}} ja {{skips}} mustandeid jäeti vahele.',
     takeOver: 'Võta üle',
-    theme: 'Theme',
+    theme: 'Teema',
     thisLanguage: 'Eesti',
     time: 'Aeg',
     timezone: 'Ajavöönd',
