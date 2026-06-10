@@ -1,7 +1,14 @@
 'use client'
 
+import { InfoIcon, PopupList } from '@payloadcms/ui'
 import React from 'react'
 
 export const UserMenuSettingsItem: React.FC = () => {
-  return <div style={{ fontSize: '14px', padding: '4px 8px' }}>Custom Settings Item</div>
+  return (
+    <PopupList.MenuItem>
+      <PopupList.Button icon={<InfoIcon size={24} />} onClick={() => alert('Custom settings!')}>
+        Custom Settings
+      </PopupList.Button>
+    </PopupList.MenuItem>
+  )
 }
