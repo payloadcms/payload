@@ -8,6 +8,12 @@
     gap: var(--spacer-3);
   }
 
+  .payload-settings__language {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
   .payload-settings h3 {
     margin: 0;
     font-size: var(--text-heading-medium-font-size);
