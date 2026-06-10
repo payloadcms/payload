@@ -263,7 +263,7 @@ export const updateOperation = async <
     let localizedPublishData: JsonObject | null = null
 
     if (config && config.localization && globalConfig.versions) {
-      if (globalConfig.versions.drafts && globalConfig.versions.drafts.localizeStatus) {
+      if (hasLocalizeStatusEnabled(globalConfig)) {
         if (publishAllLocales || unpublishAllLocales) {
           let accessibleLocaleCodes = config.localization.localeCodes
 

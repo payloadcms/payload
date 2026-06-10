@@ -238,13 +238,7 @@ export const createOperation = async <
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
-    if (
-      config.localization &&
-      collectionConfig.versions &&
-      collectionConfig.versions.drafts &&
-      collectionConfig.versions.drafts.localizeStatus &&
-      publishAllLocales
-    ) {
+    if (config.localization && hasLocalizeStatusEnabled(collectionConfig) && publishAllLocales) {
       let accessibleLocaleCodes = config.localization.localeCodes
 
       if (config.localization.filterAvailableLocales) {

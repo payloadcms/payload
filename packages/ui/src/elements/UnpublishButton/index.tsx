@@ -4,7 +4,7 @@ import type { UnpublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasLocalizeStatusEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
@@ -165,8 +165,8 @@ export function UnpublishButton({
       return false
     }
 
-    return Boolean(drafts && typeof drafts === 'object' && drafts.localizeStatus)
-  }, [canUnpublish, drafts])
+    return Boolean(entityConfig && hasLocalizeStatusEnabled(entityConfig))
+  }, [canUnpublish, entityConfig])
 
   const label = getTranslation(localeLabel, i18n)
 
