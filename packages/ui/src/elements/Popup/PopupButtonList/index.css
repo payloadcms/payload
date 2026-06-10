@@ -126,7 +126,7 @@
 
   .popup-button-list--large .popup-button-list__icon {
     width: var(--spacer-4);
-    padding: 0;
+    padding: 0 0 0 var(--spacer-1);
   }
 
   /* Submenu trigger buttons: icon on left, label in middle, chevron pushed right */
