@@ -596,6 +596,8 @@ When two **different** blocks resolve to the same auto-derived name (same slug, 
 
 The `blockReferences` property on blocks fields has been removed. The `blocks` property now accepts both inline block configs and string slugs for blocks defined in the top-level Payload Config `blocks` array.
 
+Run `npx @payloadcms/codemod --transform migrate-block-references-to-blocks` to migrate automatically.
+
 ```diff
 export const Pages: CollectionConfig = {
   slug: 'pages',
