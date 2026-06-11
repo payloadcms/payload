@@ -40,10 +40,10 @@ const renderGraphiQL = (endpoint: string) => `
     <script type="importmap">
       {
         "imports": {
-          "react": "https://esm.sh/react@19",
-          "react/": "https://esm.sh/react@19/",
-          "react-dom": "https://esm.sh/react-dom@19",
-          "react-dom/": "https://esm.sh/react-dom@19/",
+          "react": "https://esm.sh/react@19.2.5",
+          "react/": "https://esm.sh/react@19.2.5/",
+          "react-dom": "https://esm.sh/react-dom@19.2.5",
+          "react-dom/": "https://esm.sh/react-dom@19.2.5/",
           "graphiql": "https://esm.sh/graphiql@5.2.2?standalone&external=react,react-dom,@graphiql/react,graphql",
           "graphiql/": "https://esm.sh/graphiql@5.2.2/",
           "@graphiql/plugin-explorer": "https://esm.sh/@graphiql/plugin-explorer@5.1.1?standalone&external=react,@graphiql/react,graphql",
