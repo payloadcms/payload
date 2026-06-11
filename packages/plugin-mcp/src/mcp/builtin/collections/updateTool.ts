@@ -1,4 +1,4 @@
-import type { SelectType } from 'payload'
+import type { SelectType, Where } from 'payload'
 
 import { z } from 'zod'
 
@@ -59,6 +59,7 @@ export const updateDocumentTool = defineCollectionTool({
         "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
       )
       .optional(),
+    // TODO: Why where a string?
     where: z
       .string()
       .describe('JSON string for where clause to update multiple documents')
@@ -108,10 +109,10 @@ export const updateDocumentTool = defineCollectionTool({
 
     const parsedData = transformPointDataToPayload(inputData)
 
-    let whereClause: Record<string, unknown> = {}
+    let whereClause: Where = {}
     if (where) {
       try {
-        whereClause = JSON.parse(where) as Record<string, unknown>
+        whereClause = JSON.parse(where) as Where
       } catch {
         logger.error(`Invalid where clause JSON: ${where}`)
         return { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] }
@@ -129,7 +130,7 @@ export const updateDocumentTool = defineCollectionTool({
     }
 
     if (id) {
-      const updateOptions = {
+      const result = await payload.update({
         id,
         collection: collectionSlug,
         data: parsedData,
@@ -143,9 +144,7 @@ export const updateDocumentTool = defineCollectionTool({
         ...(locale ? { locale } : {}),
         ...(fallbackLocale ? { fallbackLocale } : {}),
         ...(selectClause ? { select: selectClause } : {}),
-      } as Parameters<typeof payload.update>[0]
-
-      const result = await payload.update(updateOptions)
+      })
 
       return {
         content: [
@@ -158,27 +157,24 @@ export const updateDocumentTool = defineCollectionTool({
       }
     }
 
-    const updateOptions = {
+    const result = await payload.update({
       collection: collectionSlug,
       data: parsedData,
       depth,
       draft,
       overrideLock,
       req,
-      ...localAPIDefaults(authorizedMCP),
       where: whereClause,
+      ...localAPIDefaults(authorizedMCP),
       ...(filePath ? { filePath } : {}),
       ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
       ...(locale ? { locale } : {}),
       ...(fallbackLocale ? { fallbackLocale } : {}),
       ...(selectClause ? { select: selectClause } : {}),
-    } as unknown as Parameters<typeof payload.update>[0]
+    })
 
-    const result = await payload.update(updateOptions)
-
-    const bulkResult = result as { docs?: unknown[]; errors?: unknown[] }
-    const docs = bulkResult.docs || []
-    const errors = bulkResult.errors || []
+    const docs = result.docs || []
+    const errors = result.errors || []
 
     let responseText = `Multiple documents updated in collection "${collectionSlug}"!\nUpdated: ${docs.length} documents\nErrors: ${errors.length}\n---`
     if (docs.length > 0) {
