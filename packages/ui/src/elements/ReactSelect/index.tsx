@@ -11,6 +11,7 @@ import CreatableSelect from 'react-select/creatable'
 import type { Option, ReactSelectAdapterProps } from './types.js'
 export type { Option } from './types.js'
 
+import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useTheme } from '../../providers/Theme/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
@@ -98,20 +99,13 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   // only appears once a load takes longer than the threshold below.
   const [isLoadingDebounced, setIsLoadingDebounced] = React.useState(false)
 
-  useEffect(() => {
-    if (!isLoading) {
-      setIsLoadingDebounced(false)
-      return
-    }
-
-    const timeout = setTimeout(() => {
-      setIsLoadingDebounced(true)
-    }, 250)
-
-    return () => {
-      clearTimeout(timeout)
-    }
-  }, [isLoading])
+  useDebouncedEffect(
+    () => {
+      setIsLoadingDebounced(isLoading)
+    },
+    [isLoading],
+    250,
+  )
 
   const loadingMessage = () => t('general:loading') + '...'
 
