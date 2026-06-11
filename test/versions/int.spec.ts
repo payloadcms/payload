@@ -2926,6 +2926,7 @@ describe('Versions', () => {
         const doc = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: { title: 'asd' },
+          publishAllLocales: true,
         })
 
         await wait(10)
@@ -2933,6 +2934,7 @@ describe('Versions', () => {
         const upd = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: { title: 'asd2' },
+          publishAllLocales: true,
         })
 
         expect(upd.createdAt).toBe(doc.createdAt)
@@ -3138,6 +3140,7 @@ describe('Versions', () => {
           data: {
             title: title2,
           },
+          publishAllLocales: true,
         })
 
         expect(updatedGlobal.title).toBe(title2)
@@ -3180,6 +3183,7 @@ describe('Versions', () => {
             description: 'kjnjyhbbdsfseankuhsjsfghb',
             title: originalTitle,
           },
+          publishAllLocales: true,
         })
 
         const publishedGlobal = await payload.findGlobal({
