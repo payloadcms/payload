@@ -311,6 +311,11 @@ export type File = {
    */
   data: Buffer
   /**
+   * Pre-computed image height in pixels. Provided by the client during a client upload
+   * so the server can skip probing (and fetching) the file bytes for dimensions.
+   */
+  height?: number
+  /**
    * The mimetype of the file.
    */
   mimetype: string
@@ -326,6 +331,11 @@ export type File = {
    * Path to the temp file on disk when useTempFiles is enabled. In this case file.data will be an empty buffer.
    */
   tempFilePath?: string
+  /**
+   * Pre-computed image width in pixels. Provided by the client during a client upload
+   * so the server can skip probing (and fetching) the file bytes for dimensions.
+   */
+  width?: number
 }
 
 export type FileToSave = {
