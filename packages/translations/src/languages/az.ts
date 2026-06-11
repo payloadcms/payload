@@ -255,6 +255,7 @@ export const azTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Başqa bir istifadəçi bu sənədin redaktəsini ələ keçirdi.',
     applyChanges: 'Dəyişiklikləri Tətbiq Edin',
     ascending: 'Artan',
+    auto: 'Avtomatik',
     automatic: 'Avtomatik',
     backToDashboard: 'Panelə qayıdın',
     by: 'Tərəfindən',
@@ -452,6 +453,7 @@ export const azTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} seçildi',
     selectLabel: '{{label}} seçin',
     selectValue: 'Dəyər seçin',
+    settings: 'Ayarlar',
     showAllLabel: 'Bütün {{label}}-ı göstər',
     shownInTable: 'Cədvəldə göstərilir',
     showSidebar: 'Yan paneli göstər',
@@ -468,6 +470,7 @@ export const azTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '"{{collections}}" kolleksiyalarından {{total}} sənəddən {{count}} sənəd uğurla yenidən indeksləndi və {{skips}} qaralama keçildi.',
     takeOver: 'Əvvəl',
+    theme: 'Mövzu',
     thisLanguage: 'Azərbaycan dili',
     time: 'Vaxt',
     timezone: 'Saat qurşağı',

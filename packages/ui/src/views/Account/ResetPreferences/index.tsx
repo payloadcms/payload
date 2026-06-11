@@ -72,7 +72,7 @@ export const ResetPreferences: React.FC<{
 
   return (
     <Fragment>
-      <div>
+      <div className="payload-reset-preferences">
         <Button buttonStyle="secondary" onClick={() => openModal(confirmResetModalSlug)}>
           {t('general:resetPreferences')}
         </Button>

@@ -172,7 +172,15 @@ export const ThemeProvider: React.FC<{
   )
 
   return (
-    <Context value={{ autoMode, highContrastMode, setHighContrastMode, setTheme, theme }}>
+    <Context
+      value={{
+        autoMode: isScoped ? outerContext.autoMode : autoMode,
+        highContrastMode,
+        setHighContrastMode,
+        setTheme,
+        theme: isScoped ? outerContext.theme : theme,
+      }}
+    >
       {children}
     </Context>
   )

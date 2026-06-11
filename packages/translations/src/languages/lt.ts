@@ -256,6 +256,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Kitas naudotojas perėmė šio dokumento redagavimą.',
     applyChanges: 'Taikyti pakeitimus',
     ascending: 'Kylantis',
+    auto: 'Automatinis',
     automatic: 'Automatinis',
     backToDashboard: 'Atgal į informacinę skydelį',
     by: 'Iki',
@@ -450,6 +451,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} pasirinkta',
     selectLabel: 'Pasirinkite {{label}}',
     selectValue: 'Pasirinkite reikšmę',
+    settings: 'Nustatymai',
     showAllLabel: 'Rodyti visus {{label}}',
     shownInTable: 'Rodoma lentelėje',
     showSidebar: 'Rodyti šoninę juostą',
@@ -466,6 +468,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Sėkmingai perindeksuota {{count}} iš {{total}} dokumentų iš {{collections}}, praleista {{skips}} juodraščių.',
     takeOver: 'Perimti',
+    theme: 'Tema',
     thisLanguage: 'Lietuvių',
     time: 'Laikas',
     timezone: 'Laiko juosta',

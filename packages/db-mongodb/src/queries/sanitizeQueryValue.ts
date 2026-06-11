@@ -1,10 +1,4 @@
-import type {
-  FlattenedBlock,
-  FlattenedField,
-  Operator,
-  Payload,
-  RelationshipField,
-} from 'payload'
+import type { FlattenedBlock, FlattenedField, Operator, Payload, RelationshipField } from 'payload'
 
 import { Types } from 'mongoose'
 import { createArrayFromCommaDelineated, escapeRegExp } from 'payload'

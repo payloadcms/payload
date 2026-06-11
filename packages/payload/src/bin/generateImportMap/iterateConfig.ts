@@ -58,6 +58,7 @@ export function iterateConfig({
   addToImportMap(config.admin?.components?.header)
   addToImportMap(config.admin?.components?.logout?.Button)
   addToImportMap(config.admin?.components?.settingsMenu)
+  addToImportMap(config.admin?.components?.userMenuSettingsItems)
   addToImportMap(config.admin?.components?.graphics?.Icon)
   addToImportMap(config.admin?.components?.graphics?.Logo)
 

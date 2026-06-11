@@ -253,6 +253,7 @@ export const slTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Drug uporabnik je prevzel urejanje tega dokumenta.',
     applyChanges: 'Uporabi spremembe',
     ascending: 'Naraščajoče',
+    auto: 'Samodejno',
     automatic: 'Samodejno',
     backToDashboard: 'Nazaj na nadzorno ploščo',
     by: 'S strani',
@@ -448,6 +449,7 @@ export const slTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} izbranih',
     selectLabel: 'Izberite {{label}}',
     selectValue: 'Izberi vrednost',
+    settings: 'Nastavitve',
     showAllLabel: 'Pokaži vse {{label}}',
     shownInTable: 'Prikazano v tabeli',
     showSidebar: 'Prikaži stransko vrstico',
@@ -464,6 +466,7 @@ export const slTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Uspešno je bilo ponovo indeksiranih {{count}} od skupno {{total}} dokumentov iz {{collections}}, in {{skips}} osnutkov je bilo preskočenih.',
     takeOver: 'Prevzemi',
+    theme: 'Tema',
     thisLanguage: 'Slovenščina',
     time: 'Čas',
     timezone: 'Časovni pas',

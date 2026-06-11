@@ -253,6 +253,7 @@ export const taTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'இந்த ஆவணத்தை மற்றொரு பயனர் திருத்திக் கொண்டிருக்கிறார்.',
     applyChanges: 'மாற்றங்களைப் பயன்படுத்தவும்',
     ascending: 'ஏறுவரிசை',
+    auto: 'ஆட்டோ',
     automatic: 'தானியங்கி',
     backToDashboard: 'கட்டுப்பாட்டு பலகைக்கு திரும்பவும்',
     by: 'மூலம்',
@@ -448,6 +449,7 @@ export const taTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} தேர்ந்தெடுக்கப்பட்டது',
     selectLabel: '{{label}}-ஐத் தேர்ந்தெடு',
     selectValue: 'ஒரு மதிப்பைத் தேர்ந்தெடு',
+    settings: 'அமைப்புகள்',
     showAllLabel: 'அனைத்து {{label}}-ஐக் காட்டு',
     shownInTable: 'அட்டவணையில் காண்பிக்கப்பட்டுள்ளது',
     showSidebar: 'விளைவு பட்டியலை காட்டு',
@@ -464,6 +466,7 @@ export const taTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} இலிருந்து மொத்த {{total}} ஆவணங்களில் {{count}} ஆவணங்கள் வெற்றிகரமாக மறுஇன்டெக்ஸ் செய்யப்பட்டன, மேலும் {{skips}} வரைவு எடுக்க முடியவில்லை.',
     takeOver: 'கையகப்படுத்து',
+    theme: 'தீம்',
     thisLanguage: 'தமிழ்',
     time: 'நேரம்',
     timezone: 'நேர மண்டலம்',

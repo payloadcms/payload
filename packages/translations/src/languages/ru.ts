@@ -256,6 +256,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Другой пользователь взял на себя редактирование этого документа.',
     applyChanges: 'Применить изменения',
     ascending: 'Восходящий',
+    auto: 'Автоматически',
     automatic: 'Автоматически',
     backToDashboard: 'Назад к Панели',
     by: 'По',
@@ -451,6 +452,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} выбрано',
     selectLabel: 'Выберите {{label}}',
     selectValue: 'Выбрать значение',
+    settings: 'Настройки',
     showAllLabel: 'Показать все {{label}}',
     shownInTable: 'Показано в таблице',
     showSidebar: 'Показать боковую панель',
@@ -467,6 +469,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Успешно переиндексировано {{count}} из {{total}} документов из {{collections}}, пропущено {{skips}} черновиков.',
     takeOver: 'Взять на себя',
+    theme: 'Тема',
     thisLanguage: 'Русский',
     time: 'Время',
     timezone: 'Часовой пояс',

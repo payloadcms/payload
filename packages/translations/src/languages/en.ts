@@ -254,6 +254,7 @@ export const enTranslations = {
     anotherUserTakenOver: 'Another user has taken over editing this document.',
     applyChanges: 'Apply Changes',
     ascending: 'Ascending',
+    auto: 'Auto',
     automatic: 'Automatic',
     backToDashboard: 'Back to Dashboard',
     by: 'By',
@@ -449,6 +450,7 @@ export const enTranslations = {
     selectedCount: '{{count}} {{label}} selected',
     selectLabel: 'Select {{label}}',
     selectValue: 'Select a value',
+    settings: 'Settings',
     showAllLabel: 'Show all {{label}}',
     shownInTable: 'Shown in table',
     showSidebar: 'Show sidebar',
@@ -465,6 +467,7 @@ export const enTranslations = {
     successfullyReindexed:
       'Successfully reindexed {{count}} of {{total}} documents from {{collections}} and skipped {{skips}} drafts.',
     takeOver: 'Take over',
+    theme: 'Theme',
     thisLanguage: 'English',
     time: 'Time',
     timezone: 'Timezone',
