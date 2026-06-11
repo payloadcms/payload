@@ -351,6 +351,11 @@ describe('General', () => {
           .click()
       }
 
+      const closePopups = async () => {
+        await page.keyboard.press('Escape')
+        await page.keyboard.press('Escape')
+      }
+
       test('should switch to dark theme via user menu and reflect correct active state', async () => {
         await page.goto(postsUrl.admin)
 
@@ -360,8 +365,7 @@ describe('General', () => {
           .click()
         await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
-        // reopen the theme submenu and verify 'Dark' is shown as active
-        await openThemeSubMenu()
+        // sub-popup stays open (data-popup-prevent-close) — verify active state directly
         const darkItem = page.locator('.popup-button-list__button--radio-group-item', {
           hasText: 'Dark',
         })
@@ -391,21 +395,20 @@ describe('General', () => {
           .click()
         await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
-        // now switch to light via user menu
-        await openThemeSubMenu()
+        // now switch to light via user menu — sub-popup is still open, click directly
         await page
           .locator('.popup-button-list__button--radio-group-item', { hasText: 'Light' })
           .click()
         await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 
-        // verify 'Light' shown as active in submenu
-        await openThemeSubMenu()
+        // verify 'Light' shown as active in submenu (still open)
         const lightItem = page.locator('.popup-button-list__button--radio-group-item', {
           hasText: 'Light',
         })
         await expect(lightItem).toHaveClass(/popup-button-list__button--selected/)
 
-        // reset to auto
+        // reset to auto — close popups first, then reopen fresh
+        await closePopups()
         await openThemeSubMenu()
         await page
           .locator('.popup-button-list__button--radio-group-item', { hasText: 'Auto' })
