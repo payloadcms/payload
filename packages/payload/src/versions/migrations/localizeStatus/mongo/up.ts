@@ -1,6 +1,7 @@
 import type { Payload } from '../../../../types/index.js'
 
 import { calculateVersionLocaleStatuses, type VersionRecord } from '../shared.js'
+import { retryOnTransientError } from './retryOnTransientError.js'
 
 export type LocalizeStatusArgs = {
   collectionSlug?: string
@@ -150,13 +151,15 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     }
 
     // Update the document: change version._status from string to object
-    await connection.collection(versionsCollection).updateOne(
-      { _id: doc._id },
-      {
-        $set: {
-          'version._status': newStatus,
+    await retryOnTransientError(() =>
+      connection.collection(versionsCollection).updateOne(
+        { _id: doc._id },
+        {
+          $set: {
+            'version._status': newStatus,
+          },
         },
-      },
+      ),
     )
 
     updateCount++
@@ -201,13 +204,15 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
         }
 
         // Update main document
-        await connection.collection(mainCollection).updateOne(
-          { _id: doc._id },
-          {
-            $set: {
-              _status: statusObj,
+        await retryOnTransientError(() =>
+          connection.collection(mainCollection).updateOne(
+            { _id: doc._id },
+            {
+              $set: {
+                _status: statusObj,
+              },
             },
-          },
+          ),
         )
       }
 
@@ -242,13 +247,15 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
       }
 
       // Update global document
-      await connection.collection('globals').updateOne(
-        { _id: globalDoc._id, globalType: globalSlug },
-        {
-          $set: {
-            _status: statusObj,
+      await retryOnTransientError(() =>
+        connection.collection('globals').updateOne(
+          { _id: globalDoc._id, globalType: globalSlug },
+          {
+            $set: {
+              _status: statusObj,
+            },
           },
-        },
+        ),
       )
 
       payload.logger.info({ msg: 'Migrated global document' })

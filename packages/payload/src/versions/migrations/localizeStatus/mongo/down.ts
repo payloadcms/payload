@@ -1,5 +1,7 @@
 import type { Payload } from '../../../../types/index.js'
 
+import { retryOnTransientError } from './retryOnTransientError.js'
+
 export type LocalizeStatusArgs = {
   collectionSlug?: string
   globalSlug?: string
@@ -66,13 +68,15 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
     const statusValue =
       typeof currentStatus === 'object' ? currentStatus[defaultLocale] || 'draft' : 'draft'
 
-    await connection.collection(versionsCollection).updateOne(
-      { _id: doc._id },
-      {
-        $set: {
-          'version._status': statusValue,
+    await retryOnTransientError(() =>
+      connection.collection(versionsCollection).updateOne(
+        { _id: doc._id },
+        {
+          $set: {
+            'version._status': statusValue,
+          },
         },
-      },
+      ),
     )
 
     updateCount++
@@ -95,13 +99,15 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
           // Convert from { en: 'published', es: 'draft' } to 'published' (using default locale)
           const statusValue = doc._status[defaultLocale] || 'draft'
 
-          await connection.collection(mainCollection).updateOne(
-            { _id: doc._id },
-            {
-              $set: {
-                _status: statusValue,
+          await retryOnTransientError(() =>
+            connection.collection(mainCollection).updateOne(
+              { _id: doc._id },
+              {
+                $set: {
+                  _status: statusValue,
+                },
               },
-            },
+            ),
           )
         }
       }
@@ -120,13 +126,15 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
           ? globalDoc._status[defaultLocale] || 'draft'
           : 'draft'
 
-      await connection.collection('globals').updateOne(
-        { _id: globalDoc._id, globalType: globalSlug },
-        {
-          $set: {
-            _status: statusValue,
+      await retryOnTransientError(() =>
+        connection.collection('globals').updateOne(
+          { _id: globalDoc._id, globalType: globalSlug },
+          {
+            $set: {
+              _status: statusValue,
+            },
           },
-        },
+        ),
       )
 
       payload.logger.info({ msg: 'Rolled back global document' })
