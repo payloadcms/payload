@@ -37,6 +37,8 @@
     background-color: var(--color-bg);
     box-shadow: var(--elevation-400-menu-panel);
     container: drawer / inline-size;
+    /* Animate the leftward shift when a nested drawer stacks on top. */
+    transition: transform 100ms ease-out;
   }
 
   .drawer__content-children {
@@ -46,6 +48,33 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+  }
+
+  /*
+   * Content fades in on first render so the drawer body appears gracefully
+   * instead of snapping in. Quick + soft, never blocky.
+   */
+  .drawer__fade-in {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    animation: drawer-content-fade-in 200ms ease-out both;
+  }
+
+  @keyframes drawer-content-fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .drawer__fade-in {
+      animation: none;
+    }
   }
 
   .drawer--is-open .drawer__content,
