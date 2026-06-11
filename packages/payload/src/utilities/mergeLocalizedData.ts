@@ -220,11 +220,15 @@ export function mergeLocalizedData({
           if (fieldIsLocalized) {
             if (field.name in dataWithLocales) {
               const newValue = dataWithLocales[field.name]
-              const existingValue = docWithLocales[field.name] || {}
+              const existingValue = docWithLocales[field.name]
+              const existingValueObject =
+                existingValue && typeof existingValue === 'object' && !Array.isArray(existingValue)
+                  ? (existingValue as Record<string, unknown>)
+                  : undefined
 
               // If localized, handle locale keys
               if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
-                const merged: Record<string, unknown> = { ...existingValue }
+                const merged: Record<string, unknown> = { ...(existingValueObject || {}) }
 
                 for (const locale of selectedLocales) {
                   if (locale in newValue) {
@@ -236,10 +240,12 @@ export function mergeLocalizedData({
               } else if (parentIsLocalized) {
                 // Child of localized parent - replace with new value
                 result[field.name] = newValue
-              } else {
-                // Preserve existing value if new value is not a valid object
-                result[field.name] = existingValue
+              } else if (existingValueObject) {
+                // Preserve existing locale data when new value is not a valid object
+                result[field.name] = existingValueObject
               }
+              // If newValue is not an object and there is no existing locale data,
+              // leave the field absent rather than writing an empty object.
             }
           } else if (parentIsLocalized) {
             result[field.name] = dataWithLocales[field.name]
