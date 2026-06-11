@@ -48,5 +48,6 @@
 
   .combobox__entry {
     cursor: pointer;
+    display: flex;
   }
 }
