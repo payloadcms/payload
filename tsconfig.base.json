@@ -32,7 +32,7 @@
     ],
     "paths": {
       "@payloadcms/figma": ["../enterprise-plugins/packages/figma/src/index.ts"],
-      "@payload-config": ["./test/v4/config.ts"],
+      "@payload-config": ["./test/_community/config.ts"],
       "@payloadcms/admin-bar": ["./packages/admin-bar/src"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
@@ -56,6 +56,12 @@
       "@payloadcms/plugin-search/client": ["./packages/plugin-search/src/exports/client.ts"],
       "@payloadcms/plugin-form-builder/client": [
         "./packages/plugin-form-builder/src/exports/client.ts"
+      ],
+      "@payloadcms/plugin-form-builder/translations/languages/all": [
+        "./packages/plugin-form-builder/src/translations/index.ts"
+      ],
+      "@payloadcms/plugin-form-builder/translations/languages/*": [
+        "./packages/plugin-form-builder/src/translations/languages/*.ts"
       ],
       "@payloadcms/plugin-import-export/rsc": [
         "./packages/plugin-import-export/src/exports/rsc.ts"

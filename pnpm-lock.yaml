@@ -1142,6 +1142,9 @@ importers:
 
   packages/plugin-form-builder:
     dependencies:
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
@@ -2629,6 +2632,9 @@ importers:
       '@payloadcms/plugin-ecommerce':
         specifier: workspace:*
         version: link:../../packages/plugin-ecommerce
+      '@payloadcms/plugin-form-builder':
+        specifier: workspace:*
+        version: link:../../packages/plugin-form-builder
       '@payloadcms/plugin-import-export':
         specifier: workspace:*
         version: link:../../packages/plugin-import-export

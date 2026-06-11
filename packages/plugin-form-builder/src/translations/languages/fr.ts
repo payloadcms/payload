@@ -1,6 +1,6 @@
-import type { GenericTranslationsObject } from '@payloadcms/translations'
+import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.js'
 
-export const fr: GenericTranslationsObject = {
+export const frTranslations: PluginDefaultTranslationsObject = {
   $schema: './translation-schema.json',
   'plugin-form-builder': {
     name: 'Nom (minuscules, sans caractères spéciaux)',
@@ -97,4 +97,9 @@ export const fr: GenericTranslationsObject = {
     valueOfField: 'Valeur du champ',
     valueType: 'Type de valeur',
   },
+}
+
+export const fr: PluginLanguage = {
+  dateFNSKey: 'fr',
+  translations: frTranslations,
 }

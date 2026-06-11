@@ -18,6 +18,7 @@
     "gen-templates": "pnpm runts src/generate-template-variations.ts",
     "generateTranslations:core": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/core.ts",
     "generateTranslations:plugin-ecommerce": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-ecommerce.ts",
+    "generateTranslations:plugin-form-builder": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-form-builder.ts",
     "generateTranslations:plugin-import-export": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-import-export.ts",
     "generateTranslations:plugin-multi-tenant": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-multi-tenant.ts",
     "license-check": "pnpm runts src/license-check.ts",
@@ -41,6 +42,7 @@
   },
   "devDependencies": {
     "@payloadcms/plugin-ecommerce": "workspace:*",
+    "@payloadcms/plugin-form-builder": "workspace:*",
     "@payloadcms/plugin-import-export": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
