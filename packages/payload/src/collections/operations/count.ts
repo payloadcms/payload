@@ -88,7 +88,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
 
     result = await payload.db.count({
       collection: collectionConfig.slug,
-      locale: req?.locale,
+      locale: req?.locale || undefined,
       req,
       where: fullWhere,
     })
