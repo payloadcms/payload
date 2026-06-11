@@ -1,4 +1,4 @@
-import type { CollectionSlug, GlobalSlug, PayloadRequest } from 'payload'
+import type { CollectionSlug, GlobalSlug, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/server'
 
@@ -9,7 +9,21 @@ import {
   getGlobalInputSchema,
 } from '../../utils/schemaConversion/getEntityInputSchema.js'
 
-const validator = new CfWorkerJsonSchemaValidator({ shortcircuit: false })
+/**
+ * Keep the default `shortcircuit: true` - `false` makes validating nested rich text exponentially slow.
+ */
+const validator = new CfWorkerJsonSchemaValidator({ shortcircuit: true })
+
+type EntityValidator = {
+  schema: JsonSchemaType
+  validate: ReturnType<(typeof validator)['getValidator']>
+}
+
+/**
+ * - Caches each entity's schema and validator, so both are only built on the first request.
+ * - Keyed by payload config, then by entity type, slug, partial and language.
+ */
+const validatorCache = new WeakMap<SanitizedConfig, Map<string, EntityValidator>>()
 
 export const validateCollectionData = ({
   collectionSlug,
@@ -24,10 +38,11 @@ export const validateCollectionData = ({
 }): MCPToolResponse | null =>
   validateData({
     slug: collectionSlug,
+    buildSchema: () => getCollectionInputSchema({ collectionSlug, req }),
     data,
     entity: 'collection',
     partial,
-    schema: getCollectionInputSchema({ collectionSlug, req }),
+    req,
   })
 
 export const validateGlobalData = ({
@@ -41,34 +56,58 @@ export const validateGlobalData = ({
 }): MCPToolResponse | null =>
   validateData({
     slug: globalSlug,
+    buildSchema: () => getGlobalInputSchema({ globalSlug, req }),
     data,
     entity: 'global',
     partial: true,
-    schema: getGlobalInputSchema({ globalSlug, req }),
+    req,
   })
 
 const validateData = ({
   slug,
+  buildSchema,
   data,
   entity,
   partial,
-  schema,
+  req,
 }: {
+  buildSchema: () => JsonSchemaType | null
   data: Record<string, unknown>
   entity: 'collection' | 'global'
   partial?: boolean
-  schema: JsonSchemaType | null
+  req: PayloadRequest
   slug: string
 }): MCPToolResponse | null => {
-  if (!schema) {
-    return null
+  let cache = validatorCache.get(req.payload.config)
+  if (!cache) {
+    cache = new Map()
+    validatorCache.set(req.payload.config, cache)
   }
 
-  const result = validator.getValidator(partial ? withoutRequired(schema) : schema)(data)
+  const cacheKey = `${entity}:${slug}:${partial ? 'partial' : 'full'}:${req.i18n.language}`
+  let entityValidator = cache.get(cacheKey)
+
+  if (!entityValidator) {
+    const schema = buildSchema()
+
+    if (!schema) {
+      return null
+    }
+
+    entityValidator = {
+      schema,
+      validate: validator.getValidator(partial ? withoutRequired(schema) : schema),
+    }
+    cache.set(cacheKey, entityValidator)
+  }
+
+  const result = entityValidator.validate(data)
 
   if (result.valid) {
     return null
   }
+
+  const { schema } = entityValidator
 
   return {
     content: [
