@@ -103,12 +103,19 @@ export const ThemeProvider: React.FC<{
     isScoped ? (outerContext.highContrastMode ?? false) : (initialHighContrastMode ?? false),
   )
 
-  // Keep highContrastMode in sync with the outer provider when scoped.
+  // Keep highContrastMode, theme and autoMode in sync with the outer provider when scoped.
   useEffect(() => {
     if (isScoped) {
       setHighContrastModeState(outerContext.highContrastMode)
     }
   }, [isScoped, outerContext?.highContrastMode])
+
+  useEffect(() => {
+    if (isScoped) {
+      setThemeState(outerContext.theme)
+      setAutoMode(outerContext.autoMode)
+    }
+  }, [isScoped, outerContext?.theme, outerContext?.autoMode])
 
   useEffect(() => {
     if (isScoped || preselectedTheme !== 'all') {
