@@ -1017,6 +1017,12 @@ export type Config = {
         tabs?: SidebarTab[]
       }
       /**
+       * Add custom items to the user menu popup in the admin panel header.
+       * These components will be rendered in the Settings sub-popup of the user menu.
+       * When empty or absent, the Settings sub-trigger is not shown.
+       */
+      userMenuSettingsItems?: CustomComponent[]
+      /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
        * + `Dashboard` - `/admin`

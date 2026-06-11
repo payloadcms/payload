@@ -10,8 +10,10 @@ import { APIError } from '../../errors/index.js'
 import { sanitizeField } from '../../fields/config/sanitize.js'
 import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.js'
 import { getJoinScopeContext } from './utils/getJoinScopeContext.js'
 import { getJoinScopeWhereFromDocData } from './utils/getJoinScopeWhereFromDocData.js'
@@ -285,8 +287,28 @@ export const addOrderableEndpoint = (
         ? generateNKeysBetween(targetKey, adjacentDocKey, docsToMove.length)
         : generateNKeysBetween(adjacentDocKey, targetKey, docsToMove.length)
 
+    const draftsEnabled = hasDraftsEnabled(collection)
+
     // Update each document with its new order value
     for (const [index, id] of docsToMove.entries()) {
+      let draft: boolean | undefined
+
+      if (draftsEnabled) {
+        const latestVersion = await getLatestCollectionVersion({
+          id,
+          config: collection,
+          payload: req.payload,
+          query: {
+            collection: collection.slug,
+            req,
+            where: { id: { equals: id } },
+          },
+          req,
+        })
+
+        draft = latestVersion?._status === 'draft'
+      }
+
       await req.payload.update({
         id,
         collection: collection.slug,
@@ -294,6 +316,7 @@ export const addOrderableEndpoint = (
           [orderableFieldName]: orderValues[index],
         },
         depth: 0,
+        draft,
         req,
       })
     }

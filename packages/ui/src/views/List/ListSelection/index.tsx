@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 import React, { Fragment, useCallback } from 'react'
 
 import { DeleteMany } from '../../../elements/DeleteMany/index.js'
-import { EditMany_v4 } from '../../../elements/EditMany/index.js'
+import { EditMany } from '../../../elements/EditMany/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
 import { RestoreMany } from '../../../elements/RestoreMany/index.js'
@@ -68,7 +68,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
       SelectionActions={[
         !disableBulkEdit && !isTrashView && (
           <Fragment key="bulk-actions">
-            <EditMany_v4
+            <EditMany
               collection={collectionConfig}
               count={count}
               ids={selectedIDs}

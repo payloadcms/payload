@@ -219,11 +219,10 @@ export const promise = async ({
             for (const block of siblingData[field.name] as JsonObject[]) {
               rowIndex++
               if (validationResult.invalidBlockSlugs.includes(block.blockType as string)) {
-                const blockConfigOrSlug = field.blocks.find(
-                  (blockFromField) =>
-                    typeof blockFromField === 'string'
-                      ? blockFromField === block.blockType
-                      : blockFromField.slug === block.blockType,
+                const blockConfigOrSlug = field.blocks.find((blockFromField) =>
+                  typeof blockFromField === 'string'
+                    ? blockFromField === block.blockType
+                    : blockFromField.slug === block.blockType,
                 )
                 const blockConfig =
                   typeof blockConfigOrSlug === 'string'

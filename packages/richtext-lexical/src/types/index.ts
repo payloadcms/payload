@@ -387,8 +387,12 @@ export type LexicalEditorNodeMap<
   >
 } & {
   blocks?: {
-    [K in (Extract<TNodes, { type: 'block' }> & SerializedBlockNode)['fields']['blockType']]?: NodeMapBlockValue<
-      Extract<Extract<TNodes, { type: 'block' }> & SerializedBlockNode, { fields: { blockType: K } }>
+    [K in (Extract<TNodes, { type: 'block' }> &
+      SerializedBlockNode)['fields']['blockType']]?: NodeMapBlockValue<
+      Extract<
+        Extract<TNodes, { type: 'block' }> & SerializedBlockNode,
+        { fields: { blockType: K } }
+      >
     >
   }
   inlineBlocks?: {

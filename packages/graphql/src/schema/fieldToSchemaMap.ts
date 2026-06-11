@@ -165,9 +165,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     parentIsLocalized,
     parentName,
   }) => {
-    const blockTypes: GraphQLObjectType<any, any>[] = (
-      field.blocks
-    ).reduce((acc, _block) => {
+    const blockTypes: GraphQLObjectType<any, any>[] = field.blocks.reduce((acc, _block) => {
       const blockSlug = typeof _block === 'string' ? _block : _block.slug
       if (!graphqlResult.types.blockTypes[blockSlug]) {
         // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
