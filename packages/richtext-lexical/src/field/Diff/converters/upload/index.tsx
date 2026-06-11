@@ -10,15 +10,15 @@ import { formatFilesize } from 'payload/shared'
 import React from 'react'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
-import type { UploadDataImproved } from '../../../../features/upload/server/nodes/UploadNode.js'
-import type { SerializedUploadNode } from '../../../../nodeTypes.js'
+import type { UploadDataImproved } from '../../../../features/upload/server/schema.js'
+import type { SerializedUploadNode } from '../../../../types/nodeTypes.js'
 
 const baseClass = 'lexical-upload-diff'
 
 export const UploadDiffHTMLConverterAsync: (args: {
   i18n: I18nClient
   req: PayloadRequest
-}) => HTMLConvertersAsync<SerializedUploadNode> = () => {
+}) => HTMLConvertersAsync<SerializedUploadNode> = ({ i18n, req }) => {
   return {
     upload: async ({ node, populate, providedCSSString }) => {
       const uploadNode = node as UploadDataImproved
@@ -54,6 +54,10 @@ export const UploadDiffHTMLConverterAsync: (args: {
         .update(JSON.stringify(node.fields ?? {}))
         .digest('hex')
 
+      const filename =
+        uploadDoc?.filename ||
+        `${i18n.t('general:untitled')} - ID: ${typeof uploadNode.value === 'object' ? uploadNode.value : uploadNode.value}`
+
       const JSX = (
         <div
           className={`${baseClass}${providedCSSString}`}
@@ -69,7 +73,7 @@ export const UploadDiffHTMLConverterAsync: (args: {
               {thumbnailSRC?.length ? <img alt={alt} src={thumbnailSRC} /> : <File />}
             </div>
             <div className={`${baseClass}__info`} data-enable-match="false">
-              <strong>{uploadDoc?.filename}</strong>
+              <strong>{filename}</strong>
               <div className={`${baseClass}__meta`}>
                 {formatFilesize(uploadDoc?.filesize)}
                 {typeof uploadDoc?.width === 'number' && typeof uploadDoc?.height === 'number' && (

@@ -2,6 +2,7 @@
   .popup-button-list {
     display: flex;
     flex-direction: column;
+    padding: 0 var(--spacer-2);
     text-align: left;
   }
 
@@ -26,17 +27,14 @@
   }
 
   .popup-button-list__button {
-    padding: 0 var(--spacer-2);
-    margin: 0 var(--spacer-2);
     cursor: pointer;
     text-align: inherit;
     text-decoration: none;
-    border-radius: var(--radius-medium);
-    width: calc(100% - var(--spacer-2) * 2);
-    height: 24px;
+    white-space: nowrap;
+    border-radius: var(--popup-item-radius);
     display: flex;
-    align-items: center;
-    color: var(--color-text);
+    align-items: stretch;
+    color: var(--popup-item-color, var(--color-text));
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
@@ -44,41 +42,21 @@
     letter-spacing: var(--text-letter-spacing);
   }
 
+  .popup-button-list__label {
+    display: flex;
+    align-items: center;
+    padding: var(--spacer-1) var(--spacer-2) var(--spacer-1) var(--spacer-1);
+  }
+
   .popup-button-list__button:focus-visible {
     outline: var(--accessibility-outline);
     outline-offset: -1px;
-    border-radius: var(--radius-medium);
+    border-radius: var(--popup-item-radius);
   }
   .popup-button-list__button:hover {
     outline: none;
-    background-color: var(--color-bg-selected-strong);
-    color: var(--color-text-onselected-strong);
-  }
-
-  .popup-button-list__button-size--medium .popup-button-list__button {
-    gap: var(--spacer-1);
-    min-height: var(--spacer-4);
-    padding: var(--spacer-1) var(--spacer-2) var(--spacer-1) var(--spacer-1);
-    /* Reserve space for icon column so text aligns consistently */
-    padding-left: calc(var(--spacer-1) + 20px + var(--spacer-1));
-  }
-
-  .popup-button-list__button-size--medium .popup-button-list__button svg {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    /* Pull icon into reserved space */
-    margin-left: calc(-20px - var(--spacer-1));
-  }
-
-  [dir='rtl'] .popup-button-list__button-size--medium .popup-button-list__button {
-    padding-left: var(--spacer-2);
-    padding-right: calc(var(--spacer-1) + 20px + var(--spacer-1));
-  }
-
-  [dir='rtl'] .popup-button-list__button-size--medium .popup-button-list__button svg {
-    margin-left: 0;
-    margin-right: calc(-20px - var(--spacer-1));
+    background-color: var(--popup-item-bg-hover, var(--color-bg-selected-strong));
+    color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
   }
 
   .popup-button-list__disabled {
@@ -94,33 +72,59 @@
   }
 
   .popup-button-list__button--selected {
-    background-color: var(--color-bg-selected);
-    color: var(--color-text);
+    background-color: var(--popup-item-bg-selected, var(--color-bg-selected));
+    color: var(--popup-item-color-selected, var(--popup-item-color, var(--color-text)));
   }
 
   .popup-button-list__button--selected:hover {
-    background-color: var(--color-bg-selected-strong);
-    color: var(--color-text-onselected-strong);
+    background-color: var(--popup-item-bg-hover, var(--color-bg-selected-strong));
+    color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
   }
 
-  /* IconButtonGroup - reserves space for icons so text aligns consistently */
+  /* Hide icon element by default (outside RadioGroup/MenuItem) */
+  .popup-button-list__icon {
+    display: none;
+  }
+
+  /* RadioGroup - for radio-style selection rows with 16px icons */
   .popup-button-list--with-icons .popup-button-list__button {
-    gap: var(--spacer-1);
-    min-height: var(--spacer-4);
-    padding: var(--spacer-1) var(--spacer-2) var(--spacer-1) var(--spacer-1);
+    padding-right: var(--spacer-2);
   }
 
   .popup-button-list--with-icons .popup-button-list__icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
     flex-shrink: 0;
+    width: calc(var(--spacer-3) + var(--spacer-1));
+    padding: var(--spacer-1) 0 var(--spacer-1) var(--spacer-1);
   }
 
-  .popup-button-list--with-icons .popup-button-list__icon svg {
-    width: 16px;
-    height: 16px;
+  .popup-button-list--with-icons .popup-button-list__label {
+    padding: var(--spacer-1) 0 var(--spacer-1) var(--spacer-1);
+  }
+
+  /* MenuItem - for action menu items with 16px icons (default) */
+  .popup-button-list--with-actions .popup-button-list__button {
+    padding-right: var(--spacer-2);
+    align-items: center;
+  }
+
+  .popup-button-list--with-actions .popup-button-list__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: calc(var(--spacer-3) + var(--spacer-1));
+    padding: var(--spacer-1) 0 var(--spacer-1) var(--spacer-1);
+  }
+
+  .popup-button-list--with-actions .popup-button-list__label {
+    padding: var(--spacer-1) 0 var(--spacer-1) var(--spacer-1);
+  }
+
+  .popup-button-list--large .popup-button-list__icon {
+    width: var(--spacer-4);
+    padding: 0;
   }
 }

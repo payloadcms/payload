@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { $convertToMarkdownString } from '../../packages/@lexical/markdown/index.js'
 import { AutoLinkNode } from './nodes/AutoLinkNode.js'
 import { $createLinkNode, LinkNode } from './nodes/LinkNode.js'
-import type { SerializedLinkNode } from './nodes/types.js'
+import type { SerializedLinkNode } from './server/schema.js'
 import { LinkMarkdownTransformer, createLinkMarkdownTransformer } from './markdownTransformer.js'
 
 function createEditor() {

@@ -2,7 +2,6 @@
 
 import type { ClientUser, DocumentViewClientProps } from 'payload'
 
-import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -30,6 +29,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
+import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
@@ -41,7 +41,7 @@ import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'collection-edit'
 const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
@@ -690,7 +690,11 @@ export function DefaultEditView({
             <DocumentStaleData isActive={showStaleDataModal} onReload={handleStaleDataReload} />
           )}
           {preventLeaveWithoutSaving && (
-            <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
+            <LeaveWithoutSaving
+              modalSlug={drawerSlug ? `leave-without-saving-${drawerSlug}` : undefined}
+              onConfirm={handleLeaveConfirm}
+              onPrevent={handlePrevent}
+            />
           )}
           {!isInDrawer && (
             <SetDocumentStepNav

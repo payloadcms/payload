@@ -1,20 +1,20 @@
 @layer payload-default {
   .hierarchy-list {
     width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .hierarchy-list__wrap {
     padding-bottom: var(--spacing-view-bottom);
-
-    & > *:not(:last-child) {
-      margin-bottom: var(--spacer-3);
-    }
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
-  .hierarchy-list .list-header {
-    a {
-      text-decoration: none;
-    }
+  .hierarchy-list .list-header a {
+    text-decoration: none;
   }
 
   .hierarchy-list__allowed-types {
@@ -34,12 +34,6 @@
     gap: var(--spacer-1);
   }
 
-  .hierarchy-list__controls {
-    display: flex;
-    align-items: center;
-    gap: var(--spacer-2);
-  }
-
   .hierarchy-list__controls-left {
     display: flex;
     align-items: center;
@@ -52,19 +46,18 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacer-3);
-
-    & > * {
-      margin: 0;
-    }
   }
 
-  @media (max-width: var(--breakpoint-m-width)) {
+  .hierarchy-list__no-results > * {
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
     .hierarchy-list {
       margin-top: var(--spacer-1);
     }
 
     .hierarchy-list__wrap {
-      padding-top: 0;
       padding-bottom: 0;
     }
 

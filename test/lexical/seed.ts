@@ -22,11 +22,20 @@ import {
 
 // import type { Payload } from 'payload'
 
-import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
+import {
+  buildEditorState,
+  type DefaultNodeTypes,
+  type RichTextNodes,
+} from '@payloadcms/richtext-lexical'
 import { getFileByPath } from 'payload'
 
 import type { LexicalViewsNodes } from './collections/LexicalViews/index.js'
 import type { LexicalViewsFrontendNodes } from './collections/LexicalViewsFrontend/index.js'
+import type {
+  LexicalBenchmark,
+  LexicalInBlock2,
+  LexicalRelationshipField,
+} from './payload-types.js'
 
 import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
 import { devUser } from '../credentials.js'
@@ -421,10 +430,17 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: lexicalRelationshipFieldsSlug,
     data: {
-      richText: buildEditorState<DefaultNodeTypes>({ text: 'English text' }),
+      richText: buildEditorState<LexicalRelationshipField['richText']>({ text: 'English text' }),
     },
     depth: 0,
   })
+
+  // The 2nd child is the localized block — narrow to a node that carries `fields` to reuse its id.
+  const localizedBlock = lexicalLocalizedDoc1.lexicalBlocksSubLocalized?.root.children[1]
+  const localizedBlockID =
+    localizedBlock && 'fields' in localizedBlock && typeof localizedBlock.fields.id === 'string'
+      ? localizedBlock.fields.id
+      : undefined
 
   await _payload.update({
     id: lexicalLocalizedDoc1.id,
@@ -434,7 +450,7 @@ export const seed = async (_payload: Payload) => {
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'Spanish text in block',
-        (lexicalLocalizedDoc1?.lexicalBlocksSubLocalized?.root?.children[1]?.fields as any).id,
+        localizedBlockID,
       ) as any,
       title: 'Localized Lexical es',
     },
@@ -499,7 +515,10 @@ export const seed = async (_payload: Payload) => {
     locale: 'es',
   })
 
-  const getInlineBlock = () => ({
+  const getInlineBlock = (): Extract<
+    RichTextNodes<LexicalInBlock2['lexical']>,
+    { type: 'inlineBlock' }
+  > => ({
     type: 'inlineBlock',
     fields: {
       id: Math.random().toString(36).substring(2, 15),
@@ -516,12 +535,12 @@ export const seed = async (_payload: Payload) => {
         {
           blockName: '1',
           blockType: 'lexicalInBlock2',
-          lexical: buildEditorState<DefaultNodeTypes>({ text: '1' }),
+          lexical: buildEditorState<LexicalInBlock2['lexical']>({ text: '1' }),
         },
         {
           blockName: '2',
           blockType: 'lexicalInBlock2',
-          lexical: buildEditorState<DefaultNodeTypes>({ text: '2' }),
+          lexical: buildEditorState<LexicalInBlock2['lexical']>({ text: '2' }),
         },
         {
           id: '67e1af0b78de3228e23ef1d5',
@@ -656,7 +675,7 @@ export const seed = async (_payload: Payload) => {
       blockName: '',
       blockType: `benchBlock${i + 1}`,
     },
-  }))
+  })) as Extract<RichTextNodes<LexicalBenchmark['richText']>, { type: 'block' }>[]
 
   await _payload.create({
     collection: lexicalBenchmarkSlug,

@@ -1,19 +1,18 @@
-import type {
-  SerializedTableCellNode as _SerializedTableCellNode,
-  SerializedTableNode as _SerializedTableNode,
-  SerializedTableRowNode as _SerializedTableRowNode,
-} from '@lexical/table'
-import type { SerializedLexicalNode } from 'lexical'
 import type { Config, Field, FieldSchemaMap } from 'payload'
 
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { sanitizeFields } from 'payload'
 
-import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
-
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { TableMarkdownTransformer } from '../markdownTransformer.js'
+import { tableCellNodeJSONSchema, tableNodeJSONSchema, tableRowNodeJSONSchema } from './schema.js'
+
+export type {
+  SerializedTableCellNode,
+  SerializedTableNode,
+  SerializedTableRowNode,
+} from './schema.js'
 
 const fields: Field[] = [
   {
@@ -30,14 +29,6 @@ const fields: Field[] = [
   },
 ]
 
-export type SerializedTableCellNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedElementNode<_SerializedTableCellNode, 'tablecell', T>
-
-export type SerializedTableNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedElementNode<_SerializedTableNode, 'table', T>
-
-export type SerializedTableRowNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedElementNode<_SerializedTableRowNode, 'tablerow', T>
 export const EXPERIMENTAL_TableFeature = createServerFeature({
   feature: async ({ config, isRoot, parentIsLocalized }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
@@ -63,12 +54,15 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
       markdownTransformers: [TableMarkdownTransformer],
       nodes: [
         createNode({
+          jsonSchema: tableNodeJSONSchema,
           node: TableNode,
         }),
         createNode({
+          jsonSchema: tableCellNodeJSONSchema,
           node: TableCellNode,
         }),
         createNode({
+          jsonSchema: tableRowNodeJSONSchema,
           node: TableRowNode,
         }),
       ],

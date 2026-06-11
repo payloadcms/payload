@@ -1,6 +1,5 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { Fragment } from 'react'
 
@@ -8,6 +7,7 @@ import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LanguageIcon } from '../../icons/Language/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale, useLocaleLoading } from '../../providers/Locale/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
@@ -18,8 +18,15 @@ const baseClass = 'localizer'
 
 export const Localizer: React.FC<{
   className?: string
+  renderButton?: (props: {
+    active: boolean
+    'aria-expanded': boolean
+    'aria-haspopup': true
+    onClick: React.MouseEventHandler
+    onKeyDown: React.KeyboardEventHandler
+  }) => React.ReactNode
 }> = (props) => {
-  const { className } = props
+  const { className, renderButton } = props
   const {
     config: { localization },
   } = useConfig()
@@ -93,22 +100,25 @@ export const Localizer: React.FC<{
               })}
             </PopupList.ButtonGroup>
           )}
-          renderButton={({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
-            <Button
-              aria-label={t('general:locale')}
-              buttonStyle="secondary"
-              extraButtonProps={{ onKeyDown }}
-              icon={<LanguageIcon size={24} />}
-              iconPosition="left"
-              onClick={onClick}
-              {...ariaProps}
-            >
-              <div className={`${baseClass}__button-content`}>
-                {locale.code}
-                <ChevronIcon size={16} />
-              </div>
-            </Button>
-          )}
+          renderButton={
+            renderButton ??
+            (({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
+              <Button
+                aria-label={t('general:locale')}
+                buttonStyle="secondary"
+                extraButtonProps={{ onKeyDown }}
+                icon={<LanguageIcon size={24} />}
+                iconPosition="left"
+                onClick={onClick}
+                {...ariaProps}
+              >
+                <div className={`${baseClass}__button-content`}>
+                  {locale.code}
+                  <ChevronIcon size={16} />
+                </div>
+              </Button>
+            ))
+          }
           showScrollbar
           size="large"
         />

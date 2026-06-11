@@ -49,6 +49,7 @@ const RadioFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default RadioFields

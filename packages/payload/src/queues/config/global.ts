@@ -45,5 +45,6 @@ export const getJobStatsGlobal: (config: Config) => GlobalConfig = (config) => {
         type: 'json',
       },
     ],
+    versions: false,
   }
 }

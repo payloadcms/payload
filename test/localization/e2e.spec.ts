@@ -28,6 +28,7 @@ import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { upsertPreferences } from '../__helpers/e2e/preferences.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -391,7 +392,7 @@ describe('Localization', () => {
       await changeLocale(page, spanishLocale)
       await navigateToDoc(page, url)
       await page.locator('#field-children .rs__control').click()
-      await expect(page.locator('#field-children .rs__menu')).toContainText('spanish-relation2')
+      await expect(getSelectMenu({ page })).toContainText('spanish-relation2')
     })
 
     test('ensure relationship edit drawers are opened in currently selected locale', async () => {
@@ -786,7 +787,7 @@ describe('Localization', () => {
 
   test('should use label in search filter when string or object', async () => {
     await page.goto(url.list)
-    const searchInput = page.locator('.search-filter__input')
+    const searchInput = page.locator('#search-filter-input')
     await expect(searchInput).toBeVisible()
     await expect(searchInput).toHaveAttribute('placeholder', 'Search')
   })
@@ -934,7 +935,7 @@ describe('Localization', () => {
         await page.goto(urlAllFieldsLocalized.versions(docID))
 
         const firstRow = page.locator('tbody tr').first()
-        await expect(firstRow.locator('.pill__label span')).toHaveText('Currently Published')
+        await expect(firstRow.locator('.status-cell span')).toHaveText('Currently Published')
       })
 
       test('should only show published status when viewing the published locale', async () => {
@@ -961,7 +962,7 @@ describe('Localization', () => {
         await changeLocale(page, defaultLocale)
 
         const firstRow = page.locator('tbody tr').first()
-        await expect(firstRow.locator('.pill__label span')).toHaveText('Current Draft')
+        await expect(firstRow.locator('.status-cell span')).toHaveText('Current Draft')
       })
     })
   })

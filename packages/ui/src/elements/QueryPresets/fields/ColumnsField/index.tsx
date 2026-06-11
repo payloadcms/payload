@@ -57,7 +57,7 @@ export const QueryPresetsColumnField: JSONFieldClientComponent = ({
   const accessorToLabel = useMemo(() => {
     const map: Record<string, React.ReactNode> = {}
     for (const f of reducedFields) {
-      map[String(f.value)] = f.label
+      map[String(f.fieldPath)] = f.label
     }
     return map
   }, [reducedFields])

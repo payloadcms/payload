@@ -30,6 +30,7 @@ import {
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
@@ -250,7 +251,7 @@ describe('Relationship Field', () => {
     await options.locator(`text=${anotherRelationOneDoc.id}`).click()
     await expect(values).toHaveText([relationOneDoc.id, anotherRelationOneDoc.id])
     await field.locator('.rs__input').click({ delay: 100 })
-    await expect(page.locator('.rs__menu')).toHaveText('No options')
+    await expect(getSelectMenu({ page })).toHaveText('No options')
     await saveDocAndAssert(page)
     await wait(200)
     await expect(values).toHaveText([relationOneDoc.id, anotherRelationOneDoc.id])
@@ -316,7 +317,7 @@ describe('Relationship Field', () => {
 
     await field.click({ delay: 100 })
 
-    const menu = page.locator('.rs__menu-list')
+    const menu = getSelectMenu({ page })
     await expect(menu).toBeVisible()
     await wait(300)
 
@@ -370,7 +371,8 @@ describe('Relationship Field', () => {
 
     let filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
-    let filteredOptions = filteredField.locator('.rs__option')
+    let filteredMenu = getSelectMenu({ page })
+    let filteredOptions = filteredMenu.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(1) // one doc
     await wait(200)
 
@@ -395,7 +397,8 @@ describe('Relationship Field', () => {
 
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
-    filteredOptions = filteredField.locator('.rs__option')
+    filteredMenu = getSelectMenu({ page })
+    filteredOptions = filteredMenu.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(2) // two options because the currently selected option is still there
     await wait(200)
 
@@ -428,7 +431,8 @@ describe('Relationship Field', () => {
       await wait(300)
       const field = page.locator('#field-relationshipFilteredByField')
       await field.click({ delay: 100 })
-      const options = field.locator('.rs__option')
+      const fieldMenu = getSelectMenu({ page })
+      const options = fieldMenu.locator('.rs__option')
       await expect(options).toHaveCount(1)
       await expect(options).toContainText(idToInclude)
 
@@ -443,7 +447,7 @@ describe('Relationship Field', () => {
 
       const valueInput = page.locator('.condition__value input')
       await valueInput.click()
-      const valueOptions = whereBuilder.locator('.condition__value .rs__option')
+      const valueOptions = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(valueOptions).toHaveCount(2)
       await expect(valueOptions.locator(`text=None`)).toBeVisible()
@@ -464,7 +468,8 @@ describe('Relationship Field', () => {
 
       const fieldInCollapsible = page.locator('#field-filteredByFieldInCollapsible')
       await fieldInCollapsible.click({ delay: 100 })
-      const optionsInCollapsible = fieldInCollapsible.locator('.rs__option')
+      const fieldInCollapsibleMenu = getSelectMenu({ page })
+      const optionsInCollapsible = fieldInCollapsibleMenu.locator('.rs__option')
       await expect(optionsInCollapsible).toHaveCount(1)
       await expect(optionsInCollapsible).toContainText(idToInclude)
 
@@ -472,7 +477,8 @@ describe('Relationship Field', () => {
 
       const fieldInArray = page.locator('#field-array__0__filteredByFieldInArray')
       await fieldInArray.click({ delay: 100 })
-      const optionsInArray = fieldInArray.locator('.rs__option')
+      const fieldInArrayMenu = getSelectMenu({ page })
+      const optionsInArray = fieldInArrayMenu.locator('.rs__option')
       await expect(optionsInArray).toHaveCount(1)
       await expect(optionsInArray).toContainText(idToInclude)
 
@@ -488,7 +494,7 @@ describe('Relationship Field', () => {
 
       const valueInput = condition1.locator('.condition__value input')
       await valueInput.click()
-      const valueOptions = condition1.locator('.condition__value .rs__option')
+      const valueOptions = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(valueOptions).toHaveCount(2)
       await expect(valueOptions.locator(`text=None`)).toBeVisible()
@@ -502,7 +508,7 @@ describe('Relationship Field', () => {
 
       const valueInput2 = condition2.locator('.condition__value input')
       await valueInput2.click()
-      const valueOptions2 = condition2.locator('.condition__value .rs__option')
+      const valueOptions2 = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(valueOptions2).toHaveCount(2)
       await expect(valueOptions2.locator(`text=None`)).toBeVisible()
@@ -529,7 +535,7 @@ describe('Relationship Field', () => {
       // select relationshipMany field that relies on siblingData field above
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
 
-      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      const options = getSelectMenu({ page })
       await expect(options).toContainText(include)
       await expect(options).not.toContainText(exclude)
     })
@@ -550,7 +556,7 @@ describe('Relationship Field', () => {
       // select relationshipMany field that relies on siblingData field above
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
 
-      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      const options = getSelectMenu({ page })
       await expect(options).not.toContainText('exclude')
     })
 
@@ -568,7 +574,7 @@ describe('Relationship Field', () => {
       // select relationshipMany field that relies on siblingData field above
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
 
-      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      const options = getSelectMenu({ page })
       await expect(options).toContainText('Relation With Titles')
       await expect(options).not.toContainText('whatever')
     })
@@ -590,7 +596,7 @@ describe('Relationship Field', () => {
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
       await relationFilterOptionsReq
 
-      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      const options = getSelectMenu({ page })
       await expect(options).toContainText('truth')
     })
   })
@@ -752,7 +758,7 @@ describe('Relationship Field', () => {
 
     await page.goto(versionedRelationshipFieldURL.list)
     await wait(300)
-    await page.locator('.list-controls__toggle-columns').click()
+    await page.locator('.columns-button__button').click()
 
     await addListFilter({
       page,
@@ -795,7 +801,7 @@ describe('Relationship Field', () => {
       await wait(300)
       const input = page.locator('#field-relationshipWithTitle input')
       await input.fill('title')
-      const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option')
+      const options = getSelectMenu({ page }).locator('.rs__option')
       await expect(options).toHaveCount(1)
 
       await input.fill('non-occurring-string')
@@ -807,7 +813,7 @@ describe('Relationship Field', () => {
       await wait(300)
       const input = page.locator('#field-relationshipWithTitle input')
       await input.fill('word search')
-      const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option')
+      const options = getSelectMenu({ page }).locator('.rs__option')
       await expect(options).toHaveCount(1)
     })
 
@@ -821,7 +827,8 @@ describe('Relationship Field', () => {
       await expect(value).toHaveText(relationWithTitle.name)
 
       await field.click({ delay: 100 })
-      const options = field.locator('.rs__option')
+      const fieldMenu = getSelectMenu({ page })
+      const options = fieldMenu.locator('.rs__option')
 
       await expect(options).toHaveCount(2)
     })

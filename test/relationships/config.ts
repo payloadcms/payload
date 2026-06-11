@@ -48,6 +48,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
         },
       },
     ],
+    versions: false,
   }
 }
 
@@ -138,6 +139,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
     {
       slug: slugWithLocalizedRel,
@@ -155,6 +157,7 @@ export default buildConfigWithDefaults({
           localized: true,
         },
       ],
+      versions: false,
     },
     collectionWithName(relationSlug),
     {
@@ -165,6 +168,7 @@ export default buildConfigWithDefaults({
         update: defaultAccess,
         delete: defaultAccess,
       },
+      versions: false,
     },
     {
       slug: chainedRelSlug,
@@ -180,6 +184,7 @@ export default buildConfigWithDefaults({
           relationTo: chainedRelSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: customIdSlug,
@@ -193,6 +198,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: customIdNumberSlug,
@@ -206,6 +212,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'screenings',
@@ -220,6 +227,7 @@ export default buildConfigWithDefaults({
           relationTo: 'movies',
         },
       ],
+      versions: false,
     },
     {
       slug: 'movies',
@@ -289,6 +297,7 @@ export default buildConfigWithDefaults({
           hasMany: true,
         },
       ],
+      versions: false,
     },
     {
       slug: 'movieReviews',
@@ -321,6 +330,7 @@ export default buildConfigWithDefaults({
           type: 'radio',
         },
       ],
+      versions: false,
     },
     {
       slug: polymorphicRelationshipsSlug,
@@ -350,6 +360,7 @@ export default buildConfigWithDefaults({
           relationTo: ['movies'],
         },
       ],
+      versions: false,
     },
     {
       slug: treeSlug,
@@ -364,6 +375,7 @@ export default buildConfigWithDefaults({
           relationTo: 'tree',
         },
       ],
+      versions: false,
     },
     {
       slug: 'pages',
@@ -379,6 +391,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: 'rels-to-pages',
@@ -389,6 +402,7 @@ export default buildConfigWithDefaults({
           relationTo: 'pages',
         },
       ],
+      versions: false,
     },
     {
       slug: 'rels-to-pages-and-custom-text-ids',
@@ -399,6 +413,7 @@ export default buildConfigWithDefaults({
           relationTo: ['pages', 'custom-id', 'custom-id-number'],
         },
       ],
+      versions: false,
     },
     {
       slug: 'object-writes',
@@ -426,6 +441,7 @@ export default buildConfigWithDefaults({
           hasMany: true,
         },
       ],
+      versions: false,
     },
     {
       slug: 'deep-nested',
@@ -467,6 +483,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: 'relations',
@@ -477,6 +494,7 @@ export default buildConfigWithDefaults({
           relationTo: ['items'],
         },
       ],
+      versions: false,
     },
     {
       slug: 'items',
@@ -493,6 +511,7 @@ export default buildConfigWithDefaults({
           name: 'relation',
         },
       ],
+      versions: false,
     },
     {
       slug: 'blocks',
@@ -521,6 +540,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
   ],
   onInit: async (payload) => {

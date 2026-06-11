@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { ThemeProvider } from '../../providers/Theme/index.js'
 import './index.css'
 import { PopupTrigger } from './PopupTrigger/index.js'
 
@@ -89,6 +90,13 @@ export type PopupProps = {
   showScrollbar?: boolean
   size?: 'fit-content' | 'large' | 'medium' | 'small'
   /**
+   * Theme for the popup content. Defaults to 'dark'.
+   * Set to 'auto' to inherit the current theme.
+   *
+   * @default 'dark'
+   */
+  theme?: 'auto' | 'dark' | 'light'
+  /**
    * Preferred vertical alignment of the popup (position below or above the trigger),
    * if there is enough space available.
    *
@@ -129,6 +137,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     showOnHover = false,
     showScrollbar = false,
     size = 'medium',
+    theme = 'dark',
     verticalAlign = 'bottom',
   } = props
 
@@ -199,8 +208,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
       top = triggerRect.bottom + window.scrollY + offset
 
       if (triggerRect.bottom + popupRect.height + offset > window.innerHeight) {
-        top = triggerRect.top + window.scrollY - popupRect.height - offset
-        onTop = true
+        // Try to flip above — only do so if there's actually enough room
+        const topIfAbove = triggerRect.top + window.scrollY - popupRect.height - offset
+        if (topIfAbove >= window.scrollY) {
+          top = topIfAbove
+          onTop = true
+        }
+        // else: not enough room above either — keep below and let it overflow rather than going off-screen
       }
     } else {
       top = triggerRect.top + window.scrollY - popupRect.height - offset
@@ -267,13 +281,26 @@ export const Popup: React.FC<PopupProps> = (props) => {
   // /////////////////////////////////////
   // Click Outside Handler
   // Closes popup when clicking outside both the popup and trigger.
+  // Distinguishes between parent and child popups:
+  // - Click in child popup: parent stays open
+  // - Click in parent popup: child closes
   // /////////////////////////////////////
 
   const handleClickOutside = useEffectEvent((e: MouseEvent) => {
-    const isOutsidePopup = !popupRef.current?.contains(e.target as Node)
-    const isOutsideTrigger = !triggerRef.current?.contains(e.target as Node)
+    const target = e.target as Node
+    const isOutsidePopup = !popupRef.current?.contains(target)
+    const isOutsideTrigger = !triggerRef.current?.contains(target)
 
-    if (isOutsidePopup && isOutsideTrigger) {
+    // Check if click is inside a popup portal
+    const clickedPopupContent = (target as Element).closest?.('.popup__content')
+
+    // If the clicked popup contains this popup's trigger, it's a parent popup
+    // and we should close. If it doesn't contain our trigger, it's a child popup
+    // and we should stay open to avoid closing parent when interacting with child.
+    const isInsideChildPopup =
+      clickedPopupContent && !clickedPopupContent.contains(triggerRef.current)
+
+    if (isOutsidePopup && isOutsideTrigger && !isInsideChildPopup) {
       setActive(false)
     }
   })
@@ -350,6 +377,15 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   useEffect(() => {
     if (!active) {
+      const popup = popupRef.current
+      if (popup) {
+        // Clear inline position styles so the CSS `top: -9999px` rule on
+        // `.popup__hidden-content` takes effect. Without this, the inline
+        // styles set during positioning would win over the CSS rule, keeping
+        // portaled children (e.g. a ReactSelect menu) visually on-screen.
+        popup.style.top = ''
+        popup.style.left = ''
+      }
       return
     }
 
@@ -362,9 +398,21 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // Initial Position
     // Calculate and apply popup position.
     // getBoundingClientRect() forces synchronous layout.
+    //
+    // We call updatePosition() twice: once synchronously (so the popup
+    // snaps to roughly the right place immediately rather than flashing
+    // from -9999px) and once in a requestAnimationFrame, which fires
+    // after the browser has finished laying out the newly-visible popup
+    // content. The rAF call is the authoritative one — it catches cases
+    // where the popup height wasn't stable yet during the first call
+    // (e.g. ColumnSelector content rendering after hidden → visible
+    // class switch), which was causing incorrect flip-to-top decisions.
     // /////////////////////////////////////
 
     updatePosition()
+    const rafId = requestAnimationFrame(() => {
+      updatePosition()
+    })
 
     // /////////////////////////////////////
     // Focus Management
@@ -394,6 +442,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     popup.addEventListener('click', handleActionableClick)
 
     return () => {
+      cancelAnimationFrame(rafId)
       window.removeEventListener('resize', updatePosition)
       window.removeEventListener('scroll', updatePosition, { capture: true })
       document.removeEventListener('mousedown', handleClickOutside)
@@ -462,14 +511,23 @@ export const Popup: React.FC<PopupProps> = (props) => {
                     `${baseClass}__hidden-content`
               }
               data-popup-id={id || undefined}
-              data-theme="dark"
+              data-theme={theme === 'auto' ? undefined : theme}
               ref={popupRef}
             >
               <div
                 className={`${baseClass}__scroll-container${showScrollbar ? ` ${baseClass}__scroll-container--show-scrollbar` : ''}`}
               >
-                {render?.({ close: () => setActive(false) })}
-                {children}
+                {theme === 'auto' ? (
+                  <>
+                    {render?.({ close: () => setActive(false) })}
+                    {children}
+                  </>
+                ) : (
+                  <ThemeProvider theme={theme}>
+                    {render?.({ close: () => setActive(false) })}
+                    {children}
+                  </ThemeProvider>
+                )}
               </div>
               {caret && <div className={`${baseClass}__caret`} />}
             </div>,

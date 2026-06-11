@@ -1,6 +1,6 @@
 @layer payload-default, payload;
 
-@import 'styles';
+@import './styles';
 @import './toasts.scss';
 @import './colors.scss';
 @import '../styles.css';
@@ -41,7 +41,6 @@
     --spacing-view-bottom: var(--gutter-h);
     --doc-controls-height: calc(var(--text-body-large-line-height) + var(--spacer-4));
     --nav-width: 275px;
-    --nav-trans-time: 150ms;
 
     @include large-break {
       --gutter-h: var(--spacer-4);

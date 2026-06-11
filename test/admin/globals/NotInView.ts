@@ -13,4 +13,5 @@ export const GlobalNotInView: GlobalConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

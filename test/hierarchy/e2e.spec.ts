@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { openNav } from '../__helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -9,6 +8,7 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Organization } from './payload-types.js'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -17,7 +17,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 /**
- * Safely set a hierarchy filter checkbox to checked or unchecked state.
+ * Safely set a hierarchy filter option to checked or unchecked state.
  * Opens the filter dropdown, checks current state, only toggles if needed, then closes.
  */
 async function setHierarchyFilter({
@@ -31,13 +31,17 @@ async function setHierarchyFilter({
   page: Page
   sidebar: ReturnType<Page['locator']>
 }): Promise<void> {
-  await sidebar.locator('.hierarchy-search-input__filter').click()
-  const checkbox = page.getByRole('checkbox', { name: filterName })
-  await expect(checkbox).toBeVisible()
+  await sidebar.locator('.hierarchy-search__filter').click()
+  const filterButton = page.locator('.popup__content .popup-button-list__button', {
+    hasText: filterName,
+  })
+  await expect(filterButton).toBeVisible()
 
-  const isCurrentlyChecked = await checkbox.isChecked()
+  const isCurrentlyChecked = await filterButton.evaluate((el) =>
+    el.classList.contains('popup-button-list__button--selected'),
+  )
   if (isCurrentlyChecked !== checked) {
-    await checkbox.click()
+    await filterButton.click()
   }
 
   await page.keyboard.press('Escape')
@@ -375,7 +379,7 @@ test.describe('Hierarchy Sidebar', () => {
       await page.getByRole('tab', { name: 'Folders' }).click()
 
       // Filter button should be visible (it's a div with aria-label="Filter")
-      const filterButton = page.locator('.hierarchy-search-input__filter')
+      const filterButton = page.locator('.hierarchy-search__filter')
       await expect(filterButton).toBeVisible()
     })
 
@@ -387,12 +391,16 @@ test.describe('Hierarchy Sidebar', () => {
 
       // Click filter button in sidebar
       const sidebar = page.getByRole('tabpanel')
-      await sidebar.locator('.hierarchy-search-input__filter').click()
+      await sidebar.locator('.hierarchy-search__filter').click()
 
       // Should show collection options (based on what collections reference folders)
-      // Popup content is rendered in a portal, use role-based selectors
-      await expect(page.getByRole('checkbox', { name: 'Organizations' })).toBeVisible()
-      await expect(page.getByRole('checkbox', { name: 'Products' })).toBeVisible()
+      // Popup content is rendered in a portal, use class-based selectors for PopupList.Button
+      await expect(
+        page.locator('.popup__content .popup-button-list__button', { hasText: 'Organizations' }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.popup__content .popup-button-list__button', { hasText: 'Products' }),
+      ).toBeVisible()
     })
 
     test('should filter tree by selected collection type', async () => {

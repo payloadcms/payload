@@ -1,6 +1,6 @@
 import type { PopulationPromise } from '../../typesServer.js'
 import type { UploadFeatureProps } from './index.js'
-import type { SerializedUploadNode } from './nodes/UploadNode.js'
+import type { SerializedUploadNode } from './schema.js'
 
 import { populate } from '../../../populateGraphQL/populate.js'
 import { recursivelyPopulateFieldsForGraphQL } from '../../../populateGraphQL/recursivelyPopulateFieldsForGraphQL.js'

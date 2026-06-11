@@ -318,17 +318,7 @@ export interface ReturnedResource {
 export interface Page {
   id: string;
   title: string;
-  layout?:
-    | (
-        | HeroBlock
-        | {
-            body?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textContent';
-          }
-      )[]
-    | null;
+  layout?: (HeroBlock | TextContent)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -342,6 +332,16 @@ export interface HeroBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextContent".
+ */
+export interface TextContent {
+  body?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textContent';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -459,120 +459,22 @@ export interface PayloadMcpApiKey {
    * The purpose of the API key.
    */
   description?: string | null;
-  products?: {
-    /**
-     * Allow clients to find products.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create products.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update products.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete products.
-     */
-    delete?: boolean | null;
-  };
-  fieldTypes?: {
-    /**
-     * Allow clients to find field-types.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create field-types.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update field-types.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete field-types.
-     */
-    delete?: boolean | null;
-  };
-  pages?: {
-    /**
-     * Allow clients to find pages.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create pages.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update pages.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete pages.
-     */
-    delete?: boolean | null;
-  };
-  posts?: {
-    /**
-     * Allow clients to find posts.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create posts.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update posts.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete posts.
-     */
-    delete?: boolean | null;
-  };
-  media?: {
-    /**
-     * Allow clients to find media.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to update media.
-     */
-    update?: boolean | null;
-  };
-  siteSettings?: {
-    /**
-     * Allow clients to find site-settings global.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to update site-settings global.
-     */
-    update?: boolean | null;
-  };
-  'payload-mcp-tool'?: {
-    /**
-     * Rolls a virtual dice with a specified number of sides
-     */
-    diceRoll?: boolean | null;
-  };
-  'payload-mcp-resource'?: {
-    /**
-     * Data is a resource that contains special data.
-     */
-    data?: boolean | null;
-    /**
-     * Data is a resource that contains special data.
-     */
-    dataByID?: boolean | null;
-  };
-  'payload-mcp-prompt'?: {
-    /**
-     * Creates a prompt to process a message
-     */
-    echo?: boolean | null;
-  };
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
+  /**
+   * Access for this API key — uncheck to revoke individual tools.
+   */
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   /**
    * This field added by overrideApiKeyCollection
    */
@@ -880,66 +782,8 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
   user?: T;
   label?: T;
   description?: T;
-  products?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  fieldTypes?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  pages?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  posts?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  media?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  siteSettings?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  'payload-mcp-tool'?:
-    | T
-    | {
-        diceRoll?: T;
-      };
-  'payload-mcp-resource'?:
-    | T
-    | {
-        data?: T;
-        dataByID?: T;
-      };
-  'payload-mcp-prompt'?:
-    | T
-    | {
-        echo?: T;
-      };
+  overrideAccess?: T;
+  access?: T;
   override?: T;
   updatedAt?: T;
   createdAt?: T;

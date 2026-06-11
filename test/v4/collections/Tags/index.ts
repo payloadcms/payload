@@ -25,6 +25,7 @@ const Tags: CollectionConfig = {
   tags: {
     collectionSpecific: { fieldName: 'allowedCollections' },
   },
+  versions: false,
 }
 
 export default Tags

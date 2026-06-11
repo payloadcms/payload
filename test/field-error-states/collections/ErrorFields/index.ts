@@ -250,4 +250,5 @@ export const ErrorFieldsCollection: CollectionConfig = {
       label: 'Group Field',
     },
   ],
+  versions: false,
 }

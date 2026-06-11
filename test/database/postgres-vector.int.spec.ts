@@ -54,6 +54,7 @@ describePostgres('postgres vector custom column', () => {
           slug: 'users',
           auth: true,
           fields: [],
+          versions: false,
         },
         {
           slug: 'posts',
@@ -67,6 +68,7 @@ describePostgres('postgres vector custom column', () => {
               type: 'text',
             },
           ],
+          versions: false,
         },
       ],
     })
@@ -174,6 +176,7 @@ describePostgres('postgres vector custom column', () => {
           slug: 'users',
           auth: true,
           fields: [],
+          versions: false,
         },
         {
           slug: 'posts',
@@ -187,6 +190,7 @@ describePostgres('postgres vector custom column', () => {
               type: 'text',
             },
           ],
+          versions: false,
         },
       ],
     })
@@ -284,6 +288,7 @@ describePostgres('postgres vector custom column', () => {
           slug: 'users',
           auth: true,
           fields: [],
+          versions: false,
         },
         {
           slug: 'posts',
@@ -297,6 +302,7 @@ describePostgres('postgres vector custom column', () => {
               type: 'text',
             },
           ],
+          versions: false,
         },
       ],
     })

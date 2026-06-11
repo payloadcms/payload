@@ -45,23 +45,26 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           className={`${baseClass}__breakpoint`}
           horizontalAlign="right"
           render={({ close }) => (
-            <PopupList.IconButtonGroup>
+            <PopupList.RadioGroup>
               <React.Fragment>
-                {breakpoints.map((bp) => (
-                  <PopupList.Button
-                    active={bp.name == breakpoint}
-                    key={bp.name}
-                    onClick={() => {
-                      setBreakpoint(bp.name)
-                      close()
-                    }}
-                  >
-                    {bp.label}
-                  </PopupList.Button>
-                ))}
+                {breakpoints.map((bp) => {
+                  const isActive = bp.name == breakpoint
+                  return (
+                    <PopupList.RadioGroupItem
+                      active={isActive}
+                      key={bp.name}
+                      onClick={() => {
+                        setBreakpoint(bp.name)
+                        close()
+                      }}
+                    >
+                      {bp.label}
+                    </PopupList.RadioGroupItem>
+                  )
+                })}
                 {/* Dynamically add this option so that it only appears when the width and height inputs are explicitly changed */}
                 {breakpoint === 'custom' && (
-                  <PopupList.Button
+                  <PopupList.RadioGroupItem
                     active={breakpoint == customOption.value}
                     onClick={() => {
                       setBreakpoint(customOption.value)
@@ -69,10 +72,10 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
                     }}
                   >
                     {customOption.label}
-                  </PopupList.Button>
+                  </PopupList.RadioGroupItem>
                 )}
               </React.Fragment>
-            </PopupList.IconButtonGroup>
+            </PopupList.RadioGroup>
           )}
           renderButton={(buttonProps) => (
             <Button {...buttonProps} buttonStyle="secondary" icon={<ChevronIcon size={16} />}>
@@ -90,22 +93,25 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           className={`${baseClass}__zoom`}
           horizontalAlign="right"
           render={({ close }) => (
-            <PopupList.IconButtonGroup>
+            <PopupList.RadioGroup>
               <React.Fragment>
-                {zoomOptions.map((zoomValue) => (
-                  <PopupList.Button
-                    active={zoom * 100 == zoomValue}
-                    key={zoomValue}
-                    onClick={() => {
-                      setZoom(zoomValue / 100)
-                      close()
-                    }}
-                  >
-                    {zoomValue}%
-                  </PopupList.Button>
-                ))}
+                {zoomOptions.map((zoomValue) => {
+                  const isActive = zoom * 100 == zoomValue
+                  return (
+                    <PopupList.RadioGroupItem
+                      active={isActive}
+                      key={zoomValue}
+                      onClick={() => {
+                        setZoom(zoomValue / 100)
+                        close()
+                      }}
+                    >
+                      {zoomValue}%
+                    </PopupList.RadioGroupItem>
+                  )
+                })}
               </React.Fragment>
-            </PopupList.IconButtonGroup>
+            </PopupList.RadioGroup>
           )}
           renderButton={(buttonProps) => (
             <Button {...buttonProps} buttonStyle="pill" icon={<ChevronIcon size={16} />}>

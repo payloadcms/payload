@@ -5,9 +5,7 @@ import type {
   LexicalEditor,
   LexicalNode,
   NodeKey,
-  SerializedLexicalNode,
 } from 'lexical'
-import type { JsonObject } from 'payload'
 import type React from 'react'
 import type { JSX } from 'react'
 
@@ -15,16 +13,7 @@ import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement, DecoratorNode } from 'lexical'
 
-import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
-
-export type InlineBlockFields<TInlineBlockFields extends JsonObject = JsonObject> = {
-  blockType: string
-  id: string
-} & TInlineBlockFields
-
-export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObject> = {
-  fields: InlineBlockFields<TBlockFields>
-} & StronglyTypedLeafNode<SerializedLexicalNode, 'inlineBlock'>
+import type { InlineBlockFields, SerializedInlineBlockNode } from '../schema.js'
 
 export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactElement> {
   __cacheBuster: number

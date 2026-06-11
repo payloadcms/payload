@@ -3,7 +3,6 @@ import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
@@ -14,6 +13,7 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
+import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
@@ -22,7 +22,6 @@ import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 import { Translation } from '../Translation/index.js'
-import './index.css'
 
 export type Props = {
   collection: ClientCollectionConfig
@@ -458,15 +457,13 @@ export function DeleteMany_v4({
               )}
             </p>
             {trash && hasTrashPermission && hasDeletePermission && viewType !== 'trash' && (
-              <div className="delete-documents__checkbox">
-                <CheckboxInput
-                  checked={deletePermanently}
-                  id="delete-forever"
-                  label={t('general:deletePermanently')}
-                  name="delete-forever"
-                  onToggle={(e) => setDeletePermanently(e.target.checked)}
-                />
-              </div>
+              <CheckboxInput
+                checked={deletePermanently}
+                id="delete-forever"
+                label={t('general:deletePermanently')}
+                name="delete-forever"
+                onToggle={(e) => setDeletePermanently(e.target.checked)}
+              />
             )}
           </React.Fragment>
         }

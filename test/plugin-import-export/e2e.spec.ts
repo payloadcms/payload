@@ -18,6 +18,7 @@ import {
   runJobsQueue,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { setPerPageLimit } from '../__helpers/e2e/setPerPageLimit.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -89,7 +90,7 @@ test.describe('Import Export Plugin', () => {
       const formatField = page.locator('.format-field .rs__control')
       await expect(formatField).toBeVisible()
       await formatField.click()
-      await page.locator('.rs__menu .rs__option:has-text("json")').click()
+      await getSelectMenu({ page }).locator('.rs__option', { hasText: 'json' }).click()
 
       await saveDocAndAssert(page)
 
@@ -517,7 +518,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        const menu = page.locator('.rs__menu')
+        const menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
@@ -577,7 +578,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        const menu = page.locator('.rs__menu')
+        const menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
@@ -594,7 +595,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        let menu = page.locator('.rs__menu')
+        let menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         let optionsBefore = 0
@@ -608,7 +609,7 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.collection-edit')).toBeVisible()
 
         await collectionField.locator('.rs__control').click()
-        menu = page.locator('.rs__menu')
+        menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(async () => {
@@ -943,8 +944,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await expect(page.locator('.rs__menu')).toBeVisible()
-        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({
@@ -972,8 +972,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await expect(page.locator('.rs__menu')).toBeVisible()
-        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({
@@ -1016,8 +1015,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await expect(page.locator('.rs__menu')).toBeVisible()
-        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({

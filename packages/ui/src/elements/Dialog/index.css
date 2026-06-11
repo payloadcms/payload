@@ -1,0 +1,92 @@
+@layer payload-default {
+  dialog:has(> .dialog) {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-modalbackdrop);
+  }
+
+  .dialog {
+    --dialog-max-height: calc(100dvh - var(--spacer-5));
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: var(--dialog-max-height);
+    width: var(--dialog-width);
+    max-width: calc(100vw - var(--spacer-5));
+    background: var(--color-bg);
+    border-radius: var(--radius-large);
+    overflow: clip;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    color: var(--color-text);
+    box-shadow: var(--elevation-500-modal-window);
+  }
+
+  .dialog--small {
+    --dialog-width: 280px;
+  }
+
+  .dialog--medium {
+    --dialog-width: 480px;
+  }
+
+  .dialog__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    min-height: var(--spacer-6);
+    padding: var(--spacer-2) var(--spacer-3);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    flex-shrink: 0;
+  }
+
+  .dialog__header--has-close {
+    padding-inline-end: var(--spacer-2);
+  }
+
+  .dialog__title {
+    flex: 1 0 0;
+    min-width: 0;
+    margin: 0;
+    font-weight: var(--text-body-medium-strong-font-weight);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+  }
+
+  .dialog__header-extras {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
+  .dialog__body {
+    flex: 1 1 auto;
+    padding: var(--spacer-3);
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .dialog:has(.dialog__header) .dialog__body {
+    padding-top: var(--spacer-2);
+  }
+
+  .dialog:has(.dialog__footer) .dialog__body {
+    padding-bottom: var(--spacer-2);
+  }
+
+  .dialog__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacer-2);
+    padding-block: var(--spacer-2);
+    padding-inline-start: var(--spacer-3);
+    padding-inline-end: var(--spacer-2);
+    flex-shrink: 0;
+  }
+}

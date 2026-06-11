@@ -34,20 +34,18 @@
 
     /* Modal */
     --color-modalbackdrop: rgba(0, 0, 0, 0.5);
-  }
 
-  /* ——————————————————————————————————————————————
-     Light Theme (default)
+    /* ——————————————————————————————————————————————
+       Light Theme (default)
 
-     Naming rules (UI3 parity — matches fpl/tokens):
-     - Every semantic color is prefixed with `--color-`.
-     - The `default` category is implicit. `--color-bg-secondary` (not `--color-bg-default-secondary`).
-     - The `default` variant is implicit. `--color-bg` (not `--color-bg-default`); `--color-bg-brand` (not `--color-bg-brand-default`).
-     - `on{X}` is one segment. `--color-text-onbrand`, `--color-icon-ondisabled`.
-     - Palette tokens live in the `--ramp-*` namespace.
-     ————————————————————————————————————————————— */
+       Naming rules (UI3 parity — matches fpl/tokens):
+       - Every semantic color is prefixed with `--color-`.
+       - The `default` category is implicit. `--color-bg-secondary` (not `--color-bg-default-secondary`).
+       - The `default` variant is implicit. `--color-bg` (not `--color-bg-default`); `--color-bg-brand` (not `--color-bg-brand-default`).
+       - `on{X}` is one segment. `--color-text-onbrand`, `--color-icon-ondisabled`.
+       - Palette tokens live in the `--ramp-*` namespace.
+       ————————————————————————————————————————————— */
 
-  :root {
     /* Background */
     --color-bg-assistive: var(--ramp-pink-500);
     --color-bg-assistive-hover: var(--ramp-pink-600);
@@ -236,6 +234,7 @@
     --special-bg-transparent: rgba(255, 255, 255, 0.6);
     --special-bg-transparent-secondary-hover: var(--ramp-black-200);
     --special-border-translucent: var(--ramp-black-200);
+    --special-border-translucent-strong: var(--ramp-black-300);
 
     /* Multiplayer */
     --multiplayer-blue: var(--special-multiplayer-blue);
@@ -245,6 +244,55 @@
     --multiplayer-yellow: var(--special-multiplayer-yellow);
     --multiplayer-green: var(--special-multiplayer-green);
     --multiplayer-grey: var(--special-multiplayer-grey);
+
+    /* ——————————————————————————————————————————————
+       Field Tokens
+       ——————————————————————————————————————————————
+       Override these to retheme all "light" themed
+       form fields at once
+       ————————————————————————————————————————————— */
+
+    --field-color-bg: var(--color-bg);
+    --field-color-border: var(--special-border-translucent);
+    --field-color-text: var(--color-text);
+    --field-color-placeholder: var(--color-text-tertiary);
+
+    --field-color-border-hover: var(--special-border-translucent-strong);
+
+    --field-color-border-focus: var(--accessibility-focus-color);
+
+    --field-color-bg-disabled: transparent;
+    --field-color-border-disabled: var(--color-border);
+    --field-color-text-disabled: var(--color-text-disabled);
+
+    --field-color-bg-readonly: var(--color-bg);
+    --field-color-border-readonly: var(--color-border);
+    --field-color-text-readonly: var(--color-text-secondary);
+
+    --field-color-border-error: var(--color-border-danger-strong);
+
+    --field-color-label: var(--color-text);
+    --field-color-label-required: var(--color-text-danger);
+
+    --field-color-description: var(--color-text-secondary);
+
+    --field-color-error-bg: var(--color-bg-danger);
+    --field-color-error-text: var(--color-text-ondanger);
+
+    --field-color-toggle-border: var(--color-border-strong);
+    --field-color-toggle-border-hover: var(--color-border-selected-strong);
+    --field-color-toggle-bg-checked: var(--color-bg-brand);
+    --field-color-toggle-border-checked: var(--color-border-selected);
+    --field-color-toggle-icon: var(--color-icon-onbrand);
+    --field-color-toggle-bg-disabled: var(--color-bg-disabled);
+    --field-color-toggle-border-disabled: var(--color-border-disabled);
+
+    --field-color-upload-bg: var(--color-bg-secondary);
+    --field-color-upload-border: var(--color-border);
+
+    /* ——————————————————————————————————————————————
+       End Field Tokens
+       ————————————————————————————————————————————— */
   }
 
   /* ——————————————————————————————————————————————
@@ -382,5 +430,55 @@
     --special-bg-transparent: rgba(0, 0, 0, 0.6);
     --special-bg-transparent-secondary-hover: var(--ramp-white-200);
     --special-border-translucent: var(--ramp-white-200);
+    --special-border-translucent-strong: var(--ramp-white-300);
+
+    /* ————————————————————————————————————————————————
+       Field Tokens
+       ————————————————————————————————————————————————
+       Override these to retheme all "dark" themed
+       form fields at once
+       ——————————————————————————————————————————————— */
+
+    --field-color-bg: var(--color-bg);
+    --field-color-border: var(--special-border-translucent);
+    --field-color-text: var(--color-text);
+    --field-color-placeholder: var(--color-text-tertiary);
+
+    --field-color-border-hover: var(--special-border-translucent-strong);
+
+    --field-color-border-focus: var(--accessibility-focus-color);
+
+    --field-color-bg-disabled: transparent;
+    --field-color-border-disabled: var(--color-border);
+    --field-color-text-disabled: var(--color-text-disabled);
+
+    --field-color-bg-readonly: var(--color-bg);
+    --field-color-border-readonly: var(--color-border);
+    --field-color-text-readonly: var(--color-text-secondary);
+
+    --field-color-border-error: var(--color-border-danger-strong);
+
+    --field-color-label: var(--color-text);
+    --field-color-label-required: var(--color-text-danger);
+
+    --field-color-description: var(--color-text-secondary);
+
+    --field-color-error-bg: var(--color-bg-danger);
+    --field-color-error-text: var(--color-text-ondanger);
+
+    --field-color-toggle-border: var(--color-border-strong);
+    --field-color-toggle-border-hover: var(--color-border-selected-strong);
+    --field-color-toggle-bg-checked: var(--color-bg-brand);
+    --field-color-toggle-border-checked: var(--color-border-selected);
+    --field-color-toggle-icon: var(--color-icon-onbrand);
+    --field-color-toggle-bg-disabled: var(--color-bg-disabled);
+    --field-color-toggle-border-disabled: var(--color-border-disabled);
+
+    --field-color-upload-bg: var(--color-bg-secondary);
+    --field-color-upload-border: var(--color-border);
+
+    /* ——————————————————————————————————————————————
+       End Field Tokens
+       ————————————————————————————————————————————— */
   }
 }

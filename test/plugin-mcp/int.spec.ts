@@ -1,200 +1,58 @@
-import type { Payload } from 'payload'
-
 import { randomUUID } from 'crypto'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import { getToolDoc, getToolText } from './helpers/mcpClient.js'
+import { getApiKey, it, payload, restClient, userId } from './helpers/mcpFixtures.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { devUser } from '../credentials.js'
-import { capturedMcpEvents } from './config.js'
-
-let payload: Payload
-let token: string
-let userId: string
-let restClient: NextRESTClient
-
-const { email, password } = devUser
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-async function parseStreamResponse(response: Response): Promise<any> {
-  try {
-    const reader = response.body?.getReader()
-    const decoder = new TextDecoder()
-
-    let streamData = ''
-    while (true) {
-      const { done, value } = (await reader?.read()) || { done: false, value: new Uint8Array() }
-      if (done) {
-        break
-      }
-      streamData += decoder.decode(value, { stream: true })
+/**
+ * Reports JSON Schema draft 2020-12 violations in a tool's `input_schema
+ */
+function draft2020Violations(schema: unknown, rootPath: string): string[] {
+  const errors: string[] = []
+  const walk = (node: any, jsonPath: string): void => {
+    if (Array.isArray(node)) {
+      node.forEach((child, index) => walk(child, `${jsonPath}/${index}`))
+      return
     }
-
-    const streamJSONDataLine = streamData
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line.startsWith('data:'))
-      .pop()
-
-    const streamJSONString = streamJSONDataLine
-      ? streamJSONDataLine.slice('data:'.length).trim()
-      : streamData.trim()
-
-    return JSON.parse(streamJSONString)
-  } catch (error) {
-    console.error(error)
-    throw error
+    if (!node || typeof node !== 'object') {
+      return
+    }
+    if (typeof node.$schema === 'string' && !node.$schema.includes('2020-12')) {
+      errors.push(`${jsonPath}: non-2020-12 $schema "${node.$schema}"`)
+    }
+    if ('definitions' in node) {
+      errors.push(`${jsonPath}: draft-07 "definitions" (2020-12 uses "$defs")`)
+    }
+    if (typeof node.$ref === 'string' && node.$ref.startsWith('#/definitions/')) {
+      errors.push(`${jsonPath}: $ref into draft-07 "definitions"`)
+    }
+    if (Array.isArray(node.required) && new Set(node.required).size !== node.required.length) {
+      errors.push(`${jsonPath}: duplicate "required" entries [${node.required.join(', ')}]`)
+    }
+    if (
+      Array.isArray(node.type) &&
+      (node.type.length === 0 || new Set(node.type).size !== node.type.length)
+    ) {
+      errors.push(`${jsonPath}: invalid "type" array [${node.type.join(', ')}]`)
+    }
+    for (const keyword of ['allOf', 'anyOf', 'oneOf']) {
+      if (keyword in node && (!Array.isArray(node[keyword]) || node[keyword].length === 0)) {
+        errors.push(`${jsonPath}: empty "${keyword}"`)
+      }
+    }
+    for (const [key, value] of Object.entries(node)) {
+      walk(value, `${jsonPath}/${key}`)
+    }
   }
-}
-
-function extractJsonBlock(text: string): any {
-  const match = text.match(/```json\n([\s\S]*?)\n```/)
-  expect(match).toBeDefined()
-  return JSON.parse(match![1]!)
-}
-
-const getApiKey = async (
-  enableUpdate: boolean = false,
-  enableDelete: boolean = false,
-  globalFind: boolean = false,
-  globalUpdate: boolean = false,
-): Promise<string> => {
-  const doc = await payload.create({
-    collection: 'payload-mcp-api-keys',
-    data: {
-      enableAPIKey: true,
-      label: 'Test API Key',
-      posts: { create: true, delete: enableDelete, find: true, update: enableUpdate },
-      products: { find: true },
-      ...(globalFind || globalUpdate
-        ? { siteSettings: { find: globalFind, update: globalUpdate } }
-        : {}),
-      apiKey: randomUUID(),
-      user: userId,
-    },
-  })
-
-  return doc.apiKey as string
+  walk(schema, rootPath)
+  return errors
 }
 
 describe('@payloadcms/plugin-mcp', () => {
-  beforeAll(async () => {
-    const initialized = await initPayloadInt(dirname)
-    ;({ payload, restClient } = initialized)
-
-    const data = await restClient
-      .POST('/users/login', {
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      })
-      .then((res) => res.json())
-
-    // @ts-expect-error - data is not a valid property
-    token = data.token
-    // @ts-expect-error - data.user is a valid property
-    userId = data.user.id
-  })
-
-  afterAll(async () => {
-    await payload.destroy()
-  })
-
-  it('should ping', async () => {
+  it('should ping', async ({ mcp }) => {
     const apiKey = await getApiKey()
-    const response = await restClient.POST('/mcp', {
-      body: JSON.stringify({
-        id: 1,
-        jsonrpc: '2.0',
-        method: 'ping',
-        params: {},
-      }),
-      headers: {
-        Accept: 'application/json, text/event-stream',
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-    })
-
-    const json = await parseStreamResponse(response)
-    expect(json).toBeDefined()
-  })
-
-  describe('Create MCP Handler', () => {
-    it('should invoke onEvent callback when MCP requests are processed', async () => {
-      capturedMcpEvents.length = 0
-
-      const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-
-      // Events are emitted asynchronously after the response stream completes
-      await vi.waitFor(() => expect(capturedMcpEvents.length).toBeGreaterThan(0), {
-        timeout: 2000,
-        interval: 100,
-      })
-    })
-
-    it('should capture events for multiple sequential requests', async () => {
-      capturedMcpEvents.length = 0
-
-      const apiKey = await getApiKey()
-
-      // First request
-      await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'ping',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const eventsAfterFirst = capturedMcpEvents.length
-
-      // Second request
-      await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 2,
-          jsonrpc: '2.0',
-          method: 'tools/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
-
-      expect(capturedMcpEvents.length).toBeGreaterThan(eventsAfterFirst)
-    })
+    const pingResponse = await mcp.request({ apiKey, method: 'ping' })
+    expect(pingResponse).toBeDefined()
   })
 
   describe('API Keyed Access', () => {
@@ -205,8 +63,12 @@ describe('@payloadcms/plugin-mcp', () => {
           apiKey: randomUUID(),
           enableAPIKey: true,
           label: 'Test API Key',
-          posts: { create: true, find: true },
-          products: { find: true },
+          access: {
+            collections: {
+              posts: { create: true, find: true },
+              products: { find: false },
+            },
+          },
           user: userId,
         },
       })
@@ -216,18 +78,12 @@ describe('@payloadcms/plugin-mcp', () => {
       // @ts-expect-error - doc.user is a string | User
       expect(doc.user?.id).toBe(userId)
       expect(doc.label).toBe('Test API Key')
-      expect(doc.posts?.find).toBe(true)
-      expect(doc.posts?.create).toBe(true)
-      expect(doc['payload-mcp-tool']?.['diceRoll']).toBe(true)
-      expect(doc['payload-mcp-resource']?.['data']).toBe(true)
-      expect(doc['payload-mcp-resource']?.['dataByID']).toBe(true)
-      expect(doc['payload-mcp-prompt']?.['echo']).toBe(true)
-      expect(doc.products?.find).toBe(true)
-      expect(doc.products?.create).toBe(false)
-      expect(doc.products?.update).toBe(false)
-      expect(doc.products?.delete).toBe(false)
-      expect(doc.media?.find).toBe(false)
-      expect(doc.media?.update).toBe(false)
+      // @ts-expect-error - access is a JSON field
+      expect(doc.access?.collections?.posts?.find).toBe(true)
+      // @ts-expect-error - access is a JSON field
+      expect(doc.access?.collections?.posts?.create).toBe(true)
+      // @ts-expect-error - access is a JSON field
+      expect(doc.access?.collections?.products?.find).toBe(false)
       expect(typeof doc.apiKey).toBe('string')
       expect(doc.apiKey).toHaveLength(36)
       expect(doc.override).toBe('This field added by overrideApiKeyCollection')
@@ -235,23 +91,14 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should not allow GET /api/mcp', async () => {
       const apiKey = await getApiKey()
-      const data = await restClient
-        .GET(`/mcp`, {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-          },
-        })
-        .then((res) => res.json())
+      const response = await restClient.GET(`/mcp`, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      })
 
-      expect(data).toBeDefined()
-      // @ts-expect-error - data is a valid property
-      expect(data.jsonrpc).toBe('2.0')
-      // @ts-expect-error - data is a valid property
-      expect(data.error).toBeDefined()
-      // @ts-expect-error - data is a valid property
-      expect(data.error.code).toBe(-32000)
-      // @ts-expect-error - data is a valid property
-      expect(data.error.message).toBe('Method not allowed.')
+      // The MCP endpoint is registered as POST only; a GET should not succeed.
+      expect(response.ok).toBe(false)
     })
 
     it('should not allow POST /api/mcp with unauthorized API key', async () => {
@@ -276,246 +123,134 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('List', () => {
-    it('should list tools', async () => {
+    it('should list tools', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
+      const toolsResponse = await mcp.listTools({ apiKey })
+      expect(toolsResponse).toBeDefined()
+      expect(toolsResponse.id).toBe(1)
+      expect(toolsResponse.jsonrpc).toBe('2.0')
+      expect(toolsResponse.result).toBeDefined()
+      expect(toolsResponse.result.tools).toBeDefined()
+      expect(Array.isArray(toolsResponse.result.tools)).toBe(true)
+      expect(toolsResponse.result.tools.length).toBeGreaterThan(0)
 
-      const json = await parseStreamResponse(response)
-      expect(json).toBeDefined()
-      expect(json.id).toBe(1)
-      expect(json.jsonrpc).toBe('2.0')
-      expect(json.result).toBeDefined()
-      expect(json.result.tools).toBeDefined()
-      expect(json.result.tools).toHaveLength(6)
-      expect(json.result.tools[0].name).toBe('findProducts')
-      expect(json.result.tools[0].description).toContain(
+      const toolsByName: Record<string, any> = Object.fromEntries(
+        toolsResponse.result.tools.map((t: { name: string }) => [t.name, t]),
+      )
+
+      // findProducts: built-in find (no override) — uses default description
+      const findProducts = toolsByName['findProducts']
+      expect(findProducts).toBeDefined()
+      expect(findProducts.description).toContain(
         'Find documents in a collection by ID or where clause using Find or FindByID.',
       )
-      expect(json.result.tools[0].inputSchema).toBeDefined()
-      expect(json.result.tools[1].name).toBe('createPosts')
-      expect(json.result.tools[1].description).toContain(
-        'This is a Payload collection with Post documents.',
-      )
-      expect(json.result.tools[1].inputSchema).toBeDefined()
-      expect(json.result.tools[2].name).toBe('findPosts')
-      expect(json.result.tools[2].description).toContain(
-        'This is a Payload collection with Post documents.',
-      )
-      expect(json.result.tools[2].inputSchema).toBeDefined()
-      expect(json.result.tools[3].name).toBe('diceRoll')
-      expect(json.result.tools[3].description).toContain(
+
+      // createPosts: posts collection has its own description, no per-tool override
+      const createPosts = toolsByName['createPosts']
+      expect(createPosts).toBeDefined()
+      expect(createPosts.description).toContain('This is a Payload collection with Post documents.')
+
+      // findPosts: posts collection has a per-tool override on find
+      const findPosts = toolsByName['findPosts']
+      expect(findPosts).toBeDefined()
+      expect(findPosts.description).toContain('Find blog posts')
+
+      // diceRoll: custom top-level tool
+      const diceRoll = toolsByName['diceRoll']
+      expect(diceRoll).toBeDefined()
+      expect(diceRoll.description).toContain(
         'Rolls a virtual dice with a specified number of sides',
       )
-      expect(json.result.tools[3].inputSchema).toBeDefined()
 
-      // Input Schemas
-      expect(json.result.tools[0].inputSchema).toBeDefined()
-      expect(json.result.tools[0].inputSchema.required).not.toBeDefined()
-      expect(json.result.tools[0].inputSchema.type).toBe('object')
-      expect(json.result.tools[0].inputSchema.additionalProperties).toBe(false)
-      expect(json.result.tools[0].inputSchema.$schema).toBe(
-        'http://json-schema.org/draft-07/schema#',
-      )
-      expect(json.result.tools[0].inputSchema.properties).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.id).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.id.type).toHaveLength(2)
-      expect(json.result.tools[0].inputSchema.properties.id.type[0]).toBe('string')
-      expect(json.result.tools[0].inputSchema.properties.id.type[1]).toBe('number')
-      expect(json.result.tools[0].inputSchema.properties.id.description).toContain(
+      // Input Schemas — find tool (top-level metadata fields)
+      expect(findProducts.inputSchema).toBeDefined()
+      expect(findProducts.inputSchema.required).not.toBeDefined()
+      expect(findProducts.inputSchema.type).toBe('object')
+      expect(findProducts.inputSchema.properties).toBeDefined()
+      expect(findProducts.inputSchema.properties.id).toBeDefined()
+      expect(findProducts.inputSchema.properties.id.description).toContain(
         'Optional: specific document ID to retrieve. If not provided, returns all documents',
       )
-      expect(json.result.tools[0].inputSchema.properties.fallbackLocale).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.fallbackLocale.type).toBe('string')
-      expect(json.result.tools[0].inputSchema.properties.fallbackLocale.description).toContain(
-        'Optional: fallback locale code to use when requested locale is not available',
-      )
-      expect(json.result.tools[0].inputSchema.properties.limit).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.limit.type).toBe('integer')
-      expect(json.result.tools[0].inputSchema.properties.limit.minimum).toBe(1)
-      expect(json.result.tools[0].inputSchema.properties.limit.maximum).toBe(100)
-      expect(json.result.tools[0].inputSchema.properties.limit.default).toBe(10)
-      expect(json.result.tools[0].inputSchema.properties.limit.description).toContain(
-        'Maximum number of documents to return (default: 10, max: 100)',
-      )
-      expect(json.result.tools[0].inputSchema.properties.locale).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.locale.type).toBe('string')
-      expect(json.result.tools[0].inputSchema.properties.locale.description).toContain(
-        'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
-      )
-      expect(json.result.tools[0].inputSchema.properties.page).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.page.type).toBe('integer')
-      expect(json.result.tools[0].inputSchema.properties.page.minimum).toBe(1)
-      expect(json.result.tools[0].inputSchema.properties.page.default).toBe(1)
-      expect(json.result.tools[0].inputSchema.properties.page.description).toContain(
-        'Page number for pagination (default: 1)',
-      )
-      expect(json.result.tools[0].inputSchema.properties.sort).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.sort.type).toBe('string')
-      expect(json.result.tools[0].inputSchema.properties.sort.description).toContain(
-        'Field to sort by (e.g., "createdAt", "-updatedAt" for descending)',
-      )
-      expect(json.result.tools[0].inputSchema.properties.where).toBeDefined()
-      expect(json.result.tools[0].inputSchema.properties.where.type).toBe('string')
-      expect(json.result.tools[0].inputSchema.properties.where.description).toContain(
-        'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
-      )
+      expect(findProducts.inputSchema.properties.fallbackLocale).toBeDefined()
+      expect(findProducts.inputSchema.properties.fallbackLocale.type).toBe('string')
+      expect(findProducts.inputSchema.properties.limit).toBeDefined()
+      expect(findProducts.inputSchema.properties.limit.type).toBe('integer')
+      expect(findProducts.inputSchema.properties.limit.minimum).toBe(1)
+      expect(findProducts.inputSchema.properties.limit.maximum).toBe(100)
+      expect(findProducts.inputSchema.properties.limit.default).toBe(10)
+      expect(findProducts.inputSchema.properties.locale).toBeDefined()
+      expect(findProducts.inputSchema.properties.locale.type).toBe('string')
+      expect(findProducts.inputSchema.properties.page).toBeDefined()
+      expect(findProducts.inputSchema.properties.page.type).toBe('integer')
+      expect(findProducts.inputSchema.properties.page.minimum).toBe(1)
+      expect(findProducts.inputSchema.properties.page.default).toBe(1)
+      expect(findProducts.inputSchema.properties.sort).toBeDefined()
+      expect(findProducts.inputSchema.properties.sort.type).toBe('string')
+      expect(findProducts.inputSchema.properties.where).toBeDefined()
+      expect(findProducts.inputSchema.properties.where.type).toBe('string')
 
-      expect(json.result.tools[1].inputSchema).toBeDefined()
-      expect(json.result.tools[1].inputSchema.required).toBeDefined()
-      expect(json.result.tools[1].inputSchema.required).toHaveLength(1)
-      expect(json.result.tools[1].inputSchema.required[0]).toBe('title')
-      expect(json.result.tools[1].inputSchema.type).toBe('object')
-      expect(json.result.tools[1].inputSchema.additionalProperties).toBe(false)
-      expect(json.result.tools[1].inputSchema.$schema).toBe(
-        'http://json-schema.org/draft-07/schema#',
-      )
-      expect(json.result.tools[1].inputSchema.properties).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.title).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.title.type).toBe('string')
-      expect(json.result.tools[1].inputSchema.properties.title.description).toBe(
-        'The title of the post',
-      )
-      expect(json.result.tools[1].inputSchema.properties.content).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.content.type).toHaveLength(2)
-      expect(json.result.tools[1].inputSchema.properties.content.type[0]).toBe('string')
-      expect(json.result.tools[1].inputSchema.properties.content.type[1]).toBe('null')
-      expect(json.result.tools[1].inputSchema.properties.content.description).toBe(
-        'The content of the post',
-      )
-      expect(json.result.tools[1].inputSchema.properties.author).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.author.type).toHaveLength(2)
-      expect(['string', 'number']).toContain(
-        json.result.tools[1].inputSchema.properties.author.type[0],
-      )
-      expect(json.result.tools[1].inputSchema.properties.author.type[1]).toBe('null')
-      expect(json.result.tools[1].inputSchema.properties.author.description).toBe(
-        'The author of the post',
-      )
-      expect(json.result.tools[1].inputSchema.properties.draft).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.draft.type).toBe('boolean')
-      expect(json.result.tools[1].inputSchema.properties.draft.description).toBe(
-        'Whether to create the document as a draft',
-      )
-      expect(json.result.tools[1].inputSchema.properties.fallbackLocale).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.fallbackLocale.type).toBe('string')
-      expect(json.result.tools[1].inputSchema.properties.fallbackLocale.description).toBe(
-        'Optional: fallback locale code to use when requested locale is not available',
-      )
-      expect(json.result.tools[1].inputSchema.properties.locale).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.locale.type).toBe('string')
-      expect(json.result.tools[1].inputSchema.properties.locale.description).toBe(
-        'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
-      )
-      expect(json.result.tools[1].inputSchema.properties.select).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.select.type).toBe('string')
-      expect(json.result.tools[1].inputSchema.properties.select.description).toContain(
-        'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
-      )
+      // Create tool: `data` wraps the collection fields, metadata fields stay top-level
+      expect(createPosts.inputSchema).toBeDefined()
+      expect(createPosts.inputSchema.type).toBe('object')
+      expect(createPosts.inputSchema.properties).toBeDefined()
+      expect(createPosts.inputSchema.required).toBeDefined()
+      expect(createPosts.inputSchema.required).toContain('data')
 
-      expect(json.result.tools[2].inputSchema).toBeDefined()
-      expect(json.result.tools[2].inputSchema.required).not.toBeDefined()
-      expect(json.result.tools[2].inputSchema.type).toBe('object')
-      expect(json.result.tools[2].inputSchema.additionalProperties).toBe(false)
-      expect(json.result.tools[2].inputSchema.$schema).toBe(
-        'http://json-schema.org/draft-07/schema#',
-      )
-      expect(json.result.tools[2].inputSchema.properties).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.id).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.id.type).toHaveLength(2)
-      expect(json.result.tools[2].inputSchema.properties.id.type[0]).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.id.type[1]).toBe('number')
-      expect(json.result.tools[2].inputSchema.properties.id.description).toContain(
-        'Optional: specific document ID to retrieve. If not provided, returns all documents',
-      )
-      expect(json.result.tools[2].inputSchema.properties.fallbackLocale).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.fallbackLocale.type).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.fallbackLocale.description).toBe(
-        'Optional: fallback locale code to use when requested locale is not available',
-      )
-      expect(json.result.tools[2].inputSchema.properties.limit).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.limit.type).toBe('integer')
-      expect(json.result.tools[2].inputSchema.properties.limit.minimum).toBe(1)
-      expect(json.result.tools[2].inputSchema.properties.limit.maximum).toBe(100)
-      expect(json.result.tools[2].inputSchema.properties.limit.default).toBe(10)
-      expect(json.result.tools[2].inputSchema.properties.limit.description).toContain(
-        'Maximum number of documents to return (default: 10, max: 100)',
-      )
-      expect(json.result.tools[2].inputSchema.properties.locale).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.locale.type).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.locale.description).toContain(
-        'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
-      )
-      expect(json.result.tools[2].inputSchema.properties.page).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.page.type).toBe('integer')
-      expect(json.result.tools[2].inputSchema.properties.page.minimum).toBe(1)
-      expect(json.result.tools[2].inputSchema.properties.page.default).toBe(1)
-      expect(json.result.tools[2].inputSchema.properties.page.description).toContain(
-        'Page number for pagination (default: 1)',
-      )
-      expect(json.result.tools[2].inputSchema.properties.sort).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.sort.type).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.sort.description).toContain(
-        'Field to sort by (e.g., "createdAt", "-updatedAt" for descending)',
-      )
-      expect(json.result.tools[2].inputSchema.properties.where).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.where.type).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.where.description).toContain(
-        'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
-      )
-      expect(json.result.tools[2].inputSchema.properties.select).toBeDefined()
-      expect(json.result.tools[2].inputSchema.properties.select.type).toBe('string')
-      expect(json.result.tools[2].inputSchema.properties.select.description).toContain(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
-      )
+      // Collection fields live inside `data.properties`
+      expect(createPosts.inputSchema.properties.data).toBeDefined()
+      expect(createPosts.inputSchema.properties.data.type).toBe('object')
+      const createDataProps = createPosts.inputSchema.properties.data.properties
+      expect(createDataProps).toBeDefined()
+      expect(createDataProps.title).toBeDefined()
+      expect(createDataProps.content).toBeDefined()
+      expect(createDataProps.author).toBeDefined()
 
-      expect(json.result.tools[3].inputSchema).toBeDefined()
-      expect(json.result.tools[3].inputSchema.required).not.toBeDefined()
-      expect(json.result.tools[3].inputSchema.type).toBe('object')
-      expect(json.result.tools[3].inputSchema.additionalProperties).toBe(false)
-      expect(json.result.tools[3].inputSchema.$schema).toBe(
-        'http://json-schema.org/draft-07/schema#',
-      )
-      expect(json.result.tools[3].inputSchema.properties).toBeDefined()
-      expect(json.result.tools[3].inputSchema.properties.sides).toBeDefined()
-      expect(json.result.tools[3].inputSchema.properties.sides.type).toBe('integer')
-      expect(json.result.tools[3].inputSchema.properties.sides.minimum).toBe(2)
-      expect(json.result.tools[3].inputSchema.properties.sides.maximum).toBe(1000)
-      expect(json.result.tools[3].inputSchema.properties.sides.default).toBe(6)
-      expect(json.result.tools[3].inputSchema.properties.sides.description).toContain(
-        'Number of sides on the dice (default: 6)',
-      )
+      // Top-level metadata fields on create tool
+      expect(createPosts.inputSchema.properties.draft).toBeDefined()
+      expect(createPosts.inputSchema.properties.draft.type).toBe('boolean')
+      expect(createPosts.inputSchema.properties.fallbackLocale).toBeDefined()
+      expect(createPosts.inputSchema.properties.locale).toBeDefined()
+      expect(createPosts.inputSchema.properties.select).toBeDefined()
+
+      // Find tool: no `data` wrapper, just metadata fields
+      expect(findPosts.inputSchema).toBeDefined()
+      expect(findPosts.inputSchema.type).toBe('object')
+      expect(findPosts.inputSchema.properties).toBeDefined()
+      expect(findPosts.inputSchema.properties.id).toBeDefined()
+      expect(findPosts.inputSchema.properties.limit).toBeDefined()
+      expect(findPosts.inputSchema.properties.page).toBeDefined()
+      expect(findPosts.inputSchema.properties.select).toBeDefined()
+      expect(findPosts.inputSchema.properties.where).toBeDefined()
+
+      // Custom top-level tool schema
+      expect(diceRoll.inputSchema).toBeDefined()
+      expect(diceRoll.inputSchema.type).toBe('object')
+      expect(diceRoll.inputSchema.properties).toBeDefined()
+      expect(diceRoll.inputSchema.properties.sides).toBeDefined()
+      expect(diceRoll.inputSchema.properties.sides.minimum).toBe(2)
+      expect(diceRoll.inputSchema.properties.sides.maximum).toBe(1000)
     })
 
-    it('should list tools injected by other plugins via slug and options', async () => {
+    it('should expose only tool input schemas that are valid JSON Schema draft 2020-12', async ({
+      mcp,
+    }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
+      const toolsResponse = await mcp.listTools({ apiKey })
+      const tools = toolsResponse.result.tools as Array<{ inputSchema?: object; name: string }>
 
-      const json = await parseStreamResponse(response)
-      const toolNames = json.result.tools.map((t: { name: string }) => t.name)
+      // MCP clients validate each input_schema against the strict 2020-12 meta-schema. The SDK's own validator is
+      // lenient (it only compiles), so lint for what the meta-schema enforces.
+      const invalid = tools.flatMap((tool) =>
+        tool.inputSchema ? draft2020Violations(tool.inputSchema, tool.name) : [],
+      )
+
+      expect(invalid).toEqual([])
+    })
+
+    it('should list tools injected by other plugins via slug and options', async ({ mcp }) => {
+      const apiKey = await getApiKey()
+      const toolsResponse = await mcp.listTools({ apiKey })
+      const toolNames = toolsResponse.result.tools.map((t: { name: string }) => t.name)
 
       // Both plugins inject tools into mcp's options via slug discovery,
       // regardless of whether they are listed before or after mcp in the plugins array
@@ -523,106 +258,71 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(toolNames).toContain('injectedAfter')
     })
 
-    it('should list resources', async () => {
+    it('should list resources', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'resources/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
+      const resourcesResponse = await mcp.request({ apiKey, method: 'resources/list' })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.id).toBe(1)
-      expect(json.jsonrpc).toBe('2.0')
-      expect(json.result).toBeDefined()
-      expect(json.result.resources).toBeDefined()
-      expect(json.result.resources).toHaveLength(1)
-      expect(json.result.resources[0].name).toBe('data')
-      expect(json.result.resources[0].title).toBe('Data')
-      expect(json.result.resources[0].uri).toBe('data://app')
-      expect(json.result.resources[0].description).toBe(
+      expect(resourcesResponse).toBeDefined()
+      expect(resourcesResponse.id).toBe(1)
+      expect(resourcesResponse.jsonrpc).toBe('2.0')
+      expect(resourcesResponse.result).toBeDefined()
+      expect(resourcesResponse.result.resources).toBeDefined()
+      expect(resourcesResponse.result.resources).toHaveLength(1)
+      expect(resourcesResponse.result.resources[0].name).toBe('data')
+      expect(resourcesResponse.result.resources[0].title).toBe('Data')
+      expect(resourcesResponse.result.resources[0].uri).toBe('data://app')
+      expect(resourcesResponse.result.resources[0].description).toBe(
         'Data is a resource that contains special data.',
       )
-      expect(json.result.resources[0].mimeType).toBe('text/plain')
+      expect(resourcesResponse.result.resources[0].mimeType).toBe('text/plain')
     })
 
-    it('should list prompts', async () => {
+    it('should list prompts', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'prompts/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
+      const promptsResponse = await mcp.request({ apiKey, method: 'prompts/list' })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.id).toBe(1)
-      expect(json.jsonrpc).toBe('2.0')
-      expect(json.result).toBeDefined()
-      expect(json.result.prompts).toBeDefined()
-      expect(json.result.prompts).toHaveLength(1)
-      expect(json.result.prompts[0].name).toBe('echo')
-      expect(json.result.prompts[0].title).toBe('Echo Prompt')
-      expect(json.result.prompts[0].description).toBe('Creates a prompt to process a message')
-      expect(json.result.prompts[0].arguments).toBeDefined()
-      expect(json.result.prompts[0].arguments).toHaveLength(1)
-      expect(json.result.prompts[0].arguments[0].name).toBe('message')
-      expect(json.result.prompts[0].arguments[0].required).toBe(true)
+      expect(promptsResponse).toBeDefined()
+      expect(promptsResponse.id).toBe(1)
+      expect(promptsResponse.jsonrpc).toBe('2.0')
+      expect(promptsResponse.result).toBeDefined()
+      expect(promptsResponse.result.prompts).toBeDefined()
+      expect(promptsResponse.result.prompts).toHaveLength(1)
+      expect(promptsResponse.result.prompts[0].name).toBe('echo')
+      expect(promptsResponse.result.prompts[0].title).toBe('Echo Prompt')
+      expect(promptsResponse.result.prompts[0].description).toBe(
+        'Creates a prompt to process a message',
+      )
+      expect(promptsResponse.result.prompts[0].arguments).toBeDefined()
+      expect(promptsResponse.result.prompts[0].arguments).toHaveLength(1)
+      expect(promptsResponse.result.prompts[0].arguments[0].name).toBe('message')
+      expect(promptsResponse.result.prompts[0].arguments[0].required).toBe(true)
     })
 
-    it('should list globals', async () => {
-      const apiKey = await getApiKey(false, false, true, true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
+    it('should list globals', async ({ mcp }) => {
+      const apiKey = await getApiKey({ globalFind: true, globalUpdate: true })
+      const toolsResponse = await mcp.listTools({ apiKey })
 
-      const json = await parseStreamResponse(response)
+      expect(toolsResponse).toBeDefined()
+      expect(toolsResponse.result).toBeDefined()
+      expect(toolsResponse.result.tools).toBeDefined()
 
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.tools).toBeDefined()
-
-      const findGlobalTool = json.result.tools.find((t: any) => t.name === 'findSiteSettings')
+      // The global's description (from plugin config) overrides the built-in tool description
+      const findGlobalTool = toolsResponse.result.tools.find(
+        (t: any) => t.name === 'findSiteSettings',
+      )
       expect(findGlobalTool).toBeDefined()
-      expect(findGlobalTool.description).toContain('Payload global')
+      expect(findGlobalTool.description).toContain('Site-wide configuration settings.')
       expect(findGlobalTool.inputSchema.properties.select).toBeDefined()
       expect(findGlobalTool.inputSchema.properties.select.type).toBe('string')
       expect(findGlobalTool.inputSchema.properties.select.description).toContain(
         "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
       )
 
-      const updateGlobalTool = json.result.tools.find((t: any) => t.name === 'updateSiteSettings')
+      const updateGlobalTool = toolsResponse.result.tools.find(
+        (t: any) => t.name === 'updateSiteSettings',
+      )
       expect(updateGlobalTool).toBeDefined()
-      expect(updateGlobalTool.description).toContain('Payload global')
+      expect(updateGlobalTool.description).toContain('Site-wide configuration settings.')
       expect(updateGlobalTool.inputSchema.properties.select).toBeDefined()
       expect(updateGlobalTool.inputSchema.properties.select.type).toBe('string')
       expect(updateGlobalTool.inputSchema.properties.select.description).toContain(
@@ -630,25 +330,13 @@ describe('@payloadcms/plugin-mcp', () => {
       )
     })
 
-    it('should list updatePosts when API key permits update and include select schema', async () => {
-      const apiKey = await getApiKey(true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
+    it('should list updatePosts when API key permits update and include select schema', async ({
+      mcp,
+    }) => {
+      const apiKey = await getApiKey({ enableUpdate: true })
+      const toolsResponse = await mcp.listTools({ apiKey })
 
-      const json = await parseStreamResponse(response)
-
-      const updateToolSchema = json.result.tools.find((t: any) => t.name === 'updatePosts')
+      const updateToolSchema = toolsResponse.result.tools.find((t: any) => t.name === 'updatePosts')
       expect(updateToolSchema).toBeDefined()
       expect(updateToolSchema.inputSchema.properties.select).toBeDefined()
       expect(updateToolSchema.inputSchema.properties.select.type).toBe('string')
@@ -659,36 +347,28 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('Prompts', () => {
-    it('should get echo prompt', async () => {
+    it('should get echo prompt', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'prompts/get',
-          params: {
-            name: 'echo',
-            arguments: {
-              message: 'Hello, world!',
-            },
+      const promptResponse = await mcp.request({
+        apiKey,
+        method: 'prompts/get',
+        params: {
+          name: 'echo',
+          arguments: {
+            message: 'Hello, world!',
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.messages).toHaveLength(2)
-      expect(json.result.messages[0].content.type).toBe('text')
-      expect(json.result.messages[0].content.text).toContain('This prompt was sent: Hello, world!')
-      expect(json.result.messages[1].content.type).toBe('text')
-      expect(json.result.messages[1].content.text).toContain(
+      expect(promptResponse).toBeDefined()
+      expect(promptResponse.result).toBeDefined()
+      expect(promptResponse.result.messages).toHaveLength(2)
+      expect(promptResponse.result.messages[0].content.type).toBe('text')
+      expect(promptResponse.result.messages[0].content.text).toContain(
+        'This prompt was sent: Hello, world!',
+      )
+      expect(promptResponse.result.messages[1].content.type).toBe('text')
+      expect(promptResponse.result.messages[1].content.text).toContain(
         `This prompt was sent by userId: ${userId}`,
       )
 
@@ -710,32 +390,24 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('Resources', () => {
-    it('should read the data resource', async () => {
+    it('should read the data resource', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'resources/read',
-          params: {
-            uri: 'data://app',
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const resourceResponse = await mcp.request({
+        apiKey,
+        method: 'resources/read',
+        params: {
+          uri: 'data://app',
         },
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.contents).toHaveLength(2)
-      expect(json.result.contents[0].uri).toBe('data://app')
-      expect(json.result.contents[0].text).toContain('My special data.')
-      expect(json.result.contents[1].text).toContain(`This was requested by user: ${userId}`)
+      expect(resourceResponse).toBeDefined()
+      expect(resourceResponse.result).toBeDefined()
+      expect(resourceResponse.result.contents).toHaveLength(2)
+      expect(resourceResponse.result.contents[0].uri).toBe('data://app')
+      expect(resourceResponse.result.contents[0].text).toContain('My special data.')
+      expect(resourceResponse.result.contents[1].text).toContain(
+        `This was requested by user: ${userId}`,
+      )
 
       const { docs } = await payload.find({
         collection: 'returned-resources',
@@ -753,32 +425,24 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(returnedResource?.user?.id).toBe(userId)
     })
 
-    it('should read the dataByID resource', async () => {
+    it('should read the dataByID resource', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'resources/read',
-          params: {
-            uri: 'data://app/1',
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const resourceResponse = await mcp.request({
+        apiKey,
+        method: 'resources/read',
+        params: {
+          uri: 'data://app/1',
         },
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.contents).toHaveLength(2)
-      expect(json.result.contents[0].uri).toBe('data://app/1')
-      expect(json.result.contents[0].text).toContain('My special data for ID: 1')
-      expect(json.result.contents[1].text).toContain(`This was requested by user: ${userId}`)
+      expect(resourceResponse).toBeDefined()
+      expect(resourceResponse.result).toBeDefined()
+      expect(resourceResponse.result.contents).toHaveLength(2)
+      expect(resourceResponse.result.contents[0].uri).toBe('data://app/1')
+      expect(resourceResponse.result.contents[0].text).toContain('My special data for ID: 1')
+      expect(resourceResponse.result.contents[1].text).toContain(
+        `This was requested by user: ${userId}`,
+      )
 
       const { docs } = await payload.find({
         collection: 'returned-resources',
@@ -798,37 +462,24 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('Custom MCP Tools', () => {
-    it('should call diceRoll', async () => {
+    it('should call diceRoll', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'diceRoll',
-            arguments: {
-              sides: 6,
-            },
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          sides: 6,
         },
+        name: 'diceRoll',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toHaveLength(1)
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain('**Sides:** 6')
-      expect(json.result.content[0].text).toContain('**Result:**')
-      expect(json.result.content[0].text).toContain('🎲 You rolled a **')
-      expect(json.result.content[0].text).toContain('** on a 6-sided die!')
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toHaveLength(1)
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain('**Sides:** 6')
+      expect(callResponse.result.content[0].text).toContain('**Result:**')
+      expect(callResponse.result.content[0].text).toContain('🎲 You rolled a **')
+      expect(callResponse.result.content[0].text).toContain('** on a 6-sided die!')
 
       const { docs } = await payload.find({
         collection: 'rolls',
@@ -848,77 +499,79 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('Collections', () => {
-    it('should call createPosts', async () => {
+    it('createPosts data validation: ensure invalid data is rejected', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'createPosts',
-            arguments: {
-              content: 'Content for test post.',
-              title: 'Test Post',
-            },
+
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          data: {
+            content: 'test content',
+            title: 'test title',
+            badProperty: 'not in schema',
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
+        name: 'createPosts',
+      })
+      const validationRejected =
+        callResponse.error !== undefined ||
+        callResponse.result?.isError === true ||
+        (typeof callResponse.result?.content?.[0]?.text === 'string' &&
+          callResponse.result.content[0].text
+            .toLowerCase()
+            .includes('input validation error: invalid arguments for tool createposts'))
+      expect(validationRejected).toBe(true)
+    })
+
+    it('should call createPosts', async ({ mcp }) => {
+      const apiKey = await getApiKey()
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          data: {
+            content: 'Content for test post.',
+            title: 'Test Post',
+          },
+        },
+        name: 'createPosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toHaveLength(2)
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain(
-        'Resource created successfully in collection "posts"!',
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toHaveLength(2)
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain(
+        'Document created successfully in collection "posts"!',
       )
-      expect(json.result.content[0].text).toContain('Created resource:')
-      expect(json.result.content[0].text).toContain('```json')
-      expect(json.result.content[0].text).toContain('"title":"Test Post"')
-      expect(json.result.content[0].text).toContain('"content":"Content for test post."')
-      expect(json.result.content[1].type).toBe('text')
-      expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
+      expect(callResponse.result.content[0].text).toContain('Created document:')
+      expect(callResponse.result.content[0].text).toContain('```json')
+      expect(callResponse.result.content[0].text).toContain('"title":"Test Post"')
+      expect(callResponse.result.content[0].text).toContain('"content":"Content for test post."')
+      expect(callResponse.result.content[1].type).toBe('text')
+      expect(callResponse.result.content[1].text).toContain('Override MCP response for Posts!')
     })
 
-    it('should call createPosts with select to limit returned fields', async () => {
+    it('should call createPosts with select to limit returned fields', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'createPosts',
-            arguments: {
-              content: 'Content should be omitted',
-              select: '{"title": true}',
-              title: 'Select Create Post',
-            },
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          data: {
+            content: 'Content should be omitted',
+            title: 'Select Create Post',
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+          select: '{"title": true}',
         },
+        name: 'createPosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content[0].text).toContain('"title":"Select Create Post"')
-      expect(json.result.content[0].text).not.toContain('Content should be omitted')
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content[0].text).toContain('"title":"Select Create Post"')
+      expect(callResponse.result.content[0].text).not.toContain('Content should be omitted')
     })
 
-    it('should call findPosts', async () => {
+    it('should call findPosts', async ({ mcp }) => {
       await payload.create({
         collection: 'posts',
         data: {
@@ -928,43 +581,30 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'findPosts',
-            arguments: {
-              limit: 1,
-              page: 1,
-              where: '{"title": {"contains": "Test Post for Finding"}}',
-            },
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          limit: 1,
+          page: 1,
+          where: '{"title": {"contains": "Test Post for Finding"}}',
         },
+        name: 'findPosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toHaveLength(2)
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain('Collection: "posts"')
-      expect(json.result.content[0].text).toContain('Total: 1 documents')
-      expect(json.result.content[0].text).toContain('Page: 1 of 1')
-      expect(json.result.content[0].text).toContain('```json')
-      expect(json.result.content[0].text).toContain('"content":"Content for test post."')
-      expect(json.result.content[1].type).toBe('text')
-      expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toHaveLength(2)
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain('Collection: "posts"')
+      expect(callResponse.result.content[0].text).toContain('Total: 1 documents')
+      expect(callResponse.result.content[0].text).toContain('Page: 1 of 1')
+      expect(callResponse.result.content[0].text).toContain('```json')
+      expect(callResponse.result.content[0].text).toContain('"content":"Content for test post."')
+      expect(callResponse.result.content[1].type).toBe('text')
+      expect(callResponse.result.content[1].text).toContain('Override MCP response for Posts!')
     })
 
-    it('should call findPosts with select and return only requested fields', async () => {
+    it('should call findPosts with select and return only requested fields', async ({ mcp }) => {
       await payload.create({
         collection: 'posts',
         data: {
@@ -974,40 +614,27 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'findPosts',
-            arguments: {
-              limit: 1,
-              page: 1,
-              select: '{"title": true}',
-              where: '{"title": {"contains": "Select Test Post"}}',
-            },
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          limit: 1,
+          page: 1,
+          select: '{"title": true}',
+          where: '{"title": {"contains": "Select Test Post"}}',
         },
+        name: 'findPosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toHaveLength(2)
-      const responseText: string = json.result.content[0].text
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toHaveLength(2)
+      const responseText: string = callResponse.result.content[0].text
       expect(responseText).toContain('Collection: "posts"')
       expect(responseText).toContain('"title":"Select Test Post (MCP Hook Override)"')
       expect(responseText).not.toContain('"content": "Content that should be omitted"')
     })
 
-    it('should call updatePosts', async () => {
+    it('should call updatePosts', async ({ mcp }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -1016,44 +643,33 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const apiKey = await getApiKey(true, true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'updatePosts',
-            arguments: {
-              id: post.id,
-              content: 'Updated content for test post to update.',
-            },
+      const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: post.id,
+          data: {
+            content: 'Updated content for test post to update.',
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
+        name: 'updatePosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toHaveLength(2)
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain(
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toHaveLength(2)
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain(
         'Document updated successfully in collection "posts"!',
       )
-      expect(json.result.content[0].text).toContain('Updated document:')
-      expect(json.result.content[0].text).toContain('```json')
-      expect(json.result.content[0].text).toContain(
+      expect(callResponse.result.content[0].text).toContain('Updated document:')
+      expect(callResponse.result.content[0].text).toContain('```json')
+      expect(callResponse.result.content[0].text).toContain(
         '"content":"Updated content for test post to update."',
       )
     })
 
-    it('should call updatePosts with nullable union type field set to null', async () => {
+    it('should call updatePosts with nullable union type field set to null', async ({ mcp }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -1062,41 +678,30 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const apiKey = await getApiKey(true, true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'updatePosts',
-            arguments: {
-              id: post.id,
-              content: null,
-            },
+      const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: post.id,
+          data: {
+            content: null,
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
+        name: 'updatePosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain(
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain(
         'Document updated successfully in collection "posts"!',
       )
-      expect(json.result.content[0].text).toContain('"content":null')
+      expect(callResponse.result.content[0].text).toContain('"content":null')
 
       await payload.delete({ id: post.id, collection: 'posts' })
     })
 
-    it('should call updatePosts with relationship union type field', async () => {
+    it('should call updatePosts with relationship union type field', async ({ mcp }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -1104,43 +709,32 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const apiKey = await getApiKey(true, true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'updatePosts',
-            arguments: {
-              id: post.id,
-              author: userId,
-            },
+      const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: post.id,
+          data: {
+            author: userId,
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
+        name: 'updatePosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain(
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain(
         'Document updated successfully in collection "posts"!',
       )
 
-      const updatedDoc = extractJsonBlock(json.result.content[0].text)
+      const updatedDoc = getToolDoc(callResponse)
       expect(updatedDoc.author).toBe(userId)
 
       await payload.delete({ id: post.id, collection: 'posts' })
     })
 
-    it('should call updatePosts with select to limit returned fields', async () => {
+    it('should call updatePosts with select to limit returned fields', async ({ mcp }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -1149,40 +743,29 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const apiKey = await getApiKey(true, true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'updatePosts',
-            arguments: {
-              id: post.id,
-              content: 'Updated but should be omitted',
-              select: '{"title": true}',
-              title: 'Select Update Post Edited',
-            },
+      const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: post.id,
+          data: {
+            content: 'Updated but should be omitted',
+            title: 'Select Update Post Edited',
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+          select: '{"title": true}',
         },
+        name: 'updatePosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      const responseText: string = json.result.content[0].text
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      const responseText: string = callResponse.result.content[0].text
       expect(responseText).toContain('"title":"Select Update Post Edited"')
       expect(responseText).not.toContain('Updated but should be omitted')
       expect(responseText).not.toContain('"content":')
     })
 
-    it('should call deletePosts', async () => {
+    it('should call deletePosts', async ({ mcp }) => {
       const post = await payload.create({
         collection: 'posts',
         data: {
@@ -1191,86 +774,64 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const apiKey = await getApiKey(false, true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'deletePosts',
-            arguments: {
-              id: post.id,
-            },
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const apiKey = await getApiKey({ enableDelete: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: post.id,
         },
+        name: 'deletePosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toHaveLength(2)
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain(
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toHaveLength(2)
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain(
         'Document deleted successfully from collection "posts"!',
       )
-      expect(json.result.content[0].text).toContain('Deleted document:')
-      expect(json.result.content[0].text).toContain('```json')
-      expect(json.result.content[0].text).toContain('"content":"Content for test post to delete."')
+      expect(callResponse.result.content[0].text).toContain('Deleted document:')
+      expect(callResponse.result.content[0].text).toContain('```json')
+      expect(callResponse.result.content[0].text).toContain(
+        '"content":"Content for test post to delete."',
+      )
     })
 
-    it('should handle point fields with object format in createPosts', async () => {
+    it('should handle point fields with object format in createPosts', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'createPosts',
-            arguments: {
-              content: 'Testing point field transformation',
-              location: {
-                latitude: 40.7128,
-                longitude: -74.006,
-              },
-              title: 'Post with Location',
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          data: {
+            content: 'Testing point field transformation',
+            location: {
+              latitude: 40.7128,
+              longitude: -74.006,
             },
+            title: 'Post with Location',
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
+        name: 'createPosts',
       })
 
-      const json = await parseStreamResponse(response)
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toHaveLength(2)
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain('Document created successfully')
 
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toHaveLength(2)
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain('Resource created successfully')
-
-      const createdDoc = extractJsonBlock(json.result.content[0].text)
+      const createdDoc = getToolDoc(callResponse)
 
       expect(createdDoc.location).toEqual([-74.006, 40.7128])
 
-      expect(json.result.content[1].type).toBe('text')
-      expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
+      expect(callResponse.result.content[1].type).toBe('text')
+      expect(callResponse.result.content[1].text).toContain('Override MCP response for Posts!')
 
       await payload.delete({ id: createdDoc.id, collection: 'posts' })
     })
 
-    it('should handle point fields with object format in updatePosts', async () => {
-      const apiKey = await getApiKey(true)
+    it('should handle point fields with object format in updatePosts', async ({ mcp }) => {
+      const apiKey = await getApiKey({ enableUpdate: true })
 
       const createdPost = await payload.create({
         collection: 'posts',
@@ -1280,43 +841,32 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'updatePosts',
-            arguments: {
-              id: createdPost.id,
-              location: {
-                latitude: 51.5074,
-                longitude: -0.1278,
-              },
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: createdPost.id,
+          data: {
+            location: {
+              latitude: 51.5074,
+              longitude: -0.1278,
             },
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
+        name: 'updatePosts',
       })
 
-      const json = await parseStreamResponse(response)
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toHaveLength(2)
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain('Document updated successfully')
 
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toHaveLength(2)
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain('Document updated successfully')
-
-      const updatedDoc = extractJsonBlock(json.result.content[0].text)
+      const updatedDoc = getToolDoc(callResponse)
 
       expect(updatedDoc.location).toEqual([-0.1278, 51.5074])
 
-      expect(json.result.content[1].type).toBe('text')
-      expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
+      expect(callResponse.result.content[1].type).toBe('text')
+      expect(callResponse.result.content[1].text).toContain('Override MCP response for Posts!')
 
       await payload.delete({ id: createdPost.id, collection: 'posts' })
     })
@@ -1331,9 +881,13 @@ describe('@payloadcms/plugin-mcp', () => {
         data: {
           enableAPIKey: true,
           label: 'Pages API Key',
-          pages: { create: true, find: true, update: enableUpdate, delete: true },
-          posts: { create: false, find: false },
-          products: { find: false },
+          access: {
+            collections: {
+              pages: { create: true, delete: true, find: true, update: enableUpdate },
+              posts: { create: false, find: false },
+              products: { find: false },
+            },
+          },
           apiKey: randomUUID(),
           user: userId,
         },
@@ -1341,93 +895,71 @@ describe('@payloadcms/plugin-mcp', () => {
       return doc.apiKey as string
     }
 
-    it('should create a page with a block', async () => {
+    it('should create a page with a block', async ({ mcp }) => {
       const apiKey = await getPagesApiKey()
 
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'createPages',
-            arguments: {
-              title: 'Hero Page',
-              layout: [
-                {
-                  blockType: 'hero',
-                  heading: 'Welcome to our site',
-                  subheading: 'Discover amazing things',
-                },
-              ],
-            },
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          data: {
+            title: 'Hero Page',
+            layout: [
+              {
+                blockType: 'hero',
+                heading: 'Welcome to our site',
+                subheading: 'Discover amazing things',
+              },
+            ],
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
+        name: 'createPages',
       })
 
-      const json = await parseStreamResponse(response)
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.isError).toBeFalsy()
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain('"title":"Hero Page"')
+      expect(callResponse.result.content[0].text).toContain('"blockType":"hero"')
+      expect(callResponse.result.content[0].text).toContain('"heading":"Welcome to our site"')
 
-      expect(json.result).toBeDefined()
-      expect(json.result.isError).toBeFalsy()
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain('"title":"Hero Page"')
-      expect(json.result.content[0].text).toContain('"blockType":"hero"')
-      expect(json.result.content[0].text).toContain('"heading":"Welcome to our site"')
-
-      createdPageIds.push(extractJsonBlock(json.result.content[0].text).id)
+      createdPageIds.push(getToolDoc(callResponse).id)
     })
 
-    it('should create a page with multiple block types', async () => {
+    it('should create a page with multiple block types', async ({ mcp }) => {
       const apiKey = await getPagesApiKey()
 
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'createPages',
-            arguments: {
-              title: 'Multi-block Page',
-              layout: [
-                {
-                  blockType: 'hero',
-                  heading: 'Page Hero',
-                  subheading: 'Hero subtitle',
-                },
-                {
-                  blockType: 'textContent',
-                  body: 'This is the body text.',
-                },
-              ],
-            },
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          data: {
+            title: 'Multi-block Page',
+            layout: [
+              {
+                blockType: 'hero',
+                heading: 'Page Hero',
+                subheading: 'Hero subtitle',
+              },
+              {
+                blockType: 'textContent',
+                body: 'This is the body text.',
+              },
+            ],
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
+        name: 'createPages',
       })
 
-      const json = await parseStreamResponse(response)
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.isError).toBeFalsy()
+      expect(callResponse.result.content[0].text).toContain('"blockType":"hero"')
+      expect(callResponse.result.content[0].text).toContain('"blockType":"textContent"')
+      expect(callResponse.result.content[0].text).toContain('"heading":"Page Hero"')
+      expect(callResponse.result.content[0].text).toContain('"body":"This is the body text."')
 
-      expect(json.result).toBeDefined()
-      expect(json.result.isError).toBeFalsy()
-      expect(json.result.content[0].text).toContain('"blockType":"hero"')
-      expect(json.result.content[0].text).toContain('"blockType":"textContent"')
-      expect(json.result.content[0].text).toContain('"heading":"Page Hero"')
-      expect(json.result.content[0].text).toContain('"body":"This is the body text."')
-
-      createdPageIds.push(extractJsonBlock(json.result.content[0].text).id)
+      createdPageIds.push(getToolDoc(callResponse).id)
     })
 
-    it('should update a page layout that contains blocks', async () => {
+    it('should update a page layout that contains blocks', async ({ mcp }) => {
       const page = await payload.create({
         collection: 'pages',
         data: {
@@ -1440,43 +972,32 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const apiKey = await getPagesApiKey(true)
 
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'updatePages',
-            arguments: {
-              id: page.id,
-              layout: [
-                {
-                  blockType: 'hero',
-                  heading: 'Updated Hero Heading',
-                },
-                {
-                  blockType: 'textContent',
-                  body: 'Updated body text.',
-                },
-              ],
-            },
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: page.id,
+          data: {
+            layout: [
+              {
+                blockType: 'hero',
+                heading: 'Updated Hero Heading',
+              },
+              {
+                blockType: 'textContent',
+                body: 'Updated body text.',
+              },
+            ],
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
+        name: 'updatePages',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json.result).toBeDefined()
-      expect(json.result.isError).toBeFalsy()
-      expect(json.result.content[0].text).toContain('"blockType":"hero"')
-      expect(json.result.content[0].text).toContain('"heading":"Updated Hero Heading"')
-      expect(json.result.content[0].text).toContain('"blockType":"textContent"')
-      expect(json.result.content[0].text).toContain('"body":"Updated body text."')
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.isError).toBeFalsy()
+      expect(callResponse.result.content[0].text).toContain('"blockType":"hero"')
+      expect(callResponse.result.content[0].text).toContain('"heading":"Updated Hero Heading"')
+      expect(callResponse.result.content[0].text).toContain('"blockType":"textContent"')
+      expect(callResponse.result.content[0].text).toContain('"body":"Updated body text."')
 
       const updatedPage = await payload.findByID({
         collection: 'pages',
@@ -1490,132 +1011,77 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('Virtual Fields', () => {
-    it('should not include virtual fields in createPosts tool schema', async () => {
-      const apiKey = await getApiKey(true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
+    it('should not include virtual fields in createPosts tool schema', async ({ mcp }) => {
+      const apiKey = await getApiKey({ enableUpdate: true })
+      const toolsResponse = await mcp.listTools({ apiKey })
 
-      const json = await parseStreamResponse(response)
-
-      const createTool = json.result.tools.find((t: any) => t.name === 'createPosts')
+      const createTool = toolsResponse.result?.tools?.find((t) => t.name === 'createPosts')
       expect(createTool).toBeDefined()
-      expect(createTool.inputSchema.properties.computedTitle).toBeUndefined()
+      expect(createTool?.inputSchema.properties.data).toBeDefined()
+      expect(createTool?.inputSchema.properties.data.properties.computedTitle).toBeUndefined()
     })
 
-    it('should not include virtual fields in updatePosts tool schema', async () => {
-      const apiKey = await getApiKey(true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
+    it('should not include virtual fields in updatePosts tool schema', async ({ mcp }) => {
+      const apiKey = await getApiKey({ enableUpdate: true })
+      const toolsResponse = await mcp.listTools({ apiKey })
 
-      const json = await parseStreamResponse(response)
-
-      const updateTool = json.result.tools.find((t: any) => t.name === 'updatePosts')
+      const updateTool = toolsResponse.result?.tools?.find((t) => t.name === 'updatePosts')
       expect(updateTool).toBeDefined()
-      expect(updateTool.inputSchema.properties.computedTitle).toBeUndefined()
+      expect(updateTool?.inputSchema.properties.data).toBeDefined()
+      expect(updateTool?.inputSchema.properties.data.properties.computedTitle).toBeUndefined()
     })
 
-    it('should ignore virtual fields when creating a post via MCP', async () => {
+    it('should ignore virtual fields when creating a post via MCP', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'createPosts',
-            arguments: {
-              title: 'Virtual Field Create Test',
-              content: 'Testing virtual field exclusion on create',
-            },
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          data: {
+            title: 'Virtual Field Create Test',
+            content: 'Testing virtual field exclusion on create',
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
+        name: 'createPosts',
       })
 
-      const json = await parseStreamResponse(response)
+      const text = getToolText(callResponse)
+      expect(text).toContain('Document created successfully in collection "posts"!')
+      expect(text).toContain('"title":"Virtual Field Create Test"')
+      expect(text).not.toContain('"computedTitle"')
 
-      expect(json.result).toBeDefined()
-      expect(json.result.content[0].text).toContain(
-        'Resource created successfully in collection "posts"!',
-      )
-      expect(json.result.content[0].text).toContain('"title":"Virtual Field Create Test"')
-      expect(json.result.content[0].text).not.toContain('"computedTitle"')
-
-      // Clean up
-      const createdId = JSON.parse(
-        json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)?.[1] || '{}',
-      ).id
+      const { id: createdId } = getToolDoc<{ id: string }>(callResponse)
       if (createdId) {
         await payload.delete({ id: createdId, collection: 'posts' })
       }
     })
 
-    it('should ignore virtual fields when updating a post via MCP', async () => {
+    it('should ignore virtual fields when updating a post via MCP', async ({ mcp }) => {
       const post = await payload.create({
         collection: 'posts',
         data: { title: 'Virtual Field Update Test' },
       })
 
-      const apiKey = await getApiKey(true, false)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'updatePosts',
-            arguments: {
-              id: post.id,
-              title: 'Virtual Field Updated Title',
-            },
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const apiKey = await getApiKey({ enableUpdate: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: post.id,
+          data: { title: 'Virtual Field Updated Title' },
         },
+        name: 'updatePosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json.result).toBeDefined()
-      expect(json.result.content[0].text).toContain('Document updated successfully')
-      expect(json.result.content[0].text).toContain('"title":"Virtual Field Updated Title"')
-      expect(json.result.content[0].text).not.toContain('"computedTitle"')
+      const text = getToolText(callResponse)
+      expect(text).toContain('Document updated successfully')
+      expect(text).toContain('"title":"Virtual Field Updated Title"')
+      expect(text).not.toContain('"computedTitle"')
 
       await payload.delete({ id: post.id, collection: 'posts' })
     })
   })
 
   describe('payloadAPI context', () => {
-    it('should call operations with the payloadAPI context as MCP', async () => {
+    it('should call operations with the payloadAPI context as MCP', async ({ mcp }) => {
       await payload.create({
         collection: 'posts',
         data: {
@@ -1625,68 +1091,38 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'findPosts',
-            arguments: {
-              limit: 1,
-              page: 1,
-              where: '{"title": {"contains": "Test Post for Finding"}}',
-            },
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          limit: 1,
+          page: 1,
+          where: '{"title": {"contains": "Test Post for Finding"}}',
         },
+        name: 'findPosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toHaveLength(2)
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain(
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toHaveLength(2)
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain(
         '"title":"Test Post for Finding (MCP Hook Override)"',
       )
     })
 
-    it('should find site-settings global', async () => {
-      const apiKey = await getApiKey(false, false, true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'findSiteSettings',
-            arguments: {},
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
+    it('should find site-settings global', async ({ mcp }) => {
+      const apiKey = await getApiKey({ globalFind: true })
+      const callResponse = await mcp.callTool({ apiKey, name: 'findSiteSettings' })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toBeDefined()
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain('Global "site-settings"')
-      expect(json.result.content[0].text).toContain('```json')
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toBeDefined()
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain('Global "site-settings"')
+      expect(callResponse.result.content[0].text).toContain('```json')
     })
 
-    it('should find site-settings global with select', async () => {
+    it('should find site-settings global with select', async ({ mcp }) => {
       await payload.updateGlobal({
         slug: 'site-settings',
         data: {
@@ -1697,102 +1133,69 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const apiKey = await getApiKey(false, false, true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'findSiteSettings',
-            arguments: {
-              select: '{"siteName": true}',
-            },
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const apiKey = await getApiKey({ globalFind: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          select: '{"siteName": true}',
         },
+        name: 'findSiteSettings',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toBeDefined()
-      expect(json.result.content[0].type).toBe('text')
-      const responseText: string = json.result.content[0].text
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toBeDefined()
+      expect(callResponse.result.content[0].type).toBe('text')
+      const responseText: string = callResponse.result.content[0].text
       expect(responseText).toContain('"siteName":"MCP Site"')
       expect(responseText).not.toContain('siteDescription')
       expect(responseText).not.toContain('contactEmail')
       expect(responseText).not.toContain('maintenanceMode')
     })
 
-    it('should update site-settings global', async () => {
-      const apiKey = await getApiKey(false, false, true, true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'updateSiteSettings',
-            arguments: {
-              maintenanceMode: false,
-              siteDescription: 'A test site for MCP global operations',
-              siteName: 'MCP Test Site',
-            },
+    it('should update site-settings global', async ({ mcp }) => {
+      const apiKey = await getApiKey({ globalFind: true, globalUpdate: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          data: {
+            maintenanceMode: false,
+            siteDescription: 'A test site for MCP global operations',
+            siteName: 'MCP Test Site',
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
         },
+        name: 'updateSiteSettings',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toBeDefined()
-      expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain('Global "site-settings" updated successfully')
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toBeDefined()
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain(
+        'Global "site-settings" updated successfully',
+      )
     })
 
-    it('should update site-settings global with select', async () => {
-      const apiKey = await getApiKey(false, false, true, true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'updateSiteSettings',
-            arguments: {
-              maintenanceMode: false,
-              select: '{"siteName": true}',
-              siteDescription: 'Should not appear',
-              siteName: 'MCP Test Site Select',
-            },
+    it('should update site-settings global with select', async ({ mcp }) => {
+      const apiKey = await getApiKey({ globalFind: true, globalUpdate: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          data: {
+            maintenanceMode: false,
+            siteDescription: 'Should not appear',
+            siteName: 'MCP Test Site Select',
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+          select: '{"siteName": true}',
         },
+        name: 'updateSiteSettings',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toBeDefined()
-      expect(json.result.content[0].type).toBe('text')
-      const responseText: string = json.result.content[0].text
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content).toBeDefined()
+      expect(callResponse.result.content[0].type).toBe('text')
+      const responseText: string = callResponse.result.content[0].text
       expect(responseText).toContain('"siteName":"MCP Test Site Select"')
       expect(responseText).not.toContain('siteDescription')
       expect(responseText).not.toContain('maintenanceMode')
@@ -1810,7 +1213,9 @@ describe('@payloadcms/plugin-mcp', () => {
       createdIDs.length = 0
     })
 
-    it('should return minified JSON without newlines or indentation in resource responses', async () => {
+    it('should return minified JSON without newlines or indentation in resource responses', async ({
+      mcp,
+    }) => {
       const doc = await payload.create({
         collection: 'posts',
         data: {
@@ -1822,30 +1227,17 @@ describe('@payloadcms/plugin-mcp', () => {
       createdIDs.push(doc.id)
 
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          Accept: 'application/json, text/event-stream',
-          'Content-Type': 'application/json',
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          limit: 1,
+          page: 1,
+          where: '{"title": {"equals": "Minified JSON Test"}}',
         },
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'findPosts',
-            arguments: {
-              limit: 1,
-              page: 1,
-              where: '{"title": {"equals": "Minified JSON Test"}}',
-            },
-          },
-        }),
+        name: 'findPosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      const responseText: string = json.result.content[0].text
+      const responseText: string = callResponse.result.content[0].text
       const jsonBlocks = responseText.match(/```json\n[\s\S]*?```/g)
 
       expect(jsonBlocks).toBeTruthy()
@@ -1858,28 +1250,11 @@ describe('@payloadcms/plugin-mcp', () => {
       }
     })
 
-    it('should return minified JSON in global responses', async () => {
-      const apiKey = await getApiKey(false, false, true)
-      const response = await restClient.POST('/mcp', {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          Accept: 'application/json, text/event-stream',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'findSiteSettings',
-            arguments: {},
-          },
-        }),
-      })
+    it('should return minified JSON in global responses', async ({ mcp }) => {
+      const apiKey = await getApiKey({ globalFind: true })
+      const callResponse = await mcp.callTool({ apiKey, name: 'findSiteSettings' })
 
-      const json = await parseStreamResponse(response)
-
-      const responseText: string = json.result.content[0].text
+      const responseText: string = callResponse.result.content[0].text
       const jsonBlocks = responseText.match(/```json\n[\s\S]*?```/g)
 
       expect(jsonBlocks).toBeTruthy()
@@ -1890,7 +1265,7 @@ describe('@payloadcms/plugin-mcp', () => {
       }
     })
 
-    it('should return minified JSON in findByID resource responses', async () => {
+    it('should return minified JSON in findByID resource responses', async ({ mcp }) => {
       const doc = await payload.create({
         collection: 'posts',
         data: {
@@ -1902,28 +1277,15 @@ describe('@payloadcms/plugin-mcp', () => {
       createdIDs.push(doc.id)
 
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          Accept: 'application/json, text/event-stream',
-          'Content-Type': 'application/json',
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: doc.id,
         },
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'findPosts',
-            arguments: {
-              id: doc.id,
-            },
-          },
-        }),
+        name: 'findPosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      const responseText: string = json.result.content[0].text
+      const responseText: string = callResponse.result.content[0].text
       // findByID response format: `Resource from collection "posts":\n${JSON.stringify(doc)}`
       // (no fenced code block — extract the JSON from the second line)
       const jsonPart = responseText.split('\n').slice(1).join('\n')
@@ -1936,28 +1298,14 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('Localization', () => {
-    it('should include locale parameters in tool schemas', async () => {
-      const apiKey = await getApiKey(true, true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/list',
-          params: {},
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      })
+    it('should include locale parameters in tool schemas', async ({ mcp }) => {
+      const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
+      const toolsResponse = await mcp.listTools({ apiKey })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json.result.tools).toBeDefined()
+      expect(toolsResponse.result.tools).toBeDefined()
 
       // Check createPosts has locale parameters
-      const createTool = json.result.tools.find((t: any) => t.name === 'createPosts')
+      const createTool = toolsResponse.result.tools.find((t: any) => t.name === 'createPosts')
       expect(createTool).toBeDefined()
       expect(createTool.inputSchema.properties.locale).toBeDefined()
       expect(createTool.inputSchema.properties.locale.type).toBe('string')
@@ -1965,56 +1313,47 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(createTool.inputSchema.properties.fallbackLocale).toBeDefined()
 
       // Check updatePosts has locale parameters
-      const updateTool = json.result.tools.find((t: any) => t.name === 'updatePosts')
+      const updateTool = toolsResponse.result.tools.find((t: any) => t.name === 'updatePosts')
       expect(updateTool).toBeDefined()
       expect(updateTool.inputSchema.properties.locale).toBeDefined()
       expect(updateTool.inputSchema.properties.fallbackLocale).toBeDefined()
 
       // Check findPosts has locale parameters
-      const findTool = json.result.tools.find((t: any) => t.name === 'findPosts')
+      const findTool = toolsResponse.result.tools.find((t: any) => t.name === 'findPosts')
       expect(findTool).toBeDefined()
       expect(findTool.inputSchema.properties.locale).toBeDefined()
       expect(findTool.inputSchema.properties.fallbackLocale).toBeDefined()
 
       // Check deletePosts has locale parameters
-      const deleteTool = json.result.tools.find((t: any) => t.name === 'deletePosts')
+      const deleteTool = toolsResponse.result.tools.find((t: any) => t.name === 'deletePosts')
       expect(deleteTool).toBeDefined()
       expect(deleteTool.inputSchema.properties.locale).toBeDefined()
       expect(deleteTool.inputSchema.properties.fallbackLocale).toBeDefined()
     })
 
-    it('should create post with specific locale', async () => {
+    it('should create post with specific locale', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'createPosts',
-            arguments: {
-              content: 'This is my first post in English',
-              locale: 'en',
-              title: 'Hello World',
-            },
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          data: {
+            content: 'This is my first post in English',
+            title: 'Hello World',
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+          locale: 'en',
         },
+        name: 'createPosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json.result).toBeDefined()
-      expect(json.result.content[0].text).toContain('Resource created successfully')
-      expect(json.result.content[0].text).toContain('"title":"Hello World"')
-      expect(json.result.content[0].text).toContain('"content":"This is my first post in English"')
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content[0].text).toContain('Document created successfully')
+      expect(callResponse.result.content[0].text).toContain('"title":"Hello World"')
+      expect(callResponse.result.content[0].text).toContain(
+        '"content":"This is my first post in English"',
+      )
     })
 
-    it('should update post to add translation', async () => {
+    it('should update post to add translation', async ({ mcp }) => {
       // First create a post in English
       const englishPost = await payload.create({
         collection: 'posts',
@@ -2025,38 +1364,27 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       // Update with Spanish translation via MCP
-      const apiKey = await getApiKey(true)
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'updatePosts',
-            arguments: {
-              id: englishPost.id,
-              content: 'Contenido Español',
-              locale: 'es',
-              title: 'Título Español',
-            },
+      const apiKey = await getApiKey({ enableUpdate: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: englishPost.id,
+          data: {
+            content: 'Contenido Español',
+            title: 'Título Español',
           },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+          locale: 'es',
         },
+        name: 'updatePosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json.result).toBeDefined()
-      expect(json.result.content[0].text).toContain('Document updated successfully')
-      expect(json.result.content[0].text).toContain('"title":"Título Español"')
-      expect(json.result.content[0].text).toContain('"content":"Contenido Español"')
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content[0].text).toContain('Document updated successfully')
+      expect(callResponse.result.content[0].text).toContain('"title":"Título Español"')
+      expect(callResponse.result.content[0].text).toContain('"content":"Contenido Español"')
     })
 
-    it('should find post in specific locale', async () => {
+    it('should find post in specific locale', async ({ mcp }) => {
       // Create a post with English and Spanish translations
       const post = await payload.create({
         collection: 'posts',
@@ -2078,36 +1406,23 @@ describe('@payloadcms/plugin-mcp', () => {
 
       // Find in Spanish via MCP
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'findPosts',
-            arguments: {
-              id: post.id,
-              locale: 'es',
-            },
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: post.id,
+          locale: 'es',
         },
+        name: 'findPosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json.result).toBeDefined()
-      expect(json.result.content[0].text).toContain(
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content[0].text).toContain(
         '"title":"Publicación Española (MCP Hook Override)"',
       )
-      expect(json.result.content[0].text).toContain('"content":"Contenido Español"')
+      expect(callResponse.result.content[0].text).toContain('"content":"Contenido Español"')
     })
 
-    it('should find post with locale "all"', async () => {
+    it('should find post with locale "all"', async ({ mcp }) => {
       // Create a post with multiple translations
       const post = await payload.create({
         collection: 'posts',
@@ -2139,30 +1454,17 @@ describe('@payloadcms/plugin-mcp', () => {
 
       // Find with locale: all via MCP
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'findPosts',
-            arguments: {
-              id: post.id,
-              locale: 'all',
-            },
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          id: post.id,
+          locale: 'all',
         },
+        name: 'findPosts',
       })
 
-      const json = await parseStreamResponse(response)
-
-      expect(json.result).toBeDefined()
-      const responseText = json.result.content[0].text
+      expect(callResponse.result).toBeDefined()
+      const responseText = callResponse.result.content[0].text
 
       // Should contain locale objects with all translations
       expect(responseText).toContain('"en":')
@@ -2173,7 +1475,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(responseText).toContain('Titre Français (MCP Hook Override)')
     })
 
-    it('should use fallback locale when translation does not exist', async () => {
+    it('should use fallback locale when translation does not exist', async ({ mcp }) => {
       // Create a post only in English with explicit content
       const post = await payload.create({
         collection: 'posts',
@@ -2185,27 +1487,14 @@ describe('@payloadcms/plugin-mcp', () => {
 
       // Try to find in French (which doesn't exist)
       const apiKey = await getApiKey()
-      const response = await restClient.POST('/mcp', {
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'tools/call',
-          params: {
-            name: 'findPosts',
-            arguments: {
-              id: post.id,
-              locale: 'fr',
-            },
-          },
-        }),
-        headers: {
-          Accept: 'application/json, text/event-stream',
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
+      const json = await mcp.callTool({
+        apiKey,
+        args: {
+          id: post.id,
+          locale: 'fr',
         },
+        name: 'findPosts',
       })
-
-      const json = await parseStreamResponse(response)
 
       expect(json).toBeDefined()
       expect(json.result).toBeDefined()
@@ -2228,11 +1517,15 @@ describe('@payloadcms/plugin-mcp', () => {
         data: {
           enableAPIKey: true,
           label: 'Field Types API Key',
-          fieldTypes: {
-            create: true,
-            find: true,
-            update: enableUpdate,
-            delete: enableDelete,
+          access: {
+            collections: {
+              'field-types': {
+                create: true,
+                delete: enableDelete,
+                find: true,
+                update: enableUpdate,
+              },
+            },
           },
           apiKey: randomUUID(),
           user: userId,
@@ -2242,51 +1535,27 @@ describe('@payloadcms/plugin-mcp', () => {
     }
 
     describe('Schema validation', () => {
-      it('should not include ui field in create tool schema', async () => {
+      it('should not include ui field in create tool schema', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey()
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/list',
-            params: {},
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        })
+        const toolsResponse = await mcp.listTools({ apiKey })
 
-        const json = await parseStreamResponse(response)
-
-        expect(json.result.tools).toBeDefined()
-        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        expect(toolsResponse.result.tools).toBeDefined()
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
         expect(createTool).toBeDefined()
 
-        const inputProps = createTool.inputSchema.properties
+        const inputProps = createTool.inputSchema.properties.data.properties
         expect(inputProps).not.toHaveProperty('uiField')
       })
 
-      it('should include group field as nested object in create tool schema', async () => {
+      it('should include group field as nested object in create tool schema', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey()
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/list',
-            params: {},
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        const json = await parseStreamResponse(response)
-        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const toolsResponse = await mcp.listTools({ apiKey })
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.groupField).toBeDefined()
         expect(inputProps.groupField.type).toBe('object')
@@ -2295,75 +1564,48 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(inputProps.groupField.properties.groupNumber).toBeDefined()
       })
 
-      it('should include collapsible children as top-level fields in create tool schema', async () => {
+      it('should include collapsible children as top-level fields in create tool schema', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey()
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/list',
-            params: {},
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        const json = await parseStreamResponse(response)
-        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const toolsResponse = await mcp.listTools({ apiKey })
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         // Children of collapsible appear at the top level, not under a `collapsible` key
         expect(inputProps.collapsibleText).toBeDefined()
+        // Nullable text fields render as a type array: ['string', 'null']
         expect(inputProps.collapsibleText.type).toContain('string')
+        expect(inputProps.collapsibleText.type).toContain('null')
       })
 
-      it('should include row children as top-level fields in create tool schema', async () => {
+      it('should include row children as top-level fields in create tool schema', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey()
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/list',
-            params: {},
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        const json = await parseStreamResponse(response)
-        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const toolsResponse = await mcp.listTools({ apiKey })
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         // Children of row appear at the top level, not under a `row` key
         expect(inputProps.rowText).toBeDefined()
         expect(inputProps.rowText.type).toContain('string')
+        expect(inputProps.rowText.type).toContain('null')
       })
 
-      it('should include named tab as nested object and unnamed tab children at top level in create tool schema', async () => {
+      it('should include named tab as nested object and unnamed tab children at top level in create tool schema', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey()
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/list',
-            params: {},
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        const json = await parseStreamResponse(response)
-        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const toolsResponse = await mcp.listTools({ apiKey })
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         // Named tab appears as a nested object
         expect(inputProps.namedTab).toBeDefined()
@@ -2374,27 +1616,16 @@ describe('@payloadcms/plugin-mcp', () => {
         // Unnamed tab children appear at the top level
         expect(inputProps.unnamedTabText).toBeDefined()
         expect(inputProps.unnamedTabText.type).toContain('string')
+        expect(inputProps.unnamedTabText.type).toContain('null')
       })
 
-      it('should include select field with enum values in create tool schema', async () => {
+      it('should include select field with enum values in create tool schema', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey()
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/list',
-            params: {},
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        const json = await parseStreamResponse(response)
-        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const toolsResponse = await mcp.listTools({ apiKey })
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.selectField).toBeDefined()
         expect(inputProps.selectField.enum).toBeDefined()
@@ -2403,25 +1634,13 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(inputProps.selectField.enum).toContain('option3')
       })
 
-      it('should include radio field with enum values in create tool schema', async () => {
+      it('should include radio field with enum values in create tool schema', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey()
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/list',
-            params: {},
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        const json = await parseStreamResponse(response)
-        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const toolsResponse = await mcp.listTools({ apiKey })
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.radioField).toBeDefined()
         expect(inputProps.radioField.enum).toBeDefined()
@@ -2430,25 +1649,13 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(inputProps.radioField.enum).toContain('radio3')
       })
 
-      it('should include array field with item schema in create tool schema', async () => {
+      it('should include array field with item schema in create tool schema', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey()
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/list',
-            params: {},
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-        })
-
-        const json = await parseStreamResponse(response)
-        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
-        const inputProps = createTool.inputSchema.properties
+        const toolsResponse = await mcp.listTools({ apiKey })
+        const createTool = toolsResponse.result.tools.find(
+          (t: any) => t.name === 'createFieldTypes',
+        )
+        const inputProps = createTool.inputSchema.properties.data.properties
 
         expect(inputProps.arrayField).toBeDefined()
         expect(inputProps.arrayField.type).toContain('array')
@@ -2460,41 +1667,32 @@ describe('@payloadcms/plugin-mcp', () => {
     })
 
     describe('Create + round-trip', () => {
-      it('should create and find document with atomic data fields (text, textarea, number, email, checkbox)', async () => {
+      it('should create and find document with atomic data fields (text, textarea, number, email, checkbox)', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'createFieldTypes',
-              arguments: {
-                textField: 'Hello MCP',
-                textareaField: 'Multi-line\ntext content',
-                numberField: 42,
-                emailField: 'test@example.com',
-                checkboxField: true,
-              },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            data: {
+              textField: 'Hello MCP',
+              textareaField: 'Multi-line\ntext content',
+              numberField: 42,
+              emailField: 'test@example.com',
+              checkboxField: true,
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'createFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
-
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-        expect(json.result.content[0].type).toBe('text')
-        expect(json.result.content[0].text).toContain(
-          'Resource created successfully in collection "field-types"!',
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse.result.content[0].type).toBe('text')
+        expect(callResponse.result.content[0].text).toContain(
+          'Document created successfully in collection "field-types"!',
         )
 
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         expect(doc.textField).toBe('Hello MCP')
         expect(doc.textareaField).toBe('Multi-line\ntext content')
@@ -2505,37 +1703,26 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should create document with date, code, and json fields', async () => {
+      it('should create document with date, code, and json fields', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
         const testDate = '2024-01-15T10:30:00.000Z'
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'createFieldTypes',
-              arguments: {
-                textField: 'Date/Code/JSON test',
-                dateField: testDate,
-                codeField: 'const x = 42;',
-                jsonField: { key: 'value', nested: { count: 1 } },
-              },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            data: {
+              textField: 'Date/Code/JSON test',
+              dateField: testDate,
+              codeField: 'const x = 42;',
+              jsonField: { key: 'value', nested: { count: 1 } },
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'createFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         expect(doc.codeField).toBe('const x = 42;')
         expect(doc.jsonField).toMatchObject({ key: 'value', nested: { count: 1 } })
@@ -2544,105 +1731,72 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should create document with select field', async () => {
+      it('should create document with select field', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'createFieldTypes',
-              arguments: {
-                textField: 'Select test',
-                selectField: 'option2',
-              },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            data: {
+              textField: 'Select test',
+              selectField: 'option2',
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'createFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         expect(doc.selectField).toBe('option2')
 
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should create document with radio field', async () => {
+      it('should create document with radio field', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'createFieldTypes',
-              arguments: {
-                textField: 'Radio test',
-                radioField: 'radio3',
-              },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            data: {
+              textField: 'Radio test',
+              radioField: 'radio3',
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'createFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         expect(doc.radioField).toBe('radio3')
 
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should create document with group field (nested object)', async () => {
+      it('should create document with group field (nested object)', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'createFieldTypes',
-              arguments: {
-                textField: 'Group test',
-                groupField: {
-                  groupText: 'Inside the group',
-                  groupNumber: 99,
-                },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            data: {
+              textField: 'Group test',
+              groupField: {
+                groupText: 'Inside the group',
+                groupNumber: 99,
               },
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'createFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         expect(doc.groupField).toBeDefined()
         expect(doc.groupField.groupText).toBe('Inside the group')
@@ -2651,34 +1805,23 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should create document with collapsible children at top level', async () => {
+      it('should create document with collapsible children at top level', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'createFieldTypes',
-              arguments: {
-                textField: 'Collapsible test',
-                collapsibleText: 'Text inside collapsible',
-              },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            data: {
+              textField: 'Collapsible test',
+              collapsibleText: 'Text inside collapsible',
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'createFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         // collapsibleText is stored at the top level of the document
         expect(doc.collapsibleText).toBe('Text inside collapsible')
@@ -2686,34 +1829,23 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should create document with row children at top level', async () => {
+      it('should create document with row children at top level', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'createFieldTypes',
-              arguments: {
-                textField: 'Row test',
-                rowText: 'Text inside row',
-              },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            data: {
+              textField: 'Row test',
+              rowText: 'Text inside row',
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'createFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         // rowText is stored at the top level of the document
         expect(doc.rowText).toBe('Text inside row')
@@ -2721,37 +1853,28 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should create document with tabs fields (named tab as object, unnamed tab children at top level)', async () => {
+      it('should create document with tabs fields (named tab as object, unnamed tab children at top level)', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'createFieldTypes',
-              arguments: {
-                textField: 'Tabs test',
-                namedTab: {
-                  namedTabText: 'Inside named tab',
-                },
-                unnamedTabText: 'Inside unnamed tab',
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            data: {
+              textField: 'Tabs test',
+              namedTab: {
+                namedTabText: 'Inside named tab',
               },
+              unnamedTabText: 'Inside unnamed tab',
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'createFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         // Named tab stored as nested object
         expect(doc.namedTab).toBeDefined()
@@ -2763,37 +1886,26 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should create document with array field', async () => {
+      it('should create document with array field', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'createFieldTypes',
-              arguments: {
-                textField: 'Array test',
-                arrayField: [
-                  { item: 'First item', itemNumber: 1 },
-                  { item: 'Second item', itemNumber: 2 },
-                ],
-              },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            data: {
+              textField: 'Array test',
+              arrayField: [
+                { item: 'First item', itemNumber: 1 },
+                { item: 'Second item', itemNumber: 2 },
+              ],
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'createFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         expect(doc.arrayField).toHaveLength(2)
         expect(doc.arrayField[0].item).toBe('First item')
@@ -2804,7 +1916,7 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should find documents in field-types collection', async () => {
+      it('should find documents in field-types collection', async ({ mcp }) => {
         const created = await (payload as any).create({
           collection: 'field-types',
           data: { textField: 'Findable doc', numberField: 7 },
@@ -2812,37 +1924,24 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(created.id)
 
         const apiKey = await getFieldTypesApiKey()
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'findFieldTypes',
-              arguments: {
-                where: '{"textField": {"equals": "Findable doc"}}',
-              },
-            },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            where: '{"textField": {"equals": "Findable doc"}}',
           },
+          name: 'findFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
-
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-        expect(json.result.content[0].text).toContain('Collection: "field-types"')
-        expect(json.result.content[0].text).toContain('"textField":"Findable doc"')
-        expect(json.result.content[0].text).toContain('"numberField":7')
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse.result.content[0].text).toContain('Collection: "field-types"')
+        expect(callResponse.result.content[0].text).toContain('"textField":"Findable doc"')
+        expect(callResponse.result.content[0].text).toContain('"numberField":7')
       })
     })
 
     describe('Update', () => {
-      it('should update document with group field', async () => {
+      it('should update document with group field', async ({ mcp }) => {
         const created = await (payload as any).create({
           collection: 'field-types',
           data: {
@@ -2853,44 +1952,35 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(created.id)
 
         const apiKey = await getFieldTypesApiKey(true, false)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'updateFieldTypes',
-              arguments: {
-                id: created.id,
-                groupField: {
-                  groupText: 'Updated group text',
-                  groupNumber: 100,
-                },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            id: created.id,
+            data: {
+              groupField: {
+                groupText: 'Updated group text',
+                groupNumber: 100,
               },
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'updateFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
-
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-        expect(json.result.content[0].text).toContain(
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse.result.content[0].text).toContain(
           'Document updated successfully in collection "field-types"!',
         )
 
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         expect(doc.groupField.groupText).toBe('Updated group text')
         expect(doc.groupField.groupNumber).toBe(100)
       })
 
-      it('should update document with collapsible field (children at top level)', async () => {
+      it('should update document with collapsible field (children at top level)', async ({
+        mcp,
+      }) => {
         const created = await (payload as any).create({
           collection: 'field-types',
           data: {
@@ -2901,37 +1991,26 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(created.id)
 
         const apiKey = await getFieldTypesApiKey(true, false)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'updateFieldTypes',
-              arguments: {
-                id: created.id,
-                collapsibleText: 'Updated collapsible text',
-              },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            id: created.id,
+            data: {
+              collapsibleText: 'Updated collapsible text',
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'updateFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         expect(doc.collapsibleText).toBe('Updated collapsible text')
       })
 
-      it('should update document with array field', async () => {
+      it('should update document with array field', async ({ mcp }) => {
         const created = await (payload as any).create({
           collection: 'field-types',
           data: {
@@ -2942,36 +2021,25 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(created.id)
 
         const apiKey = await getFieldTypesApiKey(true, false)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'updateFieldTypes',
-              arguments: {
-                id: created.id,
-                arrayField: [
-                  { item: 'Updated item A', itemNumber: 10 },
-                  { item: 'Updated item B', itemNumber: 20 },
-                  { item: 'Updated item C', itemNumber: 30 },
-                ],
-              },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            id: created.id,
+            data: {
+              arrayField: [
+                { item: 'Updated item A', itemNumber: 10 },
+                { item: 'Updated item B', itemNumber: 20 },
+                { item: 'Updated item C', itemNumber: 30 },
+              ],
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'updateFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         expect(doc.arrayField).toHaveLength(3)
         expect(doc.arrayField[0].item).toBe('Updated item A')
@@ -2980,36 +2048,27 @@ describe('@payloadcms/plugin-mcp', () => {
     })
 
     describe('Display field safety', () => {
-      it('should create document with ui field present without errors and ui field absent from response', async () => {
+      it('should create document with ui field present without errors and ui field absent from response', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
 
         // Create a doc without passing any `uiField` value (it has no stored data)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'createFieldTypes',
-              arguments: {
-                textField: 'UI field safety test',
-              },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            data: {
+              textField: 'UI field safety test',
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'createFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse.result.content[0].text).toContain('Document created successfully')
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-        expect(json.result.content[0].text).toContain('Resource created successfully')
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         // uiField has no stored data and should not appear in the document
         expect(doc).not.toHaveProperty('uiField')
@@ -3017,38 +2076,29 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(doc.id)
       })
 
-      it('should create and find document with all structural layout fields populated', async () => {
+      it('should create and find document with all structural layout fields populated', async ({
+        mcp,
+      }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const response = await restClient.POST('/mcp', {
-          body: JSON.stringify({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'tools/call',
-            params: {
-              name: 'createFieldTypes',
-              arguments: {
-                textField: 'All layout fields test',
-                groupField: { groupText: 'Group value', groupNumber: 5 },
-                collapsibleText: 'Collapsible value',
-                rowText: 'Row value',
-                namedTab: { namedTabText: 'Named tab value' },
-                unnamedTabText: 'Unnamed tab value',
-              },
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            data: {
+              textField: 'All layout fields test',
+              groupField: { groupText: 'Group value', groupNumber: 5 },
+              collapsibleText: 'Collapsible value',
+              rowText: 'Row value',
+              namedTab: { namedTabText: 'Named tab value' },
+              unnamedTabText: 'Unnamed tab value',
             },
-          }),
-          headers: {
-            Accept: 'application/json, text/event-stream',
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
           },
+          name: 'createFieldTypes',
         })
 
-        const json = await parseStreamResponse(response)
+        expect(callResponse.result).toBeDefined()
+        expect(callResponse.result.isError).toBeFalsy()
 
-        expect(json.result).toBeDefined()
-        expect(json.result.isError).toBeFalsy()
-
-        const doc = extractJsonBlock(json.result.content[0].text)
+        const doc = getToolDoc(callResponse)
 
         // All data fields are stored correctly regardless of their container type
         expect(doc.groupField.groupText).toBe('Group value')

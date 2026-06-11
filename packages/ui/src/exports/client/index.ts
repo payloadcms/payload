@@ -43,6 +43,23 @@ export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/Gro
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
 export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
+export {
+  DialogBody,
+  DialogCancel,
+  DialogConfirm,
+  DialogFooter,
+  DialogHeader,
+  DialogModal,
+} from '../../elements/Dialog/index.js'
+export type {
+  DialogBodyProps,
+  DialogCancelProps,
+  DialogConfirmProps,
+  DialogFooterProps,
+  DialogHeaderProps,
+  DialogModalProps,
+  DialogSize,
+} from '../../elements/Dialog/index.js'
 export { Link } from '../../elements/Link/index.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
@@ -54,6 +71,12 @@ export {
   useCellProps,
 } from '../../providers/TableColumns/RenderDefaultCell/index.js'
 export { DateCell } from '../../elements/Table/DefaultCell/fields/Date/index.js'
+export { TableSection } from '../../elements/TableSection/index.js'
+export type {
+  TableSectionContentProps,
+  TableSectionHeaderProps,
+  TableSectionProps,
+} from '../../elements/TableSection/index.js'
 
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'
@@ -106,6 +129,7 @@ export { Drawer, DrawerToggler, formatDrawerSlug } from '../../elements/Drawer/i
 export { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 export { EditMany } from '../../elements/EditMany/index.js'
 export { ErrorPill } from '../../elements/ErrorPill/index.js'
+export { Modal, useModal } from '../../elements/Modal/index.js'
 export { FullscreenModal } from '../../elements/FullscreenModal/index.js'
 export { GenerateConfirmation } from '../../elements/GenerateConfirmation/index.js'
 export { Gutter } from '../../elements/Gutter/index.js'
@@ -118,6 +142,8 @@ export type { InputStepperProps } from '../../elements/InputStepper/index.js'
 
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
+export { ListControlsBar } from '../../elements/ListControlsBar/index.js'
+export type { ListControlsBarProps } from '../../elements/ListControlsBar/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
 export type {
   ListDrawerProps,
@@ -146,7 +172,6 @@ export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { GroupByHeader } from '../../views/List/GroupByHeader/index.js'
 export { PageControls, PageControlsComponent } from '../../elements/PageControls/index.js'
-export { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 
 export { GroupByPageControls } from '../../elements/PageControls/GroupByPageControls.js'
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
@@ -154,16 +179,35 @@ export { FormLoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { LoadingOverlay } from '../../elements/Loading/index.js'
 export { Spinner } from '../../elements/Spinner/index.js'
 export type { SpinnerProps } from '../../elements/Spinner/index.js'
+export { Switch } from '../../elements/Switch/index.js'
+export type { SwitchProps } from '../../elements/Switch/index.js'
 export { DelayedSpinner } from '../../elements/DelayedSpinner/index.js'
 export type { DelayedSpinnerProps } from '../../elements/DelayedSpinner/index.js'
 export { Logout } from '../../elements/Logout/index.js'
-export { AlertModal, Modal, useModal } from '../../elements/Modal/index.js'
-export type { AlertModalProps } from '../../elements/Modal/index.js'
 export { NavToggler } from '../../elements/Nav/NavToggler/index.js'
+export { NavSidebarToggle } from '../../elements/Nav/NavSidebarToggle/index.js'
+export { NavWrapper } from '../../elements/Nav/NavWrapper/index.js'
+export { SettingsMenuButton } from '../../elements/Nav/SettingsMenuButton/index.js'
+export type { SettingsMenuButtonProps } from '../../elements/Nav/SettingsMenuButton/index.js'
+export { DefaultNavClient } from '../../elements/Nav/index.client.js'
+export { SidebarTabsClient } from '../../elements/Nav/SidebarTabs/index.client.js'
+export type {
+  SidebarTabsClientProps,
+  TabMetadata,
+} from '../../elements/Nav/SidebarTabs/index.client.js'
+export { TabError } from '../../elements/Nav/SidebarTabs/TabError/index.js'
+export { ShouldRenderTabs } from '../../elements/DocumentHeader/Tabs/ShouldRenderTabs.js'
+export { DocumentTabLink } from '../../elements/DocumentHeader/Tabs/Tab/TabLink.js'
+export { VersionsPill } from '../../elements/DocumentHeader/Tabs/tabs/VersionsPill/index.js'
+export { Wrapper as DefaultTemplateWrapper } from '../../templates/Default/Wrapper/index.js'
+export { FormHeader } from '../../elements/FormHeader/index.js'
+export { HierarchyTypeField } from '../../elements/HierarchyTypeField/index.js'
 export { NoListResults } from '../../elements/NoListResults/index.js'
 export { NavContext, NavProvider, useNav } from '../../elements/Nav/context.js'
 export { NavGroup } from '../../elements/NavGroup/index.js'
 export { Pagination } from '../../elements/Pagination/index.js'
+export { SimplePagination } from '../../elements/Pagination/SimplePagination/index.js'
+export type { SimplePaginationProps } from '../../elements/Pagination/SimplePagination/index.js'
 export { PerPage } from '../../elements/PerPage/index.js'
 export { Pill } from '../../elements/Pill/index.js'
 import * as PopupList from '../../elements/Popup/PopupButtonList/index.js'
@@ -171,6 +215,7 @@ export { PopupList }
 export { Popup } from '../../elements/Popup/index.js'
 export { Combobox } from '../../elements/Combobox/index.js'
 export type { ComboboxEntry, ComboboxProps } from '../../elements/Combobox/index.js'
+export { CommandPalette, commandPaletteSlug } from '../../elements/CommandPalette/index.js'
 export { PublishMany } from '../../elements/PublishMany/index.js'
 export { PublishButton } from '../../elements/PublishButton/index.js'
 export { SaveButton } from '../../elements/SaveButton/index.js'
@@ -201,7 +246,9 @@ import { toast } from 'sonner'
 export { toast }
 export { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 export { Upload } from '../../elements/Upload/index.js'
-export { SearchFilter } from '../../elements/SearchFilter/index.js'
+export { ListSearchFilter } from '../../elements/Search/ListSearchFilter/index.js'
+export { SearchInput } from '../../elements/Search/SearchInput/index.js'
+export { FilterTrigger } from '../../elements/FilterTrigger/index.js'
 export { EditUpload } from '../../elements/EditUpload/index.js'
 export { FileDetails } from '../../elements/FileDetails/index.js'
 export { PreviewSizes } from '../../elements/PreviewSizes/index.js'
@@ -390,15 +437,22 @@ export {
 export { ListQueryProvider, useListQuery } from '../../providers/ListQuery/index.js'
 export { LocaleProvider, useLocale } from '../../providers/Locale/index.js'
 export { OperationProvider, useOperation } from '../../providers/Operation/index.js'
-export { ParamsProvider, useParams } from '../../providers/Params/index.js'
 export { PreferencesProvider, usePreferences } from '../../providers/Preferences/index.js'
 export { RootProvider } from '../../providers/Root/index.js'
+export {
+  PayloadLink,
+  RouterAdapterContext,
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from '../../providers/RouterAdapter/index.js'
+export type { RouterAdapterContextValue } from '../../providers/RouterAdapter/index.js'
 export {
   RouteCache as RouteCacheProvider,
   useRouteCache,
 } from '../../providers/RouteCache/index.js'
 export { ScrollInfoProvider, useScrollInfo } from '../../providers/ScrollInfo/index.js'
-export { SearchParamsProvider, useSearchParams } from '../../providers/SearchParams/index.js'
 export { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
 export {
   DocumentSelectionProvider,
@@ -434,8 +488,39 @@ export { SelectAll } from '../../elements/SelectAll/index.js'
 export { SelectRow } from '../../elements/SelectRow/index.js'
 export { SelectMany } from '../../elements/SelectMany/index.js'
 
-export { DefaultListView } from '../../views/List/index.js'
+export { DefaultListView } from '../../views/List/index.client.js'
 export { HierarchyListView } from '../../views/HierarchyList/index.js'
+export { AccountClient } from '../../views/Account/index.client.js'
+export { ResetPreferences as AccountResetPreferences } from '../../views/Account/ResetPreferences/index.js'
+export { LanguageSelector as AccountLanguageSelector } from '../../views/Account/Settings/LanguageSelector.js'
+export { ToggleHighContrast as AccountToggleHighContrast } from '../../views/Account/ToggleHighContrast/index.js'
+export { ToggleTheme as AccountToggleTheme } from '../../views/Account/ToggleTheme/index.js'
+export { APIViewClient } from '../../views/API/index.client.js'
+export { CreateFirstUserClient } from '../../views/CreateFirstUser/index.client.js'
+export { ModularDashboardClient } from '../../views/Dashboard/Default/ModularDashboard/index.client.js'
+export { ForgotPasswordForm } from '../../views/ForgotPassword/ForgotPasswordForm/index.js'
+export { LoginForm } from '../../views/Login/LoginForm/index.js'
+export { LogoutClient } from '../../views/Logout/LogoutClient.js'
+export { NotFoundClient } from '../../views/NotFound/index.client.js'
+export { ResetPasswordForm } from '../../views/ResetPassword/ResetPasswordForm/index.js'
+export { ToastAndRedirect, VerifyClient } from '../../views/Verify/index.client.js'
+export { DefaultVersionView } from '../../views/Version/Default/index.js'
+export { VersionsViewClient } from '../../views/Versions/index.client.js'
+export { VersionPillLabel } from '../../views/Versions/VersionPillLabel/VersionPillLabel.js'
+export { RenderVersionFieldsToDiff } from '../../views/Version/RenderFieldsToDiff/RenderVersionFieldsToDiff.js'
+export { Checkbox as VersionFieldDiffCheckbox } from '../../views/Version/RenderFieldsToDiff/fields/Checkbox/index.js'
+export { Collapsible as VersionFieldDiffCollapsible } from '../../views/Version/RenderFieldsToDiff/fields/Collapsible/index.js'
+export { DateDiffComponent as VersionFieldDiffDate } from '../../views/Version/RenderFieldsToDiff/fields/Date/index.js'
+export { Group as VersionFieldDiffGroup } from '../../views/Version/RenderFieldsToDiff/fields/Group/index.js'
+export { Iterable as VersionFieldDiffIterable } from '../../views/Version/RenderFieldsToDiff/fields/Iterable/index.js'
+export { Row as VersionFieldDiffRow } from '../../views/Version/RenderFieldsToDiff/fields/Row/index.js'
+export { Select as VersionFieldDiffSelect } from '../../views/Version/RenderFieldsToDiff/fields/Select/index.js'
+export { Tabs as VersionFieldDiffTabs } from '../../views/Version/RenderFieldsToDiff/fields/Tabs/index.js'
+export { Text as VersionFieldDiffText } from '../../views/Version/RenderFieldsToDiff/fields/Text/index.js'
+export { AutosaveCell as VersionsAutosaveCell } from '../../views/Versions/cells/AutosaveCell/index.js'
+export { CreatedAtCell as VersionsCreatedAtCell } from '../../views/Versions/cells/CreatedAt/index.js'
+export { IDCell as VersionsIDCell } from '../../views/Versions/cells/ID/index.js'
+export { VersionDrawerCreatedAtCell } from '../../views/Versions/cells/VersionDrawerCreatedAtCell/index.js'
 
 export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 

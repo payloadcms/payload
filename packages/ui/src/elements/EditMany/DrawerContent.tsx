@@ -4,7 +4,6 @@ import type { SelectType, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
   combineWhereConstraints,
   formatAdminURL,
@@ -17,6 +16,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FormProps } from '../../forms/Form/index.js'
 import type { OnFieldSelect } from '../FieldSelect/index.js'
 import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
+import type { EditManyProps } from './index.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
@@ -28,14 +28,15 @@ import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { OperationContext } from '../../providers/Operation/index.js'
+import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
+import { baseClass } from './index.js'
 import './index.scss'
 import '../../forms/RenderFields/index.css'
-import { baseClass, type EditManyProps } from './index.js'
 
 const Submit: React.FC<{
   readonly action: string

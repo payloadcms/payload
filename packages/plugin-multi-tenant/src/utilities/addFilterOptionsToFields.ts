@@ -97,18 +97,17 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
     }
 
     if (newField.type === 'blocks') {
-      const newBlocks: Block[] = []
-      ;(newField.blockReferences ?? newField.blocks).forEach((_block) => {
+      const newBlocks: (Block | string)[] = []
+      newField.blocks.forEach((_block) => {
         let block: Block | undefined
         let isReference = false
 
         if (typeof _block === 'string') {
-          if (blockReferencesWithFilters.includes(_block)) {
-            return
-          }
           isReference = true
-          block = config?.blocks?.find((b) => b.slug === _block)
-          blockReferencesWithFilters.push(_block)
+          if (!blockReferencesWithFilters.includes(_block)) {
+            block = config?.blocks?.find((b) => b.slug === _block)
+            blockReferencesWithFilters.push(_block)
+          }
         } else {
           // Create a shallow copy to avoid mutating the original block reference
           block = { ..._block }
@@ -129,9 +128,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
           })
         }
 
-        if (block && !isReference) {
-          newBlocks.push(block)
-        }
+        newBlocks.push(isReference ? _block : block!)
       })
       newField.blocks = newBlocks
     }

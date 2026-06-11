@@ -126,4 +126,5 @@ export const Pages: CollectionConfig<'pages'> = {
       ],
     },
   ],
+  versions: false,
 }

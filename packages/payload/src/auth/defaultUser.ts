@@ -13,4 +13,5 @@ export const defaultUserCollection: CollectionConfig = {
     plural: ({ t }) => t('general:users'),
     singular: ({ t }) => t('general:user'),
   },
+  versions: false,
 }
