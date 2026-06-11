@@ -27,8 +27,8 @@ import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { upsertPreferences } from '../__helpers/e2e/preferences.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
-import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
+import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -156,8 +156,8 @@ describe('Localization', () => {
       await expect(page.locator('.view-version__toggle-locales')).toBeVisible()
       await page.locator('.view-version__toggle-locales').click()
 
-      await expect(page.locator('.select-version-locales .pill-selector')).toBeVisible()
-      await expect(page.locator('.select-version-locales .pill-selector')).not.toContainText(
+      await expect(page.locator('.select-version-locales .popup__content')).toBeVisible()
+      await expect(page.locator('.select-version-locales .popup__content')).not.toContainText(
         'FILTERED',
       )
     })

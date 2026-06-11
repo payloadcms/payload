@@ -86,6 +86,17 @@
     display: none;
   }
 
+  /* RadioGroup - selected items show only the checkmark, no background fill */
+  .popup-button-list--with-icons .popup-button-list__button--selected {
+    background-color: transparent;
+    color: var(--popup-item-color, var(--color-text));
+  }
+
+  .popup-button-list--with-icons .popup-button-list__button--selected:hover {
+    background-color: var(--popup-item-bg-hover, var(--color-bg-selected-strong));
+    color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
+  }
+
   /* RadioGroup - for radio-style selection rows with 16px icons */
   .popup-button-list--with-icons .popup-button-list__button {
     padding-right: var(--spacer-2);
