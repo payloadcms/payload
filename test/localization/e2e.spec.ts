@@ -835,7 +835,7 @@ describe('Localization', () => {
     })
 
     describe('unpublish button', () => {
-      test('should show unpublish in specific locale when localizeStatus is enabled', async () => {
+      test('should show unpublish in specific locale when localized fields exist', async () => {
         await page.goto(urlAllFieldsLocalized.create)
         await page.locator('#field-text').fill('EN Published')
         await saveDocAndAssert(page, '#publish-locale')
@@ -845,10 +845,10 @@ describe('Localization', () => {
         await expect(page.locator('#action-unpublish-locale')).toBeVisible()
       })
 
-      test('should not show unpublish in specific locale when localizeStatus is not enabled', async () => {
-        await page.goto(urlPostsWithDrafts.create)
-        await page.locator('#field-title').fill('EN Published')
-        await saveDocAndAssert(page, '#publish-locale')
+      test('should not show unpublish in specific locale when no localized fields exist', async () => {
+        await page.goto(noLocalizedFieldsURL.create)
+        await page.locator('#field-text').fill('EN Published')
+        await saveDocAndAssert(page)
         await openDocControls(page)
 
         await expect(page.locator('#action-unpublish')).toBeVisible()
