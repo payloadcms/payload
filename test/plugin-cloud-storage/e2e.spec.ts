@@ -13,6 +13,16 @@ import { mediaSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+async function selectFile(page: Page, filePath: string) {
+  const selectButton = page.locator('.file-field__upload button:has-text("Select a file")')
+  await expect(selectButton).toBeVisible()
+
+  await expect(async () => {
+    await page.setInputFiles('input[type="file"]', filePath)
+    await expect(page.locator('.file-field__filename')).toBeVisible({ timeout: 2000 })
+  }).toPass({ intervals: [1000], timeout: 15000 })
+}
+
 test.describe('Cloud Storage Plugin', () => {
   let page: Page
   let mediaURL: AdminUrlUtil
@@ -29,7 +39,7 @@ test.describe('Cloud Storage Plugin', () => {
 
   test('should create file upload', async () => {
     await page.goto(mediaURL.create)
-    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await selectFile(page, path.resolve(dirname, './image.png'))
 
     const filename = page.locator('.file-field__filename')
 
@@ -40,7 +50,7 @@ test.describe('Cloud Storage Plugin', () => {
 
   test('should update an existing upload', async () => {
     await page.goto(mediaURL.create)
-    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await selectFile(page, path.resolve(dirname, './image.png'))
 
     const filename = page.locator('.file-field__filename')
 
@@ -64,7 +74,7 @@ test.describe('Cloud Storage Plugin', () => {
     })
 
     await page.goto(mediaURL.create)
-    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await selectFile(page, path.resolve(dirname, './image.png'))
     await expect(page.locator('.file-field__filename')).toHaveValue('image.png')
     await saveDocAndAssert(page)
 

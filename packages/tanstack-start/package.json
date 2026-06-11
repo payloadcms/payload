@@ -1,0 +1,143 @@
+{
+  "name": "@payloadcms/tanstack-start",
+  "version": "3.81.0",
+  "description": "TanStack Start framework adapter for Payload",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/tanstack-start"
+  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    },
+    "./server": {
+      "import": "./src/exports/server.ts",
+      "types": "./src/exports/server.ts",
+      "default": "./src/exports/server.ts"
+    },
+    "./layouts": {
+      "import": "./src/exports/layouts.ts",
+      "types": "./src/exports/layouts.ts",
+      "default": "./src/exports/layouts.ts"
+    },
+    "./rsc": {
+      "types": "./src/exports/rsc.ts",
+      "browser": "./src/exports/rsc.browser.ts",
+      "import": "./src/exports/rsc.ts",
+      "default": "./src/exports/rsc.ts"
+    },
+    "./vite": {
+      "import": "./src/exports/vite.ts",
+      "types": "./src/exports/vite.ts",
+      "default": "./src/exports/vite.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm build:types && pnpm build:swc && pnpm build:copy-mjs",
+    "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
+    "build:copy-mjs": "node ./scripts/copyMjs.mjs",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "qs-esm": "^7.0.2"
+  },
+  "devDependencies": {
+    "@tanstack/react-router": "^1.120.0",
+    "@tanstack/react-start": "^1.120.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "payload": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vite": ">=8.0.0"
+  },
+  "peerDependencies": {
+    "@tanstack/react-router": "^1.120.0",
+    "@tanstack/react-start": "^1.120.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "payload": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vite": ">=8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@vitejs/plugin-react": {
+      "optional": true
+    },
+    "vite": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
+      },
+      "./server": {
+        "import": "./dist/exports/server.js",
+        "types": "./dist/exports/server.d.ts",
+        "default": "./dist/exports/server.js"
+      },
+      "./layouts": {
+        "import": "./dist/exports/layouts.js",
+        "types": "./dist/exports/layouts.d.ts",
+        "default": "./dist/exports/layouts.js"
+      },
+      "./rsc": {
+        "types": "./dist/exports/rsc.d.ts",
+        "browser": "./dist/exports/rsc.browser.js",
+        "import": "./dist/exports/rsc.js",
+        "default": "./dist/exports/rsc.js"
+      },
+      "./vite": {
+        "import": "./dist/exports/vite.js",
+        "types": "./dist/exports/vite.d.ts",
+        "default": "./dist/exports/vite.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  }
+}

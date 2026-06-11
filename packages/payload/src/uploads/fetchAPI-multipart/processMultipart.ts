@@ -40,11 +40,18 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     allFilesHaveResolved = res
     failedResolvingFiles = rej
   })
+  // Attach a no-op catch handler immediately to prevent Node.js from treating this as
+  // an unhandled rejection if failedResolvingFiles() is called while the read loop is
+  // still suspended at `await reader.read()`. The real error is rethrown below.
+  allFilesComplete.catch(() => {})
 
   const busboyFinished = new Promise<void>((resolve, reject) => {
     busboyFinishedResolve = resolve
     busboyFinishedReject = reject
   })
+  // Prevent unhandled rejection when abortOnLimit rejects allFilesComplete
+  // (which throws at line ~241) before execution reaches `await busboyFinished`.
+  busboyFinished.catch(() => {})
 
   const result: FetchAPIFileUploadResponse = {
     fields: undefined!,
@@ -64,6 +71,9 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     file.destroy()
     shouldAbortProccessing = true
     failedResolvingFiles(err)
+    // Cancel the reader so the while loop exits immediately rather than draining
+    // the rest of the request body after an abort.
+    void reader?.cancel()
   }
 
   // Build multipart req.body fields
@@ -205,18 +215,17 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     busboyFinishedResolve()
   })
 
-  busboy.on(
-    'error',
-    (err = new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)) => {
-      debugLog(options, `Busboy error`)
-      const busboyError =
-        err instanceof Error
-          ? err
-          : new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)
-
-      busboyFinishedReject(busboyError)
-    },
-  )
+  busboy.on('error', (err?: Error) => {
+    debugLog(options, `Busboy error`)
+    shouldAbortProccessing = true
+    const busboyError =
+      err instanceof Error
+        ? err
+        : new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)
+    // Reject both promises so neither hangs regardless of whether files were in-flight.
+    failedResolvingFiles(busboyError)
+    busboyFinishedReject(busboyError)
+  })
 
   while (parsingRequest) {
     const { done, value } = await reader!.read()

@@ -7,7 +7,6 @@ const dirname = path.dirname(filename)
 
 const directoryArg = process.argv[2] || 'dist'
 
-
 async function build() {
   const resultIndex = await esbuild.build({
     entryPoints: ['dist/index.js'],

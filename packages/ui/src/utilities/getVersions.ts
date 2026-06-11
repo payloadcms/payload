@@ -67,10 +67,15 @@ export const getVersions = async ({
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions)
 
   if (!shouldFetchVersions) {
-    // Without readVersions permission, determine published status from the _status field
-    const hasPublishedDoc = localizedDraftsEnabled
-      ? doc?._status === 'published'
-      : doc?._status !== 'draft'
+    // Without readVersions permission, determine published status from the
+    // `_status` field. A missing doc (e.g. the create view, before the first
+    // save) has no published version — guard against `undefined !== 'draft'`
+    // resolving to `true` and reporting a brand-new draft as published.
+    const hasPublishedDoc = doc
+      ? localizedDraftsEnabled
+        ? doc._status === 'published'
+        : doc._status !== 'draft'
+      : false
 
     return {
       hasPublishedDoc,

@@ -19,10 +19,12 @@ export async function initDevAndTest(
   skipGenImportMap: string,
   configFile?: string,
 ): Promise<void> {
-  const importMapPath: string = path.resolve(
-    getNextRootDir(testSuiteArg).rootDir,
-    './app/(payload)/admin/importMap.js',
-  )
+  const framework = process.env.PAYLOAD_FRAMEWORK || 'next'
+
+  const importMapPath: string =
+    framework === 'tanstack-start'
+      ? path.resolve(dirname, '../tanstack-app/src/importMap.js')
+      : path.resolve(getNextRootDir(testSuiteArg).rootDir, './app/(payload)/admin/importMap.js')
 
   try {
     fs.writeFileSync(importMapPath, 'export const importMap = {}')
@@ -41,6 +43,10 @@ export async function initDevAndTest(
     return
   }
 
+  if (framework === 'tanstack-start') {
+    process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'true'
+  }
+
   // Generate importMap
   const testDir = path.resolve(dirname, testSuiteArg)
   console.log('Generating import map for config:', testDir)
@@ -48,7 +54,12 @@ export async function initDevAndTest(
   const configUrl = pathToFileURL(path.resolve(testDir, configFile ?? 'config.ts')).href
   const config: SanitizedConfig = await (await import(configUrl)).default
 
-  process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
+  if (framework === 'tanstack-start') {
+    process.env.ROOT_DIR = path.resolve(dirname, '../tanstack-app')
+    config.admin.importMap.importMapFile = importMapPath
+  } else {
+    process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
+  }
 
   await generateImportMap(config, { log: true, force: true })
 

@@ -21,6 +21,16 @@ const dirname = path.dirname(filename)
 let context: BrowserContext
 
 test.describe('Admin Panel (Root)', () => {
+  // The tanstack-start adapter's file-based router currently mounts the admin
+  // under a fixed `/admin/*` route, so configs that move the admin to the
+  // site root (`admin: '/'`) cannot be served by `tanstack-app`. Skip the
+  // entire suite for tanstack-start until the router supports a configurable
+  // admin mount point.
+  test.skip(
+    process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+    'tanstack-start does not yet support a custom admin route at the site root',
+  )
+
   let page: Page
   let url: AdminUrlUtil
 
@@ -55,14 +65,6 @@ test.describe('Admin Panel (Root)', () => {
       serverURL,
     })
   })
-
-  // test.beforeEach(async () => {
-  //   await throttleTest({
-  //     page,
-  //     context,
-  //     delay: 'Fast 4G',
-  //   })
-  // })
 
   test('should redirect `${adminRoute}/collections` to `${adminRoute}', async () => {
     const collectionsURL = `${url.admin}/collections`

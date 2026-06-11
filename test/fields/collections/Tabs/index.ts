@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { isRSCEnabled } from 'payload/shared'
+
 import { tabsFieldsSlug } from '../../slugs.js'
 import { getBlocksField } from '../Blocks/index.js'
 import { namedTabDefaultValue } from './constants.js'
@@ -121,16 +123,20 @@ const TabsFields: CollectionConfig = {
           label: 'Tab with Array',
           description: 'This tab has an array.',
           fields: [
-            {
-              type: 'ui',
-              name: 'demoUIField',
-              label: 'Demo UI Field',
-              admin: {
-                components: {
-                  Field: '/collections/Tabs/UIField.js#UIField',
-                },
-              },
-            },
+            ...(isRSCEnabled()
+              ? [
+                  {
+                    type: 'ui' as const,
+                    name: 'demoUIField',
+                    label: 'Demo UI Field',
+                    admin: {
+                      components: {
+                        Field: '/collections/Tabs/UIField.js#UIField',
+                      },
+                    },
+                  },
+                ]
+              : []),
             {
               name: 'array',
               labels: {

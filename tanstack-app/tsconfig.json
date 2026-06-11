@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": false,
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "rootDir": "..",
+    "baseUrl": ".",
+    "paths": {
+      "@payload-config": ["../test/_community/config.ts"],
+      "~/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*", "vite.config.ts", "../test/admin/config.ts"]
+}
