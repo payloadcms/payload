@@ -13,6 +13,11 @@ const baseClass = 'drawer'
 
 export const drawerZBase = 100
 
+// Slug prefixes for every real drawer variant (base, document, list). Used to
+// count stacked drawers without matching confirmation modals like
+// `leave-without-saving-...`.
+const drawerSlugPrefixes = ['drawer_', 'doc-drawer_', 'list-drawer_']
+
 export const formatDrawerSlug = ({ slug, depth }: { depth: number; slug: string }): string =>
   `drawer_${depth}_${slug}`
 
@@ -81,6 +86,15 @@ const DrawerInner: React.FC<Props> = ({
 
   const isOpen = !!modalState[slug]?.isOpen
 
+  // Nested drawers stack as real layers: each ancestor stays visible and is
+  // pushed 16px left per drawer on top of it. Every drawer paints its own
+  // backdrop scrim, so deeper layers stack more scrims and appear darker.
+  const openDrawerCount = Object.entries(modalState).filter(
+    ([modalSlug, state]) =>
+      state?.isOpen && drawerSlugPrefixes.some((p) => modalSlug.startsWith(p)),
+  ).length
+  const layersFromTop = Math.max(openDrawerCount - drawerDepth, 0)
+
   const [animateIn, setAnimateIn] = useState(isOpen)
 
   useLayoutEffect(() => {
@@ -91,23 +105,20 @@ const DrawerInner: React.FC<Props> = ({
     // IMPORTANT: do not render the drawer until it is explicitly open, this is to avoid large html trees especially when nesting drawers
     return (
       <Modal
-        className={[
-          className,
-          baseClass,
-          animateIn && `${baseClass}--is-open`,
-          drawerDepth > 1 && `${baseClass}--nested`,
-        ]
+        className={[className, baseClass, animateIn && `${baseClass}--is-open`]
           .filter(Boolean)
           .join(' ')}
         // Fixes https://github.com/payloadcms/payload/issues/13778
         closeOnBlur={false}
         slug={slug}
-        style={{
-          paddingRight: drawerDepth > 1 ? `calc(${drawerDepth - 1} * var(--spacer-3))` : undefined,
-          zIndex: drawerZBase + drawerDepth,
-        }}
+        style={
+          {
+            '--drawer-layer-offset': `calc(${layersFromTop} * var(--spacer-3))`,
+            zIndex: drawerZBase + drawerDepth,
+          } as React.CSSProperties
+        }
       >
-        {drawerDepth === 1 && <div className={`${baseClass}__blur-bg`} />}
+        <div className={`${baseClass}__blur-bg`} />
         <button
           aria-label={t('general:close')}
           className={`${baseClass}__close`}

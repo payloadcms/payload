@@ -7,7 +7,6 @@
   }
 
   .versions__wrap {
-    padding: 0 var(--gutter-h) var(--spacing-view-bottom) var(--gutter-h);
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -39,11 +38,11 @@
   }
 
   .versions .table th:first-child {
-    padding-inline-start: var(--spacer-2-5);
+    padding-inline-start: var(--gutter-h);
   }
 
   .versions .table td:first-child:not(.cell--linked) {
-    padding-inline-start: var(--spacer-2-5);
+    padding-inline-start: var(--gutter-h);
   }
 
   .versions .table td.cell--linked {
@@ -51,7 +50,7 @@
   }
 
   .versions .table td.cell--linked > a {
-    padding: 0 var(--spacer-2-5);
+    padding-inline-start: var(--gutter-h);
     width: 100%;
   }
 
@@ -62,18 +61,11 @@
   /* on mobile, extend the table all the way to the viewport edges */
   /* this is to visually indicate overflowing content */
   @media (max-width: 768px) {
-    .versions__wrap {
-      padding: 0 0 var(--spacing-view-bottom) 0;
-      margin-top: 0;
-    }
-
     .versions .table {
       display: flex;
-      width: calc(100% + calc(var(--gutter-h) * 2));
+      flex-direction: column;
       max-width: unset;
-      left: calc(var(--gutter-h) * -1);
       position: relative;
-      padding-left: var(--gutter-h);
     }
 
     .versions .table::after {

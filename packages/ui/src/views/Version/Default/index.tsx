@@ -5,10 +5,8 @@ import React, { type FormEventHandler, useCallback, useEffect, useMemo, useState
 import type { SelectablePill } from '../../../elements/PillSelector/index.js'
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
-import { Button } from '../../../elements/Button/index.js'
 import { Gutter } from '../../../elements/Gutter/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
-import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
@@ -44,7 +42,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const { i18n, t } = useTranslation()
 
   const [locales, setLocales] = useState<SelectablePill[]>([])
-  const [localeSelectorOpen, setLocaleSelectorOpen] = React.useState(false)
 
   useEffect(() => {
     if (config.localization) {
@@ -191,37 +188,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 onToggle={onToggleModifiedOnly}
               />
             </span>
-            {localization && (
-              <Button
-                aria-controls={`${baseClass}-locales`}
-                aria-expanded={localeSelectorOpen}
-                buttonStyle="pill"
-                className={`${baseClass}__toggle-locales`}
-                icon={<ChevronIcon direction={localeSelectorOpen ? 'up' : 'down'} />}
-                onClick={() => setLocaleSelectorOpen((localeSelectorOpen) => !localeSelectorOpen)}
-                size="medium"
-              >
-                <span className={`${baseClass}__toggle-locales-label`}>
-                  {t('general:locales')}:{' '}
-                </span>
-                <span className={`${baseClass}__toggle-locales-list`}>
-                  {locales
-                    .filter((locale) => locale.selected)
-                    .map((locale) => locale.name)
-                    .join(', ')}
-                </span>
-              </Button>
-            )}
+            {localization && <SelectLocales locales={locales} onChange={onChangeSelectedLocales} />}
           </div>
         </div>
-
-        {localization && (
-          <SelectLocales
-            locales={locales}
-            localeSelectorOpen={localeSelectorOpen}
-            onChange={onChangeSelectedLocales}
-          />
-        )}
       </Gutter>
       <Gutter className={`${baseClass}-controls-bottom`}>
         <div className={`${baseClass}-controls-bottom__wrapper`}>

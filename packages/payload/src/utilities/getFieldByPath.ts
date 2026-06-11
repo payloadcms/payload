@@ -75,9 +75,7 @@ export const getFieldByPath = ({
       const blockSlug = segments[0]
       const block =
         config?.blocks?.find((b) => b.slug === blockSlug) ??
-        field.blocks.find(
-          (b): b is FlattenedBlock => typeof b !== 'string' && b.slug === blockSlug,
-        )
+        field.blocks.find((b): b is FlattenedBlock => typeof b !== 'string' && b.slug === blockSlug)
 
       if (block) {
         segments.shift()
