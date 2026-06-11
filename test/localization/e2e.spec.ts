@@ -156,10 +156,8 @@ describe('Localization', () => {
       await expect(page.locator('.view-version__toggle-locales')).toBeVisible()
       await page.locator('.view-version__toggle-locales').click()
 
-      await expect(page.locator('.select-version-locales .pill-selector')).toBeVisible()
-      await expect(page.locator('.select-version-locales .pill-selector')).not.toContainText(
-        'FILTERED',
-      )
+      await expect(page.locator('.popup__content')).toBeVisible()
+      await expect(page.locator('.popup__content')).not.toContainText('FILTERED')
     })
 
     test('should disable control for active locale', async () => {

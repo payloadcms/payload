@@ -16,11 +16,11 @@
   .restore-version__restore-as-draft-button {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
-    padding: 0;
   }
 
   .restore-version__restore-as-draft-button:focus {
-    border-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
     outline-offset: 0;
   }
 }
