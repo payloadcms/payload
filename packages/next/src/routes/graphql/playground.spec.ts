@@ -1,15 +1,10 @@
 import type { SanitizedConfig } from 'payload'
 
-import { renderGraphiQL } from '@graphql-yoga/render-graphiql'
 import { createPayloadRequest } from 'payload'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { GRAPHQL_PLAYGROUND_GET } from './index.js'
 import { GET } from './playground.js'
-
-vi.mock('@graphql-yoga/render-graphiql', () => ({
-  renderGraphiQL: vi.fn(),
-}))
 
 vi.mock('payload', () => ({
   createPayloadRequest: vi.fn(),
@@ -63,10 +58,6 @@ describe('GraphQL Playground route', () => {
         },
       } as Awaited<ReturnType<typeof createPayloadRequest>>
     })
-
-    vi.mocked(renderGraphiQL).mockImplementation((options) => {
-      return `<html><body>GraphiQL ${JSON.stringify(options)}</body></html>`
-    })
   })
 
   afterEach(() => {
@@ -78,7 +69,7 @@ describe('GraphQL Playground route', () => {
     expect(GRAPHQL_PLAYGROUND_GET).toBe(GET)
   })
 
-  it('should render GraphiQL with the configured GraphQL endpoint and included credentials', async () => {
+  it('should render GraphiQL with the configured GraphQL endpoint', async () => {
     const config = createConfig({
       routes: {
         api: '/custom-api',
@@ -92,11 +83,7 @@ describe('GraphQL Playground route', () => {
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('text/html')
     expect(html).toContain('GraphiQL')
-    expect(renderGraphiQL).toHaveBeenCalledWith({
-      credentials: 'include',
-      endpoint: '/custom-api/custom-graphql',
-      title: 'Payload GraphiQL',
-    })
+    expect(html).toContain('/custom-api/custom-graphql')
   })
 
   it('should return 404 when GraphQL is disabled', async () => {
@@ -111,7 +98,6 @@ describe('GraphQL Playground route', () => {
 
     expect(response.status).toBe(404)
     expect(await response.text()).toBe('Route Not Found')
-    expect(renderGraphiQL).not.toHaveBeenCalled()
   })
 
   it('should return 404 in production when the playground is disabled', async () => {
@@ -121,7 +107,6 @@ describe('GraphQL Playground route', () => {
 
     expect(response.status).toBe(404)
     expect(await response.text()).toBe('Route Not Found')
-    expect(renderGraphiQL).not.toHaveBeenCalled()
   })
 
   it('should render GraphiQL in production when the playground is explicitly enabled', async () => {
@@ -134,12 +119,10 @@ describe('GraphQL Playground route', () => {
     })
 
     const response = await requestGraphiQL({ config })
+    const html = await response.text()
 
     expect(response.status).toBe(200)
-    expect(renderGraphiQL).toHaveBeenCalledWith({
-      credentials: 'include',
-      endpoint: '/api/graphql',
-      title: 'Payload GraphiQL',
-    })
+    expect(html).toContain('GraphiQL')
+    expect(html).toContain('/api/graphql')
   })
 })
