@@ -11,6 +11,7 @@ import {
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
+import { whereSchema } from '../../../utils/whereSchema.js'
 import { validateCollectionData } from '../validateEntityData.js'
 import { formatCollectionError } from './formatCollectionError.js'
 
@@ -59,10 +60,10 @@ export const updateDocumentTool = defineCollectionTool({
         "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
       )
       .optional(),
-    // TODO: Why where a string?
-    where: z
-      .string()
-      .describe('JSON string for where clause to update multiple documents')
+    where: whereSchema
+      .describe(
+        'Where clause to update multiple documents. Use field names with Payload operators, and/or arrays for grouping. Example: {"title":{"contains":"test"}}',
+      )
       .optional(),
   }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
@@ -109,15 +110,7 @@ export const updateDocumentTool = defineCollectionTool({
 
     const parsedData = transformPointDataToPayload(inputData)
 
-    let whereClause: Where = {}
-    if (where) {
-      try {
-        whereClause = JSON.parse(where) as Where
-      } catch {
-        logger.error(`Invalid where clause JSON: ${where}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] }
-      }
-    }
+    const whereClause: Where = where ?? {}
 
     let selectClause: SelectType | undefined
     if (select) {

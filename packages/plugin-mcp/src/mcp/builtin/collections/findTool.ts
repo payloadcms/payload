@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
+import { whereSchema } from '../../../utils/whereSchema.js'
 
 const DEFAULT_DESCRIPTION =
   'Find documents in any collection by passing the collection slug and optional ID or where clause.'
@@ -67,10 +68,9 @@ export const findDocumentsTool = defineCollectionTool({
       .string()
       .describe('Field to sort by (e.g., "createdAt", "-updatedAt" for descending)')
       .optional(),
-    where: z
-      .string()
+    where: whereSchema
       .describe(
-        'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
+        'Optional: where clause for filtering. Use field names with Payload operators, and/or arrays for grouping. Example: {"title":{"contains":"test"}}',
       )
       .optional(),
   }),
@@ -85,16 +85,6 @@ export const findDocumentsTool = defineCollectionTool({
   )
 
   try {
-    let whereClause: Record<string, unknown> = {}
-    if (where) {
-      try {
-        whereClause = JSON.parse(where) as Record<string, unknown>
-      } catch {
-        logger.warn(`Invalid where clause JSON: ${where}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] }
-      }
-    }
-
     let selectClause: SelectType | undefined
     if (select) {
       try {
@@ -157,8 +147,8 @@ export const findDocumentsTool = defineCollectionTool({
     if (sort) {
       findOptions.sort = sort
     }
-    if (Object.keys(whereClause).length > 0) {
-      findOptions.where = whereClause as Parameters<typeof payload.find>[0]['where']
+    if (where) {
+      findOptions.where = where
     }
 
     const result = await payload.find(findOptions)

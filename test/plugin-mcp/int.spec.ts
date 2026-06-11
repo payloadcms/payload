@@ -197,7 +197,14 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(findDocuments.inputSchema.properties.sort).toBeDefined()
       expect(findDocuments.inputSchema.properties.sort.type).toBe('string')
       expect(findDocuments.inputSchema.properties.where).toBeDefined()
-      expect(findDocuments.inputSchema.properties.where.type).toBe('string')
+      // Where clause is a $ref to a shared recursive schema: and/or groups plus field operators
+      const whereRef: string = findDocuments.inputSchema.properties.where.$ref
+      expect(whereRef).toMatch(/^#\/\$defs\//)
+      const whereDef = findDocuments.inputSchema.$defs[whereRef.replace('#/$defs/', '')]
+      expect(whereDef.type).toBe('object')
+      expect(whereDef.properties.and.type).toBe('array')
+      expect(whereDef.properties.or.type).toBe('array')
+      expect(whereDef.additionalProperties.propertyNames.enum).toContain('equals')
 
       // Create tool: `data` wraps the collection fields, metadata fields stay top-level
       expect(createDocument.inputSchema).toBeDefined()
@@ -731,7 +738,7 @@ describe('@payloadcms/plugin-mcp', () => {
           collectionSlug: 'posts',
           limit: 1,
           page: 1,
-          where: '{"title": {"contains": "Test Post for Finding"}}',
+          where: { title: { contains: 'Test Post for Finding' } },
         },
         name: 'findDocuments',
       })
@@ -768,7 +775,7 @@ describe('@payloadcms/plugin-mcp', () => {
           limit: 1,
           page: 1,
           select: '{"title": true}',
-          where: '{"title": {"contains": "Select Test Post"}}',
+          where: { title: { contains: 'Select Test Post' } },
         },
         name: 'findDocuments',
       })
@@ -948,6 +955,109 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(callResponse.result.content[0].text).toContain(
         '"content":"Content for test post to delete."',
       )
+    })
+
+    it('should call updateDocument with object where clause', async ({ mcp }) => {
+      const matching = await payload.create({
+        collection: 'posts',
+        data: {
+          content: 'Original content',
+          title: 'Where Object Update Match',
+        },
+      })
+      const excluded = await payload.create({
+        collection: 'posts',
+        data: {
+          content: 'Original content',
+          title: 'Where Object Update Excluded',
+        },
+      })
+
+      const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          collectionSlug: 'posts',
+          data: {
+            content: 'Updated by object where',
+          },
+          where: {
+            and: [
+              { title: { like: 'Where Object Update' } },
+              { title: { not_equals: 'Where Object Update Excluded' } },
+            ],
+          },
+        },
+        name: 'updateDocument',
+      })
+
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain('Updated: 1 documents')
+      expect(callResponse.result.content[0].text).toContain('"content":"Updated by object where"')
+
+      const untouched = await payload.findByID({ id: excluded.id, collection: 'posts' })
+
+      expect(untouched.content).toBe('Original content')
+
+      await payload.delete({ id: matching.id, collection: 'posts' })
+      await payload.delete({ id: excluded.id, collection: 'posts' })
+    })
+
+    it('should call deleteDocuments with object where clause', async ({ mcp }) => {
+      await payload.create({
+        collection: 'posts',
+        data: {
+          content: 'Content for object where delete.',
+          title: 'Where Object Delete One',
+        },
+      })
+      await payload.create({
+        collection: 'posts',
+        data: {
+          content: 'Content for object where delete.',
+          title: 'Where Object Delete Two',
+        },
+      })
+
+      const apiKey = await getApiKey({ enableDelete: true })
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          collectionSlug: 'posts',
+          where: {
+            or: [
+              { title: { equals: 'Where Object Delete One' } },
+              { title: { equals: 'Where Object Delete Two' } },
+            ],
+          },
+        },
+        name: 'deleteDocuments',
+      })
+
+      expect(callResponse).toBeDefined()
+      expect(callResponse.result).toBeDefined()
+      expect(callResponse.result.content[0].type).toBe('text')
+      expect(callResponse.result.content[0].text).toContain('Deleted: 2 documents')
+      expect(callResponse.result.content[0].text).toContain('Errors: 0')
+    })
+
+    it('should reject a where clause with an invalid operator', async ({ mcp }) => {
+      const apiKey = await getApiKey()
+      const callResponse = await mcp.callTool({
+        apiKey,
+        args: {
+          collectionSlug: 'posts',
+          where: { title: { equalz: 'whatever' } },
+        },
+        name: 'findDocuments',
+      })
+
+      // The SDK surfaces schema validation failures as tool error results
+      expect(callResponse.result.isError).toBe(true)
+      expect(callResponse.result.content[0].text).toContain('Input validation error')
+      expect(callResponse.result.content[0].text).toContain('equalz')
     })
 
     it('should handle point fields with object format in createDocument', async ({ mcp }) => {
@@ -1256,7 +1366,7 @@ describe('@payloadcms/plugin-mcp', () => {
           collectionSlug: 'posts',
           limit: 1,
           page: 1,
-          where: '{"title": {"contains": "Test Post for Finding"}}',
+          where: { title: { contains: 'Test Post for Finding' } },
         },
         name: 'findDocuments',
       })
@@ -1401,7 +1511,7 @@ describe('@payloadcms/plugin-mcp', () => {
           collectionSlug: 'posts',
           limit: 1,
           page: 1,
-          where: '{"title": {"equals": "Minified JSON Test"}}',
+          where: { title: { equals: 'Minified JSON Test' } },
         },
         name: 'findDocuments',
       })
@@ -2114,7 +2224,7 @@ describe('@payloadcms/plugin-mcp', () => {
           apiKey,
           args: {
             collectionSlug: 'field-types',
-            where: '{"textField": {"equals": "Findable doc"}}',
+            where: { textField: { equals: 'Findable doc' } },
           },
           name: 'findDocuments',
         })
