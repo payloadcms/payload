@@ -49,9 +49,20 @@ export function ssrStripDistStyleImports(): PluginOption {
       }
     },
     resolveId(id, importer, options) {
-      const isServerEnv =
-        options?.ssr || ((this as any).environment && (this as any).environment.name !== 'client')
+      const envName = (this as any).environment?.name as string | undefined
+      const isServerEnv = options?.ssr || (envName && envName !== 'client')
       if (!isServerEnv) {
+        return
+      }
+      // Do NOT strip in the RSC environment. Server components (e.g. the admin
+      // `Nav`, a non-'use client' component that `import './index.css'`) render
+      // in the RSC graph, and `@vitejs/plugin-rsc` must SEE their `.css` imports
+      // there to collect them as client stylesheets. Stripping them here means
+      // their CSS is never emitted and the admin renders unstyled (broken nav
+      // scroll/layout, etc.). The Node-side `.css` no-op is handled by
+      // `cssLoader.mjs` (dev) and by Vite's CSS extraction (build), so the
+      // crash this plugin guards against does not require touching the RSC env.
+      if (envName === 'rsc') {
         return
       }
       if (!STYLE_EXTENSION_RE.test(id)) {
@@ -65,8 +76,14 @@ export function ssrStripDistStyleImports(): PluginOption {
       }
     },
     transform(code, id) {
-      const isServerEnv = (this as any).environment && (this as any).environment.name !== 'client'
+      const envName = (this as any).environment?.name as string | undefined
+      const isServerEnv = envName && envName !== 'client'
       if (!isServerEnv) {
+        return
+      }
+      // Skip the RSC env so plugin-rsc can collect server-component CSS — see
+      // the matching note in `resolveId` above.
+      if (envName === 'rsc') {
         return
       }
       // Only touch Payload dependency files: published `node_modules/.../dist/`
