@@ -54,6 +54,7 @@ export const Localizer: React.FC<{
                 return (
                   <PopupList.RadioGroupItem
                     active={locale.code === localeOption.code}
+                    disabled={locale.code === localeOption.code}
                     key={localeOption.code}
                     onClick={() => {
                       setLocaleIsLoading(true)
