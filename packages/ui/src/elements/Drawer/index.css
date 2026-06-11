@@ -6,8 +6,18 @@
     position: fixed;
     inset: 0;
 
-    --gutter-h: var(--spacer-2-5);
-    --gutter-v: var(--spacer-2-5);
+    --gutter-h: var(--spacer-4);
+    --gutter-v: var(--spacer-4);
+  }
+
+  @media (max-width: 768px) {
+    .drawer {
+      --gutter-h: var(--spacer-3);
+    }
+  }
+
+  .drawer.drawer--is-open {
+    visibility: visible;
   }
 
   .drawer__blur-bg {
@@ -15,7 +25,6 @@
     z-index: 1;
     inset: 0;
     opacity: 0;
-    transition: opacity 200ms linear;
     background: var(--color-drawer-backdrop);
   }
 
@@ -23,11 +32,13 @@
     opacity: 0;
     position: relative;
     z-index: 2;
-    width: 600px;
-    overflow: hidden;
-    transition: all 200ms linear;
+    width: clamp(600px, 40vw, 1080px);
+    max-width: 100vw;
     background-color: var(--color-bg);
     box-shadow: var(--elevation-400-menu-panel);
+    container: drawer / inline-size;
+    /* Animate the leftward shift when a nested drawer stacks on top. */
+    transition: transform 100ms ease-out;
   }
 
   .drawer__content-children {
@@ -39,31 +50,50 @@
     flex-direction: column;
   }
 
+  /*
+   * Content fades in on first render so the drawer body appears gracefully
+   * instead of snapping in. Quick + soft, never blocky.
+   */
+  .drawer__fade-in {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    animation: drawer-content-fade-in 200ms ease-out both;
+  }
+
+  @keyframes drawer-content-fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .drawer__fade-in {
+      animation: none;
+    }
+  }
+
   .drawer--is-open .drawer__content,
   .drawer--is-open .drawer__blur-bg {
     opacity: 1;
   }
 
-  .drawer--is-open .drawer__close {
-    opacity: 0.1;
-    transition: opacity 200ms linear;
-    transition-delay: 100ms;
-  }
-
+  /* Offset each ancestor drawer 16px left per drawer stacked on top of it. */
   .drawer--is-open .drawer__content {
-    transform: translateX(0);
+    transform: translateX(calc(-1 * var(--drawer-layer-offset, 0px)));
   }
 
   .drawer__close {
     position: relative;
-    z-index: 2;
+    z-index: 1;
     flex-shrink: 0;
     cursor: pointer;
-    opacity: 0;
-    transition: none;
-    transition-delay: 0ms;
     flex-grow: 1;
-    background: var(--color-drawer-backdrop);
+    background: transparent;
     border: 0;
 
     &:active,
@@ -75,10 +105,10 @@
   .drawer__header {
     display: flex;
     align-items: center;
-    padding: var(--spacer-2-5);
+    padding: var(--spacer-2-5) var(--spacer-3) var(--spacer-2-5) var(--spacer-2);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     background: var(--color-bg);
-    gap: var(--spacer-2);
+    gap: var(--spacer-1);
   }
 
   .drawer__header__title {
@@ -89,11 +119,11 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     color: var(--color-text);
-    font-family: var(--text-body-large-strong-font-family);
-    font-size: var(--text-body-large-strong-font-size);
-    font-weight: var(--text-body-large-strong-font-weight);
-    line-height: var(--text-body-large-strong-line-height);
-    letter-spacing: var(--text-body-large-strong-letter-spacing);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-strong-letter-spacing);
   }
 
   .drawer__header__close {

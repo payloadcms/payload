@@ -488,15 +488,15 @@ describe('relationship', () => {
         selector: '#field-relationship .relationship--single-value__drawer-toggler',
       })
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
-      const originalDrawerID = await drawer1Content.locator('.id-label').textContent()
+      const drawer1Title = drawer1Content.locator('.doc-drawer__title')
+      const originalDrawerID = await drawer1Title.getAttribute('data-doc-id')
       await openDocControls(drawer1Content, page)
       await page.locator('.popup__content #action-create').click()
       await wait(1000) // wait for /form-state to return
       const title = 'Created from drawer'
       await drawer1Content.locator('#field-text').fill(title)
       await saveDocAndAssert(page, '[id^=doc-drawer_text-fields_1_] .drawer__content #action-save')
-      const newDrawerID = drawer1Content.locator('.id-label')
-      await expect(newDrawerID).not.toHaveText(originalDrawerID)
+      await expect(drawer1Title).not.toHaveAttribute('data-doc-id', originalDrawerID)
       await page.locator('[id^=doc-drawer_text-fields_1_] .drawer__close').click()
       await page.locator('#field-relationship').scrollIntoViewIfNeeded()
 
@@ -545,14 +545,14 @@ describe('relationship', () => {
         selector: '#field-relationship .relationship--single-value__drawer-toggler',
       })
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
-      const originalID = await drawer1Content.locator('.id-label').textContent()
+      const drawer1Title = drawer1Content.locator('.doc-drawer__title')
+      const originalID = await drawer1Title.getAttribute('data-doc-id')
       const originalText = 'Text'
       await drawer1Content.locator('#field-text').fill(originalText)
       await saveDocAndAssert(page, '[id^=doc-drawer_text-fields_1_] .drawer__content #action-save')
       await openDocControls(drawer1Content, page)
       await page.locator('.popup__content #action-duplicate').click()
-      const duplicateID = drawer1Content.locator('.id-label')
-      await expect(duplicateID).not.toHaveText(originalID)
+      await expect(drawer1Title).not.toHaveAttribute('data-doc-id', originalID)
       await page.locator('[id^=doc-drawer_text-fields_1_] .drawer__close').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await page.locator('#field-relationship').scrollIntoViewIfNeeded()
@@ -605,7 +605,9 @@ describe('relationship', () => {
       })
 
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
-      const originalID = await drawer1Content.locator('.id-label').textContent()
+      const originalID = await drawer1Content
+        .locator('.doc-drawer__title')
+        .getAttribute('data-doc-id')
       await openDocControls(drawer1Content, page)
       await page.locator('.popup__content #action-delete').click()
 

@@ -12,7 +12,7 @@ type FocusTrapOptions = ComponentProps<typeof Modal>['focusTrapOptions']
 
 const baseClass = 'dialog'
 
-export type DialogSize = 'medium' | 'small'
+export type DialogSize = 'large' | 'medium' | 'small'
 
 export type DialogModalProps = {
   readonly children?: React.ReactNode

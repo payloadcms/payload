@@ -38,6 +38,16 @@
       }
     }
 
+    .drawer & th:first-child,
+    .drawer & td:first-child {
+      padding-inline-start: var(--spacer-3);
+    }
+
+    .drawer & th:last-child,
+    .drawer & td:last-child {
+      padding-inline-end: var(--spacer-3);
+    }
+
     /* Linked cells: move padding to the anchor for full-cell clickability */
     .cell--linked {
       padding: 0;
