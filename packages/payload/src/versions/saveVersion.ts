@@ -4,7 +4,7 @@ import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../ind
 import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
-import { getVersionsMax } from '../utilities/getVersionsConfig.js'
+import { getVersionsMax, hasLocalizeStatusEnabled } from '../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
@@ -62,6 +62,21 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
 
   if (versionData._id) {
     delete versionData._id
+  }
+
+  // When localizeStatus is enabled, _status must be stored as a localized object.
+  // Callers like restoreVersion set it as a plain string — expand it here.
+  const entity = collection ?? global
+  if (
+    entity &&
+    payload.config.localization &&
+    hasLocalizeStatusEnabled(entity) &&
+    typeof versionData._status === 'string'
+  ) {
+    const status = versionData._status
+    ;(versionData as JsonObject)._status = Object.fromEntries(
+      payload.config.localization.localeCodes.map((code) => [code, status]),
+    )
   }
 
   try {
