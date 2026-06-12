@@ -764,6 +764,43 @@ describe('Relationship Field', () => {
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })
 
+  test('should show draft-only title for related doc in list view cell', async () => {
+    // Create a related doc whose title only lives in a draft. The main collection
+    // row is created empty and the title is then saved as a draft, so the published
+    // row has no title. This reproduces the list cell rendering "(Untitled)".
+    const draftRelated = await payload.create({
+      collection: versionedRelationshipFieldSlug,
+      data: {
+        title: '',
+      },
+      draft: true,
+    })
+
+    await payload.update({
+      collection: versionedRelationshipFieldSlug,
+      id: draftRelated.id,
+      data: {
+        title: 'Draft Only Title',
+      },
+      draft: true,
+    })
+
+    // Create the doc that holds the relationship to the draft-only related doc.
+    await createVersionedRelationshipFieldDoc('Parent doc', undefined, {
+      relatedVersionedDoc: draftRelated.id,
+    })
+
+    await page.goto(versionedRelationshipFieldURL.list)
+    await wait(300)
+
+    const relationshipCell = page
+      .locator(tableRowLocator, { hasText: 'Parent doc' })
+      .locator('.cell-relatedVersionedDoc')
+
+    await expect(relationshipCell).toContainText('Draft Only Title')
+    await expect(relationshipCell).not.toContainText('Untitled - ID')
+  })
+
   describe('existing relationships', () => {
     test('should highlight existing relationship', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
