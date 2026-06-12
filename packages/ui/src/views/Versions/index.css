@@ -54,8 +54,12 @@
     width: 100%;
   }
 
-  .versions .table td.cell--linked > a:hover {
-    text-decoration: underline;
+  .versions .table td.cell--linked > a {
+    text-decoration: underline dotted var(--color-text-disabled);
+
+    &:hover {
+      text-decoration-color: currentColor;
+    }
   }
 
   .versions .paginator {

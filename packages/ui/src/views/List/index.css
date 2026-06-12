@@ -20,8 +20,12 @@
     overflow: auto;
   }
 
-  .collection-list .table table td.cell--linked > a:hover {
-    text-decoration: underline;
+  .collection-list .table table td.cell--linked > a {
+    text-decoration: underline dotted var(--color-text-disabled);
+
+    &:hover {
+      text-decoration-color: currentColor;
+    }
   }
 
   .collection-list .table table [class^='cell']:not(.cell--linked) > p,
