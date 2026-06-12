@@ -3,7 +3,10 @@ import type { FormState } from 'payload'
 import ObjectIdImport from 'bson-objectid'
 import { describe, expect, it } from 'vitest'
 
-import { mergeFormStateFromClipboard } from './mergeFormStateFromClipboard.js'
+import {
+  mergeFormStateFromClipboard,
+  reduceFormStateByPath,
+} from './mergeFormStateFromClipboard.js'
 import type { ClipboardPasteData } from './types.js'
 
 const ObjectId = (
@@ -547,6 +550,150 @@ describe('mergeFormStateFromClipboard', () => {
 
       // Check that other fields were preserved
       expect(result['disableSort.0.text'].value).toEqual('row one')
+    })
+  })
+
+  describe('prefix collision with multi-digit sibling indices', () => {
+    it('reduceFormStateByPath should not leak siblings whose indices share a digit prefix', () => {
+      // Array with 13 rows. Copying row 1 must filter out rows 10/11/12, whose
+      // paths all begin with the substring `children.1`.
+      const formState: FormState = {
+        children: {
+          valid: true,
+          value: 13,
+          rows: Array.from({ length: 13 }, () => ({ isLoading: false })),
+        },
+        'children.1.id': { value: 'id-1', valid: true },
+        'children.1.title': { value: 'Row 1', valid: true },
+        'children.10.id': { value: 'id-10', valid: true },
+        'children.10.title': { value: 'Row 10', valid: true },
+        'children.11.id': { value: 'id-11', valid: true },
+        'children.11.title': { value: 'Row 11', valid: true },
+        'children.12.id': { value: 'id-12', valid: true },
+        'children.12.title': { value: 'Row 12', valid: true },
+      }
+
+      const filtered = reduceFormStateByPath({
+        formState,
+        path: 'children',
+        rowIndex: 1,
+      })
+
+      const filteredKeys = Object.keys(filtered).sort()
+      expect(filteredKeys).toEqual(['children.1.id', 'children.1.title'])
+      expect(filtered['children.10.id']).toBeUndefined()
+      expect(filtered['children.11.id']).toBeUndefined()
+      expect(filtered['children.12.id']).toBeUndefined()
+    })
+
+    it('reduceFormStateByPath should not leak field-name siblings sharing a textual prefix', () => {
+      // `children` vs `childrenOther`: loose prefix matching pulls the wrong field's state.
+      const formState: FormState = {
+        children: { valid: true, value: 1, rows: [{ isLoading: false }] },
+        'children.0.id': { value: 'children-row', valid: true },
+        childrenOther: { valid: true, value: 1, rows: [{ isLoading: false }] },
+        'childrenOther.0.id': { value: 'other-row', valid: true },
+      }
+
+      const filtered = reduceFormStateByPath({ formState, path: 'children' })
+
+      expect(filtered['children.0.id']).toBeDefined()
+      expect(filtered.childrenOther).toBeUndefined()
+      expect(filtered['childrenOther.0.id']).toBeUndefined()
+    })
+
+    it('paste should not create out-of-bounds rows from a leaked clipboard payload', () => {
+      // Simulates the end-to-end Copy/Paste flow against an array with 13 rows. Even if a
+      // pre-fix clipboard leaked sibling rows (.10/.11/.12) when copying row 1, the merge
+      // filter must drop them rather than rewriting them to .50/.51/.52 when pasting into
+      // row 5.
+      const formState: FormState = {
+        children: {
+          valid: true,
+          value: 13,
+          rows: Array.from({ length: 13 }, () => ({
+            id: new ObjectId().toHexString(),
+            isLoading: false,
+          })),
+        },
+        'children.5.id': { value: new ObjectId().toHexString(), valid: true },
+      }
+
+      const sourceID = new ObjectId().toHexString()
+      const clipboardData: ClipboardPasteData = {
+        type: 'array',
+        path: 'children',
+        fields: [],
+        rowIndex: 1,
+        data: {
+          'children.1.id': { value: sourceID, valid: true },
+          'children.1.title': { value: 'Row 1 title', valid: true },
+          // Leaked siblings — these must be dropped, not rewritten to .50/.51/.52.
+          'children.10.id': { value: new ObjectId().toHexString(), valid: true },
+          'children.10.title': { value: 'Leaked Row 10', valid: true },
+          'children.11.id': { value: new ObjectId().toHexString(), valid: true },
+          'children.11.title': { value: 'Leaked Row 11', valid: true },
+          'children.12.id': { value: new ObjectId().toHexString(), valid: true },
+          'children.12.title': { value: 'Leaked Row 12', valid: true },
+        },
+      }
+
+      const result = mergeFormStateFromClipboard({
+        dataFromClipboard: clipboardData,
+        formState,
+        path: 'children',
+        rowIndex: 5,
+      })
+
+      // Target row populated from the source row.
+      expect(result['children.5.title'].value).toEqual('Row 1 title')
+
+      // No phantom out-of-bounds rows. These would correspond to `.10`/`.11`/`.12` being
+      // rewritten through `String.replace('children.1', 'children.5')`.
+      expect(result['children.50']).toBeUndefined()
+      expect(result['children.51']).toBeUndefined()
+      expect(result['children.52']).toBeUndefined()
+      expect(result['children.50.id']).toBeUndefined()
+      expect(result['children.51.id']).toBeUndefined()
+      expect(result['children.52.id']).toBeUndefined()
+      expect(result['children.50.title']).toBeUndefined()
+      expect(result['children.51.title']).toBeUndefined()
+      expect(result['children.52.title']).toBeUndefined()
+    })
+
+    it('row-to-field cleanup should not delete unrelated fields with a textual prefix collision', () => {
+      // `path` = 'children', `lastRenderedPath` = 'children.0'. A sibling field
+      // `childrenOther.0.title` must NOT be deleted by the cleanup loop.
+      const formState: FormState = {
+        children: { valid: true, value: 0, rows: [{ isLoading: false }] },
+        'children.0.id': { value: new ObjectId().toHexString(), valid: true },
+        childrenOther: { valid: true, value: 1, rows: [{ isLoading: false }] },
+        'childrenOther.0.id': { value: new ObjectId().toHexString(), valid: true },
+        'childrenOther.0.title': { value: 'Unrelated field', valid: true },
+      }
+
+      const sourceID = new ObjectId().toHexString()
+      const clipboardData: ClipboardPasteData = {
+        type: 'array',
+        path: 'someOtherArray',
+        fields: [],
+        rowIndex: 0,
+        data: {
+          'someOtherArray.0.id': { value: sourceID, valid: true },
+          'someOtherArray.0.title': { value: 'Pasted row', valid: true },
+        },
+      }
+
+      const result = mergeFormStateFromClipboard({
+        dataFromClipboard: clipboardData,
+        formState,
+        path: 'children',
+      })
+
+      // Unrelated `childrenOther.*` paths survive the cleanup.
+      expect(result.childrenOther).toBeDefined()
+      expect(result['childrenOther.0.id']).toBeDefined()
+      expect(result['childrenOther.0.title']?.value).toEqual('Unrelated field')
     })
   })
 })
