@@ -52,7 +52,10 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     !Object.prototype.hasOwnProperty.call(data, 'token') ||
     !Object.prototype.hasOwnProperty.call(data, 'password')
   ) {
-    throw new APIError('Missing required data.', httpStatus.BAD_REQUEST)
+    throw new APIError(
+      req.t ? req.t('error:missingRequiredData') : 'Missing required data.',
+      httpStatus.BAD_REQUEST,
+    )
   }
 
   if (collectionConfig.auth.disableLocalStrategy) {
@@ -92,7 +95,10 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     })
 
     if (!user) {
-      throw new APIError('Token is either invalid or has expired.', httpStatus.FORBIDDEN)
+      throw new APIError(
+        req.t ? req.t('error:tokenInvalidOrExpired') : 'Token is either invalid or has expired.',
+        httpStatus.FORBIDDEN,
+      )
     }
 
     // TODO: replace this method

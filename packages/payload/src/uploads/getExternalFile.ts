@@ -82,7 +82,10 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
             uploadConfig.pasteURL.allowList &&
             !isURLAllowed(fileURL, uploadConfig.pasteURL.allowList)
           ) {
-            throw new APIError('Redirect target is not allowed.', 400)
+            throw new APIError(
+              req.t ? req.t('error:redirectTargetNotAllowed') : 'Redirect target is not allowed.',
+              400,
+            )
           }
           continue
         }
@@ -105,5 +108,5 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
     }
   }
 
-  throw new APIError('Invalid file url', 400)
+  throw new APIError(req.t ? req.t('error:invalidFileURL') : 'Invalid file url', 400)
 }

@@ -49,7 +49,10 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   } = args
 
   if (!id) {
-    throw new APIError('Missing ID of version.', httpStatus.BAD_REQUEST)
+    throw new APIError(
+      req.t ? req.t('error:missingIDOfVersion') : 'Missing ID of version.',
+      httpStatus.BAD_REQUEST,
+    )
   }
 
   try {

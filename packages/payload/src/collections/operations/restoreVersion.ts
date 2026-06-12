@@ -71,7 +71,10 @@ export const restoreVersionOperation = async <
     })
 
     if (!id) {
-      throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST)
+      throw new APIError(
+        req.t ? req.t('error:missingIDOfVersionToRestore') : 'Missing ID of version to restore.',
+        httpStatus.BAD_REQUEST,
+      )
     }
 
     // /////////////////////////////////////

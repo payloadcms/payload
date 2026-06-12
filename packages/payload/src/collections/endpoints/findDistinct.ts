@@ -14,7 +14,10 @@ export const findDistinctHandler: PayloadHandler = async (req) => {
   const { depth, field, limit, page, sort, trash, where } = parseParams(req.query)
 
   if (!field) {
-    throw new APIError('field must be specified', httpStatus.BAD_REQUEST)
+    throw new APIError(
+      req.t ? req.t('error:fieldMustBeSpecified') : 'field must be specified',
+      httpStatus.BAD_REQUEST,
+    )
   }
 
   const result = await findDistinctOperation({
