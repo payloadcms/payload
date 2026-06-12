@@ -61,7 +61,6 @@ describe('@payloadcms/plugin-mcp', () => {
         collection: 'payload-mcp-api-keys',
         data: {
           apiKey: randomUUID(),
-          enableAPIKey: true,
           label: 'Test API Key',
           access: {
             collections: {
@@ -126,7 +125,6 @@ describe('@payloadcms/plugin-mcp', () => {
         collection: 'payload-mcp-api-keys',
         data: {
           apiKey: randomUUID(),
-          enableAPIKey: true,
           label: 'Last Used API Key',
           user: userId,
         },
@@ -309,7 +307,6 @@ describe('@payloadcms/plugin-mcp', () => {
             },
           },
           apiKey: randomUUID(),
-          enableAPIKey: true,
           label: 'Readable Slugs',
           user: userId,
         },
@@ -331,7 +328,6 @@ describe('@payloadcms/plugin-mcp', () => {
             },
           },
           apiKey: randomUUID(),
-          enableAPIKey: true,
           label: 'No Config Info',
           user: userId,
         },
@@ -730,7 +726,6 @@ describe('@payloadcms/plugin-mcp', () => {
             },
           },
           apiKey: randomUUID(),
-          enableAPIKey: true,
           label: 'Denied Create Document Key',
           user: userId,
         },
@@ -1183,7 +1178,6 @@ describe('@payloadcms/plugin-mcp', () => {
       const doc = await payload.create({
         collection: 'payload-mcp-api-keys',
         data: {
-          enableAPIKey: true,
           label: 'Pages API Key',
           access: {
             collections: {
@@ -1843,7 +1837,6 @@ describe('@payloadcms/plugin-mcp', () => {
       const doc = await payload.create({
         collection: 'payload-mcp-api-keys',
         data: {
-          enableAPIKey: true,
           label: 'Field Types API Key',
           access: {
             collections: {

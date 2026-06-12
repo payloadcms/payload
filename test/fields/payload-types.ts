@@ -2075,25 +2075,6 @@ export interface UiField {
  */
 export interface PayloadMcpApiKey {
   id: string;
-  /**
-   * The user that the API key is associated with.
-   */
-  user: string | User;
-  /**
-   * A useful label for the API key.
-   */
-  label?: string | null;
-  /**
-   * The purpose of the API key.
-   */
-  description?: string | null;
-  /**
-   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
-   */
-  overrideAccess?: boolean | null;
-  /**
-   * Access for this API key — uncheck to revoke individual tools.
-   */
   access?:
     | {
         [k: string]: unknown;
@@ -2103,6 +2084,22 @@ export interface PayloadMcpApiKey {
     | number
     | boolean
     | null;
+  /**
+   * A useful nickname for the API key.
+   */
+  label?: string | null;
+  /**
+   * Describe the purpose of the API key.
+   */
+  description?: string | null;
+  /**
+   * The user the MCP will act as.
+   */
+  user: string | User;
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -3922,11 +3919,11 @@ export interface UiFieldsSelect<T extends boolean = true> {
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  user?: T;
+  access?: T;
   label?: T;
   description?: T;
+  user?: T;
   overrideAccess?: T;
-  access?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
