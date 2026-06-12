@@ -65,9 +65,9 @@ export const getAPIKeysCollection = ({
         name: 'lastUsed',
         type: 'date',
         admin: {
+          condition: (_, _siblingData, { operation }) => operation !== 'create',
           date: { pickerAppearance: 'dayAndTime' },
           position: 'sidebar',
-          readOnly: true,
         },
         label: ({ t }) => t('plugin-mcp:lastUsed'),
       },
