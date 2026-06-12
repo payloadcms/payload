@@ -3390,6 +3390,52 @@ describe('Localization', () => {
 
         expect(enPublishedAfter.title).toBe('Published EN')
       })
+
+      describe('copyDataFromLocale - globals', () => {
+        it('copies undefined fields from a source locale to a target locale on a global', async () => {
+          await payload.updateGlobal({
+            slug: 'localized-global-for-copy',
+            data: { title: 'Hello', group: { subtitle: 'World' } },
+            locale: 'en',
+          })
+
+          await payload.updateGlobal({
+            slug: 'localized-global-for-copy',
+            data: { title: null, group: { subtitle: null } },
+            locale: 'es',
+          })
+
+          const req = await createLocalReq({ user }, payload)
+          await copyDataFromLocaleHandler({
+            fromLocale: 'en',
+            globalSlug: 'localized-global-for-copy',
+            overrideData: false,
+            req,
+            toLocale: 'es',
+          })
+
+          const result = await payload.findGlobal({
+            slug: 'localized-global-for-copy',
+            locale: 'es',
+            draft: true,
+          })
+          expect(result.title).toBe('Hello')
+          expect(result.group?.subtitle).toBe('World')
+        })
+
+        it('throws a clear error when the global slug does not exist', async () => {
+          const req = await createLocalReq({ user }, payload)
+          await expect(
+            copyDataFromLocaleHandler({
+              fromLocale: 'en',
+              globalSlug: 'does-not-exist' as never,
+              overrideData: false,
+              req,
+              toLocale: 'es',
+            }),
+          ).rejects.toThrow(/can't be found/)
+        })
+      })
     })
 
     describe('Multiple fallback locales', () => {
