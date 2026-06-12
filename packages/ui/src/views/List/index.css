@@ -20,6 +20,10 @@
     overflow: auto;
   }
 
+  .collection-list .table table td.cell--linked > a:hover {
+    text-decoration: underline;
+  }
+
   .collection-list .table table [class^='cell']:not(.cell--linked) > p,
   .collection-list .table table [class^='cell']:not(.cell--linked) > span,
   .collection-list .table table [class^='cell']:not(.cell--linked) > a {
