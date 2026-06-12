@@ -180,5 +180,20 @@ describe('getFileKey', () => {
       })
       expect(result.fileKey).not.toContain('..')
     })
+
+    it('should sanitize filenames with trailing dots consistently with upload filename generation', () => {
+      const result = getFileKey({
+        collectionPrefix: 'collection',
+        filename: 'My Photo...png',
+        useCompositePrefixes: false,
+      })
+
+      expect(result).toEqual({
+        fileKey: 'collection/My Photo.png',
+        sanitizedCollectionPrefix: 'collection',
+        sanitizedDocPrefix: '',
+        sanitizedFilename: 'My Photo.png',
+      })
+    })
   })
 })
