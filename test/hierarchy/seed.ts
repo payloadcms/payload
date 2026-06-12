@@ -9,6 +9,16 @@ export async function seed(payload: Payload): Promise<void> {
     data: { title: 'Acme Corp' },
   })
 
+  await payload.create({
+    collection: organizationsSlug,
+    data: { title: 'Beta Corp' },
+  })
+
+  await payload.create({
+    collection: organizationsSlug,
+    data: { title: 'Gamma Corp' },
+  })
+
   const engineeringDiv = await payload.create({
     collection: organizationsSlug,
     data: { parent: acmeCorp.id, title: 'Engineering Division' },
@@ -28,6 +38,23 @@ export async function seed(payload: Payload): Promise<void> {
     collection: organizationsSlug,
     data: { parent: acmeCorp.id, title: 'Marketing Division' },
   })
+
+  await payload.create({
+    collection: organizationsSlug,
+    data: { parent: acmeCorp.id, title: 'Zeta Division' },
+  })
+
+  const pagedDivision = await payload.create({
+    collection: organizationsSlug,
+    data: { parent: acmeCorp.id, title: 'Paged Division' },
+  })
+
+  for (let i = 1; i <= 5; i++) {
+    await payload.create({
+      collection: organizationsSlug,
+      data: { parent: pagedDivision.id, title: `Paged Team ${i}` },
+    })
+  }
 
   // Create department hierarchy (tests custom field names)
   const hrDept = await payload.create({

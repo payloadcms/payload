@@ -152,6 +152,55 @@ test.describe('Hierarchy Sidebar', () => {
       // Child should be hidden
       await expect(tree.getByText('Engineering Division')).toBeHidden()
     })
+
+    test('should navigate tree via keyboard and load more with Enter without navigation', async () => {
+      const prefs = await payload.find({
+        collection: 'payload-preferences',
+        where: { key: { equals: 'hierarchy-tree-organizations' } },
+      })
+      for (const pref of prefs.docs) {
+        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+      }
+
+      await page.goto(`${serverURL}/admin`)
+      await openNav(page)
+      await page.getByRole('tab', { name: 'Organizations' }).click()
+
+      const tree = page.getByRole('tree')
+      await expect(tree).toBeVisible()
+
+      const getActiveText = async () =>
+        page.evaluate(() => (document.activeElement?.textContent || '').trim())
+
+      const getActiveClass = async () =>
+        page.evaluate(() => (document.activeElement?.className || '').toString())
+
+      // Focus the first tree node, then close/open with arrows for deterministic keyboard flow
+      const acmeNode = tree.locator('.tree-node').first()
+      await expect(acmeNode).toBeVisible()
+      await acmeNode.focus()
+      await expect.poll(getActiveText).toContain('Acme Corp')
+      await page.keyboard.press('ArrowLeft')
+      await expect(acmeNode).toHaveAttribute('aria-expanded', 'false')
+
+      // Open Acme with ArrowRight, then navigate vertically through root nodes
+      await page.keyboard.press('ArrowRight')
+      await expect(acmeNode).toHaveAttribute('aria-expanded', 'true')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Beta Corp')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveClass).toContain('tree__load-more-button')
+
+      // Enter should load more children, not navigate
+      const urlBefore = page.url()
+      await page.keyboard.press('Enter')
+      await expect(page).toHaveURL(urlBefore)
+      await expect(tree.getByRole('treeitem', { name: /Gamma Corp/ })).toBeVisible()
+
+      // Continue vertical navigation into the newly loaded root node
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Gamma Corp')
+    })
   })
 
   test.describe('Sidebar Tab Visibility', () => {
