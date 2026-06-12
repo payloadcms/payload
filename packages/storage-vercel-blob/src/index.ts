@@ -30,6 +30,16 @@ export type VercelBlobStorageOptions = {
   addRandomSuffix?: boolean
 
   /**
+   * Allow overwriting an existing blob with the same key. Passed through to
+   * `@vercel/blob`'s `put()`. Useful when `addRandomSuffix: false` is combined
+   * with `clientUploads: true`, where a failed upload can leave an orphan blob
+   * that blocks a retry with `"This blob already exists"`.
+   *
+   * @default false
+   */
+  allowOverwrite?: boolean
+
+  /**
    * When enabled, fields (like the prefix field) will always be inserted into
    * the collection schema regardless of whether the plugin is enabled. This
    * ensures a consistent schema across all environments.
@@ -91,6 +101,7 @@ export type VercelBlobStorageOptions = {
 const defaultUploadOptions: Partial<VercelBlobStorageOptions> = {
   access: 'public',
   addRandomSuffix: false,
+  allowOverwrite: false,
   cacheControlMaxAge: 60 * 60 * 24 * 365, // 1 year
   enabled: true,
 }
@@ -137,12 +148,14 @@ export const vercelBlobStorage: VercelBlobStorageFactory = (
       enabled: !isPluginDisabled && Boolean(options.clientUploads),
       extraClientHandlerProps: () => ({
         addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
+        allowOverwrite: !!optionsWithDefaults.allowOverwrite,
         useCompositePrefixes: !!options.useCompositePrefixes,
       }),
       serverHandler: getClientUploadRoute({
         access:
           typeof options.clientUploads === 'object' ? options.clientUploads.access : undefined,
         addRandomSuffix: optionsWithDefaults.addRandomSuffix,
+        allowOverwrite: optionsWithDefaults.allowOverwrite,
         cacheControlMaxAge: options.cacheControlMaxAge,
         token: options.token ?? '',
       }),
@@ -174,6 +187,7 @@ export const vercelBlobStorage: VercelBlobStorageFactory = (
     const adapter = createVercelBlobAdapter({
       access: optionsWithDefaults.access ?? 'public',
       addRandomSuffix: optionsWithDefaults.addRandomSuffix,
+      allowOverwrite: optionsWithDefaults.allowOverwrite,
       baseUrl,
       cacheControlMaxAge: optionsWithDefaults.cacheControlMaxAge ?? 60 * 60 * 24 * 365,
       clientUploads: optionsWithDefaults.clientUploads,
