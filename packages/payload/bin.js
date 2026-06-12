@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { spawnSync } from 'node:child_process'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -17,20 +19,35 @@ if (disableTranspile) {
 
   void start()
 } else {
+  const require = createRequire(import.meta.url)
   const filename = fileURLToPath(import.meta.url)
   const dirname = path.dirname(filename)
   const url = pathToFileURL(dirname).toString() + '/'
 
   if (!useSwc) {
-    const start = async () => {
-      // Use tsx
-      let tsImport = (await import('tsx/esm/api')).tsImport
+    const binPath = path.resolve(dirname, 'dist/bin/index.js')
+    const binURL = pathToFileURL(binPath).href
+    const tsxLoader = require.resolve('tsx')
+    const script = `
+      process.argv = [process.argv[0], ${JSON.stringify(binPath)}, ...process.argv.slice(1)]
+      import(${JSON.stringify(binURL)})
+        .then(({ bin }) => bin())
+        .catch((error) => {
+          console.error(error)
+          process.exit(1)
+        })
+    `
+    const result = spawnSync(process.execPath, ['--import', tsxLoader, '--eval', script, ...process.argv.slice(2)], {
+      cwd: process.cwd(),
+      env: process.env,
+      stdio: 'inherit',
+    })
 
-      const { bin } = await tsImport('./dist/bin/index.js', url)
-      await bin()
+    if (result.error) {
+      throw result.error
     }
 
-    void start()
+    process.exit(result.status ?? 1)
   } else if (useSwc) {
     const { register } = await import('node:module')
     // Remove --use-swc from arguments
