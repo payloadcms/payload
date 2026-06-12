@@ -545,6 +545,8 @@ export const plTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj plik',
     addFiles: 'Dodaj pliki',
     bulkUpload: 'Załaduj masowo',
+    couldNotReadFileForTypeDetection: 'Nie można odczytać przesłanego pliku w celu wykrycia typu.',
+    couldNotReadFileForValidation: 'Nie można odczytać przesłanego pliku do walidacji.',
     crop: 'Przytnij',
     cropToolDescription:
       'Przeciągnij narożniki wybranego obszaru, narysuj nowy obszar lub dostosuj poniższe wartości.',
@@ -556,21 +558,28 @@ export const plTranslations: DefaultTranslationsObject = {
     fileSize: 'Rozmiar pliku',
     filesToUpload: 'Pliki do przesłania',
     fileToUpload: 'Plik do przesłania',
+    fileTypeNotAllowed:
+      'Typ pliku {{mimeType}} (wynikający z rozszerzenia {{extension}}) nie jest dozwolony.',
     focalPoint: 'Punkt centralny',
     focalPointDescription:
       'Przeciągnij punkt centralny bezpośrednio na podglądzie lub dostosuj wartości poniżej.',
     height: 'Wysokość',
+    invalidMimeType: 'Nieprawidłowy typ MIME: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Nieprawidłowy lub uszkodzony plik PDF.',
     lessInfo: 'Mniej informacji',
     moreInfo: 'Więcej informacji',
     noFile: 'Brak pliku',
     pasteURL: 'Wklej URL',
     previewSizes: 'Rozmiary podglądu',
+    restrictedFileType:
+      'Typ pliku „{{mimeType}}” nie jest dozwolony dla {{fileName}}: wykryto ograniczony typ pliku — aby pominąć to sprawdzenie dla tej kolekcji, ustaw opcję „allowRestrictedFileTypes” na true.',
     selectCollectionToBrowse: 'Wybierz kolekcję aby przejrzeć',
     selectFile: 'Wybierz plik',
     setCropArea: 'Ustaw obszar kadrowania',
     setFocalPoint: 'Ustawić punkt ogniskowy',
     sizes: 'Rozmiary',
     sizesFor: 'Rozmiary dla {{label}}',
+    svgHarmfulContent: 'Plik SVG zawiera potencjalnie szkodliwe treści.',
     width: 'Szerokość',
   },
   validation: {

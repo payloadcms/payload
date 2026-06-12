@@ -551,6 +551,9 @@ export const huTranslations: DefaultTranslationsObject = {
     addFile: 'Fájl hozzáadása',
     addFiles: 'Fájlok hozzáadása',
     bulkUpload: 'Tömeges feltöltés',
+    couldNotReadFileForTypeDetection:
+      'Nem sikerült beolvasni a feltöltött fájlt a típus meghatározásához.',
+    couldNotReadFileForValidation: 'Nem sikerült beolvasni a feltöltött fájlt az érvényesítéshez.',
     crop: 'Termés',
     cropToolDescription:
       'Húzza a kijelölt terület sarkait, rajzoljon új területet, vagy igazítsa a lentebb található értékeket.',
@@ -562,21 +565,28 @@ export const huTranslations: DefaultTranslationsObject = {
     fileSize: 'Fájl mérete',
     filesToUpload: 'Feltöltendő fájlok',
     fileToUpload: 'Feltöltendő fájl',
+    fileTypeNotAllowed:
+      'A(z) {{mimeType}} fájltípus (a(z) {{extension}} kiterjesztés alapján) nem engedélyezett.',
     focalPoint: 'Fókuszpont',
     focalPointDescription:
       'Húzza az érdekes pontot közvetlenül az előnézetre, vagy állítsa be az alábbi értékeket.',
     height: 'Magasság',
+    invalidMimeType: 'Érvénytelen MIME-típus: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Érvénytelen vagy sérült PDF fájl.',
     lessInfo: 'Kevesebb információ',
     moreInfo: 'További információ',
     noFile: 'Nincs fájl',
     pasteURL: 'URL beillesztése',
     previewSizes: 'Előnézeti méretek',
+    restrictedFileType:
+      "A(z) '{{mimeType}}' fájltípus nem engedélyezett a(z) {{fileName}} esetében: korlátozott fájltípus észlelve — állítsa az 'allowRestrictedFileTypes' beállítást igazra, hogy kihagyja ezt az ellenőrzést ennél a Collection-nél.",
     selectCollectionToBrowse: 'Válassza ki a böngészni kívánt gyűjteményt',
     selectFile: 'Válasszon ki egy fájlt',
     setCropArea: 'Állítsa be a vágási területet',
     setFocalPoint: 'Állítsa be a fókuszpontot',
     sizes: 'Méretek',
     sizesFor: 'Méretek a {{címke}} számára',
+    svgHarmfulContent: 'Az SVG fájl potenciálisan veszélyes tartalmat tartalmaz.',
     width: 'Szélesség',
   },
   validation: {

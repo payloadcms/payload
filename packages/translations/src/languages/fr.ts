@@ -558,6 +558,9 @@ export const frTranslations: DefaultTranslationsObject = {
     addFile: 'Ajouter un fichier',
     addFiles: 'Ajouter des fichiers',
     bulkUpload: 'Téléchargement en masse',
+    couldNotReadFileForTypeDetection:
+      'Impossible de lire le fichier téléchargé pour la détection du type.',
+    couldNotReadFileForValidation: 'Impossible de lire le fichier téléchargé pour la validation.',
     crop: 'Recadrer',
     cropToolDescription:
       'Faites glisser les coins de la zone sélectionnée, dessinez une nouvelle zone ou ajustez les valeurs ci-dessous.',
@@ -569,21 +572,28 @@ export const frTranslations: DefaultTranslationsObject = {
     fileSize: 'Taille du fichier',
     filesToUpload: 'Fichiers à télécharger',
     fileToUpload: 'Fichier à télécharger',
+    fileTypeNotAllowed:
+      'Le type de fichier {{mimeType}} (issue de l’extension {{extension}}) n’est pas autorisé.',
     focalPoint: 'Point focal',
     focalPointDescription:
       'Faites glisser le point focal directement sur l’aperçu ou ajustez les valeurs ci-dessous.',
     height: 'Hauteur',
+    invalidMimeType: 'Type MIME invalide : {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Fichier PDF invalide ou corrompu.',
     lessInfo: 'Moins d’infos',
     moreInfo: 'Plus d’infos',
     noFile: 'Aucun fichier',
     pasteURL: "Coller l'URL",
     previewSizes: 'Tailles d’aperçu',
+    restrictedFileType:
+      'Type de fichier « {{mimeType}} » non autorisé pour {{fileName}} : type de fichier restreint détecté — définissez « allowRestrictedFileTypes » sur true pour ignorer ce contrôle pour cette Collection.',
     selectCollectionToBrowse: 'Sélectionnez une collection à parcourir',
     selectFile: 'Sélectionnez un fichier',
     setCropArea: 'Définir la zone de recadrage',
     setFocalPoint: 'Définir le point focal',
     sizes: 'Tailles',
     sizesFor: 'Tailles pour {{label}}',
+    svgHarmfulContent: 'Le fichier SVG contient un contenu potentiellement nuisible.',
     width: 'Largeur',
   },
   validation: {

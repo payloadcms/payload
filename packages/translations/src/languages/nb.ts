@@ -548,6 +548,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     addFile: 'Legg til fil',
     addFiles: 'Legg til filer',
     bulkUpload: 'Bulk opplasting',
+    couldNotReadFileForTypeDetection:
+      'Kunne ikke lese den opplastede filen for å bestemme filtypen.',
+    couldNotReadFileForValidation: 'Kunne ikke lese den opplastede filen for validering.',
     crop: 'Beskjær',
     cropToolDescription:
       'Dra hjørnene av det valgte området, tegn et nytt område eller juster verdiene nedenfor.',
@@ -559,21 +562,27 @@ export const nbTranslations: DefaultTranslationsObject = {
     fileSize: 'Filstørrelse',
     filesToUpload: 'Filer til opplasting',
     fileToUpload: 'Fil til opplasting',
+    fileTypeNotAllowed: 'Filtype {{mimeType}} (fra filendelse {{extension}}) er ikke tillatt.',
     focalPoint: 'Fokuspunkt',
     focalPointDescription:
       'Dra fokuspunktet direkte på forhåndsvisningen eller juster verdiene nedenfor.',
     height: 'Høyde',
+    invalidMimeType: 'Ugyldig MIME-type: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Ugyldig eller ødelagt PDF-fil.',
     lessInfo: 'Mindre info',
     moreInfo: 'Mer info',
     noFile: 'Ingen fil',
     pasteURL: 'Lim inn URL',
     previewSizes: 'Forhåndsvisningsstørrelser',
+    restrictedFileType:
+      "Filtype '{{mimeType}}' er ikke tillatt for {{fileName}}: begrenset filtype oppdaget — sett 'allowRestrictedFileTypes' til true for å hoppe over denne kontrollen for denne kolleksjonen.",
     selectCollectionToBrowse: 'Velg en samling å bla i',
     selectFile: 'Velg en fil',
     setCropArea: 'Angi beskjæringsområde',
     setFocalPoint: 'Angi fokuspunkt',
     sizes: 'Størrelser',
     sizesFor: 'Størrelser for {{label}}',
+    svgHarmfulContent: 'SVG-filen inneholder potensielt skadelig innhold.',
     width: 'Bredde',
   },
   validation: {

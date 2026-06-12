@@ -552,6 +552,9 @@ export const esTranslations: DefaultTranslationsObject = {
     addFile: 'Añadir archivo',
     addFiles: 'Añadir archivos',
     bulkUpload: 'Subida en lotes',
+    couldNotReadFileForTypeDetection:
+      'No se pudo leer el archivo cargado para la detección de tipo.',
+    couldNotReadFileForValidation: 'No se pudo leer el archivo cargado para la validación.',
     crop: 'Recortar',
     cropToolDescription:
       'Arrastra las esquinas del área seleccionada, dibuja un nuevo área o ajusta los valores a continuación.',
@@ -563,21 +566,28 @@ export const esTranslations: DefaultTranslationsObject = {
     fileSize: 'Tamaño del archivo',
     filesToUpload: 'Archivos para subir',
     fileToUpload: 'Archivo para subir',
+    fileTypeNotAllowed:
+      'El tipo de archivo {{mimeType}} (según la extensión {{extension}}) no está permitido.',
     focalPoint: 'Punto Focal',
     focalPointDescription:
       'Arrastra el punto focal directamente en la vista previa o ajusta los valores a continuación.',
     height: 'Alto',
+    invalidMimeType: 'Tipo MIME no válido: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Archivo PDF inválido o dañado.',
     lessInfo: 'Menos info',
     moreInfo: 'Más info',
     noFile: 'Ningún archivo',
     pasteURL: 'Pegar URL',
     previewSizes: 'Tamaños de Vista Previa',
+    restrictedFileType:
+      "Tipo de archivo '{{mimeType}}' no permitido para {{fileName}}: se ha detectado un tipo de archivo restringido — configure 'allowRestrictedFileTypes' en verdadero para omitir esta verificación en esta Colección.",
     selectCollectionToBrowse: 'Selecciona una Colección para navegar',
     selectFile: 'Selecciona un archivo',
     setCropArea: 'Establecer área de recorte',
     setFocalPoint: 'Establecer punto focal',
     sizes: 'Tamaños',
     sizesFor: 'Tamaños para {{label}}',
+    svgHarmfulContent: 'El archivo SVG contiene contenido potencialmente dañino.',
     width: 'Ancho',
   },
   validation: {

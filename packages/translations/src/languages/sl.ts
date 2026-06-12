@@ -545,6 +545,9 @@ export const slTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteko',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Množično nalaganje',
+    couldNotReadFileForTypeDetection: 'Nalaganje datoteke ni uspelo prebrati za zaznavo vrste.',
+    couldNotReadFileForValidation:
+      'Naložene datoteke ni bilo mogoče prebrati za namen preverjanja veljavnosti.',
     crop: 'Obreži',
     cropToolDescription:
       'Povlecite kote izbranega območja, narišite novo območje ali prilagodite vrednosti spodaj.',
@@ -556,21 +559,28 @@ export const slTranslations: DefaultTranslationsObject = {
     fileSize: 'Velikost datoteke',
     filesToUpload: 'Datoteke za nalaganje',
     fileToUpload: 'Datoteka za nalaganje',
+    fileTypeNotAllowed:
+      'Vrsta datoteke {{mimeType}} (glede na pripono {{extension}}) ni dovoljena.',
     focalPoint: 'Žarišče',
     focalPointDescription:
       'Povlecite žarišče neposredno na predogledu ali prilagodite vrednosti spodaj.',
     height: 'Višina',
+    invalidMimeType: 'Neveljavna vrsta MIME: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Neveljavna ali poškodovana datoteka PDF.',
     lessInfo: 'Manj informacij',
     moreInfo: 'Več informacij',
     noFile: 'Ni datoteke.',
     pasteURL: 'Prilepi URL',
     previewSizes: 'Velikosti predogleda',
+    restrictedFileType:
+      "Vrsta datoteke '{{mimeType}}' ni dovoljena za {{fileName}}: zaznana je omejena vrsta datoteke — nastavite 'allowRestrictedFileTypes' na true, da preskočite to preverjanje za to Collection.",
     selectCollectionToBrowse: 'Izberite zbirko za brskanje',
     selectFile: 'Izberite datoteko',
     setCropArea: 'Nastavi območje obrezovanja',
     setFocalPoint: 'Nastavi žarišče',
     sizes: 'Velikosti',
     sizesFor: 'Velikosti za {{label}}',
+    svgHarmfulContent: 'Datoteka SVG vsebuje potencialno nevarno vsebino.',
     width: 'Širina',
   },
   validation: {

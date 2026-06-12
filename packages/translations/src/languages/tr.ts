@@ -552,6 +552,8 @@ export const trTranslations: DefaultTranslationsObject = {
     addFile: 'Dosya ekle',
     addFiles: 'Dosya Ekle',
     bulkUpload: 'Toplu Yükleme',
+    couldNotReadFileForTypeDetection: 'Tür tespiti için yüklenen dosya okunamadı.',
+    couldNotReadFileForValidation: 'Doğrulama için yüklenen dosya okunamadı.',
     crop: 'Mahsulat',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',
@@ -563,21 +565,28 @@ export const trTranslations: DefaultTranslationsObject = {
     fileSize: 'Dosya boyutu',
     filesToUpload: 'Yüklemek için Dosyalar',
     fileToUpload: 'Yüklenecek Dosya',
+    fileTypeNotAllowed:
+      '{{extension}} uzantısından gelen {{mimeType}} dosya türüne izin verilmemektedir.',
     focalPoint: 'Odak Noktası',
     focalPointDescription:
       'Önizlemeye odak noktasını doğrudan sürükleyin veya aşağıdaki değerleri ayarlayın.',
     height: 'Yükseklik',
+    invalidMimeType: 'Geçersiz MIME türü: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Geçersiz veya bozulmuş PDF dosyası.',
     lessInfo: 'Daha az bilgi',
     moreInfo: 'Daha fazla bilgi',
     noFile: 'Dosya yok',
     pasteURL: 'URL yapıştır',
     previewSizes: 'Önizleme Boyutları',
+    restrictedFileType:
+      "'{{mimeType}}' dosya türü, {{fileName}} için izin verilmemektedir: kısıtlanmış dosya türü tespit edildi — bu kontrolü atlamak için ilgili Collection üzerinde 'allowRestrictedFileTypes' seçeneğini true olarak ayarlayın.",
     selectCollectionToBrowse: 'Görüntülenecek bir koleksiyon seçin',
     selectFile: 'Dosya seç',
     setCropArea: 'Mahsul alanını ayarla',
     setFocalPoint: 'Odak noktasını ayarla',
     sizes: 'Boyutlar',
     sizesFor: '{{label}} için boyutlar',
+    svgHarmfulContent: 'SVG dosyası potansiyel olarak zararlı içerik içermektedir.',
     width: 'Genişlik',
   },
   validation: {

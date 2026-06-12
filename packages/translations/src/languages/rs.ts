@@ -545,6 +545,9 @@ export const rsTranslations: DefaultTranslationsObject = {
     addFile: 'Додај датотеку',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Masovno otpremanje',
+    couldNotReadFileForTypeDetection:
+      'Nije bilo moguće pročitati otpremljenu datoteku radi detekcije tipa.',
+    couldNotReadFileForValidation: 'Nije moguće pročitati otpremljenu datoteku za validaciju.',
     crop: 'Исеците слику',
     cropToolDescription:
       'Превуците углове изабраног подручја, нацртајте ново подручје или прилагодите вредности испод.',
@@ -556,21 +559,27 @@ export const rsTranslations: DefaultTranslationsObject = {
     fileSize: 'Величина датотеке',
     filesToUpload: 'Fajlovi za otpremanje',
     fileToUpload: 'Fajl za otpremanje',
+    fileTypeNotAllowed: 'Tip fajla {{mimeType}} (prema ekstenziji {{extension}}) nije dozvoljen.',
     focalPoint: 'Централна тачка',
     focalPointDescription:
       'Превуците средишњу тачку директно на преглед или прилагодите вредности испод.',
     height: 'Висина',
+    invalidMimeType: 'Nevažeći MIME tip: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Nevažeći ili oštećen PDF fajl.',
     lessInfo: 'Мање информација',
     moreInfo: 'Више информација',
     noFile: 'Nema fajla',
     pasteURL: 'Налепи URL',
     previewSizes: 'Величине прегледа',
+    restrictedFileType:
+      "Tip fajla '{{mimeType}}' nije dozvoljen za {{fileName}}: otkriven je ograničeni tip fajla — podesite 'allowRestrictedFileTypes' na true da biste preskočili ovu proveru za ovu Collection.",
     selectCollectionToBrowse: 'Одаберите колекцију за преглед',
     selectFile: 'Одаберите датотеку',
     setCropArea: 'Поставите подручје за исечену слику',
     setFocalPoint: 'Поставите централну тачку',
     sizes: 'Величине',
     sizesFor: 'Величине за {{label}}',
+    svgHarmfulContent: 'SVG fajl sadrži potencijalno štetan sadržaj.',
     width: 'Ширина',
   },
   validation: {

@@ -546,6 +546,8 @@ export const taTranslations: DefaultTranslationsObject = {
     addFile: 'கோப்பை சேர்க்கவும்',
     addFiles: 'கோப்புகளை சேர்க்கவும்',
     bulkUpload: 'மொத்தமாக பதிவேற்றம்',
+    couldNotReadFileForTypeDetection: 'வகை கண்டறிதலுக்கு பதிவேற்றப்பட்ட கோப்பை படிக்க முடியவில்லை.',
+    couldNotReadFileForValidation: 'சரிபார்ப்பிற்காக பதிவேற்றப்பட்ட கோப்பை படிக்க முடியவில்லை.',
     crop: 'வெட்டுக',
     cropToolDescription:
       'தேர்ந்த பகுதியின் மூலைகளை இழுத்து, புதிய பகுதியை வரையுங்கள் அல்லது கீழே உள்ள மதிப்புகளைச் சரிசெய்யவும்.',
@@ -557,21 +559,28 @@ export const taTranslations: DefaultTranslationsObject = {
     fileSize: 'கோப்பின் அளவு',
     filesToUpload: 'பதிவேற்ற வேண்டிய கோப்புகள்',
     fileToUpload: 'பதிவேற்ற வேண்டிய கோப்பு',
+    fileTypeNotAllowed:
+      'கோப்பு வகை {{mimeType}} (நீட்டிப்பு {{extension}} மூலம்) அனுமதிக்கப்படவில்லை.',
     focalPoint: 'கவனம் செலுத்தும் புள்ளி',
     focalPointDescription:
       'முன்னோட்டத்தில் புள்ளியை நேரடியாக இழுத்து விடவும் அல்லது கீழே உள்ள மதிப்புகளை மாற்றவும்.',
     height: 'உயரம்',
+    invalidMimeType: 'தவறான MIME வகை: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'தவறான அல்லது சேதமடைந்த PDF கோப்பு.',
     lessInfo: 'குறைந்த தகவல்',
     moreInfo: 'மேலும் தகவல்',
     noFile: 'கோப்பு இல்லை',
     pasteURL: 'URL ஒட்டுக',
     previewSizes: 'முன்னோட்ட அளவுகள்',
+    restrictedFileType:
+      "கோப்பு வகை '{{mimeType}}' {{fileName}}க்குச் அனுமதிக்கப்படவில்லை: கட்டுப்படுத்தப்பட்ட கோப்பு வகை கண்டறியப்பட்டுள்ளது — இந்த Collection-க்கான இந்த சரிபார்ப்பை தவிர்க்க 'allowRestrictedFileTypes' ஐ true ஆக அமைக்கவும்.",
     selectCollectionToBrowse: 'உலாவ தொகுப்பைத் தேர்ந்தெடுக்கவும்',
     selectFile: 'கோப்பைத் தேர்ந்தெடுக்கவும்',
     setCropArea: 'வெட்டும் பகுதியை அமைக்கவும்',
     setFocalPoint: 'கவனப்புள்ளியை அமைக்கவும்',
     sizes: 'அளவுகள்',
     sizesFor: '{{label}} க்கான அளவுகள்',
+    svgHarmfulContent: 'SVG கோப்பு தீங்குகள் ஏற்படுத்தக்கூடிய உள்ளடக்கத்தை கொண்டிருக்கலாம்.',
     width: 'அகலம்',
   },
   validation: {

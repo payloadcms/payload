@@ -555,6 +555,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     addFile: 'Bestand toevoegen',
     addFiles: 'Bestanden toevoegen',
     bulkUpload: 'Bulk Upload',
+    couldNotReadFileForTypeDetection: 'Kan het geüploade bestand niet lezen voor type detectie.',
+    couldNotReadFileForValidation: 'Kan het geüploade bestand niet lezen voor validatie.',
     crop: 'Bijsnijden',
     cropToolDescription:
       'Sleep de hoeken van het geselecteerde gebied, teken een nieuw gebied of pas de waarden hieronder aan.',
@@ -566,21 +568,28 @@ export const nlTranslations: DefaultTranslationsObject = {
     fileSize: 'Bestandsgrootte',
     filesToUpload: 'Bestanden om te uploaden',
     fileToUpload: 'Bestand om te uploaden',
+    fileTypeNotAllowed:
+      'Bestandstype {{mimeType}} (op basis van extensie {{extension}}) is niet toegestaan.',
     focalPoint: 'Focuspunt',
     focalPointDescription:
       'Sleep het focuspunt rechtstreeks op de voorvertoning of pas de waarden hieronder aan.',
     height: 'Hoogte',
+    invalidMimeType: 'Ongeldig MIME-type: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Ongeldig of beschadigd PDF-bestand.',
     lessInfo: 'Minder info',
     moreInfo: 'Meer info',
     noFile: 'Geen bestand',
     pasteURL: 'URL plakken',
     previewSizes: 'Voorbeeldgroottes',
+    restrictedFileType:
+      "Bestandstype '{{mimeType}}' niet toegestaan voor {{fileName}}: beperkt bestandstype gedetecteerd — stel 'allowRestrictedFileTypes' in op true om deze controle over te slaan voor deze collectie.",
     selectCollectionToBrowse: 'Selecteer een collectie om door te bladeren',
     selectFile: 'Selecteer een bestand',
     setCropArea: 'Stel bijsnijdgebied in',
     setFocalPoint: 'Stel het brandpunt in',
     sizes: 'Groottes',
     sizesFor: 'Maten voor {{label}}',
+    svgHarmfulContent: 'SVG-bestand bevat mogelijk schadelijke inhoud.',
     width: 'Breedte',
   },
   validation: {

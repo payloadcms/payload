@@ -554,6 +554,8 @@ export const myTranslations: DefaultTranslationsObject = {
     addFile: 'ဖိုင်ထည့်ပါ',
     addFiles: 'Tambah Fail',
     bulkUpload: 'Muat naik pukal',
+    couldNotReadFileForTypeDetection: 'တင်ထားသော ဖိုင်ကို အမျိုးအစားစိစစ်ရန် ဖတ်နိုင်ခြင်း မရှိပါ။',
+    couldNotReadFileForValidation: 'အတည်ပြုရန်ဖိုင်တင်သွင်းမှုကို ဖတ်ရှုနိုင်ခြင်းမရှိပါ။',
     crop: 'သုန်း',
     cropToolDescription:
       'ရွေးထားသည့်ဧရိယာတွင်မွေးလျှက်မှုများကိုဆွဲပြီး, အသစ်တည်ပြီးသို့မဟုတ်အောက်ပါတ',
@@ -565,21 +567,29 @@ export const myTranslations: DefaultTranslationsObject = {
     fileSize: 'ဖိုင် အရွယ်အစား',
     filesToUpload: 'Fail untuk Dimuat Naik',
     fileToUpload: 'ဖိုင်တင်ရန်',
+    fileTypeNotAllowed:
+      'ဖိုင်အမျိုးအစား {{mimeType}} (extension မှာ {{extension}} ဖြစ်သည်) ကို ခွင့်ပြုထားခြင်းမရှိပါ။',
     focalPoint: 'အကန့်အသတ်ချုပ်',
     focalPointDescription:
       'ပြသနားရထားသည့်ပုံအားထိန်းသိမ်းရန် ဖိုကယ်ပိုင်းကို တိုက်ရိုက်ပွဲ့နိုင်သည် သို',
     height: 'Height',
+    invalidMimeType: 'အတည်ပြုမရသော MIME အမျိုးအစား: {{mimeType}}။',
+    invalidOrCorruptedPDF: 'PDF ဖိုင်မှာ မမှန်ကန်ခြင်း သို့မဟုတ် ဖျက်စီးမှု ရှိနေပါသည်။',
     lessInfo: 'အချက်အလက်နည်းတယ်။',
     moreInfo: 'အချက်အလက်',
     noFile: 'Tiada fail',
     pasteURL: 'URL ကို ကူးထည့်ပါ',
     previewSizes: 'Saiz Pratonton',
+    restrictedFileType:
+      "ဖိုင်အမျိုးအစား '{{mimeType}}' သည် {{fileName}} အတွက် ခွင့်ပြုထားသော ဖိုင်အမျိုးအစားမဟုတ်ပါ - ကန့်သတ်ထားသော ဖိုင်အမျိုးအစား တွေ့ရှိပါသည်။ ဤ collection အတွက် ဤစစ်ဆေးမှုကို ကျော်လွှားလိုပါက 'allowRestrictedFileTypes' ကို true သို့ သတ်မှတ်ပါ။",
     selectCollectionToBrowse: 'စုစည်းမှု တစ်ခုခုကို ရွေးချယ်ပါ။',
     selectFile: 'ဖိုင်ရွေးပါ။',
     setCropArea: 'စပြန်းနယ်မြေထားပါ',
     setFocalPoint: 'အစေခံဖောက်ရေစနစ်ကိုသတ်မှတ်ပါ',
     sizes: 'အရွယ်အစားများ',
     sizesFor: '{{label}} အတွက် အရွယ်အစားများ',
+    svgHarmfulContent:
+      'SVG ဖိုင်တွင် ဖြစ်နိုင်ခြေရှိသည့် အန္တရာယ်ရှိသော အကြောင်းအရာများ ပါဝင်နိုင်သည်။',
     width: 'အကျယ်',
   },
   validation: {

@@ -557,6 +557,10 @@ export const deTranslations: DefaultTranslationsObject = {
     addFile: 'Datei hinzufügen',
     addFiles: 'Dateien hinzufügen',
     bulkUpload: 'Mehrere Dateien hochladen',
+    couldNotReadFileForTypeDetection:
+      'Hochgeladene Datei konnte zum Zweck der Typenerkennung nicht gelesen werden.',
+    couldNotReadFileForValidation:
+      'Hochgeladene Datei konnte zur Validierung nicht gelesen werden.',
     crop: 'Zuschneiden',
     cropToolDescription:
       'Ziehe die Ecken des ausgewählten Bereichs, zeichne einen neuen Bereich oder passe die Werte unten an.',
@@ -568,21 +572,28 @@ export const deTranslations: DefaultTranslationsObject = {
     fileSize: 'Dateigröße',
     filesToUpload: 'Dateien zum Hochladen',
     fileToUpload: 'Datei zum Hochladen',
+    fileTypeNotAllowed:
+      'Dateityp {{mimeType}} (basierend auf der Erweiterung {{extension}}) ist nicht erlaubt.',
     focalPoint: 'Fokuspunkt',
     focalPointDescription:
       'Setze den Fokuspunkt direkt auf der Vorschau oder passe die Werte unten an.',
     height: 'Höhe',
+    invalidMimeType: 'Ungültiger MIME-Typ: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Ungültige oder beschädigte PDF-Datei.',
     lessInfo: 'Weniger Info',
     moreInfo: 'Mehr Info',
     noFile: 'Keine Datei',
     pasteURL: 'URL einfügen',
     previewSizes: 'Bildgrößen anzeigen',
+    restrictedFileType:
+      "Dateityp '{{mimeType}}' ist für {{fileName}} nicht erlaubt: Eingeschränkter Dateityp erkannt — setzen Sie 'allowRestrictedFileTypes' auf true, um diese Prüfung für diese Collection zu überspringen.",
     selectCollectionToBrowse: 'Eine Sammlung zum Durchsuchen auswählen',
     selectFile: 'Datei auswählen',
     setCropArea: 'Zuschneide-Bereich festlegen',
     setFocalPoint: 'Fokuspunkt setzen',
     sizes: 'Bildgrößen',
     sizesFor: 'Bildgrößen für {{label}}',
+    svgHarmfulContent: 'Die SVG-Datei enthält möglicherweise schädliche Inhalte.',
     width: 'Breite',
   },
   validation: {

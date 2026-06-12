@@ -545,6 +545,9 @@ export const isTranslations: DefaultTranslationsObject = {
     addFile: 'Bæta við skrá',
     addFiles: 'Bæta við skrám',
     bulkUpload: 'Magn upphal',
+    couldNotReadFileForTypeDetection:
+      'Ekki tókst að lesa upphlaðna skrá til að greina tegund hennar.',
+    couldNotReadFileForValidation: 'Ekki tókst að lesa innhlaðna skrá til sannprófunar.',
     crop: 'Skera',
     cropToolDescription:
       'Dragðu horn valda svæðisins, teiknaðu nýtt svæði eða stilltu gildin hér að neðan.',
@@ -556,21 +559,27 @@ export const isTranslations: DefaultTranslationsObject = {
     fileSize: 'Skráarstærð',
     filesToUpload: 'Skrár til að hlaða upp',
     fileToUpload: 'Skrá til að hlaða upp',
+    fileTypeNotAllowed: 'Skráartegundin {{mimeType}} (með endingunni {{extension}}) er ekki leyfð.',
     focalPoint: 'Brennipunktur',
     focalPointDescription:
       'Dragðu brennipunktinn beint á forskoðunina eða stilltu gildin hér að neðan.',
     height: 'Hæð',
+    invalidMimeType: 'Ógild MIME tegund: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Ógild eða skemmd PDF-skrá.',
     lessInfo: 'Minni upplýsingar',
     moreInfo: 'Fleiri upplýsingar',
     noFile: 'Engin skrá',
     pasteURL: 'Líma vefslóð',
     previewSizes: 'Forskoðunarstærðir',
+    restrictedFileType:
+      "Skráartegundin '{{mimeType}}' er ekki leyfð fyrir {{fileName}}: takmörkuð skráartegund greind — stilltu 'allowRestrictedFileTypes' á satt til að sleppa þessari athugun fyrir þessa Collection.",
     selectCollectionToBrowse: 'Veldu safn til að skoða',
     selectFile: 'Veldu skrá',
     setCropArea: 'Stilla klippingarsvæði',
     setFocalPoint: 'Stilla brennipunkt',
     sizes: 'Stærðir',
     sizesFor: 'Stærðir fyrir {{label}}',
+    svgHarmfulContent: 'SVG skrá inniheldur mögulega skaðlegt efni.',
     width: 'Breidd',
   },
   validation: {

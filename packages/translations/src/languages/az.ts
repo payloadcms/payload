@@ -551,6 +551,9 @@ export const azTranslations: DefaultTranslationsObject = {
     addFile: 'Fayl əlavə et',
     addFiles: 'Faylları Əlavə Edin',
     bulkUpload: 'Kütləvi Yükləmə',
+    couldNotReadFileForTypeDetection:
+      'Yüklənmiş faylın tipinin müəyyən edilməsi üçün oxunması mümkün olmadı.',
+    couldNotReadFileForValidation: 'Yüklənmiş faylın yoxlanılması üçün oxunması mümkün olmadı.',
     crop: 'Məhsul',
     cropToolDescription:
       'Seçilmiş sahənin köşələrini sürükləyin, yeni bir sahə çəkin və ya aşağıdakı dəyərləri düzəltin.',
@@ -562,21 +565,27 @@ export const azTranslations: DefaultTranslationsObject = {
     fileSize: 'Faylım Ölçüsü',
     filesToUpload: 'Yükləmək üçün fayllar',
     fileToUpload: 'Yükləmək üçün Fayl',
+    fileTypeNotAllowed: 'Fayl növü {{mimeType}} (uzantısı {{extension}} olan) icazə verilmir.',
     focalPoint: 'Mərkəzi Nöqtə',
     focalPointDescription:
       'Fokus nöqtəsini birbaşa önizləməyə sürükləyin və ya aşağıdakı dəyərləri düzəltin.',
     height: 'Hündürlük',
+    invalidMimeType: 'Etibarsız MIME növü: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Etibarsız və ya zədələnmiş PDF faylı.',
     lessInfo: 'Daha az məlumat',
     moreInfo: 'Daha çox məlumat',
     noFile: 'Heç bir fayl',
     pasteURL: 'URL yapışdır',
     previewSizes: 'Öncədən baxış ölçüləri',
+    restrictedFileType:
+      "{{fileName}} üçün '{{mimeType}}' fayl növünə icazə verilmir: məhdudlaşdırılmış fayl növü aşkarlandı — bu yoxlamanı bu Collection üçün keçmək üçün 'allowRestrictedFileTypes' parametrini true olaraq təyin edin.",
     selectCollectionToBrowse: 'Gözdən keçirmək üçün bir Kolleksiya seçin',
     selectFile: 'Fayl seçin',
     setCropArea: 'Məhsul sahəsini təyin et',
     setFocalPoint: 'Fokus nöqtəsi təyin et',
     sizes: 'Ölçülər',
     sizesFor: '{{label}} üçün ölçülər',
+    svgHarmfulContent: 'SVG faylı potensial zərərli məzmun ehtiva edir.',
     width: 'En',
   },
   validation: {

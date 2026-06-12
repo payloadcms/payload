@@ -53,6 +53,7 @@ export const checkFileRestrictions = async ({
   req,
 }: checkFileRestrictionsParams): Promise<void> => {
   const errors: string[] = []
+  const { t } = req
   const { upload: uploadConfig } = collection
   const configMimeTypes =
     uploadConfig &&
@@ -106,9 +107,12 @@ export const checkFileRestrictions = async ({
       _fileBuffer = await fs.readFile(tempFilePath)
       return _fileBuffer
     } catch {
-      throw new ValidationError({
-        errors: [{ message: 'Could not read uploaded file for validation.', path: 'file' }],
-      })
+      throw new ValidationError(
+        {
+          errors: [{ message: t('upload:couldNotReadFileForValidation'), path: 'file' }],
+        },
+        t,
+      )
     }
   }
 
@@ -121,9 +125,12 @@ export const checkFileRestrictions = async ({
           ? await fileTypeFromFile(tempFilePath)
           : await fileTypeFromBuffer(file.data)
     } catch {
-      throw new ValidationError({
-        errors: [{ message: 'Could not read uploaded file for type detection.', path: 'file' }],
-      })
+      throw new ValidationError(
+        {
+          errors: [{ message: t('upload:couldNotReadFileForTypeDetection'), path: 'file' }],
+        },
+        t,
+      )
     }
     const typeFromExtension = file.name.split('.').pop() || ''
 
@@ -146,14 +153,17 @@ export const checkFileRestrictions = async ({
 
       if (!extIsValid) {
         errors.push(
-          `File type ${mimeTypeFromExtension} (from extension ${typeFromExtension}) is not allowed.`,
+          t('upload:fileTypeNotAllowed', {
+            extension: typeFromExtension,
+            mimeType: mimeTypeFromExtension,
+          }),
         )
       } else {
         // SVG security check (text-based files not detectable by buffer)
         if (typeFromExtension.toLowerCase() === 'svg') {
           const isSafeSvg = validateSvg(await getFileBuffer())
           if (!isSafeSvg) {
-            errors.push('SVG file contains potentially harmful content.')
+            errors.push(t('upload:svgHarmfulContent'))
           }
         }
 
@@ -161,7 +171,7 @@ export const checkFileRestrictions = async ({
         if (mimeTypeFromExtension === 'application/pdf') {
           const isValidPDF = validatePDF(await getFileBuffer())
           if (!isValidPDF) {
-            errors.push('Invalid or corrupted PDF file.')
+            errors.push(t('upload:invalidOrCorruptedPDF'))
           }
         }
       }
@@ -178,12 +188,12 @@ export const checkFileRestrictions = async ({
     if (passesMimeTypeCheck && detected?.mime === 'application/pdf') {
       const isValidPDF = validatePDF(await getFileBuffer())
       if (!isValidPDF) {
-        errors.push('Invalid PDF file.')
+        errors.push(t('upload:invalidOrCorruptedPDF'))
       }
     }
 
     if (detected && !passesMimeTypeCheck) {
-      errors.push(`Invalid MIME type: ${detected.mime}.`)
+      errors.push(t('upload:invalidMimeType', { mimeType: detected.mime }))
     }
   } else {
     const isRestricted = RESTRICTED_FILE_EXT_AND_TYPES.some((type) => {
@@ -193,15 +203,21 @@ export const checkFileRestrictions = async ({
     })
     if (isRestricted) {
       errors.push(
-        `File type '${file.mimetype}' not allowed ${file.name}: Restricted file type detected -- set 'allowRestrictedFileTypes' to true to skip this check for this Collection.`,
+        t('upload:restrictedFileType', {
+          fileName: file.name,
+          mimeType: file.mimetype,
+        }),
       )
     }
   }
 
   if (errors.length > 0) {
     req.payload.logger.error(errors.join(', '))
-    throw new ValidationError({
-      errors: [{ message: errors.join(', '), path: 'file' }],
-    })
+    throw new ValidationError(
+      {
+        errors: [{ message: errors.join(', '), path: 'file' }],
+      },
+      t,
+    )
   }
 }

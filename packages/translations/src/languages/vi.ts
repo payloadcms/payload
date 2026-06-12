@@ -546,6 +546,8 @@ export const viTranslations: DefaultTranslationsObject = {
     addFile: 'Thêm tập tin',
     addFiles: 'Thêm tệp',
     bulkUpload: 'Tải lên số lượng lớn',
+    couldNotReadFileForTypeDetection: 'Không thể đọc tệp đã tải lên để phát hiện loại tệp.',
+    couldNotReadFileForValidation: 'Không thể đọc tệp đã tải lên để xác thực.',
     crop: 'Cắt xén',
     cropToolDescription:
       'Kéo các góc của khu vực đã chọn, vẽ một khu vực mới hoặc điều chỉnh các giá trị dưới đây.',
@@ -557,21 +559,28 @@ export const viTranslations: DefaultTranslationsObject = {
     fileSize: 'Dung lượng file',
     filesToUpload: 'Tệp để Tải lên',
     fileToUpload: 'Tệp để Tải lên',
+    fileTypeNotAllowed:
+      'Loại tệp {{mimeType}} (từ phần mở rộng {{extension}}) không được cho phép.',
     focalPoint: 'Điểm trọng tâm',
     focalPointDescription:
       'Kéo điểm tiêu điểm trực tiếp trên ảnh xem trước hoặc điều chỉnh giá trị bên dưới.',
     height: 'Chiều cao',
+    invalidMimeType: 'Loại MIME không hợp lệ: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Tệp PDF không hợp lệ hoặc bị hỏng.',
     lessInfo: 'Hiển thị ít hơn',
     moreInfo: 'Xem thêm',
     noFile: 'Không có tệp',
     pasteURL: 'Dán URL',
     previewSizes: 'Kích cỡ xem trước',
+    restrictedFileType:
+      "Kiểu tệp '{{mimeType}}' không được phép cho {{fileName}}: phát hiện loại tệp bị hạn chế — hãy đặt 'allowRestrictedFileTypes' thành true để bỏ qua kiểm tra này cho Collection này.",
     selectCollectionToBrowse: 'Chọn một Collection để tìm',
     selectFile: 'Chọn một file',
     setCropArea: 'Đặt khu vực cắt',
     setFocalPoint: 'Đặt điểm tiêu điểm',
     sizes: 'Các độ phân giải',
     sizesFor: 'Kích thước cho {{label}}',
+    svgHarmfulContent: 'Tệp SVG chứa nội dung có thể gây hại.',
     width: 'Chiều rộng',
   },
   validation: {

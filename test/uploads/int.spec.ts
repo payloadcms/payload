@@ -1137,6 +1137,7 @@ describe('Collections - Uploads', () => {
             config: { upload: { useTempFiles: true } },
             logger: { warn: () => {}, error: () => {} },
           },
+          t: (key: string) => key,
         } as unknown as PayloadRequest
 
         afterEach(async () => {

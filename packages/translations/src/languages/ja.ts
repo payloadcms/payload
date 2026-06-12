@@ -546,6 +546,10 @@ export const jaTranslations: DefaultTranslationsObject = {
     addFile: 'ファイルを追加',
     addFiles: 'ファイルを追加する',
     bulkUpload: '一括アップロード',
+    couldNotReadFileForTypeDetection:
+      'タイプ検出のためにアップロードされたファイルを読み取ることができませんでした。',
+    couldNotReadFileForValidation:
+      'バリデーションのためにアップロードされたファイルを読み取ることができませんでした。',
     crop: 'クロップ',
     cropToolDescription:
       '選択したエリアのコーナーをドラッグしたり、新たなエリアを描画したり、下記の値を調整してください。',
@@ -557,20 +561,26 @@ export const jaTranslations: DefaultTranslationsObject = {
     fileSize: 'ファイル容量',
     filesToUpload: 'アップロードするファイル',
     fileToUpload: 'アップロードするファイル',
+    fileTypeNotAllowed: 'ファイルタイプ{{mimeType}}（拡張子{{extension}}）は許可されていません。',
     focalPoint: '焦点',
     focalPointDescription: 'プレビュー上で焦点を直接ドラッグするか、下の値を調整してください。',
     height: '高さ',
+    invalidMimeType: '無効なMIMEタイプ: {{mimeType}}。',
+    invalidOrCorruptedPDF: '無効または破損したPDFファイルです。',
     lessInfo: '詳細を隠す',
     moreInfo: '詳細を表示',
     noFile: 'ファイルなし',
     pasteURL: 'URLを貼り付け',
     previewSizes: 'プレビューサイズ',
+    restrictedFileType:
+      'ファイルタイプ「{{mimeType}}」は{{fileName}}に許可されていません：制限されたファイルタイプが検出されました。このコレクションでこのチェックをスキップするには、「allowRestrictedFileTypes」をtrueに設定してください。',
     selectCollectionToBrowse: '閲覧するコレクションを選択',
     selectFile: 'ファイルを選択',
     setCropArea: 'クロップエリアを設定する',
     setFocalPoint: '焦点を設定する',
     sizes: '容量',
     sizesFor: '{{label}}のサイズ',
+    svgHarmfulContent: 'SVG ファイルには潜在的に有害なコンテンツが含まれています。',
     width: '横幅',
   },
   validation: {

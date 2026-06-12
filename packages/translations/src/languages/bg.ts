@@ -545,6 +545,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     addFile: 'Добавяне на файл',
     addFiles: 'Добави файлове',
     bulkUpload: 'Масово Качване',
+    couldNotReadFileForTypeDetection: 'Не може да се прочете каченият файл за определяне на типа.',
+    couldNotReadFileForValidation: 'Неуспешно прочитане на качения файл за валидиране.',
     crop: 'Изрязване',
     cropToolDescription:
       'Плъзни ъглите на избраната област, избери нова област или коригирай стойностите по-долу.',
@@ -556,21 +558,28 @@ export const bgTranslations: DefaultTranslationsObject = {
     fileSize: 'Големина на файла',
     filesToUpload: 'Файлове за качване',
     fileToUpload: 'Файл за качване',
+    fileTypeNotAllowed:
+      'Типът на файла {{mimeType}} (от разширението {{extension}}) не е разрешен.',
     focalPoint: 'Фокусна точка',
     focalPointDescription:
       'Премести фокусната точка директно върху визуализацията или регулирай стойностите по-долу.',
     height: 'Височина',
+    invalidMimeType: 'Невалиден MIME тип: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Невалиден или повреден PDF файл.',
     lessInfo: 'По-малко информация',
     moreInfo: 'Повече информация',
     noFile: 'Няма файл',
     pasteURL: 'Поставяне на URL',
     previewSizes: 'Преглед на размери',
+    restrictedFileType:
+      "Типът на файла '{{mimeType}}' не е разрешен за {{fileName}}: открит е ограничен тип файл — задайте 'allowRestrictedFileTypes' на стойност true, за да пропуснете тази проверка за тази Collection.",
     selectCollectionToBrowse: 'Избери колекция, която да разгледаш',
     selectFile: 'Избери файл',
     setCropArea: 'Задай област за изрязване',
     setFocalPoint: 'Задай фокусна точка',
     sizes: 'Големини',
     sizesFor: 'Размери за {{label}}',
+    svgHarmfulContent: 'SVG файлът съдържа потенциално вредно съдържание.',
     width: 'Ширина',
   },
   validation: {

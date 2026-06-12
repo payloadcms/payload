@@ -545,6 +545,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Masovno dodavanje',
+    couldNotReadFileForTypeDetection:
+      'Nije bilo moguće pročitati učitanu datoteku za određivanje vrste.',
+    couldNotReadFileForValidation: 'Nije moguće pročitati učitanu datoteku za provjeru valjanosti.',
     crop: 'Izreži',
     cropToolDescription:
       'Povucite kutove odabranog područja, nacrtajte novo područje ili prilagodite vrijednosti ispod.',
@@ -556,21 +559,28 @@ export const hrTranslations: DefaultTranslationsObject = {
     fileSize: 'Veličina datoteke',
     filesToUpload: 'Datoteke za učitavanje',
     fileToUpload: 'Datoteka za prijenos',
+    fileTypeNotAllowed:
+      'Vrsta datoteke {{mimeType}} (prema ekstenziji {{extension}}) nije dopuštena.',
     focalPoint: 'Središnja točka',
     focalPointDescription:
       'Povucite središnju točku izravno na pregledu ili prilagodite vrijednosti ispod.',
     height: 'Visina',
+    invalidMimeType: 'Neispravna MIME vrsta: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Neispravna ili oštećena PDF datoteka.',
     lessInfo: 'Manje informacija',
     moreInfo: 'Više informacija',
     noFile: 'Nema datoteke',
     pasteURL: 'Zalijepi URL',
     previewSizes: 'Veličine pregleda',
+    restrictedFileType:
+      "Vrsta datoteke '{{mimeType}}' nije dopuštena za {{fileName}}: otkrivena je ograničena vrsta datoteke — postavite 'allowRestrictedFileTypes' na true kako biste preskočili ovu provjeru za ovu Collection.",
     selectCollectionToBrowse: 'Odaberite kolekciju za pregled',
     selectFile: 'Odaberite datoteku',
     setCropArea: 'Postavi područje usjeva',
     setFocalPoint: 'Postavi fokusnu točku',
     sizes: 'Veličine',
     sizesFor: 'Veličine za {{label}}',
+    svgHarmfulContent: 'SVG datoteka sadrži potencijalno štetan sadržaj.',
     width: 'Širina',
   },
   validation: {

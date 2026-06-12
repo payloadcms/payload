@@ -549,6 +549,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     addFile: 'Ավելացնել ֆայլ',
     addFiles: 'Ավելացնել ֆայլեր',
     bulkUpload: 'Զանգվածային վերբեռնում',
+    couldNotReadFileForTypeDetection:
+      'Հնարավոր չէ ընթերցել վերբեռնված ֆայլը տեսակի հայտնաբերման համար։',
+    couldNotReadFileForValidation: 'Չհաջողվեց կարդալ վերբեռնված ֆայլը վավերացնելու համար։',
     crop: 'Կտրել',
     cropToolDescription:
       'Քաշեք ընտրված տարածքի անկյունները, նշեք նոր տարածք կամ կարգավորեք ստորև նշված արժեքները։',
@@ -560,21 +563,28 @@ export const hyTranslations: DefaultTranslationsObject = {
     fileSize: 'Ֆայլի չափ',
     filesToUpload: 'Վերբեռնման ֆայլեր',
     fileToUpload: 'Վերբեռնման ֆայլ',
+    fileTypeNotAllowed:
+      'Ֆայլի տիպը {{mimeType}} (մանրամասնության հիման վրա՝ {{extension}}) թույլատրելի չէ։',
     focalPoint: 'Կիզակետ',
     focalPointDescription:
       'Քաշեք կիզակետը անմիջապես նախադիտման վրա կամ կարգավորեք ստորև նշված արժեքները։',
     height: 'Բարձրություն',
+    invalidMimeType: 'Անվավեր MIME տեսակ։ {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Անվավեր կամ վնասված PDF ֆայլ։',
     lessInfo: 'Ավելի քիչ տեղեկություն',
     moreInfo: 'Ավելի շատ տեղեկություն',
     noFile: 'Ֆայլ չկա',
     pasteURL: 'Տեղադրել URL',
     previewSizes: 'Նախադիտման չափեր',
+    restrictedFileType:
+      "Ֆայլի տեսակը «{{mimeType}}» թույլատրելի չէ {{fileName}} ֆայլի համար. հայտնաբերվել է սահմանափակված ֆայլին տեսակ — սահմանեք 'allowRestrictedFileTypes'-ը true արժեքին՝ այս հավաքածուի համար այս ստուգումը շրջանցելու համար:",
     selectCollectionToBrowse: 'Ընտրեք հավաքածու՝ դիտելու համար',
     selectFile: 'Ընտրեք ֆայլ',
     setCropArea: 'Սահմանել կտրվող տարածքի չափը',
     setFocalPoint: 'Սահմանել կիզակետ',
     sizes: 'Չափեր',
     sizesFor: 'Չափեր {{label}}-ի համար',
+    svgHarmfulContent: 'SVG ֆայլը պարունակում է հնարավոր վտանգավոր բովանդակություն:',
     width: 'Լայնություն',
   },
   validation: {

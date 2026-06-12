@@ -552,6 +552,9 @@ export const roTranslations: DefaultTranslationsObject = {
     addFile: 'Adaugă fișier',
     addFiles: 'Adăugați fișiere',
     bulkUpload: 'Încărcare în masă',
+    couldNotReadFileForTypeDetection:
+      'Nu s-a putut citi fișierul încărcat pentru detectarea tipului.',
+    couldNotReadFileForValidation: 'Nu s-a putut citi fișierul încărcat pentru validare.',
     crop: 'Cultură',
     cropToolDescription:
       'Trageți colțurile zonei selectate, desenați o nouă zonă sau ajustați valorile de mai jos.',
@@ -563,21 +566,27 @@ export const roTranslations: DefaultTranslationsObject = {
     fileSize: 'Dimensiunea fișierului',
     filesToUpload: 'Fișiere de încărcat',
     fileToUpload: 'Fișier de încărcat',
+    fileTypeNotAllowed: 'Tipul de fișier {{mimeType}} (din extensia {{extension}}) nu este permis.',
     focalPoint: 'Punct central',
     focalPointDescription:
       'Trageți punctul focal direct pe previzualizare sau ajustați valorile de mai jos.',
     height: 'Înălțime',
+    invalidMimeType: 'Tip MIME invalid: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Fișier PDF invalid sau corupt.',
     lessInfo: 'Mai puține informații',
     moreInfo: 'Mai multe informații',
     noFile: 'Niciun fișier',
     pasteURL: 'Lipește URL',
     previewSizes: 'Dimensiuni Previzualizare',
+    restrictedFileType:
+      "Tip de fișier '{{mimeType}}' nepermis pentru {{fileName}}: a fost detectat un tip de fișier restricționat — setați 'allowRestrictedFileTypes' la true pentru a omite această verificare pentru această Collection.",
     selectCollectionToBrowse: 'Selectați o colecție pentru navigare',
     selectFile: 'Selectați un fișier',
     setCropArea: 'Setați zona de decupare',
     setFocalPoint: 'Setează punctul focal',
     sizes: 'Dimensiuni',
     sizesFor: 'Mărimi pentru {{label}}',
+    svgHarmfulContent: 'Fișierul SVG conține conținut potențial periculos.',
     width: 'Lățime',
   },
   validation: {

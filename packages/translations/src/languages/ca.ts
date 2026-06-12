@@ -549,6 +549,9 @@ export const caTranslations: DefaultTranslationsObject = {
     addFile: 'Afegir fitxer',
     addFiles: 'Afegir fitxers',
     bulkUpload: 'Carregar arxius massius',
+    couldNotReadFileForTypeDetection:
+      "No s'ha pogut llegir el fitxer penjat per a la detecció del tipus.",
+    couldNotReadFileForValidation: 'No s’ha pogut llegir el fitxer carregat per a la validació.',
     crop: 'Retallar',
     cropToolDescription:
       'Arrossega les cantonades de l’àrea seleccionada, dibuixa una nova àrea o ajusta els valors a continuació.',
@@ -560,21 +563,28 @@ export const caTranslations: DefaultTranslationsObject = {
     fileSize: 'Mida del fitxer',
     filesToUpload: 'Fitxers a carregar',
     fileToUpload: 'Fitxer a carregar',
+    fileTypeNotAllowed:
+      "El tipus de fitxer {{mimeType}} (de l'extensió {{extension}}) no està permès.",
     focalPoint: 'Punt focal',
     focalPointDescription:
       'Arrossega el punt focal directament sobre la vista prèvia o ajusta els valors a continuació.',
     height: 'Alçada',
+    invalidMimeType: 'Tipus MIME no vàlid: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Arxiu PDF invàlid o malmès.',
     lessInfo: 'Menys informació',
     moreInfo: 'Més informació',
     noFile: 'No hi ha cap fitxer',
     pasteURL: "Enganxa l'URL",
     previewSizes: 'Mides de la vista prèvia',
+    restrictedFileType:
+      "El tipus de fitxer '{{mimeType}}' no està permès per a {{fileName}}: s'ha detectat un tipus de fitxer restringit — activeu 'allowRestrictedFileTypes' a vertader per ometre aquesta comprovació per a aquesta Collection.",
     selectCollectionToBrowse: 'Selecciona una col·lecció per explorar',
     selectFile: 'Selecciona un fitxer',
     setCropArea: "Estableix l'àrea de retall",
     setFocalPoint: 'Estableix el punt focal',
     sizes: 'Mides',
     sizesFor: 'Mides per a {{label}}',
+    svgHarmfulContent: "L'arxiu SVG conté contingut potencialment perjudicial.",
     width: 'Amplada',
   },
   validation: {

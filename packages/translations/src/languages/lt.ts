@@ -547,6 +547,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     addFile: 'Pridėti failą',
     addFiles: 'Pridėti failus',
     bulkUpload: 'Masinis įkėlimas',
+    couldNotReadFileForTypeDetection: 'Nepavyko nuskaityti įkelto failo tipo nustatymui.',
+    couldNotReadFileForValidation:
+      'Nepavyko perskaityti įkelto failo, kad būtų galima atlikti patvirtinimą.',
     crop: 'Pasėlis',
     cropToolDescription:
       'Temkite pasirinktos srities kampus, nubrėžkite naują sritį arba koreguokite žemiau esančias reikšmes.',
@@ -558,21 +561,27 @@ export const ltTranslations: DefaultTranslationsObject = {
     fileSize: 'Failo dydis',
     filesToUpload: 'Įkelti failai',
     fileToUpload: 'Įkelti failą',
+    fileTypeNotAllowed: 'Failo tipas {{mimeType}} (pagal plėtinį {{extension}}) nėra leidžiamas.',
     focalPoint: 'Fokuso Taškas',
     focalPointDescription:
       'Temkite fokusavimo tašką tiesiogiai peržiūroje arba reguliuokite žemiau esančias reikšmes.',
     height: 'Aukštis',
+    invalidMimeType: 'Neteisingas MIME tipas: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Neteisingas arba sugadintas PDF failas.',
     lessInfo: 'Mažiau informacijos',
     moreInfo: 'Daugiau informacijos',
     noFile: 'Nėra failo',
     pasteURL: 'Įklijuokite URL',
     previewSizes: 'Peržiūros dydžiai',
+    restrictedFileType:
+      'Failo tipas ‘{{mimeType}}’ neleidžiamas failui {{fileName}}: aptiktas apribotas failo tipas — nustatykite ‘allowRestrictedFileTypes’ reikšmę į true, kad praleistumėte šį patikrinimą šiai Collection.',
     selectCollectionToBrowse: 'Pasirinkite kolekciją, kurią norėtumėte naršyti',
     selectFile: 'Pasirinkite failą',
     setCropArea: 'Nustatykite pjovimo plotą',
     setFocalPoint: 'Nustatyti fokuso tašką',
     sizes: 'Dydžiai',
     sizesFor: 'Dydžiai skirti {{label}}',
+    svgHarmfulContent: 'SVG failas gali turėti potencialiai žalingo turinio.',
     width: 'Plotis',
   },
   validation: {

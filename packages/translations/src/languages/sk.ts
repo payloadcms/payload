@@ -544,6 +544,8 @@ export const skTranslations: DefaultTranslationsObject = {
     addFile: 'Pridať súbor',
     addFiles: 'Pridať súbory',
     bulkUpload: 'Hromadné nahranie',
+    couldNotReadFileForTypeDetection: 'Nepodarilo sa prečítať nahraný súbor na detekciu typu.',
+    couldNotReadFileForValidation: 'Nepodarilo sa prečítať nahraný súbor na účely overenia.',
     crop: 'Orezať',
     cropToolDescription:
       'Potiahnite rohy vybranej oblasti, nakreslite novú oblasť alebo upravte hodnoty nižšie.',
@@ -555,21 +557,28 @@ export const skTranslations: DefaultTranslationsObject = {
     fileSize: 'Veľkosť súboru',
     filesToUpload: 'Súbory na nahranie',
     fileToUpload: 'Súbor na nahranie',
+    fileTypeNotAllowed:
+      'Typ súboru {{mimeType}} (na základe prípony {{extension}}) nie je povolený.',
     focalPoint: 'Stredobod',
     focalPointDescription:
       'Potiahnite bod stredobodu priamo na náhľad alebo upravte hodnoty nižšie.',
     height: 'Výška',
+    invalidMimeType: 'Neplatný typ MIME: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Neplatný alebo poškodený PDF súbor.',
     lessInfo: 'Menej informácií',
     moreInfo: 'Viac informácií',
     noFile: 'Žiadny súbor',
     pasteURL: 'Vložiť URL',
     previewSizes: 'Náhľady veľkostí',
+    restrictedFileType:
+      "Typ súboru '{{mimeType}}' nie je povolený pre {{fileName}}: zistený obmedzený typ súboru — nastavte 'allowRestrictedFileTypes' na hodnotu true, aby ste túto kontrolu pre túto Collection vynechali.",
     selectCollectionToBrowse: 'Vyberte kolekciu na prezeranie',
     selectFile: 'Vyberte súbor',
     setCropArea: 'Nastaviť oblasť orezania',
     setFocalPoint: 'Nastaviť stredobod',
     sizes: 'Veľkosti',
     sizesFor: 'Veľkosti pre {{label}}',
+    svgHarmfulContent: 'Súbor SVG obsahuje potenciálne škodlivý obsah.',
     width: 'Šírka',
   },
   validation: {

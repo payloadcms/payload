@@ -548,6 +548,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     addFile: 'Adicionar arquivo',
     addFiles: 'Adicionar Arquivos',
     bulkUpload: 'Upload em Massa',
+    couldNotReadFileForTypeDetection:
+      'Não foi possível ler o arquivo carregado para detecção de tipo.',
+    couldNotReadFileForValidation: 'Não foi possível ler o arquivo carregado para validação.',
     crop: 'Cultura',
     cropToolDescription:
       'Arraste as bordas da área selecionada, desenhe uma nova área ou ajuste os valores abaixo.',
@@ -559,21 +562,28 @@ export const ptTranslations: DefaultTranslationsObject = {
     fileSize: 'Tamanho do Arquivo',
     filesToUpload: 'Arquivos para Carregar',
     fileToUpload: 'Arquivo para upload',
+    fileTypeNotAllowed:
+      'O tipo de arquivo {{mimeType}} (com extensão {{extension}}) não é permitido.',
     focalPoint: 'Ponto Focal',
     focalPointDescription:
       'Arraste o ponto focal diretamente na pré-visualização ou ajuste os valores abaixo.',
     height: 'Altura',
+    invalidMimeType: 'Tipo MIME inválido: {{mimeType}}.',
+    invalidOrCorruptedPDF: 'Arquivo PDF inválido ou corrompido.',
     lessInfo: 'Ver menos',
     moreInfo: 'Ver mais',
     noFile: 'Sem arquivo',
     pasteURL: 'Colar URL',
     previewSizes: 'Tamanhos de Pré-visualização',
+    restrictedFileType:
+      "Tipo de arquivo '{{mimeType}}' não permitido para {{fileName}}: tipo de arquivo restrito detectado — defina 'allowRestrictedFileTypes' como true para ignorar esta verificação para esta Coleção.",
     selectCollectionToBrowse: 'Selecione uma Coleção para Navegar',
     selectFile: 'Selecione um arquivo',
     setCropArea: 'Definir área de corte',
     setFocalPoint: 'Definir ponto focal',
     sizes: 'Tamanhos',
     sizesFor: 'Tamanhos para {{label}}',
+    svgHarmfulContent: 'O arquivo SVG contém conteúdo potencialmente prejudicial.',
     width: 'Largura',
   },
   validation: {
