@@ -245,6 +245,7 @@ export type { ThumbnailCardProps } from '../../elements/ThumbnailCard/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
 import { toast } from 'sonner'
 export { toast }
+export { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 export { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 export { Upload } from '../../elements/Upload/index.js'
 export { UserMenu } from '../../elements/UserMenu/index.js'

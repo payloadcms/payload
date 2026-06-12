@@ -2,8 +2,6 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { closeAllToasts } from '../helpers.js'
-
 export async function moveRow(
   page: Page,
   {
@@ -58,6 +56,5 @@ export async function moveRow(
     await expect(toast).toHaveText(
       'To reorder the rows you must first sort them by the "Order" column',
     )
-    await closeAllToasts(page)
   }
 }
