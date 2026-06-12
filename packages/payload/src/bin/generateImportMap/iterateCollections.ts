@@ -71,6 +71,7 @@ export function iterateCollections({
 
     addToImportMap(collection.admin?.components?.views?.list?.Component)
     addToImportMap(collection.admin?.components?.views?.list?.actions)
+    addToImportMap(collection.admin?.components?.views?.list?.NoResults)
 
     // Register custom collection view components (any key other than 'edit' and 'list')
     if (collection.admin?.components?.views) {

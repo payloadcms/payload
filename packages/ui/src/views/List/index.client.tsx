@@ -56,6 +56,7 @@ export function DefaultListView(props: ListViewClientProps) {
     hierarchyData,
     listMenuItems,
     newDocumentURL,
+    NoResults,
     queryPreset,
     queryPresetPermissions,
     renderedFilters,
@@ -299,40 +300,42 @@ export function DefaultListView(props: ListViewClientProps) {
             ) : null}
             {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
             {docs?.length === 0 && (
-              <NoListResults
-                Actions={
-                  hasCreatePermission && newDocumentURL && viewType !== 'trash'
-                    ? [
-                        isInDrawer ? (
-                          <Button
-                            el="button"
-                            key="create"
-                            onClick={() => openModal(createNewDrawerSlug)}
-                          >
-                            {i18n.t('general:createNewLabel', {
-                              label: getTranslation(labels?.singular, i18n),
-                            })}
-                          </Button>
-                        ) : (
-                          <Button el="link" key="create" to={newDocumentURL}>
-                            {i18n.t('general:createNewLabel', {
-                              label: getTranslation(labels?.singular, i18n),
-                            })}
-                          </Button>
-                        ),
-                      ]
-                    : []
-                }
-                description={
-                  viewType === 'trash'
-                    ? i18n.t('general:noTrashResults', {
-                        label: getTranslation(labels?.plural, i18n),
-                      })
-                    : i18n.t('general:noResultsDescription')
-                }
-                title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
-                withMargin
-              />
+              NoResults ?? (
+                <NoListResults
+                  Actions={
+                    hasCreatePermission && newDocumentURL && viewType !== 'trash'
+                      ? [
+                          isInDrawer ? (
+                            <Button
+                              el="button"
+                              key="create"
+                              onClick={() => openModal(createNewDrawerSlug)}
+                            >
+                              {i18n.t('general:createNewLabel', {
+                                label: getTranslation(labels?.singular, i18n),
+                              })}
+                            </Button>
+                          ) : (
+                            <Button el="link" key="create" to={newDocumentURL}>
+                              {i18n.t('general:createNewLabel', {
+                                label: getTranslation(labels?.singular, i18n),
+                              })}
+                            </Button>
+                          ),
+                        ]
+                      : []
+                  }
+                  description={
+                    viewType === 'trash'
+                      ? i18n.t('general:noTrashResults', {
+                          label: getTranslation(labels?.plural, i18n),
+                        })
+                      : i18n.t('general:noResultsDescription')
+                  }
+                  title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
+                  withMargin
+                />
+              )
             )}
             {AfterListTable}
             {AfterList}

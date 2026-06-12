@@ -1793,7 +1793,7 @@ export type SharedEntityViews = {
    * ```
    */
   [key: string]:
-    | { actions?: CustomComponent[]; Component?: PayloadComponent }
+    | { actions?: CustomComponent[]; Component?: PayloadComponent; NoResults?: CustomComponent }
     | AdminViewConfig
     | EditConfig
     | undefined
