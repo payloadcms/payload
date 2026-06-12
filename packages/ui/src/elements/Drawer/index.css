@@ -44,7 +44,8 @@
   .drawer__content-children {
     position: relative;
     z-index: 1;
-    overflow: auto;
+    overflow-x: clip;
+    overflow-y: auto;
     height: 100%;
     display: flex;
     flex-direction: column;

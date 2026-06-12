@@ -1658,9 +1658,9 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.popup__content')
+      const publishLocaleContent = page.locator('.popup__content')
 
-      await expect(publishSpecificLocale).toContainText('English')
+      await expect(publishLocaleContent).toContainText('English')
     })
 
     test('should publish specific locale', async () => {
@@ -1683,9 +1683,9 @@ describe('Versions', () => {
       const publishOptions = page.locator('#action-save-popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('#publish-locale')
-      await expect(publishSpecificLocale).toContainText('English')
-      await publishSpecificLocale.click()
+      const publishLocaleButton = page.locator('#publish-locale')
+      await expect(publishLocaleButton).toContainText('English')
+      await publishLocaleButton.click()
 
       await wait(500)
 
@@ -1719,7 +1719,7 @@ describe('Versions', () => {
       // This reproduces the bug where:
       // 1. A doc is saved without blocks (autosave fires before blocks are added)
       // 2. Blocks are added
-      // 3. Publishing with publishSpecificLocale drops blockType/id
+      // 3. Publishing a specific locale drops blockType/id
       await page.goto(url.create)
       const textField = page.locator('#field-text')
 
@@ -1761,7 +1761,6 @@ describe('Versions', () => {
         },
         draft: false,
         locale: 'en',
-        publishSpecificLocale: 'en',
       })
 
       // Step 4: Verify blocks survived with metadata intact
@@ -2177,9 +2176,9 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.popup__content')
+      const publishLocaleContent = page.locator('.popup__content')
 
-      await expect(publishSpecificLocale).toContainText('English')
+      await expect(publishLocaleContent).toContainText('English')
     })
   })
 

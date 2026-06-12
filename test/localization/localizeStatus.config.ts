@@ -24,8 +24,7 @@ export default buildConfigWithDefaults({
         },
       ],
       versions: {
-        drafts: true, // This adds _status field to versions
-        // localizeStatus: false by default - creates OLD schema
+        drafts: true,
       },
     },
     {
@@ -39,7 +38,6 @@ export default buildConfigWithDefaults({
       ],
       versions: {
         drafts: true,
-        // localizeStatus: false by default - creates OLD schema
       },
     },
     {

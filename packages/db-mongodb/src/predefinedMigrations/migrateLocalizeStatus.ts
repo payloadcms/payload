@@ -1,16 +1,81 @@
-import type { Payload } from '../../../../types/index.js'
+import type { ClientSession } from 'mongoose'
+import type { Payload, PayloadRequest } from 'payload'
 
-import { calculateVersionLocaleStatuses, type VersionRecord } from '../shared.js'
+import { calculateVersionLocaleStatuses, type VersionRecord } from 'payload/migrations'
+
+import type { MongooseAdapter } from '../index.js'
+
+import { getSession } from '../utilities/getSession.js'
 
 export type LocalizeStatusArgs = {
   collectionSlug?: string
   globalSlug?: string
   payload: Payload
   req?: any
+  session?: ClientSession
 }
 
-export async function up(args: LocalizeStatusArgs): Promise<void> {
-  const { collectionSlug, globalSlug, payload, req } = args
+/**
+ * Migrate all collections and globals with versions.drafts enabled to use per-locale _status.
+ *
+ * This migration:
+ * 1. Converts version._status from a scalar string to a locale-keyed object for each entity
+ * 2. Deletes all snapshot:true version documents from each versions collection
+ * 3. Unsets the `snapshot` field from remaining version documents
+ */
+export async function migrateLocalizeStatus({
+  payload,
+  req,
+}: {
+  payload: Payload
+  req: PayloadRequest
+}): Promise<void> {
+  if (!payload.config.localization) {
+    payload.logger.info({
+      msg: 'Localization not enabled, skipping localize-status migration',
+    })
+    return
+  }
+
+  const collections = payload.config.collections.filter(
+    (c) =>
+      c.versions?.drafts &&
+      typeof c.versions.drafts === 'object' &&
+      c.versions.drafts.localizeStatus,
+  )
+  const globals = payload.config.globals.filter(
+    (g) =>
+      g.versions?.drafts &&
+      typeof g.versions.drafts === 'object' &&
+      g.versions.drafts.localizeStatus,
+  )
+
+  payload.logger.info({
+    msg: `Starting localize-status migration for ${collections.length} collection(s) and ${globals.length} global(s)`,
+  })
+
+  const connection = (payload.db as any).connection
+  const session = await getSession(payload.db as MongooseAdapter, req)
+
+  for (const collection of collections) {
+    await localizeStatus({ collectionSlug: collection.slug, payload, req, session })
+    await cleanupSnapshotDocuments({ connection, entitySlug: collection.slug, payload, session })
+  }
+
+  for (const global of globals) {
+    await localizeStatus({ globalSlug: global.slug, payload, req, session })
+    await cleanupSnapshotDocuments({ connection, entitySlug: global.slug, payload, session })
+  }
+
+  payload.logger.info({ msg: 'localize-status migration completed successfully' })
+}
+
+/**
+ * Converts version._status (and the main document _status) from a scalar string to a
+ * per-locale object for a single collection or global.
+ */
+export async function localizeStatus(args: LocalizeStatusArgs): Promise<void> {
+  const { collectionSlug, globalSlug, payload, req, session } = args
 
   if (!collectionSlug && !globalSlug) {
     throw new Error('Either collectionSlug or globalSlug must be provided')
@@ -75,7 +140,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
   payload.logger.info({ msg: `Locales: ${locales.join(', ')}` })
 
   // Check if version._status exists and is NOT already localized
-  const sampleDoc = await connection.collection(versionsCollection).findOne({})
+  const sampleDoc = await connection.collection(versionsCollection).findOne({}, { session })
 
   if (!sampleDoc) {
     payload.logger.info({ msg: 'No version documents found, nothing to migrate' })
@@ -111,7 +176,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
   // Get all versions, sorted chronologically
   const allVersions = await connection
     .collection(versionsCollection)
-    .find({})
+    .find({}, { session })
     .sort({ createdAt: 1, parent: 1 })
     .toArray()
 
@@ -157,6 +222,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
           'version._status': newStatus,
         },
       },
+      { session },
     )
 
     updateCount++
@@ -168,12 +234,12 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
   // Only if it has a status field
   if (collectionSlug) {
     const mainCollection = collectionSlug
-    const mainDoc = await connection.collection(mainCollection).findOne({})
+    const mainDoc = await connection.collection(mainCollection).findOne({}, { session })
 
     if (mainDoc && '_status' in mainDoc) {
       payload.logger.info({ msg: `Migrating main collection documents for: ${mainCollection}` })
 
-      const allDocs = await connection.collection(mainCollection).find({}).toArray()
+      const allDocs = await connection.collection(mainCollection).find({}, { session }).toArray()
 
       for (const doc of allDocs) {
         if (!doc._id) {
@@ -183,7 +249,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
         // Get the latest version for this document to determine status per locale
         const latestVersions = await connection
           .collection(versionsCollection)
-          .find({ parent: doc._id })
+          .find({ parent: doc._id }, { session })
           .sort({ createdAt: -1 })
           .limit(1)
           .toArray()
@@ -208,6 +274,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
               _status: statusObj,
             },
           },
+          { session },
         )
       }
 
@@ -219,14 +286,16 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     }
   } else if (globalSlug) {
     // Globals are stored in a single 'globals' collection with globalType discriminator
-    const globalDoc = await connection.collection('globals').findOne({ globalType: globalSlug })
+    const globalDoc = await connection
+      .collection('globals')
+      .findOne({ globalType: globalSlug }, { session })
     if (globalDoc && '_status' in globalDoc && globalDoc._id) {
       payload.logger.info({ msg: `Migrating main global document for: ${globalSlug}` })
 
       // Get the latest version for the global
       const latestVersions = await connection
         .collection(versionsCollection)
-        .find({})
+        .find({}, { session })
         .sort({ createdAt: -1 })
         .limit(1)
         .toArray()
@@ -249,6 +318,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
             _status: statusObj,
           },
         },
+        { session },
       )
 
       payload.logger.info({ msg: 'Migrated global document' })
@@ -260,4 +330,32 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
   }
 
   payload.logger.info({ msg: 'Migration completed successfully' })
+}
+
+async function cleanupSnapshotDocuments({
+  connection,
+  entitySlug,
+  payload,
+  session,
+}: {
+  connection: any
+  entitySlug: string
+  payload: Payload
+  session?: ClientSession
+}): Promise<void> {
+  const versionsCollection = `_${entitySlug}_versions`.toLowerCase()
+
+  const col = connection.collection(versionsCollection)
+
+  // Delete all snapshot=true documents
+  const deleteResult = await col.deleteMany({ snapshot: true }, { session })
+
+  if (deleteResult.deletedCount > 0) {
+    payload.logger.info({
+      msg: `Deleted ${deleteResult.deletedCount} snapshot documents from ${versionsCollection}`,
+    })
+  }
+
+  // Unset the snapshot field from remaining documents
+  await col.updateMany({ snapshot: { $exists: true } }, { $unset: { snapshot: '' } }, { session })
 }
