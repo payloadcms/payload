@@ -1,11 +1,17 @@
 import path from 'path'
 import { type Payload } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import {
+  mockState,
+  resetMockAdapterOptions,
+  resetMockState,
+  setMockAdapterOptions,
+} from './mockPaymentAdapter.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -1234,6 +1240,393 @@ describe('ecommerce', () => {
 
       expect(userCartResponse.id).toBe(guestCartId)
       expect(userCartResponse.items).toHaveLength(1)
+    })
+  })
+
+  describe('payment hooks', () => {
+    let productId: string
+    const createdCartIds: string[] = []
+    const createdOrderIds: string[] = []
+    const createdTransactionIds: string[] = []
+
+    beforeAll(async () => {
+      const product = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Hook Test Product',
+          inventory: 100,
+          priceInUSDEnabled: true,
+          priceInUSD: 1999,
+        },
+      })
+      productId = product.id
+    })
+
+    afterAll(async () => {
+      await payload.delete({ id: productId, collection: 'products' }).catch(() => null)
+    })
+
+    afterEach(async () => {
+      resetMockState()
+      resetMockAdapterOptions()
+
+      for (const id of createdTransactionIds) {
+        await payload.delete({ id, collection: 'transactions' }).catch(() => null)
+      }
+      createdTransactionIds.length = 0
+
+      for (const id of createdOrderIds) {
+        await payload.delete({ id, collection: 'orders' }).catch(() => null)
+      }
+      createdOrderIds.length = 0
+
+      for (const id of createdCartIds) {
+        await payload.delete({ id, collection: 'carts' }).catch(() => null)
+      }
+      createdCartIds.length = 0
+    })
+
+    const createCartAndAddProduct = async () => {
+      const { cartId, cartSecret } = await createGuestCartWithItems(restClient, productId)
+      createdCartIds.push(cartId)
+      return { cartId, cartSecret }
+    }
+
+    it('should call both plugin-level and adapter-level beforeInitiatePayment hooks', async () => {
+      const { cartId, cartSecret } = await createCartAndAddProduct()
+
+      const response = await restClient
+        .POST('/payments/mock/initiate', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail: 'hooks-test@example.com',
+            secret: cartSecret,
+          }),
+        })
+        .then((res) => res.json())
+
+      if (response.transactionID) {
+        createdTransactionIds.push(response.transactionID)
+      }
+
+      expect(mockState.pluginBeforeInitiatePayment).toHaveLength(1)
+      expect(mockState.adapterBeforeInitiatePayment).toHaveLength(1)
+      expect(mockState.pluginBeforeInitiatePayment[0]?.summary.lines[0]?.amount).toBe(1999)
+      expect(mockState.adapterBeforeInitiatePayment[0]?.summary.lines[0]?.amount).toBe(1999)
+    })
+
+    it('should include hook-appended lines in the summary passed to the adapter', async () => {
+      const { cartId, cartSecret } = await createCartAndAddProduct()
+
+      setMockAdapterOptions({
+        appendLines: [
+          { amount: 500, label: 'Shipping', type: 'shipping' },
+          { amount: 200, label: 'Tax', type: 'tax' },
+        ],
+      })
+
+      await restClient
+        .POST('/payments/mock/initiate', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail: 'hooks-test@example.com',
+            secret: cartSecret,
+          }),
+        })
+        .then((res) => res.json())
+
+      expect(mockState.initiateCalls).toHaveLength(1)
+      const summary = mockState.initiateCalls[0]?.summary
+      expect(summary?.lines).toHaveLength(3)
+      expect(summary?.lines[0]?.type).toBe('subtotal')
+      expect(summary?.lines[0]?.amount).toBe(1999)
+      expect(summary?.total).toBe(1999 + 500 + 200)
+    })
+
+    it('should pass cumulative lines between hooks in order (plugin then adapter)', async () => {
+      const { cartId, cartSecret } = await createCartAndAddProduct()
+
+      setMockAdapterOptions({
+        appendLines: [{ amount: 300, label: 'Adapter line', type: 'custom' }],
+      })
+
+      await restClient
+        .POST('/payments/mock/initiate', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail: 'hooks-test@example.com',
+            secret: cartSecret,
+          }),
+        })
+        .then((res) => res.json())
+
+      expect(mockState.pluginBeforeInitiatePayment[0]?.summary.lines).toHaveLength(1)
+      expect(mockState.adapterBeforeInitiatePayment[0]?.summary.lines).toHaveLength(1)
+      expect(mockState.initiateCalls[0]?.summary.lines).toHaveLength(2)
+      expect(mockState.initiateCalls[0]?.summary.total).toBe(1999 + 300)
+    })
+
+    it('should abort payment when a beforeInitiatePayment hook throws', async () => {
+      const { cartId, cartSecret } = await createCartAndAddProduct()
+
+      setMockAdapterOptions({ throwInBeforeInitiatePayment: true })
+
+      const response = await restClient.POST('/payments/mock/initiate', {
+        auth: false,
+        body: JSON.stringify({
+          cartID: cartId,
+          customerEmail: 'hooks-test@example.com',
+          secret: cartSecret,
+        }),
+      })
+
+      expect(response.status).toBe(400)
+      expect(mockState.initiateCalls).toHaveLength(0)
+    })
+
+    it('should call beforeConfirmOrder and afterConfirmOrder hooks', async () => {
+      const { cartId, cartSecret } = await createCartAndAddProduct()
+
+      const initiateResponse = await restClient
+        .POST('/payments/mock/initiate', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail: 'hooks-test@example.com',
+            secret: cartSecret,
+          }),
+        })
+        .then((res) => res.json())
+
+      const confirmResponse = await restClient
+        .POST('/payments/mock/confirm-order', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail: 'hooks-test@example.com',
+            mockPaymentID: initiateResponse.mockPaymentID,
+            secret: cartSecret,
+          }),
+        })
+        .then((res) => res.json())
+
+      if (confirmResponse.orderID) {
+        createdOrderIds.push(confirmResponse.orderID)
+      }
+
+      expect(mockState.pluginBeforeConfirmOrder).toHaveLength(1)
+      expect(mockState.adapterBeforeConfirmOrder).toHaveLength(1)
+      expect(mockState.pluginAfterConfirmOrder).toHaveLength(1)
+      expect(mockState.adapterAfterConfirmOrder).toHaveLength(1)
+      expect(mockState.pluginAfterConfirmOrder[0]?.orderID).toBe(confirmResponse.orderID)
+    })
+
+    it('should abort confirmation when a beforeConfirmOrder hook throws', async () => {
+      const { cartId, cartSecret } = await createCartAndAddProduct()
+
+      const initiateResponse = await restClient
+        .POST('/payments/mock/initiate', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail: 'hooks-test@example.com',
+            secret: cartSecret,
+          }),
+        })
+        .then((res) => res.json())
+
+      setMockAdapterOptions({ throwInBeforeConfirmOrder: true })
+
+      const confirmResponse = await restClient.POST('/payments/mock/confirm-order', {
+        auth: false,
+        body: JSON.stringify({
+          cartID: cartId,
+          customerEmail: 'hooks-test@example.com',
+          mockPaymentID: initiateResponse.mockPaymentID,
+          secret: cartSecret,
+        }),
+      })
+
+      expect(confirmResponse.status).toBe(400)
+      expect(mockState.confirmOrderCalls).toHaveLength(0)
+      expect(mockState.pluginAfterConfirmOrder).toHaveLength(0)
+    })
+
+    it('should charge subtotal plus 10% adjustment end-to-end and persist the final amount on the order', async () => {
+      const cleanProduct = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Clean Price Product',
+          inventory: 100,
+          priceInUSDEnabled: true,
+          priceInUSD: 10000,
+        },
+      })
+      const cleanProductId = cleanProduct.id
+
+      const quantity = 2
+      const expectedSubtotal = 10000 * quantity
+      const expectedTax = Math.round(expectedSubtotal * 0.1)
+      const expectedTotal = expectedSubtotal + expectedTax
+
+      const createCartResponse = await restClient
+        .POST('/carts', {
+          auth: false,
+          body: JSON.stringify({
+            currency: 'USD',
+            items: [],
+          }),
+        })
+        .then((res) => res.json())
+
+      const cartId = createCartResponse.doc.id as string
+      const cartSecret = createCartResponse.doc.secret as string
+      createdCartIds.push(cartId)
+
+      await restClient
+        .POST(`/carts/${cartId}/add-item`, {
+          auth: false,
+          body: JSON.stringify({
+            item: { product: cleanProductId },
+            quantity,
+            secret: cartSecret,
+          }),
+        })
+        .then((res) => res.json())
+
+      const cartAfterAdd = await payload.findByID({
+        id: cartId,
+        collection: 'carts',
+        overrideAccess: true,
+      })
+      expect(cartAfterAdd.subtotal).toBe(expectedSubtotal)
+
+      setMockAdapterOptions({ addTenPercentTax: true })
+
+      const initiateResponse = await restClient
+        .POST('/payments/mock/initiate', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail: 'e2e-test@example.com',
+            secret: cartSecret,
+          }),
+        })
+        .then((res) => res.json())
+
+      expect(mockState.initiateCalls).toHaveLength(1)
+      const summary = mockState.initiateCalls[0]?.summary
+      expect(summary?.lines[0]?.type).toBe('subtotal')
+      expect(summary?.lines[0]?.amount).toBe(expectedSubtotal)
+      expect(summary?.total).toBe(expectedTotal)
+      expect(summary?.lines).toHaveLength(2)
+      expect(summary?.lines[1]?.type).toBe('tax')
+      expect(summary?.lines[1]?.amount).toBe(expectedTax)
+
+      expect(initiateResponse.summary).toBeDefined()
+      expect(initiateResponse.summary.total).toBe(expectedTotal)
+      expect(initiateResponse.summary.lines).toHaveLength(2)
+      expect(initiateResponse.summary.lines[0].type).toBe('subtotal')
+      expect(initiateResponse.summary.lines[1].type).toBe('tax')
+
+      const transactions = await payload.find({
+        collection: 'transactions',
+        depth: 0,
+        overrideAccess: true,
+        where: {
+          'mock.mockPaymentID': { equals: initiateResponse.mockPaymentID },
+        },
+      })
+      const transactionDoc = transactions.docs[0] as { id: string; summary?: any } | undefined
+      expect(transactionDoc?.amount).toBe(expectedTotal)
+      expect(transactionDoc?.summary).toBeDefined()
+      expect(transactionDoc?.summary?.total).toBe(expectedTotal)
+      expect(transactionDoc?.summary?.currency).toBe('USD')
+      expect(transactionDoc?.summary?.lines).toHaveLength(2)
+      expect(transactionDoc?.summary?.lines[0]?.type).toBe('subtotal')
+      expect(transactionDoc?.summary?.lines[0]?.amount).toBe(expectedSubtotal)
+      expect(transactionDoc?.summary?.lines[1]?.type).toBe('tax')
+      expect(transactionDoc?.summary?.lines[1]?.amount).toBe(expectedTax)
+      if (transactionDoc?.id) {
+        createdTransactionIds.push(transactionDoc.id)
+      }
+
+      const confirmResponse = await restClient
+        .POST('/payments/mock/confirm-order', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail: 'e2e-test@example.com',
+            mockPaymentID: initiateResponse.mockPaymentID,
+            secret: cartSecret,
+          }),
+        })
+        .then((res) => res.json())
+
+      expect(confirmResponse.orderID).toBeTruthy()
+      createdOrderIds.push(confirmResponse.orderID)
+
+      expect(confirmResponse.summary).toBeDefined()
+      expect(confirmResponse.summary.total).toBe(expectedTotal)
+      expect(confirmResponse.summary.lines).toHaveLength(2)
+      expect(confirmResponse.summary.lines[0].type).toBe('subtotal')
+      expect(confirmResponse.summary.lines[1].type).toBe('tax')
+
+      const order = (await payload.findByID({
+        id: confirmResponse.orderID,
+        collection: 'orders',
+        overrideAccess: true,
+      })) as { amount: number; currency: string; summary?: any }
+
+      expect(order.amount).toBe(expectedTotal)
+      expect(order.amount).not.toBe(expectedSubtotal)
+      expect(order.currency).toBe('USD')
+      expect(order.summary).toBeDefined()
+      expect(order.summary?.total).toBe(expectedTotal)
+      expect(order.summary?.lines).toHaveLength(2)
+      expect(order.summary?.lines[0]?.type).toBe('subtotal')
+      expect(order.summary?.lines[1]?.type).toBe('tax')
+
+      await payload.delete({ id: cleanProductId, collection: 'products' }).catch(() => null)
+    })
+
+    it('should not fail order when an afterConfirmOrder hook throws', async () => {
+      const { cartId, cartSecret } = await createCartAndAddProduct()
+
+      const initiateResponse = await restClient
+        .POST('/payments/mock/initiate', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail: 'hooks-test@example.com',
+            secret: cartSecret,
+          }),
+        })
+        .then((res) => res.json())
+
+      setMockAdapterOptions({ throwInAfterConfirmOrder: true })
+
+      const confirmResponse = await restClient
+        .POST('/payments/mock/confirm-order', {
+          auth: false,
+          body: JSON.stringify({
+            cartID: cartId,
+            customerEmail: 'hooks-test@example.com',
+            mockPaymentID: initiateResponse.mockPaymentID,
+            secret: cartSecret,
+          }),
+        })
+        .then((res) => res.json())
+
+      if (confirmResponse.orderID) {
+        createdOrderIds.push(confirmResponse.orderID)
+      }
+
+      expect(confirmResponse.orderID).toBeTruthy()
+      expect(mockState.adapterAfterConfirmOrder).toHaveLength(1)
     })
   })
 })

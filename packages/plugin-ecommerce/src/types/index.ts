@@ -45,6 +45,171 @@ type DefaultCartType = {
 
 export type Cart = DefaultCartType
 
+export type LineType = 'custom' | 'discount' | 'gift_card' | 'shipping' | 'subtotal' | 'tax'
+
+/**
+ * A single line item making up a payment summary — items, tax, shipping, discount, etc.
+ */
+export type Line = {
+  /**
+   * The signed amount of the line in the smallest currency unit (e.g. cents for USD).
+   * Positive values increase the total (tax, shipping).
+   * Negative values decrease the total (discount, gift card).
+   */
+  amount: number
+  /**
+   * Human-readable label for display (e.g., "CA Sales Tax", "Standard Shipping").
+   */
+  label: string
+  /**
+   * Optional metadata for adapter-specific or user-specific data. A common pattern
+   * is to stash a `taxable` flag here so later hooks know whether to include this line,
+   * or an external identifier for idempotency with a tax/shipping provider.
+   */
+  metadata?: Record<string, unknown>
+  /**
+   * The type of line.
+   */
+  type: LineType
+}
+
+/**
+ * Full breakdown of the payment amount. Passed through the beforeInitiatePayment hook
+ * pipeline and returned in the `/payments/{provider}/initiate` response.
+ *
+ * The plugin recomputes `total` from `lines` after every hook, so you never need to
+ * update `total` yourself inside a hook — just return the updated `lines`. The first
+ * line is always the cart subtotal and is managed by the plugin; removing it or changing
+ * its amount will throw.
+ */
+export type Summary = {
+  /**
+   * The ISO currency code used for all line amounts.
+   */
+  currency: string
+  /**
+   * Ordered list of line items contributing to the total.
+   * `lines[0]` is always the cart subtotal and is managed by the plugin.
+   */
+  lines: Line[]
+  /**
+   * The final amount charged. Always equal to `sum(lines[].amount)`. This value is
+   * recomputed by the plugin after each hook — any value a hook sets is ignored.
+   */
+  total: number
+}
+
+/**
+ * Context provided to payment hooks during the initiate payment flow.
+ */
+export type PaymentHookContext = {
+  /**
+   * Billing address, if provided.
+   */
+  billingAddress?: TypedCollection['addresses']
+  /**
+   * The validated cart with items.
+   */
+  cart: Cart
+  /**
+   * The currencies configuration.
+   */
+  currenciesConfig: CurrenciesConfig
+  /**
+   * The resolved currency code.
+   */
+  currency: string
+  /**
+   * Customer email address.
+   */
+  customerEmail: string
+  /**
+   * The Payload request object.
+   */
+  req: PayloadRequest
+  /**
+   * Shipping address, if provided.
+   */
+  shippingAddress?: TypedCollection['addresses']
+}
+
+/**
+ * Hook that runs before payment initiation, after validation.
+ *
+ * Receives the current `Summary` (total, currency, lines) and must return an updated
+ * `Summary`. Typically you'll spread the incoming summary and append your line:
+ *
+ * ```ts
+ * return {
+ *   ...summary,
+ *   lines: [...summary.lines, { type: 'tax', label: 'Sales Tax', amount: 1500 }],
+ * }
+ * ```
+ *
+ * The plugin recomputes `summary.total` from `summary.lines` after this hook runs,
+ * so you never need to update `total` yourself.
+ *
+ * Throwing an error aborts the payment.
+ */
+export type BeforeInitiatePaymentHook = (
+  args: {
+    /**
+     * The running summary — the cart subtotal plus any lines contributed by prior hooks.
+     * Return a new summary with your line appended (or existing lines modified).
+     */
+    summary: Summary
+  } & PaymentHookContext,
+) => Promise<Summary> | Summary
+
+/**
+ * Hook that runs before order confirmation.
+ * Can inspect data before the adapter confirms. Throwing an error aborts the confirmation.
+ */
+export type BeforeConfirmOrderHook = (args: {
+  /**
+   * Customer email.
+   */
+  customerEmail: string
+  /**
+   * All data passed to the confirm-order endpoint.
+   */
+  data: Record<string, unknown>
+  /**
+   * The Payload request object.
+   */
+  req: PayloadRequest
+}) => Promise<void> | void
+
+/**
+ * Hook that runs after order confirmation succeeds.
+ * For side effects only (sending emails, updating external systems, redeeming gift cards).
+ * Return value is ignored. Errors are logged but do not fail the response.
+ */
+export type AfterConfirmOrderHook = (args: {
+  /**
+   * The created order ID.
+   */
+  orderID: DefaultDocumentIDType
+  /**
+   * The Payload request object.
+   */
+  req: PayloadRequest
+  /**
+   * The transaction ID.
+   */
+  transactionID: DefaultDocumentIDType
+}) => Promise<void> | void
+
+/**
+ * Hook configuration for the payment flow. Used at both the plugin level
+ * (runs for all payment methods) and the adapter level (runs for that adapter only).
+ */
+export type PaymentHooks = {
+  afterConfirmOrder?: AfterConfirmOrderHook[]
+  beforeConfirmOrder?: BeforeConfirmOrderHook[]
+  beforeInitiatePayment?: BeforeInitiatePaymentHook[]
+}
+
 type InitiatePaymentReturnType = {
   /**
    * Allows for additional data to be returned, such as payment method specific data
@@ -52,6 +217,13 @@ type InitiatePaymentReturnType = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
   message: string
+  /**
+   * Optional ID of the transaction record created during initiation. When returned,
+   * the plugin will write the computed `summary` onto this transaction — so the
+   * breakdown (subtotal, tax, shipping, etc.) is available on the record alongside
+   * the total.
+   */
+  transactionID?: DefaultDocumentIDType
 }
 
 type InitiatePayment = (args: {
@@ -77,6 +249,12 @@ type InitiatePayment = (args: {
      * Shipping address for the payment.
      */
     shippingAddress?: TypedCollection['addresses']
+    /**
+     * The final payment summary after all beforeInitiatePayment hooks have run.
+     * Use `summary.total` as the amount to charge and store `summary.lines` if you
+     * need to persist the breakdown (e.g. in provider metadata).
+     */
+    summary: Summary
   }
   req: PayloadRequest
   /**
@@ -193,6 +371,21 @@ export type PaymentAdapter = {
    * ```
    */
   group: GroupField
+  /**
+   * Hooks specific to this payment adapter. These run after plugin-level hooks.
+   *
+   * @example
+   * ```ts
+   * hooks: {
+   *   beforeInitiatePayment: [
+   *     async ({ subtotal }) => {
+   *       return [{ type: 'tax', label: 'Stripe Tax', amount: calculatedTax }]
+   *     },
+   *   ],
+   * }
+   * ```
+   */
+  hooks?: PaymentHooks
   /**
    * The function that is called via the `/api/payments/{provider_name}/initiate` endpoint to initiate a payment for an order.
    *
@@ -446,6 +639,22 @@ export type CustomQuery = {
 }
 
 export type PaymentsConfig = {
+  /**
+   * Hooks that run for all payment methods. Plugin-level hooks execute before adapter-level hooks.
+   *
+   * @example
+   * ```ts
+   * hooks: {
+   *   beforeInitiatePayment: [
+   *     async ({ subtotal, shippingAddress }) => {
+   *       const taxRate = await fetchTaxRate(shippingAddress)
+   *       return [{ type: 'tax', label: 'Sales Tax', amount: Math.round(subtotal * taxRate) }]
+   *     },
+   *   ],
+   * }
+   * ```
+   */
+  hooks?: PaymentHooks
   paymentMethods?: PaymentAdapter[]
   productsQuery?: CustomQuery
   variantsQuery?: CustomQuery
@@ -788,6 +997,7 @@ export type SanitizedEcommercePluginConfig = {
   currencies: Required<CurrenciesConfig>
   inventory?: InventoryConfig
   payments: {
+    hooks?: PaymentHooks
     paymentMethods: [] | PaymentAdapter[]
   }
 } & Omit<

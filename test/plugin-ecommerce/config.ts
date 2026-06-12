@@ -12,6 +12,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
 import { Users } from './collections/Users.js'
+import { mockPaymentAdapter, mockPluginHooks } from './mockPaymentAdapter.js'
 import { seed } from './seed/index.js'
 
 export const currenciesConfig: NonNullable<EcommercePluginConfig['currencies']> = {
@@ -90,7 +91,9 @@ export default buildConfigWithDefaults({
         variants: true,
       },
       payments: {
+        hooks: mockPluginHooks,
         paymentMethods: [
+          mockPaymentAdapter,
           stripeAdapter({
             secretKey: process.env.STRIPE_SECRET_KEY!,
             publishableKey: process.env.STRIPE_PUBLISHABLE_KEY!,

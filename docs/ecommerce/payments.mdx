@@ -191,6 +191,7 @@ You can make your own payment adapter by implementing the `PaymentAdapter` inter
 | `confirmOrder`    | `(args: ConfirmOrderArgs) => Promise<void>`                     | The function that is called via the `/api/payments/{provider_name}/confirm-order` endpoint to confirm an order after a payment has been made. [More](#confirmOrder)                            |
 | `endpoints`       | `Endpoint[]`                                                    | (Optional) An array of endpoints to be bootstrapped to Payload's API in order to support the payment method. All API paths are relative to `/api/payments/{provider_name}`                     |
 | `group`           | `GroupField`                                                    | A group field config to be used in transactions to track the necessary data for the payment processor, eg. PaymentIntentID for Stripe. See [Payment Fields](#payment-fields) for more details. |
+| `hooks`           | `PaymentHooks`                                                  | (Optional) Hooks that run only for this adapter. See [Adapter hooks](#adapter-hooks) for details.                                                                                              |
 
 The arguments can be extended but should always include the `PaymentAdapterArgs` type which has the following types:
 
@@ -399,6 +400,80 @@ export const confirmOrder: NonNullable<PaymentAdapter>['confirmOrder'] =
     }
   }
 ```
+
+#### Adapter hooks
+
+In addition to [plugin-level hooks](./plugin#payment-hooks) that run for every payment method, a `PaymentAdapter` can define its own hooks that run only for that specific adapter. Adapter-level hooks execute **after** the plugin-level hooks, so they receive the `summary` already updated by the plugin-level pipeline.
+
+The same three hook points are available on `paymentMethod.hooks`:
+
+| Hook                    | Description                                                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `beforeInitiatePayment` | Runs before this adapter's `initiatePayment`. Receives and returns a `Summary` — append lines specific to this adapter. |
+| `beforeConfirmOrder`    | Runs before this adapter's `confirmOrder`. Throwing aborts confirmation for this adapter only.                          |
+| `afterConfirmOrder`     | Runs after this adapter successfully confirms an order. Errors are logged but do not fail the response.                 |
+
+##### Simple example
+
+```ts
+import type { PaymentAdapter } from '@payloadcms/plugin-ecommerce/types'
+
+const myAdapter: PaymentAdapter = {
+  name: 'my-provider',
+  // ...required properties (initiatePayment, confirmOrder, group)
+  hooks: {
+    afterConfirmOrder: [
+      async ({ orderID, req }) => {
+        req.payload.logger.info(`Order ${orderID} confirmed via my-provider`)
+      },
+    ],
+  },
+}
+```
+
+##### When to use adapter-level hooks
+
+Use adapter-level hooks when the logic is specific to one payment provider:
+
+- Provider-specific fees (e.g. a surcharge that only applies when using a particular processor).
+- Adjustments computed by an integration service tied to that adapter (e.g. Stripe Tax).
+- Side effects that should only fire for a specific provider after confirmation.
+
+For logic that should apply to every payment method (taxes, shipping, discount codes), prefer [plugin-level hooks](./plugin#payment-hooks) so you do not have to copy them to each adapter.
+
+```ts
+import type { PaymentAdapter } from '@payloadcms/plugin-ecommerce/types'
+
+const stripeAdapter: PaymentAdapter = {
+  // ...required properties
+  hooks: {
+    beforeInitiatePayment: [
+      async ({ summary }) => {
+        // Stripe-specific: apply a 2.9% + 30¢ surcharge on the running total
+        const currentTotal = summary.lines.reduce(
+          (sum, line) => sum + line.amount,
+          0,
+        )
+        const surcharge = Math.round(currentTotal * 0.029) + 30
+
+        return {
+          ...summary,
+          lines: [
+            ...summary.lines,
+            {
+              type: 'custom',
+              label: 'Processing Fee',
+              amount: surcharge,
+            },
+          ],
+        }
+      },
+    ],
+  },
+}
+```
+
+See [plugin.mdx#Payment hooks](./plugin#payment-hooks) for the full `Summary` / `Line` shapes and the list of arguments passed to each hook.
 
 #### Payment Fields
 

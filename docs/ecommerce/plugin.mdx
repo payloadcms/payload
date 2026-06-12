@@ -624,9 +624,10 @@ For now it's quite rudimentary tracking with no integrations to 3rd party servic
 
 The `payments` option is used to configure payments and supported payment methods.
 
-| Option           | Type    | Description                                                                                       |
-| ---------------- | ------- | ------------------------------------------------------------------------------------------------- |
-| `paymentMethods` | `array` | An array of payment method adapters. Currently, only Stripe is supported. [More](#stripe-adapter) |
+| Option           | Type     | Description                                                                                                                           |
+| ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `paymentMethods` | `array`  | An array of payment method adapters. Currently, only Stripe is supported. [More](#stripe-adapter)                                     |
+| `hooks`          | `object` | Hooks that run for all payment methods. Use these to add adjustments like tax and shipping to the final total. [More](#payment-hooks) |
 
 ### Payment adapters
 
@@ -742,6 +743,212 @@ import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/strip
   {children}
 </EcommerceProvider>
 ```
+
+### Payment hooks
+
+Payment hooks let you inject logic into the payment flow without modifying payment adapters. They are the recommended way to apply taxes, shipping costs, discount codes, gift cards, or any other monetary adjustment on top of the cart subtotal.
+
+Hooks can be defined at two levels:
+
+- **Plugin-level** hooks (`payments.hooks`) run for every payment method configured in the plugin.
+- **Adapter-level** hooks (`paymentMethod.hooks`) run only for the specific adapter they belong to. See [Adapter hooks](./payments#adapter-hooks) for details.
+
+Plugin-level hooks run first, then adapter-level hooks. Within each tier, hooks run sequentially — each hook receives the `summary` updated by every earlier hook.
+
+| Hook                    | Signature                               | Description                                                                                                                              |
+| ----------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `beforeInitiatePayment` | `(args) => Summary \| Promise<Summary>` | Runs after cart and product validation, before the adapter's `initiatePayment`. Return an updated `Summary`. Throwing aborts.            |
+| `beforeConfirmOrder`    | `(args) => void \| Promise<void>`       | Runs before the adapter's `confirmOrder`. Use for pre-confirmation checks (e.g. re-validating a gift card). Throwing aborts.             |
+| `afterConfirmOrder`     | `(args) => void \| Promise<void>`       | Runs after a successful order. Use for side effects like emails or redeeming gift cards. Errors are logged but do not fail the response. |
+
+#### The Summary object
+
+The summary is a running breakdown of what the customer will be charged. The plugin builds an initial summary from the cart subtotal and pipes it through every `beforeInitiatePayment` hook. The final summary is passed to the payment adapter, returned in the API response, and stored on the transaction and order records.
+
+```ts
+type Summary = {
+  total: number // recomputed by the plugin after each hook
+  currency: string // locked — cannot be changed inside a hook
+  lines: Line[] // lines[0] is always the cart subtotal
+}
+
+type Line = {
+  type: 'subtotal' | 'tax' | 'shipping' | 'discount' | 'gift_card' | 'custom'
+  label: string
+  amount: number // signed; negative reduces the total (discounts, gift cards)
+  metadata?: Record<string, unknown>
+}
+```
+
+When `hooks` are configured the plugin adds a read-only `summary` group field to the default transactions and orders collections, so the breakdown is queryable alongside the existing `amount` field — useful for receipts, refunds, and tax reporting. If you aren't using hooks, these fields are not added to your collections.
+
+<Banner type="info">
+  You never need to recalculate `summary.total` yourself. The plugin recomputes
+  it from `sum(lines[].amount)` after every hook runs. Just return the summary
+  with your line appended (or an existing line modified) — the plugin handles
+  the math.
+</Banner>
+
+**Invariants enforced after each hook:**
+
+- `lines[0]` must remain the subtotal line with the original cart subtotal. Removing it or changing its amount throws.
+- `currency` cannot change.
+
+#### Simple example
+
+A minimal hook that adds a $5 flat handling fee to every payment:
+
+```ts
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+
+export default buildConfig({
+  plugins: [
+    ecommercePlugin({
+      // rest of config...
+      payments: {
+        paymentMethods: [
+          /* your payment adapters */
+        ],
+        hooks: {
+          beforeInitiatePayment: [
+            ({ summary }) => ({
+              ...summary,
+              lines: [
+                ...summary.lines,
+                {
+                  type: 'custom',
+                  label: 'Handling Fee',
+                  amount: 500, // $5.00
+                },
+              ],
+            }),
+          ],
+        },
+      },
+    }),
+  ],
+})
+```
+
+#### How to add taxes and shipping calculations
+
+This is the canonical use case — you compute taxes and shipping on the server and append them to `summary.lines`. Because hooks run sequentially, the tax hook can read the shipping line out of `summary.lines` and tax it when the region requires:
+
+```ts
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+
+export default buildConfig({
+  plugins: [
+    ecommercePlugin({
+      // rest of config...
+      payments: {
+        paymentMethods: [
+          /* your payment adapters */
+        ],
+        hooks: {
+          beforeInitiatePayment: [
+            // 1. Add shipping cost based on the shipping address
+            async ({ summary, cart, shippingAddress }) => {
+              if (!shippingAddress) {
+                return summary
+              }
+
+              const shippingCost = await calculateShippingCost({
+                items: cart.items,
+                address: shippingAddress,
+              })
+
+              return {
+                ...summary,
+                lines: [
+                  ...summary.lines,
+                  {
+                    type: 'shipping',
+                    label: 'Standard Shipping',
+                    amount: shippingCost,
+                  },
+                ],
+              }
+            },
+            // 2. Calculate tax — taxes shipping only where the jurisdiction requires
+            async ({ summary, shippingAddress }) => {
+              if (!shippingAddress) {
+                return summary
+              }
+
+              const shippingIsTaxable = isShippingTaxableIn(shippingAddress)
+              const taxableAmount = summary.lines
+                .filter(
+                  (line) =>
+                    line.type === 'subtotal' ||
+                    (line.type === 'shipping' && shippingIsTaxable),
+                )
+                .reduce((sum, line) => sum + line.amount, 0)
+
+              const taxRate = await fetchTaxRate(shippingAddress)
+              const taxAmount = Math.round(taxableAmount * taxRate)
+
+              return {
+                ...summary,
+                lines: [
+                  ...summary.lines,
+                  {
+                    type: 'tax',
+                    label: `Sales Tax (${(taxRate * 100).toFixed(2)}%)`,
+                    amount: taxAmount,
+                  },
+                ],
+              }
+            },
+          ],
+        },
+      },
+    }),
+  ],
+})
+```
+
+Each `beforeInitiatePayment` hook receives:
+
+| Property           | Type                   | Description                                                                                            |
+| ------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| `summary`          | `Summary`              | The running summary — lines from the cart plus anything earlier hooks appended. Return an updated one. |
+| `cart`             | `Cart`                 | The validated cart with items.                                                                         |
+| `currency`         | `string`               | The resolved currency code.                                                                            |
+| `currenciesConfig` | `CurrenciesConfig`     | The full currencies configuration.                                                                     |
+| `customerEmail`    | `string`               | Customer email address.                                                                                |
+| `billingAddress`   | `Address \| undefined` | The billing address if provided.                                                                       |
+| `shippingAddress`  | `Address \| undefined` | The shipping address if provided.                                                                      |
+| `req`              | `PayloadRequest`       | The Payload request — use `req.payload` for database access.                                           |
+
+#### Response shape
+
+Once all `beforeInitiatePayment` hooks have run, the `/payments/{provider}/initiate` endpoint returns the final summary alongside the adapter's response:
+
+```json
+{
+  "message": "Payment initiated successfully",
+  "clientSecret": "pi_...",
+  "paymentIntentID": "pi_...",
+  "summary": {
+    "total": 22000,
+    "currency": "USD",
+    "lines": [
+      { "type": "subtotal", "label": "Subtotal", "amount": 20000 },
+      { "type": "shipping", "label": "Standard", "amount": 500 },
+      { "type": "tax", "label": "Sales Tax", "amount": 1500 }
+    ]
+  }
+}
+```
+
+Frontends can render the breakdown directly from `summary.lines` without having to re-run the calculation logic.
+
+<Banner type="warning">
+  Always compute prices on the server. Never read tax or shipping costs from
+  client-supplied values — the payment amount is whatever your hooks produce on
+  top of the validated cart subtotal.
+</Banner>
 
 ## Products
 

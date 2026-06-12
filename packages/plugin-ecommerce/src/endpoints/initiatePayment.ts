@@ -3,11 +3,14 @@ import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } fr
 import type {
   CurrenciesConfig,
   PaymentAdapter,
+  PaymentHooks,
   ProductsValidation,
   SanitizedEcommercePluginConfig,
+  Summary,
 } from '../types/index.js'
 
 import { defaultProductsValidation } from '../utilities/defaultProductsValidation.js'
+import { runBeforeInitiatePaymentHooks } from '../utilities/runPaymentHooks.js'
 
 type Args = {
   /**
@@ -20,10 +23,20 @@ type Args = {
    */
   customersSlug?: string
   /**
+   * Whether the transactions collection has the `summary` field. When true,
+   * the handler will persist the computed summary onto the transaction record
+   * after the adapter returns.
+   */
+  hasHooks?: boolean
+  /**
    * Track inventory stock for the products and variants.
    * Accepts an object to override the default field name.
    */
   inventory?: SanitizedEcommercePluginConfig['inventory']
+  /**
+   * Plugin-level payment hooks that run for all payment methods.
+   */
+  paymentHooks?: PaymentHooks
   paymentMethod: PaymentAdapter
   /**
    * The slug of the products collection, defaults to 'products'.
@@ -54,6 +67,8 @@ export const initiatePaymentHandler: InitiatePayment =
     cartsSlug = 'carts',
     currenciesConfig,
     customersSlug = 'users',
+    hasHooks = false,
+    paymentHooks,
     paymentMethod,
     productsSlug = 'products',
     productsValidation,
@@ -311,6 +326,57 @@ export const initiatePaymentHandler: InitiatePayment =
       }
     }
 
+    // Build the initial payment summary from the cart subtotal, then run hooks
+    // (plugin-level then adapter-level) to append tax, shipping, discounts, etc.
+    const cartSubtotal = cart.subtotal ?? 0
+    let summary: Summary = {
+      currency,
+      lines: [{ type: 'subtotal', amount: cartSubtotal, label: 'Subtotal' }],
+      total: cartSubtotal,
+    }
+
+    const pluginHooks = paymentHooks?.beforeInitiatePayment ?? []
+    const adapterHooks = paymentMethod.hooks?.beforeInitiatePayment ?? []
+    const allBeforeInitiateHooks = [...pluginHooks, ...adapterHooks]
+
+    if (allBeforeInitiateHooks.length > 0) {
+      try {
+        summary = await runBeforeInitiatePaymentHooks(allBeforeInitiateHooks, {
+          billingAddress,
+          cart,
+          currenciesConfig,
+          currency,
+          customerEmail,
+          req,
+          shippingAddress,
+          summary,
+        })
+      } catch (error) {
+        payload.logger.error(error, 'Error in beforeInitiatePayment hook.')
+
+        return Response.json(
+          {
+            message:
+              error instanceof Error ? error.message : 'Error in beforeInitiatePayment hook.',
+          },
+          {
+            status: 400,
+          },
+        )
+      }
+    }
+
+    if (summary.total <= 0) {
+      return Response.json(
+        {
+          message: 'Total after adjustments must be greater than zero.',
+        },
+        {
+          status: 400,
+        },
+      )
+    }
+
     try {
       const paymentResponse = await paymentMethod.initiatePayment({
         customersSlug,
@@ -320,12 +386,30 @@ export const initiatePaymentHandler: InitiatePayment =
           currency,
           customerEmail,
           shippingAddress,
+          summary,
         },
         req,
         transactionsSlug,
       })
 
-      return Response.json(paymentResponse)
+      // Persist the summary onto the transaction so the breakdown is queryable
+      // later (receipts, refunds, reporting). The adapter returns the transactionID
+      // when it has created a record; if not, persistence is skipped gracefully.
+      if (hasHooks && paymentResponse.transactionID) {
+        try {
+          await payload.update({
+            id: paymentResponse.transactionID,
+            collection: transactionsSlug,
+            data: { summary },
+            overrideAccess: true,
+            req,
+          })
+        } catch (error) {
+          payload.logger.error(error, 'Failed to persist summary onto transaction.')
+        }
+      }
+
+      return Response.json({ ...paymentResponse, summary })
     } catch (error) {
       payload.logger.error(error, 'Error initiating payment.')
 

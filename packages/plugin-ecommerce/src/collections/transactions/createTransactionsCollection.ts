@@ -6,6 +6,7 @@ import { amountField } from '../../fields/amountField.js'
 import { cartItemsField } from '../../fields/cartItemsField.js'
 import { currencyField } from '../../fields/currencyField.js'
 import { statusField } from '../../fields/statusField.js'
+import { summaryField } from '../../fields/summaryField.js'
 
 type Props = {
   access: Pick<AccessConfig, 'isAdmin'>
@@ -26,6 +27,12 @@ type Props = {
    * Enable variants in the transactions collection.
    */
   enableVariants?: boolean
+  /**
+   * Whether payment hooks are configured. When true, a `summary` group field is
+   * added to the collection to record the breakdown (subtotal, tax, shipping, etc.)
+   * produced by the payment hook pipeline.
+   */
+  hasHooks?: boolean
   /**
    * Slug of the orders collection, defaults to 'orders'.
    */
@@ -49,6 +56,7 @@ export const createTransactionsCollection: (props: Props) => CollectionConfig = 
     currenciesConfig,
     customersSlug = 'users',
     enableVariants = false,
+    hasHooks = false,
     ordersSlug = 'orders',
     paymentMethods,
     productsSlug = 'products',
@@ -187,6 +195,7 @@ export const createTransactionsCollection: (props: Props) => CollectionConfig = 
           } as Field,
         ]
       : []),
+    ...(hasHooks && currenciesConfig ? [summaryField({ currenciesConfig })] : []),
   ]
 
   const baseConfig: CollectionConfig = {
