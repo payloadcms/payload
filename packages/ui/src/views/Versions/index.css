@@ -55,7 +55,14 @@
   }
 
   .versions .table td.cell--linked > a {
-    text-decoration: underline dotted var(--color-text-disabled);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: none;
+    text-decoration-color: var(--color-border);
+    text-decoration-thickness: auto;
+    text-underline-offset: 2px;
+    text-underline-position: from-font;
 
     &:hover {
       text-decoration-color: currentColor;
