@@ -2,18 +2,12 @@ import type { PluginLanguage } from '../types.js'
 
 export const roTranslations = {
   'plugin-mcp': {
-    apiKey: 'Cheie API',
     apiKeyDescription: 'Cheile API controlează la ce colecții, resurse, instrumente și prompturi pot accesa clienții MCP.',
     apiKeys: 'Chei API',
     authentication: 'Autentificare',
-    collections: 'Colecții',
-    custom: 'Personalizat',
     description: 'Descriere',
     descriptionDescription: 'Descrie scopul cheii API.',
     dismiss: 'Închide',
-    generateAPIKey: 'Generează cheie API',
-    generateNewKey: 'Generează cheie nouă',
-    globals: 'Globale',
     keepKeyPrivate: 'Păstrează cheia privată.',
     keyPrivateDescription: 'Această cheie oferă MCP acces la conținutul tău. Nu o partaja cu alții!',
     lastUsed: 'Ultima utilizare',
@@ -23,7 +17,6 @@ export const roTranslations = {
     operations: 'Operațiuni',
     overrideAccess: 'Suprascrie controlul accesului',
     overrideAccessDescription: 'Când este bifat, această cheie ocolește controlul accesului Payload la fiecare operațiune. Lasă nebifat dacă nu ai un motiv specific.',
-    owner: 'Proprietar',
     permissions: 'Permisiuni',
     permissionsDescription: 'Permite clienților MCP să acceseze următoarele colecții, instrumente, resurse și prompturi.',
     prompts: 'Prompturi',

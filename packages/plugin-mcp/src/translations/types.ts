@@ -4,18 +4,12 @@ import type { enTranslations } from './languages/en.js'
 
 export type PluginLanguage = Language<{
   'plugin-mcp': {
-    apiKey: string
     apiKeyDescription: string
     apiKeys: string
     authentication: string
-    collections: string
-    custom: string
     description: string
     descriptionDescription: string
     dismiss: string
-    generateAPIKey: string
-    generateNewKey: string
-    globals: string
     keepKeyPrivate: string
     keyPrivateDescription: string
     lastUsed: string
@@ -25,7 +19,6 @@ export type PluginLanguage = Language<{
     operations: string
     overrideAccess: string
     overrideAccessDescription: string
-    owner: string
     permissions: string
     permissionsDescription: string
     prompts: string

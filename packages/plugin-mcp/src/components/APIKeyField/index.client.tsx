@@ -34,14 +34,14 @@ export const APIKeyField: React.FC = () => {
       </p>
       <div className={`${baseClass}__panel`}>
         <div className={`${baseClass}__header`}>
-          <span className={`${baseClass}__title`}>{t('plugin-mcp:apiKey')}</span>
+          <span className={`${baseClass}__title`}>{t('authentication:apiKey')}</span>
           {!apiKey && (
             <Button
               buttonStyle="primary"
               className={`${baseClass}__generate`}
               onClick={generateKey}
             >
-              {t('plugin-mcp:generateNewKey')}
+              {t('authentication:generateNewAPIKey')}
             </Button>
           )}
         </div>
@@ -64,7 +64,7 @@ export const APIKeyField: React.FC = () => {
                 </button>
               </div>
             )}
-            <APIKeyInput aria-label={t('plugin-mcp:apiKey')} value={apiKey} />
+            <APIKeyInput aria-label={t('authentication:apiKey')} value={apiKey} />
           </div>
         )}
       </div>

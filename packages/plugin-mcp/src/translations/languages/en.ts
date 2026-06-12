@@ -2,18 +2,12 @@ import type { PluginLanguage } from '../types.js'
 
 export const enTranslations = {
   'plugin-mcp': {
-    apiKey: 'API key',
     apiKeyDescription: 'API keys control which collections, resources, tools, and prompts MCP clients can access.',
     apiKeys: 'API Keys',
     authentication: 'Authentication',
-    collections: 'Collections',
-    custom: 'Custom',
     description: 'Description',
     descriptionDescription: 'Describe the purpose of the API key.',
     dismiss: 'Dismiss',
-    generateAPIKey: 'Generate API Key',
-    generateNewKey: 'Generate new key',
-    globals: 'Globals',
     keepKeyPrivate: 'Keep your key private.',
     keyPrivateDescription: 'This key is what gives MCP access to your content. Don’t share it with others!',
     lastUsed: 'Last used',
@@ -23,7 +17,6 @@ export const enTranslations = {
     operations: 'Operations',
     overrideAccess: 'Override access control',
     overrideAccessDescription: 'When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.',
-    owner: 'Owner',
     permissions: 'Permissions',
     permissionsDescription: 'Allow MCP clients to access the following collections, tools, resources, and prompts.',
     prompts: 'Prompts',

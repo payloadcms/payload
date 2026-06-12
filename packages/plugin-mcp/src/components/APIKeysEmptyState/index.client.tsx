@@ -23,7 +23,7 @@ export const APIKeysEmptyState: React.FC<NoResultsClientProps> = ({
         hasCreatePermission && newDocumentURL && viewType !== 'trash'
           ? [
               <Button el="link" key="create" to={newDocumentURL}>
-                {t('plugin-mcp:generateAPIKey')}
+                {t('authentication:generateNewAPIKey')}
               </Button>,
             ]
           : []

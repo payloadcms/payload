@@ -65,10 +65,8 @@ export const getAPIKeysCollection = ({
         name: 'lastUsed',
         type: 'date',
         admin: {
-          condition: (_, _siblingData, { operation }) => operation !== 'create',
           date: { pickerAppearance: 'dayAndTime' },
-          position: 'sidebar',
-          readOnly: true,
+          disabled: { field: true },
         },
         label: ({ t }) => t('plugin-mcp:lastUsed'),
       },
@@ -79,7 +77,7 @@ export const getAPIKeysCollection = ({
           description: ({ t }) => t('plugin-mcp:userDescription'),
           position: 'sidebar',
         },
-        label: ({ t }) => t('plugin-mcp:owner'),
+        label: ({ t }) => t('general:user'),
         relationTo: pluginConfig.userCollection,
         required: true,
       },
@@ -95,8 +93,8 @@ export const getAPIKeysCollection = ({
       },
     ],
     labels: {
-      plural: ({ t }) => t('plugin-mcp:apiKeys'),
-      singular: ({ t }) => t('plugin-mcp:apiKey'),
+      plural: ({ t }) => `${t('plugin-mcp:mcp')} ${t('plugin-mcp:apiKeys')}`,
+      singular: ({ t }) => `${t('plugin-mcp:mcp')} ${t('authentication:apiKey')}`,
     },
     versions: false,
   }

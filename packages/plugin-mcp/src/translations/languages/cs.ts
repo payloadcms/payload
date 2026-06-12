@@ -2,18 +2,12 @@ import type { PluginLanguage } from '../types.js'
 
 export const csTranslations = {
   'plugin-mcp': {
-    apiKey: 'Klíč API',
     apiKeyDescription: 'Klíče API určují, ke kterým kolekcím, zdrojům, nástrojům a promptům mají klienti MCP přístup.',
     apiKeys: 'Klíče API',
     authentication: 'Ověření',
-    collections: 'Kolekce',
-    custom: 'Vlastní',
     description: 'Popis',
     descriptionDescription: 'Popište účel klíče API.',
     dismiss: 'Zavřít',
-    generateAPIKey: 'Vygenerovat klíč API',
-    generateNewKey: 'Vygenerovat nový klíč',
-    globals: 'Globální položky',
     keepKeyPrivate: 'Udržujte svůj klíč v soukromí.',
     keyPrivateDescription: 'Tento klíč dává MCP přístup k vašemu obsahu. Nesdílejte ho s ostatními!',
     lastUsed: 'Naposledy použito',
@@ -23,7 +17,6 @@ export const csTranslations = {
     operations: 'Operace',
     overrideAccess: 'Přepsat řízení přístupu',
     overrideAccessDescription: 'Je-li zaškrtnuto, tento klíč obejde řízení přístupu Payload při každé operaci. Nechte nezaškrtnuté, pokud k tomu nemáte konkrétní důvod.',
-    owner: 'Vlastník',
     permissions: 'Oprávnění',
     permissionsDescription: 'Povolte klientům MCP přístup k následujícím kolekcím, nástrojům, zdrojům a promptům.',
     prompts: 'Prompty',

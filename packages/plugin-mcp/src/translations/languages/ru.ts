@@ -2,18 +2,12 @@ import type { PluginLanguage } from '../types.js'
 
 export const ruTranslations = {
   'plugin-mcp': {
-    apiKey: 'API-ключ',
     apiKeyDescription: 'API-ключи управляют тем, к каким коллекциям, ресурсам, инструментам и промптам могут получать доступ MCP-клиенты.',
     apiKeys: 'API-ключи',
     authentication: 'Аутентификация',
-    collections: 'Коллекции',
-    custom: 'Пользовательское',
     description: 'Описание',
     descriptionDescription: 'Опишите назначение API-ключа.',
     dismiss: 'Закрыть',
-    generateAPIKey: 'Создать API-ключ',
-    generateNewKey: 'Создать новый ключ',
-    globals: 'Глобальные',
     keepKeyPrivate: 'Храните ключ в секрете.',
     keyPrivateDescription: 'Этот ключ дает MCP доступ к вашему контенту. Не передавайте его другим!',
     lastUsed: 'Последнее использование',
@@ -23,7 +17,6 @@ export const ruTranslations = {
     operations: 'Операции',
     overrideAccess: 'Переопределить контроль доступа',
     overrideAccessDescription: 'Если включено, этот ключ обходит контроль доступа Payload при каждой операции. Оставьте выключенным, если нет конкретной причины.',
-    owner: 'Владелец',
     permissions: 'Разрешения',
     permissionsDescription: 'Разрешите MCP-клиентам доступ к следующим коллекциям, инструментам, ресурсам и промптам.',
     prompts: 'Промпты',

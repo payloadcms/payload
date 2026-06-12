@@ -2,18 +2,12 @@ import type { PluginLanguage } from '../types.js'
 
 export const ltTranslations = {
   'plugin-mcp': {
-    apiKey: 'API raktas',
     apiKeyDescription: 'API raktai valdo, prie kurių kolekcijų, išteklių, įrankių ir promptų gali prisijungti MCP klientai.',
     apiKeys: 'API raktai',
     authentication: 'Autentifikavimas',
-    collections: 'Kolekcijos',
-    custom: 'Pasirinktinis',
     description: 'Aprašymas',
     descriptionDescription: 'Aprašykite API rakto paskirtį.',
     dismiss: 'Uždaryti',
-    generateAPIKey: 'Generuoti API raktą',
-    generateNewKey: 'Generuoti naują raktą',
-    globals: 'Globalūs',
     keepKeyPrivate: 'Laikykite savo raktą privačiai.',
     keyPrivateDescription: 'Šis raktas suteikia MCP prieigą prie jūsų turinio. Nesidalykite juo su kitais!',
     lastUsed: 'Paskutinį kartą naudota',
@@ -23,7 +17,6 @@ export const ltTranslations = {
     operations: 'Operacijos',
     overrideAccess: 'Apeiti prieigos kontrolę',
     overrideAccessDescription: 'Pažymėjus, šis raktas apeina Payload prieigos kontrolę kiekvienoje operacijoje. Palikite nepažymėta, nebent turite konkrečią priežastį.',
-    owner: 'Savininkas',
     permissions: 'Leidimai',
     permissionsDescription: 'Leiskite MCP klientams pasiekti šias kolekcijas, įrankius, išteklius ir promptus.',
     prompts: 'Promptai',

@@ -2,18 +2,12 @@ import type { PluginLanguage } from '../types.js'
 
 export const viTranslations = {
   'plugin-mcp': {
-    apiKey: 'Khóa API',
     apiKeyDescription: 'Khóa API kiểm soát các bộ sưu tập, tài nguyên, công cụ và prompt mà client MCP có thể truy cập.',
     apiKeys: 'Khóa API',
     authentication: 'Xác thực',
-    collections: 'Bộ sưu tập',
-    custom: 'Tùy chỉnh',
     description: 'Mô tả',
     descriptionDescription: 'Mô tả mục đích của khóa API.',
     dismiss: 'Đóng',
-    generateAPIKey: 'Tạo khóa API',
-    generateNewKey: 'Tạo khóa mới',
-    globals: 'Globals',
     keepKeyPrivate: 'Giữ khóa của bạn riêng tư.',
     keyPrivateDescription: 'Khóa này cấp cho MCP quyền truy cập nội dung của bạn. Đừng chia sẻ với người khác!',
     lastUsed: 'Lần dùng cuối',
@@ -23,7 +17,6 @@ export const viTranslations = {
     operations: 'Thao tác',
     overrideAccess: 'Ghi đè kiểm soát truy cập',
     overrideAccessDescription: 'Khi bật, khóa này bỏ qua kiểm soát truy cập của Payload trong mọi thao tác. Hãy để tắt trừ khi bạn có lý do cụ thể.',
-    owner: 'Chủ sở hữu',
     permissions: 'Quyền',
     permissionsDescription: 'Cho phép client MCP truy cập các bộ sưu tập, công cụ, tài nguyên và prompt sau.',
     prompts: 'Prompt',

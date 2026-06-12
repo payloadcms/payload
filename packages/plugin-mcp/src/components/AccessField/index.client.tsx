@@ -53,7 +53,7 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
   const access = value ?? {}
   const leafGroupLabels: Record<LeafGroupKey, string> = {
     auth: t('plugin-mcp:authentication'),
-    custom: t('plugin-mcp:custom'),
+    custom: t('general:custom'),
     operations: t('plugin-mcp:operations'),
   }
 
@@ -246,10 +246,10 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
 
   const tabs: Array<{ key: TabKey; label: string }> = [
     ...(Object.keys(collectionsBySlug).length > 0
-      ? [{ key: 'collections' as const, label: t('plugin-mcp:collections') }]
+      ? [{ key: 'collections' as const, label: t('general:collections') }]
       : []),
     ...(Object.keys(globalsBySlug).length > 0
-      ? [{ key: 'globals' as const, label: t('plugin-mcp:globals') }]
+      ? [{ key: 'globals' as const, label: t('general:globals') }]
       : []),
     ...(prompts.length > 0 || resources.length > 0 || tools.length > 0
       ? [{ key: 'server' as const, label: t('plugin-mcp:server') }]

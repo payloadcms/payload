@@ -2,18 +2,12 @@ import type { PluginLanguage } from '../types.js'
 
 export const hyTranslations = {
   'plugin-mcp': {
-    apiKey: 'API բանալի',
     apiKeyDescription: 'API բանալիները կառավարում են, թե MCP հաճախորդները որ հավաքածուներին, ռեսուրսներին, գործիքներին և prompt-երին կարող են մուտք ունենալ։',
     apiKeys: 'API բանալիներ',
     authentication: 'Նույնականացում',
-    collections: 'Հավաքածուներ',
-    custom: 'Հարմարեցված',
     description: 'Նկարագրություն',
     descriptionDescription: 'Նկարագրեք API բանալիի նպատակը։',
     dismiss: 'Փակել',
-    generateAPIKey: 'Ստեղծել API բանալի',
-    generateNewKey: 'Ստեղծել նոր բանալի',
-    globals: 'Գլոբալներ',
     keepKeyPrivate: 'Ձեր բանալին պահեք գաղտնի։',
     keyPrivateDescription: 'Այս բանալին MCP-ին հասանելիություն է տալիս ձեր բովանդակությանը։ Մի՛ կիսվեք այն ուրիշների հետ։',
     lastUsed: 'Վերջին օգտագործում',
@@ -23,7 +17,6 @@ export const hyTranslations = {
     operations: 'Գործողություններ',
     overrideAccess: 'Շրջանցել հասանելիության վերահսկումը',
     overrideAccessDescription: 'Միացված լինելու դեպքում այս բանալին շրջանցում է Payload-ի հասանելիության կանոնները յուրաքանչյուր գործողության ժամանակ։ Թողեք անջատված, եթե հատուկ պատճառ չունեք։',
-    owner: 'Սեփականատեր',
     permissions: 'Թույլտվություններ',
     permissionsDescription: 'Թույլ տվեք MCP հաճախորդներին մուտք ունենալ հետևյալ հավաքածուներին, գործիքներին, ռեսուրսներին և prompt-երին։',
     prompts: 'Prompt-եր',

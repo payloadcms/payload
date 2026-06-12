@@ -2,18 +2,12 @@ import type { PluginLanguage } from '../types.js'
 
 export const itTranslations = {
   'plugin-mcp': {
-    apiKey: 'Chiave API',
     apiKeyDescription: 'Le chiavi API controllano a quali raccolte, risorse, strumenti e prompt possono accedere i client MCP.',
     apiKeys: 'Chiavi API',
     authentication: 'Autenticazione',
-    collections: 'Raccolte',
-    custom: 'Personalizzato',
     description: 'Descrizione',
     descriptionDescription: 'Descrivi lo scopo della chiave API.',
     dismiss: 'Chiudi',
-    generateAPIKey: 'Genera chiave API',
-    generateNewKey: 'Genera nuova chiave',
-    globals: 'Globali',
     keepKeyPrivate: 'Mantieni privata la tua chiave.',
     keyPrivateDescription: 'Questa chiave dà a MCP accesso ai tuoi contenuti. Non condividerla con altri!',
     lastUsed: 'Ultimo utilizzo',
@@ -23,7 +17,6 @@ export const itTranslations = {
     operations: 'Operazioni',
     overrideAccess: 'Ignora controllo accessi',
     overrideAccessDescription: 'Quando selezionato, questa chiave ignora il controllo accessi di Payload in ogni operazione. Lascialo deselezionato salvo un motivo specifico.',
-    owner: 'Proprietario',
     permissions: 'Permessi',
     permissionsDescription: 'Consenti ai client MCP di accedere alle seguenti raccolte, strumenti, risorse e prompt.',
     prompts: 'Prompt',
