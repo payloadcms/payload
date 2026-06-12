@@ -1,20 +1,34 @@
-import type { Row } from '@libsql/client'
+import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
+
+import { sql } from 'drizzle-orm'
 
 import type { BaseSQLiteAdapter, DropDatabase } from './types.js'
 
-const getTables = (adapter: BaseSQLiteAdapter) => {
-  return adapter.client.execute(`SELECT name
+const getTables = (
+  adapter: BaseSQLiteAdapter,
+): Promise<SQLiteRaw<{ rows: { name: string }[] }>> => {
+  return adapter.execute({
+    db: (adapter as any).drizzle,
+    sql: sql`
+SELECT name
                                  FROM sqlite_master
                                  WHERE type = 'table'
-                                   AND name NOT LIKE 'sqlite_%';`)
+                                   AND name NOT LIKE 'sqlite_%';
+    `,
+  }) as unknown as Promise<SQLiteRaw<{ rows: { name: string }[] }>>
 }
 
-const dropTables = (adapter: BaseSQLiteAdapter, rows: Row[]) => {
-  const multi = `
-  PRAGMA foreign_keys = OFF;\n
-  ${rows.map(({ name }) => `DROP TABLE IF EXISTS ${name as string}`).join(';\n ')};\n
-  PRAGMA foreign_keys = ON;`
-  return adapter.client.executeMultiple(multi)
+const dropTables = async (adapter: BaseSQLiteAdapter, rows: { name: string }[]) => {
+  const multi: string[] = [
+    'PRAGMA foreign_keys = OFF;',
+    ...rows.map(({ name }) => `DROP TABLE IF EXISTS ${name};`),
+    'PRAGMA foreign_keys = ON;',
+  ]
+
+  for (const statement of multi) {
+    adapter.payload.logger.debug({ msg: `Executing SQL: ${statement}` })
+    await adapter.execute({ db: (adapter as any).drizzle, sql: sql.raw(statement) })
+  }
 }
 
 export const dropDatabase: DropDatabase = async function ({ adapter }) {
