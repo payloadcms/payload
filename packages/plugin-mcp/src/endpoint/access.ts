@@ -25,15 +25,15 @@ export const getAuthorizedMCP: (args: { req: PayloadRequest }) => Promise<Author
     items: pluginConfig.items.filter((item) => {
       switch (item.type) {
         case 'collectionTool':
-          return apiKeyDoc.access.collections?.[item.collectionSlug]?.[item.key] !== false
+          return apiKeyDoc.access.collections?.[item.collectionSlug]?.[item.configKey] !== false
         case 'globalTool':
-          return apiKeyDoc.access.globals?.[item.globalSlug]?.[item.key] !== false
+          return apiKeyDoc.access.globals?.[item.globalSlug]?.[item.configKey] !== false
         case 'prompt':
-          return apiKeyDoc.access.prompts?.[item.key] !== false
+          return apiKeyDoc.access.prompts?.[item.configKey] !== false
         case 'resource':
-          return apiKeyDoc.access.resources?.[item.key] !== false
+          return apiKeyDoc.access.resources?.[item.configKey] !== false
         case 'tool':
-          return apiKeyDoc.access.tools?.[item.key] !== false
+          return apiKeyDoc.access.tools?.[item.configKey] !== false
       }
     }),
     overrideAccess:
