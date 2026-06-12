@@ -68,14 +68,15 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
     }
   }
 
-  const isScopedAllowed = (scope: ScopeKey, slug: string, key: string): boolean =>
-    access[scope]?.[slug]?.[key] !== false
+  const isScopedAllowed = (scope: ScopeKey, slug: string, configKey: string): boolean =>
+    access[scope]?.[slug]?.[configKey] !== false
 
-  const isFlatAllowed = (scope: FlatKey, key: string): boolean => access[scope]?.[key] !== false
+  const isFlatAllowed = (scope: FlatKey, configKey: string): boolean =>
+    access[scope]?.[configKey] !== false
 
-  const toggleScoped = (scope: ScopeKey, slug: string, key: string, allow: boolean) => {
+  const toggleScoped = (scope: ScopeKey, slug: string, configKey: string, allow: boolean) => {
     if (allow) {
-      const slugBucket = without(access[scope]?.[slug], key)
+      const slugBucket = without(access[scope]?.[slug], configKey)
       const scopeBucket = slugBucket
         ? setKey(access[scope], slug, slugBucket)
         : without(access[scope], slug)
@@ -85,18 +86,18 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
         setKey(
           access,
           scope,
-          setKey(access[scope], slug, setKey(access[scope]?.[slug], key, false)),
+          setKey(access[scope], slug, setKey(access[scope]?.[slug], configKey, false)),
         ),
       )
     }
   }
 
-  const toggleFlat = (scope: FlatKey, key: string, allow: boolean) => {
+  const toggleFlat = (scope: FlatKey, configKey: string, allow: boolean) => {
     if (allow) {
-      const bucket = without(access[scope], key)
+      const bucket = without(access[scope], configKey)
       setValue(bucket ? setKey(access, scope, bucket) : (without(access, scope) ?? {}))
     } else {
-      setValue(setKey(access, scope, setKey(access[scope], key, false)))
+      setValue(setKey(access, scope, setKey(access[scope], configKey, false)))
     }
   }
 
@@ -106,7 +107,7 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
       setValue(scopeBucket ? setKey(access, scope, scopeBucket) : (without(access, scope) ?? {}))
     } else {
       const slugBucket = leaves.reduce<Record<string, boolean>>(
-        (acc, leaf) => ({ ...acc, [leaf.key]: false }),
+        (acc, leaf) => ({ ...acc, [leaf.configKey]: false }),
         {},
       )
       setValue(setKey(access, scope, setKey(access[scope], slug, slugBucket)))
@@ -118,7 +119,7 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
       setValue(without(access, scope) ?? {})
     } else {
       const bucket = leaves.reduce<Record<string, boolean>>(
-        (acc, leaf) => ({ ...acc, [leaf.key]: false }),
+        (acc, leaf) => ({ ...acc, [leaf.configKey]: false }),
         {},
       )
       setValue(setKey(access, scope, bucket))
@@ -154,13 +155,13 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
               >
                 <ul className={`${baseClass}__list`}>
                   {leaves.map((leaf) => (
-                    <li key={leaf.key}>
+                    <li key={leaf.configKey}>
                       <CheckboxInput
-                        checked={isScopedAllowed('collections', slug, leaf.key)}
-                        id={`${path}.collections.${slug}.${leaf.key}`}
+                        checked={isScopedAllowed('collections', slug, leaf.configKey)}
+                        id={`${path}.collections.${slug}.${leaf.configKey}`}
                         label={leaf.label}
                         onToggle={(e) =>
-                          toggleScoped('collections', slug, leaf.key, e.target.checked)
+                          toggleScoped('collections', slug, leaf.configKey, e.target.checked)
                         }
                         tooltip={leaf.description}
                       />
@@ -197,12 +198,14 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
               >
                 <ul className={`${baseClass}__list`}>
                   {leaves.map((leaf) => (
-                    <li key={leaf.key}>
+                    <li key={leaf.configKey}>
                       <CheckboxInput
-                        checked={isScopedAllowed('globals', slug, leaf.key)}
-                        id={`${path}.globals.${slug}.${leaf.key}`}
+                        checked={isScopedAllowed('globals', slug, leaf.configKey)}
+                        id={`${path}.globals.${slug}.${leaf.configKey}`}
                         label={leaf.label}
-                        onToggle={(e) => toggleScoped('globals', slug, leaf.key, e.target.checked)}
+                        onToggle={(e) =>
+                          toggleScoped('globals', slug, leaf.configKey, e.target.checked)
+                        }
                         tooltip={leaf.description}
                       />
                     </li>
@@ -234,12 +237,12 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
             >
               <ul className={`${baseClass}__list`}>
                 {tools.map((leaf) => (
-                  <li key={leaf.key}>
+                  <li key={leaf.configKey}>
                     <CheckboxInput
-                      checked={isFlatAllowed('tools', leaf.key)}
-                      id={`${path}.tools.${leaf.key}`}
+                      checked={isFlatAllowed('tools', leaf.configKey)}
+                      id={`${path}.tools.${leaf.configKey}`}
                       label={leaf.label}
-                      onToggle={(e) => toggleFlat('tools', leaf.key, e.target.checked)}
+                      onToggle={(e) => toggleFlat('tools', leaf.configKey, e.target.checked)}
                       tooltip={leaf.description}
                     />
                   </li>
@@ -259,12 +262,12 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
             >
               <ul className={`${baseClass}__list`}>
                 {prompts.map((leaf) => (
-                  <li key={leaf.key}>
+                  <li key={leaf.configKey}>
                     <CheckboxInput
-                      checked={isFlatAllowed('prompts', leaf.key)}
-                      id={`${path}.prompts.${leaf.key}`}
+                      checked={isFlatAllowed('prompts', leaf.configKey)}
+                      id={`${path}.prompts.${leaf.configKey}`}
                       label={leaf.label}
-                      onToggle={(e) => toggleFlat('prompts', leaf.key, e.target.checked)}
+                      onToggle={(e) => toggleFlat('prompts', leaf.configKey, e.target.checked)}
                       tooltip={leaf.description}
                     />
                   </li>
@@ -286,12 +289,12 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
             >
               <ul className={`${baseClass}__list`}>
                 {resources.map((leaf) => (
-                  <li key={leaf.key}>
+                  <li key={leaf.configKey}>
                     <CheckboxInput
-                      checked={isFlatAllowed('resources', leaf.key)}
-                      id={`${path}.resources.${leaf.key}`}
+                      checked={isFlatAllowed('resources', leaf.configKey)}
+                      id={`${path}.resources.${leaf.configKey}`}
                       label={leaf.label}
-                      onToggle={(e) => toggleFlat('resources', leaf.key, e.target.checked)}
+                      onToggle={(e) => toggleFlat('resources', leaf.configKey, e.target.checked)}
                       tooltip={leaf.description}
                     />
                   </li>

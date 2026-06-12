@@ -38,6 +38,16 @@
       }
     }
 
+    .drawer & th:first-child,
+    .drawer & td:first-child {
+      padding-inline-start: var(--spacer-3);
+    }
+
+    .drawer & th:last-child,
+    .drawer & td:last-child {
+      padding-inline-end: var(--spacer-3);
+    }
+
     /* Linked cells: move padding to the anchor for full-cell clickability */
     .cell--linked {
       padding: 0;
@@ -47,11 +57,6 @@
         align-items: center;
         padding: var(--spacer-2) var(--spacer-2-5);
         min-height: calc(var(--spacer-4) * 2);
-      }
-
-      &:first-child > a {
-        padding-inline-start: var(--spacer-2);
-        padding-inline-end: var(--spacer-2);
       }
     }
 

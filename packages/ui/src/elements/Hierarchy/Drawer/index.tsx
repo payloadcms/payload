@@ -17,8 +17,9 @@ import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { DialogModal } from '../../Dialog/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
-import { Drawer, DrawerDepthProvider } from '../../Drawer/index.js'
+import { DrawerDepthProvider } from '../../Drawer/index.js'
 import { DrawerActionHeader } from '../../DrawerActionHeader/index.js'
 import { HierarchyColumnBrowser } from '../ColumnBrowser/index.js'
 import { fetchAncestorPath } from './fetchAncestorPath.js'
@@ -318,9 +319,9 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
 
   return (
     <>
-      <Drawer className={baseClass} Header={null} slug={drawerSlug}>
+      <DialogModal className={baseClass} closeOnBlur size="large" slug={drawerSlug}>
         {drawerContent}
-      </Drawer>
+      </DialogModal>
       <DrawerDepthProvider>
         <DocumentDrawer
           initialData={

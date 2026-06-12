@@ -1,5 +1,8 @@
 @layer payload-default {
   .field-select {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
     margin-bottom: var(--spacer-3);
   }
 }

@@ -20,6 +20,9 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
+      admin: {
+        description: 'The main content of the document.',
+      },
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,

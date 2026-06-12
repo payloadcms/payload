@@ -9,10 +9,7 @@ import { useTranslation } from '../../../../../providers/Translation/index.js'
 
 export interface BlocksCellProps extends DefaultCellComponentProps<BlocksFieldClient> {}
 
-export const BlocksCell: React.FC<BlocksCellProps> = ({
-  cellData,
-  field: { blocks, labels },
-}) => {
+export const BlocksCell: React.FC<BlocksCellProps> = ({ cellData, field: { blocks, labels } }) => {
   const { i18n } = useTranslation()
   const { config } = useConfig()
 

@@ -25,7 +25,7 @@ const DRAWER_SLUG = formatDrawerSlug({ slug: 'react-select-portal-test', depth: 
 
 const DrawerVariant: React.FC = () => {
   const { openModal } = useModal()
-  const [value, setValue] = useState<null | { label: string; value: string }>(null)
+  const [value, setValue] = useState<{ label: string; value: string } | null>(null)
 
   return (
     <>
@@ -52,10 +52,10 @@ const DrawerVariant: React.FC = () => {
 export const ReactSelectSection: React.FC<{ selectedComponent: string }> = ({
   selectedComponent,
 }) => {
-  const [defaultValue, setDefaultValue] = useState<null | { label: string; value: string }>(null)
-  const [overflowValue, setOverflowValue] = useState<null | { label: string; value: string }>(null)
-  const [popupValue, setPopupValue] = useState<null | { label: string; value: string }>(null)
-  const [noPortalValue, setNoPortalValue] = useState<null | { label: string; value: string }>(null)
+  const [defaultValue, setDefaultValue] = useState<{ label: string; value: string } | null>(null)
+  const [overflowValue, setOverflowValue] = useState<{ label: string; value: string } | null>(null)
+  const [popupValue, setPopupValue] = useState<{ label: string; value: string } | null>(null)
+  const [noPortalValue, setNoPortalValue] = useState<{ label: string; value: string } | null>(null)
 
   return (
     <Section id="select" selectedComponent={selectedComponent} title="ReactSelect">
@@ -91,7 +91,7 @@ export const ReactSelectSection: React.FC<{ selectedComponent: string }> = ({
           buttonType="custom"
           render={() => (
             <div style={{ padding: '16px', width: '280px' }}>
-              <p style={{ marginBottom: '8px', fontSize: '13px' }}>
+              <p style={{ fontSize: '13px', marginBottom: '8px' }}>
                 Dropdown should portal above this popup:
               </p>
               <ReactSelect
@@ -110,13 +110,13 @@ export const ReactSelectSection: React.FC<{ selectedComponent: string }> = ({
           buttonType="custom"
           render={() => (
             <div style={{ padding: '16px', width: '280px' }}>
-              <p style={{ marginBottom: '8px', fontSize: '13px' }}>
+              <p style={{ fontSize: '13px', marginBottom: '8px' }}>
                 Both the input and dropdown menu should be dark-themed:
               </p>
               <div style={{ marginBottom: '12px' }}>
                 <TextInput label="Text field" onChange={() => {}} path="dark-popup-text" value="" />
               </div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>
+              <label style={{ display: 'block', fontSize: '12px', marginBottom: '4px' }}>
                 Select field:
               </label>
               <ReactSelect

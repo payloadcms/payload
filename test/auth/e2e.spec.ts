@@ -18,7 +18,6 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
-import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -365,12 +364,8 @@ describe('Auth', () => {
 
         await expect.poll(() => lockedDocs.docs.length).toBe(1)
 
-        await openNav(page)
-        await page
-          .locator(
-            `.nav .nav__controls a[href="${formatAdminURL({ includeBasePath: true, path: '/logout', adminRoute: '/admin' })}"]`,
-          )
-          .click()
+        await page.locator('.user-menu__trigger').click()
+        await page.locator('a[href$="/logout"]').click()
 
         // Locate the modal container
         const modalContainer = page.locator('.payload__modal-container')

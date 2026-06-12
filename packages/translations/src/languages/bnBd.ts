@@ -257,6 +257,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'অন্য একজন ব্যবহারকারী এই ডকুমেন্ট সম্পাদনার দায়িত্ব নিয়েছেন।',
     applyChanges: 'পরিবর্তনগুলি প্রয়োগ করুন',
     ascending: 'আরোহী',
+    auto: 'স্বয়ংক্রিয়',
     automatic: 'স্বয়ংক্রিয়',
     backToDashboard: 'ড্যাশবোর্ডে ফিরে যান',
     by: 'দ্বারা',
@@ -455,6 +456,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} নির্বাচিত হয়েছে',
     selectLabel: '{{label}} নির্বাচন করুন',
     selectValue: 'একটি মান নির্বাচন করুন',
+    settings: 'সেটিংস',
     showAllLabel: 'সমস্ত {{label}} দেখান',
     shownInTable: 'টেবিলে প্রদর্শিত',
     showSidebar: 'সাইডবার দেখান',
@@ -471,6 +473,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} থেকে মোট {{total}}টি ডকুমেন্টের মধ্যে {{count}}টি সফলভাবে পুনরায় ইনডেক্স করা হয়েছে এবং {{skips}}টি খসড়া বাদ দেওয়া হয়েছে।',
     takeOver: 'দায়িত্ব নিন',
+    theme: 'থিম',
     thisLanguage: 'বাংলা (বাংলাদেশ)',
     time: 'সময়',
     timezone: 'টাইমজোন',

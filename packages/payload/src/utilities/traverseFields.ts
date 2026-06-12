@@ -71,9 +71,7 @@ const traverseArrayOrBlocksField = ({
     if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
       const block =
         config?.blocks?.find((b) => b.slug === ref.blockType) ??
-        field.blocks.find(
-          (b): b is Block => typeof b !== 'string' && b.slug === ref.blockType,
-        )
+        field.blocks.find((b): b is Block => typeof b !== 'string' && b.slug === ref.blockType)
 
       fields = block?.fields as Field[]
     } else if (field.type === 'array') {

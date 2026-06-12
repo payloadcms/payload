@@ -11,6 +11,7 @@ import {
   collectionSlugs,
   docControlsSlug,
   draftVersionsSlug,
+  drawersSlug,
   folderItemsSlug,
   foldersSlug,
   joinFieldsSlug,
@@ -48,6 +49,7 @@ import CollapsibleFields from './collections/Collapsible/index.js'
 import DateFields from './collections/Date/index.js'
 import DocControls from './collections/DocControls/index.js'
 import DraftVersions from './collections/DraftVersions/index.js'
+import Drawers from './collections/Drawers/index.js'
 import EmailFields from './collections/Email/index.js'
 import FolderItems from './collections/FolderItems/index.js'
 import { Folders } from './collections/Folders/index.js'
@@ -100,6 +102,7 @@ export const collections: CollectionConfig[] = [
   withGroup(Users, 'Auth'),
   // Elements
   withGroup(DocControls, 'Elements'),
+  withGroup(Drawers, 'Elements'),
   withGroup(Orderable, 'Elements'),
   withGroup(SearchBarTest, 'Elements'),
   withGroup(Talks, 'Elements'),
@@ -162,6 +165,7 @@ export const baseConfig: Partial<Config> = {
         './components/HeaderAction.tsx#HeaderAction2',
       ],
       beforeNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
+      userMenuSettingsItems: ['./components/UserMenuSettingsItem.tsx#UserMenuSettingsItem'],
       views: {
         components: {
           Component: './views/Components/index.js#ComponentsView',
@@ -285,7 +289,7 @@ export const baseConfig: Partial<Config> = {
     }
 
     // Seed relationship-fields to test join field
-    await payload.create({
+    const createdRelationship = await payload.create({
       collection: relationshipFieldsSlug,
       data: {
         authorRequired: devUserDoc.id,
@@ -719,6 +723,113 @@ export const baseConfig: Partial<Config> = {
       },
       draft: true,
     })
+
+    // Seed drawers collection: a couple of docs linked via the
+    // self-referencing `child` field so drawers can be drilled into.
+    const drawerSeeds = [
+      { title: 'Landing Page', status: 'published' as const },
+      { title: 'About Page', status: 'draft' as const },
+    ]
+
+    let previousNestedChild: number | string | undefined
+    for (let i = drawerSeeds.length - 1; i >= 0; i--) {
+      const seed = drawerSeeds[i]!
+      const created = await payload.create({
+        collection: drawersSlug,
+        data: {
+          title: seed.title,
+          blocks: [
+            { blockType: 'hero-block', heading: `${seed.title} Hero` },
+            {
+              blockType: 'content-block',
+              body: 'Some content for this page.',
+              heading: 'Overview',
+            },
+            { blockType: 'cta-block', label: 'Get Started', url: '/get-started' },
+          ],
+          child: previousNestedChild as string,
+          content: {
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'Visit the ',
+                      version: 1,
+                    },
+                    {
+                      type: 'link',
+                      children: [
+                        {
+                          type: 'text',
+                          detail: 0,
+                          format: 0,
+                          mode: 'normal',
+                          style: '',
+                          text: 'Payload website',
+                          version: 1,
+                        },
+                      ],
+                      direction: 'ltr' as const,
+                      fields: {
+                        linkType: 'custom' as const,
+                        newTab: true,
+                        rel: ['noopener'],
+                        url: 'https://payloadcms.com',
+                      },
+                      format: '' as const,
+                      indent: 0,
+                      version: 3,
+                    },
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' or ',
+                      version: 1,
+                    },
+                    {
+                      type: 'inlineBlock',
+                      fields: {
+                        id: '67b489ce0000000000000001',
+                        blockType: 'inline-cta',
+                        label: 'Get Started',
+                        url: '/get-started',
+                      },
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr' as const,
+                  format: '' as const,
+                  indent: 0,
+                  textFormat: 0,
+                  textStyle: '',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr' as const,
+              format: '' as const,
+              indent: 0,
+              version: 1,
+            },
+          },
+          publishedAt: new Date().toISOString(),
+          relatedRelationship: createdRelationship.id,
+          relatedText: createdPosts[i]?.id as string,
+          status: seed.status,
+        },
+      })
+      previousNestedChild = created.id
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

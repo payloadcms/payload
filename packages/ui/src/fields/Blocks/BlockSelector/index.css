@@ -1,6 +1,8 @@
 @layer payload-default {
   .blocks-drawer__blocks-wrapper {
-    padding: var(--spacer-2-5);
+    --blocks-drawer-card-min-width: 120px;
+    --blocks-drawer-card-max-width: 160px;
+    padding: var(--spacer-3);
   }
 
   .blocks-drawer__blocks {
@@ -8,8 +10,20 @@
     padding: 0;
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(106px, 1fr));
-    gap: var(--spacer-2-5);
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(var(--blocks-drawer-card-min-width), 1fr)
+    );
+    gap: var(--spacer-3);
+  }
+
+  .blocks-drawer__block .thumbnail-card {
+    width: 100%;
+    max-width: var(--blocks-drawer-card-max-width);
+  }
+
+  .blocks-drawer__block .thumbnail-card__thumbnail {
+    min-width: 0;
   }
 
   .blocks-drawer__default-image {

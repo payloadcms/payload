@@ -254,6 +254,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Outro usuário assumiu a edição deste documento.',
     applyChanges: 'Aplicar alterações',
     ascending: 'Ascendente',
+    auto: 'Automático',
     automatic: 'Automático',
     backToDashboard: 'Voltar para Painel de Controle',
     by: 'Por',
@@ -451,6 +452,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} selecionado',
     selectLabel: 'Selecione {{label}}',
     selectValue: 'Selecione um valor',
+    settings: 'Configurações',
     showAllLabel: 'Mostre todos {{label}}',
     shownInTable: 'Exibido em tabela',
     showSidebar: 'Mostrar barra lateral',
@@ -467,6 +469,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Reindexação bem‑sucedida de {{count}} de {{total}} documentos de {{collections}}, e {{skips}} rascunhos foram ignorados.',
     takeOver: 'Assumir',
+    theme: 'Tema',
     thisLanguage: 'Português',
     time: 'Tempo',
     timezone: 'Fuso horário',

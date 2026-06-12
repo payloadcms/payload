@@ -255,6 +255,7 @@ export const idTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Pengguna lain telah mengambil alih pengeditan dokumen ini.',
     applyChanges: 'Terapkan Perubahan',
     ascending: 'Naik',
+    auto: 'Otomatis',
     automatic: 'Otomatis',
     backToDashboard: 'Kembali ke Dasbor',
     by: 'Oleh',
@@ -451,6 +452,7 @@ export const idTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} dipilih',
     selectLabel: 'Pilih {{label}}',
     selectValue: 'Pilih nilai',
+    settings: 'Pengaturan',
     showAllLabel: 'Tampilkan semua {{label}}',
     shownInTable: 'Ditampilkan dalam tabel',
     showSidebar: 'Tampilkan bilah samping',
@@ -467,6 +469,7 @@ export const idTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Berhasil mengindeks ulang {{count}} dari {{total}} dokumen dari {{collections}}, dan melewatkan {{skips}} draf.',
     takeOver: 'Ambil alih',
+    theme: 'Tema',
     thisLanguage: 'Bahasa Indonesia',
     time: 'Waktu',
     timezone: 'Zona Waktu',

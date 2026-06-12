@@ -112,7 +112,7 @@ describe('Block fields', () => {
       fieldName: 'blocks',
     })
 
-    const searchInput = page.locator('.block-search__input')
+    const searchInput = page.locator('.block-search__input input')
     await searchInput.fill('Number')
 
     // select the first block in the drawer

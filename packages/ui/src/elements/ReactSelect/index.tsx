@@ -11,6 +11,7 @@ import CreatableSelect from 'react-select/creatable'
 import type { Option, ReactSelectAdapterProps } from './types.js'
 export type { Option } from './types.js'
 
+import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useTheme } from '../../providers/Theme/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
@@ -92,6 +93,20 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
 
   const menuPosition = menuPositionProp ?? (menuPortalTarget ? 'fixed' : undefined)
 
+  // Debounce the loading state so that fast option fetches (e.g. relationship
+  // fields that resolve almost instantly) don't cause the clear indicator to
+  // flash to react-select's loading indicator and back. The loading indicator
+  // only appears once a load takes longer than the threshold below.
+  const [isLoadingDebounced, setIsLoadingDebounced] = React.useState(false)
+
+  useDebouncedEffect(
+    () => {
+      setIsLoadingDebounced(isLoading)
+    },
+    [isLoading],
+    250,
+  )
+
   const loadingMessage = () => t('general:loading') + '...'
 
   const classes = [className, 'react-select', showError && 'react-select--error']
@@ -139,7 +154,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       <Select<Option, boolean, GroupBase<Option>>
         captureMenuScroll
         customProps={customProps}
-        isLoading={isLoading}
         {...props}
         className={classes}
         classNamePrefix="rs"
@@ -169,6 +183,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         instanceId={uuid}
         isClearable={isClearable}
         isDisabled={disabled}
+        isLoading={isLoadingDebounced}
         isSearchable={isSearchable}
         loadingMessage={loadingMessage}
         menuPlacement="auto"
@@ -229,7 +244,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   return (
     <CreatableSelect<Option, boolean, GroupBase<Option>>
       captureMenuScroll
-      isLoading={isLoading}
       {...props}
       className={classes}
       classNamePrefix="rs"
@@ -259,6 +273,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       instanceId={uuid}
       isClearable={isClearable}
       isDisabled={disabled}
+      isLoading={isLoadingDebounced}
       isSearchable={isSearchable}
       loadingMessage={loadingMessage}
       menuPlacement="auto"

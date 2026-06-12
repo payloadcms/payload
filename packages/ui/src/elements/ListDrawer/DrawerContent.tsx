@@ -186,10 +186,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     [getEntityConfig, refresh, selectedOption.value],
   )
 
-  if (isLoading) {
-    return <LoadingOverlay />
-  }
-
   return (
     <ListDrawerContextProvider
       allowCreate={allowCreate}
@@ -204,8 +200,13 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       selectedOption={selectedOption}
       setSelectedOption={setMySelectedOption}
     >
-      {ListView}
-      <DocumentDrawer onSave={onCreateNew} />
+      {!isLoading && (
+        <>
+          <div className="drawer__fade-in">{ListView}</div>
+          <DocumentDrawer onSave={onCreateNew} />
+        </>
+      )}
+      <LoadingOverlay animationDuration="200ms" overlayType="drawer" show={isLoading} />
     </ListDrawerContextProvider>
   )
 }
