@@ -60,9 +60,23 @@ import type { Args, SQLiteD1Adapter } from './types.js'
 import { connect } from './connect.js'
 import { execute } from './execute.js'
 
+export { D1HttpBinding } from './http-binding/index.js'
+
 const filename = fileURLToPath(import.meta.url)
 
 export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter> {
+  if ((!args.binding && !args.http) || (args.binding && args.http)) {
+    throw new Error(
+      'db-d1-sqlite: Provide exactly one of `binding` (Cloudflare Workers) or `http` (REST API).',
+    )
+  }
+
+  if (args.http && args.readReplicas) {
+    throw new Error(
+      'db-d1-sqlite: `readReplicas` is not supported with `http`. Use a Cloudflare Workers deployment with a D1 binding (this feature is not available over the HTTP API).',
+    )
+  }
+
   const sqliteIDType = args.idType || 'number'
   const payloadIDType = sqliteIDType === 'uuid' || sqliteIDType === 'uuidv7' ? 'text' : 'number'
   const allowIDOnCreate = args.allowIDOnCreate ?? false
@@ -107,6 +121,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       binding: args.binding,
       blocksAsJSON: args.blocksAsJSON ?? false,
+      httpConfig: args.http,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       client: undefined,
       defaultDrizzleSnapshot,
@@ -234,6 +249,7 @@ export type {
   GenericColumns,
   GenericRelation,
   GenericTable,
+  HttpConfig,
   IDType,
   Insert,
   MigrateDownArgs,
