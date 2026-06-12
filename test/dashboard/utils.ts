@@ -49,7 +49,20 @@ export class DashboardHelper {
       'x-large': 9,
       full: 12,
     }
+
+    // Wait for the dashboard and its widgets to be laid out before measuring
+    // bounding boxes. Adapters that render admin page content after the initial
+    // load (e.g. TanStack Start streams the view in post-hydration) can leave
+    // widgets briefly unmounted/unsized right after a save or `page.reload()`,
+    // producing a null `boundingBox()`. `boundingBox()` does not auto-retry, so
+    // without this the read races the mount. (Callers that change the widget
+    // count first await `toHaveCount` so the set is stable here.)
+    await expect(this.dashboard).toBeVisible()
+
     const widgets = await this.widgets.all()
+    for (const widget of widgets) {
+      await expect(widget).toBeVisible()
+    }
     let currentPos = 0
     for (let index = 0; index < widgets.length; index++) {
       const widget = widgets[index]!
@@ -221,8 +234,13 @@ export class DashboardHelper {
     await this.assertIsEditing(true)
     await this.stepNavLast.locator('button').nth(1).click()
     await this.assertIsEditing(false)
+    // The widget set must be fully (re)rendered before `validateLayout` measures
+    // bounding boxes — both after the edit→view re-render and after the reload,
+    // since admin content can mount asynchronously (see `validateLayout`).
+    await expect(this.widgets).toHaveCount(snapshot.length)
     await this.validateLayout()
     await this.page.reload()
+    await expect(this.widgets).toHaveCount(snapshot.length)
     await this.validateLayout()
     const snapshotAfter = await this.getSnapshot()
     expect(snapshotAfter).toEqual(snapshot)
