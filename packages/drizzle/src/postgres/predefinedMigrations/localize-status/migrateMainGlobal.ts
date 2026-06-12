@@ -1,6 +1,6 @@
-import type { Payload } from '../../../../types/index.js'
+import type { Payload } from 'payload'
 
-import { toSnakeCase } from '../shared.js'
+import toSnakeCase from 'to-snake-case'
 
 /**
  * Migrates main global document from _status to per-locale status object

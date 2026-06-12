@@ -50,7 +50,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overwriteExistingFiles?: boolean
   populate?: PopulateType
   publishAllLocales?: boolean
-  publishSpecificLocale?: string
   req: PayloadRequest
   showHiddenFields?: boolean
   /**
@@ -102,7 +101,6 @@ export const updateOperation = async <
       overwriteExistingFiles = false,
       populate,
       publishAllLocales,
-      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -272,7 +270,6 @@ export const updateOperation = async <
           payload,
           populate,
           publishAllLocales,
-          publishSpecificLocale,
           req,
           select: select!,
           showHiddenFields: showHiddenFields!,

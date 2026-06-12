@@ -1,4 +1,5 @@
-import { type DocumentViewServerProps, type PaginatedDocs, type Where } from 'payload'
+import type { DocumentViewServerProps, PaginatedDocs } from 'payload'
+
 import { formatAdminURL, hasDraftsEnabled, isNumber } from 'payload/shared'
 import React from 'react'
 
@@ -44,22 +45,8 @@ export async function VersionsView(props: DocumentViewServerProps) {
   const isTrashed = segments[2] === 'trash'
 
   const {
-    localization,
     routes: { api: apiRoute },
   } = config
-
-  const whereQuery: {
-    and: Array<{ parent?: { equals: number | string }; snapshot?: { not_equals: boolean } }>
-  } & Where = {
-    and: [],
-  }
-  if (localization && draftsEnabled) {
-    whereQuery.and.push({
-      snapshot: {
-        not_equals: true,
-      },
-    })
-  }
 
   const defaultLimit = collectionSlug ? collectionConfig?.admin?.pagination?.defaultLimit : 10
 
@@ -77,7 +64,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
     req,
     sort: sort as string,
     user,
-    where: whereQuery,
   })
 
   if (!versionsData) {
@@ -104,13 +90,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
           },
           status: 'published',
           user,
-          where: localization
-            ? {
-                snapshot: {
-                  not_equals: true,
-                },
-              }
-            : undefined,
         })
       : Promise.resolve(null),
     draftsEnabled
@@ -132,13 +111,6 @@ export async function VersionsView(props: DocumentViewServerProps) {
           },
           status: 'draft',
           user,
-          where: localization
-            ? {
-                snapshot: {
-                  not_equals: true,
-                },
-              }
-            : undefined,
         })
       : Promise.resolve(null),
   ])
