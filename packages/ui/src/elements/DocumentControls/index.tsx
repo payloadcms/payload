@@ -267,18 +267,22 @@ export const DocumentControls: React.FC<{
                   )}
               </Fragment>
             )}
-            {collectionConfig?.timestamps && (isEditing || isAccountView) && relativeTime && (
-              <li
-                className={`${baseClass}__list-item ${baseClass}__value-wrap`}
-                title={updatedAt || createdAt || undefined}
-              >
-                <p className={`${baseClass}__value`}>
-                  {t(isTrashed ? 'general:deletedAgo' : 'general:updatedAgo', {
-                    distance: relativeTime,
-                  })}
-                </p>
-              </li>
-            )}
+            {collectionConfig?.timestamps &&
+              (isEditing || isAccountView) &&
+              (data?.updatedAt || data?.createdAt) && (
+                <li
+                  className={`${baseClass}__list-item ${baseClass}__value-wrap`}
+                  title={updatedAt || createdAt || undefined}
+                >
+                  <p className={`${baseClass}__value`}>
+                    {relativeTime
+                      ? t(isTrashed ? 'general:deletedAgo' : 'general:updatedAgo', {
+                          distance: relativeTime,
+                        })
+                      : `${t('general:loading')}...`}
+                  </p>
+                </li>
+              )}
           </ul>
         </div>
       )}
