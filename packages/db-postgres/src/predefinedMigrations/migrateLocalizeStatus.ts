@@ -1,9 +1,10 @@
 import type { Payload, PayloadRequest } from 'payload'
 
-import { localizeStatus, toSnakeCase } from 'payload/migrations'
+import { migratePostgresLocalizeStatus } from '@payloadcms/drizzle/postgres'
+import { toSnakeCase } from 'payload/migrations'
 
 /**
- * Migrate all collections and globals with versions.drafts enabled to use per-locale _status.
+ * Migrate all collections and globals with per-locale status enabled to use per-locale _status.
  *
  * This migration:
  * 1. Converts version._status from a scalar string to a locale-keyed object for each entity
@@ -46,7 +47,7 @@ export async function migrateLocalizeStatus({
   })
 
   for (const collection of collections) {
-    await localizeStatus.up({ collectionSlug: collection.slug, db, payload, req, sql })
+    await migratePostgresLocalizeStatus({ collectionSlug: collection.slug, db, payload, req, sql })
     await _cleanupSnapshotColumn({
       db,
       payload,
@@ -56,7 +57,7 @@ export async function migrateLocalizeStatus({
   }
 
   for (const global of globals) {
-    await localizeStatus.up({ db, globalSlug: global.slug, payload, req, sql })
+    await migratePostgresLocalizeStatus({ db, globalSlug: global.slug, payload, req, sql })
     await _cleanupSnapshotColumn({
       db,
       payload,

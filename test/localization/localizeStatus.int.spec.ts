@@ -1,11 +1,14 @@
 import type { Payload } from 'payload'
 
+import { localizeStatus } from '@payloadcms/db-mongodb/migration-utils'
 import { sql } from '@payloadcms/db-postgres'
+import { migratePostgresLocalizeStatus } from '@payloadcms/db-postgres/migration-utils'
+import { migrateSqliteLocalizeStatus } from '@payloadcms/db-sqlite/migration-utils'
+import { sql as drizzleSql } from 'drizzle-orm'
 import { Types } from 'mongoose'
 import path from 'path'
-import { localizeStatus } from 'payload/migrations'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
@@ -26,26 +29,37 @@ describe('localizeStatus migration', () => {
   })
 
   describe.skipIf(process.env.PAYLOAD_DATABASE !== 'postgres')('PostgreSQL', () => {
-    // Simulate a real user's pre-migration database state: the `snapshot` column existed
-    // in the old schema but is no longer part of the Payload schema after this PR.
-    // Real users' databases will already have this column; the test DB needs it added manually.
-    //
-    // Also revert testMigrationArticles from post-migration schema (localizeStatus auto-inferred
-    // as true) to pre-migration schema (version__status in main table, not in locales).
-    beforeAll(async () => {
+    // Reset both test collections to their pre-migration database shape before every
+    // scenario so each test is self-contained and order-independent. Real users' databases
+    // will be in this pre-migration state; the runtime schema (localizeStatus auto-inferred)
+    // is reverted here via raw SQL. Each scenario's migration mutates the schema, so this
+    // must run before every test rather than once.
+    beforeEach(async () => {
       const db = payload.db
+
+      // testMigrationPosts: title is NOT localized, so versions have no locales table.
+      // Pre-migration: version__status (+ snapshot) on the versions table, _status on main.
+      await db.drizzle.execute(sql`DROP TABLE IF EXISTS _test_migration_posts_v_locales`)
+      await db.drizzle.execute(
+        sql`ALTER TABLE _test_migration_posts_v ADD COLUMN IF NOT EXISTS version__status TEXT DEFAULT 'draft'`,
+      )
       await db.drizzle.execute(
         sql`ALTER TABLE _test_migration_posts_v ADD COLUMN IF NOT EXISTS snapshot BOOLEAN`,
       )
       await db.drizzle.execute(
-        sql`ALTER TABLE _test_migration_articles_v ADD COLUMN IF NOT EXISTS snapshot BOOLEAN`,
+        sql`ALTER TABLE test_migration_posts ADD COLUMN IF NOT EXISTS _status TEXT DEFAULT 'draft'`,
       )
+      await db.drizzle.execute(sql`DELETE FROM _test_migration_posts_v`)
+      await db.drizzle.execute(sql`DELETE FROM test_migration_posts`)
 
-      // Revert testMigrationArticles to pre-migration state so migration tests work correctly.
-      // With localizeStatus auto-inferred as true (has localized fields + drafts), Payload
-      // creates the post-migration schema at startup. We revert it here for test isolation.
+      // testMigrationArticles: title IS localized, so locales tables exist.
+      // Pre-migration: version__status (+ snapshot) on the versions table and _status on main,
+      // with NO version__status/_status in the locales tables yet.
       await db.drizzle.execute(
         sql`ALTER TABLE _test_migration_articles_v ADD COLUMN IF NOT EXISTS version__status TEXT DEFAULT 'draft'`,
+      )
+      await db.drizzle.execute(
+        sql`ALTER TABLE _test_migration_articles_v ADD COLUMN IF NOT EXISTS snapshot BOOLEAN`,
       )
       await db.drizzle.execute(
         sql`ALTER TABLE _test_migration_articles_v_locales DROP COLUMN IF EXISTS version__status`,
@@ -56,6 +70,10 @@ describe('localizeStatus migration', () => {
       await db.drizzle.execute(
         sql`ALTER TABLE test_migration_articles_locales DROP COLUMN IF EXISTS _status`,
       )
+      await db.drizzle.execute(sql`DELETE FROM _test_migration_articles_v_locales`)
+      await db.drizzle.execute(sql`DELETE FROM _test_migration_articles_v`)
+      await db.drizzle.execute(sql`DELETE FROM test_migration_articles_locales`)
+      await db.drizzle.execute(sql`DELETE FROM test_migration_articles`)
     })
 
     describe('Scenario 1: Creating new locales table', () => {
@@ -93,7 +111,7 @@ describe('localizeStatus migration', () => {
         expect(latestVersion).toBeDefined()
 
         // Step 3: Run the migration
-        await localizeStatus.up({
+        await migratePostgresLocalizeStatus({
           collectionSlug: 'testMigrationPosts',
           db,
           payload,
@@ -150,37 +168,6 @@ describe('localizeStatus migration', () => {
           expect(enRow._status).toBe(esRow._status)
           expect(enRow._status).toBe(deRow._status)
         })
-
-        // Step 5: Test rollback
-        await localizeStatus.down({
-          collectionSlug: 'testMigrationPosts',
-          db,
-          payload,
-          sql,
-        })
-
-        // Verify _status column restored to main table
-        const afterDownColumnCheck = await db.drizzle.execute(sql`
-        SELECT EXISTS (
-          SELECT FROM information_schema.columns
-          WHERE table_schema = 'public'
-          AND table_name = '_test_migration_posts_v'
-          AND column_name = 'version__status'
-        ) as exists
-      `)
-
-        expect(afterDownColumnCheck.rows[0].exists).toBe(true)
-
-        // Verify locales table was dropped
-        const afterDownTableCheck = await db.drizzle.execute(sql`
-        SELECT EXISTS (
-          SELECT FROM information_schema.tables
-          WHERE table_schema = 'public'
-          AND table_name = '_test_migration_posts_v_locales'
-        ) as exists
-      `)
-
-        expect(afterDownTableCheck.rows[0].exists).toBe(false)
       })
     })
 
@@ -188,7 +175,7 @@ describe('localizeStatus migration', () => {
       it('should add _status column to existing locales table', async () => {
         const db = payload.db
 
-        // Schema is in pre-migration state (set up in beforeAll):
+        // Schema is in pre-migration state (set up in the beforeEach hook):
         // - _test_migration_articles_v has version__status in main table
         // - _test_migration_articles_v_locales has version_title but NOT version__status
         //
@@ -240,7 +227,7 @@ describe('localizeStatus migration', () => {
         }
 
         // Step 2: Run the migration
-        await localizeStatus.up({
+        await migratePostgresLocalizeStatus({
           collectionSlug: 'testMigrationArticles',
           db,
           payload,
@@ -286,37 +273,6 @@ describe('localizeStatus migration', () => {
           expect(row._status).toBeDefined()
           expect(['draft', 'published']).toContain(row._status)
         })
-
-        // Step 5: Test rollback
-        await localizeStatus.down({
-          collectionSlug: 'testMigrationArticles',
-          db,
-          payload,
-          sql,
-        })
-
-        // Verify version__status column dropped from locales table
-        const afterDownColumnCheck = await db.drizzle.execute(sql`
-        SELECT EXISTS (
-          SELECT FROM information_schema.columns
-          WHERE table_schema = 'public'
-          AND table_name = '_test_migration_articles_v_locales'
-          AND column_name = 'version__status'
-        ) as exists
-      `)
-
-        expect(afterDownColumnCheck.rows[0].exists).toBe(false)
-
-        // Verify locales table still exists (because title is still localized)
-        const afterDownTableCheck = await db.drizzle.execute(sql`
-        SELECT EXISTS (
-          SELECT FROM information_schema.tables
-          WHERE table_schema = 'public'
-          AND table_name = '_test_migration_articles_v_locales'
-        ) as exists
-      `)
-
-        expect(afterDownTableCheck.rows[0].exists).toBe(true)
       })
     })
 
@@ -373,7 +329,7 @@ describe('localizeStatus migration', () => {
         })
 
         // Run migration
-        await localizeStatus.up({
+        await migratePostgresLocalizeStatus({
           collectionSlug: 'testMigrationPosts',
           db,
           payload,
@@ -425,8 +381,8 @@ describe('localizeStatus migration', () => {
         await db.drizzle.execute(sql`DELETE FROM _test_migration_articles_v_locales`)
 
         // Create a parent article document via raw SQL.
-        // After Scenario 2's migration rollback, the schema is pre-migration state and
-        // the Payload API cannot be used (runtime expects post-migration schema for articles).
+        // The articles schema is in post-migration state for the runtime, so we set up the
+        // pre-migration shape we need directly via SQL rather than through the Payload API.
         const articleResult = await db.drizzle.execute(sql`
           INSERT INTO test_migration_articles (_status, created_at, updated_at)
           VALUES ('draft', NOW(), NOW())
@@ -503,7 +459,7 @@ describe('localizeStatus migration', () => {
         })
 
         // Run migration
-        await localizeStatus.up({
+        await migratePostgresLocalizeStatus({
           collectionSlug: 'testMigrationArticles',
           db,
           payload,
@@ -592,7 +548,7 @@ describe('localizeStatus migration', () => {
 
         // Attempt to run the migration - it should return early without error
         await expect(
-          localizeStatus.up({
+          migratePostgresLocalizeStatus({
             collectionSlug: 'testNoVersions',
             db: payload.db,
             payload,
@@ -612,6 +568,329 @@ describe('localizeStatus migration', () => {
         expect(tableExists.rows[0].exists).toBe(false)
       })
     })
+  })
+
+  describe.skipIf(process.env.PAYLOAD_DATABASE !== 'sqlite')('SQLite', () => {
+    // Mirror the PostgreSQL suite: revert the runtime (post-migration) schema back to its
+    // pre-migration shape before every scenario so each test is self-contained. SQLite has no
+    // `ADD COLUMN IF NOT EXISTS` / `DROP COLUMN IF EXISTS`, so we guard with pragma_table_info.
+    const columnExists = async (tableName: string, columnName: string): Promise<boolean> => {
+      const rows = (await payload.db.drizzle.all(
+        drizzleSql.raw(
+          `SELECT COUNT(*) as count FROM pragma_table_info('${tableName}') WHERE name = '${columnName}'`,
+        ),
+      )) as any[]
+      return Number(rows[0]?.count ?? 0) > 0
+    }
+
+    const addColumnIfMissing = async (
+      tableName: string,
+      columnName: string,
+      definition: string,
+    ): Promise<void> => {
+      if (!(await columnExists(tableName, columnName))) {
+        await payload.db.drizzle.run(
+          drizzleSql.raw(`ALTER TABLE "${tableName}" ADD COLUMN ${definition}`),
+        )
+      }
+    }
+
+    const dropColumnIfExists = async (tableName: string, columnName: string): Promise<void> => {
+      if (await columnExists(tableName, columnName)) {
+        // SQLite refuses to drop a column referenced by an index, so drop those indexes first.
+        const indexes = (await payload.db.drizzle.all(
+          drizzleSql.raw(
+            `SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name='${tableName}'`,
+          ),
+        )) as any[]
+
+        for (const index of indexes) {
+          if (typeof index.sql === 'string' && index.sql.includes(columnName)) {
+            await payload.db.drizzle.run(drizzleSql.raw(`DROP INDEX IF EXISTS "${index.name}"`))
+          }
+        }
+
+        await payload.db.drizzle.run(
+          drizzleSql.raw(`ALTER TABLE "${tableName}" DROP COLUMN ${columnName}`),
+        )
+      }
+    }
+
+    beforeEach(async () => {
+      const drizzle = payload.db.drizzle
+
+      // testMigrationPosts: title is NOT localized, so versions have no locales table pre-migration.
+      await drizzle.run(drizzleSql.raw(`DROP TABLE IF EXISTS _test_migration_posts_v_locales`))
+      await addColumnIfMissing(
+        '_test_migration_posts_v',
+        'version__status',
+        `version__status TEXT DEFAULT 'draft'`,
+      )
+      await addColumnIfMissing('_test_migration_posts_v', 'snapshot', `snapshot INTEGER`)
+      await addColumnIfMissing('test_migration_posts', '_status', `_status TEXT DEFAULT 'draft'`)
+      await drizzle.run(drizzleSql.raw(`DELETE FROM _test_migration_posts_v`))
+      await drizzle.run(drizzleSql.raw(`DELETE FROM test_migration_posts`))
+
+      // testMigrationArticles: title IS localized, so locales tables exist.
+      await addColumnIfMissing(
+        '_test_migration_articles_v',
+        'version__status',
+        `version__status TEXT DEFAULT 'draft'`,
+      )
+      await addColumnIfMissing('_test_migration_articles_v', 'snapshot', `snapshot INTEGER`)
+      await dropColumnIfExists('_test_migration_articles_v_locales', 'version__status')
+      await addColumnIfMissing('test_migration_articles', '_status', `_status TEXT DEFAULT 'draft'`)
+      await dropColumnIfExists('test_migration_articles_locales', '_status')
+      await drizzle.run(drizzleSql.raw(`DELETE FROM _test_migration_articles_v_locales`))
+      await drizzle.run(drizzleSql.raw(`DELETE FROM _test_migration_articles_v`))
+      await drizzle.run(drizzleSql.raw(`DELETE FROM test_migration_articles_locales`))
+      await drizzle.run(drizzleSql.raw(`DELETE FROM test_migration_articles`))
+    })
+
+    describe('Scenario 1: Creating new locales table', () => {
+      it('should migrate non-localized _status to localized', async () => {
+        const drizzle = payload.db.drizzle
+
+        const post1 = await payload.create({
+          collection: 'testMigrationPosts',
+          data: { title: 'Post 1' },
+        })
+
+        await payload.update({
+          id: post1.id,
+          collection: 'testMigrationPosts',
+          data: { _status: 'published', title: 'Post 1 Updated' },
+        })
+
+        const beforeVersions = (await drizzle.all(
+          drizzleSql.raw(
+            `SELECT id, parent_id as parent, version__status as _status FROM _test_migration_posts_v WHERE parent_id = ${post1.id}`,
+          ),
+        )) as any[]
+
+        expect(beforeVersions.length).toBeGreaterThan(0)
+
+        await migrateSqliteLocalizeStatus({
+          collectionSlug: 'testMigrationPosts',
+          db: drizzle,
+          payload,
+        })
+
+        expect(await tableExists('_test_migration_posts_v_locales')).toBe(true)
+        expect(await columnExists('_test_migration_posts_v', 'version__status')).toBe(false)
+
+        const localesData = (await drizzle.all(
+          drizzleSql.raw(
+            `SELECT _locale, _parent_id, version__status as _status FROM _test_migration_posts_v_locales ORDER BY _parent_id, _locale`,
+          ),
+        )) as any[]
+
+        expect(localesData).toHaveLength(beforeVersions.length * 3)
+
+        const enRows = localesData.filter((row) => row._locale === 'en')
+        const esRows = localesData.filter((row) => row._locale === 'es')
+        const deRows = localesData.filter((row) => row._locale === 'de')
+
+        expect(enRows.length).toBeGreaterThan(0)
+        expect(esRows).toHaveLength(enRows.length)
+        expect(deRows).toHaveLength(enRows.length)
+
+        enRows.forEach((enRow, idx) => {
+          expect(enRow._status).toBe(esRows[idx]._status)
+          expect(enRow._status).toBe(deRows[idx]._status)
+        })
+      })
+    })
+
+    describe('Scenario 2: Adding to existing locales table', () => {
+      it('should add version__status column to existing locales table', async () => {
+        const drizzle = payload.db.drizzle
+
+        const articleResult = (await drizzle.all(
+          drizzleSql.raw(
+            `INSERT INTO test_migration_articles (_status, created_at, updated_at) VALUES ('draft', datetime('now'), datetime('now')) RETURNING id`,
+          ),
+        )) as any[]
+        const articleId = articleResult[0].id
+
+        await drizzle.run(
+          drizzleSql.raw(
+            `INSERT INTO test_migration_articles_locales (_locale, _parent_id, title) VALUES ('en', ${articleId}, 'English Title'), ('es', ${articleId}, 'Titulo'), ('de', ${articleId}, 'German Title')`,
+          ),
+        )
+
+        const draftVersionResult = (await drizzle.all(
+          drizzleSql.raw(
+            `INSERT INTO _test_migration_articles_v (parent_id, version__status, created_at, updated_at) VALUES (${articleId}, 'draft', datetime('now'), datetime('now')) RETURNING id`,
+          ),
+        )) as any[]
+        const draftVersionId = draftVersionResult[0].id
+
+        for (const locale of ['en', 'es', 'de']) {
+          await drizzle.run(
+            drizzleSql.raw(
+              `INSERT INTO _test_migration_articles_v_locales (_locale, _parent_id) VALUES ('${locale}', ${draftVersionId})`,
+            ),
+          )
+        }
+
+        const publishedVersionResult = (await drizzle.all(
+          drizzleSql.raw(
+            `INSERT INTO _test_migration_articles_v (parent_id, version__status, created_at, updated_at) VALUES (${articleId}, 'published', datetime('now', '+1 second'), datetime('now', '+1 second')) RETURNING id`,
+          ),
+        )) as any[]
+        const publishedVersionId = publishedVersionResult[0].id
+
+        for (const locale of ['en', 'es', 'de']) {
+          await drizzle.run(
+            drizzleSql.raw(
+              `INSERT INTO _test_migration_articles_v_locales (_locale, _parent_id) VALUES ('${locale}', ${publishedVersionId})`,
+            ),
+          )
+        }
+
+        await migrateSqliteLocalizeStatus({
+          collectionSlug: 'testMigrationArticles',
+          db: drizzle,
+          payload,
+        })
+
+        expect(await columnExists('_test_migration_articles_v_locales', 'version__status')).toBe(
+          true,
+        )
+
+        const localesData = (await drizzle.all(
+          drizzleSql.raw(
+            `SELECT l._locale, l.version__status as _status FROM _test_migration_articles_v_locales l JOIN _test_migration_articles_v v ON l._parent_id = v.id WHERE v.parent_id = ${articleId} ORDER BY v.created_at DESC, l._locale`,
+          ),
+        )) as any[]
+
+        expect(localesData.length).toBeGreaterThan(0)
+        localesData.forEach((row) => {
+          expect(['draft', 'published']).toContain(row._status)
+        })
+      })
+    })
+
+    describe('Scenario 3: Test publishedLocale handling', () => {
+      it('should handle publishedLocale correctly', async () => {
+        const drizzle = payload.db.drizzle
+
+        await drizzle.run(drizzleSql.raw(`DELETE FROM _test_migration_articles_v`))
+        await drizzle.run(drizzleSql.raw(`DELETE FROM _test_migration_articles_v_locales`))
+
+        const articleResult = (await drizzle.all(
+          drizzleSql.raw(
+            `INSERT INTO test_migration_articles (_status, created_at, updated_at) VALUES ('draft', datetime('now'), datetime('now')) RETURNING id`,
+          ),
+        )) as any[]
+        const parentId = articleResult[0].id
+
+        const insertVersion = async (
+          status: 'draft' | 'published',
+          publishedLocale: null | string,
+          intervalSeconds: number,
+        ) => {
+          const publishedLocaleValue = publishedLocale === null ? 'NULL' : `'${publishedLocale}'`
+          const result = (await drizzle.all(
+            drizzleSql.raw(
+              `INSERT INTO _test_migration_articles_v (parent_id, version__status, published_locale, created_at, updated_at) VALUES (${parentId}, '${status}', ${publishedLocaleValue}, datetime('now', '+${intervalSeconds} seconds'), datetime('now', '+${intervalSeconds} seconds')) RETURNING id`,
+            ),
+          )) as any[]
+          const versionId = result[0]?.id
+
+          for (const locale of ['en', 'es', 'de']) {
+            await drizzle.run(
+              drizzleSql.raw(
+                `INSERT INTO _test_migration_articles_v_locales (_locale, _parent_id) VALUES ('${locale}', ${versionId})`,
+              ),
+            )
+          }
+        }
+
+        await insertVersion('draft', null, 0)
+        await insertVersion('published', null, 1)
+        await insertVersion('published', 'en', 2)
+        await insertVersion('draft', null, 3)
+        await insertVersion('published', 'es', 4)
+        await insertVersion('published', 'de', 5)
+
+        await migrateSqliteLocalizeStatus({
+          collectionSlug: 'testMigrationArticles',
+          db: drizzle,
+          payload,
+        })
+
+        const afterLocales = (await drizzle.all(
+          drizzleSql.raw(
+            `SELECT v.id as version_id, l._locale, l.version__status as _status FROM _test_migration_articles_v v JOIN _test_migration_articles_v_locales l ON l._parent_id = v.id WHERE v.parent_id = ${parentId} ORDER BY v.created_at ASC, l._locale ASC`,
+          ),
+        )) as any[]
+
+        const versionGroups = afterLocales.reduce(
+          (acc, row) => {
+            if (!acc[row.version_id]) {
+              acc[row.version_id] = []
+            }
+            acc[row.version_id].push(row)
+            return acc
+          },
+          {} as Record<string, any[]>,
+        )
+
+        const versions = Object.values(versionGroups)
+
+        expect(versions[0].every((row) => row._status === 'draft')).toBe(true)
+        expect(versions[1].every((row) => row._status === 'published')).toBe(true)
+
+        const v3 = versions[2]
+        expect(v3.find((r) => r._locale === 'en')._status).toBe('published')
+        expect(v3.find((r) => r._locale === 'es')._status).toBe('published')
+        expect(v3.find((r) => r._locale === 'de')._status).toBe('published')
+
+        expect(versions[3].every((row) => row._status === 'draft')).toBe(true)
+
+        const v5 = versions[4]
+        expect(v5.find((r) => r._locale === 'en')._status).toBe('draft')
+        expect(v5.find((r) => r._locale === 'es')._status).toBe('published')
+        expect(v5.find((r) => r._locale === 'de')._status).toBe('draft')
+
+        const v6 = versions[5]
+        expect(v6.find((r) => r._locale === 'en')._status).toBe('draft')
+        expect(v6.find((r) => r._locale === 'es')._status).toBe('published')
+        expect(v6.find((r) => r._locale === 'de')._status).toBe('published')
+      })
+    })
+
+    describe('Scenario 4: Skip collections without versions', () => {
+      it('should skip migration for collections without versions enabled', async () => {
+        const doc = await payload.create({
+          collection: 'testNoVersions',
+          data: { title: 'Test document' },
+        })
+
+        expect(doc.id).toBeDefined()
+
+        await expect(
+          migrateSqliteLocalizeStatus({
+            collectionSlug: 'testNoVersions',
+            db: payload.db.drizzle,
+            payload,
+          }),
+        ).resolves.not.toThrow()
+
+        expect(await tableExists('_test_no_versions_v')).toBe(false)
+      })
+    })
+
+    async function tableExists(tableName: string): Promise<boolean> {
+      const rows = (await payload.db.drizzle.all(
+        drizzleSql.raw(
+          `SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name='${tableName}'`,
+        ),
+      )) as any[]
+      return Number(rows[0]?.count ?? 0) > 0
+    }
   })
 
   describe.skipIf(process.env.PAYLOAD_DATABASE !== 'mongodb')('MongoDB', () => {
@@ -661,7 +940,7 @@ describe('localizeStatus migration', () => {
         expect(typeof latestVersion.version._status).toBe('string')
 
         // Step 3: Run the migration
-        await localizeStatus.up({
+        await localizeStatus({
           collectionSlug: 'testMigrationPosts',
           payload,
         })
@@ -716,7 +995,7 @@ describe('localizeStatus migration', () => {
         })
 
         // Step 3: Run the migration
-        await localizeStatus.up({
+        await localizeStatus({
           collectionSlug: 'testMigrationArticles',
           payload,
         })
@@ -736,63 +1015,6 @@ describe('localizeStatus migration', () => {
         expect(latestVersion.version._status.en).toBe('published')
         expect(latestVersion.version._status.es).toBe('draft')
         expect(latestVersion.version._status.de).toBe('draft')
-      })
-
-      it('should rollback migration correctly', async () => {
-        // Step 0: Clear existing data to start fresh (test 1 already migrated this collection)
-        const connection = (payload.db as any).connection
-        const versionsCollection = '_testmigrationposts_versions' // MongoDB uses lowercase
-        const mainCollection = 'testmigrationposts'
-
-        await connection.collection(versionsCollection).deleteMany({})
-        await connection.collection(mainCollection).deleteMany({})
-
-        // Step 1: Create test data
-        const post = await payload.create({
-          collection: 'testMigrationPosts',
-          data: { title: 'Rollback Test' },
-        })
-
-        await payload.update({
-          id: post.id,
-          collection: 'testMigrationPosts',
-          data: { _status: 'published' },
-        })
-
-        // Step 2: Run up migration
-        await localizeStatus.up({
-          collectionSlug: 'testMigrationPosts',
-          payload,
-        })
-
-        // Verify status is now an object (check latest version)
-        const afterUpVersions = await connection
-          .collection(versionsCollection)
-          .find({ parent: new Types.ObjectId(post.id) })
-          .sort({ createdAt: -1 })
-          .limit(1)
-          .toArray()
-        const afterUp = afterUpVersions[0]
-        expect(typeof afterUp.version._status).toBe('object')
-
-        // Step 3: Run down migration
-        await localizeStatus.down({
-          collectionSlug: 'testMigrationPosts',
-          payload,
-        })
-
-        // Step 4: Verify status is back to a string
-        // Get the LATEST version (most recent)
-        const afterDownVersions = await connection
-          .collection(versionsCollection)
-          .find({ parent: new Types.ObjectId(post.id) })
-          .sort({ createdAt: -1 })
-          .limit(1)
-          .toArray()
-        const afterDown = afterDownVersions[0]
-
-        expect(typeof afterDown.version._status).toBe('string')
-        expect(afterDown.version._status).toBe('published')
       })
     })
   })

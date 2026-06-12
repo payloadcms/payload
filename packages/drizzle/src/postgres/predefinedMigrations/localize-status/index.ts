@@ -1,6 +1,8 @@
-import type { Payload } from '../../../../types/index.js'
+import type { Payload } from 'payload'
 
-import { calculateVersionLocaleStatuses, toSnakeCase } from '../shared.js'
+import { calculateVersionLocaleStatuses } from 'payload/migrations'
+import toSnakeCase from 'to-snake-case'
+
 import { migrateMainCollectionStatus } from './migrateMainCollection.js'
 import { migrateMainGlobalStatus } from './migrateMainGlobal.js'
 
@@ -13,7 +15,7 @@ export type LocalizeStatusArgs = {
   sql: any
 }
 
-export async function up(args: LocalizeStatusArgs): Promise<void> {
+export async function migratePostgresLocalizeStatus(args: LocalizeStatusArgs): Promise<void> {
   const { collectionSlug, db, globalSlug, payload, req, sql } = args
   const schemaName = db.schemaName ?? 'public'
 
