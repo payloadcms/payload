@@ -3,7 +3,7 @@ import React from 'react'
 
 import { Button } from '../../Button/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'file-details-draggable'
 
@@ -60,6 +60,7 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
           ]
             .filter(Boolean)
             .join(' ')}
+          key={id}
           ref={draggableSortableItemProps.setNodeRef}
           style={{
             transform: draggableSortableItemProps.transform,
