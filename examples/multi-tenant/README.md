@@ -19,8 +19,13 @@ To spin up this example locally, follow these steps:
 
 ### Default users
 
-The seed script seeds 3 tenants.
-Login with email `demo@payloadcms.com` and password `demo`
+- Super admin: `demo@payloadcms.com`
+- Admin for tenants 1, 2 and 3: `multi-admin@payloadcms.com`
+- Tenant 1 admin: `tenant1@payloadcms.com`
+- Tenant 2 admin: `tenant2@payloadcms.com`
+- Tenant 3 admin: `tenant3@payloadcms.com`
+
+Use password `demo` to login as any default user.
 
 ## How it works
 
