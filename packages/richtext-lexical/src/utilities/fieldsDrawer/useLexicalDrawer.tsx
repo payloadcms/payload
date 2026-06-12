@@ -77,6 +77,7 @@ export const useLexicalDrawer = (slug: string, restoreLate?: boolean) => {
 
   return {
     closeDrawer,
+    isOpen: !!isModalOpen,
     toggleDrawer,
   }
 }
