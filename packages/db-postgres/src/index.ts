@@ -1,4 +1,4 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle'
+import type { DrizzleAdapter, GetIdentifier } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -10,6 +10,7 @@ import {
   countVersions,
   create,
   createBlocksToJsonMigrator,
+  createGetIdentifier,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -138,6 +139,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
         corePackageSuffix: 'pg-core',
         defaultOutputFile: args.generateSchemaOutputFile,
         enumImport: 'pgEnum',
+        extraConfigReturnType: 'PgTableExtraConfigValue',
         schemaImport: 'pgSchema',
         tableImport: 'pgTable',
       }),
@@ -195,9 +197,14 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       findOne,
       findVersions,
       foreignKeys: new Set(),
+      getIdentifier: (() => {
+        throw new Error('getIdentifier was called before adapter initialization completed')
+      }) as GetIdentifier,
+      identifiers: new Set<string>(),
       indexes: new Set<string>(),
       init,
       insert,
+      maxIdentifierLength: 63,
       migrate,
       migrateDown,
       migrateFresh,
@@ -210,6 +217,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       queryDrafts,
       rawRelations: {},
       rawTables: {},
+      shouldCompressIdentifiers: args.shouldCompressIdentifiers ?? false,
       updateJobs,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
@@ -224,6 +232,8 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateVersion,
       upsert,
     })
+
+    adapter.getIdentifier = createGetIdentifier(adapter as unknown as DrizzleAdapter)
 
     adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({
       adapter: adapter as unknown as DrizzleAdapter,

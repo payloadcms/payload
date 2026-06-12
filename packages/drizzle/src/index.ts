@@ -87,10 +87,16 @@ export {
   getBlocksToJsonMigrator,
 } from './utilities/blocksToJsonMigrator.js'
 export { buildCreateMigration } from './utilities/buildCreateMigration.js'
-export { buildIndexName } from './utilities/buildIndexName.js'
+export { compressIdentifier } from './utilities/compressIdentifier.js'
 export { createSchemaGenerator } from './utilities/createSchemaGenerator.js'
 export { executeSchemaHooks } from './utilities/executeSchemaHooks.js'
 export { extendDrizzleTable } from './utilities/extendDrizzleTable.js'
+export { createGetIdentifier } from './utilities/getIdentifier.js'
+export type {
+  GetIdentifier,
+  IdentifierProps,
+  IdentifierType,
+} from './utilities/getIdentifier.types.js'
 export { hasLocalesTable } from './utilities/hasLocalesTable.js'
 export { pushDevSchema } from './utilities/pushDevSchema.js'
 export { validateExistingBlockIsIdentical } from './utilities/validateExistingBlockIsIdentical.js'

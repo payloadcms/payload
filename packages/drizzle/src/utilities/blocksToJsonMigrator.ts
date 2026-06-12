@@ -25,6 +25,7 @@ import type {
   DrizzleAdapter,
 } from '../types.js'
 
+import { createGetIdentifier } from './getIdentifier.js'
 import { getTransaction } from './getTransaction.js'
 
 const DEFAULT_BATCH_SIZE = 100
@@ -312,6 +313,7 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
     this.adapter.tables = {}
     this.adapter.indexes = new Set()
     this.adapter.foreignKeys = new Set()
+    this.adapter.getIdentifier = createGetIdentifier(this.adapter)
     this.adapter.relations = {}
     this.adapter.rawTables = {}
     this.adapter.rawRelations = {}

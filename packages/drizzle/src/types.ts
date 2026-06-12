@@ -38,6 +38,7 @@ import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { QueryResult } from 'pg'
 
 import type { Operators } from './queries/operatorMap.js'
+import type { GetIdentifier } from './utilities/getIdentifier.types.js'
 
 export type PostgresDB = NodePgDatabase<Record<string, unknown>>
 
@@ -224,6 +225,7 @@ export type BaseRawColumn = {
   notNull?: boolean
   primaryKey?: boolean
   reference?: {
+    foreignKeyName?: string
     name: string
     onDelete: UpdateDeleteAction
     table: string
@@ -406,6 +408,17 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   fieldConstraints: Record<string, Record<string, string>>
 
   foreignKeys: Set<string>
+  /**
+   * Unified entrypoint for generating SQL identifier names (tables, columns,
+   * enums, indexes, foreign keys).
+   *
+   * - Deterministic: the same `IdentifierProps` always resolves to the same
+   *   string within one adapter instance (cached inside the closure).
+   * - Throws on cross-type collision: requesting `type: 'enum'` for a name
+   *   that already exists as a `'table'` in the same schema surfaces a
+   *   precise error at schema-build time.
+   */
+  getIdentifier: GetIdentifier
   idType: 'serial' | 'uuid' | 'uuidv7'
   indexes: Set<string>
   initializing: Promise<void>
@@ -419,12 +432,12 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   limitedBoundParameters?: boolean
   localesSuffix?: string
   logger: DrizzleConfig['logger']
-  operators: Operators
   /**
-   * When read replicas are configured, holds the unwrapped primary drizzle instance
-   * (before withReplicas wrapping). Used for reads that are part of write operations
-   * to avoid replication lag.
+   * Maximum identifier length for the database (e.g. 63 for PostgreSQL).
+   * Used by compressIdentifier when shouldCompressIdentifiers is true.
    */
+  maxIdentifierLength: number
+  operators: Operators
   primaryDrizzle?: PostgresDB
   push: boolean
   rawRelations: Record<string, Record<string, RawRelation>>
@@ -452,6 +465,11 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
       resolve: () => Promise<void>
     }
   }
+  /**
+   * When true, uses compressIdentifier to shorten index/FK/constraint names
+   * that exceed maxIdentifierLength. When false, uses the legacy buildIndexName approach.
+   */
+  shouldCompressIdentifiers: boolean
   tableNameMap: Map<string, string>
   tables: Record<string, any>
   transactionOptions: unknown
