@@ -2,6 +2,9 @@ import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { TanStackRouterAdapter } from '@payloadcms/tanstack-start/client'
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 import '@payloadcms/ui/scss/app.scss'
+// Custom admin styles for this test app — mirrors the Next test app's
+// `(payload)/custom.scss` so the shared "custom CSS" e2e passes on both adapters.
+import './custom.scss'
 
 import { getLayoutDataFn } from '../functions/layout.functions'
 import { serverFunctionHandler } from '../functions/serverFunction.functions'
