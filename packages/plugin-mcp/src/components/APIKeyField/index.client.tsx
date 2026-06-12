@@ -1,32 +1,29 @@
 'use client'
 
+import { APIKeyInput, Button, useField, useTranslation, WarningTriangleIcon } from '@payloadcms/ui'
+import React, { useState } from 'react'
+
 import type {
   PluginMCPTranslationKeys,
   PluginMCPTranslations,
 } from '../../translations/index.js'
-
-import { APIKeyInput, Button, useField, useTranslation, WarningTriangleIcon } from '@payloadcms/ui'
-import React, { useState } from 'react'
 
 import './index.css'
 
 const baseClass = 'mcp-api-key-field'
 
 /**
- * Replaces the hidden built-in `apiKey` / `enableAPIKey` auth fields with the
- * panel from the MCP design:
+ * Custom component for the MCP API-keys collection's `apiKey` field:
  * - no key yet: a "Generate new key" button
  * - key set: a dismissible privacy warning + the shared masked-key input
  */
 export const APIKeyField: React.FC = () => {
   const { setValue: setApiKey, value: apiKey } = useField<string>({ path: 'apiKey' })
-  const { setValue: setEnableAPIKey } = useField<boolean>({ path: 'enableAPIKey' })
   const { t } = useTranslation<PluginMCPTranslations, PluginMCPTranslationKeys>()
   const [isWarningDismissed, setIsWarningDismissed] = useState(false)
 
   const generateKey = () => {
     setApiKey(crypto.randomUUID())
-    setEnableAPIKey(true)
     setIsWarningDismissed(false)
   }
 

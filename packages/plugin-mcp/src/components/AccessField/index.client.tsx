@@ -1,14 +1,14 @@
 'use client'
 
 import type { JSONFieldClientProps } from 'payload'
-import type {
-  PluginMCPTranslationKeys,
-  PluginMCPTranslations,
-} from '../../translations/index.js'
 
 import { CheckboxInput, Collapsible, useField, useTranslation } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
+import type {
+  PluginMCPTranslationKeys,
+  PluginMCPTranslations,
+} from '../../translations/index.js'
 import type { ClientMCPPluginConfig, MCPAPIKeysDocAccessTree } from '../../types.js'
 
 import './index.css'

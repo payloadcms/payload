@@ -28,9 +28,8 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
   slug: '@payloadcms/plugin-mcp',
   order: 10,
   plugin: ({ config, plugins, ...rawConfig }) => {
-    // Our `payload-mcp-api-keys` is auth-enabled; if it'd be the only auth
-    // collection, Payload's later sanitize would pick it as `admin.user`.
-    // Pre-seed the default user collection to prevent that.
+    // If a project has no auth collection yet, add the default users collection
+    // so the relationship target and default `userCollection` exist.
     if (!config.admin?.user) {
       const firstCollectionWithAuth = (config.collections ?? []).find(({ auth }) => Boolean(auth))
       if (!firstCollectionWithAuth) {

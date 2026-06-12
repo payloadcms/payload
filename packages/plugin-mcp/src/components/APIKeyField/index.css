@@ -1,10 +1,4 @@
 @layer payload-default {
-  /* This panel replaces the core auth "Account" block (Enable API Key +
-     API Key) on the API keys collection, so hide the core block there. */
-  .collection-edit--payload-mcp-api-keys .auth-fields {
-    display: none;
-  }
-
   /* Section wrapper: description + panel, closed off by a full-bleed divider
      that spans the fields column past its horizontal gutter. */
   .mcp-api-key-field {

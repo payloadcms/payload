@@ -1,8 +1,24 @@
 import type { CollectionConfig } from 'payload'
 
+import { createAPIKeyFields } from 'payload'
+
 import type { SanitizedMCPPluginConfig } from '../types.js'
 
 import { getAccessField } from './getAccessField.js'
+
+const apiKeyStorageFields = createAPIKeyFields({
+  apiKeyField: {
+    admin: {
+      components: { Field: '@payloadcms/plugin-mcp/client#APIKeyField' },
+    },
+    required: true,
+  },
+  apiKeyIndexField: {
+    index: true,
+    required: true,
+  },
+  includeEnableAPIKey: false,
+})
 
 export const getAPIKeysCollection = ({
   pluginConfig,
@@ -20,24 +36,12 @@ export const getAPIKeysCollection = ({
         },
       },
       defaultColumns: ['label', 'lastUsed', 'user'],
-      // The intro copy renders inside the edit view via `APIKeyField` (per the
-      // design) instead of `admin.description`, which would sit in the header.
       // Kept out of the main nav — reachable through the user menu's settings instead.
       group: false,
       useAsTitle: 'label',
     },
-    auth: {
-      disableLocalStrategy: true,
-      useAPIKey: true,
-    },
     fields: [
-      {
-        name: 'apiKeyManager',
-        type: 'ui',
-        admin: {
-          components: { Field: '@payloadcms/plugin-mcp/client#APIKeyField' },
-        },
-      },
+      ...apiKeyStorageFields,
       getAccessField({ pluginConfig }),
       {
         name: 'label',

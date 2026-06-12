@@ -284,6 +284,8 @@ export type MCPAPIKeysDocAccessTree = {
  */
 export type MCPAPIKeysDoc = {
   access: MCPAPIKeysDocAccessTree
+  apiKey?: string
+  apiKeyIndex?: string
   id: DefaultDocumentIDType
   lastUsed?: string
   overrideAccess?: boolean
