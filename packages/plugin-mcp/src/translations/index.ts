@@ -51,6 +51,7 @@ import { zh } from './languages/zh.js'
 import { zhTw } from './languages/zhTw.js'
 
 export const translations = {
+  id,
   ar,
   az,
   bg,
@@ -69,7 +70,6 @@ export const translations = {
   hr,
   hu,
   hy,
-  id,
   is,
   it,
   ja,

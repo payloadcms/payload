@@ -23,9 +23,9 @@ export type PluginLanguage = Language<{
     mcp: string
     noAPIKeys: string
     operations: string
-    owner: string
     overrideAccess: string
     overrideAccessDescription: string
+    owner: string
     permissions: string
     permissionsDescription: string
     prompts: string
