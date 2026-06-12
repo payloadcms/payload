@@ -79,12 +79,14 @@ async function _cleanupSnapshotColumn({
   sql: any
   versionsTable: string
 }): Promise<void> {
+  const schemaName = db.schemaName ?? 'public'
+
   const columnCheck = await db.execute({
     drizzle: db.drizzle,
     sql: sql`
       SELECT EXISTS (
         SELECT FROM information_schema.columns
-        WHERE table_schema = 'public'
+        WHERE table_schema = ${schemaName}
         AND table_name = ${versionsTable}
         AND column_name = 'snapshot'
       ) as exists

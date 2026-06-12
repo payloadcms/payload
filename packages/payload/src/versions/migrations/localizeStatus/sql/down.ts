@@ -13,6 +13,7 @@ export type LocalizeStatusArgs = {
 
 export async function down(args: LocalizeStatusArgs): Promise<void> {
   const { collectionSlug, db, globalSlug, payload, sql } = args
+  const schemaName = db.schemaName ?? 'public'
 
   if (!collectionSlug && !globalSlug) {
     throw new Error('Either collectionSlug or globalSlug must be provided')
@@ -81,7 +82,7 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
     sql: sql`
       SELECT COUNT(*) as count
       FROM information_schema.columns
-      WHERE table_schema = 'public'
+      WHERE table_schema = ${schemaName}
       AND table_name = ${localesTable}
       AND column_name NOT IN ('id', '_locale', '_parent_id', 'version__status')
     `,
@@ -119,7 +120,7 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
     sql: sql`
       SELECT EXISTS (
         SELECT FROM information_schema.columns
-        WHERE table_schema = 'public'
+        WHERE table_schema = ${schemaName}
         AND table_name = ${mainTable}
         AND column_name = '_status'
       ) as exists
@@ -134,7 +135,7 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
       sql: sql`
         SELECT EXISTS (
           SELECT FROM information_schema.tables
-          WHERE table_schema = 'public'
+          WHERE table_schema = ${schemaName}
           AND table_name = ${mainLocalesTable}
         ) as exists
       `,
@@ -147,7 +148,7 @@ export async function down(args: LocalizeStatusArgs): Promise<void> {
         sql: sql`
           SELECT EXISTS (
             SELECT FROM information_schema.columns
-            WHERE table_schema = 'public'
+            WHERE table_schema = ${schemaName}
             AND table_name = ${mainLocalesTable}
             AND column_name = '_status'
           ) as exists
