@@ -137,6 +137,7 @@ export const runJSONJob = async ({
     return await runJSONJob({
       job,
       req,
+      silent,
       updateJob,
       workflowConfig,
       workflowHandler,

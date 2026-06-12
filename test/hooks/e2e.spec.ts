@@ -5,12 +5,16 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { beforeValidateSlug } from './shared.js'
 
@@ -94,7 +98,7 @@ describe('Hooks', () => {
       const deleteBtn = page.locator('.list-selection__button.delete-documents__toggle')
       await deleteBtn.click()
 
-      await page.locator('#confirm-action').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
 
       await expect(page.locator('.payload-toast-container')).toContainText(
         `Test error: cannot delete document with ID ${doc.id}`,
@@ -132,10 +136,10 @@ describe('Hooks', () => {
 
       await page.goto(beforeDeleteURL.edit(doc.id))
 
-      await page.locator('.doc-controls__popup .popup-button').click()
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await page.locator('#action-delete').click()
 
-      await page.locator('#confirm-action').click()
+      await page.locator(`#delete-${doc.id} [data-dialog-action="confirm"]`).click()
 
       await expect(page.locator('.payload-toast-container')).toContainText(
         `Test error: cannot delete document with ID ${doc.id}`,
@@ -180,7 +184,7 @@ describe('Hooks', () => {
       const deleteBtn = page.locator('.list-selection__button.delete-documents__toggle')
       await deleteBtn.click()
 
-      await page.locator('#confirm-action').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
 
       await expect(page.locator('.payload-toast-container')).toContainText('Something went wrong.')
       await expect(page.locator('.payload-toast-container')).not.toContainText(
@@ -203,10 +207,10 @@ describe('Hooks', () => {
 
       await page.goto(beforeDelete2URL.edit(doc.id))
 
-      await page.locator('.doc-controls__popup .popup-button').click()
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await page.locator('#action-delete').click()
 
-      await page.locator('#confirm-action').click()
+      await page.locator(`#delete-${doc.id} [data-dialog-action="confirm"]`).click()
 
       await expect(page.locator('.payload-toast-container')).toContainText('Something went wrong.')
       await expect(page.locator('.payload-toast-container')).not.toContainText(

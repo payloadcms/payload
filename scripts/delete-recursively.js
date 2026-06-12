@@ -35,7 +35,7 @@ async function deleteRecursively(targetPath, fullDelete = false) {
   try {
     if (fullDelete && existsSync(targetPath)) {
       const size = await calculateSize(targetPath)
-      await fs.rmdir(targetPath, { recursive: true }) // Use async version of rmdir
+      await fs.rm(targetPath, { recursive: true, force: true })
       return size
     }
 

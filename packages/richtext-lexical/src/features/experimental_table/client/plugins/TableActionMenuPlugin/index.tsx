@@ -45,7 +45,7 @@ import { createPortal } from 'react-dom'
 
 import type { PluginComponentWithAnchor } from '../../../../typesClient.js'
 
-import './index.scss'
+import './index.css'
 import { MeatballsIcon } from '../../../../../lexical/ui/icons/Meatballs/index.js'
 
 function computeSelectionCount(selection: TableSelection): {
@@ -420,7 +420,7 @@ function TableActionMenu({
         onClick={() => toggleRowStriping()}
         type="button"
       >
-        <span className="text">Toggle Row Striping</span>
+        <span className="text">Toggle row striping</span>
       </button>
       <button
         className="item"
@@ -428,7 +428,7 @@ function TableActionMenu({
         onClick={() => toggleFirstColumnFreeze()}
         type="button"
       >
-        <span className="text">Toggle First Column Freeze</span>
+        <span className="text">Toggle first column freeze</span>
       </button>
       <button
         className="item"

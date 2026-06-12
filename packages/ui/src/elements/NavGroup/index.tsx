@@ -1,13 +1,13 @@
 'use client'
 import type { NavPreferences } from 'payload'
 
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useState } from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import './index.scss'
-import { AnimateHeight } from '../AnimateHeight/index.js'
 import { useNav } from '../Nav/context.js'
+import './index.css'
 
 const baseClass = 'nav-group'
 
@@ -17,20 +17,16 @@ type Props = {
   label: string
 }
 
-const preferencesKey = 'nav'
-
 export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, label }) => {
   const [collapsed, setCollapsed] = useState(
     typeof isOpenFromProps !== 'undefined' ? !isOpenFromProps : false,
   )
 
-  const [animate, setAnimate] = useState(false)
   const { setPreference } = usePreferences()
   const { navOpen } = useNav()
 
   if (label) {
     const toggleCollapsed = () => {
-      setAnimate(true)
       const newGroupPrefs: NavPreferences['groups'] = {}
 
       if (!newGroupPrefs?.[label]) {
@@ -39,7 +35,7 @@ export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, l
         newGroupPrefs[label].open = Boolean(collapsed)
       }
 
-      void setPreference(preferencesKey, { groups: newGroupPrefs }, true)
+      void setPreference(PREFERENCE_KEYS.NAV, { groups: newGroupPrefs }, true)
       setCollapsed(!collapsed)
     }
 
@@ -61,17 +57,12 @@ export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, l
           tabIndex={!navOpen ? -1 : 0}
           type="button"
         >
-          <div className={`${baseClass}__label`}>{label}</div>
           <div className={`${baseClass}__indicator`}>
-            <ChevronIcon
-              className={`${baseClass}__indicator`}
-              direction={!collapsed ? 'up' : undefined}
-            />
+            <ChevronIcon direction={collapsed ? 'right' : 'down'} size={16} />
           </div>
+          <div className={`${baseClass}__label`}>{label}</div>
         </button>
-        <AnimateHeight duration={animate ? 200 : 0} height={collapsed ? 0 : 'auto'}>
-          <div className={`${baseClass}__content`}>{children}</div>
-        </AnimateHeight>
+        {!collapsed && <div className={`${baseClass}__content`}>{children}</div>}
       </div>
     )
   }

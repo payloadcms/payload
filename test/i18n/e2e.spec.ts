@@ -10,14 +10,15 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
-import { openListFilters } from '../helpers/e2e/filters/index.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { getColumnSelectorItem } from '../__helpers/e2e/columns/index.js'
+import { openListFilters } from '../__helpers/e2e/filters/index.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 let payload: PayloadTestSDK<Config>
@@ -174,12 +175,13 @@ describe('i18n', () => {
       await setUserLanguage('es')
 
       await page.goto(collection1URL.list)
-      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.columns-button__button').click()
 
       // expecting the label to fall back to english as default fallbackLng
       await expect(
-        page.locator('.pill-selector__pill', {
-          hasText: 'es-label',
+        getColumnSelectorItem({
+          container: page.locator('.popup__content .column-selector'),
+          label: 'es-label',
         }),
       ).toBeVisible()
     })
@@ -189,12 +191,13 @@ describe('i18n', () => {
       await setUserLanguage('de')
 
       await page.goto(collection1URL.list)
-      await page.locator('.list-controls__toggle-columns').click()
+      await page.locator('.columns-button__button').click()
 
       // expecting the label to fall back to english as default fallbackLng
       await expect(
-        page.locator('.pill-selector__pill', {
-          hasText: 'en-label',
+        getColumnSelectorItem({
+          container: page.locator('.popup__content .column-selector'),
+          label: 'en-label',
         }),
       ).toBeVisible()
     })
@@ -213,7 +216,6 @@ describe('i18n', () => {
       await page.goto(collection1URL.list)
 
       await openListFilters(page, {})
-      await page.locator('.where-builder__add-first-filter').click()
       await page.locator('.condition__field .rs__control').click()
 
       await expect(page.locator('.rs__option', { hasText: 'es-label' })).toBeVisible()
@@ -222,10 +224,7 @@ describe('i18n', () => {
       await expect(
         page.locator('#heading-i18nFieldLabel .sort-column__label', { hasText: 'es-label' }),
       ).toBeVisible()
-      await expect(page.locator('.search-filter input')).toHaveAttribute(
-        'placeholder',
-        /(Buscar por ID)/,
-      )
+      await expect(page.locator('#search-filter-input')).toHaveAttribute('placeholder', 'Buscar')
     })
 
     test('should display translated collections and globals config options', async () => {

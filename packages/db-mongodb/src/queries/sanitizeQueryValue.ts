@@ -1,14 +1,7 @@
-import type {
-  FlattenedBlock,
-  FlattenedBlocksField,
-  FlattenedField,
-  Operator,
-  Payload,
-  RelationshipField,
-} from 'payload'
+import type { FlattenedBlock, FlattenedField, Operator, Payload, RelationshipField } from 'payload'
 
 import { Types } from 'mongoose'
-import { createArrayFromCommaDelineated } from 'payload'
+import { createArrayFromCommaDelineated, escapeRegExp } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
 
 type SanitizeQueryValueArgs = {
@@ -56,9 +49,8 @@ const getFieldFromSegments = ({
   payload: Payload
   segments: string[]
 }): FlattenedField | undefined => {
-  if ('blocks' in field || 'blockReferences' in field) {
-    const _field: FlattenedBlocksField = field as FlattenedBlocksField
-    for (const _block of _field.blockReferences ?? _field.blocks) {
+  if ('blocks' in field) {
+    for (const _block of field.blocks) {
       const block: FlattenedBlock | undefined =
         typeof _block === 'string' ? payload.blocks[_block] : _block
       if (block) {
@@ -450,9 +442,62 @@ export const sanitizeQueryValue = ({
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains' && !Types.ObjectId.isValid(formattedValue)) {
-      formattedValue = {
-        $options: 'i',
-        $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+      if ('hasMany' in field && field.hasMany && field.type === 'select') {
+        // For hasMany select, "contains" means the array includes this exact value
+        if (typeof formattedValue === 'string') {
+          return {
+            rawQuery: {
+              [path]: formattedValue,
+            },
+          }
+        } else if (Array.isArray(formattedValue)) {
+          return {
+            rawQuery: {
+              $or: formattedValue.map((val) => ({
+                [path]: val,
+              })),
+            },
+          }
+        }
+      } else if ('hasMany' in field && field.hasMany && ['number', 'text'].includes(field.type)) {
+        // For hasMany text/number, "contains" means substring matching within array elements
+        if (typeof formattedValue === 'string') {
+          // Search for documents where any array element contains this string
+          const escapedValue = escapeRegExp(formattedValue)
+          return {
+            rawQuery: {
+              [path]: {
+                $elemMatch: {
+                  $options: 'i',
+                  $regex: escapedValue,
+                },
+              },
+            },
+          }
+        } else if (Array.isArray(formattedValue)) {
+          // Search for documents where any array element contains any of the search values
+          return {
+            rawQuery: {
+              $or: formattedValue.map((val) => {
+                const escapedValue = escapeRegExp(String(val))
+                return {
+                  [path]: {
+                    $elemMatch: {
+                      $options: 'i',
+                      $regex: escapedValue,
+                    },
+                  },
+                }
+              }),
+            },
+          }
+        }
+      } else {
+        // Regular (non-hasMany) text field
+        formattedValue = {
+          $options: 'i',
+          $regex: escapeRegExp(formattedValue),
+        }
       }
     }
 

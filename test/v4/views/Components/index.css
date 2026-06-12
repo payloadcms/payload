@@ -1,0 +1,288 @@
+.components-view {
+  padding: var(--gutter-h);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.components-view__header {
+  margin-bottom: var(--spacer-5);
+}
+
+.components-view__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacer-1);
+  padding: var(--spacer-2) var(--spacer-3);
+  margin-bottom: var(--spacer-3);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.components-view__back:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
+}
+
+.components-view h1 {
+  margin-bottom: var(--spacing-sm);
+}
+
+.components-view__description {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.components-view__description code {
+  background: var(--color-bg-secondary);
+  padding: 2px 6px;
+  border-radius: var(--radius-small);
+}
+
+.components-view__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-4);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  padding: var(--spacer-3) var(--spacer-4);
+  margin-top: var(--spacer-3);
+}
+
+.components-view__control-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-2);
+}
+
+.components-view__control-group label {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.components-view__control-group .react-select {
+  min-width: 200px;
+}
+
+.components-view__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-6);
+}
+
+.components-view__category-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  padding-bottom: var(--spacer-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.components-view__section .collapsible {
+  border: none;
+  background: transparent;
+}
+
+.components-view__section-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.components-view__variants {
+  --columns: 4;
+  display: grid;
+  grid-template-columns: repeat(var(--columns), 1fr);
+  gap: var(--spacer-4);
+}
+
+.components-view__variants--full-width {
+  grid-template-columns: 1fr;
+}
+
+.components-view__variant-row {
+  grid-column: 1 / -1;
+}
+
+.components-view__variant-row-content {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacer-4);
+}
+
+.components-view__variant-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacer-2);
+}
+
+.components-view__variant-content {
+  min-height: var(--spacer-6);
+}
+
+/* Tooltip trigger */
+.components-view__tooltip-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacer-2) var(--spacer-3);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Form elements */
+.components-view__input,
+.components-view__textarea,
+.components-view__select {
+  width: 100%;
+  padding: var(--spacer-2) var(--spacer-2-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.components-view__input:focus,
+.components-view__textarea:focus,
+.components-view__select:focus {
+  outline: none;
+  border-color: var(--color-border-strong);
+}
+
+.components-view__input:disabled,
+.components-view__textarea:disabled,
+.components-view__select:disabled {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.components-view__input--error {
+  border-color: var(--border-error);
+}
+
+.components-view__textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.components-view__radio {
+  width: var(--spacer-3);
+  height: var(--spacer-3);
+  cursor: pointer;
+}
+
+.components-view__radio:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Icon grid */
+.components-view__icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--spacer-3);
+}
+
+.components-view__icon-item {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-bg);
+  transition: border-color 0.15s ease;
+  min-width: 100px;
+  overflow: hidden;
+}
+
+.components-view__icon-item:hover {
+  border-color: var(--color-border-strong);
+}
+
+.components-view__icon-item > span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: left;
+  padding: var(--spacer-1) var(--spacer-2);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.components-view__icon-item > svg {
+  width: 24px;
+  height: 24px;
+  color: var(--color-icon);
+  margin: var(--spacer-3);
+}
+
+/* TextState icon is a span, not svg */
+.components-view__icon-item > span + span {
+  margin: var(--spacer-3);
+}
+
+.components-view__icon-item--variants {
+  min-width: 140px;
+}
+
+.components-view__icon-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-3);
+  padding: var(--spacer-1);
+}
+
+.components-view__icon-variant-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-1);
+}
+
+.components-view__icon-variant-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.components-view__icon-variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacer-2);
+}
+
+.components-view__icon-variants svg {
+  color: var(--color-icon);
+}
+
+.components-view__icon-size-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-1);
+}
+
+.components-view__icon-size-row > span {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.25px;
+  padding-bottom: var(--spacer-1);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--spacer-1);
+}
+
+.components-view__icon-size-row svg {
+  color: var(--color-icon);
+}

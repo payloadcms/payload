@@ -3,9 +3,9 @@ import { type Payload } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -69,6 +69,23 @@ describe('ecommerce', () => {
     })
 
     expect(variants).toBeTruthy()
+  })
+
+  it('should only merge plugin translations for supportedLanguages', () => {
+    // The shared test buildConfig defaults supportedLanguages to { de, en, es }.
+    const supportedLangKeys = Object.keys(payload.config.i18n.supportedLanguages).sort()
+    expect(supportedLangKeys).toEqual(['de', 'en', 'es'])
+
+    for (const lang of supportedLangKeys) {
+      expect(payload.config.i18n.translations[lang]).toHaveProperty('plugin-ecommerce')
+    }
+
+    // Plugin must not pollute non-supported languages (e.g. ar, fr).
+    const arTranslations = payload.config.i18n.translations.ar as
+      | Record<string, unknown>
+      | undefined
+
+    expect(arTranslations?.['plugin-ecommerce']).toBeUndefined()
   })
 
   describe('guest cart access', () => {

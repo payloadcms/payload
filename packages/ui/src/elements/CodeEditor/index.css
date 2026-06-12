@@ -1,0 +1,50 @@
+@layer payload-default {
+  .code-editor {
+    /* Base styles */
+    direction: ltr;
+    width: 100%;
+    contain: inline-size; /* Width doesn't depend on children - helps Monaco calculate correctly */
+    height: auto;
+    padding: var(--spacer-2) 0;
+    -webkit-appearance: none;
+
+    /* Theme */
+    background: var(--field-color-bg);
+    border: var(--stroke-width-small) solid var(--field-color-border);
+    border-radius: var(--field-border-radius);
+    box-shadow: none;
+
+    /* Typography */
+    font-family: var(--font-mono);
+    font-size: var(--text-body);
+    color: var(--color-text-default-primary);
+
+    /* Transitions */
+    transition-property: border, box-shadow, background-color;
+    transition-duration: 100ms, 100ms, 500ms;
+    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+
+    &:focus-within {
+      border-color: var(--field-color-border-focus);
+    }
+
+    &.read-only {
+      background: var(--field-color-bg-readonly);
+      border-color: var(--field-color-border-readonly);
+    }
+
+    /* Monaco editor resets */
+    .monaco-editor {
+      .view-overlays .current-line {
+        max-width: calc(100% - 14px);
+        border: none;
+      }
+
+      &:focus-within {
+        .view-overlays .current-line {
+          border: none;
+        }
+      }
+    }
+  }
+}

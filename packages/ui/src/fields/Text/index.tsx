@@ -13,7 +13,7 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { isFieldRTL } from '../shared/index.js'
 import { TextInput } from './Input.js'
-import './index.scss'
+import './index.css'
 
 export { TextInput, TextInputProps }
 

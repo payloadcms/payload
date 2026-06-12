@@ -109,6 +109,28 @@ const lexicalJSON = convertMarkdownToLexical({
 })
 ```
 
+## Converting Uploads
+
+When converting Markdown to Lexical, standard image syntax `![alt] (url)` is **not** automatically converted to Upload nodes, because Payload has no way to look up a Media document from a URL alone.
+
+The `UploadFeature` includes a built-in transformer that recognizes a special placeholder format:
+
+```ts
+![media:6507f7b9a4d3c2e1f0ab1234]()
+```
+
+Where `media` is your upload collection slug and the second part is the document ID. When `convertMarkdownToLexical` processes this, it creates a proper Upload node with the correct `relationTo` and `value`.
+
+When converting **from** Lexical to Markdown, Upload nodes are serialized back into this same placeholder format (unless the document is populated, in which case the URL and alt text are used directly as a standard markdown image).
+
+### Migrating existing Markdown content
+
+If you're migrating content that contains standard `![alt] (url)` image references, the recommended approach is:
+
+1. Upload your images to the Media collection first to get their document IDs
+2. Pre-process your Markdown to replace `![alt] (url)` with `![media:<id>]()`
+3. Then run `convertMarkdownToLexical`
+
 ## Converting MDX
 
 Payload supports serializing and deserializing MDX content. While Markdown converters are stored on the features, MDX converters are stored on the blocks that you pass to the `BlocksFeature`.

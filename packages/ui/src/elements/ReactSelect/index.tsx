@@ -1,33 +1,52 @@
 'use client'
-import type { KeyboardEventHandler } from 'react'
+import type { JSX, KeyboardEventHandler } from 'react'
+import type { GroupBase, MenuProps, StylesConfig } from 'react-select'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useId } from 'react'
-import Select, { type StylesConfig } from 'react-select'
+import Select, { components as rsComponents } from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
 import type { Option, ReactSelectAdapterProps } from './types.js'
 export type { Option } from './types.js'
 
+import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
+import { useTheme } from '../../providers/Theme/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
-import './index.scss'
 import { Input } from './Input/index.js'
 import { generateMultiValueDraggableID, MultiValue } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
 import { MultiValueRemove } from './MultiValueRemove/index.js'
 import { SingleValue } from './SingleValue/index.js'
 import { ValueContainer } from './ValueContainer/index.js'
+import './index.css'
 
 const createOption = (label: string) => ({
   label,
   value: label,
 })
+
+// Propagates the nearest scoped theme (via ThemeProvider) into the portal div,
+// falling back to the global theme. Ensures dropdown menus portaled to
+// document.body inherit the correct theme (e.g. dark Popup).
+function ThemedMenuPortal<Opt, IsMulti extends boolean, Group extends GroupBase<Opt>>(
+  props: React.ComponentProps<typeof rsComponents.MenuPortal<Opt, IsMulti, Group>>,
+) {
+  const { theme } = useTheme()
+  const menuPortalTheme = (props.selectProps as any)?.customProps?.menuPortalTheme
+  return (
+    <rsComponents.MenuPortal
+      {...props}
+      innerProps={{ 'data-theme': menuPortalTheme ?? theme } as JSX.IntrinsicElements['div']}
+    />
+  )
+}
 
 const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const { i18n, t } = useTranslation()
@@ -41,6 +60,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
 
   const {
     className,
+    classNames: externalClassNames,
     components,
     customProps,
     disabled = false,
@@ -50,6 +70,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     isCreatable,
     isLoading,
     isSearchable = true,
+    menuPortalTarget: menuPortalTargetProp,
+    menuPosition: menuPositionProp,
     noOptionsMessage = () => t('general:noOptions'),
     numberOnly = false,
     onChange,
@@ -58,8 +80,32 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     options,
     placeholder = t('general:selectValue'),
     showError,
+    styles: externalStyles,
     value,
   } = props
+
+  const menuPortalTarget =
+    menuPortalTargetProp === undefined
+      ? typeof document !== 'undefined'
+        ? document.body
+        : null
+      : menuPortalTargetProp
+
+  const menuPosition = menuPositionProp ?? (menuPortalTarget ? 'fixed' : undefined)
+
+  // Debounce the loading state so that fast option fetches (e.g. relationship
+  // fields that resolve almost instantly) don't cause the clear indicator to
+  // flash to react-select's loading indicator and back. The loading indicator
+  // only appears once a load takes longer than the threshold below.
+  const [isLoadingDebounced, setIsLoadingDebounced] = React.useState(false)
+
+  useDebouncedEffect(
+    () => {
+      setIsLoadingDebounced(isLoading)
+    },
+    [isLoading],
+    250,
+  )
 
   const loadingMessage = () => t('general:loading') + '...'
 
@@ -71,27 +117,60 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     // Remove the default react-select z-index from the menu so that our custom
     // z-index in the "payload-default" css layer can take effect, in such a way
     // that end users can easily override it as with other styles.
-    menu: (rsStyles) => ({ ...rsStyles, zIndex: undefined }),
+    menu: (rsStyles, state) => ({
+      ...rsStyles,
+      zIndex: undefined,
+      ...externalStyles?.menu?.(rsStyles, state),
+    }),
+    // When portaling to document.body, the portal container needs an explicit
+    // z-index so the menu appears above drawers and dialogs. unstyled={true}
+    // strips react-select's default zIndex:9999 from the portal container.
+    ...(menuPortalTarget && {
+      menuPortal: (rsStyles, state) => ({
+        ...rsStyles,
+        zIndex: 9999,
+        ...externalStyles?.menuPortal?.(rsStyles, state),
+      }),
+    }),
+    // Remove the default react-select min-height so our CSS can control it
+    control: (rsStyles, state) => ({
+      ...rsStyles,
+      minHeight: undefined,
+      ...externalStyles?.control?.(rsStyles, state),
+    }),
+    // Allow external option styles to override emotion defaults
+    option: (rsStyles, state) => ({
+      ...rsStyles,
+      ...externalStyles?.option?.(rsStyles, state),
+    }),
   }
 
   if (!hasMounted) {
-    return <ShimmerEffect height="calc(var(--base) * 2 + 2px)" />
+    return <ShimmerEffect height="var(--field-min-height)" />
   }
 
   if (!isCreatable) {
     return (
-      <Select
+      <Select<Option, boolean, GroupBase<Option>>
         captureMenuScroll
         customProps={customProps}
-        isLoading={isLoading}
         {...props}
         className={classes}
         classNamePrefix="rs"
+        classNames={{
+          ...externalClassNames,
+          menu: (state: MenuProps<Option, boolean, GroupBase<Option>>) => {
+            const placement = state.placement ? `rs__menu--placement-${state.placement}` : ''
+            const external = externalClassNames?.menu?.(state) ?? ''
+            return [placement, external].filter(Boolean).join(' ')
+          },
+        }}
         components={{
           ClearIndicator,
           Control,
           DropdownIndicator,
           Input,
+          MenuPortal: ThemedMenuPortal,
           MultiValue,
           MultiValueLabel,
           MultiValueRemove,
@@ -104,9 +183,12 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         instanceId={uuid}
         isClearable={isClearable}
         isDisabled={disabled}
+        isLoading={isLoadingDebounced}
         isSearchable={isSearchable}
         loadingMessage={loadingMessage}
         menuPlacement="auto"
+        menuPortalTarget={menuPortalTarget}
+        menuPosition={menuPosition}
         noOptionsMessage={noOptionsMessage}
         onChange={onChange}
         onMenuClose={onMenuClose}
@@ -160,17 +242,25 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   }
 
   return (
-    <CreatableSelect
+    <CreatableSelect<Option, boolean, GroupBase<Option>>
       captureMenuScroll
-      isLoading={isLoading}
       {...props}
       className={classes}
       classNamePrefix="rs"
+      classNames={{
+        ...externalClassNames,
+        menu: (state: MenuProps<Option, boolean, GroupBase<Option>>) => {
+          const placement = state.placement ? `rs__menu--placement-${state.placement}` : ''
+          const external = externalClassNames?.menu?.(state) ?? ''
+          return [placement, external].filter(Boolean).join(' ')
+        },
+      }}
       components={{
         ClearIndicator,
         Control,
         DropdownIndicator,
         Input,
+        MenuPortal: ThemedMenuPortal,
         MultiValue,
         MultiValueLabel,
         MultiValueRemove,
@@ -183,9 +273,12 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       instanceId={uuid}
       isClearable={isClearable}
       isDisabled={disabled}
+      isLoading={isLoadingDebounced}
       isSearchable={isSearchable}
       loadingMessage={loadingMessage}
       menuPlacement="auto"
+      menuPortalTarget={menuPortalTarget}
+      menuPosition={menuPosition}
       noOptionsMessage={noOptionsMessage}
       onChange={onChange}
       onInputChange={(newValue) => setInputValue(newValue)}

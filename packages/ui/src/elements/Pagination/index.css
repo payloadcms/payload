@@ -1,0 +1,50 @@
+@layer payload-default {
+  .paginator {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
+  .paginator__page-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
+  .paginator__page-input {
+    box-sizing: content-box;
+    min-width: calc(var(--spacer-3) - 2px); /* -2px for content-box sizing */
+    min-height: calc(var(--control-height) - 2px);
+    padding: 0 var(--spacer-1);
+    border: var(--stroke-width-small) solid var(--field-color-border);
+    border-radius: var(--field-border-radius);
+    background: var(--color-bg-secondary);
+    color: var(--field-color-text);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    text-align: center;
+
+    &:hover:not(:focus) {
+      border-color: var(--color-border);
+    }
+
+    &:focus {
+      border-color: var(--color-border-selected);
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  .paginator__page-total {
+    color: var(--color-text);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    white-space: nowrap;
+  }
+}

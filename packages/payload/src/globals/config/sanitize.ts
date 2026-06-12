@@ -97,6 +97,8 @@ export const sanitizeGlobal = async (
     }
   }
 
+  global.versions = global.versions ?? true
+
   if (global.versions) {
     if (global.versions === true) {
       global.versions = {
@@ -171,7 +173,7 @@ export const sanitizeGlobal = async (
       name: 'updatedAt',
       type: 'date',
       admin: {
-        disableBulkEdit: true,
+        disabled: { bulkEdit: true },
         hidden: true,
       },
       label: ({ t }) => t('general:updatedAt'),
@@ -182,7 +184,7 @@ export const sanitizeGlobal = async (
       name: 'createdAt',
       type: 'date',
       admin: {
-        disableBulkEdit: true,
+        disabled: { bulkEdit: true },
         hidden: true,
       },
       label: ({ t }) => t('general:createdAt'),

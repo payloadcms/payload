@@ -19,6 +19,7 @@ export type DocToSync = {
 }
 
 export type BeforeSync = (args: {
+  collectionSlug: string
   originalDoc: {
     [key: string]: any
   }
@@ -37,13 +38,6 @@ export type SkipSyncFunction<ConfigTypes = unknown> = (args: {
 }) => boolean | Promise<boolean>
 
 export type SearchPluginConfig<ConfigTypes = unknown> = {
-  /**
-   * @deprecated
-   * This plugin gets the api route from the config directly and does not need to be passed in.
-   * As long as you have `routes.api` set in your Payload config, the plugin will use that.
-   * This property will be removed in the next major version.
-   */
-  apiBasePath?: string
   beforeSync?: BeforeSync
   collections?: string[]
   defaultPriorities?: {

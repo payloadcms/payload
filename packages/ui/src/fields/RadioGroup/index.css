@@ -1,0 +1,75 @@
+@layer payload-default {
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+
+    .tooltip:not([aria-hidden='true']) {
+      right: auto;
+      position: static;
+      margin-bottom: 0.2em;
+      max-width: fit-content;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    &.error {
+      .radio-input__styled-radio {
+        border-color: var(--field-color-border-error);
+
+        &:hover {
+          border-color: var(--field-color-border-error);
+        }
+      }
+    }
+  }
+
+  .radio-group--layout-horizontal {
+    ul {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: var(--spacer-2-5);
+    }
+  }
+
+  .radio-group--layout-vertical {
+    ul {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
+    }
+  }
+
+  .radio-group--read-only {
+    .radio-input {
+      cursor: default;
+    }
+
+    .radio-input__label {
+      color: var(--field-color-text-readonly);
+    }
+
+    .radio-input__styled-radio {
+      border-color: var(--field-color-toggle-border-disabled);
+
+      &::before {
+        background-color: var(--field-color-toggle-border-disabled);
+      }
+    }
+
+    .radio-input:not(.radio-input--is-selected) {
+      &:hover {
+        .radio-input__styled-radio {
+          &::before {
+            opacity: 0;
+          }
+        }
+      }
+    }
+  }
+}

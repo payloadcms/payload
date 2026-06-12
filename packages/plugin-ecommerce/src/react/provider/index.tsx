@@ -1116,26 +1116,27 @@ export const useCurrency = () => {
   const { currenciesConfig, currency, setCurrency } = useEcommerce()
 
   const formatCurrency = useCallback(
-    (value?: null | number, options?: { currency?: Currency }): string => {
+    (value?: null | number, options?: { currency?: Currency; locale?: string }): string => {
       if (value === undefined || value === null) {
         return ''
       }
 
       const currencyToUse = options?.currency || currency
-
       if (!currencyToUse) {
         return value.toString()
       }
 
-      if (value === 0) {
-        return `${currencyToUse.symbol}0.${'0'.repeat(currencyToUse.decimals)}`
-      }
+      const { code, decimals, symbolDisplay } = currencyToUse
 
-      // Convert from base value (e.g., cents) to decimal value (e.g., dollars)
-      const decimalValue = value / Math.pow(10, currencyToUse.decimals)
+      const locale = options?.locale || 'en'
 
-      // Format with the correct number of decimal places
-      return `${currencyToUse.symbol}${decimalValue.toFixed(currencyToUse.decimals)}`
+      return new Intl.NumberFormat(locale, {
+        currency: code,
+        currencyDisplay: symbolDisplay || 'symbol',
+        maximumFractionDigits: decimals,
+        minimumFractionDigits: decimals,
+        style: 'currency',
+      }).format(value / Math.pow(10, decimals))
     },
     [currency],
   )

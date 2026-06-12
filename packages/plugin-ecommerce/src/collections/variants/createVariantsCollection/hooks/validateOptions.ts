@@ -29,6 +29,7 @@ export const validateOptions: (props?: Props) => Validate =
       joins: {
         variants: {
           where: {
+            deletedAt: { exists: false },
             ...(data.id && {
               id: {
                 not_equals: data.id, // exclude the current variant from the search

@@ -10,10 +10,12 @@ import {
   MIN_PREVIEW_LIMIT,
   MIN_PREVIEW_PAGE,
 } from '../constants.js'
+import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
 import { parseCSV } from '../utilities/parseCSV.js'
 import { parseJSON } from '../utilities/parseJSON.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
+import { resolveLimit } from '../utilities/resolveLimit.js'
 import { unflattenObject } from '../utilities/unflattenObject.js'
 
 export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
@@ -45,6 +47,13 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     )
   }
 
+  // Resolve max limit from the collection config
+  const pluginConfig = targetCollection.config.custom?.['plugin-import-export']
+  const maxLimit = await resolveLimit({
+    limit: pluginConfig?.importLimit,
+    req,
+  })
+
   if (!fileData) {
     return Response.json({ error: 'No file data provided' }, { status: 400 })
   }
@@ -52,15 +61,16 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   try {
     // Parse the file data
     let parsedData: Record<string, unknown>[]
+    let originalDocs: Record<string, unknown>[] = []
     const buffer = Buffer.from(fileData, 'base64')
+
+    const importFieldHooks = getImportFieldFunctions({
+      fields: targetCollection.config.flattenedFields || [],
+    })
 
     if (format === 'csv') {
       const rawData = await parseCSV({ data: buffer, req })
-
-      // Get fromCSV functions for field transformations
-      const fromCSVFunctions = getImportFieldFunctions({
-        fields: targetCollection.config.flattenedFields || [],
-      })
+      originalDocs = rawData
 
       // Unflatten CSV data
       parsedData = rawData
@@ -68,14 +78,41 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
           const unflattened = unflattenObject({
             data: doc,
             fields: targetCollection.config.flattenedFields ?? [],
-            fromCSVFunctions,
+            format: 'csv',
+            importFieldHooks,
             req,
           })
           return unflattened ?? {}
         })
         .filter((doc) => doc && Object.keys(doc).length > 0)
     } else {
-      parsedData = parseJSON({ data: buffer, req })
+      const parsedDocs = parseJSON({ data: buffer, req })
+      originalDocs = parsedDocs
+      // Apply field-level import hooks for JSON format
+      parsedData = parsedDocs.map((doc) =>
+        applyFieldHooks({
+          type: 'beforeImport',
+          data: doc,
+          fieldHooks: importFieldHooks,
+          fields: targetCollection.config.flattenedFields ?? [],
+          format: 'json',
+          operation: 'import',
+          req,
+        }),
+      )
+    }
+
+    const importHooks = targetCollection.config.custom?.['plugin-import-export']?.importHooks
+    if (importHooks?.before && parsedData.length > 0) {
+      const result = await importHooks.before({
+        batchNumber: 1,
+        data: parsedData as unknown as Parameters<typeof importHooks.before>[0]['data'],
+        format: format ?? 'csv',
+        originalData: originalDocs,
+        req,
+        totalBatches: 1,
+      })
+      parsedData = result as unknown as Record<string, unknown>[]
     }
 
     // Remove disabled fields from the documents
@@ -96,11 +133,16 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     const hasNextPage = previewPage < totalPages
     const hasPrevPage = previewPage > 1
 
+    // Check if the file exceeds the max limit
+    const limitExceeded = typeof maxLimit === 'number' && maxLimit > 0 && totalDocs > maxLimit
+
     const response: ImportPreviewResponse = {
       docs: paginatedDocs,
       hasNextPage,
       hasPrevPage,
       limit: previewLimit,
+      limitExceeded,
+      maxLimit,
       page: previewPage,
       totalDocs,
       totalPages,

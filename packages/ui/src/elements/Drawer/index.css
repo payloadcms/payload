@@ -1,0 +1,140 @@
+@layer payload-default {
+  .drawer {
+    display: flex;
+    justify-content: flex-end;
+    overflow: hidden;
+    position: fixed;
+    inset: 0;
+
+    --gutter-h: var(--spacer-4);
+    --gutter-v: var(--spacer-4);
+  }
+
+  @media (max-width: 768px) {
+    .drawer {
+      --gutter-h: var(--spacer-3);
+    }
+  }
+
+  .drawer.drawer--is-open {
+    visibility: visible;
+  }
+
+  .drawer__blur-bg {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    opacity: 0;
+    background: var(--color-drawer-backdrop);
+  }
+
+  .drawer__content {
+    opacity: 0;
+    position: relative;
+    z-index: 2;
+    width: clamp(600px, 40vw, 1080px);
+    max-width: 100vw;
+    background-color: var(--color-bg);
+    box-shadow: var(--elevation-400-menu-panel);
+    container: drawer / inline-size;
+    /* Animate the leftward shift when a nested drawer stacks on top. */
+    transition: transform 100ms ease-out;
+  }
+
+  .drawer__content-children {
+    position: relative;
+    z-index: 1;
+    overflow: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /*
+   * Content fades in on first render so the drawer body appears gracefully
+   * instead of snapping in. Quick + soft, never blocky.
+   */
+  .drawer__fade-in {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    animation: drawer-content-fade-in 200ms ease-out both;
+  }
+
+  @keyframes drawer-content-fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .drawer__fade-in {
+      animation: none;
+    }
+  }
+
+  .drawer--is-open .drawer__content,
+  .drawer--is-open .drawer__blur-bg {
+    opacity: 1;
+  }
+
+  /* Offset each ancestor drawer 16px left per drawer stacked on top of it. */
+  .drawer--is-open .drawer__content {
+    transform: translateX(calc(-1 * var(--drawer-layer-offset, 0px)));
+  }
+
+  .drawer__close {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    cursor: pointer;
+    flex-grow: 1;
+    background: transparent;
+    border: 0;
+
+    &:active,
+    &:focus {
+      outline: 0;
+    }
+  }
+
+  .drawer__header {
+    display: flex;
+    align-items: center;
+    padding: var(--spacer-2-5) var(--spacer-3) var(--spacer-2-5) var(--spacer-2);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    background: var(--color-bg);
+    gap: var(--spacer-1);
+  }
+
+  .drawer__header__title {
+    margin: 0;
+    flex: 1 0 0;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--color-text);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-strong-letter-spacing);
+  }
+
+  .drawer__header__close {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .drawer__header__actions {
+    display: flex;
+    gap: var(--spacer-2);
+    align-items: center;
+  }
+}

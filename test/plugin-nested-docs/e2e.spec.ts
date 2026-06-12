@@ -6,9 +6,9 @@ import { fileURLToPath } from 'url'
 
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -83,7 +83,7 @@ describe('Nested Docs Plugin', () => {
       await expect(slug).toHaveValue('child-slug')
 
       // TODO: remove when error states are fixed
-      const apiTabButton = page.locator('text=API')
+      const apiTabButton = page.getByRole('link', { name: 'API', exact: true })
       await apiTabButton.click()
       const breadcrumbs = page.locator('text=/parent-slug').first()
       await expect(breadcrumbs).toBeVisible()
@@ -114,7 +114,7 @@ describe('Nested Docs Plugin', () => {
       await page.goto(url.edit(draftChildID))
 
       // TODO: remove when error states are fixed
-      const apiTabButton = page.locator('text=API')
+      const apiTabButton = page.getByRole('link', { name: 'API', exact: true })
       await apiTabButton.click()
       const breadcrumbs = page.locator('text=/parent-slug-draft').first()
       await expect(breadcrumbs).toBeVisible()

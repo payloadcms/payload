@@ -1,6 +1,8 @@
 'use client'
 import type { ClientField, Field, SanitizedCollectionConfig } from 'payload'
 
+import { isFieldDisabled } from 'payload/shared'
+
 import './index.scss'
 
 import React, { useMemo } from 'react'
@@ -14,7 +16,10 @@ import { ReactSelect } from '../ReactSelect/index.js'
 
 export type Props = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
-  fields: ClientField[]
+  readonly fields: ClientField[]
+  /** When set, GroupByBuilder is controlled by the form (value + onChange) instead of list query. */
+  readonly onChange?: (groupBy: string) => void
+  readonly value?: string
 }
 
 const baseClass = 'group-by-builder'
@@ -40,9 +45,19 @@ const supportedFieldTypes: Field['type'][] = [
   'upload',
 ]
 
-export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
+export const GroupByBuilder: React.FC<Props> = ({
+  collectionSlug,
+  fields,
+  onChange,
+  value: valueProp,
+}) => {
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
+  const listQuery = useListQuery()
+
+  const isFormMode = typeof onChange === 'function'
+  const groupByRaw = isFormMode ? valueProp : listQuery.query?.groupBy
+  const groupByFieldName = groupByRaw?.replace(/^-/, '')
 
   const fieldPermissions = permissions?.collections?.[collectionSlug]?.fields
 
@@ -56,11 +71,79 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
     [fields, fieldPermissions, i18n],
   )
 
-  const { query, refineListData } = useListQuery()
+  const groupByField = reducedFields.find((field) => field.fieldPath === groupByFieldName)
 
-  const groupByFieldName = query.groupBy?.replace(/^-/, '')
+  const handleFieldChange = useMemo(() => {
+    if (isFormMode) {
+      return (v: { value: string } | null) => {
+        const value = v === null ? undefined : v.value
+        const newGroupBy = value ? (groupByRaw?.startsWith('-') ? `-${value}` : value) : ''
+        onChange?.(newGroupBy)
+      }
+    }
+    return (v: { value: string } | null) => {
+      void (async () => {
+        if (typeof listQuery.refineListData !== 'function') {
+          return
+        }
+        const value = v === null ? undefined : v.value
+        if (v === null) {
+          await listQuery.refineListData({ groupBy: '', page: 1 })
+        } else {
+          await listQuery.refineListData({
+            groupBy: value
+              ? listQuery.query?.groupBy?.startsWith('-')
+                ? `-${value}`
+                : value
+              : undefined,
+            page: 1,
+          })
+        }
+      })()
+    }
+  }, [isFormMode, groupByRaw, listQuery, onChange])
 
-  const groupByField = reducedFields.find((field) => field.value === groupByFieldName)
+  const handleClear = useMemo(() => {
+    if (isFormMode) {
+      return () => onChange?.('')
+    }
+    return () => {
+      void (async () => {
+        if (typeof listQuery.refineListData === 'function') {
+          await listQuery.refineListData({ groupBy: '' })
+        }
+      })()
+    }
+  }, [isFormMode, listQuery, onChange])
+
+  const handleDirectionChange = useMemo(() => {
+    if (isFormMode) {
+      return ({ value }: { value: string }) => {
+        if (!groupByFieldName) {
+          return
+        }
+        onChange?.(value === 'asc' ? groupByFieldName : `-${groupByFieldName}`)
+      }
+    }
+    return ({ value }: { value: string }) => {
+      void (async () => {
+        if (!groupByFieldName || typeof listQuery.refineListData !== 'function') {
+          return
+        }
+        await listQuery.refineListData({
+          groupBy: value === 'asc' ? groupByFieldName : `-${groupByFieldName}`,
+          page: 1,
+        })
+      })()
+    }
+  }, [groupByFieldName, isFormMode, listQuery, onChange])
+
+  const directionValue =
+    !groupByRaw || typeof groupByRaw !== 'string'
+      ? 'asc'
+      : groupByRaw.startsWith('-')
+        ? 'desc'
+        : 'asc'
 
   return (
     <div className={baseClass}>
@@ -70,15 +153,11 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
             label: '',
           })}
         </p>
-        {query.groupBy && (
+        {groupByRaw && (
           <button
             className={`${baseClass}__clear-button`}
             id="group-by--reset"
-            onClick={async () => {
-              await refineListData({
-                groupBy: '',
-              })
-            }}
+            onClick={() => void handleClear()}
             type="button"
           >
             {t('general:clear')}
@@ -95,28 +174,15 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           id="group-by--field-select"
           isClearable
           isMulti={false}
-          onChange={async (v: { value: string } | null) => {
-            const value = v === null ? undefined : v.value
-
-            // value is being cleared
-            if (v === null) {
-              await refineListData({
-                groupBy: '',
-                page: 1,
-              })
-            }
-
-            await refineListData({
-              groupBy: value ? (query.groupBy?.startsWith('-') ? `-${value}` : value) : undefined,
-              page: 1,
-            })
-          }}
-          options={reducedFields.filter(
-            (field) =>
-              !field.field.admin.disableGroupBy &&
-              field.value !== 'id' &&
-              supportedFieldTypes.includes(field.field.type),
-          )}
+          onChange={handleFieldChange}
+          options={reducedFields
+            .filter(
+              (field) =>
+                !isFieldDisabled(field.field, 'groupBy') &&
+                field.fieldPath !== 'id' &&
+                supportedFieldTypes.includes(field.field.type),
+            )
+            .map((f) => ({ ...f, value: f.fieldPath }))}
           value={{
             label: groupByField?.label || t('general:selectValue'),
             value: groupByFieldName || '',
@@ -126,29 +192,14 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           id="group-by--sort"
           isClearable={false}
           name="direction"
-          onChange={async ({ value }: { value: string }) => {
-            if (!groupByFieldName) {
-              return
-            }
-
-            await refineListData({
-              groupBy: value === 'asc' ? groupByFieldName : `-${groupByFieldName}`,
-              page: 1,
-            })
-          }}
+          onChange={handleDirectionChange}
           options={[
             { label: t('general:ascending'), value: 'asc' },
             { label: t('general:descending'), value: 'desc' },
           ]}
           path="direction"
           readOnly={!groupByFieldName}
-          value={
-            !query.groupBy
-              ? 'asc'
-              : typeof query.groupBy === 'string'
-                ? `${query.groupBy.startsWith('-') ? 'desc' : 'asc'}`
-                : ''
-          }
+          value={directionValue}
         />
       </div>
     </div>

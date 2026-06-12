@@ -36,11 +36,22 @@ export const plugins: Plugin[] = [
       payment: false,
     },
     formSubmissionOverrides: {
+      access: {
+        delete: isAdmin,
+        read: isAdmin,
+        update: isAdmin,
+      },
       admin: {
         group: 'Content',
       },
     },
     formOverrides: {
+      access: {
+        delete: isAdmin,
+        read: isAdmin,
+        update: isAdmin,
+        create: isAdmin,
+      },
       admin: {
         group: 'Content',
       },
@@ -75,6 +86,34 @@ export const plugins: Plugin[] = [
     },
     customers: {
       slug: 'users',
+    },
+    orders: {
+      ordersCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        fields: [
+          ...defaultCollection.fields,
+          {
+            name: 'accessToken',
+            type: 'text',
+            unique: true,
+            index: true,
+            admin: {
+              position: 'sidebar',
+              readOnly: true,
+            },
+            hooks: {
+              beforeValidate: [
+                ({ value, operation }) => {
+                  if (operation === 'create' || !value) {
+                    return crypto.randomUUID()
+                  }
+                  return value
+                },
+              ],
+            },
+          },
+        ],
+      }),
     },
     payments: {
       paymentMethods: [

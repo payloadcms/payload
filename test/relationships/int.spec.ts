@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -17,8 +17,8 @@ import type {
   Relation,
 } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { mongooseList } from '../helpers/isMongoose.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { mongooseList } from '../__helpers/shared/isMongoose.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -471,6 +471,37 @@ describe('Relationships', () => {
 
         expect(res.totalDocs).toBe(1)
         expect(res.docs[0].id).toBe(director_2.id)
+      })
+
+      // MongoDB dedupes $in at execution, so the bug is only visible in the
+      // filter Payload hands to Mongoose — not in the returned docs.
+      mongoIt('should not duplicate IDs in $in when querying through a relationship', async () => {
+        const movie = await payload.create({
+          collection: 'movies',
+          data: { name: 'dup_test_movie' },
+        })
+
+        const Model = (payload.db as any).collections.directors
+        const originalPaginate = Model.paginate.bind(Model)
+        let capturedQuery: any
+        Model.paginate = (query: any, ...rest: any[]) => {
+          capturedQuery = query
+          return originalPaginate(query, ...rest)
+        }
+
+        try {
+          await payload.find({
+            collection: 'directors',
+            where: { 'movie.name': { equals: 'dup_test_movie' } },
+          })
+        } finally {
+          Model.paginate = originalPaginate
+        }
+
+        // eslint-disable-next-line vitest/no-standalone-expect
+        expect(capturedQuery.$and[0].movie.$in).toHaveLength(1)
+
+        await payload.delete({ collection: 'movies', id: movie.id })
       })
 
       describe('hasMany relationships', () => {
@@ -970,6 +1001,93 @@ describe('Relationships', () => {
           expect(doc?.maxDepthRelation).not.toHaveProperty('name')
           // should not affect other fields
           expect(doc?.relationField).toMatchObject({ id: relation.id, name: relation.name })
+        })
+
+        describe('Local API', () => {
+          it('should populate to depth via local API find', async () => {
+            const result = await payload.find({
+              collection: slug,
+              depth: 2,
+              where: {
+                id: { equals: post.id },
+              },
+            })
+
+            const doc = result.docs[0]
+            const chainedRel = doc?.chainedRelation as EasierChained
+
+            expect(chainedRel.id).toEqual(chained.id)
+            expect(chainedRel.relation.id).toEqual(chained2.id)
+            expect(chainedRel.relation.relation as unknown as string).toEqual(chained3.id)
+          })
+
+          it('should only populate ID if depth 0 via local API find', async () => {
+            const result = await payload.find({
+              collection: slug,
+              depth: 0,
+              where: {
+                id: { equals: post.id },
+              },
+            })
+
+            const doc = result.docs[0]
+
+            expect(doc?.chainedRelation).toEqual(chained.id)
+          })
+
+          it('should respect maxDepth at field level via local API find', async () => {
+            const result = await payload.find({
+              collection: slug,
+              depth: 1,
+              where: {
+                id: { equals: post.id },
+              },
+            })
+
+            const doc = result.docs[0]
+
+            expect(doc?.maxDepthRelation).toEqual(relation.id)
+            expect(doc?.maxDepthRelation).not.toHaveProperty('name')
+            // should not affect other fields
+            expect(doc?.relationField).toMatchObject({ id: relation.id, name: relation.name })
+          })
+
+          it('should use depth option even if req.query.depth is set', async () => {
+            const result = await payload.find({
+              collection: slug,
+              depth: 0,
+              where: {
+                id: { equals: post.id },
+              },
+              req: { query: { depth: 5 } } as Partial<PayloadRequest> as PayloadRequest,
+            })
+
+            const doc = result.docs[0]
+
+            // depth: 0 from options should be used, not depth: 5 from req.query
+            expect(doc?.chainedRelation).toEqual(chained.id)
+          })
+
+          it('should ignore req.query.depth when no depth option is provided', async () => {
+            // When no depth option is provided, req.query.depth should be ignored
+            // and the default depth behavior should apply
+            const result = await payload.find({
+              collection: slug,
+              where: {
+                id: { equals: post.id },
+              },
+              req: { query: { depth: 0 } } as Partial<PayloadRequest> as PayloadRequest,
+            })
+
+            const doc = result.docs[0]
+
+            // Default depth should apply, not depth: 0 from req.query
+            // So relationships should be populated (not just IDs)
+            const chainedRel = doc?.chainedRelation as EasierChained
+
+            expect(chainedRel).toHaveProperty('id')
+            expect(chainedRel.id).toEqual(chained.id)
+          })
         })
       })
 
@@ -1725,7 +1843,8 @@ describe('Relationships', () => {
           polymorphic: {
             equals: {
               relationTo: 'movies',
-              value: payload.db.idType === 'uuid' ? randomUUID() : 99,
+              value:
+                payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7' ? randomUUID() : 99,
             },
           },
         },

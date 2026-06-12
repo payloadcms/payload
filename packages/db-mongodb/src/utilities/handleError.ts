@@ -11,6 +11,29 @@ function extractFieldFromMessage(message: string) {
   return null
 }
 
+function stripLocaleFromPath(path: string, req?: Partial<PayloadRequest>): string {
+  if (!path) {
+    return path
+  }
+
+  const localization = req?.payload?.config?.localization
+  if (!localization) {
+    return path
+  }
+
+  const lastDotIndex = path.lastIndexOf('.')
+  if (lastDotIndex === -1) {
+    return path
+  }
+
+  const lastSegment = path.substring(lastDotIndex + 1)
+  if (localization.localeCodes.includes(lastSegment)) {
+    return path.substring(0, lastDotIndex)
+  }
+
+  return path
+}
+
 export const handleError = ({
   collection,
   error,
@@ -34,6 +57,10 @@ export const handleError = ({
       path = Object.keys(error.keyValue)[0] ?? ''
     } else if ('message' in error && typeof error.message === 'string') {
       path = extractFieldFromMessage(error.message)
+    }
+
+    if (path) {
+      path = stripLocaleFromPath(path, req)
     }
 
     throw new ValidationError(

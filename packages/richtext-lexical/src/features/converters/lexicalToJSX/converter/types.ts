@@ -4,25 +4,29 @@ import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../../nodeTypes.js'
-export type JSXConverter<T extends { [key: string]: any; type?: string } = SerializedLexicalNode> =
-  | ((args: {
-      childIndex: number
-      converters: JSXConverters
-      node: T
-      nodesToJSX: (args: {
-        converters?: JSXConverters
-        disableIndent?: boolean | string[]
-        disableTextAlign?: boolean | string[]
-        nodes: SerializedLexicalNode[]
-        parent?: SerializedLexicalNodeWithParent
-      }) => React.ReactNode[]
-      parent: SerializedLexicalNodeWithParent
-    }) => React.ReactNode)
-  | React.ReactNode
+} from '../../../../types/nodeTypes.js'
+
+export type JSXConverterArgs<
+  TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,
+> = {
+  childIndex: number
+  converters: JSXConverters
+  node: TNode
+  nodesToJSX: (args: {
+    converters?: JSXConverters
+    disableIndent?: boolean | string[]
+    disableTextAlign?: boolean | string[]
+    nodes: SerializedLexicalNode[]
+    parent?: SerializedLexicalNodeWithParent
+  }) => React.ReactNode[]
+  parent: SerializedLexicalNodeWithParent
+}
+export type JSXConverter<
+  TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,
+> = ((args: JSXConverterArgs<TNode>) => React.ReactNode) | React.ReactNode
 
 export type JSXConverters<
-  T extends { [key: string]: any; type?: string } =
+  TNodes extends { [key: string]: any; type?: string } =
     | DefaultNodeTypes
     | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided
@@ -34,36 +38,18 @@ export type JSXConverters<
     | JSXConverter<any>
     | undefined
 } & {
-  [nodeType in Exclude<NonNullable<T['type']>, 'block' | 'inlineBlock'>]?: JSXConverter<
-    Extract<T, { type: nodeType }>
+  [nodeType in Exclude<NonNullable<TNodes['type']>, 'block' | 'inlineBlock'>]?: JSXConverter<
+    Extract<TNodes, { type: nodeType }>
   >
 } & {
   blocks?: {
-    [K in Extract<
-      Extract<T, { type: 'block' }> extends SerializedBlockNode<infer B>
-        ? B extends { blockType: string }
-          ? B['blockType']
-          : never
-        : never,
-      string
-    >]?: JSXConverter<
-      Extract<T, { type: 'block' }> extends SerializedBlockNode<infer B>
-        ? SerializedBlockNode<Extract<B, { blockType: K }>>
-        : SerializedBlockNode
+    [K in Extract<TNodes, { type: 'block' }>['fields']['blockType']]?: JSXConverter<
+      Extract<TNodes, { fields: { blockType: K }; type: 'block' }>
     >
   }
   inlineBlocks?: {
-    [K in Extract<
-      Extract<T, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
-        ? B extends { blockType: string }
-          ? B['blockType']
-          : never
-        : never,
-      string
-    >]?: JSXConverter<
-      Extract<T, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
-        ? SerializedInlineBlockNode<Extract<B, { blockType: K }>>
-        : SerializedInlineBlockNode
+    [K in Extract<TNodes, { type: 'inlineBlock' }>['fields']['blockType']]?: JSXConverter<
+      Extract<TNodes, { fields: { blockType: K }; type: 'inlineBlock' }>
     >
   }
   unknown?: JSXConverter<SerializedLexicalNode>

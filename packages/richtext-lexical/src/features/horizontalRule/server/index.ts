@@ -3,6 +3,9 @@ import { createNode } from '../../typeUtilities.js'
 import { i18n } from './i18n.js'
 import { MarkdownTransformer } from './markdownTransformer.js'
 import { HorizontalRuleServerNode } from './nodes/HorizontalRuleNode.js'
+import { horizontalRuleNodeJSONSchema } from './schema.js'
+
+export type { SerializedHorizontalRuleNode } from './schema.js'
 
 export const HorizontalRuleFeature = createServerFeature({
   feature: {
@@ -11,14 +14,7 @@ export const HorizontalRuleFeature = createServerFeature({
     markdownTransformers: [MarkdownTransformer],
     nodes: [
       createNode({
-        converters: {
-          html: {
-            converter: () => {
-              return `<hr/>`
-            },
-            nodeTypes: [HorizontalRuleServerNode.getType()],
-          },
-        },
+        jsonSchema: horizontalRuleNodeJSONSchema,
         node: HorizontalRuleServerNode,
       }),
     ],

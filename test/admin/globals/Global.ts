@@ -6,7 +6,7 @@ export const Global: GlobalConfig = {
   slug: globalSlug,
   admin: {
     components: {
-      elements: {
+      edit: {
         beforeDocumentControls: [
           '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
         ],

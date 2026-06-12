@@ -4,8 +4,8 @@ import React from 'react'
 
 import { SortDownIcon } from '../../icons/Sort/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import './index.scss'
 import { useTranslation } from '../../providers/Translation/index.js'
+import './index.css'
 
 export type SortHeaderProps = {
   readonly appearance?: 'condensed' | 'default'
@@ -37,24 +37,22 @@ export const SortHeader: React.FC<SortHeaderProps> = (props) => {
   const { t } = useTranslation()
 
   return (
-    <div
-      className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
+    <button
+      aria-label={t('general:sortByLabelDirection', {
+        direction: t('general:ascending'),
+        label: 'Order',
+      })}
+      className={[
+        baseClass,
+        appearance && `${baseClass}--appearance-${appearance}`,
+        isActive && `${baseClass}--active`,
+      ]
         .filter(Boolean)
         .join(' ')}
+      onClick={handleSortPress}
+      type="button"
     >
-      <div className={`${baseClass}__buttons`}>
-        <button
-          aria-label={t('general:sortByLabelDirection', {
-            direction: t('general:ascending'),
-            label: 'Order',
-          })}
-          className={`${baseClass}__button ${isActive ? `${baseClass}--active` : ''}`}
-          onClick={handleSortPress}
-          type="button"
-        >
-          <SortDownIcon />
-        </button>
-      </div>
-    </div>
+      <SortDownIcon />
+    </button>
   )
 }

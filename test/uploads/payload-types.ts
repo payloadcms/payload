@@ -60,10 +60,94 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_7A11A510".
+ */
+export type LexicalNodes_7A11A510 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_7A11A510>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_7A11A510>
+  | SerializedUploadNode<'gif-resize'>
+  | SerializedUploadNode<'filename-compound-index'>
+  | SerializedUploadNode<'no-image-sizes'>
+  | SerializedUploadNode<'object-fit'>
+  | SerializedUploadNode<'with-meta-data'>
+  | SerializedUploadNode<'without-meta-data'>
+  | SerializedUploadNode<'with-only-jpeg-meta-data'>
+  | SerializedUploadNode<'crop-only'>
+  | SerializedUploadNode<'focal-only'>
+  | SerializedUploadNode<'image-sizes-only'>
+  | SerializedUploadNode<'focal-no-sizes'>
+  | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
+  | SerializedUploadNode<'allow-list-media'>
+  | SerializedUploadNode<'skip-safe-fetch-media'>
+  | SerializedUploadNode<'skip-safe-fetch-header-filter'>
+  | SerializedUploadNode<'skip-allow-list-safe-fetch-media'>
+  | SerializedUploadNode<'restrict-file-types'>
+  | SerializedUploadNode<'no-restrict-file-types'>
+  | SerializedUploadNode<'no-restrict-file-mime-types'>
+  | SerializedUploadNode<'pdf-only'>
+  | SerializedUploadNode<'restricted-mime-types'>
+  | SerializedUploadNode<'animated-type-media'>
+  | SerializedUploadNode<'enlarge'>
+  | SerializedUploadNode<'without-enlarge'>
+  | SerializedUploadNode<'reduce'>
+  | SerializedUploadNode<'media-trim'>
+  | SerializedUploadNode<'custom-file-name-media'>
+  | SerializedUploadNode<'unstored-media'>
+  | SerializedUploadNode<'externally-served-media'>
+  | SerializedUploadNode<'uploads-1'>
+  | SerializedUploadNode<'admin-thumbnail-function'>
+  | SerializedUploadNode<'admin-thumbnail-with-search-queries'>
+  | SerializedUploadNode<'admin-thumbnail-size'>
+  | SerializedUploadNode<'admin-upload-control'>
+  | SerializedUploadNode<'no-files-required'>
+  | SerializedUploadNode<'optional-file'>
+  | SerializedUploadNode<'required-file'>
+  | SerializedUploadNode<'versions'>
+  | SerializedUploadNode<'custom-upload-field'>
+  | SerializedUploadNode<'media-with-relation-preview'>
+  | SerializedUploadNode<'media-without-cache-tags'>
+  | SerializedUploadNode<'media-without-relation-preview'>
+  | SerializedUploadNode<'hide-file-input-on-create'>
+  | SerializedUploadNode<'three-dimensional'>
+  | SerializedUploadNode<'constructor-options'>
+  | SerializedUploadNode<'bulk-uploads'>
+  | SerializedUploadNode<'bulk-uploads-hook-error'>
+  | SerializedUploadNode<'file-mime-type'>
+  | SerializedUploadNode<'svg-only'>
+  | SerializedUploadNode<'media-without-delete-access'>
+  | SerializedUploadNode<'media-with-image-size-admin-props'>
+  | SerializedUploadNode<'prefix-media'>
+  | SerializedQuoteNode<LexicalNodes_7A11A510>
+  | SerializedListNode<LexicalNodes_7A11A510>
+  | SerializedListItemNode<LexicalNodes_7A11A510>
+  | SerializedAutoLinkNode<LexicalNodes_7A11A510, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_7A11A510, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNode<
+      | 'relation'
+      | 'audio'
+      | 'relation-to-no-files-required'
+      | 'relation-preview'
+      | 'best-fit'
+      | 'list-view-preview'
+      | 'simple-relationship'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -121,13 +205,16 @@ export interface Config {
     'three-dimensional': ThreeDimensional;
     'constructor-options': ConstructorOption;
     'bulk-uploads': BulkUpload;
+    'bulk-uploads-hook-error': BulkUploadsHookError;
     'simple-relationship': SimpleRelationship;
     'file-mime-type': FileMimeType;
     'svg-only': SvgOnly;
     'media-without-delete-access': MediaWithoutDeleteAccess;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
-    'payload-kv': PayloadKv;
+    'prefix-media': PrefixMedia;
     users: User;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -188,27 +275,31 @@ export interface Config {
     'three-dimensional': ThreeDimensionalSelect<false> | ThreeDimensionalSelect<true>;
     'constructor-options': ConstructorOptionsSelect<false> | ConstructorOptionsSelect<true>;
     'bulk-uploads': BulkUploadsSelect<false> | BulkUploadsSelect<true>;
+    'bulk-uploads-hook-error': BulkUploadsHookErrorSelect<false> | BulkUploadsHookErrorSelect<true>;
     'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
     'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
     'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
     'media-without-delete-access': MediaWithoutDeleteAccessSelect<false> | MediaWithoutDeleteAccessSelect<true>;
     'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'prefix-media': PrefixMediaSelect<false> | PrefixMediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'fr';
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -232,24 +323,35 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface PayloadMcpApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation".
  */
 export interface Relation {
-  id: number;
-  image?: (number | null) | Media;
-  versionedImage?: (number | null) | Version;
-  hideFileInputOnCreate?: (number | null) | HideFileInputOnCreate;
-  blocks?:
-    | {
-        media: number | Media;
-        relatedMedia?: (number | Media)[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedMediaBlock';
-      }[]
-    | null;
+  id: string;
+  image?: (string | null) | Media;
+  versionedImage?: (string | null) | Version;
+  hideFileInputOnCreate?: (string | null) | HideFileInputOnCreate;
+  hasManyImage?: (string | Media)[] | null;
+  blocks?: LocalizedMediaBlock[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -259,7 +361,7 @@ export interface Relation {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   alt?: string | null;
   localized?: string | null;
   updatedAt: string;
@@ -409,7 +511,7 @@ export interface Media {
  * via the `definition` "versions".
  */
 export interface Version {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -429,7 +531,7 @@ export interface Version {
  * via the `definition` "hide-file-input-on-create".
  */
 export interface HideFileInputOnCreate {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -445,11 +547,22 @@ export interface HideFileInputOnCreate {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LocalizedMediaBlock".
+ */
+export interface LocalizedMediaBlock {
+  media: string | Media;
+  relatedMedia?: (string | Media)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedMediaBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "audio".
  */
 export interface Audio {
-  id: number;
-  audio?: (number | null) | Media;
+  id: string;
+  audio?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -458,7 +571,7 @@ export interface Audio {
  * via the `definition` "gif-resize".
  */
 export interface GifResize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -494,7 +607,7 @@ export interface GifResize {
  * via the `definition` "filename-compound-index".
  */
 export interface FilenameCompoundIndex {
-  id: number;
+  id: string;
   /**
    * Alt text to be used for compound index
    */
@@ -534,7 +647,7 @@ export interface FilenameCompoundIndex {
  * via the `definition` "no-image-sizes".
  */
 export interface NoImageSize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -552,7 +665,7 @@ export interface NoImageSize {
  * via the `definition` "object-fit".
  */
 export interface ObjectFit {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -604,7 +717,7 @@ export interface ObjectFit {
  * via the `definition` "with-meta-data".
  */
 export interface WithMetaDatum {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -632,7 +745,7 @@ export interface WithMetaDatum {
  * via the `definition` "without-meta-data".
  */
 export interface WithoutMetaDatum {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -660,7 +773,7 @@ export interface WithoutMetaDatum {
  * via the `definition` "with-only-jpeg-meta-data".
  */
 export interface WithOnlyJpegMetaDatum {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -688,7 +801,7 @@ export interface WithOnlyJpegMetaDatum {
  * via the `definition` "crop-only".
  */
 export interface CropOnly {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -732,7 +845,7 @@ export interface CropOnly {
  * via the `definition` "focal-only".
  */
 export interface FocalOnly {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -776,7 +889,7 @@ export interface FocalOnly {
  * via the `definition` "image-sizes-only".
  */
 export interface ImageSizesOnly {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -812,7 +925,7 @@ export interface ImageSizesOnly {
  * via the `definition` "focal-no-sizes".
  */
 export interface FocalNoSize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -830,7 +943,7 @@ export interface FocalNoSize {
  * via the `definition` "allow-list-media".
  */
 export interface AllowListMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -848,7 +961,7 @@ export interface AllowListMedia {
  * via the `definition` "skip-safe-fetch-media".
  */
 export interface SkipSafeFetchMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -866,7 +979,7 @@ export interface SkipSafeFetchMedia {
  * via the `definition` "skip-safe-fetch-header-filter".
  */
 export interface SkipSafeFetchHeaderFilter {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -884,7 +997,7 @@ export interface SkipSafeFetchHeaderFilter {
  * via the `definition` "skip-allow-list-safe-fetch-media".
  */
 export interface SkipAllowListSafeFetchMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -902,7 +1015,7 @@ export interface SkipAllowListSafeFetchMedia {
  * via the `definition` "restrict-file-types".
  */
 export interface RestrictFileType {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -920,7 +1033,7 @@ export interface RestrictFileType {
  * via the `definition` "no-restrict-file-types".
  */
 export interface NoRestrictFileType {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -938,7 +1051,7 @@ export interface NoRestrictFileType {
  * via the `definition` "no-restrict-file-mime-types".
  */
 export interface NoRestrictFileMimeType {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -956,7 +1069,7 @@ export interface NoRestrictFileMimeType {
  * via the `definition` "pdf-only".
  */
 export interface PdfOnly {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -974,7 +1087,7 @@ export interface PdfOnly {
  * via the `definition` "restricted-mime-types".
  */
 export interface RestrictedMimeType {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -992,7 +1105,7 @@ export interface RestrictedMimeType {
  * via the `definition` "animated-type-media".
  */
 export interface AnimatedTypeMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1044,7 +1157,7 @@ export interface AnimatedTypeMedia {
  * via the `definition` "enlarge".
  */
 export interface Enlarge {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1112,7 +1225,7 @@ export interface Enlarge {
  * via the `definition` "without-enlarge".
  */
 export interface WithoutEnlarge {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1130,7 +1243,7 @@ export interface WithoutEnlarge {
  * via the `definition` "reduce".
  */
 export interface Reduce {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1182,7 +1295,7 @@ export interface Reduce {
  * via the `definition` "media-trim".
  */
 export interface MediaTrim {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1226,7 +1339,7 @@ export interface MediaTrim {
  * via the `definition` "custom-file-name-media".
  */
 export interface CustomFileNameMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1254,7 +1367,7 @@ export interface CustomFileNameMedia {
  * via the `definition` "unstored-media".
  */
 export interface UnstoredMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1272,7 +1385,7 @@ export interface UnstoredMedia {
  * via the `definition` "externally-served-media".
  */
 export interface ExternallyServedMedia {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1290,26 +1403,12 @@ export interface ExternallyServedMedia {
  * via the `definition` "uploads-1".
  */
 export interface Uploads1 {
-  id: number;
-  hasManyUpload?: (number | Uploads2)[] | null;
-  singleUpload?: (number | null) | Uploads2;
-  hasManyThumbnailUpload?: (number | AdminThumbnailSize)[] | null;
-  singleThumbnailUpload?: (number | null) | AdminThumbnailSize;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  id: string;
+  hasManyUpload?: (string | Uploads2)[] | null;
+  singleUpload?: (string | null) | Uploads2;
+  hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
+  singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
+  richText?: LexicalRichText<LexicalNodes_7A11A510> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1327,7 +1426,7 @@ export interface Uploads1 {
  * via the `definition` "uploads-2".
  */
 export interface Uploads2 {
-  id: number;
+  id: string;
   prefix: string;
   title?: string | null;
   updatedAt: string;
@@ -1347,7 +1446,7 @@ export interface Uploads2 {
  * via the `definition` "admin-thumbnail-size".
  */
 export interface AdminThumbnailSize {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1383,7 +1482,7 @@ export interface AdminThumbnailSize {
  * via the `definition` "any-images".
  */
 export interface AnyImage {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1401,7 +1500,7 @@ export interface AnyImage {
  * via the `definition` "admin-thumbnail-function".
  */
 export interface AdminThumbnailFunction {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1419,7 +1518,7 @@ export interface AdminThumbnailFunction {
  * via the `definition` "admin-thumbnail-with-search-queries".
  */
 export interface AdminThumbnailWithSearchQuery {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1437,7 +1536,7 @@ export interface AdminThumbnailWithSearchQuery {
  * via the `definition` "admin-upload-control".
  */
 export interface AdminUploadControl {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1455,7 +1554,7 @@ export interface AdminUploadControl {
  * via the `definition` "no-files-required".
  */
 export interface NoFilesRequired {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1474,9 +1573,9 @@ export interface NoFilesRequired {
  * via the `definition` "relation-to-no-files-required".
  */
 export interface RelationToNoFilesRequired {
-  id: number;
+  id: string;
   title?: string | null;
-  uploadField?: (number | null) | NoFilesRequired;
+  uploadField?: (string | null) | NoFilesRequired;
   updatedAt: string;
   createdAt: string;
 }
@@ -1485,7 +1584,7 @@ export interface RelationToNoFilesRequired {
  * via the `definition` "optional-file".
  */
 export interface OptionalFile {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1503,7 +1602,7 @@ export interface OptionalFile {
  * via the `definition` "required-file".
  */
 export interface RequiredFile {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1521,7 +1620,7 @@ export interface RequiredFile {
  * via the `definition` "custom-upload-field".
  */
 export interface CustomUploadField {
-  id: number;
+  id: string;
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1540,7 +1639,7 @@ export interface CustomUploadField {
  * via the `definition` "media-with-relation-preview".
  */
 export interface MediaWithRelationPreview {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1559,7 +1658,7 @@ export interface MediaWithRelationPreview {
  * via the `definition` "media-without-cache-tags".
  */
 export interface MediaWithoutCacheTag {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1578,7 +1677,7 @@ export interface MediaWithoutCacheTag {
  * via the `definition` "media-without-relation-preview".
  */
 export interface MediaWithoutRelationPreview {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1597,13 +1696,13 @@ export interface MediaWithoutRelationPreview {
  * via the `definition` "relation-preview".
  */
 export interface RelationPreview {
-  id: number;
-  imageWithPreview1?: (number | null) | MediaWithRelationPreview;
-  imageWithPreview2?: (number | null) | MediaWithRelationPreview;
-  imageWithoutPreview1?: (number | null) | MediaWithRelationPreview;
-  imageWithoutPreview2?: (number | null) | MediaWithoutRelationPreview;
-  imageWithPreview3?: (number | null) | MediaWithoutRelationPreview;
-  imageWithoutPreview3?: (number | null) | MediaWithoutRelationPreview;
+  id: string;
+  imageWithPreview1?: (string | null) | MediaWithRelationPreview;
+  imageWithPreview2?: (string | null) | MediaWithRelationPreview;
+  imageWithoutPreview1?: (string | null) | MediaWithRelationPreview;
+  imageWithoutPreview2?: (string | null) | MediaWithoutRelationPreview;
+  imageWithPreview3?: (string | null) | MediaWithoutRelationPreview;
+  imageWithoutPreview3?: (string | null) | MediaWithoutRelationPreview;
   updatedAt: string;
   createdAt: string;
 }
@@ -1612,11 +1711,11 @@ export interface RelationPreview {
  * via the `definition` "best-fit".
  */
 export interface BestFit {
-  id: number;
-  withAdminThumbnail?: (number | null) | AdminThumbnailFunction;
-  withinRange?: (number | null) | Enlarge;
-  nextSmallestOutOfRange?: (number | null) | FocalOnly;
-  original?: (number | null) | FocalOnly;
+  id: string;
+  withAdminThumbnail?: (string | null) | AdminThumbnailFunction;
+  withinRange?: (string | null) | Enlarge;
+  nextSmallestOutOfRange?: (string | null) | FocalOnly;
+  original?: (string | null) | FocalOnly;
   updatedAt: string;
   createdAt: string;
 }
@@ -1625,10 +1724,10 @@ export interface BestFit {
  * via the `definition` "list-view-preview".
  */
 export interface ListViewPreview {
-  id: number;
+  id: string;
   title?: string | null;
-  imageUpload?: (number | null) | MediaWithRelationPreview;
-  imageRelationship?: (number | null) | MediaWithRelationPreview;
+  imageUpload?: (string | null) | MediaWithRelationPreview;
+  imageRelationship?: (string | null) | MediaWithRelationPreview;
   updatedAt: string;
   createdAt: string;
 }
@@ -1637,7 +1736,7 @@ export interface ListViewPreview {
  * via the `definition` "three-dimensional".
  */
 export interface ThreeDimensional {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1653,7 +1752,7 @@ export interface ThreeDimensional {
  * via the `definition` "constructor-options".
  */
 export interface ConstructorOption {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1671,11 +1770,11 @@ export interface ConstructorOption {
  * via the `definition` "bulk-uploads".
  */
 export interface BulkUpload {
-  id: number;
+  id: string;
   title: string;
   relationship?: {
     relationTo: 'simple-relationship';
-    value: number | SimpleRelationship;
+    value: string | SimpleRelationship;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -1694,17 +1793,37 @@ export interface BulkUpload {
  * via the `definition` "simple-relationship".
  */
 export interface SimpleRelationship {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-uploads-hook-error".
+ */
+export interface BulkUploadsHookError {
+  id: string;
+  title?: string | null;
+  shouldFail?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "file-mime-type".
  */
 export interface FileMimeType {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1723,7 +1842,7 @@ export interface FileMimeType {
  * via the `definition` "svg-only".
  */
 export interface SvgOnly {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1741,7 +1860,7 @@ export interface SvgOnly {
  * via the `definition` "media-without-delete-access".
  */
 export interface MediaWithoutDeleteAccess {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1759,7 +1878,7 @@ export interface MediaWithoutDeleteAccess {
  * via the `definition` "media-with-image-size-admin-props".
  */
 export interface MediaWithImageSizeAdminProp {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1808,27 +1927,29 @@ export interface MediaWithImageSizeAdminProp {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
+ * via the `definition` "prefix-media".
  */
-export interface PayloadKv {
-  id: number;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+export interface PrefixMedia {
+  id: string;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1846,259 +1967,337 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
+}
+/**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
+  /**
+   * Access for this API key — uncheck to revoke individual tools.
+   */
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'relation';
-        value: number | Relation;
+        value: string | Relation;
       } | null)
     | ({
         relationTo: 'audio';
-        value: number | Audio;
+        value: string | Audio;
       } | null)
     | ({
         relationTo: 'gif-resize';
-        value: number | GifResize;
+        value: string | GifResize;
       } | null)
     | ({
         relationTo: 'filename-compound-index';
-        value: number | FilenameCompoundIndex;
+        value: string | FilenameCompoundIndex;
       } | null)
     | ({
         relationTo: 'no-image-sizes';
-        value: number | NoImageSize;
+        value: string | NoImageSize;
       } | null)
     | ({
         relationTo: 'object-fit';
-        value: number | ObjectFit;
+        value: string | ObjectFit;
       } | null)
     | ({
         relationTo: 'with-meta-data';
-        value: number | WithMetaDatum;
+        value: string | WithMetaDatum;
       } | null)
     | ({
         relationTo: 'without-meta-data';
-        value: number | WithoutMetaDatum;
+        value: string | WithoutMetaDatum;
       } | null)
     | ({
         relationTo: 'with-only-jpeg-meta-data';
-        value: number | WithOnlyJpegMetaDatum;
+        value: string | WithOnlyJpegMetaDatum;
       } | null)
     | ({
         relationTo: 'crop-only';
-        value: number | CropOnly;
+        value: string | CropOnly;
       } | null)
     | ({
         relationTo: 'focal-only';
-        value: number | FocalOnly;
+        value: string | FocalOnly;
       } | null)
     | ({
         relationTo: 'image-sizes-only';
-        value: number | ImageSizesOnly;
+        value: string | ImageSizesOnly;
       } | null)
     | ({
         relationTo: 'focal-no-sizes';
-        value: number | FocalNoSize;
+        value: string | FocalNoSize;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'allow-list-media';
-        value: number | AllowListMedia;
+        value: string | AllowListMedia;
       } | null)
     | ({
         relationTo: 'skip-safe-fetch-media';
-        value: number | SkipSafeFetchMedia;
+        value: string | SkipSafeFetchMedia;
       } | null)
     | ({
         relationTo: 'skip-safe-fetch-header-filter';
-        value: number | SkipSafeFetchHeaderFilter;
+        value: string | SkipSafeFetchHeaderFilter;
       } | null)
     | ({
         relationTo: 'skip-allow-list-safe-fetch-media';
-        value: number | SkipAllowListSafeFetchMedia;
+        value: string | SkipAllowListSafeFetchMedia;
       } | null)
     | ({
         relationTo: 'restrict-file-types';
-        value: number | RestrictFileType;
+        value: string | RestrictFileType;
       } | null)
     | ({
         relationTo: 'no-restrict-file-types';
-        value: number | NoRestrictFileType;
+        value: string | NoRestrictFileType;
       } | null)
     | ({
         relationTo: 'no-restrict-file-mime-types';
-        value: number | NoRestrictFileMimeType;
+        value: string | NoRestrictFileMimeType;
       } | null)
     | ({
         relationTo: 'pdf-only';
-        value: number | PdfOnly;
+        value: string | PdfOnly;
       } | null)
     | ({
         relationTo: 'restricted-mime-types';
-        value: number | RestrictedMimeType;
+        value: string | RestrictedMimeType;
       } | null)
     | ({
         relationTo: 'animated-type-media';
-        value: number | AnimatedTypeMedia;
+        value: string | AnimatedTypeMedia;
       } | null)
     | ({
         relationTo: 'enlarge';
-        value: number | Enlarge;
+        value: string | Enlarge;
       } | null)
     | ({
         relationTo: 'without-enlarge';
-        value: number | WithoutEnlarge;
+        value: string | WithoutEnlarge;
       } | null)
     | ({
         relationTo: 'reduce';
-        value: number | Reduce;
+        value: string | Reduce;
       } | null)
     | ({
         relationTo: 'media-trim';
-        value: number | MediaTrim;
+        value: string | MediaTrim;
       } | null)
     | ({
         relationTo: 'custom-file-name-media';
-        value: number | CustomFileNameMedia;
+        value: string | CustomFileNameMedia;
       } | null)
     | ({
         relationTo: 'unstored-media';
-        value: number | UnstoredMedia;
+        value: string | UnstoredMedia;
       } | null)
     | ({
         relationTo: 'externally-served-media';
-        value: number | ExternallyServedMedia;
+        value: string | ExternallyServedMedia;
       } | null)
     | ({
         relationTo: 'uploads-1';
-        value: number | Uploads1;
+        value: string | Uploads1;
       } | null)
     | ({
         relationTo: 'uploads-2';
-        value: number | Uploads2;
+        value: string | Uploads2;
       } | null)
     | ({
         relationTo: 'any-images';
-        value: number | AnyImage;
+        value: string | AnyImage;
       } | null)
     | ({
         relationTo: 'admin-thumbnail-function';
-        value: number | AdminThumbnailFunction;
+        value: string | AdminThumbnailFunction;
       } | null)
     | ({
         relationTo: 'admin-thumbnail-with-search-queries';
-        value: number | AdminThumbnailWithSearchQuery;
+        value: string | AdminThumbnailWithSearchQuery;
       } | null)
     | ({
         relationTo: 'admin-thumbnail-size';
-        value: number | AdminThumbnailSize;
+        value: string | AdminThumbnailSize;
       } | null)
     | ({
         relationTo: 'admin-upload-control';
-        value: number | AdminUploadControl;
+        value: string | AdminUploadControl;
       } | null)
     | ({
         relationTo: 'no-files-required';
-        value: number | NoFilesRequired;
+        value: string | NoFilesRequired;
       } | null)
     | ({
         relationTo: 'relation-to-no-files-required';
-        value: number | RelationToNoFilesRequired;
+        value: string | RelationToNoFilesRequired;
       } | null)
     | ({
         relationTo: 'optional-file';
-        value: number | OptionalFile;
+        value: string | OptionalFile;
       } | null)
     | ({
         relationTo: 'required-file';
-        value: number | RequiredFile;
+        value: string | RequiredFile;
       } | null)
     | ({
         relationTo: 'versions';
-        value: number | Version;
+        value: string | Version;
       } | null)
     | ({
         relationTo: 'custom-upload-field';
-        value: number | CustomUploadField;
+        value: string | CustomUploadField;
       } | null)
     | ({
         relationTo: 'media-with-relation-preview';
-        value: number | MediaWithRelationPreview;
+        value: string | MediaWithRelationPreview;
       } | null)
     | ({
         relationTo: 'media-without-cache-tags';
-        value: number | MediaWithoutCacheTag;
+        value: string | MediaWithoutCacheTag;
       } | null)
     | ({
         relationTo: 'media-without-relation-preview';
-        value: number | MediaWithoutRelationPreview;
+        value: string | MediaWithoutRelationPreview;
       } | null)
     | ({
         relationTo: 'relation-preview';
-        value: number | RelationPreview;
+        value: string | RelationPreview;
       } | null)
     | ({
         relationTo: 'hide-file-input-on-create';
-        value: number | HideFileInputOnCreate;
+        value: string | HideFileInputOnCreate;
       } | null)
     | ({
         relationTo: 'best-fit';
-        value: number | BestFit;
+        value: string | BestFit;
       } | null)
     | ({
         relationTo: 'list-view-preview';
-        value: number | ListViewPreview;
+        value: string | ListViewPreview;
       } | null)
     | ({
         relationTo: 'three-dimensional';
-        value: number | ThreeDimensional;
+        value: string | ThreeDimensional;
       } | null)
     | ({
         relationTo: 'constructor-options';
-        value: number | ConstructorOption;
+        value: string | ConstructorOption;
       } | null)
     | ({
         relationTo: 'bulk-uploads';
-        value: number | BulkUpload;
+        value: string | BulkUpload;
+      } | null)
+    | ({
+        relationTo: 'bulk-uploads-hook-error';
+        value: string | BulkUploadsHookError;
       } | null)
     | ({
         relationTo: 'simple-relationship';
-        value: number | SimpleRelationship;
+        value: string | SimpleRelationship;
       } | null)
     | ({
         relationTo: 'file-mime-type';
-        value: number | FileMimeType;
+        value: string | FileMimeType;
       } | null)
     | ({
         relationTo: 'svg-only';
-        value: number | SvgOnly;
+        value: string | SvgOnly;
       } | null)
     | ({
         relationTo: 'media-without-delete-access';
-        value: number | MediaWithoutDeleteAccess;
+        value: string | MediaWithoutDeleteAccess;
       } | null)
     | ({
         relationTo: 'media-with-image-size-admin-props';
-        value: number | MediaWithImageSizeAdminProp;
+        value: string | MediaWithImageSizeAdminProp;
+      } | null)
+    | ({
+        relationTo: 'prefix-media';
+        value: string | PrefixMedia;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -2107,11 +2306,16 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  id: string;
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -2130,7 +2334,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -2144,6 +2348,7 @@ export interface RelationSelect<T extends boolean = true> {
   image?: T;
   versionedImage?: T;
   hideFileInputOnCreate?: T;
+  hasManyImage?: T;
   blocks?:
     | T
     | {
@@ -3666,6 +3871,25 @@ export interface BulkUploadsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-uploads-hook-error_select".
+ */
+export interface BulkUploadsHookErrorSelect<T extends boolean = true> {
+  title?: T;
+  shouldFail?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "simple-relationship_select".
  */
 export interface SimpleRelationshipSelect<T extends boolean = true> {
@@ -3788,11 +4012,21 @@ export interface MediaWithImageSizeAdminPropsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
+ * via the `definition` "prefix-media_select".
  */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
+export interface PrefixMediaSelect<T extends boolean = true> {
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3815,6 +4049,30 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  overrideAccess?: T;
+  access?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3850,14 +4108,204 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_1AB4670B".
+ */
+export interface LexicalUploadFields_1AB4670B {
+  alt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ */
+export interface LexicalLinkFields_0A7E9EC0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
 }
 
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

@@ -4,9 +4,9 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -78,7 +78,9 @@ describe('@payloadcms/storage-s3', () => {
       prefix,
       payload,
     })
-    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+    expect(upload.url).toEqual(
+      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
+    )
   })
 
   it('has prefix field with alwaysInsertFields even when plugin is disabled', async () => {
@@ -133,6 +135,36 @@ describe('@payloadcms/storage-s3', () => {
     expect(response.status).toBe(404)
   })
 
+  it('should return 304 with empty body when the ETag matches', async () => {
+    await payload.create({
+      collection: mediaWithSignedDownloadsSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../uploads/temp.png'),
+    })
+
+    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/temp.png`, {
+      headers: { 'X-Disable-Signed-URL': 'true', 'If-None-Match': 'invalid-etag-1234' },
+    })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('Content-Type')).toBe('image/png')
+
+    const etag = response.headers.get('ETag')
+    expect(etag).toBeDefined()
+
+    const responseNotModified = await restClient.GET(
+      `/${mediaWithSignedDownloadsSlug}/file/temp.png`,
+      {
+        headers: {
+          'X-Disable-Signed-URL': 'true',
+          'If-None-Match': etag!,
+        },
+      },
+    )
+    expect(responseNotModified.status).toBe(304)
+    const body = await responseNotModified.text()
+    expect(body).toBe('')
+  })
+
   describe('disablePayloadAccessControl', () => {
     it('should return direct S3 URL with encoded filename when uploading file with spaces', async () => {
       const upload = await payload.create({
@@ -154,6 +186,55 @@ describe('@payloadcms/storage-s3', () => {
       const response = await fetch(upload.url)
       expect(response.status).toBe(200)
       expect(response.headers.get('Content-Type')).toBe('image/png')
+
+      // CRITICAL: Verify that the database stores the full S3 URL, not a relative path
+      // This is important because disablePayloadAccessControl means files should be accessed directly from S3
+      const dbDoc = await payload.db.findOne({
+        collection: mediaWithDirectAccessSlug,
+        where: {
+          id: {
+            equals: upload.id,
+          },
+        },
+      })
+
+      expect(dbDoc).toBeDefined()
+      expect(dbDoc.url).toBeDefined()
+      // URL in database should be the full S3 URL, not a relative path
+      expect(dbDoc.url).toContain(process.env.S3_ENDPOINT)
+      expect(dbDoc.url).toContain(getTestBucketName())
+      expect(dbDoc.url).not.toMatch(/^\/api\//)
+    })
+
+    it('should store full S3 URLs in database for image sizes when disablePayloadAccessControl is true', async () => {
+      const upload = await payload.create({
+        collection: mediaWithDirectAccessSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      expect(upload.id).toBeTruthy()
+
+      // Verify image sizes URLs are returned correctly
+      expect(upload.sizes?.thumbnail?.url).toContain(process.env.S3_ENDPOINT)
+      expect(upload.sizes?.thumbnail?.url).toContain(getTestBucketName())
+
+      // CRITICAL: Verify that image size URLs are also stored as full S3 URLs in the database
+      const dbDoc = await payload.db.findOne({
+        collection: mediaWithDirectAccessSlug,
+        where: {
+          id: {
+            equals: upload.id,
+          },
+        },
+      })
+
+      expect(dbDoc).toBeDefined()
+      expect(dbDoc.sizes.thumbnail.url).toContain(process.env.S3_ENDPOINT)
+      expect(dbDoc.sizes.thumbnail.url).toContain(getTestBucketName())
+      expect(dbDoc.sizes.thumbnail.url).not.toMatch(/^\/api\//)
+
+      await payload.delete({ collection: mediaWithDirectAccessSlug, id: upload.id })
     })
 
     it('should return direct S3 URL without encoding issues for normal filenames', async () => {
@@ -173,6 +254,25 @@ describe('@payloadcms/storage-s3', () => {
       // Verify the file can be fetched
       const response = await fetch(upload.url)
       expect(response.status).toBe(200)
+    })
+  })
+
+  describe('storage config', () => {
+    it('should default storage to an empty array when the key is omitted', () => {
+      // sanitize.ts sets storage = [] when the key is absent from the raw config
+      // (packages/payload/src/config/sanitize.ts). Verified here because the sanitized
+      // config must always expose a defined array regardless of what the user configured.
+      expect(payload.config.storage).toBeDefined()
+      expect(Array.isArray(payload.config.storage)).toBe(true)
+    })
+
+    it('should expose adapter name and collections on each storage adapter', () => {
+      const s3Adapter = payload.config.storage.find((a) => a.name === 's3')
+
+      expect(s3Adapter).toBeDefined()
+      expect(s3Adapter!.name).toBe('s3')
+      expect(Array.isArray(s3Adapter!.collections)).toBe(true)
+      expect(s3Adapter!.collections).toContain(mediaSlug)
     })
   })
 

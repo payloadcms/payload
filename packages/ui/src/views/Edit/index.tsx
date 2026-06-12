@@ -2,7 +2,6 @@
 
 import type { ClientUser, DocumentViewClientProps } from 'payload'
 
-import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -16,6 +15,7 @@ import { DocumentDrawerHeader } from '../../elements/DocumentDrawer/DrawerHeader
 import { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../elements/DocumentFields/index.js'
 import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
+import { DocumentStaleData } from '../../elements/DocumentStaleData/index.js'
 import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 import { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
@@ -29,6 +29,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
+import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
@@ -40,7 +41,7 @@ import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'collection-edit'
 const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
@@ -55,6 +56,7 @@ export type OnSaveContext = {
 // This is solely to support custom edit views which get server-rendered
 export function DefaultEditView({
   BeforeDocumentControls,
+  BeforeDocumentMeta,
   Description,
   EditMenuItems,
   LivePreview: CustomLivePreview,
@@ -63,6 +65,7 @@ export function DefaultEditView({
   SaveButton,
   SaveDraftButton,
   Status,
+  UnpublishButton,
   Upload: CustomUpload,
   UploadControls,
 }: DocumentViewClientProps) {
@@ -144,7 +147,7 @@ export function DefaultEditView({
   const {
     isLivePreviewEnabled,
     isLivePreviewing,
-    previewWindowType,
+    isPopupOpen,
     setURL: setLivePreviewURL,
     typeofLivePreviewURL,
     url: livePreviewURL,
@@ -177,8 +180,14 @@ export function DefaultEditView({
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
+  const [showStaleDataModal, setShowStaleDataModal] = useState(false)
 
   const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
+
+  const hasCheckedForStaleDataRef = useRef(false)
+  const originalUpdatedAtRef = useRef(data?.updatedAt)
+  const saveCounterRef = useRef(0)
+  const isSavingRef = useRef(false)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
   const isLockExpired = Date.now() > lockExpiryTime
@@ -238,6 +247,14 @@ export function DefaultEditView({
     [documentLockState, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
   )
 
+  const handleStaleDataReload = useCallback(() => {
+    // Reset modal state so it can appear again if needed
+    setShowStaleDataModal(false)
+
+    // Refresh to get the latest data
+    router.refresh()
+  }, [router])
+
   const handlePrevent = useCallback((nextHref: null | string) => {
     nextHrefRef.current = nextHref
   }, [])
@@ -295,7 +312,13 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      setLastUpdateTime(updatedAt)
+      setLastUpdateTime(new Date(updatedAt).getTime())
+
+      // Update stale data check refs after successful save
+      // This allows detecting if another user modifies the document after this save
+      originalUpdatedAtRef.current = updatedAt
+      hasCheckedForStaleDataRef.current = false
+      isSavingRef.current = false
 
       if (context?.incrementVersionCount !== false) {
         incrementVersionCount()
@@ -447,6 +470,18 @@ export function DefaultEditView({
     async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
+      // Capture save state before the async form-state request so we can detect
+      // if a save was triggered while this request was in-flight
+      const saveCounterAtStart = saveCounterRef.current
+      const isSavingAtStart = isSavingRef.current
+
+      // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
+      if (data?.updatedAt && data.updatedAt > originalUpdatedAtRef.current) {
+        originalUpdatedAtRef.current = data.updatedAt
+        // Reset check flag so we can detect new stale data
+        hasCheckedForStaleDataRef.current = false
+      }
+
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - editSessionStartTime
 
@@ -456,16 +491,31 @@ export function DefaultEditView({
         setEditSessionStartTime(currentTime)
       }
 
+      // Check for stale data on first edit only
+      // Skip this check entirely for autosave-enabled collections/globals to prevent
+      // false positives from the user's own autosaves
+      const checkForStaleData =
+        !hasCheckedForStaleDataRef.current &&
+        originalUpdatedAtRef.current &&
+        operation === 'update' &&
+        !autosaveEnabled
+
+      if (checkForStaleData) {
+        hasCheckedForStaleDataRef.current = true
+      }
+
       const docPreferences = await getDocPreferences()
 
       const result = await getFormState({
         id,
+        checkForStaleData,
         collectionSlug,
         docPermissions,
         docPreferences,
         formState: prevFormState,
         globalSlug,
         operation,
+        originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
         renderAllFields: false,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
@@ -478,10 +528,21 @@ export function DefaultEditView({
         return
       }
 
-      const { lockedState, state } = result
+      const { lockedState, staleDataState, state } = result
 
       if (isLockingEnabled) {
         handleDocumentLocking(lockedState)
+      }
+
+      // Handle stale data detection.
+      // Skip if a save was in-flight when this request started, or if the save counter
+      // has advanced — either way the newer updatedAt is from our OWN save.
+      if (
+        staleDataState?.isStale &&
+        !isSavingAtStart &&
+        saveCounterRef.current === saveCounterAtStart
+      ) {
+        setShowStaleDataModal(true)
       }
 
       abortOnChangeRef.current = null
@@ -489,6 +550,7 @@ export function DefaultEditView({
       return state
     },
     [
+      data?.updatedAt,
       editSessionStartTime,
       isLockingEnabled,
       getDocPreferences,
@@ -500,6 +562,7 @@ export function DefaultEditView({
       operation,
       schemaPathSegments,
       handleDocumentLocking,
+      autosaveEnabled,
     ],
   )
 
@@ -543,7 +606,62 @@ export function DefaultEditView({
     !documentLockState.current?.hasShownLockedModal &&
     !isLockExpired
 
-  const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
+  const isFolderCollection = Boolean(
+    collectionConfig?.hierarchy &&
+      typeof collectionConfig.hierarchy === 'object' &&
+      collectionConfig.hierarchy.allowHasMany === false,
+  )
+
+  const documentControlsProps: Omit<React.ComponentProps<typeof DocumentControls>, 'variant'> = {
+    id,
+    slug: collectionConfig?.slug || globalConfig?.slug,
+    apiURL,
+    BeforeDocumentControls,
+    BeforeDocumentMeta,
+    customComponents: {
+      PreviewButton,
+      PublishButton,
+      SaveButton,
+      SaveDraftButton,
+      Status,
+      UnpublishButton,
+    },
+    data,
+    disableActions: disableActions || isTrashed,
+    disableCreate,
+    EditMenuItems,
+    hasPublishPermission,
+    hasSavePermission,
+    isEditing,
+    isInDrawer,
+    isTrashed,
+    onDelete,
+    onDrawerCreateNew: clearDoc,
+    onDuplicate,
+    onRestore,
+    onSave,
+    onTakeOver: () => {
+      void handleTakeOver({
+        id,
+        clearRouteCache,
+        collectionSlug,
+        documentLockStateRef: documentLockState,
+        globalSlug,
+        isLockingEnabled,
+        isWithinDoc: true,
+        setCurrentEditor,
+        setIsReadOnlyForIncomingUser,
+        updateDocumentEditor,
+        user,
+      })
+    },
+    permissions: docPermissions,
+    readOnlyForIncomingUser: isReadOnlyForIncomingUser,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
+    redirectAfterRestore,
+    user: currentEditor,
+  }
 
   return (
     <main
@@ -552,7 +670,7 @@ export function DefaultEditView({
         (id || globalSlug) && `${baseClass}--is-editing`,
         globalSlug && `global-edit--${globalSlug}`,
         collectionSlug && `collection-edit--${collectionSlug}`,
-        isLivePreviewing && previewWindowType === 'iframe' && `${baseClass}--is-live-previewing`,
+        isLivePreviewing && `${baseClass}--is-live-previewing`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -570,13 +688,24 @@ export function DefaultEditView({
           key={`${isLocked}`}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
+          onSubmit={() => {
+            saveCounterRef.current += 1
+            isSavingRef.current = true
+          }}
           onSuccess={onSave}
         >
           {isInDrawer && (
             <DocumentDrawerHeader
+              actions={
+                <DocumentControls {...documentControlsProps} variant="drawerHeaderActions" />
+              }
               AfterHeader={Description}
+              BeforeDocumentMeta={BeforeDocumentMeta}
               drawerSlug={drawerSlug}
-              showDocumentID={!isFolderCollection}
+              readOnlyForIncomingUser={isReadOnlyForIncomingUser}
+              renderTitleAsLink={!isFolderCollection}
+              Status={Status}
+              user={currentEditor}
             />
           )}
           {isLockingEnabled && shouldShowDocumentLockedModal && (
@@ -615,8 +744,15 @@ export function DefaultEditView({
               }}
             />
           )}
+          {showStaleDataModal && (
+            <DocumentStaleData isActive={showStaleDataModal} onReload={handleStaleDataReload} />
+          )}
           {preventLeaveWithoutSaving && (
-            <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
+            <LeaveWithoutSaving
+              modalSlug={drawerSlug ? `leave-without-saving-${drawerSlug}` : undefined}
+              onConfirm={handleLeaveConfirm}
+              onPrevent={handlePrevent}
+            />
           )}
           {!isInDrawer && (
             <SetDocumentStepNav
@@ -634,67 +770,14 @@ export function DefaultEditView({
             fallback={depth <= 1 ? id?.toString() : undefined}
             globalConfig={globalConfig}
           />
-          <DocumentControls
-            apiURL={apiURL}
-            BeforeDocumentControls={BeforeDocumentControls}
-            customComponents={{
-              PreviewButton,
-              PublishButton,
-              SaveButton,
-              SaveDraftButton,
-              Status,
-            }}
-            data={data}
-            disableActions={disableActions || isFolderCollection || isTrashed}
-            disableCreate={disableCreate}
-            EditMenuItems={EditMenuItems}
-            hasPublishPermission={hasPublishPermission}
-            hasSavePermission={hasSavePermission}
-            id={id}
-            isEditing={isEditing}
-            isInDrawer={isInDrawer}
-            isTrashed={isTrashed}
-            onDelete={onDelete}
-            onDrawerCreateNew={clearDoc}
-            onDuplicate={onDuplicate}
-            onRestore={onRestore}
-            onSave={onSave}
-            onTakeOver={() =>
-              handleTakeOver({
-                id,
-                clearRouteCache,
-                collectionSlug,
-                documentLockStateRef: documentLockState,
-                globalSlug,
-                isLockingEnabled,
-                isWithinDoc: true,
-                setCurrentEditor,
-                setIsReadOnlyForIncomingUser,
-                updateDocumentEditor,
-                user,
-              })
-            }
-            permissions={docPermissions}
-            readOnlyForIncomingUser={isReadOnlyForIncomingUser}
-            redirectAfterDelete={redirectAfterDelete}
-            redirectAfterDuplicate={redirectAfterDuplicate}
-            redirectAfterRestore={redirectAfterRestore}
-            slug={collectionConfig?.slug || globalConfig?.slug}
-            user={currentEditor}
-          />
+          {!isInDrawer && <DocumentControls {...documentControlsProps} variant="default" />}
           <div
-            className={[
-              `${baseClass}__main-wrapper`,
-              previewWindowType === 'popup' && `${baseClass}--detached`,
-            ]
+            className={[`${baseClass}__main-wrapper`, isPopupOpen && `${baseClass}--detached`]
               .filter(Boolean)
               .join(' ')}
           >
             <div
-              className={[
-                `${baseClass}__main`,
-                previewWindowType === 'popup' && `${baseClass}__main--popup-open`,
-              ]
+              className={[`${baseClass}__main`, isPopupOpen && `${baseClass}__main--popup-open`]
                 .filter(Boolean)
                 .join(' ')}
             >

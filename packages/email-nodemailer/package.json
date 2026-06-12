@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-nodemailer",
-  "version": "3.73.0",
+  "version": "4.0.0-beta.0",
   "description": "Payload Nodemailer Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -42,17 +42,17 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "nodemailer": "7.0.12"
+    "nodemailer": "^8.0.5"
   },
   "devDependencies": {
-    "@types/nodemailer": "7.0.2",
+    "@types/nodemailer": "^8.0.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=24.15.0"
   },
   "publishConfig": {
     "exports": {

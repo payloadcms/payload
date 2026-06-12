@@ -22,7 +22,7 @@ export const setNestedValue = (
   value: unknown,
 ): void => {
   const parts = path.split('.')
-  let current: any = obj
+  let current: unknown = obj
 
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i]
@@ -37,28 +37,32 @@ export const setNestedValue = (
         current = []
       }
 
+      const currentArray = current as unknown[]
+
       // Ensure the array slot is initialized
-      if (!current[index]) {
-        current[index] = {}
+      if (!currentArray[index]) {
+        currentArray[index] = {}
       }
 
       if (isLast) {
-        current[index] = value
+        currentArray[index] = value
       } else {
-        current = current[index] as Record<string, unknown>
+        current = currentArray[index]
       }
     } else {
+      const currentObj = current as Record<string, unknown>
+
       // Ensure the object key exists
       if (isLast) {
         if (typeof part === 'string') {
-          current[part] = value
+          currentObj[part] = value
         }
       } else {
-        if (typeof current[part as string] !== 'object' || current[part as string] === null) {
-          current[part as string] = {}
+        if (typeof currentObj[part as string] !== 'object' || currentObj[part as string] === null) {
+          currentObj[part as string] = {}
         }
 
-        current = current[part as string] as Record<string, unknown>
+        current = currentObj[part as string]
       }
     }
   }

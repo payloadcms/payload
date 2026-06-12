@@ -11,16 +11,19 @@ import type { User } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { Auth } from './collections/Auth/index.js'
 import { BlocksFieldAccess } from './collections/BlocksFieldAccess/index.js'
+import { DifferentiatedTrash } from './collections/DifferentiatedTrash/index.js'
 import { Disabled } from './collections/Disabled/index.js'
 import { Hooks } from './collections/hooks/index.js'
 import { ReadRestricted } from './collections/ReadRestricted/index.js'
 import { seedReadRestricted } from './collections/ReadRestricted/seed.js'
 import { Regression1 } from './collections/Regression-1/index.js'
 import { Regression2 } from './collections/Regression-2/index.js'
+import { RestrictedTrash } from './collections/RestrictedTrash/index.js'
 import { RichText } from './collections/RichText/index.js'
 import {
   blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
+  differentiatedTrashSlug,
   docLevelAccessSlug,
   firstArrayText,
   fullyRestrictedSlug,
@@ -33,7 +36,9 @@ import {
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
+  regularUserEmail,
   relyOnRequestHeadersSlug,
+  restrictedTrashSlug,
   restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   secondArrayText,
@@ -80,6 +85,14 @@ export const getConfig: () => Partial<Config> = () => ({
   admin: {
     autoLogin: false,
     user: 'users',
+    components: {
+      views: {
+        dashboard: {
+          Component: './CustomDashboard.js#default',
+          path: '/',
+        },
+      },
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -140,11 +153,13 @@ export const getConfig: () => Partial<Config> = () => ({
           options: ['admin', 'user'],
         },
       ],
+      versions: false,
     },
     {
       slug: publicUsersSlug,
       auth: true,
       fields: [],
+      versions: false,
     },
     {
       slug,
@@ -206,6 +221,7 @@ export const getConfig: () => Partial<Config> = () => ({
           label: 'Access',
         },
       ],
+      versions: false,
     },
     {
       slug: unrestrictedSlug,
@@ -241,6 +257,7 @@ export const getConfig: () => Partial<Config> = () => ({
           relationTo: createNotUpdateCollectionSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: 'relation-restricted',
@@ -258,6 +275,7 @@ export const getConfig: () => Partial<Config> = () => ({
           relationTo: slug,
         },
       ],
+      versions: false,
     },
     {
       slug: fullyRestrictedSlug,
@@ -273,6 +291,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: readOnlySlug,
@@ -288,6 +307,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: userRestrictedCollectionSlug,
@@ -310,6 +330,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: createNotUpdateCollectionSlug,
@@ -328,6 +349,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: restrictedVersionsSlug,
@@ -425,6 +447,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: relyOnRequestHeadersSlug,
@@ -440,6 +463,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: docLevelAccessSlug,
@@ -483,6 +507,7 @@ export const getConfig: () => Partial<Config> = () => ({
         plural: 'Doc Level Access',
         singular: 'Doc Level Access',
       },
+      versions: false,
     },
     {
       slug: hiddenFieldsSlug,
@@ -534,6 +559,7 @@ export const getConfig: () => Partial<Config> = () => ({
           defaultValue: 'default value',
         },
       ],
+      versions: false,
     },
     {
       slug: hiddenAccessSlug,
@@ -562,6 +588,7 @@ export const getConfig: () => Partial<Config> = () => ({
           hidden: true,
         },
       ],
+      versions: false,
     },
     {
       slug: hiddenAccessCountSlug,
@@ -590,6 +617,7 @@ export const getConfig: () => Partial<Config> = () => ({
           hidden: true,
         },
       ],
+      versions: false,
     },
     {
       slug: 'fields-and-top-access',
@@ -622,6 +650,8 @@ export const getConfig: () => Partial<Config> = () => ({
     Hooks,
     Auth,
     ReadRestricted,
+    DifferentiatedTrash,
+    RestrictedTrash,
     {
       slug: 'field-restricted-update-based-on-data',
       fields: [
@@ -643,6 +673,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'checkbox',
         },
       ],
+      versions: false,
     },
     // Collection for testing where query cache with SAME where queries
     {
@@ -681,6 +712,7 @@ export const getConfig: () => Partial<Config> = () => ({
           required: true,
         },
       ],
+      versions: false,
     },
 
     // Collection for testing where query cache with UNIQUE where queries
@@ -730,6 +762,7 @@ export const getConfig: () => Partial<Config> = () => ({
           required: true,
         },
       ],
+      versions: false,
     },
     // Collection for testing async parent permission inheritance
     {
@@ -786,6 +819,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
   ],
   globals: [
@@ -793,7 +827,7 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'settings',
       admin: {
         components: {
-          elements: {
+          edit: {
             SaveButton: '/TestButton.js#TestButton',
           },
         },
@@ -805,6 +839,7 @@ export const getConfig: () => Partial<Config> = () => ({
           label: 'Allow access to test global',
         },
       ],
+      versions: false,
     },
     {
       slug: 'test',
@@ -815,6 +850,7 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       },
       fields: [],
+      versions: false,
     },
     {
       slug: readOnlyGlobalSlug,
@@ -828,6 +864,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: userRestrictedGlobalSlug,
@@ -841,6 +878,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: readNotUpdateGlobalSlug,
@@ -854,6 +892,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
   ],
   onInit: async (payload) => {
@@ -870,6 +909,16 @@ export const getConfig: () => Partial<Config> = () => ({
       data: {
         email: nonAdminEmail,
         password: 'test',
+      },
+    })
+
+    // Regular user - can access admin panel but has limited delete permissions
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: regularUserEmail,
+        password: 'test',
+        roles: ['user'],
       },
     })
 
@@ -1029,6 +1078,23 @@ export const getConfig: () => Partial<Config> = () => ({
 
     // Seed read-restricted collection
     await seedReadRestricted(payload)
+
+    // Seed trash access control collections
+    await payload.create({
+      collection: differentiatedTrashSlug,
+      data: {
+        title: 'Differentiated Doc 1',
+        _status: 'published',
+      },
+    })
+
+    await payload.create({
+      collection: restrictedTrashSlug,
+      data: {
+        title: 'Restricted Doc 1',
+        _status: 'published',
+      },
+    })
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

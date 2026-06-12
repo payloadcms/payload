@@ -1,8 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { wait } from 'payload/shared'
@@ -10,25 +8,36 @@ import { fileURLToPath } from 'url'
 
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  switchTab,
+  waitForFormReady,
+} from '../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe } = test
+const { beforeAll, describe, beforeEach } = test
 
 let url: AdminUrlUtil
 let page: Page
 let id: string
+let serverURL: string
 
 describe('SEO Plugin', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    const { payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname })
+    const { payload, serverURL: serverURLFromInit } = await initPayloadE2ENoConfig<Config>({
+      dirname,
+    })
+    serverURL = serverURLFromInit
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
@@ -61,6 +70,10 @@ describe('SEO Plugin', () => {
     id = createdPage.id
   })
 
+  beforeEach(async () => {
+    await ensureCompilationIsDone({ page, serverURL })
+  })
+
   describe('Core functionality', () => {
     test('Config tab should be merged in correctly', async () => {
       await page.goto(url.edit(id))
@@ -71,12 +84,12 @@ describe('SEO Plugin', () => {
     })
 
     test('Should auto-generate meta title when button is clicked in tabs', async () => {
-      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
+      await page.goto(url.edit(id))
+      await waitForFormReady(page)
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
       const metaTitleClass = '#field-meta__title'
 
-      const secondTab = page.locator(contentTabsClass).nth(1)
-      await secondTab.click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
 
       const metaTitle = page.locator(metaTitleClass)
 
@@ -90,19 +103,28 @@ describe('SEO Plugin', () => {
     })
 
     // todo: Re-enable this test once required attributes are fixed
-    /* test('Title should be required as per custom override', async () => {
+    test.skip('Title should be required as per custom override', async () => {
       const metaTitleClass = '#field-title'
 
       const metaTitle = page.locator(metaTitleClass).nth(0)
 
       await expect(metaTitle).toHaveAttribute('required', '')
-    }) */
+    })
 
     test('Indicator should be orangered and characters counted', async () => {
+      await page.goto(url.edit(id))
+      await waitForFormReady(page)
+      const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
+
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
+
+      const autoGenButton = page.locator(autoGenerateButtonClass).nth(0)
+      await autoGenButton.click()
+
       const indicatorClass =
-        '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(3) > div'
+        '#field-meta > div > div.render-fields > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(3) > div'
       const indicatorLabelClass =
-        '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2)'
+        '#field-meta > div > div.render-fields > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(2)'
 
       const indicator = page.locator(indicatorClass)
       const indicatorLabel = page.locator(indicatorLabelClass)
@@ -113,14 +135,11 @@ describe('SEO Plugin', () => {
 
     test('Should generate a search result preview based on content', async () => {
       await page.goto(url.edit(id))
-      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
-      const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
+      await waitForFormReady(page)
       const metaDescriptionClass = '#field-meta__description'
-      const previewClass =
-        '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(5)'
+      const previewClass = '#field-meta > div > div.render-fields > div:nth-child(5)'
 
-      const secondTab = page.locator(contentTabsClass).nth(1)
-      await secondTab.click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
 
       const metaDescription = page.locator(metaDescriptionClass)
       await metaDescription.fill('My new amazing SEO description')
@@ -135,11 +154,11 @@ describe('SEO Plugin', () => {
   describe('i18n', () => {
     test('support for another language', async () => {
       await page.goto(url.edit(id))
-      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
+      await waitForFormReady(page)
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
+      const seoTabSelector = '.tabs-field__tab-button:has-text("SEO")'
 
-      const secondTab = page.locator(contentTabsClass).nth(1)
-      await secondTab.click()
+      await switchTab(page, seoTabSelector)
 
       const autoGenButton = page.locator(autoGenerateButtonClass).nth(0)
 
@@ -160,22 +179,19 @@ describe('SEO Plugin', () => {
 
       // Navigate back to the page
       await page.goto(url.edit(id))
-      await wait(600)
+      await waitForFormReady(page)
 
-      await secondTab.click()
-      await wait(600)
+      await switchTab(page, seoTabSelector)
 
       await expect(autoGenButton).toContainText('Auto-génerar')
     })
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme('SEO fields should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.edit(id))
-      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
 
-      const secondTab = page.locator(contentTabsClass).nth(1)
-      await secondTab.click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
 
       const scanResults = await runAxeScan({
         exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
@@ -189,10 +205,8 @@ describe('SEO Plugin', () => {
 
     test.fixme('SEO fields inputs have focus indicators', async ({}, testInfo) => {
       await page.goto(url.edit(id))
-      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
 
-      const secondTab = page.locator(contentTabsClass).nth(1)
-      await secondTab.click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
 
       const scanResults = await checkFocusIndicators({
         page,

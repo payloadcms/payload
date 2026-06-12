@@ -50,7 +50,7 @@ export const seed = async ({
 
   const mediaDir = path.resolve(dirname, '../../public/media')
   if (fs.existsSync(mediaDir)) {
-    fs.rmdirSync(mediaDir, { recursive: true })
+    fs.rmSync(mediaDir, { recursive: true })
   }
 
   payload.logger.info(`— Clearing collections and globals...`)

@@ -51,7 +51,7 @@ export const defaults: Partial<CollectionConfig> = {
   indexes: [],
   timestamps: true,
   upload: false,
-  versions: false,
+  versions: true,
 }
 
 export const addDefaultsToCollectionConfig = (collection: CollectionConfig): CollectionConfig => {
@@ -82,7 +82,7 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
   collection.custom = collection.custom ?? {}
   collection.endpoints = collection.endpoints ?? []
   collection.fields = collection.fields ?? []
-  collection.folders = collection.folders ?? false
+  collection.hierarchy = collection.hierarchy ?? false
 
   collection.hooks = {
     afterChange: [],
@@ -107,7 +107,7 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
 
   collection.timestamps = collection.timestamps ?? true
   collection.upload = collection.upload ?? false
-  collection.versions = collection.versions ?? false
+  collection.versions = collection.versions ?? true
 
   collection.indexes = collection.indexes ?? []
 

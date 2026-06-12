@@ -37,7 +37,7 @@
     "@swc-node/register": "1.11.1",
     "@tools/constants": "workspace:*",
     "chalk": "^4.1.2",
-    "changelogen": "^0.5.5",
+    "changelogen": "^0.6.2",
     "execa": "5.1.1",
     "minimist": "1.2.8",
     "open": "^10.1.0",

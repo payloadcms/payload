@@ -1,7 +1,6 @@
 'use client'
 import type { Where } from 'payload'
 
-import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -9,6 +8,7 @@ import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useAuth } from '../Auth/index.js'
 import { useListQuery } from '../ListQuery/index.js'
 import { useLocale } from '../Locale/index.js'
+import { useSearchParams } from '../RouterAdapter/index.js'
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',
@@ -105,11 +105,24 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       ) {
         setSelectAll(SelectAllStatus.None)
       } else {
+        const shouldSelect = selectAll !== SelectAllStatus.Some
+
         docs.forEach(({ id, _isLocked, _userEditing }) => {
           if (!_isLocked || _userEditing?.id === user?.id) {
-            rows.set(id, selectAll !== SelectAllStatus.Some)
+            rows.set(id, shouldSelect)
           }
         })
+
+        // Set selectAll synchronously to avoid race conditions with useEffect
+        if (shouldSelect && rows.size > 0) {
+          if (rows.size === docs.length) {
+            setSelectAll(SelectAllStatus.AllInPage)
+          } else {
+            setSelectAll(SelectAllStatus.Some)
+          }
+        } else {
+          setSelectAll(SelectAllStatus.None)
+        }
       }
 
       setSelected(rows)

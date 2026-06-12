@@ -1,3 +1,4 @@
+import { createRequire } from 'module'
 import path from 'path'
 import fs from 'fs'
 import { defineConfig } from 'vitest/config'
@@ -6,6 +7,13 @@ import { defineConfig } from 'vitest/config'
 const ROOT_DIR = process.cwd()
 const figmaPath = path.resolve(ROOT_DIR, '../enterprise-plugins/packages/figma/src/index.ts')
 const hasFigma = fs.existsSync(figmaPath)
+
+// Resolve graphql to a single copy to avoid duplicate-instance issues (instanceof checks fail).
+// pnpm's isolated linker means graphql isn't hoisted to root node_modules, so we resolve
+// the actual path from packages/graphql where it's a direct dependency.
+// https://github.com/vitest-dev/vitest/issues/4605
+const _require = createRequire(path.resolve(ROOT_DIR, 'packages/graphql/package.json'))
+const graphqlDir = path.dirname(_require.resolve('graphql/package.json'))
 
 console.log('[Dev Setup] Checking for local Figma plugin at:', figmaPath)
 if (hasFigma) {
@@ -22,6 +30,8 @@ export default defineConfig({
   },
   test: {
     watch: false, // too troublesome especially with the in memory DB setup
+    // Retry failed tests up to 2 times in CI to handle flaky tests (e.g. due to timing-sensitive int tests like job queues, installation failures due to temporary network issues)
+    retry: process.env.CI ? 2 : 0,
     server: {
       deps: {
         inline: [/@payloadcms\/figma/],
@@ -29,6 +39,15 @@ export default defineConfig({
     },
     projects: [
       {
+        // Vite 8 / oxc reads `jsx: preserve` from the workspace tsconfig (needed by Next.js)
+        // and refuses to transform JSX. Set jsx explicitly here so oxc transforms it.
+        // Project vite options are NOT inherited from the root config.
+        oxc: {
+          jsx: {
+            runtime: 'automatic',
+            importSource: 'react',
+          },
+        },
         test: {
           include: ['packages/**/*.spec.ts'],
           name: 'unit',
@@ -37,9 +56,19 @@ export default defineConfig({
       },
       {
         resolve: {
-          alias: {
-            graphql: 'node_modules/graphql/index.js', // https://github.com/vitest-dev/vitest/issues/4605
-            ...(hasFigma ? { '@payloadcms/figma': figmaPath } : {}),
+          alias: [
+            { find: /^graphql\/(.*)/, replacement: graphqlDir + '/$1' },
+            { find: /^graphql$/, replacement: path.join(graphqlDir, 'index.js') },
+            ...(hasFigma ? [{ find: '@payloadcms/figma', replacement: figmaPath }] : []),
+          ],
+        },
+        // Vite 8 / oxc reads `jsx: preserve` from the workspace tsconfig (needed by Next.js)
+        // and refuses to transform JSX. Set jsx explicitly here so oxc transforms it.
+        // Project vite options are NOT inherited from the root config.
+        oxc: {
+          jsx: {
+            runtime: 'automatic',
+            importSource: 'react',
           },
         },
         test: {
@@ -50,6 +79,26 @@ export default defineConfig({
           hookTimeout: 90000,
           testTimeout: 90000,
           setupFiles: ['./test/vitest.setup.ts'],
+          // Root-level `server.deps.inline` is not inherited by projects. Without
+          // this, @payloadcms/figma (used by PAYLOAD_DATABASE=content-api) is
+          // externalized, and its static `import ... from 'payload'` falls to
+          // Node's loader, which cannot read payload's .ts source exports.
+          server: {
+            deps: {
+              inline: [/@payloadcms\/figma/],
+            },
+          },
+        },
+      },
+      {
+        test: {
+          include: ['test/evals/**/*.spec.ts'],
+          name: 'eval',
+          environment: 'node',
+          fileParallelism: false,
+          globalSetup: ['test/evals/globalSetup.ts'],
+          // 10 minutes per test: LLM call (~60-120s) + tsc wait + scorer + buffer.
+          testTimeout: 600000,
         },
       },
     ],

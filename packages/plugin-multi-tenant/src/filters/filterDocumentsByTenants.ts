@@ -11,8 +11,9 @@ type Args<ConfigType = unknown> = {
   /**
    * If the document this filter is run belongs to a tenant, the tenant ID should be passed here.
    * If set, this will be used instead of the tenant cookie
+   * Can be an array when hasMany is true
    */
-  docTenantID?: number | string
+  docTenantID?: number | number[] | string | string[]
   filterFieldName: string
   req: PayloadRequest
   tenantsArrayFieldName?: string
@@ -41,7 +42,7 @@ export const filterDocumentsByTenants = <ConfigType = unknown>({
   if (selectedTenant) {
     return {
       [filterFieldName]: {
-        in: [selectedTenant],
+        in: Array.isArray(selectedTenant) ? selectedTenant : [selectedTenant],
       },
     }
   }

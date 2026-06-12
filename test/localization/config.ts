@@ -29,6 +29,7 @@ import {
   englishTitle,
   globalWithDraftsSlug,
   hungarianLocale,
+  localeRestrictedSlug,
   localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
@@ -92,6 +93,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'users',
+      versions: false,
     },
     {
       slug: localizedPostsSlug,
@@ -144,6 +146,7 @@ export default buildConfigWithDefaults({
           unique: true,
         },
       ],
+      versions: false,
     },
     NoLocalizedFieldsCollection,
     ArrayCollection,
@@ -158,6 +161,17 @@ export default buildConfigWithDefaults({
         {
           type: 'tabs',
           tabs: [
+            {
+              label: 'SEO',
+              fields: [
+                {
+                  name: 'seoTitle',
+                  type: 'text',
+                  localized: true,
+                  unique: true,
+                },
+              ],
+            },
             {
               label: 'Main Nav',
               fields: [
@@ -261,6 +275,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: withRequiredLocalizedFields,
+      versions: false,
     },
     {
       access: openAccess,
@@ -293,6 +308,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: withLocalizedRelSlug,
+      versions: false,
     },
     {
       fields: [
@@ -338,6 +354,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: relationshipLocalizedSlug,
+      versions: false,
     },
     {
       access: {
@@ -351,6 +368,22 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: cannotCreateDefaultLocale,
+      versions: false,
+    },
+    {
+      access: {
+        ...openAccess,
+        update: ({ req }) => req.locale === spanishLocale,
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+        },
+      ],
+      slug: localeRestrictedSlug,
+      versions: false,
     },
     NestedToArrayAndBlock,
     Group,
@@ -371,6 +404,7 @@ export default buildConfigWithDefaults({
           localized: true,
         },
       ],
+      versions: false,
     },
     {
       slug: blocksWithLocalizedSameName,
@@ -402,6 +436,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
     LocalizedWithinLocalized,
     ArrayWithFallbackCollection,
@@ -422,6 +457,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'global-array',
+      versions: false,
     },
     {
       fields: [
@@ -432,6 +468,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'global-text',
+      versions: false,
     },
     {
       fields: [

@@ -28,15 +28,16 @@ const traverseFields = ({
       }
       case 'group': {
         if (fieldAffectsData(field)) {
+          const groupData: Record<string, unknown> =
+            (data[field.name] as Record<string, unknown>) ?? {}
           let targetResult
           if (typeof field.saveToJWT === 'string') {
             targetResult = field.saveToJWT
-            result[field.saveToJWT] = data[field.name]
+            result[field.saveToJWT] = groupData
           } else if (field.saveToJWT) {
             targetResult = field.name
-            result[field.name] = data[field.name]
+            result[field.name] = groupData
           }
-          const groupData: Record<string, unknown> = data[field.name] as Record<string, unknown>
           const groupResult = (targetResult ? result[targetResult] : result) as Record<
             string,
             unknown
@@ -59,15 +60,16 @@ const traverseFields = ({
       }
       case 'tab': {
         if (tabHasName(field)) {
+          const tabData: Record<string, unknown> =
+            (data[field.name] as Record<string, unknown>) ?? {}
           let targetResult
           if (typeof field.saveToJWT === 'string') {
             targetResult = field.saveToJWT
-            result[field.saveToJWT] = data[field.name]
+            result[field.saveToJWT] = tabData
           } else if (field.saveToJWT) {
             targetResult = field.name
-            result[field.name] = data[field.name]
+            result[field.name] = tabData
           }
-          const tabData: Record<string, unknown> = data[field.name] as Record<string, unknown>
           const tabResult = (targetResult ? result[targetResult] : result) as Record<
             string,
             unknown

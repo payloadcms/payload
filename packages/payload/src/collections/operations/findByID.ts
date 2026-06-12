@@ -27,6 +27,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -72,6 +73,7 @@ export const findByIDOperation = async <
       args,
       collection: args.collection.config,
       operation: 'read',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -98,8 +100,12 @@ export const findByIDOperation = async <
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
-      forceSelect: collectionConfig.forceSelect,
-      select: incomingSelect,
+      select: resolveSelect({
+        config: collectionConfig.select,
+        operation: 'read',
+        req,
+        select: incomingSelect,
+      }),
     })
 
     // /////////////////////////////////////
@@ -180,9 +186,9 @@ export const findByIDOperation = async <
       throw new NotFound(t)
     }
 
-    const docFromDB = await req.payload.db.findOne(findOneArgs)
+    const docWithLocales = await req.payload.db.findOne(findOneArgs)
 
-    if (!docFromDB && !args.data) {
+    if (!docWithLocales && !args.data) {
       if (!disableErrors) {
         throw new NotFound(req.t)
       }
@@ -190,7 +196,15 @@ export const findByIDOperation = async <
     }
 
     let result: DataFromCollectionSlug<TSlug> =
-      (args.data as DataFromCollectionSlug<TSlug>) ?? docFromDB!
+      (args.data as DataFromCollectionSlug<TSlug>) ?? docWithLocales!
+
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
 
     // /////////////////////////////////////
     // Include Lock Status if required
@@ -274,6 +288,7 @@ export const findByIDOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             query: findOneArgs.where,
             req,
           })) || result
@@ -313,6 +328,7 @@ export const findByIDOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             query: findOneArgs.where,
             req,
           })) || result
@@ -327,6 +343,7 @@ export const findByIDOperation = async <
       args,
       collection: collectionConfig,
       operation: 'findByID',
+      overrideAccess,
       result,
     })
 

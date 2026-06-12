@@ -26,17 +26,70 @@ When it comes to design-related changes or additions, it's crucial for us to ens
 
 Our design review ensures that proposed changes fit seamlessly with other components, both existing and planned. This step is meant to prevent unintentional design inconsistencies and to save you from investing time in implementing features that might need significant design alterations later.
 
-### Before Starting
+## Before Starting
 
 To help us work on new features, you can create a new feature request post in [GitHub Discussion](https://github.com/payloadcms/payload/discussions) or discuss it in our [Discord](https://discord.com/invite/payload). New functionality often has large implications across the entire Payload repo, so it is best to discuss the architecture and approach before starting work on a pull request.
 
-### Installation & Requirements
+## Installation & Requirements
 
 Payload is structured as a Monorepo, encompassing not only the core Payload platform but also various plugins and packages. To install all required dependencies, you have to run `pnpm install` once in the root directory. **PNPM IS REQUIRED!** Yarn or npm will not work - you will have to use pnpm to develop in the core repository. In most systems, the easiest way to install pnpm is to run `npm add -g pnpm` in your terminal.
 
 If you're coming from a very outdated version of payload, it is recommended to perform a clean install, which nukes the node_modules folder and reinstalls all dependencies. You can easily do that using the `pnpm reinstall` command.
 
 It is also recommended to use the exact Node.js and pnpm version defined in the .tool-versions file. You can check your current node version by typing `node --version` in your terminal. The Payload team uses [mise](https://mise.jdx.dev) to manage Node.js versions.
+
+## AI Code Tool Compatibility
+
+This project includes configuration files for AI-assisted development.
+
+| Tool              | Context | Skills | Hooks | MCP |
+| ----------------- | ------- | ------ | ----- | --- |
+| Claude Code       | ✅      | ✅     | ✅    | ✅  |
+| Cursor            | ✅      | ✅     | ✅    | ✅  |
+| VS Code + Copilot | ⚠      | ✅     | ❌    | ✅  |
+
+We don't use `AGENTS.md` because Cursor loads both `CLAUDE.md` and `AGENTS.md`, which would result in duplicated context. Instead, the AGENTS.md just contains a link to the CLAUDE.md file.
+
+### Context
+
+Project purpose, architecture, and coding guidelines. Located in `CLAUDE.md`.
+
+Without this, the AI won't know project conventions and may generate code that doesn't match the codebase conventions.
+
+### Skills
+
+Task-specific guidance (e.g., how to generate translations). Located in `.claude/skills/<name>/SKILL.md`.
+
+Without this, you'll need to manually explain covered testing patterns and other workflows in each conversation.
+
+### Hooks
+
+Auto-format code on file write. Located in `.claude/hooks/`.
+
+Without this, files will show eslint errors after AI edits. While lint-staged will fix them on commit, you may not want to commit yet during large edits. The AI may also waste time manually fixing automatically fixable eslint errors instead of moving on to the next task.
+
+### MCP (Model Context Protocol)
+
+External tool servers that extend AI capabilities. Located in `.cursor/mcp.json`, `.mcp.json` (for Claude Code) and `.vscode/mcp.json` (for VS Code).
+
+This project includes:
+
+- **Playwright MCP** - Interactive browser automation (navigate, click, fill forms, screenshots)
+
+**Configuration flags explained:**
+
+| Flag                                    | Purpose                                                                                                                                 |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `--caps=vision,verify,tracing,devtools` | Enables vision (screenshots), verification, tracing, and devtools capabilities                                                          |
+| `--isolated`                            | Uses an isolated browser profile instead of system Chrome, avoiding enterprise policy restrictions that block DevTools remote debugging |
+| `--headless`                            | Runs browser without visible UI for faster automation                                                                                   |
+
+**Prerequisites:**
+
+- The dev server must be running (`pnpm dev`) before using the Playwright MCP
+- The AI will navigate to `localhost:3000` to interact with the app
+
+Without MCP, the AI cannot interactively browse and test the running application. It would be limited to writing test code without being able to verify the UI directly.
 
 ### Code
 
@@ -81,49 +134,60 @@ Set `PAYLOAD_DATABASE` in your `.env` file to choose the database adapter:
 - `postgres` - PostgreSQL with pgvector and PostGIS
 - `postgres-custom-schema` - PostgreSQL with custom schema
 - `postgres-uuid` - PostgreSQL with UUID primary keys
+- `postgres-uuidv7` - PostgreSQL with UUID V7 primary keys
 - `postgres-read-replica` - PostgreSQL with read replica
 - `sqlite` - SQLite
 - `sqlite-uuid` - SQLite with UUID primary keys
+- `sqlite-uuidv7` - SQLite with UUID V7 primary keys
 - `supabase` - Supabase (PostgreSQL)
 - `d1` - D1 (SQLite)
 
-Then use Docker to start your database.
+Then use Docker to start your databases and storage emulators.
 
-On MacOS, the easiest way to install Docker is to use brew. Simply run `pnpm install --cask docker`, open the docker desktop app, apply the recommended settings and you're good to go.
-
-### PostgreSQL
+On MacOS, the easiest way to install Docker is to use brew. Simply run `brew install --cask docker`, open the docker desktop app, apply the recommended settings and you're good to go.
 
 ```bash
-pnpm docker:postgres:start         # Start (persists data)
-pnpm docker:postgres:restart:clean # Start fresh (removes data)
-pnpm docker:postgres:stop          # Stop
+pnpm docker:start  # Clean + start all services (PostgreSQL, MongoDB, storage emulators) with fresh data
+pnpm docker:clean  # Stop and remove all services
+pnpm docker:test   # Test database connections
 ```
 
-URL: `postgres://payload:payload@127.0.0.1:5433/payload`
+Every `docker:start` automatically removes old data and starts fresh, so you always get a clean environment.
 
-### MongoDB (with vector search)
+All services are defined in a single `test/docker-compose.yml` using Docker Compose profiles (`postgres`, `mongodb`, `mongodb-atlas`, `storage`, `all`).
 
-```bash
-pnpm docker:mongodb:start          # Start (persists data)
-pnpm docker:mongodb:restart:clean  # Start fresh (removes data)
-pnpm docker:mongodb:stop           # Stop
-```
+**Connection URLs:**
 
-URL: `mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0`
+| Database            | URL                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| PostgreSQL          | `postgres://payload:payload@127.0.0.1:5433/payload`                                                       |
+| MongoDB             | `mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0` |
+| MongoDB Atlas Local | `mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local` (no auth)        |
 
-### MongoDB Atlas Local
+SQLite databases don't require Docker — they're stored as files in the project.
 
-```bash
-pnpm docker:mongodb-atlas:start         # Start (persists data)
-pnpm docker:mongodb-atlas:restart:clean # Start fresh (removes data)
-pnpm docker:mongodb-atlas:stop          # Stop
-```
+### Development with Devcontainers
 
-URL: `mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local` (no auth required)
+You can run the entire development environment inside a devcontainer.
 
-### SQLite
+**Prerequisites:**
 
-SQLite databases don't require Docker - they're stored as files in the project.
+- Docker or [OrbStack](https://orbstack.dev) (recommended on macOS for better performance)
+- One of:
+  - VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers), or
+  - The [`@devcontainers/cli`](https://github.com/devcontainers/cli)
+
+**Start the container — pick one:**
+
+- **VS Code:** Open the repo and click "Reopen in Container" when prompted (or run `Dev Containers: Reopen in Container` from the command palette).
+- **CLI (any editor):** From the repo root, run `devcontainer up`, then `devcontainer exec zsh` for a shell. To attach an editor, point it at the running container - e.g. JetBrains "Dev Containers" plugin, Cursor / VS Code "Attach to Running Container", or just use the terminal.
+
+**Then, inside the container:**
+
+1. Run `pnpm docker:start` if you're not using sqlite
+2. Run `pnpm dev <test suite name>`
+
+The default `PAYLOAD_DATABASE` inside the devcontainer is `sqlite`, so the `pnpm docker:start` step is only needed when you switch to mongodb/postgres.
 
 ### Testing with your own database
 
@@ -166,6 +230,12 @@ If you are committing to [templates](./templates) or [examples](./examples), use
 
 - `chore(templates): adds feature to template`
 - `chore(examples): fixes bug in example`
+
+### Allow edits from maintainers
+
+When opening a PR from a fork, please leave **"Allow edits and access to secrets by maintainers"** enabled on the pull request (it is on by default in the GitHub UI). This lets the Payload team push small fixes — rebases, lint/format cleanup, minor adjustments — directly to your branch so the PR can land without an extra round trip.
+
+If that permission is disabled and we need to push changes to move the PR forward, we may close your PR and re-open an equivalent branch directly in the Payload repository so the team can iterate on it.
 
 ## Previewing docs
 

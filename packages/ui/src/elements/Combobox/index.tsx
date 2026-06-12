@@ -4,7 +4,7 @@ import React, { useMemo, useRef, useState } from 'react'
 import type { PopupProps } from '../Popup/index.js'
 
 import { Popup, PopupList } from '../Popup/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'combobox'
 
@@ -22,6 +22,8 @@ export type ComboboxEntry = {
  * @experimental
  */
 export type ComboboxProps = {
+  /** Accessible label for the list of entries */
+  'aria-label'?: string
   entries: ComboboxEntry[]
   /** Minimum number of entries required to show search */
   minEntriesForSearch?: number
@@ -37,6 +39,7 @@ export type ComboboxProps = {
  */
 export const Combobox: React.FC<ComboboxProps> = (props) => {
   const {
+    'aria-label': ariaLabel,
     entries,
     minEntriesForSearch = 8,
     onSelect,
@@ -103,32 +106,35 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
             </div>
           )}
           <PopupList.ButtonGroup>
-            {filteredEntries.map((entry, index) => {
-              const handleClick = () => {
-                if (onSelect) {
-                  onSelect(entry)
+            <div aria-label={ariaLabel} role="menu">
+              {filteredEntries.map((entry, index) => {
+                const handleClick = () => {
+                  if (onSelect) {
+                    onSelect(entry)
+                  }
+                  close()
                 }
-                close()
-              }
 
-              return (
-                <div
-                  className={`${baseClass}__entry`}
-                  key={`${entry.name}-${index}`}
-                  onClick={handleClick}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      handleClick()
-                    }
-                  }}
-                  role="menuitem"
-                  tabIndex={0}
-                >
-                  {entry.Component}
-                </div>
-              )
-            })}
+                return (
+                  <div
+                    className={`${baseClass}__entry`}
+                    data-popup-prevent-close
+                    key={`${entry.name}-${index}`}
+                    onClick={handleClick}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleClick()
+                      }
+                    }}
+                    role="menuitem"
+                    tabIndex={0}
+                  >
+                    {entry.Component}
+                  </div>
+                )
+              })}
+            </div>
           </PopupList.ButtonGroup>
         </div>
       )}

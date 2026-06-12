@@ -278,7 +278,7 @@ export const promise = async <T>({
       executed: false,
       value: undefined,
     }
-    if (typeof siblingData[field.name!] === 'undefined') {
+    if (typeof siblingData[field.name!] === 'undefined' && !req.context?.isRestoringVersion) {
       fallbackResult.value = await getFallbackValue({ field, req, siblingDoc })
       fallbackResult.executed = true
     }
@@ -334,7 +334,7 @@ export const promise = async <T>({
       }
     }
 
-    if (typeof siblingData[field.name!] === 'undefined') {
+    if (typeof siblingData[field.name!] === 'undefined' && !req.context?.isRestoringVersion) {
       siblingData[field.name!] = !fallbackResult.executed
         ? await getFallbackValue({ field, req, siblingDoc })
         : fallbackResult.value
@@ -390,7 +390,7 @@ export const promise = async <T>({
 
           const block: Block | undefined =
             req.payload.blocks[blockTypeToMatch] ??
-            ((field.blockReferences ?? field.blocks).find(
+            (field.blocks.find(
               (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
             ) as Block | undefined)
 

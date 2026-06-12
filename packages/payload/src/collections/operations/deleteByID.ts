@@ -20,6 +20,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
@@ -55,6 +56,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       args,
       collection: args.collection.config,
       operation: 'delete',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -174,8 +176,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
-      forceSelect: collectionConfig.forceSelect,
-      select: incomingSelect,
+      select: resolveSelect({
+        config: collectionConfig.select,
+        operation: 'delete',
+        req,
+        select: incomingSelect,
+      }),
     })
 
     // /////////////////////////////////////
@@ -188,6 +194,14 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       select,
       where: { id: { equals: id } },
     })
+
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
 
     // /////////////////////////////////////
     // Delete Preferences
@@ -231,6 +245,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             req,
           })) || result
       }
@@ -261,6 +276,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       args,
       collection: collectionConfig,
       operation: 'deleteByID',
+      overrideAccess,
       result,
     })
 

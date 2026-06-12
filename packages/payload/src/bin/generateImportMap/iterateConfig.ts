@@ -58,18 +58,29 @@ export function iterateConfig({
   addToImportMap(config.admin?.components?.header)
   addToImportMap(config.admin?.components?.logout?.Button)
   addToImportMap(config.admin?.components?.settingsMenu)
+  addToImportMap(config.admin?.components?.userMenuSettingsItems)
   addToImportMap(config.admin?.components?.graphics?.Icon)
   addToImportMap(config.admin?.components?.graphics?.Logo)
 
   addToImportMap(config.admin?.components?.actions)
   addToImportMap(config.admin?.components?.afterDashboard)
   addToImportMap(config.admin?.components?.afterLogin)
+  addToImportMap(config.admin?.components?.afterNav)
   addToImportMap(config.admin?.components?.afterNavLinks)
   addToImportMap(config.admin?.components?.beforeDashboard)
   addToImportMap(config.admin?.components?.beforeLogin)
+  addToImportMap(config.admin?.components?.beforeNav)
   addToImportMap(config.admin?.components?.beforeNavLinks)
 
   addToImportMap(config.admin?.components?.providers)
+
+  // Sidebar tabs
+  if (config.admin?.components?.sidebar?.tabs?.length) {
+    for (const tab of config.admin.components.sidebar.tabs) {
+      addToImportMap(tab.components.Icon)
+      addToImportMap(tab.components.Content)
+    }
+  }
 
   if (config.admin?.components?.views) {
     if (Object.keys(config.admin?.components?.views)?.length) {
@@ -82,7 +93,17 @@ export function iterateConfig({
 
   if (config.admin?.dashboard?.widgets?.length) {
     for (const dashboardWidget of config.admin.dashboard.widgets) {
-      addToImportMap(dashboardWidget.ComponentPath)
+      addToImportMap(dashboardWidget.Component)
+      if (dashboardWidget.fields?.length) {
+        genImportMapIterateFields({
+          addToImportMap,
+          baseDir,
+          config,
+          fields: dashboardWidget.fields,
+          importMap,
+          imports,
+        })
+      }
     }
   }
 

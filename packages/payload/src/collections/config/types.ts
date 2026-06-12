@@ -2,7 +2,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { CustomStatus, CustomUpload, ViewTypes } from '../../admin/types.js'
+import type { CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -14,15 +14,16 @@ import type {
   AfterErrorHookArgs,
   AfterErrorResult,
   CustomComponent,
-  EditConfig,
   Endpoint,
   EntityDescription,
-  EntityDescriptionComponent,
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
   MetaConfig,
   PayloadComponent,
+  SharedAdminComponents,
+  SharedEditViewComponents,
+  SharedEntityViews,
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -33,11 +34,16 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
-import type { CollectionFoldersConfiguration } from '../../folders/types.js'
+import type {
+  HierarchyConfig,
+  HierarchyJoinFieldConfig,
+  SanitizedHierarchyConfig,
+} from '../../hierarchy/types.js'
 import type {
   CollectionAdminCustom,
   CollectionCustom,
   CollectionSlug,
+  GeneratedTypes,
   JsonObject,
   RequestContext,
   TypedAuthOperations,
@@ -52,6 +58,7 @@ import type {
   Sort,
   TransformCollectionWithSelect,
   Where,
+  WithSelectFn,
 } from '../../types/index.js'
 import type { SanitizedUploadConfig, UploadConfig } from '../../uploads/types.js'
 import type {
@@ -68,12 +75,47 @@ export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollecti
 
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
+/**
+ * Collection slugs that do not have drafts enabled.
+ * Detects collections without drafts by checking for the absence of the `_status` field.
+ */
+export type CollectionsWithoutDrafts = {
+  [TSlug in CollectionSlug]: DataFromCollectionSlug<TSlug> extends { _status?: any } ? never : TSlug
+}[CollectionSlug]
+
+/**
+ * Conditionally allows or forbids the `draft` property based on collection configuration.
+ * When `strictDraftTypes` is enabled, the `draft` property is forbidden on collections without drafts.
+ */
+export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = GeneratedTypes extends {
+  strictDraftTypes: true
+}
+  ? TSlug extends CollectionsWithoutDrafts
+    ? {
+        /**
+         * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
+         */
+        draft?: never
+      }
+    : {
+        /**
+         * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         */
+        draft?: boolean
+      }
+  : {
+      /**
+       * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft?: boolean
+    }
+
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
 
 export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
-  'createdAt' | 'deletedAt' | 'id' | 'updatedAt'
+  'collection' | 'createdAt' | 'deletedAt' | 'id' | 'updatedAt'
 >
 
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
@@ -85,9 +127,9 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
  * The id field is optional since it's auto-generated
  */
 export type DraftDataFromCollection<TData extends JsonObject> = Partial<
-  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+  Omit<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
 > &
-  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>>
+  Partial<Pick<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>>
 
 export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
   DataFromCollectionSlug<TSlug>
@@ -177,6 +219,10 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    * Hook operation being performed
    */
   operation: CreateOrUpdateOperation
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   previousDoc: T
   req: PayloadRequest
 }) => any
@@ -186,6 +232,10 @@ export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query: { [key: string]: any }
   req: PayloadRequest
 }) => any
@@ -196,6 +246,10 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   doc: T
   findMany?: boolean
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query?: { [key: string]: any }
   req: PayloadRequest
 }) => any
@@ -295,6 +349,40 @@ export type EnableFoldersOptions = {
   debug?: boolean
 }
 
+/**
+ * Configuration options for folder hierarchy preset.
+ * Subset of HierarchyConfig with folder-appropriate defaults applied.
+ */
+export type FoldersConfig = {
+  admin?: {
+    components?: {
+      Icon?: PayloadComponent
+    }
+    injectSidebarTab?: boolean
+    treeLimit?: number
+    useHeaderButton?: boolean
+  }
+  collectionSpecific?:
+    | {
+        fieldName?: string
+      }
+    | boolean
+  joinField?: HierarchyJoinFieldConfig
+  parentFieldName?: string
+  slugField?: string
+  slugify?: (text: string) => string
+  slugPathFieldName?: string
+  titlePathFieldName?: string
+}
+
+/**
+ * Configuration options for tags hierarchy preset.
+ * Same as FoldersConfig but allowHasMany can be overridden.
+ */
+export type TagsConfig = {
+  allowHasMany?: boolean
+} & FoldersConfig
+
 export type BaseFilter = (args: {
   limit: number
   locale?: TypedLocale
@@ -337,56 +425,18 @@ export type CollectionAdminOptions = {
     afterListTable?: CustomComponent[]
     beforeList?: CustomComponent[]
     beforeListTable?: CustomComponent[]
-    Description?: EntityDescriptionComponent
     /**
      * Components within the edit view
      */
     edit?: {
       /**
-       * Inject custom components before the document controls
-       */
-      beforeDocumentControls?: CustomComponent[]
-      /**
-       * Inject custom components within the 3-dot menu dropdown
-       */
-      editMenuItems?: CustomComponent[]
-      /**
-       * Replaces the "Preview" button
-       */
-      PreviewButton?: CustomComponent
-      /**
-       * Replaces the "Publish" button
-       * + drafts must be enabled
-       */
-      PublishButton?: CustomComponent
-      /**
-       * Replaces the "Save" button
-       * + drafts must be disabled
-       */
-      SaveButton?: CustomComponent
-      /**
-       * Replaces the "Save Draft" button
-       * + drafts must be enabled
-       * + autosave must be disabled
-       */
-      SaveDraftButton?: CustomComponent
-      /**
-       * Replaces the "Status" section
-       */
-      Status?: CustomStatus
-      /**
        * Replaces the "Upload" section
        * + upload must be enabled
        */
       Upload?: CustomUpload
-    }
+    } & SharedEditViewComponents
     listMenuItems?: CustomComponent[]
     views?: {
-      /**
-       * Replace, modify, or add new "document" views.
-       * @link https://payloadcms.com/docs/custom-components/document-views
-       */
-      edit?: EditConfig
       /**
        * Replace or modify the "list" view.
        * @link https://payloadcms.com/docs/custom-components/list-view
@@ -395,8 +445,8 @@ export type CollectionAdminOptions = {
         actions?: CustomComponent[]
         Component?: PayloadComponent
       }
-    }
-  }
+    } & SharedEntityViews
+  } & Omit<SharedAdminComponents, 'edit' | 'views'>
   /** Extension point to add your custom data. Available in server and client. */
   custom?: CollectionAdminCustom
   /**
@@ -412,15 +462,6 @@ export type CollectionAdminOptions = {
    * @default false
    */
   disableCopyToLocale?: boolean
-  /**
-   * Performance opt-in. If true, will use the [Select API](https://payloadcms.com/docs/queries/select) when
-   * loading the list view to query only the active columns, as opposed to the entire documents.
-   * If your cells require specific fields that may be unselected, such as within hooks, etc.,
-   * use `forceSelect` in conjunction with this property.
-   *
-   * @experimental This is an experimental feature and may change in the future. Use at your own risk.
-   */
-  enableListViewSelectAPI?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -452,20 +493,9 @@ export type CollectionAdminOptions = {
    */
   group?: false | Record<string, string> | string
   /**
-   * @description Enable grouping by a field in the list view.
-   * Uses `payload.findDistinct` under the hood to populate the group-by options.
-   *
-   * @experimental This option is currently in beta and may change in future releases. Use at your own risk.
-   */
-  groupBy?: boolean
-  /**
    * Exclude the collection from the admin nav and routes
    */
   hidden?: ((args: { user: ClientUser }) => boolean) | boolean
-  /**
-   * Hide the API URL within the Edit view
-   */
-  hideAPIURL?: boolean
   /**
    * Additional fields to be searched via the full text search
    */
@@ -538,6 +568,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   defaultSort?: Sort
   /**
+   * Disable the bulk delete operation for the collection in the admin panel and the API
+   */
+  disableBulkDelete?: boolean
+  /**
    * Disable the bulk edit operation for the collection in the admin panel and the API
    */
   disableBulkEdit?: boolean
@@ -556,15 +590,13 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
-   * Enables folders for this collection
+   * Enable folder hierarchy preset for this collection.
+   * Sets hierarchy with folder defaults: allowHasMany: false, FolderIcon, useHeaderButton: true
+   *
+   * Use `true` for defaults, or object for customization.
+   * Cannot be used together with `tags` or `hierarchy`.
    */
-  folders?: boolean | CollectionFoldersConfiguration
-  /**
-   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
-   */
-  forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
-    ? SelectIncludeType
-    : SelectFromCollectionSlug<TSlug>
+  folders?: boolean | FoldersConfig
   /**
    * GraphQL configuration
    */
@@ -576,6 +608,25 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
         singularName?: string
       }
     | false
+  /**
+   * Enable hierarchical tree structure for this collection
+   *
+   * Use `true` to enable with defaults (auto-detects parent field)
+   * or provide configuration object
+   *
+   * @example
+   * // Enable with defaults
+   * hierarchy: true
+   *
+   * @example
+   * // Customize field names and slugify function
+   * hierarchy: {
+   *   parentFieldName: 'parent',
+   *   slugify: (text) => customSlugify(text),
+   *   slugPathFieldName: '_breadcrumbPath'
+   * }
+   */
+  hierarchy?: boolean | HierarchyConfig
   /**
    * Hooks to modify Payload functionality
    */
@@ -649,6 +700,14 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   orderable?: boolean
   slug: string
   /**
+   * Enable tags hierarchy preset for this collection.
+   * Sets hierarchy with tag defaults: allowHasMany: true, TagIcon
+   *
+   * Use `true` for defaults, or object for customization.
+   * Cannot be used together with `folders` or `hierarchy`.
+   */
+  tags?: boolean | TagsConfig
+  /**
    * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
    * @default true
@@ -661,7 +720,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * This allows documents to be marked as deleted without being permanently removed.
    * The `deletedAt` field will be set to the current date and time when a document is trashed.
    *
-   * @experimental This is a beta feature and its behavior may be refined in future releases.
    * @default false
    */
   trash?: boolean
@@ -688,7 +746,14 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * @default false // disable versioning
    */
   versions?: boolean | IncomingCollectionVersions
-}
+} & Pick<
+  WithSelectFn<
+    IsAny<SelectFromCollectionSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromCollectionSlug<TSlug>
+  >,
+  'select'
+>
 
 export type SanitizedJoin = {
   /**
@@ -719,7 +784,17 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'admin' | 'auth' | 'endpoints' | 'fields' | 'folders' | 'slug' | 'upload' | 'versions'
+    | 'admin'
+    | 'auth'
+    | 'endpoints'
+    | 'fields'
+    | 'folder'
+    | 'folders'
+    | 'hierarchy'
+    | 'slug'
+    | 'tags'
+    | 'upload'
+    | 'versions'
   > {
   admin: CollectionAdminOptions
   auth: Auth
@@ -731,11 +806,13 @@ export interface SanitizedCollectionConfig
    */
   flattenedFields: FlattenedField[]
   /**
+   * Hierarchy configuration (when collection is a hierarchy type like folders or tags)
+   */
+  hierarchy: false | SanitizedHierarchyConfig
+  /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
-  folders: CollectionFoldersConfiguration | false
   joins: SanitizedJoins
-
   /**
    * List of all polymorphic join fields
    */
@@ -744,6 +821,7 @@ export interface SanitizedCollectionConfig
   sanitizedIndexes: SanitizedCompoundIndex[]
 
   slug: CollectionSlug
+
   upload: SanitizedUploadConfig
   versions?: SanitizedCollectionVersions
 }

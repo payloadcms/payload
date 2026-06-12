@@ -17,6 +17,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
     let transaction: DrizzleTransaction
 
     let transactionReady: () => void
+    let transactionFailed: (err: unknown) => void
 
     // Await initialization here
     // Prevent race conditions where the adapter may be
@@ -44,13 +45,17 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
           transactionReady()
         })
       }, options || this.transactionOptions)
-      .catch(() => {
-        // swallow
+      .catch((err) => {
+        // Connection failed before callback ran - reject instead of hanging forever
+        transactionFailed(err)
       })
 
     // Need to wait until the transaction is ready
     // before binding its `resolve` and `reject` methods below
-    await new Promise<void>((resolve) => (transactionReady = resolve))
+    await new Promise<void>((res, rej) => {
+      transactionReady = res
+      transactionFailed = rej
+    })
 
     this.sessions[id] = {
       db: transaction,

@@ -3,28 +3,20 @@ import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny } from 'ts-essentials'
 
 import type {
-  CustomPreviewButton,
-  CustomPublishButton,
-  CustomSaveButton,
-  CustomSaveDraftButton,
-  CustomStatus,
-} from '../../admin/types.js'
-import type {
   Access,
-  CustomComponent,
-  EditConfig,
   Endpoint,
   EntityDescription,
-  EntityDescriptionComponent,
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
   MetaConfig,
+  SharedAdminComponents,
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
 import type {
+  GeneratedTypes,
   GlobalAdminCustom,
   GlobalCustom,
   GlobalSlug,
@@ -32,12 +24,47 @@ import type {
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
-import type { PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
+import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
+
+/**
+ * Global slugs that do not have drafts enabled.
+ * Detects globals without drafts by checking for the absence of the `_status` field.
+ */
+export type GlobalsWithoutDrafts = {
+  [TSlug in GlobalSlug]: DataFromGlobalSlug<TSlug> extends { _status?: any } ? never : TSlug
+}[GlobalSlug]
+
+/**
+ * Conditionally allows or forbids the `draft` property based on global configuration.
+ * When `strictDraftTypes` is enabled, the `draft` property is forbidden on globals without drafts.
+ */
+export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
+  strictDraftTypes: true
+}
+  ? TSlug extends GlobalsWithoutDrafts
+    ? {
+        /**
+         * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
+         */
+        draft?: never
+      }
+    : {
+        /**
+         * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         */
+        draft?: boolean
+      }
+  : {
+      /**
+       * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft?: boolean
+    }
 
 export type BeforeValidateHook = (args: {
   context: RequestContext
@@ -45,6 +72,10 @@ export type BeforeValidateHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -54,6 +85,10 @@ export type BeforeChangeHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -63,6 +98,10 @@ export type AfterChangeHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   previousDoc: any
   req: PayloadRequest
 }) => any
@@ -72,6 +111,10 @@ export type BeforeReadHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -81,6 +124,10 @@ export type AfterReadHook = (args: {
   findMany?: boolean
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query?: Where
   req: PayloadRequest
 }) => any
@@ -98,6 +145,10 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -105,46 +156,7 @@ export type GlobalAdminOptions = {
   /**
    * Custom admin components
    */
-  components?: {
-    elements?: {
-      /**
-       * Inject custom components before the document controls
-       */
-      beforeDocumentControls?: CustomComponent[]
-      Description?: EntityDescriptionComponent
-      /**
-       * Replaces the "Preview" button
-       */
-      PreviewButton?: CustomPreviewButton
-      /**
-       * Replaces the "Publish" button
-       * + drafts must be enabled
-       */
-      PublishButton?: CustomPublishButton
-      /**
-       * Replaces the "Save" button
-       * + drafts must be disabled
-       */
-      SaveButton?: CustomSaveButton
-      /**
-       * Replaces the "Save Draft" button
-       * + drafts must be enabled
-       * + autosave must be disabled
-       */
-      SaveDraftButton?: CustomSaveDraftButton
-      /**
-       * Replaces the "Status" section
-       */
-      Status?: CustomStatus
-    }
-    views?: {
-      /**
-       * Set to a React component to replace the entire Edit View, including all nested routes.
-       * Set to an object to replace or modify individual nested routes, or to add new ones.
-       */
-      edit?: EditConfig
-    }
-  }
+  components?: SharedAdminComponents
   /** Extension point to add your custom data. Available in server and client. */
   custom?: GlobalAdminCustom
   /**
@@ -162,10 +174,6 @@ export type GlobalAdminOptions = {
    * Exclude the global from the admin nav and routes
    */
   hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
-  /**
-   * Hide the API URL within the Edit View
-   */
-  hideAPIURL?: boolean
   /**
    * Live preview options
    */
@@ -197,12 +205,6 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   dbName?: DBIdentifierName
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
-  /**
-   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
-   */
-  forceSelect?: IsAny<SelectFromGlobalSlug<TSlug>> extends true
-    ? SelectIncludeType
-    : SelectFromGlobalSlug<TSlug>
   graphQL?:
     | {
         disableMutations?: true
@@ -239,7 +241,14 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     interface?: string
   }
   versions?: boolean | IncomingGlobalVersions
-}
+} & Pick<
+  WithSelectFn<
+    IsAny<SelectFromGlobalSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromGlobalSlug<TSlug>
+  >,
+  'select'
+>
 
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {

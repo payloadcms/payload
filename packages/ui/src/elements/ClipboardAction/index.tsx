@@ -7,11 +7,13 @@ import { toast } from 'sonner'
 
 import type { ClipboardCopyData, OnPasteFn } from './types.js'
 
+import { ClipboardIcon } from '../../icons/Clipboard/index.js'
+import { CopyIcon } from '../../icons/Copy/index.js'
 import { MoreIcon } from '../../icons/More/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import { ClipboardActionLabel } from './ClipboardActionLabel.js'
 import { clipboardCopy, clipboardPaste } from './clipboardUtilities.js'
+import './index.css'
 
 const baseClass = 'clipboard-action'
 
@@ -90,34 +92,37 @@ export const ClipboardAction: FC<Props> = ({
   return (
     <Popup
       button={<MoreIcon />}
+      buttonClassName={`${baseClass}__button`}
+      caret={false}
       className={classes}
       disabled={disabled}
-      horizontalAlign="center"
+      horizontalAlign="right"
       render={({ close }) => (
-        <PopupList.ButtonGroup>
+        <PopupList.MenuItem>
           <PopupList.Button
             className={copyClassName}
             disabled={!allowCopy}
+            icon={<CopyIcon size={24} />}
             onClick={() => {
               void handleCopy()
               close()
             }}
           >
-            <ClipboardActionLabel isRow={isRow} />
+            {isRow ? t('general:copyRow') : t('general:copyField')}
           </PopupList.Button>
           <PopupList.Button
             className={pasteClassName}
             disabled={!allowPaste}
+            icon={<ClipboardIcon />}
             onClick={() => {
               void handlePaste()
               close()
             }}
           >
-            <ClipboardActionLabel isPaste isRow={isRow} />
+            {isRow ? t('general:pasteRow') : t('general:pasteField')}
           </PopupList.Button>
-        </PopupList.ButtonGroup>
+        </PopupList.MenuItem>
       )}
-      size="large"
       verticalAlign="bottom"
     />
   )

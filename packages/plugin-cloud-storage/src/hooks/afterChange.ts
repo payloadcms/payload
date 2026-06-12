@@ -12,12 +12,70 @@ interface Args {
 export const getAfterChangeHook =
   ({ adapter, collection }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
   async ({ doc, operation, previousDoc, req }) => {
+    // Skip if this is an internal update to prevent infinite loop
+    if (req.context?.skipCloudStorage) {
+      return doc
+    }
+
     try {
       const files = getIncomingFiles({ data: doc, req })
 
       if (files.length > 0) {
-        // If there is a previous doc, files and the operation is update,
-        // delete the old files before uploading the new ones.
+        const uploadResults = await Promise.all(
+          files
+            .filter((file) => !file.clientUploadContext)
+            .map((file) =>
+              adapter.handleUpload({
+                clientUploadContext: file.clientUploadContext,
+                collection,
+                data: doc,
+                file,
+                req,
+              }),
+            ),
+        )
+
+        const uploadMetadata = uploadResults
+          .filter(
+            (result): result is Partial<FileData & TypeWithID> =>
+              result != null && typeof result === 'object',
+          )
+          .reduce(
+            (acc, metadata) => ({ ...acc, ...metadata }),
+            {} as Partial<FileData & TypeWithID>,
+          )
+
+        let docWithMetadata = doc
+
+        if (Object.keys(uploadMetadata).length > 0) {
+          if (!req.context) {
+            req.context = {}
+          }
+          req.context.skipCloudStorage = true
+
+          // Clear to prevent re-processing
+          req.file = undefined
+          req.payloadUploadSizes = undefined
+
+          try {
+            await req.payload.update({
+              id: doc.id,
+              collection: collection.slug,
+              data: uploadMetadata,
+              depth: 0,
+              req,
+            })
+          } finally {
+            delete req.context.skipCloudStorage
+          }
+
+          docWithMetadata = { ...doc, ...uploadMetadata }
+        }
+
+        // Delete previous files only after the new upload and metadata
+        // persistence have succeeded. Deleting earlier would orphan the
+        // record if a later step throws (e.g. a user-defined afterChange
+        // hook on the same collection).
         if (previousDoc && operation === 'update') {
           let filesToDelete: string[] = []
 
@@ -33,8 +91,23 @@ export const getAfterChangeHook =
             )
           }
 
+          // Collect new filenames (main + sizes) so we don't delete a
+          // file that the new upload reused (e.g. same filename on reupload
+          // where Payload overwrites in place).
+          const newFilenames = new Set<string>()
+          if (typeof docWithMetadata.filename === 'string') {
+            newFilenames.add(docWithMetadata.filename)
+          }
+          if (typeof docWithMetadata.sizes === 'object') {
+            for (const size of Object.values(docWithMetadata.sizes || {})) {
+              if (size?.filename && typeof size.filename === 'string') {
+                newFilenames.add(size.filename)
+              }
+            }
+          }
+
           const deletionPromises = filesToDelete.map(async (filename) => {
-            if (filename) {
+            if (filename && !newFilenames.has(filename)) {
               await adapter.handleDelete({ collection, doc: previousDoc, filename, req })
             }
           })
@@ -42,43 +115,8 @@ export const getAfterChangeHook =
           await Promise.all(deletionPromises)
         }
 
-        const uploadResults = await Promise.all(
-          files.map((file) =>
-            adapter.handleUpload({
-              clientUploadContext: file.clientUploadContext,
-              collection,
-              data: doc,
-              file,
-              req,
-            }),
-          ),
-        )
-
-        const uploadMetadata = uploadResults
-          .filter(
-            (result): result is Partial<FileData & TypeWithID> =>
-              result != null && typeof result === 'object',
-          )
-          .reduce(
-            (acc, metadata) => ({ ...acc, ...metadata }),
-            {} as Partial<FileData & TypeWithID>,
-          )
-
-        if (Object.keys(uploadMetadata).length > 0) {
-          try {
-            await req.payload.update({
-              id: doc.id,
-              collection: collection.slug,
-              data: uploadMetadata,
-              depth: 0,
-              req,
-            })
-            return { ...doc, ...uploadMetadata }
-          } catch (updateError: unknown) {
-            req.payload.logger.warn(
-              `Failed to persist upload data for collection ${collection.slug} document ${doc.id}: ${String(updateError)}`,
-            )
-          }
+        if (docWithMetadata !== doc) {
+          return docWithMetadata
         }
       }
     } catch (err: unknown) {

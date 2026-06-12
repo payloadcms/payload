@@ -165,9 +165,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     parentIsLocalized,
     parentName,
   }) => {
-    const blockTypes: GraphQLObjectType<any, any>[] = (
-      field.blockReferences ?? field.blocks
-    ).reduce((acc, _block) => {
+    const blockTypes: GraphQLObjectType<any, any>[] = field.blocks.reduce((acc, _block) => {
       const blockSlug = typeof _block === 'string' ? _block : _block.slug
       if (!graphqlResult.types.blockTypes[blockSlug]) {
         // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
@@ -194,6 +192,11 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         })
 
         if (Object.keys(objectType.getFields()).length) {
+          // Store block slug in extensions for use in select building
+          objectType.extensions = {
+            ...objectType.extensions,
+            blockSlug: block.slug,
+          }
           graphqlResult.types.blockTypes[block.slug] = objectType
         }
       }
@@ -649,7 +652,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
-        forceNullable,
+        // can be null if the related doc is deleted even if the field is required, unless hasMany
+        forceNullable: !field.hasMany,
         parentIsLocalized,
       }) as GraphQLOutputType,
       args: relationshipArgs,
@@ -1067,7 +1071,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
-        forceNullable,
+        // can be null if the related doc is deleted even if the field is required, unless hasMany
+        forceNullable: !field.hasMany,
         parentIsLocalized,
       }) as GraphQLOutputType,
       args: relationshipArgs,

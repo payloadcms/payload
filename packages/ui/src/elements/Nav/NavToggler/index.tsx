@@ -1,11 +1,12 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
 import { usePreferences } from '../../../providers/Preferences/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useNav } from '../context.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'nav-toggler'
 
@@ -41,7 +42,7 @@ export const NavToggler: React.FC<{
         // this is because the js may open or close the nav based on the window size, routing, etc
         if (!largeBreak) {
           await setPreference(
-            'nav',
+            PREFERENCE_KEYS.NAV,
             {
               open: !navOpen,
             },

@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process'
 import path from 'path'
 import { generateTypes } from 'payload/node'
 
-import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
+import { setTestEnvPaths } from './__helpers/shared/setTestEnvPaths.js'
 
 const [testConfigDir] = process.argv.slice(2)
 
@@ -11,7 +11,7 @@ import type { SanitizedConfig } from 'payload'
 
 import { fileURLToPath } from 'url'
 
-import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
+import { generateDatabaseAdapter } from './dbAdapters.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -35,6 +35,10 @@ async function run() {
 
     setTestEnvPaths(testDir)
     await generateTypes(config)
+
+    // Generation is done; Configs that leave handles open (e.g. storage-r2's undisposed
+    // Cloudflare workerd runtime) shouldn't keep the process alive.
+    process.exit(0)
   } else {
     // Search through every folder in dirname, and if it has a config.ts file, generate types for it
     const foundDirs: string[] = []

@@ -258,7 +258,7 @@ const blocks: FieldSchemaGenerator<BlocksField> = (
       parentIsLocalized,
     ),
   })
-  ;(field.blockReferences ?? field.blocks).forEach((blockItem) => {
+  field.blocks.forEach((blockItem) => {
     const blockSchema = new mongoose.Schema({}, { _id: false, id: false })
 
     const block = typeof blockItem === 'string' ? payload.blocks[blockItem] : blockItem
@@ -268,6 +268,10 @@ const blocks: FieldSchemaGenerator<BlocksField> = (
     }
 
     block.fields.forEach((blockField) => {
+      if (fieldIsVirtual(blockField)) {
+        return
+      }
+
       const addFieldSchema = getSchemaGenerator(blockField.type)
 
       if (addFieldSchema) {

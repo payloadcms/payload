@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/providers/Auth'
-import { useRouter } from 'next/navigation'
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { sendOrderAccessEmail } from './sendOrderAccessEmail'
 
 type FormData = {
   email: string
@@ -20,8 +20,10 @@ type Props = {
 }
 
 export const FindOrderForm: React.FC<Props> = ({ initialEmail }) => {
-  const router = useRouter()
   const { user } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
 
   const {
     formState: { errors },
@@ -33,18 +35,46 @@ export const FindOrderForm: React.FC<Props> = ({ initialEmail }) => {
     },
   })
 
-  const onSubmit = useCallback(
-    async (data: FormData) => {
-      router.push(`/orders/${data.orderID}?email=${data.email}`)
-    },
-    [router],
-  )
+  const onSubmit = useCallback(async (data: FormData) => {
+    setIsSubmitting(true)
+    setSubmitError(null)
+
+    try {
+      const result = await sendOrderAccessEmail({
+        email: data.email,
+        orderID: data.orderID,
+      })
+
+      if (result.success) {
+        setSuccess(true)
+      } else {
+        setSubmitError(result.error || 'Something went wrong. Please try again.')
+      }
+    } catch {
+      setSubmitError('Something went wrong. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [])
+
+  if (success) {
+    return (
+      <Fragment>
+        <h1 className="text-xl mb-4">Check your email</h1>
+        <div className="prose dark:prose-invert">
+          <p>
+            {`If an order exists with the provided email and order ID, we've sent you an email with a link to view your order details.`}
+          </p>
+        </div>
+      </Fragment>
+    )
+  }
 
   return (
     <Fragment>
       <h1 className="text-xl mb-4">Find my order</h1>
       <div className="prose dark:prose-invert mb-8">
-        <p>{`Please enter your email and order ID below.`}</p>
+        <p>{`Please enter your email and order ID below. We'll send you a link to view your order.`}</p>
       </div>
       <form className="max-w-lg flex flex-col gap-8" onSubmit={handleSubmit(onSubmit)}>
         <FormItem>
@@ -65,14 +95,15 @@ export const FindOrderForm: React.FC<Props> = ({ initialEmail }) => {
           <Input
             id="orderID"
             {...register('orderID', {
-              required: 'Order ID is required. You can find this in your email.',
+              required: 'Order ID is required.',
             })}
             type="text"
           />
           {errors.orderID && <FormError message={errors.orderID.message} />}
         </FormItem>
-        <Button type="submit" className="self-start" variant="default">
-          Find my order
+        {submitError && <FormError message={submitError} />}
+        <Button type="submit" className="self-start" variant="default" disabled={isSubmitting}>
+          {isSubmitting ? 'Sending...' : 'Find order'}
         </Button>
       </form>
     </Fragment>

@@ -21,6 +21,7 @@ export const postCollectionSlug = 'posts'
 export const diffCollectionSlug = 'diff'
 export const mediaCollectionSlug = 'media'
 export const media2CollectionSlug = 'media2'
+export const draftWithUploadCollectionSlug = 'draft-with-upload'
 
 export const versionCollectionSlug = 'version-posts'
 
@@ -50,11 +51,19 @@ export const autosaveWithDraftButtonGlobal = 'autosave-with-draft-button-global'
 
 export const draftGlobalSlug = 'draft-global'
 
+export const simpleDraftGlobalSlug = 'simple-draft-global'
+
 export const draftUnlimitedGlobalSlug = 'draft-unlimited-global'
 
 export const draftWithMaxGlobalSlug = 'draft-with-max-global'
 
-export const globalSlugs = [autoSaveGlobalSlug, draftGlobalSlug]
+export const globalSlugs = [
+  autoSaveGlobalSlug,
+  draftGlobalSlug,
+  simpleDraftGlobalSlug,
+  draftUnlimitedGlobalSlug,
+  draftWithMaxGlobalSlug,
+]
 
 export const localizedCollectionSlug = 'localized-posts'
 

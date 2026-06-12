@@ -16,10 +16,10 @@ import { getNextAppDetails, initNext } from './lib/init-next.js'
 import { manageEnvFiles } from './lib/manage-env-files.js'
 import { parseProjectName } from './lib/parse-project-name.js'
 import { parseTemplate } from './lib/parse-template.js'
+import { selectAgent } from './lib/select-agent.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { updatePayloadInProject } from './lib/update-payload-in-project.js'
-import { getLatestPackageVersion } from './utils/getLatestPackageVersion.js'
 import { debug, error, info } from './utils/log.js'
 import {
   feedbackOutro,
@@ -28,6 +28,7 @@ import {
   successfulNextInit,
   successMessage,
 } from './utils/messages.js'
+import { resolvePackageVersion } from './utils/resolvePackageVersion.js'
 
 export class Main {
   args: CliArgs
@@ -36,6 +37,7 @@ export class Main {
     // @ts-expect-error bad typings
     this.args = arg(
       {
+        '--agent': String,
         '--branch': String,
         '--db': String,
         '--db-accept-recommended': Boolean,
@@ -46,10 +48,13 @@ export class Main {
         '--name': String,
         '--secret': String,
         '--template': String,
-        '--version': String, // Allows overriding the installed Payload version instead of installing the latest
+        '--version': String, // Install a specific Payload version or npm dist-tag (e.g. 3.40.0 or canary; default: latest)
 
         // Next.js
         '--init-next': Boolean, // TODO: Is this needed if we detect if inside Next.js project?
+
+        // Agent
+        '--no-agent': Boolean,
 
         // Package manager
         '--no-deps': Boolean,
@@ -67,6 +72,7 @@ export class Main {
         '--dry-run': Boolean,
 
         // Aliases
+        '-a': '--agent',
         '-d': '--db',
         '-e': '--example',
         '-h': '--help',
@@ -86,9 +92,10 @@ export class Main {
         process.env.DEBUG = 'true'
       }
 
-      const LATEST_VERSION = await getLatestPackageVersion({
+      const LATEST_VERSION = await resolvePackageVersion({
         debug: debugFlag,
         packageName: 'payload',
+        versionOrTag: this.args['--version'],
       })
 
       if (this.args['--help']) {
@@ -129,7 +136,10 @@ export class Main {
         })
 
         if (!p.isCancel(shouldUpdate) && shouldUpdate) {
-          const { message, success: updateSuccess } = await updatePayloadInProject(nextAppDetails)
+          const { message, success: updateSuccess } = await updatePayloadInProject(
+            nextAppDetails,
+            this.args['--version'],
+          )
           if (updateSuccess) {
             info(message)
           } else {
@@ -231,7 +241,10 @@ export class Main {
           process.exit(1)
         }
 
+        const agentType = await selectAgent({ cliArgs: this.args })
+
         await createProject({
+          agentType,
           cliArgs: this.args,
           example,
           packageManager,
@@ -255,7 +268,9 @@ export class Main {
 
         switch (template.type) {
           case 'plugin': {
+            const agentType = await selectAgent({ cliArgs: this.args })
             await createProject({
+              agentType,
               cliArgs: this.args,
               packageManager,
               projectDir,
@@ -266,8 +281,10 @@ export class Main {
           }
           case 'starter': {
             const dbDetails = await selectDb(this.args, projectName, template)
+            const agentType = await selectAgent({ cliArgs: this.args })
 
             await createProject({
+              agentType,
               cliArgs: this.args,
               dbDetails,
               packageManager,

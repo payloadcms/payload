@@ -67,6 +67,11 @@ export type UpdateBaseOptions<
    * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
    */
   select?: TSelect
+  /**
+   * When `true`, the operation can target trashed (soft-deleted) documents. No effect unless the collection has `trash` enabled.
+   * @default false
+   */
+  trash?: boolean
 }
 
 export type UpdateByIDOptions<

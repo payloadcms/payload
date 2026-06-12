@@ -30,6 +30,10 @@ export const jaTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'インポートの概要',
     importDocumentLabel: '{{label}}をインポートする',
     importResults: 'インポート結果',
+    limitCapped: '上限は最大{{limit}}に制限されています',
+    limitExceededExport: 'エクスポートは{{limit}}ドキュメントに制限されています',
+    limitExceededImport:
+      'インポートファイルには{{count}}個のドキュメントが含まれていますが、制限は{{limit}}です。',
     matchBy: '一致する',
     mode: 'モード',
     noDataToPreview: '表示するデータがありません',

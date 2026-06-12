@@ -2,6 +2,9 @@ import type { PayloadRequest, TypedUser } from 'payload'
 
 import { APIError } from 'payload'
 
+import type { ImportResult } from '../types.js'
+
+import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
 import { parseCSV } from '../utilities/parseCSV.js'
 import { parseJSON } from '../utilities/parseJSON.js'
@@ -34,6 +37,11 @@ export type Import = {
    */
   importMode: ImportMode
   matchField?: string
+  /**
+   * Maximum number of documents that can be imported in a single operation.
+   * This value has already been resolved from the plugin config.
+   */
+  maxLimit?: number
   name: string
   userCollection?: string
   userID?: number | string
@@ -44,17 +52,6 @@ export type CreateImportArgs = {
   req: PayloadRequest
 } & Import
 
-export type ImportResult = {
-  errors: Array<{
-    doc: Record<string, unknown>
-    error: string
-    index: number
-  }>
-  imported: number
-  total: number
-  updated: number
-}
-
 export const createImport = async ({
   batchSize = 100,
   collectionSlug,
@@ -64,6 +61,7 @@ export const createImport = async ({
   format,
   importMode = 'create',
   matchField = 'id',
+  maxLimit,
   req,
   userCollection,
   userID,
@@ -74,6 +72,7 @@ export const createImport = async ({
     user = (await req.payload.findByID({
       id: userID,
       collection: userCollection,
+      req,
     })) as TypedUser
   }
 
@@ -87,7 +86,7 @@ export const createImport = async ({
       format,
       importMode,
       matchField,
-      message: 'Starting import process with args:',
+      msg: 'Starting import process with args:',
       transactionID: req.transactionID, // Log transaction ID to verify we're in same transaction
     })
   }
@@ -104,8 +103,8 @@ export const createImport = async ({
     req.payload.logger.debug({
       fileName: file.name,
       fileSize: file.data.length,
-      message: 'File info',
       mimeType: file.mimetype,
+      msg: 'File info',
     })
   }
 
@@ -124,12 +123,15 @@ export const createImport = async ({
   const disabledFields =
     collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
-  // Get fromCSV functions for field transformations
-  const fromCSVFunctions = getImportFieldFunctions({
+  const importHooks = collectionConfig.custom?.['plugin-import-export']?.importHooks
+
+  // Get beforeImport functions for field transformations
+  const importFieldHooks = getImportFieldFunctions({
     fields: collectionConfig.flattenedFields || [],
   })
 
   // Parse the file data
+  let originalDocs: Record<string, unknown>[] | undefined
   let documents: Record<string, unknown>[]
   if (format === 'csv') {
     const rawData = await parseCSV({
@@ -137,25 +139,7 @@ export const createImport = async ({
       req,
     })
 
-    // Debug logging
-    if (debug && rawData.length > 0) {
-      req.payload.logger.info({
-        firstRow: rawData[0], // Show the complete first row
-        msg: 'Parsed CSV data - FULL',
-      })
-      req.payload.logger.info({
-        msg: 'Parsed CSV data',
-        rows: rawData.map((row, i) => ({
-          excerpt: row.excerpt,
-          hasManyNumber: row.hasManyNumber, // Add this to see what we get from CSV
-          hasOnePolymorphic_id: row.hasOnePolymorphic_id,
-          hasOnePolymorphic_relationTo: row.hasOnePolymorphic_relationTo,
-          index: i,
-          title: row.title,
-        })),
-      })
-    }
-
+    originalDocs = rawData
     documents = rawData
 
     // Unflatten CSV data
@@ -164,58 +148,58 @@ export const createImport = async ({
         const unflattened = unflattenObject({
           data: doc,
           fields: collectionConfig.flattenedFields ?? [],
-          fromCSVFunctions,
+          format,
+          importFieldHooks,
           req,
         })
         return unflattened ?? {}
       })
       .filter((doc) => doc && Object.keys(doc).length > 0)
 
-    // Debug after unflatten
-    if (debug && documents.length > 0) {
-      req.payload.logger.info({
-        msg: 'After unflatten',
-        rows: documents.map((row, i) => ({
-          hasManyNumber: row.hasManyNumber, // Add this to see the actual value
-          hasManyPolymorphic: row.hasManyPolymorphic,
-          hasOnePolymorphic: row.hasOnePolymorphic,
-          hasTitle: 'title' in row,
-          index: i,
-          title: row.title,
-        })),
-      })
-    }
-
     if (debug) {
       req.payload.logger.debug({
         documentCount: documents.length,
-        message: 'After unflattening CSV',
+        msg: 'After unflattening CSV',
         rawDataCount: rawData.length,
       })
-
-      // Debug: show a sample of raw vs unflattened
-      if (rawData.length > 0 && documents.length > 0) {
-        req.payload.logger.debug({
-          message: 'Sample data transformation',
-          raw: Object.keys(rawData[0] || {}).filter((k) => k.includes('localized')),
-          unflattened: JSON.stringify(documents[0], null, 2),
-        })
-      }
     }
   } else {
-    documents = parseJSON({ data: file.data, req })
+    const parsedDocs = parseJSON({ data: file.data, req })
+    originalDocs = parsedDocs
+    // Apply field-level import hooks for JSON format
+    documents = parsedDocs.map((doc) =>
+      applyFieldHooks({
+        type: 'beforeImport',
+        data: doc,
+        fieldHooks: importFieldHooks,
+        fields: collectionConfig.flattenedFields ?? [],
+        format,
+        operation: 'import',
+        req,
+      }),
+    )
   }
 
   if (debug) {
     req.payload.logger.debug({
-      message: `Parsed ${documents.length} documents from ${format} file`,
+      msg: `Parsed ${documents.length} documents from ${format} file`,
     })
     if (documents.length > 0) {
       req.payload.logger.debug({
         doc: documents[0],
-        message: 'First document sample:',
+        msg: 'First document sample:',
       })
     }
+  }
+
+  // Enforce maxLimit before processing to save memory/time
+  if (typeof maxLimit === 'number' && maxLimit > 0 && documents.length > maxLimit) {
+    throw new APIError(
+      `Import file contains ${documents.length} documents but limit is ${maxLimit}`,
+      400,
+      null,
+      true,
+    )
   }
 
   // Remove disabled fields from all documents
@@ -227,7 +211,7 @@ export const createImport = async ({
     req.payload.logger.debug({
       batchSize,
       documentCount: documents.length,
-      message: 'Processing import in batches',
+      msg: 'Processing import in batches',
     })
   }
 
@@ -237,13 +221,19 @@ export const createImport = async ({
     defaultVersionStatus,
   })
 
+  const totalBatches = documents.length > 0 ? Math.ceil(documents.length / batchSize) : 1
+
   // Process import with batch processor
   const result = await processor.processImport({
     collectionSlug,
-    documents,
+    docs: documents,
+    format,
+    hooks: importHooks,
     importMode,
     matchField,
+    originalDocs,
     req,
+    totalBatches,
     user,
   })
 
@@ -251,7 +241,7 @@ export const createImport = async ({
     req.payload.logger.info({
       errors: result.errors.length,
       imported: result.imported,
-      message: 'Import completed',
+      msg: 'Import completed',
       total: result.total,
       updated: result.updated,
     })

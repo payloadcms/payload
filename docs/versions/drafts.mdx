@@ -254,6 +254,45 @@ export const Pages: CollectionConfig = {
 }
 ```
 
+## Controlling who can publish
+
+You can use `update` [Access Control](../access-control/collections#update) to restrict who can publish documents by returning a [query constraint](/docs/queries/overview) on the `_status` field. When this constraint prevents publishing, the Admin UI automatically hides the Publish and Unpublish buttons.
+
+Here is an example where admins can publish, but editors can only save drafts:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  access: {
+    update: ({ req: { user } }) => {
+      if (!user) {
+        // If there is no user, they can't update anything
+        return false
+      }
+
+      // Admins can update any document, including publishing
+      if (user?.role === 'admin') return true
+
+      // Editors can only update documents that are not published.
+      return {
+        _status: {
+          equals: 'draft',
+        },
+      }
+    },
+  },
+  versions: {
+    drafts: true,
+  },
+}
+```
+
+The `update` function returns a query constraint instead of a boolean. Payload appends this constraint to the update query, so only documents where `_status` is not `published` can be updated by editors. This also blocks scheduled publish jobs from executing for those users.
+
+The `create` function uses a `data` check instead since there is no existing document to query against.
+
 ## Scheduled publish
 
 Payload provides for an ability to schedule publishing / unpublishing events in the future, which can be helpful if you need to set certain documents to "go live" at a given date in the future, or, vice versa, revert to a draft state after a certain time has passed.

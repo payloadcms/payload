@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
-import './index.scss'
+import './index.css'
 
 export type Props = {
   alignCaret?: 'center' | 'left' | 'right'
@@ -10,12 +10,32 @@ export type Props = {
   children: React.ReactNode
   className?: string
   delay?: number
-  position?: 'bottom' | 'top'
+  position?: 'bottom' | 'left' | 'right' | 'top'
   show?: boolean
   /**
    * If the tooltip position should not change depending on if the toolbar is outside the boundingRef. @default false
    */
   staticPositioning?: boolean
+}
+
+const TooltipCaret: React.FC = () => {
+  const clipId = React.useId()
+
+  return (
+    <svg aria-hidden="true" className="tooltip__caret" height="14" viewBox="0 0 14 14" width="15">
+      <clipPath id={clipId}>
+        <rect height="14" width="15" x="-0.5" y="0.5" />
+      </clipPath>
+      {/* Border stroke - clipped to hide top edge */}
+      <path
+        className="tooltip__caret-stroke"
+        clipPath={`url(#${clipId})`}
+        d="M0,0 H14 L7.875,6.125 Q7,7 6.125,6.125 Z"
+      />
+      {/* Fill path */}
+      <path className="tooltip__caret-fill" d="M0,0 H14 L7.875,6.125 Q7,7 6.125,6.125 Z" />
+    </svg>
+  )
 }
 
 export const Tooltip: React.FC<Props> = (props) => {
@@ -24,16 +44,14 @@ export const Tooltip: React.FC<Props> = (props) => {
     boundingRef,
     children,
     className,
-    delay = 350,
+    delay = 500,
     position: positionFromProps,
     show: showFromProps = true,
     staticPositioning = false,
   } = props
 
   const [show, setShow] = React.useState(showFromProps)
-  const [position, setPosition] = React.useState<'bottom' | 'top'>('top')
-
-  const getTitleAttribute = (content) => (typeof content === 'string' ? content : '')
+  const [position, setPosition] = React.useState<'bottom' | 'left' | 'right' | 'top'>('top')
 
   const [ref, intersectionEntry] = useIntersect(
     {
@@ -82,6 +100,7 @@ export const Tooltip: React.FC<Props> = (props) => {
           ref={ref}
           style={{ opacity: '0' }}
         >
+          <TooltipCaret />
           <div className="tooltip-content">{children}</div>
         </aside>
       )}
@@ -95,8 +114,8 @@ export const Tooltip: React.FC<Props> = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
-        title={getTitleAttribute(children)}
       >
+        <TooltipCaret />
         <div className="tooltip-content">{children}</div>
       </aside>
     </React.Fragment>

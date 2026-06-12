@@ -4,12 +4,14 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Post, RestrictedCollection } from './payload-types.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { DifferentiatedTrashCollection, Post, RestrictedCollection } from './payload-types.js'
 
-import { regularUser } from '../credentials.js'
-import { idToString } from '../helpers/idToString.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { idToString } from '../__helpers/shared/idToString.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser, regularUser } from '../credentials.js'
+import { differentiatedTrashCollectionSlug } from './collections/DifferentiatedTrashCollection/index.js'
+import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { restrictedCollectionSlug } from './collections/RestrictedCollection/index.js'
 import { usersSlug } from './collections/Users/index.js'
@@ -129,6 +131,292 @@ describe('trash', () => {
         status: 403,
         name: 'Forbidden',
         message: expect.stringContaining('You are not allowed'),
+      })
+    })
+  })
+
+  /**
+   * Tests for differentiated trash/delete permissions.
+   *
+   * The DifferentiatedTrashCollection has delete access that distinguishes between:
+   * - Trashing (soft-delete): Any logged-in user can trash when deletedAt doesn't exist
+   * - Permanently deleting: Only admins can permanently delete when deletedAt exists
+   */
+  describe('Differentiated trash/delete permissions', () => {
+    let adminUser: any
+    const createdDocIds: (number | string)[] = []
+
+    beforeAll(async () => {
+      // Login as admin user
+      adminUser = await payload.login({
+        collection: usersSlug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+    })
+
+    afterEach(async () => {
+      // Clean up created documents
+      for (const id of createdDocIds) {
+        try {
+          await payload.delete({
+            collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            id,
+            trash: true,
+          })
+        } catch (_e) {
+          // Ignore errors from cleanup
+        }
+      }
+      createdDocIds.length = 0
+    })
+
+    describe('trashing documents (soft delete)', () => {
+      it('should allow regular user to trash (soft-delete) a document', async () => {
+        // Create a document as admin
+        const doc = await payload.create({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          data: { title: 'Regular user trash test' },
+        })
+
+        createdDocIds.push(doc.id)
+
+        // Regular user should be able to trash the document
+        const trashedDoc = await payload.update({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          id: doc.id,
+          data: {
+            deletedAt: new Date().toISOString(),
+          },
+          user, // Regular user from outer scope
+          overrideAccess: false,
+        })
+
+        expect(trashedDoc.deletedAt).toBeDefined()
+      })
+
+      it('should allow admin to trash (soft-delete) a document', async () => {
+        // Create a document
+        const doc = await payload.create({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          data: { title: 'Admin trash test' },
+        })
+
+        createdDocIds.push(doc.id)
+
+        // Admin should be able to trash the document
+        const trashedDoc = await payload.update({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          id: doc.id,
+          data: {
+            deletedAt: new Date().toISOString(),
+          },
+          user: adminUser.user,
+          overrideAccess: false,
+        })
+
+        expect(trashedDoc.deletedAt).toBeDefined()
+      })
+    })
+
+    describe('permanently deleting documents', () => {
+      it('should NOT allow regular user to permanently delete a trashed document', async () => {
+        // Create and trash a document
+        const doc = await payload.create({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          data: {
+            title: 'Regular user perm delete test',
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        createdDocIds.push(doc.id)
+
+        // Regular user should NOT be able to permanently delete
+        await expect(
+          payload.delete({
+            collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            id: doc.id,
+            trash: true,
+            user, // Regular user from outer scope
+            overrideAccess: false,
+          }),
+        ).rejects.toMatchObject({
+          status: 403,
+          name: 'Forbidden',
+          message: expect.stringContaining('You are not allowed'),
+        })
+      })
+
+      it('should allow admin to permanently delete a trashed document', async () => {
+        // Create and trash a document
+        const doc = await payload.create({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          data: {
+            title: 'Admin perm delete test',
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        // Admin should be able to permanently delete
+        const deletedDoc = await payload.delete({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          id: doc.id,
+          trash: true,
+          user: adminUser.user,
+          overrideAccess: false,
+        })
+
+        expect(deletedDoc.id).toBe(doc.id)
+
+        // Verify document is gone
+        await expect(
+          payload.findByID({
+            collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            id: doc.id,
+            trash: true,
+          }),
+        ).rejects.toThrow('Not Found')
+      })
+    })
+
+    describe('bulk operations with differentiated permissions', () => {
+      it('should allow regular user to bulk trash documents', async () => {
+        // Create multiple documents
+        const doc1 = await payload.create({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          data: { title: 'Bulk trash test 1' },
+        })
+
+        const doc2 = await payload.create({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          data: { title: 'Bulk trash test 2' },
+        })
+
+        createdDocIds.push(doc1.id, doc2.id)
+
+        // Regular user should be able to bulk trash
+        const result = await payload.update({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          data: {
+            deletedAt: new Date().toISOString(),
+          },
+          where: {
+            title: {
+              like: 'Bulk trash test',
+            },
+          },
+          user, // Regular user from outer scope
+          overrideAccess: false,
+        })
+
+        expect(result.docs.length).toBe(2)
+        expect(result.docs.every((doc: DifferentiatedTrashCollection) => doc.deletedAt)).toBe(true)
+      })
+
+      it('should NOT allow regular user to bulk permanently delete trashed documents', async () => {
+        // Create multiple trashed documents
+        const doc1 = await payload.create({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          data: {
+            title: 'Bulk perm delete test 1',
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        const doc2 = await payload.create({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          data: {
+            title: 'Bulk perm delete test 2',
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        createdDocIds.push(doc1.id, doc2.id)
+
+        // Regular user should NOT be able to bulk permanently delete
+        await expect(
+          payload.delete({
+            collection: differentiatedTrashCollectionSlug as CollectionSlug,
+            where: {
+              title: {
+                like: 'Bulk perm delete test',
+              },
+            },
+            trash: true,
+            user, // Regular user from outer scope
+            overrideAccess: false,
+          }),
+        ).rejects.toMatchObject({
+          status: 403,
+          name: 'Forbidden',
+          message: expect.stringContaining('You are not allowed'),
+        })
+
+        // Verify documents still exist
+        const remaining = await payload.find({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          trash: true,
+          where: {
+            title: {
+              like: 'Bulk perm delete test',
+            },
+          },
+        })
+
+        expect(remaining.docs.length).toBe(2)
+      })
+
+      it('should allow admin to bulk permanently delete trashed documents', async () => {
+        // Create multiple trashed documents
+        const doc1 = await payload.create({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          data: {
+            title: 'Admin bulk perm delete 1',
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        const doc2 = await payload.create({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          data: {
+            title: 'Admin bulk perm delete 2',
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        // Admin should be able to bulk permanently delete
+        const result = await payload.delete({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          where: {
+            title: {
+              like: 'Admin bulk perm delete',
+            },
+          },
+          trash: true,
+          user: adminUser.user,
+          overrideAccess: false,
+        })
+
+        expect(result.docs.length).toBe(2)
+        expect(result.docs.map((d: DifferentiatedTrashCollection) => d.id).sort()).toEqual(
+          [doc1.id, doc2.id].sort(),
+        )
+
+        // Verify documents are gone
+        const remaining = await payload.find({
+          collection: differentiatedTrashCollectionSlug as CollectionSlug,
+          trash: true,
+          where: {
+            title: {
+              like: 'Admin bulk perm delete',
+            },
+          },
+        })
+
+        expect(remaining.docs.length).toBe(0)
       })
     })
   })
@@ -859,6 +1147,82 @@ describe('trash', () => {
 
         expect(result.totalDocs).toEqual(1) // Only postsDocTwo
       })
+    })
+
+    it('should preserve localized field data when bulk trashing draft documents', async () => {
+      const localizedFieldValueEN = 'Localized Draft Content EN'
+      const localizedFieldValueES = 'Localized Draft Content ES'
+
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'Draft with Localized Field',
+          _status: 'draft',
+        },
+      })
+
+      // Update en locale as draft - isSavingDraft = true skips updateOne on the main table,
+      // storing localized data only in the versions table
+      await payload.update({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'en',
+        data: {
+          localizedField: localizedFieldValueEN,
+          _status: 'draft',
+        },
+        draft: true,
+      })
+
+      await payload.update({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'es',
+        data: {
+          localizedField: localizedFieldValueES,
+          _status: 'draft',
+        },
+        draft: true,
+      })
+
+      // Bulk trash the document (simulates list view "Move to Trash")
+      // This reads from the main table which has stale/empty localizedField
+      const trashResult = await payload.update({
+        collection: postsSlug,
+        data: {
+          deletedAt: new Date().toISOString(),
+        },
+        where: {
+          id: {
+            equals: post.id,
+          },
+        },
+      })
+
+      expect(trashResult.docs).toHaveLength(1)
+      expect(trashResult.docs[0]?.deletedAt).toBeTruthy()
+
+      // Fetch the latest draft version of the trashed document for each locale
+      const trashedDocEN = await payload.findByID({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'en',
+        draft: true,
+        trash: true,
+      })
+
+      const trashedDocES = await payload.findByID({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'es',
+        draft: true,
+        trash: true,
+      })
+
+      // localizedField should be preserved from the latest draft version for both locales,
+      // not lost due to stale main table data being used during bulk trash
+      expect(trashedDocEN.localizedField).toBe(localizedFieldValueEN)
+      expect(trashedDocES.localizedField).toBe(localizedFieldValueES)
     })
   })
 
@@ -1701,21 +2065,21 @@ describe('trash', () => {
       })
     })
 
-    // describe('update endpoint', () => {
-    //   it.todo('should update only normal document when trash: false')
+    describe.skip('update endpoint', () => {
+      it.todo('should update only normal document when trash: false')
 
-    //   it.todo('should update all documents including soft-deleted documents when trash: true')
+      it.todo('should update all documents including soft-deleted documents when trash: true')
 
-    //   it.todo(
-    //     'should only update soft-deleted documents when trash: true and where[deletedAt][exists]=true',
-    //   )
-    // })
+      it.todo(
+        'should only update soft-deleted documents when trash: true and where[deletedAt][exists]=true',
+      )
+    })
 
-    // describe('delete endpoint', () => {
-    //   it.todo('should perma delete all docs including soft-deleted documents when trash: true')
+    describe('delete endpoint', () => {
+      it.todo('should perma delete all docs including soft-deleted documents when trash: true')
 
-    //   it.todo('should only perma delete normal docs when trash: false')
-    // })
+      it.todo('should only perma delete normal docs when trash: false')
+    })
 
     describe('deleteByID query', () => {
       it('should throw NotFound error when trying to delete a soft-deleted document w/o trash: true', async () => {
@@ -1853,6 +2217,103 @@ describe('trash', () => {
 
         expect(res.data.countPosts.totalDocs).toBe(1)
       })
+    })
+  })
+
+  describe('Relationship population', () => {
+    const createdPageIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdPageIDs) {
+        await payload.delete({ collection: pagesSlug, id })
+      }
+      createdPageIDs.length = 0
+    })
+
+    it('should not include trashed document IDs in hasMany relationship population', async () => {
+      // postsDocOne is non-trashed, postsDocTwo is trashed
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with related posts',
+          relatedPosts: [postsDocOne.id, postsDocTwo.id],
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 1,
+      })
+
+      // The trashed post (postsDocTwo) should be absent from the relationship array
+      // Non-trashed post (postsDocOne) should be populated as an object
+      expect(Array.isArray(result.relatedPosts)).toBe(true)
+      expect(result.relatedPosts).toHaveLength(1)
+      expect((result.relatedPosts as Post[])[0]?.id).toBe(postsDocOne.id)
+    })
+
+    it('should return null for a trashed document in a single relationship', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with featured post',
+          featuredPost: postsDocTwo.id,
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 1,
+      })
+
+      expect(result.featuredPost).toBeNull()
+    })
+
+    it('should populate a non-trashed document in a single relationship', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with featured post',
+          featuredPost: postsDocOne.id,
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 1,
+      })
+
+      expect((result.featuredPost as Post)?.id).toBe(postsDocOne.id)
+    })
+
+    it('should include trashed documents in relationship when depth=0', async () => {
+      // At depth=0, relationships are returned as IDs - but trashed IDs should still be filtered
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with related posts depth 0',
+          relatedPosts: [postsDocOne.id, postsDocTwo.id],
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 0,
+      })
+
+      // At depth=0, no population occurs - raw IDs are returned as stored
+      // The trashed post ID should still be visible at depth=0
+      const relatedPosts = result.relatedPosts as (number | string)[]
+      expect(Array.isArray(relatedPosts)).toBe(true)
+      expect(relatedPosts).toHaveLength(2)
     })
   })
 })

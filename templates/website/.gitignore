@@ -4,6 +4,7 @@ node_modules
 .DS_Store
 .env
 .next
+next-env.d.ts
 .vercel
 
 # Payload default media upload directory

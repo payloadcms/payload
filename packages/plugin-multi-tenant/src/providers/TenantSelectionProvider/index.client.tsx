@@ -2,8 +2,7 @@
 
 import type { OptionObject } from 'payload'
 
-import { toast, useAuth, useConfig } from '@payloadcms/ui'
-import { useRouter } from 'next/navigation.js'
+import { toast, useAuth, useConfig, useRouter } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React, { createContext } from 'react'
 
@@ -216,6 +215,32 @@ export const TenantSelectionProviderClient = ({
     [syncTenants],
   )
 
+  /**
+   * Sync server-provided tenant options into client state.
+   * When the server component re-renders (e.g., after navigation post-login),
+   * it provides updated initialTenantOptions. Since useState() ignores new
+   * initial values on re-renders, and re-initializes with stale props on
+   * remounts, we sync them explicitly via this effect.
+   */
+  React.useEffect(() => {
+    if (initialTenantOptions.length > 0) {
+      setTenantOptions((prev) => {
+        if (
+          prev.length === initialTenantOptions.length &&
+          prev.every((opt, i) => opt.value === initialTenantOptions[i]?.value)
+        ) {
+          return prev
+        }
+        return initialTenantOptions
+      })
+
+      if (initialTenantOptions.length === 1 && initialTenantOptions[0]) {
+        setSelectedTenantID(initialTenantOptions[0].value)
+        setTenantCookie({ value: String(initialTenantOptions[0].value) })
+      }
+    }
+  }, [initialTenantOptions])
+
   React.useEffect(() => {
     if (userChanged || (initialValue && String(initialValue) !== getTenantCookie())) {
       if (userID) {
@@ -225,14 +250,12 @@ export const TenantSelectionProviderClient = ({
         // user logging out
         setSelectedTenantID(undefined)
         deleteTenantCookie()
-        if (tenantOptions.length > 0) {
-          setTenantOptions([])
-        }
+        setTenantOptions((prev) => (prev.length > 0 ? [] : prev))
         router.refresh()
       }
       prevUserID.current = userID
     }
-  }, [userID, userChanged, syncTenants, tenantOptions, initialValue, router])
+  }, [userID, userChanged, syncTenants, initialValue, router])
 
   /**
    * If there is no initial value, clear the tenant and refresh the router.

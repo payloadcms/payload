@@ -1,122 +1,113 @@
-import { type FlattenedField, traverseFields, type TraverseFieldsCallback } from 'payload'
+import type { FlattenedField } from 'payload'
 
-import type { ToCSVFunction } from '../types.js'
+import type { ExportFieldHookEntry, FieldBeforeExportHook } from '../types.js'
+
+import { registerFieldHooks } from './flattenedFields.js'
+import { getPolymorphicRelId, isPolymorphicRelValue } from './polymorphicRel.js'
 
 type Args = {
   fields: FlattenedField[]
 }
 
 /**
- * Gets custom toCSV field functions for export.
- * These functions transform field values when flattening documents for CSV export.
+ * Builds a map from logical field path (e.g. `content_textBlock_body`) to
+ * the export hook entry. Paths include block slugs but never array indices.
  */
-export const getExportFieldFunctions = ({ fields }: Args): Record<string, ToCSVFunction> => {
-  const result: Record<string, ToCSVFunction> = {}
+export const getExportFieldFunctions = ({ fields }: Args): Record<string, ExportFieldHookEntry> => {
+  const result: Record<string, ExportFieldHookEntry> = {}
+  registerFieldHooks(fields, '', result, registerExportHandler)
+  return result
+}
 
-  const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentRef, ref }) => {
-    // @ts-expect-error ref is untyped
-    ref.prefix = parentRef.prefix || ''
-    if (field.type === 'group' || field.type === 'tab') {
-      // @ts-expect-error ref is untyped
-      const parentPrefix = parentRef?.prefix ? `${parentRef.prefix}_` : ''
-      // @ts-expect-error ref is untyped
-      ref.prefix = `${parentPrefix}${field.name}_`
-    }
+const registerExportHandler = (
+  field: FlattenedField,
+  fullKey: string,
+  result: Record<string, ExportFieldHookEntry>,
+): void => {
+  const beforeExport = field.custom?.['plugin-import-export']?.hooks?.beforeExport
 
-    if (typeof field.custom?.['plugin-import-export']?.toCSV === 'function') {
-      // @ts-expect-error ref is untyped
-      result[`${ref.prefix}${field.name}`] = field.custom['plugin-import-export']?.toCSV
-    } else if (field.type === 'json' || field.type === 'richText') {
-      // Serialize JSON and richText fields as JSON strings in a single column
-      // This prevents them from being flattened into multiple columns
-      // @ts-expect-error ref is untyped
-      result[`${ref.prefix}${field.name}`] = ({ value }) => {
-        if (value === null || value === undefined) {
-          return value
-        }
-        if (typeof value === 'object') {
-          return JSON.stringify(value)
-        }
-        return value
-      }
-    } else if (field.type === 'relationship' || field.type === 'upload') {
-      if (field.hasMany !== true) {
-        if (!Array.isArray(field.relationTo)) {
-          // monomorphic single
-          // @ts-expect-error ref is untyped
-          result[`${ref.prefix}${field.name}`] = ({ value }) =>
-            typeof value === 'object' && value && 'id' in value ? value.id : value
-        } else {
-          // polymorphic single
-          // @ts-expect-error ref is untyped
-          result[`${ref.prefix}${field.name}`] = ({ data, value }) => {
-            if (value && typeof value === 'object' && 'relationTo' in value && 'value' in value) {
-              const relationTo = (value as { relationTo: string; value: { id: number | string } })
-                .relationTo
-              const relatedDoc = (value as { relationTo: string; value: { id: number | string } })
-                .value
-              if (relatedDoc && typeof relatedDoc === 'object') {
-                // @ts-expect-error ref is untyped
-                data[`${ref.prefix}${field.name}_id`] = relatedDoc.id
-                // @ts-expect-error ref is untyped
-                data[`${ref.prefix}${field.name}_relationTo`] = relationTo
-              }
-            }
-            return undefined // prevents further flattening
-          }
-        }
-      } else {
-        if (!Array.isArray(field.relationTo)) {
-          // monomorphic many
-          // @ts-expect-error ref is untyped
-          result[`${ref.prefix}${field.name}`] = ({
-            data,
-            value,
-          }: {
-            data: Record<string, unknown>
-            value: Array<number | Record<string, any> | string> | undefined
-          }) => {
-            if (Array.isArray(value)) {
-              value.forEach((val, i) => {
-                const id = typeof val === 'object' && val ? val.id : val
-                // @ts-expect-error ref is untyped
-                data[`${ref.prefix}${field.name}_${i}_id`] = id
-              })
-            }
-            return undefined // prevents further flattening
-          }
-        } else {
-          // polymorphic many
-          // @ts-expect-error ref is untyped
-          result[`${ref.prefix}${field.name}`] = ({
-            data,
-            value,
-          }: {
-            data: Record<string, unknown>
-            value: Array<Record<string, any>> | undefined
-          }) => {
-            if (Array.isArray(value)) {
-              value.forEach((val, i) => {
-                if (val && typeof val === 'object') {
-                  const relationTo = val.relationTo
-                  const relatedDoc = val.value
-                  if (relationTo && relatedDoc && typeof relatedDoc === 'object') {
-                    // @ts-expect-error ref is untyped
-                    data[`${ref.prefix}${field.name}_${i}_id`] = relatedDoc.id
-                    // @ts-expect-error ref is untyped
-                    data[`${ref.prefix}${field.name}_${i}_relationTo`] = relationTo
-                  }
-                }
-              })
-            }
-            return undefined
-          }
-        }
-      }
-    }
+  if (typeof beforeExport === 'function') {
+    result[fullKey] = { type: 'beforeExport', fn: beforeExport }
+    return
   }
 
-  traverseFields({ callback: buildCustomFunctions, fields })
+  const registerHandler = (handler: FieldBeforeExportHook) => {
+    result[fullKey] = { type: 'beforeExport', fn: handler }
+  }
 
-  return result
+  if (field.type === 'json' || field.type === 'richText') {
+    registerHandler(({ format, value }) => {
+      if (format === 'json') {
+        return value
+      }
+      if (value === null || value === undefined) {
+        return value
+      }
+      if (typeof value === 'object') {
+        return JSON.stringify(value)
+      }
+      return value
+    })
+    return
+  }
+
+  if (field.type === 'date') {
+    registerHandler(({ value }) => value)
+    return
+  }
+
+  if (field.type !== 'relationship' && field.type !== 'upload') {
+    return
+  }
+
+  if (field.hasMany !== true) {
+    if (!Array.isArray(field.relationTo)) {
+      registerHandler(({ value }) =>
+        typeof value === 'object' && value && 'id' in value ? value.id : value,
+      )
+      return
+    }
+
+    registerHandler(({ siblingData, value }) => {
+      if (isPolymorphicRelValue(value)) {
+        const id = getPolymorphicRelId(value)
+        if (id !== undefined) {
+          siblingData[`${fullKey}_id`] = id
+          siblingData[`${fullKey}_relationTo`] = value.relationTo
+        }
+      }
+      return null
+    })
+    return
+  }
+
+  if (!Array.isArray(field.relationTo)) {
+    registerHandler(({ siblingData, value }) => {
+      if (Array.isArray(value)) {
+        value.forEach((val, i) => {
+          const id = typeof val === 'object' && val ? (val as { id: unknown }).id : val
+          siblingData[`${fullKey}_${i}_id`] = id
+        })
+        return null
+      }
+      return undefined
+    })
+    return
+  }
+
+  registerHandler(({ siblingData, value }) => {
+    if (Array.isArray(value)) {
+      value.forEach((val, i) => {
+        if (isPolymorphicRelValue(val)) {
+          const id = getPolymorphicRelId(val)
+          if (id !== undefined) {
+            siblingData[`${fullKey}_${i}_id`] = id
+            siblingData[`${fullKey}_${i}_relationTo`] = val.relationTo
+          }
+        }
+      })
+      return null
+    }
+    return undefined
+  })
 }

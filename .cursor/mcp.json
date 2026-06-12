@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "pnpm",
+      "env": {},
+      "args": [
+        "dlx",
+        "@playwright/mcp@latest",
+        "--caps=vision,verify,tracing,devtools",
+        "--isolated",
+        "--headless",
+        "--browser",
+        "chromium"
+      ]
+    },
+    "payload": {
+      "type": "http",
+      "url": "http://localhost:3000/api/mcp"
+    }
+  }
+}

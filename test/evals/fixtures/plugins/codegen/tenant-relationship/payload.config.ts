@@ -1,0 +1,43 @@
+import type { Config, Plugin } from 'payload'
+
+import { stubAdapter } from '@/db-stub.js'
+import { buildConfig } from 'payload'
+
+// TODO: implement this plugin so that it adds a "tenant" relationship
+// field (pointing to the "tenants" collection) to every collection
+// that has auth enabled.
+// Note: spread the config and cast back to Config when returning:
+//   return { ...incomingConfig, collections: [...] } as Config
+export const withTenancy: Plugin = (incomingConfig) => {
+  return {
+    ...incomingConfig,
+    collections: (incomingConfig.collections ?? []).map((col) => ({
+      ...col,
+      // TODO: add the tenant relationship field to auth-enabled collections
+    })),
+  } as Config
+}
+
+export default buildConfig({
+  db: stubAdapter,
+  secret: 'eval-fixture',
+  collections: [
+    {
+      slug: 'tenants',
+      fields: [{ name: 'name', type: 'text', required: true }],
+      versions: false,
+    },
+    {
+      slug: 'users',
+      auth: true,
+      fields: [{ name: 'email', type: 'email', required: true }],
+      versions: false,
+    },
+    {
+      slug: 'posts',
+      fields: [{ name: 'title', type: 'text', required: true }],
+      versions: false,
+    },
+  ],
+  plugins: [withTenancy],
+})

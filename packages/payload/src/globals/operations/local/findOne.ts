@@ -14,13 +14,13 @@ import type {
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { SelectFromGlobalSlug } from '../../config/types.js'
+import type { DraftFlagFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOneOperation, type GlobalFindOneArgs } from '../findOne.js'
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -37,6 +37,10 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
+  /**
+   * When set to `true`, errors will not be thrown.
+   */
+  disableErrors?: boolean
   /**
    * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
    */
@@ -77,12 +81,19 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * the Global slug to operate against.
    */
   slug: TSlug
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
 } & Pick<FindOptions<string, SelectType>, 'select'> &
   Pick<GlobalFindOneArgs, 'flattenLocales'>
+
+export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseFindOneOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromGlobalSlug<TSlug>
 
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,
@@ -95,6 +106,7 @@ export async function findOneGlobalLocal<
     slug: globalSlug,
     data,
     depth,
+    disableErrors,
     draft = false,
     flattenLocales,
     includeLockStatus,
@@ -114,6 +126,7 @@ export async function findOneGlobalLocal<
     slug: globalSlug as string,
     data,
     depth,
+    disableErrors,
     draft,
     flattenLocales,
     globalConfig,

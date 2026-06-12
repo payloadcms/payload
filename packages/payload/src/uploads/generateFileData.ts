@@ -25,6 +25,7 @@ type Args<T> = {
   collection: Collection
   config: SanitizedConfig
   data: T
+  draft?: boolean
   isDuplicating?: boolean
   operation: 'create' | 'update'
   originalDoc?: T
@@ -68,6 +69,7 @@ const shouldReupload = (
 export const generateFileData = async <T>({
   collection: { config: collectionConfig },
   data,
+  draft,
   isDuplicating,
   operation,
   originalDoc,
@@ -84,7 +86,7 @@ export const generateFileData = async <T>({
 
   const { serverURL, sharp } = req.payload.config
 
-  let file = req.file
+  let file = isDuplicating ? undefined : req.file
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
     data,
@@ -348,20 +350,31 @@ export const generateFileData = async <T>({
         req.file = fileForResize
       }
     } else {
+      // For non-image files with useTempFiles, read the buffer from the temp file
+      // since file.data is empty when using temp files
+      let bufferToSave: Buffer
+      if (fileBuffer?.data) {
+        bufferToSave = fileBuffer.data
+      } else if (file.tempFilePath) {
+        bufferToSave = await fs.readFile(file.tempFilePath)
+      } else {
+        bufferToSave = file.data
+      }
+
       filesToSave.push({
-        buffer: fileBuffer?.data || file.data,
+        buffer: bufferToSave,
         path: `${staticPath}/${fsSafeName}`,
       })
 
       // If using temp files and the image is being resized, write the file to the temp path
-      if (fileBuffer?.data || file.data.length > 0) {
+      if (fileBuffer?.data || bufferToSave.length > 0) {
         if (file.tempFilePath) {
-          await fs.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
+          await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave) // write fileBuffer to the temp path
         } else {
           // Assign the _possibly modified_ file to the request object
           req.file = {
             ...file,
-            data: fileBuffer?.data || file.data,
+            data: fileBuffer?.data || bufferToSave,
             size: fileBuffer?.info.size,
           }
         }
@@ -411,6 +424,7 @@ export const generateFileData = async <T>({
   newData = {
     ...newData,
     ...fileData,
+    ...(draft ? { _status: 'draft' } : {}),
   }
 
   return {

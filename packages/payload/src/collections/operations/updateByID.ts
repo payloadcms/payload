@@ -27,6 +27,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -73,6 +74,7 @@ export const updateByIDOperation = async <
       args,
       collection: args.collection.config,
       operation: 'update',
+      overrideAccess: args.overrideAccess!,
     })
 
     if (args.publishSpecificLocale) {
@@ -136,7 +138,8 @@ export const updateByIDOperation = async <
       data.deletedAt != null
 
     if (isTrashAttempt && !overrideAccess) {
-      const deleteAccessResult = await executeAccess({ req }, collectionConfig.access.delete)
+      // Pass data so access function can check data.deletedAt to know it's a trash attempt
+      const deleteAccessResult = await executeAccess({ data, req }, collectionConfig.access.delete)
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 
@@ -190,8 +193,12 @@ export const updateByIDOperation = async <
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
-      forceSelect: collectionConfig.forceSelect,
-      select: incomingSelect,
+      select: resolveSelect({
+        config: collectionConfig.select,
+        operation: 'update',
+        req,
+        select: incomingSelect,
+      }),
     })
 
     // ///////////////////////////////////////////////
@@ -222,6 +229,14 @@ export const updateByIDOperation = async <
       unpublishAllLocales,
     })
 
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
+
     await unlinkTempFiles({
       collectionConfig,
       config,
@@ -236,6 +251,7 @@ export const updateByIDOperation = async <
       args,
       collection: collectionConfig,
       operation: 'updateByID',
+      overrideAccess,
       result,
     })) as TransformCollectionWithSelect<TSlug, TSelect>
 

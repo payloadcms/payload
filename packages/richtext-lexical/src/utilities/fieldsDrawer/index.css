@@ -1,0 +1,16 @@
+@layer payload-default {
+  .fields-drawer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-3);
+    padding: var(--spacer-4);
+
+    @media (max-width: 768px) {
+      padding: var(--spacer-3);
+    }
+  }
+
+  .fields-drawer .radio-group .field-description {
+    margin-top: var(--spacer-2);
+  }
+}

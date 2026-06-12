@@ -2,10 +2,11 @@
 import type { CollectionSlug } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { useBulkUpload } from '../../../elements/BulkUpload/index.js'
+import { useHierarchy } from '../../../providers/Hierarchy/index.js'
+import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 
@@ -27,7 +28,13 @@ export function ListBulkUploadButton({
    */
   openBulkUpload?: () => void
 }) {
-  const { drawerSlug: bulkUploadDrawerSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
+  const {
+    drawerSlug: bulkUploadDrawerSlug,
+    setCollectionSlug,
+    setOnSuccess,
+    setParentID,
+  } = useBulkUpload()
+  const { parent } = useHierarchy()
   const { t } = useTranslation()
   const { openModal } = useModal()
   const router = useRouter()
@@ -37,6 +44,7 @@ export function ListBulkUploadButton({
       openBulkUploadFromProps()
     } else {
       setCollectionSlug(collectionSlug)
+      setParentID(parent?.id)
       openModal(bulkUploadDrawerSlug)
       setOnSuccess(() => {
         if (typeof onBulkUploadSuccess === 'function') {
@@ -50,8 +58,10 @@ export function ListBulkUploadButton({
     router,
     collectionSlug,
     bulkUploadDrawerSlug,
+    parent,
     openModal,
     setCollectionSlug,
+    setParentID,
     setOnSuccess,
     onBulkUploadSuccess,
     openBulkUploadFromProps,
@@ -67,7 +77,7 @@ export function ListBulkUploadButton({
       buttonStyle="pill"
       key="bulk-upload-button"
       onClick={openBulkUpload}
-      size="small"
+      size="medium"
     >
       {t('upload:bulkUpload')}
     </Button>

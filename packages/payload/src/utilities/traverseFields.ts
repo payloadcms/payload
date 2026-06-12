@@ -46,8 +46,7 @@ const traverseArrayOrBlocksField = ({
       })
     }
     if (field.type === 'blocks') {
-      for (const _block of field.blockReferences ?? field.blocks) {
-        // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+      for (const _block of field.blocks) {
         const block =
           typeof _block === 'string' ? config?.blocks?.find((b) => b.slug === _block) : _block
         if (block) {
@@ -70,13 +69,9 @@ const traverseArrayOrBlocksField = ({
   for (const ref of data) {
     let fields!: Field[]
     if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
-      // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
-      const block = field.blockReferences
-        ? ((config?.blocks?.find((b) => b.slug === ref.blockType) ??
-            field.blockReferences.find(
-              (b) => typeof b !== 'string' && b.slug === ref.blockType,
-            )) as Block)
-        : field.blocks.find((b) => b.slug === ref.blockType)
+      const block =
+        config?.blocks?.find((b) => b.slug === ref.blockType) ??
+        field.blocks.find((b): b is Block => typeof b !== 'string' && b.slug === ref.blockType)
 
       fields = block?.fields as Field[]
     } else if (field.type === 'array') {
@@ -317,7 +312,7 @@ export const traverseFields = ({
             isTopLevel: false,
             leavesFirst,
             parentIsLocalized: false,
-            parentPath: tabHasName(tab) ? `${parentPath}${tab.name}` : parentPath,
+            parentPath: tabHasName(tab) ? `${parentPath}${tab.name}.` : parentPath,
             parentRef: currentParentRef,
             ref: tabRef,
           })

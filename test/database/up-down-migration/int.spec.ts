@@ -1,4 +1,4 @@
-import { existsSync, rmdirSync, rmSync } from 'fs'
+import { existsSync, rmSync } from 'fs'
 import path from 'path'
 import { buildConfig, getPayload } from 'payload'
 import { fileURLToPath } from 'url'
@@ -40,6 +40,7 @@ describeToUse('SQL migrations', () => {
           slug: 'users',
           auth: true,
           fields: [],
+          versions: false,
         },
       ],
     })

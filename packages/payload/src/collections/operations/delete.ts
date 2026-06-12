@@ -25,6 +25,7 @@ import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
@@ -52,6 +53,10 @@ export const deleteOperation = async <
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
 
+  if (args.collection.config.disableBulkDelete && !args.overrideAccess) {
+    throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk delete`, 403)
+  }
+
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
     // /////////////////////////////////////
@@ -62,6 +67,7 @@ export const deleteOperation = async <
       args,
       collection: args.collection.config,
       operation: 'delete',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -117,8 +123,12 @@ export const deleteOperation = async <
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
-      forceSelect: collectionConfig.forceSelect,
-      select: incomingSelect,
+      select: resolveSelect({
+        config: collectionConfig.select,
+        operation: 'delete',
+        req,
+        select: incomingSelect,
+      }),
     })
 
     // /////////////////////////////////////
@@ -244,6 +254,14 @@ export const deleteOperation = async <
         })
 
         // /////////////////////////////////////
+        // Add collection property for auth collections
+        // /////////////////////////////////////
+
+        if (collectionConfig.auth) {
+          result = { ...result, collection: collectionConfig.slug }
+        }
+
+        // /////////////////////////////////////
         // afterRead - Collection
         // /////////////////////////////////////
 
@@ -254,6 +272,7 @@ export const deleteOperation = async <
                 collection: collectionConfig,
                 context: req.context,
                 doc: result || doc,
+                overrideAccess,
                 req,
               })) || result
           }
@@ -335,6 +354,7 @@ export const deleteOperation = async <
       args,
       collection: collectionConfig,
       operation: 'delete',
+      overrideAccess,
       result,
     })
 

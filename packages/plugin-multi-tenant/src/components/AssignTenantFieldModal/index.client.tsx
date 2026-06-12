@@ -106,7 +106,7 @@ export const AssignTenantFieldModal: React.FC<{
       className={baseClass}
       slug={assignTenantModalSlug}
       style={{
-        zIndex: drawerZBase + editDepth,
+        zIndex: drawerZBase + editDepth + 1,
       }}
     >
       <div className={`${baseClass}__bg`} />

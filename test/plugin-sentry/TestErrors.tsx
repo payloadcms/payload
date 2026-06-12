@@ -2,17 +2,19 @@
 
 import { useState } from 'react'
 
+const serverURL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
+
 export const TestErrors = () => {
   const [throwClientSide, setThrowClientSide] = useState(false)
 
   const notFound = async () => {
-    const req = await fetch('http://localhost:3000/api/users/notFound', {
+    const req = await fetch(`${serverURL}/api/users/notFound`, {
       method: 'GET',
     })
   }
 
   const cannotCreate = async () => {
-    const req = await fetch('http://localhost:3000/api/posts', {
+    const req = await fetch(`${serverURL}/api/posts`, {
       body: JSON.stringify({
         text: 'New post',
       }),
@@ -21,7 +23,7 @@ export const TestErrors = () => {
   }
 
   const badLogin = async () => {
-    const req = await fetch('http://localhost:3000/api/users/login', {
+    const req = await fetch(`${serverURL}/api/users/login`, {
       body: JSON.stringify({
         email: 'sorry@whoareyou.com',
         password: '123456',
@@ -31,7 +33,7 @@ export const TestErrors = () => {
   }
 
   const badReq = async () => {
-    const req = await fetch('http://localhost:3000/api/users/forgot-password', {
+    const req = await fetch(`${serverURL}/api/users/forgot-password`, {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
@@ -41,7 +43,7 @@ export const TestErrors = () => {
   }
 
   const badReset = async () => {
-    const req = await fetch('http://localhost:3000/api/users/reset-password', {
+    const req = await fetch(`${serverURL}/api/users/reset-password`, {
       body: JSON.stringify({
         password: 'newPassword',
         token: '7eac3830ffcfc7f9f66c00315dabeb11575dba91',
@@ -55,7 +57,7 @@ export const TestErrors = () => {
   }
 
   const badVerify = async () => {
-    const req = await fetch('http://localhost:3000/api/users/unlock', {
+    const req = await fetch(`${serverURL}/api/users/unlock`, {
       headers: {
         'Content-Type': 'application/json',
       },

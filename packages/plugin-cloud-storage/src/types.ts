@@ -63,7 +63,7 @@ export type StaticHandler = (
   args: {
     doc?: TypeWithID
     headers?: Headers
-    params: { clientUploadContext?: unknown; collection: string; filename: string }
+    params: { clientUploadContext?: unknown; collection: string; filename: string; prefix?: string }
   },
 ) => Promise<Response> | Response
 
@@ -127,4 +127,14 @@ export interface PluginOptions {
    * Default: true
    */
   enabled?: boolean
+  /**
+   * When true (compositional prefixes), the stored `prefix` field is only the
+   * document-level segment; the collection prefix comes from plugin options and
+   * must not be pre-filled as the field default.
+   *
+   * Set by storage adapters that support compositional prefixes (e.g. S3, Azure, R2, Vercel Blob, GCS).
+   *
+   * @default false
+   */
+  useCompositePrefixes?: boolean
 }

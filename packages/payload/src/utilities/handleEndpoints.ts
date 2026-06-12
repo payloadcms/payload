@@ -108,8 +108,6 @@ export const handleEndpoints = async ({
     }
 
     const req = new Request(url, {
-      // @ts-expect-error // TODO: check if this is required
-      cache: request.cache,
       credentials: request.credentials,
       headers: request.headers,
       method: 'GET',

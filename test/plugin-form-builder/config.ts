@@ -3,7 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { BeforeEmail } from '@payloadcms/plugin-form-builder/types'
-import type { Block, Field } from 'payload'
+import type { Block, CollectionConfig, Field } from 'payload'
 
 //import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { formBuilderPlugin, fields as formFields } from '@payloadcms/plugin-form-builder'
@@ -13,9 +13,12 @@ import type { FormSubmission } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { Documents } from './collections/Documents.js'
+import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
+import { documentsSlug, mediaSlug } from './shared.js'
 
 const colorField: Block = {
   slug: 'color',
@@ -40,8 +43,17 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
+      views: {
+        uploadFormTest: {
+          Component: '/components/views/UploadFormTest/index.js#UploadFormTestView',
+          path: '/upload-form-test',
+        },
+      },
+    },
   },
-  collections: [Pages, Users],
+  collections: [Pages, Users, Media, Documents],
   editor: lexicalEditor({}),
   localization: {
     defaultLocale: 'en',
@@ -95,6 +107,7 @@ export default buildConfigWithDefaults({
               : []),
           ],
         },
+        upload: true,
         // payment: {
         //     paymentProcessor: {
         //       options: [
@@ -107,6 +120,7 @@ export default buildConfigWithDefaults({
         //     },
         // },
       },
+      uploadCollections: [mediaSlug, documentsSlug],
       beforeEmail,
       formOverrides: {
         // labels: {

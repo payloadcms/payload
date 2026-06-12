@@ -1,23 +1,29 @@
 import type { AddressInfo } from 'net'
-import type { CollectionSlug, Payload } from 'payload'
+import type { CollectionSlug, Payload, PayloadRequest } from 'payload'
 
 import { randomUUID } from 'crypto'
 import fs from 'fs'
 import { createServer } from 'http'
+import os from 'os'
 import path from 'path'
 import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
-import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
+import { checkFileRestrictions } from '../../packages/payload/src/uploads/checkFileRestrictions.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
+  adminThumbnailSizeSlug,
   allowListMediaSlug,
   anyImagesSlug,
   enlargeSlug,
@@ -27,6 +33,7 @@ import {
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
   pdfOnlySlug,
+  prefixMediaSlug,
   reduceSlug,
   relationSlug,
   restrictedMimeTypesSlug,
@@ -123,6 +130,8 @@ describe('Collections - Uploads', () => {
         expect(mediaDoc.sizes?.icon?.url).toBeDefined()
         expect(mediaDoc.sizes?.icon?.url).toContain('%20')
         expect(mediaDoc.sizes?.icon?.url).not.toContain(' ')
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       })
 
       it('creates from form data given an svg', async () => {
@@ -217,6 +226,40 @@ describe('Collections - Uploads', () => {
         // Check api response
         expect(doc.sizes.tablet.filename).toBeNull()
         expect(doc.sizes.icon.filename).toBeDefined()
+      })
+
+      it('should not set url on image sizes that cannot be generated', async () => {
+        // Create image too small for size generation
+        const formData = new FormData()
+        const filePath = path.join(dirname, './small.png')
+        const { file, handle } = await createStreamableFile(filePath)
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/${mediaSlug}`, {
+          body: formData,
+          file,
+        })
+        const { doc } = await response.json()
+
+        await handle.close()
+
+        expect(response.status).toBe(201)
+
+        // Check ungenerated sizes are empty, including the URL
+        expect(doc.sizes.tablet.filename).toBeNull()
+        expect(doc.sizes.tablet.width).toBeNull()
+        expect(doc.sizes.tablet.height).toBeNull()
+        expect(doc.sizes.tablet.mimeType).toBeNull()
+        expect(doc.sizes.tablet.filesize).toBeNull()
+        expect(doc.sizes.tablet.url).toBeNull()
+
+        // Also verify the database
+        const dbDoc = await payload.db.findOne({
+          collection: mediaSlug,
+          where: { id: { equals: doc.id } },
+        })
+
+        expect(dbDoc.sizes.tablet.url).toBeNull()
       })
 
       it('creates images from a different format', async () => {
@@ -461,6 +504,31 @@ describe('Collections - Uploads', () => {
       })
     })
     describe('read', () => {
+      it('should serve files with hash characters in filename', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file!.name = 'file #hash.png'
+
+        const mediaDoc = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })
+
+        expect(mediaDoc.url).toContain('%23')
+        expect(mediaDoc.url).not.toContain('#')
+
+        expect(mediaDoc.filename).toContain('#')
+        expect(mediaDoc.filename).not.toContain('%23')
+
+        const response = await restClient.GET(`/${mediaSlug}/file/${mediaDoc.filename}`)
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('content-type')).toContain('image/png')
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+      })
+
       it('should return the media document with the correct file type', async () => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
@@ -477,6 +545,8 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(200)
 
         expect(response.headers.get('content-type')).toContain('image/png')
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       })
     })
   })
@@ -513,6 +583,8 @@ describe('Collections - Uploads', () => {
         })
 
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+
+        await payload.delete({ collection: anyImagesSlug as CollectionSlug, id: doc.id })
       })
 
       it('should upload svg files', async () => {
@@ -526,6 +598,33 @@ describe('Collections - Uploads', () => {
         })
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
         expect(doc.mimeType).toEqual('image/svg+xml')
+      })
+
+      it('should not crash when adminThumbnail size is not generated', async () => {
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const fileBuffer = fs.readFileSync(svgFilePath)
+
+        // SVGs cannot be resized, so sizes.small should have null fields
+        const doc = await payload.create({
+          collection: adminThumbnailSizeSlug as CollectionSlug,
+          data: {},
+          file: {
+            data: fileBuffer,
+            mimetype: 'image/svg+xml',
+            name: 'test-thumbnail.svg',
+            size: fileBuffer.length,
+          },
+        })
+
+        expect(doc.id).toBeDefined()
+        expect(doc.filename).toBeDefined()
+        expect(doc.thumbnailURL).toBeNull()
+
+        // Clean up
+        await payload.delete({
+          collection: adminThumbnailSizeSlug as CollectionSlug,
+          id: doc.id,
+        })
       })
     })
 
@@ -562,6 +661,8 @@ describe('Collections - Uploads', () => {
         // Check that the replacement file was created and the old one was removed
         expect(await fileExists(path.join(expectedPath, updatedMediaDoc.filename))).toBe(true)
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
+
+        await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.id })
       })
 
       it('should remove existing media on re-upload - where query', async () => {
@@ -601,6 +702,8 @@ describe('Collections - Uploads', () => {
           true,
         )
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
+
+        await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.docs[0].id })
       })
 
       it('should remove sizes that do not pertain to the new image - by ID', async () => {
@@ -1025,6 +1128,145 @@ describe('Collections - Uploads', () => {
           }),
         ).resolves.not.toThrow()
       })
+
+      describe('useTempFiles MIME type bypass', () => {
+        const createdTmpFiles: string[] = []
+
+        const mockReq = {
+          payload: {
+            config: { upload: { useTempFiles: true } },
+            logger: { warn: () => {}, error: () => {} },
+          },
+        } as unknown as PayloadRequest
+
+        afterEach(async () => {
+          for (const tmpFile of createdTmpFiles) {
+            try {
+              await fs.promises.unlink(tmpFile)
+            } catch {
+              // ignore cleanup errors
+            }
+          }
+          createdTmpFiles.length = 0
+        })
+
+        it('should not bypass mimeTypes restriction when useTempFiles is enabled and file is HTML', async () => {
+          const htmlContent = Buffer.from('<html><script>alert("xss")</script></html>')
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.html`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, htmlContent)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'text/html',
+                name: 'malicious.html',
+                size: htmlContent.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
+
+        it('should not bypass SVG content validation when useTempFiles is enabled', async () => {
+          const svgContent = Buffer.from(
+            '<svg xmlns="http://www.w3.org/2000/svg"><script>alert("xss")</script></svg>',
+          )
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.svg`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, svgContent)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/svg+xml', 'image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'image/svg+xml',
+                name: 'malicious.svg',
+                size: svgContent.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
+
+        it('should allow a valid image file when useTempFiles is enabled', async () => {
+          const pngData = await fs.promises.readFile(path.resolve(dirname, './image.png'))
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.png`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, pngData)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'image/png',
+                name: 'valid.png',
+                size: pngData.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).resolves.not.toThrow()
+        })
+
+        it('should throw ValidationError when tempFilePath is missing and file.data is empty', async () => {
+          // No tempFilePath — falls through to extension-based check, which should still reject
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'text/html',
+                name: 'malicious.html',
+                size: 0,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
+
+        it('should reject an invalid PDF when useTempFiles is enabled', async () => {
+          const invalidPdfContent = Buffer.from('not a pdf')
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.pdf`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, invalidPdfContent)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['application/pdf'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'application/pdf',
+                name: 'invalid.pdf',
+                size: invalidPdfContent.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
+      })
     })
   })
 
@@ -1072,6 +1314,8 @@ describe('Collections - Uploads', () => {
       // Expect focal point to be the same
       expect(updateWithoutFocal.focalX).toEqual(10)
       expect(updateWithoutFocal.focalY).toEqual(10)
+
+      await payload.delete({ collection: focalOnlySlug, id: doc.id })
     })
 
     it('should default focal point to 50, 50', async () => {
@@ -1094,6 +1338,8 @@ describe('Collections - Uploads', () => {
 
       expect(updateWithoutFocal.focalX).toEqual(50)
       expect(updateWithoutFocal.focalY).toEqual(50)
+
+      await payload.delete({ collection: focalOnlySlug, id: doc.id })
     })
 
     it('should set focal point even if no sizes defined', async () => {
@@ -1107,6 +1353,8 @@ describe('Collections - Uploads', () => {
 
       expect(doc.focalX).toEqual(50)
       expect(doc.focalY).toEqual(50)
+
+      await payload.delete({ collection: focalNoSizesSlug, id: doc.id })
     })
   })
 
@@ -1220,6 +1468,8 @@ describe('Collections - Uploads', () => {
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
+
+      await payload.delete({ collection: reduceSlug, id: result.id })
     })
 
     it('should not enlarge image if `withoutEnlargement` is set to undefined and width or height is undefined when imageSizes are larger than the uploaded image', async () => {
@@ -1311,6 +1561,57 @@ describe('Collections - Uploads', () => {
       const expectedPath = path.join(dirname, './media')
 
       expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
+
+      await payload.delete({ collection: 'media', id: mediaDoc.id })
+      await payload.delete({ collection: 'media', id: duplicatedDoc.id })
+    })
+
+    it('should not leak req.file between sequential duplicate() calls on a shared req', async () => {
+      const filePath1 = path.resolve(dirname, './image.png')
+      const file1 = await getFileByPath(filePath1)
+      file1.name = 'alpha-leak-test.png'
+
+      const filePath2 = path.resolve(dirname, './small.png')
+      const file2 = await getFileByPath(filePath2)
+      file2.name = 'bravo-leak-test.png'
+
+      const doc1 = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: file1,
+      })
+
+      const doc2 = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: file2,
+      })
+
+      // Use a shared req object to simulate batch operations within a transaction
+      const req = {} as PayloadRequest
+
+      const dup1 = await payload.duplicate({
+        collection: mediaSlug,
+        id: doc1.id,
+        req,
+      })
+
+      const dup2 = await payload.duplicate({
+        collection: mediaSlug,
+        id: doc2.id,
+        req,
+      })
+
+      // dup1 should derive from alpha-leak-test.png
+      expect(dup1.filename).toContain('alpha-leak-test')
+      // dup2 should derive from bravo-leak-test.png, NOT alpha-leak-test.png
+      expect(dup2.filename).toContain('bravo-leak-test')
+
+      // Clean up created docs
+      await payload.delete({ collection: mediaSlug, id: doc1.id })
+      await payload.delete({ collection: mediaSlug, id: doc2.id })
+      await payload.delete({ collection: mediaSlug, id: dup1.id })
+      await payload.delete({ collection: mediaSlug, id: dup2.id })
     })
   })
 
@@ -1364,6 +1665,8 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.icon?.url).toBeDefined()
         expect(dbDoc.sizes?.icon?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.icon?.url).toMatch(/^\/api\/media\/file\//)
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -1423,6 +1726,9 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.tablet?.url).toBeDefined()
         expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ collection: mediaSlug, id: duplicatedDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -1482,6 +1788,8 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.tablet?.url).toBeDefined()
         expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -1598,13 +1906,379 @@ describe('Collections - Uploads', () => {
       expect(arrayBuffer.byteLength).toBe(1)
     })
   })
+
+  describe('SVG Security', () => {
+    let xssPayloadDoc: Media
+    const docIDs: (number | string)[] = []
+
+    afterAll(async () => {
+      for (const id of docIDs) {
+        try {
+          await payload.delete({
+            collection: noRestrictFileTypesSlug as CollectionSlug,
+            id,
+          })
+        } catch {
+          // ignore
+        }
+      }
+    })
+
+    it('should serve SVG files with Content-Security-Policy header to prevent XSS', async () => {
+      // Upload an SVG with embedded JavaScript
+      const filePath = path.resolve(dirname, './xss-payload.svg')
+      const file = await getFileByPath(filePath)
+
+      xssPayloadDoc = (await payload.create({
+        collection: noRestrictFileTypesSlug as CollectionSlug,
+        data: {},
+        file,
+      })) as unknown as Media
+
+      docIDs.push(xssPayloadDoc.id)
+
+      // Fetch the SVG file
+      const response = await restClient.GET(
+        `/${noRestrictFileTypesSlug}/file/${xssPayloadDoc.filename}`,
+      )
+
+      expect(response.status).toBe(200)
+
+      // Verify the Content-Security-Policy header is present
+      const cspHeader = response.headers.get('Content-Security-Policy')
+      expect(cspHeader).toBeTruthy()
+      expect(cspHeader).toContain("script-src 'none'")
+    })
+
+    it('should serve all SVG files with CSP headers regardless of content', async () => {
+      // Upload a safe SVG file
+      const filePath = path.resolve(dirname, './image.svg')
+      const file = await getFileByPath(filePath)
+
+      const safeDoc = (await payload.create({
+        collection: svgOnlySlug as CollectionSlug,
+        data: {},
+        file,
+      })) as unknown as Media
+
+      docIDs.push(safeDoc.id)
+
+      // Fetch the uploaded SVG file
+      const response = await restClient.GET(`/${svgOnlySlug}/file/${safeDoc.filename}`)
+
+      expect(response.status).toBe(200)
+
+      // Expect to have CSP headers
+      const cspHeader = response.headers.get('Content-Security-Policy')
+      expect(cspHeader).toBeTruthy()
+      expect(cspHeader).toContain("script-src 'none'")
+    })
+  })
+
+  describe('External File Upload - Redirect Blocking', () => {
+    const validPNG = Buffer.from(
+      '89504e470d0a1a0a0000000d494844520000000100000001' +
+        '0806000000ifad8300000010494441541865000000018001' +
+        'ffa500051f37dbba0000000049454e44ae426082',
+      'hex',
+    )
+
+    const startServer = async (server: ReturnType<typeof createServer>): Promise<number> => {
+      return new Promise<number>((resolve) => {
+        server.listen(0, '0.0.0.0', () => {
+          resolve((server.address() as AddressInfo).port)
+        })
+      })
+    }
+
+    it('should block malicious redirect', async () => {
+      const internalServer = createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end('SECRET_CREDENTIALS')
+      })
+
+      const internalServerPort = await startServer(internalServer)
+
+      const attackerServer = createServer((req, res) => {
+        res.writeHead(302, {
+          Location: `http://127.0.0.1:${internalServerPort}/secret`,
+        })
+        res.end()
+      })
+
+      const attackerServerPort = await startServer(attackerServer)
+
+      try {
+        await expect(
+          payload.create({
+            collection: mediaSlug,
+            data: {
+              filename: 'malicious.jpg',
+              url: `http://127.0.0.1:${attackerServerPort}/image.jpg`,
+            },
+          }),
+        ).rejects.toThrow()
+      } finally {
+        attackerServer.close()
+        internalServer.close()
+      }
+    })
+
+    it('should allow legitimate redirects within allowlist', async () => {
+      const edgeServer = createServer((req, res) => {
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Content-Length': validPNG.length.toString(),
+        })
+        res.end(validPNG)
+      })
+
+      const edgeServerPort = await startServer(edgeServer)
+
+      const cdnServer = createServer((req, res) => {
+        res.writeHead(302, { Location: `http://127.0.0.1:${edgeServerPort}/image.png` })
+        res.end()
+      })
+
+      const cdnServerPort = await startServer(cdnServer)
+
+      try {
+        const doc = await payload.create({
+          collection: allowListMediaSlug,
+          data: {
+            filename: 'cdn-image.png',
+            url: `http://127.0.0.1:${cdnServerPort}/image.png`,
+          },
+        })
+
+        expect(doc.filename).toBe('cdn-image.png')
+        expect(doc.mimeType).toBe('image/png')
+      } finally {
+        cdnServer.close()
+        edgeServer.close()
+      }
+    })
+
+    it('should enforce allowList on redirect targets', async () => {
+      const redirectServer = createServer((req, res) => {
+        // Redirect to a host that is NOT on the allowList
+        res.writeHead(302, { Location: 'http://192.168.99.99/file.png' })
+        res.end()
+      })
+
+      const redirectServerPort = await startServer(redirectServer)
+
+      try {
+        await expect(
+          payload.create({
+            collection: allowListMediaSlug,
+            data: {
+              filename: 'redirect-test.png',
+              url: `http://127.0.0.1:${redirectServerPort}/image.png`,
+            },
+          }),
+        ).rejects.toThrow()
+      } finally {
+        redirectServer.close()
+      }
+    })
+
+    it('should not allow infinite redirect loops', async () => {
+      // eslint-disable-next-line prefer-const
+      let redirectServerPort: number
+
+      const redirectServer = createServer((req, res) => {
+        res.writeHead(302, { Location: `http://127.0.0.1:${redirectServerPort}/loop` })
+        res.end()
+      })
+
+      redirectServerPort = await startServer(redirectServer)
+
+      try {
+        await expect(
+          payload.create({
+            collection: allowListMediaSlug,
+            data: {
+              filename: 'loop.png',
+              url: `http://127.0.0.1:${redirectServerPort}/loop`,
+            },
+          }),
+        ).rejects.toThrow(/Too many redirects/)
+      } finally {
+        redirectServer.close()
+      }
+    })
+  })
+
+  describe('paste-url endpoint', () => {
+    it('should return 400 when pasteURL is not configured', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/paste-url`, {
+        query: { src: 'http://example.com/file.png' },
+      })
+      expect(response.status).toBe(400)
+    })
+
+    it('should return 400 when pasteURL is disabled', async () => {
+      const response = await restClient.GET(`/${focalNoSizesSlug}/paste-url`, {
+        query: { src: 'http://example.com/file.png' },
+      })
+      expect(response.status).toBe(400)
+    })
+
+    it('should reject requests to non-public addresses', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+        query: { src: 'http://127.0.0.1/file.png' },
+      })
+      expect(response.status).toBe(500)
+    })
+
+    it('should validate resolved addresses', async () => {
+      const globalCachedFn = _internal_safeFetchGlobal.lookup
+
+      // @ts-expect-error mock lookup
+      _internal_safeFetchGlobal.lookup = (_hostname, _options, callback) => {
+        callback(null, '127.0.0.1' as any, 4)
+      }
+
+      try {
+        const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+          query: { src: 'http://localhost/file.png' },
+        })
+        expect(response.status).toBe(500)
+      } finally {
+        _internal_safeFetchGlobal.lookup = globalCachedFn
+      }
+    })
+
+    it('should reject URLs not matching the allowList', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+        query: { src: 'http://other.example.com/file.png' },
+      })
+      expect(response.status).toBe(400)
+    })
+
+    it('should require authentication', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+        query: { src: 'http://127.0.0.1/file.png' },
+        auth: false,
+      })
+      expect(response.status).toBe(403)
+    })
+
+    it('should require a src query parameter', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`)
+      expect(response.status).toBeGreaterThanOrEqual(400)
+    })
+  })
+
+  describe('tempFileDir', () => {
+    it.each([
+      { dir: '/tmp', expectedPrefix: '/tmp', description: 'absolute path like /tmp' },
+      { dir: 'tmp', expectedPrefix: path.join(process.cwd(), 'tmp'), description: 'relative path' },
+    ])('creates temp files in correct location for $description', ({ dir, expectedPrefix }) => {
+      const handler = tempFileHandler({ tempFileDir: dir }, 'field', 'file.png')
+      const filePath = handler.getFilePath()
+
+      expect(filePath.startsWith(expectedPrefix)).toBe(true)
+      handler.cleanup()
+    })
+  })
+
+  describe('prefix query parameter', () => {
+    const docIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of docIDs) {
+        try {
+          await payload.delete({ collection: prefixMediaSlug, id })
+        } catch {
+          // noop — file may already have been deleted
+        }
+      }
+      docIDs.length = 0
+    })
+
+    it('should return 200 when the prefix query param matches the stored document prefix', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: { prefix: 'abc123' },
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(
+        `/${prefixMediaSlug}/file/${doc.filename}?prefix=abc123`,
+      )
+
+      expect(response.status).toBe(200)
+    })
+
+    it('should return 403 when the prefix query param does not match the stored document prefix', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: { prefix: 'abc123' },
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(
+        `/${prefixMediaSlug}/file/${doc.filename}?prefix=wrongprefix`,
+      )
+
+      expect(response.status).toBe(403)
+    })
+
+    it('should return 200 without prefix param for documents that have no prefix (backward compatibility)', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: {},
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(`/${prefixMediaSlug}/file/${doc.filename}`)
+
+      expect(response.status).toBe(200)
+    })
+
+    it('should return 403 when prefix param is provided but no document has a matching prefix', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: {},
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(
+        `/${prefixMediaSlug}/file/${doc.filename}?prefix=nonexistent`,
+      )
+
+      expect(response.status).toBe(403)
+    })
+  })
 })
 
 async function fileExists(fileName: string): Promise<boolean> {
   try {
     await stat(fileName)
     return true
-  } catch (err) {
+  } catch (_err) {
     return false
   }
 }

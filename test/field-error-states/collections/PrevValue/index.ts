@@ -6,13 +6,18 @@ import { collectionSlugs } from '../../shared.js'
 
 export const PrevValue: CollectionConfig = {
   slug: collectionSlugs.prevValue,
+  admin: {
+    useAsTitle: 'title',
+  },
   fields: [
     {
       name: 'title',
       type: 'text',
       required: true,
       validate: async (value, options) => {
-        if (options.operation === 'create') return true
+        if (options.operation === 'create') {
+          return true
+        }
 
         const query = QueryString.stringify(
           {
@@ -29,7 +34,7 @@ export const PrevValue: CollectionConfig = {
 
         try {
           const relatedDocs = await fetch(
-            `http://localhost:3000/api/${collectionSlugs.prevValueRelation}${query}`,
+            `http://localhost:${process.env.PORT || 3000}/api/${collectionSlugs.prevValueRelation}${query}`,
             {
               credentials: 'include',
               headers: {
@@ -39,8 +44,8 @@ export const PrevValue: CollectionConfig = {
           ).then((res) => res.json())
           if (relatedDocs.docs.length > 0 && value !== options.previousValue) {
             console.log({
-              value,
               prev: options.previousValue,
+              value,
             })
             return 'Doc is being referenced, cannot change title'
           }
@@ -56,4 +61,5 @@ export const PrevValue: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

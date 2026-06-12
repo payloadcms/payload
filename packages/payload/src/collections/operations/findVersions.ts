@@ -12,10 +12,10 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
-import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -46,6 +46,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       args,
       collection: args.collection.config,
       operation: 'findVersions',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -100,8 +101,12 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
 
     const select = sanitizeSelect({
       fields: versionFields,
-      forceSelect: getQueryDraftsSelect({ select: collectionConfig.forceSelect }),
-      select: incomingSelect,
+      select: resolveSelect({
+        config: collectionConfig.select,
+        operation: 'read',
+        req,
+        select: incomingSelect,
+      }),
       versions: true,
     })
 
@@ -144,6 +149,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
                 collection: collectionConfig,
                 context: req.context,
                 doc: docRef.version,
+                overrideAccess,
                 query: fullWhere,
                 req,
               })) || docRef.version
@@ -196,6 +202,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
                 context: req.context,
                 doc: doc.version,
                 findMany: true,
+                overrideAccess,
                 query: fullWhere,
                 req,
               })) || doc.version
@@ -219,6 +226,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       args,
       collection: collectionConfig,
       operation: 'findVersions',
+      overrideAccess,
       result,
     })
 

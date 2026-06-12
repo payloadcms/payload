@@ -8,6 +8,7 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export async function createVersion<T extends JsonObject = JsonObject>(
@@ -52,7 +53,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
     version,
   }
 
-  const db = await getTransaction(this, req)
+  const db = getPrimaryDb(this, await getTransaction(this, req))
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,

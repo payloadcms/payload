@@ -85,13 +85,20 @@ export const getStaticHandler = ({ cachingOptions, collection, debug }: Args): S
 
       const bodyBuffer = await streamToBuffer(object.Body)
 
+      const responseHeaders: Record<string, string> = {
+        'Content-Length': String(object.ContentLength),
+        'Content-Type': object.ContentType,
+        ...(cachingEnabled && { 'Cache-Control': `public, max-age=${maxAge}` }),
+        ETag: object.ETag,
+      }
+
+      // Add Content-Security-Policy header for SVG files to prevent executable code
+      if (object.ContentType === 'image/svg+xml') {
+        responseHeaders['Content-Security-Policy'] = "script-src 'none'"
+      }
+
       return new Response(bodyBuffer, {
-        headers: new Headers({
-          'Content-Length': String(object.ContentLength),
-          'Content-Type': object.ContentType,
-          ...(cachingEnabled && { 'Cache-Control': `public, max-age=${maxAge}` }),
-          ETag: object.ETag,
-        }),
+        headers: new Headers(responseHeaders),
         status: 200,
       })
     } catch (err: unknown) {

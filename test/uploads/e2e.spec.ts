@@ -1,28 +1,35 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { statSync } from 'fs'
-import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
-import { openListFilters } from 'helpers/e2e/filters/index.js'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
+import { readFileSync, statSync } from 'fs'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
+  getColumnSelectorItem,
+  openListColumns,
+  toggleColumn,
+} from '../__helpers/e2e/columns/index.js'
+import { openListFilters } from '../__helpers/e2e/filters/index.js'
+import {
+  closeAllToasts,
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertToastErrors } from '../helpers/assertToastErrors.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
-import { RESTClient } from '../helpers/rest.js'
+  waitForFormReady,
+} from '../__helpers/e2e/helpers.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
+import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
@@ -31,6 +38,7 @@ import {
   adminUploadControlSlug,
   animatedTypeMedia,
   audioSlug,
+  bulkUploadsHookErrorSlug,
   bulkUploadsSlug,
   constructorOptionsSlug,
   customFileNameMediaSlug,
@@ -67,6 +75,12 @@ const dirname = path.dirname(filename)
  */
 const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z/
 
+const adminThumbnailFunctionSrcPattern = new RegExp(
+  String.raw`^https://raw\.githubusercontent\.com/payloadcms/website/refs/heads/main/public/images/universal-truth\.jpg` +
+    cacheTagPattern.source +
+    '$',
+)
+
 const { afterAll, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
@@ -101,6 +115,7 @@ let consoleErrorsFromPage: string[] = []
 let collectErrorsFromPage: () => boolean
 let stopCollectingErrorsFromPage: () => boolean
 let bulkUploadsURL: AdminUrlUtil
+let bulkUploadsHookErrorURL: AdminUrlUtil
 let fileMimeTypeURL: AdminUrlUtil
 let svgOnlyURL: AdminUrlUtil
 let mediaWithoutDeleteAccessURL: AdminUrlUtil
@@ -145,6 +160,7 @@ describe('Uploads', () => {
     threeDimensionalURL = new AdminUrlUtil(serverURL, threeDimensionalSlug)
     constructorOptionsURL = new AdminUrlUtil(serverURL, constructorOptionsSlug)
     bulkUploadsURL = new AdminUrlUtil(serverURL, bulkUploadsSlug)
+    bulkUploadsHookErrorURL = new AdminUrlUtil(serverURL, bulkUploadsHookErrorSlug)
     fileMimeTypeURL = new AdminUrlUtil(serverURL, fileMimeTypeSlug)
     svgOnlyURL = new AdminUrlUtil(serverURL, svgOnlySlug)
     mediaWithoutDeleteAccessURL = new AdminUrlUtil(serverURL, mediaWithoutDeleteAccessSlug)
@@ -171,6 +187,34 @@ describe('Uploads', () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'uploadsTest',
+      uploadsDir: [
+        path.resolve(dirname, './uploads'),
+        path.resolve(dirname, './media'),
+        path.resolve(dirname, './media-gif'),
+        path.resolve(dirname, './no-image-sizes'),
+        path.resolve(dirname, './object-fit'),
+        path.resolve(dirname, './custom-file-name-media'),
+        path.resolve(dirname, './focal-only'),
+        path.resolve(dirname, './crop-only'),
+        path.resolve(dirname, './optional'),
+        path.resolve(dirname, './required'),
+        path.resolve(dirname, './focal-no-sizes'),
+        path.resolve(dirname, './svg-only'),
+        path.resolve(dirname, './media-trim'),
+        path.resolve(dirname, './image-sizes-only'),
+        path.resolve(dirname, './versions'),
+        path.resolve(dirname, './media-with-relation-preview'),
+        path.resolve(dirname, './with-meta-data'),
+        path.resolve(dirname, './with-any-image-type'),
+        path.resolve(dirname, './with-only-jpeg-meta-data'),
+        path.resolve(dirname, './without-meta-data'),
+        path.resolve(dirname, './collections/Upload1/uploads'),
+        path.resolve(dirname, './collections/Upload2/uploads'),
+        path.resolve(dirname, './collections/AdminThumbnailFunction/test/uploads'),
+        path.resolve(dirname, './collections/AdminThumbnailSize/test/uploads'),
+        path.resolve(dirname, './collections/AdminThumbnailWithSearchQueries/test/uploads'),
+        path.resolve(dirname, './collections/AdminUploadControl/test/uploads'),
+      ],
     })
 
     if (client) {
@@ -226,7 +270,7 @@ describe('Uploads', () => {
     const filename = page.locator('.upload-relationship-details__filename a').nth(0)
     await expect(filename).toContainText('image.png')
 
-    await page.locator('.upload-relationship-details__edit').nth(0).click()
+    await page.locator('.field-type.upload').nth(0).getByRole('button', { name: 'Edit' }).click()
     await page.locator('.file-details__remove').click()
 
     await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
@@ -468,11 +512,13 @@ describe('Uploads', () => {
 
   test('should show draft uploads in the relation list', async () => {
     await page.goto(relationURL.list)
+    // Wait for hydration
+    await wait(1000)
     // from the list edit the first document
     await page.locator('.row-1 a').click()
 
     // edit the versioned image
-    await page.locator('.field-type:nth-of-type(2) .icon--edit').click()
+    await page.locator('.field-type:nth-of-type(2) .icon--write').click()
 
     // fill the title with 'draft'
     await page.locator('#field-title').fill('draft')
@@ -522,7 +568,7 @@ describe('Uploads', () => {
 
       // remove the selection and open the list drawer
       await wait(500) // flake workaround
-      await page.locator('#field-audio .upload-relationship-details__remove').click()
+      await page.locator('#field-audio').getByRole('button', { name: 'Remove' }).click()
 
       await openDocDrawer({ page, selector: '#field-audio .upload__listToggler' })
 
@@ -543,9 +589,8 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'successfully',
       )
-      await page
-        .locator('.payload-toast-container .toast-success .payload-toast-close-button')
-        .click()
+
+      await closeAllToasts(page)
 
       // save the document and expect an error
       await page.locator('button#action-save').click()
@@ -568,7 +613,7 @@ describe('Uploads', () => {
 
       // remove the selection and open the list drawer
       await wait(500) // flake workaround
-      await page.locator('#field-audio .upload-relationship-details__remove').click()
+      await page.locator('#field-audio').getByRole('button', { name: 'Remove' }).click()
 
       await openDocDrawer({ page, selector: '.upload__listToggler' })
 
@@ -608,6 +653,8 @@ describe('Uploads', () => {
 
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
+
     await wait(1000)
 
     const mediaID = page.url().split('/').pop()
@@ -628,6 +675,8 @@ describe('Uploads', () => {
     await loadFromUrlButton.click()
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
+
     await wait(1000)
 
     const mediaID = page.url().split('/').pop()
@@ -646,10 +695,9 @@ describe('Uploads', () => {
 
     // Ensure sure false or null shows generic file svg
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
-    await expect(genericUploadImage).toHaveAttribute(
-      'src',
-      /^https:\/\/raw\.githubusercontent\.com\/payloadcms\/website\/refs\/heads\/main\/public\/images\/universal-truth\.jpg(\?.*)?$/,
-    )
+
+    // cacheTags defaults to true, so the cache tag is appended to the src in list view
+    await expect(genericUploadImage).toHaveAttribute('src', adminThumbnailFunctionSrcPattern)
   })
 
   test('should render adminThumbnail when using a custom thumbnail URL with additional queries', async () => {
@@ -885,6 +933,7 @@ describe('Uploads', () => {
     await page.locator('[id^="doc-drawer_admin-thumbnail-size"] #action-save').click()
 
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
 
     const href = await page.locator('#field-singleThumbnailUpload a').getAttribute('href')
 
@@ -916,6 +965,7 @@ describe('Uploads', () => {
       '.bulk-upload--actions-bar__saveButtons button',
     )
     await saveButton.click()
+    await closeAllToasts(page)
 
     await expect(
       page.locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem'),
@@ -948,6 +998,8 @@ describe('Uploads', () => {
     await page.waitForSelector('button#action-save')
     await page.locator('button#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
+
     await wait(1000) // Wait for the save
 
     await expect(page.locator('.file-field__previewSizes')).toBeVisible()
@@ -997,6 +1049,7 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
       await expect(items).toHaveCount(2)
@@ -1038,6 +1091,7 @@ describe('Uploads', () => {
         .fill('prefix-one')
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
       await expect(items).toHaveCount(1)
@@ -1085,10 +1139,12 @@ describe('Uploads', () => {
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
-      await editManyBulkUploadModal
-        .locator('.edit-many-bulk-uploads__form .react-select')
-        .click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const editFieldSelector = editManyBulkUploadModal.locator(
+        '.edit-many-bulk-uploads__form .react-select',
+      )
+      await editFieldSelector.click({ delay: 100 })
+      const editFieldMenu = getSelectMenu({ page })
+      const options = editFieldMenu.locator('.rs__option')
 
       await options.locator('text=Prefix').click()
 
@@ -1096,6 +1152,7 @@ describe('Uploads', () => {
 
       await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
       await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+      await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
       await expect(items).toHaveCount(2)
@@ -1108,6 +1165,7 @@ describe('Uploads', () => {
     test('should remove validation errors from bulk upload files after correction in edit many drawer', async () => {
       // Navigate to the upload creation page
       await page.goto(uploadsOne.create)
+      await waitForFormReady(page)
 
       // Upload single file
       await page.setInputFiles(
@@ -1136,6 +1194,7 @@ describe('Uploads', () => {
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 2 files')
+      await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('2')
@@ -1148,7 +1207,8 @@ describe('Uploads', () => {
         '.edit-many-bulk-uploads__form .react-select',
       )
       await fieldSelector.click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const fieldSelectorMenu = getSelectMenu({ page })
+      const options = fieldSelectorMenu.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
 
@@ -1160,6 +1220,7 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'Successfully saved 2 files',
       )
+      await closeAllToasts(page)
 
       await saveDocAndAssert(page)
     })
@@ -1200,7 +1261,8 @@ describe('Uploads', () => {
         '.edit-many-bulk-uploads__form .react-select',
       )
       await fieldSelector.click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const fieldSelectorMenu2 = getSelectMenu({ page })
+      const options = fieldSelectorMenu2.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
 
@@ -1224,6 +1286,7 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
@@ -1231,16 +1294,36 @@ describe('Uploads', () => {
 
     test('should preserve state when adding additional files to an existing bulk upload', async () => {
       await page.goto(uploadsTwo.list)
-      await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+
+      // Wait for page header to be visible (indicates page is loaded and hydrated)
+      await expect(page.locator('.list-header__title')).toBeVisible()
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeEnabled()
+
+      // Click and retry until dropzone appears (handles hydration timing issues)
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ timeout: 5000, intervals: [500] })
 
       await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
 
       await page.locator('#field-prefix').fill('should-preserve')
 
       // add another file
-      await page
-        .locator('.file-selections__header__actions button', { hasText: 'Add File' })
-        .click()
+      const addFileButton = page.locator('.file-selections__header__actions button', {
+        hasText: 'Add File',
+      })
+      await expect(addFileButton).toBeEnabled()
+      await addFileButton.click()
+
+      // Wait for new dropzone to be ready
+      await expect(dropzoneInput).toBeAttached()
+
       await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './small.png'))
 
       const originalFileRow = page
@@ -1259,7 +1342,22 @@ describe('Uploads', () => {
 
     test('should not redirect to created relationship document inside the bulk upload drawer', async () => {
       await page.goto(bulkUploadsURL.list)
-      await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+
+      // Wait for page header to be visible (indicates page is loaded and hydrated)
+      await expect(page.locator('.list-header__title')).toBeVisible()
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeEnabled()
+
+      // Click and retry until dropzone appears (handles hydration timing issues)
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ timeout: 5000, intervals: [500] })
+
       await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
 
       await page.locator('#field-title').fill('Upload title 1')
@@ -1352,17 +1450,15 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'Successfully saved 1 files',
       )
+      await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
 
       await expect(bulkUploadModal).toBeVisible()
 
-      // Navigate back to first file to fix it
-      const prevImageChevronButton = bulkUploadModal.locator(
-        '.bulk-upload--actions-bar__controls button:nth-of-type(1)',
-      )
-      await prevImageChevronButton.click()
+      // After the successful file is saved and removed, only the failed file remains.
+      // It should already be active (no need to navigate).
 
       // Should show "A file name is required" error message
       await expect(bulkUploadModal.locator('.field-error')).toContainText('A file name is required')
@@ -1378,6 +1474,7 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'Successfully saved 1 files',
       )
+      await closeAllToasts(page)
 
       await expect(bulkUploadModal).toBeHidden()
 
@@ -1420,6 +1517,7 @@ describe('Uploads', () => {
 
       // Should show error message for all failed files
       await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 3 files')
+      await closeAllToasts(page)
 
       // Check that each file has exactly 1 error (the missing required field)
       const errorCounts = await bulkUploadModal
@@ -1482,7 +1580,7 @@ describe('Uploads', () => {
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("Failed to save 2 files")'),
       ).toBeVisible()
-
+      await closeAllToasts(page)
       // After submission, the successful form (form 3) is removed from sidebar
       // Only the 2 failed forms remain in the sidebar
       const fileSelections = bulkUploadModal.locator('.file-selections__filesContainer')
@@ -1567,21 +1665,62 @@ describe('Uploads', () => {
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
       ).toBeVisible()
-
-      // The file that exceeded the size limit should have exactly 1 error
-      // Navigate back to check the second file (2mb.jpg)
-      const prevButton = bulkUploadModal.locator(
-        '.bulk-upload--actions-bar__controls button:nth-of-type(1)',
-      )
-      await prevButton.click()
-
-      const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
-      await expect(errorCount).toHaveText('1')
-
       // Verify the error message indicates file size limit
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("File size limit")'),
       ).toBeVisible()
+      await closeAllToasts(page)
+      // The file that exceeded the size limit should have exactly 1 error.
+      // After the 2 successful files are saved and removed, only the failed file (2mb.jpg) remains.
+      // It should already be active (no need to navigate).
+
+      const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
+      await expect(errorCount).toHaveText('1')
+    })
+
+    test('should report failure when beforeChange hook throws non-field error', async () => {
+      await page.goto(bulkUploadsHookErrorURL.list)
+
+      await expect(page.locator('.list-header__title')).toBeVisible()
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeEnabled()
+
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ timeout: 5000, intervals: [500] })
+
+      await page
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([path.resolve(dirname, './image.png'), path.resolve(dirname, './small.png')])
+
+      const nextButton = page.locator('.bulk-upload--actions-bar__controls button:nth-of-type(2)')
+      await nextButton.click()
+
+      await page.locator('#field-shouldFail').check()
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'Successfully saved 1 files',
+      )
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
+      ).toBeVisible()
+      await expect(
+        page.locator(
+          '.payload-toast-container .toast-error:has-text("Simulated hook error in beforeChange")',
+        ),
+      ).toBeVisible()
+
+      await expect(page.locator('.file-selections .file-selections__fileRowContainer')).toHaveCount(
+        1,
+      )
     })
   })
 
@@ -1663,7 +1802,8 @@ describe('Uploads', () => {
   })
 
   describe('image manipulation', () => {
-    test('should crop image correctly', async () => {
+    // Skip until the crop tool is reworked to v4 design
+    test.skip('should crop image correctly', async () => {
       const positions = {
         'bottom-right': {
           dragX: 800,
@@ -1886,10 +2026,7 @@ describe('Uploads', () => {
       await page.locator('#field-withAdminThumbnail button.upload__listToggler').click()
       await page.locator('tr.row-1 td.cell-filename button.default-cell__first-cell').click()
       const thumbnail = page.locator('#field-withAdminThumbnail div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute(
-        'src',
-        /^https:\/\/raw\.githubusercontent\.com\/payloadcms\/website\/refs\/heads\/main\/public\/images\/universal-truth\.jpg(\?.*)?$/,
-      )
+      await expect(thumbnail).toHaveAttribute('src', adminThumbnailFunctionSrcPattern)
     })
 
     test('should select an image within target range', async () => {
@@ -1936,17 +2073,19 @@ describe('Uploads', () => {
     const imageRelationshipCell = firstRow.locator('.cell-imageRelationship .relationship-cell')
     await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
 
-    const pageTwoButton = page.locator('.paginator__page', { hasText: '2' })
-    await expect(pageTwoButton).toBeVisible()
-    await pageTwoButton.click()
+    // Navigate to page 2 using the right arrow
+    const nextPageButton = page.locator('.clickable-arrow--right')
+    await expect(nextPageButton).toBeVisible()
+    await nextPageButton.click()
 
     const imageUploadImg = imageUploadCell.locator('.thumbnail')
     await expect(imageUploadImg).toBeVisible()
-    await expect(imageRelationshipCell).toHaveText('image-1.png')
+    await expect(imageRelationshipCell).toHaveText('image.png')
 
-    const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
-    await expect(pageOneButton).toBeVisible()
-    await pageOneButton.click()
+    // Navigate back to page 1 using the left arrow
+    const prevPageButton = page.locator('.clickable-arrow--left')
+    await expect(prevPageButton).toBeVisible()
+    await prevPageButton.click()
 
     await expect(imageUploadCell).toHaveText('<No Image Upload>')
     await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
@@ -2014,19 +2153,79 @@ describe('Uploads', () => {
 
     await openListColumns(page, {})
 
-    await expect(page.locator('button:has-text("Sizes > one > URL")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > one > Width")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > one > Height")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > one > MIME Type")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > one > File Size")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > one > File Name")')).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > URL',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > Width',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > Height',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > MIME Type',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > File Size',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > File Name',
+      }),
+    ).toBeHidden()
 
-    await expect(page.locator('button:has-text("Sizes > two > URL")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > two > Width")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > two > Height")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > two > MIME Type")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > two > File Size")')).toBeHidden()
-    await expect(page.locator('button:has-text("Sizes > two > File Name")')).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > URL',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > Width',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > Height',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > MIME Type',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > File Size',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > File Name',
+      }),
+    ).toBeHidden()
   })
 
   test('should show image size in column selector in list view if imageSize has admin.disableListColumn false', async () => {
@@ -2034,19 +2233,79 @@ describe('Uploads', () => {
 
     await openListColumns(page, {})
 
-    await expect(page.locator('button:has-text("Sizes > three > URL")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > three > Width")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > three > Height")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > three > MIME Type")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > three > File Size")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > three > File Name")')).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > URL',
+      }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > Width',
+      }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > Height',
+      }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > MIME Type',
+      }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > File Size',
+      }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > File Name',
+      }),
+    ).toBeVisible()
 
-    await expect(page.locator('button:has-text("Sizes > four > URL")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > four > Width")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > four > Height")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > four > MIME Type")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > four > File Size")')).toBeVisible()
-    await expect(page.locator('button:has-text("Sizes > four > File Name")')).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > URL',
+      }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > Width',
+      }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > Height',
+      }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > MIME Type',
+      }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > File Size',
+      }),
+    ).toBeVisible()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > File Name',
+      }),
+    ).toBeVisible()
   })
 
   test('should not show image size in where filter drodown in list view if imageSize has admin.disableListFilter true', async () => {
@@ -2055,15 +2314,13 @@ describe('Uploads', () => {
     await openListFilters(page, {})
 
     const whereBuilder = page.locator('.where-builder')
-    await whereBuilder.locator('.where-builder__add-first-filter').click()
 
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = conditionField.locator('.rs__menu-list')
+    const menuList = getSelectMenu({ page })
 
     // ensure the image size is not present
-    await expect(menuList.getByText('Sizes > one > URL', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > Width', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > Height', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > MIME Type', { exact: true })).toHaveCount(0)
@@ -2084,12 +2341,11 @@ describe('Uploads', () => {
     await openListFilters(page, {})
 
     const whereBuilder = page.locator('.where-builder')
-    await whereBuilder.locator('.where-builder__add-first-filter').click()
 
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = conditionField.locator('.rs__menu-list')
+    const menuList = getSelectMenu({ page })
 
     // ensure the image size is present
     await expect(menuList.getByText('Sizes > two > URL', { exact: true })).toHaveCount(1)
@@ -2148,7 +2404,7 @@ describe('Uploads', () => {
 
     await expect(page.locator('#field-uploadField')).toBeVisible()
 
-    await page.locator('#field-uploadField .upload-relationship-details__edit').click()
+    await page.locator('#field-uploadField').getByRole('button', { name: 'Edit' }).click()
 
     const drawer = page.locator('[id^=doc-drawer_no-files-required_]')
     await expect(drawer).toBeVisible()
@@ -2156,5 +2412,35 @@ describe('Uploads', () => {
     const titleField = drawer.locator('#field-title')
 
     await expect(titleField).toHaveValue('Upload without file')
+  })
+
+  test('should upload and serve file with # and % in filename', async () => {
+    await page.goto(mediaURL.create)
+
+    const imageBuffer = readFileSync(path.resolve(dirname, './image.png'))
+
+    await page.setInputFiles('input[type="file"]', {
+      buffer: imageBuffer,
+      mimeType: 'image/png',
+      name: 'file%20#hash.png',
+    })
+
+    const filenameField = page.locator('.file-field__filename')
+    await expect(filenameField).toHaveValue('file%20#hash.png')
+
+    await saveDocAndAssert(page)
+
+    // After saving, the URL shown in the admin panel must have # and % encoded
+    const fileUrlLink = page.locator('.file-meta__url a')
+    await expect(fileUrlLink).toHaveAttribute('href')
+
+    const href = await fileUrlLink.getAttribute('href')
+    expect(href).toContain('%23') // # encoded
+    expect(href).toContain('%25') // % encoded
+    expect(href).not.toContain('#') // no literal #
+
+    // Navigating to the file URL must return 200
+    const response = await page.goto(`${serverURL}${href}`)
+    expect(response?.status()).toBe(200)
   })
 })

@@ -53,6 +53,10 @@ export type OperationMap<TOperationGeneric extends CollectionSlug> = {
 export type AfterOperationArg<TOperationGeneric extends CollectionSlug> = {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 } & (
   | {
@@ -195,6 +199,10 @@ export type BeforeOperationArg<TOperationGeneric extends CollectionSlug> = {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 } & (
   | {

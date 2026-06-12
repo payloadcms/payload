@@ -51,8 +51,47 @@ Each tab must have either a `name` or `label` and the required `fields` array. Y
 | **`description`**   | Optionally render a description within this tab to describe the contents of the tab itself.                                                                                                                                                                                                             |
 | **`interfaceName`** | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). (`name` must be present)                                                                                            |
 | **`virtual`**       | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
+| **`admin`**         | Admin-specific configuration. [More details](./overview#admin-options). Currently supports `condition` and `description`.                                                                                                                                                                               |
+| **`id`**            | An optional identifier for the tab. If `admin.condition` is used on an unnamed tab, an `id` is required (and will be auto-generated if not provided).                                                                                                                                                   |
 
 _\* An asterisk denotes that a property is required._
+
+## Conditional Tabs
+
+Just like fields, individual tabs can be conditionally shown or hidden based on the value of other fields. This is done by providing a `condition` function to the `admin` property of the tab config.
+
+When a tab's condition returns `false`, the tab and all of its fields will be hidden from the Admin Panel. If the currently active tab becomes hidden due to a condition change, Payload will automatically switch to the next available visible tab.
+
+### Example
+
+```ts
+{
+  type: 'tabs',
+  tabs: [
+    {
+      label: 'Always Visible',
+      fields: [
+        {
+          name: 'showExtraTab',
+          type: 'checkbox',
+        },
+      ],
+    },
+    {
+      label: 'Conditional Tab',
+      admin: {
+        condition: (data) => !!data.showExtraTab,
+      },
+      fields: [
+        {
+          name: 'extraField',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+}
+```
 
 ## Example
 

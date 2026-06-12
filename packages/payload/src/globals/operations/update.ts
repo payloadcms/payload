@@ -33,6 +33,7 @@ import {
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { mergeLocalizedData } from '../../utilities/mergeLocalizedData.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -98,6 +99,7 @@ export const updateOperation = async <
             context: args.req.context,
             global: globalConfig,
             operation: 'update',
+            overrideAccess,
             req: args.req,
           })) || args
       }
@@ -215,6 +217,7 @@ export const updateOperation = async <
             data,
             global: globalConfig,
             originalDoc,
+            overrideAccess,
             req,
           })) || data
       }
@@ -232,6 +235,7 @@ export const updateOperation = async <
             data,
             global: globalConfig,
             originalDoc,
+            overrideAccess,
             req,
           })) || data
       }
@@ -250,7 +254,10 @@ export const updateOperation = async <
       global: globalConfig,
       operation: 'update' as Operation,
       req,
-      skipValidation: isSavingDraft && !hasDraftValidationEnabled(globalConfig),
+      skipValidation:
+        (isSavingDraft && !hasDraftValidationEnabled(globalConfig)) ||
+        // Skip validation for unpublish operations — they only change _status, not document data
+        unpublishAllLocales,
     }
 
     let result: JsonObject = await beforeChange(beforeChangeArgs)
@@ -330,8 +337,12 @@ export const updateOperation = async <
 
     const select = sanitizeSelect({
       fields: globalConfig.flattenedFields,
-      forceSelect: globalConfig.forceSelect,
-      select: incomingSelect,
+      select: resolveSelect({
+        config: globalConfig.select,
+        operation: 'update',
+        req,
+        select: incomingSelect,
+      }),
     })
 
     if (!isSavingDraft) {
@@ -376,6 +387,7 @@ export const updateOperation = async <
         req,
         select,
         snapshot: snapshotToSave,
+        unpublish: unpublishAllLocales,
       })
 
       result = {
@@ -428,6 +440,7 @@ export const updateOperation = async <
             context: req.context,
             doc: result,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || result
       }
@@ -460,6 +473,7 @@ export const updateOperation = async <
             data,
             doc: result,
             global: globalConfig,
+            overrideAccess,
             previousDoc: originalDoc,
             req,
           })) || result

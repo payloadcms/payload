@@ -39,6 +39,7 @@ export const EditManyBulkUploads: React.FC<EditManyBulkUploadsProps> = (props) =
     <div className={baseClass}>
       <DrawerToggler
         aria-label={t('general:editAll')}
+        buttonStyle="secondary"
         className={`${baseClass}__toggle`}
         slug={drawerSlug}
       >

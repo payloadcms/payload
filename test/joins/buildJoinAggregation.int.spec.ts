@@ -9,7 +9,7 @@ import { expect, it } from 'vitest'
 
 import { buildJoinAggregation } from '../../packages/db-mongodb/src/utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from '../../packages/db-mongodb/src/utilities/buildProjectionFromSelect.js'
-import { describe } from '../helpers/vitest.js'
+import { describe } from '../__helpers/int/vitest.js'
 
 describe(
   'buildJoinAggregation',
@@ -38,6 +38,7 @@ describe(
                   on: 'categories',
                 },
               ],
+              versions: false,
             },
             {
               slug: 'versioned-categories',
@@ -74,6 +75,7 @@ describe(
                   hasMany: true,
                 },
               ],
+              versions: false,
             },
             {
               slug: 'versioned-posts',

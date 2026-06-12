@@ -9,7 +9,7 @@ import type {
 import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 import { Thumbnail } from '../../../../Thumbnail/index.js'
 
 const baseClass = 'file'
@@ -43,6 +43,9 @@ export const FileCell: React.FC<FileCellProps> = ({
       })
     }
 
+    const uploadConfig = collectionConfig?.upload
+    const imageCacheTag = uploadConfig?.cacheTags && rowData?.updatedAt
+
     return (
       <div className={baseClass}>
         <Thumbnail
@@ -53,9 +56,9 @@ export const FileCell: React.FC<FileCellProps> = ({
             filename,
           }}
           fileSrc={fileSrc}
-          imageCacheTag={collectionConfig?.upload?.cacheTags && rowData?.updatedAt}
+          imageCacheTag={imageCacheTag}
           size="small"
-          uploadConfig={collectionConfig?.upload}
+          uploadConfig={uploadConfig}
         />
         <span className={`${baseClass}__filename`}>{String(filename)}</span>
       </div>

@@ -1,0 +1,92 @@
+@layer payload-default {
+  .sort-column {
+    display: flex;
+    gap: var(--spacer-1);
+    align-items: center;
+  }
+
+  .sort-column__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+  }
+
+  .sort-column__label,
+  .sort-column .btn {
+    vertical-align: middle;
+    display: inline-block;
+  }
+
+  /* Hover: label turns primary color */
+  .sort-column:hover .sort-column__label {
+    color: var(--color-text);
+  }
+
+  /* Sorted column label styling */
+  .sort-column--sorted .sort-column__label {
+    color: var(--color-text);
+    font-weight: var(--text-body-medium-strong-font-weight);
+  }
+
+  .sort-column__buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
+  .sort-column__button {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--button-radius);
+    color: var(--color-icon-tertiary);
+
+    &.sort-column--active {
+      color: var(--color-icon);
+      background: var(--color-bg-secondary);
+    }
+
+    &:hover {
+      color: var(--color-icon);
+      background: var(--color-bg-secondary);
+    }
+
+    &:focus-visible {
+      outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
+      outline-offset: var(--accessibility-outline-offset);
+      border-radius: var(--button-radius);
+      color: var(--color-icon);
+    }
+  }
+
+  .sort-column:hover .sort-column__button {
+    color: var(--color-icon-secondary);
+  }
+
+  .sort-column:hover .sort-column__button.sort-column--active {
+    color: var(--color-icon);
+  }
+
+  .sort-column:hover .btn {
+    visibility: visible;
+  }
+
+  .sort-column--appearance-condensed {
+    gap: var(--spacer-1);
+  }
+
+  .sort-column--appearance-condensed .sort-column__buttons {
+    gap: 0;
+  }
+}

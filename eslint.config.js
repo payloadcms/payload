@@ -1,5 +1,6 @@
 import payloadEsLintConfig from '@payloadcms/eslint-config'
 import payloadPlugin from '@payloadcms/eslint-plugin'
+import mdxTextParser from '@payloadcms/eslint-plugin/customRules/mdx-text-parser.js'
 
 export const defaultESLintIgnores = [
   '**/.temp',
@@ -25,6 +26,8 @@ export const defaultESLintIgnores = [
   '**/app',
   'src/**/*.spec.ts',
   'packages/payload/rollup.dts.config.mjs',
+  'scripts/**/*.js',
+  'packages/plugin-mcp/bin.js',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -46,6 +49,9 @@ export const rootEslintConfig = [
       'packages/**/*.spec.ts',
       'templates/**',
       'examples/**',
+      'packages/drizzle/src/postgres/predefinedMigrations/v2-v3/**',
+      'packages/codemod/src/transforms/**/*.input.ts',
+      'packages/codemod/src/transforms/**/*.output.ts',
     ],
   },
   {
@@ -98,6 +104,19 @@ export default [
     files: ['templates/vercel-postgres/**'],
     rules: {
       'no-restricted-exports': 'off',
+    },
+  },
+  // MDX/Markdown documentation linting for code block languages
+  {
+    files: ['docs/**/*.mdx', 'docs/**/*.md'],
+    plugins: {
+      payload: payloadPlugin,
+    },
+    languageOptions: {
+      parser: mdxTextParser,
+    },
+    rules: {
+      'payload/valid-code-block-languages': 'error',
     },
   },
 ]

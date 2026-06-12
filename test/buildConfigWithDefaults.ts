@@ -1,5 +1,6 @@
 import type { Config, SanitizedConfig } from 'payload'
 
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import {
   AlignFeature,
   BlockquoteFeature,
@@ -24,16 +25,15 @@ import {
   UnorderedListFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
-// import { slateEditor } from '@payloadcms/richtext-slate'
 import { buildConfig } from 'payload'
 import { de } from 'payload/i18n/de'
 import { en } from 'payload/i18n/en'
 import { es } from 'payload/i18n/es'
 import sharp from 'sharp'
 
+import { reInitEndpoint } from './__helpers/shared/clearAndSeed/reInitEndpoint.js'
+import { localAPIEndpoint } from './__helpers/shared/sdk/endpoint.js'
 import { databaseAdapter } from './databaseAdapter.js'
-import { reInitEndpoint } from './helpers/reInitEndpoint.js'
-import { localAPIEndpoint } from './helpers/sdk/endpoint.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
 
 // process.env.POSTGRES_URL = 'postgres://postgres:postgres@127.0.0.1:5432/payloadtests'
@@ -172,6 +172,15 @@ export async function buildConfigWithDefaults(
       config.admin = {}
     }
     config.admin.disable = true
+  }
+
+  // Auto-add the MCP plugin so every test suite exercises it. Suites that need
+  // to configure it explicitly add their own `mcpPlugin({...})` call. The
+  // plugin itself adds a default `users` collection when needed so its own
+  // auth-enabled `payload-mcp-api-keys` doesn't end up as `admin.user`.
+  const hasMcpPlugin = (config.plugins ?? []).some((p) => p.slug === '@payloadcms/plugin-mcp')
+  if (!hasMcpPlugin) {
+    config.plugins = [...(config.plugins ?? []), mcpPlugin({})]
   }
 
   return await buildConfig(config)

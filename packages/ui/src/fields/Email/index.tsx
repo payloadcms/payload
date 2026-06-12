@@ -17,7 +17,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
+import './index.css'
 
 const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
@@ -92,6 +92,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           autoComplete={autoComplete}
+          className="form-input"
           disabled={readOnly || disabled}
           id={`field-${path.replace(/\./g, '__')}`}
           name={path}

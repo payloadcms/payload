@@ -14,6 +14,7 @@ export type OperationArgs = {
   populate?: Record<string, unknown>
   select?: unknown
   sort?: Sort
+  trash?: boolean
   where?: Where
 }
 
@@ -34,6 +35,10 @@ export const buildSearchParams = (args: OperationArgs): string => {
 
   if (typeof args.draft === 'boolean') {
     search.draft = String(args.draft)
+  }
+
+  if (typeof args.trash === 'boolean') {
+    search.trash = String(args.trash)
   }
 
   if (typeof args.pagination === 'boolean') {

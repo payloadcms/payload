@@ -35,7 +35,7 @@ export const reduceFieldsToOptions = ({
 }: ReduceFieldOptionsArgs): ReducedField[] => {
   return fields.reduce((reduced, field) => {
     let pathPrefix = pathPrefixFromArgs
-    // Do not filter out `field.admin.disableListFilter` fields here, as these should still render as disabled if they appear in the URL query
+    // Do not filter out `field.admin.disabled.filter` fields here, as these should still render as disabled if they appear in the URL query
     // Filter out `virtual: true` fields since they are regular virtuals and not backed by a DB field
     if (
       (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
@@ -66,9 +66,11 @@ export const reduceFieldsToOptions = ({
         if (typeof tab.label !== 'boolean') {
           const localizedTabLabel = getTranslation(tab.label, i18n)
 
-          const labelWithPrefix = labelPrefix
-            ? labelPrefix + ' > ' + localizedTabLabel
-            : localizedTabLabel
+          const labelWithPrefix = tabHasName(tab)
+            ? labelPrefix
+              ? labelPrefix + ' > ' + localizedTabLabel
+              : localizedTabLabel
+            : labelPrefix
 
           // Make sure we handle nested tabs
           const tabPathPrefix =
@@ -255,9 +257,9 @@ export const reduceFieldsToOptions = ({
         }
 
         const formattedField: ReducedField = {
+          fieldPath,
           label: formattedLabel,
           plainTextLabel: `${labelPrefix ? labelPrefix + ' > ' : ''}${localizedLabel}`,
-          value: fieldPath,
           ...fieldTypeConditions[field.type],
           field,
           operators,

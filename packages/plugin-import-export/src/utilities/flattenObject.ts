@@ -1,171 +1,193 @@
-import type { Document } from 'payload'
+import type { PayloadRequest } from 'payload'
 
-import type { ToCSVFunction } from '../types.js'
+import type { ExportFieldHookEntry } from '../types.js'
+
+import { fieldToRegex } from './fieldToRegex.js'
+import { isPlainObject } from './isPlainObject.js'
+import { getPolymorphicRelId, isPolymorphicRelValue } from './polymorphicRel.js'
 
 type Args = {
-  doc: Document
+  data: Record<string, unknown>
+  exportFieldHooks: Record<string, ExportFieldHookEntry>
   fields?: string[]
-  prefix?: string
-  toCSVFunctions: Record<string, ToCSVFunction>
+  format: 'csv' | 'json' | ({} & string)
+  path?: string
+  req: PayloadRequest
 }
 
 export const flattenObject = ({
-  doc,
+  data,
+  exportFieldHooks,
   fields,
-  prefix,
-  toCSVFunctions,
+  format,
+  path,
+  req,
 }: Args): Record<string, unknown> => {
   const row: Record<string, unknown> = {}
 
-  // Helper to get toCSV function by full path or base field name
-  // This allows functions registered for field names (e.g., 'richText') to work
-  // even when the field is nested in arrays/blocks (e.g., 'blocks_0_content_richText')
-  const getToCSVFunction = (fullPath: string, baseFieldName: string): ToCSVFunction | undefined => {
-    return toCSVFunctions?.[fullPath] ?? toCSVFunctions?.[baseFieldName]
+  const invokeHook = (
+    entry: ExportFieldHookEntry,
+    columnName: string,
+    value: unknown,
+    siblingSource: Record<string, unknown>,
+  ): unknown => {
+    return entry.fn({
+      columnName,
+      data,
+      format,
+      siblingData: row,
+      siblingDoc: siblingSource,
+      value,
+    })
   }
 
-  const flatten = (siblingDoc: Document, prefix?: string) => {
-    Object.entries(siblingDoc).forEach(([key, value]) => {
-      const newKey = prefix ? `${prefix}_${key}` : key
-      const toCSVFn = getToCSVFunction(newKey, key)
+  const selectedTopLevelKeys =
+    Array.isArray(fields) && fields.length > 0
+      ? new Set(fields.map((f) => f.split('.')[0]))
+      : undefined
+
+  const flattenWithFilter = (
+    siblingSource: Record<string, unknown>,
+    currentPath: string | undefined,
+    currentSchemaPath: string | undefined,
+  ) => {
+    Object.entries(siblingSource).forEach(([key, value]) => {
+      if (!currentPath && selectedTopLevelKeys && !selectedTopLevelKeys.has(key)) {
+        return
+      }
+
+      const fieldPath = currentPath ? `${currentPath}_${key}` : key
+      const fieldSchemaPath = currentSchemaPath ? `${currentSchemaPath}_${key}` : key
+      const hookEntry = exportFieldHooks?.[fieldSchemaPath]
+
+      const flattenArray = (items: unknown[], arrayPath: string, arraySchemaPath: string): void => {
+        items.forEach((item, index) => {
+          if (!isPlainObject(item)) {
+            row[`${arrayPath}_${index}`] = item
+            return
+          }
+
+          const blockType = typeof item.blockType === 'string' ? item.blockType : undefined
+          const itemPath = blockType
+            ? `${arrayPath}_${index}_${blockType}`
+            : `${arrayPath}_${index}`
+          const itemSchemaPath = blockType ? `${arraySchemaPath}_${blockType}` : arraySchemaPath
+
+          if (isPolymorphicRelValue(item) && isPlainObject(item.value)) {
+            const id = getPolymorphicRelId(item)
+            if (id !== undefined) {
+              row[`${itemPath}_relationTo`] = item.relationTo
+              row[`${itemPath}_id`] = id
+              return
+            }
+          }
+
+          flattenWithFilter(item, itemPath, itemSchemaPath)
+        })
+      }
 
       if (Array.isArray(value)) {
-        // If a custom toCSV function exists for this array field, run it first.
-        // If it produces output, skip per-item handling; otherwise, fall back.
-        if (toCSVFn) {
+        if (hookEntry) {
           try {
-            const result = toCSVFn({
-              columnName: newKey,
-              data: row,
-              doc,
-              row,
-              siblingDoc,
-              value, // whole array
-            })
+            const result = invokeHook(hookEntry, fieldPath, value, siblingSource)
 
-            if (typeof result !== 'undefined') {
-              // Custom function returned a single value for this array field.
-              row[newKey] = result
+            if (result === null) {
               return
             }
 
-            // If the custom function wrote any keys for this field, consider it handled.
-            for (const k in row) {
-              if (k === newKey || k.startsWith(`${newKey}_`)) {
-                return
-              }
+            if (Array.isArray(result)) {
+              flattenArray(result, fieldPath, fieldSchemaPath)
+              return
             }
-            // Otherwise, fall through to per-item handling.
+
+            if (typeof result !== 'undefined') {
+              row[fieldPath] = result
+              return
+            }
           } catch (error) {
-            throw new Error(
-              `Error in toCSVFunction for array "${newKey}": ${JSON.stringify(value)}\n${
-                (error as Error).message
-              }`,
-            )
+            req.payload.logger.error({
+              err: error,
+              msg: `[plugin-import-export] Field-level beforeExport hook for "${fieldPath}" threw — falling back to default flattening`,
+            })
           }
         }
 
-        value.forEach((item, index) => {
-          if (typeof item === 'object' && item !== null) {
-            const blockType = typeof item.blockType === 'string' ? item.blockType : undefined
-            const itemPrefix = blockType ? `${newKey}_${index}_${blockType}` : `${newKey}_${index}`
-
-            // Case: hasMany polymorphic relationships
-            if (
-              'relationTo' in item &&
-              'value' in item &&
-              typeof item.value === 'object' &&
-              item.value !== null
-            ) {
-              row[`${itemPrefix}_relationTo`] = item.relationTo
-              row[`${itemPrefix}_id`] = item.value.id
+        flattenArray(value, fieldPath, fieldSchemaPath)
+      } else if (typeof value === 'object' && value !== null) {
+        if (!hookEntry) {
+          flattenWithFilter(value as Record<string, unknown>, fieldPath, fieldSchemaPath)
+        } else {
+          const keysBeforeHook = new Set(Object.keys(row))
+          try {
+            const result = invokeHook(hookEntry, fieldPath, value, siblingSource)
+            if (result === null) {
               return
             }
-
-            // Fallback: deep-flatten nested objects
-            flatten(item, itemPrefix)
-          } else {
-            // Primitive array item.
-            row[`${newKey}_${index}`] = item
-          }
-        })
-      } else if (typeof value === 'object' && value !== null) {
-        // Object field: use custom toCSV if present, else recurse.
-        if (!toCSVFn) {
-          flatten(value, newKey)
-        } else {
-          try {
-            const result = toCSVFn({
-              columnName: newKey,
-              data: row,
-              doc,
-              row,
-              siblingDoc,
-              value,
-            })
-            if (typeof result !== 'undefined') {
-              row[newKey] = result
+            if (typeof result === 'undefined') {
+              const hookWroteForField = Object.keys(row).some(
+                (k) => !keysBeforeHook.has(k) && (k === fieldPath || k.startsWith(`${fieldPath}_`)),
+              )
+              if (hookWroteForField) {
+                return
+              }
+              flattenWithFilter(value as Record<string, unknown>, fieldPath, fieldSchemaPath)
+            } else if (typeof result === 'object' && !Array.isArray(result)) {
+              flattenWithFilter(result as Record<string, unknown>, fieldPath, fieldSchemaPath)
+            } else {
+              row[fieldPath] = result
             }
           } catch (error) {
-            throw new Error(
-              `Error in toCSVFunction for nested object "${newKey}": ${JSON.stringify(value)}\n${
-                (error as Error).message
-              }`,
-            )
+            req.payload.logger.error({
+              err: error,
+              msg: `[plugin-import-export] Field-level beforeExport hook for "${fieldPath}" threw — falling back to default flattening`,
+            })
+            flattenWithFilter(value as Record<string, unknown>, fieldPath, fieldSchemaPath)
           }
         }
       } else {
-        if (toCSVFn) {
+        if (hookEntry) {
           try {
-            const result = toCSVFn({
-              columnName: newKey,
-              data: row,
-              doc,
-              row,
-              siblingDoc,
-              value,
-            })
+            const result = invokeHook(hookEntry, fieldPath, value, siblingSource)
             if (typeof result !== 'undefined') {
-              row[newKey] = result
+              row[fieldPath] = result
             }
           } catch (error) {
-            throw new Error(
-              `Error in toCSVFunction for field "${newKey}": ${JSON.stringify(value)}\n${
-                (error as Error).message
-              }`,
-            )
+            req.payload.logger.error({
+              err: error,
+              msg: `[plugin-import-export] Field-level beforeExport hook for "${fieldPath}" threw — falling back to original value`,
+            })
+            row[fieldPath] = value
           }
         } else {
-          row[newKey] = value
+          row[fieldPath] = value
         }
       }
     })
   }
 
-  flatten(doc, prefix)
+  flattenWithFilter(data, path, path)
 
   if (Array.isArray(fields) && fields.length > 0) {
     const orderedResult: Record<string, unknown> = {}
 
-    const fieldToRegex = (field: string): RegExp => {
-      const parts = field.split('.').map((part) => `${part}(?:_\\d+)?`)
-      const pattern = `^${parts.join('_')}`
-      return new RegExp(pattern)
-    }
+    const fieldPatterns = fields.map((field) => ({
+      field,
+      regex: fieldToRegex(field),
+    }))
 
-    fields.forEach((field) => {
-      if (row[field.replace(/\./g, '_')]) {
-        const sanitizedField = field.replace(/\./g, '_')
-        orderedResult[sanitizedField] = row[sanitizedField]
-      } else {
-        const regex = fieldToRegex(field)
-        Object.keys(row).forEach((key) => {
-          if (regex.test(key)) {
-            orderedResult[key] = row[key]
-          }
-        })
+    const rowKeys = Object.keys(row)
+
+    for (const { regex } of fieldPatterns) {
+      for (const key of rowKeys) {
+        if (key in orderedResult) {
+          continue
+        }
+
+        if (regex.test(key)) {
+          orderedResult[key] = row[key]
+        }
       }
-    })
+    }
 
     return orderedResult
   }

@@ -1,10 +1,13 @@
 'use client'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+import { Link } from '../../elements/Link/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { IDLabel } from '../IDLabel/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'render-title'
 
@@ -13,14 +16,24 @@ export type RenderTitleProps = {
   element?: React.ElementType
   fallback?: string
   fallbackToID?: boolean
+  /**
+   * When true, renders the title as a link to the document. Useful inside drawers
+   * to navigate to the full document view.
+   */
+  renderAsLink?: boolean
   title?: string
 }
 
 export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
-  const { className, element = 'h1', fallback, title: titleFromProps } = props
+  const { className, element = 'h1', fallback, renderAsLink, title: titleFromProps } = props
 
-  const { id, isInitializing } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, isInitializing } = useDocumentInfo()
   const { title: titleFromContext } = useDocumentTitle()
+  const {
+    config: {
+      routes: { admin: adminRoute },
+    },
+  } = useConfig()
 
   const title = titleFromProps || titleFromContext || fallback
 
@@ -30,6 +43,14 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
 
   // Render and invisible character to prevent layout shift when the title populates from context
   const EmptySpace = <Fragment>&nbsp;</Fragment>
+
+  const docPath =
+    renderAsLink && id && (collectionSlug || globalSlug)
+      ? formatAdminURL({
+          adminRoute,
+          path: `/${collectionSlug ? `collections/${collectionSlug}` : `globals/${globalSlug}`}/${id}`,
+        })
+      : null
 
   return (
     <Tag
@@ -41,10 +62,14 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
     >
       {isInitializing ? (
         EmptySpace
+      ) : idAsTitle ? (
+        <IDLabel className={`${baseClass}__id`} id={id} />
+      ) : docPath ? (
+        <Link className={`${baseClass}__link`} href={docPath}>
+          {title || EmptySpace}
+        </Link>
       ) : (
-        <Fragment>
-          {idAsTitle ? <IDLabel className={`${baseClass}__id`} id={id} /> : title || EmptySpace}
-        </Fragment>
+        title || EmptySpace
       )}
     </Tag>
   )

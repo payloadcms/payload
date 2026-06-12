@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--external-link {
+    /* Icon uses fill, no additional styles needed */
+  }
+}

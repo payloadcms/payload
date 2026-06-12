@@ -31,4 +31,5 @@ export const ValueCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

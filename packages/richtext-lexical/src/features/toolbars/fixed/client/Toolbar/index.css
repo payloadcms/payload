@@ -1,0 +1,87 @@
+@layer payload-default {
+  .fixed-toolbar.fixed-toolbar--hide {
+    visibility: hidden;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .fixed-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0 var(--spacer-2);
+    gap: var(--spacer-2);
+    vertical-align: middle;
+    position: sticky;
+    z-index: 2;
+    top: var(--doc-controls-height);
+    border: var(--stroke-width-small) solid var(--lexical-border-color);
+    border-collapse: unset;
+    border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+    transform: translateY(var(--stroke-width-small));
+
+    min-height: var(--spacer-6);
+
+    &:before,
+    &:after {
+      content: ' ';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      border-radius: inherit;
+    }
+
+    &:before {
+      background: var(--color-bg);
+      opacity: 0.75;
+    }
+
+    &:after {
+      backdrop-filter: blur(8px);
+    }
+
+    + .editor-container {
+      border-radius: 0 0 var(--radius-medium) var(--radius-medium) !important;
+
+      > .editor-scroller > .editor {
+        > .ContentEditable__root {
+          padding-top: var(--spacer-2);
+        }
+      }
+
+      > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder {
+        top: var(--spacer-4);
+      }
+    }
+  }
+
+  .fixed-toolbar__group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacer-2);
+    align-self: stretch;
+    z-index: 1;
+
+    .divider {
+      width: var(--stroke-width-small);
+      align-self: stretch;
+      background-color: var(--lexical-border-color);
+    }
+  }
+
+  .rich-text-lexical--show-gutter {
+    .fixed-toolbar {
+      + .editor-container {
+        > .editor-scroller > .editor {
+          > .ContentEditable__root::before {
+            top: var(--spacer-4) !important;
+            height: calc(100% - var(--spacer-4) - 8px) !important;
+          }
+        }
+      }
+    }
+  }
+}

@@ -2,9 +2,8 @@
 
 import type { PublishButtonClientProps } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled, hasLocalizeStatusEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -19,9 +18,11 @@ import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
-import { ScheduleDrawer } from './ScheduleDrawer/index.js'
+import './index.css'
 
-export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
+export function PublishButton({
+  label: labelProp,
+}: { label?: string } & PublishButtonClientProps = {}) {
   const {
     id,
     collectionSlug,
@@ -40,10 +41,6 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const modified = useFormModified()
   const editDepth = useEditDepth()
   const { code: localeCode } = useLocale()
-  const { isModalOpen, toggleModal } = useModal()
-
-  const drawerSlug = `schedule-publish-${id}`
-
   const {
     localization,
     routes: { api },
@@ -51,6 +48,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
 
   const { i18n, t } = useTranslation()
   const label = labelProp || t('version:publishChanges')
+  const shortLabel = labelProp || t('version:publish')
 
   const entityConfig = React.useMemo(() => {
     if (collectionSlug) {
@@ -69,18 +67,6 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     (modified || hasNewerVersions || !hasPublishedDoc) &&
     uploadStatus !== 'uploading'
 
-  const scheduledPublishEnabled = hasScheduledPublishEnabled(entityConfig)
-
-  // If autosave is enabled the modified will always be true so only conditionally check on modified state
-  const hasAutosave = hasAutosaveEnabled(entityConfig)
-
-  const canSchedulePublish = Boolean(
-    scheduledPublishEnabled &&
-      hasPublishPermission &&
-      (globalSlug || (collectionSlug && id)) &&
-      (hasAutosave || !modified),
-  )
-
   const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
 
   useEffect(() => {
@@ -93,6 +79,9 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const operation = useOperation()
 
   const disabled = operation === 'update' && !modified
+
+  // If autosave is enabled the modified will always be true so only conditionally check on modified state
+  const hasAutosave = hasAutosaveEnabled(entityConfig)
 
   const saveDraft = useCallback(async () => {
     if (disabled) {
@@ -148,6 +137,8 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     }
   })
 
+  const localizeStatusEnabled = hasLocalizeStatusEnabled(entityConfig)
+
   const publish = useCallback(async () => {
     if (uploadStatus === 'uploading') {
       return
@@ -157,7 +148,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       {
         depth: 0,
         locale: localeCode,
-        publishAllLocales: true,
+        ...(localizeStatusEnabled && { publishAllLocales: true }),
       },
       { addQueryPrefix: true },
     )
@@ -183,6 +174,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     }
   }, [
     localeCode,
+    localizeStatusEnabled,
     api,
     collectionSlug,
     globalSlug,
@@ -225,10 +217,22 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       })
 
       if (result) {
+        setUnpublishedVersionCount(0)
+        setMostRecentVersionIsAutosaved(false)
         setHasPublishedDoc(true)
       }
     },
-    [api, collectionSlug, globalSlug, id, setHasPublishedDoc, submit, uploadStatus],
+    [
+      api,
+      collectionSlug,
+      globalSlug,
+      id,
+      setHasPublishedDoc,
+      setMostRecentVersionIsAutosaved,
+      setUnpublishedVersionCount,
+      submit,
+      uploadStatus,
+    ],
   )
 
   // Publish to all locales unless there are localized fields AND defaultLocalePublishOption is 'active'
@@ -253,24 +257,13 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       <FormSubmit
         buttonId="action-save"
         disabled={!canPublish}
-        enableSubMenu={canSchedulePublish}
         onClick={isDefaultPublishAll ? publish : () => publishSpecificLocale(activeLocale.code)}
         size="medium"
         SubMenuPopupContent={
-          isSpecificLocalePublishEnabled || canSchedulePublish
+          isSpecificLocalePublishEnabled
             ? ({ close }) => {
                 return (
                   <React.Fragment>
-                    {canSchedulePublish && (
-                      <PopupList.ButtonGroup key="schedule-publish">
-                        <PopupList.Button
-                          id="schedule-publish"
-                          onClick={() => [toggleModal(drawerSlug), close()]}
-                        >
-                          {t('version:schedulePublish')}
-                        </PopupList.Button>
-                      </PopupList.ButtonGroup>
-                    )}
                     {isSpecificLocalePublishEnabled && (
                       <PopupList.ButtonGroup>
                         <PopupList.Button
@@ -294,20 +287,15 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         }
         type="button"
       >
-        {!isDefaultPublishAll ? t('version:publishIn', { locale: activeLocaleLabel }) : label}
+        {!isDefaultPublishAll ? (
+          t('version:publishIn', { locale: activeLocaleLabel })
+        ) : (
+          <React.Fragment>
+            <span className="publish-button__label--full">{label}</span>
+            <span className="publish-button__label--short">{shortLabel}</span>
+          </React.Fragment>
+        )}
       </FormSubmit>
-      {canSchedulePublish && isModalOpen(drawerSlug) && (
-        <ScheduleDrawer
-          defaultType={!hasNewerVersions ? 'unpublish' : 'publish'}
-          schedulePublishConfig={
-            scheduledPublishEnabled &&
-            typeof entityConfig.versions.drafts.schedulePublish === 'object'
-              ? entityConfig.versions.drafts.schedulePublish
-              : undefined
-          }
-          slug={drawerSlug}
-        />
-      )}
     </React.Fragment>
   )
 }

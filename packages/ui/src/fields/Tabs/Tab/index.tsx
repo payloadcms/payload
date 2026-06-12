@@ -7,9 +7,10 @@ import { tabHasName } from 'payload/shared'
 import React, { useState } from 'react'
 
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
+import { useFormInitializing } from '../../../forms/Form/context.js'
 import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'tabs-field__tab-button'
 
@@ -29,6 +30,7 @@ export const TabComponent: React.FC<TabProps> = ({
   tab,
 }) => {
   const { i18n } = useTranslation()
+  const isInitializing = useFormInitializing()
   const [errorCount, setErrorCount] = useState(undefined)
 
   const path = [
@@ -51,6 +53,7 @@ export const TabComponent: React.FC<TabProps> = ({
         ]
           .filter(Boolean)
           .join(' ')}
+        disabled={isInitializing}
         onClick={setIsActive}
         type="button"
       >

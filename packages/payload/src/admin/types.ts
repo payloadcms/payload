@@ -59,7 +59,13 @@ export type {
   EditMenuItemsServerProps,
   EditMenuItemsServerPropsOnly,
 } from './elements/EditMenuItems.js'
-export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
+export type {
+  NavGroupPreferences,
+  NavPreferences,
+  SidebarTabClientProps,
+  SidebarTabServerProps,
+  SidebarTabServerPropsOnly,
+} from './elements/Nav.js'
 export type {
   PreviewButtonClientProps,
   PreviewButtonServerProps,
@@ -80,10 +86,15 @@ export type {
   SaveDraftButtonServerProps,
   SaveDraftButtonServerPropsOnly,
 } from './elements/SaveDraftButton.js'
-
 export type { CustomStatus } from './elements/Status.js'
 
 export type { Column } from './elements/Table.js'
+
+export type {
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
+  UnpublishButtonServerPropsOnly,
+} from './elements/UnpublishButton.js'
 
 export type { CustomUpload } from './elements/Upload.js'
 
@@ -562,6 +573,7 @@ export type FieldRow = {
 
 export type DocumentSlots = {
   BeforeDocumentControls?: React.ReactNode
+  BeforeDocumentMeta?: React.ReactNode
   Description?: React.ReactNode
   EditMenuItems?: React.ReactNode
   LivePreview?: React.ReactNode
@@ -570,15 +582,15 @@ export type DocumentSlots = {
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
   Status?: React.ReactNode
+  UnpublishButton?: React.ReactNode
   Upload?: React.ReactNode
   UploadControls?: React.ReactNode
 }
 
 export type {
-  BuildCollectionFolderViewResult,
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
-  GetFolderResultsComponentAndDataArgs,
+  InitReqResult,
   ListQuery,
   ServerFunction,
   ServerFunctionArgs,
@@ -636,25 +648,7 @@ export type {
   RenderDocumentVersionsProperties,
 } from './views/document.js'
 
-export type {
-  AfterFolderListClientProps,
-  AfterFolderListServerProps,
-  AfterFolderListServerPropsOnly,
-  AfterFolderListTableClientProps,
-  AfterFolderListTableServerProps,
-  AfterFolderListTableServerPropsOnly,
-  BeforeFolderListClientProps,
-  BeforeFolderListServerProps,
-  BeforeFolderListServerPropsOnly,
-  BeforeFolderListTableClientProps,
-  BeforeFolderListTableServerProps,
-  BeforeFolderListTableServerPropsOnly,
-  FolderListViewClientProps,
-  FolderListViewServerProps,
-  FolderListViewServerPropsOnly,
-  FolderListViewSlots,
-  FolderListViewSlotSharedClientProps,
-} from './views/folderList.js'
+export type { RelatedDocumentsGrouped } from './views/hierarchyList.js'
 
 export type {
   AdminViewClientProps,
@@ -695,6 +689,7 @@ export type {
   BeforeListTableClientProps,
   BeforeListTableServerProps,
   BeforeListTableServerPropsOnly,
+  HierarchyViewData,
   ListViewClientProps,
   ListViewServerProps,
   ListViewServerPropsOnly,

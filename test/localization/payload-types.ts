@@ -60,10 +60,65 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_B43B745B".
+ */
+export type LexicalNodes_B43B745B =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_B43B745B>
+  | SerializedHorizontalRuleNode
+  | {
+      type: 'upload';
+      /**
+       * Lexical's internal serialization version for this node type.
+       */
+      version: number;
+      [k: string]: unknown;
+    }
+  | SerializedQuoteNode<LexicalNodes_B43B745B>
+  | SerializedRelationshipNode<
+      | 'richText'
+      | 'blocks-fields'
+      | 'nested-arrays'
+      | 'nested-field-tables'
+      | 'localized-drafts'
+      | 'localized-date-fields'
+      | 'all-fields-localized'
+      | 'users'
+      | 'localized-posts'
+      | 'no-localized-fields'
+      | 'array-fields'
+      | 'localized-required'
+      | 'with-localized-relationship'
+      | 'relationship-localized'
+      | 'cannot-create-default-locale'
+      | 'locale-restricted'
+      | 'nested'
+      | 'groups'
+      | 'tabs'
+      | 'localized-sort'
+      | 'blocks-same-name'
+      | 'localized-within-localized'
+      | 'array-with-fallback-fields'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_B43B745B, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_B43B745B, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_B43B745B>
+  | SerializedListItemNode<LexicalNodes_B43B745B>
+  | SerializedHeadingNode<LexicalNodes_B43B745B>;
 
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -82,6 +137,7 @@ export interface Config {
     'with-localized-relationship': WithLocalizedRelationship;
     'relationship-localized': RelationshipLocalized;
     'cannot-create-default-locale': CannotCreateDefaultLocale;
+    'locale-restricted': LocaleRestricted;
     nested: Nested;
     groups: Group;
     tabs: Tab;
@@ -89,6 +145,7 @@ export interface Config {
     'blocks-same-name': BlocksSameName;
     'localized-within-localized': LocalizedWithinLocalized;
     'array-with-fallback-fields': ArrayWithFallbackField;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -111,6 +168,7 @@ export interface Config {
     'with-localized-relationship': WithLocalizedRelationshipSelect<false> | WithLocalizedRelationshipSelect<true>;
     'relationship-localized': RelationshipLocalizedSelect<false> | RelationshipLocalizedSelect<true>;
     'cannot-create-default-locale': CannotCreateDefaultLocaleSelect<false> | CannotCreateDefaultLocaleSelect<true>;
+    'locale-restricted': LocaleRestrictedSelect<false> | LocaleRestrictedSelect<true>;
     nested: NestedSelect<false> | NestedSelect<true>;
     groups: GroupsSelect<false> | GroupsSelect<true>;
     tabs: TabsSelect<false> | TabsSelect<true>;
@@ -118,13 +176,14 @@ export interface Config {
     'blocks-same-name': BlocksSameNameSelect<false> | BlocksSameNameSelect<true>;
     'localized-within-localized': LocalizedWithinLocalizedSelect<false> | LocalizedWithinLocalizedSelect<true>;
     'array-with-fallback-fields': ArrayWithFallbackFieldsSelect<false> | ArrayWithFallbackFieldsSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale:
     | ('false' | 'none' | 'null')
@@ -143,9 +202,10 @@ export interface Config {
     'global-drafts': GlobalDraftsSelect<false> | GlobalDraftsSelect<true>;
   };
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -169,32 +229,31 @@ export interface UserAuthOperations {
     password: string;
   };
 }
+export interface PayloadMcpApiKeyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "richText".
  */
 export interface RichText {
-  id: number;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  lexical?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  id: string;
+  lexical?: LexicalRichText<LexicalNodes_B43B745B> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -203,69 +262,68 @@ export interface RichText {
  * via the `definition` "blocks-fields".
  */
 export interface BlocksField {
-  id: number;
+  id: string;
   title?: string | null;
-  tabContent?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockInsideTab';
-      }[]
-    | null;
-  content?:
-    | {
-        text?: string | null;
-        content?:
-          | {
-              text?: string | null;
-              id?: string | null;
-              blockName?: string | null;
-              blockType: 'textBlock';
-            }[]
-          | null;
-        array?:
-          | {
-              link?: {
-                label?: string | null;
-              };
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockInsideBlock';
-      }[]
-    | null;
+  tabContent?: BlockInsideTab[] | null;
+  content?: BlockInsideBlock[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockInsideTab".
+ */
+export interface BlockInsideTab {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockInsideTab';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockInsideBlock".
+ */
+export interface BlockInsideBlock {
+  text?: string | null;
+  content?: TextBlock[] | null;
+  array?:
+    | {
+        link?: {
+          label?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockInsideBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock".
+ */
+export interface TextBlock {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "nested-arrays".
  */
 export interface NestedArray {
-  id: number;
+  id: string;
   arrayWithBlocks?:
     | {
-        blocksWithinArray?:
-          | {
-              relationWithinBlock?: (number | null) | LocalizedPost;
-              myGroup?: {
-                text?: string | null;
-              };
-              id?: string | null;
-              blockName?: string | null;
-              blockType: 'someBlock';
-            }[]
-          | null;
+        blocksWithinArray?: SomeBlock[] | null;
         id?: string | null;
       }[]
     | null;
   arrayWithLocalizedRelation?:
     | {
-        localizedRelation?: (number | null) | LocalizedPost;
+        localizedRelation?: (string | null) | LocalizedPost;
         id?: string | null;
       }[]
     | null;
@@ -275,15 +333,28 @@ export interface NestedArray {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SomeBlock".
+ */
+export interface SomeBlock {
+  relationWithinBlock?: (string | null) | LocalizedPost;
+  myGroup?: {
+    text?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'someBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
-  id: number;
+  id: string;
   title?: string | null;
   description?: string | null;
   localizedDescription?: string | null;
   localizedCheckbox?: boolean | null;
-  children?: (number | LocalizedPost)[] | null;
+  children?: (string | LocalizedPost)[] | null;
   group?: {
     children?: string | null;
   };
@@ -296,18 +367,18 @@ export interface LocalizedPost {
  * via the `definition` "nested-field-tables".
  */
 export interface NestedFieldTable {
-  id: number;
+  id: string;
   array?:
     | {
         relation?: {
           relationTo: 'localized-posts';
-          value: number | LocalizedPost;
+          value: string | LocalizedPost;
         } | null;
-        hasManyRelation?: (number | LocalizedPost)[] | null;
+        hasManyRelation?: (string | LocalizedPost)[] | null;
         hasManyPolyRelation?:
           | {
               relationTo: 'localized-posts';
-              value: number | LocalizedPost;
+              value: string | LocalizedPost;
             }[]
           | null;
         select?: ('one' | 'two' | 'three')[] | null;
@@ -316,42 +387,48 @@ export interface NestedFieldTable {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        nestedBlocks?:
-          | {
-              relation?: {
-                relationTo: 'localized-posts';
-                value: number | LocalizedPost;
-              } | null;
-              id?: string | null;
-              blockName?: string | null;
-              blockType: 'content';
-            }[]
-          | null;
-        array?:
-          | {
-              relation?: {
-                relationTo: 'localized-posts';
-                value: number | LocalizedPost;
-              } | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocks?: Block[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  nestedBlocks?: Content[] | null;
+  array?:
+    | {
+        relation?: {
+          relationTo: 'localized-posts';
+          value: string | LocalizedPost;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Content".
+ */
+export interface Content {
+  relation?: {
+    relationTo: 'localized-posts';
+    value: string | LocalizedPost;
+  } | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized-drafts".
  */
 export interface LocalizedDraft {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -362,7 +439,7 @@ export interface LocalizedDraft {
  * via the `definition` "localized-date-fields".
  */
 export interface LocalizedDateField {
-  id: number;
+  id: string;
   localizedDate?: string | null;
   date?: string | null;
   updatedAt: string;
@@ -374,7 +451,7 @@ export interface LocalizedDateField {
  * via the `definition` "all-fields-localized".
  */
 export interface AllFieldsLocalized {
-  id: number;
+  id: string;
   text?: string | null;
   textarea?: string | null;
   number?: number | null;
@@ -413,27 +490,7 @@ export interface AllFieldsLocalized {
         id?: string | null;
       }[]
     | null;
-  localizedBlocks?:
-    | (
-        | {
-            text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'localizedTextBlock';
-          }
-        | {
-            nestedArray?:
-              | {
-                  item?: string | null;
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'nestedBlock';
-          }
-      )[]
-    | null;
+  localizedBlocks?: (LocalizedTextBlock | NestedBlock)[] | null;
   localizedTab?: {
     tabText?: string | null;
   };
@@ -456,19 +513,44 @@ export interface AllFieldsLocalized {
         | null;
     };
   };
-  selfRelation?: (number | null) | AllFieldsLocalized;
+  selfRelation?: (string | null) | AllFieldsLocalized;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LocalizedTextBlock".
+ */
+export interface LocalizedTextBlock {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTextBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NestedBlock".
+ */
+export interface NestedBlock {
+  nestedArray?:
+    | {
+        item?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'nestedBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   name?: string | null;
-  relation?: (number | null) | LocalizedPost;
+  relation?: (string | null) | LocalizedPost;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -486,13 +568,14 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "no-localized-fields".
  */
 export interface NoLocalizedField {
-  id: number;
+  id: string;
   text?: string | null;
   group?: {
     en?: {
@@ -508,7 +591,7 @@ export interface NoLocalizedField {
  * via the `definition` "array-fields".
  */
 export interface ArrayField {
-  id: number;
+  id: string;
   items?:
     | {
         text?: string | null;
@@ -523,45 +606,11 @@ export interface ArrayField {
  * via the `definition` "localized-required".
  */
 export interface LocalizedRequired {
-  id: number;
+  id: string;
   title: string;
+  seoTitle?: string | null;
   nav: {
-    layout: (
-      | {
-          text?: string | null;
-          nestedArray?:
-            | {
-                text?: string | null;
-                l2?:
-                  | {
-                      l3?:
-                        | {
-                            l4?:
-                              | {
-                                  superNestedText?: string | null;
-                                  id?: string | null;
-                                }[]
-                              | null;
-                            id?: string | null;
-                          }[]
-                        | null;
-                      id?: string | null;
-                    }[]
-                  | null;
-                id?: string | null;
-              }[]
-            | null;
-          id?: string | null;
-          blockName?: string | null;
-          blockType: 'text';
-        }
-      | {
-          number?: number | null;
-          id?: string | null;
-          blockName?: string | null;
-          blockType: 'number';
-        }
-    )[];
+    layout: (Text | Number)[];
   };
   myTab?: {
     text?: string | null;
@@ -580,30 +629,72 @@ export interface LocalizedRequired {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Text".
+ */
+export interface Text {
+  text?: string | null;
+  nestedArray?:
+    | {
+        text?: string | null;
+        l2?:
+          | {
+              l3?:
+                | {
+                    l4?:
+                      | {
+                          superNestedText?: string | null;
+                          id?: string | null;
+                        }[]
+                      | null;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'text';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Number".
+ */
+export interface Number {
+  number?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'number';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "with-localized-relationship".
  */
 export interface WithLocalizedRelationship {
-  id: number;
-  localizedRelationship?: (number | null) | LocalizedPost;
-  localizedRelationHasManyField?: (number | LocalizedPost)[] | null;
+  id: string;
+  localizedRelationship?: (string | null) | LocalizedPost;
+  localizedRelationHasManyField?: (string | LocalizedPost)[] | null;
   localizedRelationMultiRelationTo?:
     | ({
         relationTo: 'localized-posts';
-        value: number | LocalizedPost;
+        value: string | LocalizedPost;
       } | null)
     | ({
         relationTo: 'cannot-create-default-locale';
-        value: number | CannotCreateDefaultLocale;
+        value: string | CannotCreateDefaultLocale;
       } | null);
   localizedRelationMultiRelationToHasMany?:
     | (
         | {
             relationTo: 'localized-posts';
-            value: number | LocalizedPost;
+            value: string | LocalizedPost;
           }
         | {
             relationTo: 'cannot-create-default-locale';
-            value: number | CannotCreateDefaultLocale;
+            value: string | CannotCreateDefaultLocale;
           }
       )[]
     | null;
@@ -615,7 +706,7 @@ export interface WithLocalizedRelationship {
  * via the `definition` "cannot-create-default-locale".
  */
 export interface CannotCreateDefaultLocale {
-  id: number;
+  id: string;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -625,33 +716,33 @@ export interface CannotCreateDefaultLocale {
  * via the `definition` "relationship-localized".
  */
 export interface RelationshipLocalized {
-  id: number;
-  relationship?: (number | null) | LocalizedPost;
-  relationshipHasMany?: (number | LocalizedPost)[] | null;
+  id: string;
+  relationship?: (string | null) | LocalizedPost;
+  relationshipHasMany?: (string | LocalizedPost)[] | null;
   relationMultiRelationTo?:
     | ({
         relationTo: 'localized-posts';
-        value: number | LocalizedPost;
+        value: string | LocalizedPost;
       } | null)
     | ({
         relationTo: 'cannot-create-default-locale';
-        value: number | CannotCreateDefaultLocale;
+        value: string | CannotCreateDefaultLocale;
       } | null);
   relationMultiRelationToHasMany?:
     | (
         | {
             relationTo: 'localized-posts';
-            value: number | LocalizedPost;
+            value: string | LocalizedPost;
           }
         | {
             relationTo: 'cannot-create-default-locale';
-            value: number | CannotCreateDefaultLocale;
+            value: string | CannotCreateDefaultLocale;
           }
       )[]
     | null;
   arrayField?:
     | {
-        nestedRelation?: (number | null) | LocalizedPost;
+        nestedRelation?: (string | null) | LocalizedPost;
         id?: string | null;
       }[]
     | null;
@@ -660,25 +751,21 @@ export interface RelationshipLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-restricted".
+ */
+export interface LocaleRestricted {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "nested".
  */
 export interface Nested {
-  id: number;
-  blocks?:
-    | {
-        someText?: string | null;
-        array?:
-          | {
-              text?: string | null;
-              textNotLocalized?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  id: string;
+  blocks?: Block_8612C35D[] | null;
   topLevelArray?:
     | {
         localizedText?: string | null;
@@ -696,11 +783,30 @@ export interface Nested {
   createdAt: string;
 }
 /**
+ * Multiple blocks resolve to the `Block` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block_8612C35D".
+ */
+export interface Block_8612C35D {
+  someText?: string | null;
+  array?:
+    | {
+        text?: string | null;
+        textNotLocalized?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "groups".
  */
 export interface Group {
-  id: number;
+  id: string;
   groupLocalizedRow?: {
     text?: string | null;
   };
@@ -717,24 +823,27 @@ export interface Group {
           id?: string | null;
         }[]
       | null;
-    blocks?:
-      | {
-          title?: string | null;
-          id?: string | null;
-          blockName?: string | null;
-          blockType: 'first';
-        }[]
-      | null;
+    blocks?: First[] | null;
   };
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "First".
+ */
+export interface First {
+  title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'first';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tabs".
  */
 export interface Tab {
-  id: number;
+  id: string;
   tabLocalized?: {
     title?: string | null;
     array?:
@@ -743,6 +852,9 @@ export interface Tab {
           id?: string | null;
         }[]
       | null;
+    group?: {
+      heading?: string | null;
+    };
   };
   tab?: {
     title?: string | null;
@@ -754,14 +866,7 @@ export interface Tab {
           id?: string | null;
         }[]
       | null;
-    blocks?:
-      | {
-          title?: string | null;
-          id?: string | null;
-          blockName?: string | null;
-          blockType: 'first';
-        }[]
-      | null;
+    blocks?: First[] | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -771,7 +876,7 @@ export interface Tab {
  * via the `definition` "localized-sort".
  */
 export interface LocalizedSort {
-  id: number;
+  id: string;
   title?: string | null;
   date?: string | null;
   updatedAt: string;
@@ -782,32 +887,37 @@ export interface LocalizedSort {
  * via the `definition` "blocks-same-name".
  */
 export interface BlocksSameName {
-  id: number;
-  blocks?:
-    | (
-        | {
-            title?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block_first';
-          }
-        | {
-            title?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block_second';
-          }
-      )[]
-    | null;
+  id: string;
+  blocks?: (BlockFirst | BlockSecond)[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block_first".
+ */
+export interface BlockFirst {
+  title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block_first';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block_second".
+ */
+export interface BlockSecond {
+  title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block_second';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized-within-localized".
  */
 export interface LocalizedWithinLocalized {
-  id: number;
+  id: string;
   myTab?: {
     shouldNotBeLocalized?: string | null;
   };
@@ -817,14 +927,7 @@ export interface LocalizedWithinLocalized {
         id?: string | null;
       }[]
     | null;
-  myBlocks?:
-    | {
-        shouldNotBeLocalized?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'myBlock';
-      }[]
-    | null;
+  myBlocks?: MyBlock[] | null;
   myGroup?: {
     shouldNotBeLocalized?: string | null;
   };
@@ -833,10 +936,20 @@ export interface LocalizedWithinLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  shouldNotBeLocalized?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'myBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "array-with-fallback-fields".
  */
 export interface ArrayWithFallbackField {
-  id: number;
+  id: string;
   items: {
     text?: string | null;
     id?: string | null;
@@ -851,11 +964,54 @@ export interface ArrayWithFallbackField {
   createdAt: string;
 }
 /**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
+  /**
+   * Access for this API key — uncheck to revoke individual tools.
+   */
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -872,101 +1028,114 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'richText';
-        value: number | RichText;
+        value: string | RichText;
       } | null)
     | ({
         relationTo: 'blocks-fields';
-        value: number | BlocksField;
+        value: string | BlocksField;
       } | null)
     | ({
         relationTo: 'nested-arrays';
-        value: number | NestedArray;
+        value: string | NestedArray;
       } | null)
     | ({
         relationTo: 'nested-field-tables';
-        value: number | NestedFieldTable;
+        value: string | NestedFieldTable;
       } | null)
     | ({
         relationTo: 'localized-drafts';
-        value: number | LocalizedDraft;
+        value: string | LocalizedDraft;
       } | null)
     | ({
         relationTo: 'localized-date-fields';
-        value: number | LocalizedDateField;
+        value: string | LocalizedDateField;
       } | null)
     | ({
         relationTo: 'all-fields-localized';
-        value: number | AllFieldsLocalized;
+        value: string | AllFieldsLocalized;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'localized-posts';
-        value: number | LocalizedPost;
+        value: string | LocalizedPost;
       } | null)
     | ({
         relationTo: 'no-localized-fields';
-        value: number | NoLocalizedField;
+        value: string | NoLocalizedField;
       } | null)
     | ({
         relationTo: 'array-fields';
-        value: number | ArrayField;
+        value: string | ArrayField;
       } | null)
     | ({
         relationTo: 'localized-required';
-        value: number | LocalizedRequired;
+        value: string | LocalizedRequired;
       } | null)
     | ({
         relationTo: 'with-localized-relationship';
-        value: number | WithLocalizedRelationship;
+        value: string | WithLocalizedRelationship;
       } | null)
     | ({
         relationTo: 'relationship-localized';
-        value: number | RelationshipLocalized;
+        value: string | RelationshipLocalized;
       } | null)
     | ({
         relationTo: 'cannot-create-default-locale';
-        value: number | CannotCreateDefaultLocale;
+        value: string | CannotCreateDefaultLocale;
+      } | null)
+    | ({
+        relationTo: 'locale-restricted';
+        value: string | LocaleRestricted;
       } | null)
     | ({
         relationTo: 'nested';
-        value: number | Nested;
+        value: string | Nested;
       } | null)
     | ({
         relationTo: 'groups';
-        value: number | Group;
+        value: string | Group;
       } | null)
     | ({
         relationTo: 'tabs';
-        value: number | Tab;
+        value: string | Tab;
       } | null)
     | ({
         relationTo: 'localized-sort';
-        value: number | LocalizedSort;
+        value: string | LocalizedSort;
       } | null)
     | ({
         relationTo: 'blocks-same-name';
-        value: number | BlocksSameName;
+        value: string | BlocksSameName;
       } | null)
     | ({
         relationTo: 'localized-within-localized';
-        value: number | LocalizedWithinLocalized;
+        value: string | LocalizedWithinLocalized;
       } | null)
     | ({
         relationTo: 'array-with-fallback-fields';
         value: string | ArrayWithFallbackField;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -975,11 +1144,16 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  id: string;
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -998,7 +1172,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1009,7 +1183,6 @@ export interface PayloadMigration {
  * via the `definition` "richText_select".
  */
 export interface RichTextSelect<T extends boolean = true> {
-  richText?: T;
   lexical?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1353,6 +1526,7 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
  */
 export interface LocalizedRequiredSelect<T extends boolean = true> {
   title?: T;
+  seoTitle?: T;
   nav?:
     | T
     | {
@@ -1457,6 +1631,15 @@ export interface CannotCreateDefaultLocaleSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-restricted_select".
+ */
+export interface LocaleRestrictedSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "nested_select".
  */
 export interface NestedSelect<T extends boolean = true> {
@@ -1552,6 +1735,11 @@ export interface TabsSelect<T extends boolean = true> {
           | {
               title?: T;
               id?: T;
+            };
+        group?:
+          | T
+          | {
+              heading?: T;
             };
       };
   tab?:
@@ -1676,6 +1864,22 @@ export interface ArrayWithFallbackFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  overrideAccess?: T;
+  access?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1719,7 +1923,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "global-array".
  */
 export interface GlobalArray {
-  id: number;
+  id: string;
   array?:
     | {
         text?: string | null;
@@ -1734,7 +1938,7 @@ export interface GlobalArray {
  * via the `definition` "global-text".
  */
 export interface GlobalText {
-  id: number;
+  id: string;
   text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1744,7 +1948,7 @@ export interface GlobalText {
  * via the `definition` "global-drafts".
  */
 export interface GlobalDraft {
-  id: number;
+  id: string;
   text?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -1788,10 +1992,154 @@ export interface GlobalDraftsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

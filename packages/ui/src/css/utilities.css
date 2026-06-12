@@ -1,0 +1,27 @@
+@layer payload-default {
+  :root {
+    --accessibility-focus-color: var(--color-border-selected);
+    --accessibility-outline: 1px solid var(--accessibility-focus-color);
+    --accessibility-outline-offset: 1px;
+  }
+
+  /* Screen reader only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Global focus ring */
+  :focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+    border-radius: var(--button-radius);
+  }
+}

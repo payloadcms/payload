@@ -1,0 +1,30 @@
+@layer payload-default {
+  .json-cell {
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    border: 0;
+    display: inline-flex;
+    vertical-align: middle;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+    border-radius: var(--radius-medium);
+    padding: 0 var(--spacer-1);
+    max-width: 99.9%;
+
+    [dir='ltr'] & {
+      padding-left: var(--spacer-2);
+    }
+
+    [dir='rtl'] & {
+      padding-right: var(--spacer-2);
+    }
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}

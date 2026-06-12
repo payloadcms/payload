@@ -10,16 +10,17 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
+import { getFieldsToSign } from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { ApiKey } from './payload-types.js'
 
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   apiKeysSlug,
   namedSaveToJWTValue,
@@ -126,16 +127,16 @@ describe('Auth', () => {
       const testUser = await payload.create({
         collection: slug,
         data: {
-          roles: ['user'],
           email: testEmail,
-          password: testPassword,
           loginMetadata: originalArrayData,
+          password: testPassword,
+          roles: ['user'],
         },
       })
 
       const userBefore: any = await payload.findByID({
-        collection: slug,
         id: testUser.id,
+        collection: slug,
       })
       const sessionCountBefore = userBefore.sessions?.length || 0
 
@@ -170,8 +171,8 @@ describe('Auth', () => {
       }
 
       const userAfter: any = await payload.findByID({
-        collection: slug,
         id: testUser.id,
+        collection: slug,
       })
 
       expect(userAfter.loginMetadata).toHaveLength(2)
@@ -182,8 +183,8 @@ describe('Auth', () => {
 
       // Clean up
       await payload.delete({
-        collection: slug,
         id: testUser.id,
+        collection: slug,
       })
     })
 
@@ -270,6 +271,39 @@ describe('Auth', () => {
         expect(exp).toBeDefined()
       })
 
+      it('should not crash when building JWT for user with missing group/tab fields', () => {
+        const collectionConfig = payload.collections[slug].config
+
+        // Simulate a user document that was created before group/tab fields were added.
+        // Without the fix, getFieldsToSign would crash with:
+        // "TypeError: Cannot read properties of undefined (reading 'saveToJWTString')"
+        // when trying to traverse into groupSaveToJWT.saveToJWTString
+        const userWithMissingFields = {
+          id: '123',
+          email: 'test@example.com',
+          roles: ['user'],
+          // Missing fields: group, groupSaveToJWT, saveToJWTTab, tabSaveToJWTString
+        }
+
+        expect(() => {
+          getFieldsToSign({
+            collectionConfig,
+            email: userWithMissingFields.email,
+            user: userWithMissingFields as any,
+          })
+        }).not.toThrow()
+
+        const result = getFieldsToSign({
+          collectionConfig,
+          email: userWithMissingFields.email,
+          user: userWithMissingFields as any,
+        })
+
+        expect(result.id).toBe(userWithMissingFields.id)
+        expect(result.email).toBe(userWithMissingFields.email)
+        expect(result.collection).toBe(slug)
+      })
+
       it('should allow authentication with an API key with useAPIKey', async () => {
         const apiKey = '0123456789ABCDEFGH'
 
@@ -335,7 +369,7 @@ describe('Auth', () => {
         const apiKey = '987e6543-e21b-12d3-a456-426614174999'
         const user = await payload.create({
           collection: slug,
-          data: { email: 'user@example.com', password: 'Password123', apiKey, enableAPIKey: true },
+          data: { apiKey, email: 'user@example.com', enableAPIKey: true, password: 'Password123' },
         })
         const { token } = await payload.login({
           collection: 'users',
@@ -560,8 +594,8 @@ describe('Auth', () => {
             },
           })
 
-          expect(result.docs[0].value.property).toStrictEqual('updated')
-          expect(result.docs[0].value.property2).toStrictEqual('updated')
+          expect((result.docs[0]?.value as any)?.property).toStrictEqual('updated')
+          expect((result.docs[0]?.value as any)?.property2).toStrictEqual('updated')
 
           expect(result.docs).toHaveLength(1)
         })
@@ -597,6 +631,105 @@ describe('Auth', () => {
           })
 
           expect(result.docs).toHaveLength(0)
+        })
+      })
+
+      describe('Cross-Collection Preference Isolation', () => {
+        const adminKey = 'cross-collection-admin'
+        const publicKey = 'cross-collection-public'
+        let publicUserToken: string
+        let publicUserId: number | string
+        const createdIDs: (number | string)[] = []
+
+        beforeAll(async () => {
+          // Admin creates preference
+          const adminPref = await restClient.POST(`/payload-preferences/${adminKey}`, {
+            body: JSON.stringify({ value: { data: 'admin-sensitive' } }),
+            headers: { Authorization: `JWT ${token}` },
+          })
+          createdIDs.push(((await adminPref.json()) as any).doc.id)
+
+          // Create and verify public user
+          const userRes = await restClient.POST(`/${publicUsersSlug}`, {
+            body: JSON.stringify({ email: 'crosscollection@test.com', password: 'test123!' }),
+            headers: { Authorization: `JWT ${token}` },
+          })
+          publicUserId = ((await userRes.json()) as any).doc.id
+
+          const user = await payload.findByID({
+            collection: publicUsersSlug,
+            id: publicUserId,
+            showHiddenFields: true,
+          })
+          await restClient.POST(`/${publicUsersSlug}/verify/${(user as any)._verificationToken}`)
+
+          // Login as public user
+          const login = await restClient.POST(`/${publicUsersSlug}/login`, {
+            body: JSON.stringify({ email: 'crosscollection@test.com', password: 'test123!' }),
+          })
+          publicUserToken = ((await login.json()) as any).token
+
+          // Public user creates preference
+          const publicPref = await restClient.POST(`/payload-preferences/${publicKey}`, {
+            body: JSON.stringify({ value: { data: 'public-data' } }),
+            headers: { Authorization: `JWT ${publicUserToken}` },
+          })
+          createdIDs.push(((await publicPref.json()) as any).doc.id)
+        })
+
+        afterAll(async () => {
+          await Promise.all(
+            createdIDs.map((id) =>
+              payload.delete({ collection: 'payload-preferences', id }).catch(() => {}),
+            ),
+          )
+          if (publicUserId) {
+            await payload.delete({ collection: publicUsersSlug, id: publicUserId }).catch(() => {})
+          }
+        })
+
+        it('should only return own preferences via REST find', async () => {
+          const res = await restClient.GET('/payload-preferences', {
+            headers: { Authorization: `JWT ${publicUserToken}` },
+          })
+          const data: any = await res.json()
+
+          expect(data.docs).toHaveLength(1)
+          expect(data.docs[0].user.relationTo).toBe(publicUsersSlug)
+          expect(data.docs.some((doc: any) => doc.user.relationTo === 'users')).toBe(false)
+        })
+
+        it('should not delete other collection preferences via REST', async () => {
+          const before = await payload.find({
+            collection: 'payload-preferences',
+            where: { 'user.relationTo': { equals: 'users' } },
+          })
+          expect(before.docs).toHaveLength(1)
+
+          await restClient.DELETE(`/payload-preferences?where[key][equals]=${adminKey}`, {
+            headers: { Authorization: `JWT ${publicUserToken}` },
+          })
+
+          const after = await payload.find({
+            collection: 'payload-preferences',
+            where: { 'user.relationTo': { equals: 'users' } },
+          })
+          expect(after.docs).toHaveLength(1)
+          expect((after.docs[0]?.value as any)?.data).toBe('admin-sensitive')
+        })
+
+        it('should isolate preferences by user ID and collection', async () => {
+          const publicPrefs = await payload.find({
+            collection: 'payload-preferences',
+            where: { 'user.relationTo': { equals: publicUsersSlug } },
+          })
+          expect(publicPrefs.docs).toHaveLength(1)
+
+          const adminPrefs = await payload.find({
+            collection: 'payload-preferences',
+            where: { 'user.relationTo': { equals: 'users' } },
+          })
+          expect(adminPrefs.docs).toHaveLength(1)
         })
       })
 
@@ -806,24 +939,25 @@ describe('Auth', () => {
             },
           })
 
-          expect(lockedUser.docs[0].loginAttempts).toBe(2)
-          expect(lockedUser.docs[0].lockUntil).toBeDefined()
+          expect(lockedUser.docs[0]!.loginAttempts).toBe(2)
+          expect(lockedUser.docs[0]!.lockUntil).toBeDefined()
 
           const manuallyReleaseLock = new Date(Date.now() - 605 * 1000).toISOString()
-          const userLockElapsed = await payload.update({
+          await payload.db.updateOne({
             collection: slug,
+            id: lockedUser.docs[0]!.id,
             data: {
               lockUntil: manuallyReleaseLock,
             },
-            showHiddenFields: true,
-            where: {
-              email: {
-                equals: userEmail,
-              },
-            },
           })
 
-          expect(userLockElapsed.docs[0].lockUntil).toEqual(manuallyReleaseLock)
+          const userAfterUpdate = await payload.findByID({
+            collection: slug,
+            id: lockedUser.docs[0]!.id,
+            showHiddenFields: true,
+          })
+
+          expect(userAfterUpdate.lockUntil).toEqual(manuallyReleaseLock)
 
           // login
           await restClient.POST(`/${slug}/login`, {
@@ -1022,9 +1156,9 @@ describe('Auth', () => {
       })
       expect(doc.password).toBe('123')
       const updated = await payload.update({
+        id: doc.id,
         collection: 'disable-local-strategy-password',
         data: { password: '1234' },
-        id: doc.id,
       })
       expect(updated.password).toBe('1234')
     })
@@ -1070,11 +1204,11 @@ describe('Auth', () => {
         .digest('hex')
 
       await payload.db.updateOne({
+        id: user.id,
         collection: apiKeysSlug,
         data: {
           apiKeyIndex: sha1Index,
         },
-        id: user.id,
       })
 
       const response = await restClient
@@ -1195,6 +1329,90 @@ describe('Auth', () => {
       expect(authenticated.token).toBeTruthy()
     })
 
+    it('should return collection property on user documents', async () => {
+      const testEmail = `collection-test-${Date.now()}@example.com`
+
+      const createdUser = await payload.create({
+        collection: slug,
+        data: {
+          email: testEmail,
+          password: 'test',
+          roles: ['user'],
+        },
+      })
+
+      expect(createdUser.collection).toBe(slug)
+
+      const foundUser = await payload.findByID({
+        id: createdUser.id,
+        collection: slug,
+      })
+
+      expect(foundUser.collection).toBe(slug)
+
+      const foundUsers = await payload.find({
+        collection: slug,
+        where: { id: { equals: createdUser.id } },
+      })
+
+      expect(foundUsers.docs[0]?.collection).toBe(slug)
+
+      const updatedUser = await payload.update({
+        id: createdUser.id,
+        collection: slug,
+        data: { roles: ['admin'] },
+      })
+
+      expect(updatedUser.collection).toBe(slug)
+
+      const deletedUser = await payload.delete({
+        id: createdUser.id,
+        collection: slug,
+      })
+
+      expect(deletedUser.collection).toBe(slug)
+    })
+
+    it('should return collection property on api-keys auth collection', async () => {
+      const createdApiKey = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          enableAPIKey: true,
+        },
+      })
+
+      expect(createdApiKey.collection).toBe(apiKeysSlug)
+
+      const foundApiKey = await payload.findByID({
+        id: createdApiKey.id,
+        collection: apiKeysSlug,
+      })
+
+      expect(foundApiKey.collection).toBe(apiKeysSlug)
+
+      const foundApiKeys = await payload.find({
+        collection: apiKeysSlug,
+        where: { id: { equals: createdApiKey.id } },
+      })
+
+      expect(foundApiKeys.docs[0]?.collection).toBe(apiKeysSlug)
+
+      const updatedApiKey = await payload.update({
+        id: createdApiKey.id,
+        collection: apiKeysSlug,
+        data: { enableAPIKey: false },
+      })
+
+      expect(updatedApiKey.collection).toBe(apiKeysSlug)
+
+      const deletedApiKey = await payload.delete({
+        id: createdApiKey.id,
+        collection: apiKeysSlug,
+      })
+
+      expect(deletedApiKey.collection).toBe(apiKeysSlug)
+    })
+
     it('should forget and reset password', async () => {
       const forgot = await payload.forgotPassword({
         collection: 'users',
@@ -1290,8 +1508,8 @@ describe('Auth', () => {
         expect(successfulLogin2).toBeDefined()
 
         const user = await payload.findByID({
-          collection: slug,
           id: successfulLogin2.user.id,
+          collection: slug,
           overrideAccess: true,
           showHiddenFields: true,
         })
@@ -1385,6 +1603,10 @@ describe('Auth', () => {
 
     const mockContext: Parameters<EmailFieldValidation>[1] = {
       // @ts-expect-error: Mocking context for email validation
+      blockData: {},
+      data: {},
+      path: ['email'],
+      preferences: { fields: {} },
       req: {
         payload: {
           collections: {} as Record<string, never>,
@@ -1394,10 +1616,6 @@ describe('Auth', () => {
       },
       required: true,
       siblingData: {},
-      blockData: {},
-      data: {},
-      path: ['email'],
-      preferences: { fields: {} },
     }
     it('should allow standard formatted emails', () => {
       expect(emailValidation('user@example.com', mockContext)).toBe(true)

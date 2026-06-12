@@ -65,6 +65,20 @@ export const withTenantAccess =
         tenantsArrayTenantFieldName,
         user: args.req.user as UserWithTenantsField,
       })
+
+      // User with no tenants should have no access to tenant-scoped documents
+      // except for their own user document
+      if (tenantConstraint[fieldName]?.in.length === 0) {
+        const result: AccessResult =
+          collection.slug === args.req.user.collection
+            ? { id: { equals: args.req.user.id } }
+            : false
+
+        return accessResultCallback
+          ? accessResultCallback({ accessKey, accessResult: result, ...args })
+          : result
+      }
+
       if (collection.slug === args.req.user.collection) {
         constraints.push({
           or: [

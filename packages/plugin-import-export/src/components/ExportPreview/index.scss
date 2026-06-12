@@ -7,9 +7,21 @@
       margin-bottom: 10px;
     }
 
+    &__export-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
     &__export-count {
       font-size: var(--font-size-small);
       color: var(--theme-elevation-500);
+    }
+
+    &__limit-capped {
+      font-size: var(--font-size-small);
+      color: var(--theme-warning-500);
     }
 
     &__pagination {

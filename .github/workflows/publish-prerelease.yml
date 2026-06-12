@@ -1,9 +1,6 @@
 name: publish-prerelease
 
 on:
-  schedule:
-    # Run nightly at 10pm EST
-    - cron: '0 3 * * *'
   workflow_dispatch:
     inputs:
       debug_build:

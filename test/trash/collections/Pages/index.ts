@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { postsSlug } from '../Posts/index.js'
+
 export const pagesSlug = 'pages'
 
 export const Pages: CollectionConfig = {
@@ -12,6 +14,17 @@ export const Pages: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+    },
+    {
+      name: 'relatedPosts',
+      type: 'relationship',
+      relationTo: postsSlug,
+      hasMany: true,
+    },
+    {
+      name: 'featuredPost',
+      type: 'relationship',
+      relationTo: postsSlug,
     },
   ],
   versions: {

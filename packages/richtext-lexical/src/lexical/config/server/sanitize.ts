@@ -12,13 +12,7 @@ export const sanitizeServerFeatures = (
   features: ResolvedServerFeatureMap,
 ): SanitizedServerFeatures => {
   const sanitized: SanitizedServerFeatures = {
-    converters: {
-      html: [],
-    },
     enabledFeatures: [],
-    generatedTypes: {
-      modifyOutputSchemas: [],
-    },
     getSubFields: new Map(),
     getSubFieldsData: new Map(),
     graphQLPopulationPromises: new Map(),
@@ -46,10 +40,6 @@ export const sanitizeServerFeatures = (
   }
 
   features.forEach((feature) => {
-    if (feature?.generatedTypes?.modifyOutputSchema) {
-      sanitized.generatedTypes.modifyOutputSchemas.push(feature.generatedTypes.modifyOutputSchema)
-    }
-
     if (feature?.hooks?.beforeValidate?.length) {
       sanitized.hooks.beforeValidate = sanitized.hooks.beforeValidate?.concat(
         feature.hooks.beforeValidate,
@@ -82,18 +72,23 @@ export const sanitizeServerFeatures = (
     if (feature.nodes?.length) {
       // Do not concat here. We need to keep the object reference of sanitized.nodes so that function markdown transformers of features automatically get the updated nodes
       for (const node of feature.nodes) {
+        const nodeType = 'with' in node.node ? node.node.replace.getType() : node.node.getType()
+        const alreadyRegistered = sanitized.nodes.some((existing) => {
+          const existingType =
+            'with' in existing.node ? existing.node.replace.getType() : existing.node.getType()
+          return existingType === nodeType
+        })
+        if (alreadyRegistered) {
+          throw new Error(
+            `Lexical editor config: node type "${nodeType}" was registered more than once (feature "${feature.key}"). Each lexical node type may only be registered by a single feature.`,
+          )
+        }
         sanitized.nodes.push(node)
-      }
-      feature.nodes.forEach((node) => {
-        const nodeType = 'with' in node.node ? node.node.replace.getType() : node.node.getType() // TODO: Idk if this works for node replacements
         if (node?.graphQLPopulationPromises?.length) {
           sanitized.graphQLPopulationPromises.set(nodeType, node.graphQLPopulationPromises)
         }
         if (node?.validations?.length) {
           sanitized.validations.set(nodeType, node.validations)
-        }
-        if (node?.converters?.html) {
-          sanitized.converters.html.push(node.converters.html)
         }
         if (node?.hooks?.afterChange) {
           sanitized.nodeHooks?.afterChange?.set(nodeType, node.hooks.afterChange)
@@ -113,7 +108,7 @@ export const sanitizeServerFeatures = (
         if (node?.getSubFieldsData) {
           sanitized.getSubFieldsData?.set(nodeType, node.getSubFieldsData)
         }
-      })
+      }
     }
 
     if (feature.markdownTransformers?.length) {

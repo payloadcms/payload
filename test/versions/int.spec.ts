@@ -1,18 +1,19 @@
-import type { JsonObject, Payload} from 'payload';
+import type { JsonObject, Payload } from 'payload'
 
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
+import fs from 'fs'
 import path from 'path'
-import { createLocalReq, saveVersion, ValidationError  } from 'payload'
+import { createLocalReq, getFileByPath, saveVersion, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   cleanupDocuments,
   cleanupGlobal,
@@ -26,6 +27,7 @@ import {
   draftCollectionSlug,
   draftGlobalSlug,
   draftUnlimitedGlobalSlug,
+  draftWithUploadCollectionSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   versionCollectionSlug,
@@ -431,6 +433,104 @@ describe('Versions', () => {
         expect(await getVersionsCount()).toBe(2)
       })
 
+      it('should show autosave changes after reload on a published document', async () => {
+        // Bug: When autosave is enabled, editing a published document and then reloading
+        // should show the draft changes ("Changed" status). Previously, reload showed
+        // "Published" status with the button disabled, even though draft content persisted.
+        const published = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { _status: 'published', description: 'original', title: 'Published Post' },
+        })
+
+        // Autosave a change on the published document
+        await payload.update({
+          id: published.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'Autosaved Title' },
+          draft: true,
+        })
+
+        // Simulate page reload: read the latest draft version (what getLatestCollectionVersion does)
+        const { docs: latestVersions } = await payload.findVersions({
+          collection: autosaveCollectionSlug,
+          limit: 1,
+          sort: '-updatedAt',
+          where: {
+            and: [{ parent: { equals: published.id } }, { latest: { equals: true } }],
+          },
+        })
+
+        expect(latestVersions).toHaveLength(1)
+        expect(latestVersions[0].version.title).toBe('Autosaved Title')
+        // The draft version should exist and be findable, proving the UI would show "Changed"
+      })
+
+      it('should update existing draft version during repeated autosaves instead of creating new ones', async () => {
+        // Bug: Auto Save when changing content kept adding a new version EVERY time
+        // instead of updating the existing draft one.
+        const published = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { _status: 'published', description: 'desc', title: 'Original' },
+        })
+
+        // First autosave creates a draft version
+        await payload.update({
+          id: published.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'Change 1' },
+          draft: true,
+        })
+
+        const countAfterFirst = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: { parent: { equals: published.id } },
+        })
+
+        // Second autosave should update the existing draft, NOT create a new one
+        await payload.update({
+          id: published.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'Change 2' },
+          draft: true,
+        })
+
+        const countAfterSecond = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: { parent: { equals: published.id } },
+        })
+
+        expect(countAfterSecond.totalDocs).toBe(countAfterFirst.totalDocs)
+
+        // Third autosave — still same count
+        await payload.update({
+          id: published.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'Change 3' },
+          draft: true,
+        })
+
+        const countAfterThird = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: { parent: { equals: published.id } },
+        })
+
+        expect(countAfterThird.totalDocs).toBe(countAfterFirst.totalDocs)
+
+        // Verify the latest version has the most recent content
+        const { docs } = await payload.findVersions({
+          collection: autosaveCollectionSlug,
+          limit: 1,
+          sort: '-updatedAt',
+          where: { parent: { equals: published.id } },
+        })
+
+        expect(docs[0].version.title).toBe('Change 3')
+      })
+
       it('should return null when saving a version with returning:false', async () => {
         const collection = autosaveCollectionSlug
         const collectionConfig = payload.collections[autosaveCollectionSlug].config
@@ -476,6 +576,63 @@ describe('Versions', () => {
         })
 
         expect(duplicatedDoc._status).toBe('draft')
+
+        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
+        await payload.delete({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+      })
+
+      it('should duplicate a draft document with empty required fields via local API', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Draft with partial data',
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        // description is required but missing — duplicate should still succeed as a draft
+        const duplicatedDoc = await payload.duplicate({
+          id: originalDoc.id,
+          collection: draftCollectionSlug,
+          draft: true,
+        })
+
+        expect(duplicatedDoc._status).toBe('draft')
+        expect(duplicatedDoc.id).not.toEqual(originalDoc.id)
+        expect(duplicatedDoc.title).toContain('Draft with partial data')
+
+        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
+        await payload.delete({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+      })
+
+      it('should duplicate a draft document with empty required fields via REST API without explicit draft param', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST draft partial',
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        // Mimics the admin UI: POST to /:collection/:id/duplicate
+        // with { _status: 'draft' } in body and NO draft query parameter
+        const response = await restClient.POST(
+          `/${draftCollectionSlug}/${originalDoc.id}/duplicate`,
+          {
+            body: JSON.stringify({ _status: 'draft' }),
+          },
+        )
+
+        const { doc } = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(doc._status).toBe('draft')
+        expect(doc.id).not.toEqual(originalDoc.id)
+
+        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
+        await payload.delete({ collection: draftCollectionSlug, id: doc.id })
       })
     })
 
@@ -727,6 +884,74 @@ describe('Versions', () => {
         })
         expect(latestDraft.blocksField).toHaveLength(0)
       })
+
+      it('should not copy current document fields into restored version', async () => {
+        // Create doc with a block (only text set), leaving radio/select/localized unset
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            blocksField: [
+              {
+                blockType: 'block',
+                text: 'original-text',
+              },
+            ],
+            description: 'initial description',
+            title: 'leak test',
+          },
+          draft: true,
+        })
+
+        const blockId = doc.blocksField?.[0]!.id
+
+        // Update doc to set radio, select, and block localized field
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            blocksField: [
+              {
+                id: blockId,
+                blockType: 'block',
+                localized: 'leaked-value',
+                text: 'original-text',
+              },
+            ],
+            description: 'updated description',
+            radio: 'test',
+            select: ['test1'],
+            title: 'leak test',
+          },
+          draft: true,
+        })
+
+        // Find versions and restore the original (oldest) version
+        const versions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        const originalVersion = versions.docs[versions.docs.length - 1]
+
+        await payload.restoreVersion({
+          id: originalVersion!.id,
+          collection: draftCollectionSlug,
+        })
+
+        const restored = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          draft: true,
+        })
+
+        // Top-level fields should NOT have leaked from the updated version
+        expect(restored.radio).toBeFalsy()
+        expect(restored.select).toEqual([])
+
+        // Block sub-fields should NOT have leaked either
+        expect(restored.blocksField?.[0]!.localized).toBeFalsy()
+        expect(restored.blocksField?.[0]!.text).toBe('original-text')
+      })
     })
 
     it('should restore published version with correct data', async () => {
@@ -778,6 +1003,48 @@ describe('Versions', () => {
       // assert it has the original post content
       expect(latestDraft.title).toStrictEqual('v1')
       expect(restoredVersion.title).toStrictEqual('v1')
+    })
+
+    it('should restore a published version when required localized fields are empty in a non-default locale', async () => {
+      const originalPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          description: 'description v1',
+          title: 'title v1 en',
+        },
+      })
+
+      await payload.update({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          description: 'description v2',
+          title: 'title v2 en',
+        },
+        draft: true,
+      })
+
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: {
+            equals: originalPost.id,
+          },
+        },
+      })
+
+      const oldestVersion = versions.docs[versions.docs.length - 1]
+
+      const restoredVersion = await payload.restoreVersion({
+        id: oldestVersion!.id,
+        collection: draftCollectionSlug,
+        fallbackLocale: false,
+        locale: 'de',
+      })
+
+      expect(restoredVersion.id).toStrictEqual(originalPost.id)
     })
 
     it('findVersions - pagination should work correctly', async () => {
@@ -1012,15 +1279,14 @@ describe('Versions', () => {
           draft: true,
         })
 
-        await expect(async () => {
-          // should not be able to publish a doc that fails validation
-          await payload.update({
+        await expect(
+          payload.update({
             id: doc.id,
             collection: draftCollectionSlug,
             data: { _status: 'published' },
             draft: true,
-          })
-        }).rejects.toThrow(ValidationError)
+          }),
+        ).rejects.toThrow(ValidationError)
 
         // succeeds but returns zero docs updated, with an error
         const updateManyResult = await payload.update({
@@ -1098,6 +1364,7 @@ describe('Versions', () => {
           payload,
         })
       })
+
     })
 
     describe('Update Many', () => {
@@ -1266,6 +1533,149 @@ describe('Versions', () => {
         })
 
         expect(versions.docs).toHaveLength(3)
+      })
+    })
+
+    describe('Unpublish', () => {
+      afterEach(async () => {
+        await cleanupDocuments({
+          collectionSlugs: [draftCollectionSlug],
+          payload,
+        })
+      })
+
+      it('should not create a new version when unpublishing a collection document', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'test',
+            title: 'unpublish test',
+          },
+        })
+
+        const initialVersions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        expect(initialVersions.docs).toHaveLength(1)
+        expect(initialVersions.docs[0].version._status).toBe('published')
+
+        const unpublished = await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: { _status: 'draft' },
+          unpublishAllLocales: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+
+        const afterVersions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        expect(afterVersions.docs).toHaveLength(1)
+        expect(afterVersions.docs[0].version._status).toBe('draft')
+      })
+
+      it('should not create a new version when unpublishing a global', async () => {
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'published', title: 'unpublish global test' },
+        })
+
+        const initialVersions = await payload.findGlobalVersions({
+          slug: draftGlobalSlug,
+        })
+
+        const initialCount = initialVersions.docs.length
+
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'draft' },
+          unpublishAllLocales: true,
+        })
+
+        const afterVersions = await payload.findGlobalVersions({
+          slug: draftGlobalSlug,
+        })
+
+        expect(afterVersions.docs).toHaveLength(initialCount)
+        expect(afterVersions.docs[0].version._status).toBe('draft')
+
+        await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
+      })
+
+      it('should update main table _status to draft when unpublishing', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'test',
+            title: 'main table unpublish test',
+          },
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: { _status: 'draft' },
+          unpublishAllLocales: true,
+        })
+
+        const found = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          draft: false,
+        })
+
+        expect(found._status).toBe('draft')
+      })
+
+      it('should unpublish a collection document with localized required fields from a non-default locale', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'test',
+            title: 'unpublish localized test',
+          },
+          locale: 'en',
+        })
+
+        const unpublished = await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: { _status: 'draft' },
+          locale: 'es',
+          unpublishAllLocales: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+
+        await payload.delete({ collection: draftCollectionSlug, id: doc.id })
+      })
+
+      it('should unpublish a global with localized required fields from a non-default locale', async () => {
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'published', title: 'unpublish global localized test' },
+          locale: 'en',
+        })
+
+        const unpublished = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'draft' },
+          fallbackLocale: false,
+          locale: 'es',
+          unpublishAllLocales: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+
+        await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
       })
     })
 
@@ -1497,6 +1907,299 @@ describe('Versions', () => {
           payload,
         })
       })
+
+      it('should fall back to creating a new version when updateVersion fails due to a concurrent write', async () => {
+        const doc = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { title: 'original', _status: 'draft' },
+          draft: true,
+        })
+
+        // Establish an existing autosave version so updateLatestVersion has something to update
+        await payload.update({
+          id: doc.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'first autosave' },
+          draft: true,
+        })
+
+        const spy = vi
+          .spyOn(payload.db, 'updateVersion')
+          .mockRejectedValueOnce(new Error('concurrent update conflict'))
+
+        // Should not throw — updateLatestVersion catches the error and saveVersion falls back to createVersion
+        const result = await payload.update({
+          id: doc.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'second autosave' },
+          draft: true,
+        })
+
+        spy.mockRestore()
+
+        expect(result.title).toBe('second autosave')
+
+        // A new version was created as fallback instead of the in-place update
+        const { totalDocs } = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        // create → 1 version, first autosave updates in place → still 1 version on autosave collection (it creates a new autosave),
+        // second autosave failed update → fell back to create → one extra version
+        expect(totalDocs).toBeGreaterThan(1)
+
+        await cleanupDocuments({
+          collectionSlugs: [autosaveCollectionSlug],
+          payload,
+        })
+      })
+
+      it('should propagate the error when createVersion also fails', async () => {
+        const doc = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { title: 'original', _status: 'draft' },
+          draft: true,
+        })
+
+        const updateVersionSpy = vi
+          .spyOn(payload.db, 'updateVersion')
+          .mockRejectedValueOnce(new Error('concurrent update conflict'))
+        const createVersionSpy = vi
+          .spyOn(payload.db, 'createVersion')
+          .mockRejectedValueOnce(new Error('database connection lost'))
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            autosave: true,
+            collection: autosaveCollectionSlug,
+            data: { title: 'will fail' },
+            draft: true,
+          }),
+        ).rejects.toThrow('database connection lost')
+
+        updateVersionSpy.mockRestore()
+        createVersionSpy.mockRestore()
+
+        await cleanupDocuments({
+          collectionSlugs: [autosaveCollectionSlug],
+          payload,
+        })
+      })
+    })
+  })
+
+  describe('Upload Collections with Drafts', () => {
+    const uploadedFilenames: string[] = []
+    const uploadStaticDir = path.resolve(dirname, './collections/uploads-draft')
+
+    afterEach(async () => {
+      await cleanupDocuments({
+        collectionSlugs: [draftWithUploadCollectionSlug],
+        payload,
+      })
+
+      for (const filename of uploadedFilenames) {
+        const filePath = path.resolve(uploadStaticDir, filename)
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath)
+        }
+      }
+      uploadedFilenames.length = 0
+    })
+
+    it('should not modify the published document when saving a draft with a new file', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'original-published.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+      expect(publishedDoc._status).toBe('published')
+
+      const draftImageFile = await getFileByPath(path.resolve(dirname, './image.png'))
+
+      draftImageFile.name = 'new-draft-file.png'
+
+      await payload.update({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'draft',
+          alt: 'Updated in draft',
+        },
+        draft: true,
+        file: draftImageFile,
+      })
+
+      const mainDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+      })
+
+      const draftDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        draft: true,
+      })
+
+      uploadedFilenames.push(draftDoc.filename)
+
+      expect(mainDoc._status).toBe('published')
+      expect(mainDoc.filename).toBe(publishedDoc.filename)
+      expect(mainDoc.alt).toBe('Original image')
+
+      expect(draftDoc._status).toBe('draft')
+      expect(draftDoc.alt).toBe('Updated in draft')
+      expect(draftDoc.filename).not.toBe(publishedDoc.filename)
+    })
+
+    it('should not delete the published file from disk when saving a draft with a new file', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'published-file-disk-check.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Published image',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+
+      const publishedFilePath = path.resolve(uploadStaticDir, publishedDoc.filename)
+
+      expect(fs.existsSync(publishedFilePath)).toBe(true)
+
+      const draftImageFile = await getFileByPath(path.resolve(dirname, './image.png'))
+
+      draftImageFile.name = 'replacement-draft-file.png'
+
+      await payload.update({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'draft',
+          alt: 'Draft with new file',
+        },
+        draft: true,
+        file: draftImageFile,
+      })
+
+      const draftDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        draft: true,
+      })
+
+      uploadedFilenames.push(draftDoc.filename)
+
+      expect(fs.existsSync(publishedFilePath)).toBe(true)
+    })
+
+    it('should correctly publish a draft with a new file using the PublishMany pattern', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'publish-many-original.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+
+      const draftImageFile = await getFileByPath(path.resolve(dirname, './image.png'))
+
+      draftImageFile.name = 'publish-many-draft.png'
+
+      await payload.update({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'draft',
+          alt: 'Draft version',
+        },
+        draft: true,
+        file: draftImageFile,
+      })
+
+      const draftDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        draft: true,
+      })
+
+      uploadedFilenames.push(draftDoc.filename)
+
+      await payload.update({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+        },
+        draft: true,
+        where: {
+          id: { equals: publishedDoc.id },
+        },
+      })
+
+      const republishedDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+      })
+
+      expect(republishedDoc._status).toBe('published')
+      expect(republishedDoc.filename).toBe(draftDoc.filename)
+      expect(republishedDoc.alt).toBe('Draft version')
+    })
+
+    it('should create a draft when duplicating a published upload document with draft: true', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'duplicate-source.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original published',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+      expect(publishedDoc._status).toBe('published')
+
+      const duplicatedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          alt: 'Duplicated draft',
+        },
+        draft: true,
+        duplicateFromID: publishedDoc.id,
+      })
+
+      uploadedFilenames.push(duplicatedDoc.filename)
+
+      expect(duplicatedDoc._status).toBe('draft')
     })
   })
 
@@ -1628,6 +2331,51 @@ describe('Versions', () => {
       })
 
       expect(draftFindResults.docs[0].title).toStrictEqual(updatedTitle2)
+    })
+
+    it('should be able to query blockType fields with contains and draft=true', async () => {
+      const matchingDraft = await createDraftDocument({
+        blocksField: [
+          {
+            blockType: 'block',
+            localized: null,
+            text: 'Block',
+          },
+        ],
+        collection: draftCollectionSlug,
+        payload,
+        title: 'draft block type query',
+      })
+
+      await createDraftDocument({
+        blocksField: [],
+        collection: draftCollectionSlug,
+        payload,
+        title: 'draft block type query 2',
+      })
+
+      const query = {
+        'blocksField.blockType': {
+          contains: 'block',
+        },
+      }
+
+      const publishedFindResults = await payload.find({
+        collection: draftCollectionSlug,
+        where: query,
+      })
+
+      expect(publishedFindResults.docs).toHaveLength(1)
+      expect(publishedFindResults.docs.find(({ id }) => id === matchingDraft.id)).toBeDefined()
+
+      const draftFindResults = await payload.find({
+        collection: draftCollectionSlug,
+        draft: true,
+        where: query,
+      })
+
+      expect(draftFindResults.docs).toHaveLength(1)
+      expect(draftFindResults.docs.find(({ id }) => id === matchingDraft.id)).toBeDefined()
     })
 
     it("should not be able to query old drafts that don't match with draft=true", async () => {
@@ -2323,6 +3071,57 @@ describe('Versions', () => {
 
         expect(versions.docs[0].version.title.en).toStrictEqual(newEnglishTitle)
         expect(versions.docs[0].version.title.es).toStrictEqual(spanishTitle)
+      })
+
+      it('should have correct updatedAt timestamps for globals when saving drafts', async () => {
+        const created = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'title',
+          },
+          draft: true,
+        })
+
+        await wait(10)
+
+        const updated = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+        })
+
+        const createdUpdatedAt = new Date(created.updatedAt)
+        const updatedUpdatedAt = new Date(updated.updatedAt)
+
+        expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
+      })
+
+      it('should have correct updatedAt timestamps for globals when saving drafts with autosave', async () => {
+        const created = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'title',
+          },
+          draft: true,
+        })
+
+        await wait(10)
+
+        const updated = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+          autosave: true,
+        })
+
+        const createdUpdatedAt = new Date(created.updatedAt)
+        const updatedUpdatedAt = new Date(updated.updatedAt)
+
+        expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
       })
     })
 
@@ -3371,6 +4170,69 @@ describe('Versions', () => {
 
         expect(latestVersion.text.es).toBeUndefined()
         expect(latestVersion.text.en).toStrictEqual('English publish')
+      })
+
+      it('should preserve block metadata when publishing specific locale with blocks added after initial save', async () => {
+        // Step 1: Create doc without blocks (simulates autosave before blocks are added)
+        const draft = await payload.create({
+          collection: localizedCollectionSlug,
+          data: {
+            text: 'English draft',
+          },
+          draft: true,
+          locale: 'en',
+        })
+
+        // Step 2: Update with blocks
+        await payload.update({
+          id: draft.id,
+          collection: localizedCollectionSlug,
+          data: {
+            blocks: [
+              {
+                blockType: 'block',
+                array: [],
+              },
+            ],
+            text: 'English with blocks',
+          },
+          draft: true,
+          locale: 'en',
+        })
+
+        // Step 3: Publish only English locale
+        const published = await payload.update({
+          id: draft.id,
+          collection: localizedCollectionSlug,
+          data: {
+            _status: 'published',
+            blocks: [
+              {
+                blockType: 'block',
+                array: [],
+              },
+            ],
+            text: 'English published with blocks',
+          },
+          draft: false,
+          locale: 'en',
+          publishSpecificLocale: 'en',
+        })
+
+        // Blocks should be preserved with blockType intact
+        expect(published.blocks).toHaveLength(1)
+        expect(published.blocks[0].blockType).toBe('block')
+        expect(published.blocks[0].id).toBeDefined()
+
+        // Verify via findByID as well
+        const found = await payload.findByID({
+          id: draft.id,
+          collection: localizedCollectionSlug,
+        })
+
+        expect(found.blocks).toHaveLength(1)
+        expect(found.blocks[0].blockType).toBe('block')
+        expect(found.blocks[0].id).toBeDefined()
       })
     })
 

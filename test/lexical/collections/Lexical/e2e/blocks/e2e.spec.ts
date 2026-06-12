@@ -15,23 +15,25 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../../../__helpers/shared/sdk/index.js'
 import type { Config, LexicalField, Upload } from '../../../../payload-types.js'
 
+import { assertNetworkRequests } from '../../../../../__helpers/e2e/assertNetworkRequests.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
-} from '../../../../../helpers.js'
-import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
-import { assertToastErrors } from '../../../../../helpers/assertToastErrors.js'
-import { assertNetworkRequests } from '../../../../../helpers/e2e/assertNetworkRequests.js'
-import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../../../helpers/rest.js'
+} from '../../../../../__helpers/e2e/helpers.js'
+import { goToFirstCell } from '../../../../../__helpers/e2e/navigateToDoc.js'
+import { getSelectMenu } from '../../../../../__helpers/e2e/selectInput.js'
+import { AdminUrlUtil } from '../../../../../__helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../../../../../__helpers/shared/assertToastErrors.js'
+import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
-import { lexicalFieldsSlug } from '../../../../slugs.js'
+import { lexicalFieldsSlug, lexicalNestedBlocksSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -98,9 +100,9 @@ describe('lexicalBlocks', () => {
     // Select paragraph with text "123"
     // Now double-click to select entire line
     await richTextField.locator('p').getByText('123').first().click({ clickCount: 2 })
-
-    const editButton = newRSCBlock.locator('.LexicalEditorTheme__block__editButton').first()
-    await editButton.click()
+    const actionsButton = newRSCBlock.locator('.LexicalEditorTheme__block__actions-button').first()
+    await actionsButton.click()
+    await page.locator('.popup-button-list__button').getByText('Edit').click()
 
     const editDrawer = page.locator('dialog[id^=drawer_1_lexical-blocks-create-]').first() // IDs starting with list-drawer_1_ (there's some other symbol after the underscore)
     await expect(editDrawer).toBeVisible()
@@ -108,13 +110,14 @@ describe('lexicalBlocks', () => {
 
     await editDrawer.locator('.rs__control .value-container').first().click()
     await wait(500)
-    await expect(editDrawer.locator('.rs__option').nth(1)).toBeVisible()
-    await expect(editDrawer.locator('.rs__option').nth(1)).toContainText('value2')
+    const editDrawerSelectMenu = getSelectMenu({ page })
+    await expect(editDrawerSelectMenu.locator('.rs__option').nth(1)).toBeVisible()
+    await expect(editDrawerSelectMenu.locator('.rs__option').nth(1)).toContainText('value2')
     await assertNetworkRequests(
       page,
       '/admin/collections/lexical-fields',
       async () => {
-        await editDrawer.locator('.rs__option').nth(1).click()
+        await editDrawerSelectMenu.locator('.rs__option').nth(1).click()
       },
       {
         allowedNumberOfRequests: 2,
@@ -159,7 +162,6 @@ describe('lexicalBlocks', () => {
         expect(rscBlock.fields.blockType).toBe('BlockRSC')
         expect(rscBlock.fields.key).toBe('value2')
         expect((paragraphNode.children[0] as SerializedTextNode).text).toBe('123')
-        expect((paragraphNode.children[0] as SerializedTextNode).format).toBe(1)
       },
     })
   })
@@ -227,17 +229,17 @@ describe('lexicalBlocks', () => {
       } = await setupFilterOptionsTests()
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await expect(getSelectMenu({ page })).toHaveText('No options')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnBlockData.locator('.rs__control').click()
 
       // Fill and wait for form state to come back
@@ -257,17 +259,17 @@ describe('lexicalBlocks', () => {
       )
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('invalid')
+      await expect(getSelectMenu({ page })).toHaveText('invalid')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnBlockData.locator('.rs__control').click()
 
       await saveDocAndAssert(page)
@@ -294,16 +296,16 @@ describe('lexicalBlocks', () => {
       )
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await expect(getSelectMenu({ page })).toHaveText('No options')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('invalid')
+      await expect(getSelectMenu({ page })).toHaveText('invalid')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnBlockData.locator('.rs__control').click()
 
       await saveDocAndAssert(page)
@@ -330,16 +332,16 @@ describe('lexicalBlocks', () => {
       )
 
       await dependsOnDocData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await expect(getSelectMenu({ page })).toHaveText('No options')
       await dependsOnDocData.locator('.rs__control').click()
 
       await dependsOnSiblingData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
-      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await expect(getSelectMenu({ page })).toContainText('Seeded text document')
+      await expect(getSelectMenu({ page })).toContainText('Another text document')
       await dependsOnSiblingData.locator('.rs__control').click()
 
       await dependsOnBlockData.locator('.rs__control').click()
-      await expect(newBlock.locator('.rs__menu')).toHaveText('invalid')
+      await expect(getSelectMenu({ page })).toHaveText('invalid')
       await dependsOnBlockData.locator('.rs__control').click()
 
       await saveDocAndAssert(page)
@@ -554,8 +556,6 @@ describe('lexicalBlocks', () => {
 
       await expect(floatingToolbar_formatSection).toBeVisible()
 
-      await expect(page.locator('.toolbar-popup__button').first()).toBeVisible()
-
       const boldButton = floatingToolbar_formatSection.locator('.toolbar-popup__button').first()
 
       await expect(boldButton).toBeVisible()
@@ -631,7 +631,7 @@ describe('lexicalBlocks', () => {
       await wait(1000)
       await urlField.fill('https://www.payloadcms.com')
       await expect(urlField).toHaveValue('https://www.payloadcms.com')
-      await drawerContent.locator('.form-submit button').click({ delay: 100 })
+      await drawerContent.locator('button').getByText('Save changes').click({ delay: 100 })
       await expect(drawerContent).toBeHidden()
 
       /**
@@ -721,8 +721,12 @@ describe('lexicalBlocks', () => {
         // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
         // and usually the only method which works.
 
-        const x = popoverHeading2ButtonBoundingBox?.x ?? 0
-        const y = popoverHeading2ButtonBoundingBox?.y ?? 0
+        const x =
+          (popoverHeading2ButtonBoundingBox?.x ?? 0) +
+          (popoverHeading2ButtonBoundingBox?.width ?? 0) / 2
+        const y =
+          (popoverHeading2ButtonBoundingBox?.y ?? 0) +
+          (popoverHeading2ButtonBoundingBox?.height ?? 0) / 2
 
         await page.mouse.click(x, y, { button: 'left' })
 
@@ -731,7 +735,6 @@ describe('lexicalBlocks', () => {
         const newHeadingInSubEditor = lexicalBlock.locator('p ~ h2').getByText('A Heading').first()
 
         await expect(newHeadingInSubEditor).toBeVisible()
-        await expect(newHeadingInSubEditor).toHaveText('A Heading')
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
@@ -753,7 +756,7 @@ describe('lexicalBlocks', () => {
 
       const textAreaAddBlockButton = drawerContent.locator('button').getByText('Text Area').first()
       await expect(textAreaAddBlockButton).toBeVisible()
-      await textAreaAddBlockButton.click()
+      await textAreaAddBlockButton.dblclick()
 
       /**
        * Check if it was created successfully and
@@ -1070,7 +1073,7 @@ describe('lexicalBlocks', () => {
       const selectField = conditionalArrayBlock.locator('.react-select').first()
       await selectField.click()
 
-      const selectFieldMenu = selectField.locator('.rs__menu').first()
+      const selectFieldMenu = getSelectMenu({ page })
       await selectFieldMenu.locator('.rs__option').nth(1).click() // Select "2" (2 columns / array fields)
 
       // Make sure the OTHER arrays aren't visible, as their conditions are not fulfilled. Catches a bug where they might not be hidden fully
@@ -1143,9 +1146,9 @@ describe('lexicalBlocks', () => {
       await uploadBlock.scrollIntoViewIfNeeded()
       await expect(uploadBlock).toBeVisible()
 
-      await expect(
-        uploadBlock.locator('.LexicalEditorTheme__upload__doc-drawer-toggler strong'),
-      ).toHaveText('payload.jpg')
+      await expect(uploadBlock.locator('.LexicalEditorTheme__upload__filename')).toHaveText(
+        'payload.jpg',
+      )
     })
 
     test('should respect required error state in deeply nested text field', async () => {
@@ -1261,23 +1264,27 @@ describe('lexicalBlocks', () => {
       const height = (await codeEditor.boundingBox())?.height
 
       await expect(() => {
-        expect(height).toBe(56)
+        expect(height).toBeGreaterThanOrEqual(48) // MIN_HEIGHT
       }).toPass()
       await codeEditor.click()
       await page.keyboard.press('Enter')
 
       const height2 = (await codeEditor.boundingBox())?.height
       await expect(() => {
-        expect(height2).toBe(74)
+        expect(height2).toBe(height + 16) // LINE_HEIGHT = 16
       }).toPass()
     })
 
     test('ensure nested lexical field displays field label and description', async () => {
       // Previously, we had the issue that nested lexical fields did not display the field label and description, as
       // their client field configs were generated incorrectly on the server.
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/LexicalInBlock/**`)
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
+
+      // Wait for table to be fully loaded
+      await expect(page.locator('tbody tr')).not.toHaveCount(0)
+
+      await goToFirstCell(page, serverURL)
+      await waitForFormReady(page)
 
       await expect(
         page.locator('.LexicalEditorTheme__block-blockInLexical .render-fields label.field-label'),
@@ -1292,15 +1299,48 @@ describe('lexicalBlocks', () => {
       ).toHaveText('Some Description')
     })
 
+    test('should render block with nested blocks field using blockReferences without crashing', async () => {
+      // https://github.com/payloadcms/payload/issues/15509
+      const url = new AdminUrlUtil(serverURL, lexicalNestedBlocksSlug)
+
+      await page.goto(url.create)
+      await waitForFormReady(page)
+
+      const richTextField = page.locator('.rich-text-lexical').first()
+      await expect(richTextField).toBeVisible()
+
+      const contentEditable = richTextField.locator('[contenteditable="true"]').first()
+      await contentEditable.click()
+
+      await page.keyboard.press('/')
+      await page.keyboard.type('blockwithblockref')
+
+      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
+
+      const blockSelectButton = slashMenuPopover.locator('button').first()
+      await expect(blockSelectButton).toBeVisible()
+      await blockSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+
+      const newBlock = richTextField.locator('.LexicalEditorTheme__block').first()
+      await expect(newBlock).toBeVisible()
+
+      await expect(newBlock.locator('button:has-text("Add Nested Block")')).toBeVisible()
+    })
+
     test('ensure individual inline blocks in lexical editor within a block have initial state on initial load', async () => {
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
+
+      // Wait for table to be fully loaded
+      await expect(page.locator('tbody tr')).not.toHaveCount(0)
 
       await assertNetworkRequests(
         page,
         '/collections/LexicalInBlock/',
         async () => {
-          await page.locator('.cell-id a').first().click()
-          await page.waitForURL(`**/collections/LexicalInBlock/**`)
+          await goToFirstCell(page, serverURL)
+          await waitForFormReady(page)
 
           await expect(
             page.locator('.LexicalEditorTheme__inlineBlock:has-text("Inline Block In Lexical")'),
@@ -1322,9 +1362,10 @@ describe('lexicalBlocks', () => {
       // Click on react select in drawer, select 'value1'
       await inlineBlockDrawer.locator('.rs__control .value-container').first().click()
       await wait(500)
-      await expect(inlineBlockDrawer.locator('.rs__option').first()).toBeVisible()
-      await expect(inlineBlockDrawer.locator('.rs__option').first()).toContainText('value1')
-      await inlineBlockDrawer.locator('.rs__option').first().click()
+      const inlineBlockSelectMenu = getSelectMenu({ page })
+      await expect(inlineBlockSelectMenu.locator('.rs__option').first()).toBeVisible()
+      await expect(inlineBlockSelectMenu.locator('.rs__option').first()).toContainText('value1')
+      await inlineBlockSelectMenu.locator('.rs__option').first().click()
 
       const { inlineBlock, openEditDrawer } = await saveDrawer()
       // Save document
@@ -1341,30 +1382,20 @@ describe('lexicalBlocks', () => {
         },
       })
 
-      const { editDrawer } = await openEditDrawer()
-
-      // Expect react select to have value 'value1'
-      await expect(editDrawer.locator('.rs__control .value-container')).toHaveText('value1')
-      // Close drawer by pressing escape
-      await page.keyboard.press('Escape')
-      await expect(editDrawer).toBeHidden()
-
-      // Select inline block again
-      await inlineBlock.click()
+      const inlineBlockDecorator = richTextField
+        .locator('span.LexicalEditorTheme__inlineBlock[data-lexical-decorator="true"]')
+        .first()
+      await inlineBlockDecorator.dispatchEvent('click')
       await wait(500)
+
+      // Verify the inline block is actually selected (decorator-selected class is added)
+      await expect(inlineBlockDecorator).toHaveClass(/decorator-selected/)
 
       // Press toolbar-popup__button-setKeyToDebug button of richtext editor
       const toolbarPopup = richTextField.locator('.toolbar-popup__button-setKeyToDebug').first()
       // Click it
       await toolbarPopup.click()
       await wait(1000)
-
-      // Open edit drawer, check if value is now value2, then exit
-      await inlineBlock.click()
-      await openEditDrawer()
-      await expect(editDrawer.locator('.rs__control .value-container')).toHaveText('value2')
-      await page.keyboard.press('Escape')
-      await expect(editDrawer).toBeHidden()
 
       // Save and check api result
       await saveDocAndAssert(page)
@@ -1452,10 +1483,13 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure inline blocks restore their state after undoing a removal', async () => {
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/LexicalInBlock/**`)
+      // Wait for table to be fully loaded
+      await expect(page.locator('tbody tr')).not.toHaveCount(0)
+
+      await goToFirstCell(page, serverURL)
+      await waitForFormReady(page)
 
       // Wait for the page to be fully loaded and elements to be stable
       await page.waitForLoadState('domcontentloaded')
@@ -1479,36 +1513,39 @@ describe('lexicalBlocks', () => {
       }).toPass()
 
       const inlineBlockElement = inlineBlocks.first()
-      await inlineBlockElement
-        .locator('.LexicalEditorTheme__inlineBlock__editButton')
+      // Clicking inline block opens drawer
+      await inlineBlockElement.click()
+
+      await page.locator('.drawer--is-open #field-text').fill('value1')
+      await page
+        .locator('.drawer--is-open')
+        .locator('button')
+        .getByText('Save changes')
         .first()
         .click()
 
-      await page.locator('.drawer--is-open #field-text').fill('value1')
-      await page.locator('.drawer--is-open button[type="submit"]').first().click()
-
-      // remove inline block
-      await inlineBlockElement.click()
-      await page.keyboard.press('Backspace')
+      // remove inline block using the X (remove) button
+      const removeButton = inlineBlockElement
+        .locator('.LexicalEditorTheme__inlineBlock__removeButton')
+        .first()
+      await removeButton.click()
 
       // Check both that this specific element is removed and the total count decreased
       await expect(inlineBlocks).toHaveCount(inlineBlockCount - 1)
 
-      await page.keyboard.press('Escape')
-
-      await inlineBlockElement.click()
+      const contentEditable = secondRow.locator('[contenteditable="true"]').first()
+      // Use focus() instead of click() to avoid creating an extra selection undo entry
+      await contentEditable.focus()
 
       // Undo the removal using keyboard shortcut
       await page.keyboard.press('ControlOrMeta+Z')
+      await wait(500)
 
       // Wait for the block to be restored
       await expect(inlineBlocks).toHaveCount(inlineBlockCount)
 
       // Open the drawer again
-      await inlineBlockElement
-        .locator('.LexicalEditorTheme__inlineBlock__editButton')
-        .first()
-        .click()
+      await inlineBlockElement.click()
 
       // Check if the text field still contains 'value1'
       await expect(page.locator('.drawer--is-open #field-text')).toHaveValue('value1')

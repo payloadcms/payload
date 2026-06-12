@@ -1,0 +1,215 @@
+@layer payload-default {
+  .timezone-picker-wrapper {
+    display: flex;
+    gap: var(--spacer-1);
+    margin-top: var(--spacer-2);
+    align-items: center;
+    position: relative;
+
+    --field-min-height: var(--text-body-medium-line-height);
+
+    .shimmer-effect {
+      max-width: calc(2 * var(--spacer-4));
+    }
+
+    .timezone-picker__label {
+      color: var(--color-text-secondary);
+      flex-shrink: 0;
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
+      letter-spacing: var(--text-body-medium-letter-spacing);
+    }
+
+    .timezone-picker__required {
+      color: var(--color-text-danger);
+      margin-left: var(--spacer-1);
+    }
+
+    .timezone-picker.react-select {
+      display: inline-flex;
+      position: static;
+
+      .rs__option--is-focused,
+      .rs__option--is-selected {
+        /* Colors handled by inline styles via react-select styles prop */
+      }
+
+      .rs__value-container {
+        padding: 0;
+      }
+
+      .rs__control.rs__control {
+        display: inline-flex;
+        align-items: center;
+        background: none;
+        border: none;
+        padding: 0;
+        padding-left: var(--spacer-1);
+        min-height: auto !important;
+        position: relative;
+        box-shadow: unset;
+        border-radius: var(--button-radius);
+        gap: 0;
+        flex-wrap: nowrap;
+
+        &:hover {
+          cursor: pointer;
+          box-shadow: unset;
+          background: var(--color-bg-secondary);
+        }
+
+        &:active {
+          background: var(--color-bg-secondary-pressed);
+        }
+
+        &.rs__control--is-focused {
+          box-shadow: 0 0 0 1px var(--accessibility-focus-color);
+        }
+
+        &.rs__control--menu-is-open::before {
+          display: block;
+        }
+      }
+
+      .rs__input-container {
+        margin: 0;
+        padding: 0;
+      }
+
+      .rs__input {
+        caret-color: transparent;
+      }
+
+      .rs__indicators {
+        position: static;
+        display: flex;
+        align-items: center;
+        min-height: auto;
+        margin-inline-start: 0;
+        gap: 0;
+        flex-shrink: 0;
+      }
+
+      .rs__single-value {
+        color: var(--color-text);
+        font-family: var(--text-body-medium-font-family);
+        font-size: var(--text-body-medium-font-size);
+        font-weight: var(--text-body-medium-font-weight);
+        line-height: var(--text-body-medium-line-height);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .rs__placeholder {
+        color: var(--color-text-secondary);
+        font-family: var(--text-body-medium-font-family);
+        font-size: var(--text-body-medium-font-size);
+        font-weight: var(--text-body-medium-font-weight);
+        line-height: var(--text-body-medium-line-height);
+      }
+
+      .timezone-picker__dropdown-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        border-radius: var(--button-radius);
+        color: var(--color-text-secondary);
+
+        &:focus-visible {
+          outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
+          outline-offset: calc(-1 * var(--stroke-width-small));
+        }
+      }
+
+      .timezone-picker__clear-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-inline: calc(-1 * var(--stroke-width-small));
+        cursor: pointer;
+        margin-left: calc(var(--spacer-1) / 2);
+        height: var(--spacer-3);
+        overflow: visible;
+        border-radius: var(--button-radius);
+
+        &:focus-visible {
+          outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
+        }
+      }
+    }
+  }
+
+  .timezone-picker__menu {
+    border-radius: var(--radius-large);
+    background: var(--color-bg-menu);
+    color: var(--color-text);
+    padding-top: var(--spacer-2);
+    min-width: 280px;
+
+    .rs__option {
+      padding: var(--spacer-1) var(--spacer-2);
+      border-radius: var(--button-radius);
+      cursor: pointer;
+    }
+
+    .timezone-picker__option-check {
+      opacity: 0;
+      flex-shrink: 0;
+    }
+
+    .timezone-picker__option-label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .rs__option--is-focused {
+      background-color: var(--popup-item-bg-hover, var(--color-bg-selected-strong));
+      color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
+    }
+
+    .rs__option--is-selected {
+      background-color: transparent;
+      color: var(--popup-item-color-selected, var(--popup-item-color, var(--color-text)));
+
+      .timezone-picker__option-check {
+        opacity: 1;
+      }
+    }
+
+    .rs__option--is-selected.rs__option--is-focused {
+      background-color: var(--popup-item-bg-hover, var(--color-bg-selected-strong));
+      color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
+    }
+  }
+
+  .timezone-picker__menu-list {
+    max-height: calc(var(--spacer-6) * 5);
+    padding-inline: var(--spacer-2);
+    padding-bottom: var(--spacer-2);
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-text) 40%, transparent) transparent;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--color-text) 40%, transparent);
+      border-radius: 2px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+  }
+}

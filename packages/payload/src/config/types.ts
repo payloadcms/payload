@@ -1,5 +1,5 @@
 import type {
-  DefaultTranslationKeys,
+  ClientTranslationKeys,
   DefaultTranslationsObject,
   I18n,
   I18nClient,
@@ -16,12 +16,18 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
+  CustomStatus,
   DocumentSubViewTypes,
   DocumentTabConfig,
   DocumentViewServerProps,
+  PublishButtonClientProps,
+  PublishButtonServerProps,
   RichTextAdapter,
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
 } from '../admin/types.js'
 import type { AdminViewConfig, ViewTypes, VisibleEntities } from '../admin/views/index.js'
 import type { SanitizedPermissions } from '../auth/index.js'
@@ -39,18 +45,23 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
-import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
+  ClientField,
+  DataFromWidgetSlug,
   DefaultDocumentIDType,
+  Field,
   FlattenedBlock,
   JobsConfig,
   KVAdapterResult,
   Payload,
+  RegisteredPlugins,
   RequestContext,
   SelectField,
   TypedUser,
+  TypedWidget,
+  WidgetSlug,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
@@ -138,7 +149,62 @@ type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
 
-export type Plugin = (config: Config) => Config | Promise<Config>
+/**
+ * @experimental The plugin API (`order`, `slug`, `options`) may change before being declared stable.
+ */
+export type Plugin = ((config: Config) => Config | Promise<Config>) & {
+  /** @experimental Plugin options exposed for cross-plugin mutation. */
+  options?: Record<string, unknown>
+  /** @experimental Execution order - lower values run first. Defaults to 0. */
+  order?: number
+  /** @experimental Unique identifier for cross-plugin discovery via `config.plugins`. */
+  slug?: string
+}
+
+/**
+ * Configures where uploaded files are stored (S3, GCS, Azure, Vercel Blob, etc.).
+ *
+ * Storage adapters run **before plugins**, so upload hooks, static file handlers,
+ * and presigned-URL endpoints are guaranteed to be in place before any plugin
+ * modifies the config.
+ *
+ * Pass the return value of a storage adapter factory to `storage` in your
+ * Payload config:
+ *
+ * ```ts
+ * import { s3Storage } from '@payloadcms/storage-s3'
+ *
+ * export default buildConfig({
+ *   storage: [
+ *     s3Storage({
+ *       bucket: process.env.S3_BUCKET,
+ *       collections: { media: true },
+ *       config: { region: process.env.S3_REGION },
+ *     }),
+ *   ],
+ * })
+ * ```
+ *
+ * @see https://payloadcms.com/docs/uploads/storage-adapters
+ */
+export interface StorageAdapter {
+  /** Collection slugs this adapter is configured to handle. */
+  collections: string[]
+  /** Initializes the adapter and returns the modified config with upload hooks and handlers injected. */
+  init: (config: Config) => Config | Promise<Config>
+  /** Unique identifier for this adapter (e.g. `'s3'`, `'gcs'`, `'azure'`). Surfaced in telemetry and on `payload.config.upload.adapters`. */
+  name: string
+}
+
+/**
+ * A map of plugin slugs to Plugin instances, built from `config.plugins`.
+ * Registered slugs (via `RegisteredPlugins` module augmentation) return typed options.
+ *
+ * @experimental
+ */
+export type PluginsMap = {
+  [K in keyof RegisteredPlugins]: ({ options: RegisteredPlugins[K] } & Plugin) | undefined
+} & Record<string, Plugin | undefined>
 
 export type LivePreviewURLType = null | string | undefined
 
@@ -419,6 +485,12 @@ export type ServerProps = {
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
   readonly searchParams?: Params
+  /**
+   * Framework-agnostic methods for server-side navigation, headers, cookies, and other server-only APIs.
+   * Plugins should call these methods instead of importing directly from `next/navigation`, `next/headers`, etc.
+   * These methods are populated by the given framework adapter, e.g. `@payloadcms/next`.
+   */
+  readonly server: ServerAdapter
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
@@ -555,7 +627,7 @@ export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
 
-export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = (args: {
+export type LabelFunction<TTranslationKeys = ClientTranslationKeys> = (args: {
   i18n: I18nClient
   t: TFunction<TTranslationKeys>
 }) => string
@@ -676,7 +748,7 @@ export type FetchAPIFileUploadOptions = {
    * Used along with the `useTempFiles` option. By default this module uses `'tmp'` folder
    * in the current working directory.
    * You can use trailing slash, but it is not necessary.
-   * @default './tmp'
+   * @default 'tmp'
    */
   tempFileDir?: string | undefined
   /**
@@ -748,7 +820,8 @@ export type AfterErrorHook = (
 export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x-small'
 
 export type Widget = {
-  ComponentPath: string
+  Component: PayloadComponent
+  fields?: Field[]
   /**
    * Human-friendly label for the widget.
    * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
@@ -758,8 +831,6 @@ export type Widget = {
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
   slug: string
-  // TODO: Add fields
-  // fields?: Field[]
   // Maybe:
   // ImageURL?: string // similar to Block
 }
@@ -768,18 +839,32 @@ export type Widget = {
  * Client-side widget type with resolved label (no functions).
  */
 export type ClientWidget = {
+  fields?: ClientField[]
   label?: StaticLabel
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
   slug: string
 }
 
-export type WidgetInstance = {
-  // TODO: should be inferred from Widget Fields
-  // data: Record<string, any>
-  widgetSlug: string
-  width?: WidgetWidth
-}
+export type WidgetInstance<TSlug extends WidgetSlug = WidgetSlug> = TSlug extends WidgetSlug
+  ? {
+      data?: DataFromWidgetSlug<TSlug> extends Record<string, unknown>
+        ? DataFromWidgetSlug<TSlug>
+        : Record<string, unknown>
+      widgetSlug: TSlug
+      width: [
+        Extract<
+          TypedWidget[TSlug] extends { width: infer TWidth } ? TWidth : WidgetWidth,
+          WidgetWidth
+        >,
+      ] extends [never]
+        ? WidgetWidth
+        : Extract<
+            TypedWidget[TSlug] extends { width: infer TWidth } ? TWidth : WidgetWidth,
+            WidgetWidth
+          >
+    }
+  : never
 
 export type DashboardConfig = {
   defaultLayout?:
@@ -789,7 +874,29 @@ export type DashboardConfig = {
 }
 
 export type SanitizedDashboardConfig = {
-  widgets: Array<Omit<Widget, 'ComponentPath'>>
+  widgets: Array<Omit<Widget, 'Component'>>
+}
+
+export type SidebarTab = {
+  /** Tab components */
+  components: {
+    /** Component to render as tab content */
+    Content: CustomComponent
+    /** Component to render as tab icon */
+    Icon: PayloadComponent
+  }
+  /** Disable this tab */
+  disabled?: boolean
+  /** Make this tab active by default */
+  isDefaultActive?: boolean
+  /**
+   * Label for accessibility and tab display.
+   * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
+   * If not provided, the slug will be used as fallback.
+   */
+  label?: LabelFunction | StaticLabel
+  /** Unique identifier for override/disable */
+  slug: string
 }
 
 /**
@@ -836,7 +943,7 @@ export type Config = {
     /**
      * Add extra and/or replace built-in components with custom components
      *
-     * @see https://payloadcms.com/docs/admin/custom-components/overview
+     * @see https://payloadcms.com/docs/custom-components/overview
      */
     components?: {
       /**
@@ -852,6 +959,10 @@ export type Config = {
        */
       afterLogin?: CustomComponent[]
       /**
+       * Add custom components after the navigation section
+       */
+      afterNav?: CustomComponent[]
+      /**
        * Add custom components after the navigation links
        */
       afterNavLinks?: CustomComponent[]
@@ -863,6 +974,10 @@ export type Config = {
        * Add custom components before the email/password field
        */
       beforeLogin?: CustomComponent[]
+      /**
+       * Add custom components before the navigation section
+       */
+      beforeNav?: CustomComponent[]
       /**
        * Add custom components before the navigation links
        */
@@ -896,6 +1011,17 @@ export type Config = {
        * These components will be rendered in a popup menu above the logout button.
        */
       settingsMenu?: CustomComponent[]
+      /** Sidebar configuration */
+      sidebar?: {
+        /** Extensible tab system */
+        tabs?: SidebarTab[]
+      }
+      /**
+       * Add custom items to the user menu popup in the admin panel header.
+       * These components will be rendered in the Settings sub-popup of the user menu.
+       * When empty or absent, the Settings sub-trigger is not shown.
+       */
+      userMenuSettingsItems?: CustomComponent[]
       /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
@@ -970,11 +1096,6 @@ export type Config = {
        * @default '/account'
        */
       account?: `/${string}`
-      /** The route for the browse by folder view.
-       *
-       * @default '/browse-by-folder'
-       */
-      browseByFolder?: `/${string}`
       /** The route for the create first user page.
        *
        * @default '/create-first-user'
@@ -1095,21 +1216,6 @@ export type Config = {
    */
   collections?: CollectionConfig[]
   /**
-   * Compatibility flags for prior Payload versions
-   */
-  compatibility?: {
-    /**
-     * By default, Payload will remove the `localized: true` property
-     * from fields if a parent field is localized. Set this property
-     * to `true` only if you have an existing Payload database from pre-3.0
-     * that you would like to maintain without migrating. This is only
-     * relevant for MongoDB databases.
-     *
-     * @todo Remove in v4
-     */
-    allowLocalizedWithinLocalized: true
-  }
-  /**
    * Prefix a string to all cookies that Payload sets.
    *
    * @default "payload"
@@ -1165,12 +1271,6 @@ export type Config = {
      */
     localizeStatus?: boolean
   }
-  /**
-   * Options for folder view within the admin panel
-   *
-   * @experimental This feature may change in minor versions until it is fully stable
-   */
-  folders?: false | RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
@@ -1433,6 +1533,20 @@ export type Config = {
    *
    */
   sharp?: SharpDependency
+  /**
+   * Storage adapters that handle where uploaded files are stored (S3, GCS, Azure, Vercel Blob, etc.).
+   *
+   * Adapters are initialized **before** `plugins`, so file handling is fully wired before any plugin
+   * runs. Use this instead of placing storage adapter packages in `plugins`.
+   *
+   * Migrate existing `plugins` usage automatically with:
+   * ```sh
+   * npx @payloadcms/codemod --transform migrate-storage-adapters-to-config
+   * ```
+   *
+   * @see https://payloadcms.com/docs/uploads/storage-adapters
+   */
+  storage?: StorageAdapter[]
   /** Send anonymous telemetry data about general usage. */
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
@@ -1461,6 +1575,24 @@ export type Config = {
     outputFile?: string
 
     /**
+     * Post-process the generated TypeScript types string before writing to file.
+     * Useful for plugins that need to inject generic types that JSON Schema cannot express.
+     *
+     * Functions are applied in order after the built-in Select generics are added.
+     *
+     * @example
+     * ```ts
+     * postProcess: [
+     *   ({ compiledTypes, config }) => {
+     *     const genericType = `export type MyGeneric<T> = { value: T };`
+     *     return compiledTypes.replace(/(\/\*[\s\S]*?\*\/\n)/, `$1\n${genericType}\n`)
+     *   },
+     * ]
+     * ```
+     */
+    postProcess?: Array<(args: { compiledTypes: string; config: SanitizedConfig }) => string>
+
+    /**
      * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
      * to generate the TypeScript interfaces.
      */
@@ -1476,8 +1608,10 @@ export type Config = {
     >
 
     /**
-     * Enable strict type safety for draft mode queries.
-     * When enabled, find operations with draft: true will type required fields as optional.
+     * Enable strict type safety for draft operations. When enabled, the `draft` parameter is forbidden
+     * on collections without drafts, and query results with `draft: true` type required fields as optional.
+     * This prevents invalid draft usage at compile time and ensures type correctness across all Local API operations.
+     *
      * @default false
      * @todo Remove in v4. Strict draft types will become the default behavior.
      */
@@ -1495,8 +1629,16 @@ export type Config = {
  */
 export type SanitizedConfig = {
   admin: {
+    /**
+     * `Required` (shallow) marks the top-level dashboard props as required, mainly `defaultLayout`,
+     * which sanitizing always fills in. Do not switch this to the `DeepRequired` used below: it
+     * recurses into the widgets and re-expands the whole `Field` type (a large self-referencing
+     * union), which is very expensive to check. Never run a `Field`-bearing type through
+     * `DeepRequired`.
+     */
+    dashboard: Required<NonNullable<NonNullable<Config['admin']>['dashboard']>>
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']>
+  } & DeepRequired<Omit<NonNullable<Config['admin']>, 'dashboard'>>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
@@ -1511,6 +1653,7 @@ export type SanitizedConfig = {
     configDir: string
     rawConfig: string
   }
+  storage: StorageAdapter[]
   upload: {
     /**
      * Deduped list of adapters used in the project
@@ -1531,6 +1674,7 @@ export type SanitizedConfig = {
   | 'i18n'
   | 'jobs'
   | 'localization'
+  | 'storage'
   | 'upload'
 >
 
@@ -1579,6 +1723,103 @@ export type EditConfigWithoutRoot = {
 }
 
 export type EntityDescriptionComponent = CustomComponent
+
+/**
+ * Custom components rendered within the Edit View.
+ * Shared by Collection and Global configs.
+ */
+export type SharedEditViewComponents = {
+  /**
+   * Inject custom components before the document controls
+   */
+  beforeDocumentControls?: CustomComponent[]
+  /**
+   * Inject custom components before the document metadata (left of status/timestamps)
+   */
+  BeforeDocumentMeta?: CustomComponent[]
+  /**
+   * Inject custom components within the 3-dot menu dropdown
+   */
+  editMenuItems?: CustomComponent[]
+  /**
+   * Replaces the "Preview" button
+   */
+  PreviewButton?: CustomComponent
+  /**
+   * Replaces the "Publish" button
+   * + drafts must be enabled
+   */
+  PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
+  /**
+   * Replaces the "Save" button
+   * + drafts must be disabled
+   */
+  SaveButton?: CustomComponent
+  /**
+   * Replaces the "Save Draft" button
+   * + drafts must be enabled
+   * + autosave must be disabled
+   */
+  SaveDraftButton?: CustomComponent
+  /**
+   * Replaces the "Status" section
+   */
+  Status?: CustomStatus
+  /**
+   * Replaces the "Unpublish" button
+   * + drafts must be enabled
+   */
+  UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
+}
+
+/**
+ * Custom views object shared by Collection and Global configs.
+ * Allows custom view keys (matched by path) alongside the document `edit` view.
+ */
+export type SharedEntityViews = {
+  /**
+   * Add custom views.
+   * Any additional keys define custom views that are matched by path and rendered at the entity level.
+   * @link https://payloadcms.com/docs/custom-components/custom-views
+   * @example
+   * ```ts
+   * views: {
+   *   audit: {
+   *     Component: '/path/to/AuditView',
+   *     path: '/audit',
+   *     exact: true,
+   *   }
+   * }
+   * ```
+   */
+  [key: string]:
+    | { actions?: CustomComponent[]; Component?: PayloadComponent }
+    | AdminViewConfig
+    | EditConfig
+    | undefined
+  /**
+   * Replace, modify, or add new "document" views.
+   * @link https://payloadcms.com/docs/custom-components/document-views
+   */
+  edit?: EditConfig
+}
+
+/**
+ * Admin component slots shared by Collection and Global configs.
+ * Collection extends this with list-only slots and `edit.Upload`; Global uses it as-is.
+ */
+export type SharedAdminComponents = {
+  /**
+   * Custom Description component for the entity. Rendered in the Edit View
+   * (and List View for Collections).
+   */
+  Description?: EntityDescriptionComponent
+  /**
+   * Components within the edit view
+   */
+  edit?: SharedEditViewComponents
+  views?: SharedEntityViews
+}
 
 export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 

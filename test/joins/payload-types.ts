@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -93,8 +94,8 @@ export interface Config {
     'example-posts': ExamplePost;
     folderPoly1: FolderPoly1;
     folderPoly2: FolderPoly2;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
-    'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -155,10 +156,7 @@ export interface Config {
       children: 'multiple-collections-1' | 'multiple-collections-2';
     };
     folders: {
-      children: 'folders' | 'example-pages' | 'example-posts';
-    };
-    'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'folderPoly1' | 'folderPoly2';
+      children: 'folders' | 'example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2';
     };
   };
   collectionsSelect: {
@@ -188,8 +186,8 @@ export interface Config {
     'example-posts': ExamplePostsSelect<false> | ExamplePostsSelect<true>;
     folderPoly1: FolderPoly1Select<false> | FolderPoly1Select<true>;
     folderPoly2: FolderPoly2Select<false> | FolderPoly2Select<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
-    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -201,15 +199,34 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es';
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -255,6 +272,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -338,14 +356,7 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        category?: (string | null) | Category;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocks?: Block[] | null;
   first?: {
     tabText?: string | null;
   };
@@ -575,6 +586,16 @@ export interface Singular {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  category?: (string | null) | Category;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "self-joins".
  */
 export interface SelfJoin {
@@ -760,8 +781,13 @@ export interface MultipleCollections2 {
  */
 export interface Folder {
   id: string;
-  folder?: (string | null) | Folder;
-  title?: string | null;
+  _h_folders?: (string | null) | Folder;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+  folderType?: ('example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2')[] | null;
   children?: {
     docs?: (
       | {
@@ -776,62 +802,6 @@ export interface Folder {
           relationTo?: 'example-posts';
           value: string | ExamplePost;
         }
-    )[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "example-pages".
- */
-export interface ExamplePage {
-  id: string;
-  folder?: (string | null) | Folder;
-  title?: string | null;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "example-posts".
- */
-export interface ExamplePost {
-  id: string;
-  folder?: (string | null) | Folder;
-  title?: string | null;
-  description?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "folderPoly1".
- */
-export interface FolderPoly1 {
-  id: string;
-  folderPoly1Title?: string | null;
-  folder?: (string | null) | FolderInterface;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders".
- */
-export interface FolderInterface {
-  id: string;
-  name: string;
-  folder?: (string | null) | FolderInterface;
-  documentsAndFolders?: {
-    docs?: (
-      | {
-          relationTo?: 'payload-folders';
-          value: string | FolderInterface;
-        }
       | {
           relationTo?: 'folderPoly1';
           value: string | FolderPoly1;
@@ -844,7 +814,39 @@ export interface FolderInterface {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  folderType?: ('folderPoly1' | 'folderPoly2')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "example-pages".
+ */
+export interface ExamplePage {
+  id: string;
+  _h_folders?: (string | null) | Folder;
+  title?: string | null;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "example-posts".
+ */
+export interface ExamplePost {
+  id: string;
+  _h_folders?: (string | null) | Folder;
+  title?: string | null;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly1".
+ */
+export interface FolderPoly1 {
+  id: string;
+  folderPoly1Title?: string | null;
+  _h_folders?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
 }
@@ -855,9 +857,52 @@ export interface FolderInterface {
 export interface FolderPoly2 {
   id: string;
   folderPoly2Title?: string | null;
-  folder?: (string | null) | FolderInterface;
+  _h_folders?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  /**
+   * The user that the API key is associated with.
+   */
+  user: string | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  /**
+   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
+   */
+  overrideAccess?: boolean | null;
+  /**
+   * Access for this API key — uncheck to revoke individual tools.
+   */
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -988,14 +1033,19 @@ export interface PayloadLockedDocument {
         value: string | FolderPoly2;
       } | null)
     | ({
-        relationTo: 'payload-folders';
-        value: string | FolderInterface;
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1005,10 +1055,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -1355,18 +1410,21 @@ export interface MultipleCollections2Select<T extends boolean = true> {
  * via the `definition` "folders_select".
  */
 export interface FoldersSelect<T extends boolean = true> {
-  folder?: T;
-  title?: T;
-  children?: T;
+  _h_folders?: T;
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+  folderType?: T;
+  children?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "example-pages_select".
  */
 export interface ExamplePagesSelect<T extends boolean = true> {
-  folder?: T;
+  _h_folders?: T;
   title?: T;
   name?: T;
   updatedAt?: T;
@@ -1377,7 +1435,7 @@ export interface ExamplePagesSelect<T extends boolean = true> {
  * via the `definition` "example-posts_select".
  */
 export interface ExamplePostsSelect<T extends boolean = true> {
-  folder?: T;
+  _h_folders?: T;
   title?: T;
   description?: T;
   updatedAt?: T;
@@ -1389,7 +1447,7 @@ export interface ExamplePostsSelect<T extends boolean = true> {
  */
 export interface FolderPoly1Select<T extends boolean = true> {
   folderPoly1Title?: T;
-  folder?: T;
+  _h_folders?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1399,9 +1457,25 @@ export interface FolderPoly1Select<T extends boolean = true> {
  */
 export interface FolderPoly2Select<T extends boolean = true> {
   folderPoly2Title?: T;
-  folder?: T;
+  _h_folders?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  overrideAccess?: T;
+  access?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1410,18 +1484,6 @@ export interface FolderPoly2Select<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders_select".
- */
-export interface PayloadFoldersSelect<T extends boolean = true> {
-  name?: T;
-  folder?: T;
-  documentsAndFolders?: T;
-  folderType?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1457,6 +1519,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -1465,6 +1537,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

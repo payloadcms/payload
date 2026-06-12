@@ -10,9 +10,9 @@ import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
-import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
 export type Arguments = {
   currentDepth?: number
@@ -61,8 +61,12 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
 
     const select = sanitizeSelect({
       fields: buildVersionGlobalFields(payload.config, globalConfig, true),
-      forceSelect: getQueryDraftsSelect({ select: globalConfig.forceSelect }),
-      select: incomingSelect,
+      select: resolveSelect({
+        config: globalConfig.select,
+        operation: 'read',
+        req,
+        select: incomingSelect,
+      }),
       versions: true,
     })
 
@@ -118,6 +122,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
             context: req.context,
             doc: result.version,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || result.version
       }
@@ -155,6 +160,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
             context: req.context,
             doc: result.version,
             global: globalConfig,
+            overrideAccess,
             query: findGlobalVersionsArgs.where,
             req,
           })) || result.version

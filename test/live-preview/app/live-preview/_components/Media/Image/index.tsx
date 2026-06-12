@@ -49,7 +49,7 @@ export const Image: React.FC<MediaProps> = (props) => {
 
     const filename = fullFilename
 
-    src = `${PAYLOAD_SERVER_URL}/api/media/file/${filename}`
+    src = `/api/media/file/${filename}`
   }
 
   if (!src) return null

@@ -1,97 +1,37 @@
 import { status as httpStatus } from 'http-status'
 
 import type { BeforeChangeHook, CollectionConfig } from '../../collections/config/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type { Config } from '../../config/types.js'
+import type { Field, TextField } from '../../fields/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { APIError } from '../../errors/index.js'
+import { sanitizeField } from '../../fields/config/sanitize.js'
+import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { traverseFields } from '../../utilities/traverseFields.js'
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.js'
+import { getJoinScopeContext } from './utils/getJoinScopeContext.js'
+import { getJoinScopeWhereFromDocData } from './utils/getJoinScopeWhereFromDocData.js'
+import { resolvePendingTargetKey } from './utils/resolvePendingTargetKey.js'
 
-/**
- * This function creates:
- * - N fields per collection, named `_order` or `_<collection>_<joinField>_order`
- * - 1 hook per collection
- * - 1 endpoint per app
- *
- * Also, if collection.defaultSort or joinField.defaultSort is not set, it will be set to the orderable field.
- */
-export const setupOrderable = (config: SanitizedConfig) => {
-  const fieldsToAdd = new Map<CollectionConfig, string[]>()
-
-  config.collections.forEach((collection) => {
-    if (collection.orderable) {
-      const currentFields = fieldsToAdd.get(collection) || []
-      fieldsToAdd.set(collection, [...currentFields, '_order'])
-      collection.defaultSort = collection.defaultSort ?? '_order'
-    }
-
-    traverseFields({
-      callback: ({ field, parentRef, ref }) => {
-        if (field.type === 'array' || field.type === 'blocks') {
-          return false
-        }
-        if (field.type === 'group' || field.type === 'tab') {
-          // @ts-expect-error ref is untyped
-          const parentPrefix = parentRef?.prefix ? `${parentRef.prefix}_` : ''
-          // @ts-expect-error ref is untyped
-          ref.prefix = `${parentPrefix}${field.name}`
-        }
-        if (field.type === 'join' && field.orderable === true) {
-          if (Array.isArray(field.collection)) {
-            throw new APIError(
-              'Orderable joins must target a single collection',
-              httpStatus.BAD_REQUEST,
-              {},
-              true,
-            )
-          }
-          const relationshipCollection = config.collections.find((c) => c.slug === field.collection)
-          if (!relationshipCollection) {
-            return false
-          }
-          field.defaultSort = field.defaultSort ?? `_${field.collection}_${field.name}_order`
-          const currentFields = fieldsToAdd.get(relationshipCollection) || []
-          // @ts-expect-error ref is untyped
-          const prefix = parentRef?.prefix ? `${parentRef.prefix}_` : ''
-          fieldsToAdd.set(relationshipCollection, [
-            ...currentFields,
-            `_${field.collection}_${prefix}${field.name}_order`,
-          ])
-        }
-      },
-      fields: collection.fields,
-    })
-  })
-
-  Array.from(fieldsToAdd.entries()).forEach(([collection, orderableFields]) => {
-    addOrderableFieldsAndHook(collection, orderableFields)
-  })
-
-  if (fieldsToAdd.size > 0) {
-    addOrderableEndpoint(config)
-  }
-}
-
-export const addOrderableFieldsAndHook = (
+export const addOrderableFieldsAndHook = async (
   collection: CollectionConfig,
+  config: Config,
   orderableFieldNames: string[],
+  joinFieldPathsByCollection?: Map<string, Map<string, string>>,
 ) => {
-  // 1. Add field
-  orderableFieldNames.forEach((orderableFieldName) => {
-    const orderField: Field = {
+  // 1. Add fields
+  for (const orderableFieldName of orderableFieldNames) {
+    const orderField: TextField = {
       name: orderableFieldName,
       type: 'text',
       admin: {
-        disableBulkEdit: true,
         disabled: true,
-        disableGroupBy: true,
-        disableListColumn: true,
-        disableListFilter: true,
         hidden: true,
         readOnly: true,
       },
@@ -105,8 +45,24 @@ export const addOrderableFieldsAndHook = (
       index: true,
     }
 
+    // Sanitize the field using the standard sanitization logic
+    await sanitizeField({
+      collectionConfig: collection,
+      config,
+      existingFieldNames: new Set(),
+      field: orderField,
+      index: 0,
+      isTopLevelField: true,
+      joinPath: '',
+      parentIndexPath: '',
+      parentIsLocalized: false,
+      parentSchemaPath: '',
+      requireFieldLevelRichTextEditor: false,
+      validRelationships: null,
+    })
+
     collection.fields.unshift(orderField)
-  })
+  }
 
   // 2. Add hook
   if (!collection.hooks) {
@@ -119,6 +75,14 @@ export const addOrderableFieldsAndHook = (
   const orderBeforeChangeHook: BeforeChangeHook = async ({ data, originalDoc, req }) => {
     for (const orderableFieldName of orderableFieldNames) {
       if (!data[orderableFieldName] && !originalDoc?.[orderableFieldName]) {
+        const joinScopeWhere = getJoinScopeWhereFromDocData({
+          collectionSlug: collection.slug,
+          data,
+          joinFieldPathsByCollection,
+          orderableFieldName,
+          originalDoc,
+        })
+
         const lastDoc = await req.payload.find({
           collection: collection.slug,
           depth: 0,
@@ -127,11 +91,14 @@ export const addOrderableFieldsAndHook = (
           req,
           select: { [orderableFieldName]: true },
           sort: `-${orderableFieldName}`,
-          where: {
-            [orderableFieldName]: {
-              exists: true,
+          where: combineWhereConstraints([
+            {
+              [orderableFieldName]: {
+                exists: true,
+              },
             },
-          },
+            joinScopeWhere ?? undefined,
+          ]),
         })
 
         const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
@@ -160,7 +127,10 @@ export type OrderableEndpointBody = {
   }
 }
 
-export const addOrderableEndpoint = (config: SanitizedConfig) => {
+export const addOrderableEndpoint = (
+  config: SanitizedConfig,
+  joinFieldPathsByCollection: Map<string, Map<string, string>>,
+) => {
   // 3. Add endpoint
   const reorderHandler: PayloadHandler = async (req) => {
     const body = (await req.json?.()) as OrderableEndpointBody
@@ -193,6 +163,14 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
       })
     }
 
+    const { joinScopeWhere, targetDoc } = await getJoinScopeContext({
+      collectionSlug: collection.slug,
+      joinFieldPathsByCollection,
+      orderableFieldName,
+      req,
+      target,
+    })
+
     // Prevent reordering if user doesn't have editing permissions
     if (collection.access?.update) {
       await executeAccess(
@@ -222,11 +200,14 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         limit: 0,
         req,
         select: { [orderableFieldName]: true },
-        where: {
-          [orderableFieldName]: {
-            exists: false,
+        where: combineWhereConstraints([
+          {
+            [orderableFieldName]: {
+              exists: false,
+            },
           },
-        },
+          joinScopeWhere ?? undefined,
+        ]),
       })
       await initTransaction(req)
       // We cannot update all documents in a single operation with `payload.update`,
@@ -269,19 +250,14 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
     }
 
     const targetId = target.id
-    let targetKey = target.key
-
-    // If targetKey = pending, we need to find its current key.
-    // This can only happen if the user reorders rows quickly with a slow connection.
-    if (targetKey === 'pending') {
-      const beforeDoc = await req.payload.findByID({
-        id: targetId,
-        collection: collection.slug,
-        depth: 0,
-        select: { [orderableFieldName]: true },
-      })
-      targetKey = beforeDoc?.[orderableFieldName] || null
-    }
+    const targetKey = await resolvePendingTargetKey({
+      collectionSlug: collection.slug,
+      orderableFieldName,
+      req,
+      targetDoc,
+      targetID: targetId,
+      targetKey: target.key,
+    })
 
     // The reason the endpoint does not receive this docId as an argument is that there
     // are situations where the user may not see or know what the next or previous one is. For
@@ -293,11 +269,14 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
       pagination: false,
       select: { [orderableFieldName]: true },
       sort: newKeyWillBe === 'greater' ? orderableFieldName : `-${orderableFieldName}`,
-      where: {
-        [orderableFieldName]: {
-          [newKeyWillBe === 'greater' ? 'greater_than' : 'less_than']: targetKey,
+      where: combineWhereConstraints([
+        {
+          [orderableFieldName]: {
+            [newKeyWillBe === 'greater' ? 'greater_than' : 'less_than']: targetKey,
+          },
         },
-      },
+        joinScopeWhere ?? undefined,
+      ]),
     })
     const adjacentDocKey = adjacentDoc.docs?.[0]?.[orderableFieldName] || null
 
@@ -308,8 +287,28 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         ? generateNKeysBetween(targetKey, adjacentDocKey, docsToMove.length)
         : generateNKeysBetween(adjacentDocKey, targetKey, docsToMove.length)
 
+    const draftsEnabled = hasDraftsEnabled(collection)
+
     // Update each document with its new order value
     for (const [index, id] of docsToMove.entries()) {
+      let draft: boolean | undefined
+
+      if (draftsEnabled) {
+        const latestVersion = await getLatestCollectionVersion({
+          id,
+          config: collection,
+          payload: req.payload,
+          query: {
+            collection: collection.slug,
+            req,
+            where: { id: { equals: id } },
+          },
+          req,
+        })
+
+        draft = latestVersion?._status === 'draft'
+      }
+
       await req.payload.update({
         id,
         collection: collection.slug,
@@ -317,6 +316,7 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
           [orderableFieldName]: orderValues[index],
         },
         depth: 0,
+        draft,
         req,
       })
     }

@@ -1,4 +1,4 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { Connect, Migration } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
@@ -62,6 +62,7 @@ export const connect: Connect = async function connect(
     this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
 
     if (this.readReplicaOptions) {
+      this.primaryDrizzle = this.drizzle as any
       const readReplicas = this.readReplicaOptions.map((connectionString) => {
         const options = {
           ...this.poolOptions,

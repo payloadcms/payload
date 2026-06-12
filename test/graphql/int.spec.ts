@@ -4,10 +4,10 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { idToString } from '../helpers/idToString.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { idToString } from '../__helpers/shared/idToString.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -147,6 +147,126 @@ query {
         })
         .then((res) => res.json())
       expect(res_2.errors).toBeFalsy()
+    })
+
+    it('should handle blocks with select: true', async () => {
+      const createdPost = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post with Blocks',
+          contentBlockField: [
+            {
+              blockType: 'content',
+              text: 'Hello World from Block',
+            },
+          ],
+        },
+      })
+
+      // Query without select: true
+      const queryWithoutSelect = `query {
+        Post(id: ${idToString(createdPost.id, payload)}) {
+          title
+          contentBlockField {
+            ... on Content {
+              text
+            }
+          }
+        }
+      }`
+
+      const responseWithoutSelect = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithoutSelect }) })
+        .then((res) => res.json())
+
+      expect(responseWithoutSelect.errors).toBeFalsy()
+      expect(responseWithoutSelect.data.Post.title).toBe('Test Post with Blocks')
+      expect(responseWithoutSelect.data.Post.contentBlockField).toHaveLength(1)
+      expect(responseWithoutSelect.data.Post.contentBlockField[0].text).toBe(
+        'Hello World from Block',
+      )
+
+      // Query with select: true
+      const queryWithSelect = `query {
+        Posts(select: true, where: { id: { equals: ${idToString(createdPost.id, payload)} } }) {
+          docs {
+            title
+            contentBlockField {
+              ... on Content {
+                text
+              }
+            }
+          }
+        }
+      }`
+
+      const responseWithSelect = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithSelect }) })
+        .then((res) => res.json())
+
+      expect(responseWithSelect.errors).toBeFalsy()
+      expect(responseWithSelect.data.Posts.docs).toHaveLength(1)
+      expect(responseWithSelect.data.Posts.docs[0].title).toBe('Test Post with Blocks')
+      expect(responseWithSelect.data.Posts.docs[0].contentBlockField).toHaveLength(1)
+      expect(responseWithSelect.data.Posts.docs[0].contentBlockField[0].text).toBe(
+        'Hello World from Block',
+      )
+
+      await payload.delete({
+        collection: 'posts',
+        id: createdPost.id,
+      })
+    })
+
+    it('should not error when querying a global with a deleted relationship in an array', async () => {
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 1',
+        },
+      })
+
+      await payload.updateGlobal({
+        slug: 'home',
+        data: {
+          topPosts: [
+            {
+              post: post1.id,
+              caption: 'The best post out there',
+            },
+          ],
+        },
+      })
+
+      const query = `query {
+        Home {
+          topPosts {
+            post {
+              title
+            }
+          }
+        }
+      }`
+
+      const beforeDelete = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(beforeDelete.errors).toBeUndefined()
+      expect(beforeDelete.data.Home.topPosts).toEqual([
+        expect.objectContaining({ post: { title: 'Post 1' } }),
+      ])
+
+      await payload.delete({
+        collection: 'posts',
+        id: post1.id,
+      })
+
+      const afterDelete = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(afterDelete.errors).toBeUndefined()
     })
   })
 })

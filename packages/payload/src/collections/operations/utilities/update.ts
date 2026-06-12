@@ -169,14 +169,23 @@ export const updateDocument = async <
   // Delete any associated files
   // /////////////////////////////////////
 
-  await deleteAssociatedFiles({
-    collectionConfig,
-    config,
-    doc: docWithLocales,
-    files: filesToUpload,
-    overrideDelete: false,
-    req,
-  })
+  // When saving a draft on a document whose latest version is published, the file
+  // referenced by docWithLocales is still actively used by the published main document.
+  // Deleting it here would break the published document's file even though no publish
+  // is happening. Only skip deletion in this case; when the latest version is already a
+  // draft, it is safe to delete the old draft file as it is being replaced.
+  const isDraftOverPublished = isSavingDraft && docWithLocales._status === 'published'
+
+  if (!isDraftOverPublished) {
+    await deleteAssociatedFiles({
+      collectionConfig,
+      config,
+      doc: docWithLocales,
+      files: filesToUpload,
+      overrideDelete: false,
+      req,
+    })
+  }
 
   // /////////////////////////////////////
   // beforeValidate - Fields
@@ -257,7 +266,9 @@ export const updateDocument = async <
       // only skip validation for drafts when draft validation is false
       (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
       // Skip validation for trash operations since they're just metadata updates
-      (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)),
+      (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
+      // Skip validation for unpublish operations — they only change _status, not document data
+      unpublishAllLocales,
   }
 
   // /////////////////////////////////////
@@ -357,10 +368,12 @@ export const updateDocument = async <
   // Update
   // /////////////////////////////////////
 
+  let resultWithLocales: JsonObject = result
+
   if (!isSavingDraft) {
     // Ensure updatedAt date is always updated
     dataToUpdate.updatedAt = new Date().toISOString()
-    result = await req.payload.db.updateOne({
+    resultWithLocales = await req.payload.db.updateOne({
       id,
       collection: collectionConfig.slug,
       data: dataToUpdate,
@@ -374,17 +387,18 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   if (collectionConfig.versions) {
-    result = await saveVersion({
+    resultWithLocales = await saveVersion({
       id,
       autosave,
       collection: collectionConfig,
-      docWithLocales: result,
+      docWithLocales: resultWithLocales,
       draft: isSavingDraft,
       operation: 'update',
       payload,
       publishSpecificLocale,
       req,
       snapshot: snapshotToSave,
+      unpublish: unpublishAllLocales,
     })
   }
 
@@ -396,7 +410,7 @@ export const updateDocument = async <
     collection: collectionConfig,
     context: req.context,
     depth,
-    doc: result,
+    doc: resultWithLocales,
     draft: draftArg,
     fallbackLocale,
     global: null,
@@ -419,6 +433,7 @@ export const updateDocument = async <
           collection: collectionConfig,
           context: req.context,
           doc: result,
+          overrideAccess,
           req,
         })) || result
     }
@@ -452,6 +467,7 @@ export const updateDocument = async <
           data,
           doc: result,
           operation: 'update',
+          overrideAccess,
           previousDoc: originalDoc,
           req,
         })) || result

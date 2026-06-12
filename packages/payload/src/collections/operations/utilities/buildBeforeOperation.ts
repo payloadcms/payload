@@ -80,7 +80,7 @@ export async function buildBeforeOperation<
 export async function buildBeforeOperation<TOperationGeneric extends CollectionSlug>(
   operationArgs: Omit<BeforeOperationArg<TOperationGeneric>, 'context' | 'req'>,
 ): Promise<unknown> {
-  const { args, collection, operation } = operationArgs
+  const { args, collection, operation, overrideAccess } = operationArgs
 
   let newArgs = args
 
@@ -95,6 +95,7 @@ export async function buildBeforeOperation<TOperationGeneric extends CollectionS
         collection,
         context: args.req!.context,
         operation: hookOperation,
+        overrideAccess,
         req: args.req!,
       } as BeforeOperationArg<TOperationGeneric>)
 

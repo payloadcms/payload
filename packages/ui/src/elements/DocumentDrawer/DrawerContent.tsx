@@ -8,7 +8,6 @@ import type { DocumentDrawerProps } from './types.js'
 
 import { LoadingOverlay } from '../../elements/Loading/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useLocale } from '../../providers/Locale/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
@@ -30,7 +29,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   redirectAfterRestore,
 }) => {
   const { getEntityConfig } = useConfig()
-  const locale = useLocale()
 
   const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug }))
 
@@ -62,7 +60,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
             docID,
             drawerSlug,
             initialData,
-            locale,
             overrideEntityVisibility,
             redirectAfterCreate,
             redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
@@ -99,7 +96,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       closeModal,
       overrideEntityVisibility,
       t,
-      locale,
     ],
   )
 
@@ -167,10 +163,6 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
     }
   }, [])
 
-  if (isLoading) {
-    return <LoadingOverlay />
-  }
-
   return (
     <DocumentDrawerContextProvider
       clearDoc={clearDoc}
@@ -179,7 +171,8 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
       onDuplicate={onDuplicate}
       onSave={onSave}
     >
-      {DocumentView}
+      {!isLoading && <div className="drawer__fade-in">{DocumentView}</div>}
+      <LoadingOverlay animationDuration="200ms" overlayType="drawer" show={isLoading} />
     </DocumentDrawerContextProvider>
   )
 }

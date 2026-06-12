@@ -60,6 +60,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
       // Find our existing transaction by the payment intent ID
       const transactionsResults = await payload.find({
         collection: transactionsSlug,
+        req,
         where: {
           'stripe.paymentIntentID': {
             equals: paymentIntentID,
@@ -73,8 +74,11 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         throw new Error('No transaction found for the provided PaymentIntent ID')
       }
 
-      // Verify the payment intent exists and retrieve it
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
+
+      if (paymentIntent.status !== 'succeeded') {
+        throw new Error(`Payment not completed.`)
+      }
 
       const cartID = paymentIntent.metadata.cartID
       const cartItemsSnapshot = paymentIntent.metadata.cartItemsSnapshot
@@ -104,6 +108,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           status: 'processing',
           transactions: [transaction.id],
         },
+        req,
       })
 
       const timestamp = new Date().toISOString()
@@ -114,6 +119,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         data: {
           purchasedAt: timestamp,
         },
+        req,
       })
 
       await payload.update({
@@ -123,15 +129,17 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           order: order.id,
           status: 'succeeded',
         },
+        req,
       })
 
       return {
         message: 'Payment initiated successfully',
         orderID: order.id,
         transactionID: transaction.id,
+        ...(order.accessToken ? { accessToken: order.accessToken } : {}),
       }
     } catch (error) {
-      payload.logger.error(error, 'Error initiating payment with Stripe')
+      payload.logger.error({ err: error, msg: 'Error confirming order with Stripe' })
 
       throw new Error(error instanceof Error ? error.message : 'Unknown error initiating payment')
     }

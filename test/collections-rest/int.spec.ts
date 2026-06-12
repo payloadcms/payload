@@ -7,12 +7,12 @@ import { APIError, NotFound } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
-import { getFormDataSize } from '../helpers/getFormDataSize.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { getFormDataSize } from '../__helpers/shared/getFormDataSize.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
   customIdNumberSlug,
@@ -52,6 +52,18 @@ describe('collections-rest', () => {
       const doc = await createPost(data)
 
       expect(doc).toMatchObject(data)
+    })
+
+    it('should return 400 when request body contains malformed JSON', async () => {
+      const response = await restClient.POST(`/${postsSlug}`, {
+        body: '{ invalid json',
+      })
+
+      expect(response.status).toEqual(400)
+      const result: any = await response.json()
+
+      expect(result.errors).toBeDefined()
+      expect(result.errors[0].message).toEqual('Invalid JSON')
     })
 
     it('should find', async () => {
@@ -1213,6 +1225,49 @@ describe('collections-rest', () => {
           expect(result.docs).toHaveLength(0)
         })
 
+        // https://github.com/payloadcms/payload/issues/14471 - ensure geospatial queries use true geodetic meters, not the distorted meters of EPSG:3857
+        it('should use true geodetic meters at high latitudes', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
+
+          // A point ~10 km north of NYC: lat += 10000/111320 ≈ 0.0898°
+          const queryLng = -74.0059
+          const queryLat = 40.7128
+          const pointLat = queryLat + 0.0898 // ~10 km north
+          let createdId: number | string | undefined
+
+          try {
+            const created = await payload.create({
+              collection: pointSlug,
+              data: { point: [queryLng, pointLat] },
+            })
+
+            createdId = created.id
+
+            // Query with 12 km radius — the point at ~10 km should be within range.
+            // With the old EPSG:3857 approach, the effective radius at this latitude was
+            // only ~9 km, causing the point to be missed.
+            const response = await restClient.GET(`/${pointSlug}`, {
+              query: {
+                where: {
+                  point: {
+                    near: `${queryLng}, ${queryLat}, 12000`,
+                  },
+                },
+              },
+            })
+            const result: any = await response.json()
+
+            expect(response.status).toEqual(200)
+            expect(result.docs.map((d: { id: number | string }) => d.id)).toContain(createdId)
+          } finally {
+            if (createdId !== undefined) {
+              await payload.delete({ collection: pointSlug, id: createdId })
+            }
+          }
+        })
+
         it('should not return a point far away', async () => {
           if (payload.db.name === 'sqlite') {
             return
@@ -1861,6 +1916,38 @@ describe('collections-rest', () => {
         collection: 'disabled-bulk-edit-docs',
         where: {},
         data: {},
+      }),
+    ).resolves.toBeTruthy()
+  })
+
+  it('should disable bulk delete for the collection with disableBulkDelete: true', async () => {
+    const res = await restClient.DELETE('/disabled-bulk-delete-docs?where[id][equals]=0')
+    expect(res.status).toBe(403)
+
+    await expect(
+      payload.delete({
+        collection: 'disabled-bulk-delete-docs',
+        where: {},
+        overrideAccess: false,
+      }),
+    ).rejects.toBeInstanceOf(APIError)
+
+    const doc = await payload.create({
+      collection: 'disabled-bulk-delete-docs',
+      data: { text: 'should be deletable by id' },
+    })
+
+    await expect(
+      payload.delete({
+        collection: 'disabled-bulk-delete-docs',
+        id: doc.id,
+      }),
+    ).resolves.toBeTruthy()
+
+    await expect(
+      payload.delete({
+        collection: 'disabled-bulk-delete-docs',
+        where: {},
       }),
     ).resolves.toBeTruthy()
   })

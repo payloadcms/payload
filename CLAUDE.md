@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) and Cursor when working with code in this repository.
 
 ## Project Structure
 
@@ -15,7 +15,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   - `packages/db-*` - Database adapters (MongoDB, Postgres, SQLite, Vercel Postgres, D1 SQLite)
   - `packages/drizzle` - Drizzle ORM integration
   - `packages/kv-redis` - Redis key-value store adapter
-  - `packages/richtext-*` - Rich text editors (Lexical, Slate)
+  - `packages/richtext-*` - Rich text editors (Lexical)
   - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Uploadthing, Vercel Blob, R2)
   - `packages/email-*` - Email adapters (Nodemailer, Resend)
   - `packages/plugin-*` - Additional functionality plugins
@@ -54,7 +54,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 ### Coding Patterns and Best Practices
 
-- Prefer single object parameters (improves backwards-compatibility)
+- Always use object parameters for function arguments: `fn({ name }: { name: string })` not `fn(name: string)` (improves backwards-compatibility)
 - Prefer types over interfaces (except when extending external types)
 - Prefer functions over classes (classes only for errors/adapters)
 - Prefer pure functions; when mutation is unavoidable, return the mutated object instead of void.
@@ -62,10 +62,47 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Use JSDoc for complex functions; add tags only when justified beyond type signature
 - Use `import type` for types, regular `import` for values, separate statements even from same module
 - Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
+- Prefer self describing function and variable names over generic names with comments to explain their purpose
+- **Translation/Label handling**: Always use `getTranslation` from `@payloadcms/translations` when you need to render labels defined in the config - it already handles functions, strings, and translation objects correctly. Don't write custom if/else logic to handle different label types.
+- **Memoize arrays/objects passed to hooks**: Never pass inline array/object literals to custom hooks - they create new references on every render, breaking memoization and causing unnecessary re-renders or remounts.
+
+  ```typescript
+  // BAD - creates new array every render, breaks hook memoization
+  const [Drawer] = useHierarchyDrawer({
+    filterByCollection: [collectionSlug],
+  })
+
+  // GOOD - memoized, stable reference
+  const filterByCollection = useMemo(() => [collectionSlug], [collectionSlug])
+  const [Drawer] = useHierarchyDrawer({
+    filterByCollection,
+  })
+  ```
+
 - Commenting Guidelines
+
   - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
   - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
   - Type definitions: Property/interface documentation is always acceptable.
+
+- Logger Usage (`payload.logger.error`)
+  - Valid: `payload.logger.error('message')` or `payload.logger.error({ msg: '...', err: error })`
+  - Invalid: `payload.logger.error('message', err)` - don't pass error as second argument
+  - Use `err` not `error`, use `msg` not `message` in object form
+
+### React Component File Structure
+
+Each React component should have its own named folder:
+
+```
+ComponentName/
+├── index.tsx       # Component implementation
+└── index.scss      # Styles (if applicable)
+```
+
+- **Do:** Create a folder per component with `index.tsx` and `index.scss`
+- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.scss` file
+- Re-export from barrel files (`index.ts`) when grouping related components in a parent directory
 
 ### Running Dev Server
 
@@ -78,7 +115,46 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Auto-login is enabled by default with credentials: `dev@payloadcms.com` / `test`
 - To disable: pass `--no-auto-login` flag or set `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN=false`
 - Default database is MongoDB (in-memory). Switch to Postgres with `PAYLOAD_DATABASE=postgres`
-- Docker services: `pnpm docker:start` / `pnpm docker:stop` / `pnpm docker:restart`
+- Docker services: `pnpm docker:start` / `pnpm docker:clean` / `pnpm docker:test`
+
+### Playwright MCP
+
+You should have access to the Playwright MCP server. This MCP server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
+
+**Prerequisites:**
+
+- The dev server MUST be running (`pnpm run dev`) before using the MCP
+- First call `browser_install` to set up the browser if needed
+
+**Key tools (not exhaustive):**
+
+- `browser_navigate` - Navigate to a URL
+- `browser_snapshot` - Get accessibility snapshot of current page
+- `browser_click` - Click elements (requires `ref` from snapshot)
+- `browser_fill_form` - Fill form fields
+- `browser_take_screenshot` - Capture screenshot (use `fullPage: true` for full page)
+
+**Screenshots for visual verification:**
+
+Use `browser_take_screenshot` to visually verify UI state. Useful for:
+
+- Confirming layout and styling look correct
+- Checking component rendering (tags, forms, tables)
+- Debugging UI issues that aren't visible in accessibility snapshots
+
+```
+browser_take_screenshot()                    # Viewport only
+browser_take_screenshot({ fullPage: true })  # Full scrollable page
+```
+
+Screenshots are saved to `.playwright-mcp/` and displayed inline.
+
+**Usage flow:**
+
+1. Ensure dev server is running on `localhost:3000`
+2. Call `browser_navigate` to open a page
+3. Call `browser_snapshot` to get element refs
+4. Use refs to interact with `browser_click`, `browser_fill_form`, etc.
 
 ## Testing
 
@@ -89,6 +165,8 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - If you create a database record in a test, you MUST delete it before the test completes
 - For multiple tests with similar cleanup needs, use `afterEach` to centralize cleanup logic
 - Track created resources (IDs, files, etc.) in a shared array within the `describe` block
+- Do not use conditionals in tests where it can be avoided such as `if else`
+- Do not use `try {} finally {}` in e2e tests; prefer Playwright cleanup hooks (`afterEach`, `afterAll`)
 
 **Example pattern:**
 
@@ -187,5 +265,95 @@ Examples:
 
 - LLMS.txt: <https://payloadcms.com/llms.txt>
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
-- Node version: ^18.20.2 || >=20.9.0
+- Node version: >=24.15.0
 - pnpm version: ^10.27.0
+
+## Admin Panel
+
+The admin panel is made up of both client and server react components.
+
+### Patterns
+
+ALWAYS use `formatAdminURL` when formatting api and admin routes.
+
+**Building API URLs with query parameters:** Use `qs-esm` to build query strings with proper object syntax instead of manual string concatenation.
+
+Incorrect:
+
+```typescript
+const whereClause = parentId
+  ? `where[${parentFieldName}][equals]=${parentId}`
+  : `where[or][0][${parentFieldName}][exists]=false&where[or][1][${parentFieldName}][equals]=`
+
+const url = `${serverURL}${api}/${collectionSlug}?${whereClause}&limit=${limit}&page=${page}`
+```
+
+Correct:
+
+```typescript
+import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
+
+const where = parentId
+  ? { [parentFieldName]: { equals: parentId } }
+  : {
+      or: [{ [parentFieldName]: { exists: false } }, { [parentFieldName]: { equals: null } }],
+    }
+
+const queryString = qs.stringify({ limit, page, where }, { addQueryPrefix: true })
+const url = formatAdminURL({ apiRoute: api, path: `/${collectionSlug}${queryString}`, serverURL })
+```
+
+**Building server functions, views, or endpoints:** Always use `overrideAccess: false` and pass the `user` to payload operations. Without these, the operation runs with access control disabled, which is a security vulnerability.
+
+Incorrect:
+
+```typescript
+// INSECURE - runs with full access, bypassing all access control
+const docs = await payload.find({
+  collection: 'posts',
+})
+```
+
+Correct:
+
+```typescript
+// SECURE - respects access control for the current user
+const docs = await payload.find({
+  collection: 'posts',
+  overrideAccess: false,
+  user,
+})
+```
+
+### RSC/Client Bundling Rules
+
+These rules prevent production bundling issues where client code gets evaluated in server context.
+
+**1. Avoid barrel exports (`export *`) - always use explicit named exports:**
+
+Barrel exports cause bundling issues, break tree-shaking, and can break client/server boundaries in production. Always use explicit named exports.
+
+```typescript
+// BAD - barrel export
+export * from '../../elements/SomeComponent/exports.js'
+
+// GOOD - explicit named exports
+export { SomeComponent } from '../../elements/SomeComponent/index.js'
+export { AnotherComponent } from '../../elements/AnotherComponent/index.js'
+```
+
+**2. Server components must import client components from `exports/client/index.js`:**
+
+When a `.server.tsx` file needs to render a client component, it must import from the client exports bundle, not via relative path. Relative imports don't respect `'use client'` boundaries in production builds.
+
+```typescript
+// BAD - relative import doesn't work in prod
+import { MyClientComponent } from './MyComponent.js'
+
+// GOOD - import from client exports bundle
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { MyClientComponent } from '../../exports/client/index.js'
+```
+
+**Testing bundling changes:** Always test with `pnpm prepare-run-test-against-prod` followed by `pnpm dev:prod <suite>`. Dev mode (`pnpm dev`) doesn't catch these issues.

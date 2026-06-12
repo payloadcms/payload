@@ -26,6 +26,16 @@ export const Tab: CollectionConfig = {
                 },
               ],
             },
+            {
+              name: 'group',
+              type: 'group',
+              fields: [
+                {
+                  name: 'heading',
+                  type: 'text',
+                },
+              ],
+            },
           ],
         },
         {
@@ -73,4 +83,5 @@ export const Tab: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

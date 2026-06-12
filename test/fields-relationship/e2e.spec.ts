@@ -6,7 +6,7 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type {
   Collection1,
   FieldsRelationship as CollectionWithRelationships,
@@ -18,22 +18,23 @@ import type {
   VersionedRelationshipField,
 } from './payload-types.js'
 
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { addArrayRow } from '../__helpers/e2e/fields/array/addArrayRow.js'
+import { openCreateDocDrawer } from '../__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
+import { addListFilter } from '../__helpers/e2e/filters/index.js'
+import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertToastErrors } from '../helpers/assertToastErrors.js'
-import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
-import { addArrayRow } from '../helpers/e2e/fields/array/addArrayRow.js'
-import { openCreateDocDrawer } from '../helpers/e2e/fields/relationship/openCreateDocDrawer.js'
-import { addListFilter } from '../helpers/e2e/filters/index.js'
-import { goToNextPage } from '../helpers/e2e/goToNextPage.js'
-import { openDocControls } from '../helpers/e2e/openDocControls.js'
-import { openDocDrawer } from '../helpers/e2e/toggleDocDrawer.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
+import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   collection1Slug,
@@ -250,7 +251,7 @@ describe('Relationship Field', () => {
     await options.locator(`text=${anotherRelationOneDoc.id}`).click()
     await expect(values).toHaveText([relationOneDoc.id, anotherRelationOneDoc.id])
     await field.locator('.rs__input').click({ delay: 100 })
-    await expect(page.locator('.rs__menu')).toHaveText('No options')
+    await expect(getSelectMenu({ page })).toHaveText('No options')
     await saveDocAndAssert(page)
     await wait(200)
     await expect(values).toHaveText([relationOneDoc.id, anotherRelationOneDoc.id])
@@ -316,7 +317,7 @@ describe('Relationship Field', () => {
 
     await field.click({ delay: 100 })
 
-    const menu = page.locator('.rs__menu-list')
+    const menu = getSelectMenu({ page })
     await expect(menu).toBeVisible()
     await wait(300)
 
@@ -370,7 +371,8 @@ describe('Relationship Field', () => {
 
     let filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
-    let filteredOptions = filteredField.locator('.rs__option')
+    let filteredMenu = getSelectMenu({ page })
+    let filteredOptions = filteredMenu.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(1) // one doc
     await wait(200)
 
@@ -395,7 +397,8 @@ describe('Relationship Field', () => {
 
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
-    filteredOptions = filteredField.locator('.rs__option')
+    filteredMenu = getSelectMenu({ page })
+    filteredOptions = filteredMenu.locator('.rs__option')
     await expect(filteredOptions).toHaveCount(2) // two options because the currently selected option is still there
     await wait(200)
 
@@ -428,7 +431,8 @@ describe('Relationship Field', () => {
       await wait(300)
       const field = page.locator('#field-relationshipFilteredByField')
       await field.click({ delay: 100 })
-      const options = field.locator('.rs__option')
+      const fieldMenu = getSelectMenu({ page })
+      const options = fieldMenu.locator('.rs__option')
       await expect(options).toHaveCount(1)
       await expect(options).toContainText(idToInclude)
 
@@ -443,7 +447,7 @@ describe('Relationship Field', () => {
 
       const valueInput = page.locator('.condition__value input')
       await valueInput.click()
-      const valueOptions = whereBuilder.locator('.condition__value .rs__option')
+      const valueOptions = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(valueOptions).toHaveCount(2)
       await expect(valueOptions.locator(`text=None`)).toBeVisible()
@@ -464,7 +468,8 @@ describe('Relationship Field', () => {
 
       const fieldInCollapsible = page.locator('#field-filteredByFieldInCollapsible')
       await fieldInCollapsible.click({ delay: 100 })
-      const optionsInCollapsible = fieldInCollapsible.locator('.rs__option')
+      const fieldInCollapsibleMenu = getSelectMenu({ page })
+      const optionsInCollapsible = fieldInCollapsibleMenu.locator('.rs__option')
       await expect(optionsInCollapsible).toHaveCount(1)
       await expect(optionsInCollapsible).toContainText(idToInclude)
 
@@ -472,7 +477,8 @@ describe('Relationship Field', () => {
 
       const fieldInArray = page.locator('#field-array__0__filteredByFieldInArray')
       await fieldInArray.click({ delay: 100 })
-      const optionsInArray = fieldInArray.locator('.rs__option')
+      const fieldInArrayMenu = getSelectMenu({ page })
+      const optionsInArray = fieldInArrayMenu.locator('.rs__option')
       await expect(optionsInArray).toHaveCount(1)
       await expect(optionsInArray).toContainText(idToInclude)
 
@@ -488,7 +494,7 @@ describe('Relationship Field', () => {
 
       const valueInput = condition1.locator('.condition__value input')
       await valueInput.click()
-      const valueOptions = condition1.locator('.condition__value .rs__option')
+      const valueOptions = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(valueOptions).toHaveCount(2)
       await expect(valueOptions.locator(`text=None`)).toBeVisible()
@@ -502,7 +508,7 @@ describe('Relationship Field', () => {
 
       const valueInput2 = condition2.locator('.condition__value input')
       await valueInput2.click()
-      const valueOptions2 = condition2.locator('.condition__value .rs__option')
+      const valueOptions2 = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(valueOptions2).toHaveCount(2)
       await expect(valueOptions2.locator(`text=None`)).toBeVisible()
@@ -529,7 +535,7 @@ describe('Relationship Field', () => {
       // select relationshipMany field that relies on siblingData field above
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
 
-      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      const options = getSelectMenu({ page })
       await expect(options).toContainText(include)
       await expect(options).not.toContainText(exclude)
     })
@@ -550,7 +556,7 @@ describe('Relationship Field', () => {
       // select relationshipMany field that relies on siblingData field above
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
 
-      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      const options = getSelectMenu({ page })
       await expect(options).not.toContainText('exclude')
     })
 
@@ -568,7 +574,7 @@ describe('Relationship Field', () => {
       // select relationshipMany field that relies on siblingData field above
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
 
-      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      const options = getSelectMenu({ page })
       await expect(options).toContainText('Relation With Titles')
       await expect(options).not.toContainText('whatever')
     })
@@ -590,7 +596,7 @@ describe('Relationship Field', () => {
       await page.locator('#field-relationshipManyFiltered .rs__control').click()
       await relationFilterOptionsReq
 
-      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      const options = getSelectMenu({ page })
       await expect(options).toContainText('truth')
     })
   })
@@ -752,7 +758,7 @@ describe('Relationship Field', () => {
 
     await page.goto(versionedRelationshipFieldURL.list)
     await wait(300)
-    await page.locator('.list-controls__toggle-columns').click()
+    await page.locator('.columns-button__button').click()
 
     await addListFilter({
       page,
@@ -762,6 +768,43 @@ describe('Relationship Field', () => {
     })
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
+  })
+
+  test('should show draft-only title for related doc in list view cell', async () => {
+    // Create a related doc whose title only lives in a draft. The main collection
+    // row is created empty and the title is then saved as a draft, so the published
+    // row has no title. This reproduces the list cell rendering "(Untitled)".
+    const draftRelated = await payload.create({
+      collection: versionedRelationshipFieldSlug,
+      data: {
+        title: '',
+      },
+      draft: true,
+    })
+
+    await payload.update({
+      collection: versionedRelationshipFieldSlug,
+      id: draftRelated.id,
+      data: {
+        title: 'Draft Only Title',
+      },
+      draft: true,
+    })
+
+    // Create the doc that holds the relationship to the draft-only related doc.
+    await createVersionedRelationshipFieldDoc('Parent doc', undefined, {
+      relatedVersionedDoc: draftRelated.id,
+    })
+
+    await page.goto(versionedRelationshipFieldURL.list)
+    await wait(300)
+
+    const relationshipCell = page
+      .locator(tableRowLocator, { hasText: 'Parent doc' })
+      .locator('.cell-relatedVersionedDoc')
+
+    await expect(relationshipCell).toContainText('Draft Only Title')
+    await expect(relationshipCell).not.toContainText('Untitled - ID')
   })
 
   describe('existing relationships', () => {
@@ -790,14 +833,12 @@ describe('Relationship Field', () => {
       await expect(options).toHaveCount(1) // None + 1 Unitled ID
     })
 
-    // test.todo('should paginate within the dropdown');
-
     test('should search within the relationship field', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
       await wait(300)
       const input = page.locator('#field-relationshipWithTitle input')
       await input.fill('title')
-      const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option')
+      const options = getSelectMenu({ page }).locator('.rs__option')
       await expect(options).toHaveCount(1)
 
       await input.fill('non-occurring-string')
@@ -809,7 +850,7 @@ describe('Relationship Field', () => {
       await wait(300)
       const input = page.locator('#field-relationshipWithTitle input')
       await input.fill('word search')
-      const options = page.locator('#field-relationshipWithTitle .rs__menu .rs__option')
+      const options = getSelectMenu({ page }).locator('.rs__option')
       await expect(options).toHaveCount(1)
     })
 
@@ -823,7 +864,8 @@ describe('Relationship Field', () => {
       await expect(value).toHaveText(relationWithTitle.name)
 
       await field.click({ delay: 100 })
-      const options = field.locator('.rs__option')
+      const fieldMenu = getSelectMenu({ page })
+      const options = fieldMenu.locator('.rs__option')
 
       await expect(options).toHaveCount(2)
     })
@@ -1016,7 +1058,7 @@ describe('Relationship Field', () => {
       }
     }
 
-    test('should filter on polymorphic hasMany=true relationship field', async () => {
+    test('should filter on polymorphic hasMany=true relationship field - equals', async () => {
       const { relatedDoc, cleanup } = await createRelatedDoc()
       await page.goto(url.list)
       await addListFilter({
@@ -1029,7 +1071,7 @@ describe('Relationship Field', () => {
       await expect(tableRow).toHaveCount(1)
       await cleanup()
     })
-    test('should filter on polymorphic hasMany=false relationship field', async () => {
+    test('should filter on polymorphic hasMany=false relationship field - equals', async () => {
       const { relatedDoc, cleanup } = await createRelatedDoc()
       await page.goto(url.list)
       await addListFilter({
@@ -1042,7 +1084,21 @@ describe('Relationship Field', () => {
       await expect(tableRow).toHaveCount(1)
       await cleanup()
     })
-    test('should filter on monomorphic hasMany=true relationship field', async () => {
+    test('should filter on monomorphic hasMany=false relationship field - is in', async () => {
+      const { relatedDoc, cleanup } = await createRelatedDoc()
+      await page.goto(url.list)
+      await addListFilter({
+        page,
+        fieldLabel: 'Relationship',
+        operatorLabel: 'is in',
+        value: relatedDoc.id,
+        multiSelect: true,
+      })
+      const tableRow = page.locator(tableRowLocator)
+      await expect(tableRow).toHaveCount(1)
+      await cleanup()
+    })
+    test('should filter on monomorphic hasMany=true relationship field - is in', async () => {
       const { relatedDoc, cleanup } = await createRelatedDoc()
       await page.goto(url.list)
       await addListFilter({
@@ -1055,6 +1111,58 @@ describe('Relationship Field', () => {
       const tableRow = page.locator(tableRowLocator)
       await expect(tableRow).toHaveCount(1)
       await cleanup()
+    })
+
+    test('should filter on monomorphic hasMany=false relationship field - is in with multiple values', async () => {
+      // Create multiple related docs
+      const relatedDoc1 = await payload.create({
+        collection: relationOneSlug,
+        data: { name: 'Related Doc 1' },
+      })
+      const relatedDoc2 = await payload.create({
+        collection: relationOneSlug,
+        data: { name: 'Related Doc 2' },
+      })
+      const relatedDoc3 = await payload.create({
+        collection: relationOneSlug,
+        data: { name: 'Related Doc 3' },
+      })
+
+      // Create main docs that reference different related docs
+      const mainDoc1 = await payload.create({
+        collection: slug,
+        data: { relationship: relatedDoc1.id },
+      })
+      const mainDoc2 = await payload.create({
+        collection: slug,
+        data: { relationship: relatedDoc2.id },
+      })
+      const mainDoc3 = await payload.create({
+        collection: slug,
+        data: { relationship: relatedDoc3.id },
+      })
+
+      await page.goto(url.list)
+
+      // Filter by relatedDoc1 and relatedDoc2 (should match mainDoc1 and mainDoc2)
+      await addListFilter({
+        page,
+        fieldLabel: 'Relationship',
+        operatorLabel: 'is in',
+        value: [String(relatedDoc1.id), String(relatedDoc2.id)],
+        multiSelect: true,
+      })
+
+      const tableRow = page.locator(tableRowLocator)
+      await expect(tableRow).toHaveCount(2)
+
+      // Cleanup
+      await payload.delete({ collection: slug, id: String(mainDoc1.id) })
+      await payload.delete({ collection: slug, id: String(mainDoc2.id) })
+      await payload.delete({ collection: slug, id: String(mainDoc3.id) })
+      await payload.delete({ collection: relationOneSlug, id: String(relatedDoc1.id) })
+      await payload.delete({ collection: relationOneSlug, id: String(relatedDoc2.id) })
+      await payload.delete({ collection: relationOneSlug, id: String(relatedDoc3.id) })
     })
   })
 })

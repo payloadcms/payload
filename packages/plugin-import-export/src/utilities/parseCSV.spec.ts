@@ -145,6 +145,26 @@ describe('parseCSV', () => {
 
       expect(result).toEqual([{ field: 'value1' }, { field: 'value2' }])
     })
+
+    it('should strip UTF-8 BOM from column names', async () => {
+      // UTF-8 BOM is 0xEF 0xBB 0xBF
+      const bomBytes = Buffer.from([0xef, 0xbb, 0xbf])
+      const csvContent = Buffer.from('id,title,createdAt\ntesssst,test,2026-02-11T21:03:39.020Z')
+      const csvWithBOM = Buffer.concat([bomBytes, csvContent])
+
+      const result = await parseCSV({ data: csvWithBOM, req: mockReq })
+
+      expect(result).toEqual([
+        {
+          id: 'tesssst',
+          title: 'test',
+          createdAt: '2026-02-11T21:03:39.020Z',
+        },
+      ])
+
+      // Verify the column name is exactly "id" without BOM character
+      expect(Object.keys(result[0])[0]).toBe('id')
+    })
   })
 
   describe('error handling', () => {

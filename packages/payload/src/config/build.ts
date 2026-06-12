@@ -9,11 +9,24 @@ import { sanitizeConfig } from './sanitize.js'
  */
 export async function buildConfig(config: Config): Promise<SanitizedConfig> {
   if (Array.isArray(config.plugins)) {
-    let configAfterPlugins = config
-    for (const plugin of config.plugins) {
-      configAfterPlugins = await plugin(configAfterPlugins)
+    const sorted = [...config.plugins].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+    for (const plugin of sorted) {
+      config = await plugin(config)
     }
-    return await sanitizeConfig(configAfterPlugins)
+  }
+
+  if (Array.isArray(config.storage)) {
+    for (const adapter of config.storage) {
+      if (typeof adapter?.init !== 'function') {
+        throw new Error(
+          `storage contains an invalid entry: expected an object with an \`init\` function. ` +
+            `Ensure you are passing the result of a storage adapter factory (e.g. s3Storage({…})) ` +
+            `to \`storage\`, not to \`plugins\`.`,
+        )
+      }
+      config = await adapter.init(config)
+    }
   }
 
   return await sanitizeConfig(config)

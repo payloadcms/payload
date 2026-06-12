@@ -5,8 +5,8 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import removeFiles from '../helpers/removeFiles.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)

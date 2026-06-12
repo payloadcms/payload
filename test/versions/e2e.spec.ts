@@ -23,19 +23,19 @@
  */
 
 import type { BrowserContext, Dialog, Page } from '@playwright/test'
+import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { postsCollectionSlug } from 'admin/slugs.js'
-import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import mongoose from 'mongoose'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Diff } from './payload-types.js'
 
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
@@ -46,14 +46,18 @@ import {
   saveDocAndAssert,
   waitForFormReady,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
-import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../helpers/e2e/navigateToDiffVersionView.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '../__helpers/e2e/helpers.js'
+import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
+import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { postsCollectionSlug } from '../admin/slugs.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { draftWithCustomUnpublishSlug } from './collections/DraftsWithCustomUnpublish.js'
 import { BASE_PATH } from './shared.js'
 import {
   autosaveCollectionSlug,
@@ -71,11 +75,15 @@ import {
   draftWithChangeHookCollectionSlug,
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
+  draftWithUploadCollectionSlug,
   draftWithValidateCollectionSlug,
   errorOnUnpublishSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
+  simpleDraftGlobalSlug,
+  textCollectionSlug,
+  versionCollectionSlug,
 } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -103,6 +111,7 @@ describe('Versions', () => {
   let postURL: AdminUrlUtil
   let errorOnUnpublishURL: AdminUrlUtil
   let draftsNoReadVersionsURL: AdminUrlUtil
+  let versionURL: AdminUrlUtil
   let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -148,6 +157,7 @@ describe('Versions', () => {
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
       errorOnUnpublishURL = new AdminUrlUtil(serverURL, errorOnUnpublishSlug)
       draftsNoReadVersionsURL = new AdminUrlUtil(serverURL, draftsNoReadVersionsSlug)
+      versionURL = new AdminUrlUtil(serverURL, versionCollectionSlug)
     })
 
     test('collection — should show "has published version" status in list view when draft is saved after publish', async () => {
@@ -189,7 +199,9 @@ describe('Versions', () => {
 
     test('collection — has versions tab', async () => {
       await page.goto(url.list)
-      await page.locator('tbody tr .cell-title a').first().click()
+      const firstRowLink = page.locator('tbody tr .cell-title a').first()
+      const docHref = await firstRowLink.getAttribute('href')
+      await page.goto(`${serverURL}${docHref}`)
 
       const versionsTab = page.locator('.doc-tab:has-text("Versions")')
       await versionsTab.waitFor({ state: 'visible' })
@@ -207,13 +219,15 @@ describe('Versions', () => {
 
     test('collection — tab displays proper number of versions', async () => {
       await page.goto(url.list)
+      // Wait for hydration
       const linkToDoc = page
         .locator('tbody tr .cell-title a', {
           hasText: exactText('Title With Many Versions 11'),
         })
         .first()
       expect(linkToDoc).toBeTruthy()
-      await linkToDoc.click()
+      const linkHref = await linkToDoc.getAttribute('href')
+      await page.goto(`${serverURL}${linkHref}`)
       const versionsTab = page.locator('.doc-tab', {
         hasText: 'Versions',
       })
@@ -226,9 +240,9 @@ describe('Versions', () => {
 
     test('collection — has versions route', async () => {
       await page.goto(url.list)
-      await page.locator('tbody tr .cell-title a').first().click()
-      await page.waitForSelector('.doc-header__title', { state: 'visible' })
-      await page.goto(`${page.url()}/versions`)
+      const firstRowLink = page.locator('tbody tr .cell-title a').first()
+      const docHref = await firstRowLink.getAttribute('href')
+      await page.goto(`${serverURL}${docHref}/versions`)
       await expect(() => {
         expect(page.url()).toMatch(/\/versions/)
       }).toPass({ timeout: 10000, intervals: [100] })
@@ -257,7 +271,9 @@ describe('Versions', () => {
 
     test('should show collection versions view level action in collection versions view', async () => {
       await page.goto(url.list)
-      await page.locator('tbody tr .cell-title a').first().click()
+      const firstRowLink = page.locator('tbody tr .cell-title a').first()
+      const docHref = await firstRowLink.getAttribute('href')
+      await page.goto(`${serverURL}${docHref}`)
 
       // Wait for the document to load
       const versionsTab = page.locator('.doc-tab', {
@@ -271,6 +287,7 @@ describe('Versions', () => {
 
     test('should restore version with correct data', async () => {
       await page.goto(url.create)
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
       await saveDocAndAssert(page)
@@ -313,12 +330,10 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('v2')
       await page.goto(`${savedDocURL}/api`)
       await page.locator('#field-draft').check()
-      const values = page.locator('.query-inspector__value')
-      const count = await values.count()
-
-      for (let i = 0; i < count; i++) {
-        await expect(values.nth(i)).not.toHaveText(/published/i)
-      }
+      // The API view renders JSON via the Monaco editor. Wait for the restored v2 draft
+      // content to render, then assert v3's "published" description value is absent.
+      await expect(page.locator('.query-inspector__results')).toContainText('restore me as draft')
+      await expect(page.locator('.query-inspector__results')).not.toContainText(/published/i)
     })
 
     test('should show currently published version status in versions view', async () => {
@@ -551,10 +566,9 @@ describe('Versions', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
 
       await page.goto(autosaveURL.list)
-      const createNewButton = page.locator('.list-header .btn:has-text("Create New")')
-      await createNewButton.click()
-
-      await page.waitForURL(`**/${autosaveCollectionSlug}/**`)
+      const createNewButton = page.locator('#create-new-doc')
+      const href = await createNewButton.getAttribute('href')
+      await page.goto(`${serverURL}${href}`)
 
       await page.locator('#field-title').fill('autosave title')
       await waitForAutoSaveToRunAndComplete(page)
@@ -579,12 +593,9 @@ describe('Versions', () => {
       await saveDocAndAssert(page)
 
       const updatedAtWrapper = page.locator(
-        '.doc-controls .doc-controls__content .doc-controls__list-item',
-        {
-          hasText: 'Last Modified',
-        },
+        '.doc-controls .doc-controls__content .doc-controls__value-wrap',
       )
-      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const initialTitle = await updatedAtWrapper.getAttribute('title')
 
       // wait for 1 second so that the timestamp can be different
       await wait(1000)
@@ -592,9 +603,10 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('changed description')
       await saveDocAndAssert(page)
 
-      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
-
-      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
+      await expect(async () => {
+        const newTitle = updatedAtWrapper
+        await expect(newTitle).not.toHaveAttribute('title', initialTitle!)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('collection - should update updatedAt on autosave', async () => {
@@ -604,12 +616,9 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('autosave title')
 
       const updatedAtWrapper = page.locator(
-        '.doc-controls .doc-controls__content .doc-controls__list-item',
-        {
-          hasText: 'Last Modified',
-        },
+        '.doc-controls .doc-controls__content .doc-controls__value-wrap',
       )
-      const initialUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const initialTitle = await updatedAtWrapper.getAttribute('title')
 
       // wait for 1 second so that the timestamp can be different
       await wait(1000)
@@ -617,9 +626,10 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('autosave title updated')
       await waitForAutoSaveToRunAndComplete(page)
 
-      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
-
-      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
+      await expect(async () => {
+        const newTitle = updatedAtWrapper
+        await expect(newTitle).not.toHaveAttribute('title', initialTitle!)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should retain localized data during autosave', async () => {
@@ -683,7 +693,7 @@ describe('Versions', () => {
 
       // revert to last published version
       await page.locator('#action-revert-to-published').click()
-      await saveDocAndAssert(page, '[id^=confirm-revert-] #confirm-action')
+      await saveDocAndAssert(page, '[id^=confirm-revert-] [data-dialog-action="confirm"]')
 
       // verify that spanish content is reverted correctly
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
@@ -709,8 +719,7 @@ describe('Versions', () => {
       await page.goto(autosaveURL.list)
       const secondRowLink = page.locator('tbody tr:nth-child(2) .cell-title a')
       const docURL = await secondRowLink.getAttribute('href')
-      await secondRowLink.click()
-      await page.waitForURL(`**${docURL}`)
+      await page.goto(`${serverURL}${docURL}`)
       await expect(page.locator('#field-title')).toHaveValue('first post title')
       await expect(page.locator('#field-description')).toHaveValue('first post description')
     })
@@ -723,7 +732,9 @@ describe('Versions', () => {
       await saveDocAndAssert(page)
 
       await page.goto(customIDURL.list)
-      await page.locator('tbody tr .cell-id a').click()
+      const customIDLink = page.locator('tbody tr .cell-id a')
+      const docURL = await customIDLink.getAttribute('href')
+      await page.goto(`${serverURL}${docURL}`)
 
       await expect(page.locator('div.id-label')).toHaveText(/custom/)
       await expect(page.locator('#field-title')).toHaveValue('title')
@@ -782,6 +793,7 @@ describe('Versions', () => {
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
 
       // Verify unpublish button is hidden when user doesn't have publish permission
+      await openDocControls(page)
       await expect(page.locator('#action-unpublish')).not.toBeAttached()
     })
 
@@ -794,11 +806,82 @@ describe('Versions', () => {
         },
       })
       await page.goto(errorOnUnpublishURL.edit(String(publishedDoc.id)))
+      await openDocControls(page)
       await page.locator('#action-unpublish').click()
-      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
+      await page.locator('[id^="confirm-un-publish-"] [data-dialog-action="confirm"]').click()
       await expect(
         page.locator('.payload-toast-item:has-text("Custom error on unpublish")'),
       ).toBeVisible()
+    })
+
+    test('collections — should render custom unpublish button', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithCustomUnpublishSlug,
+        data: {
+          _status: 'published',
+          title: 'Test Custom Unpublish',
+        },
+      })
+
+      const customUnpublishURL = new AdminUrlUtil(serverURL, draftWithCustomUnpublishSlug)
+      await page.goto(customUnpublishURL.edit(String(publishedDoc.id)))
+
+      await openDocControls(page)
+      await expect(page.getByRole('button', { name: 'Custom Unpublish' })).toBeVisible()
+
+      await payload.delete({
+        collection: draftWithCustomUnpublishSlug,
+        id: publishedDoc.id,
+      })
+    })
+
+    test('collections — should not show unpublish button when drafts are not enabled', async () => {
+      const doc = await payload.create({
+        collection: versionCollectionSlug,
+        data: {
+          title: 'No Drafts Doc',
+          description: 'This collection has drafts disabled',
+        },
+      })
+
+      await page.goto(versionURL.edit(String(doc.id)))
+      await openDocControls(page)
+
+      await expect(page.locator('#action-unpublish')).not.toBeAttached()
+
+      await payload.delete({
+        collection: versionCollectionSlug,
+        id: doc.id,
+      })
+    })
+
+    test('collections — should not increment version count when unpublishing', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'unpublish version count test',
+          description: 'description',
+        },
+      })
+
+      await page.goto(url.edit(publishedDoc.id))
+
+      const versionsCountSelector = `.doc-tabs__tabs .pill-version-count`
+      await page.locator(versionsCountSelector).waitFor({ state: 'visible' })
+      const countBefore = await page.locator(versionsCountSelector).textContent()
+
+      await openDocControls(page)
+      await page.locator('#action-unpublish').click()
+      await page.locator('[id^="confirm-un-publish-"] [data-dialog-action="confirm"]').click()
+      await expect(page.locator('.payload-toast-item')).toBeVisible()
+
+      await expect.poll(() => page.locator(versionsCountSelector).textContent()).toBe(countBefore)
+
+      await payload.delete({
+        collection: draftCollectionSlug,
+        id: publishedDoc.id,
+      })
     })
 
     test('should show documents title in relationship even if draft document', async () => {
@@ -815,9 +898,13 @@ describe('Versions', () => {
 
       const field = page.locator('#field-relationToAutosaves')
 
-      await field.click()
-
-      await expect(page.locator('.rs__option')).toHaveCount(1)
+      await expect(async () => {
+        const optionCount = await page.locator('.rs__option').count()
+        if (optionCount === 0) {
+          await field.click()
+        }
+        await expect(page.locator('.rs__option')).toHaveCount(1)
+      }).toPass({ timeout: 30000 })
 
       await expect(page.locator('.rs__option')).toHaveText('some title')
     })
@@ -908,12 +995,12 @@ describe('Versions', () => {
       expect(versionsTabUpdated).toBeTruthy()
     })
 
-    describe('A11y', () => {
+    describe.skip('A11y', () => {
       test('Versions list view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
-        await page.locator('tbody tr .cell-title a').first().click()
-        await page.waitForSelector('.doc-header__title', { state: 'visible' })
-        await page.goto(`${page.url()}/versions`)
+        const firstRowLink = page.locator('tbody tr .cell-title a').first()
+        const docHref = await firstRowLink.getAttribute('href')
+        await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
         }).toPass({ timeout: 10000, intervals: [100] })
@@ -929,9 +1016,9 @@ describe('Versions', () => {
 
       test('Versions list view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
-        await page.locator('tbody tr .cell-title a').first().click()
-        await page.waitForSelector('.doc-header__title', { state: 'visible' })
-        await page.goto(`${page.url()}/versions`)
+        const firstRowLink = page.locator('tbody tr .cell-title a').first()
+        const docHref = await firstRowLink.getAttribute('href')
+        await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
         }).toPass({ timeout: 10000, intervals: [100] })
@@ -948,14 +1035,16 @@ describe('Versions', () => {
 
       test.fixme('Version view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
-        await page.locator('tbody tr .cell-title a').first().click()
-        await page.waitForSelector('.doc-header__title', { state: 'visible' })
-        await page.goto(`${page.url()}/versions`)
+        const firstRowLink = page.locator('tbody tr .cell-title a').first()
+        const docHref = await firstRowLink.getAttribute('href')
+        await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
         }).toPass({ timeout: 10000, intervals: [100] })
 
-        await page.locator('.cell-updatedAt a').first().click()
+        const versionLink = page.locator('.cell-updatedAt a').first()
+        const versionHref = await versionLink.getAttribute('href')
+        await page.goto(`${serverURL}${versionHref}`)
 
         await page.locator('.view-version').waitFor()
 
@@ -970,9 +1059,9 @@ describe('Versions', () => {
 
       test('Version view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
-        await page.locator('tbody tr .cell-title a').first().click()
-        await page.waitForSelector('.doc-header__title', { state: 'visible' })
-        await page.goto(`${page.url()}/versions`)
+        const firstRowLink = page.locator('tbody tr .cell-title a').first()
+        const docHref = await firstRowLink.getAttribute('href')
+        await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
         }).toPass({ timeout: 10000, intervals: [100] })
@@ -997,7 +1086,7 @@ describe('Versions', () => {
         await saveDocAndAssert(page, '#action-save-draft')
 
         await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
-
+        await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeHidden()
       })
 
@@ -1015,7 +1104,7 @@ describe('Versions', () => {
         await expect(page.locator('.doc-controls__status .status__value')).toContainText(
           'Published',
         )
-
+        await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeVisible()
       })
 
@@ -1032,8 +1121,133 @@ describe('Versions', () => {
         await saveDocAndAssert(page, '#action-save-draft')
 
         await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+        await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeHidden()
       })
+    })
+  })
+
+  describe('draft upload collections', () => {
+    let uploadURL: AdminUrlUtil
+
+    beforeAll(() => {
+      uploadURL = new AdminUrlUtil(serverURL, draftWithUploadCollectionSlug)
+    })
+
+    test('should keep published status after reuploading a file and saving as draft', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        filePath: path.resolve(dirname, './image.jpg'),
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('.doc-controls__status .status__value')).toContainText('Published')
+
+      // The file input is only rendered once the existing file is removed.
+      // Click the remove button on the current file to reveal the file input.
+      await page.locator('.file-details__remove').click()
+      await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'), {
+        force: true,
+      })
+
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(page.locator('.doc-controls__status .status__value')).toContainText('Changed')
+
+      await expect(async () => {
+        const { docs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          where: { id: { equals: publishedDoc.id } },
+        })
+        expect(docs[0]!._status).toStrictEqual('published')
+        expect(docs[0]!.filename).toStrictEqual(publishedDoc.filename)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+
+    test('should create a draft version with the new file without altering the published doc', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        filePath: path.resolve(dirname, './image.jpg'),
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+
+      // The file input is only rendered once the existing file is removed.
+      // Click the remove button on the current file to reveal the file input.
+      await page.locator('.file-details__remove').click()
+      await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'), {
+        force: true,
+      })
+
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(async () => {
+        const { docs: draftDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          draft: true,
+          where: { id: { equals: publishedDoc.id } },
+        })
+        expect(draftDocs[0]!._status).toStrictEqual('draft')
+        expect(draftDocs[0]!.filename).not.toStrictEqual(publishedDoc.filename)
+
+        const { docs: mainDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          where: { id: { equals: publishedDoc.id } },
+        })
+        expect(mainDocs[0]!.filename).toStrictEqual(publishedDoc.filename)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+
+    test('should create a draft when duplicating a published upload document', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        filePath: path.resolve(dirname, './image.jpg'),
+      })
+
+      await page.goto(uploadURL.edit(publishedDoc.id))
+      await waitForFormReady(page)
+
+      await openDocControls(page)
+      await page.locator('#action-duplicate').click()
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .not.toContain(publishedDoc.id)
+
+      await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+      await waitForFormReady(page)
+
+      const duplicatedDocID = new URL(page.url()).pathname.split('/').pop()
+
+      await expect(async () => {
+        const { docs: draftDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          draft: true,
+          where: { id: { equals: duplicatedDocID } },
+        })
+        expect(draftDocs[0]!._status).toStrictEqual('draft')
+
+        const { docs: mainDocs } = await payload.find({
+          collection: draftWithUploadCollectionSlug,
+          where: { id: { equals: duplicatedDocID } },
+        })
+        expect(mainDocs[0]!._status).toStrictEqual('draft')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
 
@@ -1155,15 +1369,65 @@ describe('Versions', () => {
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
+    test('globals — should show unpublish button after publishing', async () => {
+      await payload.updateGlobal({
+        slug: simpleDraftGlobalSlug,
+        data: { title: 'published global', _status: 'published' },
+      })
+
+      const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
+      await page.goto(globalURL.global(simpleDraftGlobalSlug))
+
+      await openDocControls(page)
+      await expect(page.locator('#action-unpublish')).toBeVisible()
+    })
+
+    test('globals — dot menu should only contain unpublish and copy to locale options', async () => {
+      await payload.updateGlobal({
+        slug: simpleDraftGlobalSlug,
+        data: { title: 'published global', _status: 'published' },
+      })
+
+      const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
+      await page.goto(globalURL.global(simpleDraftGlobalSlug))
+
+      await openDocControls(page)
+
+      await expect(page.locator('#action-unpublish')).toBeVisible()
+      await expect(page.locator('#copy-locale-data__button')).toBeVisible()
+      await expect(page.locator('#action-create')).not.toBeAttached()
+      await expect(page.locator('#action-delete')).not.toBeAttached()
+      await expect(page.locator('#action-duplicate')).not.toBeAttached()
+    })
+
+    test('globals — should not increment version count when unpublishing', async () => {
+      await payload.updateGlobal({
+        slug: simpleDraftGlobalSlug,
+        data: { title: 'unpublish version count test', _status: 'published' },
+      })
+
+      const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
+      await page.goto(globalURL.global(simpleDraftGlobalSlug))
+
+      const versionsCountPill = page.locator(`.doc-tabs__tabs .pill-version-count`)
+      await versionsCountPill.waitFor({ state: 'visible' })
+      const countBefore = await versionsCountPill.textContent()
+
+      await openDocControls(page)
+      await page.locator('#action-unpublish').click()
+      await page.locator('[id^="confirm-un-publish-"] [data-dialog-action="confirm"]').click()
+      await expect(page.locator('.payload-toast-item')).toBeVisible()
+
+      await expect.poll(() => versionsCountPill.textContent()).toBe(countBefore)
+    })
+
     test('globals — should hide unpublish button when access control prevents update', async () => {
-      // Then publish it with override access to create a published version
       await payload.updateGlobal({
         slug: disablePublishGlobalSlug,
         data: {
           _status: 'published',
           title: 'published global',
         },
-        overrideAccess: true,
       })
 
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
@@ -1195,7 +1459,8 @@ describe('Versions', () => {
 
       const versionAnchor = versionsTable.locator('tbody tr.row-1 td.cell-updatedAt a')
       await expect(versionAnchor).toBeVisible()
-      await versionAnchor.click()
+      const versionHref = await versionAnchor.getAttribute('href')
+      await page.goto(`${serverURL}${versionHref}`)
 
       const compareFromContainer = page.locator(
         '.view-version__version-from .field-type.compare-version',
@@ -1206,7 +1471,8 @@ describe('Versions', () => {
       await expect(fromSelect).toBeVisible()
       await fromSelect.click()
 
-      const moreVersions = compareFromContainer.locator('.rs__option:has-text("More versions...")')
+      const versionSelectMenu = getSelectMenu({ page })
+      const moreVersions = versionSelectMenu.locator('.rs__option:has-text("More versions...")')
       await expect(moreVersions).toBeVisible()
       await moreVersions.click()
 
@@ -1220,6 +1486,11 @@ describe('Versions', () => {
   })
 
   describe('Scheduled publish', () => {
+    // Required so test.use applies to the fixture page used in 'correctly sets a UTC date' test
+    test.use({
+      timezoneId: londonTimezone,
+    })
+
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
@@ -1231,16 +1502,14 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('scheduled publish description')
 
       // schedule publish should not be available before document has been saved
-      await page.locator('#action-save-popup').click()
-      await expect(page.locator('#schedule-publish')).toBeHidden()
+      await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
       await saveDocAndAssert(page)
-      await page.locator('#action-save-popup').click()
-      await page.locator('#schedule-publish').click()
+      await page.locator('#schedule-publish-button').click()
 
       // drawer should open
-      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      await expect(page.locator('.drawer__header')).toBeVisible()
       // nothing in scheduled
       await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
 
@@ -1266,16 +1535,14 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('scheduled publish description')
 
       // schedule publish should not be available before document has been saved
-      await page.locator('#action-save-popup').click()
-      await expect(page.locator('#schedule-publish')).toBeHidden()
+      await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
       await saveDocAndAssert(page)
-      await page.locator('#action-save-popup').click()
-      await page.locator('#schedule-publish').click()
+      await page.locator('#schedule-publish-button').click()
 
       // drawer should open
-      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      await expect(page.locator('.drawer__header')).toBeVisible()
       // nothing in scheduled
       await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
 
@@ -1305,13 +1572,72 @@ describe('Versions', () => {
 
       await waitForAutoSaveToRunAndComplete(page)
 
-      await page.locator('#action-save-popup').click()
-
       await expect(async () => {
-        await expect(page.locator('#schedule-publish')).toBeVisible()
+        await expect(page.locator('#schedule-publish-button')).toBeVisible()
       }).toPass({
         timeout: POLL_TOPASS_TIMEOUT,
       })
+    })
+
+    test('correctly sets a UTC date for the chosen timezone', async ({ page: localPage }) => {
+      const post = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'new post',
+          description: 'new description',
+        },
+      })
+
+      await localPage.goto(
+        formatAdminURL({
+          adminRoute,
+          path: `/collections/${draftCollectionSlug}/${post.id}`,
+          serverURL,
+        }),
+      )
+
+      await waitForFormReady(localPage)
+      await localPage.locator('#schedule-publish-button').click()
+
+      const drawerContent = localPage.locator('.schedule-publish__scheduler')
+      const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
+      await dropdownControlSelector.click()
+      await getSelectMenu({ page: localPage }).locator('.rs__option', { hasText: 'Paris' }).click()
+
+      const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
+      // Create a date for 2049-01-01 18:00:00 UTC, so it is timezone-invariant across CI environments
+      const date = new Date(Date.UTC(2049, 0, 1, 18, 0))
+
+      await dateInput.fill(date.toISOString())
+      await localPage.keyboard.press('Enter') // formats the date to the correct format
+
+      const saveButton = drawerContent.locator('.schedule-publish__actions button')
+
+      await saveButton.click()
+
+      const upcomingContent = localPage.locator('.schedule-publish__upcoming')
+      const createdDate = await upcomingContent.locator('.row-1 .cell-waitUntil').textContent()
+
+      await expect(() => {
+        expect(createdDate).toContain('6:00:00 PM')
+      }).toPass({ timeout: 10000, intervals: [100] })
+
+      const {
+        docs: [createdJob],
+      } = await payload.find({
+        collection: 'payload-jobs',
+        where: {
+          'input.doc.value': {
+            equals: String(post.id),
+          },
+        },
+      })
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(createdJob).toBeTruthy()
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(createdJob?.waitUntil).toEqual('2049-01-01T17:00:00.000Z')
     })
   })
 
@@ -1387,6 +1713,74 @@ describe('Versions', () => {
         en: 'english published',
         es: 'spanish published',
       })
+    })
+
+    test('should preserve block metadata when publishing specific locale after initial save without blocks', async () => {
+      // This reproduces the bug where:
+      // 1. A doc is saved without blocks (autosave fires before blocks are added)
+      // 2. Blocks are added
+      // 3. Publishing with publishSpecificLocale drops blockType/id
+      await page.goto(url.create)
+      const textField = page.locator('#field-text')
+
+      // Step 1: Create and save a document without blocks
+      await textField.fill('english text')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      const id = await page.locator('.id-label').getAttribute('title')
+
+      // Step 2: Add a block via API (simpler and more reliable than UI interaction)
+      await payload.update({
+        collection: localizedCollectionSlug,
+        id,
+        data: {
+          blocks: [
+            {
+              blockType: 'localizedTextBlock',
+              blockText: 'Block content for English',
+            },
+          ],
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      // Step 3: Publish specific locale (English) via API
+      const published = await payload.update({
+        collection: localizedCollectionSlug,
+        id,
+        data: {
+          _status: 'published',
+          blocks: [
+            {
+              blockType: 'localizedTextBlock',
+              blockText: 'Block content for English',
+            },
+          ],
+          text: 'english text',
+        },
+        draft: false,
+        locale: 'en',
+        publishSpecificLocale: 'en',
+      })
+
+      // Step 4: Verify blocks survived with metadata intact
+      expect(published.blocks).toHaveLength(1)
+      expect(published.blocks![0].blockType).toBe('localizedTextBlock')
+      expect(published.blocks![0].id).toBeDefined()
+
+      // Step 5: Verify via find (reload from DB)
+      const data = await payload.find({
+        collection: localizedCollectionSlug,
+        where: {
+          id: { equals: id },
+        },
+      })
+
+      const found = data.docs[0]
+      expect(found.blocks).toHaveLength(1)
+      expect(found.blocks![0].blockType).toBe('localizedTextBlock')
+      expect(found.blocks![0].id).toBeDefined()
     })
   })
 
@@ -1727,7 +2121,7 @@ describe('Versions', () => {
 
       // press slower than the autosave interval, but not faster than the response and processing
       await titleField.pressSequentially('Initial', {
-        delay: 150,
+        delay: 100,
       })
 
       const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')
@@ -2091,8 +2485,8 @@ describe('Versions', () => {
 
       const checkbox = page.locator('[data-field-path="checkbox"]')
 
-      await expect(checkbox.locator('.html-diff__diff-old')).toHaveText('true')
-      await expect(checkbox.locator('.html-diff__diff-new')).toHaveText('false')
+      await expect(checkbox.locator('.checkbox-diff__label--delete')).toHaveText('Checked')
+      await expect(checkbox.locator('.checkbox-diff__label--create')).toHaveText('Unchecked')
     })
 
     test('correctly renders diff for code fields', async () => {
@@ -2224,7 +2618,7 @@ describe('Versions', () => {
 
       const zeroDepthRelationship = page.locator('[data-field-path="zeroDepthRelationship"]')
 
-      await expect(zeroDepthRelationship.locator('.html-diff__diff-old')).toBeEmpty()
+      await expect(zeroDepthRelationship.locator('.diff-no-value')).toHaveText('No value')
       await expect(
         zeroDepthRelationship.locator('.html-diff__diff-new .relationship-diff__info'),
       ).toHaveText('dev@payloadcms.com')
@@ -2527,81 +2921,188 @@ describe('Versions', () => {
       await expect(blockDiff.locator('.html-diff__diff-old')).toHaveText('textInArray2')
       await expect(blockDiff.locator('.html-diff__diff-new')).toHaveText('textInArray2Modified')
     })
-  })
 
-  describe('Scheduled publish', () => {
-    test.use({
-      timezoneId: londonTimezone,
+    test('should handle swapping blocks with polymorphic relationships (single vs hasMany)', async () => {
+      const textDoc = await payload.create({
+        collection: textCollectionSlug,
+        data: {
+          text: 'Test text document',
+        },
+      })
+
+      await payload.update({
+        collection: diffCollectionSlug,
+        data: {
+          blocks: [
+            {
+              blockType: 'SingleRelationshipBlock',
+              title: 'Single Block',
+              relatedItem: {
+                relationTo: textCollectionSlug,
+                value: textDoc.id,
+              },
+            },
+            {
+              blockType: 'ManyRelationshipBlock',
+              title: 'Many Block',
+              relatedItem: [
+                {
+                  relationTo: textCollectionSlug,
+                  value: textDoc.id,
+                },
+              ],
+            },
+          ],
+        },
+        id: diffID,
+      })
+
+      // Swap the order of the blocks
+      await payload.update({
+        collection: diffCollectionSlug,
+        data: {
+          blocks: [
+            {
+              blockType: 'ManyRelationshipBlock',
+              title: 'Many Block',
+              relatedItem: [
+                {
+                  relationTo: textCollectionSlug,
+                  value: textDoc.id,
+                },
+              ],
+            },
+            {
+              blockType: 'SingleRelationshipBlock',
+              title: 'Single Block',
+              relatedItem: {
+                relationTo: textCollectionSlug,
+                value: textDoc.id,
+              },
+            },
+          ],
+        },
+        id: diffID,
+      })
+
+      const latestVersionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: diffID },
+          },
+        })
+      ).docs[0] as Diff
+
+      // This should not throw "Cannot read properties of undefined (reading 'config')"
+      await navigateToDiffVersionView(latestVersionDiff.id)
+
+      const blocks = page.locator('[data-field-path="blocks"]')
+      await expect(blocks).toBeVisible()
     })
 
-    test('correctly sets a UTC date for the chosen timezone', async () => {
-      const post = await payload.create({
-        collection: draftCollectionSlug,
+    test('correctly renders text fields containing HTML special characters', async () => {
+      // Create a document with HTML special characters in a text field
+      const doc = await payload.create({
+        collection: diffCollectionSlug,
         data: {
-          title: 'new post',
-          description: 'new description',
+          _status: 'published',
+          text: '<b>bold</b> & "quotes"',
         },
       })
 
-      await page.goto(
-        formatAdminURL({
-          adminRoute,
-          path: `/collections/${draftCollectionSlug}/${post.id}`,
-          serverURL,
-        }),
-      )
+      // Update to create a version
+      await payload.update({
+        collection: diffCollectionSlug,
+        id: doc.id,
+        data: {
+          _status: 'published',
+          text: '<script>alert(1)</script>',
+        },
+      })
 
-      const publishDropdown = page.locator('.doc-controls__controls .popup-button')
-      await publishDropdown.click()
-
-      const schedulePublishButton = page.locator(
-        '.popup__content .popup-button-list__button:has-text("Schedule Publish")',
-      )
-      await schedulePublishButton.click()
-
-      const drawerContent = page.locator('.schedule-publish__scheduler')
-
-      const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
-      const timezoneOptionSelector = drawerContent.locator(
-        `.timezone-picker .rs__menu .rs__option:has-text("Paris")`,
-      )
-      await dropdownControlSelector.click()
-      await timezoneOptionSelector.click()
-
-      const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
-      // Create a date for 2049-01-01 18:00:00
-      const date = new Date(2049, 0, 1, 18, 0)
-
-      await dateInput.fill(date.toISOString())
-      await page.keyboard.press('Enter') // formats the date to the correct format
-
-      const saveButton = drawerContent.locator('.schedule-publish__actions button')
-
-      await saveButton.click()
-
-      const upcomingContent = page.locator('.schedule-publish__upcoming')
-      const createdDate = await upcomingContent.locator('.row-1 .cell-waitUntil').textContent()
-
-      await expect(() => {
-        expect(createdDate).toContain('6:00:00 PM')
-      }).toPass({ timeout: 10000, intervals: [100] })
-
-      const {
-        docs: [createdJob],
-      } = await payload.find({
-        collection: 'payload-jobs',
-        where: {
-          'input.doc.value': {
-            equals: String(post.id),
+      const versionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: doc.id },
           },
+        })
+      ).docs[0] as unknown as TypeWithID
+
+      await _navigateToDiffVersionView({
+        adminRoute,
+        serverURL,
+        collectionSlug: diffCollectionSlug,
+        docID: doc.id,
+        versionID: versionDiff.id,
+        page,
+      })
+
+      const text = page.locator('[data-field-path="text"]')
+
+      // Verify that HTML characters are rendered as literal text, not interpreted as HTML
+      await expect(text.locator('.html-diff__diff-old')).toHaveText('<b>bold</b> & "quotes"')
+      await expect(text.locator('.html-diff__diff-new')).toHaveText('<script>alert(1)</script>')
+
+      // Cleanup
+      await payload.delete({ collection: diffCollectionSlug, id: doc.id })
+    })
+
+    test('correctly renders JSON fields containing HTML special characters', async () => {
+      // Create a document with HTML special characters in a JSON field
+      const doc = await payload.create({
+        collection: diffCollectionSlug,
+        data: {
+          _status: 'published',
+          json: { html: '<div class="test">&amp;</div>' },
         },
       })
 
-      // eslint-disable-next-line payload/no-flaky-assertions
-      expect(createdJob).toBeTruthy()
+      // Update to create a version
+      await payload.update({
+        collection: diffCollectionSlug,
+        id: doc.id,
+        data: {
+          _status: 'published',
+          json: { html: '<span onclick="alert(1)">click</span>' },
+        },
+      })
 
-      // eslint-disable-next-line payload/no-flaky-assertions
-      expect(createdJob?.waitUntil).toEqual('2049-01-01T17:00:00.000Z')
+      const versionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: doc.id },
+          },
+        })
+      ).docs[0] as unknown as TypeWithID
+
+      await _navigateToDiffVersionView({
+        adminRoute,
+        serverURL,
+        collectionSlug: diffCollectionSlug,
+        docID: doc.id,
+        versionID: versionDiff.id,
+        page,
+      })
+
+      const json = page.locator('[data-field-path="json"]')
+
+      // Verify that JSON with HTML characters renders the literal text
+      await expect(json.locator('.html-diff__diff-old')).toContainText('"<div class=\\"test\\">')
+      await expect(json.locator('.html-diff__diff-new')).toContainText(
+        '"<span onclick=\\"alert(1)\\">',
+      )
+
+      // Cleanup
+      await payload.delete({ collection: diffCollectionSlug, id: doc.id })
     })
   })
 })

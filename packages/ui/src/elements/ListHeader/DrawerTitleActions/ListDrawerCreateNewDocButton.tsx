@@ -2,7 +2,6 @@
 
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { useListDrawerContext } from '../../ListDrawer/Provider.js'
-import { Pill } from '../../Pill/index.js'
 
 const baseClass = 'list-header'
 
@@ -22,10 +21,11 @@ export function ListDrawerCreateNewDocButton({
 
   return (
     <DocumentDrawerToggler
+      buttonStyle="primary"
       className={`${baseClass}__create-new-button`}
       key="create-new-button-toggler"
     >
-      <Pill size="small">{t('general:createNew')}</Pill>
+      {t('general:createNew')}
     </DocumentDrawerToggler>
   )
 }

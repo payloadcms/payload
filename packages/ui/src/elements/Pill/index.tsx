@@ -1,9 +1,7 @@
 'use client'
-import type { ElementType, HTMLAttributes } from 'react'
+import type { HTMLAttributes } from 'react'
 
-import React from 'react' // TODO: abstract this out to support all routers
-
-import { Link } from '../Link/index.js'
+import React from 'react'
 
 export type PillStyle =
   | 'always-white'
@@ -29,26 +27,16 @@ export type PillProps = {
   } & HTMLAttributes<HTMLElement>
   icon?: React.ReactNode
   id?: string
-  onClick?: () => void
   /**
    * @default 'light'
    */
   pillStyle?: PillStyle
   rounded?: boolean
   size?: 'medium' | 'small'
-  to?: string
-}
-
-export type RenderedTypeProps = {
-  children: React.ReactNode
-  className?: string
-  onClick?: () => void
-  to: string
-  type?: 'button'
 }
 
 import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'pill'
 
@@ -88,11 +76,9 @@ const StaticPill: React.FC<PillProps> = (props) => {
     draggable,
     elementProps,
     icon,
-    onClick,
     pillStyle = 'light',
     rounded,
     size = 'medium',
-    to,
   } = props
 
   const classes = [
@@ -100,8 +86,6 @@ const StaticPill: React.FC<PillProps> = (props) => {
     `${baseClass}--style-${pillStyle}`,
     `${baseClass}--size-${size}`,
     className && className,
-    to && `${baseClass}--has-link`,
-    (to || onClick) && `${baseClass}--has-action`,
     icon && `${baseClass}--has-icon`,
     icon && `${baseClass}--align-icon-${alignIcon}`,
     draggable && `${baseClass}--draggable`,
@@ -110,32 +94,19 @@ const StaticPill: React.FC<PillProps> = (props) => {
     .filter(Boolean)
     .join(' ')
 
-  let Element: ElementType | React.FC<RenderedTypeProps> = 'div'
-
-  if (onClick && !to) {
-    Element = 'button'
-  }
-
-  if (to) {
-    Element = Link
-  }
-
   return (
-    <Element
+    <div
       {...elementProps}
       aria-checked={ariaChecked}
       aria-controls={ariaControls}
       aria-expanded={ariaExpanded}
       aria-label={ariaLabel}
       className={classes}
-      href={to || null}
       id={id}
-      onClick={onClick}
-      type={Element === 'button' ? 'button' : undefined}
     >
       <span className={`${baseClass}__label`}>{children}</span>
       {Boolean(icon) && <span className={`${baseClass}__icon`}>{icon}</span>}
-    </Element>
+    </div>
   )
 }
 

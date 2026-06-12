@@ -48,6 +48,10 @@ const ArrayFields: CollectionConfig = {
           localized: true,
         },
         {
+          name: 'richTextField',
+          type: 'richText',
+        },
+        {
           name: 'subArray',
           fields: [
             {
@@ -278,7 +282,7 @@ const ArrayFields: CollectionConfig = {
           name: 'id',
           type: 'text',
           admin: {
-            disableListFilter: true,
+            disabled: { filter: true },
           },
         },
         {
@@ -297,8 +301,7 @@ const ArrayFields: CollectionConfig = {
       },
     },
   ],
-  slug: arrayFieldsSlug,
-  versions: true,
+  slug: arrayFieldsSlug
 }
 
 export default ArrayFields

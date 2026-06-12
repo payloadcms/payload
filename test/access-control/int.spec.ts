@@ -1,4 +1,3 @@
-import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
   CollectionPermission,
   CollectionSlug,
@@ -14,9 +13,10 @@ import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { FullyRestricted, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,
@@ -26,11 +26,14 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   hooksSlug,
+  publicUserEmail,
+  publicUsersSlug,
   relyOnRequestHeadersSlug,
   restrictedVersionsSlug,
   secondArrayText,
   siblingDataSlug,
   slug,
+  unrestrictedSlug,
 } from './shared.js'
 
 let payload: Payload
@@ -270,23 +273,22 @@ describe('Access Control', () => {
         const { id } = await createDoc({ restrictedField: 'restricted' })
 
         await expect(
-          async () =>
-            await payload.find({
-              collection: slug,
-              overrideAccess: false,
-              where: {
-                and: [
-                  {
-                    id: { equals: id },
+          payload.find({
+            collection: slug,
+            overrideAccess: false,
+            where: {
+              and: [
+                {
+                  id: { equals: id },
+                },
+                {
+                  restrictedField: {
+                    equals: 'restricted',
                   },
-                  {
-                    restrictedField: {
-                      equals: 'restricted',
-                    },
-                  },
-                ],
-              },
-            }),
+                },
+              ],
+            },
+          }),
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
@@ -294,16 +296,15 @@ describe('Access Control', () => {
         const post = await createDoc({})
         await createDoc({ post: post.id, name: 'test' }, 'relation-restricted')
         await expect(
-          async () =>
-            await payload.find({
-              collection: 'relation-restricted',
-              overrideAccess: false,
-              where: {
-                'post.restrictedField': {
-                  equals: 'restricted',
-                },
+          payload.find({
+            collection: 'relation-restricted',
+            overrideAccess: false,
+            where: {
+              'post.restrictedField': {
+                equals: 'restricted',
               },
-            }),
+            },
+          }),
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
@@ -863,6 +864,49 @@ describe('Access Control', () => {
         read: { permission: true },
         update: { permission: true },
       } satisfies CollectionPermission)
+    })
+  })
+
+  describe('Default access - admin auth collection scoping', () => {
+    let adminUser: Record<string, unknown>
+    let publicUser: Record<string, unknown>
+
+    beforeAll(async () => {
+      const { docs: adminDocs } = await payload.find({
+        collection: 'users',
+        limit: 1,
+        where: { email: { equals: 'dev@payloadcms.com' } },
+      })
+      adminUser = { ...adminDocs[0], collection: 'users' }
+
+      const { docs: publicDocs } = await payload.find({
+        collection: publicUsersSlug,
+        limit: 1,
+        where: { email: { equals: publicUserEmail } },
+      })
+      publicUser = { ...publicDocs[0], collection: publicUsersSlug }
+    })
+
+    it('should grant default access to a user from the admin auth collection', async () => {
+      const doc = await payload.create({
+        collection: unrestrictedSlug,
+        data: { name: 'created by admin user' },
+        overrideAccess: false,
+        user: adminUser as any,
+      })
+
+      expect(doc.id).toBeDefined()
+    })
+
+    it('should deny default access to a user from a non-admin auth collection', async () => {
+      await expect(
+        payload.create({
+          collection: unrestrictedSlug,
+          data: { name: 'created by public user' },
+          overrideAccess: false,
+          user: publicUser as any,
+        }),
+      ).rejects.toThrow(Forbidden)
     })
   })
 })

@@ -1,0 +1,7 @@
+@layer payload-default {
+  .autosave-cell__items {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+}

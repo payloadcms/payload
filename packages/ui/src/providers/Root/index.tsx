@@ -4,6 +4,7 @@ import type {
   ClientConfig,
   LanguageOptions,
   Locale,
+  RouterAdapterComponent,
   SanitizedPermissions,
   ServerFunctionClient,
   TypedUser,
@@ -27,12 +28,11 @@ import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
+import { HierarchyProvider } from '../Hierarchy/index.js'
 import { LocaleProvider } from '../Locale/index.js'
-import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
 import { RouteTransitionProvider } from '../RouteTransition/index.js'
-import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
@@ -44,13 +44,14 @@ type Props = {
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
   readonly fallbackLang: I18nOptions['fallbackLanguage']
+  readonly highContrastMode: boolean
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
   readonly locale?: Locale['code']
   readonly permissions: SanitizedPermissions
+  readonly RouterAdapter: RouterAdapterComponent
   readonly serverFunction: ServerFunctionClient
-  readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
   readonly translations: I18nClient['translations']
   readonly user: null | TypedUser
@@ -61,13 +62,14 @@ export const RootProvider: React.FC<Props> = ({
   config,
   dateFNSKey,
   fallbackLang,
+  highContrastMode,
   isNavOpen,
   languageCode,
   languageOptions,
   locale,
   permissions,
+  RouterAdapter,
   serverFunction,
-  switchLanguageServerAction,
   theme,
   translations,
   user,
@@ -76,37 +78,36 @@ export const RootProvider: React.FC<Props> = ({
 
   return (
     <ClickOutsideProvider>
-      <ServerFunctionsProvider serverFunction={serverFunction}>
-        <RouteTransitionProvider>
-          <RouteCache
-            cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
-          >
-            <ConfigProvider config={config}>
-              <ClientFunctionProvider>
-                <TranslationProvider
-                  dateFNSKey={dateFNSKey}
-                  fallbackLang={fallbackLang}
-                  language={languageCode}
-                  languageOptions={languageOptions}
-                  switchLanguageServerAction={switchLanguageServerAction}
-                  translations={translations}
-                >
-                  <WindowInfoProvider
-                    breakpoints={{
-                      l: '(max-width: 1440px)',
-                      m: '(max-width: 1024px)',
-                      s: '(max-width: 768px)',
-                      xs: '(max-width: 400px)',
-                    }}
+      <RouterAdapter>
+        <ServerFunctionsProvider serverFunction={serverFunction}>
+          <RouteTransitionProvider>
+            <RouteCache
+              cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
+            >
+              <ConfigProvider config={config}>
+                <ClientFunctionProvider>
+                  <TranslationProvider
+                    dateFNSKey={dateFNSKey}
+                    fallbackLang={fallbackLang}
+                    language={languageCode}
+                    languageOptions={languageOptions}
+                    translations={translations}
                   >
-                    <ScrollInfoProvider>
-                      <SearchParamsProvider>
+                    <WindowInfoProvider
+                      breakpoints={{
+                        l: '(max-width: 1440px)',
+                        m: '(max-width: 1024px)',
+                        s: '(max-width: 768px)',
+                        xs: '(max-width: 400px)',
+                      }}
+                    >
+                      <ScrollInfoProvider>
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
                           <CloseModalOnRouteChange />
                           <AuthProvider permissions={permissions} user={user}>
                             <PreferencesProvider>
-                              <ThemeProvider theme={theme}>
-                                <ParamsProvider>
+                              <HierarchyProvider>
+                                <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
                                   <LocaleProvider locale={locale}>
                                     <StepNavProvider>
                                       <LoadingOverlayProvider>
@@ -126,22 +127,22 @@ export const RootProvider: React.FC<Props> = ({
                                       </LoadingOverlayProvider>
                                     </StepNavProvider>
                                   </LocaleProvider>
-                                </ParamsProvider>
-                              </ThemeProvider>
+                                </ThemeProvider>
+                              </HierarchyProvider>
                             </PreferencesProvider>
                             <ModalContainer />
                             <StayLoggedInModal />
                           </AuthProvider>
                         </ModalProvider>
-                      </SearchParamsProvider>
-                    </ScrollInfoProvider>
-                  </WindowInfoProvider>
-                </TranslationProvider>
-              </ClientFunctionProvider>
-            </ConfigProvider>
-          </RouteCache>
-        </RouteTransitionProvider>
-      </ServerFunctionsProvider>
+                      </ScrollInfoProvider>
+                    </WindowInfoProvider>
+                  </TranslationProvider>
+                </ClientFunctionProvider>
+              </ConfigProvider>
+            </RouteCache>
+          </RouteTransitionProvider>
+        </ServerFunctionsProvider>
+      </RouterAdapter>
       <ToastContainer config={config} />
     </ClickOutsideProvider>
   )

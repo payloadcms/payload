@@ -2,17 +2,25 @@ import type { Payload } from 'payload'
 import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
+import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import fs from 'fs'
 import path from 'path'
+import { APIError } from 'payload'
+import { sanitizeFilename } from 'payload/shared'
 import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Config } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   mediaSlug,
+  mediaWithCustomURLSlug,
+  mediaWithGenerateFileURLSlug,
+  mediaWithOverwriteSlug,
   mediaWithPrefixSlug,
+  mediaWithThrowingHookSlug,
   prefix,
   restrictedMediaSlug,
   testMetadataSlug,
@@ -22,7 +30,57 @@ import { clearTestBucket, createTestBucket } from './utils.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let payload: Payload
+async function verifyUploads({
+  client,
+  collectionSlug,
+  payload,
+  prefix = '',
+  TEST_BUCKET,
+  uploadId,
+}: {
+  client: AWS.S3Client
+  collectionSlug: keyof Config['collections']
+  payload: Payload
+  prefix?: string
+  TEST_BUCKET: string
+  uploadId: number | string
+}) {
+  const uploadData = (await payload.findByID({
+    id: uploadId,
+    collection: collectionSlug,
+  })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
+
+  const sizes = uploadData.sizes ?? {}
+  const fileKeys = Object.keys(sizes).map((key) => {
+    const entry = sizes[key]
+    if (!entry) {
+      throw new Error(`Missing sizes entry for key: ${key}`)
+    }
+
+    const rawFilename = entry.filename
+    return prefix ? `${prefix}/${rawFilename}` : rawFilename
+  })
+
+  fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
+  try {
+    for (const key of fileKeys) {
+      const { $metadata } = await client.send(
+        new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
+      )
+
+      if ($metadata.httpStatusCode !== 200) {
+        console.error('Error verifying uploads', key, $metadata)
+        throw new Error(`Error verifying uploads: ${key}, ${$metadata.httpStatusCode}`)
+      }
+
+      // Verify each size was properly uploaded
+      expect($metadata.httpStatusCode).toBe(200)
+    }
+  } catch (error: unknown) {
+    console.error('Error verifying uploads:', fileKeys, error)
+    throw error
+  }
+}
 
 // needs to be here as it imports vitest functions and conflicts with playwright that uses jest
 export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
@@ -44,341 +102,703 @@ export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
 }
 
 describe('@payloadcms/plugin-cloud-storage', () => {
-  let TEST_BUCKET: string
+  describe('getFilePrefix', () => {
+    const mockReq = {
+      payload: {
+        find: () => ({ docs: [] }),
+      },
+    } as any
 
-  beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
-    TEST_BUCKET = process.env.S3_BUCKET
-  })
+    const mockCollection = {
+      slug: 'media',
+      upload: {},
+    } as any
 
-  afterAll(async () => {
-    await payload.destroy()
-  })
+    describe('clientUploadContext prefix sanitization', () => {
+      it('should return a valid prefix unchanged', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: 'media/images' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('media/images')
+      })
 
-  let client: AWS.S3Client
-  describeIfInCIOrHasLocalstack()('plugin-cloud-storage', () => {
-    describe('S3', () => {
-      beforeAll(async () => {
-        client = new AWS.S3({
-          endpoint: process.env.S3_ENDPOINT,
-          forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-          region: process.env.S3_REGION,
-          credentials: {
-            accessKeyId: process.env.S3_ACCESS_KEY_ID,
-            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+      it('should strip invalid segments from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '../other-collection/private' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('other-collection/private')
+        expect(result).not.toContain('..')
+      })
+
+      it('should handle deeply nested invalid segments', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: 'a/../../outside' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('a/outside')
+        expect(result).not.toContain('..')
+      })
+
+      it('should strip leading slashes from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '/absolute/path' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('absolute/path')
+        expect(result).not.toMatch(/^\//)
+      })
+
+      it('should strip dot segments from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: './relative/./path' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('relative/path')
+      })
+
+      it('should normalize backslash separators', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '..\\..\\outside' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).not.toContain('..')
+      })
+
+      it('should strip control characters from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: 'media\x00/images' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('media/images')
+      })
+
+      it('should return empty string for a prefix of only invalid segments', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '../../..' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('')
+      })
+    })
+
+    describe('fallback to DB lookup', () => {
+      it('should return empty string when no clientUploadContext and no DB match', async () => {
+        const result = await getFilePrefix({
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('')
+      })
+
+      it('should return prefix from DB when doc has a prefix', async () => {
+        const reqWithDoc = {
+          payload: {
+            find: () => ({ docs: [{ prefix: 'db-prefix' }] }),
           },
-        })
+        } as any
 
-        await createTestBucket()
-        await clearTestBucket(client)
+        const result = await getFilePrefix({
+          collection: mockCollection,
+          filename: 'test.png',
+          req: reqWithDoc,
+        })
+        expect(result).toBe('db-prefix')
       })
+    })
+  })
 
-      afterEach(async () => {
-        await clearTestBucket(client)
-      })
+  describe('sanitizeFilename', () => {
+    it('should return a simple filename unchanged', () => {
+      expect(sanitizeFilename('image.png')).toBe('image.png')
+    })
 
-      it('can upload', async () => {
-        const upload = await payload.create({
-          collection: mediaSlug,
-          data: {},
-          filePath: path.resolve(dirname, '../uploads/image.png'),
+    it('should return only the base name from a path', () => {
+      expect(sanitizeFilename('some/path/to/file.jpg')).toBe('file.jpg')
+      expect(sanitizeFilename('a/b/../../c/d/../file.txt')).toBe('file.txt')
+    })
+
+    it('should normalize backslash separators', () => {
+      expect(sanitizeFilename('..\\..\\windows\\system32\\config')).toBe('config')
+    })
+
+    it('should reject standalone dot filenames', () => {
+      expect(() => sanitizeFilename('.')).toThrow(APIError)
+      expect(() => sanitizeFilename('..')).toThrow(APIError)
+    })
+
+    it('should reject empty filenames', () => {
+      expect(() => sanitizeFilename('')).toThrow(APIError)
+      expect(() => sanitizeFilename('/')).toThrow(APIError)
+      expect(() => sanitizeFilename('//')).toThrow(APIError)
+    })
+
+    it('should strip control characters', () => {
+      expect(sanitizeFilename('file\x00name\x1f.txt')).toBe('filename.txt')
+      expect(sanitizeFilename('file\x80name\x9f.txt')).toBe('filename.txt')
+    })
+
+    it('should preserve unicode filenames', () => {
+      expect(sanitizeFilename('résumé.pdf')).toBe('résumé.pdf')
+      expect(sanitizeFilename('日本語.txt')).toBe('日本語.txt')
+    })
+
+    it('should treat percent-encoded strings as literal filenames', () => {
+      expect(sanitizeFilename('%2e%2e%2f')).toBe('%2e%2e%2f')
+    })
+  })
+
+  describe('integration (non-composite prefixes)', () => {
+    let payload: Payload
+    let TEST_BUCKET: string
+
+    beforeAll(async () => {
+      ;({ payload } = await initPayloadInt(dirname, undefined, true, 'config.ts'))
+      TEST_BUCKET = process.env.S3_BUCKET!
+    })
+
+    afterAll(async () => {
+      await payload.destroy()
+    })
+
+    let client: AWS.S3Client
+    describeIfInCIOrHasLocalstack()('plugin-cloud-storage (non-composite prefixes)', () => {
+      describe('S3', () => {
+        beforeAll(async () => {
+          client = new AWS.S3({
+            credentials: {
+              accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+              secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+            },
+            endpoint: process.env.S3_ENDPOINT!,
+            forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+            region: process.env.S3_REGION!,
+          })
+
+          await createTestBucket()
+          await clearTestBucket(client)
         })
 
-        expect(upload.id).toBeTruthy()
-
-        await verifyUploads({
-          collectionSlug: mediaSlug,
-          uploadId: upload.id,
+        afterEach(async () => {
+          await clearTestBucket(client)
         })
 
-        expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
-      })
+        it('can upload', async () => {
+          const upload = await payload.create({
+            collection: mediaSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
 
-      it('can upload with prefix', async () => {
-        const upload = await payload.create({
-          collection: mediaWithPrefixSlug,
-          data: {},
-          filePath: path.resolve(dirname, '../uploads/image.png'),
+          expect(upload.id).toBeTruthy()
+
+          await verifyUploads({
+            client,
+            collectionSlug: mediaSlug,
+            payload,
+            TEST_BUCKET,
+            uploadId: upload.id,
+          })
+
+          expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
         })
 
-        expect(upload.id).toBeTruthy()
+        it('can upload with prefix', async () => {
+          const upload = await payload.create({
+            collection: mediaWithPrefixSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
 
-        await verifyUploads({
-          collectionSlug: mediaWithPrefixSlug,
-          uploadId: upload.id,
-          prefix,
+          expect(upload.id).toBeTruthy()
+
+          await verifyUploads({
+            client,
+            collectionSlug: mediaWithPrefixSlug,
+            payload,
+            prefix,
+            TEST_BUCKET,
+            uploadId: upload.id,
+          })
+          expect(upload.url).toEqual(
+            `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
+          )
         })
-        expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
-      })
 
-      it('should not upload to S3 when mimeType validation fails', async () => {
-        // Get initial bucket contents
-        const listBefore = await client.send(new AWS.ListObjectsV2Command({ Bucket: TEST_BUCKET }))
-        const fileCountBefore = listBefore.Contents?.length || 0
+        it('should not upload to S3 when mimeType validation fails', async () => {
+          // Get initial bucket contents
+          const listBefore = await client.send(
+            new AWS.ListObjectsV2Command({ Bucket: TEST_BUCKET }),
+          )
+          const fileCountBefore = listBefore.Contents?.length || 0
 
-        // Try to upload a JSON file to a collection that only accepts PNG
-        await expect(
-          payload.create({
+          // Try to upload a JSON file to a collection that only accepts PNG
+          await expect(
+            payload.create({
+              collection: restrictedMediaSlug,
+              data: {},
+              filePath: path.resolve(dirname, './test.json'),
+            }),
+          ).rejects.toThrow()
+
+          // Verify no new files were uploaded to S3
+          const listAfter = await client.send(new AWS.ListObjectsV2Command({ Bucket: TEST_BUCKET }))
+          const fileCountAfter = listAfter.Contents?.length || 0
+
+          expect(fileCountAfter).toBe(fileCountBefore)
+        })
+
+        it('should upload to S3 when mimeType validation passes', async () => {
+          // Upload a valid PNG file
+          const upload = await payload.create({
             collection: restrictedMediaSlug,
             data: {},
-            filePath: path.resolve(dirname, './test.json'),
-          }),
-        ).rejects.toThrow()
+            filePath: path.resolve(dirname, './image.png'),
+          })
 
-        // Verify no new files were uploaded to S3
-        const listAfter = await client.send(new AWS.ListObjectsV2Command({ Bucket: TEST_BUCKET }))
-        const fileCountAfter = listAfter.Contents?.length || 0
+          expect(upload.id).toBeTruthy()
 
-        expect(fileCountAfter).toBe(fileCountBefore)
+          const filename = upload.filename
+          if (filename == null || filename === '') {
+            throw new Error('expected filename after upload')
+          }
+
+          // Verify the file was uploaded to S3
+          const { $metadata } = await client.send(
+            new AWS.HeadObjectCommand({
+              Bucket: TEST_BUCKET,
+              Key: filename,
+            }),
+          )
+
+          expect($metadata.httpStatusCode).toBe(200)
+        })
+
+        it('should store correct URLs for sized images', async () => {
+          const upload = await payload.create({
+            collection: mediaSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+
+          const apiResponse = await payload.findByID({
+            id: upload.id,
+            collection: mediaSlug,
+          })
+          expect(apiResponse.sizes).toBeTruthy()
+
+          const apiSizeKeys = Object.keys(apiResponse.sizes || {})
+          for (const sizeKey of apiSizeKeys) {
+            const size = apiResponse.sizes?.[sizeKey as keyof typeof apiResponse.sizes]
+            if (!size) {
+              continue
+            }
+
+            expect(size.url).toEqual(`/api/${mediaSlug}/file/${size.filename}`)
+          }
+
+          const rawDbData = await payload.db.findOne({
+            collection: mediaSlug,
+            where: { id: { equals: upload.id } },
+          })
+          expect(rawDbData).toBeTruthy()
+
+          const dbRecord = rawDbData as unknown as {
+            filename: string
+            sizes: Record<string, { filename: string; url: string }>
+            url: string
+          }
+          type SizeData = { filename: string; url: string }
+
+          const sizeKeys = Object.keys(dbRecord.sizes)
+          expect(sizeKeys.length).toBeGreaterThan(0)
+
+          for (const sizeKey of sizeKeys) {
+            const size: SizeData = dbRecord.sizes[sizeKey] as SizeData
+            expect(size.url).not.toEqual(`/api/${mediaSlug}/file/${dbRecord.filename}`)
+            expect(size.url).toEqual(`/api/${mediaSlug}/file/${size.filename}`)
+          }
+        })
+
+        it('should handle collections without imageSizes correctly', async () => {
+          const upload = await payload.create({
+            collection: mediaWithPrefixSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+
+          expect(upload.filename).toBeTruthy()
+          expect(upload.url).toEqual(
+            `/api/${mediaWithPrefixSlug}/file/${upload.filename}?prefix=${prefix}`,
+          )
+          expect((upload as any).sizes).toBeFalsy()
+
+          const rawDbData = await payload.db.findOne({
+            collection: mediaWithPrefixSlug,
+            where: { id: { equals: upload.id } },
+          })
+
+          expect(rawDbData).toBeTruthy()
+
+          const dbRecord = rawDbData as unknown as {
+            filename: string
+            url: string
+          }
+
+          expect(dbRecord.filename).toEqual(upload.filename)
+          expect(dbRecord.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
+          expect((rawDbData as any)?.sizes).toBeFalsy()
+        })
+
+        it('should use custom generateFileURL in beforeChange when disablePayloadAccessControl is true', async () => {
+          // This test verifies that custom generateFileURL is used in beforeChange hook
+          // when disablePayloadAccessControl: true, preventing "undefined" from appearing in URLs
+          const upload = await payload.create({
+            collection: mediaWithCustomURLSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+
+          expect(upload.id).toBeTruthy()
+          expect(upload.filename).toBeTruthy()
+
+          // Get the raw DB data
+          const rawDbData = await payload.db.findOne({
+            collection: mediaWithCustomURLSlug,
+            where: { id: { equals: upload.id } },
+          })
+
+          const dbRecord = rawDbData as unknown as {
+            filename: string
+            prefix: string
+            url: string
+          }
+
+          // The custom generateFileURL should be used, resulting in test-cdn.example.com URL
+          expect(dbRecord.url).toContain('test-cdn.example.com')
+          expect(dbRecord.url).toContain(prefix)
+          expect(dbRecord.url).toContain(encodeURIComponent(dbRecord.filename))
+          expect(dbRecord.url).toMatch(/^https:\/\//)
+
+          // Verify the API response also returns the custom URL
+          const apiResponse = await payload.findByID({
+            id: upload.id,
+            collection: mediaWithCustomURLSlug,
+          })
+
+          expect(apiResponse.url).toContain('test-cdn.example.com')
+          expect(apiResponse.url).toContain(prefix)
+        })
+
+        it('should use custom generateFileURL even without disablePayloadAccessControl', async () => {
+          const upload = await payload.create({
+            collection: mediaWithGenerateFileURLSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+
+          expect(upload.id).toBeTruthy()
+          expect(upload.filename).toBeTruthy()
+
+          const rawDbData = await payload.db.findOne({
+            collection: mediaWithGenerateFileURLSlug,
+            where: { id: { equals: upload.id } },
+          })
+
+          const dbRecord = rawDbData as unknown as {
+            filename: string
+            prefix: string
+            url: string
+          }
+
+          // The URL should be the CDN URL, not a relative path
+          expect(dbRecord.url).toContain('cdn-proxied.example.com')
+          expect(dbRecord.url).toContain(prefix)
+          expect(dbRecord.url).toContain(encodeURIComponent(dbRecord.filename))
+          expect(dbRecord.url).toMatch(/^https:\/\//)
+
+          const apiResponse = await payload.findByID({
+            id: upload.id,
+            collection: mediaWithGenerateFileURLSlug,
+          })
+
+          expect(apiResponse.url).toContain('cdn-proxied.example.com')
+          expect(apiResponse.url).toContain(prefix)
+        })
+      })
+    })
+
+    describe('External data persistence', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          try {
+            await payload.delete({ id, collection: testMetadataSlug })
+          } catch (e) {
+            // Ignore
+          }
+        }
+        createdIDs.length = 0
       })
 
-      it('should upload to S3 when mimeType validation passes', async () => {
-        // Upload a valid PNG file
+      it('should automatically persist metadata returned by custom adapters', async () => {
         const upload = await payload.create({
-          collection: restrictedMediaSlug,
-          data: {},
+          collection: testMetadataSlug,
+          data: {
+            testNote: 'Testing automatic metadata persistence',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(upload.id)
+
+        expect(upload.id).toBeTruthy()
+        expect(upload.filename).toBeTruthy()
+        expect(upload.testNote).toBe('Testing automatic metadata persistence')
+
+        // Our afterChange hook should automatically persist whatever metadata the adapter returns
+        expect(upload.customStorageId).toBeTruthy()
+        expect(upload.customStorageId).toContain('storage-')
+        expect(upload.uploadTimestamp).toBeTruthy()
+        expect(upload.storageProvider).toBe('test-adapter')
+        expect(upload.bucketName).toBe('test-bucket')
+        expect(upload.objectKey).toBe(upload.filename)
+        expect(upload.processingStatus).toBe('completed')
+        expect(upload.uploadVersion).toBe('1.0.0')
+
+        console.log('Test adapter metadata automatically persisted:', {
+          bucketName: upload.bucketName,
+          customStorageId: upload.customStorageId,
+          objectKey: upload.objectKey,
+          processingStatus: upload.processingStatus,
+          storageProvider: upload.storageProvider,
+          uploadTimestamp: upload.uploadTimestamp,
+          uploadVersion: upload.uploadVersion,
+        })
+      })
+
+      it('should persist metadata on update operations', async () => {
+        const upload = await payload.create({
+          collection: testMetadataSlug,
+          data: {
+            testNote: 'Testing update metadata persistence',
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        createdIDs.push(upload.id)
+
+        const initialStorageId = upload.customStorageId
+        const initialTimestamp = upload.uploadTimestamp
+
+        const updatedUpload = await payload.update({
+          id: upload.id,
+          collection: testMetadataSlug,
+          data: {
+            testNote: 'Updated test note',
+          },
           filePath: path.resolve(dirname, './image.png'),
         })
 
-        expect(upload.id).toBeTruthy()
+        expect(updatedUpload.testNote).toBe('Updated test note')
 
-        // Verify the file was uploaded to S3
-        const { $metadata } = await client.send(
-          new AWS.HeadObjectCommand({
-            Bucket: TEST_BUCKET,
-            Key: upload.filename,
-          }),
-        )
+        // Test that metadata persistence works on updates too
+        expect(updatedUpload.customStorageId).toBeTruthy()
+        expect(updatedUpload.uploadTimestamp).toBeTruthy()
+        expect(updatedUpload.storageProvider).toBe('test-adapter')
+        expect(updatedUpload.bucketName).toBe('test-bucket')
+        expect(updatedUpload.objectKey).toBe(updatedUpload.filename)
+        expect(updatedUpload.processingStatus).toBe('completed')
+        expect(updatedUpload.uploadVersion).toBe('1.0.0')
 
-        expect($metadata.httpStatusCode).toBe(200)
+        const filenamesAreDifferent = upload.filename !== updatedUpload.filename
+        const storageIdsAreDifferent = updatedUpload.customStorageId !== initialStorageId
+        const timestampsAreDifferent = updatedUpload.uploadTimestamp !== initialTimestamp
+
+        // If filename changed, storage ID and timestamp should also change (new upload)
+        expect(filenamesAreDifferent).toBe(storageIdsAreDifferent)
+        expect(filenamesAreDifferent).toBe(timestampsAreDifferent)
+
+        console.log('Update test adapter metadata persistence:', {
+          filenameChanged: filenamesAreDifferent,
+          newStorageId: updatedUpload.customStorageId,
+          storageIdChanged: storageIdsAreDifferent,
+          timestampChanged: timestampsAreDifferent,
+        })
       })
+    })
 
-      it('should store correct URLs for sized images', async () => {
-        const upload = await payload.create({
-          collection: mediaSlug,
-          data: {},
-          filePath: path.resolve(dirname, '../uploads/image.png'),
-        })
+    describe('User afterChange hook propagation', () => {
+      const createdIDs: (number | string)[] = []
 
-        const apiResponse = await payload.findByID({
-          collection: mediaSlug,
-          id: upload.id,
-        })
-        expect(apiResponse.sizes).toBeTruthy()
-
-        const apiSizeKeys = Object.keys(apiResponse.sizes || {})
-        for (const sizeKey of apiSizeKeys) {
-          const size = apiResponse.sizes?.[sizeKey as keyof typeof apiResponse.sizes]
-          if (!size) {
-            continue
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          try {
+            await payload.delete({ id, collection: mediaWithThrowingHookSlug })
+          } catch (_) {
+            // Ignore
           }
-
-          expect(size.url).toEqual(`/api/${mediaSlug}/file/${size.filename}`)
         }
-
-        const rawDbData = await payload.db.findOne({
-          collection: mediaSlug,
-          where: { id: { equals: upload.id } },
-        })
-        expect(rawDbData).toBeTruthy()
-
-        const dbRecord = rawDbData as unknown as {
-          filename: string
-          sizes: Record<string, { filename: string; url: string }>
-          url: string
-        }
-        type SizeData = { filename: string; url: string }
-
-        const sizeKeys = Object.keys(dbRecord.sizes)
-        expect(sizeKeys.length).toBeGreaterThan(0)
-
-        for (const sizeKey of sizeKeys) {
-          const size: SizeData = dbRecord.sizes[sizeKey] as SizeData
-          expect(size.url).not.toEqual(`/api/${mediaSlug}/file/${dbRecord.filename}`)
-          expect(size.url).toEqual(`/api/${mediaSlug}/file/${size.filename}`)
-        }
+        createdIDs.length = 0
       })
 
-      it('should handle collections without imageSizes correctly', async () => {
-        const upload = await payload.create({
-          collection: mediaWithPrefixSlug,
-          data: {},
-          filePath: path.resolve(dirname, '../uploads/image.png'),
+      it('should surface user afterChange errors that throw during the plugin internal update on create', async () => {
+        await expect(
+          payload.create({
+            collection: mediaWithThrowingHookSlug,
+            data: { shouldThrow: true },
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          }),
+        ).rejects.toThrow('User afterChange hook throws error')
+      })
+
+      it('should surface user afterChange errors during reupload and preserve the previous file in S3', async () => {
+        const imagePath = path.resolve(dirname, '../uploads/image.png')
+        const buildFile = (name: string) => ({
+          data: fs.readFileSync(imagePath),
+          mimetype: 'image/png',
+          name,
+          size: fs.statSync(imagePath).size,
         })
 
-        expect(upload.filename).toBeTruthy()
-        expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
-        expect((upload as any).sizes).toBeFalsy()
-
-        const rawDbData = await payload.db.findOne({
-          collection: mediaWithPrefixSlug,
-          where: { id: { equals: upload.id } },
+        const initial = await payload.create({
+          collection: mediaWithThrowingHookSlug,
+          data: { shouldThrow: false },
+          file: buildFile('initial.png'),
         })
 
-        expect(rawDbData).toBeTruthy()
+        createdIDs.push(initial.id)
 
-        const dbRecord = rawDbData as unknown as {
-          filename: string
-          url: string
-        }
-
-        expect(dbRecord.filename).toEqual(upload.filename)
-        expect(dbRecord.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
-        expect((rawDbData as any)?.sizes).toBeFalsy()
-      })
-    })
-  })
-
-  describe('External data persistence', () => {
-    const createdIDs: (number | string)[] = []
-
-    afterEach(async () => {
-      for (const id of createdIDs) {
-        try {
-          await payload.delete({ collection: testMetadataSlug, id })
-        } catch (e) {
-          // Ignore
-        }
-      }
-      createdIDs.length = 0
-    })
-
-    it('should automatically persist metadata returned by custom adapters', async () => {
-      const upload = await payload.create({
-        collection: testMetadataSlug,
-        data: {
-          testNote: 'Testing automatic metadata persistence',
-        },
-        filePath: path.resolve(dirname, '../uploads/image.png'),
-      })
-
-      createdIDs.push(upload.id)
-
-      expect(upload.id).toBeTruthy()
-      expect(upload.filename).toBeTruthy()
-      expect(upload.testNote).toBe('Testing automatic metadata persistence')
-
-      // Our afterChange hook should automatically persist whatever metadata the adapter returns
-      expect(upload.customStorageId).toBeTruthy()
-      expect(upload.customStorageId).toContain('storage-')
-      expect(upload.uploadTimestamp).toBeTruthy()
-      expect(upload.storageProvider).toBe('test-adapter')
-      expect(upload.bucketName).toBe('test-bucket')
-      expect(upload.objectKey).toBe(upload.filename)
-      expect(upload.processingStatus).toBe('completed')
-      expect(upload.uploadVersion).toBe('1.0.0')
-
-      console.log('Test adapter metadata automatically persisted:', {
-        customStorageId: upload.customStorageId,
-        uploadTimestamp: upload.uploadTimestamp,
-        storageProvider: upload.storageProvider,
-        bucketName: upload.bucketName,
-        objectKey: upload.objectKey,
-        processingStatus: upload.processingStatus,
-        uploadVersion: upload.uploadVersion,
-      })
-    })
-
-    it('should persist metadata on update operations', async () => {
-      const upload = await payload.create({
-        collection: testMetadataSlug,
-        data: {
-          testNote: 'Testing update metadata persistence',
-        },
-        filePath: path.resolve(dirname, '../uploads/image.png'),
-      })
-
-      createdIDs.push(upload.id)
-
-      const initialStorageId = upload.customStorageId
-      const initialTimestamp = upload.uploadTimestamp
-
-      const updatedUpload = await payload.update({
-        collection: testMetadataSlug,
-        id: upload.id,
-        data: {
-          testNote: 'Updated test note',
-        },
-        filePath: path.resolve(dirname, './image.png'),
-      })
-
-      expect(updatedUpload.testNote).toBe('Updated test note')
-
-      // Test that metadata persistence works on updates too
-      expect(updatedUpload.customStorageId).toBeTruthy()
-      expect(updatedUpload.uploadTimestamp).toBeTruthy()
-      expect(updatedUpload.storageProvider).toBe('test-adapter')
-      expect(updatedUpload.bucketName).toBe('test-bucket')
-      expect(updatedUpload.objectKey).toBe(updatedUpload.filename)
-      expect(updatedUpload.processingStatus).toBe('completed')
-      expect(updatedUpload.uploadVersion).toBe('1.0.0')
-
-      const filenamesAreDifferent = upload.filename !== updatedUpload.filename
-      const storageIdsAreDifferent = updatedUpload.customStorageId !== initialStorageId
-      const timestampsAreDifferent = updatedUpload.uploadTimestamp !== initialTimestamp
-
-      // If filename changed, storage ID and timestamp should also change (new upload)
-      expect(filenamesAreDifferent).toBe(storageIdsAreDifferent)
-      expect(filenamesAreDifferent).toBe(timestampsAreDifferent)
-
-      console.log('Update test adapter metadata persistence:', {
-        filenameChanged: filenamesAreDifferent,
-        storageIdChanged: storageIdsAreDifferent,
-        timestampChanged: timestampsAreDifferent,
-        newStorageId: updatedUpload.customStorageId,
-      })
-    })
-  })
-
-  describe('Azure', () => {
-    it.todo('can upload')
-  })
-
-  describe('GCS', () => {
-    it.todo('can upload')
-  })
-
-  describe('R2', () => {
-    it.todo('can upload')
-  })
-
-  async function verifyUploads({
-    collectionSlug,
-    uploadId,
-    prefix = '',
-  }: {
-    collectionSlug: keyof Config['collections']
-    prefix?: string
-    uploadId: number | string
-  }) {
-    const uploadData = (await payload.findByID({
-      collection: collectionSlug,
-      id: uploadId,
-    })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
-
-    const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
-      const rawFilename = uploadData.sizes[key].filename
-      return prefix ? `${prefix}/${rawFilename}` : rawFilename
-    })
-
-    fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
-    try {
-      for (const key of fileKeys) {
-        const { $metadata } = await client.send(
-          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
+        const initialKey = `${initial.filename}`
+        const before = await client.send(
+          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
         )
+        expect(before.$metadata.httpStatusCode).toBe(200)
 
-        if ($metadata.httpStatusCode !== 200) {
-          console.error('Error verifying uploads', key, $metadata)
-          throw new Error(`Error verifying uploads: ${key}, ${$metadata.httpStatusCode}`)
+        await expect(
+          payload.update({
+            id: initial.id,
+            collection: mediaWithThrowingHookSlug,
+            data: { shouldThrow: true },
+            file: buildFile('replacement.png'),
+          }),
+        ).rejects.toThrow('User afterChange hook throws error')
+
+        const after = await client.send(
+          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: initialKey }),
+        )
+        expect(after.$metadata.httpStatusCode).toBe(200)
+      })
+    })
+
+    describe('Reupload with overwriteExistingFiles', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          try {
+            await payload.delete({ id, collection: mediaWithOverwriteSlug })
+          } catch (_) {
+            // Ignore
+          }
+        }
+        createdIDs.length = 0
+      })
+
+      it('should preserve size variants in S3 when reupload reuses the same filename', async () => {
+        const imagePath = path.resolve(dirname, '../uploads/image.png')
+        const buildFile = (name: string) => ({
+          data: fs.readFileSync(imagePath),
+          mimetype: 'image/png',
+          name,
+          size: fs.statSync(imagePath).size,
+        })
+
+        const initial = (await payload.create({
+          collection: mediaWithOverwriteSlug,
+          data: {},
+          file: buildFile('overwrite.png'),
+          overwriteExistingFiles: true,
+        })) as unknown as {
+          filename: string
+          id: number | string
+          sizes: Record<string, { filename: string }>
         }
 
-        // Verify each size was properly uploaded
-        expect($metadata.httpStatusCode).toBe(200)
-      }
-    } catch (error: unknown) {
-      console.error('Error verifying uploads:', fileKeys, error)
-      throw error
-    }
-  }
+        createdIDs.push(initial.id)
+
+        const initialSizeKeys = Object.values(initial.sizes ?? {})
+          .map((s) => s?.filename)
+          .filter((f): f is string => typeof f === 'string')
+
+        expect(initialSizeKeys.length).toBeGreaterThan(0)
+
+        for (const key of [initial.filename, ...initialSizeKeys]) {
+          const head = await client.send(
+            new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
+          )
+          expect(head.$metadata.httpStatusCode).toBe(200)
+        }
+
+        const updated = (await payload.update({
+          id: initial.id,
+          collection: mediaWithOverwriteSlug,
+          data: {},
+          file: buildFile('overwrite.png'),
+          overwriteExistingFiles: true,
+        })) as unknown as {
+          filename: string
+          sizes: Record<string, { filename: string }>
+        }
+
+        // Filenames should match because overwriteExistingFiles is enabled.
+        expect(updated.filename).toBe(initial.filename)
+
+        const updatedSizeKeys = Object.values(updated.sizes ?? {})
+          .map((s) => s?.filename)
+          .filter((f): f is string => typeof f === 'string')
+
+        expect(updatedSizeKeys.sort()).toEqual(initialSizeKeys.sort())
+
+        // All keys (main + every size variant) should still exist in S3.
+        for (const key of [updated.filename, ...updatedSizeKeys]) {
+          const head = await client.send(
+            new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: key }),
+          )
+          expect(head.$metadata.httpStatusCode).toBe(200)
+        }
+      })
+    })
+
+    describe('Azure', () => {
+      it.todo('can upload')
+    })
+
+    describe('GCS', () => {
+      it.todo('can upload')
+    })
+
+    describe('R2', () => {
+      it.todo('can upload')
+    })
+  })
 })

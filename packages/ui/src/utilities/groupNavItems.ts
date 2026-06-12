@@ -1,5 +1,6 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
+  EntityType,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
@@ -8,13 +9,7 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 
-/**
- * @deprecated Import from `payload` instead
- */
-export enum EntityType {
-  collection = 'collections',
-  global = 'globals',
-}
+import { isNavEntityVisible } from './isNavEntityVisible.js'
 
 export type EntityToGroup =
   | {
@@ -42,14 +37,13 @@ export function groupNavItems(
 ): NavGroupType[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {
-      // Skip entities where admin.group is explicitly false
-      if (entityToGroup.entity?.admin?.group === false) {
-        return groups
-      }
-
-      if (permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read) {
-        const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
-
+      if (
+        isNavEntityVisible({
+          adminGroup: entityToGroup.entity?.admin?.group,
+          entityPermissions:
+            permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug],
+        })
+      ) {
         const labelOrFunction =
           'labels' in entityToGroup.entity
             ? entityToGroup.entity.labels.plural
@@ -61,6 +55,8 @@ export function groupNavItems(
             : labelOrFunction
 
         if (entityToGroup.entity.admin.group) {
+          const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
+
           const existingGroup = groups.find(
             (group) => getTranslation(group.label, i18n) === translatedGroup,
           ) as NavGroupType

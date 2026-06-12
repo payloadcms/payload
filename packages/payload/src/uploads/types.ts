@@ -10,19 +10,9 @@ export type FileSize = {
   filesize: null | number
   height: null | number
   mimeType: null | string
-  url?: null | string // TODO V4: make non-optional
+  url: null | string
   width: null | number
 }
-
-// TODO: deprecate in Payload v4.
-/**
- * FileSizeImproved is a more precise type, and will replace FileSize in Payload v4.
- * This type is for internal use only as it will be deprecated in the future.
- * @internal
- */
-export type FileSizeImproved = {
-  url: null | string
-} & FileSize
 
 export type FileSizes = {
   [size: string]: FileSize
@@ -72,30 +62,21 @@ export type GenerateImageName = (args: {
 export type ImageSize = {
   /**
    * Admin UI options that control how this image size appears in list views.
-   *
-   * NOTE: In Payload v4, these options (`disableGroupBy`, `disableListColumn` and `disableListFilter`)
-   * should default to `true` so image size subfields are hidden from list columns
-   * and filters by default, reducing noise in the admin UI.
    */
   admin?: {
     /**
-     * If set to true, this image size will not be available
-     * as a selectable groupBy option in the collection list view.
-     * @default false
+     * Controls visibility of this image size in the collection list view.
+     * Defaults to hiding the image size from columns, filters, and group-by to reduce noise.
+     *
+     * - `column` — whether to hide this size from selectable list columns. @default false
+     * - `filter` — whether to hide this size from filter options. @default false
+     * - `groupBy` — whether to hide this size from group-by options. @default false
      */
-    disableGroupBy?: boolean
-    /**
-     * If set to true, this image size will not be available
-     * as a selectable column in the collection list view.
-     * @default false
-     */
-    disableListColumn?: boolean
-    /**
-     * If set to true, this image size will not be available
-     * as a filter option in the collection list view.
-     * @default false
-     */
-    disableListFilter?: boolean
+    disabled?: {
+      column?: boolean
+      filter?: boolean
+      groupBy?: boolean
+    }
   }
   /**
    * @deprecated prefer position
@@ -223,7 +204,7 @@ export type UploadConfig = {
   filesRequiredOnCreate?: boolean
   /**
    * Enables focal point positioning for image manipulation.
-   * @default false
+   * @default true
    */
   focalPoint?: boolean
   /**
@@ -245,7 +226,12 @@ export type UploadConfig = {
     args: {
       doc: TypeWithID
       headers?: Headers
-      params: { clientUploadContext?: unknown; collection: string; filename: string }
+      params: {
+        clientUploadContext?: unknown
+        collection: string
+        filename: string
+        prefix?: string
+      }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
   /**
@@ -336,6 +322,10 @@ export type File = {
    * The size of the file in bytes.
    */
   size: number
+  /**
+   * Path to the temp file on disk when useTempFiles is enabled. In this case file.data will be an empty buffer.
+   */
+  tempFilePath?: string
 }
 
 export type FileToSave = {

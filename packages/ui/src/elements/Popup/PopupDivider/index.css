@@ -1,0 +1,8 @@
+@layer payload-default {
+  .popup-divider {
+    height: var(--stroke-width-small);
+    background-color: var(--color-border);
+    border: none;
+    margin-block: var(--spacer-2);
+  }
+}

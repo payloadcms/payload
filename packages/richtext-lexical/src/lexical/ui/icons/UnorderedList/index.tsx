@@ -1,22 +1,22 @@
 'use client'
 import React from 'react'
 
-export const UnorderedListIcon: React.FC = () => (
+const path =
+  'M7 16C7.55228 16 8 16.4477 8 17C8 17.5523 7.55228 18 7 18C6.44772 18 6 17.5523 6 17C6 16.4477 6.44772 16 7 16ZM17.5 16.5C17.7761 16.5 18 16.7239 18 17C18 17.2761 17.7761 17.5 17.5 17.5H10.5C10.2239 17.5 10 17.2761 10 17C10 16.7239 10.2239 16.5 10.5 16.5H17.5ZM7 11C7.55228 11 8 11.4477 8 12C8 12.5523 7.55228 13 7 13C6.44772 13 6 12.5523 6 12C6 11.4477 6.44772 11 7 11ZM17.5 11.5C17.7761 11.5 18 11.7239 18 12C18 12.2761 17.7761 12.5 17.5 12.5H10.5C10.2239 12.5 10 12.2761 10 12C10 11.7239 10.2239 11.5 10.5 11.5H17.5ZM7 6C7.55228 6 8 6.44772 8 7C8 7.55228 7.55228 8 7 8C6.44772 8 6 7.55228 6 7C6 6.44772 6.44772 6 7 6ZM17.5 6.5C17.7761 6.5 18 6.72386 18 7C18 7.27614 17.7761 7.5 17.5 7.5H10.5C10.2239 7.5 10 7.27614 10 7C10 6.72386 10.2239 6.5 10.5 6.5H17.5Z'
+
+export const UnorderedListIcon: React.FC<{
+  readonly className?: string
+}> = ({ className }) => (
   <svg
     aria-hidden="true"
-    className="icon"
+    className={['icon', className].filter(Boolean).join(' ')}
     fill="none"
     focusable="false"
-    height="20"
-    viewBox="0 0 20 20"
-    width="20"
+    height={24}
+    viewBox="0 0 24 24"
+    width={24}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <circle cx="4" cy="5" fill="currentColor" r="1.15" stroke="currentColor" strokeWidth="0.3" />
-    <circle cx="4" cy="10" fill="currentColor" r="1.15" stroke="currentColor" strokeWidth="0.3" />
-    <circle cx="4" cy="15" fill="currentColor" r="1.15" stroke="currentColor" strokeWidth="0.3" />
-    <path d="M17 5H7" stroke="currentColor" strokeWidth="1.5" />
-    <path d="M17 10H7" stroke="currentColor" strokeWidth="1.5" />
-    <path d="M17 15H7" stroke="currentColor" strokeWidth="1.5" />
+    <path d={path} fill="currentColor" />
   </svg>
 )

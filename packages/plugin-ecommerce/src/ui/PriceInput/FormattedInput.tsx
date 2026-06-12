@@ -20,6 +20,7 @@ interface Props {
   path: string
   placeholder?: string
   readOnly?: boolean
+  required?: boolean
   supportedCurrencies: Currency[]
 }
 
@@ -34,6 +35,7 @@ export const FormattedInput: React.FC<Props> = ({
   path,
   placeholder = '0.00',
   readOnly,
+  required,
   supportedCurrencies,
 }) => {
   const { setValue, value } = useField<number>({ path })
@@ -136,7 +138,7 @@ export const FormattedInput: React.FC<Props> = ({
 
   return (
     <div className={`field-type number ${baseClass}`}>
-      {label && <FieldLabel as="label" htmlFor={id} label={label} />}
+      {label && <FieldLabel as="label" htmlFor={id} label={label} required={required} />}
 
       <div className={`${baseClass}Container`}>
         <div className={`${baseClass}CurrencySymbol`}>

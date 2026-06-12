@@ -25,6 +25,7 @@ import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
@@ -73,6 +74,7 @@ export const findOperation = async <
       args,
       collection: args.collection.config,
       operation: 'read',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -105,8 +107,12 @@ export const findOperation = async <
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
-      forceSelect: collectionConfig.forceSelect,
-      select: incomingSelect,
+      select: resolveSelect({
+        config: collectionConfig.select,
+        operation: 'read',
+        req,
+        select: incomingSelect,
+      }),
     })
 
     // /////////////////////////////////////
@@ -216,6 +222,14 @@ export const findOperation = async <
       })
     }
 
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result.docs = result.docs.map((doc) => ({ ...doc, collection: collectionConfig.slug }))
+    }
+
     if (includeLockStatus) {
       try {
         const lockDocumentsProp = collectionConfig?.lockDocuments
@@ -291,6 +305,7 @@ export const findOperation = async <
                 collection: collectionConfig,
                 context: req.context,
                 doc: docRef,
+                overrideAccess: overrideAccess!,
                 query: fullWhere,
                 req,
               })) || docRef
@@ -343,6 +358,7 @@ export const findOperation = async <
                 context: req.context,
                 doc: docRef,
                 findMany: true,
+                overrideAccess: overrideAccess!,
                 query: fullWhere,
                 req,
               })) || docRef
@@ -361,6 +377,7 @@ export const findOperation = async <
       args,
       collection: collectionConfig,
       operation: 'find',
+      overrideAccess: overrideAccess!,
       result,
     })
 

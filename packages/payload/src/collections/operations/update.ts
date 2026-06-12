@@ -26,6 +26,7 @@ import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
@@ -86,6 +87,7 @@ export const updateOperation = async <
       args,
       collection: args.collection.config,
       operation: 'update',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -154,7 +156,11 @@ export const updateOperation = async <
 
     // Enforce delete access if performing a soft-delete (trash)
     if (isTrashAttempt && !overrideAccess) {
-      const deleteAccessResult = await executeAccess({ req }, collectionConfig.access.delete)
+      // Pass data so access function can check data.deletedAt to know it's a trash attempt
+      const deleteAccessResult = await executeAccess(
+        { data: bulkUpdateData, req },
+        collectionConfig.access.delete,
+      )
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 
@@ -174,7 +180,7 @@ export const updateOperation = async <
 
     let docs
 
-    if (hasDraftsEnabled(collectionConfig) && shouldSaveDraft) {
+    if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
       const versionsWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({
@@ -238,14 +244,18 @@ export const updateOperation = async <
 
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
-          forceSelect: collectionConfig.forceSelect,
-          select: incomingSelect,
+          select: resolveSelect({
+            config: collectionConfig.select,
+            operation: 'update',
+            req,
+            select: incomingSelect,
+          }),
         })
 
         // ///////////////////////////////////////////////
         // Update document, runs all document level hooks
         // ///////////////////////////////////////////////
-        const updatedDoc = await updateDocument({
+        let updatedDoc = await updateDocument({
           id,
           autosave,
           collectionConfig,
@@ -268,6 +278,14 @@ export const updateOperation = async <
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
         })
+
+        // /////////////////////////////////////
+        // Add collection property for auth collections
+        // /////////////////////////////////////
+
+        if (collectionConfig.auth) {
+          updatedDoc = { ...updatedDoc, collection: collectionConfig.slug }
+        }
 
         if (docShouldCommit) {
           await commitTransaction(req)
@@ -320,6 +338,7 @@ export const updateOperation = async <
       args,
       collection: collectionConfig,
       operation: 'update',
+      overrideAccess,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       result,
     })

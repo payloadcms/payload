@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "3.73.0",
+  "version": "4.0.0-beta.0",
   "description": "The officially supported Postgres database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -24,11 +24,6 @@
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
-    },
-    "./types": {
-      "import": "./src/exports/types-deprecated.ts",
-      "types": "./src/exports/types-deprecated.ts",
-      "default": "./src/exports/types-deprecated.ts"
     },
     "./migration-utils": {
       "import": "./src/exports/migration-utils.ts",
@@ -75,14 +70,14 @@
   },
   "dependencies": {
     "@payloadcms/drizzle": "workspace:*",
-    "@types/pg": "8.10.2",
-    "console-table-printer": "2.12.1",
+    "@types/pg": "8.20.0",
+    "console-table-printer": "2.15.0",
     "drizzle-kit": "0.31.7",
-    "drizzle-orm": "0.44.7",
-    "pg": "8.16.3",
+    "drizzle-orm": "0.45.2",
+    "pg": "8.20.0",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
-    "uuid": "10.0.0"
+    "uuid": "14.0.0"
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
@@ -100,11 +95,6 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      },
-      "./types": {
-        "import": "./dist/exports/types-deprecated.js",
-        "types": "./dist/exports/types-deprecated.d.ts",
-        "default": "./dist/exports/types-deprecated.js"
       },
       "./migration-utils": {
         "import": "./dist/exports/migration-utils.js",

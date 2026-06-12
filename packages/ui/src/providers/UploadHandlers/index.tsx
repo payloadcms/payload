@@ -4,6 +4,7 @@ import type { UploadCollectionSlug } from 'payload'
 import React, { useState } from 'react'
 
 type UploadHandler = (args: {
+  docPrefix?: string
   file: File
   updateFilename: (filename: string) => void
 }) => Promise<unknown>

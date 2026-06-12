@@ -5,20 +5,31 @@ import type { EditViewProps } from 'payload'
 import React from 'react'
 
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
+import { CollapseIcon } from '../../../../icons/Collapse/index.js'
+import { ExpandIcon } from '../../../../icons/Expand/index.js'
 import { ExternalLinkIcon } from '../../../../icons/ExternalLink/index.js'
-import { XIcon } from '../../../../icons/X/index.js'
 import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
+import { Button } from '../../../Button/index.js'
 import { Popup, PopupList } from '../../../Popup/index.js'
 import { PreviewFrameSizeInput } from '../SizeInput/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'live-preview-toolbar-controls'
 const zoomOptions = [50, 75, 100, 125, 150, 200]
 
 export const ToolbarControls: React.FC<EditViewProps> = () => {
-  const { breakpoint, breakpoints, setBreakpoint, setPreviewWindowType, setZoom, url, zoom } =
-    useLivePreviewContext()
+  const {
+    breakpoint,
+    breakpoints,
+    isExpanded,
+    openPopupWindow,
+    setBreakpoint,
+    setIsExpanded,
+    setIsLivePreviewing,
+    setZoom,
+    zoom,
+  } = useLivePreviewContext()
 
   const { t } = useTranslation()
 
@@ -31,34 +42,29 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
     <div className={baseClass}>
       {breakpoints?.length > 0 && (
         <Popup
-          button={
-            <React.Fragment>
-              <span>
-                {breakpoints.find((bp) => bp.name == breakpoint)?.label ?? customOption.label}
-              </span>
-              <ChevronIcon className={`${baseClass}__chevron`} />
-            </React.Fragment>
-          }
           className={`${baseClass}__breakpoint`}
           horizontalAlign="right"
           render={({ close }) => (
-            <PopupList.ButtonGroup>
+            <PopupList.RadioGroup>
               <React.Fragment>
-                {breakpoints.map((bp) => (
-                  <PopupList.Button
-                    active={bp.name == breakpoint}
-                    key={bp.name}
-                    onClick={() => {
-                      setBreakpoint(bp.name)
-                      close()
-                    }}
-                  >
-                    {bp.label}
-                  </PopupList.Button>
-                ))}
+                {breakpoints.map((bp) => {
+                  const isActive = bp.name == breakpoint
+                  return (
+                    <PopupList.RadioGroupItem
+                      active={isActive}
+                      key={bp.name}
+                      onClick={() => {
+                        setBreakpoint(bp.name)
+                        close()
+                      }}
+                    >
+                      {bp.label}
+                    </PopupList.RadioGroupItem>
+                  )
+                })}
                 {/* Dynamically add this option so that it only appears when the width and height inputs are explicitly changed */}
                 {breakpoint === 'custom' && (
-                  <PopupList.Button
+                  <PopupList.RadioGroupItem
                     active={breakpoint == customOption.value}
                     onClick={() => {
                       setBreakpoint(customOption.value)
@@ -66,65 +72,78 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
                     }}
                   >
                     {customOption.label}
-                  </PopupList.Button>
+                  </PopupList.RadioGroupItem>
                 )}
               </React.Fragment>
-            </PopupList.ButtonGroup>
+            </PopupList.RadioGroup>
+          )}
+          renderButton={(buttonProps) => (
+            <Button {...buttonProps} buttonStyle="secondary" icon={<ChevronIcon size={16} />}>
+              {breakpoints.find((bp) => bp.name == breakpoint)?.label ?? customOption.label}
+            </Button>
           )}
           showScrollbar
           verticalAlign="bottom"
         />
       )}
-      <div className={`${baseClass}__device-size`}>
+      <div className={`${baseClass}__center`}>
         <PreviewFrameSizeInput axis="x" />
-        <span className={`${baseClass}__size-divider`}>
-          <XIcon />
-        </span>
         <PreviewFrameSizeInput axis="y" />
+        <Popup
+          className={`${baseClass}__zoom`}
+          horizontalAlign="right"
+          render={({ close }) => (
+            <PopupList.RadioGroup>
+              <React.Fragment>
+                {zoomOptions.map((zoomValue) => {
+                  const isActive = zoom * 100 == zoomValue
+                  return (
+                    <PopupList.RadioGroupItem
+                      active={isActive}
+                      key={zoomValue}
+                      onClick={() => {
+                        setZoom(zoomValue / 100)
+                        close()
+                      }}
+                    >
+                      {zoomValue}%
+                    </PopupList.RadioGroupItem>
+                  )
+                })}
+              </React.Fragment>
+            </PopupList.RadioGroup>
+          )}
+          renderButton={(buttonProps) => (
+            <Button {...buttonProps} buttonStyle="pill" icon={<ChevronIcon size={16} />}>
+              <span className={`${baseClass}__zoom-percentage`}>%</span>
+              {zoom * 100}
+            </Button>
+          )}
+          showScrollbar
+          verticalAlign="bottom"
+        />
       </div>
-      <Popup
-        button={
-          <React.Fragment>
-            <span>{zoom * 100}%</span>
-            <ChevronIcon className={`${baseClass}__chevron`} />
-          </React.Fragment>
-        }
-        className={`${baseClass}__zoom`}
-        horizontalAlign="right"
-        render={({ close }) => (
-          <PopupList.ButtonGroup>
-            <React.Fragment>
-              {zoomOptions.map((zoomValue) => (
-                <PopupList.Button
-                  active={zoom * 100 == zoomValue}
-                  key={zoomValue}
-                  onClick={() => {
-                    setZoom(zoomValue / 100)
-                    close()
-                  }}
-                >
-                  {zoomValue}%
-                </PopupList.Button>
-              ))}
-            </React.Fragment>
-          </PopupList.ButtonGroup>
-        )}
-        showScrollbar
-        verticalAlign="bottom"
-      />
-      <a
-        className={`${baseClass}__external`}
-        href={url}
-        onClick={(e) => {
-          e.preventDefault()
-          setPreviewWindowType('popup')
-        }}
-        target="_blank"
-        title="Open in new window"
-        type="button"
-      >
-        <ExternalLinkIcon />
-      </a>
+      <div className={`${baseClass}__end`}>
+        <Button
+          aria-label={isExpanded ? t('general:collapse') : t('general:expand')}
+          buttonStyle="ghost"
+          icon={isExpanded ? <CollapseIcon size={16} /> : <ExpandIcon size={16} />}
+          onClick={() => setIsExpanded(!isExpanded)}
+          tooltip={isExpanded ? t('general:collapse') : t('general:expand')}
+        />
+        <Button
+          aria-label={t('general:openInNewWindow')}
+          buttonStyle="ghost"
+          className={`${baseClass}__external`}
+          icon={<ExternalLinkIcon size={16} />}
+          onClick={(e) => {
+            e.preventDefault()
+            openPopupWindow()
+            setIsLivePreviewing(false)
+          }}
+          tooltip={t('general:openInNewWindow')}
+        />
+      </div>
     </div>
   )
 }

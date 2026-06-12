@@ -1,14 +1,10 @@
 import type { CollectionSlug, ServerProps, ViewTypes } from 'payload'
 
-import { headers as getHeaders } from 'next/headers.js'
-import { redirect } from 'next/navigation.js'
-
 import type { MultiTenantPluginConfig } from '../../types.js'
 
 import { getGlobalViewRedirect } from '../../utilities/getGlobalViewRedirect.js'
 
 type Args = {
-  basePath?: string
   collectionSlug: CollectionSlug
   docID?: number | string
   globalSlugs: string[]
@@ -24,13 +20,18 @@ type Args = {
 export const GlobalViewRedirect = async (args: Args) => {
   const collectionSlug = args?.collectionSlug
   if (collectionSlug && args.globalSlugs?.includes(collectionSlug)) {
-    const headers = await getHeaders()
+    if (!args.server) {
+      throw new Error(
+        'GlobalViewRedirect requires `server` in ServerProps. Ensure your framework adapter (e.g. @payloadcms/next) populates ServerProps.server.',
+      )
+    }
+    const headers = await args.server.getHeaders()
     const redirectRoute = await getGlobalViewRedirect({
       slug: collectionSlug,
-      basePath: args.basePath,
       docID: args.docID,
       headers,
       payload: args.payload,
+      server: args.server,
       tenantFieldName: args.tenantFieldName,
       tenantsArrayFieldName: args.tenantArrayFieldName,
       tenantsArrayTenantFieldName: args.tenantArrayTenantFieldName,
@@ -42,7 +43,7 @@ export const GlobalViewRedirect = async (args: Args) => {
     })
 
     if (redirectRoute) {
-      redirect(redirectRoute)
+      args.server.redirect(redirectRoute)
     }
   }
 }

@@ -36,6 +36,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection.config,
       operation: 'count',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -99,6 +100,7 @@ export const countOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: collectionConfig,
       operation: 'count',
+      overrideAccess,
       result,
     })
 
