@@ -456,32 +456,47 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           })
         }
 
-        const { docs, totalDocs } = await req.payload.find({
+        const requestedLimit = typeof limit === 'number' && limit > 0 ? limit : 0
+        // The over-fetch trick (limit + 1) avoids a count query when computing hasNextPage,
+        // but it inflates the offset calculation `(page - 1) * limit` for page > 1, causing
+        // rows to be skipped or duplicated. Fall back to pagination: true in that case so the
+        // adapter applies the offset against the user's original limit.
+        const isOverFetchSafe = !(typeof page === 'number' && page > 1)
+        const usePagination = count || !isOverFetchSafe
+
+        const { docs, totalDocs, totalPages } = await req.payload.find({
           collection,
           depth: 0,
           draft,
           fallbackLocale: req.fallbackLocale,
-          // Fetch one extra document to determine if there are more documents beyond the requested limit (used for hasNextPage calculation).
-          limit: typeof limit === 'number' && limit > 0 ? limit + 1 : 0,
+          limit: isOverFetchSafe && requestedLimit > 0 ? requestedLimit + 1 : requestedLimit,
           locale: req.locale,
           overrideAccess: false,
           page,
-          pagination: count ? true : false,
+          pagination: usePagination,
           req,
           select,
           sort,
           where: fullWhere,
         })
 
-        let shouldSlice = false
+        let resultDocs = docs
+        let hasNextPage = false
 
-        if (typeof limit === 'number' && limit !== 0 && limit < docs.length) {
-          shouldSlice = true
+        if (requestedLimit > 0) {
+          if (isOverFetchSafe) {
+            hasNextPage = requestedLimit < docs.length
+            if (hasNextPage) {
+              resultDocs = docs.slice(0, -1)
+            }
+          } else {
+            hasNextPage = (page ?? 1) < totalPages
+          }
         }
 
         return {
-          docs: shouldSlice ? docs.slice(0, -1) : docs,
-          hasNextPage: limit === 0 ? false : limit < docs.length,
+          docs: resultDocs,
+          hasNextPage,
           ...(count ? { totalDocs } : {}),
         }
       },
