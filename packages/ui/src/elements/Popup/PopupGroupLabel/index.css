@@ -6,4 +6,16 @@
     margin-top: var(--spacer-1);
     margin-bottom: var(--spacer-2);
   }
+
+  /* Align the label's text with its sibling button labels, which carry a
+     var(--spacer-1) inset. The icon variants reserve an extra icon-slot
+     inset, so their labels sit one more var(--spacer-1) in. */
+  .popup-button-list .popup-list-group-label {
+    padding-inline-start: var(--spacer-1);
+  }
+
+  .popup-button-list--with-actions .popup-list-group-label,
+  .popup-button-list--with-icons .popup-list-group-label {
+    padding-inline-start: calc(var(--spacer-1) * 2);
+  }
 }

@@ -53,6 +53,16 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
 
     return {
       ...config,
+      admin: {
+        ...config.admin,
+        components: {
+          ...config.admin?.components,
+          userMenuSettingsItems: [
+            ...(config.admin?.components?.userMenuSettingsItems ?? []),
+            '@payloadcms/plugin-mcp/client#MCPSettingsMenu',
+          ],
+        },
+      },
       endpoints: [
         ...(config.endpoints ?? []),
         // Payload prefixes /api, so the full path is /api/mcp.
