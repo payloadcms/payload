@@ -145,9 +145,10 @@ export const deleteOperation = async <
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
-    const promises = docs.map(async (doc) => {
-      let result
+    const docsToProcess = docs
+    const awaitedDocs: BulkOperationResult<TSlug, TSelect>['docs'] = []
 
+    for (const doc of docsToProcess) {
       const { id } = doc
 
       try {
@@ -236,11 +237,11 @@ export const deleteOperation = async <
         // afterRead - Fields
         // /////////////////////////////////////
 
-        result = await afterRead({
+        let result = await afterRead({
           collection: collectionConfig,
           context: req.context,
           depth: depth!,
-          doc: result || doc,
+          doc,
           // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
           draft: undefined,
           fallbackLocale: fallbackLocale!,
@@ -271,7 +272,7 @@ export const deleteOperation = async <
               (await hook({
                 collection: collectionConfig,
                 context: req.context,
-                doc: result || doc,
+                doc: result,
                 overrideAccess,
                 req,
               })) || result
@@ -302,7 +303,7 @@ export const deleteOperation = async <
           await commitTransaction(req)
         }
 
-        return result
+        awaitedDocs.push(result)
       } catch (error) {
         const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
 
@@ -315,19 +316,6 @@ export const deleteOperation = async <
           message: error instanceof Error ? error.message : 'Unknown error',
         })
       }
-      return null
-    })
-
-    // Process sequentially when using single transaction mode to avoid shared state issues
-    // Process in parallel when using one transaction for better performance
-    let awaitedDocs
-    if (req.payload.db.bulkOperationsSingleTransaction) {
-      awaitedDocs = []
-      for (const promise of promises) {
-        awaitedDocs.push(await promise)
-      }
-    } else {
-      awaitedDocs = await Promise.all(promises)
     }
 
     // /////////////////////////////////////
