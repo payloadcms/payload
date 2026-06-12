@@ -49,12 +49,12 @@
     padding: 0;
   }
 
-  .versions .table td.cell--linked > a {
+  .versions .table td.cell--linked > :is(a, button) {
     padding-inline-start: var(--gutter-h);
     width: 100%;
   }
 
-  .versions .table td.cell--linked > a {
+  .versions .table td.cell--linked > :is(a, button) {
     font-weight: var(--text-body-medium-strong-font-weight);
     text-decoration-line: underline;
     text-decoration-style: solid;
