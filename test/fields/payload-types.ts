@@ -182,7 +182,6 @@ export type LexicalNodes_313DC238 =
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {
     ConfigBlockTest: ConfigBlockTest;
@@ -286,31 +285,13 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User | PayloadMcpApiKey;
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
-}
-export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -1071,6 +1052,7 @@ export interface ConditionalLogic {
   toggleField?: boolean | null;
   fieldWithDocIDCondition?: string | null;
   fieldWithCondition?: string | null;
+  rowFieldWithCondition?: string | null;
   fieldWithOperationCondition?: string | null;
   customFieldWithField?: string | null;
   customFieldWithHOC?: string | null;
@@ -2068,13 +2050,13 @@ export interface UiField {
   createdAt: string;
 }
 /**
- * API keys control which collections, resources, tools, and prompts MCP clients can access
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys".
  */
 export interface PayloadMcpApiKey {
   id: string;
+  apiKey: string;
+  apiKeyIndex: string;
   access?:
     | {
         [k: string]: unknown;
@@ -2084,28 +2066,13 @@ export interface PayloadMcpApiKey {
     | number
     | boolean
     | null;
-  /**
-   * A useful nickname for the API key.
-   */
   label?: string | null;
-  /**
-   * Describe the purpose of the API key.
-   */
   description?: string | null;
-  /**
-   * The user the MCP will act as.
-   */
+  lastUsed?: string | null;
   user: string | User;
-  /**
-   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
-   */
   overrideAccess?: boolean | null;
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2280,15 +2247,10 @@ export interface PayloadLockedDocument {
         value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -2298,15 +2260,10 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   key?: string | null;
   value?:
     | {
@@ -3001,6 +2958,7 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
   toggleField?: T;
   fieldWithDocIDCondition?: T;
   fieldWithCondition?: T;
+  rowFieldWithCondition?: T;
   fieldWithOperationCondition?: T;
   customFieldWithField?: T;
   customFieldWithHOC?: T;
@@ -3919,16 +3877,16 @@ export interface UiFieldsSelect<T extends boolean = true> {
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  apiKey?: T;
+  apiKeyIndex?: T;
   access?: T;
   label?: T;
   description?: T;
+  lastUsed?: T;
   user?: T;
   overrideAccess?: T;
   updatedAt?: T;
   createdAt?: T;
-  enableAPIKey?: T;
-  apiKey?: T;
-  apiKeyIndex?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
