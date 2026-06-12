@@ -177,6 +177,13 @@ export interface PayloadMcpApiKeyAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  array?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  check?: boolean | null;
   content?: LexicalRichText<LexicalNodes_00871687> | null;
   updatedAt: string;
   createdAt: string;
@@ -391,6 +398,13 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  array?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
+  check?: T;
   content?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -1,0 +1,50 @@
+import { ProgressBar, RootProvider } from '@payloadcms/ui'
+import { TanStackRouterAdapter } from '@payloadcms/tanstack-start/client'
+import { createFileRoute, Outlet } from '@tanstack/react-router'
+import '@payloadcms/ui/scss/app.scss'
+// Custom admin styles for this test app — mirrors the Next test app's
+// `(payload)/custom.scss` so the shared "custom CSS" e2e passes on both adapters.
+import './custom.scss'
+
+import { getLayoutDataFn } from '../functions/layout.functions'
+import { serverFunctionHandler } from '../functions/serverFunction.functions'
+import { switchLanguageFn } from '../functions/switchLanguage.functions'
+
+export const Route = createFileRoute('/_payload')({
+  loader: () => getLayoutDataFn(),
+  component: PayloadLayout,
+})
+
+function PayloadLayout() {
+  const data = Route.useLoaderData()
+
+  return (
+    <>
+      <RootProvider
+        config={data.clientConfig}
+        dateFNSKey={data.dateFNSKey}
+        fallbackLang={data.fallbackLang}
+        isNavOpen={data.isNavOpen}
+        languageCode={data.languageCode}
+        languageOptions={data.languageOptions}
+        locale={data.locale}
+        permissions={data.user ? data.permissions : null}
+        RouterAdapter={TanStackRouterAdapter}
+        serverFunction={serverFunctionHandler}
+        switchLanguageServerAction={async (lang: string) => {
+          await switchLanguageFn({ data: lang })
+        }}
+        theme={data.theme}
+        translations={data.translations}
+        user={data.user}
+      >
+        <ProgressBar />
+        {/* `data.providers` is the custom-provider tree (config.admin.components.providers)
+            already wrapping the router <Outlet />; falls back to a bare <Outlet /> when
+            no custom providers are configured. */}
+        {(data as any).providers ?? <Outlet />}
+      </RootProvider>
+      <div id="portal" />
+    </>
+  )
+}

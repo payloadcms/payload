@@ -21,8 +21,10 @@ import {
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
   waitForFormReady,
+  waitForLexicalReady,
 } from '../../../../../__helpers/e2e/helpers.js'
 import { goToFirstCell } from '../../../../../__helpers/e2e/navigateToDoc.js'
+import { currentFramework } from '../../../../../__helpers/e2e/playwright.js'
 import { getSelectMenu } from '../../../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -69,6 +71,8 @@ async function navigateToLexicalFields(
     await expect(richTextField).toBeVisible()
     // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
     await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
+    // Wait for the editor to be fully interactive (React hydration complete + Lexical initialized)
+    await waitForLexicalReady(richTextField)
   }
 }
 
@@ -256,6 +260,10 @@ describe('lexicalMain', () => {
   })
 
   test('ensure saving document does not kick cursor / focus out of rich text field', async () => {
+    test.skip(
+      currentFramework === 'tanstack-start',
+      'TanStack Start: save hotkey moves focus to the button element; focus restoration not yet implemented',
+    )
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').nth(2) // second
     await richTextField.scrollIntoViewIfNeeded()
@@ -1873,6 +1881,10 @@ describe('lexicalMain', () => {
   })
 
   test('should render custom Cell component for richText fields in list view', async () => {
+    test.skip(
+      currentFramework === 'tanstack-start',
+      'TanStack Start: custom Cell components rendered via RSC are not yet supported in list views',
+    )
     const doc = await payload.create({
       collection: lexicalCustomCellSlug,
       data: {

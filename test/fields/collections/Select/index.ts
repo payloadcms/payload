@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { isRSCEnabled } from 'payload/shared'
+
 import { selectFieldsSlug } from '../../slugs.js'
 import { CustomJSXLabel } from './CustomJSXLabel.js'
 
@@ -222,26 +224,30 @@ const SelectFields: CollectionConfig = {
         },
       ],
     },
-    {
-      name: 'selectWithJsxLabelOption',
-      label: 'Select with JSX label option',
-      type: 'select',
-      defaultValue: 'three',
-      options: [
-        {
-          label: 'Value One',
-          value: 'one',
-        },
-        {
-          label: 'Value Two',
-          value: 'two',
-        },
-        {
-          label: CustomJSXLabel,
-          value: 'three',
-        },
-      ],
-    },
+    ...(isRSCEnabled()
+      ? [
+          {
+            name: 'selectWithJsxLabelOption',
+            label: 'Select with JSX label option',
+            type: 'select' as const,
+            defaultValue: 'three',
+            options: [
+              {
+                label: 'Value One',
+                value: 'one',
+              },
+              {
+                label: 'Value Two',
+                value: 'two',
+              },
+              {
+                label: CustomJSXLabel,
+                value: 'three',
+              },
+            ],
+          },
+        ]
+      : []),
     {
       name: 'disallowOption1',
       type: 'checkbox',

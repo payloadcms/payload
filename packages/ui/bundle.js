@@ -90,6 +90,19 @@ async function build() {
   }
 
   console.log('styles.css bundled successfully')
+  // Plugin to externalize all internal relative imports that point outside the
+  // exports/ directory. This prevents the barrel from inlining provider/context
+  // modules, ensuring that both the barrel export and subpath exports resolve to
+  // the same physical files (avoiding duplicate React context instances).
+  const externalizeInternalModules = {
+    name: 'externalize-internal-modules',
+    setup(build) {
+      build.onResolve({ filter: /^\.\.\/\.\.\//, namespace: 'file' }, (args) => {
+        return { external: true, path: args.path }
+      })
+    },
+  }
+
   // Bundle `client.ts`
   const resultClient = await esbuild.build({
     entryPoints: ['dist/exports/client/index.js'],
@@ -140,6 +153,7 @@ function require(m) {
 
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [
+      externalizeInternalModules,
       removeCSSImports,
       useClientPlugin, // required for banner to work
       /*commonjs({

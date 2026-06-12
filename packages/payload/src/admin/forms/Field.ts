@@ -6,6 +6,7 @@ import type { ClientBlock, ClientField, Field } from '../../fields/config/types.
 import type { TypedUser } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, Payload, PayloadRequest } from '../../types/index.js'
+import type { ComponentRenderer } from '../adapters/render.js'
 import type {
   ClientFieldSchemaMap,
   ClientTab,
@@ -99,6 +100,12 @@ export type ServerComponentProps = {
   payload: Payload
   permissions: SanitizedFieldPermissions
   preferences: DocumentPreferences
+  /**
+   * Adapter-injected component renderer. Server components can use this
+   * to render other import map components without importing a
+   * framework-specific renderer directly.
+   */
+  renderComponent?: ComponentRenderer
   req: PayloadRequest
   siblingData: Data
   user: TypedUser

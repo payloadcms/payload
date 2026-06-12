@@ -1,0 +1,114 @@
+import { spawn } from 'child_process'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+
+import type { DevServerResult } from './nextDevServer.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+/**
+ * Resolve `@payloadcms/tanstack-start/node/cssLoader.mjs` from the dev-server
+ * root. We resolve it manually rather than importing the module here so the
+ * file path can be passed straight to Node's `--import` flag in the spawned
+ * Vite process.
+ *
+ * The loader is what allows CSS/SCSS/LESS statements that survive into the
+ * SSR/RSC bundle (e.g. from a prod-packed `@payloadcms/ui/dist/...` tarball
+ * that Vite ends up externalizing) to be silently swallowed instead of
+ * crashing every admin route with `ERR_UNKNOWN_FILE_EXTENSION`.
+ */
+function resolveCssLoaderUrl(rootDir: string): null | string {
+  const candidates = [
+    path.resolve(
+      rootDir,
+      'node_modules/@payloadcms/tanstack-start/dist/node/registerCssLoader.mjs',
+    ),
+    path.resolve(__dirname, '../../packages/tanstack-start/dist/node/registerCssLoader.mjs'),
+    path.resolve(__dirname, '../../packages/tanstack-start/src/node/registerCssLoader.mjs'),
+  ]
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return pathToFileURL(candidate).href
+    }
+  }
+  return null
+}
+
+export async function startTanStackStartDevServer({
+  port,
+  testSuiteArg,
+}: {
+  port: number
+  testSuiteArg: string
+}): Promise<DevServerResult> {
+  const rootDir = path.resolve(__dirname, '../../tanstack-app')
+  const adminRoute = '/admin'
+
+  const viteBin = path.resolve(rootDir, 'node_modules/.bin/vite')
+
+  const cssLoaderUrl = resolveCssLoaderUrl(rootDir)
+  const previousNodeOptions = process.env.NODE_OPTIONS ?? ''
+  const nodeOptions = cssLoaderUrl
+    ? `${previousNodeOptions} --import ${cssLoaderUrl}`.trim()
+    : previousNodeOptions
+
+  return new Promise<DevServerResult>((resolve, reject) => {
+    const child = spawn(
+      viteBin,
+      ['dev', '--port', String(port), '--strictPort', '--configLoader', 'runner'],
+      {
+        cwd: rootDir,
+        env: {
+          ...process.env,
+          NODE_OPTIONS: nodeOptions,
+          PORT: String(port),
+          NODE_ENV: 'development',
+          PAYLOAD_CORE_DEV: 'true',
+          PAYLOAD_DROP_DATABASE: process.env.PAYLOAD_DROP_DATABASE ?? 'true',
+          PAYLOAD_TEST_SUITE: testSuiteArg,
+          ROOT_DIR: rootDir,
+        },
+        stdio: ['pipe', 'pipe', 'pipe'],
+      },
+    )
+
+    let resolved = false
+
+    child.stdout?.on('data', (data: Buffer) => {
+      const output = data.toString()
+      process.stdout.write(output)
+
+      if (!resolved && output.includes('Local:')) {
+        resolved = true
+        resolve({ adminRoute, port, rootDir })
+      }
+    })
+
+    child.stderr?.on('data', (data: Buffer) => {
+      process.stderr.write(data.toString())
+    })
+
+    child.on('error', (err) => {
+      if (!resolved) {
+        reject(err)
+      }
+    })
+
+    child.on('exit', (code) => {
+      if (!resolved) {
+        reject(new Error(`Vite dev server exited with code ${code}`))
+      }
+    })
+
+    process.on('SIGINT', () => child.kill('SIGINT'))
+    process.on('SIGTERM', () => child.kill('SIGTERM'))
+
+    setTimeout(() => {
+      if (!resolved) {
+        resolved = true
+        resolve({ adminRoute, port, rootDir })
+      }
+    }, 30000)
+  })
+}

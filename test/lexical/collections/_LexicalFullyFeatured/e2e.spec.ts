@@ -40,6 +40,7 @@ describe('Lexical Fully Featured', () => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
   test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async () => {
@@ -374,6 +375,7 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     await options.locator('text=עברית').click()
     await expect(page.getByText('משתמשים').first()).toBeVisible()
     await page.goto(url.create)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
   test('slash menu should be positioned correctly in RTL', async ({ page }) => {
