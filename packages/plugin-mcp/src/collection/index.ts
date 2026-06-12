@@ -12,9 +12,18 @@ export const getAPIKeysCollection = ({
   const collection: CollectionConfig = {
     slug: 'payload-mcp-api-keys',
     admin: {
-      description:
-        'API keys control which collections, resources, tools, and prompts MCP clients can access',
-      group: 'MCP',
+      components: {
+        views: {
+          list: {
+            NoResults: '@payloadcms/plugin-mcp/client#APIKeysEmptyState',
+          },
+        },
+      },
+      defaultColumns: ['label', 'lastUsed', 'user'],
+      // The intro copy renders inside the edit view via `APIKeyField` (per the
+      // design) instead of `admin.description`, which would sit in the header.
+      // Kept out of the main nav — reachable through the user menu's settings instead.
+      group: false,
       useAsTitle: 'label',
     },
     auth: {
@@ -23,21 +32,41 @@ export const getAPIKeysCollection = ({
     },
     fields: [
       {
-        name: 'user',
-        type: 'relationship',
-        admin: { description: 'The user that the API key is associated with.' },
-        relationTo: pluginConfig.userCollection,
-        required: true,
+        name: 'apiKeyManager',
+        type: 'ui',
+        admin: {
+          components: { Field: '@payloadcms/plugin-mcp/client#APIKeyField' },
+        },
       },
+      getAccessField({ pluginConfig }),
       {
         name: 'label',
         type: 'text',
-        admin: { description: 'A useful label for the API key.' },
+        admin: { description: 'A useful nickname for the API key.', position: 'sidebar' },
+        label: 'Title',
       },
       {
         name: 'description',
         type: 'text',
-        admin: { description: 'The purpose of the API key.' },
+        admin: { description: 'Describe the purpose of the API key.', position: 'sidebar' },
+      },
+      {
+        name: 'lastUsed',
+        type: 'date',
+        admin: {
+          date: { pickerAppearance: 'dayAndTime' },
+          position: 'sidebar',
+          readOnly: true,
+        },
+        label: 'Last used',
+      },
+      {
+        name: 'user',
+        type: 'relationship',
+        admin: { description: 'The user the MCP will act as.', position: 'sidebar' },
+        label: 'Owner',
+        relationTo: pluginConfig.userCollection,
+        required: true,
       },
       {
         name: 'overrideAccess',
@@ -45,11 +74,11 @@ export const getAPIKeysCollection = ({
         admin: {
           description:
             'When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.',
+          position: 'sidebar',
         },
         defaultValue: false,
         label: 'Override access control',
       },
-      getAccessField({ pluginConfig }),
     ],
     labels: {
       plural: 'API Keys',

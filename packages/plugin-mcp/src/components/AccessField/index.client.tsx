@@ -3,7 +3,7 @@
 import type { JSONFieldClientProps } from 'payload'
 
 import { CheckboxInput, Collapsible, useField } from '@payloadcms/ui'
-import React from 'react'
+import React, { useState } from 'react'
 
 import type { ClientMCPPluginConfig, MCPAPIKeysDocAccessTree } from '../../types.js'
 
@@ -14,6 +14,14 @@ const baseClass = 'mcp-access-field'
 type ClientItem = ClientMCPPluginConfig['items'][number]
 type ScopeKey = 'collections' | 'globals'
 type FlatKey = 'prompts' | 'resources' | 'tools'
+type TabKey = 'collections' | 'globals' | 'server'
+
+// TODO: group labels need i18n once design is finalized
+const LEAF_GROUPS = [
+  { key: 'operations', label: 'Operations' },
+  { key: 'auth', label: 'Authentication' },
+  { key: 'custom', label: 'Custom' },
+] as const
 
 type Props = {
   pluginConfig: ClientMCPPluginConfig
@@ -39,15 +47,15 @@ const setKey = <T extends Record<string, unknown>>(
 
 export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
   const { setValue, value } = useField<MCPAPIKeysDocAccessTree>({ path })
+  const [activeTab, setActiveTab] = useState<null | TabKey>(null)
   const access = value ?? {}
 
-  // Bucket items for rendering. (Bucketing is cheap and runs once per render;
-  // memoizing would mean managing inputs/refs for marginal benefit.)
   const collectionsBySlug: Record<string, ClientItem[]> = {}
   const globalsBySlug: Record<string, ClientItem[]> = {}
-  const tools: ClientItem[] = []
   const prompts: ClientItem[] = []
   const resources: ClientItem[] = []
+  const tools: ClientItem[] = []
+
   for (const item of pluginConfig.items) {
     switch (item.type) {
       case 'collectionTool':
@@ -126,220 +134,165 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
     }
   }
 
-  const collectionSlugs = Object.keys(collectionsBySlug)
-  const globalSlugs = Object.keys(globalsBySlug)
+  const renderLeaf = (
+    leaf: ClientItem,
+    id: string,
+    checked: boolean,
+    onToggle: (allow: boolean) => void,
+  ) => (
+    <li className={`${baseClass}__leaf`} key={leaf.configKey}>
+      <CheckboxInput
+        checked={checked}
+        id={id}
+        label={leaf.label}
+        onToggle={(e) => onToggle(e.target.checked)}
+      />
+      {leaf.description && <p className={`${baseClass}__leaf-description`}>{leaf.description}</p>}
+    </li>
+  )
+
+  const renderCard = ({
+    id,
+    isLeafAllowed,
+    label,
+    leaves,
+    onSetAll,
+    onToggleLeaf,
+  }: {
+    id: string
+    isLeafAllowed: (leaf: ClientItem) => boolean
+    label: string
+    leaves: ClientItem[]
+    onSetAll: (allow: boolean) => void
+    onToggleLeaf: (leaf: ClientItem, allow: boolean) => void
+  }) => {
+    const allowedCount = leaves.filter(isLeafAllowed).length
+    const groups = LEAF_GROUPS.map((group) => ({
+      ...group,
+      leaves: leaves.filter((leaf) => (leaf.group ?? 'custom') === group.key),
+    })).filter((group) => group.leaves.length > 0)
+    const hasGroupLabels = groups.length > 1
+
+    return (
+      <Collapsible
+        className={`${baseClass}__card`}
+        header={
+          // Keep header clicks on the checkbox from also toggling the collapsible.
+          <span
+            className={`${baseClass}__card-checkbox`}
+            onClick={(e) => e.stopPropagation()}
+            role="presentation"
+          >
+            <CheckboxInput
+              checked={allowedCount === leaves.length}
+              id={`${id}._all`}
+              label={label}
+              onToggle={() => onSetAll(allowedCount < leaves.length)}
+              partialChecked={allowedCount > 0 && allowedCount < leaves.length}
+            />
+          </span>
+        }
+        initCollapsed
+        key={id}
+      >
+        <div className={`${baseClass}__card-groups`}>
+          {groups.map((group) => (
+            <div className={`${baseClass}__leaf-group`} key={group.key}>
+              {hasGroupLabels && <p className={`${baseClass}__leaf-group-label`}>{group.label}</p>}
+              <ul className={`${baseClass}__list`}>
+                {group.leaves.map((leaf) =>
+                  renderLeaf(leaf, `${id}.${leaf.configKey}`, isLeafAllowed(leaf), (allow) =>
+                    onToggleLeaf(leaf, allow),
+                  ),
+                )}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </Collapsible>
+    )
+  }
+
+  const renderScope = (scope: ScopeKey, bySlug: Record<string, ClientItem[]>) =>
+    Object.entries(bySlug).map(([slug, leaves]) =>
+      renderCard({
+        id: `${path}.${scope}.${slug}`,
+        isLeafAllowed: (leaf) => isScopedAllowed(scope, slug, leaf.configKey),
+        label: titleCase(slug),
+        leaves,
+        onSetAll: (allow) => setAllScoped(scope, slug, leaves, allow),
+        onToggleLeaf: (leaf, allow) => toggleScoped(scope, slug, leaf.configKey, allow),
+      }),
+    )
+
+  const renderFlat = (scope: FlatKey, label: string, leaves: ClientItem[]) =>
+    leaves.length > 0 &&
+    renderCard({
+      id: `${path}.${scope}`,
+      isLeafAllowed: (leaf) => isFlatAllowed(scope, leaf.configKey),
+      label,
+      leaves,
+      onSetAll: (allow) => setAllFlat(scope, leaves, allow),
+      onToggleLeaf: (leaf, allow) => toggleFlat(scope, leaf.configKey, allow),
+    })
+
+  // TODO: tab labels need i18n once design is finalized
+  const tabs: Array<{ key: TabKey; label: string }> = [
+    ...(Object.keys(collectionsBySlug).length > 0
+      ? [{ key: 'collections' as const, label: 'Collections' }]
+      : []),
+    ...(Object.keys(globalsBySlug).length > 0
+      ? [{ key: 'globals' as const, label: 'Globals' }]
+      : []),
+    ...(prompts.length > 0 || resources.length > 0 || tools.length > 0
+      ? [{ key: 'server' as const, label: 'Server' }]
+      : []),
+  ]
+  const currentTab = activeTab ?? tabs[0]?.key
+
+  if (tabs.length === 0) {
+    return null
+  }
 
   return (
     <div className={baseClass}>
-      {collectionSlugs.length > 0 && (
-        <section className={`${baseClass}__section`}>
-          <header className={`${baseClass}__section-header`}>
-            {/* TODO: needs i18n once design is finalized */}
-            <h4>Collection-level permissions</h4>
-            {/* TODO: needs i18n once design is finalized */}
-            <p>Allow MCP clients to perform the following actions within these collections:</p>
-          </header>
-          {collectionSlugs.map((slug) => {
-            const leaves = collectionsBySlug[slug]!
-            return (
-              <Collapsible
-                actions={
-                  <GroupActions
-                    onSetAll={(allow) => setAllScoped('collections', slug, leaves, allow)}
-                  />
-                }
-                className={`${baseClass}__group`}
-                header={<span className={`${baseClass}__group-label`}>{titleCase(slug)}</span>}
-                initCollapsed
-                key={`collection-${slug}`}
-              >
-                <ul className={`${baseClass}__list`}>
-                  {leaves.map((leaf) => (
-                    <li key={leaf.configKey}>
-                      <CheckboxInput
-                        checked={isScopedAllowed('collections', slug, leaf.configKey)}
-                        id={`${path}.collections.${slug}.${leaf.configKey}`}
-                        label={leaf.label}
-                        onToggle={(e) =>
-                          toggleScoped('collections', slug, leaf.configKey, e.target.checked)
-                        }
-                        tooltip={leaf.description}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </Collapsible>
-            )
-          })}
-        </section>
-      )}
-
-      {globalSlugs.length > 0 && (
-        <section className={`${baseClass}__section`}>
-          <header className={`${baseClass}__section-header`}>
-            {/* TODO: needs i18n once design is finalized */}
-            <h4>Global-level permissions</h4>
-            {/* TODO: needs i18n once design is finalized */}
-            <p>Allow MCP clients to perform the following actions on these globals:</p>
-          </header>
-          {globalSlugs.map((slug) => {
-            const leaves = globalsBySlug[slug]!
-            return (
-              <Collapsible
-                actions={
-                  <GroupActions
-                    onSetAll={(allow) => setAllScoped('globals', slug, leaves, allow)}
-                  />
-                }
-                className={`${baseClass}__group`}
-                header={<span className={`${baseClass}__group-label`}>{titleCase(slug)}</span>}
-                initCollapsed
-                key={`global-${slug}`}
-              >
-                <ul className={`${baseClass}__list`}>
-                  {leaves.map((leaf) => (
-                    <li key={leaf.configKey}>
-                      <CheckboxInput
-                        checked={isScopedAllowed('globals', slug, leaf.configKey)}
-                        id={`${path}.globals.${slug}.${leaf.configKey}`}
-                        label={leaf.label}
-                        onToggle={(e) =>
-                          toggleScoped('globals', slug, leaf.configKey, e.target.checked)
-                        }
-                        tooltip={leaf.description}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </Collapsible>
-            )
-          })}
-        </section>
-      )}
-
-      {(tools.length > 0 || prompts.length > 0 || resources.length > 0) && (
-        <section className={`${baseClass}__section`}>
-          <header className={`${baseClass}__section-header`}>
-            {/* TODO: needs i18n once design is finalized */}
-            <h4>Project-level permissions</h4>
-            {/* TODO: needs i18n once design is finalized */}
-            <p>Cross-cutting tools, prompts, and resources not scoped to a single collection.</p>
-          </header>
-          {tools.length > 0 && (
-            <Collapsible
-              actions={<GroupActions onSetAll={(allow) => setAllFlat('tools', tools, allow)} />}
-              className={`${baseClass}__group`}
-              header={
-                /* TODO: needs i18n once design is finalized */
-                <span className={`${baseClass}__group-label`}>Tools</span>
-              }
-              initCollapsed
-            >
-              <ul className={`${baseClass}__list`}>
-                {tools.map((leaf) => (
-                  <li key={leaf.configKey}>
-                    <CheckboxInput
-                      checked={isFlatAllowed('tools', leaf.configKey)}
-                      id={`${path}.tools.${leaf.configKey}`}
-                      label={leaf.label}
-                      onToggle={(e) => toggleFlat('tools', leaf.configKey, e.target.checked)}
-                      tooltip={leaf.description}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </Collapsible>
-          )}
-          {prompts.length > 0 && (
-            <Collapsible
-              actions={<GroupActions onSetAll={(allow) => setAllFlat('prompts', prompts, allow)} />}
-              className={`${baseClass}__group`}
-              header={
-                /* TODO: needs i18n once design is finalized */
-                <span className={`${baseClass}__group-label`}>Prompts</span>
-              }
-              initCollapsed
-            >
-              <ul className={`${baseClass}__list`}>
-                {prompts.map((leaf) => (
-                  <li key={leaf.configKey}>
-                    <CheckboxInput
-                      checked={isFlatAllowed('prompts', leaf.configKey)}
-                      id={`${path}.prompts.${leaf.configKey}`}
-                      label={leaf.label}
-                      onToggle={(e) => toggleFlat('prompts', leaf.configKey, e.target.checked)}
-                      tooltip={leaf.description}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </Collapsible>
-          )}
-          {resources.length > 0 && (
-            <Collapsible
-              actions={
-                <GroupActions onSetAll={(allow) => setAllFlat('resources', resources, allow)} />
-              }
-              className={`${baseClass}__group`}
-              header={
-                /* TODO: needs i18n once design is finalized */
-                <span className={`${baseClass}__group-label`}>Resources</span>
-              }
-              initCollapsed
-            >
-              <ul className={`${baseClass}__list`}>
-                {resources.map((leaf) => (
-                  <li key={leaf.configKey}>
-                    <CheckboxInput
-                      checked={isFlatAllowed('resources', leaf.configKey)}
-                      id={`${path}.resources.${leaf.configKey}`}
-                      label={leaf.label}
-                      onToggle={(e) => toggleFlat('resources', leaf.configKey, e.target.checked)}
-                      tooltip={leaf.description}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </Collapsible>
-          )}
-        </section>
-      )}
+      <header className={`${baseClass}__header`}>
+        {/* TODO: needs i18n once design is finalized */}
+        <h4>Permissions</h4>
+        {/* TODO: needs i18n once design is finalized */}
+        <p>Allow MCP clients to access the following collections, tools, resources, and prompts.</p>
+      </header>
+      <div className={`${baseClass}__tabs`} role="tablist">
+        {tabs.map((tab) => (
+          <button
+            aria-selected={tab.key === currentTab}
+            className={[`${baseClass}__tab`, tab.key === currentTab && `${baseClass}__tab--active`]
+              .filter(Boolean)
+              .join(' ')}
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            role="tab"
+            type="button"
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+      <div className={`${baseClass}__cards`}>
+        {currentTab === 'collections' && renderScope('collections', collectionsBySlug)}
+        {currentTab === 'globals' && renderScope('globals', globalsBySlug)}
+        {currentTab === 'server' && (
+          <>
+            {/* TODO: card labels need i18n once design is finalized */}
+            {renderFlat('prompts', 'Prompts', prompts)}
+            {renderFlat('resources', 'Resources', resources)}
+            {renderFlat('tools', 'Tools', tools)}
+          </>
+        )}
+      </div>
     </div>
   )
 }
-
-const GroupActions: React.FC<{ onSetAll: (allow: boolean) => void }> = ({ onSetAll }) => (
-  // TODO: button labels + aria-labels need i18n once design is finalized
-  <div className={`${baseClass}__group-actions`}>
-    <button
-      aria-label="Select all"
-      className={`${baseClass}__action`}
-      onClick={(e) => {
-        e.stopPropagation()
-        onSetAll(true)
-      }}
-      title="Select all"
-      type="button"
-    >
-      all
-    </button>
-    <span aria-hidden className={`${baseClass}__action-sep`}>
-      /
-    </span>
-    <button
-      aria-label="Clear all"
-      className={`${baseClass}__action`}
-      onClick={(e) => {
-        e.stopPropagation()
-        onSetAll(false)
-      }}
-      title="Clear all"
-      type="button"
-    >
-      none
-    </button>
-  </div>
-)
 
 const titleCase = (slug: string): string =>
   slug.replace(/(^|[-_])(.)/g, (_, sep: string, ch: string) =>

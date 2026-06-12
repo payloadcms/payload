@@ -3,32 +3,22 @@
     display: flex;
     flex-direction: column;
     gap: var(--base);
+    /* Breathing room below the API-key section's divider - the fields
+       container itself adds no gap between these two fields. */
+    padding-block-start: var(--spacer-4);
+    /* This custom field renders straight into `render-fields` (no `.field-type`
+       wrapper), so it must carry the standard inter-field margin itself -
+       otherwise the next field (e.g. an overrideApiKeyCollection field) butts
+       against the last card. */
+    margin-block-end: var(--spacer-3);
   }
 
-  .mcp-access-field__section {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--base) / 2);
-    padding-bottom: var(--base);
-    /* Full-bleed separator: extend past the sidebar's horizontal gutter so the
-       border-block-end spans the entire sidebar width. */
-    margin-inline-start: calc(-1 * var(--sidebar-gutter-h-left, var(--gutter-h)));
-    margin-inline-end: calc(-1 * var(--sidebar-gutter-h-right, var(--gutter-h)));
-    padding-inline-start: var(--sidebar-gutter-h-left, var(--gutter-h));
-    padding-inline-end: var(--sidebar-gutter-h-right, var(--gutter-h));
-    border-block-end: 1px solid var(--theme-elevation-100);
-  }
-
-  .mcp-access-field__section:last-child {
-    border-block-end: none;
-  }
-
-  .mcp-access-field__section-header {
+  .mcp-access-field__header {
     display: flex;
     flex-direction: column;
   }
 
-  .mcp-access-field__section-header h4 {
+  .mcp-access-field__header h4 {
     margin: 0;
     color: var(--color-text);
     font-family: var(--text-heading-small-font-family);
@@ -38,7 +28,7 @@
     letter-spacing: var(--text-heading-small-letter-spacing);
   }
 
-  .mcp-access-field__section-header p {
+  .mcp-access-field__header p {
     margin: 0;
     color: var(--color-text-secondary);
     font-family: var(--text-body-medium-font-family);
@@ -48,38 +38,69 @@
     letter-spacing: var(--text-body-medium-letter-spacing);
   }
 
-  .mcp-access-field__group {
-    margin-block-end: calc(var(--base) / 2);
-  }
-
-  .mcp-access-field__group-label {
-    font-weight: 600;
-  }
-
-  .mcp-access-field__group-actions {
+  .mcp-access-field__tabs {
     display: flex;
-    align-items: center;
-    gap: calc(var(--base) / 6);
+    gap: var(--base);
   }
 
-  .mcp-access-field__action {
+  .mcp-access-field__tab {
     appearance: none;
     background: none;
     border: none;
-    color: var(--theme-elevation-500);
+    border-block-end: 2px solid transparent;
+    color: var(--color-text-secondary);
     cursor: pointer;
-    font-size: 0.75rem;
-    padding: 0;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+    padding: 0 0 calc(var(--base) / 4);
   }
 
-  .mcp-access-field__action:hover {
-    color: var(--theme-text);
-    text-decoration: underline;
+  .mcp-access-field__tab:hover {
+    color: var(--color-text);
   }
 
-  .mcp-access-field__action-sep {
-    color: var(--theme-elevation-300);
-    font-size: 0.75rem;
+  .mcp-access-field__tab--active {
+    border-block-end-color: var(--color-bg-brand);
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  .mcp-access-field__cards {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) / 2);
+  }
+
+  /* The collapsible header is pointer-events: none so clicks reach the toggle
+     overlay; re-enable events on the checkbox and lift it above the toggle. */
+  .mcp-access-field__card-checkbox {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    pointer-events: auto;
+  }
+
+  .mcp-access-field__leaf-group {
+    padding-block: calc(var(--base) / 2);
+    border-block-end: 1px solid var(--theme-elevation-100);
+  }
+
+  .mcp-access-field__leaf-group:first-child {
+    padding-block-start: 0;
+  }
+
+  .mcp-access-field__leaf-group:last-child {
+    border-block-end: none;
+    padding-block-end: 0;
+  }
+
+  .mcp-access-field__leaf-group-label {
+    margin: 0 0 calc(var(--base) / 2);
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
   }
 
   .mcp-access-field__list {
@@ -88,6 +109,14 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: calc(var(--base) / 3);
+    gap: calc(var(--base) / 2);
+  }
+
+  .mcp-access-field__leaf-description {
+    margin: calc(var(--base) / 6) 0 0;
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
   }
 }
