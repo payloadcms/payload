@@ -119,7 +119,9 @@ export const DocumentDrawerHeader: React.FC<{
     }
   }, [updatedAt, createdAt, i18n, dateFormat])
 
-  const showUpdatedAt = Boolean(collectionConfig?.timestamps && isEditing && relativeTime)
+  const showUpdatedAt = Boolean(
+    collectionConfig?.timestamps && isEditing && (updatedAt || createdAt),
+  )
 
   const handleOnClose = useCallback(() => {
     if (isModified) {
@@ -172,9 +174,11 @@ export const DocumentDrawerHeader: React.FC<{
               className={`${documentDrawerBaseClass}__updated-at`}
               title={formattedUpdatedAt || formattedCreatedAt || undefined}
             >
-              {t(isTrashed ? 'general:deletedAgo' : 'general:updatedAgo', {
-                distance: relativeTime,
-              })}
+              {relativeTime
+                ? t(isTrashed ? 'general:deletedAgo' : 'general:updatedAgo', {
+                    distance: relativeTime,
+                  })
+                : `${t('general:loading')}...`}
             </span>
           ) : null}
           {showAutosave ? (
