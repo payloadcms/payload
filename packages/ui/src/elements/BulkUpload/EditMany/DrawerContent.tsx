@@ -75,6 +75,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
         schemaPath: collection.slug,
         select,
         signal: controller.signal,
+        skipConditionChecks: true,
         skipValidation: !submitted,
       })
 
@@ -126,6 +127,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
             return acc
           }, {} as SelectType),
         ),
+        skipConditionChecks: true,
         skipValidation: true,
       })
 
