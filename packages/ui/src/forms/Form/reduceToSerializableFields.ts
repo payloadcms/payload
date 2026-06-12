@@ -10,6 +10,11 @@ const sanitizeField = (incomingField: FormField): FormField => {
     delete field[key]
   }
 
+  // Rows carry their own customComponents (RowLabel). Strip those too.
+  if (Array.isArray(field.rows)) {
+    field.rows = field.rows.map(({ customComponents: _customComponents, ...rest }) => rest)
+  }
+
   return field
 }
 
