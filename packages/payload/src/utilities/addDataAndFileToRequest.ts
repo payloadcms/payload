@@ -102,6 +102,13 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
           throw new APIError('Expected response from the upload handler.')
         }
 
+        if (response.status >= 300 && response.status < 400) {
+          const redirectUrl = response.headers.get('Location')
+          if (redirectUrl) {
+            response = await fetch(redirectUrl)
+          }
+        }
+
         req.file = {
           name: filename,
           clientUploadContext,
