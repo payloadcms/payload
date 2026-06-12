@@ -129,7 +129,7 @@ export type DefaultTranslationKeys =
   | NestedKeysStripped<DefaultTranslationsObject>
 
 export type ClientTranslationKeys<
-  TExtraProps = CustomTranslationKey | (typeof clientTranslationKeys)[number],
+  TExtraProps = (typeof clientTranslationKeys)[number] | CustomTranslationKey,
 > = TExtraProps
 
 // Use GenericTranslationsObject instead of reconstructing the object from the client keys. This is because reconstructing the object is
