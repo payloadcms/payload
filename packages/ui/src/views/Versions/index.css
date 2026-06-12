@@ -65,7 +65,7 @@
     text-underline-position: from-font;
 
     &:hover {
-      text-decoration-color: currentColor;
+      text-decoration-color: var(--color-text);
     }
   }
 
