@@ -208,6 +208,84 @@ describe('Relationship Field', () => {
     })
   })
 
+  test('should batch multiple relationship value fetches into a single request', async () => {
+    // Create additional relation-one docs so we have many values to fetch
+    const extraDocs = await Promise.all(
+      Array.from({ length: 3 }, (_, i) =>
+        payload.create({
+          collection: relationOneSlug,
+          data: { name: `batch-test-${i}` },
+        }),
+      ),
+    )
+
+    const allRelationIds = [
+      relationOneDoc.id,
+      anotherRelationOneDoc.id,
+      ...extraDocs.map((d) => d.id),
+    ]
+
+    // Create a doc with multiple hasMany relationship values
+    const doc = await payload.create({
+      collection: slug,
+      data: {
+        relationship: relationOneDoc.id,
+        relationshipHasMany: allRelationIds,
+      },
+    })
+
+    // Navigate to the edit page of this doc and assert that only a single
+    // request is made to /api/relation-one to resolve all relationship values.
+    // Without batching, each value would trigger its own request (N requests).
+    const requests = await assertNetworkRequests(
+      page,
+      `/api/${relationOneSlug}`,
+      async () => {
+        await page.goto(url.edit(doc.id))
+
+        // Wait for relationship field values to be fully resolved
+        const hasManyValues = page.locator(
+          '#field-relationshipHasMany .relationship--multi-value-label__text',
+        )
+
+        await expect(hasManyValues).toHaveCount(allRelationIds.length, { timeout: 10000 })
+      },
+      {
+        allowedNumberOfRequests: 1,
+        timeout: 5000,
+        requestFilter: (request) => {
+          if (
+            request.method() !== 'POST' ||
+            request.headers()['x-payload-http-method-override'] !== 'GET'
+          ) {
+            return false
+          }
+
+          // Distinguish batch value-resolution requests (where[id][in])
+          // from dropdown-options requests (where[and])
+          const body = request.postData() ?? ''
+          return body.includes('where%5Bid%5D%5Bin%5D') || body.includes('where[id][in]')
+        },
+      },
+    )
+
+    // Verify the single request fetched all IDs in one batch
+    const batchRequest = requests.find((r) => {
+      const body = r.postData() ?? ''
+      return allRelationIds.every((id) => body.includes(String(id)))
+    })
+
+    // eslint-disable-next-line payload/no-flaky-assertions
+    expect(batchRequest).toBeDefined()
+
+    // Clean up
+    await payload.delete({ collection: slug, id: doc.id })
+
+    for (const extraDoc of extraDocs) {
+      await payload.delete({ collection: relationOneSlug, id: extraDoc.id })
+    }
+  })
+
   // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
   test.skip('should create relations to multiple collections', async () => {
     await loadCreatePage()
