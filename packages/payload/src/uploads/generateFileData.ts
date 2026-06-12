@@ -221,8 +221,15 @@ export const generateFileData = async <T>({
 
     if (fileSupportsResize || isImage(file.mimetype)) {
       dimensions = await getImageSize(file)
-      fileData.width = dimensions.width
-      fileData.height = dimensions.height
+
+      // Fall back to client-supplied dimensions when the bytes couldn't be probed
+      // (e.g. a client upload whose handler returned a redirect / empty body).
+      if (!dimensions && typeof file.width === 'number' && typeof file.height === 'number') {
+        dimensions = { height: file.height, width: file.width }
+      }
+
+      fileData.width = dimensions?.width
+      fileData.height = dimensions?.height
     }
 
     if (sharpFile) {
