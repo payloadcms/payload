@@ -586,6 +586,8 @@ export const enTranslations = {
     invalidSelections: 'This field has the following invalid selections:',
     latitudeOutOfBounds: 'Latitude must be between -90 and 90.',
     lessThanMin: '{{value}} is less than the min allowed {{label}} of {{min}}.',
+    lexicalUnsupportedNodes:
+      'This rich text uses node types that are not enabled for this field (for example lists require the unordered or ordered list features).',
     limitReached: 'Limit reached, only {{max}} items can be added.',
     longerThanMin: 'This value must be longer than the minimum length of {{minLength}} characters.',
     longitudeOutOfBounds: 'Longitude must be between -180 and 180.',
