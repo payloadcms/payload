@@ -156,6 +156,14 @@
     border-color: var(--color-border-selected-strong);
   }
 
+  /* Selected state - pill buttons */
+  .btn.btn--style-pill.btn--selected,
+  .btn.btn--style-pill.btn--selected:hover,
+  .btn.btn--style-pill.btn--selected:active {
+    background-color: var(--color-bg-selected);
+    color: var(--color-text-selected);
+  }
+
   /* Icon */
 
   .btn__icon {
