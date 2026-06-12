@@ -127,6 +127,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Sąrašai',
     toolbarItemsActive: '{{count}} aktyvus',
   },
+  ms: {
+    placeholder: "Mula menaip atau tekan '/' untuk arahan...",
+    slashMenuBasicGroupLabel: 'Asas',
+    slashMenuListGroupLabel: 'Senarai',
+    toolbarItemsActive: '{{count}} aktif',
+  },
   my: {
     placeholder: "Mula menaip, atau tekan '/' untuk arahan...",
     slashMenuBasicGroupLabel: 'အခြေခံ',

@@ -55,6 +55,9 @@ export const i18n: Partial<GenericLanguages> = {
   ko: {
     label: '비정렬 목록',
   },
+  ms: {
+    label: 'Senarai berbulet',
+  },
   my: {
     label: 'Senarai Tidak Tertib',
   },
