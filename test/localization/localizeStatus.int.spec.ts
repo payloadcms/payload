@@ -615,6 +615,21 @@ describe('localizeStatus migration', () => {
   })
 
   describe.skipIf(process.env.PAYLOAD_DATABASE !== 'mongodb')('MongoDB', () => {
+    // Force collection and index creation to finish before the timed writes below.
+    // With autoIndex enabled on a fresh database, the first write to a versions
+    // collection kicks off async index builds; a subsequent write can then race
+    // with that catalog change and fail with a transient "catalog changes" error.
+    // Model.init() resolves once autoCreate and autoIndex have completed.
+    beforeAll(async () => {
+      const db = payload.db as any
+      const slugs = ['testMigrationPosts', 'testMigrationArticles']
+
+      for (const slug of slugs) {
+        await db.collections?.[slug]?.init?.()
+        await db.versions?.[slug]?.init?.()
+      }
+    })
+
     describe('MongoDB version status migration', () => {
       it('should migrate version._status from string to per-locale object', async () => {
         // Step 1: Create a post with a version
