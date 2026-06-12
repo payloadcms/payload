@@ -156,7 +156,7 @@ mcpPlugin({
 
 | Option             | Type       | Description                                                                                                                                                             |
 | ------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `description`      | `string`   | Description shown for this collection in discovery responses.                                                                                                          |
+| `description`      | `string`   | Description shown for this collection in discovery responses.                                                                                                           |
 | `tools`            | `object`   | Map of tool name → configuration. See [Configuring tools](#configuring-per-collection-tools) and [Defining custom tools](#defining-custom-tools-prompts-and-resources). |
 | `overrideResponse` | `function` | Intercept the response of any built-in tool for this collection (`(response, doc, req) => response`). See [Modifying responses](#modifying-responses).                  |
 
@@ -335,12 +335,12 @@ The HTTP endpoint requires a Bearer API key on every request. API keys live in t
 ### Creating an API key
 
 1. Start your Payload server and open the admin panel
-2. Go to **MCP → API Keys**
-3. Click **Create New**
+2. Open the user menu (avatar in the header), then **Settings → Manage API keys**
+3. Click **Create New**, then click **Generate new key**
 4. Pick the user the key represents (its Payload access control rules become the key's ceiling)
-5. In the **Access** field, leave items checked to allow them, uncheck them to deny - every collection tool, global tool, prompt, resource, and top-level tool is listed
+5. Under **Permissions**, leave items checked to allow them, uncheck them to deny - the Collections, Globals, and Server tabs list every collection tool, global tool, prompt, resource, and top-level tool
 6. Optionally check **Override access control** to make local-API calls performed by this key run with `overrideAccess: true` (use sparingly; this bypasses Payload access rules)
-7. Save and copy the generated key
+7. Save and copy the key
 
 ### Dev-mode session fallback
 
