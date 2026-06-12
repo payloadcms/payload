@@ -54,6 +54,10 @@
     width: 100%;
   }
 
+  .versions .table td.cell--linked > a:hover {
+    text-decoration: underline;
+  }
+
   .versions .paginator {
     margin-bottom: 0;
   }
