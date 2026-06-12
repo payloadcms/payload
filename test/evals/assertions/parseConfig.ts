@@ -1,5 +1,7 @@
 import ts from 'typescript'
 
+import type { AdapterName } from './types.js'
+
 export type ParsedField = {
   /** For `blocks` fields: the parsed block configs in `blocks: [...]`. */
   blocks?: ParsedBlock[]
@@ -21,19 +23,33 @@ export type ParsedCollection = {
   access: Record<string, boolean>
   fields: ParsedField[]
   hooks: Record<string, boolean>
+  /** Top-level collection keys excluding `fields`, `hooks`, `access`, `slug`. Captures `versions`, `auth`, `admin`, `timestamps`, `upload`, etc. as raw AST expressions. */
+  options: Record<string, ts.Expression>
   slug?: string
 }
 
 export type ParsedConfig = {
   collections: ParsedCollection[]
+  /** Top-level buildConfig keys excluding `collections`, `db`, and `jobs`. Captured as raw AST expressions so dotted paths can be walked. */
+  configOptions: Record<string, ts.Expression>
+  /** Parsed db adapter call: which adapter is in use and the object literal passed to it. */
+  db?: { adapter: '<unknown>' | AdapterName; options: Record<string, ts.Expression> }
+  /** Parsed jobs config. */
+  jobs?: {
+    options: Record<string, ts.Expression>
+    tasks: Array<{ slug?: string }>
+    workflows: Array<{ slug?: string }>
+  }
+  /** Top-level symbol table mapping identifier names to their AST initializers. Exposed so the evaluator's `walkPath` helper can chase identifier references across nested paths. */
+  symbols: Map<string, ts.Expression>
 }
 
 /**
  * Parses an LLM-generated payload.config.ts source string into a structural
  * model focused on what the assertion DSL needs (collection slugs, fields,
- * hooks at each level, access functions, block definitions). Resolves
- * top-level identifier references so configs that pull collections out into
- * named consts work.
+ * hooks at each level, access functions, block definitions, top-level config
+ * options, db adapter options, and jobs config). Resolves top-level identifier
+ * references so configs that pull collections out into named consts work.
  */
 export function parseConfig(source: string): ParsedConfig {
   const sourceFile = ts.createSourceFile('config.ts', source, ts.ScriptTarget.Latest, true)
@@ -41,15 +57,73 @@ export function parseConfig(source: string): ParsedConfig {
 
   const buildConfigCall = findBuildConfigCall(sourceFile)
   if (!buildConfigCall || buildConfigCall.arguments.length === 0) {
-    return { collections: [] }
+    return { collections: [], configOptions: {}, symbols }
   }
 
   const configArg = resolveToObjectLiteral(buildConfigCall.arguments[0]!, symbols)
   if (!configArg) {
-    return { collections: [] }
+    return { collections: [], configOptions: {}, symbols }
   }
 
-  return { collections: collectCollections(configArg, symbols) }
+  const configOptions = collectConfigOptions(configArg)
+  const db = collectDbAdapter(configArg, symbols)
+  const jobs = collectJobs(configArg, symbols)
+
+  return {
+    collections: collectCollections(configArg, symbols),
+    configOptions,
+    db,
+    jobs,
+    symbols,
+  }
+}
+
+/**
+ * Structured result from `walkPath`. On success, `expr` holds the resolved
+ * expression. On failure, `failedAt` names the segment that couldn't be
+ * resolved and `reason` distinguishes "the key was absent" from "the
+ * intermediate node was not an object literal".
+ */
+export type WalkPathResult =
+  | { expr: ts.Expression; ok: true }
+  | { failedAt: string; ok: false; reason: 'missing' | 'not-object' }
+
+/**
+ * Walks a dotted path through nested object literals, resolving identifier
+ * references at each step via the symbols map.
+ *
+ * For example, given the expression for `admin: { importMap: { baseDir: './src' } }`
+ * and path `['admin', 'importMap', 'baseDir']`, returns the expression for `'./src'`.
+ *
+ * Returns a structured result indicating success or the specific failure reason
+ * (missing key or non-object intermediate node).
+ *
+ * Boolean shorthand: when the final path segment resolves to an
+ * `ObjectLiteralExpression`, the evaluator may treat that as satisfying
+ * `value: true` (presence of an object means the feature is enabled). This
+ * function returns the object expression — the caller decides how to compare.
+ */
+export function walkPath(
+  expr: ts.Expression,
+  path: string[],
+  symbols: Map<string, ts.Expression>,
+): WalkPathResult {
+  if (path.length === 0) {
+    return { expr, ok: true }
+  }
+  const obj = resolveToObjectLiteral(expr, symbols)
+  const [head, ...rest] = path as [string, ...string[]]
+  if (!obj) {
+    return { failedAt: head, ok: false, reason: 'not-object' }
+  }
+  const next = getProp(obj, head)
+  if (!next) {
+    return { failedAt: head, ok: false, reason: 'missing' }
+  }
+  if (rest.length === 0) {
+    return { expr: next, ok: true }
+  }
+  return walkPath(next, rest, symbols)
 }
 
 function collectTopLevelSymbols(sourceFile: ts.SourceFile): Map<string, ts.Expression> {
@@ -100,7 +174,7 @@ function unwrap(node: ts.Expression): ts.Expression {
   return current
 }
 
-function resolveToObjectLiteral(
+export function resolveToObjectLiteral(
   node: ts.Expression,
   symbols: Map<string, ts.Expression>,
   seen: Set<string> = new Set(),
@@ -229,8 +303,8 @@ function collectBlocks(
       continue
     }
     blocks.push({
-      fields: collectFieldsFrom(blockObj, symbols),
       slug: getString(getProp(blockObj, 'slug')),
+      fields: collectFieldsFrom(blockObj, symbols),
     })
   }
   return blocks
@@ -242,10 +316,10 @@ function parseField(
 ): ParsedField {
   const type = getString(getProp(fieldObj, 'type'))
   const field: ParsedField = {
-    hooks: collectHooks(fieldObj, symbols),
     name: getString(getProp(fieldObj, 'name')),
-    options: collectFieldOptions(fieldObj),
     type,
+    hooks: collectHooks(fieldObj, symbols),
+    options: collectFieldOptions(fieldObj),
   }
   if (type === 'array' || type === 'group') {
     field.fields = collectFieldsFrom(fieldObj, symbols)
@@ -279,6 +353,9 @@ function collectFieldsFrom(
   return fields
 }
 
+/** The set of collection keys that are handled by dedicated parsers (not captured in `options`). */
+const COLLECTION_RESERVED_KEYS = new Set(['access', 'fields', 'hooks', 'slug'])
+
 function collectCollections(
   configArg: ts.ObjectLiteralExpression,
   symbols: Map<string, ts.Expression>,
@@ -297,14 +374,142 @@ function collectCollections(
     if (!collObj) {
       continue
     }
+    // Capture collection-level options: every key except the reserved ones.
+    const options: Record<string, ts.Expression> = {}
+    for (const prop of collObj.properties) {
+      if (
+        ts.isPropertyAssignment(prop) &&
+        ts.isIdentifier(prop.name) &&
+        !COLLECTION_RESERVED_KEYS.has(prop.name.text)
+      ) {
+        options[prop.name.text] = prop.initializer
+      }
+    }
     collections.push({
+      slug: getString(getProp(collObj, 'slug')),
       access: collectAccess(collObj, symbols),
       fields: collectFieldsFrom(collObj, symbols),
       hooks: collectHooks(collObj, symbols),
-      slug: getString(getProp(collObj, 'slug')),
+      options,
     })
   }
   return collections
+}
+
+function collectConfigOptions(
+  configArg: ts.ObjectLiteralExpression,
+): Record<string, ts.Expression> {
+  const out: Record<string, ts.Expression> = {}
+  for (const prop of configArg.properties) {
+    if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
+      out[prop.name.text] = prop.initializer
+    } else if (ts.isShorthandPropertyAssignment(prop)) {
+      // e.g. buildConfig({ csrf }) where csrf is a top-level const
+      // Use the name identifier as the expression so the symbols map can resolve it
+      out[prop.name.text] = prop.name
+    }
+  }
+  return out
+}
+
+/** Maps adapter function names to their short discriminator strings. */
+const ADAPTER_NAME_MAP: Record<string, AdapterName> = {
+  d1SqliteAdapter: 'd1-sqlite',
+  mongooseAdapter: 'mongoose',
+  postgresAdapter: 'postgres',
+  sqliteAdapter: 'sqlite',
+  vercelPostgresAdapter: 'vercel-postgres',
+}
+
+function collectDbAdapter(
+  configArg: ts.ObjectLiteralExpression,
+  symbols: Map<string, ts.Expression>,
+): ParsedConfig['db'] {
+  const dbProp = getProp(configArg, 'db')
+  if (!dbProp) {
+    return undefined
+  }
+  const expr = unwrap(dbProp)
+  // db value must be a call expression like postgresAdapter({ ... })
+  if (!ts.isCallExpression(expr)) {
+    return undefined
+  }
+  const callee = unwrap(expr.expression)
+  const calleeName = ts.isIdentifier(callee) ? callee.text : undefined
+  const adapter = calleeName ? (ADAPTER_NAME_MAP[calleeName] ?? '<unknown>') : '<unknown>'
+
+  // Extract options from the first argument object
+  const options: Record<string, ts.Expression> = {}
+  if (expr.arguments.length > 0) {
+    const argsObj = resolveToObjectLiteral(expr.arguments[0]!, symbols)
+    if (argsObj) {
+      for (const prop of argsObj.properties) {
+        if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
+          options[prop.name.text] = prop.initializer
+        }
+      }
+    }
+  }
+  return { adapter, options }
+}
+
+function collectJobs(
+  configArg: ts.ObjectLiteralExpression,
+  symbols: Map<string, ts.Expression>,
+): ParsedConfig['jobs'] {
+  const jobsProp = getProp(configArg, 'jobs')
+  if (!jobsProp) {
+    return undefined
+  }
+  const jobsObj = resolveToObjectLiteral(jobsProp, symbols)
+  if (!jobsObj) {
+    return undefined
+  }
+
+  // Collect tasks
+  const tasks: Array<{ slug?: string }> = []
+  const tasksProp = getProp(jobsObj, 'tasks')
+  if (tasksProp) {
+    const arr = resolveToArrayLiteral(tasksProp, symbols)
+    if (arr) {
+      for (const element of arr.elements) {
+        const taskObj = resolveToObjectLiteral(element, symbols)
+        if (taskObj) {
+          tasks.push({ slug: getString(getProp(taskObj, 'slug')) })
+        }
+      }
+    }
+  }
+
+  // Collect workflows
+  const workflows: Array<{ slug?: string }> = []
+  const workflowsProp = getProp(jobsObj, 'workflows')
+  if (workflowsProp) {
+    const arr = resolveToArrayLiteral(workflowsProp, symbols)
+    if (arr) {
+      for (const element of arr.elements) {
+        const wfObj = resolveToObjectLiteral(element, symbols)
+        if (wfObj) {
+          workflows.push({ slug: getString(getProp(wfObj, 'slug')) })
+        }
+      }
+    }
+  }
+
+  // Collect other jobs options (e.g. autoRun)
+  const options: Record<string, ts.Expression> = {}
+  for (const prop of jobsObj.properties) {
+    if (
+      ts.isPropertyAssignment(prop) &&
+      ts.isIdentifier(prop.name) &&
+      prop.name.text !== 'tasks' &&
+      prop.name.text !== 'workflows'
+    ) {
+      options[prop.name.text] = prop.initializer
+    }
+  }
+
+  return { options, tasks, workflows }
 }
 
 /**

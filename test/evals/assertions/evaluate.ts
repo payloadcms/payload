@@ -1,3 +1,5 @@
+import ts from 'typescript'
+
 import type { Assertion } from './types.js'
 
 import {
@@ -5,6 +7,8 @@ import {
   parseConfig,
   type ParsedCollection,
   type ParsedField,
+  resolveToObjectLiteral,
+  walkPath,
 } from './parseConfig.js'
 
 /**
@@ -26,7 +30,7 @@ export function evaluateAssertions(source: string, assertions: Assertion[]): str
 
   const errors: string[] = []
   for (const assertion of assertions) {
-    const error = evaluateOne(assertion, parsed.collections)
+    const error = evaluateOne(assertion, parsed)
     if (error) {
       errors.push(error)
     }
@@ -34,7 +38,8 @@ export function evaluateAssertions(source: string, assertions: Assertion[]): str
   return errors
 }
 
-function evaluateOne(assertion: Assertion, collections: ParsedCollection[]): null | string {
+function evaluateOne(assertion: Assertion, parsed: ReturnType<typeof parseConfig>): null | string {
+  const { collections } = parsed
   switch (assertion.kind) {
     case 'blockField': {
       const collection = findCollection(collections, assertion.slug)
@@ -83,6 +88,122 @@ function evaluateOne(assertion: Assertion, collections: ParsedCollection[]): nul
       }
       if (!collection.hooks[assertion.hook]) {
         return `expected collection-level hooks.${assertion.hook} on collection "${assertion.slug}"`
+      }
+      return null
+    }
+
+    case 'collectionOption': {
+      const collection = findCollection(collections, assertion.slug)
+      if (!collection) {
+        return `expected collection "${assertion.slug}" (for option "${assertion.path}")`
+      }
+      const segments = assertion.path.split('.')
+      const [root, ...rest] = segments as [string, ...string[]]
+      const rootExpr = collection.options[root]
+      if (!rootExpr) {
+        return `expected collection "${assertion.slug}" to have option "${assertion.path}"`
+      }
+      let expr: ts.Expression
+      if (rest.length > 0) {
+        const result = walkPath(rootExpr, rest, parsed.symbols)
+        if (!result.ok) {
+          return result.reason === 'missing'
+            ? `expected collection "${assertion.slug}" option "${assertion.path}" to exist (missing segment "${result.failedAt}")`
+            : `expected collection "${assertion.slug}" option "${assertion.path}" path to descend through object literals (segment "${result.failedAt}" is not an object literal)`
+        }
+        expr = result.expr
+      } else {
+        expr = rootExpr
+      }
+      if (assertion.value !== undefined) {
+        const error = checkValueWithBooleanShorthand(
+          expr,
+          assertion.value,
+          `collection "${assertion.slug}" option "${assertion.path}"`,
+          parsed.symbols,
+        )
+        if (error) {
+          return error
+        }
+      }
+      return null
+    }
+
+    case 'configOption': {
+      const segments = assertion.path.split('.')
+      const [root, ...rest] = segments as [string, ...string[]]
+      const rootExpr = parsed.configOptions[root]
+      if (!rootExpr) {
+        return `expected buildConfig to have option "${assertion.path}"`
+      }
+      let expr: ts.Expression
+      if (rest.length > 0) {
+        const result = walkPath(rootExpr, rest, parsed.symbols)
+        if (!result.ok) {
+          return result.reason === 'missing'
+            ? `expected buildConfig option "${assertion.path}" to exist (missing segment "${result.failedAt}")`
+            : `expected buildConfig option "${assertion.path}" path to descend through object literals (segment "${result.failedAt}" is not an object literal)`
+        }
+        expr = result.expr
+      } else {
+        expr = rootExpr
+      }
+      if (assertion.value !== undefined) {
+        const error = checkValueWithBooleanShorthand(
+          expr,
+          assertion.value,
+          `buildConfig option "${assertion.path}"`,
+          parsed.symbols,
+        )
+        if (error) {
+          return error
+        }
+      }
+      return null
+    }
+
+    case 'dbAdapterOption': {
+      if (!parsed.db) {
+        return `expected db adapter to be configured (for option "${assertion.path}")`
+      }
+      if (assertion.adapter && parsed.db.adapter !== assertion.adapter) {
+        return `expected db adapter "${assertion.adapter}", got "${parsed.db.adapter}"`
+      }
+      const isUnknownAdapter = parsed.db.adapter === '<unknown>'
+      const segments = assertion.path.split('.')
+      const [root, ...rest] = segments as [string, ...string[]]
+      const rootExpr = parsed.db.options[root]
+      if (!rootExpr) {
+        const unknownNote = isUnknownAdapter
+          ? ' (note: parser did not recognize the db adapter call expression)'
+          : ''
+        return `expected db adapter to have option "${assertion.path}"${unknownNote}`
+      }
+      let expr: ts.Expression
+      if (rest.length > 0) {
+        const result = walkPath(rootExpr, rest, parsed.symbols)
+        if (!result.ok) {
+          const unknownNote = isUnknownAdapter
+            ? ' (note: parser did not recognize the db adapter call expression)'
+            : ''
+          return result.reason === 'missing'
+            ? `expected db adapter option "${assertion.path}" to exist (missing segment "${result.failedAt}")${unknownNote}`
+            : `expected db adapter option "${assertion.path}" path to descend through object literals (segment "${result.failedAt}" is not an object literal)${unknownNote}`
+        }
+        expr = result.expr
+      } else {
+        expr = rootExpr
+      }
+      if (assertion.value !== undefined) {
+        const error = checkValueWithBooleanShorthand(
+          expr,
+          assertion.value,
+          `db adapter option "${assertion.path}"`,
+          parsed.symbols,
+        )
+        if (error) {
+          return error
+        }
       }
       return null
     }
@@ -141,13 +262,73 @@ function evaluateOne(assertion: Assertion, collections: ParsedCollection[]): nul
       }
       if (assertion.value !== undefined) {
         const actual = literalValue(expr)
-        if (actual !== assertion.value) {
-          return `expected field "${describeFieldPath(assertion)}" option "${assertion.option}" to equal ${JSON.stringify(assertion.value)}, got ${JSON.stringify(actual)}`
+        if (actual === assertion.value) {
+          return null
         }
+        if (actual === undefined) {
+          // expr exists but is not a primitive literal (function call, identifier, etc.)
+          return `expected field "${describeFieldPath(assertion)}" option "${assertion.option}" to equal ${JSON.stringify(assertion.value)}, got non-literal expression (${ts.SyntaxKind[expr.kind]})`
+        }
+        return `expected field "${describeFieldPath(assertion)}" option "${assertion.option}" to equal ${JSON.stringify(assertion.value)}, got ${JSON.stringify(actual)}`
       }
       return null
     }
+
+    case 'jobsTask': {
+      if (!parsed.jobs) {
+        return `expected jobs config to be present (for task "${assertion.slug}")`
+      }
+      return parsed.jobs.tasks.some((t) => t.slug === assertion.slug)
+        ? null
+        : `expected jobs.tasks to contain a task with slug "${assertion.slug}"`
+    }
+
+    case 'jobsWorkflow': {
+      if (!parsed.jobs) {
+        return `expected jobs config to be present (for workflow "${assertion.slug}")`
+      }
+      return parsed.jobs.workflows.some((w) => w.slug === assertion.slug)
+        ? null
+        : `expected jobs.workflows to contain a workflow with slug "${assertion.slug}"`
+    }
+
+    default: {
+      const _exhaustive: never = assertion
+      return null
+    }
   }
+}
+
+/**
+ * Checks a walked expression against an expected value, implementing the
+ * boolean shorthand rule:
+ *
+ * When `expected` is `true` AND the expression resolves to an ObjectLiteral,
+ * the check passes — an object value implies the feature is enabled (e.g.
+ * `auth.loginWithUsername: { allowEmailLogin: true }` satisfies `value: true`).
+ *
+ * For `expected: false` or any primitive, strict literal equality is required.
+ *
+ * Returns an error string on mismatch, or `null` on success.
+ */
+function checkValueWithBooleanShorthand(
+  expr: ts.Expression,
+  expected: boolean | number | string,
+  label: string,
+  symbols: Map<string, ts.Expression>,
+): null | string {
+  // Boolean shorthand: object presence satisfies value: true
+  if (expected === true) {
+    const asObj = resolveToObjectLiteral(expr, symbols)
+    if (asObj) {
+      return null
+    }
+  }
+  const actual = literalValue(expr)
+  if (actual !== expected) {
+    return `expected ${label} to equal ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`
+  }
+  return null
 }
 
 type FieldLookup = {
