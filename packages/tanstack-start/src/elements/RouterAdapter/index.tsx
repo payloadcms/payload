@@ -5,6 +5,7 @@ import type { LinkAdapterProps, RouterAdapterComponent } from 'payload'
 
 import { RouterAdapterContext } from '@payloadcms/ui'
 import { Link as TanStackLink, useLocation, useParams, useRouter } from '@tanstack/react-router'
+import * as qs from 'qs-esm'
 import React, { useCallback, useMemo } from 'react'
 
 const normalizeNavigationTarget = ({
@@ -68,31 +69,47 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
     return adapted
   }, [params])
 
+  // Split a target into `to` (pathname) + a parsed `search` object, so the
+  // router serializes the query via its `stringifySearch` (qs, bracket-encoded)
+  // rather than embedding the raw string in `to`. Navigating with a string `to`
+  // leaves the search *unencoded* in `window.location.search`
+  // (e.g. `where[or][0]…`), which then never matches Payload's `qs.stringify`
+  // output (`where%5Bor%5D…`) — breaking the list-view `syncPropsToURL` guard,
+  // which compares the two and would otherwise clobber optimistic query state
+  // (e.g. an in-progress filter condition) on every navigation.
+  const toNavOptions = useCallback((path: string) => {
+    const relativePath = normalizeNavigationTarget({
+      path,
+      pathname: window.location.pathname,
+      search: window.location.search,
+    })
+    const queryIndex = relativePath.indexOf('?')
+    if (queryIndex === -1) {
+      return { to: relativePath }
+    }
+    const searchObject = qs.parse(relativePath.slice(queryIndex + 1), {
+      depth: 10,
+      ignoreQueryPrefix: true,
+    })
+    // Function form replaces the search entirely (no merge with current search).
+    return { search: () => searchObject, to: relativePath.slice(0, queryIndex) }
+  }, [])
+
   const back = useCallback(() => router.history.back(), [router])
   const push = useCallback(
     (path: string, options?: { scroll?: boolean }) => {
-      const relativePath = normalizeNavigationTarget({
-        path,
-        pathname: window.location.pathname,
-        search: window.location.search,
-      })
-      void router.navigate({ resetScroll: options?.scroll, to: relativePath })
+      void router.navigate({ ...toNavOptions(path), resetScroll: options?.scroll })
     },
-    [router],
+    [router, toNavOptions],
   )
   const refresh = useCallback(() => {
     void router.invalidate()
   }, [router])
   const replace = useCallback(
     (path: string, options?: { scroll?: boolean }) => {
-      const relativePath = normalizeNavigationTarget({
-        path,
-        pathname: window.location.pathname,
-        search: window.location.search,
-      })
-      void router.navigate({ replace: true, resetScroll: options?.scroll, to: relativePath })
+      void router.navigate({ ...toNavOptions(path), replace: true, resetScroll: options?.scroll })
     },
-    [router],
+    [router, toNavOptions],
   )
 
   const adaptedRouter = useMemo(

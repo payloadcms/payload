@@ -39,7 +39,10 @@ function PayloadLayout() {
         user={data.user}
       >
         <ProgressBar />
-        <Outlet />
+        {/* `data.providers` is the custom-provider tree (config.admin.components.providers)
+            already wrapping the router <Outlet />; falls back to a bare <Outlet /> when
+            no custom providers are configured. */}
+        {(data as any).providers ?? <Outlet />}
       </RootProvider>
       <div id="portal" />
     </>

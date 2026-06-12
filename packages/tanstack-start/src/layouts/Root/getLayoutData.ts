@@ -1,9 +1,15 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ImportMap, LanguageOptions, SanitizedConfig } from 'payload'
+import type { ImportMap, LanguageOptions, SanitizedConfig, ServerProps } from 'payload'
 
 import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
-import { applyLocaleFiltering } from 'payload/shared'
+import { Outlet } from '@tanstack/react-router'
+import {
+  applyLocaleFiltering,
+  getFromImportMap,
+  isReactServerComponentOrFunction,
+} from 'payload/shared'
+import { createElement } from 'react'
 
 import type { RootLayoutData } from './index.js'
 
@@ -59,6 +65,42 @@ export async function getLayoutData({
 
   await applyLocaleFiltering({ clientConfig, config, req })
 
+  // Build the custom admin provider tree (`config.admin.components.providers`)
+  // nested around the router `<Outlet />`, mirroring the Next adapter's
+  // `NestProviders`. Returned as an unrendered element; the caller's server
+  // function renders it to an RSC payload (so server-component providers run
+  // server-side and client providers wrap the live Outlet). `undefined` when
+  // no custom providers are configured — the caller falls back to `<Outlet />`.
+  const providerPaths = config.admin?.components?.providers
+  let providers: React.ReactNode = undefined
+  if (Array.isArray(providerPaths) && providerPaths.length > 0) {
+    const serverProps: ServerProps = {
+      i18n: req.i18n,
+      params: {},
+      payload: req.payload,
+      permissions,
+      searchParams: {},
+      user: req.user ?? undefined,
+    }
+    providers = providerPaths.reduceRight<React.ReactNode>((children, providerPath) => {
+      const Component = getFromImportMap<React.ComponentType<any>>({
+        importMap,
+        PayloadComponent: providerPath,
+        schemaPath: '',
+      })
+      if (!Component) {
+        return children
+      }
+      // Only server components receive `serverProps` — they carry non-serializable
+      // values (payload instance, req fns) that cannot be passed to a client
+      // component across the RSC boundary. Client providers get just `children`.
+      const props = isReactServerComponentOrFunction(Component)
+        ? { ...serverProps, children }
+        : { children }
+      return createElement(Component, props)
+    }, createElement(Outlet))
+  }
+
   return {
     clientConfig,
     dateFNSKey: req.i18n.dateFNSKey,
@@ -68,6 +110,7 @@ export async function getLayoutData({
     languageOptions,
     locale: req.locale ?? undefined,
     permissions,
+    providers,
     theme,
     translations: req.i18n.translations,
     user: req.user,

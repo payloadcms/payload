@@ -24,6 +24,13 @@ export type RootLayoutData = {
   languageOptions: LanguageOptions
   locale?: string
   permissions: SanitizedPermissions
+  /**
+   * Custom admin provider tree (`config.admin.components.providers`) nested
+   * around the router `<Outlet />`. Built unrendered by `getLayoutData`; the
+   * layout server function renders it to an RSC payload before it reaches the
+   * client. `undefined` when no custom providers are configured.
+   */
+  providers?: React.ReactNode
   theme: Theme
   translations: I18nClient['translations']
   user: null | TypedUser

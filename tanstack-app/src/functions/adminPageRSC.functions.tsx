@@ -10,7 +10,7 @@ type LoadInput = {
 }
 
 type LoadResult =
-  | { _notFound: true }
+  | { _notFound: true; routeKey?: string; rscPayload?: React.ReactNode }
   | { _redirect: string }
   | {
       metadata: AdminPageMetadata
@@ -98,7 +98,12 @@ const toAdminPageMetadata = (meta: MetaConfig): AdminPageMetadata => {
   return {
     description: typeof meta.description === 'string' ? meta.description : undefined,
     icons: icons?.length ? icons : undefined,
-    keywords: typeof keywords === 'string' ? keywords : Array.isArray(keywords) ? keywords.join(', ') : undefined,
+    keywords:
+      typeof keywords === 'string'
+        ? keywords
+        : Array.isArray(keywords)
+          ? keywords.join(', ')
+          : undefined,
     openGraph: og
       ? {
           description: typeof og.description === 'string' ? og.description : undefined,
@@ -181,29 +186,38 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
       throw new Error(`redirect:${url}`)
     }
 
-    // Renders Payload's NotFound view (`.not-found`) with a 404 status, matching
-    // the Next adapter which serves `renderNotFoundPage` for
-    // `req.server.notFound()`. Used for notFound thrown both during `renderRoot`
-    // orchestration (unknown route) and deep inside a streamed view component
-    // (access denied) — TanStack's generic `notFound()` would render its own
-    // component instead of Payload's.
+    // Build the 404 result the route loader re-throws as TanStack `notFound()`.
+    //
+    // Throwing `notFound()` is the only way to set the SSR document status to 404
+    // (it's read from `router.stores.statusCode`, set by a not-found match — NOT
+    // from `setResponseStatus`, which only affects the RSC RPC response). But the
+    // matching `notFoundComponent` is a client component with no access to the
+    // Payload `req`, so it can't build the admin chrome on its own. To match Next
+    // (whose not-found route renders the full admin layout — nav sidebar, etc. —
+    // around the NotFound body, see `renderNotFoundPage`), we render that same
+    // shared `renderNotFoundPage` tree here, server-side, and ship its Flight
+    // payload through the `notFound()` error so the client renders it verbatim.
+    // For users without admin access `renderNotFoundPage` returns the bare
+    // `NotFoundClient`, preserving the access-denied behavior.
     const renderNotFound = async (): Promise<LoadResult> => {
-      const { setResponseStatus } = await import('@tanstack/react-start/server')
-      setResponseStatus(404)
       const { renderNotFoundPage } = await import('@payloadcms/ui/views/NotFound/page')
+
       const notFoundNode = await renderNotFoundPage({
         config: Promise.resolve(config),
         importMap,
-        initReq: boundInitReq,
-        params: Promise.resolve({ segments }),
+        initReq: (args) =>
+          initReq({
+            configPromise: args.configPromise,
+            importMap: args.importMap,
+            overrides: args.overrides,
+          }),
+        params: Promise.resolve({ segments: splatSegments }),
         searchParams: Promise.resolve(searchParams),
       })
-      const notFoundPayload = await renderServerComponent(notFoundNode as React.ReactElement)
 
-      return {
-        metadata: { title: 'Not Found' },
-        rscPayload: notFoundPayload,
-      } as unknown as LoadResult
+      const rscPayload = await renderServerComponent(notFoundNode as React.ReactElement)
+
+      return { _notFound: true, routeKey: data._splat ?? '', rscPayload }
     }
 
     try {
