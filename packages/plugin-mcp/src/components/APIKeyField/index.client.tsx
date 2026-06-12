@@ -1,6 +1,11 @@
 'use client'
 
-import { APIKeyInput, Button, useField, WarningTriangleIcon } from '@payloadcms/ui'
+import type {
+  PluginMCPTranslationKeys,
+  PluginMCPTranslations,
+} from '../../translations/index.js'
+
+import { APIKeyInput, Button, useField, useTranslation, WarningTriangleIcon } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
 import './index.css'
@@ -16,6 +21,7 @@ const baseClass = 'mcp-api-key-field'
 export const APIKeyField: React.FC = () => {
   const { setValue: setApiKey, value: apiKey } = useField<string>({ path: 'apiKey' })
   const { setValue: setEnableAPIKey } = useField<boolean>({ path: 'enableAPIKey' })
+  const { t } = useTranslation<PluginMCPTranslations, PluginMCPTranslationKeys>()
   const [isWarningDismissed, setIsWarningDismissed] = useState(false)
 
   const generateKey = () => {
@@ -26,22 +32,19 @@ export const APIKeyField: React.FC = () => {
 
   return (
     <div className={baseClass}>
-      {/* TODO: needs i18n once design is finalized */}
       <p className={`${baseClass}__description`}>
-        API keys control which collections, resources, tools, and prompts MCP clients can access.
+        {t('plugin-mcp:apiKeyDescription')}
       </p>
       <div className={`${baseClass}__panel`}>
         <div className={`${baseClass}__header`}>
-          {/* TODO: needs i18n once design is finalized */}
-          <span className={`${baseClass}__title`}>API key</span>
+          <span className={`${baseClass}__title`}>{t('plugin-mcp:apiKey')}</span>
           {!apiKey && (
-            // TODO: needs i18n once design is finalized
             <Button
               buttonStyle="primary"
               className={`${baseClass}__generate`}
               onClick={generateKey}
             >
-              Generate new key
+              {t('plugin-mcp:generateNewKey')}
             </Button>
           )}
         </div>
@@ -50,13 +53,12 @@ export const APIKeyField: React.FC = () => {
             {!isWarningDismissed && (
               <div className={`${baseClass}__warning`}>
                 <WarningTriangleIcon className={`${baseClass}__warning-icon`} />
-                {/* TODO: needs i18n once design is finalized */}
                 <p className={`${baseClass}__warning-text`}>
-                  <strong>Keep your key private.</strong>
-                  {' This key is what gives MCP access to your content. Don’t share it with others!'}
+                  <strong>{t('plugin-mcp:keepKeyPrivate')}</strong>
+                  {` ${t('plugin-mcp:keyPrivateDescription')}`}
                 </p>
                 <button
-                  aria-label="Dismiss"
+                  aria-label={t('plugin-mcp:dismiss')}
                   className={`${baseClass}__warning-dismiss`}
                   onClick={() => setIsWarningDismissed(true)}
                   type="button"
@@ -65,7 +67,7 @@ export const APIKeyField: React.FC = () => {
                 </button>
               </div>
             )}
-            <APIKeyInput aria-label="API key" value={apiKey} />
+            <APIKeyInput aria-label={t('plugin-mcp:apiKey')} value={apiKey} />
           </div>
         )}
       </div>

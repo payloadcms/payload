@@ -1,10 +1,14 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
+
 import { defaultUserCollection, definePlugin } from 'payload'
 
+import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig } from './types.js'
 
 import { getAPIKeysCollection } from './collection/index.js'
 import { mcpEndpoint } from './endpoint/index.js'
 import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
+import { translations } from './translations/index.js'
 
 declare module 'payload' {
   export interface PayloadRequest {
@@ -44,6 +48,32 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
     }
 
     ;(config.collections ??= []).push(getAPIKeysCollection({ pluginConfig }))
+
+    if (!config.i18n) {
+      config.i18n = {}
+    }
+
+    if (!config.i18n.translations) {
+      config.i18n.translations = {}
+    }
+
+    const supportedLanguageKeys = config.i18n.supportedLanguages
+      ? Object.keys(config.i18n.supportedLanguages)
+      : ['en']
+
+    for (const lang of supportedLanguageKeys) {
+      const pluginEntry = translations[lang as keyof typeof translations]
+      if (!pluginEntry) {
+        continue
+      }
+
+      const typedLocale = lang as AcceptedLanguages
+      const existing = (config.i18n.translations[typedLocale] ?? {}) as Record<string, unknown>
+      config.i18n.translations[typedLocale] = {
+        ...existing,
+        'plugin-mcp': pluginEntry.translations['plugin-mcp'],
+      } as PluginDefaultTranslationsObject
+    }
 
     // Keep the API-keys collection registered even when disabled, so DB schema
     // and generated types don't drift between enabled/disabled environments.

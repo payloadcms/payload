@@ -42,13 +42,20 @@ export const getAPIKeysCollection = ({
       {
         name: 'label',
         type: 'text',
-        admin: { description: 'A useful nickname for the API key.', position: 'sidebar' },
-        label: 'Title',
+        admin: {
+          description: ({ t }) => t('plugin-mcp:titleDescription'),
+          position: 'sidebar',
+        },
+        label: ({ t }) => t('plugin-mcp:title'),
       },
       {
         name: 'description',
         type: 'text',
-        admin: { description: 'Describe the purpose of the API key.', position: 'sidebar' },
+        admin: {
+          description: ({ t }) => t('plugin-mcp:descriptionDescription'),
+          position: 'sidebar',
+        },
+        label: ({ t }) => t('plugin-mcp:description'),
       },
       {
         name: 'lastUsed',
@@ -58,13 +65,16 @@ export const getAPIKeysCollection = ({
           position: 'sidebar',
           readOnly: true,
         },
-        label: 'Last used',
+        label: ({ t }) => t('plugin-mcp:lastUsed'),
       },
       {
         name: 'user',
         type: 'relationship',
-        admin: { description: 'The user the MCP will act as.', position: 'sidebar' },
-        label: 'Owner',
+        admin: {
+          description: ({ t }) => t('plugin-mcp:userDescription'),
+          position: 'sidebar',
+        },
+        label: ({ t }) => t('plugin-mcp:owner'),
         relationTo: pluginConfig.userCollection,
         required: true,
       },
@@ -72,17 +82,16 @@ export const getAPIKeysCollection = ({
         name: 'overrideAccess',
         type: 'checkbox',
         admin: {
-          description:
-            'When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.',
+          description: ({ t }) => t('plugin-mcp:overrideAccessDescription'),
           position: 'sidebar',
         },
         defaultValue: false,
-        label: 'Override access control',
+        label: ({ t }) => t('plugin-mcp:overrideAccess'),
       },
     ],
     labels: {
-      plural: 'API Keys',
-      singular: 'API Key',
+      plural: ({ t }) => t('plugin-mcp:apiKeys'),
+      singular: ({ t }) => t('plugin-mcp:apiKey'),
     },
     versions: false,
   }

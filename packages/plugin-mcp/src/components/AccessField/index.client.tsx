@@ -1,8 +1,12 @@
 'use client'
 
 import type { JSONFieldClientProps } from 'payload'
+import type {
+  PluginMCPTranslationKeys,
+  PluginMCPTranslations,
+} from '../../translations/index.js'
 
-import { CheckboxInput, Collapsible, useField } from '@payloadcms/ui'
+import { CheckboxInput, Collapsible, useField, useTranslation } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
 import type { ClientMCPPluginConfig, MCPAPIKeysDocAccessTree } from '../../types.js'
@@ -16,12 +20,9 @@ type ScopeKey = 'collections' | 'globals'
 type FlatKey = 'prompts' | 'resources' | 'tools'
 type TabKey = 'collections' | 'globals' | 'server'
 
-// TODO: group labels need i18n once design is finalized
-const LEAF_GROUPS = [
-  { key: 'operations', label: 'Operations' },
-  { key: 'auth', label: 'Authentication' },
-  { key: 'custom', label: 'Custom' },
-] as const
+const LEAF_GROUP_KEYS = ['operations', 'auth', 'custom'] as const
+
+type LeafGroupKey = (typeof LEAF_GROUP_KEYS)[number]
 
 type Props = {
   pluginConfig: ClientMCPPluginConfig
@@ -47,8 +48,14 @@ const setKey = <T extends Record<string, unknown>>(
 
 export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
   const { setValue, value } = useField<MCPAPIKeysDocAccessTree>({ path })
+  const { t } = useTranslation<PluginMCPTranslations, PluginMCPTranslationKeys>()
   const [activeTab, setActiveTab] = useState<null | TabKey>(null)
   const access = value ?? {}
+  const leafGroupLabels: Record<LeafGroupKey, string> = {
+    auth: t('plugin-mcp:authentication'),
+    custom: t('plugin-mcp:custom'),
+    operations: t('plugin-mcp:operations'),
+  }
 
   const collectionsBySlug: Record<string, ClientItem[]> = {}
   const globalsBySlug: Record<string, ClientItem[]> = {}
@@ -167,9 +174,10 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
     onToggleLeaf: (leaf: ClientItem, allow: boolean) => void
   }) => {
     const allowedCount = leaves.filter(isLeafAllowed).length
-    const groups = LEAF_GROUPS.map((group) => ({
-      ...group,
-      leaves: leaves.filter((leaf) => (leaf.group ?? 'custom') === group.key),
+    const groups = LEAF_GROUP_KEYS.map((key) => ({
+      key,
+      label: leafGroupLabels[key],
+      leaves: leaves.filter((leaf) => (leaf.group ?? 'custom') === key),
     })).filter((group) => group.leaves.length > 0)
     const hasGroupLabels = groups.length > 1
 
@@ -236,16 +244,15 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
       onToggleLeaf: (leaf, allow) => toggleFlat(scope, leaf.configKey, allow),
     })
 
-  // TODO: tab labels need i18n once design is finalized
   const tabs: Array<{ key: TabKey; label: string }> = [
     ...(Object.keys(collectionsBySlug).length > 0
-      ? [{ key: 'collections' as const, label: 'Collections' }]
+      ? [{ key: 'collections' as const, label: t('plugin-mcp:collections') }]
       : []),
     ...(Object.keys(globalsBySlug).length > 0
-      ? [{ key: 'globals' as const, label: 'Globals' }]
+      ? [{ key: 'globals' as const, label: t('plugin-mcp:globals') }]
       : []),
     ...(prompts.length > 0 || resources.length > 0 || tools.length > 0
-      ? [{ key: 'server' as const, label: 'Server' }]
+      ? [{ key: 'server' as const, label: t('plugin-mcp:server') }]
       : []),
   ]
   const currentTab = activeTab ?? tabs[0]?.key
@@ -257,10 +264,8 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
   return (
     <div className={baseClass}>
       <header className={`${baseClass}__header`}>
-        {/* TODO: needs i18n once design is finalized */}
-        <h4>Permissions</h4>
-        {/* TODO: needs i18n once design is finalized */}
-        <p>Allow MCP clients to access the following collections, tools, resources, and prompts.</p>
+        <h4>{t('plugin-mcp:permissions')}</h4>
+        <p>{t('plugin-mcp:permissionsDescription')}</p>
       </header>
       <div className={`${baseClass}__tabs`} role="tablist">
         {tabs.map((tab) => (
@@ -283,10 +288,9 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
         {currentTab === 'globals' && renderScope('globals', globalsBySlug)}
         {currentTab === 'server' && (
           <>
-            {/* TODO: card labels need i18n once design is finalized */}
-            {renderFlat('prompts', 'Prompts', prompts)}
-            {renderFlat('resources', 'Resources', resources)}
-            {renderFlat('tools', 'Tools', tools)}
+            {renderFlat('prompts', t('plugin-mcp:prompts'), prompts)}
+            {renderFlat('resources', t('plugin-mcp:resources'), resources)}
+            {renderFlat('tools', t('plugin-mcp:tools'), tools)}
           </>
         )}
       </div>

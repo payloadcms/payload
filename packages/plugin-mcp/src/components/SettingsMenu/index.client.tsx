@@ -1,6 +1,11 @@
 'use client'
 
-import { PopupList, useConfig } from '@payloadcms/ui'
+import type {
+  PluginMCPTranslationKeys,
+  PluginMCPTranslations,
+} from '../../translations/index.js'
+
+import { PopupList, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
@@ -11,19 +16,18 @@ import React from 'react'
  */
 export const MCPSettingsMenu: React.FC = () => {
   const { config } = useConfig()
+  const { t } = useTranslation<PluginMCPTranslations, PluginMCPTranslationKeys>()
 
   return (
     <PopupList.MenuItem>
-      {/* TODO: needs i18n once design is finalized */}
-      <PopupList.GroupLabel label="MCP" />
+      <PopupList.GroupLabel label={t('plugin-mcp:mcp')} />
       <PopupList.Button
         href={formatAdminURL({
           adminRoute: config.routes.admin,
           path: '/collections/payload-mcp-api-keys',
         })}
       >
-        {/* TODO: needs i18n once design is finalized */}
-        Manage API keys
+        {t('plugin-mcp:manageAPIKeys')}
       </PopupList.Button>
     </PopupList.MenuItem>
   )
