@@ -4,7 +4,8 @@ import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { useIntersect } from '../../hooks/useIntersect.js'
 import './index.css'
 
-const EDGE_GUTTER = 8
+// Breathing room (px) between a shifted tooltip and its clipping edge. Maps to `--spacer-1`.
+const EDGE_GUTTER = 4
 
 const getClipBoundary = (el: HTMLElement | null): DOMRect | null => {
   let current = el?.parentElement || null

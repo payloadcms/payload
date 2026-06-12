@@ -95,7 +95,11 @@
 
   .tooltip--position-top {
     top: 0;
-    transform: translate3d(var(--tooltip-x), calc(-100% - var(--caret-height) - var(--caret-offset) + 1px), 0);
+    transform: translate3d(
+      var(--tooltip-x),
+      calc(-100% - var(--caret-height) - var(--caret-offset) + 1px),
+      0
+    );
 
     .tooltip__caret {
       --color-border: var(--ramp-grey-700);
@@ -109,7 +113,11 @@
 
   .tooltip--position-bottom {
     top: 100%;
-    transform: translate3d(var(--tooltip-x), calc(var(--caret-height) + var(--caret-offset) - 1px), 0);
+    transform: translate3d(
+      var(--tooltip-x),
+      calc(var(--caret-height) + var(--caret-offset) - 1px),
+      0
+    );
 
     .tooltip__caret {
       bottom: calc(100% - 0.5px);
