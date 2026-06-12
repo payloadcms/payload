@@ -129,7 +129,10 @@ export const updateOperation = async <
 
     let accessResult: AccessResult
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, collectionConfig.access.update)
+      accessResult = await executeAccess(
+        { data: bulkUpdateData, req },
+        collectionConfig.access.update,
+      )
     }
 
     await validateQueryPaths({
