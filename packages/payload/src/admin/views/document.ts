@@ -22,10 +22,6 @@ export type RenderDocumentVersionsProperties = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CreatedAtCellOverride?: (props: any) => any
   /**
-   * @default false
-   */
-  disableGutter?: boolean
-  /**
    * @deprecated Pass `CreatedAtCellOverride` directly instead.
    * @default false
    */

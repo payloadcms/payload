@@ -1,6 +1,8 @@
-import type { Payload } from '../../../../types/index.js'
+import type { Payload } from 'payload'
 
-import { calculateVersionLocaleStatuses, toSnakeCase } from '../shared.js'
+import { calculateVersionLocaleStatuses } from 'payload/migrations'
+import toSnakeCase from 'to-snake-case'
+
 import { migrateMainCollectionStatus } from './migrateMainCollection.js'
 import { migrateMainGlobalStatus } from './migrateMainGlobal.js'
 
@@ -13,8 +15,9 @@ export type LocalizeStatusArgs = {
   sql: any
 }
 
-export async function up(args: LocalizeStatusArgs): Promise<void> {
+export async function migratePostgresLocalizeStatus(args: LocalizeStatusArgs): Promise<void> {
   const { collectionSlug, db, globalSlug, payload, req, sql } = args
+  const schemaName = db.schemaName ?? 'public'
 
   if (!collectionSlug && !globalSlug) {
     throw new Error('Either collectionSlug or globalSlug must be provided')
@@ -84,7 +87,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     sql: sql`
       SELECT EXISTS (
         SELECT FROM information_schema.columns
-        WHERE table_schema = 'public'
+        WHERE table_schema = ${schemaName}
         AND table_name = ${versionsTable}
         AND column_name = 'version__status'
       ) as exists
@@ -105,7 +108,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     sql: sql`
       SELECT EXISTS (
         SELECT FROM information_schema.tables
-        WHERE table_schema = 'public'
+        WHERE table_schema = ${schemaName}
         AND table_name = ${localesTable}
       ) as exists
     `,
@@ -176,14 +179,34 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
       msg: `Found existing locales in table: ${existingLocales.join(', ')}`,
     })
 
+    // Check if the snapshot column exists (only present on DBs that used publishSpecificLocale)
+    const snapshotColumnCheckResult = await db.execute({
+      drizzle: db.drizzle,
+      sql: sql`
+        SELECT EXISTS (
+          SELECT FROM information_schema.columns
+          WHERE table_schema = ${schemaName}
+          AND table_name = ${versionsTable}
+          AND column_name = 'snapshot'
+        ) as exists
+      `,
+    })
+    const hasSnapshotColumn = snapshotColumnCheckResult.rows[0]?.exists === true
+
     // Get all version records grouped by parent document, ordered chronologically
     const versionsResult = await db.execute({
       drizzle: db.drizzle,
-      sql: sql`
-        SELECT id, parent_id as parent, version__status as _status, published_locale, snapshot, created_at
-        FROM ${sql.identifier(versionsTable)}
-        ORDER BY parent_id, created_at ASC
-      `,
+      sql: hasSnapshotColumn
+        ? sql`
+          SELECT id, parent_id as parent, version__status as _status, published_locale, snapshot, created_at
+          FROM ${sql.identifier(versionsTable)}
+          ORDER BY parent_id, created_at ASC
+        `
+        : sql`
+          SELECT id, parent_id as parent, version__status as _status, published_locale, created_at
+          FROM ${sql.identifier(versionsTable)}
+          ORDER BY parent_id, created_at ASC
+        `,
     })
 
     // Use shared function to calculate version locale statuses
@@ -235,7 +258,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     sql: sql`
       SELECT EXISTS (
         SELECT FROM information_schema.tables
-        WHERE table_schema = 'public'
+        WHERE table_schema = ${schemaName}
         AND table_name = ${mainLocalesTable}
       ) as exists
     `,
@@ -248,7 +271,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
       sql: sql`
         SELECT EXISTS (
           SELECT FROM information_schema.columns
-          WHERE table_schema = 'public'
+          WHERE table_schema = ${schemaName}
           AND table_name = ${mainLocalesTable}
           AND column_name = '_status'
         ) as exists
@@ -291,7 +314,7 @@ export async function up(args: LocalizeStatusArgs): Promise<void> {
     sql: sql`
       SELECT EXISTS (
         SELECT FROM information_schema.columns
-        WHERE table_schema = 'public'
+        WHERE table_schema = ${schemaName}
         AND table_name = ${mainTable}
         AND column_name = '_status'
       ) as exists
