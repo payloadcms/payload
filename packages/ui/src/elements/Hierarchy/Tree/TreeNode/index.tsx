@@ -116,6 +116,9 @@ export const TreeNode = ({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      if (e.target !== e.currentTarget) {
+        return
+      }
       switch (e.key) {
         case ' ':
         case 'Enter':
@@ -148,7 +151,11 @@ export const TreeNode = ({
       aria-level={depth + 1}
       aria-selected={selected}
       className={baseClass}
-      onFocus={handleFocus}
+      onFocus={(e) => {
+        if (e.target === e.currentTarget) {
+          handleFocus()
+        }
+      }}
       onKeyDown={handleKeyDown}
       ref={nodeRef}
       role="treeitem"
