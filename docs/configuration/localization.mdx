@@ -183,6 +183,50 @@ status: {
 
 If localization is not configured, or the collection/global has no localized fields, the `status` field remains a single string (`'draft'` or `'published'`) representing document status across all locales.
 
+### Publishing and unpublishing per locale
+
+When the `_status` field is localized, publishing and unpublishing are scoped to a single locale by default. The locale being acted on is the one provided to the operation (via the `locale` parameter, or the request locale). This means publishing in one locale leaves the other locales' statuses untouched.
+
+```ts
+// Publishes ONLY the Spanish status; English, German, etc. are unchanged
+await payload.update({
+  collection: 'posts',
+  id,
+  locale: 'es',
+  data: { _status: 'published' },
+})
+```
+
+To publish or unpublish every locale at once, use `publishAllLocales` or `unpublishAllLocales`. These set the status for all locales the user has access to, regardless of the active locale:
+
+```ts
+// Publishes every locale
+await payload.update({
+  collection: 'posts',
+  id,
+  publishAllLocales: true,
+  data: { _status: 'published' },
+})
+
+// Unpublishes every locale
+await payload.update({
+  collection: 'posts',
+  id,
+  unpublishAllLocales: true,
+  data: { _status: 'draft' },
+})
+```
+
+Passing `locale: 'all'` together with `_status: 'published'` also publishes every locale, and is equivalent to `publishAllLocales: true`.
+
+<Banner type="info">
+  When the `_status` field is **not** localized (localization disabled, or no
+  localized fields), publishing and unpublishing always apply to the whole
+  document, and `publishAllLocales` / `unpublishAllLocales` have no effect.
+</Banner>
+
+The same parameters are available on `payload.updateGlobal()` for globals, as well as on the REST and Local APIs.
+
 ## Retrieving Localized Docs
 
 When retrieving documents, you can specify which locale you'd like to receive as well as which fallback locale should be
