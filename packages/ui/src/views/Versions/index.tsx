@@ -33,11 +33,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
     },
     routeSegments: segments,
     searchParams: { limit, page, sort },
-    versions: {
-      CreatedAtCellOverride,
-      disableGutter = false,
-      useVersionDrawerCreatedAtCell = false,
-    } = {},
+    versions: { CreatedAtCellOverride, useVersionDrawerCreatedAtCell = false } = {},
   } = props
 
   const draftsEnabled = hasDraftsEnabled(collectionConfig || globalConfig)

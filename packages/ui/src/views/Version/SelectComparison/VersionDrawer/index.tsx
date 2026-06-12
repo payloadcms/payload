@@ -67,7 +67,6 @@ export const VersionDrawerContent: React.FC<{
             redirectAfterDuplicate: false,
             searchParams: Object.fromEntries(searchParams.entries()),
             versions: {
-              disableGutter: true,
               useVersionDrawerCreatedAtCell: true,
             },
           })
