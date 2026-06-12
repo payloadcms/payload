@@ -42,6 +42,7 @@ export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> 
         timezone,
         user: user.id,
       },
+      queue: payload.config.jobs?.scheduledPublishQueue,
       task: 'schedulePublish',
       waitUntil: date,
     })
