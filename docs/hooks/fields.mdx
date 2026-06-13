@@ -180,6 +180,13 @@ membership level (Standard, Premium, VIP). The hook monitors changes in the memb
 logs the update and can be used to trigger further actions, such as tracking conversion from one tier to another or
 notifying them about changes in their membership benefits.
 
+<Banner type="success">
+  **NOTE:** `beforeChange` and `afterChange` hooks only run after validation has
+  passed and the document is successfully saved. If validation fails, these
+  hooks will not be triggered. Use field-level validate for logic that should
+  run on invalid input.
+</Banner>
+
 ### afterRead
 
 The `afterRead` hook is invoked after a field value is read from the database. This is ideal for formatting or
