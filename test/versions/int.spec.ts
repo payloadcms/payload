@@ -30,6 +30,7 @@ import {
   draftWithUploadCollectionSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
+  mediaCollectionSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -1050,6 +1051,131 @@ describe('Versions', () => {
       })
 
       expect(restoredVersion.id).toStrictEqual(originalPost.id)
+    })
+
+    it('should clear upload field when restoring a version where the field was never set', async () => {
+      // Create a media document for testing
+      const mediaDoc = await payload.create({
+        collection: mediaCollectionSlug,
+        data: {},
+        filePath: path.resolve(dirname, './image.png'),
+      })
+
+      // 1. Publish a document WITHOUT an upload field value
+      const originalPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          description: 'no image',
+          title: 'upload-test-no-image',
+        },
+      })
+
+      // 2. Draft save WITH an upload field value
+      await payload.update({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        data: {
+          media: mediaDoc.id,
+        },
+        draft: true,
+      })
+
+      // Verify the draft has the media
+      const draftWithMedia = await payload.findByID({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        draft: true,
+      })
+      expect(draftWithMedia.media).toBeDefined()
+
+      // 3. Find the original published version (oldest)
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: { equals: originalPost.id },
+        },
+      })
+      const publishedVersion = versions.docs[versions.docs.length - 1]
+
+      // 4. Restore the published version (which has no image)
+      await payload.restoreVersion({
+        id: publishedVersion!.id,
+        collection: draftCollectionSlug,
+      })
+
+      // 5. Verify the upload field is cleared
+      const restoredPost = await payload.findByID({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        draft: true,
+      })
+
+      expect(restoredPost.media).toBeFalsy()
+    })
+
+    it('should clear relationship field when restoring a version where the field was never set', async () => {
+      // Create a related document
+      const relatedPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          description: 'related',
+          title: 'relation-target',
+        },
+      })
+
+      // 1. Publish a document WITHOUT a relationship field value
+      const originalPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          description: 'no relation',
+          title: 'relation-test-no-relation',
+        },
+      })
+
+      // 2. Draft save WITH a relationship field value
+      await payload.update({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        data: {
+          relation: relatedPost.id,
+        },
+        draft: true,
+      })
+
+      // Verify the draft has the relation
+      const draftWithRelation = await payload.findByID({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        draft: true,
+      })
+      expect(draftWithRelation.relation).toBeDefined()
+
+      // 3. Find the original published version (oldest)
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: { equals: originalPost.id },
+        },
+      })
+      const publishedVersion = versions.docs[versions.docs.length - 1]
+
+      // 4. Restore the published version (which has no relation)
+      await payload.restoreVersion({
+        id: publishedVersion!.id,
+        collection: draftCollectionSlug,
+      })
+
+      // 5. Verify the relationship field is cleared
+      const restoredPost = await payload.findByID({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        draft: true,
+      })
+
+      expect(restoredPost.relation).toBeFalsy()
     })
 
     it('findVersions - pagination should work correctly', async () => {

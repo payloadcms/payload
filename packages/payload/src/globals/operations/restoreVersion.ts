@@ -4,6 +4,7 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { NotFound } from '../../errors/index.js'
+import { fieldAffectsData } from '../../fields/config/types.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -106,6 +107,18 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     let result = rawVersion.version
 
     if (global) {
+      // Ensure relationship/upload fields missing from the restored version
+      // are explicitly set to null so that database adapters clear stale values.
+      for (const field of globalConfig.flattenedFields) {
+        if (
+          (field.type === 'relationship' || field.type === 'upload') &&
+          fieldAffectsData(field) &&
+          !(field.name in result)
+        ) {
+          result[field.name] = null
+        }
+      }
+
       // Ensure updatedAt date is always updated
       result.updatedAt = new Date().toISOString()
       result = await payload.db.updateGlobal({
