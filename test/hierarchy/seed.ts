@@ -17,19 +17,19 @@ export async function seed(payload: Payload): Promise<void> {
 
   await payload.create({
     collection: divisionsSlug,
-    data: { parent: alphaDivision.id, title: 'Alpha Child One' },
+    data: { parent: alphaDivision.id, title: 'Alpha Child 1' },
   })
   await payload.create({
     collection: divisionsSlug,
-    data: { parent: alphaDivision.id, title: 'Alpha Child Two' },
+    data: { parent: alphaDivision.id, title: 'Alpha Child 2' },
   })
   await payload.create({
     collection: divisionsSlug,
-    data: { parent: alphaDivision.id, title: 'Alpha Child Three' },
+    data: { parent: alphaDivision.id, title: 'Alpha Child 3' },
   })
   await payload.create({
     collection: divisionsSlug,
-    data: { parent: alphaDivision.id, title: 'Alpha Child Four' },
+    data: { parent: alphaDivision.id, title: 'Alpha Child 4' },
   })
 
   await payload.create({ collection: divisionsSlug, data: { title: 'Beta Division' } })
