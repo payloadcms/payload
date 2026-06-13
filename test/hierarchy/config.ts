@@ -155,7 +155,7 @@ export const Organizations: CollectionConfig = {
           path: '/components/ColorCircleIcon.tsx#ColorCircleIcon',
         },
       },
-      treeLimit: 2,
+      treeLimit: 3,
     },
     parentFieldName: 'parent',
   },

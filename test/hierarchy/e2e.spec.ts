@@ -183,11 +183,16 @@ test.describe('Hierarchy Sidebar', () => {
       await page.keyboard.press('ArrowLeft')
       await expect(acmeNode).toHaveAttribute('aria-expanded', 'false')
 
-      // Open Acme with ArrowRight, then navigate vertically through root nodes
+      // Open Acme with ArrowRight, then navigate vertically through its children
       await page.keyboard.press('ArrowRight')
       await expect(acmeNode).toHaveAttribute('aria-expanded', 'true')
+      await expect(tree.getByText('Engineering Division')).toBeVisible()
       await page.keyboard.press('ArrowDown')
-      await expect.poll(getActiveText).toContain('Beta Corp')
+      await expect.poll(getActiveText).toContain('Engineering Division')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Marketing Division')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Paged Division')
       await page.keyboard.press('ArrowDown')
       await expect.poll(getActiveClass).toContain('tree__load-more-button')
 
@@ -195,11 +200,11 @@ test.describe('Hierarchy Sidebar', () => {
       const urlBefore = page.url()
       await page.keyboard.press('Enter')
       await expect(page).toHaveURL(urlBefore)
-      await expect(tree.getByRole('treeitem', { name: /Gamma Corp/ })).toBeVisible()
+      await expect(tree.getByText('Zeta Division')).toBeVisible()
 
-      // Continue vertical navigation into the newly loaded root node
+      // Continue vertical navigation through the newly loaded Acme children
       await page.keyboard.press('ArrowDown')
-      await expect.poll(getActiveText).toContain('Gamma Corp')
+      await expect.poll(getActiveText).toContain('Zeta Division')
     })
   })
 

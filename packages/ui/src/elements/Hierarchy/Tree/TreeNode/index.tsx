@@ -137,12 +137,13 @@ export const TreeNode = ({
           e.preventDefault()
           e.stopPropagation()
           if (hasChildren && !expanded) {
+            void load()
             onToggle({ id: node.id })
           }
           break
       }
     },
-    [hasChildren, expanded, handleSelectClick, onToggle, node.id],
+    [expanded, handleSelectClick, hasChildren, load, node.id, onToggle],
   )
 
   return (
