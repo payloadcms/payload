@@ -4,7 +4,7 @@ export const myTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'အကောင့်',
     accountOfCurrentUser: 'သင့် အကောင့်',
-    accountVerified: 'Akaun telah disahkan dengan jayanya.',
+    accountVerified: 'အကောင့်ကို အောင်မြင်စွာ အတည်ပြုပြီးပါပြီ။',
     alreadyActivated: 'အတည်ပြုပြီး',
     alreadyLoggedIn: 'ဝင်ရောက်ပြီးသား',
     apiKey: 'API Key',
@@ -13,13 +13,13 @@ export const myTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'အသုံးပြုသူတစ်ဦးကို တည်ဆောက်၍ စတင်ပါ။',
     changePassword: 'စကားဝှက် ပြောင်းလဲမည်။',
     checkYourEmailForPasswordReset:
-      'Jika alamat e-mel dikaitkan dengan akaun, anda akan menerima arahan untuk menetapkan semula kata laluan anda sebentar lagi. Sila semak folder spam atau junk mail anda jika anda tidak melihat e-mel di kotak masuk anda.',
+    'အကောင့်နှင့် ချိတ်ဆက်ထားသော အီးမေးလ်လိပ်စာ ရှိပါက၊ စကားဝှက် ပြန်လည်သတ်မှတ်ရန် လမ်းညွှန်ချက်များကို မကြာမီ လက်ခံရရှိမည်ဖြစ်သည်။ သင့် spam သို့မဟုတ် junk mail ဖိုင်တွဲကို ကြည့်ပါ။',
     confirmGeneration: 'Generation အတည်ပြု',
     confirmPassword: 'စကားဝှက်အား ထပ်မံ ရိုက်ထည့်ပါ။',
     createFirstUser: 'ပထမဆုံး အသုံးပြုသူကို ဖန်တီးပါ။',
     createUser: 'အသုံးပြုသူဖန်တီးပါ',
     emailNotValid: 'ထည့်သွင်းထားသော အီးမေလ်မှာ မှားယွင်းနေပါသည်။',
-    emailOrUsername: 'E-mel atau Nama Pengguna',
+    emailOrUsername: 'အီးမေးလ် သို့မဟုတ် အသုံးပြုသူအမည်',
     emailSent: 'မေးလ် ပို့ထားပါသည်။',
     emailVerified: 'အီးမေးလ်အတည်ပြုခဲ့ပါပြီ။',
     emailVerifiedRedirecting:
@@ -32,7 +32,7 @@ export const myTranslations: DefaultTranslationsObject = {
       'ကျေးဇူးပြု၍ သင့်အီးမေးလ်ကို ထည့်သွင်းပါ။ သင့်စကားဝှက်ကို ပြန်လည်သတ်မှတ်နိုင်ရန် အီးမေးလ်စာတစ်စောင်ကို သင်လက်ခံရရှိမည်ဖြစ်သည်။',
     forgotPasswordQuestion: 'စကားဝှက် မေ့နေပါသလား။',
     forgotPasswordUsernameInstructions:
-      'Sila masukkan nama pengguna anda di bawah. Arahan mengenai bagaimana untuk menetapkan semula kata laluan anda akan dihantar ke alamat emel yang dikaitkan dengan nama pengguna anda.',
+    'သင့်အသုံးပြုသူအမည်ကို ဖော်ပြပါနေရာတွင် ထည့်သွင်းပါ။ သင့်အသုံးပြုသူအမည်နှင့် ချိတ်ဆက်ထားသော အီးမေးလ်လိပ်စာသို့ စကားဝှက် ပြန်လည်သတ်မှတ်ရန် လမ်းညွှန်ချက်များ ပေးပို့မည်ဖြစ်သည်။',
     generate: 'Generate',
     generateNewAPIKey: 'API key အသစ်ဖန်တီးရန်',
     generatingNewAPIKeyWillInvalidate:
@@ -51,7 +51,7 @@ export const myTranslations: DefaultTranslationsObject = {
     loginWithAnotherUser: 'အခြားအကောင့်နှင့် လော့ဂ်အင်ဝင်လိုပါက <0>လော့ဂ်အောက်</0> ပြုလုပ်ပါ။',
     logOut: 'အကောင့်ထဲက ထွက်မည်။',
     logout: 'အကောင့်မှ ထွက်မည်၊',
-    logoutSuccessful: 'Log keluar berjaya.',
+    logoutSuccessful: 'အောင်မြင်စွာ ထွက်ပြီးပါပြီ။',
     logoutUser: 'လော့ဂ်အောက် အသုံးပြုသူ',
     newAccountCreated:
       '<a href="{{serverURL}}">{{serverURL}}</a> သို့ဝင်ရောက်ရန် သင့်အီးမေးလ်ကို အတည်ပြုရန်အတွက် အကောင့်အသစ်တစ်ခုကို ယခုလေးတင် ဖန်တီးပြီးပါပြီ။ ကျေးဇူးပြု၍ အောက်ပါလင့်ခ်ကို နှိပ်ပါ သို့မဟုတ် သင့်အီးမေးလ်ကို အတည်ပြုရန် ဖော်ပြပါ လင့်ခ်ကို သင့်ဘရောက်ဆာထဲသို့ ကူးထည့်ပါ- <a href="{{verificationURL}}">{{verificationURL}}</a><br> သင့်အီးမေးလ်ကို အတည်ပြုပြီးနောက်၊ သင်သည် အောင်မြင်စွာ လော့ဂ်အင်ဝင်နိုင်ပါမည်။',
@@ -65,11 +65,11 @@ export const myTranslations: DefaultTranslationsObject = {
     resetPasswordToken: 'စကားဝှက် တိုကင်အား ပြန်လည်သတ်မှတ်',
     resetYourPassword: 'သင့်စကားဝှက်ကို ပြန်လည်သတ်မှတ်ပါ။',
     stayLoggedIn: 'အကောင့်ထဲ ဝင်ထားသည်။',
-    successfullyRegisteredFirstUser: 'Pendaftaran pengguna pertama berjaya.',
+    successfullyRegisteredFirstUser: 'ပထမဦးဆုံး အသုံးပြုသူကို အောင်မြင်စွာ မှတ်ပုံတင်ပြီးပါပြီ။',
     successfullyUnlocked: 'အောင်မြင်စွာသော့ဖွင့်ခဲ့သည်။',
-    tokenRefreshSuccessful: 'Token refresh berhasil.',
+    tokenRefreshSuccessful: 'Token ကို အောင်မြင်စွာ ပြန်လည်သုံးပြုပြီးပါပြီ။',
     unableToVerify: 'စိစစ်၍မရပါ။',
-    username: 'Nama pengguna',
+    username: 'အသုံးပြုသူအမည်',
     usernameNotValid: 'ပေးထားသော အသုံးပြုသူအမည်မှာ တရားဝင်မှု မရှိပါ။',
     verificationFailedRequestNew:
       'သင့်အကောင့်ကိုအတည်ပြု၍မရပါ။ အတည်ပြုရန်အီးမေးလ်အသစ်တောင်းဆိုပြီး ထပ်မံကြိုးစားပါ။',
