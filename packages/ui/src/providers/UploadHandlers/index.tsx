@@ -1,7 +1,7 @@
 'use client'
 import type { UploadCollectionSlug } from 'payload'
 
-import React, { useState } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 
 type UploadHandler = (args: {
   docPrefix?: string
@@ -20,26 +20,28 @@ export type UploadHandlersContext = {
 const Context = React.createContext<null | UploadHandlersContext>(null)
 
 export const UploadHandlersProvider = ({ children }) => {
-  const [uploadHandlers, setUploadHandlers] = useState<Map<UploadCollectionSlug, UploadHandler>>(
-    () => new Map(),
+  const uploadHandlersRef = useRef<Map<UploadCollectionSlug, UploadHandler>>(new Map())
+
+  const getUploadHandler: UploadHandlersContext['getUploadHandler'] = useCallback(
+    ({ collectionSlug }) => {
+      return uploadHandlersRef.current.get(collectionSlug) ?? null
+    },
+    [],
   )
 
-  const getUploadHandler: UploadHandlersContext['getUploadHandler'] = ({ collectionSlug }) => {
-    return uploadHandlers.get(collectionSlug)
-  }
+  const setUploadHandler: UploadHandlersContext['setUploadHandler'] = useCallback(
+    ({ collectionSlug, handler }) => {
+      uploadHandlersRef.current.set(collectionSlug, handler)
+    },
+    [],
+  )
 
-  const setUploadHandler: UploadHandlersContext['setUploadHandler'] = ({
-    collectionSlug,
-    handler,
-  }) => {
-    setUploadHandlers((uploadHandlers) => {
-      const clone = new Map(uploadHandlers)
-      clone.set(collectionSlug, handler)
-      return clone
-    })
-  }
+  const value = useMemo(
+    () => ({ getUploadHandler, setUploadHandler }),
+    [getUploadHandler, setUploadHandler],
+  )
 
-  return <Context value={{ getUploadHandler, setUploadHandler }}>{children}</Context>
+  return <Context value={value}>{children}</Context>
 }
 
 export const useUploadHandlers = (): UploadHandlersContext => {
