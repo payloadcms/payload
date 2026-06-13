@@ -60,6 +60,11 @@ export type S3StorageOptions = {
     Record<
       UploadCollectionSlug,
       | ({
+          /**
+           * Cache-Control header value to set on uploaded files.
+           * For example: 'max-age=31536000, public'.
+           */
+          cacheControl?: string
           signedDownloads?: SignedDownloadsConfig
         } & Omit<CollectionOptions, 'adapter'>)
       | true
@@ -220,6 +225,7 @@ export const s3Storage: S3StorageFactory = (
           adapter: createS3Adapter({
             acl: s3StorageOptions.acl,
             bucket: s3StorageOptions.bucket,
+            cacheControl: typeof collOptions === 'object' ? collOptions.cacheControl : undefined,
             clientUploads: s3StorageOptions.clientUploads,
             config: s3StorageOptions.config,
             getStorageClient,
