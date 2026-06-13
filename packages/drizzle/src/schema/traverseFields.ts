@@ -963,7 +963,7 @@ export const traverseFields = ({
             type: colType,
             reference: {
               name: 'id',
-              onDelete: 'set null',
+              onDelete: field.cascade === 'delete' ? 'cascade' : 'set null',
               table: tableName,
             },
           }

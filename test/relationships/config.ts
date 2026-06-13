@@ -247,6 +247,18 @@ export default buildConfigWithDefaults({
           name: 'director',
           type: 'relationship',
           relationTo: 'directors',
+          cascade: 'delete',
+        },
+        {
+          name: 'directorSetNull',
+          type: 'relationship',
+          relationTo: 'directors',
+          cascade: 'set-null',
+        },
+        {
+          name: 'directorNoCascade',
+          type: 'relationship',
+          relationTo: 'directors',
         },
         {
           type: 'array',
