@@ -427,6 +427,32 @@ export const baseConfig: Partial<Config> = {
       data: { name: 'Subfolder B', parent: rootFolder.id },
     })
 
+    // Seed nested child folders under a single parent to test nested LoadMoreRow pagination
+    const nestedParentFolder = await payload.create({
+      collection: foldersSlug,
+      data: { name: 'Nested Parent Folder', parent: rootFolder.id },
+    })
+
+    for (let i = 1; i <= 10; i++) {
+      await payload.create({
+        collection: foldersSlug,
+        data: { name: `Nested Child ${i}`, parent: nestedParentFolder.id },
+      })
+    }
+
+    // Seed a third level: Nested Parent Folder > Branch Folder > Leaf Child N
+    const branchFolder = await payload.create({
+      collection: foldersSlug,
+      data: { name: 'Branch Folder', parent: nestedParentFolder.id },
+    })
+
+    for (let i = 1; i <= 10; i++) {
+      await payload.create({
+        collection: foldersSlug,
+        data: { name: `Leaf Child ${i}`, parent: branchFolder.id },
+      })
+    }
+
     // Seed folder-items collection with 30 items (no folder assigned) for hierarchy pagination testing
     for (let i = 1; i <= 30; i++) {
       await payload.create({
