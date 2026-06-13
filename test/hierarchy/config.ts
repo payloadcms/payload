@@ -129,6 +129,28 @@ export const Departments: CollectionConfig = {
   versions: false,
 }
 
+// Divisions collection - dedicated to tree-limit / load-more keyboard regression tests
+export const Divisions: CollectionConfig = {
+  slug: 'divisions',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hierarchy: {
+    admin: {
+      treeLimit: 3,
+    },
+    parentFieldName: 'parent',
+  },
+  versions: false,
+}
+
 // Organizations collection with hierarchy (main test collection)
 export const Organizations: CollectionConfig = {
   slug: 'organizations',
@@ -155,7 +177,6 @@ export const Organizations: CollectionConfig = {
           path: '/components/ColorCircleIcon.tsx#ColorCircleIcon',
         },
       },
-      treeLimit: 3,
     },
     parentFieldName: 'parent',
   },
@@ -175,7 +196,6 @@ export const Folders: CollectionConfig = {
           path: '/components/ColorCircleIcon.tsx#ColorCircleIcon',
         },
       },
-      treeLimit: 4,
     },
     collectionSpecific: { fieldName: 'allowedTypes' },
     parentFieldName: 'parentFolder',
@@ -235,7 +255,16 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Categories, Departments, Folders, Organizations, Pages, Products, Regions],
+  collections: [
+    Categories,
+    Departments,
+    Divisions,
+    Folders,
+    Organizations,
+    Pages,
+    Products,
+    Regions,
+  ],
   debug: true,
   localization: {
     defaultLocale: 'en',

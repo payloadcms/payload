@@ -156,7 +156,7 @@ test.describe('Hierarchy Sidebar', () => {
     test('should navigate tree via keyboard and load more with Enter without navigation', async () => {
       const prefs = await payload.find({
         collection: 'payload-preferences',
-        where: { key: { equals: 'hierarchy-tree-organizations' } },
+        where: { key: { equals: 'hierarchy-tree-divisions' } },
       })
       for (const pref of prefs.docs) {
         await payload.delete({ collection: 'payload-preferences', id: pref.id })
@@ -164,7 +164,7 @@ test.describe('Hierarchy Sidebar', () => {
 
       await page.goto(`${serverURL}/admin`)
       await openNav(page)
-      await page.getByRole('tab', { name: 'Organizations' }).click()
+      await page.getByRole('tab', { name: 'Divisions' }).click()
 
       const tree = page.getByRole('tree')
       await expect(tree).toBeVisible()
@@ -176,23 +176,23 @@ test.describe('Hierarchy Sidebar', () => {
         page.evaluate(() => (document.activeElement?.className || '').toString())
 
       // Focus the first tree node, then close/open with arrows for deterministic keyboard flow
-      const acmeNode = tree.locator('.tree-node').first()
-      await expect(acmeNode).toBeVisible()
-      await acmeNode.focus()
-      await expect.poll(getActiveText).toContain('Acme Corp')
+      const alphaNode = tree.locator('.tree-node').first()
+      await expect(alphaNode).toBeVisible()
+      await alphaNode.focus()
+      await expect.poll(getActiveText).toContain('Alpha Division')
       await page.keyboard.press('ArrowLeft')
-      await expect(acmeNode).toHaveAttribute('aria-expanded', 'false')
+      await expect(alphaNode).toHaveAttribute('aria-expanded', 'false')
 
-      // Open Acme with ArrowRight, then navigate vertically through its children
+      // Open Alpha Division with ArrowRight, then navigate vertically through its children
       await page.keyboard.press('ArrowRight')
-      await expect(acmeNode).toHaveAttribute('aria-expanded', 'true')
-      await expect(tree.getByText('Engineering Division')).toBeVisible()
+      await expect(alphaNode).toHaveAttribute('aria-expanded', 'true')
+      await expect(tree.getByText('Alpha Child One')).toBeVisible()
       await page.keyboard.press('ArrowDown')
-      await expect.poll(getActiveText).toContain('Engineering Division')
+      await expect.poll(getActiveText).toContain('Alpha Child One')
       await page.keyboard.press('ArrowDown')
-      await expect.poll(getActiveText).toContain('Marketing Division')
+      await expect.poll(getActiveText).toContain('Alpha Child Two')
       await page.keyboard.press('ArrowDown')
-      await expect.poll(getActiveText).toContain('Paged Division')
+      await expect.poll(getActiveText).toContain('Alpha Child Three')
       await page.keyboard.press('ArrowDown')
       await expect.poll(getActiveClass).toContain('tree__load-more-button')
 
@@ -200,14 +200,14 @@ test.describe('Hierarchy Sidebar', () => {
       const urlBefore = page.url()
       await page.keyboard.press('Enter')
       await expect(page).toHaveURL(urlBefore)
-      await expect(tree.getByText('Zeta Division')).toBeVisible()
+      await expect(tree.getByText('Alpha Child Four')).toBeVisible()
       await expect
         .poll(() => page.evaluate(() => document.activeElement?.getAttribute('aria-level')))
         .toBe('2')
 
       // Continue vertical navigation to the next root sibling after the newly loaded child
       await page.keyboard.press('ArrowDown')
-      await expect.poll(getActiveText).toContain('Beta Corp')
+      await expect.poll(getActiveText).toContain('Beta Division')
     })
   })
 

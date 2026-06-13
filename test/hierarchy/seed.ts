@@ -1,8 +1,40 @@
 import type { Payload } from 'payload'
 
-import { departmentsSlug, foldersSlug, organizationsSlug, productsSlug } from './shared.js'
+import {
+  departmentsSlug,
+  divisionsSlug,
+  foldersSlug,
+  organizationsSlug,
+  productsSlug,
+} from './shared.js'
 
 export async function seed(payload: Payload): Promise<void> {
+  // Create divisions hierarchy (dedicated to tree-limit / load-more keyboard tests)
+  const alphaDivision = await payload.create({
+    collection: divisionsSlug,
+    data: { title: 'Alpha Division' },
+  })
+
+  await payload.create({
+    collection: divisionsSlug,
+    data: { parent: alphaDivision.id, title: 'Alpha Child One' },
+  })
+  await payload.create({
+    collection: divisionsSlug,
+    data: { parent: alphaDivision.id, title: 'Alpha Child Two' },
+  })
+  await payload.create({
+    collection: divisionsSlug,
+    data: { parent: alphaDivision.id, title: 'Alpha Child Three' },
+  })
+  await payload.create({
+    collection: divisionsSlug,
+    data: { parent: alphaDivision.id, title: 'Alpha Child Four' },
+  })
+
+  await payload.create({ collection: divisionsSlug, data: { title: 'Beta Division' } })
+  await payload.create({ collection: divisionsSlug, data: { title: 'Gamma Division' } })
+
   // Create organization hierarchy
   const acmeCorp = await payload.create({
     collection: organizationsSlug,
@@ -43,18 +75,6 @@ export async function seed(payload: Payload): Promise<void> {
     collection: organizationsSlug,
     data: { parent: acmeCorp.id, title: 'Zeta Division' },
   })
-
-  const pagedDivision = await payload.create({
-    collection: organizationsSlug,
-    data: { parent: acmeCorp.id, title: 'Paged Division' },
-  })
-
-  for (let i = 1; i <= 5; i++) {
-    await payload.create({
-      collection: organizationsSlug,
-      data: { parent: pagedDivision.id, title: `Paged Team ${i}` },
-    })
-  }
 
   // Create department hierarchy (tests custom field names)
   const hrDept = await payload.create({
