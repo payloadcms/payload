@@ -141,7 +141,7 @@ export const sanitizeQueryValue = ({
   }
 
   if (field.type === 'relationship' || field.type === 'upload') {
-    if (val === 'null') {
+    if (val === 'null' || (Array.isArray(val) && val.length === 1 && val[0] === 'null')) {
       formattedValue = null
     } else if (!(formattedValue === null || typeof formattedValue === 'boolean')) {
       // convert the value to the idType of the relationship
