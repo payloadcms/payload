@@ -201,10 +201,13 @@ test.describe('Hierarchy Sidebar', () => {
       await page.keyboard.press('Enter')
       await expect(page).toHaveURL(urlBefore)
       await expect(tree.getByText('Zeta Division')).toBeVisible()
+      await expect
+        .poll(() => page.evaluate(() => document.activeElement?.getAttribute('aria-level')))
+        .toBe('2')
 
-      // Continue vertical navigation through the newly loaded Acme children
+      // Continue vertical navigation to the next root sibling after the newly loaded child
       await page.keyboard.press('ArrowDown')
-      await expect.poll(getActiveText).toContain('Zeta Division')
+      await expect.poll(getActiveText).toContain('Beta Corp')
     })
   })
 
