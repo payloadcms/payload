@@ -1,0 +1,105 @@
+---
+title: Toast
+label: Toast
+order: 30
+desc: The Toast component is a simple toast notification element based on sonner.
+keywords: toast, sonner, toaster, ui, component, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+## Using Toast
+
+To display a toast, call `toast` with a title and optional config. The [sonner docs](https://sonner.emilkowal.ski) provide more details.
+
+```tsx
+toast('Basic toast')
+
+// Or provide custom config:
+toast('Configured toast', { duration: 5000 })
+```
+
+### Success
+
+```tsx
+toast.success('Success toast')
+```
+
+### Error
+
+```tsx
+toast.error('Error toast')
+```
+
+### Action
+
+```tsx
+toast('Action toast', {
+  action: <Button onClick={() => console.log('Action clicked')}>Action</Button>,
+})
+```
+
+### Cancel
+
+```tsx
+toast('Cancel toast', {
+  cancel: <Button onClick={() => console.log('Cancel clicked')}>Cancel</Button>,
+})
+```
+
+### Promise
+
+```tsx
+toast.promise(
+  fetchData(),
+  {
+    loading: 'Loading...',
+    success: (result) => `Loaded: ${result.length} items`,
+    error: (err) => `Error: ${err.message}`,
+  }
+)
+```
+
+### Loading
+
+```tsx
+toast.loading('Loading toast')
+```
+
+### Custom
+
+You can render JSX instead of a string:
+
+```tsx
+toast(<strong>Custom Toast</strong>)
+```
+
+### Headless
+
+```tsx
+toast.custom((t) => (
+  <div>
+    {t.message}
+    <Button onClick={() => toast.dismiss(t.id)}>Close</Button>
+  </div>
+))
+```
+
+## API Reference
+
+| Prop                | Type                 | Default         |
+| ------------------- | -------------------- | --------------- |
+| `description`       | `ReactNode`          | -               |
+| `closeButton`       | `boolean`            | `false`         |
+| `invert`            | `boolean`            | `false`         |
+| `duration`          | `number`             | `4000`          |
+| `position`          | `string`             | `bottom-right`  |
+| `dismissible`       | `boolean`            | `true`          |
+| `icon`              | `ReactNode`          | -               |
+| `action`            | `ReactNode`          | -               |
+| `cancel`            | `ReactNode`          | -               |
+| `id`                | `string`             | -               |
+| `onDismiss`         | `function`           | -               |
+| `onAutoClose`       | `function`           | -               |
+| `containerAriaLabel`| `string`             | `Notifications` |
+| `actionButtonStyle` | `object`             | `{}`            |
+| `cancelButtonStyle` | `object`             | `{}`            |
+
