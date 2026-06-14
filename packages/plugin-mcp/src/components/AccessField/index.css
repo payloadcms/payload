@@ -38,32 +38,9 @@
     letter-spacing: var(--text-body-medium-letter-spacing);
   }
 
-  .mcp-access-field__tabs {
+  .mcp-access-field__tabbed-content {
     display: flex;
-    gap: var(--base);
-  }
-
-  .mcp-access-field__tab {
-    appearance: none;
-    background: none;
-    border: none;
-    border-block-end: 2px solid transparent;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    font-family: var(--text-body-medium-font-family);
-    font-size: var(--text-body-medium-font-size);
-    line-height: var(--text-body-medium-line-height);
-    padding: 0 0 calc(var(--base) / 4);
-  }
-
-  .mcp-access-field__tab:hover {
-    color: var(--color-text);
-  }
-
-  .mcp-access-field__tab--active {
-    border-block-end-color: var(--color-bg-brand);
-    color: var(--color-text);
-    font-weight: 600;
+    flex-direction: column;
   }
 
   .mcp-access-field__cards {

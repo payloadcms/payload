@@ -2,7 +2,7 @@
 
 import type { JSONFieldClientProps } from 'payload'
 
-import { CheckboxInput, Collapsible, useField, useTranslation } from '@payloadcms/ui'
+import { CheckboxInput, Collapsible, Tabs, useField, useTranslation } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
 import type {
@@ -255,11 +255,11 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
       ? [{ key: 'server' as const, label: t('plugin-mcp:server') }]
       : []),
   ]
-  const currentTab = activeTab ?? tabs[0]?.key
-
   if (tabs.length === 0) {
     return null
   }
+
+  const currentTab = activeTab ?? tabs[0]!.key
 
   return (
     <div className={baseClass}>
@@ -267,32 +267,27 @@ export const AccessField: React.FC<Props> = ({ path, pluginConfig }) => {
         <h4>{t('plugin-mcp:permissions')}</h4>
         <p>{t('plugin-mcp:permissionsDescription')}</p>
       </header>
-      <div className={`${baseClass}__tabs`} role="tablist">
-        {tabs.map((tab) => (
-          <button
-            aria-selected={tab.key === currentTab}
-            className={[`${baseClass}__tab`, tab.key === currentTab && `${baseClass}__tab--active`]
-              .filter(Boolean)
-              .join(' ')}
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            role="tab"
-            type="button"
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      <div className={`${baseClass}__cards`}>
-        {currentTab === 'collections' && renderScope('collections', collectionsBySlug)}
-        {currentTab === 'globals' && renderScope('globals', globalsBySlug)}
-        {currentTab === 'server' && (
-          <>
-            {renderFlat('prompts', t('plugin-mcp:prompts'), prompts)}
-            {renderFlat('resources', t('plugin-mcp:resources'), resources)}
-            {renderFlat('tools', t('plugin-mcp:tools'), tools)}
-          </>
-        )}
+      <div className={`${baseClass}__tabbed-content`}>
+        <Tabs
+          className={`${baseClass}__tabs`}
+          onChange={setActiveTab}
+          tabs={tabs.map((tab) => ({
+            label: tab.label,
+            value: tab.key,
+          }))}
+          value={currentTab}
+        />
+        <div className={`${baseClass}__cards`}>
+          {currentTab === 'collections' && renderScope('collections', collectionsBySlug)}
+          {currentTab === 'globals' && renderScope('globals', globalsBySlug)}
+          {currentTab === 'server' && (
+            <>
+              {renderFlat('prompts', t('plugin-mcp:prompts'), prompts)}
+              {renderFlat('resources', t('plugin-mcp:resources'), resources)}
+              {renderFlat('tools', t('plugin-mcp:tools'), tools)}
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
