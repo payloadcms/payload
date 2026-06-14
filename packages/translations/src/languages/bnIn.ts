@@ -518,7 +518,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
       'আপনি <1>{{count}} {{label}}</1> কে রুট এ সরিয়ে দিতে চলেছেন। আপনি কি নিশ্চিত?',
     moveToRoot: 'রুটে সরান',
     noParent: 'কোন মাতা-পিতা নেই',
-    noResults: 'No results for "{{query}}"',
+    noResults: '"{{query}}" এর জন্য কোনো ফলাফল পাওয়া যায়নি',
     searchLabel: '{{label}} অনুসন্ধান করুন',
   },
   localization: {
