@@ -26,7 +26,7 @@ export function AddFilesView({ acceptMimeTypes, onCancel, onDrop }: Props) {
       <div className={`${baseClass}__dropArea`}>
         <Dropzone multipleFiles onChange={onDrop}>
           <Button
-            buttonStyle="pill"
+            buttonStyle="primary"
             iconPosition="left"
             onClick={() => {
               if (inputRef.current) {
