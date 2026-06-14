@@ -47,8 +47,10 @@ export type ClientMCPPluginConfig = {
   items: Array<{
     collectionSlug?: string
     configKey: string
-    description: string
+    description?: string
     globalSlug?: string
+    /** Admin-UI bucket for collection/global tools: built-in CRUD, auth, or custom. */
+    group?: 'auth' | 'custom' | 'operations'
     label: string
     type: 'collectionTool' | 'globalTool' | 'prompt' | 'resource' | 'tool'
   }>
@@ -282,7 +284,10 @@ export type MCPAPIKeysDocAccessTree = {
  */
 export type MCPAPIKeysDoc = {
   access: MCPAPIKeysDocAccessTree
+  apiKey?: string
+  apiKeyIndex?: string
   id: DefaultDocumentIDType
+  lastUsed?: string
   overrideAccess?: boolean
   user: null | TypedUser
 }

@@ -54,7 +54,6 @@ test.describe('MCP Plugin', () => {
           },
         },
         apiKey: randomUUID(),
-        enableAPIKey: true,
         label: 'E2E Test Key',
         user: userId,
       },

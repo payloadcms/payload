@@ -26,8 +26,7 @@ export const PriceInput: React.FC<Props> = (args) => {
 
   const description = field.admin?.description
     ? typeof field.admin.description === 'function'
-      ? // @ts-expect-error - weird type issue on 't' here
-        field.admin.description({ i18n, t })
+      ? field.admin.description({ i18n, t })
       : field.admin.description
     : undefined
 
