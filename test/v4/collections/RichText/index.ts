@@ -13,10 +13,16 @@ import { richTextFieldsSlug } from '../../slugs.js'
 
 const RichTextFields: CollectionConfig = {
   slug: richTextFieldsSlug,
+  versions: {
+    drafts: true,
+  },
   fields: [
     {
       name: 'content',
       type: 'richText',
+      admin: {
+        description: 'The main content of the document.',
+      },
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,

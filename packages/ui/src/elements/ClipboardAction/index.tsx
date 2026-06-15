@@ -98,11 +98,11 @@ export const ClipboardAction: FC<Props> = ({
       disabled={disabled}
       horizontalAlign="right"
       render={({ close }) => (
-        <PopupList.IconButtonGroup>
+        <PopupList.MenuItem>
           <PopupList.Button
             className={copyClassName}
             disabled={!allowCopy}
-            icon={<CopyIcon />}
+            icon={<CopyIcon size={24} />}
             onClick={() => {
               void handleCopy()
               close()
@@ -121,7 +121,7 @@ export const ClipboardAction: FC<Props> = ({
           >
             {isRow ? t('general:pasteRow') : t('general:pasteField')}
           </PopupList.Button>
-        </PopupList.IconButtonGroup>
+        </PopupList.MenuItem>
       )}
       verticalAlign="bottom"
     />

@@ -15,6 +15,7 @@ import DraftsNoReadVersions from './collections/DraftsNoReadVersions.js'
 import DraftWithChangeHook from './collections/DraftsWithChangeHook.js'
 import DraftsWithCustomUnpublish from './collections/DraftsWithCustomUnpublish.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
+import { DraftsWithUpload } from './collections/DraftsWithUpload.js'
 import DraftsWithValidate from './collections/DraftsWithValidate.js'
 import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
 import LocalizedPosts from './collections/Localized.js'
@@ -62,6 +63,7 @@ export default buildConfigWithDefaults({
     CustomIDs,
     Diff,
     TextCollection,
+    DraftsWithUpload,
     Media,
     Media2,
   ],

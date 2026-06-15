@@ -1,542 +1,347 @@
 import type {
+  CallToolResult,
+  ContentBlock,
+  JsonSchemaType,
+  McpServer,
+  ResourceTemplate,
+  ServerContext,
+  StandardSchemaWithJSON,
+} from '@modelcontextprotocol/server'
+import type {
+  AuthCollectionSlug,
   CollectionConfig,
   CollectionSlug,
+  DefaultDocumentIDType,
   GlobalSlug,
+  MaybePromise,
   PayloadRequest,
   TypedUser,
 } from 'payload'
-import type { z } from 'zod'
 
-import { type ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
+import type {
+  MCPCollectionAuthToolName,
+  MCPCollectionBuiltinName,
+  MCPGlobalBuiltinName,
+} from './mcp/builtinTools.js'
 
+export type { MCPCollectionAuthToolName, MCPCollectionBuiltinName, MCPGlobalBuiltinName }
+
+/** Re-exported from `@modelcontextprotocol/server` — the JSON Schema shape the MCP runtime validates against. */
+export type { JsonSchemaType, StandardSchemaWithJSON }
+
+/**
+ * What a tool's `input` (or a prompt's `argsSchema`) can be — either a raw
+ * JSON Schema literal, or a Standard Schema instance (Zod, Valibot, …).
+ */
+export type ToolInputSchema = JsonSchemaType | StandardSchemaWithJSON
+
+/**
+ * Serializable mirror of `SanitizedMCPPluginConfig` for client components —
+ * the full sanitized config carries functions (tool handlers, etc.) that can't
+ * cross the server→client boundary. Built by `sanitizeClientPluginConfig` and
+ * passed to the `AccessField` component via `clientProps`.
+ *
+ * @internal
+ */
+export type ClientMCPPluginConfig = {
+  items: Array<{
+    collectionSlug?: string
+    configKey: string
+    description?: string
+    globalSlug?: string
+    /** Admin-UI bucket for collection/global tools: built-in CRUD, auth, or custom. */
+    group?: 'auth' | 'custom' | 'operations'
+    label: string
+    type: 'collectionTool' | 'globalTool' | 'prompt' | 'resource' | 'tool'
+  }>
+}
+
+export type MCPToolResponse = {
+  content: ContentBlock[]
+  /**
+   * If available, return the document fetched within the
+   * mcp tool. This is threaded as an additional argument to
+   * overrideResponse functions and stripped before going on the wire.
+   */
+  doc?: Record<string, unknown>
+} & Pick<CallToolResult, '_meta' | 'isError' | 'structuredContent'>
+
+export type MCPResponseOverride = (
+  response: MCPToolResponse,
+  doc: Record<string, unknown>,
+  req: PayloadRequest,
+) => MCPToolResponse
+
+/**
+ * The handler's `input` type. A specific Standard Schema (Zod, Valibot, …) gets
+ * its inferred output; anything else falls back to `Record<string, unknown>`.
+ */
+export type TypedInput<TSchema> = TSchema extends StandardSchemaWithJSON
+  ? StandardSchemaWithJSON extends TSchema
+    ? Record<string, unknown>
+    : StandardSchemaWithJSON.InferOutput<TSchema>
+  : Record<string, unknown>
+
+export type ToolHandlerArgs<TSchema = undefined> = {
+  authorizedMCP: AuthorizedMCP
+  input: TypedInput<TSchema>
+  req: PayloadRequest
+  serverContext: ServerContext
+}
+
+export type CollectionToolHandlerArgs<TSchema = undefined> = {
+  collectionSlug: CollectionSlug
+} & ToolHandlerArgs<TSchema>
+
+export type GlobalToolHandlerArgs<TSchema = undefined> = {
+  globalSlug: GlobalSlug
+} & ToolHandlerArgs<TSchema>
+
+export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> = {
+  description: string
+  handler: (args: ToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
+  input?: TSchema
+  /**
+   * Override the return value of the tool handler
+   */
+  overrideResponse?: MCPResponseOverride
+}
+
+export type CollectionTool<
+  TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
+> = {
+  handler: (args: CollectionToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
+  input?: TSchema
+} & Pick<Tool, 'description' | 'overrideResponse'>
+
+export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> =
+  {
+    handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
+    input?: TSchema
+  } & Pick<Tool, 'description' | 'overrideResponse'>
+
+/**
+ * Configures (or disables) a built-in tool without replacing it.
+ * `handler?: never` prevents a full `CollectionTool`/`GlobalTool` (which has a
+ * required handler) from being silently accepted at a built-in key slot.
+ */
+export type MCPBuiltInToolOverride = {
+  description?: string
+  handler?: never
+  overrideResponse?: MCPResponseOverride
+}
+
+/**
+ * Value at a custom (non-built-in) tool key. Either the tool itself, or `false`
+ * to disable it (useful when one plugin defines a custom tool and another
+ * wants to opt out per-collection).
+ */
+export type MCPTopLevelToolEntry = Tool
+
+export type MCPCollectionToolsMap = {
+  [customToolName: string]: boolean | CollectionTool | MCPBuiltInToolOverride | undefined
+} & {
+  [K in MCPCollectionBuiltinName]?: false | MCPBuiltInToolOverride
+}
+
+export type MCPAuthCollectionToolsMap = {
+  [K in MCPCollectionAuthToolName]?: MCPBuiltInToolOverride | true
+} & MCPCollectionToolsMap
+
+/** Auth-enabled collections get auth-tool name autocomplete; others get CRUD-only. */
+export type MCPToolsMapForCollection<Slug extends CollectionSlug> = Slug extends AuthCollectionSlug
+  ? MCPAuthCollectionToolsMap
+  : MCPCollectionToolsMap
+
+export type MCPGlobalToolsMap = {
+  [customToolName: string]: boolean | GlobalTool | MCPBuiltInToolOverride | undefined
+} & {
+  [K in MCPGlobalBuiltinName]?: false | MCPBuiltInToolOverride
+}
+
+export type MCPTopLevelToolsMap = Record<string, Tool>
+
+export type PromptHandlerArgs<TSchema = undefined> = {
+  input: TypedInput<TSchema>
+  req: PayloadRequest
+  serverContext: ServerContext
+}
+
+export type Prompt<TSchema extends ToolInputSchema = ToolInputSchema> = {
+  argsSchema: TSchema
+  description: string
+  handler: (args: PromptHandlerArgs<TSchema>) => MaybePromise<{
+    messages: Array<{ content: { text: string; type: 'text' }; role: 'assistant' | 'user' }>
+  }>
+  title: string
+}
+
+export type ResourceHandlerArgs = {
+  /** Variables extracted from a `ResourceTemplate` URI. Empty for static-URI resources. */
+  params: Record<string, string>
+  req: PayloadRequest
+  serverContext: ServerContext
+  uri: URL
+}
+
+export type Resource = {
+  description: string
+  handler: (args: ResourceHandlerArgs) => MaybePromise<{
+    contents: Array<{ text: string; uri: string }>
+  }>
+  mimeType: string
+  title: string
+  uri: ResourceTemplate | string
+}
+
+export type MCPPluginCollectionConfig<TSlug extends CollectionSlug> = {
+  description?: string
+  /** Fallback for built-in tools that don't set their own `overrideResponse`. */
+  overrideResponse?: MCPResponseOverride
+  tools?: MCPToolsMapForCollection<TSlug>
+}
+
+export type MCPPluginGlobalConfig = {
+  description?: string
+  overrideResponse?: MCPResponseOverride
+  tools?: MCPGlobalToolsMap
+}
+
+/**
+ * The user-facing config shape passed to `mcpPlugin({ ... })`. Tools, prompts,
+ * resources, and per-collection/global tool maps live in their own nested
+ * fields. `sanitizeMCPConfig` flattens those into `items` and applies defaults
+ * to produce a `SanitizedMCPPluginConfig` — the form every internal consumer
+ * actually works with.
+ */
 export type MCPPluginConfig = {
-  /**
-   * Set the collections that should be available as resources via MCP.
-   */
-  collections?: Partial<
-    Record<
-      CollectionSlug,
-      {
-        /**
-         * Set the description of the collection. This is used by MCP clients to determine when to use the collecton as a resource.
-         */
-        description?: string
-        /**
-         * Set the enabled capabilities of the collection. Admins can then allow or disallow the use of the capability by MCP clients.
-         */
-        enabled:
-          | {
-              create?: boolean
-              delete?: boolean
-              find?: boolean
-              update?: boolean
-            }
-          | boolean
-
-        /**
-         * Override the response generated by the MCP client. This allows you to modify the response that is sent to the MCP client. This is useful for adding additional data to the response, data normalization, or verifying data.
-         */
-        overrideResponse?: (
-          response: {
-            content: Array<{
-              text: string
-              type: string
-            }>
-          },
-          doc: Record<string, unknown>,
-          req: PayloadRequest,
-        ) => {
-          content: Array<{
-            text: string
-            type: string
-          }>
-        }
-      }
-    >
-  >
-  /**
-   * Disable the MCP plugin.
-   */
+  collections?: {
+    [Slug in CollectionSlug]?: MCPPluginCollectionConfig<Slug>
+  }
+  /** Skip MCP registration. The API key collection is still added (so DB / types stay stable). */
   disabled?: boolean
-  /**
-   * Experimental features
-   * **These features are for experimental purposes -- They are Disabled in Production by Default**
-   */
-  experimental?: {
-    /**
-     * These are MCP tools that can be used by a client to modify Payload.
-     */
-    tools: {
-      /**
-       * **Experimental** -- Auth MCP tools allow a client to change authentication priviliages for users. This is for developing ideas that help Admins with authentication tasks.
-       */
-      auth?: {
-        /**
-         * Enable the auth MCP tools. This allows Admins to enable or disable the auth capabilities.
-         * @default false
-         */
-        enabled: boolean
-      }
-      /**
-       * **Experimental** -- Collection MCP tools allow for the creation, modification, and deletion of Payload collections. This is for developing ideas that help Developers with collection tasks.
-       */
-      collections?: {
-        /**
-         * Set the directory path to the collections directory. This can be a directory outside of your default directory, or another Payload project.
-         */
-        collectionsDirPath: string
-        /**
-         * Enable the collection MCP tools. This allows Admins to enable or disable the Collection modification capabilities.
-         * @default false
-         */
-        enabled: boolean
-      }
-      /**
-       * **Experimental** -- Config MCP tools allow for the modification of a Payload Config. This is for developing ideas that help Developers with config tasks.
-       */
-      config?: {
-        /**
-         * Set the directory path to the config directory. This can be a directory outside of your default directory, or another Payload project.
-         */
-        configFilePath: string
-        /**
-         * Enable the config MCP tools. This allows Admins to enable or disable the Payload Config modification capabilities.
-         * @default false
-         */
-        enabled: boolean
-      }
-      /**
-       * **Experimental** -- Jobs MCP tools allow for the modification of Payload jobs. This is for developing ideas that help Developers with job tasks.
-       */
-      jobs?: {
-        /**
-         * Enable the jobs MCP tools. This allows Admins to enable or disable the Job modification capabilities.
-         * @default false
-         */
-        enabled: boolean
-        /**
-         * Set the directory path to the jobs directory. This can be a directory outside of your default directory, or another Payload project.
-         */
-        jobsDirPath: string
-      }
-    }
+  globals?: {
+    [Slug in GlobalSlug]?: MCPPluginGlobalConfig
   }
-  /**
-   * Set the globals that should be available as resources via MCP.
-   * Globals are singleton configuration objects (e.g., site settings, navigation).
-   * Note: Globals only support find and update operations.
-   */
-  globals?: Partial<
-    Record<
-      GlobalSlug,
-      {
-        /**
-         * Set the description of the global. This is used by MCP clients to determine when to use the global as a resource.
-         */
-        description?: string
-        /**
-         * Set the enabled capabilities of the global. Admins can then allow or disallow the use of the capability by MCP clients.
-         * Note: Globals only support find and update operations as they are singletons.
-         */
-        enabled:
-          | {
-              find?: boolean
-              update?: boolean
-            }
-          | boolean
-
-        /**
-         * Override the response generated by the MCP client. This allows you to modify the response that is sent to the MCP client. This is useful for adding additional data to the response, data normalization, or verifying data.
-         */
-        overrideResponse?: (
-          response: {
-            content: Array<{
-              text: string
-              type: string
-            }>
-          },
-          doc: Record<string, unknown>,
-          req: PayloadRequest,
-        ) => {
-          content: Array<{
-            text: string
-            type: string
-          }>
-        }
-      }
-    >
-  >
-  /**
-   * MCP Server options.
-   */
   mcp?: {
-    handlerOptions?: MCPHandlerOptions
-    /**
-     * Add custom MCP Prompts.
-     */
-    prompts?: {
-      /**
-       * Set the args schema of the prompt. This is the args schema that will be passed to the prompt. This is used by MCP clients to determine the arguments that will be passed to the prompt.
-       */
-      argsSchema: z.ZodRawShape
-      /**
-       * Set the description of the prompt. This is used by MCP clients to determine when to use the prompt.
-       */
-      description: string
-      /**
-       * Set the handler of the prompt. This is the function that will be called when the prompt is used.
-       */
-      handler: (
-        args: Record<string, unknown>,
-        req: PayloadRequest,
-        _extra: unknown,
-      ) =>
-        | {
-            messages: Array<{
-              content: {
-                text: string
-                type: 'text'
-              }
-              role: 'assistant' | 'user'
-            }>
-          }
-        | Promise<{
-            messages: Array<{
-              content: {
-                text: string
-                type: 'text'
-              }
-              role: 'assistant' | 'user'
-            }>
-          }>
-      /**
-       * Set the function name of the prompt.
-       */
-      name: string
-      /**
-       * Set the title of the prompt. LLMs will interperate the title to determine when to use the prompt.
-       */
-      title: string
-    }[]
-
-    /**
-     * Add custom MCP Resource.
-     */
-    resources?: {
-      /**
-       * Set the description of the resource. This is used by MCP clients to determine when to use the resource.
-       * example: 'Data is a resource that contains special data.'
-       */
-      description: string
-      /**
-       * Set the handler of the resource. This is the function that will be called when the resource is used.
-       * The handler can have either 3 arguments (when no args are passed) or 4 arguments (when args are passed).
-       */
-      handler: (...args: any[]) =>
-        | {
-            contents: Array<{
-              text: string
-              uri: string
-            }>
-          }
-        | Promise<{
-            contents: Array<{
-              text: string
-              uri: string
-            }>
-          }>
-      /**
-       * Set the mime type of the resource.
-       * example: 'text/plain'
-       */
-      mimeType: string
-      /**
-       * Set the function name of the resource.
-       * example: 'data'
-       */
-      name: string
-      /**
-       * Set the title of the resource. LLMs will interperate the title to determine when to use the resource.
-       * example: 'Data'
-       */
-      title: string
-      /**
-       * Set the uri of the resource.
-       * example: 'data://app'
-       */
-      uri: ResourceTemplate | string
-    }[]
     serverOptions?: MCPServerOptions
-    /**
-     * Add custom MCP Tools.
-     */
-    tools?: {
-      /**
-       * Set the description of the tool. This is used by MCP clients to determine when to use the tool.
-       */
-      description: string
-      /**
-       * Set the handler of the tool. This is the function that will be called when the tool is used.
-       */
-      handler: (
-        args: Record<string, unknown>,
-        req: PayloadRequest,
-        _extra: unknown,
-      ) =>
-        | {
-            content: Array<{
-              text: string
-              type: 'text'
-            }>
-            role?: string
-          }
-        | Promise<{
-            content: Array<{
-              text: string
-              type: 'text'
-            }>
-            role?: string
-          }>
-      /**
-       * Set the name of the tool. This is the name that will be used to identify the tool. LLMs will interperate the name to determine when to use the tool.
-       */
-      name: string
-      /**
-       * Set the parameters of the tool. This is the parameters that will be passed to the tool.
-       */
-      parameters: z.ZodRawShape
-    }[]
+    verboseLogs?: boolean
   }
-
-  /**
-   * Override the API key collection.
-   * This allows you to add fields to the API key collection or modify the collection in any way you want.
-   * @param collection - The API key collection.
-   * @returns The modified API key collection.
-   */
   overrideApiKeyCollection?: (collection: CollectionConfig) => CollectionConfig
-
-  /**
-   * Override the authentication method.
-   * This allows you to use a custom authentication method instead of the default API key authentication.
-   * @param req - The request object.
-   * @returns The MCP access settings.
-   */
-  overrideAuth?: (
-    req: PayloadRequest,
-    getDefaultMcpAccessSettings: (overrideApiKey?: null | string) => Promise<MCPAccessSettings>,
-  ) => MCPAccessSettings | Promise<MCPAccessSettings>
-
-  /**
-   * Set the users collection that API keys should be associated with.
-   */
+  /** Replace the default API-key auth with a custom resolver. */
+  overrideAuth?: (args: {
+    getAPIKeyDoc: (overrideApiKey?: string) => Promise<MCPAPIKeysDoc>
+    getAuthorizedMCP: (args: { apiKeyDoc: MCPAPIKeysDoc }) => AuthorizedMCP
+    pluginConfig: SanitizedMCPPluginConfig
+    req: PayloadRequest
+  }) => MaybePromise<AuthorizedMCP>
+  prompts?: Record<string, Prompt>
+  resources?: Record<string, Resource>
+  /** Cross-cutting tools (not scoped to any collection or global). */
+  tools?: MCPTopLevelToolsMap
   userCollection?: CollectionSlug
 }
 
-/**
- * MCP Handler options.
- */
-export type MCPHandlerOptions = {
-  /**
-   * Set the base path of the MCP handler. This is the path that will be used to access the MCP handler.
-   * @default /api
-   */
-  basePath?: string
-  /**
-   * If true, disables the SSE endpoint. Only Streamable HTTP will be available.
-   * @default true
-   */
-  disableSse?: boolean
-  /**
-   * Set the maximum duration of the MCP handler. This is the maximum duration that the MCP handler will run for.
-   * @default 60
-   */
-  maxDuration?: number
-  /**
-   * Callback function that receives MCP events.
-   * This can be used to track analytics, debug issues, or implement custom behaviors.
-   */
-  onEvent?: (event: unknown) => void
-  /**
-   * Set the Redis URL for the MCP handler. This is the URL that will be used to access the Redis server.
-   * @default process.env.REDIS_URL
-   */
-  redisUrl?: string
-  /**
-   * Set verbose logging.
-   * @default false
-   */
-  verboseLogs?: boolean
-}
+export type SanitizedMCPPluginConfig = {
+  items: MCPItem[]
+  userCollection: CollectionSlug
+} & Pick<MCPPluginConfig, 'disabled' | 'mcp' | 'overrideApiKeyCollection' | 'overrideAuth'>
 
-/**
- * MCP Server options.
- */
 export type MCPServerOptions = {
-  /**
-   * Optional instructions describing how to use the server and its features.
-   */
-  instructions?: string
-  /**
-   * Set the server info of the MCP server.
-   */
-  serverInfo?: {
-    /**
-     * Set the name of the MCP server.
-     * @default 'Payload MCP Server'
-     */
-    name: string
-    /**
-     * Set the version of the MCP server.
-     * @default '1.0.0'
-     */
-    version: string
-  }
+  options?: ConstructorParameters<typeof McpServer>[1]
+  serverInfo?: Partial<ConstructorParameters<typeof McpServer>[0]>
 }
 
-export type MCPAccessSettings = {
-  auth?: {
-    auth?: boolean
-    forgotPassword?: boolean
-    login?: boolean
-    resetPassword?: boolean
-    unlock?: boolean
-    verify?: boolean
-  }
+/**
+ * Nested access tree as stored in the collection.
+ * A `false` leaf disables that tool; missing keys defer to
+ * defaults (built-in CRUD is on, opt-in tools are off).
+ */
+export type MCPAPIKeysDocAccessTree = {
   collections?: {
-    create?: boolean
-    delete?: boolean
-    find?: boolean
-    update?: boolean
+    [CollectionSlug: CollectionSlug]: {
+      [ToolKey: string]: boolean
+    }
   }
-  config?: {
-    find?: boolean
-    update?: boolean
-  }
-  custom?: Record<string, boolean>
   globals?: {
-    find?: boolean
-    update?: boolean
+    [GlobalSlug: GlobalSlug]: {
+      [ToolKey: string]: boolean
+    }
   }
-  jobs?: {
-    create?: boolean
-    run?: boolean
-    update?: boolean
+  prompts?: {
+    [PromptKey: string]: boolean
   }
-  'payload-mcp-prompt'?: Record<string, boolean>
-  'payload-mcp-resource'?: Record<string, boolean>
-  'payload-mcp-tool'?: Record<string, boolean>
-  user: TypedUser
-} & Record<string, unknown>
-
-export type EntityConfig = MCPPluginConfig['collections'] | MCPPluginConfig['globals']
-
-export type FieldDefinition = {
-  description?: string
-  name: string
-  options?: { label: string; value: string }[]
-  position?: 'main' | 'sidebar'
-  required?: boolean
-  type: string
-}
-
-export type FieldModification = {
-  changes: {
-    description?: string
-    options?: { label: string; value: string }[]
-    position?: 'main' | 'sidebar'
-    required?: boolean
-    type?: string
+  resources?: {
+    [ResourceKey: string]: boolean
   }
-  fieldName: string
-}
-
-export type CollectionConfigUpdates = {
-  access?: {
-    create?: string
-    delete?: string
-    read?: string
-    update?: string
-  }
-  description?: string
-  slug?: string
-  timestamps?: boolean
-  versioning?: boolean
-}
-
-export type AdminConfig = {
-  avatar?: string
-  css?: string
-  dateFormat?: string
-  inactivityRoute?: string
-  livePreview?: {
-    breakpoints?: Array<{
-      height: number
-      label: string
-      name: string
-      width: number
-    }>
-  }
-  logoutRoute?: string
-  meta?: {
-    favicon?: string
-    ogImage?: string
-    titleSuffix?: string
-  }
-  user?: string
-}
-
-export type DatabaseConfig = {
-  connectOptions?: string
-  type?: 'mongodb' | 'postgres'
-  url?: string
-}
-
-export type PluginUpdates = {
-  add?: string[]
-  remove?: string[]
-}
-
-export type GeneralConfig = {
-  cookiePrefix?: string
-  cors?: string
-  csrf?: string
-  graphQL?: {
-    disable?: boolean
-    schemaOutputFile?: string
-  }
-  rateLimit?: {
-    max?: number
-    skip?: string
-    window?: number
-  }
-  secret?: string
-  serverURL?: string
-  typescript?: {
-    declare?: boolean
-    outputFile?: string
+  tools?: {
+    [ToolKey: string]: boolean
   }
 }
 
-export interface SchemaField {
-  description?: string
-  name: string
-  options?: string[]
-  required?: boolean
-  type: string
+/**
+ * Stored on `payload-mcp-api-keys` docs
+ */
+export type MCPAPIKeysDoc = {
+  access: MCPAPIKeysDocAccessTree
+  apiKey?: string
+  apiKeyIndex?: string
+  id: DefaultDocumentIDType
+  lastUsed?: string
+  overrideAccess?: boolean
+  user: null | TypedUser
 }
 
-export interface TaskSequenceItem {
-  description?: string
-  retries?: number
-  taskId: string
-  taskSlug: string
-  timeout?: number
+/**
+ * One MCP primitive plus the metadata needed for access checks, admin UI, and
+ * registration.
+ *
+ * - `configKey`: the config/API-key identifier, e.g. `find` or `echo`.
+ * - `mcpName`: the MCP wire name, e.g. `findDocuments` or `echo`.
+ * - `label`: human-readable admin checkbox text.
+ */
+export type MCPItemBase = {
+  configKey: string
+  label: string
+  mcpName: string
 }
 
-export interface JobConfigUpdate {
-  description?: string
-  queue?: string
-  retries?: number
-  timeout?: number
+export type CollectionMCPItem = {
+  collectionSlug: CollectionSlug
+  tool: CollectionTool
+  type: 'collectionTool'
+} & MCPItemBase
+
+export type GlobalMCPItem = {
+  globalSlug: GlobalSlug
+  tool: GlobalTool
+  type: 'globalTool'
+} & MCPItemBase
+
+export type MCPItem =
+  | ({
+      prompt: Prompt
+      type: 'prompt'
+    } & MCPItemBase)
+  | ({
+      resource: Resource
+      type: 'resource'
+    } & MCPItemBase)
+  | ({
+      tool: Tool
+      type: 'tool'
+    } & MCPItemBase)
+  | CollectionMCPItem
+  | GlobalMCPItem
+
+/**
+ * The caller's identity + the MCP items they can use for this request. Returned
+ * by `getAuthorizedMCP`; denied items are simply absent from `items`. Handlers
+ * receive this via `args.authorizedMCP` so they can spread
+ * `localAPIDefaults(authorizedMCP)` into every local API call.
+ */
+export type AuthorizedMCP = {
+  items: MCPItem[]
+  overrideAccess: boolean
+  user: null | TypedUser
 }

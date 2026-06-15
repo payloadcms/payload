@@ -13,10 +13,12 @@
 
   .live-preview-window--is-live-previewing {
     display: block;
+    border-left: var(--stroke-width-small) solid var(--color-border);
   }
 
   .live-preview-window--is-expanded {
     width: 100%;
+    border-left: none;
   }
 
   .live-preview-window__wrapper {

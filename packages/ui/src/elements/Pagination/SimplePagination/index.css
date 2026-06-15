@@ -1,0 +1,23 @@
+@layer payload-default {
+  .simple-pagination {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-3);
+  }
+
+  .simple-pagination__info {
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    white-space: nowrap;
+  }
+
+  .simple-pagination__arrows {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+}

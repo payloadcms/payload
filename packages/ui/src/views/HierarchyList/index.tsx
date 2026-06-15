@@ -11,10 +11,10 @@ import type { CollectionOption } from '../../elements/CreateDocumentButton/index
 import type { StepNavItem } from '../../elements/StepNav/index.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
-import { Gutter } from '../../elements/Gutter/index.js'
+import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
-import { SearchBar } from '../../elements/SearchBar/index.js'
+import { ListSearchFilter } from '../../elements/Search/ListSearchFilter/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -41,6 +41,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     hasCreatePermission: hasCreatePermissionFromProps,
     hierarchyData,
     HierarchyIcon,
+    HierarchySmallIcon,
     viewType,
   } = props
 
@@ -87,7 +88,7 @@ export function HierarchyListView(props: ListViewClientProps) {
   // Get search from URL params
   const searchFromURL = searchParams.get('search') || ''
 
-  // Update URL when search changes (debouncing is handled by SearchFilter)
+  // Update URL when search changes (debouncing is handled by ListSearchFilter)
   // This triggers a server refetch via Next.js router
   const handleSearchChange = useCallback(
     (value: string) => {
@@ -296,6 +297,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       .map(([slug, related]) => ({
         collectionSlug: slug,
         data: related.result,
+        fieldName: related.fieldName,
         hasMany: related.hasMany,
         label: related.label,
       }))
@@ -317,7 +319,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         {BeforeList}
         <DocumentSelectionProvider collectionData={collectionData}>
-          <Gutter className={`${baseClass}__wrap`}>
+          <div className={`${baseClass}__wrap`}>
             <HierarchyListHeader
               collectionConfig={collectionConfig}
               currentItemTitle={currentItemTitle}
@@ -350,9 +352,9 @@ export function HierarchyListView(props: ListViewClientProps) {
               viewType={viewType}
             />
 
-            <div className={`${baseClass}__controls`}>
+            <ListControlsBar className={`${baseClass}__controls`}>
               <div className={`${baseClass}__controls-left`}>
-                <SearchBar
+                <ListSearchFilter
                   label={t('general:searchBy', {
                     label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
                   })}
@@ -375,7 +377,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                   onSave={handleSave}
                 />
               )}
-            </div>
+            </ListControlsBar>
 
             <HierarchyTable
               baseFilter={baseFilter}
@@ -383,7 +385,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               collections={collections}
               collectionSlug={collectionSlug}
               hasCreatePermission={hasCreatePermission}
-              HierarchyIcon={HierarchyIcon}
+              HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
               hierarchyLabel={collectionLabel}
               key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
                 hierarchyData?.relatedDocumentsByCollection || {},
@@ -396,7 +398,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               search={searchFromURL}
               useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
             />
-          </Gutter>
+          </div>
         </DocumentSelectionProvider>
         {AfterList}
       </div>

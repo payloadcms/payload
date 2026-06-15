@@ -2,9 +2,9 @@
 
 import React, { Fragment } from 'react'
 
-import { DeleteMany_v4 } from '../../../elements/DeleteMany/index.js'
+import { DeleteMany } from '../../../elements/DeleteMany/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
-import { EditMany_v4 } from '../../../elements/EditMany/index.js'
+import { EditMany } from '../../../elements/EditMany/index.js'
 import { MoveMany } from '../../../elements/Hierarchy/MoveMany/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
@@ -113,7 +113,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
           collectionConfig &&
           ids.length > 0 && (
             <Fragment key="bulk-actions">
-              <EditMany_v4
+              <EditMany
                 collection={collectionConfig}
                 count={ids.length}
                 ids={ids}
@@ -140,7 +140,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
             </Fragment>
           ),
         !disableBulkDelete && (
-          <DeleteMany_v4
+          <DeleteMany
             afterDelete={handleActionSuccess}
             key="bulk-delete"
             modalPrefix="hierarchy-list"

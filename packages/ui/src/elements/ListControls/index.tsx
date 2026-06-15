@@ -1,7 +1,6 @@
 'use client'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
-import { validateWhereQuery } from 'payload/shared'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 
 import type { ListControlsProps } from './types.js'
@@ -11,12 +10,11 @@ import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Dots } from '../../icons/Dots/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { AnimateHeight } from '../AnimateHeight/index.js'
 import { Button } from '../Button/index.js'
-import { ColumnSelector } from '../ColumnSelector/index.js'
-import { GroupByBuilder } from '../GroupByBuilder/index.js'
+import { ColumnsButton } from '../ColumnsButton/index.js'
+import { GroupByControl } from '../GroupByControl/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
-import { SearchBar } from '../SearchBar/index.js'
+import { ListSearchFilter } from '../Search/ListSearchFilter/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import './index.css'
 
@@ -37,15 +35,19 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableFilters = true,
     enableSort = false,
     hasCreatePermission,
+    isWhereOpen: isWhereOpenFromProps,
     listMenuItems,
     newDocumentURL,
+    onWhereToggle,
     queryPreset: activePreset,
     queryPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
   } = props
 
-  const { handleSearchChange, query } = useListQuery()
+  const isControlled = typeof onWhereToggle === 'function'
+
+  const { handleSearchChange, hasActiveFilters, query } = useListQuery()
 
   const { t } = useTranslation()
 
@@ -58,10 +60,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
 
   const hasWhereParam = useRef(Boolean(query?.where))
 
-  const shouldInitializeWhereOpened = validateWhereQuery(query?.where)
-
-  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'group-by' | 'sort' | 'where'>(
-    shouldInitializeWhereOpened ? 'where' : undefined,
+  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
+    hasActiveFilters ? 'where' : undefined,
   )
 
   useEffect(() => {
@@ -72,11 +72,16 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     }
   }, [setVisibleDrawer, query?.where])
 
+  const isWhereOpen = isControlled ? Boolean(isWhereOpenFromProps) : visibleDrawer === 'where'
+  const handleWhereToggle = isControlled
+    ? onWhereToggle
+    : () => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__search-row`}>
         <div className={`${baseClass}__left`}>
-          <SearchBar
+          <ListSearchFilter
             key={collectionSlug}
             label={searchLabelTranslated}
             onSearchChange={handleSearchChange}
@@ -101,54 +106,17 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 'aria-controls': `${baseClass}-where`,
                 'aria-expanded': visibleDrawer === 'where',
               }}
-              icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} size={16} />}
+              icon={<ChevronIcon direction={isWhereOpen ? 'up' : 'down'} size={16} />}
               id="toggle-list-filters"
-              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
+              onClick={handleWhereToggle}
+              selected={isWhereOpen || hasActiveFilters}
               size="medium"
             >
               {t('general:filters')}
             </Button>
           )}
-          {collectionConfig.admin.groupBy && (
-            <Button
-              buttonStyle="secondary"
-              className={`${baseClass}__toggle-group-by`}
-              extraButtonProps={{
-                'aria-controls': `${baseClass}-group-by`,
-                'aria-expanded': visibleDrawer === 'group-by',
-              }}
-              icon={
-                <ChevronIcon direction={visibleDrawer === 'group-by' ? 'up' : 'down'} size={16} />
-              }
-              id="toggle-group-by"
-              onClick={() =>
-                setVisibleDrawer(visibleDrawer !== 'group-by' ? 'group-by' : undefined)
-              }
-              size="medium"
-            >
-              {t('general:groupByLabel', {
-                label: '',
-              })}
-            </Button>
-          )}
-          {enableColumns && (
-            <Button
-              buttonStyle="secondary"
-              className={`${baseClass}__toggle-columns`}
-              extraButtonProps={{
-                'aria-controls': `${baseClass}-columns`,
-                'aria-expanded': visibleDrawer === 'columns',
-              }}
-              icon={
-                <ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} size={16} />
-              }
-              id="toggle-list-columns"
-              onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
-              size="medium"
-            >
-              {t('general:columns')}
-            </Button>
-          )}
+          <GroupByControl collectionSlug={collectionConfig.slug} fields={collectionConfig.fields} />
+          {enableColumns && <ColumnsButton collectionSlug={collectionConfig.slug} />}
           {enableSort && (
             <Button
               buttonStyle="secondary"
@@ -195,36 +163,17 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           )}
         </div>
       </div>
-      {enableColumns && (
-        <AnimateHeight
-          className={`${baseClass}__columns`}
-          height={visibleDrawer === 'columns' ? 'auto' : 0}
-          id={`${baseClass}-columns`}
-        >
-          <ColumnSelector collectionSlug={collectionConfig.slug} />
-        </AnimateHeight>
-      )}
-      <AnimateHeight
-        className={`${baseClass}__where`}
-        height={visibleDrawer === 'where' ? 'auto' : 0}
-        id={`${baseClass}-where`}
-      >
-        <WhereBuilder
-          collectionPluralLabel={collectionConfig?.labels?.plural}
-          collectionSlug={collectionConfig.slug}
-          fields={collectionConfig?.fields}
-          renderedFilters={renderedFilters}
-          resolvedFilterOptions={resolvedFilterOptions}
-        />
-      </AnimateHeight>
-      {collectionConfig.admin.groupBy && (
-        <AnimateHeight
-          className={`${baseClass}__group-by`}
-          height={visibleDrawer === 'group-by' ? 'auto' : 0}
-          id={`${baseClass}-group-by`}
-        >
-          <GroupByBuilder collectionSlug={collectionConfig.slug} fields={collectionConfig.fields} />
-        </AnimateHeight>
+      {!isControlled && isWhereOpen && (
+        <div className={`${baseClass}__where`} id={`${baseClass}-where`}>
+          <WhereBuilder
+            collectionPluralLabel={collectionConfig?.labels?.plural}
+            collectionSlug={collectionConfig.slug}
+            fields={collectionConfig?.fields}
+            onClose={() => setVisibleDrawer(undefined)}
+            renderedFilters={renderedFilters}
+            resolvedFilterOptions={resolvedFilterOptions}
+          />
+        </div>
       )}
     </div>
   )

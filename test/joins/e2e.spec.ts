@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -18,6 +17,7 @@ import {
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
 import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -167,6 +167,7 @@ describe('Join Field', () => {
 
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('#field-relatedPosts.field-type.join')
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
     await expect(joinField.locator('.row-1 > .cell-title')).toContainText('z')
     await expect(joinField.locator('.relationship-table-pagination')).toBeVisible()
     const rows = joinField.locator('.relationship-table tbody tr')
@@ -305,8 +306,7 @@ describe('Join Field', () => {
     await expect(link).toBeHidden()
 
     await reorderColumns(page, {
-      togglerSelector: '.relationship-table__toggle-columns',
-      columnContainerSelector: '.relationship-table__columns',
+      togglerSelector: '#field-relatedPosts .columns-button__button',
       fromColumn: 'Category',
       toColumn: 'Title',
     })
@@ -319,8 +319,7 @@ describe('Join Field', () => {
 
     // put columns back in original order for the next test
     await reorderColumns(page, {
-      togglerSelector: '.relationship-table__toggle-columns',
-      columnContainerSelector: '.relationship-table__columns',
+      togglerSelector: '#field-relatedPosts .columns-button__button',
       fromColumn: 'Title',
       toColumn: 'Category',
     })
@@ -505,7 +504,7 @@ describe('Join Field', () => {
     await deleteButton.click()
     const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
     await expect(deleteConfirmModal).toBeVisible()
-    const confirmDeleteButton = deleteConfirmModal.locator('button#confirm-action')
+    const confirmDeleteButton = deleteConfirmModal.locator('button[data-dialog-action="confirm"]')
     await expect(confirmDeleteButton).toBeVisible()
     await confirmDeleteButton.click()
     await expect(drawer).toBeHidden()
@@ -654,6 +653,7 @@ describe('Join Field', () => {
     await page.goto(foldersURL.edit(rootParentID))
     const joinField = page.locator('#field-children.field-type.join')
     await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
 
     const addNewPopupBtn = joinField.locator('.relationship-table__add-new-polymorphic')
     await expect(addNewPopupBtn).toBeVisible()

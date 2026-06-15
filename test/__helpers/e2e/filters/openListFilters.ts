@@ -10,7 +10,7 @@ export const openListFilters = async (
   page: Page,
   {
     togglerSelector = '#toggle-list-filters',
-    filterContainerSelector = '#list-controls-where',
+    filterContainerSelector = '.where-builder',
   }: {
     filterContainerSelector?: string
     togglerSelector?: string
@@ -18,16 +18,22 @@ export const openListFilters = async (
 ): Promise<{
   filterContainer: Locator
 }> => {
-  await expect(page.locator(togglerSelector)).toBeVisible()
-  const filterContainer = page.locator(filterContainerSelector).first()
+  const toggler = page.locator(togglerSelector).first()
+  await expect(toggler).toBeVisible()
 
-  const isAlreadyOpen = await filterContainer.isVisible()
+  const openContainer = page.locator(filterContainerSelector).first()
 
-  if (!isAlreadyOpen) {
-    await page.locator(togglerSelector).first().click()
-  }
+  // The filter drawer is now rendered conditionally (only present in the DOM when open),
+  // so its visibility is the source of truth for the open/closed state. Click the toggler
+  // only when the container isn't already visible, then retry until it is. This makes the
+  // helper idempotent and resilient to re-render races (e.g. after a group-by/sort change).
+  await expect(async () => {
+    if (!(await openContainer.isVisible())) {
+      await toggler.click()
+    }
 
-  await expect(page.locator(`${filterContainerSelector}.rah-static--height-auto`)).toBeVisible()
+    await expect(openContainer).toBeVisible()
+  }).toPass()
 
-  return { filterContainer }
+  return { filterContainer: openContainer }
 }

@@ -1,0 +1,92 @@
+@layer payload-default {
+  .versions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .versions__wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .versions__header {
+    margin-bottom: var(--spacer-3);
+  }
+
+  .versions__no-versions {
+    margin-top: var(--spacer-5);
+  }
+
+  .versions__parent-doc .banner__content {
+    display: flex;
+  }
+
+  [dir='ltr'] .versions__parent-doc-pills {
+    margin-left: auto;
+  }
+
+  [dir='rtl'] .versions__parent-doc-pills {
+    margin-right: auto;
+  }
+
+  .versions .table table {
+    width: 100%;
+    overflow: auto;
+  }
+
+  .versions .table th:first-child {
+    padding-inline-start: var(--gutter-h);
+  }
+
+  .versions .table td:first-child:not(.cell--linked) {
+    padding-inline-start: var(--gutter-h);
+  }
+
+  .versions .table td.cell--linked {
+    padding: 0;
+  }
+
+  .versions .table td.cell--linked > :is(a, button) {
+    padding-inline-start: var(--gutter-h);
+    width: 100%;
+  }
+
+  .versions .table td.cell--linked > :is(a, button) {
+    font-weight: var(--text-body-medium-strong-font-weight);
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: none;
+    text-decoration-color: var(--color-border);
+    text-decoration-thickness: auto;
+    text-underline-offset: 2px;
+    text-underline-position: from-font;
+
+    &:hover {
+      text-decoration-color: var(--color-text);
+    }
+  }
+
+  .versions .paginator {
+    margin-bottom: 0;
+  }
+
+  /* on mobile, extend the table all the way to the viewport edges */
+  /* this is to visually indicate overflowing content */
+  @media (max-width: 768px) {
+    .versions .table {
+      display: flex;
+      flex-direction: column;
+      max-width: unset;
+      position: relative;
+    }
+
+    .versions .table::after {
+      content: '';
+      height: var(--stroke-width-small);
+      padding-right: var(--gutter-h);
+    }
+  }
+}

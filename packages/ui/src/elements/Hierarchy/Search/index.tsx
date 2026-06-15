@@ -11,7 +11,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
-import { HierarchySearchInput } from './HierarchySearchInput.js'
+import { SearchInput } from '../../Search/SearchInput/index.js'
 import { HierarchySearchResults } from './HierarchySearchResults.js'
 import { useHierarchySearch } from './useHierarchySearch.js'
 import './index.css'
@@ -93,7 +93,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__controls`}>
-        <HierarchySearchInput
+        <SearchInput
           onChange={handleInputChange}
           onClear={handleClear}
           onSearch={handleSearch}
@@ -106,7 +106,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
             caret={false}
             horizontalAlign="right"
             render={() => (
-              <PopupList.IconButtonGroup>
+              <PopupList.RadioGroup>
                 {collectionSpecificOptions.map(({ label, value }) => {
                   const isActive = selectedFilters?.includes(value)
                   return (
@@ -125,12 +125,12 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
                     </PopupList.Button>
                   )
                 })}
-              </PopupList.IconButtonGroup>
+              </PopupList.RadioGroup>
             )}
             renderButton={({ active, onClick, onKeyDown }) => (
               <Button
                 aria-label={t('general:filter')}
-                buttonStyle="ghost"
+                buttonStyle="secondary"
                 className={`${baseClass}__filter`}
                 extraButtonProps={{ onKeyDown }}
                 icon={<FilterIcon hasBadgeCutout={hasActiveFilters} size={16} />}
@@ -159,7 +159,6 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   )
 }
 
-export { HierarchySearchInput } from './HierarchySearchInput.js'
 export { HierarchySearchResultItem } from './HierarchySearchResultItem.js'
 export { HierarchySearchResults } from './HierarchySearchResults.js'
 export type { HierarchySearchProps, SearchResult } from './types.js'

@@ -216,4 +216,5 @@ export const CustomFields: CollectionConfig = {
       type: 'ui',
     },
   ],
+  versions: false,
 }

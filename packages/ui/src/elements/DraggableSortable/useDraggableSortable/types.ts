@@ -4,6 +4,8 @@ import type { HTMLAttributes } from 'react'
 export type UseDraggableSortableReturn = {
   readonly attributes: HTMLAttributes<unknown>
   readonly isDragging?: boolean
+  readonly isOver?: boolean
+  readonly isSorting?: boolean
   readonly listeners: SyntheticListenerMap
   readonly setNodeRef: (node: HTMLElement | null) => void
   readonly transform: string

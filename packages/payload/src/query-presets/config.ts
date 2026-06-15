@@ -51,8 +51,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'json',
       admin: {
         components: {
-          Cell: '@payloadcms/next/client#QueryPresetsWhereCell',
-          Field: '@payloadcms/next/client#QueryPresetsWhereField',
+          Cell: '@payloadcms/ui#QueryPresetsWhereCell',
+          Field: '@payloadcms/ui#QueryPresetsWhereField',
         },
       },
       hooks: {
@@ -78,8 +78,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'json',
       admin: {
         components: {
-          Cell: '@payloadcms/next/client#QueryPresetsColumnsCell',
-          Field: '@payloadcms/next/client#QueryPresetsColumnField',
+          Cell: '@payloadcms/ui#QueryPresetsColumnsCell',
+          Field: '@payloadcms/ui#QueryPresetsColumnField',
         },
       },
       validate: (value) => {
@@ -99,8 +99,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'text',
       admin: {
         components: {
-          Cell: '@payloadcms/next/client#QueryPresetsGroupByCell',
-          Field: '@payloadcms/next/client#QueryPresetsGroupByField',
+          Cell: '@payloadcms/ui#QueryPresetsGroupByCell',
+          Field: '@payloadcms/ui#QueryPresetsGroupByField',
         },
       },
       label: 'Group By',
@@ -183,4 +183,5 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
   },
   lockDocuments: false,
   select: ({ select }) => (select ? { ...select, relatedCollection: true } : undefined),
+  versions: false,
 })

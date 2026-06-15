@@ -1,8 +1,9 @@
 import type { JsonObject, Payload } from 'payload'
 
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
+import fs from 'fs'
 import path from 'path'
-import { createLocalReq, saveVersion, ValidationError } from 'payload'
+import { createLocalReq, getFileByPath, saveVersion, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
@@ -26,6 +27,7 @@ import {
   draftCollectionSlug,
   draftGlobalSlug,
   draftUnlimitedGlobalSlug,
+  draftWithUploadCollectionSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   versionCollectionSlug,
@@ -37,7 +39,6 @@ let restClient: NextRESTClient
 const collectionGraphQLOriginalTitle = 'autosave title'
 
 const globalGraphQLOriginalTitle = 'updated global title'
-let globalLocalVersionID: number | string
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -539,10 +540,16 @@ describe('Versions', () => {
           draft: true,
         })
 
+        const docWithLocales = await payload.findByID({
+          collection,
+          id: post.id,
+          locale: 'all',
+        })
+
         const result = await saveVersion({
           id: post.id,
           collection: collectionConfig,
-          docWithLocales: post,
+          docWithLocales,
           operation: 'create',
           payload,
           returning: false,
@@ -1989,6 +1996,217 @@ describe('Versions', () => {
     })
   })
 
+  describe('Upload Collections with Drafts', () => {
+    const uploadedFilenames: string[] = []
+    const uploadStaticDir = path.resolve(dirname, './collections/uploads-draft')
+
+    afterEach(async () => {
+      await cleanupDocuments({
+        collectionSlugs: [draftWithUploadCollectionSlug],
+        payload,
+      })
+
+      for (const filename of uploadedFilenames) {
+        const filePath = path.resolve(uploadStaticDir, filename)
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath)
+        }
+      }
+      uploadedFilenames.length = 0
+    })
+
+    it('should not modify the published document when saving a draft with a new file', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'original-published.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+      expect(publishedDoc._status).toBe('published')
+
+      const draftImageFile = await getFileByPath(path.resolve(dirname, './image.png'))
+
+      draftImageFile.name = 'new-draft-file.png'
+
+      await payload.update({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'draft',
+          alt: 'Updated in draft',
+        },
+        draft: true,
+        file: draftImageFile,
+      })
+
+      const mainDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+      })
+
+      const draftDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        draft: true,
+      })
+
+      uploadedFilenames.push(draftDoc.filename)
+
+      expect(mainDoc._status).toBe('published')
+      expect(mainDoc.filename).toBe(publishedDoc.filename)
+      expect(mainDoc.alt).toBe('Original image')
+
+      expect(draftDoc._status).toBe('draft')
+      expect(draftDoc.alt).toBe('Updated in draft')
+      expect(draftDoc.filename).not.toBe(publishedDoc.filename)
+    })
+
+    it('should not delete the published file from disk when saving a draft with a new file', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'published-file-disk-check.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Published image',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+
+      const publishedFilePath = path.resolve(uploadStaticDir, publishedDoc.filename)
+
+      expect(fs.existsSync(publishedFilePath)).toBe(true)
+
+      const draftImageFile = await getFileByPath(path.resolve(dirname, './image.png'))
+
+      draftImageFile.name = 'replacement-draft-file.png'
+
+      await payload.update({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'draft',
+          alt: 'Draft with new file',
+        },
+        draft: true,
+        file: draftImageFile,
+      })
+
+      const draftDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        draft: true,
+      })
+
+      uploadedFilenames.push(draftDoc.filename)
+
+      expect(fs.existsSync(publishedFilePath)).toBe(true)
+    })
+
+    it('should correctly publish a draft with a new file using the PublishMany pattern', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'publish-many-original.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+
+      const draftImageFile = await getFileByPath(path.resolve(dirname, './image.png'))
+
+      draftImageFile.name = 'publish-many-draft.png'
+
+      await payload.update({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'draft',
+          alt: 'Draft version',
+        },
+        draft: true,
+        file: draftImageFile,
+      })
+
+      const draftDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+        draft: true,
+      })
+
+      uploadedFilenames.push(draftDoc.filename)
+
+      await payload.update({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+        },
+        draft: true,
+        where: {
+          id: { equals: publishedDoc.id },
+        },
+      })
+
+      const republishedDoc = await payload.findByID({
+        id: publishedDoc.id,
+        collection: draftWithUploadCollectionSlug,
+      })
+
+      expect(republishedDoc._status).toBe('published')
+      expect(republishedDoc.filename).toBe(draftDoc.filename)
+      expect(republishedDoc.alt).toBe('Draft version')
+    })
+
+    it('should create a draft when duplicating a published upload document with draft: true', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'duplicate-source.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original published',
+        },
+        file: imageFile,
+      })
+
+      uploadedFilenames.push(publishedDoc.filename)
+      expect(publishedDoc._status).toBe('published')
+
+      const duplicatedDoc = await payload.create({
+        collection: draftWithUploadCollectionSlug,
+        data: {
+          alt: 'Duplicated draft',
+        },
+        draft: true,
+        duplicateFromID: publishedDoc.id,
+      })
+
+      uploadedFilenames.push(duplicatedDoc.filename)
+
+      expect(duplicatedDoc._status).toBe('draft')
+    })
+  })
+
   describe('Querying', () => {
     const originalTitle = 'original title'
     const updatedTitle1 = 'new title 1'
@@ -2708,6 +2926,7 @@ describe('Versions', () => {
         const doc = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: { title: 'asd' },
+          publishAllLocales: true,
         })
 
         await wait(10)
@@ -2715,6 +2934,7 @@ describe('Versions', () => {
         const upd = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: { title: 'asd2' },
+          publishAllLocales: true,
         })
 
         expect(upd.createdAt).toBe(doc.createdAt)
@@ -2920,6 +3140,7 @@ describe('Versions', () => {
           data: {
             title: title2,
           },
+          publishAllLocales: true,
         })
 
         expect(updatedGlobal.title).toBe(title2)
@@ -2962,6 +3183,7 @@ describe('Versions', () => {
             description: 'kjnjyhbbdsfseankuhsjsfghb',
             title: originalTitle,
           },
+          publishAllLocales: true,
         })
 
         const publishedGlobal = await payload.findGlobal({
@@ -3657,7 +3879,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const docWithoutSpanishDraft = await payload.findByID({
@@ -3670,7 +3891,8 @@ describe('Versions', () => {
         // which should not leak any unpublished Spanish content
         // and should retain the English fields that were not explicitly
         // passed in from publishedEN1
-        expect(docWithoutSpanishDraft.text.es).toBeUndefined()
+        // null (SQL: locale row exists but text is NULL) or undefined (MongoDB) both mean no data
+        expect(docWithoutSpanishDraft.text.es ?? null).toBeNull()
         expect(docWithoutSpanishDraft.description.en).toStrictEqual('My English description')
 
         const docWithSpanishDraft1 = await payload.findByID({
@@ -3695,7 +3917,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const docWithoutSpanishDraft2 = await payload.findByID({
@@ -3707,7 +3928,8 @@ describe('Versions', () => {
         // On the second consecutive publish of a specific locale,
         // Make sure we maintain draft data that has never been published
         // even after two + consecutive publish events
-        expect(docWithoutSpanishDraft2.text.es).toBeUndefined()
+        // null (SQL) or undefined (MongoDB) both indicate no published data for this locale
+        expect(docWithoutSpanishDraft2.text.es ?? null).toBeNull()
         expect(docWithoutSpanishDraft2.text.en).toStrictEqual('English published 2')
         expect(docWithoutSpanishDraft2.description.en).toStrictEqual('My English description')
 
@@ -3746,7 +3968,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'de',
-          publishSpecificLocale: 'de',
         })
 
         await payload.update({
@@ -3758,7 +3979,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const finalPublishedNoES = await payload.findByID({
@@ -3769,7 +3989,8 @@ describe('Versions', () => {
 
         expect(finalPublishedNoES.text.de).toStrictEqual('German published 1')
         expect(finalPublishedNoES.text.en).toStrictEqual('English published 3')
-        expect(finalPublishedNoES.text.es).toBeUndefined()
+        // null (SQL) or undefined (MongoDB) both indicate no published data for this locale
+        expect(finalPublishedNoES.text.es ?? null).toBeNull()
 
         const finalDraft = await payload.findByID({
           id: draft1.id,
@@ -3820,7 +4041,6 @@ describe('Versions', () => {
             text: 'English publish',
           },
           draft: false,
-          publishSpecificLocale: 'en',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -3829,7 +4049,7 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.es ?? null).toBeNull()
         expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
       })
 
@@ -3851,7 +4071,6 @@ describe('Versions', () => {
             text: 'English publish',
           },
           draft: false,
-          publishSpecificLocale: 'en',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -3860,7 +4079,7 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.es ?? null).toBeNull()
         expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
 
         const published2 = await payload.update({
@@ -3870,6 +4089,7 @@ describe('Versions', () => {
             _status: 'published',
           },
           draft: false,
+          publishAllLocales: true,
         })
 
         const publishedAll = await payload.findByID({
@@ -3900,7 +4120,7 @@ describe('Versions', () => {
             text: 'German publish',
           },
           draft: false,
-          publishSpecificLocale: 'de',
+          locale: 'de',
         })
 
         const publishedOnlyDE = await payload.findByID({
@@ -3909,8 +4129,8 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyDE.text.es).toBeUndefined()
-        expect(publishedOnlyDE.text.en).toBeUndefined()
+        expect(publishedOnlyDE.text.es ?? null).toBeNull()
+        expect(publishedOnlyDE.text.en ?? null).toBeNull()
         expect(publishedOnlyDE.text.de).toStrictEqual('German publish')
       })
 
@@ -3932,7 +4152,6 @@ describe('Versions', () => {
             text: 'English publish',
           },
           draft: false,
-          publishSpecificLocale: 'en',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -3941,7 +4160,7 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.es ?? null).toBeNull()
         expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
 
         const allVersions = await payload.findVersions({
@@ -3949,12 +4168,10 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        const versions = allVersions.docs.filter(
-          (version) => version.parent === published.id && version.snapshot !== true,
-        )
+        const versions = allVersions.docs.filter((version) => version.parent === published.id)
         const latestVersion = versions[0].version
 
-        expect(latestVersion.text.es).toBeUndefined()
+        expect(latestVersion.text.es).toStrictEqual('Spanish draft')
         expect(latestVersion.text.en).toStrictEqual('English publish')
       })
 
@@ -4002,7 +4219,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         // Blocks should be preserved with blockType intact
@@ -4060,7 +4276,6 @@ describe('Versions', () => {
             title: 'Eng published',
           },
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const globalData = await payload.findGlobal({
@@ -4094,7 +4309,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const globalData = await payload.findGlobal({
@@ -4127,7 +4341,6 @@ describe('Versions', () => {
             title: 'Eng published',
           },
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const publishedOnlyEN = await payload.findGlobal({
@@ -4143,6 +4356,7 @@ describe('Versions', () => {
           data: {
             _status: 'published',
           },
+          publishAllLocales: true,
         })
 
         const publishedAll = await payload.findGlobal({
@@ -4174,7 +4388,6 @@ describe('Versions', () => {
             title: 'German published',
           },
           locale: 'de',
-          publishSpecificLocale: 'de',
         })
 
         const globalData = await payload.findGlobal({
@@ -4207,14 +4420,13 @@ describe('Versions', () => {
             title: 'New eng',
           },
           draft: false,
-          publishSpecificLocale: 'en',
         })
 
         const allVersions = await payload.findGlobalVersions({
           slug: global,
           locale: 'all',
           where: {
-            'version._status': {
+            'version._status.en': {
               equals: 'published',
             },
           },
@@ -4222,7 +4434,7 @@ describe('Versions', () => {
 
         const versions = allVersions.docs
         const latestVersion = versions[0].version
-        expect(latestVersion.title.es).toBeFalsy()
+        expect(latestVersion.title.es).toStrictEqual('New spanish draft')
         expect(latestVersion.title.en).toStrictEqual('New eng')
       })
     })

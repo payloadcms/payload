@@ -24,5 +24,10 @@
     &:focus-visible {
       outline-color: var(--color-border-selected);
     }
+
+    .locked__tooltip {
+      left: 0;
+      transform: translate3d(0, calc(var(--caret-height) + var(--caret-offset) - 1px), 0);
+    }
   }
 }

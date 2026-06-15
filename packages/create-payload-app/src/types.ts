@@ -27,6 +27,7 @@ export interface Args extends arg.Spec {
   '--use-npm': BooleanConstructor
   '--use-pnpm': BooleanConstructor
   '--use-yarn': BooleanConstructor
+  '--version': StringConstructor
 
   // Aliases
 

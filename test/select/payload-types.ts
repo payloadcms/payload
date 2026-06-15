@@ -60,6 +60,41 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_AE9E55AF".
+ */
+export type LexicalNodes_AE9E55AF =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_AE9E55AF>
+  | SerializedAutoLinkNode<LexicalNodes_AE9E55AF, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_AE9E55AF, LexicalLinkFields>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'upload'>
+  | SerializedQuoteNode<LexicalNodes_AE9E55AF>
+  | SerializedRelationshipNode<
+      | 'posts'
+      | 'localized-posts'
+      | 'versioned-posts'
+      | 'deep-posts'
+      | 'pages'
+      | 'points'
+      | 'force-select'
+      | 'rels'
+      | 'relationships-blocks'
+      | 'custom-ids'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedListNode<LexicalNodes_AE9E55AF>
+  | SerializedListItemNode<LexicalNodes_AE9E55AF>
+  | SerializedHeadingNode<LexicalNodes_AE9E55AF>;
 
 export interface Config {
   auth: {
@@ -79,6 +114,7 @@ export interface Config {
     'relationships-blocks': RelationshipsBlock;
     'custom-ids': CustomId;
     users: User;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -98,6 +134,7 @@ export interface Config {
     'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -164,24 +201,7 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | (
-        | {
-            text?: string | null;
-            introText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'intro';
-          }
-        | {
-            text?: string | null;
-            ctaText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-      )[]
-    | null;
+  blocks?: (Intro | Cta)[] | null;
   tab?: {
     text?: string | null;
     number?: number | null;
@@ -203,6 +223,28 @@ export interface Post {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Intro".
+ */
+export interface Intro {
+  text?: string | null;
+  introText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'intro';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Cta".
+ */
+export interface Cta {
+  text?: string | null;
+  ctaText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cta';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -264,44 +306,32 @@ export interface LocalizedPost {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | (
-        | {
-            text?: string | null;
-            introText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'intro';
-          }
-        | {
-            text?: string | null;
-            ctaText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-      )[]
-    | null;
-  blocksSecond?:
-    | (
-        | {
-            text?: string | null;
-            firstText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'first';
-          }
-        | {
-            text?: string | null;
-            secondText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'second';
-          }
-      )[]
-    | null;
+  blocks?: (Intro | Cta)[] | null;
+  blocksSecond?: (First | Second)[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "First".
+ */
+export interface First {
+  text?: string | null;
+  firstText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'first';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Second".
+ */
+export interface Second {
+  text?: string | null;
+  secondText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'second';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -317,17 +347,20 @@ export interface VersionedPost {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'test';
-      }[]
-    | null;
+  blocks?: Test[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Test".
+ */
+export interface Test {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'test';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -345,15 +378,7 @@ export interface DeepPost {
           id?: string | null;
         }[]
       | null;
-    blocks?:
-      | {
-          text?: string | null;
-          number?: number | null;
-          id?: string | null;
-          blockName?: string | null;
-          blockType: 'block';
-        }[]
-      | null;
+    blocks?: Block[] | null;
   };
   arrayTop?:
     | {
@@ -373,49 +398,23 @@ export interface DeepPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  text?: string | null;
+  number?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
   id: string;
   relatedPage?: (string | null) | Page;
-  content?:
-    | {
-        title: string;
-        link: {
-          docPoly?: {
-            relationTo: 'pages';
-            value: string | Page;
-          } | null;
-          doc?: (string | null) | Page;
-          docMany?: (string | Page)[] | null;
-          docHasManyPoly?:
-            | {
-                relationTo: 'pages';
-                value: string | Page;
-              }[]
-            | null;
-          label: string;
-        };
-        richTextLexical?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'introduction';
-      }[]
-    | null;
+  content?: Introduction[] | null;
   slug: string;
   additional?: string | null;
   array?:
@@ -425,17 +424,46 @@ export interface Page {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        title?: string | null;
-        other?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'some';
-      }[]
-    | null;
+  blocks?: Some[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Introduction".
+ */
+export interface Introduction {
+  title: string;
+  link: {
+    docPoly?: {
+      relationTo: 'pages';
+      value: string | Page;
+    } | null;
+    doc?: (string | null) | Page;
+    docMany?: (string | Page)[] | null;
+    docHasManyPoly?:
+      | {
+          relationTo: 'pages';
+          value: string | Page;
+        }[]
+      | null;
+    label: string;
+  };
+  richTextLexical?: LexicalRichText<LexicalNodes_AE9E55AF> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'introduction';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Some".
+ */
+export interface Some {
+  title?: string | null;
+  other?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'some';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -470,17 +498,22 @@ export interface ForceSelect {
  */
 export interface RelationshipsBlock {
   id: string;
-  blocks?:
-    | {
-        hasMany?: (string | Rel)[] | null;
-        hasOne?: (string | null) | Rel;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocks?: Block_421D958C[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Multiple blocks resolve to the `Block` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block_421D958C".
+ */
+export interface Block_421D958C {
+  hasMany?: (string | Rel)[] | null;
+  hasOne?: (string | null) | Rel;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -518,6 +551,31 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string | User;
+  overrideAccess?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -590,6 +648,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -999,6 +1061,22 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  apiKey?: T;
+  apiKeyIndex?: T;
+  access?: T;
+  label?: T;
+  description?: T;
+  lastUsed?: T;
+  user?: T;
+  overrideAccess?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1099,6 +1177,140 @@ export interface CollectionsWidget {
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

@@ -44,7 +44,7 @@ export function FilterTrigger({
         iconPosition="left"
         id={id}
         onClick={onClick}
-        selected={popupActive}
+        selected={isActive || popupActive}
         size="medium"
       >
         {children}

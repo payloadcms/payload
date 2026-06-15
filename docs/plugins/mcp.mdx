@@ -8,7 +8,7 @@ keywords: plugins, mcp, ai, model context protocol, plugin, payload, cms
 
 ![https://www.npmjs.com/package/@payloadcms/plugin-mcp](https://img.shields.io/npm/v/@payloadcms/plugin-mcp)
 
-This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) capabilities.
+This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) capabilities to Payload.
 
 <Banner type="info">
   This plugin is completely open-source and the [source code can be found
@@ -20,138 +20,166 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
   with as much detail as possible.
 </Banner>
 
-<YouTube
-  id="UBbElyhoszQ"
-  title="Supercharge Your CMS: Payload MCP Server Overview & Demo"
-/>
-
 ## Core features
 
-- Adds a collection to your config where:
-  - You can allow / disallow `find`, `create`, `update`, and `delete` operations for each collection
-  - You can allow / disallow `find` and `update` operations for each global
-  - You can allow / disallow capabilities in real time
-  - You can define your own Prompts, Tools and Resources available over MCP
+- Two transports out of the box:
+  - **HTTP** at `/api/mcp` - for remote clients, protected by per-user API keys
+  - **stdio** via the `payload-mcp` bin - for local AI clients spawning a child process
+- Stable discovery and CRUD tools for all collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - opt out per operation with simple keys like `tools: { delete: false }`
+- Auth-enabled collections expose opt-in `login`, `auth`, `forgotPassword`, `resetPassword`, `unlock`, `verify` tools
+- Define your own `tools`, `prompts`, and `resources` with full TypeScript inference via `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt`
+- Per-API-key access control through an admin-UI managed collection - toggle any tool, prompt, or resource on/off per key in real time
+- Custom auth strategies via `overrideAuth`
 
 ## Installation
 
-Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
-
 ```bash
-  pnpm add @payloadcms/plugin-mcp
+pnpm add @payloadcms/plugin-mcp
 ```
 
-## Basic Usage
+## Quick Start
 
-In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+**1.** Add `mcpPlugin` to your Payload config:
 
 ```ts
 import { buildConfig } from 'payload'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 
-const config = buildConfig({
-  collections: [
-    {
-      slug: 'posts',
-      fields: [],
-    },
-  ],
-  plugins: [
-    mcpPlugin({
-      collections: {
-        posts: {
-          enabled: true,
-        },
-      },
-    }),
-  ],
+export default buildConfig({
+  // your collections, globals, etc.
+  plugins: [mcpPlugin({})],
 })
-
-export default config
 ```
 
-### Options
+**2.** Point your MCP client (Claude Desktop, your IDE, …) at the stdio server:
 
-| Option                                 | Type                | Description                                                                                    |
-| -------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------- |
-| `collections`                          | `object`            | An object of collection slugs to use for MCP capabilities.                                     |
-| `collections[slug]`                    | `object`            | An object of collection slugs to use for MCP capabilities.                                     |
-| `collections[slug].description`        | `string`            | A description for the collection.                                                              |
-| `collections[slug].overrideResponse`   | `function`          | A function that allows you to override the response from the operation tool call.              |
-| `collections[slug].enabled`            | `object or boolean` | Determines whether the model can find, create, update, and delete documents in the collection. |
-| `collections[slug].enabled.find`       | `boolean`           | Whether to allow the model to find documents in the collection.                                |
-| `collections[slug].enabled.create`     | `boolean`           | Whether to allow the model to create documents in the collection.                              |
-| `collections[slug].enabled.update`     | `boolean`           | Whether to allow the model to update documents in the collection.                              |
-| `collections[slug].enabled.delete`     | `boolean`           | Whether to allow the model to delete documents in the collection.                              |
-| `globals`                              | `object`            | An object of global slugs to expose via MCP. Globals only support find and update.             |
-| `globals[slug].description`            | `string`            | A description for the global shown to models.                                                  |
-| `globals[slug].overrideResponse`       | `function`          | A function that allows you to override the response from the operation tool call.              |
-| `globals[slug].enabled`                | `object or boolean` | Determines whether the model can find or update the global.                                    |
-| `globals[slug].enabled.find`           | `boolean`           | Whether to allow the model to read the global.                                                 |
-| `globals[slug].enabled.update`         | `boolean`           | Whether to allow the model to update the global.                                               |
-| `disabled`                             | `boolean`           | Disable the MCP plugin while keeping database schema consistent.                               |
-| `userCollection`                       | `CollectionSlug`    | The users collection that API keys are associated with. Defaults to `config.admin.user`.       |
-| `overrideApiKeyCollection`             | `function`          | A function that allows you to override the automatically generated API Keys collection.        |
-| `overrideAuth`                         | `function`          | Replace the default Bearer-token / API-key auth with a completely custom access strategy.      |
-| `mcp`                                  | `object`            | MCP options that allow you to customize the MCP server.                                        |
-| `mcp.tools`                            | `array`             | An array of tools to add to the MCP server.                                                    |
-| `mcp.tools.name`                       | `string`            | The name of the tool.                                                                          |
-| `mcp.tools.description`                | `string`            | The description of the tool.                                                                   |
-| `mcp.tools.handler`                    | `function`          | The handler function for the tool.                                                             |
-| `mcp.tools.parameters`                 | `object`            | The parameters for the tool (Zod schema).                                                      |
-| `mcp.prompts`                          | `array`             | An array of prompts to add to the MCP server.                                                  |
-| `mcp.prompts.name`                     | `string`            | The name of the prompt.                                                                        |
-| `mcp.prompts.title`                    | `string`            | The title of the prompt (used by models to determine when to use it).                          |
-| `mcp.prompts.description`              | `string`            | The description of the prompt.                                                                 |
-| `mcp.prompts.handler`                  | `function`          | The handler function for the prompt.                                                           |
-| `mcp.prompts.argsSchema`               | `object`            | The arguments schema for the prompt (Zod schema).                                              |
-| `mcp.resources`                        | `array`             | An array of resources to add to the MCP server.                                                |
-| `mcp.resources.name`                   | `string`            | The name of the resource.                                                                      |
-| `mcp.resources.title`                  | `string`            | The title of the resource (used by models to determine when to use it).                        |
-| `mcp.resources.description`            | `string`            | The description of the resource.                                                               |
-| `mcp.resources.handler`                | `function`          | The handler function for the resource.                                                         |
-| `mcp.resources.uri`                    | `string or object`  | The URI of the resource (can be a string or ResourceTemplate for dynamic URIs).                |
-| `mcp.resources.mimeType`               | `string`            | The MIME type of the resource.                                                                 |
-| `mcp.handlerOptions`                   | `object`            | The handler options for the MCP server.                                                        |
-| `mcp.handlerOptions.verboseLogs`       | `boolean`           | Whether to log verbose logs to the console (default: false).                                   |
-| `mcp.handlerOptions.maxDuration`       | `number`            | The maximum duration for the MCP server requests in seconds (default: 60).                     |
-| `mcp.handlerOptions.onEvent`           | `function`          | Callback invoked for every MCP event. Useful for analytics and audit logging.                  |
-| `mcp.serverOptions`                    | `object`            | The server options for the MCP server.                                                         |
-| `mcp.serverOptions.serverInfo`         | `object`            | The server info for the MCP server.                                                            |
-| `mcp.serverOptions.serverInfo.name`    | `string`            | The name of the MCP server (default: 'Payload MCP Server').                                    |
-| `mcp.serverOptions.serverInfo.version` | `string`            | The version of the MCP server (default: '1.0.0').                                              |
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": ["payload-mcp"]
+    }
+  }
+}
+```
 
-## How Access Control Works with MCP
+That's it - every collection and global is now available through the generic MCP tools. For example, call `getConfigInfo` to see available slugs, inspect a collection with `getCollectionSchema`, then create a document with `createDocument`.
 
-<Banner type="warning">
-  Enabling a collection or global in the plugin config does **not**
-  automatically make it accessible to MCP clients. There are two separate steps.
-</Banner>
+The `payload-mcp` bin finds your `payload.config.ts` automatically, since it's installed
+inside your project. If your project has an unusual layout (e.g. a monorepo), see
+[locating the config](#locating-the-config).
 
-**Step 1 — Enable in your config**
+### Production setup (HTTP)
 
-Add the collection or global to the plugin with `enabled: true` (or a capabilities object):
+The stdio server above is for local development, and works even when the dev server is not running.
+
+For deployed apps and remote clients, use the HTTP transport - `mcpPlugin` already exposes `POST /api/mcp` and a
+`payload-mcp-api-keys` collection in the admin UI. [Create an API key](#creating-an-api-key),
+then point your client at the endpoint - see [Connecting MCP clients](#http).
+
+### Configuring per-collection tools
+
+To configure a collection - disable specific built-in tools, tighten a description, add a custom tool - use the `collections` map:
 
 ```ts
 mcpPlugin({
   collections: {
-    posts: { enabled: true },
-  },
-  globals: {
-    'site-settings': { enabled: { find: true, update: true } },
+    posts: {
+      description:
+        'Published blog articles. Use `findDocuments` to list or fetch one by ID.',
+      tools: {
+        // Built-in opt-out: keep find/create/update, block delete
+        delete: false,
+
+        // Built-in override: keep findDocuments enabled, just refine its description
+        find: {
+          description:
+            'Find blog posts. Pass an `id` to fetch one; omit it to list with pagination.',
+        },
+      },
+    },
+    media: {
+      // Read-only: only `findDocuments` and `updateDocument` remain
+      tools: {
+        create: false,
+        delete: false,
+      },
+    },
   },
 })
 ```
 
-**Step 2 — Allow in the API Key**
+### Auth-collection tools
 
-In your Payload admin panel, navigate to **MCP → API Keys**, create a new key, and
-toggle the individual capabilities on for each collection, global, tool, prompt, and
-resource you want that key to be able to use.
+Auth-enabled collections additionally support `auth`, `login`, `forgotPassword`, `resetPassword`, `unlock`, and `verify` tools. These are **opt-in** - set them to `true` (or to an override object) to expose them:
 
-All MCP requests must include a valid API key as a Bearer token — requests without
-one are rejected immediately. Here is a complete example of an MCP `tools/list` request
-showing the correct headers:
+```ts
+mcpPlugin({
+  collections: {
+    users: {
+      description: 'User accounts.',
+      tools: {
+        auth: true,
+        login: true,
+        forgotPassword: true,
+        resetPassword: true,
+        unlock: true,
+        verify: true,
+      },
+    },
+  },
+})
+```
+
+## Options
+
+| Option                                 | Type             | Description                                                                                                                                   |
+| -------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `collections`                          | `object`         | Map keyed by collection slug. See [Per-collection options](#per-collection-options).                                                          |
+| `globals`                              | `object`         | Map keyed by global slug. See [Per-global options](#per-global-options).                                                                      |
+| `tools`                                | `object`         | Cross-cutting custom tools, keyed by tool name. Values are `Tool` objects (use [`defineTool`](#defining-custom-tools-prompts-and-resources)). |
+| `prompts`                              | `object`         | Custom prompts, keyed by name. Values are `Prompt` objects (use [`definePrompt`](#prompts)).                                                  |
+| `resources`                            | `object`         | Custom resources, keyed by name. Values are `Resource` objects.                                                                               |
+| `disabled`                             | `boolean`        | Skip MCP registration. The API key collection is still added so database schema stays consistent across environments.                         |
+| `userCollection`                       | `CollectionSlug` | The users collection API keys are associated with. Defaults to `config.admin.user` (typically `users`).                                       |
+| `overrideApiKeyCollection`             | `function`       | Modify the auto-generated `payload-mcp-api-keys` collection (add fields, hooks, etc.).                                                        |
+| `overrideAuth`                         | `function`       | Replace the default Bearer-token / API-key auth with a fully custom access strategy. See [Custom auth](#custom-auth).                         |
+| `mcp.serverOptions.serverInfo.name`    | `string`         | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
+| `mcp.serverOptions.serverInfo.version` | `string`         | The MCP server version. Default `'1.0.0'`.                                                                                                    |
+| `mcp.serverOptions.options`            | `object`         | Raw options passed through to the underlying `McpServer` from `@modelcontextprotocol/server`.                                                 |
+| `mcp.verboseLogs`                      | `boolean`        | When `true`, info/debug logs from the plugin surface in Payload's logger. Warnings and errors are always logged. Default `false`.             |
+
+### Per-collection options
+
+`collections[slug]` accepts:
+
+| Option             | Type       | Description                                                                                                                                                             |
+| ------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `description`      | `string`   | Description shown for this collection in discovery responses.                                                                                                           |
+| `tools`            | `object`   | Map of tool name → configuration. See [Configuring tools](#configuring-per-collection-tools) and [Defining custom tools](#defining-custom-tools-prompts-and-resources). |
+| `overrideResponse` | `function` | Intercept the response of any built-in tool for this collection (`(response, doc, req) => response`). See [Modifying responses](#modifying-responses).                  |
+
+The `tools` map keys can be:
+
+- A built-in key (`getCollectionSchema`, `find`, `create`, `update`, `delete`, plus auth tool names on auth collections): set to `false` to disable, or to an override object `{ description?, overrideResponse? }`. Auth tools also accept `true` to enable with no overrides.
+- A custom name: a value produced by `defineCollectionTool(...)`.
+
+`getConfigInfo` is always registered as a top-level tool. It returns the collection and global slugs visible to the current MCP client. API keys can disable it like any other top-level tool.
+
+### Per-global options
+
+`globals[slug]` accepts the same shape, but the built-in keys are limited to `getGlobalSchema`, `find`, and `update` (globals are singletons; create / delete don't apply).
+
+## Transports
+
+The plugin ships two transports. You can use either or both.
+
+### HTTP transport (`/api/mcp`)
+
+Once `mcpPlugin` is in your `plugins` array, `POST /api/mcp` accepts JSON-RPC 2.0 MCP requests. All requests must include a Bearer API key (see [API key authentication](#api-key-authentication)) - except in development.
+
+Quick test:
 
 ```bash
 curl -i 'http://localhost:3000/api/mcp' \
@@ -162,36 +190,28 @@ curl -i 'http://localhost:3000/api/mcp' \
   -d '{"jsonrpc":"2.0","id":"1","method":"tools/list","params":{}}'
 ```
 
-Access controls are also enforced at the Payload level using the user associated with
-the API key, so existing collection access rules, hooks, and multi-tenant restrictions
-all continue to apply.
+### stdio transport (`payload-mcp`)
 
-## Connecting to MCP Clients
+The plugin ships a `payload-mcp` bin that serves the MCP protocol over stdin/stdout. It loads your `payload.config.ts`, boots Payload, and serves MCP requests until the parent process closes the stream.
 
-After installing and configuring the plugin, you can connect apps with MCP client capabilities to Payload.
+```bash
+npx payload-mcp
+```
 
-### Step 1: Create an API Key
+Notes on stdio:
 
-1. Start your Payload server
-2. Navigate to your admin panel at `http://localhost:3000/admin`
-3. Go to the **MCP → API Keys** collection
-4. Click **Create New**
-5. Allow or Disallow MCP traffic permissions for each collection (enable find, create, update, delete as needed)
-6. Click **Create** and copy the uniquely generated API key
+- **You don't need `mcpPlugin` in your `plugins` array** for stdio to work. The bin auto-detects the plugin and falls back to default configuration (all collections / globals enabled with default tools) when it isn't registered. Installing the package is enough.
+- Add `mcpPlugin({ ... })` to your config when you want to customize tools, descriptions, prompts, or resources - the bin will pick up that configuration too.
+- stdio runs **full access** (no API key, no per-tool filtering). Whoever can spawn the process is treated as the user. Do not use it in production.
+- The bin uses `tsx` to load TypeScript configs directly. Pass `--disable-transpile` if your config is already compiled to JavaScript.
 
-### Step 2: Configure Your MCP Client
+## Connecting MCP clients
 
-MCP Clients can be configured to interact with your MCP server.
-These clients require some JSON configuration, or platform configuration in order to know how to reach your MCP server.
+Below are configuration examples for popular MCP clients. The format of these JSON files may change over time - check the client website for current schemas.
 
-<Banner type="warning">
-  Caution: the format of these JSON files may change over time. Please check the
-  client website for updates.
-</Banner>
+### HTTP
 
-Our recommended approach to make your server available for most MCP clients is to use the [mcp-remote](https://www.npmjs.com/package/mcp-remote) package via `npx`.
-
-Below are configuration examples for popular MCP clients.
+Most clients support the streamable-HTTP transport directly. If yours doesn't, the [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) package via `npx` is a reliable adapter.
 
 #### [VSCode](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
 
@@ -238,9 +258,7 @@ claude mcp add --transport http Payload http://127.0.0.1:3000/api/mcp \
   --header "Authorization: Bearer MCP-USER-API-KEY"
 ```
 
-#### Other MCP Clients
-
-For connections without using `mcp-remote` you can use this configuration format:
+#### Native HTTP (no `mcp-remote`)
 
 ```json
 {
@@ -256,199 +274,363 @@ For connections without using `mcp-remote` you can use this configuration format
 }
 ```
 
-## Testing Your MCP Endpoint
+### stdio
 
-The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the recommended
-way to explore and test your MCP server interactively:
+For clients that spawn local processes (Claude Desktop, Cursor stdio servers, etc.):
+
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": ["payload-mcp"]
+    }
+  }
+}
+```
+
+stdio runs with full local access - no API key is required.
+
+#### Locating the config
+
+The `payload-mcp` bin is installed inside your project's `node_modules`, so it derives
+your project root from its own location and resolves `payload.config.ts` from there - no
+matter which working directory the MCP client spawns it from.
+
+For layouts where that derived root is wrong (most commonly a monorepo where the package
+is hoisted above the app that actually contains the config), point the bin at the config
+explicitly with the `PAYLOAD_CONFIG_PATH` environment variable:
+
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": ["payload-mcp"],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "/absolute/path/to/your/payload.config.ts"
+      }
+    }
+  }
+}
+```
+
+## Testing your MCP endpoint
+
+The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the fastest way to explore and call your server interactively:
 
 ```bash
 npx @modelcontextprotocol/inspector
 ```
 
-Open the inspector, set the URL to `http://127.0.0.1:3000/api/mcp`, and add an
-`Authorization: Bearer MCP-USER-API-KEY` header.
+- For HTTP: set the URL to `http://127.0.0.1:3000/api/mcp` and add `Authorization: Bearer MCP-USER-API-KEY` as a header.
+- For stdio: choose the stdio transport and set the command to `npx payload-mcp`. Run the
+  Inspector from your project directory, or set `PAYLOAD_CONFIG_PATH` (see
+  [locating the config](#locating-the-config)).
 
-You can also test directly with `curl`:
+## API key authentication
 
-```bash
-curl -i 'http://localhost:3000/api/mcp' \
-  -X POST \
-  -H 'Authorization: Bearer MCP-USER-API-KEY' \
-  -H 'Content-Type: application/json' \
-  -H 'Accept: application/json, text/event-stream' \
-  -d '{"jsonrpc":"2.0","id":"1","method":"tools/list","params":{}}'
-```
+The HTTP endpoint requires a Bearer API key on every request. API keys live in the `payload-mcp-api-keys` collection that the plugin adds to your admin panel.
 
-## Customizations
+### Creating an API key
 
-The plugin supports fully custom `prompts`, `tools` and `resources` that can be called or retrieved by MCP clients.
-After defining a custom method you can allow / disallow the feature from the admin panel by adjusting the `API Key` MCP Options checklist.
+1. Start your Payload server and open the admin panel
+2. Open the user menu (avatar in the header), then **Settings → Manage API keys**
+3. Click **Create New**, then click **Generate new key**
+4. Pick the user the key represents (its Payload access control rules become the key's ceiling)
+5. Under **Permissions**, leave items checked to allow them, uncheck them to deny - the Collections, Globals, and Server tabs list every collection tool, global tool, prompt, resource, and top-level tool
+6. Optionally check **Override access control** to make local-API calls performed by this key run with `overrideAccess: true` (use sparingly; this bypasses Payload access rules)
+7. Save and copy the key
 
-## Globals
+### Dev-mode session fallback
 
-Globals are singleton configuration objects (e.g. site settings, navigation). The plugin
-exposes them as `find` and `update` tools — one tool per global per operation.
+In `NODE_ENV=development`, requests without an `Authorization` header fall back to no user with `overrideAccess: true`. Production builds require the Bearer token.
+
+### Customizing the API key collection
 
 ```ts
 mcpPlugin({
-  globals: {
-    'site-settings': {
-      enabled: {
-        find: true,
-        update: true,
+  overrideApiKeyCollection: (collection) => {
+    collection.fields.push({
+      name: 'department',
+      type: 'select',
+      options: [
+        { label: 'Development', value: 'dev' },
+        { label: 'Marketing', value: 'marketing' },
+      ],
+    })
+
+    return collection
+  },
+})
+```
+
+### Custom auth
+
+Replace the default API-key resolver entirely with `overrideAuth`. Return an `AuthorizedMCP` describing the caller and the items they may use:
+
+```ts
+import { type AuthorizedMCP, mcpPlugin } from '@payloadcms/plugin-mcp'
+
+mcpPlugin({
+  overrideAuth: async ({
+    getAPIKeyDoc,
+    getAuthorizedMCP,
+    pluginConfig,
+    req,
+  }) => {
+    // Option 1: read your own header and translate to AuthorizedMCP
+    const userId = req.headers.get('X-User-Id')
+    if (userId) {
+      const user = await req.payload.findByID({
+        id: userId,
+        collection: 'users',
+        disableErrors: true,
+      })
+      return {
+        user,
+        overrideAccess: false,
+        items: pluginConfig.items, // expose all items to this user
+      }
+    }
+
+    // Option 2: still defer to the built-in API-key lookup when you want to
+    const apiKeyDoc = await getAPIKeyDoc()
+    return getAuthorizedMCP({ apiKeyDoc })
+  },
+})
+```
+
+The handler receives:
+
+- `req` - the incoming `PayloadRequest`
+- `pluginConfig` - the fully sanitized plugin config, including the registered `items`
+- `getAPIKeyDoc(overrideKey?)` - runs the default Bearer-token lookup (optionally with a key you provide)
+- `getAuthorizedMCP({ apiKeyDoc })` - builds an `AuthorizedMCP` from an API key doc the same way the built-in resolver does
+
+## Defining custom tools, prompts, and resources
+
+The plugin ships four helpers - `defineTool`, `defineCollectionTool`, `defineGlobalTool`, `definePrompt` - that give you full inference of the `input` schema in the handler's argument type. Each helper is a two-stage builder: pass the schema and metadata first, then chain `.handler(fn)`.
+
+### Top-level tools
+
+A "top-level" tool isn't scoped to a collection or global. Its wire name is exactly its key in the `tools` map.
+
+```ts
+import { defineTool, mcpPlugin } from '@payloadcms/plugin-mcp'
+import { localAPIDefaults } from '@payloadcms/plugin-mcp'
+import * as z from 'zod'
+
+mcpPlugin({
+  tools: {
+    diceRoll: defineTool({
+      description: 'Roll a virtual dice with the specified number of sides.',
+      input: z.object({
+        sides: z.number().int().min(2).max(1000).default(6),
+      }),
+    }).handler(async ({ input, authorizedMCP, req }) => {
+      const result = Math.floor(Math.random() * input.sides) + 1
+
+      await req.payload.create({
+        collection: 'rolls',
+        data: { sides: input.sides, result, user: req.user?.id },
+        req,
+        ...localAPIDefaults(authorizedMCP),
+      })
+
+      return {
+        content: [{ type: 'text', text: `You rolled a ${result}.` }],
+      }
+    }),
+  },
+})
+```
+
+### Collection-scoped tools
+
+A collection tool's wire name is exactly its key. Payload adds a `collectionSlug` string to the MCP input schema automatically; the handler receives the resolved `collectionSlug`. The field is intentionally not enum-restricted so newly-added collections can be used after HMR even if the MCP client cached the previous tool schema.
+
+```ts
+import { defineCollectionTool, mcpPlugin } from '@payloadcms/plugin-mcp'
+import { localAPIDefaults } from '@payloadcms/plugin-mcp'
+import * as z from 'zod'
+
+mcpPlugin({
+  collections: {
+    posts: {
+      tools: {
+        publish: defineCollectionTool({
+          description: 'Publish a draft post by ID.',
+          input: z.object({
+            id: z.string(),
+          }),
+        }).handler(async ({ collectionSlug, input, authorizedMCP, req }) => {
+          const result = await req.payload.update({
+            id: input.id,
+            collection: collectionSlug,
+            data: { _status: 'published' },
+            req,
+            ...localAPIDefaults(authorizedMCP),
+          })
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Published ${input.id}: ${JSON.stringify(result)}`,
+              },
+            ],
+          }
+        }),
       },
-      description:
-        'Site-wide configuration settings including name, description, and maintenance mode.',
     },
   },
 })
 ```
 
-This produces two MCP tools: `findSiteSettings` and `updateSiteSettings`. Globals do not
-support `create` or `delete` because they are singletons managed by Payload.
+### Global-scoped tools
 
-## Prompts
-
-Prompts allow models to generate structured messages for specific tasks. Each prompt defines a schema for arguments and returns formatted messages:
+`defineGlobalTool` mirrors `defineCollectionTool`. Payload adds a `globalSlug` string to the MCP input schema automatically; the handler receives the resolved `globalSlug`. The field is intentionally not enum-restricted so newly-added globals can be used after HMR even if the MCP client cached the previous tool schema.
 
 ```ts
-prompts: [
-  {
-    name: 'reviewContent',
-    title: 'Content Review Prompt',
-    description: 'Creates a prompt for reviewing content quality',
-    argsSchema: {
-      content: z.string().describe('The content to review'),
-      criteria: z.array(z.string()).describe('Review criteria'),
+import { defineGlobalTool, mcpPlugin } from '@payloadcms/plugin-mcp'
+import { localAPIDefaults } from '@payloadcms/plugin-mcp'
+import * as z from 'zod'
+
+mcpPlugin({
+  globals: {
+    'site-settings': {
+      tools: {
+        setMaintenanceMode: defineGlobalTool({
+          description: 'Enable or disable maintenance mode.',
+          input: z.object({
+            enabled: z.boolean(),
+          }),
+        }).handler(async ({ globalSlug, input, authorizedMCP, req }) => {
+          const result = await req.payload.updateGlobal({
+            slug: globalSlug,
+            data: { maintenanceMode: input.enabled },
+            req,
+            ...localAPIDefaults(authorizedMCP),
+          })
+
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result) }],
+          }
+        }),
+      },
     },
-    handler: ({ content, criteria }, req) => ({
-      messages: [
-        {
-          content: {
-            type: 'text',
-            text: `Please review this content based on the following criteria: ${criteria.join(', ')}\n\nContent: ${content}`,
-          },
-          role: 'user',
-        },
-      ],
-    }),
   },
-]
+})
 ```
 
-## Resources
-
-Resources provide access to data or content that models can read. They can be static or dynamic with parameterized URIs:
+### Prompts
 
 ```ts
-resources: [
-  // Static resource
-  {
-    name: 'guidelines',
-    title: 'Content Guidelines',
-    description: 'Company content creation guidelines',
-    uri: 'guidelines://company',
-    mimeType: 'text/markdown',
-    handler: (uri, req) => ({
-      contents: [
+import { definePrompt, mcpPlugin } from '@payloadcms/plugin-mcp'
+import * as z from 'zod'
+
+mcpPlugin({
+  prompts: {
+    reviewContent: definePrompt({
+      title: 'Content Review Prompt',
+      description: 'Creates a prompt for reviewing content quality.',
+      argsSchema: z.object({
+        content: z.string(),
+        criteria: z.array(z.string()),
+      }),
+    }).handler(({ input }) => ({
+      messages: [
         {
-          uri: uri.href,
-          text: '# Content Guidelines\n\n1. Keep it concise\n2. Use clear language',
+          role: 'user',
+          content: {
+            type: 'text',
+            text: `Review based on: ${input.criteria.join(', ')}\n\n${input.content}`,
+          },
         },
       ],
-    }),
+    })),
   },
+})
+```
 
-  // Dynamic resource with template
-  {
-    name: 'userProfile',
-    title: 'User Profile',
-    description: 'Access user profile information',
-    uri: new ResourceTemplate('users://profile/{userId}', { list: undefined }),
-    mimeType: 'application/json',
-    handler: async (uri, { userId }, req) => {
-      // Fetch user data from your system
-      const userData = await getUserById(userId)
-      return {
+### Resources
+
+Resources can be static (string URI) or dynamic (`ResourceTemplate` for parameterized URIs):
+
+```ts
+import { ResourceTemplate } from '@modelcontextprotocol/server'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
+
+mcpPlugin({
+  resources: {
+    guidelines: {
+      title: 'Content Guidelines',
+      description: 'Company content creation guidelines.',
+      uri: 'guidelines://company',
+      mimeType: 'text/markdown',
+      handler: ({ uri }) => ({
         contents: [
           {
             uri: uri.href,
-            text: JSON.stringify(userData, null, 2),
+            text: '# Content Guidelines\n\n1. Keep it concise\n2. Use clear language',
           },
         ],
-      }
+      }),
+    },
+
+    userProfile: {
+      title: 'User Profile',
+      description: 'Access user profile information.',
+      uri: new ResourceTemplate('users://profile/{userId}', {
+        list: undefined,
+      }),
+      mimeType: 'application/json',
+      handler: async ({ params, req, uri }) => {
+        const user = await req.payload.findByID({
+          id: params.userId,
+          collection: 'users',
+        })
+        return {
+          contents: [{ uri: uri.href, text: JSON.stringify(user) }],
+        }
+      },
     },
   },
-]
+})
 ```
 
-## Tools
+## `AuthorizedMCP` and `localAPIDefaults`
 
-Tools allow you to extend MCP capabilities beyond basic CRUD operations. Use them when you need to perform complex queries, aggregations, or business logic that isn't covered by the standard collection operations.
-
-Every tool `handler` receives `(args, req)` where `req` is the full Payload
-[`PayloadRequest`](https://payloadcms.com/docs/rest-api/overview#custom-routes) object. From it you have access to:
-
-| Property      | Description                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------------- |
-| `req.payload` | The initialised Payload instance — use it to call `payload.find`, `payload.create`, `payload.update`, etc. |
-| `req.user`    | The authenticated user making the request (the MCP API key owner).                                         |
-| `req.locale`  | The active locale, if localisation is enabled.                                                             |
-| `req.headers` | Incoming request headers.                                                                                  |
-
-Always pass `req` through to Payload operations and set `overrideAccess: false` so the
-request inherits the API key owner's access control rules.
+Every handler receives an `authorizedMCP` object describing the caller:
 
 ```ts
-tools: [
-  {
-    name: 'getPostScores',
-    description: 'Get useful scores about content in posts',
-    handler: async (args, req) => {
-      const { payload } = req
-      const stats = await payload.find({
-        collection: 'posts',
-        where: {
-          createdAt: {
-            greater_than: args.since,
-          },
-        },
-        req,
-        overrideAccess: false,
-        user: req.user,
-      })
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Found ${stats.totalDocs} posts created since ${args.since}`,
-          },
-        ],
-      }
-    },
-    parameters: z.object({
-      since: z.string().describe('ISO date string for filtering posts'),
-    }).shape,
-  },
-]
+type AuthorizedMCP = {
+  items: MCPItem[] // the items this caller may use
+  overrideAccess: boolean // mirror of the API key doc's setting
+  user: TypedUser | null // the resolved user (null for stdio)
+}
 ```
 
-## Reducing Token Usage with `select`
-
-All collection and global tools accept an optional `select` parameter. It limits which
-fields are returned in the response, which can significantly reduce token consumption
-when working with large documents.
-
-`select` is a JSON string that follows [Payload's Select API](https://payloadcms.com/docs/queries/select)
-syntax — set a field to `true` to include it:
+When calling Payload's local API from a handler, spread `localAPIDefaults(authorizedMCP)` to forward `user` and `overrideAccess` together - this keeps the two pieces of caller state from drifting apart:
 
 ```ts
-// In a tool call, pass select as a JSON string:
-// arguments: { select: '{"title": true, "slug": true}' }
+import { localAPIDefaults } from '@payloadcms/plugin-mcp'
+
+await req.payload.create({
+  collection: 'posts',
+  data,
+  req,
+  ...localAPIDefaults(authorizedMCP),
+})
 ```
 
-For example, to list only post titles:
+Built-in CRUD tools already use this pattern, so they automatically respect the API key's `overrideAccess` setting and run under the key's user.
+
+## Reducing token usage with `select`
+
+The built-in `findDocuments`, `findGlobal`, `createDocument`, `updateDocument`, and `updateGlobal` tools accept an optional `select` parameter. It limits which fields come back, which significantly reduces token usage on large documents.
+
+`select` is a JSON string following [Payload's Select API](https://payloadcms.com/docs/queries/select) syntax - set a field to `true` to include it:
 
 ```bash
 curl -i 'http://localhost:3000/api/mcp' \
@@ -461,46 +643,39 @@ curl -i 'http://localhost:3000/api/mcp' \
     "id": "1",
     "method": "tools/call",
     "params": {
-      "name": "findPosts",
+      "name": "findDocuments",
       "arguments": {
+        "collectionSlug": "posts",
         "select": "{\"title\": true, \"slug\": true}"
       }
     }
   }'
 ```
 
-Without `select`, the full document is returned for every result. On collections with
-many fields or rich text, this can exhaust a model's context budget quickly.
+Without `select`, the full document is returned. On collections with rich text or deeply nested relationships this can exhaust a model's context budget quickly.
 
-## Modifying Responses
+## Modifying responses
 
-Use `overrideResponse` on a collection or global to intercept what is sent back to the
-model after any operation. This is the primary place to sanitize sensitive data.
+Use `overrideResponse` to intercept what is sent back to the model after any built-in operation on a collection or global. This is the primary place to sanitize sensitive data:
 
 ```ts
 mcpPlugin({
   collections: {
     posts: {
-      enabled: true,
       overrideResponse: (response, doc, req) => {
         req.payload.logger.info('[MCP] Post response intercepted')
-
-        // Append additional context
         response.content.push({
           type: 'text',
           text: `Document last modified by: ${doc.updatedBy ?? 'unknown'}`,
         })
-
         return response
       },
     },
     users: {
-      enabled: { find: true },
-      overrideResponse: (response, doc, req) => {
-        // Redact sensitive fields before the model sees the document
+      overrideResponse: (response) => {
         response.content = response.content.map((item) => ({
           ...item,
-          text: item.text
+          text: (item as { text: string }).text
             .replace(/"hash":\s*"[^"]*"/g, '"hash": "[redacted]"')
             .replace(/"salt":\s*"[^"]*"/g, '"salt": "[redacted]"'),
         }))
@@ -511,81 +686,16 @@ mcpPlugin({
 })
 ```
 
+For finer-grained control, you can set `overrideResponse` on an individual built-in tool override or on a custom tool. Resolution order: per-tool > collection/global > the built-in's default.
+
 <Banner type="warning">
   Models receive the full document by default. Use `overrideResponse` or
   `select` to remove sensitive fields before they reach the model.
 </Banner>
 
-## API Key Access to MCP
-
-Payload adds an API key collection that allows admins to manage MCP capabilities. Admins can:
-
-- Create user associated API keys for MCP clients
-- `Allow` or `disallow` endpoint traffic in real-time
-- `Allow` or `disallow` tools, resources, and prompts
-
-You can customize the API Key collection using the `overrideApiKeyCollection` option:
-
-```ts
-mcpPlugin({
-  overrideApiKeyCollection: (collection) => {
-    // Add fields to the API Keys collection
-    collection.fields.push({
-      name: 'department',
-      type: 'select',
-      options: [
-        { label: 'Development', value: 'dev' },
-        { label: 'Marketing', value: 'marketing' },
-      ],
-    })
-
-    // You can also add hooks
-    collection.hooks?.beforeRead?.push(({ doc, req }) => {
-      req.payload.logger.info('Before Read MCP hook!')
-      return doc
-    })
-    return collection
-  },
-  // ... other options
-})
-```
-
-You can create an MCP access strategy using the `overrideAuth` option:
-
-```ts
-import { type MCPAccessSettings, mcpPlugin } from '@payloadcms/plugin-mcp'
-
-// ... other config
-
-mcpPlugin({
-  overrideAuth: (req, getDefaultMcpAccessSettings) => {
-    const { payload } = req
-
-    // This will return the default MCPAccessSettings
-    // getDefaultMcpAccessSettings()
-
-    payload.logger.info('Custom access Settings for all MCP traffic')
-    return {
-      posts: {
-        find: true,
-      },
-      products: {
-        find: true,
-      },
-    } as MCPAccessSettings
-  },
-  // ... other options
-})
-```
-
-If you want the default `MCPAccessSettings`, you can use the additional argument `getDefaultMcpAccessSettings`.
-This will use the Bearer token found in the headers on the req to return the `MCPAccessSettings` related to the user assigned to the API key.
-
 ## Hooks
 
-To understand or modify data returned by models at runtime use a collection [Hook](https://payloadcms.com/docs/hooks/collections). Within a hook you can look up the API context. If the context is `MCP` that collection was triggered by the MCP Plugin. This does not apply to custom tools or resources that have their own context, and can make unrelated database calls.
-
-In this example, Post titles are modified to include '(MCP Hook Override)' when they are read using MCP.
+To modify documents at runtime use a collection [Hook](https://payloadcms.com/docs/hooks/collections). Inside the hook you can detect MCP traffic via `req.payloadAPI === 'MCP'`:
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -596,13 +706,8 @@ export const Posts: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
-      admin: {
-        description: 'The title of the post',
-      },
       required: true,
     },
-
-    // ... other fields
   ],
   hooks: {
     beforeRead: [
@@ -617,18 +722,18 @@ export const Posts: CollectionConfig = {
 }
 ```
 
+`payloadAPI === 'MCP'` is set on the request that the built-in collection / global tools issue. Custom tools that make their own local-API calls control their own `req.payloadAPI` value.
+
 ## Localization
 
-When your Payload config has localization enabled, all collection and global tools
-automatically include `locale` and `fallbackLocale` parameters — no extra plugin
-configuration is required.
+When your Payload config has localization enabled, all built-in collection and global tools automatically include `locale` and `fallbackLocale` parameters - no extra plugin configuration is required.
 
 | Parameter        | Description                                                                                                    |
 | ---------------- | -------------------------------------------------------------------------------------------------------------- |
 | `locale`         | Retrieve or write data in a specific locale (e.g. `"en"`, `"es"`). Pass `"all"` to return all locales at once. |
 | `fallbackLocale` | The locale to use when the requested locale has no translation for a field.                                    |
 
-Example — find posts in Spanish with English as fallback:
+Example - find posts in Spanish with English as fallback:
 
 ```bash
 curl -i 'http://localhost:3000/api/mcp' \
@@ -641,8 +746,9 @@ curl -i 'http://localhost:3000/api/mcp' \
     "id": "1",
     "method": "tools/call",
     "params": {
-      "name": "findPosts",
+      "name": "findDocuments",
       "arguments": {
+        "collectionSlug": "posts",
         "locale": "es",
         "fallbackLocale": "en"
       }
@@ -650,58 +756,30 @@ curl -i 'http://localhost:3000/api/mcp' \
   }'
 ```
 
-## Tracking MCP Events
+## Virtual fields
 
-Use the `onEvent` callback to receive a notification for every MCP request processed
-by your server. This is useful for analytics, audit logging, or debugging.
-
-```ts
-mcpPlugin({
-  mcp: {
-    handlerOptions: {
-      onEvent: (event) => {
-        // Forward to your analytics pipeline, audit log, etc.
-        console.log('[MCP event]', event)
-      },
-    },
-  },
-})
-```
-
-## Virtual Fields
-
-Virtual fields (computed, read-only fields) are automatically excluded from the `create`
-and `update` tool schemas. They cannot be set by a model, so including them in the schema
-would be misleading and add noise. They are still present in `find` responses.
+Virtual fields (computed, read-only fields) are automatically excluded from `getCollectionSchema` and `getGlobalSchema`. They cannot be set by a model, so including them in the schema would be misleading and add noise. They are still present in find responses.
 
 ## Performance
 
-There are several levers for reducing the number of tokens consumed per MCP request.
-Token efficiency matters because large responses can exhaust a model's context budget,
-slow down responses, and increase cost.
+There are several levers for reducing the number of tokens consumed per MCP request. Token efficiency matters because large responses can exhaust a model's context budget, slow down responses, and increase cost.
 
 ### Write strong descriptions
 
-The description you provide for a collection or global is the primary signal a model
-uses to decide which tool to call. A vague description leads to missed or incorrect
-tool calls; a precise description gets the right tool called on the first try.
+The description you provide for a collection or global helps the model choose the right `collectionSlug` / `globalSlug` after inspecting the available schemas. A vague description leads to missed or incorrect tool calls; a precise description gets the right document target on the first try.
 
 ```ts
-// Weak — a model has no idea what kind of posts these are or when to use this collection
+// Weak - the model has no idea what kind of posts these are
 mcpPlugin({
   collections: {
-    posts: {
-      enabled: true,
-      description: 'My posts',
-    },
+    posts: { description: 'My posts' },
   },
 })
 
-// Strong — the model understands the content and its purpose
+// Strong - the model understands content and purpose
 mcpPlugin({
   collections: {
     posts: {
-      enabled: true,
       description:
         'Published articles covering science and nature topics, with title, body, tags, and publication date.',
     },
@@ -711,36 +789,25 @@ mcpPlugin({
 
 ### Use `select` to return only the fields you need
 
-By default, the full document is returned for every operation. On collections with
-many fields, rich text, or deeply nested relationships this can be very large. Pass
-a `select` JSON string to limit what comes back:
-
-```bash
-# Return only title and slug instead of the full document
--d '{"jsonrpc":"2.0","id":"1","method":"tools/call","params":{"name":"findPosts","arguments":{"select":"{\"title\": true, \"slug\": true}"}}}'
-```
-
-See [Reducing Token Usage with `select`](#reducing-token-usage-with-select) for more detail.
+By default, the full document is returned for every operation. On collections with many fields, rich text, or deeply nested relationships this can be very large. Pass a `select` JSON string to limit what comes back - see [Reducing token usage with `select`](#reducing-token-usage-with-select).
 
 ### Sanitize responses with `overrideResponse`
 
-If a collection has fields that are irrelevant or sensitive for the model's task,
-strip them before the response leaves the server. Fewer fields returned means fewer
-tokens consumed on every call.
-
-See [Modifying Responses](#modifying-responses) for examples.
+If a collection has fields that are irrelevant or sensitive for the model's task, strip them before the response leaves the server. Fewer fields returned means fewer tokens consumed on every call - see [Modifying responses](#modifying-responses).
 
 ### Only enable the operations you need
 
-If a model only needs to read data, enable only `find`. Every additional operation
-(`create`, `update`, `delete`) adds more tools to the model's context, which costs
-tokens and increases the chance of an unintended action.
+If a model only needs to read data, disable `create`, `update`, and `delete`.
 
 ```ts
 mcpPlugin({
   collections: {
     posts: {
-      enabled: { find: true }, // create / update / delete are off
+      tools: {
+        create: false,
+        update: false,
+        delete: false,
+      },
     },
   },
 })

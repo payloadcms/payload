@@ -1,0 +1,99 @@
+@layer payload-default {
+  .mcp-access-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
+    /* Breathing room below the API-key section's divider - the fields
+       container itself adds no gap between these two fields. */
+    padding-block-start: var(--spacer-4);
+    /* This custom field renders straight into `render-fields` (no `.field-type`
+       wrapper), so it must carry the standard inter-field margin itself -
+       otherwise the next field (e.g. an overrideApiKeyCollection field) butts
+       against the last card. */
+    margin-block-end: var(--spacer-3);
+  }
+
+  .mcp-access-field__header {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mcp-access-field__header h4 {
+    margin: 0;
+    color: var(--color-text);
+    font-family: var(--text-heading-small-font-family);
+    font-size: var(--text-heading-small-font-size);
+    font-weight: var(--text-heading-small-font-weight);
+    line-height: var(--text-heading-small-line-height);
+    letter-spacing: var(--text-heading-small-letter-spacing);
+  }
+
+  .mcp-access-field__header p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+  }
+
+  .mcp-access-field__tabbed-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mcp-access-field__cards {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) / 2);
+  }
+
+  /* The collapsible header is pointer-events: none so clicks reach the toggle
+     overlay; re-enable events on the checkbox and lift it above the toggle. */
+  .mcp-access-field__card-checkbox {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    pointer-events: auto;
+  }
+
+  .mcp-access-field__leaf-group {
+    padding-block: calc(var(--base) / 2);
+    border-block-end: 1px solid var(--theme-elevation-100);
+  }
+
+  .mcp-access-field__leaf-group:first-child {
+    padding-block-start: 0;
+  }
+
+  .mcp-access-field__leaf-group:last-child {
+    border-block-end: none;
+    padding-block-end: 0;
+  }
+
+  .mcp-access-field__leaf-group-label {
+    margin: 0 0 calc(var(--base) / 2);
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .mcp-access-field__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) / 2);
+  }
+
+  .mcp-access-field__leaf-description {
+    margin: calc(var(--base) / 6) 0 0;
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+}

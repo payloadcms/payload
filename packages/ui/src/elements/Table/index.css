@@ -1,6 +1,5 @@
 @layer payload-default {
   .table {
-    margin-bottom: var(--spacer-3);
     overflow: auto;
     max-width: 100%;
     isolation: isolate;
@@ -30,7 +29,7 @@
       height: calc(var(--spacer-4) * 2);
 
       &:first-child {
-        padding-inline-start: var(--spacer-2);
+        padding-inline-start: var(--gutter-h);
         padding-inline-end: var(--spacer-2);
       }
 
@@ -39,20 +38,26 @@
       }
     }
 
-    /* Linked cells: move padding to the anchor for full-cell clickability */
+    .drawer & th:first-child,
+    .drawer & td:first-child {
+      padding-inline-start: var(--spacer-3);
+    }
+
+    .drawer & th:last-child,
+    .drawer & td:last-child {
+      padding-inline-end: var(--spacer-3);
+    }
+
+    /* Linked cells: move padding to the anchor/button for full-cell clickability */
     .cell--linked {
       padding: 0;
 
-      > a {
+      > :is(a, button) {
         display: flex;
         align-items: center;
         padding: var(--spacer-2) var(--spacer-2-5);
         min-height: calc(var(--spacer-4) * 2);
-      }
-
-      &:first-child > a {
-        padding-inline-start: var(--spacer-2);
-        padding-inline-end: var(--spacer-2);
+        cursor: pointer;
       }
     }
 
@@ -60,7 +65,8 @@
     .cell-_select {
       width: var(--spacer-5);
       min-width: var(--spacer-5);
-      padding: var(--spacer-2);
+      padding-inline-end: var(--spacer-2);
+      padding-block: var(--spacer-2);
       text-align: center;
     }
 
@@ -153,7 +159,7 @@
       height: var(--spacer-5);
       line-height: var(--text-body-medium-line-height);
       vertical-align: middle;
-      border-right: 1px solid var(--color-border);
+      border-right: var(--stroke-width-small) solid var(--color-border);
 
       &:last-child {
         border-right: none;
@@ -171,26 +177,27 @@
       }
     }
 
-    /* Linked cells: move padding to the anchor for full-cell clickability */
+    /* Linked cells: move padding to the anchor/button for full-cell clickability */
     .cell--linked {
       padding: 0;
 
-      > a {
+      > :is(a, button) {
         padding: 0 var(--spacer-2-5);
         min-height: var(--spacer-5);
+        cursor: pointer;
       }
 
-      &:first-child > a {
+      &:first-child > :is(a, button) {
         padding-inline-start: var(--spacer-2-5);
       }
     }
 
     tbody td {
-      border-top: 1px solid var(--color-border);
+      border-top: var(--stroke-width-small) solid var(--color-border);
     }
 
     th {
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: var(--stroke-width-small) solid var(--color-border);
     }
   }
 

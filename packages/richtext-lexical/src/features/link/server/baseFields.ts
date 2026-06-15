@@ -8,7 +8,7 @@ import type {
   TypedUser,
 } from 'payload'
 
-import type { LinkFields } from '../nodes/types.js'
+import type { LinkFields } from './schema.js'
 
 import { validateUrl, validateUrlMinimal } from '../../../lexical/utils/url.js'
 

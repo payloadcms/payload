@@ -42,6 +42,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug,
+      versions: false,
     },
     {
       access,
@@ -59,6 +60,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: arraySlug,
+      versions: false,
     },
     {
       fields: [
@@ -80,6 +82,7 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: defaultValueSlug,
+      versions: false,
     },
     {
       access: {
@@ -107,12 +110,14 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: accessControlSlug,
+      versions: false,
     },
     {
       access,
       fields: [],
       graphQL: false,
       slug: 'without-graphql',
+      versions: false,
     },
   ],
   localization: {

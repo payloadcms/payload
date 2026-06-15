@@ -1,11 +1,11 @@
 import React from 'react'
 
+import type { SerializedNodeBase } from '../../../../types/index.js'
 import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../../nodeTypes.js'
-import type { SerializedNodeBase } from '../../../../types.js'
+} from '../../../../types/nodeTypes.js'
 import type { JSXConverters } from '../converter/types.js'
 
 import { defaultJSXConverters } from '../converter/defaultConverters.js'
@@ -14,9 +14,9 @@ import { convertLexicalToJSX, type ConvertLexicalToJSXArgs } from '../converter/
 export type JSXConvertersFunction<
   T extends SerializedNodeBase =
     | DefaultNodeTypes
-    | SerializedBlockNode<{ blockName?: null | string }>
-    | SerializedInlineBlockNode<{ blockName?: null | string }>,
-> = (args: { defaultConverters: JSXConverters<DefaultNodeTypes> }) => JSXConverters<T>
+    | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
+    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
+> = (args: { defaultConverters: JSXConverters<T> }) => JSXConverters<T>
 
 type RichTextProps<TNodes extends SerializedNodeBase = SerializedNodeBase> = {
   /**
@@ -26,7 +26,7 @@ type RichTextProps<TNodes extends SerializedNodeBase = SerializedNodeBase> = {
   /**
    * Custom converters to transform your nodes to JSX. Can be an object or a function that receives the default converters.
    */
-  converters?: JSXConverters | JSXConvertersFunction
+  converters?: JSXConverters<TNodes> | JSXConvertersFunction<TNodes>
 
   /**
    * If true, removes the container div wrapper.
@@ -47,12 +47,14 @@ export function RichText<TNodes extends SerializedNodeBase = SerializedNodeBase>
     return null
   }
 
+  const baseConverters = converters as JSXConverters | JSXConvertersFunction | undefined
+
   let finalConverters: JSXConverters = {}
-  if (converters) {
-    if (typeof converters === 'function') {
-      finalConverters = converters({ defaultConverters: defaultJSXConverters })
+  if (baseConverters) {
+    if (typeof baseConverters === 'function') {
+      finalConverters = baseConverters({ defaultConverters: defaultJSXConverters })
     } else {
-      finalConverters = converters
+      finalConverters = baseConverters
     }
   } else {
     finalConverters = defaultJSXConverters

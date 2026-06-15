@@ -138,10 +138,7 @@ export const populateFieldPermissions = ({
         })
       }
 
-      if (
-        ('blocks' in field && field.blocks?.length) ||
-        ('blockReferences' in field && field.blockReferences?.length)
-      ) {
+      if ('blocks' in field && field.blocks?.length) {
         if (!fieldPermissions.blocks) {
           fieldPermissions.blocks = {}
         }
@@ -158,7 +155,7 @@ export const populateFieldPermissions = ({
             parentPermissionsObject[operation as keyof typeof parentPermissionsObject] as Permission
           )?.permission
 
-          for (const _block of field.blockReferences ?? field.blocks) {
+          for (const _block of field.blocks) {
             const block = typeof _block === 'string' ? req.payload.blocks[_block] : _block
 
             // Skip if block doesn't exist (invalid block reference)
@@ -196,7 +193,7 @@ export const populateFieldPermissions = ({
 
         // Process nested content for each unique block (once per block, not once per operation)
         const processedBlocks = new Set<string>()
-        for (const _block of field.blockReferences ?? field.blocks) {
+        for (const _block of field.blocks) {
           const block = typeof _block === 'string' ? req.payload.blocks[_block] : _block
 
           // Skip if block doesn't exist (invalid block reference)
@@ -241,11 +238,11 @@ export const populateFieldPermissions = ({
       // Field does not have a name => same parentPermissionsObject
       populateFieldPermissions({
         id,
-        blockReferencesPermissions,
         data,
         fields: field.fields,
         operations,
         // Field does not have a name here => use parent permissions object
+        blockReferencesPermissions,
         parentPermissionsObject,
         permissionsObject,
         promises,
@@ -304,11 +301,11 @@ export const populateFieldPermissions = ({
           // Tab does not have a name => same parentPermissionsObject
           populateFieldPermissions({
             id,
-            blockReferencesPermissions,
             data,
             fields: tab.fields,
             operations,
             // Tab does not have a name here => use parent permissions object
+            blockReferencesPermissions,
             parentPermissionsObject,
             permissionsObject,
             promises,
