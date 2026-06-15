@@ -50,7 +50,6 @@ export async function getApiKey({
           : {}),
       },
       apiKey: randomUUID(),
-      enableAPIKey: true,
       label: 'Test API Key',
       user: userId,
     },

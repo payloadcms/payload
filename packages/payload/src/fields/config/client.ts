@@ -1,9 +1,10 @@
 // @ts-strict-ignore
 /* eslint-disable perfectionist/sort-switch-case */
 // Keep perfectionist/sort-switch-case disabled - it incorrectly messes up the ordering of the switch cases, causing it to break
-import type { I18nClient, TFunction } from '@payloadcms/translations'
+import type { ClientTranslationKeys, I18nClient, TFunction } from '@payloadcms/translations'
 
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
+import type { LabelFunction } from '../../config/types.js'
 import type {
   AdminClient,
   ArrayFieldClient,
@@ -416,12 +417,20 @@ export const createClientField = ({
                 i18n,
                 importMap,
               })
-            } else if (
-              (key === 'label' || key === 'description') &&
-              typeof tabProp === 'function'
-            ) {
-              // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-              clientTab[key] = tabProp({ t: i18n.t })
+            } else if (key === 'label' && typeof tabProp === 'function') {
+              const label = tabProp as LabelFunction
+
+              clientTab.label = label({
+                i18n,
+                t: i18n.t,
+              })
+            } else if (key === 'description' && typeof tabProp === 'function') {
+              const description = tabProp as LabelFunction
+
+              clientTab.description = description({
+                i18n,
+                t: i18n.t,
+              })
             } else if (key === 'admin') {
               clientTab.admin = {} as AdminClient
 
@@ -436,7 +445,7 @@ export const createClientField = ({
                       if (typeof tab.admin?.description === 'function') {
                         clientTab.admin.description = tab.admin.description({
                           i18n,
-                          t: i18n.t as TFunction,
+                          t: i18n.t,
                         })
                       } else {
                         clientTab.admin.description = tab.admin.description

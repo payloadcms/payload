@@ -20,6 +20,21 @@
     overflow: auto;
   }
 
+  .collection-list .table table td.cell--linked > :is(a, button) {
+    font-weight: var(--text-body-medium-strong-font-weight);
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: none;
+    text-decoration-color: var(--color-border);
+    text-decoration-thickness: auto;
+    text-underline-offset: 2px;
+    text-underline-position: from-font;
+
+    &:hover {
+      text-decoration-color: var(--color-text);
+    }
+  }
+
   .collection-list .table table [class^='cell']:not(.cell--linked) > p,
   .collection-list .table table [class^='cell']:not(.cell--linked) > span,
   .collection-list .table table [class^='cell']:not(.cell--linked) > a {

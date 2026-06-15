@@ -165,7 +165,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug, onClose }) => 
       const label =
         'labelWithPrefix' in field && field.labelWithPrefix !== undefined
           ? field.labelWithPrefix
-          : 'label' in field && field.label !== undefined
+          : 'label' in field && field.label !== undefined && field.label !== false
             ? field.label
             : 'name' in field && field.name !== undefined
               ? field.name
