@@ -7,5 +7,6 @@
     text-decoration: underline;
     text-align: left;
     white-space: nowrap;
+    height: 100%;
   }
 }

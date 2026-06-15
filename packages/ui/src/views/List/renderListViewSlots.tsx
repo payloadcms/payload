@@ -9,6 +9,8 @@ import type {
   ListViewServerPropsOnly,
   ListViewSlots,
   ListViewSlotSharedClientProps,
+  NoResultsClientProps,
+  NoResultsServerPropsOnly,
   Payload,
   SanitizedCollectionConfig,
   StaticDescription,
@@ -116,6 +118,15 @@ export const renderListViewSlots = ({
       Component: collectionConfig.admin.components.Description,
       importMap: payload.importMap,
       serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
+    })
+  }
+
+  if (collectionConfig.admin.components?.views?.list?.NoResults) {
+    result.NoResults = RenderServerComponent({
+      clientProps: clientProps satisfies NoResultsClientProps,
+      Component: collectionConfig.admin.components.views.list.NoResults,
+      importMap: payload.importMap,
+      serverProps: serverProps satisfies NoResultsServerPropsOnly,
     })
   }
 

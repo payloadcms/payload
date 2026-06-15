@@ -66,6 +66,7 @@
   "dependencies": {
     "@cfworker/json-schema": "^4.1.1",
     "@modelcontextprotocol/server": "2.0.0-alpha.2",
+    "@payloadcms/translations": "workspace:*",
     "tsx": "4.22.4",
     "zod": "^4.0.0"
   },

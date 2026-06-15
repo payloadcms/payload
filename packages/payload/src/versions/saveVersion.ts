@@ -4,11 +4,10 @@ import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../ind
 import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
-import { getVersionsMax } from '../utilities/getVersionsConfig.js'
+import { getVersionsMax, hasLocalizeStatusEnabled } from '../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
-import { saveSnapshot } from './saveSnapshot.js'
 import { updateLatestVersion } from './updateLatestVersion.js'
 
 type Args<T extends JsonObject = JsonObject> = {
@@ -20,11 +19,9 @@ type Args<T extends JsonObject = JsonObject> = {
   id?: number | string
   operation?: 'create' | 'restoreVersion' | 'update'
   payload: Payload
-  publishSpecificLocale?: string
   req?: PayloadRequest
   returning?: boolean
   select?: SelectType
-  snapshot?: any
   unpublish?: boolean
 }
 
@@ -46,11 +43,9 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
   global,
   operation,
   payload,
-  publishSpecificLocale,
   req,
   returning,
   select,
-  snapshot,
   unpublish,
 }: Args<TData>): Promise<JsonObject | null> {
   let result: JsonObject | undefined
@@ -67,6 +62,21 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
 
   if (versionData._id) {
     delete versionData._id
+  }
+
+  // When localizeStatus is enabled, _status must be stored as a localized object.
+  // Callers like restoreVersion set it as a plain string — expand it here.
+  const entity = collection ?? global
+  if (
+    entity &&
+    payload.config.localization &&
+    hasLocalizeStatusEnabled(entity) &&
+    typeof versionData._status === 'string'
+  ) {
+    const status = versionData._status
+    ;(versionData as JsonObject)._status = Object.fromEntries(
+      payload.config.localization.localeCodes.map((code) => [code, status]),
+    )
   }
 
   try {
@@ -92,7 +102,6 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
         createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
         globalSlug: undefined as string | undefined,
         parent: collection ? id : undefined,
-        publishedLocale: publishSpecificLocale || undefined,
         req,
         returning,
         select: getQueryDraftsSelect({ select }),
@@ -108,20 +117,6 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
       if (global) {
         createVersionArgs.globalSlug = global.slug
         result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
-      }
-
-      if (snapshot) {
-        await saveSnapshot<TData>({
-          id,
-          autosave,
-          collection,
-          data: snapshot,
-          global,
-          payload,
-          publishSpecificLocale,
-          req,
-          select,
-        })
       }
     }
   } catch (err) {

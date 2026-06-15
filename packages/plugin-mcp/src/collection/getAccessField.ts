@@ -2,6 +2,12 @@ import type { JSONField } from 'payload'
 
 import type { ClientMCPPluginConfig, MCPItem, SanitizedMCPPluginConfig } from '../types.js'
 
+import {
+  COLLECTION_AUTH_BUILTINS,
+  COLLECTION_BUILTINS,
+  GLOBAL_BUILTINS,
+} from '../mcp/builtinTools.js'
+
 /**
  * Returns the API key collection's `access` field — a JSON field whose value
  * is the `MCPAPIKeysDocAccessTree` the endpoint consults. The actual UI is
@@ -25,13 +31,9 @@ export const getAccessField = ({
           path: '@payloadcms/plugin-mcp/client#AccessField',
         },
       },
-      // TODO: needs i18n once design is finalized
-      description: 'Access for this API key — uncheck to revoke individual tools.',
-      position: 'sidebar',
     },
     defaultValue: {},
-    // TODO: needs i18n once design is finalized
-    label: 'Access',
+    label: false,
   }
 }
 
@@ -43,14 +45,19 @@ export const getAccessField = ({
 const sanitizeClientPluginConfig = (
   pluginConfig: SanitizedMCPPluginConfig,
 ): ClientMCPPluginConfig => ({
-  items: pluginConfig.items.map((item) => ({
-    ...(item.type === 'collectionTool' ? { collectionSlug: item.collectionSlug } : {}),
-    ...(item.type === 'globalTool' ? { globalSlug: item.globalSlug } : {}),
-    type: item.type,
-    configKey: item.configKey,
-    description: itemDescription(item),
-    label: item.label,
-  })),
+  items: pluginConfig.items.map((item) => {
+    const group = itemGroup(item)
+
+    return {
+      ...(item.type === 'collectionTool' ? { collectionSlug: item.collectionSlug } : {}),
+      ...(item.type === 'globalTool' ? { globalSlug: item.globalSlug } : {}),
+      type: item.type,
+      configKey: item.configKey,
+      ...(group === 'operations' ? {} : { description: itemDescription(item) }),
+      group,
+      label: item.label,
+    }
+  }),
 })
 
 const itemDescription = (item: MCPItem): string => {
@@ -61,4 +68,17 @@ const itemDescription = (item: MCPItem): string => {
     return item.resource.description
   }
   return item.tool.description
+}
+
+const itemGroup = (item: MCPItem): 'auth' | 'custom' | 'operations' | undefined => {
+  if (item.type === 'collectionTool') {
+    if (item.configKey in COLLECTION_BUILTINS) {
+      return 'operations'
+    }
+    return item.configKey in COLLECTION_AUTH_BUILTINS ? 'auth' : 'custom'
+  }
+  if (item.type === 'globalTool') {
+    return item.configKey in GLOBAL_BUILTINS ? 'operations' : 'custom'
+  }
+  return undefined
 }
