@@ -1,0 +1,6 @@
+@layer payload-default {
+  .tenant-selector {
+    width: 100%;
+    margin-bottom: var(--spacer-5);
+  }
+}
