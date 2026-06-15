@@ -1,0 +1,27 @@
+@layer payload-default {
+  .load-more-row {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .load-more-row__text {
+    margin: 0;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
+  .load-more-row__button {
+    padding: 0;
+    color: var(--color-text);
+    font-size: inherit;
+    text-decoration: underline;
+  }
+
+  .load-more-row__button:hover {
+    color: var(--color-text-secondary);
+  }
+}
