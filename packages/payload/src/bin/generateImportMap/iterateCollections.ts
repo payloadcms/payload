@@ -1,6 +1,6 @@
 import type { AdminViewConfig } from '../../admin/views/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { SanitizedConfig } from '../../config/types.js'
+import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
 import { genImportMapIterateFields } from './iterateFields.js'
@@ -50,6 +50,20 @@ export function iterateCollections({
 
     if (collection.upload?.admin?.components?.controls) {
       addToImportMap(collection.upload?.admin?.components?.controls)
+    }
+
+    const filePreview = collection.upload?.admin?.components?.filePreview
+    if (filePreview) {
+      if (
+        typeof filePreview === 'string' ||
+        (typeof filePreview === 'object' && 'path' in filePreview)
+      ) {
+        addToImportMap(filePreview)
+      } else {
+        for (const component of Object.values(filePreview as Record<string, PayloadComponent>)) {
+          addToImportMap(component)
+        }
+      }
     }
 
     if (collection.admin?.components?.views?.edit) {

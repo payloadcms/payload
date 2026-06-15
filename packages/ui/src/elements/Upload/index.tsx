@@ -2,7 +2,7 @@
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL, isImage } from 'payload/shared'
+import { formatAdminURL, formatFilesize, isImage } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -22,8 +22,13 @@ import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
 import './index.css'
 import { FileDetails } from '../FileDetails/index.js'
+import { MiniCarousel } from '../MiniCarousel/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
+import { pasteURLDrawerSlug, UploadFromURLModal } from './UploadFromURLModal/index.js'
+import { UploadToolbar } from './UploadToolbar/index.js'
+
+export { pasteURLDrawerSlug }
 
 const baseClass = 'file-field'
 export const editDrawerSlug = 'edit-upload'
@@ -110,8 +115,10 @@ export type UploadProps = {
   readonly customActions?: React.ReactNode[]
   readonly initialState?: FormState
   readonly onChange?: (file?: File) => void
+  readonly sidePanel?: boolean
   readonly uploadConfig: SanitizedCollectionConfig['upload']
   readonly UploadControls?: React.ReactNode
+  readonly UploadFilePreview?: React.ReactNode
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
@@ -141,10 +148,12 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     initialState,
     onChange,
     resetUploadEdits,
+    sidePanel,
     updateUploadEdits,
     uploadConfig,
     UploadControls,
     uploadEdits,
+    UploadFilePreview,
   } = props
 
   const {
@@ -163,6 +172,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   } = useConfig()
 
   const { t } = useTranslation()
+  const { closeModal, openModal } = useModal()
   const { setModified } = useForm()
   const { id, data, docPermissions, setUploadStatus } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
@@ -174,10 +184,9 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const [removedFile, setRemovedFile] = useState(false)
   const [filename, setFilename] = useState<string>(value?.name || '')
-  const [showUrlInput, setShowUrlInput] = useState(false)
   const [fileUrl, setFileUrl] = useState<string>('')
+  const [selectedSize, setSelectedSize] = useState<null | string>(null)
 
-  const urlInputRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const useServerSideFetch =
@@ -190,7 +199,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       }
 
       setValue(file)
-      setShowUrlInput(false)
       setUploadControlFileUrl('')
       setUploadControlFileName(null)
       setUploadControlFile(null)
@@ -210,6 +218,17 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     })
     return newFile
   }
+
+  const handleRename = React.useCallback(
+    (newName: string) => {
+      if (value) {
+        handleFileChange({ file: renameFile(value, newName), isNewFile: false })
+      }
+      setFilename(newName)
+      setModified(true)
+    },
+    [value, handleFileChange, setModified],
+  )
 
   const handleFileNameChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,7 +256,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     setFileSrc('')
     setFileUrl('')
     resetUploadEdits()
-    setShowUrlInput(false)
     setUploadControlFileUrl('')
     setUploadControlFileName(null)
     setUploadControlFile(null)
@@ -257,8 +275,10 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     [setModified, updateUploadEdits],
   )
 
+  const isValidUrl = Boolean(fileUrl && URL.canParse(fileUrl))
+
   const handleUrlSubmit = useCallback(async () => {
-    if (!fileUrl || uploadConfig?.pasteURL === false) {
+    if (!fileUrl || !URL.canParse(fileUrl) || uploadConfig?.pasteURL === false) {
       return
     }
 
@@ -272,11 +292,14 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       }
 
       const blob = await clientResponse.blob()
-      const fileName = uploadControlFileName || decodeURIComponent(fileUrl.split('/').pop() || '')
+      const rawSegment = fileUrl.split('/').pop() || ''
+      const fileName = uploadControlFileName || decodeURIComponent(rawSegment.split('?')[0])
       const file = new File([blob], fileName, { type: blob.type })
 
       handleFileChange({ file })
       setUploadStatus('idle')
+      closeModal(pasteURLDrawerSlug)
+      setFileUrl('')
       return // Exit if client-side fetch succeeds
     } catch (_clientError) {
       if (!useServerSideFetch) {
@@ -302,17 +325,21 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       }
 
       const blob = await serverResponse.blob()
-      const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
+      const rawSegment = fileUrl.split('/').pop() || ''
+      const fileName = decodeURIComponent(rawSegment.split('?')[0])
       const file = new File([blob], fileName, { type: blob.type })
 
       handleFileChange({ file })
       setUploadStatus('idle')
+      closeModal(pasteURLDrawerSlug)
+      setFileUrl('')
     } catch (_serverError) {
       toast.error('The provided URL is not allowed.')
       setUploadStatus('failed')
     }
   }, [
     api,
+    closeModal,
     collectionSlug,
     fileUrl,
     handleFileChange,
@@ -329,12 +356,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       setRemovedFile(false)
     }
   }, [initialState])
-
-  useEffect(() => {
-    if (showUrlInput && urlInputRef.current) {
-      // urlInputRef.current.focus() // Focus on the remote-url input field when showUrlInput is true
-    }
-  }, [showUrlInput])
 
   useEffect(() => {
     if (isFormSubmitting) {
@@ -378,6 +399,220 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     void handleControlFile()
   }, [uploadControlFile, handleFileChange])
 
+  const drawers = (
+    <React.Fragment>
+      {(value || data?.filename) && (
+        <EditDepthProvider>
+          <EditUpload
+            fileName={value?.name || data?.filename}
+            fileSrc={data?.url || fileSrc}
+            imageCacheTag={imageCacheTag}
+            initialCrop={uploadEdits?.crop ?? undefined}
+            initialFocalPoint={{
+              x: uploadEdits?.focalPoint?.x || data?.focalX || 50,
+              y: uploadEdits?.focalPoint?.y || data?.focalY || 50,
+            }}
+            onSave={onEditsSave}
+            showCrop={showCrop}
+            showFocalPoint={showFocalPoint}
+          />
+        </EditDepthProvider>
+      )}
+      {data && hasImageSizes && (
+        <Drawer
+          className={`${baseClass}__previewDrawer`}
+          hoverTitle
+          slug={sizePreviewSlug}
+          title={t('upload:sizesFor', { label: data.filename })}
+        >
+          <PreviewSizes doc={data} imageCacheTag={imageCacheTag} uploadConfig={uploadConfig} />
+        </Drawer>
+      )}
+      {uploadConfig?.pasteURL !== false && (
+        <UploadFromURLModal
+          fileUrl={fileUrl}
+          handleUrlSubmit={handleUrlSubmit}
+          isValidUrl={isValidUrl}
+          setFileUrl={setFileUrl}
+        />
+      )}
+    </React.Fragment>
+  )
+
+  if (sidePanel) {
+    const selectedSizeData = selectedSize ? data?.sizes?.[selectedSize] : null
+    const sidePanelFileSrc = selectedSizeData?.url || data?.thumbnailURL || data?.url || null
+    const sidePanelMimeType = data?.mimeType as string | undefined
+    const fileTypeIsAdjustable =
+      !!sidePanelMimeType &&
+      isImage(sidePanelMimeType) &&
+      sidePanelMimeType !== 'image/svg+xml' &&
+      sidePanelMimeType !== 'image/jxl'
+
+    return (
+      <div
+        className={[fieldBaseClass, baseClass, `${baseClass}--side-panel`]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <FieldError message={errorMessage} showError={showError} />
+        {data?.filename && !removedFile && (
+          <UploadToolbar
+            canRemove={!uploadConfig.hideRemoveFile && canRemoveUpload}
+            filename={selectedSize ?? (data.filename as string)}
+            fileSrc={sidePanelFileSrc}
+            isAdjustable={fileTypeIsAdjustable}
+            onEditImage={() => openModal(editDrawerSlug)}
+            onRemove={handleFileRemoval}
+            onRenameConfirm={handleRename}
+            onReplace={handleFileRemoval}
+          />
+        )}
+        <div className={`${baseClass}__side-panel`}>
+          {data?.filename && !removedFile ? (
+            <React.Fragment>
+              {hasImageSizes && (
+                <MiniCarousel
+                  doc={data}
+                  imageCacheTag={imageCacheTag}
+                  onSelect={setSelectedSize}
+                  selectedSize={selectedSize}
+                  uploadConfig={uploadConfig}
+                />
+              )}
+              <div className={`${baseClass}__side-panel__preview`}>
+                <div className={`${baseClass}__side-panel__info`}>
+                  <span className={`${baseClass}__side-panel__info-label`}>
+                    {selectedSize ?? t('general:original')}
+                  </span>
+                  <span className={`${baseClass}__side-panel__info-meta`}>
+                    {formatFilesize(
+                      (selectedSizeData?.filesize ?? (data?.filesize as number)) || 0,
+                    )}
+                    {data.mimeType ? ` – ${data.mimeType as string}` : null}
+                  </span>
+                </div>
+                <div className={`${baseClass}__side-panel__image-wrap`}>
+                  {UploadFilePreview ?? (
+                    <Thumbnail
+                      className={`${baseClass}__side-panel__thumbnail`}
+                      collectionSlug={collectionSlug}
+                      doc={selectedSizeData || data}
+                      fileSrc={sidePanelFileSrc}
+                      imageCacheTag={imageCacheTag}
+                      size="expand"
+                      uploadConfig={uploadConfig}
+                    />
+                  )}
+                </div>
+                {(() => {
+                  const w = (selectedSizeData?.width ?? data?.width) as number | undefined
+                  const h = (selectedSizeData?.height ?? data?.height) as number | undefined
+                  return typeof w === 'number' && typeof h === 'number' ? (
+                    <span className={`${baseClass}__side-panel__dimensions`}>
+                      {w} × {h}
+                    </span>
+                  ) : null
+                })()}
+              </div>
+            </React.Fragment>
+          ) : (
+            <div className={`${baseClass}__side-panel__upload`}>
+              {!value && (
+                <Dropzone onChange={handleFileSelection}>
+                  <div className={`${baseClass}__dropzoneContent`}>
+                    <div className={`${baseClass}__dropzoneButtons`}>
+                      <Button
+                        buttonStyle="secondary"
+                        onClick={() => {
+                          if (inputRef.current) {
+                            inputRef.current.click()
+                          }
+                        }}
+                        size="medium"
+                      >
+                        {t('upload:selectFile')}
+                      </Button>
+                      <input
+                        accept={acceptMimeTypes}
+                        aria-hidden="true"
+                        className={`${baseClass}__hidden-input`}
+                        hidden
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            handleFileSelection(e.target.files)
+                          }
+                        }}
+                        ref={inputRef}
+                        type="file"
+                      />
+                      {uploadConfig?.pasteURL !== false && (
+                        <Fragment>
+                          <span className={`${baseClass}__orText`}>{t('general:or')}</span>
+                          <Button
+                            buttonStyle="secondary"
+                            onClick={() => {
+                              openModal(pasteURLDrawerSlug)
+                              setUploadControlFileUrl('')
+                              setUploadControlFile(null)
+                              setUploadControlFileName(null)
+                            }}
+                            size="medium"
+                          >
+                            {t('upload:pasteURL')}
+                          </Button>
+                        </Fragment>
+                      )}
+                      {UploadControls ? UploadControls : null}
+                    </div>
+                    <p className={`${baseClass}__dragAndDropText`}>
+                      {t('general:or')} {t('upload:dragAndDrop')}
+                    </p>
+                  </div>
+                </Dropzone>
+              )}
+              {value && fileSrc && (
+                <React.Fragment>
+                  <div className={`${baseClass}__thumbnail-wrap`}>
+                    <Thumbnail
+                      collectionSlug={collectionSlug}
+                      fileSrc={isImage(value.type) ? fileSrc : null}
+                    />
+                  </div>
+                  <div className={`${baseClass}__file-adjustments`}>
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <input
+                      className={`${baseClass}__filename`}
+                      onChange={handleFileNameChange}
+                      title={filename || value.name}
+                      type="text"
+                      value={filename || value.name}
+                    />
+                    <UploadActions
+                      customActions={customActions}
+                      enableAdjustments={showCrop || showFocalPoint}
+                      enablePreviewSizes={hasImageSizes && data?.filename && !removedFile}
+                      mimeType={value.type}
+                    />
+                  </div>
+                  <Button
+                    buttonStyle="ghost"
+                    className={`${baseClass}__remove`}
+                    icon="x"
+                    onClick={handleFileRemoval}
+                    round
+                    tooltip={t('general:cancel')}
+                  />
+                </React.Fragment>
+              )}
+            </div>
+          )}
+        </div>
+        {drawers}
+      </div>
+    )
+  }
+
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <FieldError message={errorMessage} showError={showError} />
@@ -396,7 +631,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       )}
       {((!uploadConfig.hideFileInputOnCreate && !data?.filename) || removedFile) && (
         <div className={`${baseClass}__upload`}>
-          {!value && !showUrlInput && (
+          {!value && (
             <Dropzone onChange={handleFileSelection}>
               <div className={`${baseClass}__dropzoneContent`}>
                 <div className={`${baseClass}__dropzoneButtons`}>
@@ -430,7 +665,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                       <Button
                         buttonStyle="pill"
                         onClick={() => {
-                          setShowUrlInput(true)
+                          openModal(pasteURLDrawerSlug)
                           setUploadControlFileUrl('')
                           setUploadControlFile(null)
                           setUploadControlFileName(null)
@@ -449,47 +684,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 </p>
               </div>
             </Dropzone>
-          )}
-          {showUrlInput && (
-            <React.Fragment>
-              <div className={`${baseClass}__remote-file-wrap`}>
-                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                <input
-                  className={`${baseClass}__remote-file`}
-                  onChange={(e) => {
-                    setFileUrl(e.target.value)
-                  }}
-                  ref={urlInputRef}
-                  title={fileUrl}
-                  type="text"
-                  value={fileUrl}
-                />
-                <div className={`${baseClass}__add-file-wrap`}>
-                  <button
-                    className={`${baseClass}__add-file`}
-                    onClick={() => {
-                      void handleUrlSubmit()
-                    }}
-                    type="button"
-                  >
-                    {t('upload:addFile')}
-                  </button>
-                </div>
-              </div>
-              <Button
-                buttonStyle="ghost"
-                className={`${baseClass}__remove`}
-                icon="x"
-                onClick={() => {
-                  setShowUrlInput(false)
-                  setUploadControlFileUrl('')
-                  setUploadControlFile(null)
-                  setUploadControlFileName(null)
-                }}
-                round
-                tooltip={t('general:cancel')}
-              />
-            </React.Fragment>
           )}
           {value && fileSrc && (
             <React.Fragment>
@@ -527,35 +721,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
           )}
         </div>
       )}
-      {(value || data?.filename) && (
-        <EditDepthProvider>
-          <Drawer Header={null} slug={editDrawerSlug}>
-            <EditUpload
-              fileName={value?.name || data?.filename}
-              fileSrc={data?.url || fileSrc}
-              imageCacheTag={imageCacheTag}
-              initialCrop={uploadEdits?.crop ?? undefined}
-              initialFocalPoint={{
-                x: uploadEdits?.focalPoint?.x || data?.focalX || 50,
-                y: uploadEdits?.focalPoint?.y || data?.focalY || 50,
-              }}
-              onSave={onEditsSave}
-              showCrop={showCrop}
-              showFocalPoint={showFocalPoint}
-            />
-          </Drawer>
-        </EditDepthProvider>
-      )}
-      {data && hasImageSizes && (
-        <Drawer
-          className={`${baseClass}__previewDrawer`}
-          hoverTitle
-          slug={sizePreviewSlug}
-          title={t('upload:sizesFor', { label: data.filename })}
-        >
-          <PreviewSizes doc={data} imageCacheTag={imageCacheTag} uploadConfig={uploadConfig} />
-        </Drawer>
-      )}
+      {drawers}
     </div>
   )
 }

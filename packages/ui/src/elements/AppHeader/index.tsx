@@ -34,8 +34,29 @@ export function AppHeader({ CustomAvatar, settingsItems }: Props) {
     config: { localization },
   } = useConfig()
 
+  const headerRef = useRef<HTMLElement>(null)
   const customControlsRef = useRef<HTMLDivElement>(null)
   const [isScrollable, setIsScrollable] = useState(false)
+
+  useEffect(() => {
+    const el = headerRef.current
+    if (!el) {
+      return
+    }
+    const observer = new ResizeObserver(() => {
+      document.documentElement.style.setProperty('--app-header-height', `${el.offsetHeight}px`)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const update = () =>
+      document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`)
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
+  }, [])
 
   useEffect(() => {
     const checkIsScrollable = () => {
@@ -57,7 +78,10 @@ export function AppHeader({ CustomAvatar, settingsItems }: Props) {
   const ActionComponents = Actions ? Object.values(Actions) : []
 
   return (
-    <header className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
+    <header
+      className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}
+      ref={headerRef}
+    >
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__wrapper`}>
           <NavToggler className={`${baseClass}__mobile-nav-toggler`} tabIndex={-1} />

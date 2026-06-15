@@ -365,6 +365,7 @@ export const renderDocument = async ({
   const documentSlots = renderDocumentSlots({
     id,
     collectionConfig,
+    doc: doc as Record<string, unknown>,
     globalConfig,
     hasSavePermission,
     locale,

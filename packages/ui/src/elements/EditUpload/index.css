@@ -1,47 +1,35 @@
 @layer payload-default {
-  .edit-upload {
-    --edit-upload-cell-spacing: var(--spacer-4);
-    --edit-upload-sidebar-width: calc(350px + var(--gutter-h));
+  /* Allow the ReactCrop 9999px box-shadow overlay to escape the dialog bounds.
+     Make the body a flex column so edit-upload__content can fill its height. */
+  .edit-upload__dialog {
+    overflow: visible;
+
+    .dialog__body {
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  .edit-upload__content {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+    min-height: 480px;
+    gap: 0;
+  }
+
+  /* Canvas area — must have a definite height for max-height: 100% to resolve on focal-wrapper */
+  .edit-upload__crop {
+    flex: 1 1 0;
+    min-width: 0;
     height: 100%;
     display: flex;
-    flex-direction: column;
-  }
-
-  .edit-upload__header {
-    border-bottom: 1px solid var(--color-border);
-    padding: var(--spacer-2-5);
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-  }
-
-  .edit-upload__header h2 {
-    margin: 0;
-    text-wrap: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  [dir='rtl'] .edit-upload__actions {
-    margin-right: auto;
-    margin-left: unset;
-  }
-
-  .edit-upload__actions {
-    min-width: 350px;
-    margin-left: auto;
-    padding: var(--spacer-2) 0 var(--spacer-2) var(--spacer-4);
-    justify-content: flex-end;
-    display: flex;
-    gap: var(--spacer-3);
-    text-wrap: nowrap;
-  }
-
-  .edit-upload__toolWrap {
-    display: flex;
-    justify-content: flex-end;
-    flex: 1;
-    min-height: 0;
+    justify-content: center;
+    padding: var(--spacer-4);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-small);
   }
 
   .edit-upload .ReactCrop__selection-addon,
@@ -54,27 +42,76 @@
     position: relative;
     display: inline-flex;
     max-height: 100%;
+    max-width: 100%;
   }
 
+  /* Sidebar */
+  .edit-upload__sidebar {
+    flex-shrink: 0;
+    width: 240px;
+    border-left: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    margin-inline-start: var(--spacer-3);
+    padding-inline-start: var(--spacer-3);
+  }
+
+  .edit-upload__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    padding-block: var(--spacer-3);
+  }
+
+  .edit-upload__section + .edit-upload__section {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .edit-upload__section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .edit-upload__section-title {
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    color: var(--color-text);
+  }
+
+  .edit-upload__reset {
+    height: fit-content;
+    padding: 0 var(--spacer-2);
+  }
+
+  .edit-upload__fieldset {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacer-2);
+  }
+
+  .edit-upload__field {
+    margin-bottom: 0;
+  }
+
+  .edit-upload__suffix {
+    font-size: var(--text-body-medium-font-size);
+    color: var(--color-text-secondary);
+    padding-inline-start: var(--spacer-1);
+  }
+
+  /* Draggable focal point */
   .edit-upload__draggable-container {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: 0;
-    pointer-events: none;
-  }
-
-  .edit-upload__draggable-container--dragging {
-    pointer-events: all;
-  }
-
-  .edit-upload__draggable-container--dragging .edit-upload__focalPoint {
-    cursor: grabbing;
+    inset: 0;
+    pointer-events: none; /* let clicks pass through to the image/crop layer */
   }
 
   .edit-upload__draggable {
     position: absolute;
+    pointer-events: all; /* only the handle itself is interactive */
   }
 
   .edit-upload__focalPoint {
@@ -94,10 +131,7 @@
 
   .edit-upload__focalPoint svg {
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    inset: 0;
     background: rgba(0, 0, 0, 0.5);
     border-radius: 100%;
     width: var(--spacer-6);
@@ -105,122 +139,23 @@
     color: white;
   }
 
-  .edit-upload__crop,
-  .edit-upload__focalOnly {
-    padding: var(--spacer-4) var(--spacer-4) var(--spacer-4) 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
-  .edit-upload__crop {
-    padding: var(--edit-upload-cell-spacing);
-    padding-left: var(--gutter-h);
-    display: flex;
-    align-items: flex-start;
-    height: 100%;
-  }
-
-  .edit-upload__imageWrap {
-    position: relative;
-  }
-
-  .edit-upload__point {
-    cursor: move;
-    position: absolute;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 100%;
-  }
-
-  .edit-upload__point svg {
-    width: var(--spacer-6);
-    height: var(--spacer-6);
-  }
-
-  .edit-upload__sidebar {
-    border-left: 1px solid var(--color-border);
-    padding-top: var(--edit-upload-cell-spacing);
-    min-width: var(--edit-upload-sidebar-width);
-  }
-
-  .edit-upload__sidebar > div:first-child {
-    margin-bottom: var(--spacer-3);
-  }
-
-  .edit-upload__groupWrap {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacer-2);
-    padding-right: var(--gutter-h);
-    padding-left: var(--edit-upload-cell-spacing);
-    width: 100%;
-  }
-
-  .edit-upload__groupWrap + .edit-upload__groupWrap {
-    padding-top: var(--edit-upload-cell-spacing);
-    margin-top: var(--edit-upload-cell-spacing);
-    border-top: 1px solid var(--color-border);
-  }
-
-  .edit-upload__inputsWrap,
-  .edit-upload__titleWrap {
-    display: flex;
-    gap: var(--spacer-3);
-  }
-
-  .edit-upload__titleWrap {
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .edit-upload__titleWrap h3 {
-    margin: 0;
-  }
-
-  .edit-upload__reset {
-    height: fit-content;
-    border-radius: var(--radius-small);
-    background-color: var(--color-bg-secondary);
-    padding: 0 var(--spacer-2);
-  }
-
-  .edit-upload__input {
-    flex: 1;
-  }
-
-  @media (max-width: 1024px) {
-    .edit-upload {
-      --edit-upload-cell-spacing: var(--gutter-h);
-    }
-
-    .edit-upload__sidebar {
-      padding-left: 0;
-      border-left: 0;
-      width: 100%;
-    }
-
-    .edit-upload__toolWrap {
-      flex-direction: column-reverse;
-    }
-  }
-
   @media (max-width: 768px) {
-    .edit-upload {
+    .edit-upload__content {
       flex-direction: column;
-    }
-
-    .edit-upload__focalPoint {
-      border-right: none;
-      padding: var(--spacer-3) 0;
-    }
-
-    .edit-upload__inputsWrap {
-      flex-direction: column;
-      gap: var(--spacer-3);
+      min-height: unset;
     }
 
     .edit-upload__sidebar {
-      min-width: 0;
+      width: 100%;
+      border-left: none;
+      border-top: 1px solid var(--color-border);
+      margin-inline-start: 0;
+      padding-inline-start: 0;
+      padding-top: var(--spacer-3);
+    }
+
+    .edit-upload__fieldset {
+      flex-direction: column;
     }
   }
 }

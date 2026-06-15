@@ -13,6 +13,32 @@
     width: 100%;
   }
 
+  .collection-edit__upload-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+
+    .document-fields {
+      flex: 0 0 auto;
+      width: 347px;
+      border-inline-end: 1px solid var(--color-border);
+    }
+
+    .document-fields:not(:has(.document-fields__sidebar-wrap)):not(:has(.document-fields__edit > :not(.document-fields__fields))):not(:has(.document-fields__fields > :not(input[type="hidden"]))) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .collection-edit__upload-layout {
+      flex-direction: column;
+
+      .document-fields {
+        width: 100%;
+      }
+    }
+  }
+
   .collection-edit__main--is-live-previewing {
     width: 40%;
     position: relative;

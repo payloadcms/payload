@@ -68,6 +68,7 @@ export function DefaultEditView({
   UnpublishButton,
   Upload: CustomUpload,
   UploadControls,
+  UploadFilePreview,
 }: DocumentViewClientProps) {
   const {
     id,
@@ -781,53 +782,100 @@ export function DefaultEditView({
                 .filter(Boolean)
                 .join(' ')}
             >
-              <DocumentFields
-                AfterFields={AfterFields}
-                BeforeFields={
-                  BeforeFields || (
-                    <Fragment>
-                      {auth && (
-                        <Auth
-                          className={`${baseClass}__auth`}
-                          collectionSlug={collectionConfig.slug}
-                          disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                          email={data?.email}
-                          loginWithUsername={auth?.loginWithUsername}
-                          operation={operation}
-                          readOnly={!hasSavePermission}
-                          requirePassword={!id}
-                          setValidateBeforeSubmit={setValidateBeforeSubmit}
-                          // eslint-disable-next-line react-compiler/react-compiler
-                          useAPIKey={auth.useAPIKey}
-                          username={data?.username}
-                          verify={auth.verify}
-                        />
-                      )}
-                      {upload && (
-                        <React.Fragment>
-                          <UploadControlsProvider>
-                            {CustomUpload || (
-                              <Upload
-                                collectionSlug={collectionConfig.slug}
-                                initialState={initialState}
-                                uploadConfig={upload}
-                                UploadControls={UploadControls}
-                              />
-                            )}
-                          </UploadControlsProvider>
-                        </React.Fragment>
-                      )}
-                    </Fragment>
-                  )
-                }
-                Description={Description}
-                docPermissions={docPermissions}
-                fields={docConfig.fields}
-                forceSidebarWrap={isLivePreviewing}
-                isTrashed={isTrashed}
-                readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
-                schemaPathSegments={schemaPathSegments}
-              />
+              {upload && !BeforeFields && !isInDrawer ? (
+                <UploadControlsProvider>
+                  <div className={`${baseClass}__upload-layout`}>
+                    <DocumentFields
+                      AfterFields={AfterFields}
+                      BeforeFields={
+                        auth ? (
+                          <Auth
+                            className={`${baseClass}__auth`}
+                            collectionSlug={collectionConfig.slug}
+                            disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
+                            email={data?.email}
+                            loginWithUsername={auth?.loginWithUsername}
+                            operation={operation}
+                            readOnly={!hasSavePermission}
+                            requirePassword={!id}
+                            setValidateBeforeSubmit={setValidateBeforeSubmit}
+                            // eslint-disable-next-line react-compiler/react-compiler
+                            useAPIKey={auth.useAPIKey}
+                            username={data?.username}
+                            verify={auth.verify}
+                          />
+                        ) : undefined
+                      }
+                      Description={Description}
+                      docPermissions={docPermissions}
+                      fields={docConfig.fields}
+                      forceSidebarWrap={isLivePreviewing}
+                      isTrashed={isTrashed}
+                      readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
+                      schemaPathSegments={schemaPathSegments}
+                    />
+                    {CustomUpload || (
+                      <Upload
+                        collectionSlug={collectionConfig.slug}
+                        initialState={initialState}
+                        sidePanel
+                        uploadConfig={upload}
+                        UploadControls={UploadControls}
+                        UploadFilePreview={UploadFilePreview}
+                      />
+                    )}
+                  </div>
+                </UploadControlsProvider>
+              ) : (
+                <DocumentFields
+                  AfterFields={AfterFields}
+                  BeforeFields={
+                    BeforeFields || (
+                      <Fragment>
+                        {auth && (
+                          <Auth
+                            className={`${baseClass}__auth`}
+                            collectionSlug={collectionConfig.slug}
+                            disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
+                            email={data?.email}
+                            loginWithUsername={auth?.loginWithUsername}
+                            operation={operation}
+                            readOnly={!hasSavePermission}
+                            requirePassword={!id}
+                            setValidateBeforeSubmit={setValidateBeforeSubmit}
+                            // eslint-disable-next-line react-compiler/react-compiler
+                            useAPIKey={auth.useAPIKey}
+                            username={data?.username}
+                            verify={auth.verify}
+                          />
+                        )}
+                        {upload && (
+                          <React.Fragment>
+                            <UploadControlsProvider>
+                              {CustomUpload || (
+                                <Upload
+                                  collectionSlug={collectionConfig.slug}
+                                  initialState={initialState}
+                                  uploadConfig={upload}
+                                  UploadControls={UploadControls}
+                                  UploadFilePreview={UploadFilePreview}
+                                />
+                              )}
+                            </UploadControlsProvider>
+                          </React.Fragment>
+                        )}
+                      </Fragment>
+                    )
+                  }
+                  Description={Description}
+                  docPermissions={docPermissions}
+                  fields={docConfig.fields}
+                  forceSidebarWrap={isLivePreviewing}
+                  isTrashed={isTrashed}
+                  readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
+                  schemaPathSegments={schemaPathSegments}
+                />
+              )}
               {AfterDocument}
             </div>
             {isLivePreviewEnabled && !isInDrawer && livePreviewURL && (

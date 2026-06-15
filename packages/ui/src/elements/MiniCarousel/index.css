@@ -1,0 +1,50 @@
+@layer payload-default {
+  .mini-carousel {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacer-1);
+    padding: var(--spacer-2-5);
+    width: 72px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    background: var(--color-bg-secondary);
+    border-right: 1px solid var(--color-border);
+    align-self: stretch;
+  }
+
+  .mini-carousel__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1/1;
+    flex-shrink: 0;
+    padding: var(--spacer-1);
+    border-radius: var(--radius-medium);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .mini-carousel__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .mini-carousel__item--active {
+    border-color: var(--color-border-selected);
+  }
+
+  .mini-carousel__item:hover:not(.mini-carousel__item--active) {
+    border-color: var(--color-border-hover);
+  }
+
+  .mini-carousel__divider {
+    width: 32px;
+    height: 1px;
+    background: var(--color-border);
+    flex-shrink: 0;
+  }
+}

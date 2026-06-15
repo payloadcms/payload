@@ -157,7 +157,20 @@ export const DocumentControls: React.FC<{
   const processing = useFormProcessing()
   const initializing = useFormInitializing()
 
+  const rootRef = useRef<HTMLDivElement>(null)
   const i18nRef = useRef(i18n)
+
+  useEffect(() => {
+    const el = rootRef.current
+    if (!el) {
+      return
+    }
+    const observer = new ResizeObserver(() => {
+      document.documentElement.style.setProperty('--doc-controls-height', `${el.offsetHeight}px`)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
   i18nRef.current = i18n
 
   const updateRelativeTime = useCallback(() => {
@@ -221,6 +234,7 @@ export const DocumentControls: React.FC<{
       className={[baseClass, variant !== 'default' && `${baseClass}--${variant}`]
         .filter(Boolean)
         .join(' ')}
+      ref={rootRef}
     >
       {variant === 'default' && (
         <div className={`${baseClass}__content`}>
