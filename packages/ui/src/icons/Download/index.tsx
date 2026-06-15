@@ -2,6 +2,14 @@ import React from 'react'
 
 import './index.css'
 
+// Paths from Figma icon library
+// 24px: fpl/components/src/icons/icon-24-export-small.tsx
+// 16px: fpl/components/src/icons/icon-16-download.tsx
+const paths: Record<16 | 24, string> = {
+  16: 'M8 2.5a.5.5 0 0 0-1 0v5.793L5.354 6.646a.5.5 0 1 0-.707.708l2.5 2.5a.5.5 0 0 0 .707 0l2.5-2.5a.5.5 0 0 0-.707-.708L8 8.293zm-4 8a.5.5 0 0 0-1 0v1A1.5 1.5 0 0 0 4.5 13h6a1.5 1.5 0 0 0 1.5-1.5v-1a.5.5 0 0 0-1 0v1a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5z',
+  24: 'M12 6.5a.5.5 0 0 0-1 0v5.793l-2.146-2.147a.5.5 0 0 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L12 12.293zm-5 7a.5.5 0 0 0-1 0v3A1.5 1.5 0 0 0 7.5 18h8a1.5 1.5 0 0 0 1.5-1.5v-3a.5.5 0 0 0-1 0v3a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5z',
+}
+
 export const DownloadIcon: React.FC<{
   readonly className?: string
   readonly size?: 16 | 24
@@ -16,21 +24,6 @@ export const DownloadIcon: React.FC<{
     width={size}
     xmlns="http://www.w3.org/2000/svg"
   >
-    {size === 24 ? (
-      <>
-        {/* Arrow with stem */}
-        <path
-          d="M13 3H11V13.17L8.41 10.59L7 12L12 17L17 12L15.59 10.59L13 13.17V3Z"
-          fill="currentColor"
-        />
-        {/* Bottom bar */}
-        <path d="M5 19H19V21H5V19Z" fill="currentColor" />
-      </>
-    ) : (
-      <>
-        <path d="M9 2H7V9.17L5.41 7.59L4 9L8 13L12 9L10.59 7.59L9 9.17V2Z" fill="currentColor" />
-        <path d="M2 13H14V15H2V13Z" fill="currentColor" />
-      </>
-    )}
+    <path clipRule="evenodd" d={paths[size]} fill="currentColor" fillRule="evenodd" />
   </svg>
 )

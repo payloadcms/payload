@@ -577,7 +577,6 @@ export const enTranslations = {
     setFocalPoint: 'Set focal point',
     sizes: 'Sizes',
     sizesFor: 'Sizes for {{label}}',
-    uploadFile: 'Upload file',
     width: 'Width',
   },
   validation: {

@@ -474,7 +474,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'upload:pasteURL',
   'upload:renameFile',
   'upload:replaceFile',
-  'upload:uploadFile',
   'upload:previewSizes',
   'upload:selectCollectionToBrowse',
   'upload:selectFile',
