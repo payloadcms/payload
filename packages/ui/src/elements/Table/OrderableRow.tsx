@@ -38,7 +38,12 @@ export const OrderableRow = ({
       }
 
       return (
-        <td className={`cell-${accessor}`} key={colIndex}>
+        <td
+          className={[`cell-${accessor}`, col.isLinkedColumn && 'cell--linked']
+            .filter(Boolean)
+            .join(' ')}
+          key={colIndex}
+        >
           {cell}
         </td>
       )

@@ -47,8 +47,8 @@ const sanitizeClientPluginConfig = (
     ...(item.type === 'collectionTool' ? { collectionSlug: item.collectionSlug } : {}),
     ...(item.type === 'globalTool' ? { globalSlug: item.globalSlug } : {}),
     type: item.type,
+    configKey: item.configKey,
     description: itemDescription(item),
-    key: item.key,
     label: item.label,
   })),
 })

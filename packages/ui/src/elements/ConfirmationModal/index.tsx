@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogModal,
 } from '../Dialog/index.js'
+import './index.css'
 
 export type OnCancel = () => void
 
@@ -40,7 +41,11 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
   return (
     <DialogModal className={className} slug={modalSlug}>
       <DialogHeader showClose title={heading} />
-      <DialogBody>{typeof body === 'string' ? <p>{body}</p> : body}</DialogBody>
+      <DialogBody>
+        <div className="confirmation-modal__body">
+          {typeof body === 'string' ? <p>{body}</p> : body}
+        </div>
+      </DialogBody>
       <DialogFooter>
         <DialogCancel label={cancelLabel} onClick={onCancel} />
         <DialogConfirm label={confirmLabel} loadingLabel={confirmingLabel} onClick={onConfirm} />

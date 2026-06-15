@@ -259,6 +259,7 @@ export const roTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Un alt utilizator a preluat editarea acestui document.',
     applyChanges: 'Aplicați modificările',
     ascending: 'Ascendant',
+    auto: 'Automat',
     automatic: 'Automat',
     backToDashboard: 'Înapoi la panoul de bord',
     by: 'De',
@@ -455,6 +456,7 @@ export const roTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} selectate',
     selectLabel: 'Selectați {{label}}',
     selectValue: 'Selectați o valoare',
+    settings: 'Setări',
     showAllLabel: 'Afișează toate {{eticheta}}',
     shownInTable: 'Afișat în tabel',
     showSidebar: 'Afișați bara laterală',
@@ -471,6 +473,7 @@ export const roTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Au fost reindexate cu succes {{count}} din {{total}} documente din {{collections}}, iar {{skips}} proiecte au fost omise.',
     takeOver: 'Preia controlul',
+    theme: 'Temă',
     thisLanguage: 'Română',
     time: 'Timp',
     timezone: 'Fus orar',

@@ -254,6 +254,7 @@ export const svTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'En annan användare har tagit över redigeringen av detta dokument.',
     applyChanges: 'Verkställ ändringar',
     ascending: 'Stigande',
+    auto: 'Automatiskt',
     automatic: 'Automatiskt',
     backToDashboard: 'Tillbaka till översikten',
     by: 'Av',
@@ -451,6 +452,7 @@ export const svTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} har valts',
     selectLabel: 'Välj {{label}}',
     selectValue: 'Välj ett värde',
+    settings: 'Inställningar',
     showAllLabel: 'Visa alla {{label}}',
     shownInTable: 'Visas i tabell',
     showSidebar: 'Visa sidofält',
@@ -467,6 +469,7 @@ export const svTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Omindexerade {{count}} av {{total}} dokument från {{collections}}. {{skips}} utkast hoppades över.',
     takeOver: 'Ta över',
+    theme: 'Tema',
     thisLanguage: 'Svenska',
     time: 'Tid',
     timezone: 'Tidszon',

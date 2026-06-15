@@ -1131,12 +1131,12 @@ test.describe('Multi Tenant', () => {
       await checkbox.click()
 
       // Open the move drawer
-      const moveButton = page.locator('button', { hasText: 'Move' })
+      const moveButton = page.getByRole('button', { exact: true, name: 'Move' })
       await expect(moveButton).toBeVisible()
       await moveButton.click()
 
       // The move drawer should be visible
-      const moveDrawer = page.locator('.drawer__content')
+      const moveDrawer = page.locator('.hierarchy-drawer__content')
       await expect(moveDrawer).toBeVisible()
 
       // The miller columns should only show Blue Dog folders

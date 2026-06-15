@@ -47,12 +47,12 @@ export const Localizer: React.FC<{
         <Popup
           horizontalAlign="right"
           render={({ close }) => (
-            <PopupList.ButtonGroup>
+            <PopupList.RadioGroup>
               {locales.map((localeOption) => {
                 const localeOptionLabel = getTranslation(localeOption.label, i18n)
 
                 return (
-                  <PopupList.Button
+                  <PopupList.RadioGroupItem
                     active={locale.code === localeOption.code}
                     disabled={locale.code === localeOption.code}
                     key={localeOption.code}
@@ -95,10 +95,10 @@ export const Localizer: React.FC<{
                         {localeOptionLabel}
                       </span>
                     )}
-                  </PopupList.Button>
+                  </PopupList.RadioGroupItem>
                 )
               })}
-            </PopupList.ButtonGroup>
+            </PopupList.RadioGroup>
           )}
           renderButton={
             renderButton ??
@@ -120,7 +120,6 @@ export const Localizer: React.FC<{
             ))
           }
           showScrollbar
-          size="large"
         />
       </div>
     )

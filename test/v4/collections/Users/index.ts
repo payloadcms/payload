@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 const Users: CollectionConfig = {
   slug: 'users',
   admin: {
-    useAsTitle: 'email',
+    useAsTitle: 'name',
   },
   auth: {
     useAPIKey: true,
@@ -14,6 +14,10 @@ const Users: CollectionConfig = {
     },
   },
   fields: [
+    {
+      name: 'name',
+      type: 'text',
+    },
     {
       name: 'roles',
       type: 'select',

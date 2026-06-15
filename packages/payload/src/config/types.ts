@@ -1017,6 +1017,12 @@ export type Config = {
         tabs?: SidebarTab[]
       }
       /**
+       * Add custom items to the user menu popup in the admin panel header.
+       * These components will be rendered in the Settings sub-popup of the user menu.
+       * When empty or absent, the Settings sub-trigger is not shown.
+       */
+      userMenuSettingsItems?: CustomComponent[]
+      /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
        * + `Dashboard` - `/admin`
@@ -1249,22 +1255,6 @@ export type Config = {
   email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
-  /**
-   * Experimental features may be unstable or change in future versions.
-   */
-  experimental?: {
-    /**
-     * Enable per-locale status for documents.
-     *
-     * Requires:
-     * - `localization` enabled
-     * - `versions.drafts` enabled
-     * - `versions.drafts.localizeStatus` set at collection or global level
-     *
-     * @experimental
-     */
-    localizeStatus?: boolean
-  }
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */

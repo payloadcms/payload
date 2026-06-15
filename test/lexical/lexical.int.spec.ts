@@ -1310,7 +1310,7 @@ describe('Lexical block interface generation', () => {
       const defs = jsonSchema.$defs!
 
       // Each differently-shaped `hero` gets its own interface (one clean, one hashed).
-      const heroNames = Object.keys(defs).filter((k) => /^Hero(_[0-9A-F]{8})?$/.test(k))
+      const heroNames = Object.keys(defs).filter((k) => /^Hero(?:_[0-9A-F]{8})?$/.test(k))
       expect(heroNames).toHaveLength(2)
 
       // ...and they carry distinct field shapes (not a silent overwrite).

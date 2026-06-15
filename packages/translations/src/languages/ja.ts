@@ -256,6 +256,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: '別のユーザーがこのドキュメントの編集を引き継ぎました。',
     applyChanges: '変更を適用する',
     ascending: '昇順',
+    auto: '自動',
     automatic: '自動設定',
     backToDashboard: 'ダッシュボードに戻る',
     by: '〜によって',
@@ -449,6 +450,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}}つの{{label}}を選択中',
     selectLabel: '{{label}}を選択してください',
     selectValue: '値を選択',
+    settings: '設定',
     showAllLabel: 'すべての{{label}}を表示する',
     shownInTable: '表に表示',
     showSidebar: 'サイドバーを表示',
@@ -465,6 +467,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{collections}} から {{total}} 件のうち {{count}} 件を正常に再インデックスし、{{skips}} 件の下書きをスキップしました。',
     takeOver: '引き継ぐ',
+    theme: 'テーマ',
     thisLanguage: 'Japanese',
     time: '時間',
     timezone: 'タイムゾーン',

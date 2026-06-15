@@ -3766,6 +3766,24 @@ describe('database', () => {
       expect(globalData.postTitle).toBe('post')
     })
 
+    it('should allow referenced virtual field in collection update response', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'post-updated' } })
+      const doc = await payload.create({
+        collection: 'virtual-relations',
+        data: {},
+        depth: 0,
+      })
+
+      const updated = await payload.update({
+        collection: 'virtual-relations',
+        id: doc.id,
+        data: { post: post.id },
+        depth: 0,
+      })
+
+      expect(updated.postTitle).toBe('post-updated')
+    })
+
     it('should allow to sort by a virtual field with a reference to an ID', async () => {
       await payload.delete({ collection: 'virtual-relations', where: {} })
       const category_1 = await payload.create({

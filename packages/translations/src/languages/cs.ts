@@ -253,6 +253,7 @@ export const csTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Jiný uživatel převzal úpravy tohoto dokumentu.',
     applyChanges: 'Použít změny',
     ascending: 'Vzestupně',
+    auto: 'Automaticky',
     automatic: 'Automatický',
     backToDashboard: 'Zpět na nástěnku',
     by: 'Od',
@@ -447,6 +448,7 @@ export const csTranslations: DefaultTranslationsObject = {
     selectedCount: 'Vybráno {{count}} {{label}}',
     selectLabel: 'Vyberte {{label}}',
     selectValue: 'Vyberte hodnotu',
+    settings: 'Nastavení',
     showAllLabel: 'Zobrazit všechny {{label}}',
     shownInTable: 'Zobrazeno v tabulce',
     showSidebar: 'Zobrazit postranní panel',
@@ -463,6 +465,7 @@ export const csTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Úspěšně reindexováno {{count}} z {{total}} dokumentů z {{collections}} a přeskočeno {{skips}} konceptů.',
     takeOver: 'Převzít',
+    theme: 'Téma',
     thisLanguage: 'Čeština',
     time: 'Čas',
     timezone: 'Časové pásmo',

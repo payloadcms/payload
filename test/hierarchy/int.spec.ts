@@ -960,6 +960,7 @@ describe('Hierarchy', () => {
         collection: 'products',
         data: { _status: 'published' },
         draft: false,
+        publishAllLocales: true,
       })
 
       // Create draft with different title for each locale

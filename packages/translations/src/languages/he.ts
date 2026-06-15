@@ -244,6 +244,7 @@ export const heTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'משתמש אחר השתלט על עריכת מסמך זה.',
     applyChanges: 'החל שינויים',
     ascending: 'בסדר עולה',
+    auto: 'אוטו',
     automatic: 'אוטומטי',
     backToDashboard: 'חזרה ללוח המחוונים',
     by: 'על ידי',
@@ -435,6 +436,7 @@ export const heTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} נבחרו',
     selectLabel: '{{label}} בחר',
     selectValue: 'בחר ערך',
+    settings: 'הגדרות',
     showAllLabel: 'הצג את כל ה{{label}}',
     shownInTable: 'מוצג בטבלה',
     showSidebar: 'הצג סרגל צד',
@@ -451,6 +453,7 @@ export const heTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'ביצוע מחדש של אינדקס בוצע בהצלחה על {{count}} מתוך {{total}} מסמכים מתוך {{collections}}, ו-{{skips}} טיוטות הושמטו.',
     takeOver: 'קח פיקוד',
+    theme: 'ערכת עיצוב',
     thisLanguage: 'עברית',
     time: 'זמן',
     timezone: 'אזור זמן',

@@ -254,6 +254,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Drugi korisnik je preuzeo uređivanje ovog dokumenta.',
     applyChanges: 'Primijeni promjene',
     ascending: 'Uzlazno',
+    auto: 'Automatski',
     automatic: 'Automatsko',
     backToDashboard: 'Natrag na nadzornu ploču',
     by: 'Od strane',
@@ -448,6 +449,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} odabrano',
     selectLabel: 'Odaberite {{label}}',
     selectValue: 'Odaberi vrijednost',
+    settings: 'Postavke',
     showAllLabel: 'Prikaži sve {{label}}',
     shownInTable: 'Prikazano u tablici',
     showSidebar: 'Prikaži bočnu traku',
@@ -464,6 +466,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Uspješno je reindeksirano {{count}} od {{total}} dokumenata iz {{collections}}, a {{skips}} nacrta je preskočeno.',
     takeOver: 'Preuzmi',
+    theme: 'Tema',
     thisLanguage: 'Hrvatski',
     time: 'Vrijeme',
     timezone: 'Vremenska zona',
