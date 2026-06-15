@@ -38,6 +38,7 @@ const DocumentInfo: React.FC<
     hasPublishedDoc: hasPublishedDocFromProps,
     hasPublishPermission: hasPublishPermissionFromProps,
     hasSavePermission: hasSavePermissionFromProps,
+    hasScheduledPublish: hasScheduledPublishFromProps,
     initialData,
     initialState,
     isLocked: isLockedFromProps,
@@ -91,6 +92,10 @@ const DocumentInfo: React.FC<
 
   const [unpublishedVersionCount, setUnpublishedVersionCount] = useState(
     unpublishedVersionCountFromProps,
+  )
+
+  const [hasScheduledPublish, setHasScheduledPublish] = useState(
+    Boolean(hasScheduledPublishFromProps),
   )
 
   const [documentIsLocked, setDocumentIsLocked] = useControllableState<boolean | undefined>(
@@ -355,6 +360,7 @@ const DocumentInfo: React.FC<
     hasPublishedDoc,
     hasPublishPermission,
     hasSavePermission,
+    hasScheduledPublish,
     incrementVersionCount,
     initialData,
     initialState,
@@ -368,6 +374,7 @@ const DocumentInfo: React.FC<
     setDocFieldPreferences,
     setDocumentIsLocked,
     setHasPublishedDoc,
+    setHasScheduledPublish,
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
