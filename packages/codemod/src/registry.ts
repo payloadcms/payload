@@ -3,6 +3,7 @@ import type { Transform } from './types.js'
 import { exampleNoop } from './transforms/example-noop/index.js'
 import { globalsComponentsEdit } from './transforms/globals-components-edit/index.js'
 import { migrateAliasedExports } from './transforms/migrate-aliased-exports/index.js'
+import { migrateBlockReferencesToBlocks } from './transforms/migrate-block-references-to-blocks/index.js'
 import { migrateBuildScript } from './transforms/migrate-build-script/index.js'
 import { migrateDbTypesSubpath } from './transforms/migrate-db-types-subpath/index.js'
 import { migrateDisabledFields } from './transforms/migrate-disabled-fields/index.js'
@@ -14,6 +15,9 @@ import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-
 import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
 import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
+import { removeGroupByTrue } from './transforms/remove-group-by-true/index.js'
+import { removeLocalizeStatusConfig } from './transforms/remove-localize-status-config/index.js'
+import { removePublishSpecificLocale } from './transforms/remove-publish-specific-locale/index.js'
 import { removeVersionsTrue } from './transforms/remove-versions-true/index.js'
 import { renameStorageAdaptersToStorage } from './transforms/rename-storage-adapters-to-storage/index.js'
 import { renameTypescriptSchemaToJsonSchema } from './transforms/rename-typescript-schema-to-json-schema/index.js'
@@ -26,6 +30,7 @@ export const transforms: Transform[] = [
   migrateDisabledFields,
   migrateForceSelect,
   migrateAliasedExports,
+  migrateBlockReferencesToBlocks,
   migrateBuildScript,
   migrateDocumentTitleContext,
   migrateStorageAdaptersToConfig,
@@ -34,6 +39,9 @@ export const transforms: Transform[] = [
   migrateDbTypesSubpath,
   migrateNextSubpathExports,
   migrateVersionsDefault,
+  removeGroupByTrue,
+  removeLocalizeStatusConfig,
   removeVersionsTrue,
+  removePublishSpecificLocale,
   renameTypescriptSchemaToJsonSchema,
 ]

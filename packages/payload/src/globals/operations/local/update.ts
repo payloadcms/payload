@@ -67,15 +67,12 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   populate?: PopulateType
   /**
-   * Publish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   * Publish the document / documents in all locales. Only applies when localization is enabled
+   * and the global has localized fields.
    *
    * @default undefined
    */
   publishAllLocales?: boolean
-  /**
-   * Publish the document / documents with a specific locale.
-   */
-  publishSpecificLocale?: TypedLocale
   /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
@@ -91,7 +88,8 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   slug: TSlug
   /**
-   * Unpublish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   * Unpublish the document / documents in all locales. Only applies when localization is enabled
+   * and the global has localized fields.
    */
   unpublishAllLocales?: boolean
   // TODO: Strongly type User as TypedUser (= User in v4.0)
@@ -123,7 +121,6 @@ export async function updateGlobalLocal<
     overrideLock,
     populate,
     publishAllLocales,
-    publishSpecificLocale,
     select,
     showHiddenFields,
     unpublishAllLocales,
@@ -145,7 +142,6 @@ export async function updateGlobalLocal<
     overrideLock,
     populate,
     publishAllLocales,
-    publishSpecificLocale: publishSpecificLocale!,
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,

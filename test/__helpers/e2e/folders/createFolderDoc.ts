@@ -14,6 +14,7 @@ export const createFolderDoc = async ({
   await drawer.locator('input#field-name').fill(folderName)
 
   await selectInput({
+    page,
     multiSelect: true,
     options: folderType,
     selectLocator: drawer.locator('#field-folderType'),

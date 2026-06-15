@@ -39,7 +39,6 @@ let restClient: NextRESTClient
 const collectionGraphQLOriginalTitle = 'autosave title'
 
 const globalGraphQLOriginalTitle = 'updated global title'
-let globalLocalVersionID: number | string
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -541,10 +540,16 @@ describe('Versions', () => {
           draft: true,
         })
 
+        const docWithLocales = await payload.findByID({
+          collection,
+          id: post.id,
+          locale: 'all',
+        })
+
         const result = await saveVersion({
           id: post.id,
           collection: collectionConfig,
-          docWithLocales: post,
+          docWithLocales,
           operation: 'create',
           payload,
           returning: false,
@@ -1364,7 +1369,6 @@ describe('Versions', () => {
           payload,
         })
       })
-
     })
 
     describe('Update Many', () => {
@@ -2922,6 +2926,7 @@ describe('Versions', () => {
         const doc = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: { title: 'asd' },
+          publishAllLocales: true,
         })
 
         await wait(10)
@@ -2929,6 +2934,7 @@ describe('Versions', () => {
         const upd = await payload.updateGlobal({
           slug: autoSaveGlobalSlug,
           data: { title: 'asd2' },
+          publishAllLocales: true,
         })
 
         expect(upd.createdAt).toBe(doc.createdAt)
@@ -3134,6 +3140,7 @@ describe('Versions', () => {
           data: {
             title: title2,
           },
+          publishAllLocales: true,
         })
 
         expect(updatedGlobal.title).toBe(title2)
@@ -3176,6 +3183,7 @@ describe('Versions', () => {
             description: 'kjnjyhbbdsfseankuhsjsfghb',
             title: originalTitle,
           },
+          publishAllLocales: true,
         })
 
         const publishedGlobal = await payload.findGlobal({
@@ -3871,7 +3879,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const docWithoutSpanishDraft = await payload.findByID({
@@ -3884,7 +3891,8 @@ describe('Versions', () => {
         // which should not leak any unpublished Spanish content
         // and should retain the English fields that were not explicitly
         // passed in from publishedEN1
-        expect(docWithoutSpanishDraft.text.es).toBeUndefined()
+        // null (SQL: locale row exists but text is NULL) or undefined (MongoDB) both mean no data
+        expect(docWithoutSpanishDraft.text.es ?? null).toBeNull()
         expect(docWithoutSpanishDraft.description.en).toStrictEqual('My English description')
 
         const docWithSpanishDraft1 = await payload.findByID({
@@ -3909,7 +3917,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const docWithoutSpanishDraft2 = await payload.findByID({
@@ -3921,7 +3928,8 @@ describe('Versions', () => {
         // On the second consecutive publish of a specific locale,
         // Make sure we maintain draft data that has never been published
         // even after two + consecutive publish events
-        expect(docWithoutSpanishDraft2.text.es).toBeUndefined()
+        // null (SQL) or undefined (MongoDB) both indicate no published data for this locale
+        expect(docWithoutSpanishDraft2.text.es ?? null).toBeNull()
         expect(docWithoutSpanishDraft2.text.en).toStrictEqual('English published 2')
         expect(docWithoutSpanishDraft2.description.en).toStrictEqual('My English description')
 
@@ -3960,7 +3968,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'de',
-          publishSpecificLocale: 'de',
         })
 
         await payload.update({
@@ -3972,7 +3979,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const finalPublishedNoES = await payload.findByID({
@@ -3983,7 +3989,8 @@ describe('Versions', () => {
 
         expect(finalPublishedNoES.text.de).toStrictEqual('German published 1')
         expect(finalPublishedNoES.text.en).toStrictEqual('English published 3')
-        expect(finalPublishedNoES.text.es).toBeUndefined()
+        // null (SQL) or undefined (MongoDB) both indicate no published data for this locale
+        expect(finalPublishedNoES.text.es ?? null).toBeNull()
 
         const finalDraft = await payload.findByID({
           id: draft1.id,
@@ -4034,7 +4041,6 @@ describe('Versions', () => {
             text: 'English publish',
           },
           draft: false,
-          publishSpecificLocale: 'en',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4043,7 +4049,7 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.es ?? null).toBeNull()
         expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
       })
 
@@ -4065,7 +4071,6 @@ describe('Versions', () => {
             text: 'English publish',
           },
           draft: false,
-          publishSpecificLocale: 'en',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4074,7 +4079,7 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.es ?? null).toBeNull()
         expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
 
         const published2 = await payload.update({
@@ -4084,6 +4089,7 @@ describe('Versions', () => {
             _status: 'published',
           },
           draft: false,
+          publishAllLocales: true,
         })
 
         const publishedAll = await payload.findByID({
@@ -4114,7 +4120,7 @@ describe('Versions', () => {
             text: 'German publish',
           },
           draft: false,
-          publishSpecificLocale: 'de',
+          locale: 'de',
         })
 
         const publishedOnlyDE = await payload.findByID({
@@ -4123,8 +4129,8 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyDE.text.es).toBeUndefined()
-        expect(publishedOnlyDE.text.en).toBeUndefined()
+        expect(publishedOnlyDE.text.es ?? null).toBeNull()
+        expect(publishedOnlyDE.text.en ?? null).toBeNull()
         expect(publishedOnlyDE.text.de).toStrictEqual('German publish')
       })
 
@@ -4146,7 +4152,6 @@ describe('Versions', () => {
             text: 'English publish',
           },
           draft: false,
-          publishSpecificLocale: 'en',
         })
 
         const publishedOnlyEN = await payload.findByID({
@@ -4155,7 +4160,7 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        expect(publishedOnlyEN.text.es).toBeUndefined()
+        expect(publishedOnlyEN.text.es ?? null).toBeNull()
         expect(publishedOnlyEN.text.en).toStrictEqual('English publish')
 
         const allVersions = await payload.findVersions({
@@ -4163,12 +4168,10 @@ describe('Versions', () => {
           locale: 'all',
         })
 
-        const versions = allVersions.docs.filter(
-          (version) => version.parent === published.id && version.snapshot !== true,
-        )
+        const versions = allVersions.docs.filter((version) => version.parent === published.id)
         const latestVersion = versions[0].version
 
-        expect(latestVersion.text.es).toBeUndefined()
+        expect(latestVersion.text.es).toStrictEqual('Spanish draft')
         expect(latestVersion.text.en).toStrictEqual('English publish')
       })
 
@@ -4216,7 +4219,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         // Blocks should be preserved with blockType intact
@@ -4274,7 +4276,6 @@ describe('Versions', () => {
             title: 'Eng published',
           },
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const globalData = await payload.findGlobal({
@@ -4308,7 +4309,6 @@ describe('Versions', () => {
           },
           draft: false,
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const globalData = await payload.findGlobal({
@@ -4341,7 +4341,6 @@ describe('Versions', () => {
             title: 'Eng published',
           },
           locale: 'en',
-          publishSpecificLocale: 'en',
         })
 
         const publishedOnlyEN = await payload.findGlobal({
@@ -4357,6 +4356,7 @@ describe('Versions', () => {
           data: {
             _status: 'published',
           },
+          publishAllLocales: true,
         })
 
         const publishedAll = await payload.findGlobal({
@@ -4388,7 +4388,6 @@ describe('Versions', () => {
             title: 'German published',
           },
           locale: 'de',
-          publishSpecificLocale: 'de',
         })
 
         const globalData = await payload.findGlobal({
@@ -4421,14 +4420,13 @@ describe('Versions', () => {
             title: 'New eng',
           },
           draft: false,
-          publishSpecificLocale: 'en',
         })
 
         const allVersions = await payload.findGlobalVersions({
           slug: global,
           locale: 'all',
           where: {
-            'version._status': {
+            'version._status.en': {
               equals: 'published',
             },
           },
@@ -4436,7 +4434,7 @@ describe('Versions', () => {
 
         const versions = allVersions.docs
         const latestVersion = versions[0].version
-        expect(latestVersion.title.es).toBeFalsy()
+        expect(latestVersion.title.es).toStrictEqual('New spanish draft')
         expect(latestVersion.title.en).toStrictEqual('New eng')
       })
     })

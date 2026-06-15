@@ -26,6 +26,7 @@ import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { upsertPreferences } from '../__helpers/e2e/preferences.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -154,10 +155,8 @@ describe('Localization', () => {
       await expect(page.locator('.view-version__toggle-locales')).toBeVisible()
       await page.locator('.view-version__toggle-locales').click()
 
-      await expect(page.locator('.select-version-locales .pill-selector')).toBeVisible()
-      await expect(page.locator('.select-version-locales .pill-selector')).not.toContainText(
-        'FILTERED',
-      )
+      await expect(page.locator('.popup__content')).toBeVisible()
+      await expect(page.locator('.popup__content')).not.toContainText('FILTERED')
     })
 
     test('should disable control for active locale', async () => {
@@ -390,7 +389,7 @@ describe('Localization', () => {
       await changeLocale(page, spanishLocale)
       await navigateToDoc(page, url)
       await page.locator('#field-children .rs__control').click()
-      await expect(page.locator('#field-children .rs__menu')).toContainText('spanish-relation2')
+      await expect(getSelectMenu({ page })).toContainText('spanish-relation2')
     })
 
     test('ensure relationship edit drawers are opened in currently selected locale', async () => {
@@ -400,7 +399,7 @@ describe('Localization', () => {
         '#field-relationMultiRelationTo .relationship--single-value__drawer-toggler'
       await expect(page.locator(drawerToggler)).toBeEnabled()
       await openDocDrawer({ page, selector: drawerToggler })
-      await expect(page.locator('.doc-drawer__header-text')).toContainText('spanish-relation2')
+      await expect(page.locator('.doc-drawer__title')).toContainText('spanish-relation2')
       await page.locator('.doc-drawer__header-close').click()
     })
   })
@@ -791,7 +790,7 @@ describe('Localization', () => {
   })
 
   describe('publish specific locale', () => {
-    test('should create post in correct locale with publishSpecificLocale', async () => {
+    test('should create post in correct locale when publishing a specific locale', async () => {
       await page.goto(urlPostsWithDrafts.create)
       await changeLocale(page, 'es')
       await fillValues({ title: 'Created In Spanish' })
@@ -834,7 +833,7 @@ describe('Localization', () => {
     })
 
     describe('unpublish button', () => {
-      test('should show unpublish in specific locale when localizeStatus is enabled', async () => {
+      test('should show unpublish in specific locale when localized fields exist', async () => {
         await page.goto(urlAllFieldsLocalized.create)
         await page.locator('#field-text').fill('EN Published')
         await saveDocAndAssert(page, '#publish-locale')
@@ -844,10 +843,10 @@ describe('Localization', () => {
         await expect(page.locator('#action-unpublish-locale')).toBeVisible()
       })
 
-      test('should not show unpublish in specific locale when localizeStatus is not enabled', async () => {
-        await page.goto(urlPostsWithDrafts.create)
-        await page.locator('#field-title').fill('EN Published')
-        await saveDocAndAssert(page, '#publish-locale')
+      test('should not show unpublish in specific locale when no localized fields exist', async () => {
+        await page.goto(noLocalizedFieldsURL.create)
+        await page.locator('#field-text').fill('EN Published')
+        await saveDocAndAssert(page)
         await openDocControls(page)
 
         await expect(page.locator('#action-unpublish')).toBeVisible()

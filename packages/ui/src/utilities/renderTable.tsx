@@ -130,7 +130,7 @@ export const renderTable = ({
   let serverFields: Field[] = collectionConfig?.fields || []
   const isPolymorphic = collections
 
-  const isGroupingBy = Boolean(collectionConfig?.admin?.groupBy && query?.groupBy)
+  const isGroupingBy = Boolean(query?.groupBy)
 
   if (isPolymorphic) {
     clientFields = []

@@ -11,7 +11,7 @@ import { useEditDepth } from '../../../../providers/EditDepth/index.js'
 import { useSearchParams } from '../../../../providers/RouterAdapter/index.js'
 import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 export const baseClass = 'version-drawer'
 export const formatVersionDrawerSlug = ({
@@ -67,7 +67,6 @@ export const VersionDrawerContent: React.FC<{
             redirectAfterDuplicate: false,
             searchParams: Object.fromEntries(searchParams.entries()),
             versions: {
-              disableGutter: true,
               useVersionDrawerCreatedAtCell: true,
             },
           })

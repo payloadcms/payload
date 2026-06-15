@@ -3,13 +3,20 @@
 import type { OptionObject } from 'payload'
 import type React from 'react'
 import type { JSX } from 'react'
-import type { ClearIndicatorProps, DropdownIndicatorProps, StylesConfig } from 'react-select'
+import type {
+  ClearIndicatorProps,
+  DropdownIndicatorProps,
+  OptionProps,
+  StylesConfig,
+} from 'react-select'
 
 import { useMemo } from 'react'
+import { components as rsComponents } from 'react-select'
 
 import type { Option as OptionType } from '../ReactSelect/types.js'
 import type { Props } from './types.js'
 
+import { CheckIcon } from '../../icons/Check/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { CircledXIcon } from '../../icons/CircledX/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -68,6 +75,17 @@ const SmallClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (pr
   )
 }
 
+const TimezoneOption: React.FC<OptionProps<OptionType, false>> = (props) => {
+  const { children } = props
+
+  return (
+    <rsComponents.Option {...props}>
+      <CheckIcon className="timezone-picker__option-check" size={16} />
+      <span className="timezone-picker__option-label">{children}</span>
+    </rsComponents.Option>
+  )
+}
+
 export const TimezonePicker: React.FC<Props> = (props) => {
   const {
     id,
@@ -99,10 +117,16 @@ export const TimezonePicker: React.FC<Props> = (props) => {
       </span>
       <ReactSelect
         className="timezone-picker"
+        classNames={{
+          menu: () => 'timezone-picker__menu',
+          menuList: () => 'timezone-picker__menu-list',
+        }}
         components={{
           ClearIndicator: SmallClearIndicator,
           DropdownIndicator: SmallDropdownIndicator,
+          Option: TimezoneOption,
         }}
+        customProps={{ menuPortalTheme: 'dark' }}
         disabled={readOnly}
         inputId={id}
         isClearable={!required}
@@ -120,17 +144,12 @@ export const TimezonePicker: React.FC<Props> = (props) => {
               ...base,
               flexWrap: 'nowrap',
             }),
-            option: (base, state) => ({
+            option: (base) => ({
               ...base,
-              backgroundColor: state.isSelected
-                ? 'var(--popup-item-bg-selected-dark, var(--color-bg-selected))'
-                : state.isFocused
-                  ? 'var(--popup-item-bg-hover-dark, var(--color-bg-selected-strong))'
-                  : 'transparent',
-              color:
-                state.isFocused || state.isSelected
-                  ? 'var(--popup-item-color-hover-dark, var(--color-text-onselected-strong))'
-                  : 'var(--popup-item-color-dark, var(--color-text-ontooltip))',
+              alignItems: 'center',
+              display: 'flex',
+              gap: 'var(--spacer-1)',
+              minWidth: 0,
             }),
           } as StylesConfig<OptionType>
         }

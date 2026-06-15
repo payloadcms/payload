@@ -120,6 +120,11 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T, filterUndefi
     if (value instanceof Date) {
       return new Date(value) as unknown as T
     }
+    // BSON ObjectId instances expose extra enumerable properties (e.g. `buffer`) via `for...in`
+    // that corrupt the copy. Detect BSON types early and convert them to their string representation.
+    if ('_bsontype' in value && typeof (value as any).toHexString === 'function') {
+      return (value as any).toHexString() as unknown as T
+    }
     const ret: { [key: string]: T } = {}
     for (const k in value) {
       const v = value[k]
@@ -165,6 +170,9 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
     }
     if (value instanceof Date) {
       return new Date(value) as unknown as T
+    }
+    if ('_bsontype' in value && typeof (value as any).toHexString === 'function') {
+      return (value as any).toHexString() as unknown as T
     }
     const ret: { [key: string]: T } = {}
     for (const k in value) {

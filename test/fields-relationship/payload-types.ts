@@ -403,6 +403,7 @@ export interface VersionedRelationshipField {
         value: string | Collection1;
       }[]
     | null;
+  relatedVersionedDoc?: (string | null) | VersionedRelationshipField;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -767,6 +768,7 @@ export interface MixedMediaSelect<T extends boolean = true> {
 export interface VersionedRelationshipFieldSelect<T extends boolean = true> {
   title?: T;
   relationshipField?: T;
+  relatedVersionedDoc?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

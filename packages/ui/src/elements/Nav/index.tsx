@@ -6,12 +6,7 @@ import React from 'react'
 import type { EntityToGroup } from '../../utilities/groupNavItems.js'
 
 /* eslint-disable payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary */
-import {
-  DefaultNavClient,
-  Logout,
-  NavWrapper,
-  SettingsMenuButton,
-} from '../../exports/client/index.js'
+import { DefaultNavClient, NavWrapper, SettingsMenuButton } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
 import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
 import { groupNavItems } from '../../utilities/groupNavItems.js'
@@ -48,7 +43,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
 
   const {
     admin: {
-      components: { afterNav, afterNavLinks, beforeNav, beforeNavLinks, logout, settingsMenu },
+      components: { afterNav, afterNavLinks, beforeNav, beforeNavLinks, settingsMenu },
     },
     collections,
     globals,
@@ -82,25 +77,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
   )
 
   const navPreferences = await getNavPrefs(req)
-
-  const LogoutComponent = RenderServerComponent({
-    clientProps: {
-      documentSubViewType,
-      viewType,
-    },
-    Component: logout?.Button,
-    Fallback: Logout,
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
 
   const RenderedSettingsMenu =
     settingsMenu && Array.isArray(settingsMenu)
@@ -239,7 +215,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
         />
         <div className={`${baseClass}__controls`}>
           <SettingsMenuButton settingsMenu={RenderedSettingsMenu} />
-          {LogoutComponent}
         </div>
       </nav>
       {RenderedAfterNav}

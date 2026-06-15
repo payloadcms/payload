@@ -43,10 +43,9 @@ export function getFieldsForRowComparison({
     if (valueToRow?.blockType === valueFromRow?.blockType) {
       const matchedBlock: ClientBlock =
         config?.blocksMap?.[valueToRow?.blockType] ??
-        (((('blocks' in field || 'blockReferences' in field) &&
-          (field.blockReferences ?? field.blocks)?.find(
-            (block) => typeof block !== 'string' && block.slug === valueToRow?.blockType,
-          )) || {
+        ((field.blocks.find(
+          (block) => typeof block !== 'string' && block.slug === valueToRow?.blockType,
+        ) || {
           fields: [],
         }) as ClientBlock)
 
@@ -57,19 +56,17 @@ export function getFieldsForRowComparison({
     } else {
       const matchedVersionBlock =
         config?.blocksMap?.[valueToRow?.blockType] ??
-        (((('blocks' in field || 'blockReferences' in field) &&
-          (field.blockReferences ?? field.blocks)?.find(
-            (block) => typeof block !== 'string' && block.slug === valueToRow?.blockType,
-          )) || {
+        ((field.blocks.find(
+          (block) => typeof block !== 'string' && block.slug === valueToRow?.blockType,
+        ) || {
           fields: [],
         }) as ClientBlock)
 
       const matchedComparisonBlock =
         config?.blocksMap?.[valueFromRow?.blockType] ??
-        (((('blocks' in field || 'blockReferences' in field) &&
-          (field.blockReferences ?? field.blocks)?.find(
-            (block) => typeof block !== 'string' && block.slug === valueFromRow?.blockType,
-          )) || {
+        ((field.blocks.find(
+          (block) => typeof block !== 'string' && block.slug === valueFromRow?.blockType,
+        ) || {
           fields: [],
         }) as ClientBlock)
 

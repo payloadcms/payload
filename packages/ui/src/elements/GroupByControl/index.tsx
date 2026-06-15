@@ -4,7 +4,6 @@ import type { ClientField, Field, SanitizedCollectionConfig } from 'payload'
 import { isFieldDisabled } from 'payload/shared'
 import React, { useCallback, useMemo, useRef } from 'react'
 
-import { CheckIcon } from '../../icons/Check/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { TrashIcon } from '../../icons/Trash/index.js'
 import { XIcon } from '../../icons/X/index.js'
@@ -113,6 +112,10 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({ collectionSlug, 
     [groupByFieldName, listQuery],
   )
 
+  if (filteredFields.length === 0) {
+    return null
+  }
+
   const directionValue =
     !groupByRaw || typeof groupByRaw !== 'string'
       ? 'asc'
@@ -167,15 +170,10 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({ collectionSlug, 
                     className={`${baseClass}__select-popup`}
                     horizontalAlign="right"
                     render={({ close: closeFieldPopup }) => (
-                      <PopupList.ButtonGroup>
+                      <PopupList.RadioGroup>
                         {filteredFields.map((field, i) => (
-                          <PopupList.Button
+                          <PopupList.RadioGroupItem
                             active={field.fieldPath === groupByFieldName}
-                            icon={
-                              field.fieldPath === groupByFieldName ? (
-                                <CheckIcon size={16} />
-                              ) : undefined
-                            }
                             key={i}
                             onClick={() => {
                               handleFieldSelect(field.fieldPath)
@@ -183,9 +181,9 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({ collectionSlug, 
                             }}
                           >
                             {field.label}
-                          </PopupList.Button>
+                          </PopupList.RadioGroupItem>
                         ))}
-                      </PopupList.ButtonGroup>
+                      </PopupList.RadioGroup>
                     )}
                     renderButton={({ active, onClick, onKeyDown }) => (
                       <button

@@ -12,6 +12,7 @@ import {
   saveDocAndAssert,
   waitForFormReady,
 } from '../../../__helpers/e2e/helpers.js'
+import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -86,7 +87,8 @@ describe('Upload polymorphic with hasMany', () => {
     await expect(collectionSelector).toBeVisible()
     const fieldSelector = collectionSelector.locator('.react-select')
     await fieldSelector.click({ delay: 100 })
-    const options = uploadModal.locator('.rs__option')
+    const fieldSelectorMenu = getSelectMenu({ page })
+    const options = fieldSelectorMenu.locator('.rs__option')
     // Select an option
     await options.locator('text=Upload 2').click()
 
@@ -137,7 +139,8 @@ describe('Upload polymorphic with hasMany', () => {
     await expect(collectionSelector).toBeVisible()
     const fieldSelector = collectionSelector.locator('.react-select')
     await fieldSelector.click({ delay: 100 })
-    const options = uploadModal.locator('.rs__option')
+    const fieldSelectorMenu = getSelectMenu({ page })
+    const options = fieldSelectorMenu.locator('.rs__option')
     // Select an option
     await options.locator('text=Upload 2').click()
 

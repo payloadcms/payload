@@ -1,4 +1,4 @@
-import type { Block, Field, SanitizedConfig, TypedUser } from 'payload'
+import type { Field, SanitizedConfig, TypedUser } from 'payload'
 
 import { combineWhereConstraints } from 'payload/shared'
 
@@ -89,10 +89,9 @@ export function applyBaseFilterToFields(fields: Field[], config: SanitizedConfig
 
     // Handle blocks
     if (field.type === 'blocks') {
-      const blocks = (field.blockReferences ?? field.blocks ?? []) as Block[]
       return {
         ...field,
-        blocks: blocks.map((block) => {
+        blocks: field.blocks.map((block) => {
           if (typeof block === 'string') {
             return block
           }

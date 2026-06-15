@@ -62,7 +62,6 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   i18n,
   isBulkUploadEnabled,
   isTrashEnabled,
-  newDocumentURL,
   onBulkUploadSuccess,
   openBulkUpload,
   smallBreak,
