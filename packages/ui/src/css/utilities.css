@@ -18,6 +18,11 @@
     border-width: 0;
   }
 
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
   /* Global focus ring */
   :focus-visible {
     outline: var(--accessibility-outline);
