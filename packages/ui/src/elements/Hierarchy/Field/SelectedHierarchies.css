@@ -12,17 +12,12 @@
   .selected-hierarchies__pill.chip--size-medium {
     height: 1.25rem;
     padding-inline-start: var(--spacer-1);
-    /* Specific radius to match the select pills */
+    /* Specific radius to match the chip component in FPL */
     border-radius: 0.1875rem;
   }
 
   .selected-hierarchies__pill .chip__remove {
     color: var(--color-icon-secondary);
-  }
-
-  .selected-hierarchies__pill .chip__remove svg {
-    width: 1.25rem;
-    height: 1.25rem;
   }
 
   .selected-hierarchies__pill .chip__remove:hover {
