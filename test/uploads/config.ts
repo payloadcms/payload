@@ -6,11 +6,16 @@ import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/ind
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
 import { AdminUploadControl } from './collections/AdminUploadControl/index.js'
+import {
+  AdminUploadFilePreviewMap,
+  AdminUploadFilePreviewSingle,
+} from './collections/AdminUploadFilePreview/index.js'
 import { AnyImageTypeCollection } from './collections/AnyImageType/index.js'
 import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
 import { BulkUploadsHookErrorCollection } from './collections/BulkUploadsHookError/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { FileMimeType } from './collections/FileMimeType/index.js'
+import { FilePreviewCollection } from './collections/FilePreview/index.js'
 import { NoFilesRequired } from './collections/NoFilesRequired/index.js'
 import { RelationToNoFilesRequired } from './collections/RelationToNoFilesRequired/index.js'
 import { SimpleRelationshipCollection } from './collections/SimpleRelationship/index.js'
@@ -29,6 +34,7 @@ import {
   imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
+  mediaWithFieldsSlug,
   mediaWithImageSizeAdminPropsSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutDeleteAccessSlug,
@@ -833,6 +839,9 @@ export default buildConfigWithDefaults({
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
     AdminUploadControl,
+    AdminUploadFilePreviewSingle,
+    AdminUploadFilePreviewMap,
+    FilePreviewCollection,
     NoFilesRequired,
     RelationToNoFilesRequired,
     {
@@ -1124,6 +1133,186 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './prefix-media'),
       },
       versions: false,
+    },
+    {
+      slug: mediaWithFieldsSlug,
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+        },
+        {
+          name: 'altText',
+          label: 'Alt Text',
+          type: 'text',
+        },
+        {
+          name: 'caption',
+          type: 'text',
+        },
+        {
+          name: 'credit',
+          label: 'Photo Credit',
+          type: 'text',
+        },
+        {
+          name: 'source',
+          label: 'Source URL',
+          type: 'text',
+        },
+        {
+          name: 'category',
+          type: 'select',
+          options: ['Nature', 'Architecture', 'People', 'Abstract', 'Technology'],
+        },
+        {
+          name: 'tags',
+          type: 'text',
+          hasMany: true,
+        },
+        {
+          name: 'featured',
+          label: 'Featured Image',
+          type: 'checkbox',
+        },
+        {
+          name: 'photographer',
+          type: 'text',
+          admin: {
+            // position: 'sidebar',
+          },
+        },
+        {
+          name: 'priority',
+          type: 'select',
+          options: ['Low', 'Medium', 'High'],
+          defaultValue: 'Medium',
+        },
+        {
+          name: 'shootDate',
+          label: 'Shoot Date',
+          type: 'date',
+        },
+        {
+          name: 'location',
+          type: 'group',
+          fields: [
+            {
+              name: 'city',
+              type: 'text',
+            },
+            {
+              name: 'country',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'dimensions',
+          label: 'Original Dimensions',
+          type: 'group',
+          fields: [
+            {
+              name: 'widthCm',
+              label: 'Width (cm)',
+              type: 'number',
+            },
+            {
+              name: 'heightCm',
+              label: 'Height (cm)',
+              type: 'number',
+            },
+          ],
+        },
+        {
+          name: 'colorProfile',
+          label: 'Color Profile',
+          type: 'select',
+          options: ['sRGB', 'Adobe RGB', 'ProPhoto RGB', 'CMYK'],
+        },
+        {
+          name: 'license',
+          type: 'select',
+          options: ['All Rights Reserved', 'CC BY', 'CC BY-SA', 'CC BY-NC', 'Public Domain'],
+        },
+        {
+          name: 'licenseUrl',
+          label: 'License URL',
+          type: 'text',
+        },
+        {
+          name: 'notes',
+          label: 'Internal Notes',
+          type: 'textarea',
+        },
+        {
+          name: 'rating',
+          type: 'number',
+          min: 1,
+          max: 5,
+        },
+        {
+          name: 'exifData',
+          label: 'EXIF Data',
+          type: 'group',
+          fields: [
+            {
+              name: 'camera',
+              type: 'text',
+            },
+            {
+              name: 'lens',
+              type: 'text',
+            },
+            {
+              name: 'iso',
+              label: 'ISO',
+              type: 'number',
+            },
+            {
+              name: 'aperture',
+              type: 'text',
+            },
+            {
+              name: 'shutterSpeed',
+              label: 'Shutter Speed',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'published',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+      ],
+      upload: {
+        crop: true,
+        imageSizes: [
+          {
+            name: 'thumbnail',
+            width: 300,
+            height: 300,
+            crop: 'centre',
+          },
+          {
+            name: 'card',
+            width: 768,
+            height: 512,
+          },
+          {
+            name: 'hero',
+            width: 1920,
+            height: 1080,
+          },
+        ],
+        staticDir: path.resolve(dirname, './media'),
+      },
     },
   ],
   onInit: async (payload) => {

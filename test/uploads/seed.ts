@@ -7,7 +7,10 @@ import { fileURLToPath } from 'url'
 import { devUser } from '../credentials.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import {
+  adminUploadFilePreviewMapSlug,
+  adminUploadFilePreviewSingleSlug,
   animatedTypeMedia,
+  filePreviewSlug,
   audioSlug,
   mediaSlug,
   mediaWithoutDeleteAccessSlug,
@@ -205,4 +208,73 @@ export const seed = async (payload: Payload) => {
       data,
     })
   }
+
+  // Seed filePreview single collection — one image and one audio doc
+  const pdfFilePath = path.resolve(dirname, './test-pdf.pdf')
+  const pdfFile = await getFileByPath(pdfFilePath)
+
+  await payload.create({
+    collection: adminUploadFilePreviewSingleSlug,
+    data: {},
+    file: {
+      ...imageFile,
+      name: `single-preview-image-${imageFile?.name}`,
+    } as File,
+  })
+
+  await payload.create({
+    collection: adminUploadFilePreviewSingleSlug,
+    data: {},
+    file: {
+      ...audioFile,
+      name: `single-preview-audio-${audioFile?.name}`,
+    } as File,
+  })
+
+  // Seed filePreview map collection — one image (no match), one PDF (exact), one audio (wildcard)
+  await payload.create({
+    collection: adminUploadFilePreviewMapSlug,
+    data: {},
+    file: {
+      ...imageFile,
+      name: `map-preview-image-${imageFile?.name}`,
+    } as File,
+  })
+
+  await payload.create({
+    collection: adminUploadFilePreviewMapSlug,
+    data: {},
+    file: {
+      ...pdfFile,
+      name: `map-preview-pdf-${pdfFile?.name}`,
+    } as File,
+  })
+
+  await payload.create({
+    collection: adminUploadFilePreviewMapSlug,
+    data: {},
+    file: {
+      ...audioFile,
+      name: `map-preview-audio-${audioFile?.name}`,
+    } as File,
+  })
+
+  // Seed file-preview collection — image and audio to exercise the switch-case component
+  await payload.create({
+    collection: filePreviewSlug,
+    data: {},
+    file: {
+      ...imageFile,
+      name: `file-preview-image-${imageFile?.name}`,
+    } as File,
+  })
+
+  await payload.create({
+    collection: filePreviewSlug,
+    data: {},
+    file: {
+      ...audioFile,
+      name: `file-preview-audio-${audioFile?.name}`,
+    } as File,
+  })
 }

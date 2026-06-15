@@ -36,6 +36,9 @@ import {
   adminThumbnailSizeSlug,
   adminThumbnailWithSearchQueries,
   adminUploadControlSlug,
+  adminUploadFilePreviewMapSlug,
+  adminUploadFilePreviewSingleSlug,
+  filePreviewSlug,
   animatedTypeMedia,
   audioSlug,
   bulkUploadsHookErrorSlug,
@@ -122,6 +125,9 @@ let mediaWithoutDeleteAccessURL: AdminUrlUtil
 let mediaWithImageSizeAdminPropsURL: AdminUrlUtil
 let noFilesRequiredURL: AdminUrlUtil
 let relationToNoFilesRequiredURL: AdminUrlUtil
+let adminUploadFilePreviewSingleURL: AdminUrlUtil
+let adminUploadFilePreviewMapURL: AdminUrlUtil
+let filePreviewURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -167,6 +173,9 @@ describe('Uploads', () => {
     mediaWithImageSizeAdminPropsURL = new AdminUrlUtil(serverURL, mediaWithImageSizeAdminPropsSlug)
     noFilesRequiredURL = new AdminUrlUtil(serverURL, noFilesRequiredSlug)
     relationToNoFilesRequiredURL = new AdminUrlUtil(serverURL, relationToNoFilesRequiredSlug)
+    adminUploadFilePreviewSingleURL = new AdminUrlUtil(serverURL, adminUploadFilePreviewSingleSlug)
+    adminUploadFilePreviewMapURL = new AdminUrlUtil(serverURL, adminUploadFilePreviewMapSlug)
+    filePreviewURL = new AdminUrlUtil(serverURL, filePreviewSlug)
 
     const context = await browser.newContext()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
@@ -295,6 +304,59 @@ describe('Uploads', () => {
     await page.locator('.copy-to-clipboard').click()
     const clipbaordContent = await page.evaluate(() => navigator.clipboard.readText())
     expect(clipbaordContent).toBe(mediaDoc?.url)
+  })
+
+  test('should show side-by-side layout for upload collection document with file', async () => {
+    const mediaDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
+
+    await page.goto(mediaURL.edit(mediaDoc!.id))
+    await waitForFormReady(page)
+
+    await expect(page.locator('.collection-edit__upload-layout')).toBeVisible()
+    await expect(page.locator('.file-field__side-panel')).toBeVisible()
+    await expect(page.locator('.file-field__side-panel__preview')).toBeVisible()
+    await expect(page.locator('.mini-carousel')).toBeVisible()
+  })
+
+  test('should show upload dropzone in right panel for new upload collection document', async () => {
+    await page.goto(mediaURL.create)
+    await waitForFormReady(page)
+
+    await expect(page.locator('.collection-edit__upload-layout')).toBeVisible()
+    await expect(page.locator('.file-field__side-panel .dropzone')).toBeVisible()
+  })
+
+  test('should switch active thumbnail when clicking mini carousel item', async () => {
+    const mediaDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+        where: {
+          mimeType: { contains: 'image/' },
+        },
+      })
+    ).docs[0]
+
+    await page.goto(mediaURL.edit(mediaDoc!.id))
+    await waitForFormReady(page)
+
+    const carouselItems = page.locator('.mini-carousel__item')
+
+    await expect(carouselItems.first()).toHaveClass(/mini-carousel__item--active/)
+
+    await carouselItems.nth(1).click()
+
+    await expect(carouselItems.nth(1)).toHaveClass(/mini-carousel__item--active/)
+    await expect(carouselItems.first()).not.toHaveClass(/mini-carousel__item--active/)
   })
 
   test('should create file upload', async () => {
@@ -2442,5 +2504,129 @@ describe('Uploads', () => {
     // Navigating to the file URL must return 200
     const response = await page.goto(`${serverURL}${href}`)
     expect(response?.status()).toBe(200)
+  })
+
+  describe('filePreview custom components', () => {
+    test('should render single custom filePreview for any file type', async () => {
+      const imageDoc = (
+        await payload.find({
+          collection: adminUploadFilePreviewSingleSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'image/png' } },
+        })
+      ).docs[0]
+
+      await page.goto(adminUploadFilePreviewSingleURL.edit(imageDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('#custom-file-preview-single')).toBeVisible()
+      await expect(page.locator('.file-field__side-panel__image-wrap .thumbnail')).toBeHidden()
+    })
+
+    test('should pass mimeType as clientProp to filePreview component', async () => {
+      const audioDoc = (
+        await payload.find({
+          collection: adminUploadFilePreviewSingleSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'audio/mpeg' } },
+        })
+      ).docs[0]
+
+      await page.goto(adminUploadFilePreviewSingleURL.edit(audioDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('#custom-file-preview-single')).toHaveAttribute(
+        'data-mime-type',
+        'audio/mpeg',
+      )
+    })
+
+    test('should render filePreview matched by exact MIME type', async () => {
+      const pdfDoc = (
+        await payload.find({
+          collection: adminUploadFilePreviewMapSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'application/pdf' } },
+        })
+      ).docs[0]
+
+      await page.goto(adminUploadFilePreviewMapURL.edit(pdfDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('#custom-file-preview-pdf')).toBeVisible()
+    })
+
+    test('should render filePreview matched by category wildcard', async () => {
+      const audioDoc = (
+        await payload.find({
+          collection: adminUploadFilePreviewMapSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'audio/mpeg' } },
+        })
+      ).docs[0]
+
+      await page.goto(adminUploadFilePreviewMapURL.edit(audioDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('#custom-file-preview-audio')).toBeVisible()
+    })
+
+    test('should fall back to default Thumbnail when no filePreview matches', async () => {
+      const imageDoc = (
+        await payload.find({
+          collection: adminUploadFilePreviewMapSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'image/png' } },
+        })
+      ).docs[0]
+
+      await page.goto(adminUploadFilePreviewMapURL.edit(imageDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('.file-field__side-panel__image-wrap .thumbnail')).toBeVisible()
+      await expect(page.locator('#custom-file-preview-pdf')).toBeHidden()
+      await expect(page.locator('#custom-file-preview-audio')).toBeHidden()
+    })
+  })
+
+  describe('filePreview switch-case component', () => {
+    test('should render image branch for image uploads', async () => {
+      const imageDoc = (
+        await payload.find({
+          collection: filePreviewSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'image/png' } },
+        })
+      ).docs[0]
+
+      await page.goto(filePreviewURL.edit(imageDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('#file-preview[data-mime-category="image"]')).toBeVisible()
+      await expect(page.locator('#file-preview img')).toBeVisible()
+    })
+
+    test('should render audio branch for audio uploads', async () => {
+      const audioDoc = (
+        await payload.find({
+          collection: filePreviewSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'audio/mpeg' } },
+        })
+      ).docs[0]
+
+      await page.goto(filePreviewURL.edit(audioDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('#file-preview[data-mime-category="audio"]')).toBeVisible()
+      await expect(page.locator('#file-preview audio')).toBeVisible()
+    })
   })
 })
