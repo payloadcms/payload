@@ -121,6 +121,18 @@ const getAPIKeyDoc = async ({
     throw new UnauthorizedError()
   }
 
+  try {
+    await req.payload.db.updateOne({
+      id: doc.id,
+      collection: 'payload-mcp-api-keys',
+      data: { lastUsed: new Date().toISOString() },
+      req,
+      returning: false,
+    })
+  } catch (err) {
+    logger.warn({ err, msg: 'Failed to update MCP API key last-used timestamp' })
+  }
+
   return {
     ...doc,
     user: {
