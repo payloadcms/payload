@@ -23,5 +23,5 @@
 }
 
 .tree__load-more-button:active {
-  color: var(--color-bg-hover);
+  color: var(--color-text);
 }
