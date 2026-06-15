@@ -89,7 +89,7 @@ export const createClientBlocks = ({
   defaultIDType: Payload['config']['db']['defaultIDType']
   i18n: I18nClient
   importMap: ImportMap
-}): (ClientBlock | string)[] | ClientBlock[] => {
+}): (ClientBlock | string)[] => {
   const clientBlocks: (ClientBlock | string)[] = []
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i]!
@@ -311,22 +311,13 @@ export const createClientField = ({
         }
       }
 
-      if (incomingField.blockReferences?.length) {
-        field.blockReferences = createClientBlocks({
-          blocks: incomingField.blockReferences,
-          defaultIDType,
-          i18n,
-          importMap,
-        })
-      }
-
       if (incomingField.blocks?.length) {
         field.blocks = createClientBlocks({
           blocks: incomingField.blocks,
           defaultIDType,
           i18n,
           importMap,
-        }) as ClientBlock[]
+        })
       }
 
       break

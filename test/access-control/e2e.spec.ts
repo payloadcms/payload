@@ -21,6 +21,7 @@ import {
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -1088,17 +1089,16 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedTopLevel field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted Top Level' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Restricted Top Level' })).toBeHidden()
       })
 
       test('should hide nested field with read: false inside group in filter dropdown', async () => {
@@ -1107,15 +1107,16 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Public Phone',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretPhone field
-        await expect(initialField.locator('.rs__option', { hasText: 'Secret Phone' })).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Secret Phone' })).toBeHidden()
       })
 
       test('should hide field with read: false inside row in filter dropdown', async () => {
@@ -1124,17 +1125,16 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible In Row',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedInRow field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted In Row' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Restricted In Row' })).toBeHidden()
       })
 
       test('should hide field with read: false inside collapsible in filter dropdown', async () => {
@@ -1143,16 +1143,17 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible In Collapsible',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedInCollapsible field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted In Collapsible' }),
+          menu.locator('.rs__option', { hasText: 'Restricted In Collapsible' }),
         ).toBeHidden()
       })
 
@@ -1162,17 +1163,16 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Metric',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide metadata.analytics.restrictedMetric field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted Metric' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Restricted Metric' })).toBeHidden()
       })
 
       test('should hide field with read: false inside unnamed tab in filter dropdown', async () => {
@@ -1181,17 +1181,16 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Public Data',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretInPublicTab field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Secret In Public Tab' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Secret In Public Tab' })).toBeHidden()
       })
 
       test('should hide field with read: false inside named tab in filter dropdown', async () => {
@@ -1200,16 +1199,17 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Settings > Visible Setting',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedSetting field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Settings > Restricted Setting' }),
+          menu.locator('.rs__option', { hasText: 'Settings > Restricted Setting' }),
         ).toBeHidden()
       })
 
@@ -1219,16 +1219,17 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Address > City',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretPostalCode field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Address > Secret Postal Code' }),
+          menu.locator('.rs__option', { hasText: 'Address > Secret Postal Code' }),
         ).toBeHidden()
       })
 
@@ -1238,16 +1239,17 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Advanced Settings > Advanced > Visible Advanced',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedAdvanced field
         await expect(
-          initialField.locator('.rs__option', {
+          menu.locator('.rs__option', {
             hasText: 'Advanced Settings > Advanced > Restricted Advanced',
           }),
         ).toBeHidden()
@@ -1436,15 +1438,16 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Virtual field should be visible in the filter dropdown
-        const virtualFieldOption = initialField.locator('.rs__option', {
+        const virtualFieldOption = menu.locator('.rs__option', {
           hasText: 'Unrestricted Virtual Field Name',
         })
         await expect(virtualFieldOption).toBeVisible()
@@ -1476,20 +1479,21 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Nested fields within the virtual group should be visible
-        const virtualGroupTitleOption = initialField.locator('.rs__option', {
+        const virtualGroupTitleOption = menu.locator('.rs__option', {
           hasText: 'Unrestricted Virtual Group Info > Title',
         })
         await expect(virtualGroupTitleOption).toBeVisible()
 
-        const virtualGroupDescriptionOption = initialField.locator('.rs__option', {
+        const virtualGroupDescriptionOption = menu.locator('.rs__option', {
           hasText: 'Unrestricted Virtual Group Info > Description',
         })
         await expect(virtualGroupDescriptionOption).toBeVisible()
@@ -1526,15 +1530,16 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Virtual field nested inside contactInfo group should be visible
-        const nestedVirtualFieldOption = initialField.locator('.rs__option', {
+        const nestedVirtualFieldOption = menu.locator('.rs__option', {
           hasText: 'Contact Info > Virtual Contact Name',
         })
         await expect(nestedVirtualFieldOption).toBeVisible()
@@ -1566,16 +1571,17 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Restricted virtual field should be hidden (use exactText to avoid matching "Unrestricted...")
         await expect(
-          initialField.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
+          menu.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
         ).toBeHidden()
       })
 
@@ -1606,16 +1612,17 @@ describe('Access Control', () => {
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Restricted virtual field nested in contactInfo should be hidden
         await expect(
-          initialField.locator('.rs__option', {
+          menu.locator('.rs__option', {
             hasText: 'Contact Info > Restricted Virtual Contact Info',
           }),
         ).toBeHidden()

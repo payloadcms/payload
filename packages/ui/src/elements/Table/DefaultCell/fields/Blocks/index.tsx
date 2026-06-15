@@ -11,14 +11,14 @@ export interface BlocksCellProps extends DefaultCellComponentProps<BlocksFieldCl
 
 export const BlocksCell: React.FC<BlocksCellProps> = ({
   cellData,
-  field: { blockReferences, blocks, labels },
+  field: { blocks, labels },
 }) => {
   const { i18n } = useTranslation()
   const { config } = useConfig()
 
   const selectedBlocks = Array.isArray(cellData) ? cellData.map(({ blockType }) => blockType) : []
 
-  const translatedBlockLabels = (blockReferences ?? blocks)?.map((b) => {
+  const translatedBlockLabels = blocks.map((b) => {
     const block = typeof b === 'string' ? config.blocksMap[b] : b
     return {
       slug: block.slug,

@@ -8,7 +8,6 @@ export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
     useAsTitle: 'title',
-    groupBy: true,
     defaultColumns: ['title', 'category', 'createdAt', 'updatedAt'],
   },
   enableQueryPresets: true,

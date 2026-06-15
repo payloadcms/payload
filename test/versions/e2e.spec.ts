@@ -50,6 +50,7 @@ import {
 import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -1470,7 +1471,8 @@ describe('Versions', () => {
       await expect(fromSelect).toBeVisible()
       await fromSelect.click()
 
-      const moreVersions = compareFromContainer.locator('.rs__option:has-text("More versions...")')
+      const versionSelectMenu = getSelectMenu({ page })
+      const moreVersions = versionSelectMenu.locator('.rs__option:has-text("More versions...")')
       await expect(moreVersions).toBeVisible()
       await moreVersions.click()
 
@@ -1599,11 +1601,8 @@ describe('Versions', () => {
 
       const drawerContent = localPage.locator('.schedule-publish__scheduler')
       const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
-      const timezoneOptionSelector = drawerContent.locator(
-        `.timezone-picker .rs__menu .rs__option:has-text("Paris")`,
-      )
       await dropdownControlSelector.click()
-      await timezoneOptionSelector.click()
+      await getSelectMenu({ page: localPage }).locator('.rs__option', { hasText: 'Paris' }).click()
 
       const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
       // Create a date for 2049-01-01 18:00:00 UTC, so it is timezone-invariant across CI environments

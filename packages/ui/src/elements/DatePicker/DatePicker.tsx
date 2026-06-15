@@ -91,10 +91,12 @@ const DatePicker: React.FC<Props> = (props) => {
     minTime,
     monthsShown: Math.min(2, monthsToShow),
     nextMonthButtonLabel: <ChevronIcon direction="right" />,
+    nextYearButtonLabel: '›',
     onChange,
     placeholderText,
     popperPlacement: 'bottom-start',
     previousMonthButtonLabel: <ChevronIcon direction="left" />,
+    previousYearButtonLabel: '‹',
     selected: value && new Date(value),
     shouldCloseOnSelect: false,
     showMonthYearPicker: pickerAppearance === 'monthOnly',
@@ -119,7 +121,7 @@ const DatePicker: React.FC<Props> = (props) => {
         const datepickerLocale = getFormattedLocale(i18n.language)
         registerLocale(datepickerLocale, i18n.dateFNS)
         setDefaultLocale(datepickerLocale)
-      } catch (e) {
+      } catch (_error) {
         // eslint-disable-next-line no-console
         console.warn(`Could not find DatePicker locale for ${i18n.language}`)
       }
@@ -132,8 +134,8 @@ const DatePicker: React.FC<Props> = (props) => {
         <ReactDatePicker
           {...dateTimePickerProps}
           dropdownMode="select"
-          showMonthDropdown
-          showYearDropdown
+          showMonthDropdown={pickerAppearance !== 'monthOnly'}
+          showYearDropdown={pickerAppearance !== 'monthOnly'}
         />
         <CalendarIcon />
       </div>

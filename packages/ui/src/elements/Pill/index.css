@@ -13,7 +13,7 @@
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
     display: inline-flex;
-    background: var(--ramp-black-200);
+    background: var(--color-bg-secondary);
     color: var(--color-text);
     border-radius: var(--button-radius);
     cursor: inherit;
