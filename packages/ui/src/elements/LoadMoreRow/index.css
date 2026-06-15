@@ -5,17 +5,6 @@
     gap: var(--stroke-width-medium);
   }
 
-  .load-more-row__connector {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    flex-shrink: 0;
-    width: var(--spacer-3);
-    margin-right: 0;
-    margin-top: 0;
-    transform: translateY(-25%);
-  }
-
   .load-more-row__text {
     margin: 0;
     color: var(--color-text-secondary);

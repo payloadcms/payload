@@ -12,6 +12,7 @@ import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { mergeFieldStyles } from '../../../fields/mergeFieldStyles.js'
 import { fieldBaseClass } from '../../../fields/shared/index.js'
 import { useField } from '../../../forms/useField/index.js'
+import { CirclePlusIcon } from '../../../icons/CirclePlus/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -193,7 +194,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
               buttonStyle="dashed"
               className={`${baseClass}__manage-button`}
               disabled={disabled}
-              icon="plus"
+              icon={<CirclePlusIcon size={24} />}
               iconPosition="left"
               margin={false}
               onClick={handleOpenDrawer}
