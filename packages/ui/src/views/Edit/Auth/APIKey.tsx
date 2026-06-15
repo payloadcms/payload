@@ -119,6 +119,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
         <APIKeyInput
           aria-label={apiKeyLabel}
           highlighted={highlightedField}
+          id="apiKey"
           value={value as string}
         />
       </div>

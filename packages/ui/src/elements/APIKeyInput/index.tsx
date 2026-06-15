@@ -11,6 +11,7 @@ const baseClass = 'api-key-input'
 export type APIKeyInputProps = {
   readonly 'aria-label'?: string
   readonly highlighted?: boolean
+  readonly id?: string
   readonly value: null | string | undefined
 }
 
@@ -21,6 +22,7 @@ export type APIKeyInputProps = {
 export const APIKeyInput: React.FC<APIKeyInputProps> = ({
   'aria-label': ariaLabel = 'API Key',
   highlighted,
+  id,
   value,
 }) => {
   const [showKey, setShowKey] = useState(false)
@@ -35,6 +37,7 @@ export const APIKeyInput: React.FC<APIKeyInputProps> = ({
         <input
           aria-label={ariaLabel}
           className={`${baseClass}__field`}
+          id={id}
           readOnly
           type={showKey ? 'text' : 'password'}
           value={keyValue}
