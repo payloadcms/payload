@@ -13,19 +13,17 @@ type APIKeyTextFieldOverride = Omit<
   'hasMany' | 'maxRows' | 'minRows' | 'name' | 'type' | 'validate'
 >
 
-export type CreateAPIKeyFieldsOptions = {
-  apiKeyField?: APIKeyTextFieldOverride
-  apiKeyIndexField?: APIKeyTextFieldOverride
-  enableAPIKeyField?: APIKeyCheckboxFieldOverride
-  includeEnableAPIKey?: boolean
-}
-
 export const createAPIKeyFields = ({
   apiKeyField,
   apiKeyIndexField,
   enableAPIKeyField,
   includeEnableAPIKey = true,
-}: CreateAPIKeyFieldsOptions = {}): Field[] => {
+}: {
+  apiKeyField?: APIKeyTextFieldOverride
+  apiKeyIndexField?: APIKeyTextFieldOverride
+  enableAPIKeyField?: APIKeyCheckboxFieldOverride
+  includeEnableAPIKey?: boolean
+} = {}): Field[] => {
   const fields: Field[] = []
 
   if (includeEnableAPIKey) {
