@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { resolvePackageVersion } from './resolvePackageVersion.js'
+import { DEFAULT_PAYLOAD_VERSION_TAG, resolvePackageVersion } from './resolvePackageVersion.js'
 
 const mockRegistry = ({
   distTags,
@@ -57,5 +57,11 @@ describe('resolvePackageVersion', () => {
     await expect(
       resolvePackageVersion({ packageName: 'payload', versionOrTag: 'nope' }),
     ).rejects.toThrow('No version or tag "nope" found for package: payload')
+  })
+})
+
+describe('DEFAULT_PAYLOAD_VERSION_TAG', () => {
+  it('should export DEFAULT_PAYLOAD_VERSION_TAG as "canary"', () => {
+    expect(DEFAULT_PAYLOAD_VERSION_TAG).toBe('canary')
   })
 })

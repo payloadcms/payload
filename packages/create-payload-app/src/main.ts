@@ -28,7 +28,10 @@ import {
   successfulNextInit,
   successMessage,
 } from './utils/messages.js'
-import { resolvePackageVersion } from './utils/resolvePackageVersion.js'
+import {
+  DEFAULT_PAYLOAD_VERSION_TAG,
+  resolvePackageVersion,
+} from './utils/resolvePackageVersion.js'
 
 export class Main {
   args: CliArgs
@@ -46,9 +49,9 @@ export class Main {
         '--help': Boolean,
         '--local-template': String,
         '--name': String,
+        '--payload-version': String, // Install a specific Payload version or npm dist-tag (e.g. 3.40.0 or canary; default: canary)
         '--secret': String,
         '--template': String,
-        '--version': String, // Install a specific Payload version or npm dist-tag (e.g. 3.40.0 or canary; default: latest)
 
         // Next.js
         '--init-next': Boolean, // TODO: Is this needed if we detect if inside Next.js project?
@@ -95,7 +98,7 @@ export class Main {
       const LATEST_VERSION = await resolvePackageVersion({
         debug: debugFlag,
         packageName: 'payload',
-        versionOrTag: this.args['--version'],
+        versionOrTag: this.args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG,
       })
 
       if (this.args['--help']) {
@@ -138,7 +141,7 @@ export class Main {
         if (!p.isCancel(shouldUpdate) && shouldUpdate) {
           const { message, success: updateSuccess } = await updatePayloadInProject(
             nextAppDetails,
-            this.args['--version'],
+            this.args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG,
           )
           if (updateSuccess) {
             info(message)
