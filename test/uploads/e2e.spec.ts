@@ -702,6 +702,16 @@ describe('Uploads', () => {
   })
 
   test('should render adminThumbnail when using a custom thumbnail URL with additional queries', async () => {
+    // The collection's `adminThumbnail` config hardcodes a Next.js image-optimizer
+    // URL (`/_next/image?url=...&w=384&q=5`). That endpoint only exists on the
+    // Next.js adapter; TanStack Start has no `/_next/image` route, so the thumbnail
+    // 404s and never renders. The feature (custom thumbnailURL) is exercised by the
+    // other adminThumbnail tests; this one is Next-image-optimizer specific.
+    test.skip(
+      process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+      'Asserts the Next.js image-optimizer URL (/_next/image), which TanStack Start does not provide.',
+    )
+
     await page.goto(adminThumbnailWithSearchQueriesURL.list)
 
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
@@ -1659,9 +1669,13 @@ describe('Uploads', () => {
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
 
-      // Should show mixed success/failure messages
+      // Should show mixed success/failure messages. The save processes each file
+      // (incl. uploading the 2MB file that hits the size limit) sequentially, which
+      // can take longer than the default expect timeout under slower adapters, so
+      // wait longer for the success toast to appear.
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Successfully saved 2 files',
+        { timeout: POLL_TOPASS_TIMEOUT },
       )
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),

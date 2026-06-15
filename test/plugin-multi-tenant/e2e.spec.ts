@@ -76,7 +76,7 @@ test.describe('Multi Tenant', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    await ensureCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
   })
 
   test.beforeEach(async () => {
@@ -638,6 +638,18 @@ test.describe('Multi Tenant', () => {
 
   test.describe('Polymorphic Relationships', () => {
     test('should not duplicate tenant constraints in polymorphic relationship queries', async () => {
+      // This assertion inspects the Next.js server-action wire format: a POST to
+      // `/admin/collections/<slug>` whose JSON body is `[{ name: 'render-list', args }]`.
+      // The TanStack adapter dispatches `render-list` through a `createServerFn`
+      // (seroval-encoded POST to `/_serverFn/...`), so this interception never
+      // matches. The behaviour under test — that the tenant constraint isn't
+      // duplicated in the render-list query — is framework-agnostic plugin logic
+      // and is covered by the Next.js run.
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'Inspects the Next.js server-action wire format; render-list uses a different transport on TanStack. Query behaviour is covered by the Next.js run.',
+      )
+
       await loginClientSide({
         data: credentials.admin,
         page,

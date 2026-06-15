@@ -2,13 +2,10 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { ImportMap, LanguageOptions, SanitizedConfig, ServerProps } from 'payload'
 
 import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { Outlet } from '@tanstack/react-router'
-import {
-  applyLocaleFiltering,
-  getFromImportMap,
-  isReactServerComponentOrFunction,
-} from 'payload/shared'
+import { applyLocaleFiltering } from 'payload/shared'
 import { createElement } from 'react'
 
 import type { RootLayoutData } from './index.js'
@@ -80,25 +77,24 @@ export async function getLayoutData({
       payload: req.payload,
       permissions,
       searchParams: {},
+      server: req.server,
       user: req.user ?? undefined,
     }
-    providers = providerPaths.reduceRight<React.ReactNode>((children, providerPath) => {
-      const Component = getFromImportMap<React.ComponentType<any>>({
-        importMap,
-        PayloadComponent: providerPath,
-        schemaPath: '',
-      })
-      if (!Component) {
-        return children
-      }
-      // Only server components receive `serverProps` — they carry non-serializable
-      // values (payload instance, req fns) that cannot be passed to a client
-      // component across the RSC boundary. Client providers get just `children`.
-      const props = isReactServerComponentOrFunction(Component)
-        ? { ...serverProps, children }
-        : { children }
-      return createElement(Component, props)
-    }, createElement(Outlet))
+    // Mirror the Next adapter's `NestProviders`: render each configured provider
+    // via `RenderServerComponent` so the entry's own `clientProps`/`serverProps`
+    // (e.g. plugin-multi-tenant's `userHasAccessToAllTenants`) are merged in, and
+    // server components receive `serverProps` while client components get only
+    // `clientProps`. Nested around the router `<Outlet />` instead of `children`.
+    providers = providerPaths.reduceRight<React.ReactNode>(
+      (children, provider) =>
+        RenderServerComponent({
+          clientProps: { children },
+          Component: provider,
+          importMap,
+          serverProps,
+        }),
+      createElement(Outlet),
+    )
   }
 
   return {
