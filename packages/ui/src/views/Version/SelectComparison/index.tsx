@@ -8,7 +8,7 @@ import type { Props } from './types.js'
 import { ReactSelect } from '../../../elements/ReactSelect/index.js'
 import { fieldBaseClass } from '../../../fields/shared/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 import { useVersionDrawer } from './VersionDrawer/index.js'
 
 const baseClass = 'compare-version'

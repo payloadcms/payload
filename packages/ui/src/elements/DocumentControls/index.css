@@ -134,6 +134,16 @@
     display: none;
   }
 
+  /* Action buttons rendered inside the document drawer header */
+  .doc-controls--drawerHeaderActions {
+    position: static;
+    width: auto;
+    padding: 0;
+    gap: 0;
+    border-bottom: 0;
+    background: transparent;
+  }
+
   @media (max-width: 1024px) {
     .doc-controls__controls-wrapper {
       margin-left: auto;

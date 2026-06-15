@@ -35,6 +35,10 @@
   .rich-text-lexical__wrap {
     width: 100%;
     position: relative;
+
+    > .field-description {
+      margin-top: var(--spacer-2);
+    }
   }
 
   .rich-text-lexical--read-only {

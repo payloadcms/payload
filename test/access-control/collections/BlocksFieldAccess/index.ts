@@ -65,8 +65,7 @@ export const BlocksFieldAccess: CollectionConfig = {
     {
       type: 'blocks',
       name: 'editableBlockRefs',
-      blocks: [],
-      blockReferences: ['titleblock'],
+      blocks: ['titleblock'],
     },
     // Block field with block references - WITH access control (should be read-only)
     {
@@ -77,8 +76,7 @@ export const BlocksFieldAccess: CollectionConfig = {
         create: () => false,
         update: () => false,
       },
-      blocks: [],
-      blockReferences: ['titleblock'],
+      blocks: ['titleblock'],
     },
     // Test tab with read-only blocks fields
     {
@@ -122,8 +120,7 @@ export const BlocksFieldAccess: CollectionConfig = {
                 create: () => false,
                 update: () => false,
               },
-              blocks: [],
-              blockReferences: ['titleblock'],
+              blocks: ['titleblock'],
             },
           ],
         },

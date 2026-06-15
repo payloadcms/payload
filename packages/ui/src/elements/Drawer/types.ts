@@ -24,4 +24,5 @@ export type TogglerProps = {
   disabled?: boolean
   extraButtonProps?: Record<string, any>
   slug: string
+  tooltip?: string
 } & HTMLAttributes<HTMLButtonElement>

@@ -44,30 +44,6 @@ describe('defineCollectionTool input inference', () => {
     })
   })
 
-  test('function-form (no param)', () => {
-    defineCollectionTool({
-      description: 'x',
-      input: () => z.object({ id: z.string() }),
-    }).handler(({ input }) => {
-      expect(input).type.toBe<IdSchemaInput>()
-      return { content: [] }
-    })
-  })
-
-  test('function-form reading collectionSchema', () => {
-    defineCollectionTool({
-      description: 'x',
-      input: ({ collectionSchema }) => {
-        // collectionSchema is the per-collection JSON Schema, typed (not implicit any)
-        expect(collectionSchema).type.toBeAssignableTo<object>()
-        return z.object({ id: z.string() })
-      },
-    }).handler(({ input }) => {
-      expect(input).type.toBe<IdSchemaInput>()
-      return { content: [] }
-    })
-  })
-
   test('no schema — input falls back to Record<string, unknown>', () => {
     defineCollectionTool({
       description: 'x',
@@ -90,18 +66,6 @@ describe('defineGlobalTool input inference', () => {
     })
   })
 
-  test('function-form reading globalSchema', () => {
-    defineGlobalTool({
-      description: 'x',
-      input: ({ globalSchema }) => {
-        expect(globalSchema).type.toBeAssignableTo<object>()
-        return z.object({ id: z.string() })
-      },
-    }).handler(({ input }) => {
-      expect(input).type.toBe<IdSchemaInput>()
-      return { content: [] }
-    })
-  })
 })
 
 describe('definePrompt input inference', () => {

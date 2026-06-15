@@ -14,6 +14,7 @@ import type { CliArgs, DbType, NextAppDetails, NextConfigType, PackageManager } 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { debug as origDebug, warning } from '../utils/log.js'
 import { moveMessage } from '../utils/messages.js'
+import { resolvePackageVersion } from '../utils/resolvePackageVersion.js'
 import { installPackages } from './install-packages.js'
 import { wrapNextConfig } from './wrap-next-config.js'
 
@@ -29,7 +30,7 @@ type InitNextArgs = {
   packageManager: PackageManager
   projectDir: string
   useDistFiles?: boolean
-} & Pick<CliArgs, '--debug'>
+} & Pick<CliArgs, '--debug' | '--version'>
 
 type InitNextResult =
   | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
@@ -89,7 +90,12 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
     return { ...configurationResult, isSrcDir, success: false }
   }
 
-  const { success: installSuccess } = await installDeps(projectDir, packageManager, dbType)
+  const { success: installSuccess } = await installDeps({
+    dbType,
+    packageManager,
+    projectDir,
+    versionOrTag: args['--version'],
+  })
   if (!installSuccess) {
     installSpinner.stop('Failed to install dependencies', 1)
     return {
@@ -221,14 +227,22 @@ async function installAndConfigurePayload(
   }
 }
 
-async function installDeps(projectDir: string, packageManager: PackageManager, dbType: DbType) {
+async function installDeps(args: {
+  dbType: DbType
+  packageManager: PackageManager
+  projectDir: string
+  versionOrTag?: string
+}) {
+  const { dbType, packageManager, projectDir, versionOrTag } = args
   const { getDbPackageName } = await import('./ast/adapter-config.js')
 
+  const version = await resolvePackageVersion({ packageName: 'payload', versionOrTag })
+
   const packagesToInstall = ['payload', '@payloadcms/next', '@payloadcms/richtext-lexical'].map(
-    (pkg) => `${pkg}@latest`,
+    (pkg) => `${pkg}@${version}`,
   )
 
-  packagesToInstall.push(`${getDbPackageName(dbType)}@latest`)
+  packagesToInstall.push(`${getDbPackageName(dbType)}@${version}`)
 
   // Match graphql version of @payloadcms/next
   packagesToInstall.push('graphql@^16.8.1')

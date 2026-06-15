@@ -2,7 +2,7 @@
   .pill-selector {
     display: flex;
     flex-wrap: wrap;
-    background: var(--theme-elevation-50);
+    background: var(--color-bg-secondary);
     padding: var(--spacer-4);
     gap: var(--spacer-2-5);
   }

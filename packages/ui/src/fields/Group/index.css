@@ -132,7 +132,7 @@
         left: calc(var(--gutter-h) * -1);
         right: calc(var(--gutter-h) * -1);
         height: 0;
-        border-top: 1px solid var(--border-default);
+        border-top: var(--stroke-width-small) solid var(--color-border);
       }
     }
   }

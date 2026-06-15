@@ -139,14 +139,6 @@ export const getVersions = async ({
           ],
         }
 
-        if (localizedDraftsEnabled) {
-          where.and.push({
-            snapshot: {
-              not_equals: true,
-            },
-          })
-        }
-
         const mostRecentVersion = await payload.findVersions({
           collection: collectionConfig.slug,
           depth: 0,
@@ -207,14 +199,6 @@ export const getVersions = async ({
           },
         },
       ],
-    }
-
-    if (localizedDraftsEnabled) {
-      countVersionsWhere.and.push({
-        snapshot: {
-          not_equals: true,
-        },
-      })
     }
 
     ;({ totalDocs: versionCount } = await payload.countVersions({
@@ -299,13 +283,6 @@ export const getVersions = async ({
       global: globalConfig.slug,
       locale,
       user,
-      where: localizedDraftsEnabled
-        ? {
-            snapshot: {
-              not_equals: true,
-            },
-          }
-        : undefined,
     }))
   }
 
