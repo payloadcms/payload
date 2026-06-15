@@ -2,7 +2,7 @@
   .load-more-row {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--stroke-width-medium);
   }
 
   .load-more-row__text {
@@ -14,14 +14,21 @@
     gap: var(--spacer-1);
   }
 
-  .load-more-row__button {
+  .load-more-row__button.btn {
+    background-color: transparent;
     padding: 0;
     color: var(--color-text);
     font-size: inherit;
     text-decoration: underline;
   }
 
-  .load-more-row__button:hover {
+  .load-more-row__button.btn:hover:not(.btn--disabled) {
     color: var(--color-text-secondary);
+    background-color: transparent;
+  }
+
+  .load-more-row__button.btn:active:not(.btn--disabled) {
+    color: var(--color-text);
+    background-color: transparent;
   }
 }

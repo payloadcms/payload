@@ -17,3 +17,11 @@
   cursor: pointer;
   text-decoration: underline;
 }
+
+.tree__load-more-button:hover {
+  color: var(--color-text-secondary);
+}
+
+.tree__load-more-button:active {
+  color: var(--color-text);
+}
