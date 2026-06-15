@@ -12,8 +12,7 @@
   .selected-hierarchies__pill.chip--size-medium {
     height: 1.25rem;
     padding-inline-start: var(--spacer-1);
-    /* Specific radius to match the chip component in FPL */
-    border-radius: 0.1875rem;
+    border-radius: var(--radius-chip);
   }
 
   .selected-hierarchies__pill .chip__remove {
