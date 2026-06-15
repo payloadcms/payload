@@ -268,5 +268,43 @@ query {
 
       expect(afterDelete.errors).toBeUndefined()
     })
+
+    it('should preserve hasMany relationship order when a single relationship to the same collection is queried first', async () => {
+      const postA = await payload.create({ collection: 'posts', data: { title: 'A' } })
+      const postB = await payload.create({ collection: 'posts', data: { title: 'B' } })
+      const postC = await payload.create({ collection: 'posts', data: { title: 'C' } })
+
+      const parent = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'parent',
+          manyRelations: [postA.id, postB.id, postC.id],
+          singleRelation: postA.id,
+        },
+      })
+
+      const query = `query {
+        Post(id: ${idToString(parent.id, payload)}) {
+          singleRelation {
+            title
+          }
+          manyRelations {
+            title
+          }
+        }
+      }`
+
+      const response = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(response.errors).toBeUndefined()
+      expect(response.data.Post.manyRelations.map((doc) => doc.title)).toStrictEqual(['A', 'B', 'C'])
+
+      await payload.delete({
+        collection: 'posts',
+        where: { id: { in: [parent.id, postA.id, postB.id, postC.id] } },
+      })
+    })
   })
 })

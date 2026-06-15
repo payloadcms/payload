@@ -33,6 +33,17 @@ export default buildConfigWithDefaults({
           },
         },
         {
+          type: 'relationship',
+          name: 'singleRelation',
+          relationTo: 'posts',
+        },
+        {
+          type: 'relationship',
+          name: 'manyRelations',
+          hasMany: true,
+          relationTo: 'posts',
+        },
+        {
           name: 'contentBlockField',
           type: 'blocks',
           blocks: [ContentBlock],
