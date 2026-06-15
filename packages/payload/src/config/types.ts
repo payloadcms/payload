@@ -1777,7 +1777,7 @@ export type SharedEntityViews = {
    * ```
    */
   [key: string]:
-    | { actions?: CustomComponent[]; Component?: PayloadComponent }
+    | { actions?: CustomComponent[]; Component?: PayloadComponent; NoResults?: CustomComponent }
     | AdminViewConfig
     | EditConfig
     | undefined
@@ -1805,7 +1805,7 @@ export type SharedAdminComponents = {
   views?: SharedEntityViews
 }
 
-export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
+export type EntityDescriptionFunction = ({ t }: { t: TFunction<ClientTranslationKeys> }) => string
 
 export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 

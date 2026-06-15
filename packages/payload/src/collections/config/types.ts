@@ -444,6 +444,7 @@ export type CollectionAdminOptions = {
       list?: {
         actions?: CustomComponent[]
         Component?: PayloadComponent
+        NoResults?: CustomComponent
       }
     } & SharedEntityViews
   } & Omit<SharedAdminComponents, 'edit' | 'views'>

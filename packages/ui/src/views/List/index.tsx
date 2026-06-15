@@ -477,6 +477,7 @@ export const renderListView = async (
       hasDeletePermission,
       hasTrashPermission,
       newDocumentURL,
+      viewType,
     },
     collectionConfig,
     description: staticDescription,

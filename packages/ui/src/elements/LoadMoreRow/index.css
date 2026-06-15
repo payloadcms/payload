@@ -16,13 +16,9 @@
     transform: translateY(-25%);
   }
 
-  .load-more-row__connector svg {
-    color: var(--color-icon-tertiary);
-  }
-
   .load-more-row__text {
     margin: 0;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     white-space: nowrap;
     display: flex;
     align-items: center;
@@ -37,6 +33,6 @@
   }
 
   .load-more-row__button:hover {
-    color: var(--color-text);
+    color: var(--color-text-secondary);
   }
 }

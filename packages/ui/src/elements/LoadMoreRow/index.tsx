@@ -4,7 +4,6 @@ import React from 'react'
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import { TreeConnector } from '../Hierarchy/Tree/TreeConnector.js'
 import './index.css'
 
 const baseClass = 'load-more-row'
@@ -46,9 +45,6 @@ export const LoadMoreRow: React.FC<LoadMoreRowProps> = ({
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')} style={style}>
-      <div className={`${baseClass}__connector`}>
-        <TreeConnector />
-      </div>
       <p className={`${baseClass}__text`}>
         {hasMore ? (
           <>

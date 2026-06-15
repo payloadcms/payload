@@ -82,7 +82,9 @@ export const TreeNode = ({
     if (newDocs && newDocs.length > 0) {
       const firstNewDoc = newDocs[0]
       const docId: number | string = (firstNewDoc as { id: number | string }).id
-      setFocusedId(`node-${docId}`)
+      window.requestAnimationFrame(() => {
+        setFocusedId(`node-${docId}`)
+      })
     }
   }, [loadMoreFromHook, setFocusedId])
 
@@ -99,15 +101,13 @@ export const TreeNode = ({
   const hasChildren =
     node.hasChildren === true || (expanded && children !== null ? children.length > 0 : true)
 
-  const handleToggleClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation()
-      if (!expanded) {
-        void load()
-      }
+  const handleToggle = useCallback(
+    (e?: React.SyntheticEvent) => {
+      e?.stopPropagation()
+      void load()
       onToggle({ id: node.id })
     },
-    [node.id, onToggle, expanded, load],
+    [load, node.id, onToggle],
   )
 
   const handleSelectClick = useCallback(() => {
@@ -116,6 +116,9 @@ export const TreeNode = ({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      if (e.target !== e.currentTarget) {
+        return
+      }
       switch (e.key) {
         case ' ':
         case 'Enter':
@@ -134,12 +137,12 @@ export const TreeNode = ({
           e.preventDefault()
           e.stopPropagation()
           if (hasChildren && !expanded) {
-            onToggle({ id: node.id })
+            handleToggle()
           }
           break
       }
     },
-    [hasChildren, expanded, handleSelectClick, onToggle, node.id],
+    [expanded, handleSelectClick, handleToggle, hasChildren, node.id, onToggle],
   )
 
   return (
@@ -148,7 +151,11 @@ export const TreeNode = ({
       aria-level={depth + 1}
       aria-selected={selected}
       className={baseClass}
-      onFocus={handleFocus}
+      onFocus={(e) => {
+        if (e.target === e.currentTarget) {
+          handleFocus()
+        }
+      }}
       onKeyDown={handleKeyDown}
       ref={nodeRef}
       role="treeitem"
@@ -169,7 +176,7 @@ export const TreeNode = ({
           <button
             aria-label={expanded ? t('general:collapse') : t('general:open')}
             className={`${baseClass}__toggle`}
-            onClick={handleToggleClick}
+            onClick={handleToggle}
             onMouseDown={(e) => e.preventDefault()}
             tabIndex={-1}
             type="button"

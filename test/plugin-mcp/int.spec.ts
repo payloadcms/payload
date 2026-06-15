@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto'
-import { afterEach, describe, expect } from 'vitest'
+import { afterEach, describe, expect, vi } from 'vitest'
 
 import { getToolDoc, getToolText } from './helpers/mcpClient.js'
 import { getApiKey, it, payload, restClient, userId } from './helpers/mcpFixtures.js'
@@ -61,7 +61,6 @@ describe('@payloadcms/plugin-mcp', () => {
         collection: 'payload-mcp-api-keys',
         data: {
           apiKey: randomUUID(),
-          enableAPIKey: true,
           label: 'Test API Key',
           access: {
             collections: {
@@ -119,6 +118,44 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.errors[0].message).toBe(
         'Unauthorized, you must be logged in to make this request.',
       )
+    })
+
+    it('should update last used with a direct database write', async ({ mcp }) => {
+      const doc = await payload.create({
+        collection: 'payload-mcp-api-keys',
+        data: {
+          apiKey: randomUUID(),
+          label: 'Last Used API Key',
+          user: userId,
+        },
+      })
+      const beforeRequest = Date.now()
+      const updateOneSpy = vi.spyOn(payload.db, 'updateOne')
+
+      try {
+        await mcp.request({ apiKey: doc.apiKey as string, method: 'ping' })
+
+        expect(updateOneSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            collection: 'payload-mcp-api-keys',
+            id: doc.id,
+            returning: false,
+          }),
+        )
+
+        const updatedDoc = await payload.findByID({
+          id: doc.id,
+          collection: 'payload-mcp-api-keys',
+          depth: 0,
+        })
+
+        expect(updatedDoc.lastUsed).toBeDefined()
+        expect(new Date(updatedDoc.lastUsed as string).getTime()).toBeGreaterThanOrEqual(
+          beforeRequest,
+        )
+      } finally {
+        updateOneSpy.mockRestore()
+      }
     })
   })
 
@@ -270,7 +307,6 @@ describe('@payloadcms/plugin-mcp', () => {
             },
           },
           apiKey: randomUUID(),
-          enableAPIKey: true,
           label: 'Readable Slugs',
           user: userId,
         },
@@ -292,7 +328,6 @@ describe('@payloadcms/plugin-mcp', () => {
             },
           },
           apiKey: randomUUID(),
-          enableAPIKey: true,
           label: 'No Config Info',
           user: userId,
         },
@@ -691,7 +726,6 @@ describe('@payloadcms/plugin-mcp', () => {
             },
           },
           apiKey: randomUUID(),
-          enableAPIKey: true,
           label: 'Denied Create Document Key',
           user: userId,
         },
@@ -1144,7 +1178,6 @@ describe('@payloadcms/plugin-mcp', () => {
       const doc = await payload.create({
         collection: 'payload-mcp-api-keys',
         data: {
-          enableAPIKey: true,
           label: 'Pages API Key',
           access: {
             collections: {
@@ -1804,7 +1837,6 @@ describe('@payloadcms/plugin-mcp', () => {
       const doc = await payload.create({
         collection: 'payload-mcp-api-keys',
         data: {
-          enableAPIKey: true,
           label: 'Field Types API Key',
           access: {
             collections: {

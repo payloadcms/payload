@@ -1,0 +1,105 @@
+@layer payload-default {
+  /* Section wrapper: description + panel, closed off by a full-bleed divider
+     that spans the fields column past its horizontal gutter. */
+  .mcp-api-key-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
+    margin-inline: calc(-1 * var(--gutter-h));
+    padding-inline: var(--gutter-h);
+    padding-block-end: var(--spacer-4);
+    border-block-end: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .mcp-api-key-field__description {
+    margin: 0;
+    color: var(--color-text);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+  }
+
+  .mcp-api-key-field__panel {
+    overflow: hidden;
+    background: var(--color-bg);
+    border: var(--stroke-width-small) solid var(--color-border);
+    border-radius: var(--button-radius);
+  }
+
+  .mcp-api-key-field__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacer-2);
+    min-height: var(--spacer-5);
+    padding: var(--spacer-2) var(--spacer-3);
+    background: var(--color-bg-secondary);
+  }
+
+  /* Holds the warning + key row; its top border is the full-width divider
+     under the header. Only rendered once a key exists. */
+  .mcp-api-key-field__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    padding: var(--spacer-3);
+    border-block-start: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .mcp-api-key-field__title {
+    color: var(--color-text);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+  }
+
+  .mcp-api-key-field__generate {
+    margin: 0;
+  }
+
+  /* Matches the core Banner's warning treatment: theme-adaptive warning-tertiary
+     bg with regular --color-text (NOT --color-text-onwarning, which is only
+     defined for light mode and reads as muddy dark-on-dark in dark mode). */
+  .mcp-api-key-field__warning {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 2);
+    padding: calc(var(--spacer-2) + (var(--spacer-1) / 2)) calc(var(--base) / 2);
+    background: var(--color-bg-warning-tertiary);
+    border: none;
+    border-radius: var(--radius-medium);
+    color: var(--color-text);
+  }
+
+  .mcp-api-key-field__warning-icon {
+    flex-shrink: 0;
+    width: 15px;
+    height: 13px;
+  }
+
+  .mcp-api-key-field__warning-text {
+    flex-grow: 1;
+    margin: 0;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .mcp-api-key-field__warning-text strong {
+    font-weight: var(--text-body-medium-strong-font-weight);
+  }
+
+  .mcp-api-key-field__warning-dismiss {
+    appearance: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0;
+  }
+}

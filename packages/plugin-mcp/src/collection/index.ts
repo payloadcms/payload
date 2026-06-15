@@ -1,8 +1,24 @@
 import type { CollectionConfig } from 'payload'
 
+import { createAPIKeyFields } from 'payload'
+
 import type { SanitizedMCPPluginConfig } from '../types.js'
 
 import { getAccessField } from './getAccessField.js'
+
+const apiKeyStorageFields = createAPIKeyFields({
+  apiKeyField: {
+    admin: {
+      components: { Field: '@payloadcms/plugin-mcp/client#APIKeyField' },
+    },
+    required: true,
+  },
+  apiKeyIndexField: {
+    index: true,
+    required: true,
+  },
+  includeEnableAPIKey: false,
+})
 
 export const getAPIKeysCollection = ({
   pluginConfig,
@@ -12,48 +28,73 @@ export const getAPIKeysCollection = ({
   const collection: CollectionConfig = {
     slug: 'payload-mcp-api-keys',
     admin: {
-      description:
-        'API keys control which collections, resources, tools, and prompts MCP clients can access',
-      group: 'MCP',
+      components: {
+        views: {
+          list: {
+            NoResults: '@payloadcms/plugin-mcp/client#APIKeysEmptyState',
+          },
+        },
+      },
+      defaultColumns: ['label', 'lastUsed', 'user'],
+      // Kept out of the main nav — reachable through the user menu's settings instead.
+      group: false,
       useAsTitle: 'label',
     },
-    auth: {
-      disableLocalStrategy: true,
-      useAPIKey: true,
-    },
     fields: [
-      {
-        name: 'user',
-        type: 'relationship',
-        admin: { description: 'The user that the API key is associated with.' },
-        relationTo: pluginConfig.userCollection,
-        required: true,
-      },
+      ...apiKeyStorageFields,
+      getAccessField({ pluginConfig }),
       {
         name: 'label',
         type: 'text',
-        admin: { description: 'A useful label for the API key.' },
+        admin: {
+          description: ({ t }) => t('plugin-mcp:titleDescription'),
+          position: 'sidebar',
+        },
+        label: ({ t }) => t('plugin-mcp:title'),
       },
       {
         name: 'description',
         type: 'text',
-        admin: { description: 'The purpose of the API key.' },
+        admin: {
+          description: ({ t }) => t('plugin-mcp:descriptionDescription'),
+          position: 'sidebar',
+        },
+        label: ({ t }) => t('plugin-mcp:description'),
+      },
+      {
+        name: 'lastUsed',
+        type: 'date',
+        admin: {
+          date: { pickerAppearance: 'dayAndTime' },
+          disabled: { field: true },
+        },
+        label: ({ t }) => t('plugin-mcp:lastUsed'),
+      },
+      {
+        name: 'user',
+        type: 'relationship',
+        admin: {
+          description: ({ t }) => t('plugin-mcp:userDescription'),
+          position: 'sidebar',
+        },
+        label: ({ t }) => t('general:user'),
+        relationTo: pluginConfig.userCollection,
+        required: true,
       },
       {
         name: 'overrideAccess',
         type: 'checkbox',
         admin: {
-          description:
-            'When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.',
+          description: ({ t }) => t('plugin-mcp:overrideAccessDescription'),
+          position: 'sidebar',
         },
         defaultValue: false,
-        label: 'Override access control',
+        label: ({ t }) => t('plugin-mcp:overrideAccess'),
       },
-      getAccessField({ pluginConfig }),
     ],
     labels: {
-      plural: 'API Keys',
-      singular: 'API Key',
+      plural: ({ t }) => `${t('plugin-mcp:mcp')} ${t('plugin-mcp:apiKeys')}`,
+      singular: ({ t }) => `${t('plugin-mcp:mcp')} ${t('authentication:apiKey')}`,
     },
     versions: false,
   }
