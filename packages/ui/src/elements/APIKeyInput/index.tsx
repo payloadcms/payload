@@ -20,9 +20,9 @@ export type APIKeyInputProps = {
  * control. Shared by the core auth API-key field and the MCP API-keys collection.
  */
 export const APIKeyInput: React.FC<APIKeyInputProps> = ({
+  id,
   'aria-label': ariaLabel = 'API Key',
   highlighted,
-  id,
   value,
 }) => {
   const [showKey, setShowKey] = useState(false)
