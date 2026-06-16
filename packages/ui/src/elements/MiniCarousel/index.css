@@ -3,14 +3,22 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: var(--spacer-1);
+    gap: var(--spacer-3);
     padding: var(--spacer-2-5);
     width: var(--mini-carousel-width, 72px);
     flex-shrink: 0;
     overflow-y: auto;
+    /* Hide the native scrollbar so it doesn't consume layout width — otherwise a classic
+       (non-overlay) scrollbar shrinks the stretched thumbnails below their intended size. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     background: var(--color-bg-secondary);
     border-right: 1px solid var(--color-border);
     align-self: stretch;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .mini-carousel__item {
@@ -46,7 +54,6 @@
     height: 1px;
     background: var(--color-border);
     flex-shrink: 0;
-    margin: var(--spacer-2) 0;
   }
 
   @media (max-width: 768px) {
@@ -61,13 +68,12 @@
     }
 
     .mini-carousel__item {
-      width: 52px;
-      height: 52px;
+      width: 48px;
     }
 
     .mini-carousel__divider {
       width: 1px;
-      height: 52px;
+      height: 48px;
       margin: 0 var(--spacer-2);
     }
   }

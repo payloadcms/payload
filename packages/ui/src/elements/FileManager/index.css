@@ -114,6 +114,7 @@
   @media (max-width: 1024px) {
     .file-manager {
       min-height: 400px;
+      border-bottom: 1px solid var(--color-border);
     }
 
     .file-manager__panel {
@@ -125,9 +126,9 @@
     .file-manager__content {
       flex-direction: column;
     }
-  }
 
-  @media (max-width: 768px) {
+    /* The panel is static here (no stacking context), so the absolutely-positioned divider
+       would paint over the toolbar — and there is no sticky gap left to fill anyway. */
     .file-manager--has-side-carousel::before {
       display: none;
     }
